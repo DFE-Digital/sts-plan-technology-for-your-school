@@ -38,16 +38,16 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         if (string.IsNullOrEmpty(recommendationSlug))
             throw new ArgumentNullException(nameof(recommendationSlug));
 
-        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken, true);
 
         return _router.Status switch
         {
-            SubmissionStatus.Completed => checklist ?
+            Status.CompleteReviewed => checklist ?
                 await HandleChecklist(controller, recommendationSlug, cancellationToken) :
                 await HandleCompleteStatus(controller, recommendationSlug, cancellationToken),
-            SubmissionStatus.CheckAnswers => controller.RedirectToCheckAnswers(sectionSlug),
-            SubmissionStatus.NextQuestion => HandleQuestionStatus(sectionSlug, controller),
-            SubmissionStatus.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
+            Status.CompleteNotReviewed => controller.RedirectToCheckAnswers(sectionSlug),
+            Status.InProgress => HandleQuestionStatus(sectionSlug, controller),
+            Status.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
             _ => throw new InvalidOperationException($"Invalid journey status - {_router.Status}"),
         };
     }
@@ -75,7 +75,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
     public async Task<string> GetRecommendationSlugForSection(string sectionSlug, CancellationToken cancellationToken)
     {
-        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken, true);
         var (_, subTopicIntro, _, _) = await GetSubtopicRecommendation(cancellationToken);
         return subTopicIntro.Slug;
     }
@@ -110,14 +110,15 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
         if (showYSA)
         {
+            var establishmentId = await _router.User.GetEstablishmentId();
+
             YSAChunk = new()
             {
                 Header = "Your self-assessment"
             };
 
             subTopicChunks.Add(YSAChunk);
-
-            latestCompletionDate = await _getLatestResponsesQuery.GetLatestCompletionDate(await _router.User.GetEstablishmentId(), _router.Section.Sys.Id, true);
+            latestCompletionDate = await _getLatestResponsesQuery.GetLatestCompletionDate(establishmentId, _router.Section.Sys.Id, true);
         }
 
         return new RecommendationsViewModel()
@@ -129,7 +130,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
                                 ? DateTimeFormatter.FormattedDateShort(latestCompletionDate.Value)
                                 : null,
             Slug = recommendationSlug,
-            SubmissionResponses = latestResponses
+            SubmissionResponses = latestResponses,
         };
     }
 

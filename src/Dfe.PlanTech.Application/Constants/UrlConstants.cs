@@ -6,6 +6,8 @@ public static class UrlConstants
 
     public const string SelectASchoolPage = "/groups/select-a-school";
 
+    public const string RecommendationsPage = "/recommendations";
+
     public const string ServerError = "/server-error";
 
     public const string Error = "/error";

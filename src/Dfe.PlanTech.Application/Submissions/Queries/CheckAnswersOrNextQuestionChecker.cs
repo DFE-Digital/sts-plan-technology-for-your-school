@@ -13,44 +13,50 @@ public static class CheckAnswersOrNextQuestionChecker
 {
     public static readonly ISubmissionStatusChecker CheckAnswersOrNextQuestion = new SubmissionStatusChecker()
     {
-        IsMatchingSubmissionStatusFunc = (userJourneyRouter) => userJourneyRouter.SectionStatus != null &&
-                                                                userJourneyRouter.SectionStatus.Status > Status.NotStarted &&
-                                                                userJourneyRouter.SectionStatus.Status != Status.Completed,
+        IsMatchingSubmissionStatusFunc = (userJourneyRouter) =>
+        {
+            var status = userJourneyRouter.SectionStatus?.Status;
+
+            return status == Status.InProgress || status == Status.CompleteNotReviewed;
+        },
+
         ProcessSubmissionFunc = async (userJourneyRouter, cancellationToken) =>
         {
-            var responses = await userJourneyRouter.GetResponsesQuery.GetLatestResponses(await userJourneyRouter.User.GetEstablishmentId(),
-                                                                                        userJourneyRouter.Section.Sys.Id,
-                                                                                        false,
-                                                                                        cancellationToken) ?? throw new InvalidDataException("Missing responses");
+            var establishmentId = await userJourneyRouter.User.GetEstablishmentId();
+            var sectionId = userJourneyRouter.Section.Sys.Id;
 
-            var lastResponseInUserJourney = userJourneyRouter.Section.GetOrderedResponsesForJourney(responses.Responses).Last();
+            var responses = await userJourneyRouter.GetResponsesQuery.GetLatestResponses(establishmentId, sectionId, false, cancellationToken)
+                            ?? throw new InvalidDataException("Missing responses");
 
-            var lastSelectedQuestion = userJourneyRouter.Section.Questions.FirstOrDefault(question => question.Sys.Id == lastResponseInUserJourney.QuestionRef);
+            var lastResponseInUserJourney = userJourneyRouter.Section
+                .GetOrderedResponsesForJourney(responses.Responses)
+                .LastOrDefault();
 
-            if (lastSelectedQuestion == null)
+            if (lastResponseInUserJourney == null)
             {
-                throw new UserJourneyMissingContentException($"Could not find question with ID {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
+                throw new InvalidDataException("No responses found for section.");
             }
 
-            var lastSelectedAnswer = lastSelectedQuestion.Answers.FirstOrDefault(answer => answer.Sys.Id == lastResponseInUserJourney.AnswerRef);
+            var lastSelectedQuestion = userJourneyRouter.Section.Questions
+                .FirstOrDefault(q => q.Sys.Id == lastResponseInUserJourney.QuestionRef)
+                ?? throw new UserJourneyMissingContentException($"Could not find question with ID {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
 
-            if (lastSelectedAnswer == null)
-            {
-                throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.AnswerRef} in question {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
-            }
+            var lastSelectedAnswer = lastSelectedQuestion.Answers
+                .FirstOrDefault(a => a.Sys.Id == lastResponseInUserJourney.AnswerRef)
+                ?? throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.AnswerRef} in question {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
 
+            // Route user depending on whether there's a next question
             if (lastSelectedAnswer.NextQuestion == null)
             {
-                userJourneyRouter.Status = SubmissionStatus.CheckAnswers;
+                userJourneyRouter.Status = Status.CompleteNotReviewed;
                 return;
             }
 
-            userJourneyRouter.Status = SubmissionStatus.NextQuestion;
+            userJourneyRouter.Status = Status.InProgress;
             userJourneyRouter.NextQuestion = GetNextQuestion(userJourneyRouter, lastSelectedAnswer);
         }
     };
 
-    private static Question? GetNextQuestion(ISubmissionStatusProcessor userJourneyRouter, Answer lastSelectedAnswer)
-    => userJourneyRouter.Section.Questions.Find(question => question.Sys.Id == lastSelectedAnswer.NextQuestion?.Sys.Id);
+    private static Question? GetNextQuestion(ISubmissionStatusProcessor userJourneyRouter, Answer lastSelectedAnswer) =>
+        userJourneyRouter.Section.Questions.Find(question => question.Sys.Id == lastSelectedAnswer.NextQuestion?.Sys.Id);
 }
-

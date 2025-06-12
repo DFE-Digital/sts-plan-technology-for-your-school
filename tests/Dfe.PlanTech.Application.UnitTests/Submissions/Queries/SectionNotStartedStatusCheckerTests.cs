@@ -25,12 +25,12 @@ public class SectionNotStartedStatusCheckerTests
 
     [Theory]
     [InlineData(Status.InProgress)]
-    [InlineData(Status.Completed)]
+    [InlineData(Status.CompleteReviewed)]
     public void Should_Not_Match_AnyOtherStatus(Status status)
     {
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatus() { Status = status, Completed = status == Status.Completed });
+        processor.SectionStatus.Returns(new SectionStatus() { Status = status, Completed = status == Status.CompleteReviewed });
 
         var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
@@ -57,7 +57,7 @@ public class SectionNotStartedStatusCheckerTests
         processor.SectionStatus.Returns(new SectionStatus() { Status = Status.NotStarted, Completed = false });
 
         await StatusChecker.ProcessSubmission(processor, default);
-        Assert.Equal(SubmissionStatus.NotStarted, processor.Status);
+        Assert.Equal(Status.NotStarted, processor.Status);
         Assert.Equal(section.Questions.First(), processor.NextQuestion);
     }
 }

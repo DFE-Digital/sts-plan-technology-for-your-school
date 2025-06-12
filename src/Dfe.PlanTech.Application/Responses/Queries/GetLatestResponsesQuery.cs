@@ -1,8 +1,10 @@
 using System.Linq.Expressions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Application.Responses.Queries;
 
@@ -60,6 +62,50 @@ public class GetLatestResponsesQuery(IPlanTechDbContext db) : IGetLatestResponse
             currentSubmission.Viewed = true;
             await db.SaveChangesAsync();
         }
+    }
+
+    public async Task<Submission?> GetLatestCompletedSubmission(int establishmentId, string sectionId)
+    {
+        var currentSubmission = await GetCurrentSubmission(establishmentId, sectionId, true).FirstOrDefaultAsync();
+        if (currentSubmission != null)
+        {
+            currentSubmission = await db.GetSubmissionById(currentSubmission.Id);
+        }
+
+        return currentSubmission;
+    }
+
+    public async Task<Submission?> GetInProgressSubmission(
+    int establishmentId,
+    string sectionId,
+    CancellationToken cancellationToken = default)
+    {
+        // Get latest matching submission
+        var submission = await db.FirstOrDefaultAsync(
+            db.GetSubmissions
+                .Where(s => s.EstablishmentId == establishmentId &&
+                            s.SectionId == sectionId &&
+                            !s.Deleted &&
+                            s.Status == SubmissionStatus.InProgress.ToString())
+                .OrderByDescending(s => s.DateCreated),
+                cancellationToken);
+
+        if (submission is null)
+            return null;
+
+        var latestResponses = await db.ToListAsync(
+                db.GetSubmissions
+                        .Where(s => s.Id == submission.Id)
+                        .SelectMany(s => s.Responses)
+                        .GroupBy(r => r.QuestionId)
+                        .Select(g =>
+                            g.Where(r => r.DateCreated == g.Max(x => x.DateCreated))
+                             .First()),
+                        cancellationToken);
+
+        submission.Responses = latestResponses;
+
+        return submission;
     }
 
     private static Expression<Func<Submission, bool>> IsMatchingIncompleteSubmission(int establishmentId, string sectionId, bool completedSubmission)

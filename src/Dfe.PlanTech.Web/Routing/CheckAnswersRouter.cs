@@ -30,24 +30,26 @@ public class CheckAnswersRouter : ICheckAnswersRouter
         _router = router;
     }
 
-    public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
+    public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken, bool isChangeAnswersFlow = false)
     {
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
 
-        await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken);
+        await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken, isChangeAnswersFlow);
 
         return _router.Status switch
         {
-            SubmissionStatus.CheckAnswers => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
-            SubmissionStatus.Completed or SubmissionStatus.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
+            Status.CompleteNotReviewed => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
+            Status.CompleteReviewed when isChangeAnswersFlow => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken, isChangeAnswersFlow),
+            Status.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
             _ => ProcessQuestionStatus(sectionSlug, controller),
         };
     }
 
-    private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
+    private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken, bool isChangeAnswersFlow = false)
     {
         var establishmentId = await _user.GetEstablishmentId();
+
         var submissionResponsesDto = await _processSubmissionResponsesCommand.GetSubmissionResponsesDtoForSection(establishmentId, _router.Section, cancellationToken);
 
         if (submissionResponsesDto == null || submissionResponsesDto.Responses == null)
