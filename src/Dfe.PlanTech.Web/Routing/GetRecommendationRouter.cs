@@ -38,7 +38,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         if (string.IsNullOrEmpty(recommendationSlug))
             throw new ArgumentNullException(nameof(recommendationSlug));
 
-        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken, true);
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, true, cancellationToken);
 
         return _router.Status switch
         {
@@ -57,7 +57,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
                                                               RecommendationsController controller,
                                                               CancellationToken cancellationToken)
     {
-        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken);
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken: cancellationToken);
         var recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
 
         var intro = recommendation.Intros.Find(intro => string.Equals(intro.Maturity, maturity, StringComparison.InvariantCultureIgnoreCase)) ?? recommendation.Intros[0];
@@ -75,7 +75,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
     public async Task<string> GetRecommendationSlugForSection(string sectionSlug, CancellationToken cancellationToken)
     {
-        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken, true);
+        await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, true, cancellationToken);
         var (_, subTopicIntro, _, _) = await GetSubtopicRecommendation(cancellationToken);
         return subTopicIntro.Slug;
     }

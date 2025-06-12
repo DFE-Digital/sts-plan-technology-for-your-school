@@ -65,7 +65,7 @@ public class CheckAnswersRouterTests
     public CheckAnswersRouterTests()
     {
         _user.GetEstablishmentId().Returns(establishmentId);
-        _checkAnswerCommand.GetSubmissionResponsesDtoForSection(establishmentId, Arg.Any<Section>(), Arg.Any<CancellationToken>())
+        _checkAnswerCommand.GetSubmissionResponsesDtoForSection(establishmentId, Arg.Any<Section>(), cancellationToken: Arg.Any<CancellationToken>())
                             .Returns((callinfo) =>
                             {
                                 var sectionArg = callinfo.ArgAt<ISection>(1);
@@ -105,7 +105,7 @@ public class CheckAnswersRouterTests
             Slug = "next-question"
         };
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken : Arg.Any<CancellationToken>()))
         .Do(callInfo =>
         {
             _submissionStatusProcessor.Status = Status.InProgress;
@@ -134,7 +134,7 @@ public class CheckAnswersRouterTests
     {
         var sectionSlug = _section.InterstitialPage?.Slug ?? throw new InvalidOperationException("InterstitialPage cannot be null.");
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(processor =>
                                   {
                                       _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
@@ -175,7 +175,7 @@ public class CheckAnswersRouterTests
 
         var sectionSlug = noneAnsweredSection.InterstitialPage.Slug;
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(processor =>
                                   {
                                       _submissionStatusProcessor.Status = Status.CompleteNotReviewed;

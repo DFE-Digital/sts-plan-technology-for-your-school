@@ -45,12 +45,12 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
         User = user;
     }
 
-    public async Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken, bool completed)
+    public async Task GetJourneyStatusForSection(string sectionSlug, bool completed, CancellationToken cancellationToken)
     {
         await GetJourneyStatus(sectionSlug, completed, cancellationToken);
     }
 
-    public async Task GetJourneyStatusForSectionRecommendation(string sectionSlug, CancellationToken cancellationToken, bool completed)
+    public async Task GetJourneyStatusForSectionRecommendation(string sectionSlug, bool completed, CancellationToken cancellationToken)
     {
         await GetJourneyStatus(sectionSlug, completed, cancellationToken);
     }

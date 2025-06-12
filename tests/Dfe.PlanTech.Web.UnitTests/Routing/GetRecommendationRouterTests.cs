@@ -279,7 +279,7 @@ public class GetRecommendationRouterTests
         };
 
         _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>(), true))
+                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, true, Arg.Any<CancellationToken>()))
             .Do((callinfo) =>
             {
                 _submissionStatusProcessor.Status = Status.InProgress;
@@ -321,7 +321,7 @@ public class GetRecommendationRouterTests
         };
 
         _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
             .Do((callinfo) =>
             {
                 _submissionStatusProcessor.Status = Status.NotStarted;
@@ -350,7 +350,7 @@ public class GetRecommendationRouterTests
     {
         Assert.NotNull(_section.InterstitialPage);
         _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>(), true))
+                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, true, Arg.Any<CancellationToken>()))
             .Do((callinfo) =>
             {
                 _submissionStatusProcessor.Status = Status.CompleteReviewed;
@@ -370,7 +370,7 @@ public class GetRecommendationRouterTests
     public async Task Should_Throw_Exception_When_Recommendation_Not_In_Section(bool checklist)
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>(), true))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, true, Arg.Any<CancellationToken>()))
             .Do((callinfo) =>
             {
                 _submissionStatusProcessor.Status = Status.CompleteReviewed;
@@ -395,7 +395,7 @@ public class GetRecommendationRouterTests
     {
         Assert.NotNull(_section.InterstitialPage);
         _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>(), true))
+                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, true, Arg.Any<CancellationToken>()))
             .Do((callinfo) =>
             {
                 _submissionStatusProcessor.Status = Status.CompleteReviewed;
@@ -576,7 +576,7 @@ public class GetRecommendationRouterTests
     private void Setup_Valid_Recommendation(List<QuestionWithAnswer>? responses = null, string maturity = "High", bool isCompleted = true)
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>(), isCompleted))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, isCompleted, Arg.Any<CancellationToken>()))
             .Do(_ =>
             {
                 _submissionStatusProcessor.Status = Status.CompleteReviewed;

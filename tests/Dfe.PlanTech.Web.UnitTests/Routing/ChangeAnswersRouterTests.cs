@@ -110,7 +110,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
         {
             _statusProcessor.Status = Status.CompleteNotReviewed;
 
-            _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, Arg.Any<CancellationToken>(), true)
+            _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, true, Arg.Any<CancellationToken>())
                            .Returns(_responsesDto);
 
             var result = await _router.ValidateRoute(_sectionSlug, "error", _controller, default);
@@ -207,7 +207,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
 
             _dbContext.GetSubmissions.Returns(new List<Submission> { latestCompletedSubmission }.AsQueryable());
 
-            _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, Arg.Any<CancellationToken>(), true)
+            _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, true, Arg.Any<CancellationToken>())
                            .Returns(_responsesDto);
 
             _statusProcessor.User.Returns(_user);
@@ -252,7 +252,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
         {
             _statusProcessor.Status = Status.CompleteNotReviewed;
 
-            _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, Arg.Any<CancellationToken>(), true)
+            _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, true, Arg.Any<CancellationToken>())
                            .Returns((SubmissionResponsesDto?)null);
 
             await Assert.ThrowsAsync<DatabaseException>(() =>

@@ -13,7 +13,7 @@ public class ProcessSubmissionResponsesDto : IProcessSubmissionResponsesCommand
         _getLatestResponseListForSubmissionQuery = getLatestResponseListForSubmissionQuery;
     }
 
-    public async Task<SubmissionResponsesDto?> GetSubmissionResponsesDtoForSection(int establishmentId, ISectionComponent section, CancellationToken cancellationToken = default, bool completed = false)
+    public async Task<SubmissionResponsesDto?> GetSubmissionResponsesDtoForSection(int establishmentId, ISectionComponent section, bool completed = false, CancellationToken cancellationToken = default)
     {
         var submissionResponsesDto = await _getLatestResponseListForSubmissionQuery.GetLatestResponses(establishmentId, section.Sys.Id, completed, cancellationToken);
         if (submissionResponsesDto?.Responses == null || submissionResponsesDto.Responses.Count == 0)

@@ -50,7 +50,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
         var returnTo = controller.TempData["ReturnTo"]?.ToString();
         var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
 
-        await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken, false);
+        await _router.GetJourneyStatusForSection(sectionSlug, false, cancellationToken);
 
         if (IsSlugForNextQuestion(questionSlug))
         {
