@@ -8,6 +8,8 @@ public class RecommendationsViewModel
 {
     public string SectionName { get; init; } = null!;
 
+    public string SectionSlug { get; init; } = null!;
+
     public RecommendationIntro Intro { get; init; } = null!;
 
     public List<RecommendationChunk> Chunks { get; init; } = null!;
