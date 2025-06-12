@@ -1,3 +1,6 @@
+DISABLE TRIGGER [dbo].[tr_submission] ON [dbo].[submission]
+GO
+
 WITH
 mostRecentCompleted AS (
 	SELECT
@@ -38,4 +41,6 @@ UPDATE s
 SET s.status = nd.status
 FROM dbo.submission s
 INNER JOIN newData nd ON s.id = nd.id
+GO
 
+ENABLE TRIGGER [dbo].[tr_submission] ON [dbo].[submission]
