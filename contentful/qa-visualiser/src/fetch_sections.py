@@ -31,7 +31,7 @@ def fetch_sections() -> list[Section]:
 
         result = []
         logger.info("Validating retrieved sections")
-        for i, item in data.json():
+        for i, item in enumerate(data.json()):
             name = item.get("name", "<unnamed>")
             logger.info(f"Validating section '{name}' (index [{i}])")
             result.append(Section.model_validate(item))
