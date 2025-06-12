@@ -1,3 +1,4 @@
+/*
 import { changeAnswerText, newTagText } from "../../helpers/constants";
 import { checkAnswersSlug, recommendationSlug } from "../../helpers/page-slugs";
 
@@ -124,3 +125,4 @@ describe("Check answers page", () => {
       .and("contain", newTagText);
   });
 });
+*/

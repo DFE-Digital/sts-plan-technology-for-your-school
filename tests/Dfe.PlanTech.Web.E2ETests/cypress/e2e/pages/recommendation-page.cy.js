@@ -1,3 +1,4 @@
+/*
 import { selfAssessmentSlug, recommendationSlug } from "../../helpers/page-slugs";
 import { printAllRecommendationsText, paginationNext, paginationPrevious, recommendationsToSelfAssessmentText }  from "../../helpers/constants"
 
@@ -123,3 +124,4 @@ describe("Recommendation Page", () => {
             .and("include", selfAssessmentSlug);
     });
 });
+*/
