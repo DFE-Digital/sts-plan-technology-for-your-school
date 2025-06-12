@@ -80,35 +80,28 @@ public class GetLatestResponsesQuery(IPlanTechDbContext db) : IGetLatestResponse
     string sectionId,
     CancellationToken cancellationToken = default)
     {
-        var validStatuses = new[]
-        {
-            SubmissionStatus.InProgress.ToString(),
-        };
-
         // Get latest matching submission
         var submission = await db.FirstOrDefaultAsync(
             db.GetSubmissions
                 .Where(s => s.EstablishmentId == establishmentId &&
                             s.SectionId == sectionId &&
                             !s.Deleted &&
-                            validStatuses.Contains(s.Status ?? SubmissionStatus.CompleteNotReviewed.ToString()))
+                            s.Status == SubmissionStatus.InProgress.ToString())
                 .OrderByDescending(s => s.DateCreated),
-            cancellationToken);
+                cancellationToken);
 
         if (submission is null)
             return null;
 
-        // Load associated response objects from the same submission ID
-        var allResponses = db.GetSubmissions
-            .Where(s => s.Id == submission.Id)
-            .SelectMany(s => s.Responses);
-
-        // Group and take latest response per question
         var latestResponses = await db.ToListAsync(
-            allResponses
-                .GroupBy(r => r.QuestionId)
-                .Select(g => g.OrderByDescending(r => r.DateCreated).First()),
-            cancellationToken);
+                db.GetSubmissions
+                        .Where(s => s.Id == submission.Id)
+                        .SelectMany(s => s.Responses)
+                        .GroupBy(r => r.QuestionId)
+                        .Select(g =>
+                            g.Where(r => r.DateCreated == g.Max(x => x.DateCreated))
+                             .First()),
+                        cancellationToken);
 
         submission.Responses = latestResponses;
 

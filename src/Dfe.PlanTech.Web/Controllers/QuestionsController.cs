@@ -162,7 +162,7 @@ public class QuestionsController : BaseController<QuestionsController>
             return RenderView(viewModel);
         }
 
-        var isChangeAnswersFlow = returnTo == "ChangeAnswers";
+        var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
 
         if (isChangeAnswersFlow)
         {
@@ -194,7 +194,7 @@ public class QuestionsController : BaseController<QuestionsController>
                 {
                     sectionSlug,
                     questionSlug = nextQuestion.Slug,
-                    returnTo = "ChangeAnswers"
+                    returnTo = FlowConstants.ChangeAnswersFlow
                 });
             }
 

@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Application.Submissions.Commands
 {
@@ -21,18 +22,18 @@ namespace Dfe.PlanTech.Application.Submissions.Commands
             submission.Status = SubmissionStatus.CompleteReviewed.ToString();
             submission.DateCompleted = DateTime.UtcNow;
 
-            var otherSubmissions = await _db.ToListAsync(
-                _db.GetSubmissions.Where(s =>
-                    s.SectionId == submission.SectionId &&
-                    s.EstablishmentId == submission.EstablishmentId &&
-                    s.Status == SubmissionStatus.CompleteReviewed.ToString() &&
-                    s.Id != submission.Id),
-                cancellationToken
-            );
+            var otherSubmissions = await _db.GetSubmissions
+                    .Where(s =>
+                        s.SectionId == submission.SectionId &&
+                        s.EstablishmentId == submission.EstablishmentId &&
+                        s.Status == SubmissionStatus.CompleteReviewed.ToString() &&
+                        s.Id != submission.Id)
+                    .ToListAsync(cancellationToken);
 
             foreach (var oldSubmissions in otherSubmissions)
             {
                 oldSubmissions.Status = SubmissionStatus.Inaccessible.ToString();
+                oldSubmissions.Deleted = true;
             }
 
             await _db.SaveChangesAsync();

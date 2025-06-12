@@ -37,7 +37,11 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
                         <div class="govuk-grid-column-three-quarters">
                             @if (!headerWithContent.SlugifiedLinkText.Equals("your-self-assessment"))
                             {
-                                <partial name="Content" model="@(Tuple.Create(headerWithContent, Model.LatestCompletionDate, Model.SectionName))" />
+                                <partial name="Content" model="new HeaderContentViewModel {
+                                                    Header = headerWithContent,
+                                                    SubmissionDate = Model.LatestCompletionDate,
+                                                    SectionName = Model.SectionName
+                                }" />
                                 
                             }
                             else {

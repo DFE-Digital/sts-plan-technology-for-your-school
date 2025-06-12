@@ -1,12 +1,12 @@
 @using Dfe.PlanTech.Domain.Questionnaire.Models
 @using GovUk.Frontend.AspNetCore.TagHelpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Tuple<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent, string?, string?>
+@model Dfe.PlanTech.Web.Models.HeaderContentViewModel
 
 @{
-    var header = Model.Item1;
-    var submissionDate = Model.Item2;
-    var sectionName = Model.Item3;
+    var header = Model.Header;
+    var submissionDate = Model.SubmissionDate;
+    var sectionName = Model.SectionName;
 }
 
 <div class="recommendation-piece-content">

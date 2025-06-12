@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
@@ -47,7 +48,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
             throw new ArgumentNullException(nameof(questionSlug));
 
         var returnTo = controller.TempData["ReturnTo"]?.ToString();
-        var isChangeAnswersFlow = returnTo == "ChangeAnswers";
+        var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
 
         await _router.GetJourneyStatusForSection(sectionSlug, cancellationToken, false);
 
