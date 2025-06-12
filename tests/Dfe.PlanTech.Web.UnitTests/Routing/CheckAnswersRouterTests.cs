@@ -105,7 +105,7 @@ public class CheckAnswersRouterTests
             Slug = "next-question"
         };
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken : Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
         .Do(callInfo =>
         {
             _submissionStatusProcessor.Status = Status.InProgress;
