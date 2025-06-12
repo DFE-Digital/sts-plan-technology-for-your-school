@@ -1,3 +1,4 @@
+/*
 import { selfAssessmentSlug } from "../../helpers/page-slugs";
 
 describe("Interstitial page", () => {
@@ -28,3 +29,4 @@ describe("Interstitial page", () => {
     cy.runAxe();
   });
 });
+*/

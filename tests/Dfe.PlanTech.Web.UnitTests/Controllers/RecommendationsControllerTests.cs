@@ -95,4 +95,29 @@ public class RecommendationsControllerTests
         await _recommendationsRouter.Received().ValidateRoute(sectionSlug, recommendationSlug, true, _recommendationsController, Arg.Any<CancellationToken>());
     }
 
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
+    public async Task FromSection_Should_ThrowException_When_SectionSlug_NullOrEmpty(string? sectionSlug)
+    {
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _recommendationsController.FromSection(sectionSlug!, _recommendationsRouter, CancellationToken.None));
+    }
+
+    [Fact]
+    public async Task FromSection_Should_Call_GetRecommendationSlugForSection_And_Redirect()
+    {
+        var sectionSlug = "section-slug";
+        var recommendationSlug = "recommendation-slug";
+
+        _recommendationsRouter.GetRecommendationSlugForSection(sectionSlug, Arg.Any<CancellationToken>())
+                              .Returns(recommendationSlug);
+
+        var result = await _recommendationsController.FromSection(sectionSlug, _recommendationsRouter, CancellationToken.None);
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(RecommendationsController.GetRecommendationAction, redirect.ActionName);
+        Assert.Null(redirect.ControllerName);
+        Assert.Equal(recommendationSlug, redirect.RouteValues?["recommendationSlug"]);
+    }
 }

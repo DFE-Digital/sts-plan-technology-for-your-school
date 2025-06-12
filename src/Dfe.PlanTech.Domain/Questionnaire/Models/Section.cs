@@ -18,7 +18,9 @@ public class Section : ContentComponent, ISectionComponent
 
     public IEnumerable<QuestionWithAnswer> GetOrderedResponsesForJourney(IEnumerable<QuestionWithAnswer> responses)
     {
-        var questionWithAnswerMap = responses.ToDictionary(questionWithAnswer => questionWithAnswer.QuestionRef, questionWithAnswer => questionWithAnswer);
+        var questionWithAnswerMap = responses
+                    .GroupBy(r => r.QuestionRef)
+                    .ToDictionary(g => g.Key, g => g.First());
 
         Question? node = Questions.FirstOrDefault();
 

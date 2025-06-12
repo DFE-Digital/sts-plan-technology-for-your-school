@@ -1,20 +1,13 @@
 @model CategorySectionViewComponentViewModel
 
-<h3 class="govuk-heading-s govuk-!-margin-bottom-2">Progress</h3>
+<partial name="Components/PageComponentFactory" model="@Model.Description" />
 
 @if (Model.NoSectionsErrorRedirectUrl != null)
 {
     Context.Response.Redirect(Url.Content(Model.NoSectionsErrorRedirectUrl));
 }
 
-@if (Model.ProgressRetrievalErrorMessage == null)
-{
-    bool plural = @Model.TotalSectionCount > 1;
-    string topic = plural ? "topics" : "topic"; 
-    <p class="govuk-body govuk-!-margin-bottom-5">You have completed <strong>@Model.CompletedSectionCount of
-        @Model.TotalSectionCount</strong> @topic.</p>
-}
-else
+@if (Model.ProgressRetrievalErrorMessage != null)
 {
     <p id="progress-error" class="govuk-error-message"><span
         class="govuk-visually-hidden">Error:</span>@Model.ProgressRetrievalErrorMessage</p>

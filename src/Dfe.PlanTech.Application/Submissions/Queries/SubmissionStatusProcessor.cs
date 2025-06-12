@@ -24,7 +24,7 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
     public IUser User { get; init; }
     public Question? NextQuestion { get; set; }
     public SectionStatus? SectionStatus { get; private set; }
-    public SubmissionStatus Status { get; set; }
+    public Status Status { get; set; }
 
     public SubmissionStatusProcessor(IGetSectionQuery getSectionQuery,
                                     IGetSubmissionStatusesQuery getSubmissionStatusesQuery,
@@ -45,14 +45,14 @@ public class SubmissionStatusProcessor : ISubmissionStatusProcessor
         User = user;
     }
 
-    public async Task GetJourneyStatusForSection(string sectionSlug, CancellationToken cancellationToken)
+    public async Task GetJourneyStatusForSection(string sectionSlug, bool completed, CancellationToken cancellationToken)
     {
-        await GetJourneyStatus(sectionSlug, false, cancellationToken);
+        await GetJourneyStatus(sectionSlug, completed, cancellationToken);
     }
 
-    public async Task GetJourneyStatusForSectionRecommendation(string sectionSlug, CancellationToken cancellationToken)
+    public async Task GetJourneyStatusForSectionRecommendation(string sectionSlug, bool completed, CancellationToken cancellationToken)
     {
-        await GetJourneyStatus(sectionSlug, true, cancellationToken);
+        await GetJourneyStatus(sectionSlug, completed, cancellationToken);
     }
 
     /// <summary>

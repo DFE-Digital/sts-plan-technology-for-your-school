@@ -16,7 +16,7 @@ public class SectionCompleteStatusCheckerTests
     {
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.Completed, Completed = true });
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.CompleteNotReviewed, Completed = true });
 
         var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
@@ -54,10 +54,10 @@ public class SectionCompleteStatusCheckerTests
         };
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(section);
-        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.Completed, Completed = true });
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.InProgress, Completed = true });
 
         await StatusChecker.ProcessSubmission(processor, default);
-        Assert.Equal(SubmissionStatus.Completed, processor.Status);
+        Assert.Equal(Status.CompleteReviewed, processor.Status);
         Assert.Equal(section.Questions.First(), processor.NextQuestion);
     }
 }

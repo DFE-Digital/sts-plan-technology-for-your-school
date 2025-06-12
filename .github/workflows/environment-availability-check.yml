@@ -2,7 +2,7 @@ name: Check Environment Availability
 
 on:
   schedule:
-    - cron: '*/30 * * * *'  # every 30 minutes
+    - cron: '*/15 * * * *'  # every 15 minutes
   workflow_dispatch:
 
 jobs:
@@ -21,6 +21,8 @@ jobs:
             env_url: "https://staging.plan-technology-for-your-school.education.gov.uk/information-asset-register"
           - env_name: Production
             env_url: "https://plan-technology-for-your-school.education.gov.uk/information-asset-register"
+          - env_name: DfE Sign In
+            env_url: "https://interactions.signin.education.gov.uk"
 
     steps:
       - name: Prepare empty failures list
@@ -33,7 +35,7 @@ jobs:
           echo "🌐 Pinging ${{ matrix.env_name }} (${{ matrix.env_url }})..."
           status_code=$(curl -s -o /dev/null -w "%{http_code}" "${{ matrix.env_url }}")
           
-          if [[ "$status_code" -ne 200 ]]; then
+          if [[ "$status_code" -ne 200 && "$status_code" -ne 302 ]]; then
             echo "❌ ${{ matrix.env_name }} returned status code $status_code"
             echo "- name: ${{ matrix.env_name }}" >> tmp/env-check-failures.yml
             echo "  url: ${{ matrix.env_url }}" >> tmp/env-check-failures.yml
