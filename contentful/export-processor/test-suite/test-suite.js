@@ -81,16 +81,16 @@ export default class TestSuiteForSubTopic {
 
     generateCanSaveAnswers() {
         const testScenario = `User can save answers to questions for ${this.subtopicName} subtopic`;
-        const testSteps = `1 - Navigate to ${this.subtopicName} subtopic 2 - Answer and save each question presented 3 - Compare the answers presented on 'Check your answers' page to your answers`;
-        const expectedOutcome = `Answers match. Can save and continue.`;
+        const testSteps = `1 - Navigate to ${this.subtopicName} subtopic 2 - Answer and continue each question presented 3 - Compare the answers presented on 'Check your answers' page to your answers`;
+        const expectedOutcome = `Answers match. Can continue.`;
         return this.createRow(testScenario, testSteps, expectedOutcome);
     }
 
     generateAttemptsSaveWithoutAnswer() {
-        const testScenario = `User attempts to save and continue without selecting an answer`;
+        const testScenario = `User attempts to continue without selecting an answer`;
         const testSteps = `1 - Navigate to ${this.subtopicName} subtopic
                         2 - Do not answer question
-                        3 - Select 'save and continue'`;
+                        3 - Select 'continue'`;
         const expectedOutcome = `User sees modal that states 'There is a problem. You must select an answer to continue'.`;
         return this.createRow(testScenario, testSteps, expectedOutcome);
     }
@@ -125,7 +125,7 @@ export default class TestSuiteForSubTopic {
         const testSteps = `1 - Navigate to ${this.subtopicName} subtopic
                         2 - Navigate through the interstitial page
                         3 - Navigate through questions/check answers
-                        4 - Save and continue`;
+                        4 - Continue`;
         const expectedOutcome = `User returns to self-assessment page and sees success modal.`;
         return this.createRow(testScenario, testSteps, expectedOutcome);
     }
@@ -135,7 +135,7 @@ export default class TestSuiteForSubTopic {
         const testSteps = `1 - Navigate to ${this.subtopicName} subtopic
                         2 - Navigate through the interstitial page
                         3 - Navigate through questions all questions and the check answers page
-                        4 - Save and continue
+                        4 - Continue
                         5 - View ${this.subtopicName} recommendation
                         6 - Click on the 'Share or download this recommendation' link,
                         7 - Verify that you are redirected to the share/download page,
@@ -150,7 +150,7 @@ export default class TestSuiteForSubTopic {
         const testSteps = `1 - Navigate to the ${this.subtopicName} subtopic
                         2 - Navigate through the interstitial page
                         3 - Navigate through questions/check answers
-                        4 - Save and continue`;
+                        4 - Continue`;
         const expectedOutcome = `Recommendations are updated.`;
         return this.createRow(testScenario, testSteps, expectedOutcome);
     }
@@ -187,7 +187,7 @@ export default class TestSuiteForSubTopic {
                         pathPart.answer.text
                     }' for question '${pathPart.question.text}'`
             ),
-            `4 - Save and continue`,
+            `4 - Continue`,
             `5 - View ${this.subtopicName} recommendation`,
         ]
             .join("\n")
@@ -256,7 +256,7 @@ export default class TestSuiteForSubTopic {
         const testScenario = `User returns to self - assessment screen during question routing`;
         const testSteps = `1 - Navigate to the ${this.subtopicName} subtopic
     2 - Navigate through the interstitial page
-    3 - Answer first question, save and continue
+    3 - Answer first question, continue
     4 - User clicks PTFYS header`;
         const expectedOutcome = `User returned to self - assessment page.${this.subtopicName} subtopic shows 'In progress'.`;
         return this.createRow(testScenario, testSteps, expectedOutcome);
@@ -266,7 +266,7 @@ export default class TestSuiteForSubTopic {
         const testScenario = `User uses back button to navigate back through questions to self assessment page`;
         const testSteps = `1 - Navigate to the ${this.subtopicName} subtopic
     2 - Navigate through the interstitial page
-    3 - Answer first question, save and continue
+    3 - Answer first question, continue
     4 - Use back button to return to first queston
     5 - use back button again to return to self assessment page`;
         const expectedOutcome = `User returned to self - assessment page.${this.subtopicName} subtopic shows 'In progress'.`;
@@ -298,7 +298,7 @@ export default class TestSuiteForSubTopic {
                         pathPart.answer.text
                     }' for question '${pathPart.question.text}'`
             ),
-            `4 - Save and continue`,
+            `4 - Continue`,
             `5 - View ${this.subtopicName} recommendation`,
             `6 - Using the navigation bar and pagination buttons, navigate between the different recommendation chunks:`,
             ...filteredChunks.map(
@@ -344,7 +344,7 @@ export default class TestSuiteForSubTopic {
                 (pathPart, index) =>
                     `3.${index} - Choose answer '${pathPart.answer.text}' for question '${pathPart.question.text}'`
             ),
-            `4 - Save and continue`,
+            `4 - Continue`,
             `5 - View ${this.subtopicName} recommendation`,
             `6 - Using the navigation bar and pagination buttons, navigate between the different recommendation chunks with unique csLink:`,
             ...filteredChunks.flatMap((chunk, index) => [

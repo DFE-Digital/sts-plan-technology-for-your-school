@@ -20,6 +20,5 @@ export {
     continueButtonText,
     recommendationsSidebarTitle,
     recommendationIntroTitle,
-    saveAndContinueButtonText,
     changeAnswerText
 } from "../../../helpers/constants.js";
