@@ -2,8 +2,8 @@ using System.Text.Json;
 using Dfe.PlanTech.Application.Content.Commands;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Authorisation;
-using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Authorisation.Policies;
+using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Models.QaVisualiser;
 using Microsoft.AspNetCore.Authorization;
@@ -56,7 +56,7 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
         var pageNumber = page ?? 1;
         var queryResult = await getRecommendationQuery.GetChunksByPage(pageNumber);
 
-        var resultModel = new PagedResultModel<ChunkAnswerResultModel>
+        var resultModel = new PagedResultViewModel<ChunkAnswerResultModel>
         {
             Page = pageNumber,
             Total = queryResult.Pagination.Total,

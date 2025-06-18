@@ -1,5 +1,5 @@
 using System.Text;
-using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.Configuration;
 using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Middleware;

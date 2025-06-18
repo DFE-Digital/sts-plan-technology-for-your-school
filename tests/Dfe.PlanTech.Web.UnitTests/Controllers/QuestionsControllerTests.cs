@@ -33,8 +33,8 @@ public class QuestionsControllerTests
     private readonly IDeleteCurrentSubmissionCommand _deleteCurrentSubmissionCommand;
     private readonly IGetQuestionBySlugRouter _getQuestionBySlugRouter;
     private readonly IUser _user;
-    private readonly IOptions<ErrorMessages> _errorMessages;
-    private readonly IOptions<ContactOptions> _contactOptions;
+    private readonly IOptions<ErrorMessagesConfiguration> _errorMessages;
+    private readonly IOptions<ContactOptionsConfiguration> _contactOptions;
     private readonly QuestionsController _controller;
     private readonly IConfiguration _configuration;
 
@@ -102,14 +102,14 @@ public class QuestionsControllerTests
                 return null;
             });
 
-        var message = new ErrorMessages
+        var message = new ErrorMessagesConfiguration
         {
             ConcurrentUsersOrContentChange = "An error occurred. Please contact us."
         };
         _errorMessages = Options.Create(message);
 
 
-        var contactUs = new ContactOptions
+        var contactUs = new ContactOptionsConfiguration
         {
             LinkId = "LinkId"
         };

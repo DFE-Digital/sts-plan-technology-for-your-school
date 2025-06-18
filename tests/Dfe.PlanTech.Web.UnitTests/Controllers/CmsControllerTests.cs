@@ -130,7 +130,7 @@ public class CmsControllerTests
         var result = await _controller.GetChunks(pageNumber, getRecommendationQuery);
 
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var pagedResult = Assert.IsType<PagedResultModel<ChunkAnswerResultModel>>(okResult.Value);
+        var pagedResult = Assert.IsType<PagedResultViewModel<ChunkAnswerResultModel>>(okResult.Value);
 
         Assert.Equal(pageNumber, pagedResult.Page);
         Assert.Equal(expectedTotalCount, pagedResult.Total);
@@ -155,7 +155,7 @@ public class CmsControllerTests
         var result = await _controller.GetChunks(null, getRecommendationQuery);
 
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var pagedResult = Assert.IsType<PagedResultModel<ChunkAnswerResultModel>>(okResult.Value);
+        var pagedResult = Assert.IsType<PagedResultViewModel<ChunkAnswerResultModel>>(okResult.Value);
 
         Assert.Equal(1, pagedResult.Page);
     }

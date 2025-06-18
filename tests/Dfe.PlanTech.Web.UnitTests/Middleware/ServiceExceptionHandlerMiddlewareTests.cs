@@ -24,8 +24,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var internalErrorPageId = "Internal Error Page ID";
             var internalErrorPage = new Page { Slug = InternalErrorSlug };
 
-            var errorPages = new ErrorPages { InternalErrorPageId = internalErrorPageId };
-            var errorPagesOptions = Substitute.For<IOptions<ErrorPages>>();
+            var errorPages = new ErrorPagesConfiguration { InternalErrorPageId = internalErrorPageId };
+            var errorPagesOptions = Substitute.For<IOptions<ErrorPagesConfiguration>>();
             errorPagesOptions.Value.Returns(errorPages);
 
             var getPageQuery = Substitute.For<IGetPageQuery>();

@@ -24,7 +24,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IGetPageQuery _getPageQuery;
         private readonly IGetSectionQuery _getSectionQuery;
         private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
-        private readonly IOptions<ContactOptions> _contactOptions;
+        private readonly IOptions<ContactOptionsConfiguration> _contactOptions;
         private readonly IGetNavigationQuery _getNavigationQuery;
 
         private readonly GroupsController _controller;
@@ -103,7 +103,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task GetSelectASchoolView_ReturnsViewWithCorrectModel()
         {
             var getNavigationQuery = Substitute.For<IGetNavigationQuery>();
-            var contactOptions = Substitute.For<IOptions<ContactOptions>>();
+            var contactOptions = Substitute.For<IOptions<ContactOptionsConfiguration>>();
             var mockSchools = new List<EstablishmentLink>
                 { new EstablishmentLink() { Urn = "123", EstablishmentName = "School A" } };
             var orgData = new EstablishmentDto { OrgName = "GroupName" };
@@ -118,7 +118,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var contactLink = Substitute.For<INavigationLink>();
             contactLink.Href = contactLinkHref;
 
-            var options = new ContactOptions
+            var options = new ContactOptionsConfiguration
             {
                 LinkId = contactLinkHref
             };

@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Helpers;
 using NSubstitute;
 using Xunit;
@@ -26,7 +27,7 @@ public class GtmServiceTests
 
         var cookieService = Substitute.For<ICookieService>();
 
-        var gtmService = new GtmService(config, cookieService);
+        var gtmService = new GtmServiceConfiguration(config, cookieService);
 
         Assert.Equal(id, config.Id);
         Assert.Equal(siteVerificationId, config.SiteVerificationId);

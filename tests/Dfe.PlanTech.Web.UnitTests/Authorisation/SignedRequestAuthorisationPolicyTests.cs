@@ -1,7 +1,8 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
-using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Authorisation.Policies;
+using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;

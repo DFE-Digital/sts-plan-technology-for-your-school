@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -27,11 +27,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
             var getNavigationQuery = Substitute.For<IGetNavigationQuery>();
             getNavigationQuery.GetLinkById(href).Returns(navigationLink);
 
-            var options = new ContactOptions
+            var options = new ContactOptionsConfiguration
             {
                 LinkId = href
             };
-            var contactOptions = Substitute.For<IOptions<ContactOptions>>();
+            var contactOptions = Substitute.For<IOptions<ContactOptionsConfiguration>>();
             contactOptions.Value.Returns(options);
 
             _attribute = new MaintainUrlOnKeyNotFoundAttribute(getNavigationQuery, contactOptions);

@@ -19,7 +19,7 @@ public class CacherTests
 
         _memoryCache.Set(testKey, testObject);
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
         var result = cacher.Get<string>(testKey);
 
@@ -35,7 +35,7 @@ public class CacherTests
 
         _memoryCache.Set(testKey, testObject);
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
         var result = cacher.Get<string>("doesn't exist");
 
@@ -53,7 +53,7 @@ public class CacherTests
             Value = testObject
         };
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
         var result = cacher.Get<string>(testKey, () => service.Value);
 
@@ -73,7 +73,7 @@ public class CacherTests
         var testKey = "Testing";
         var testObject = "Test value";
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
         cacher.Set(testKey, TimeSpan.FromMinutes(60), testObject);
 
@@ -93,7 +93,7 @@ public class CacherTests
         var testKey = "Testing";
         var testObject = "Test value";
 
-        var cacher = new Cacher(cacheOptionsSubstitute, _memoryCache);
+        var cacher = new CacheHelper(cacheOptionsSubstitute, _memoryCache);
 
         cacher.Set(testKey, testObject);
 
@@ -112,7 +112,7 @@ public class CacherTests
 
         _memoryCache.Set(testKey, testObject);
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
         var result = await cacher.GetAsync(testKey, () => Task.FromResult("new value"), TimeSpan.MaxValue);
 
@@ -126,7 +126,7 @@ public class CacherTests
         var testKey = "Testing";
         var newValue = "new value";
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
         var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.MaxValue);
 
@@ -140,7 +140,7 @@ public class CacherTests
         var testKey = "Testing";
         var newValue = "new value";
 
-        var cacher = new Cacher(new CacheOptions(), _memoryCache);
+        var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
         var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.MaxValue);
 
@@ -159,7 +159,7 @@ public class CacherTests
         var cacheOptionsSubstitute = Substitute.For<ICacheOptions>();
         cacheOptionsSubstitute.DefaultTimeToLive.Returns(TimeSpan.FromSeconds(1));
 
-        var cacher = new Cacher(cacheOptionsSubstitute, _memoryCache);
+        var cacher = new CacheHelper(cacheOptionsSubstitute, _memoryCache);
 
         var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue));
 

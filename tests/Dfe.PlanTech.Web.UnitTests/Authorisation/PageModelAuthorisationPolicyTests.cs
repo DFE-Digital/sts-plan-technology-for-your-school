@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Authorisation.Policies;
+using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

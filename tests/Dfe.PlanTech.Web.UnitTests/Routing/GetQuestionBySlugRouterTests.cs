@@ -28,8 +28,8 @@ public class GetQuestionBySlugRouterTests
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
     private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
     private readonly IUser _user = Substitute.For<IUser>();
-    private readonly IOptions<ErrorMessages> _errorMessages = Substitute.For<IOptions<ErrorMessages>>();
-    private readonly IOptions<ContactOptions> _contactOptions = Substitute.For<IOptions<ContactOptions>>();
+    private readonly IOptions<ErrorMessagesConfiguration> _errorMessages = Substitute.For<IOptions<ErrorMessagesConfiguration>>();
+    private readonly IOptions<ContactOptionsConfiguration> _contactOptions = Substitute.For<IOptions<ContactOptionsConfiguration>>();
 
     private readonly IGetSectionQuery _getSectionQuery = Substitute.For<IGetSectionQuery>();
     private readonly QuestionsController _controller;

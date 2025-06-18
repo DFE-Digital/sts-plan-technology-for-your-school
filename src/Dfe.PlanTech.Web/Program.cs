@@ -5,10 +5,9 @@ using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
+using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
-using Dfe.PlanTech.Web.Models;
 using GovUk.Frontend.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,9 +35,9 @@ if (builder.Environment.EnvironmentName != "E2E")
 }
 
 builder.Services.AddCustomTelemetry();
-builder.Services.Configure<ErrorMessages>(builder.Configuration.GetSection("ErrorMessages"));
-builder.Services.Configure<ErrorPages>(builder.Configuration.GetSection("ErrorPages"));
-builder.Services.Configure<ContactOptions>(builder.Configuration.GetSection("ContactUs"));
+builder.Services.Configure<ErrorMessagesConfiguration>(builder.Configuration.GetSection("ErrorMessages"));
+builder.Services.Configure<ErrorPagesConfiguration>(builder.Configuration.GetSection("ErrorPages"));
+builder.Services.Configure<ContactOptionsConfiguration>(builder.Configuration.GetSection("ContactUs"));
 builder.Services.Configure<AutomatedTestingOptions>(builder.Configuration.GetSection("AutomatedTesting"));
 
 builder.AddContentAndSupportServices()

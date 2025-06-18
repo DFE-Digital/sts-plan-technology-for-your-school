@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Web.Helpers;
-using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

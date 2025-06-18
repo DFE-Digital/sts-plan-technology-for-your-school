@@ -12,7 +12,7 @@ public class ComponentViewsFactoryTests
     {
         var header = new Header();
 
-        var factory = new ComponentViewsFactory(new NullLogger<ComponentViewsFactory>());
+        var factory = new ComponentViewsHelper(new NullLogger<ComponentViewsHelper>());
         var success = factory.TryGetViewForType(header, out string? viewPath);
 
         Assert.True(success);
@@ -25,7 +25,7 @@ public class ComponentViewsFactoryTests
     {
         var testClass = new NotARealClass();
 
-        var factory = new ComponentViewsFactory(new NullLogger<ComponentViewsFactory>());
+        var factory = new ComponentViewsHelper(new NullLogger<ComponentViewsHelper>());
         var success = factory.TryGetViewForType(testClass, out string? viewPath);
 
         Assert.False(success);

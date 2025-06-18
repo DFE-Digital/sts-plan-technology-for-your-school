@@ -12,10 +12,10 @@ namespace Dfe.PlanTech.Web.Middleware;
 public class ServiceExceptionHandlerMiddleware : IExceptionHandlerMiddleware
 {
     private readonly IGetPageQuery _pageQuery;
-    private readonly ErrorPages _errorPages;
+    private readonly ErrorPagesConfiguration _errorPages;
 
     public ServiceExceptionHandlerMiddleware(
-        IOptions<ErrorPages> errorPagesOptions,
+        IOptions<ErrorPagesConfiguration> errorPagesOptions,
         IGetPageQuery getPageQuery
     )
     {

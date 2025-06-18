@@ -32,9 +32,13 @@ using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Redis;
-using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Authorisation.Filters;
+using Dfe.PlanTech.Web.Authorisation.Handlers;
+using Dfe.PlanTech.Web.Authorisation.Policies;
+using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Dfe.PlanTech.Web.Background;
 using Dfe.PlanTech.Web.Configuration;
+using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
@@ -108,7 +112,7 @@ public static class ProgramExtensions
 
         services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
 
-        services.AddScoped<ComponentViewsFactory>();
+        services.AddScoped<ComponentViewsHelper>();
 
         return services;
     }
@@ -127,7 +131,7 @@ public static class ProgramExtensions
 
         services.AddHttpContextAccessor();
         services.AddSingleton<ICacheOptions>(new CacheOptions());
-        services.AddTransient<ICacher, Cacher>();
+        services.AddTransient<ICacher, CacheHelper>();
         services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
         services.AddTransient<IUser, UserHelper>();
 
@@ -189,7 +193,7 @@ public static class ProgramExtensions
                 });
 
         services.AddTransient(services => services.GetRequiredService<IOptions<GtmConfiguration>>().Value);
-        services.AddTransient<GtmService>();
+        services.AddTransient<GtmServiceConfiguration>();
         return services;
     }
 
@@ -262,12 +266,12 @@ public static class ProgramExtensions
 
     public static void InitCsDependencyInjection(this WebApplicationBuilder app)
     {
-        app.Services.Configure<TrackingOptions>(app.Configuration.GetSection("tracking"))
-            .AddSingleton(sp => sp.GetRequiredService<IOptions<TrackingOptions>>().Value);
+        app.Services.Configure<TrackingOptionsConfiguration>(app.Configuration.GetSection("tracking"))
+            .AddSingleton(sp => sp.GetRequiredService<IOptions<TrackingOptionsConfiguration>>().Value);
 
         app.Services
-            .Configure<SupportedAssetTypes>(app.Configuration.GetSection("cs:supportedAssetTypes"))
-            .AddSingleton(sp => sp.GetRequiredService<IOptions<SupportedAssetTypes>>().Value);
+            .Configure<SupportedAssetTypesConfiguration>(app.Configuration.GetSection("cs:supportedAssetTypes"))
+            .AddSingleton(sp => sp.GetRequiredService<IOptions<SupportedAssetTypesConfiguration>>().Value);
 
         app.Services.Configure<CookiePolicyOptions>(options =>
         {

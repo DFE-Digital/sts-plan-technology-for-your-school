@@ -7,7 +7,7 @@ using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
@@ -28,8 +28,8 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
     private readonly IGetNavigationQuery _getNavigationQuery;
     private readonly IUser _user;
-    private readonly ErrorMessages _errorMessages;
-    private readonly ContactOptions _contactOptions;
+    private readonly ErrorMessagesConfiguration _errorMessages;
+    private readonly ContactOptionsConfiguration _contactOptions;
 
     public QuestionsController(ILogger<QuestionsController> logger,
                                IGetSectionQuery getSectionQuery,
@@ -37,8 +37,8 @@ public class QuestionsController : BaseController<QuestionsController>
                                IGetEntityFromContentfulQuery getEntityByIdQuery,
                                IGetNavigationQuery getNavigationQuery,
                                IUser user,
-                               IOptions<ErrorMessages> errorMessageOptions,
-                               IOptions<ContactOptions> contactOptions) : base(logger)
+                               IOptions<ErrorMessagesConfiguration> errorMessageOptions,
+                               IOptions<ContactOptionsConfiguration> contactOptions) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;

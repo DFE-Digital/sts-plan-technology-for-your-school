@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 namespace Dfe.PlanTech.Web.Binders;
 
 /// <summary>
-/// Retrieves <see cref="Page"/> from the HttpContext items, as set by <see cref="Authorisation.PageModelAuthorisationPolicy"/>
+/// Retrieves <see cref="Page"/> from the HttpContext items, as set by <see cref="Authorisation.Policies.PageModelAuthorisationPolicy"/>
 /// </summary>
 public class PageModelBinder(ILogger<PageModelBinder> logger) : IModelBinder
 {

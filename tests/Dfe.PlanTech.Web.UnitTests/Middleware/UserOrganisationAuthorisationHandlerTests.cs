@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Dfe.PlanTech.Infrastructure.SignIns.Models;
-using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Web.Authorisation.Handlers;
+using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;

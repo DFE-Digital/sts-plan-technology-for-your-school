@@ -33,8 +33,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
         private readonly PagesController _controller;
         private readonly ControllerContext _controllerContext;
-        private readonly IOptions<ContactOptions> _contactOptions;
-        private readonly IOptions<ErrorPages> _errorPages;
+        private readonly IOptions<ContactOptionsConfiguration> _contactOptions;
+        private readonly IOptions<ErrorPagesConfiguration> _errorPages;
 
         public PagesControllerTests()
         {
@@ -43,12 +43,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _controllerContext = ControllerHelpers.SubstituteControllerContext();
             _getNavigationQuery.GetLinkById(Arg.Any<string>()).Returns(new NavigationLink { DisplayText = "contact us", Href = "/contact-us", OpenInNewTab = true });
 
-            var contactUs = new ContactOptions
+            var contactUs = new ContactOptionsConfiguration
             {
                 LinkId = "LinkId"
             };
             _contactOptions = Options.Create(contactUs);
-            _errorPages = Options.Create(new ErrorPages { InternalErrorPageId = INTERNAL_ERROR_ID });
+            _errorPages = Options.Create(new ErrorPagesConfiguration { InternalErrorPageId = INTERNAL_ERROR_ID });
 
             _controller = new PagesController(Logger, _getNavigationQuery, _contactOptions, _errorPages)
             {

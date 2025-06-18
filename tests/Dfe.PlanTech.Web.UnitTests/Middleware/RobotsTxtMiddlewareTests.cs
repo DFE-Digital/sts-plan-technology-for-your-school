@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Middleware;
-using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using NSubstitute;
