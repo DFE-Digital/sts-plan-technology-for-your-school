@@ -2,7 +2,11 @@
 
 public static class DatabaseConstants
 {
-    public const string CalculateMaturitySprocParam = "@submissionId";
-    public const string CalculateMaturitySproc = $"[dbo].[calculateMaturityForSubmission] {CalculateMaturitySprocParam}";
+    public static class StoredProcedures
+    {
+        public const string CalculateMaturity = $"[dbo].[calculateMaturityForSubmission] {SubmissionIdParam}";
+    }
+
+    public const string SubmissionIdParam = "@submissionId";
     public const string GetSectionStatuses = "[dbo].[GetSectionStatuses]";
 }

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Web.Configuration;
+using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;

@@ -3,7 +3,7 @@ using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.SignIns.Enums;
-using Dfe.PlanTech.Web.Configuration;
+using Dfe.PlanTech.Web.Configurations;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.Options;
 

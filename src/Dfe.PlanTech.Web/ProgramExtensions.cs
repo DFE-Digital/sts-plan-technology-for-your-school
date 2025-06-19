@@ -37,7 +37,7 @@ using Dfe.PlanTech.Web.Authorisation.Handlers;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Dfe.PlanTech.Web.Background;
-using Dfe.PlanTech.Web.Configuration;
+using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;

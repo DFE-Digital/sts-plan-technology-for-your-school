@@ -22,12 +22,12 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         {
             //Arrange
             var strut = CreateStrut();
-            User? createdUser = null;
+            UserDataEntity? createdUser = null;
 
-            Db.When(x => x.AddUser(Arg.Any<User>()))
+            Db.When(x => x.AddUser(Arg.Any<UserDataEntity>()))
                     .Do((callInfo) =>
                     {
-                        User user = (User)callInfo[0];
+                        UserDataEntity user = (UserDataEntity)callInfo[0];
                         createdUser = user;
                     });
 

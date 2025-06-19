@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json;
+using Dfe.PlanTech.Domain.Models;
 using Dfe.PlanTech.Domain.SignIns.Enums;
-using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.Models;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns.Extensions;

@@ -7,12 +7,12 @@ using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Binders;
-using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Dfe.PlanTech.Web.Configurations;
 
 namespace Dfe.PlanTech.Web.Controllers;
 

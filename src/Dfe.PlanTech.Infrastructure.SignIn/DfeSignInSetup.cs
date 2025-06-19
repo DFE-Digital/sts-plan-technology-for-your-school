@@ -34,7 +34,7 @@ public static class DfeSignInSetup
                 .AddCookie(options => ConfigureCookie(options, config));
 
         services.AddScoped((services) => config);
-        services.AddScoped<IDfeSignInConfiguration>((_) => config);
+        services.AddScoped<DfeSignInConfiguration>((_) => config);
 
         services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -53,7 +53,7 @@ public static class DfeSignInSetup
         sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
     }
 
-    private static void ConfigureCookie(CookieAuthenticationOptions options, IDfeSignInConfiguration config)
+    private static void ConfigureCookie(CookieAuthenticationOptions options, DfeSignInConfiguration config)
     {
         options.Cookie.Name = config.CookieName;
         options.Cookie.SameSite = SameSiteMode.Lax;
@@ -63,7 +63,7 @@ public static class DfeSignInSetup
         options.AccessDeniedPath = config.AccessDeniedPath;
     }
 
-    private static void ConfigureOpenIdConnect(IServiceCollection services, OpenIdConnectOptions options, IDfeSignInConfiguration config)
+    private static void ConfigureOpenIdConnect(IServiceCollection services, OpenIdConnectOptions options, DfeSignInConfiguration config)
     {
         options.ClientId = config.ClientId;
         options.ClientSecret = config.ClientSecret;

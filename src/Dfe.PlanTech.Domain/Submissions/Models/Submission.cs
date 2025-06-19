@@ -8,7 +8,7 @@ public class Submission
 
     public int EstablishmentId { get; set; }
 
-    public Establishment Establishmet { get; set; } = null!;
+    public Establishment Establishment { get; set; } = null!;
 
     public bool Completed { get; set; }
 

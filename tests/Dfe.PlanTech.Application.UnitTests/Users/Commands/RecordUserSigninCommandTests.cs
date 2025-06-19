@@ -31,7 +31,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             int signInId = 1;
 
             var guid = Guid.NewGuid().ToString();
-            var user = new User
+            var user = new UserDataEntity
             {
                 Id = 1,
                 DfeSignInRef = guid
@@ -39,7 +39,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
 
             var strut = CreateStrut();
             UserQuery.GetUserId(Arg.Any<string>()).Returns(1);
-            Db.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).Returns(user);
+            Db.GetUserBy(Arg.Any<Expression<Func<UserDataEntity, bool>>>()).Returns(user);
             Db.When(x => x.AddSignIn(Arg.Any<SignIn>())).Do(callInfo =>
             {
                 createdSignIn = (SignIn)callInfo[0];
@@ -80,15 +80,15 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         [InlineData(2402)]
         public async Task RecordSignInForNewUser_AddsUser_UpdatesSignInDetailsAnd_ReturnsId(int userId)
         {
-            User? createdUser = null;
+            UserDataEntity? createdUser = null;
             SignIn? createdSignIn = null;
             int signInId = 1;
 
-            Db.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).ReturnsNull();
+            Db.GetUserBy(Arg.Any<Expression<Func<UserDataEntity, bool>>>()).ReturnsNull();
 
-            Db.When(x => x.AddUser(Arg.Any<User>())).Do((callInfo) =>
+            Db.When(x => x.AddUser(Arg.Any<UserDataEntity>())).Do((callInfo) =>
             {
-                User user = (User)callInfo[0];
+                UserDataEntity user = (UserDataEntity)callInfo[0];
                 createdUser = user;
             });
 
@@ -142,14 +142,14 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
         [InlineData(2402)]
         public async Task RecordSignInForUser_WithNoOrganisation_UpdatesSignInDetailsAnd_ReturnsId(int userId)
         {
-            User? createdUser = null;
+            UserDataEntity? createdUser = null;
             SignIn? createdSignIn = null;
             int signInId = 1;
 
-            Db.GetUserBy(Arg.Any<Expression<Func<User, bool>>>()).ReturnsNull();
-            Db.When(x => x.AddUser(Arg.Any<User>())).Do((callInfo) =>
+            Db.GetUserBy(Arg.Any<Expression<Func<UserDataEntity, bool>>>()).ReturnsNull();
+            Db.When(x => x.AddUser(Arg.Any<UserDataEntity>())).Do((callInfo) =>
             {
-                User user = (User)callInfo[0];
+                UserDataEntity user = (UserDataEntity)callInfo[0];
                 createdUser = user;
             });
 

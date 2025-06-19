@@ -3,6 +3,7 @@ using System.Text.Json;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
 using Microsoft.AspNetCore.Http;
@@ -25,12 +26,12 @@ public class UserHelperTests
     private IGetUserIdQuery _getUserIdQuerySubstitute;
     private IGetEstablishmentIdQuery _getEstablishmentIdQuerySubstitute;
 
-    private readonly List<User> _users = new(){
-        new User(){
+    private readonly List<UserEntity> _users = new(){
+        new UserEntity(){
             DfeSignInRef = FIRST_USER_REF,
             Id = 1
         },
-        new User(){
+        new UserEntity(){
             DfeSignInRef = SECOND_USER_REF,
             Id = 2
         }

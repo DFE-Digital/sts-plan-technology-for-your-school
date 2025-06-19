@@ -6,7 +6,7 @@ using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Web.Configuration;
+using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;

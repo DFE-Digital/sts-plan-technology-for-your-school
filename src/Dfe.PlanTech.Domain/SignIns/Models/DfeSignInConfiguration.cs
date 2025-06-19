@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Domain.SignIns.Models;
 
-public sealed class DfeSignInConfiguration : IDfeSignInConfiguration
+public sealed class DfeSignInConfiguration
 {
     /// <inheritdoc/>
     public string Authority { get; set; } = null!;
@@ -36,7 +36,7 @@ public sealed class DfeSignInConfiguration : IDfeSignInConfiguration
     public bool SaveTokens { get; set; }
 
     /// <inheritdoc/>
-    public IList<string> Scopes { get; set; } = null!;
+    public List<string> Scopes { get; set; } = null!;
 
     /// <inheritdoc/>
     public string SignoutCallbackUrl { get; set; } = null!;

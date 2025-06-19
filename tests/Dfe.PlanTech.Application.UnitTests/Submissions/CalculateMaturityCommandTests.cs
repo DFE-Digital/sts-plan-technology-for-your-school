@@ -20,7 +20,7 @@ public class CalculateMaturityCommandTests
 
             _sqlParams = sqlParams;
 
-            var submissionIdParam = _sqlParams.FirstOrDefault(sqlParam => sqlParam.ParameterName == DatabaseConstants.CalculateMaturitySprocParam);
+            var submissionIdParam = _sqlParams.FirstOrDefault(sqlParam => sqlParam.ParameterName == DatabaseConstants.SubmissionIdParam);
 
             if (submissionIdParam != null && submissionIdParam.Value is int i && i > 0)
             {
