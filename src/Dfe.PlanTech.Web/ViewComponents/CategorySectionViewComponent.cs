@@ -74,7 +74,7 @@ public class CategorySectionViewComponent(
             );
         }
     }
-
+     
     private async Task<CategorySectionRecommendationDto> GetCategorySectionRecommendationDto(ISectionComponent section, SectionStatusDto? sectionStatus)
     {
         if (string.IsNullOrEmpty(sectionStatus?.LastMaturity))
