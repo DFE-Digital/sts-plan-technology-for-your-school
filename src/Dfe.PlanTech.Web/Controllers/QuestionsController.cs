@@ -74,7 +74,7 @@ public class QuestionsController : BaseController<QuestionsController>
                                                             CancellationToken cancellationToken = default)
     {
         if (!contentfulOptions.UsePreviewApi)
-            return new RedirectResult(UrlConstants.SelfAssessmentPage);
+            return new RedirectResult(UrlConstants.HomePage);
 
         var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
                        throw new ContentfulDataUnavailableException($"Could not find question with Id {questionId}");
@@ -109,14 +109,14 @@ public class QuestionsController : BaseController<QuestionsController>
         }
         catch (DatabaseException)
         {
-            // Remove the current invalid submission and redirect to self-assessment page
+            // Remove the current invalid submission and redirect to homepage
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
 
             TempData["SubtopicError"] = await BuildErrorMessage();
             return RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
-                new { route = "self-assessment" });
+                new { route = "home" });
         }
     }
 
