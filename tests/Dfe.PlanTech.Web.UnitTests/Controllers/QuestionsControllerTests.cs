@@ -213,7 +213,7 @@ public class QuestionsControllerTests
     }
 
     [Fact]
-    public async Task GetNextUnansweredQuestion_Should_Redirect_To_SelfAssessmentPage_When_Database_Exception_Raised()
+    public async Task GetNextUnansweredQuestion_Should_Redirect_To_HomePage_When_Database_Exception_Raised()
     {
         _getNextUnansweredQuestionQuery
             .When(x => x.GetNextUnansweredQuestion(Arg.Any<int>(), Arg.Any<Section>()))
@@ -400,7 +400,7 @@ public class QuestionsControllerTests
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
-        Assert.Equal(UrlConstants.SelfAssessmentPage, redirectResult.Url);
+        Assert.Equal(UrlConstants.HomePage, redirectResult.Url);
     }
 
     [Fact]
