@@ -13,10 +13,10 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 
 /// <summary>
-/// Processes messages from Service Bus, and saves them into the DB using the <see cref="WebhookMessageProcessor"/>.
+/// Processes messages from Service Bus, and saves them into the DB using the <see cref="CmsWebHookMessageProcessor"/>.
 /// </summary>
 /// <param name="processorFactory"></param>
-/// <param name="resultProcessor">Processes results from the <see cref="WebhookMessageProcessor"/> </param>
+/// <param name="resultProcessor">Processes results from the <see cref="CmsWebHookMessageProcessor"/> </param>
 /// <param name="logger"></param>
 /// <param name="serviceScopeFactory">Service factory - used to create transient services to prevent state problems</param>
 public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcessor> processorFactory,
@@ -46,13 +46,13 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     }
 
     /// <summary>
-    /// Receives messages from the <see cref="ServiceBusProcessor"/>, saves them to the DB using the <see cref="WebhookMessageProcessor"/>, and then processses the results with <see cref="ServiceBusResultProcessor"/>
+    /// Receives messages from the <see cref="ServiceBusProcessor"/>, saves them to the DB using the <see cref="CmsWebHookMessageProcessor"/>, and then processses the results with <see cref="ServiceBusResultProcessor"/>
     /// </summary>
     /// <param name="processMessageEventArgs">Received Service Bus message</param>
     private async Task MessageHandler(ProcessMessageEventArgs processMessageEventArgs)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var webhookToDbCommand = scope.ServiceProvider.GetRequiredService<IWebhookToDbCommand>();
+        var webhookToDbCommand = scope.ServiceProvider.GetRequiredService<IContentfulMessageProcessor>();
 
         try
         {

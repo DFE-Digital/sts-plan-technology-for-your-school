@@ -1,10 +1,9 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
-using Dfe.PlanTech.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Content.Queries;
@@ -54,7 +53,7 @@ public class GetSubTopicRecommendationQuery(IContentRepository repository,
     }
 
     private static GetEntitiesOptions CreateGetEntityOptions(string sectionId, int depth = 4, params IContentQuery[] additionalQueries) =>
-        new(depth, [new ContentQueryEquals() { Field = "fields.subtopic.sys.id", Value = sectionId }, .. additionalQueries]);
+        new(depth, [new ContentQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = sectionId }, .. additionalQueries]);
 
     private void LogMissingRecommendationError(string subtopicId)
     => logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);

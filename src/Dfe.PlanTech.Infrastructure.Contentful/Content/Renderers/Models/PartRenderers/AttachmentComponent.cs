@@ -55,9 +55,9 @@ public class AttachmentComponent
         var contentType = content?.Asset.File.ContentType;
         var fileExtension = contentType?.Split('/')[^1].ToLower();
 
-        if (fileExtension == FileExtensions.XLSXSPREADSHEET)
+        if (fileExtension == FileExtensionConstants.XLSXSPREADSHEET)
         {
-            fileExtension = FileExtensions.XLSX;
+            fileExtension = FileExtensionConstants.XLSX;
         }
 
         return new CustomAttachment
@@ -76,14 +76,14 @@ public class AttachmentComponent
     {
         switch (fileExtension)
         {
-            case FileExtensions.PDF:
+            case FileExtensionConstants.PDF:
                 return "<img src=\"/assets/images/pdf-file-icon.svg\" alt=\"pdf file type\" >";
-            case FileExtensions.CSV:
-            case FileExtensions.XLS:
-            case FileExtensions.XLSX:
+            case FileExtensionConstants.CSV:
+            case FileExtensionConstants.XLS:
+            case FileExtensionConstants.XLSX:
                 return "<img src=\"/assets/images/spreadsheet-file-icon.svg\" alt=\"spreadsheet file type\" />";
-            case FileExtensions.HTML:
-            case FileExtensions.HTM:
+            case FileExtensionConstants.HTML:
+            case FileExtensionConstants.HTM:
                 return "<img src =\"/assets/images/html-file-icon.svg\" alt=\"html file type\">";
             default:
                 return "<img src =\"/assets/images/generic-file-icon.svg\" alt=\"generic file type\">";

@@ -1,5 +1,5 @@
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Exceptions;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -38,12 +38,12 @@ public static class CheckAnswersOrNextQuestionChecker
             }
 
             var lastSelectedQuestion = userJourneyRouter.Section.Questions
-                .FirstOrDefault(q => q.Sys.Id == lastResponseInUserJourney.QuestionRef)
-                ?? throw new UserJourneyMissingContentException($"Could not find question with ID {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
+                .FirstOrDefault(q => q.Sys.Id == lastResponseInUserJourney.QuestionSysId)
+                ?? throw new UserJourneyMissingContentException($"Could not find question with ID {lastResponseInUserJourney.QuestionSysId}", userJourneyRouter.Section);
 
             var lastSelectedAnswer = lastSelectedQuestion.Answers
-                .FirstOrDefault(a => a.Sys.Id == lastResponseInUserJourney.AnswerRef)
-                ?? throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.AnswerRef} in question {lastResponseInUserJourney.QuestionRef}", userJourneyRouter.Section);
+                .FirstOrDefault(a => a.Sys.Id == lastResponseInUserJourney.AnswerSysId)
+                ?? throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.AnswerSysId} in question {lastResponseInUserJourney.QuestionSysId}", userJourneyRouter.Section);
 
             // Route user depending on whether there's a next question
             if (lastSelectedAnswer.NextQuestion == null)

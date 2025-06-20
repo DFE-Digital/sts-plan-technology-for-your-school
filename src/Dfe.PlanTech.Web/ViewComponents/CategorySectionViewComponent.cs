@@ -1,10 +1,10 @@
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Web.Models;
@@ -41,7 +41,7 @@ public class CategorySectionViewComponent(
             };
         }
 
-        category = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _query);
+        category = await SubmissionStatusHelper.RetrieveSectionStatuses(category, _logger, _query);
 
         return new CategorySectionViewComponentViewModel
         {

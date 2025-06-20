@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.SignIns.Enums;
+﻿using Dfe.PlanTech.Domain.Constants;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Configurations;
 using Microsoft.AspNetCore.Http;

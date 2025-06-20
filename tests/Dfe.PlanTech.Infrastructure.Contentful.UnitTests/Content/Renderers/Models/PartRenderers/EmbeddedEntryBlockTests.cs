@@ -84,7 +84,7 @@ public class EmbeddedEntryBlockTests
                         {
                             SystemProperties = new SystemProperties()
                             {
-                                Id = ContentTypeId.Attachment,
+                                Id = ContentTypeConstants.Attachment,
                             }
                         }
                     },
@@ -140,7 +140,7 @@ public class EmbeddedEntryBlockTests
                         {
                             SystemProperties = new SystemProperties()
                             {
-                                Id = ContentTypeId.Accordion,
+                                Id = ContentTypeConstants.Accordion,
                             }
                         }
                     },

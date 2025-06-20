@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using NSubstitute;
@@ -36,7 +36,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
                     var id = callinfo.ArgAt<string>(0);
                     var include = callinfo.ArgAt<int>(1);
                     return new GetEntitiesOptions(include, [
-                        new ContentQueryEquals()
+                        new ContentQuerySingleValue()
                         {
                             Field = "sys.id",
                             Value = id
@@ -93,7 +93,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         private static bool ValidateGetEntitiesOptions(GetEntitiesOptions arg, string id)
         {
             var first = arg.Queries?.FirstOrDefault();
-            return first is ContentQueryEquals queryEquals &&
+            return first is ContentQuerySingleValue queryEquals &&
                    queryEquals.Field == "sys.id" &&
                    queryEquals.Value == id;
         }

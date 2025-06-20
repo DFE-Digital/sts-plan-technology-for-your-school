@@ -9,13 +9,13 @@ public class QueryBuilderWithQueryTests
     private const string TEST_VALUE = "TestValue";
     private const string TEST_FIELD = "TestField";
 
-    private readonly ContentQueryIncludes INCLUDES = new()
+    private readonly ContentQueryMultipleValues INCLUDES = new()
     {
         Value = new[] { TEST_VALUE, "OtherTestValue" },
         Field = TEST_FIELD
     };
 
-    private readonly ContentQueryEquals EQUALS = new()
+    private readonly ContentQuerySingleValue EQUALS = new()
     {
         Value = TEST_VALUE,
         Field = TEST_FIELD
@@ -79,9 +79,9 @@ public class QueryBuilderWithQueryTests
         Assert.Contains(expectedIncludesString, queryString);
     }
 
-    private static string GetExpectedStringForIncludes(ContentQueryIncludes query)
+    private static string GetExpectedStringForIncludes(ContentQueryMultipleValues query)
     => $"{query.Field}[in]={string.Join("%2C", query.Value)}";
 
-    private static string GetExpectedStringForEquals(ContentQueryEquals query)
+    private static string GetExpectedStringForEquals(ContentQuerySingleValue query)
     => $"{query.Field}={query.Value}";
 }

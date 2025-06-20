@@ -3,7 +3,7 @@ using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -20,7 +20,7 @@ public class ContentfulServiceBusProcessorTests
     private readonly ServiceBusReceiver _serviceBusReceiver = Substitute.For<ServiceBusReceiver>();
     private readonly IMessageRetryHandler _retryHandler = Substitute.For<IMessageRetryHandler>();
     private readonly ILogger<ContentfulServiceBusProcessor> _logger = Substitute.For<ILogger<ContentfulServiceBusProcessor>>();
-    private readonly IWebhookToDbCommand _webhookToDbCommand = Substitute.For<IWebhookToDbCommand>();
+    private readonly IContentfulMessageProcessor _webhookToDbCommand = Substitute.For<IContentfulMessageProcessor>();
     private readonly IServiceScopeFactory _serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
     private readonly IOptions<ServiceBusOptions> _options = Substitute.For<IOptions<ServiceBusOptions>>();
     private readonly IServiceBusResultProcessor _serviceBusResultProcessor;
@@ -34,7 +34,7 @@ public class ContentfulServiceBusProcessorTests
         var serviceProvider = Substitute.For<IServiceProvider>();
         scope.ServiceProvider.Returns(serviceProvider);
 
-        serviceProvider.GetService<IWebhookToDbCommand>().Returns(_webhookToDbCommand);
+        serviceProvider.GetService<IContentfulMessageProcessor>().Returns(_webhookToDbCommand);
 
         _serviceBusResultProcessor = Substitute.For<IServiceBusResultProcessor>();
         _processorFactory.CreateClient("contentfulprocessor").Returns(_serviceBusProcessor);

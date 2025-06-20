@@ -1,10 +1,11 @@
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -124,7 +125,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException">Thrown if no responses are found</exception>
-    private async Task<List<QuestionWithAnswer>> GetLatestResponsesForSection(bool completed = false, CancellationToken cancellationToken = default)
+    private async Task<List<Domain.Submissions.Models.QuestionWithAnswerModel>> GetLatestResponsesForSection(bool completed = false, CancellationToken cancellationToken = default)
     {
         var establishmentId = await _user.GetEstablishmentId();
 
@@ -143,7 +144,7 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="responses">Latest responses for the section</param>
     /// <returns></returns>
     /// <exception cref="DatabaseException">Thrown if none found</exception>
-    private static QuestionWithAnswer GetLatestResponseForQuestion(IEnumerable<QuestionWithAnswer> responses, Question question)
+    private static Domain.Submissions.Models.QuestionWithAnswerModel GetLatestResponseForQuestion(IEnumerable<Domain.Submissions.Models.QuestionWithAnswerModel> responses, Question question)
     => responses.FirstOrDefault(response => response.QuestionRef == question.Sys.Id) ??
        throw new DatabaseException($"Could not find response for question '{question.Sys.Id}'");
 
@@ -154,8 +155,8 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="responses">Latest response path for the <see cref="Section"/> from the <see cref="_router"/></param>
     /// <param name="question">Question to check attached status</param>
     /// <returns></returns>
-    private bool IsQuestionAttached(IEnumerable<QuestionWithAnswer> responses, Question question)
-    => _router.Section.GetOrderedResponsesForJourney(responses).Any(response => response.QuestionRef == question.Sys.Id);
+    private bool IsQuestionAttached(IEnumerable<Domain.Submissions.Models.QuestionWithAnswerModel> responses, Question question)
+    => _router.Section.GetOrderedResponsesForJourney(responses).Any(response => response.QuestionSysId == question.Sys.Id);
 
     /// <summary>
     /// Returns an IActionResult depending on the <see cref="SubmissionStatus"/> in the <see cref="_router"/>

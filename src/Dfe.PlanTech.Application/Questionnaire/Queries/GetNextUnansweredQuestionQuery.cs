@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 
 namespace Dfe.PlanTech.Application.Questionnaire.Queries;
@@ -41,9 +41,9 @@ public class GetNextUnansweredQuestionQuery : IGetNextUnansweredQuestionQuery
         if (lastAttachedResponse == null)
             throw new DatabaseException($"The responses to the ongoing submission {answeredQuestions.SubmissionId} are out of sync with the topic");
 
-        return section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionRef)
+        return section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionSysId)
                               .SelectMany(question => question.Answers)
-                              .Where(answer => answer.Sys.Id == lastAttachedResponse.AnswerRef)
+                              .Where(answer => answer.Sys.Id == lastAttachedResponse.AnswerSysId)
                               .Select(answer => answer.NextQuestion)
                               .FirstOrDefault();
     }

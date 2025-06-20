@@ -4,6 +4,7 @@ using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Options;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
@@ -118,7 +119,7 @@ public class ContentfulRepository : IContentRepository
         //with links to children. This was proving rather useless, so I have used the "GetEntries" option here
         //instead.
         return new GetEntitiesOptions(include, new[] {
-            new ContentQueryEquals(){
+            new ContentQuerySingleValue(){
                 Field = "sys.id",
                 Value = id
             }});

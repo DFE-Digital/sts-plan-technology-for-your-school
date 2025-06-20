@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Content.Enums;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;

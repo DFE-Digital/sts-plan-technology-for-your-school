@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.Groups.Models;

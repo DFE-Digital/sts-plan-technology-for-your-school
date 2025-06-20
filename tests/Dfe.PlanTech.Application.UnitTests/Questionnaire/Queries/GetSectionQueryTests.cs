@@ -3,7 +3,7 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using NSubstitute;
 
@@ -88,8 +88,8 @@ public class GetSectionQueryTests
         {
             var options = callinfo.ArgAt<GetEntitiesOptions>(0);
 
-            var slugQuery = (options.Queries?.FirstOrDefault(query => query is ContentQueryEquals equalsQuery &&
-                                                            equalsQuery.Field == GetSectionQuery.SlugFieldPath) as ContentQueryEquals) ??
+            var slugQuery = (options.Queries?.FirstOrDefault(query => query is ContentQuerySingleValue equalsQuery &&
+                                                            equalsQuery.Field == GetSectionQuery.SlugFieldPath) as ContentQuerySingleValue) ??
                                             throw new InvalidOperationException("Missing query for slug");
 
 

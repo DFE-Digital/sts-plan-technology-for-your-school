@@ -2,15 +2,14 @@ using System.Reflection;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Questionnaire.Models;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
@@ -78,7 +77,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 .GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), Arg.Any<int>())
                 .Throws(new Exception("Database error"));
 
-            var result = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _submissionStatusesQuery, 1);
+            var result = await SubmissionStatusHelper.RetrieveSectionStatuses(category, _logger, _submissionStatusesQuery, 1);
 
             Assert.True(result.RetrievalError);
         }
@@ -95,7 +94,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 .GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), Arg.Any<int>())
                 .Returns(statuses);
 
-            var result = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _submissionStatusesQuery, 1);
+            var result = await SubmissionStatusHelper.RetrieveSectionStatuses(category, _logger, _submissionStatusesQuery, 1);
 
             Assert.False(result.RetrievalError);
             Assert.Single(result.SectionStatuses);

@@ -30,8 +30,8 @@ public static class QueryBuilders
     public static QueryBuilder<T> WithQuery<T>(this QueryBuilder<T> queryBuilder, IContentQuery query) =>
     query switch
     {
-        ContentQueryEquals equals => equals.AddToQuery(queryBuilder),
-        ContentQueryIncludes includes => includes.AddToQuery(queryBuilder),
+        ContentQuerySingleValue equals => equals.AddToQuery(queryBuilder),
+        ContentQueryMultipleValues includes => includes.AddToQuery(queryBuilder),
         _ => throw new ArgumentException($"Could not find correct query builder for ${query.GetType()}")
     };
 

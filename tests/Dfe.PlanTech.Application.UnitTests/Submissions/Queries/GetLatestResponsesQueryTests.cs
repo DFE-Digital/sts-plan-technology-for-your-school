@@ -2,7 +2,7 @@ using Bogus;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Responses.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
@@ -57,11 +57,11 @@ public class GetLatestResponsesQueryTests
             };
         };
 
-        var answerFaker = new Faker<Domain.Questionnaire.Models.Answer>()
+        var answerFaker = new Faker<Answer>()
                             .RuleFor(answer => answer.Sys, generateSystemDetails)
                             .RuleFor(answer => answer.Text, faker => faker.Lorem.Sentence(faker.Random.Int(1, 5)));
 
-        var questionFaker = new Faker<Domain.Questionnaire.Models.Question>()
+        var questionFaker = new Faker<Question>()
                             .RuleFor(question => question.Sys, generateSystemDetails)
                             .RuleFor(question => question.Text, faker => faker.Lorem.Sentence())
                             .RuleFor(question => question.Answers, _ => answerFaker.Generate(ANSWER_PER_QUESTION_COUNT).ToList());

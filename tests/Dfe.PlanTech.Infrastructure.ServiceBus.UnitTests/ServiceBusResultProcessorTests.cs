@@ -1,7 +1,7 @@
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;

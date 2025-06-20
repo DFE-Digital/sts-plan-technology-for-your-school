@@ -1,6 +1,6 @@
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.CategorySection;
@@ -82,6 +82,6 @@ public class CategorySectionDto
         if (date == null)
             return null;
         var localTime = TimeZoneHelpers.ToUkTime(date.Value);
-        return DateTimeFormatter.FormattedDateShort(localTime);
+        return DateTimeHelper.FormattedDateShort(localTime);
     }
 }

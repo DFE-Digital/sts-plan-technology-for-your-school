@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
 
 namespace Dfe.PlanTech.Domain.Exceptions;
 

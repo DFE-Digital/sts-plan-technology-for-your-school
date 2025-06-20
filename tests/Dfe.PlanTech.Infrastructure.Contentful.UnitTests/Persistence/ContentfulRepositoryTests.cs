@@ -4,7 +4,7 @@ using Contentful.Core.Models;
 using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Options;
 using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 using Microsoft.Extensions.Hosting;

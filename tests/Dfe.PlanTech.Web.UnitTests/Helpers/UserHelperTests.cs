@@ -5,7 +5,7 @@ using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Domain.Users.Models;
+using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 using Xunit;

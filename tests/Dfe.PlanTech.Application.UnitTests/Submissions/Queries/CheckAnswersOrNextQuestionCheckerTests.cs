@@ -1,8 +1,8 @@
 using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Exceptions;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -68,28 +68,28 @@ public class CheckAnswersOrNextQuestionCheckerTests
         Responses = [
           new QuestionWithAnswer()
           {
-              QuestionRef = "Question-One",
-              AnswerRef = "Answer-One"
+              QuestionSysId = "Question-One",
+              AnswerSysId = "Answer-One"
           },
             new QuestionWithAnswer()
             {
-                QuestionRef = "Question-Two",
-                AnswerRef = "Answer-Two"
+                QuestionSysId = "Question-Two",
+                AnswerSysId = "Answer-Two"
             },
             new QuestionWithAnswer()
             {
-                QuestionRef = "Question-Three",
-                AnswerRef = "Answer-Three"
+                QuestionSysId = "Question-Three",
+                AnswerSysId = "Answer-Three"
             },
             new QuestionWithAnswer()
             {
-                QuestionRef = "Question-Four",
-                AnswerRef = "Answer-Four"
+                QuestionSysId = "Question-Four",
+                AnswerSysId = "Answer-Four"
             },
             new QuestionWithAnswer()
             {
-                QuestionRef = "Question-Five",
-                AnswerRef = "Answer-Four"
+                QuestionSysId = "Question-Five",
+                AnswerSysId = "Answer-Four"
             },
         ]
     };
@@ -249,7 +249,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
 
         var lastResponse = section.GetOrderedResponsesForJourney(ResponsesForSubmissionDto.Responses).Last();
 
-        var expectedErrorMessage = $"Could not find question with ID {lastResponse.QuestionRef}";
+        var expectedErrorMessage = $"Could not find question with ID {lastResponse.QuestionSysId}";
 
         Assert.Equal(expectedErrorMessage, exception.Message);
     }
@@ -310,7 +310,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
 
         var lastResponse = section.GetOrderedResponsesForJourney(ResponsesForSubmissionDto.Responses).Last();
 
-        var expectedErrorMessage = $"Could not find answer with ID {lastResponse.AnswerRef} in question {lastResponse.QuestionRef}";
+        var expectedErrorMessage = $"Could not find answer with ID {lastResponse.AnswerSysId} in question {lastResponse.QuestionSysId}";
 
         Assert.Equal(expectedErrorMessage, exception.Message);
     }

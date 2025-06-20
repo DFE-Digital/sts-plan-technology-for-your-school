@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Domain.Submissions.Interfaces;
 

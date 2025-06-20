@@ -2,12 +2,13 @@ using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -325,7 +326,7 @@ public class QuestionsControllerTests
             {
                 Responses = new List<QuestionWithAnswer>
                 {
-                    new QuestionWithAnswer { QuestionRef = _validQuestion.Sys.Id }
+                    new QuestionWithAnswer { QuestionSysId = _validQuestion.Sys.Id }
                 }
             });
 

@@ -2,8 +2,8 @@ using Dfe.PlanTech.Application.Core;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 
 namespace Dfe.PlanTech.Application.Questionnaire.Queries;
@@ -22,12 +22,12 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
         {
             Queries =
             [
-                new ContentQueryEquals()
+                new ContentQuerySingleValue()
                 {
                     Field = SlugFieldPath,
                     Value = sectionSlug
                 },
-                new ContentQueryEquals()
+                new ContentQuerySingleValue()
                 {
                     Field = "fields.interstitialPage.sys.contentType.sys.id",
                     Value = "page"

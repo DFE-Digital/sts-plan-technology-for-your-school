@@ -23,9 +23,9 @@ public class GetEntitiesOptionsTests
             {
                 "Query", new GetEntitiesOptions(queries:
                 [
-                    new ContentQueryEquals() { Field = "slug", Value = "/" },
-                    new ContentQueryEquals() { Field = "id", Value = "1234" },
-                    new ContentQueryIncludes() { Field = "toinclude", Value = ["value1", "value2"] }
+                    new ContentQuerySingleValue() { Field = "slug", Value = "/" },
+                    new ContentQuerySingleValue() { Field = "id", Value = "1234" },
+                    new ContentQueryMultipleValues() { Field = "toinclude", Value = ["value1", "value2"] }
                 ])
             },
             {
@@ -34,7 +34,7 @@ public class GetEntitiesOptionsTests
                     Select = ["field.intros", "field.sys"],
                     Queries =
                     [
-                        new ContentQueryEquals() { Field = "slug", Value = "/test" },
+                        new ContentQuerySingleValue() { Field = "slug", Value = "/test" },
                     ],
                     Include = 6
                 }

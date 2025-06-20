@@ -12,7 +12,7 @@ public class DateTimeFormatterTests
     public void FormattedTime_Should_Display_Correctly(string inputDate, string expected)
     {
         var dateTime = DateTime.Parse(inputDate, new CultureInfo("en-GB"));
-        Assert.Equal(expected, DateTimeFormatter.FormattedTime(dateTime));
+        Assert.Equal(expected, DateTimeHelper.FormattedTime(dateTime));
     }
 
     [Theory]
@@ -21,7 +21,7 @@ public class DateTimeFormatterTests
     public void FormattedDateLong_Should_Display_Correctly(string inputDate, string expected)
     {
         var dateTime = DateTime.Parse(inputDate, new CultureInfo("en-GB"));
-        Assert.Equal(expected, DateTimeFormatter.FormattedDateLong(dateTime));
+        Assert.Equal(expected, DateTimeHelper.FormattedDateLong(dateTime));
     }
 
     [Theory]
@@ -36,6 +36,6 @@ public class DateTimeFormatterTests
         // Further information:
         //  https://stackoverflow.com/questions/77430109/trouble-with-abbreviatedmonthnames
         //  https://cldr.unicode.org/downloads/cldr-38
-        Assert.Equal(expected, DateTimeFormatter.FormattedDateShort(dateTime).Replace("Sept", "Sep"));
+        Assert.Equal(expected, DateTimeHelper.FormattedDateShort(dateTime).Replace("Sept", "Sep"));
     }
 }

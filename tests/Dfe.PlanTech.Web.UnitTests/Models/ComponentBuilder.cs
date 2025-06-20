@@ -1,7 +1,8 @@
 ﻿using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
 using Dfe.PlanTech.Web.Models;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
@@ -105,8 +106,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         {
             return new List<QuestionWithAnswer>
             {
-                new QuestionWithAnswer { QuestionRef = "Question1", QuestionText = "Question 1", AnswerRef = "Answer1", AnswerText = "Answer 1", DateCreated = new DateTime() },
-                new QuestionWithAnswer { QuestionRef = "Question2", QuestionText = "Question 2", AnswerRef = "Answer2", AnswerText = "Answer 2", DateCreated = new DateTime() },
+                new QuestionWithAnswer { QuestionSysId = "Question1", QuestionText = "Question 1", AnswerSysId = "Answer1", AnswerText = "Answer 1", DateCreated = new DateTime() },
+                new QuestionWithAnswer { QuestionSysId = "Question2", QuestionText = "Question 2", AnswerSysId = "Answer2", AnswerText = "Answer 2", DateCreated = new DateTime() },
             };
         }
 

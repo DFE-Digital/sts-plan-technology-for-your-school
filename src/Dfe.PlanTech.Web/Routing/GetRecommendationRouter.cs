@@ -1,10 +1,11 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Helpers;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -80,7 +81,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         return subTopicIntro.Slug;
     }
 
-    private async Task<(SubtopicRecommendation, RecommendationIntro, List<RecommendationChunk>, IEnumerable<QuestionWithAnswer>)> GetSubtopicRecommendation(CancellationToken cancellationToken)
+    private async Task<(SubtopicRecommendation, RecommendationIntro, List<RecommendationChunk>, IEnumerable<Domain.Submissions.Models.QuestionWithAnswerModel>)> GetSubtopicRecommendation(CancellationToken cancellationToken)
     {
         if (_router.SectionStatus?.Maturity == null)
             throw new DatabaseException("Maturity is null, but shouldn't be for a completed section");
@@ -93,7 +94,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
         var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
         var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(_router.SectionStatus.Maturity) ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro for maturity:  {_router.SectionStatus?.Maturity}");
-        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
+        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerSysId));
 
         return (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses);
     }
@@ -127,7 +128,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
             Intro = subTopicIntro,
             Chunks = subTopicChunks,
             LatestCompletionDate = latestCompletionDate.HasValue
-                                ? DateTimeFormatter.FormattedDateShort(latestCompletionDate.Value)
+                                ? DateTimeHelper.FormattedDateShort(latestCompletionDate.Value)
                                 : null,
             Slug = recommendationSlug,
             SectionSlug = sectionSlug,

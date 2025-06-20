@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Extensions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

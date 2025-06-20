@@ -16,7 +16,7 @@ public class EntityResolver(ILogger<EntityResolver> logger) : IContentTypeResolv
 
     private readonly ILogger<EntityResolver> _logger = logger;
 
-    private readonly Dictionary<string, Type> _types = ReflectionHelpers.GetTypesInheritingFrom<IContentComponent>()
+    private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<IContentComponent>()
                                                                         .ToDictionary(type => type.Name.ToLower());
 
     /// <summary>

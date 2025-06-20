@@ -2,7 +2,7 @@ using System.Security.Authentication;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submissions.Commands;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Microsoft.Data.SqlClient;
 using NSubstitute;

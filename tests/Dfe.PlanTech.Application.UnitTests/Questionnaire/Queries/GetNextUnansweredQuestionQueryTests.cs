@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
@@ -108,8 +108,8 @@ public class GetNextUnansweredQuestionQueryTests
             // skip first question so that ordering responses by question fails
             Responses = _section.Questions.Select(question => new QuestionWithAnswer()
             {
-                QuestionRef = question.Sys.Id,
-                AnswerRef = question.Answers[0].Sys.Id
+                QuestionSysId = question.Sys.Id,
+                AnswerSysId = question.Answers[0].Sys.Id
             }).Skip(1)
             .ToList()
         };
@@ -140,8 +140,8 @@ public class GetNextUnansweredQuestionQueryTests
             SubmissionId = 1,
             Responses = _section.Questions.Select(question => new QuestionWithAnswer()
             {
-                QuestionRef = question.Sys.Id,
-                AnswerRef = question.Answers[0].Sys.Id
+                QuestionSysId = question.Sys.Id,
+                AnswerSysId = question.Answers[0].Sys.Id
             }).Take(2)
             .ToList()
         };

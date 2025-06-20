@@ -2,8 +2,8 @@ using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Enums;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Enums;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -228,7 +228,7 @@ public class GetSubTopicRecommendationQueryTests
                         {
                             var options = callinfo.ArgAt<GetEntitiesOptions>(0);
                             var idFilter = options.Queries!.Where(query => query.Field == "fields.subtopic.sys.id")
-                                                            .Select(query => query as ContentQueryEquals)
+                                                            .Select(query => query as ContentQuerySingleValue)
                                                             .Select(query => query!.Value).FirstOrDefault();
 
                             return _subtopicRecommendations.Where(rec => rec.Subtopic.Sys.Id == idFilter)

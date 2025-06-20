@@ -15,11 +15,11 @@ public class WebhookMessageProcessorTests
 
     private const string QuestionId = "2VSR0emw0SPy8dlR9XlgfF";
 
-    private readonly ILogger<WebhookMessageProcessor> _logger = Substitute.For<ILogger<WebhookMessageProcessor>>();
+    private readonly ILogger<ContentfulMessageProcessor> _logger = Substitute.For<ILogger<ContentfulMessageProcessor>>();
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
-    private readonly WebhookMessageProcessor _webhookMessageProcessor;
+    private readonly ContentfulMessageProcessor _webhookMessageProcessor;
 
     public WebhookMessageProcessorTests()
     {
@@ -32,7 +32,7 @@ public class WebhookMessageProcessorTests
         _webhookMessageProcessor = CreateWebhookToDbCommand(true);
     }
 
-    private WebhookMessageProcessor CreateWebhookToDbCommand(bool usePreview) => new(_cache, _jsonSerializerOptions, _logger);
+    private ContentfulMessageProcessor CreateWebhookToDbCommand(bool usePreview) => new(_cache, _jsonSerializerOptions, _logger);
 
     [Fact]
     public async Task ProcessMessage_Should_Execute_Successfully()

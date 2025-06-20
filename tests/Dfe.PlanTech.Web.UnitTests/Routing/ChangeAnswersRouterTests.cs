@@ -2,11 +2,12 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Responses.Queries;
 using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
@@ -88,7 +89,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
                 SubmissionId = 123,
                 Responses = new List<QuestionWithAnswer>
                 {
-                    new QuestionWithAnswer { QuestionRef = "q1", AnswerRef = "a1" }
+                    new QuestionWithAnswer { QuestionSysId = "q1", AnswerSysId = "a1" }
                 }
             };
 

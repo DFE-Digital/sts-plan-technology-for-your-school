@@ -61,7 +61,7 @@ public class SubmissionCommandTests
         _db.Submissions.Find(Arg.Any<int>()).Returns((Submission?)null);
 
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            _command.DeleteSubmission(42, CancellationToken.None));
+            _command.SetSubmissionInaccessible(42, CancellationToken.None));
     }
 
     [Fact]
@@ -70,7 +70,7 @@ public class SubmissionCommandTests
         var submission = new Submission { Id = 1, SectionId = "section-1", SectionName = "Test Section", Status = SubmissionStatus.CompleteReviewed.ToString() };
         _db.Submissions.Find(1).Returns(submission);
 
-        await _command.DeleteSubmission(1, CancellationToken.None);
+        await _command.SetSubmissionInaccessible(1, CancellationToken.None);
 
         Assert.Equal(SubmissionStatus.Inaccessible.ToString(), submission.Status);
         await _db.Received().SaveChangesAsync();

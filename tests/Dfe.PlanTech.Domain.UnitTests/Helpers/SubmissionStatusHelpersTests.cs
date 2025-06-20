@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Domain.Constants;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Microsoft.Extensions.Logging;
@@ -38,17 +38,17 @@ public class SubmissionStatusHelpersTests
         }
 
         // Act
-        var tag = SubmissionStatusHelpers.GetGroupsSubmissionStatusTag(retrievalError, dto, systemTime);
+        var tag = SubmissionStatusHelper.GetGroupsSubmissionStatusTag(retrievalError, dto, systemTime);
 
         // Assert
         Assert.StartsWith(expectedMessageStart, tag.Text);
-        Assert.Equal(TagColour.GetMatchingColour(expectedColour), tag.Colour);
+        Assert.Equal(TagColourConstants.GetMatchingColour(expectedColour), tag.Colour);
     }
 
     [Fact]
     public void LastEditedDate_ShouldReturnNull_WhenDateIsNull()
     {
-        var result = SubmissionStatusHelpers.LastEditedDate(null, Substitute.For<ISystemTime>());
+        var result = SubmissionStatusHelper.LastEditedDate(null, Substitute.For<ISystemTime>());
         Assert.Null(result);
     }
 
@@ -59,7 +59,7 @@ public class SubmissionStatusHelpersTests
         var systemTime = Substitute.For<ISystemTime>();
         systemTime.Today.Returns(DateTime.UtcNow.Date);
 
-        var result = SubmissionStatusHelpers.LastEditedDate(date, systemTime);
+        var result = SubmissionStatusHelper.LastEditedDate(date, systemTime);
 
         Assert.StartsWith("on ", result);
     }
@@ -80,7 +80,7 @@ public class SubmissionStatusHelpersTests
         query.GetSectionSubmissionStatuses(sections, 123).Returns(sectionStatuses);
 
         // Act
-        var result = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, logger, query, 123);
+        var result = await SubmissionStatusHelper.RetrieveSectionStatuses(category, logger, query, 123);
 
         // Assert
         Assert.False(result.RetrievalError);
@@ -97,7 +97,7 @@ public class SubmissionStatusHelpersTests
         new() { Sections = new List<Section> { new() } }
     };
 
-        var result = SubmissionStatusHelpers.GetTotalSections(categories);
+        var result = SubmissionStatusHelper.GetTotalSections(categories);
 
         Assert.Equal("3", result);
     }

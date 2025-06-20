@@ -1,6 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.SignIns.Enums;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;

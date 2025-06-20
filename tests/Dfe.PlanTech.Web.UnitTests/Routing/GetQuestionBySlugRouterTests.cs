@@ -1,12 +1,13 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -117,12 +118,12 @@ public class GetQuestionBySlugRouterTests
         {
             Responses = new List<QuestionWithAnswer>(){
         new(){
-          QuestionRef = firstQuestion.Sys.Id,
-          AnswerRef = firstQuestion.Answers[0].Sys.Id
+          QuestionSysId = firstQuestion.Sys.Id,
+          AnswerSysId = firstQuestion.Answers[0].Sys.Id
         },
         new(){
-          QuestionRef = secondQuestion.Sys.Id,
-          AnswerRef = secondQuestion.Answers[0].Sys.Id
+          QuestionSysId = secondQuestion.Sys.Id,
+          AnswerSysId = secondQuestion.Answers[0].Sys.Id
         }
       }
         };

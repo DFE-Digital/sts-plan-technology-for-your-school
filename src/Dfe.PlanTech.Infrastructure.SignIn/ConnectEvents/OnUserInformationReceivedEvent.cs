@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Dfe.PlanTech.Domain.SignIns.Enums;
+using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.SignIns.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Domain.Users.Models;
@@ -27,7 +27,7 @@ public static class OnUserInformationReceivedEvent
 
         var userId = context.Principal.Claims.GetUserId();
         var establishment = context.Principal.Claims.GetOrganisation();
-        var recordUserSignInCommand = context.HttpContext.RequestServices.GetRequiredService<IRecordUserSignInCommand>();
+        var recordUserSignInCommand = context.HttpContext.RequestServices.GetRequiredService<SignInRepository>();
 
         if (establishment == null)
         {

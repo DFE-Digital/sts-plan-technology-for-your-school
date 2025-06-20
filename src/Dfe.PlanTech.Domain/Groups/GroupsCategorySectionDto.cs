@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Domain.CategorySection;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.Groups;
@@ -34,7 +34,7 @@ public class GroupsCategorySectionDto
             ErrorMessage = $"{name} unavailable";
             Tag = new Tag();
         }
-        var tag = SubmissionStatusHelpers.GetGroupsSubmissionStatusTag(retrievalError, sectionStatus, systemTime);
+        var tag = SubmissionStatusHelper.GetGroupsSubmissionStatusTag(retrievalError, sectionStatus, systemTime);
 
         Slug = slug;
         RecommendationSlug = recommendationSlug;

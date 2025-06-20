@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Domain.Users.Models;
-using Dfe.PlanTech.Infrastructure.Data.Entities;
+using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Infrastructure.Data;

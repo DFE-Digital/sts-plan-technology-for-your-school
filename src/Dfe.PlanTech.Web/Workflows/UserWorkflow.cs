@@ -1,8 +1,8 @@
 ﻿using System.Text.Json;
+using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.DataTransferObjects;
 using Dfe.PlanTech.Domain.Models;
-using Dfe.PlanTech.Domain.SignIns.Enums;
-using Dfe.PlanTech.Infrastructure.Data.Repositories;
+using Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
 
 namespace Dfe.PlanTech.Web.Workflows
 {
@@ -23,14 +23,8 @@ namespace Dfe.PlanTech.Web.Workflows
             _userRepository = userRepository;
         }
 
-        public async Task<int?> GetCurrentUserIdAsync()
+        public async Task<UserDto?> GetCurrentUserAsync()
         {
-            var dbUserId = GetIntFromClaim(ClaimConstants.DB_USER_ID);
-            if (dbUserId is not null)
-            {
-                return dbUserId;
-            }
-
             var dfeSignInRef = GetStringFromClaim(ClaimConstants.NameIdentifier);
             if (dfeSignInRef is null)
             {
@@ -38,6 +32,18 @@ namespace Dfe.PlanTech.Web.Workflows
             }
 
             var user = await _userRepository.GetUserBySignInRefAsync(dfeSignInRef);
+            return user?.ToDto();
+        }
+
+        public async Task<int?> GetCurrentUserIdAsync()
+        {
+            var dbUserId = GetIntFromClaim(ClaimConstants.DB_USER_ID);
+            if (dbUserId is not null)
+            {
+                return null;
+            }
+
+            var user = await GetCurrentUserAsync();
             return user?.Id;
         }
 
@@ -51,7 +57,6 @@ namespace Dfe.PlanTech.Web.Workflows
 
             var establishmentModel = GetEstablishmentModel();
             var establishment = await UpsertEstablishment(establishmentModel);
-
 
             return Convert.ToInt16(establishment.Id);
         }

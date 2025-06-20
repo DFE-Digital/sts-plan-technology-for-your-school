@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Application.Responses.Commands;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using NSubstitute;
 

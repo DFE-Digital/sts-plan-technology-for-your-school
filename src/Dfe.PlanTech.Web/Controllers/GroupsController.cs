@@ -2,12 +2,12 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.Helpers;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Configurations;
@@ -68,7 +68,7 @@ namespace Dfe.PlanTech.Web.Controllers
 
             if (categories != null)
             {
-                totalSections = SubmissionStatusHelpers.GetTotalSections(categories);
+                totalSections = SubmissionStatusHelper.GetTotalSections(categories);
             }
 
             var contactLink = await getNavigationQuery.GetLinkById(contactOptions.Value.LinkId, cancellationToken);
@@ -154,7 +154,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 Responses = latestResponses.ToList(),
             };
 
-            var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
+            var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerSysId));
 
             var viewModel = new GroupsRecommendationsViewModel
             {
@@ -200,7 +200,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 return RedirectToAction(GetSchoolDashboardAction);
             }
 
-            var subTopicChunks = subtopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
+            var subTopicChunks = subtopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerSysId));
 
             var viewModel = new GroupsRecommendationsViewModel
             {
@@ -238,7 +238,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 var completedSectionsCount = 0;
                 foreach (var category in categories)
                 {
-                    var categoryWithStatus = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _getSubmissionStatusesQuery, establishmentId);
+                    var categoryWithStatus = await SubmissionStatusHelper.RetrieveSectionStatuses(category, _logger, _getSubmissionStatusesQuery, establishmentId);
                     completedSectionsCount += categoryWithStatus.Completed;
 
                     foreach (var sectionStatus in categoryWithStatus.SectionStatuses)

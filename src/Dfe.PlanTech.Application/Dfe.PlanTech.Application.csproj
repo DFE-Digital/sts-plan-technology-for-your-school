@@ -18,4 +18,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Extensions\" />
+    <Folder Include="Persistence\" />
+    <Folder Include="Responses\Queries\" />
+  </ItemGroup>
 </Project>

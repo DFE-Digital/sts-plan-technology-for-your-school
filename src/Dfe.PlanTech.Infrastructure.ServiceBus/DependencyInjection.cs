@@ -8,8 +8,9 @@ using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Application.Queues.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.ServiceBus.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Queues;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +31,7 @@ public static class DependencyInjection
         services.AddServiceBusServices(configuration)
             .AddMessageRetryHandler();
 
-        services.AddTransient<IWebhookToDbCommand, WebhookMessageProcessor>();
+        services.AddTransient<IContentfulMessageProcessor, CmsWebHookMessageProcessor>();
         services.AddSingleton(new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

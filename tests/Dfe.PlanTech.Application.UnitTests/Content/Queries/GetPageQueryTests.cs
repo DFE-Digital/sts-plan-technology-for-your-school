@@ -66,7 +66,7 @@ public class GetPageQueryTests
             {
                 foreach (var query in options.Queries)
                 {
-                    if (query is ContentQueryEquals equalsQuery && query.Field == "fields.slug")
+                    if (query is ContentQuerySingleValue equalsQuery && query.Field == "fields.slug")
                     {
                         return _pages.Where(page => page.Slug == equalsQuery.Value);
                     }

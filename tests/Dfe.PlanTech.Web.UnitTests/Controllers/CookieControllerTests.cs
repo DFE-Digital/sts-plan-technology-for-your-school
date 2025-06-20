@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
+﻿using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
@@ -21,7 +22,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Slug = "cookies",
                 Title = new Title() { Text = "Cookies" },
-                Content = [new Header() { Tag = Domain.Content.Enums.HeaderTag.H1, Text = "Analytical Cookies" }]
+                Content = [new Header() { Tag = HeaderTag.H1, Text = "Analytical Cookies" }]
             },
         ];
 

@@ -4,13 +4,16 @@ namespace Dfe.PlanTech.Domain.Models;
 
 public sealed class OrganisationModel
 {
+    [JsonPropertyName("id")]
     public Guid Id { get; set; }
 
+    [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
 
-    public IdWithName? Category { get; set; }
+    [JsonPropertyName("category")]
+    public IdWithNameModel? Category { get; set; }
 
-    public IdWithName? Type { get; set; }
+    public IdWithNameModel? Type { get; set; }
 
     public string? Urn { get; set; }
 
@@ -26,11 +29,4 @@ public sealed class OrganisationModel
     public string DistrictAdministrativeCode { get; set; } = null!;
 
     public string Reference => Urn ?? Ukprn ?? Uid ?? Id.ToString();
-}
-
-public class IdWithName
-{
-    public string Id { get; init; } = null!;
-
-    public string Name { get; init; } = null!;
 }

@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Exceptions;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
+﻿using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Handlers;

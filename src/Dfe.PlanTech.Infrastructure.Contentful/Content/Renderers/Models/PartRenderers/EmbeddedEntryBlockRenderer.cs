@@ -27,10 +27,10 @@ public class EmbeddedEntryBlockRenderer : BaseRichTextContentPartRender
 
         switch (richTextData.SystemProperties.ContentType?.SystemProperties.Id)
         {
-            case ContentTypeId.Attachment:
+            case ContentTypeConstants.Attachment:
                 var attachment = new AttachmentComponent();
                 return attachment.AddHtml(content, stringBuilder);
-            case ContentTypeId.Accordion:
+            case ContentTypeConstants.Accordion:
                 var accordionComponent = new AccordionComponent(_loggerAccordion);
                 return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
             default:

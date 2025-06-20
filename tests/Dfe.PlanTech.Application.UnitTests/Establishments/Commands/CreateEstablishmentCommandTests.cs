@@ -1,8 +1,8 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Domain.DataTransferObjects;
-using Dfe.PlanTech.Domain.Establishments.Exceptions;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Models;
 using NSubstitute;
 

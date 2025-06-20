@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Infrastructure.Data.Repositories;
+﻿using Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
 
 namespace Dfe.PlanTech.Web.Workflows
 {
@@ -13,9 +13,15 @@ namespace Dfe.PlanTech.Web.Workflows
             _submissionRepository = submissionRepository;
         }
 
-        public Task DeleteCurrentSubmission(int establishmentId, int sectionId)
+        public async Task SetSubmissionReviewedAsync(int submissionId)
         {
-            return _submissionRepository.DeleteCurrentSubmission(establishmentId, sectionId);
+            var submission = await _submissionRepository.SetSubmissionReviewedAsync(submissionId);
+            await _submissionRepository.SetPreviousCompletedReviewedSubmissionsInaccessible(submission);
+        }
+
+        public Task DeleteCurrentSubmission(int establishmentId, string sectionId)
+        {
+            return _submissionRepository.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
         }
     }
 }

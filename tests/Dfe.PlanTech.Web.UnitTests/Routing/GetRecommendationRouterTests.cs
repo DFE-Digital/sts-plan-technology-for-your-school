@@ -2,10 +2,11 @@ using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
@@ -442,32 +443,32 @@ public class GetRecommendationRouterTests
             new QuestionWithAnswer()
             {
                 AnswerText = AnswerOne.Text,
-                AnswerRef = AnswerOne.Sys.Id,
-                QuestionRef = QuestionOne.Sys.Id,
+                AnswerSysId = AnswerOne.Sys.Id,
+                QuestionSysId = QuestionOne.Sys.Id,
                 QuestionSlug = QuestionOne.Slug,
                 QuestionText = QuestionOne.Text
             },
             new QuestionWithAnswer()
             {
                 AnswerText = AnswerThree.Text,
-                AnswerRef = AnswerThree.Sys.Id,
-                QuestionRef = QuestionTwo.Sys.Id,
+                AnswerSysId = AnswerThree.Sys.Id,
+                QuestionSysId = QuestionTwo.Sys.Id,
                 QuestionSlug = QuestionTwo.Slug,
                 QuestionText = QuestionTwo.Text
             },
             new QuestionWithAnswer()
             {
                 AnswerText = AnswerFour.Text,
-                AnswerRef = AnswerFour.Sys.Id,
-                QuestionRef = QuestionThree.Sys.Id,
+                AnswerSysId = AnswerFour.Sys.Id,
+                QuestionSysId = QuestionThree.Sys.Id,
                 QuestionSlug = QuestionThree.Slug,
                 QuestionText = QuestionThree.Text
             },
             new QuestionWithAnswer()
             {
                 AnswerText = AnswerFive.Text,
-                AnswerRef = AnswerFive.Sys.Id,
-                QuestionRef = QuestionFour.Sys.Id,
+                AnswerSysId = AnswerFive.Sys.Id,
+                QuestionSysId = QuestionFour.Sys.Id,
                 QuestionSlug = QuestionFour.Slug,
                 QuestionText = QuestionFour.Text
             },
@@ -603,8 +604,8 @@ public class GetRecommendationRouterTests
                 new QuestionWithAnswer()
                 {
                     AnswerText = AnswerOne.Text,
-                    AnswerRef = AnswerOne.Sys.Id,
-                    QuestionRef = QuestionOne.Sys.Id,
+                    AnswerSysId = AnswerOne.Sys.Id,
+                    QuestionSysId = QuestionOne.Sys.Id,
                     QuestionSlug = QuestionOne.Slug,
                     QuestionText = QuestionOne.Text
                 },
