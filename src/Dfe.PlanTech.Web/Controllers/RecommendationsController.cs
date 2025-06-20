@@ -43,7 +43,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
     {
         if (!contentfulOptions.UsePreviewApi)
         {
-            return new RedirectResult(UrlConstants.SelfAssessmentPage);
+            return new RedirectResult(UrlConstants.HomePage);
         }
 
         if (string.IsNullOrEmpty(sectionSlug))

@@ -73,7 +73,7 @@ public class RecommendationsControllerTests
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
-        Assert.Equal(UrlConstants.SelfAssessmentPage, redirectResult.Url);
+        Assert.Equal(UrlConstants.HomePage, redirectResult.Url);
     }
 
     [Theory]
