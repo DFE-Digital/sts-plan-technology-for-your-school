@@ -1,0 +1,227 @@
+name: Run Playwright E2E Tests
+
+on:
+    workflow_dispatch:
+        inputs:
+            environment:
+                description: Which db environment to run the tests on
+                required: true
+                type: choice
+                options: [ 'Dev', 'Tst' ]
+                default: 'Dev'
+
+concurrency:
+    group: "${{ github.workflow }}"
+    cancel-in-progress: false
+
+env:
+    DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+
+jobs:
+    clear-db:
+        name: Clear database
+        runs-on: ubuntu-latest
+        env:
+            az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+            az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
+            az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            SQL_IP_NAME: e2e-tests-clear-db
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Azure Login
+              uses: ./.github/actions/azure-login
+              with:
+                  az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+                  az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+                  az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+                  az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+            - name: Get workflow IP address
+              id: whats-my-ip
+              uses: ./.github/actions/whats-my-ip-address
+
+            - name: Add Azure firewall rules
+              uses: ./.github/actions/azure-ip-whitelist
+              with:
+                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+                  verb: "add"
+                  az_keyvault_name: ${{ env.az_keyvault_name }}
+                  az_ip_name: ${{ env.SQL_IP_NAME }}
+                  az_resource_group: ${{ env.az_resource_group_name }}
+                  az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+
+            - name: Get connection string
+              id: get-connection-string
+              uses: ./.github/actions/azure-get-keyvault-secret
+              with:
+                  az_keyvault_name: ${{ env.az_keyvault_name }}
+                  az_keyvault_secret_name: ${{ env.az_keyvault_database_connectionstring_name }}
+
+            - name: Execute stored procedure
+              uses: azure/sql-action@v2.2
+              with:
+                  connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
+                  path: "./.github/scripts/drop-establishment-data.sql"
+
+            - name: Remove Azure firewall rules
+              if: always()
+              uses: ./.github/actions/azure-ip-whitelist
+              with:
+                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+                  verb: "remove"
+                  az_keyvault_name: ${{ env.az_keyvault_name }}
+                  az_ip_name: ${{ env.SQL_IP_NAME }}
+                  az_resource_group: ${{ env.az_resource_group_name }}
+                  az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+
+    run-tests:
+        name: Run Playwright + Cucumber Tests
+        runs-on: ubuntu-22.04
+        needs: [clear-db]
+        env:
+            PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
+            KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+            RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            SQL_IP_NAME: e2e-tests-pr
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+
+            - name: Azure CLI Login
+              uses: ./.github/actions/azure-login
+              with:
+                  az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+                  az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+                  az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+                  az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+            - name: Setup .NET
+              uses: actions/setup-dotnet@v4
+              with:
+                  dotnet-version: ${{ env.DOTNET_VERSION }}
+
+            - name: Clear NuGet Cache
+              shell: bash
+              run: dotnet nuget locals all --clear
+
+            - name: Install dependencies
+              shell: bash
+              run: dotnet restore ${{ env.PROJECT_PATH }}
+
+            - name: Build project
+              shell: bash
+              run: dotnet publish ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj --configuration Release --no-restore --output ./build
+
+            - name: Create overwrite json file
+              shell: bash
+              working-directory: ./build
+              run: echo '{ "DfeSignIn": { "FrontDoorUrl": "https://localhost:8081" } }' > overrides.json
+
+            - name: Get workflow IP address
+              id: whats-my-ip
+              uses: ./.github/actions/whats-my-ip-address
+
+            - name: Add Azure firewall rules
+              uses: ./.github/actions/azure-ip-whitelist
+              with:
+                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+                  verb: "add"
+                  az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+                  az_ip_name: ${{ env.SQL_IP_NAME }}
+                  az_resource_group: ${{ env.RESOURCE_GROUP }}
+                  az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+
+            - name: Run Web App
+              shell: bash
+              working-directory: ./build
+              run: |
+                  export ASPNETCORE_ENVIRONMENT=E2E
+                  export KeyVaultName=${{ env.KEYVAULT_NAME }}
+                  export Kestrel__Endpoints__Https__Url=https://*:8081
+                  export DfeSignIn__FrontDoorUrl=https://localhost:8081
+                  export GTM__Id=gtm_id
+                  export GTM__SiteVerificationId=testing_site_verification_id
+                  export AutomatedTesting__Contentful__Tag=e2e
+                  export AutomatedTesting__Contentful__IncludeTaggedContent=true
+                  dotnet ./Dfe.PlanTech.Web.dll &
+
+            - name: Install Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 20
+
+            - name: Install NPM dependencies
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              run: npm ci
+
+            - name: Install Playwright browsers
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              run: npx playwright install --with-deps
+
+            - name: Setup session storage (login)
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              run: npx ts-node login.setup.ts
+
+            - name: Run Playwright + Cucumber tests (with recording)
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              env:
+                  URL: https://localhost:8081
+                  DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
+                  DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
+                  DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
+                  DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
+                  DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
+                  DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
+              run: npm run test:record
+
+            - name: Generate HTML report
+              if: always()
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              run: npm run report
+
+            - name: Upload HTML report
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: cucumber-html-report
+                  path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/reports/
+                  if-no-files-found: warn
+
+            - name: Upload Playwright screenshots
+              if: failure()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: playwright-screenshots
+                  path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/screenshots/
+                  if-no-files-found: ignore
+
+            - name: Upload Playwright videos
+              if: failure()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: playwright-videos
+                  path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/videos/
+                  if-no-files-found: ignore
+
+            - name: Upload Playwright traces
+              if: failure()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: playwright-traces
+                  path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/traces/
+                  if-no-files-found: ignore
+
+            - name: Remove Azure firewall rules
+              if: always()
+              uses: ./.github/actions/azure-ip-whitelist
+              with:
+                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+                  verb: "remove"
+                  az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+                  az_ip_name: ${{ env.SQL_IP_NAME }}
+                  az_resource_group: ${{ env.RESOURCE_GROUP }}
+                  az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
