@@ -119,7 +119,8 @@ jobs:
             - name: Create overwrite json file
               shell: bash
               working-directory: ./build
-              run: echo '{ "DfeSignIn": { "FrontDoorUrl": "https://localhost:8081" } }' > overrides.json
+              run: |
+                echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
 
             - name: Get workflow IP address
               id: whats-my-ip
