@@ -16,14 +16,14 @@
        class="govuk-back-link back-link-top-override govuk-!-margin-top-3">
         Back to digital leadership and governance
     </a>
+
+    <span class="govuk-caption-xl">Recommendation @viewCount of @recommendationCount</span>
+
+    <h1 class="govuk-heading-xl">
+        @header.HeaderText
+    </h1>
     @foreach (var content in header.Content)
     {
-        <span class="govuk-caption-xl">Recommendation @viewCount of @recommendationCount</span>
-
-        <h1 class="govuk-heading-xl">
-            @header.HeaderText
-        </h1>
-
         <partial name="Components/PageComponentFactory" model="@content" />
     }
 </div>
