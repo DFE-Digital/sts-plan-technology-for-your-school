@@ -8,5 +8,9 @@ namespace Dfe.PlanTech.Web.Models
         public IHeaderWithContent? Header { get; set; }
         public string? SubmissionDate { get; set; }
         public string? SectionName { get; set; }
+
+        public int? RecommendationCount { get; set; }
+
+        public int CurrentRecommendationNumber { get; set; }
     }
 }

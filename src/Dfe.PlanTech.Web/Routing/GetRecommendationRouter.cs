@@ -105,19 +105,12 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     {
         var (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses) = await GetSubtopicRecommendation(cancellationToken);
 
-        var YSAChunk = new RecommendationChunk();
         var latestCompletionDate = new DateTime?();
 
         if (showYSA)
         {
             var establishmentId = await _router.User.GetEstablishmentId();
 
-            YSAChunk = new()
-            {
-                Header = "Your self-assessment"
-            };
-
-            subTopicChunks.Add(YSAChunk);
             latestCompletionDate = await _getLatestResponsesQuery.GetLatestCompletionDate(establishmentId, _router.Section.Sys.Id, true);
         }
 
