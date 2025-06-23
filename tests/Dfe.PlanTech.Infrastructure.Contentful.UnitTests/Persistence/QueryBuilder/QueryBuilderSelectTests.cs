@@ -10,7 +10,7 @@ public class QueryBuilderSelectTests
     public void Should_Add_Select_Properties()
     {
         var queryBuilder = new QueryBuilder<TestClass>();
-        var options = new GetEntitiesOptions()
+        var options = new GetEntriesOptions()
         {
             Select = new[] { "fields.one", "fields.two" }
         };
@@ -30,7 +30,7 @@ public class QueryBuilderSelectTests
     public void Should_DoNothing_When_Select_Null()
     {
         var queryBuilder = new QueryBuilder<TestClass>();
-        var options = new GetEntitiesOptions()
+        var options = new GetEntriesOptions()
         {
         };
 

@@ -6,7 +6,7 @@ public class SqlQuestionDto
 
     public string? QuestionText { get; init; } = null!;
 
-    public string ContentfulRef { get; init; } = null!;
+    public string ContentfulSysId { get; init; } = null!;
 
     public DateTime DateCreated { get; init; } = DateTime.UtcNow;
 }

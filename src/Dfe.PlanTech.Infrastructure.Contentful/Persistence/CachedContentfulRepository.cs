@@ -34,7 +34,7 @@ public class CachedContentfulRepository : IContentRepository
         return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntities<TEntity>(cancellationToken)) ?? [];
     }
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntriesOptions options, CancellationToken cancellationToken = default)
     {
         var contentType = GetContentTypeName<TEntity>();
         var jsonOptions = options.SerializeToRedisFormat();
@@ -42,7 +42,7 @@ public class CachedContentfulRepository : IContentRepository
 
         return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntities<TEntity>(options, cancellationToken)) ?? [];
     }
-    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntriesOptions options, CancellationToken cancellationToken = default)
     {
         return await _contentRepository.GetPaginatedEntities<TEntity>(options, cancellationToken) ?? [];
     }
@@ -53,12 +53,12 @@ public class CachedContentfulRepository : IContentRepository
         var entities = (await GetEntities<TEntity>(options, cancellationToken)).ToList();
 
         if (entities.Count > 1)
-            throw new GetEntitiesException($"Found more than 1 entity with id {id}");
+            throw new GetEntriesException($"Found more than 1 entity with id {id}");
 
         return entities.FirstOrDefault();
     }
 
-    public GetEntitiesOptions GetEntityByIdOptions(string id, int include = 2)
+    public GetEntriesOptions GetEntityByIdOptions(string id, int include = 2)
     {
         return _contentRepository.GetEntityByIdOptions(id, include);
     }

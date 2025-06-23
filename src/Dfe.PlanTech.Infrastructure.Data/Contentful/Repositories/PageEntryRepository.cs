@@ -27,7 +27,7 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
         {
             try
             {
-                return _contentful.GetEntityById<PageEntry?>(id);
+                return _contentful.GetEntryById<PageEntry?>(id);
             }
             catch (Exception ex)
             {
@@ -42,7 +42,7 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
 
             try
             {
-                var pages = await _contentful.GetEntities<PageEntry?>(options);
+                var pages = await _contentful.GetEntries<PageEntry?>(options);
                 return pages.FirstOrDefault();
             }
             catch (Exception ex)
@@ -52,7 +52,7 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
             }
         }
 
-        private GetEntitiesOptions CreateGetEntityOptions(string slug) =>
+        private GetEntriesOptions CreateGetEntityOptions(string slug) =>
             new(NumberOfReferenceLevels, [new ContentQuerySingleValue() { Field = "fields.slug", Value = slug }]);
     }
 }

@@ -35,7 +35,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
                 {
                     var id = callinfo.ArgAt<string>(0);
                     var include = callinfo.ArgAt<int>(1);
-                    return new GetEntitiesOptions(include, [
+                    return new GetEntriesOptions(include, [
                         new ContentQuerySingleValue()
                         {
                             Field = "sys.id",
@@ -56,7 +56,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task Should_Cache_GetEntities_With_Options()
         {
-            var options = new GetEntitiesOptions(include: 3);
+            var options = new GetEntriesOptions(include: 3);
             await _cachedContentRepository.GetEntities<Question>(options);
             await _cache.Received(1).GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Question>>>>());
             await _contentRepository.Received(1).GetEntities<Question>(options);
@@ -65,7 +65,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task Should_Not_Cache_GetPaginatedEntities()
         {
-            var options = new GetEntitiesOptions(include: 3);
+            var options = new GetEntriesOptions(include: 3);
             await _cachedContentRepository.GetPaginatedEntities<Question>(options);
             await _cache.Received(0).GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Question>>>>());
             await _contentRepository.Received(1).GetPaginatedEntities<Question>(options);
@@ -74,7 +74,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public async Task Should_Not_Cache_GetEntitiesCount()
         {
-            var options = new GetEntitiesOptions(include: 3);
+            var options = new GetEntriesOptions(include: 3);
             await _cachedContentRepository.GetEntitiesCount<Question>();
             await _cache.Received(0).GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<int>>>());
             await _contentRepository.Received(1).GetEntitiesCount<Question>();
@@ -87,10 +87,10 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
             await _cachedContentRepository.GetEntityById<Question>(id);
             await _cache.Received(1).GetOrCreateAsync(Arg.Any<string>(), Arg.Any<Func<Task<IEnumerable<Question>>>>());
             await _contentRepository.Received(1).GetEntities<Question>(
-                Arg.Is<GetEntitiesOptions>(arg => ValidateGetEntitiesOptions(arg, id)));
+                Arg.Is<GetEntriesOptions>(arg => ValidateGetEntitiesOptions(arg, id)));
         }
 
-        private static bool ValidateGetEntitiesOptions(GetEntitiesOptions arg, string id)
+        private static bool ValidateGetEntitiesOptions(GetEntriesOptions arg, string id)
         {
             var first = arg.Queries?.FirstOrDefault();
             return first is ContentQuerySingleValue queryEquals &&

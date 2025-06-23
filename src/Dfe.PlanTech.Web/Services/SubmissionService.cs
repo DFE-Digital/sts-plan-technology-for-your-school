@@ -16,7 +16,7 @@ namespace Dfe.PlanTech.Web.Services
             _userWorkflow = userWorkflow;
         }
 
-        public async Task DeleteCurrentSubmission(int sectionId)
+        public async Task DeleteCurrentSubmission(string sectionId)
         {
             var establishmentId = await _userWorkflow.GetCurrentUserEstablishmentIdAsync();
             await _submissionWorkflow.DeleteCurrentSubmission(establishmentId, sectionId);

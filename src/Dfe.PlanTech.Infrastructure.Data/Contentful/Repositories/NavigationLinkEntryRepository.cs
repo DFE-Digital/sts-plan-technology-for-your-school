@@ -24,7 +24,7 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
         {
             try
             {
-                return await _contentful.GetEntities<NavigationLinkEntry>();
+                return await _contentful.GetEntries<NavigationLinkEntry>();
             }
             catch (Exception ex)
             {
@@ -37,7 +37,7 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
         {
             try
             {
-                return await _contentful.GetEntityById<NavigationLinkEntry?>(contentId);
+                return await _contentful.GetEntryById<NavigationLinkEntry?>(contentId);
             }
             catch (Exception ex)
             {

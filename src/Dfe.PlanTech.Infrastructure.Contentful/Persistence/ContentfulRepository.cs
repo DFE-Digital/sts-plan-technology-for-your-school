@@ -30,17 +30,17 @@ public class ContentfulRepository : IContentRepository
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _hostEnvironment = hostEnvironment;
         _automatedTestingOptions = automatedTestingOptions.Value;
-        _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<EntityResolver>());
+        _client.ContentTypeResolver = new EntryResolver(loggerFactory.CreateLogger<EntryResolver>());
         _logger = loggerFactory.CreateLogger<ContentfulRepository>();
     }
 
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
         => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), null, cancellationToken);
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntriesOptions options, CancellationToken cancellationToken = default)
         => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntriesOptions? options, CancellationToken cancellationToken = default)
     {
         var queryBuilder = BuildQueryBuilder<TEntity>(entityTypeId, options);
 
@@ -51,7 +51,7 @@ public class ContentfulRepository : IContentRepository
         return entries.Items ?? [];
     }
 
-    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(string entityTypeId, IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(string entityTypeId, IGetEntriesOptions options, CancellationToken cancellationToken = default)
     {
         var limit = options?.Limit ?? 100;
         var queryBuilder = BuildQueryBuilder<TEntity>(entityTypeId, options)
@@ -95,7 +95,7 @@ public class ContentfulRepository : IContentRepository
 
     }
 
-    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntriesOptions options, CancellationToken cancellationToken = default)
         => await GetPaginatedEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
@@ -104,12 +104,12 @@ public class ContentfulRepository : IContentRepository
         var entities = (await GetEntities<TEntity>(options, cancellationToken)).ToList();
 
         if (entities.Count > 1)
-            throw new GetEntitiesException($"Found more than 1 entity with id {id}");
+            throw new GetEntriesException($"Found more than 1 entity with id {id}");
 
         return entities.FirstOrDefault();
     }
 
-    public GetEntitiesOptions GetEntityByIdOptions(string id, int include = 2)
+    public GetEntriesOptions GetEntityByIdOptions(string id, int include = 2)
     {
         if (string.IsNullOrEmpty(id))
             throw new ArgumentNullException(nameof(id));
@@ -118,7 +118,7 @@ public class ContentfulRepository : IContentRepository
         //option doesn't seem to have any effect there - it only seems to return the main parent entry
         //with links to children. This was proving rather useless, so I have used the "GetEntries" option here
         //instead.
-        return new GetEntitiesOptions(include, new[] {
+        return new GetEntriesOptions(include, new[] {
             new ContentQuerySingleValue(){
                 Field = "sys.id",
                 Value = id
@@ -131,7 +131,7 @@ public class ContentfulRepository : IContentRepository
         return name == "ContentSupportPage" ? name : name.FirstCharToLower();
     }
 
-    private QueryBuilder<TEntity> BuildQueryBuilder<TEntity>(string contentTypeId, IGetEntitiesOptions? options)
+    private QueryBuilder<TEntity> BuildQueryBuilder<TEntity>(string contentTypeId, IGetEntriesOptions? options)
     {
         var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(contentTypeId, options);
 

@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         [Fact]
         public void Should_Find_Types()
         {
-            var entityResolver = new EntityResolver(new NullLogger<EntityResolver>());
+            var entityResolver = new EntryResolver(new NullLogger<EntryResolver>());
 
             Assert.NotEmpty(entityResolver.Types);
         }
@@ -19,7 +19,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         {
             var type = typeof(Category);
 
-            var entityResolver = new EntityResolver(new NullLogger<EntityResolver>());
+            var entityResolver = new EntryResolver(new NullLogger<EntryResolver>());
 
             var contentTypeId = type.Name.ToLower();
 
@@ -33,7 +33,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         {
             var expectedType = typeof(MissingComponent);
 
-            var entityResolver = new EntityResolver(new NullLogger<EntityResolver>());
+            var entityResolver = new EntryResolver(new NullLogger<EntryResolver>());
 
             var foundType = entityResolver.Resolve("not a real type");
 

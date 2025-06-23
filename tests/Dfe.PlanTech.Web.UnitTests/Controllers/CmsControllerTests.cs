@@ -1,11 +1,11 @@
 using System.Text.Json;
-using Dfe.PlanTech.Application.Content.Commands;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Queues.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Models.QaVisualiser;
@@ -124,7 +124,7 @@ public class CmsControllerTests
         repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(expectedTotalCount));
 
-        repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+        repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntriesOptions>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(fakeChunks));
 
         var result = await _controller.GetChunks(pageNumber, getRecommendationQuery);
@@ -147,7 +147,7 @@ public class CmsControllerTests
         repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(0));
 
-        repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+        repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntriesOptions>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(new List<RecommendationChunk>()));
 
         var getRecommendationQuery = new GetRecommendationQuery(repository);

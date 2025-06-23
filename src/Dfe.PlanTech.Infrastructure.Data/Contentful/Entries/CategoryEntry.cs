@@ -13,4 +13,3 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
         public bool RetrievalError { get; set; }
     }
 }
-}

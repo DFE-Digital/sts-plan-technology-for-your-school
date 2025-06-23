@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using System.Threading;
+using Dfe.PlanTech.Core.DataTransferObjects;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -62,7 +62,62 @@ public class SubmissionRepository
         return includeRelationships
           ? IncludeRelationships(query)
           : query;
+    }
 
+    public IQueryable<SubmissionEntity> GetPreviousSubmissions(
+        int establishmentId,
+        string sectionId,
+        bool isCompleted,
+        bool includeRelationships = false
+    )
+    {
+        Func<string, bool> statusCheck;
+        if (isCompleted)
+        {
+            statusCheck = (string status) => Equals(status, SubmissionStatus.CompleteReviewed);
+        }
+        else
+        {
+            statusCheck = (string status) => Equals(status, SubmissionStatus.InProgress) ||
+                                             Equals(status, SubmissionStatus.CompleteNotReviewed);
+        }
+
+        return GetSubmissionsBy(submission =>
+                !submission.Deleted &&
+                submission.EstablishmentId == establishmentId &&
+                submission.SectionId == sectionId,
+                includeRelationships)
+            .Where(s => statusCheck(s.Status!))
+            .OrderByDescending(submission => submission.DateCreated);
+    }
+
+    public async Task<SubmissionEntity?> GetLatestSubmissionAsync(int establishmentId, string sectionId, bool isCompleted, bool includeRelationships = false)
+    {
+        var submission = await GetPreviousSubmissions(establishmentId, sectionId, isCompleted, includeRelationships)
+            .OrderByDescending(submission => submission.DateCreated)
+            .FirstOrDefaultAsync();
+
+        return submission;
+    }
+
+    public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(int establishmentId, string sectionId, bool isCompleted)
+    {
+        // Get latest submission
+        var submission = await GetLatestSubmissionAsync(establishmentId, sectionId, isCompleted, true);
+        if (submission is null)
+        {
+            return null;
+        }
+
+        var latestResponses = submission.Responses
+            .GroupBy(response => response.QuestionId)
+            .Select(group => group
+                .Where(response => response.DateCreated == group.Max(r => r.DateCreated))
+                .First());
+
+        submission.Responses = latestResponses.ToList();
+
+        return submission;
     }
 
     public async Task<SubmissionEntity> SetSubmissionInaccessibleAsync(int submissionId)
@@ -95,7 +150,7 @@ public class SubmissionRepository
             query = query
                 .Where(s => string.Equals(s.Status, submissionStatus.ToString()));
         }
-            
+
         var submission = await query.FirstOrDefaultAsync();
 
         if (submission is null)
@@ -141,12 +196,22 @@ public class SubmissionRepository
         return submission;
     }
 
-    public async Task<SubmissionEntity> SetSubmissionViewedAsync(SubmissionEntity submission)
+    public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
     {
-        submission.Viewed = true;
-        await _db.SaveChangesAsync();
+        var currentSubmission = await GetPreviousSubmissions(
+                establishmentId,
+                sectionId,
+                (string status) => Equals(status, SubmissionStatus.CompleteReviewed),
+                includeRelationships: true
+            )
+            .FirstOrDefaultAsync();
 
-        return submission;
+        if (currentSubmission is not null)
+        {
+            currentSubmission.Viewed = true;
+        }
+
+        await _db.SaveChangesAsync();
     }
 
     public Task DeleteCurrentSubmission(int establishmentId, int sectionId)

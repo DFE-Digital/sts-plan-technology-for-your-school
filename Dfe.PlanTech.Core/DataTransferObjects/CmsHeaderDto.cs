@@ -2,12 +2,12 @@
 
 namespace Dfe.PlanTech.Core.DataTransferObjects
 {
-    public class CmsHeaderDto
+    public class CmsHeaderDto : CmsEntryDto
     {
-        public string Text { get; init; } = null!;
+        public string Text { get; set; } = null!;
 
-        public HeaderTag Tag { get; init; }
+        public HeaderTag Tag { get; set; }
 
-        public HeaderSize Size { get; init; }
+        public HeaderSize Size { get; set; }
     }
 }

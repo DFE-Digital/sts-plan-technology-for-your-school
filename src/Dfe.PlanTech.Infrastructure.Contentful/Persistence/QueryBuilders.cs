@@ -45,7 +45,7 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithQueries<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
+    public static QueryBuilder<T> WithQueries<T>(this QueryBuilder<T> queryBuilder, IGetEntriesOptions options)
     {
         if (options.Queries != null)
         {
@@ -55,7 +55,7 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> BuildQueryBuilder<T>(string contentTypeId, IGetEntitiesOptions? options)
+    public static QueryBuilder<T> BuildQueryBuilder<T>(string contentTypeId, IGetEntriesOptions? options)
     {
         var queryBuilder = ByContentType<T>(contentTypeId);
 
@@ -68,7 +68,7 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithOptions<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
+    public static QueryBuilder<T> WithOptions<T>(this QueryBuilder<T> queryBuilder, IGetEntriesOptions options)
     {
         queryBuilder = queryBuilder.WithInclude(options);
         queryBuilder = queryBuilder.WithQueries(options);
@@ -76,13 +76,13 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithInclude<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
+    public static QueryBuilder<T> WithInclude<T>(this QueryBuilder<T> queryBuilder, IGetEntriesOptions options)
     {
         queryBuilder.Include(options.Include);
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithSelect<T>(this QueryBuilder<T> queryBuilder, IGetEntitiesOptions options)
+    public static QueryBuilder<T> WithSelect<T>(this QueryBuilder<T> queryBuilder, IGetEntriesOptions options)
     {
         if (options.Select == null)
             return queryBuilder;

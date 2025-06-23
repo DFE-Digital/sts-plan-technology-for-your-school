@@ -107,7 +107,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         public async Task GetPaginatedEntities_Should_ReturnItems_When_ClassMatches()
         {
             var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _hostEnvironmentMock, _automatedTestingOptions);
-            var result = await repository.GetPaginatedEntities<TestClass>(new GetEntitiesOptions());
+            var result = await repository.GetPaginatedEntities<TestClass>(new GetEntriesOptions());
             Assert.NotNull(result);
             Assert.Equal(_substituteData, result);
         }
@@ -116,7 +116,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         public async Task GetPaginatedEntities_Should_ReturnEmptyIEnumerable_When_NoDataFound()
         {
             var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _hostEnvironmentMock, _automatedTestingOptions);
-            var result = await repository.GetPaginatedEntities<OtherTestClass>(new GetEntitiesOptions());
+            var result = await repository.GetPaginatedEntities<OtherTestClass>(new GetEntriesOptions());
             Assert.NotNull(result);
             Assert.Empty(result);
         }
@@ -172,7 +172,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         {
             var testId = "duplicateId";
             var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _hostEnvironmentMock, _automatedTestingOptions);
-            await Assert.ThrowsAsync<GetEntitiesException>(() => repository.GetEntityById<TestClass>(testId));
+            await Assert.ThrowsAsync<GetEntriesException>(() => repository.GetEntityById<TestClass>(testId));
         }
 
         [Fact]
@@ -180,7 +180,7 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
         {
             var testId = "duplicateId";
             var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _hostEnvironmentMock, _automatedTestingOptions);
-            var exception = await Assert.ThrowsAsync<GetEntitiesException>(() => repository.GetEntityById<TestClass>(testId));
+            var exception = await Assert.ThrowsAsync<GetEntriesException>(() => repository.GetEntityById<TestClass>(testId));
             Assert.Equal("Found more than 1 entity with id duplicateId", exception.Message);
         }
     }

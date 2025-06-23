@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Domain.Persistence.Interfaces;
 
-public interface IGetEntitiesOptions
+public interface IGetEntriesOptions
 {
     /// <summary>
     /// Filter queries (e.g. where field equals value)

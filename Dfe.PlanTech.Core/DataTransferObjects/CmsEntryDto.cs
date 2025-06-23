@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects
 {
     public abstract class CmsEntryDto
     {
-        public CmsEntrySystemDetailsDto Sys { get; init; } = null!;
-        public string Description { get; init; } = null!;
+        public CmsEntrySystemDetailsDto Sys { get; set; } = null!;
+        public string Description { get; set; } = null!;
     }
 }

@@ -1,13 +1,13 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects
 {
-    public class CmsQuestionDto
+    public class CmsQuestionDto : CmsEntryDto
     {
         public string Slug { get; set; } = null!;
 
-        public string Text { get; init; } = null!;
+        public string Text { get; set; } = null!;
 
-        public string? HelpText { get; init; }
+        public string? HelpText { get; set; }
 
-        public List<CmsAnswerDto> Answers { get; init; } = new();
+        public List<CmsAnswerDto> Answers { get; set; } = new();
     }
 }

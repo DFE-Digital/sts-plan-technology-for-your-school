@@ -11,7 +11,7 @@ public class SqlAnswerDto
     public string? AnswerText { get; init; } = null!;
 
     [Required]
-    public string ContentfulRef { get; init; } = null!;
+    public string ContentfulSysId { get; init; } = null!;
 
     [Required]
     public DateTime DateCreated { get; init; } = DateTime.UtcNow;

@@ -1,6 +1,5 @@
 ﻿using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.Models
@@ -41,6 +40,6 @@ namespace Dfe.PlanTech.Web.Models
             }
         }
 
-        public IEnumerable<Domain.Submissions.Models.QuestionWithAnswerModel> SubmissionResponses { get; init; } = null!;
+        public IEnumerable<Workflows.Models.QuestionWithAnswerModel> SubmissionResponses { get; init; } = null!;
     }
 }

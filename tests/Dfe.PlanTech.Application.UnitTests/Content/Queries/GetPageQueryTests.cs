@@ -58,10 +58,10 @@ public class GetPageQueryTests
 
     private void SetupRepository()
     {
-        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
+        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntriesOptions>(), Arg.Any<CancellationToken>())
         .Returns((callInfo) =>
         {
-            IGetEntitiesOptions options = (IGetEntitiesOptions)callInfo[0];
+            IGetEntriesOptions options = (IGetEntriesOptions)callInfo[0];
             if (options.Queries != null)
             {
                 foreach (var query in options.Queries)
@@ -97,7 +97,7 @@ public class GetPageQueryTests
         Assert.NotNull(result);
         Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
 
-        await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>());
+        await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntities<Page>(Arg.Any<IGetEntriesOptions>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -125,7 +125,7 @@ public class GetPageQueryTests
     [Fact]
     public async Task Page_Not_Found_Exception_Is_Thrown_When_There_Is_An_Issue_Retrieving_Data()
     {
-        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntitiesOptions>(), Arg.Any<CancellationToken>())
+        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntriesOptions>(), Arg.Any<CancellationToken>())
             .Throws(new Exception("Test Exception"));
 
         var query = CreateGetPageQuery();

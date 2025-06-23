@@ -1,7 +1,6 @@
-﻿using Dfe.PlanTech.Domain.Submissions.Models;
-using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
+﻿using Dfe.PlanTech.Core.DataTransferObjects;
 
-namespace Dfe.PlanTech.Web.Workflows.WorkflowModels
+namespace Dfe.PlanTech.Core.Models
 {
     public class SubmissionResponsesModel
     {
@@ -11,12 +10,12 @@ namespace Dfe.PlanTech.Web.Workflows.WorkflowModels
 
         public bool HasResponses => Responses != null && Responses.Count > 0;
 
-        public SubmissionResponsesModel(SubmissionEntity submission)
+        public SubmissionResponsesModel(SqlSubmissionDto submission)
         {
             SubmissionId = submission.Id;
             Responses = submission.Responses
                 .Select(response => new QuestionWithAnswerModel(response))
-                .GroupBy(questionWithAnswer => questionWithAnswer.QuestionRef)
+                .GroupBy(questionWithAnswer => questionWithAnswer.QuestionSysId)
                 .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First())
                 .ToList();
         }

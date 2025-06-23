@@ -4,26 +4,26 @@ using Dfe.PlanTech.Infrastructure.Application.Models;
 
 namespace Dfe.PlanTech.Application.Persistence.Models;
 
-public class GetEntitiesOptions : IGetEntitiesOptions
+public class GetEntriesOptions : IGetEntriesOptions
 {
-    public GetEntitiesOptions(int include, IEnumerable<IContentQuery> queries)
+    public GetEntriesOptions(int include, IEnumerable<IContentQuery> queries)
         : this(include)
     {
         Include = include;
         Queries = queries;
     }
 
-    public GetEntitiesOptions(int include)
+    public GetEntriesOptions(int include)
     {
         Include = include;
     }
 
-    public GetEntitiesOptions(IEnumerable<IContentQuery> queries)
+    public GetEntriesOptions(IEnumerable<IContentQuery> queries)
     {
         Queries = queries;
     }
 
-    public GetEntitiesOptions()
+    public GetEntriesOptions()
     {
     }
 

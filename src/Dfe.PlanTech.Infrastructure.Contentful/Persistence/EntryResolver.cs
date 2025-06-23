@@ -10,11 +10,11 @@ namespace Dfe.PlanTech.Infrastructure.Contentful;
 /// For mapping fields/properties of type <see chref="IContentComponent"/> to their concrete type,
 /// when serialising the returned API response from Contentful
 /// </summary>
-public class EntityResolver(ILogger<EntityResolver> logger) : IContentTypeResolver
+public class EntryResolver(ILogger<EntryResolver> logger) : IContentTypeResolver
 {
     public Dictionary<string, Type> Types => _types;
 
-    private readonly ILogger<EntityResolver> _logger = logger;
+    private readonly ILogger<EntryResolver> _logger = logger;
 
     private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<IContentComponent>()
                                                                         .ToDictionary(type => type.Name.ToLower());

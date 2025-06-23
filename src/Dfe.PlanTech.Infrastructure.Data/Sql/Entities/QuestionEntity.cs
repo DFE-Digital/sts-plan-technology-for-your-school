@@ -23,7 +23,7 @@ public class QuestionEntity
         {
             Id = Id,
             QuestionText = QuestionText,
-            ContentfulRef = ContentfulRef,
+            ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated
         };
     }

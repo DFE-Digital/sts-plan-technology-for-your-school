@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
+using Dfe.PlanTech.Core.DataTransferObjects;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
 {
@@ -20,5 +21,18 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
         public string SlugifiedLinkText => _slugifiedLinkText ??= LinkText.Slugify();
 
         private string? _slugifiedLinkText;
+
+        protected override CmsRecommendationDto CreateDto()
+        {
+            return new CmsRecommendationDto
+            {
+                Slug = Slug,
+                Maturity = Maturity,
+                Content = Content.Select(c => c.ToDto()).ToList(),
+                HeaderText = HeaderText,
+                LinkText = LinkText,
+                SlugifiedLinkText = SlugifiedLinkText
+            };
+        }
     }
 }

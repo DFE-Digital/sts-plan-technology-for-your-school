@@ -1,10 +1,10 @@
 using System.Text.Json;
-using Dfe.PlanTech.Application.Queues.Interfaces;
 using Dfe.PlanTech.Domain.Queues.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Queues;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Application.Content.Commands;
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
 
 /// <summary>
 /// Processes the HTTP request/body from the Contentful webhook, and writes it to an Azure Service Bus queue using the <see cref="IQueueWriter"/>

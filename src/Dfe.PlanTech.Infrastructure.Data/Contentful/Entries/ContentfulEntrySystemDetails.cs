@@ -23,5 +23,23 @@
         public ContentfulEntryLink? CreatedBy { get; set; }
 
         public ContentfulEntryLink? UpdatedBy { get; set; }
+
+        public CmsEntrySystemDetailsDto ToDto()
+        {
+            return new CmsEntrySystemDetailsDto
+            {
+                Id = Id,
+                Type = Type,
+                ContentType = ContentType,
+                CreatedAt = CreatedAt,
+                UpdatedAt = UpdatedAt,
+                Revision = Revision,
+                Space = Space?.ToDto(),
+                Environment = Environment?.ToDto(),
+                ContentTypeLink = ContentTypeLink?.ToDto(),
+                CreatedBy = CreatedBy?.ToDto(),
+                UpdatedBy = UpdatedBy?.ToDto()
+            };
+        }
     }
 }

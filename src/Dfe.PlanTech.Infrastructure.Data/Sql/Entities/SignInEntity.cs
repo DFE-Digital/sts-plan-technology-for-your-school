@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Domain.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
@@ -14,9 +14,9 @@ public class SignInEntity
 
     public UserEntity User { get; set; } = default!;
 
-    public SignInDto ToDto()
+    public SqlSignInDto CreateDto()
     {
-        return new SignInDto
+        return new SqlSignInDto
         {
             Id = Id,
             UserId = UserId,

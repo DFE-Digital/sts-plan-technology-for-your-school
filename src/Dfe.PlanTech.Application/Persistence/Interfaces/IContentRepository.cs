@@ -34,9 +34,9 @@ public interface IContentRepository
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
-    Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntriesOptions options, CancellationToken cancellationToken = default);
 
-    Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default);
+    Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntriesOptions options, CancellationToken cancellationToken = default);
 
     Task<int> GetEntitiesCount<TEntity>(CancellationToken cancellationToken = default);
 

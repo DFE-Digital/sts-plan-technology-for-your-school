@@ -1,29 +1,29 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects
 {
-    public class CmsPageDto
+    public class CmsPageDto : CmsEntryDto
     {
-        public string InternalName { get; init; } = null!;
+        public string InternalName { get; set; } = null!;
 
-        public string Slug { get; init; } = null!;
+        public string Slug { get; set; } = null!;
 
-        public bool DisplayBackButton { get; init; }
+        public bool DisplayBackButton { get; set; }
 
-        public bool DisplayHomeButton { get; init; }
+        public bool DisplayHomeButton { get; set; }
 
-        public bool DisplayTopicTitle { get; init; }
+        public bool DisplayTopicTitle { get; set; }
 
-        public bool DisplayOrganisationName { get; init; }
+        public bool DisplayOrganisationName { get; set; }
 
-        public bool RequiresAuthorisation { get; init; } = true;
+        public bool RequiresAuthorisation { get; set; } = true;
 
         public string? SectionTitle { get; set; }
 
-        public List<CmsEntryDto> BeforeTitleContent { get; init; } = [];
+        public List<CmsEntryDto> BeforeTitleContent { get; set; } = [];
 
-        public CmsTitleDto? Title { get; init; }
+        public CmsTitleDto? Title { get; set; }
 
         public string? OrganisationName { get; set; }
 
-        public List<CmsEntryDto> Content { get; init; } = [];
+        public List<CmsEntryDto> Content { get; set; } = [];
     }
 }
