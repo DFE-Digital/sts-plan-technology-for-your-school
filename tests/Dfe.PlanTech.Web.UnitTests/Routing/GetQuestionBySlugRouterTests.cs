@@ -11,7 +11,9 @@ using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -42,6 +44,11 @@ public class GetQuestionBySlugRouterTests
     {
         _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _getNavigationQuery, _user, _errorMessages, _contactOptions);
         _user.GetEstablishmentId().Returns(1);
+
+        // Global TempData setup for all tests
+        _controller.TempData = new TempDataDictionary(
+            new DefaultHttpContext(),
+            Substitute.For<ITempDataProvider>());
 
         var secondQuestion = new Question()
         {
@@ -140,15 +147,15 @@ public class GetQuestionBySlugRouterTests
     }
 
     [Theory]
-    [InlineData(SubmissionStatus.Completed)]
-    [InlineData(SubmissionStatus.NextQuestion)]
-    [InlineData(SubmissionStatus.NotStarted)]
-    public async Task Should_Return_QuestionPage_If_NextQuestion_Matches_Slug(SubmissionStatus submissionStatus)
+    [InlineData(Status.CompleteNotReviewed)]
+    [InlineData(Status.InProgress)]
+    [InlineData(Status.NotStarted)]
+    public async Task Should_Return_QuestionPage_If_NextQuestion_Matches_Slug(Status submissionStatus)
     {
         var nextQuestion = _section.Questions[0] ?? throw new InvalidOperationException("Next question cannot be null.");
 
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
                                       _submissionStatusProcessor.NextQuestion = nextQuestion;
@@ -184,11 +191,11 @@ public class GetQuestionBySlugRouterTests
                          .Returns(_responses);
         Assert.NotNull(_section.InterstitialPage);
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
                                       _submissionStatusProcessor.NextQuestion = secondQuestion;
-                                      _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
+                                      _submissionStatusProcessor.Status = Status.InProgress;
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
@@ -222,11 +229,11 @@ public class GetQuestionBySlugRouterTests
                          .Returns(_responses);
         Assert.NotNull(_section.InterstitialPage);
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
                                       _submissionStatusProcessor.NextQuestion = thirdQuestion;
-                                      _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
+                                      _submissionStatusProcessor.Status = Status.InProgress;
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
@@ -246,39 +253,6 @@ public class GetQuestionBySlugRouterTests
         Assert.Equal(firstQuestion, model.Question);
     }
 
-
-    [Theory]
-    [InlineData(SubmissionStatus.Completed)]
-    [InlineData(SubmissionStatus.NotStarted)]
-    public async Task Should_Redirect_To_InterstitialPage_When_QuestionSlug_Not_Matching_And_Status_CompeletedOrNotStarted(SubmissionStatus submissionStatus)
-    {
-        var secondQuestion = _section.Questions[1];
-        var nextQuestion = _section.Questions[0];
-
-        Assert.NotNull(_section.InterstitialPage);
-
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
-                                  .Do(callinfo =>
-                                  {
-                                      _submissionStatusProcessor.NextQuestion = secondQuestion;
-                                      _submissionStatusProcessor.Status = submissionStatus;
-                                      _submissionStatusProcessor.Section.Returns(_section);
-                                  });
-
-        var result = await _router.ValidateRoute(_section.InterstitialPage?.Slug ?? throw new InvalidOperationException("InterstitialPage cannot be null."), nextQuestion.Slug, _controller, default);
-
-        var redirectResult = result as RedirectToActionResult;
-
-        Assert.NotNull(redirectResult);
-
-        Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
-        Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
-
-        var route = redirectResult.RouteValues != null ? redirectResult.RouteValues["route"] : null;
-        Assert.NotNull(route);
-        Assert.Equal(_section.InterstitialPage.Slug, route);
-    }
-
     [Fact]
     public async Task Should_Redirect_To_CheckAnswers_When_Status_Is_CheckAnswers_And_Question_Is_Unattached()
     {
@@ -296,10 +270,10 @@ public class GetQuestionBySlugRouterTests
 
         Assert.NotNull(_section.InterstitialPage);
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                      _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
@@ -322,10 +296,10 @@ public class GetQuestionBySlugRouterTests
     public async Task Should_Throw_Exception_When_Question_NoLonger_In_Section()
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                     .Do(callinfo =>
                                     {
-                                        _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                        _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
                                         _submissionStatusProcessor.Section.Returns(_section);
                                     });
 
@@ -339,10 +313,10 @@ public class GetQuestionBySlugRouterTests
     public async Task Should_Throw_Exception_When_No_Responses_Returned()
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                 .Do(callinfo =>
                                 {
-                                    _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                    _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
                                     _submissionStatusProcessor.Section.Returns(_section);
                                 });
 
@@ -361,10 +335,10 @@ public class GetQuestionBySlugRouterTests
         _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, false, Arg.Any<CancellationToken>())
                          .Returns(_responses);
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(callinfo =>
                                   {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                      _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 

@@ -14,5 +14,8 @@ public enum RichTextNodeType
     TableRow,
     TableHeaderCell,
     TableCell,
-    Heading
+    Heading,
+    EmbeddedEntryBlock,
+    GridContainer,
+    CsCard,
 }

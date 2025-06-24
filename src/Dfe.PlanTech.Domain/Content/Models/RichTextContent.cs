@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Domain.Content.Models;
 /// Content for a 'RichText' field in Contentful
 /// </summary>
 /// <inheritdoc/>
-public class RichTextContent : ContentComponent, IRichTextContent<RichTextMark, RichTextContent, RichTextData>
+public class RichTextContent : ContentComponent, IRichTextContent<RichTextMark, RichTextContent, RichTextContentSupportData>
 {
     public string Value { get; set; } = "";
 
@@ -16,5 +16,5 @@ public class RichTextContent : ContentComponent, IRichTextContent<RichTextMark, 
 
     public List<RichTextContent> Content { get; set; } = [];
 
-    public RichTextData? Data { get; set; }
+    public RichTextContentSupportData? Data { get; set; }
 }

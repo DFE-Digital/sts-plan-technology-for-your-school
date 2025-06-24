@@ -22,6 +22,7 @@ env:
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
 
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
+  AZ_SA_COSTING_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}costing
 
   TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
   TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
@@ -39,14 +40,11 @@ env:
   TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
   TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
   TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
-  TF_VAR_registry_server: "s190d01plantech.azurecr.io"
+  TF_VAR_registry_server: ${{ secrets.AZ_ACR_URL }}
+  TF_VAR_registry_username: ${{ secrets.AZ_CLIENT_ID }}
+  TF_VAR_registry_password: ${{ secrets.AZ_CLIENT_SECRET }}
   TF_VAR_image_tag: "development-bee6860823f4db57b0afa70d2f562df206ddba4c-Dev"
-  # TF_VAR_registry_username: ${{ github.repository_owner }}
-  # TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
-  TF_VAR_registry_username: ${{ secrets.REGISTRY_USERNAME }}
-  TF_VAR_registry_password: ${{ secrets.REGISTRY_PASSWORD }}
-  
-  
+
   container_app_min_replicas: ${{secrets.CONTAINER_MIN_REPLICAS}}
   container_app_max_replicas: ${{secrets.CONTAINER_MAX_REPLICAS}}
   container_app_http_concurrency: ${{secrets.CONTAINER_HTTP_CONCURRENCY}}
@@ -62,7 +60,7 @@ jobs:
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
-    environment: ${{ github.event.inputs.environment }}
+    environment: ${{ inputs.environment }}
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
@@ -89,12 +87,30 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
+      - name: Replace in secret environment variable
+        run: |
+          AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
+          SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
+          echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
+
+      - name: Add Runner to KV Blobforcost SA
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az storage account network-rule add --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
         with:
           azcliversion: 2.45.0
           inlineScript: |
             az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+      - name: Set container app image_tag env variables
+        run: |
+          IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
+          echo "TF_VAR_image_tag=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Set container app scaling env variables
         run: |
@@ -116,7 +132,6 @@ jobs:
           fi
             echo "TF_VAR_container_environment=$container_environment" >> $GITHUB_ENV
 
-
       - name: Terraform init
         id: init
         run: |
@@ -130,7 +145,15 @@ jobs:
         id: apply
         run: terraform apply -auto-approve
 
-      - name: Remove Runner to KV whitelist
+      - name: Remove Runner to Blobforcost SA
+        uses: azure/CLI@v1
+        if: always()
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az storage account network-rule remove --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+      - name: Remove Runner from KV whitelist
         uses: azure/CLI@v1
         if: always()
         with:

@@ -1,8 +1,7 @@
 @use "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
-* {
-    font-family: BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu,
-        Cantarell, "Helvetica Neue", sans-serif !important;
+html {
+    font-family: GDS Transport, arial, sans-serif;
 }
 
 .logo {
@@ -50,6 +49,31 @@ strong.govuk-tag {
     }
 }
 
+// MAT View Dashboard Topic List
+.dfe-mat-self-assessment-list {
+    .govuk-task-list__item {
+        height: 2.7rem;
+    }
+
+    .govuk-task-list__name-and-hint,
+    .govuk-task-list__status {
+        vertical-align: middle;
+    }
+
+    .govuk-tag {
+        white-space: nowrap;
+
+        @media (max-width: 350px) {
+            white-space: normal;
+        }
+    }
+
+    .govuk-task-list__item:first-child {
+        border-top: none;
+    }
+}
+
+
 .govuk-summary-list__key,
 .govuk-summary-list__value {
     vertical-align: middle;
@@ -85,4 +109,63 @@ button.govuk-button--white {
 .js-only {
     display: none !important;
     visibility: hidden !important;
+}
+
+.school-button {
+    font-size: 24px;
+    background-color: #ffffff;
+    color: #1d70b8;
+    padding-left: 0px;
+    box-shadow: none !important;
+    text-decoration: underline 1px !important;
+    text-underline-offset: 4px;
+    font-weight: bold !important;
+    margin-bottom: 8px;
+}
+
+.school-button:hover {
+    color: #003078;
+    background-color: #ffffff;
+    text-decoration-thickness: 2px !important;
+}
+
+.school-ident {
+    background-color: #ebf2f6;
+    padding: 20px 0;
+    margin-bottom: 0px;
+}
+
+.dfe-page-header-inner {
+    > .school-ident {
+        padding-top: 0px;
+    }
+}
+
+.school-ident-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+}
+
+.school-ident-name {
+    display: inline-block !important;
+    padding-top: 0 !important;
+    margin: 0 10px 0 0;
+}
+
+.groups-list-tag {
+    padding-right: 0px !important;
+}
+
+.groups-recommendation-piece-header {
+    padding-top: 32px;
+    padding-bottom: 16px;
+}
+
+.groups-recommendation-piece-header {
+    > h1.govuk-heading-xl {
+        padding-top: 0px !important;
+    }
 }

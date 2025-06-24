@@ -59,7 +59,7 @@ else
 }
 
 @{
-    if (Model.Page.Slug == "self-assessment" && TempData.ContainsKey("SubtopicError"))
+    if (Model.Page.Slug == "home" && TempData.ContainsKey("SubtopicError"))
     {
         var error = TempData["SubtopicError"] as string;
         <div class="govuk-error-summary" data-module="govuk-error-summary">

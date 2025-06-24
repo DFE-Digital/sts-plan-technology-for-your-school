@@ -4,6 +4,8 @@ using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Service;
+using Dfe.PlanTech.Application.Groups.Commands;
+using Dfe.PlanTech.Application.Groups.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Responses.Commands;
@@ -18,10 +20,10 @@ using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Domain.Content.Queries;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Database;
+using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -33,7 +35,6 @@ using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Background;
 using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Content;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
@@ -146,13 +147,13 @@ public static class ProgramExtensions
         ConfigureCookies(services, configuration);
 
         services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
+        services.AddScoped<IMarkSubmissionAsReviewedCommand, MarkSubmissionAsReviewedCommand>();
         services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
         services.AddTransient<ICreateUserCommand, CreateUserCommand>();
         services.AddTransient<IGetEntityFromContentfulQuery, GetEntityFromContentfulQuery>();
         services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
         services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
-        services.AddTransient<IGetContentSupportPageQuery, GetContentSupportPageQuery>();
         services.AddTransient<IGetNextUnansweredQuestionQuery, GetNextUnansweredQuestionQuery>();
         services.AddTransient<IGetSectionQuery, GetSectionQuery>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
@@ -161,6 +162,9 @@ public static class ProgramExtensions
         services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
         services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
         services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
+        services.AddTransient<IRecordGroupSelectionCommand, RecordGroupSelectionCommand>();
+        services.AddTransient<IGetGroupSelectionQuery, GetGroupSelectionQuery>();
+        services.AddTransient<ISubmissionCommand, SubmissionCommand>();
 
         return services;
     }
@@ -223,6 +227,7 @@ public static class ProgramExtensions
         services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
         services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
         services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
+        services.AddTransient<IChangeAnswersRouter, ChangeAnswersRouter>();
 
         services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplete);
         services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
@@ -263,10 +268,6 @@ public static class ProgramExtensions
         app.Services
             .Configure<SupportedAssetTypes>(app.Configuration.GetSection("cs:supportedAssetTypes"))
             .AddSingleton(sp => sp.GetRequiredService<IOptions<SupportedAssetTypes>>().Value);
-
-        app.Services.AddTransient<IModelMapper, ModelMapper>();
-        app.Services.AddTransient<IContentService, ContentService>();
-        app.Services.AddTransient<ILayoutService, LayoutService>();
 
         app.Services.Configure<CookiePolicyOptions>(options =>
         {

@@ -131,7 +131,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
     {
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.Completed });
+        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.CompleteReviewed });
 
         var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
@@ -170,7 +170,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
 
         await StatusChecker.ProcessSubmission(processor, default);
 
-        Assert.Equal(SubmissionStatus.CheckAnswers, processor.Status);
+        Assert.Equal(Status.CompleteNotReviewed, processor.Status);
     }
 
     [Fact]
@@ -203,7 +203,7 @@ public class CheckAnswersOrNextQuestionCheckerTests
 
         await StatusChecker.ProcessSubmission(processor, default);
 
-        Assert.Equal(SubmissionStatus.NextQuestion, processor.Status);
+        Assert.Equal(Status.InProgress, processor.Status);
         Assert.Equal(Questions[3], processor.NextQuestion);
     }
 
