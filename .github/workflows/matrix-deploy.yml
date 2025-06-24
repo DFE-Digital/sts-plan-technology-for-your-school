@@ -242,6 +242,7 @@ jobs:
     needs:
       [
         set-env,
+        check-for-terraform-changes,
         create-and-publish-image,
         deploy-to-dev-and-test,
         deploy-to-staging,
@@ -252,6 +253,7 @@ jobs:
     if: |
       always() &&
       needs.set-env.outputs.branch == 'main' &&
+      needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true'
     strategy:
       max-parallel: 1
       fail-fast: true
