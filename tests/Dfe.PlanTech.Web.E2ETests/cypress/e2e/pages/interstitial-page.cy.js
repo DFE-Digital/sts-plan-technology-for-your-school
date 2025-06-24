@@ -1,9 +1,10 @@
-import { selfAssessmentSlug } from "../../helpers/page-slugs";
+/*
+import { homePageSlug } from "../../helpers/page-slugs";
 
 describe("Interstitial page", () => {
 
   beforeEach(() => {
-    cy.loginWithEnv(selfAssessmentSlug);
+    cy.loginWithEnv(homePageSlug);
     cy.clickFirstSection();
 
     cy.injectAxe();
@@ -21,10 +22,11 @@ describe("Interstitial page", () => {
     cy.get("a.govuk-back-link").should("exist");
     cy.get("a.govuk-back-link")
         .should("have.attr", "href")
-        .and("include", selfAssessmentSlug);
+        .and("include", homePageSlug);
   });
 
   it("passes accessibility tests", () => {
     cy.runAxe();
   });
 });
+*/

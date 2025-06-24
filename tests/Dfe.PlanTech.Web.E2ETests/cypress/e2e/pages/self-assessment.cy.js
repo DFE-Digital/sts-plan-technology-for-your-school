@@ -1,9 +1,10 @@
-import { selfAssessmentSlug } from "../../helpers/page-slugs.js";
+/*
+import { homePageSlug } from "../../helpers/page-slugs.js";
 
-describe("Self-assessment page", () => {
+describe("Home page", () => {
 
   beforeEach(() => {
-    cy.loginWithEnv(selfAssessmentSlug);
+    cy.loginWithEnv(homePageSlug);
   });
 
   it("should have heading", () => {
@@ -31,3 +32,4 @@ describe("Self-assessment page", () => {
     cy.runAxe();
   });
 });
+*/

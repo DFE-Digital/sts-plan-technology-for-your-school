@@ -29,4 +29,6 @@ public class Submission
     public bool Deleted { get; set; }
 
     public bool Viewed { get; set; }
+
+    public string? Status { get; set; }
 }

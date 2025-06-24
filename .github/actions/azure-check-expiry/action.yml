@@ -1,0 +1,59 @@
+name: Check Azure Key Vault Expiry
+description: Check key bault for expiring secrets, certificates, and keys
+inputs:
+  az_tenant_id:
+    required: true
+    type: string
+  az_subscription_id:
+    required: true
+    type: string
+  az_client_id:
+    required: true
+    type: string
+  az_client_secret:
+    required: true
+    type: string
+  az_keyvault_name:
+    required: true
+    type: string
+  environment:
+    description: GitHub environment name
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: Azure Login
+      uses: ./.github/actions/azure-login
+      with:
+        az_tenant_id: ${{ inputs.az_tenant_id }}
+        az_subscription_id: ${{ inputs.az_subscription_id }}
+        az_client_id: ${{ inputs.az_client_id }}
+        az_client_secret: ${{ inputs.az_client_secret }}
+    
+    - name: Get GitHub Runner IP
+      id: whats-my-ip
+      uses: ./.github/actions/whats-my-ip-address
+
+    - name: Add Runner to KV whitelist
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.73.0
+        inlineScript: |
+          az keyvault network-rule add --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+    - name: Generate list of expiring keys
+      env:
+        AZ_KEYVAULT_NAME: ${{ inputs.az_keyvault_name }}
+        ENVIRONMENT: ${{ inputs.environment }}
+      run: ./.github/scripts/azure-check-expiry.sh
+      shell: bash
+
+    - name: Remove Runner from KV whitelist
+      uses: azure/CLI@v1
+      if: always()
+      with:
+        azcliversion: 2.73.0
+        inlineScript: |
+          az keyvault network-rule remove --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null

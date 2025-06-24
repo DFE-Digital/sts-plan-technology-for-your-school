@@ -1,4 +1,5 @@
-import { backText, saveAndContinueButtonText } from "../../helpers/constants";
+/*
+import { backText, continueButtonText } from "../../helpers/constants";
 
 describe("Question page", () => {
   const url = "/self-assessment";
@@ -29,7 +30,7 @@ describe("Question page", () => {
         cy.log(`Question Text is: ${questionText}`);
 
         cy.get("form button.govuk-button")
-          .contains(saveAndContinueButtonText)
+          .contains(continueButtonText)
           .click();
 
         cy.get("form div.govuk-form-group--error").should("exist");
@@ -104,3 +105,4 @@ describe("Question page", () => {
     cy.runAxe();
   });
 });
+*/

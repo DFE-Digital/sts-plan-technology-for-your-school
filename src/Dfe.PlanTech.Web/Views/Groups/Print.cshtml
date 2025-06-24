@@ -1,0 +1,8 @@
+@using Dfe.PlanTech
+@model Dfe.PlanTech.Web.Models.GroupsRecommendationsViewModel
+
+<div class="govuk-!-margin-bottom-6 govuk-!-margin-top-6">
+    <p class="govuk-body">
+        <a class="govuk-link" href=" @Url.Action("GetRecommendationsPrintView", "Groups", new { schoolId = Model.SelectedEstablishmentId, schoolName = Model.SelectedEstablishmentName, sectionSlug = Model.Slug })">View and print all recommendations</a>
+    </p>
+</div>

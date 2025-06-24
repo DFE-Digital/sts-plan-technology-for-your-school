@@ -152,7 +152,7 @@ jobs:
           inlineScript: |
             az storage account network-rule remove --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
-      - name: Remove Runner to KV whitelist
+      - name: Remove Runner from KV whitelist
         uses: azure/CLI@v1
         if: always()
         with:

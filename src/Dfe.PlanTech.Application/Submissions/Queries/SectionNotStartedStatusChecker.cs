@@ -16,7 +16,7 @@ public static class SectionNotStartedStatusChecker
                                                        userJourneyRouter.SectionStatus.Status == Status.NotStarted,
         ProcessSubmissionFunc = (userJourneyRouter, cancellationToken) =>
         {
-            userJourneyRouter.Status = SubmissionStatus.NotStarted;
+            userJourneyRouter.Status = Status.NotStarted;
             userJourneyRouter.NextQuestion = userJourneyRouter.Section.Questions[0];
             return Task.CompletedTask;
         }

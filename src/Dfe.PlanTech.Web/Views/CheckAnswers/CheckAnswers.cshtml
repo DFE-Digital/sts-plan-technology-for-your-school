@@ -51,13 +51,12 @@
             }
 
             <govuk-button class="govuk-!-margin-right-5" type="submit" name="redirectOption" value="@RecommendationsController.GetRecommendationAction">Submit and view recommendations</govuk-button>
-            <govuk-button class="govuk-button--secondary" type="submit" name="redirectOption" value="@UrlConstants.SelfAssessmentPage">Submit and go to self-assessment topics</govuk-button>
 
             @if (Model.ErrorMessage != null)
             {
                 <p class="govuk-error-message">
                     <span class="govuk-visually-hidden">Error:</span> @Model.ErrorMessage <a class="govuk-error-message"
-                        href="@UrlConstants.SelfAssessmentPage">return to the self-assessment page</a>
+                        href="@UrlConstants.HomePage">Return to the homepage</a>
                 </p>
             }
 

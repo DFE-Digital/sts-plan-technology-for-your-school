@@ -1,4 +1,4 @@
-import { selfAssessmentSlug } from "../../helpers/page-slugs";
+import { homePageSlug } from "../../helpers/page-slugs";
 
 describe("landing page", () => {
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe("landing page", () => {
   it("should direct to self-assessment page", () => {
     cy.get("a.govuk-button--start.govuk-button")
       .and("have.attr", "href")
-      .and("equal", selfAssessmentSlug);
+      .and("equal", homePageSlug);
   });
 
   it("passes accessibility tests", () => {

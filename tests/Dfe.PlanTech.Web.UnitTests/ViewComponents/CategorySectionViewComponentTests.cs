@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Interfaces;
@@ -203,16 +204,16 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         InterstitialPage = new Page
                         {
                             Slug = "test-slug"
-                        }
-                    }
-                ]
+                        },
+                    },
+                ],
             };
         }
 
         [Theory]
-        [InlineData("2015/10/15", "last completed 15 Oct 2015")]
-        [InlineData("2015/10/16 12:13:00", "last completed 1:13pm")] // British summer time GMT + 1
-        public async Task Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted(string utcTime, string expectedBadge)
+        [InlineData("2015/10/15")]
+        [InlineData("2015/10/16 12:13:00")] // British summer time GMT + 1
+        public async Task Returns_CategorySectionInfo_If_Slug_Exists_And_SectionIsCompleted(string utcTime)
         {
             _systemTime.Today.Returns(_ => new DateTime(2015, 10, 16, 0, 0, 0, DateTimeKind.Utc));
             _category.SectionStatuses.Add(new SectionStatusDto()
@@ -251,15 +252,58 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("grey", categorySectionDto.Tag.Colour);
-            Assert.Equal(expectedBadge, categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
         [Theory]
-        [InlineData("2015/03/05", "in progress 5 Mar 2015")]
-        [InlineData("2015/03/06 10:13:00", "in progress 10:13am")] // GMT
-        public async Task Returns_CategorySelectionInfo_If_Slug_Exists_And_SectionIsNotCompleted(string utcTime, string expectedBadge)
+        [InlineData("2015/10/15")]
+        [InlineData("2015/10/16 12:13:00")] // British summer time GMT + 1
+        public async Task Returns_CategorySectionStatus_If_Slug_Exists_And_SectionIsCompleted(string utcTime)
+        {
+            _systemTime.Today.Returns(_ => new DateTime(2015, 10, 16, 0, 0, 0, DateTimeKind.Utc));
+            _category.SectionStatuses.Add(new SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = true,
+                DateUpdated = DateTime.Parse(utcTime),
+            });
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+
+            Assert.Equal(1, unboxed.CompletedSectionCount);
+            Assert.Equal(1, unboxed.TotalSectionCount);
+
+            var categorySectionDtoList = unboxed.CategorySectionDto;
+
+            Assert.NotNull(categorySectionDtoList);
+
+            categorySectionDtoList = categorySectionDtoList.ToList();
+            Assert.NotEmpty(categorySectionDtoList);
+
+            var categorySectionDto = categorySectionDtoList.FirstOrDefault();
+
+            Assert.NotNull(categorySectionDto);
+
+            Assert.Equal("section-1", categorySectionDto.Slug);
+            Assert.Equal(SectionProgressStatus.Completed, categorySectionDto.ProgressStatus);
+            Assert.Null(categorySectionDto.ErrorMessage);
+        }
+
+        [Theory]
+        [InlineData("2015/03/05")]
+        [InlineData("2015/03/06 10:13:00")] // GMT
+        public async Task Returns_CategorySelectionInfo_If_Slug_Exists_And_SectionIsNotCompleted(string utcTime)
         {
             _systemTime.Today.Returns(_ => new DateTime(2015, 3, 6, 0, 0, 0, DateTimeKind.Utc));
             _category.Completed = 0;
@@ -300,8 +344,53 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("grey", categorySectionDto.Tag.Colour);
-            Assert.Equal(expectedBadge, categorySectionDto.Tag.Text);
+            Assert.Null(categorySectionDto.ErrorMessage);
+        }
+
+        [Theory]
+        [InlineData("2015/03/05")]
+        [InlineData("2015/03/06 10:13:00")] // GMT
+        public async Task Returns_CategorySelectionStatus_If_Slug_Exists_And_SectionIsStartedNeverCompleted(string utcTime)
+        {
+            _systemTime.Today.Returns(_ => new DateTime(2015, 3, 6, 0, 0, 0, DateTimeKind.Utc));
+            _category.Completed = 0;
+
+            _category.SectionStatuses.Add(new SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = false,
+                DateUpdated = DateTime.Parse(utcTime)
+            });
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+
+            Assert.Equal(0, unboxed.CompletedSectionCount);
+            Assert.Equal(1, unboxed.TotalSectionCount);
+
+            var categorySectionDtoList = unboxed.CategorySectionDto;
+
+            Assert.NotNull(categorySectionDtoList);
+
+            categorySectionDtoList = categorySectionDtoList.ToList();
+            Assert.NotEmpty(categorySectionDtoList);
+
+            var categorySectionDto = categorySectionDtoList.FirstOrDefault();
+
+            Assert.NotNull(categorySectionDto);
+
+            Assert.Equal("section-1", categorySectionDto.Slug);
+            Assert.Equal(SectionProgressStatus.StartedNeverCompleted, categorySectionDto.ProgressStatus);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -339,8 +428,89 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("grey", categorySectionDto.Tag.Colour);
-            Assert.Equal("not started", categorySectionDto.Tag.Text);
+            Assert.Null(categorySectionDto.ErrorMessage);
+        }
+
+        [Fact]
+        public async Task Returns_CategorySelectionStatus_If_Section_IsNotStarted()
+        {
+            _category.Completed = 0;
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+
+            Assert.Equal(0, unboxed.CompletedSectionCount);
+            Assert.Equal(1, unboxed.TotalSectionCount);
+
+            var categorySectionDtoList = unboxed.CategorySectionDto;
+
+            Assert.NotNull(categorySectionDtoList);
+
+            categorySectionDtoList = categorySectionDtoList.ToList();
+            Assert.NotEmpty(categorySectionDtoList);
+
+            var categorySectionDto = categorySectionDtoList.FirstOrDefault();
+
+            Assert.NotNull(categorySectionDto);
+
+            Assert.Equal("section-1", categorySectionDto.Slug);
+            Assert.Equal(SectionProgressStatus.NotStarted, categorySectionDto.ProgressStatus);
+            Assert.Null(categorySectionDto.ErrorMessage);
+        }
+
+        [Theory]
+        [InlineData("2015/10/15")]
+        [InlineData("2015/10/16 12:13:00")] // British summer time GMT + 1
+        public async Task Returns_CategorySelectionStatus_If_Section_IsCompletedAndStartedNew(string utcTime)
+        {
+            _systemTime.Today.Returns(_ => new DateTime(2015, 10, 16, 0, 0, 0, DateTimeKind.Utc));
+            _category.SectionStatuses.Add(new SectionStatusDto()
+            {
+                SectionId = "Section1",
+                Completed = false,
+                LastCompletionDate = DateTime.Parse(utcTime),
+                DateUpdated = DateTime.Parse(utcTime),
+            });
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+
+            Assert.Equal(0, unboxed.CompletedSectionCount);
+            Assert.Equal(1, unboxed.TotalSectionCount);
+
+            var categorySectionDtoList = unboxed.CategorySectionDto;
+
+            Assert.NotNull(categorySectionDtoList);
+
+            categorySectionDtoList = categorySectionDtoList.ToList();
+            Assert.NotEmpty(categorySectionDtoList);
+
+            var categorySectionDto = categorySectionDtoList.FirstOrDefault();
+
+            Assert.NotNull(categorySectionDto);
+
+            Assert.Equal("section-1", categorySectionDto.Slug);
+            Assert.Equal(SectionProgressStatus.CompletedStartedNew, categorySectionDto.ProgressStatus);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -392,8 +562,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Null(categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Null(categorySectionDto.Tag.Colour);
-            Assert.Null(categorySectionDto.Tag.Text);
             Assert.NotNull(categorySectionDto.ErrorMessage);
             Assert.Equal("Test Section 1 unavailable", categorySectionDto.ErrorMessage);
         }
@@ -401,7 +569,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         [Fact]
         public async Task Returns_ProgressRetrievalError_When_ProgressCanNotBeRetrieved()
         {
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>())
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), null)
                                         .ThrowsAsync(new Exception("Error occurred fection sections"));
 
             var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
@@ -429,8 +597,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.Equal("section-1", categorySectionDto.Slug);
             Assert.Equal("Test Section 1", categorySectionDto.Name);
-            Assert.Equal("red", categorySectionDto.Tag.Colour);
-            Assert.Equal("unable to retrieve status", categorySectionDto.Tag.Text);
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
@@ -619,6 +785,27 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
             Assert.Equal(_subtopic.Intros[0].HeaderText, recommendation.RecommendationDisplayName);
             Assert.Null(recommendation.NoRecommendationFoundErrorMessage);
+        }
+
+        [Fact]
+        public async Task Model_MissingDescription_ReturnsMissingComponent()
+        {
+            _category.Completed = 0;
+
+            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
+
+            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
+
+            Assert.NotNull(result);
+            Assert.NotNull(result.ViewData);
+
+            var model = result.ViewData.Model;
+            Assert.NotNull(model);
+
+            var unboxed = model as CategorySectionViewComponentViewModel;
+            Assert.NotNull(unboxed);
+            Assert.IsType<MissingComponent>(unboxed.Description);
+
         }
     }
 }
