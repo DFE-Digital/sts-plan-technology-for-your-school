@@ -6,7 +6,7 @@ let selectedQuestionsWithAnswers = [];
 let changeLinkHref;
 
 describe("Check answers page", () => {
-  const url = "/self-assessment";
+  const url = "/home";
 
   beforeEach(() => {
     cy.loginWithEnv(url);

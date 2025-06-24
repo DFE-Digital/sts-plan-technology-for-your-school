@@ -225,7 +225,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
 
 
         [Fact]
-        public async Task ValidateRoute_ShouldRedirectToSelfAssessment_WhenStatusIsNotStarted()
+        public async Task ValidateRoute_ShouldRedirectToHomePage_WhenStatusIsNotStarted()
         {
             _statusProcessor.Status = Status.NotStarted;
 

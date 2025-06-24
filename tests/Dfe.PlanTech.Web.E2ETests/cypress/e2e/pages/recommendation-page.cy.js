@@ -1,17 +1,17 @@
 /*
-import { selfAssessmentSlug, recommendationSlug } from "../../helpers/page-slugs";
+import { homePageSlug, recommendationSlug } from "../../helpers/page-slugs";
 import { printAllRecommendationsText, paginationNext, paginationPrevious, recommendationsToSelfAssessmentText }  from "../../helpers/constants"
 
 describe("Recommendation Page", () => {
 
     before(() => {
-        cy.loginWithEnv(selfAssessmentSlug);
+        cy.loginWithEnv(homePageSlug);
 
         cy.completeFirstSubtopic();
     });
 
     beforeEach(() => {
-        cy.loginWithEnv(selfAssessmentSlug);
+        cy.loginWithEnv(homePageSlug);
         cy.navigateToRecommendationPage();
 
         cy.url().should("contain", recommendationSlug);
@@ -114,14 +114,14 @@ describe("Recommendation Page", () => {
         //Should not have normal back button
         cy.get("section.dfe-page-header a.govuk-back-link").should("not.exist");
 
-        //Should have back button to self-assessment on the top of the vertical nav
+        //Should have back button to homepage on the top of the vertical nav
         cy.get(
             "nav.dfe-vertical-nav div.dfe-vertical-nav__back-button a.govuk-back-link"
         )
             .contains(recommendationsToSelfAssessmentText)
             .should("exist")
             .and("have.attr", "href")
-            .and("include", selfAssessmentSlug);
+            .and("include", homePageSlug);
     });
 });
 */

@@ -45,7 +45,7 @@ public class PagesController(
             var organisation = System.Text.Json.JsonSerializer.Deserialize<OrganisationDto>(organisationClaim);
 
             //MAT user org ID is 010
-            if (page.Slug == UrlConstants.SelfAssessmentPage.Replace("/", "") && organisation?.Category?.Id == "010")
+            if (page.Slug == UrlConstants.HomePage.Replace("/", "") && organisation?.Category?.Id == "010")
             {
                 return Redirect(UrlConstants.SelectASchoolPage);
             }
