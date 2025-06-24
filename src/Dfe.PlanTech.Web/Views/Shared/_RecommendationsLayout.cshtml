@@ -1,5 +1,6 @@
 @using Dfe.PlanTech.Web.Helpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
+
 @section Head {
     <partial name="_Head" />
     @await RenderSectionAsync("Head", required: false)
@@ -14,10 +15,15 @@
     }
 }
 
-@section Header {
+@section BeforeContent {
+    <partial name="_BeforeContent" />
+    @await RenderSectionAsync("BeforeContent", required: false)
+}
+
+@section Header {    
     <partial name="GoogleTagManager/_Body" />
     <partial name="CookiesBanner/_CookieBanner" />
-    <partial name="_Header" />
+    <partial name="_Header" /> 
     @await RenderSectionAsync("Header", required: false)
 }
 

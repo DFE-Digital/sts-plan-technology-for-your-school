@@ -11,6 +11,6 @@ namespace Dfe.PlanTech.Web.Models
 
         public int? RecommendationCount { get; set; }
 
-        public int CurrentRecommendationNumber { get; set; }
+        public int CurrentRecommendationPageCount { get; set; }
     }
 }
