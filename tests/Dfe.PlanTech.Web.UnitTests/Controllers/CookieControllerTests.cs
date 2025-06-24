@@ -37,8 +37,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Theory]
-        [InlineData("https://localhost:8080/self-assessment")]
-        [InlineData("https://www.dfe.gov.uk/self-assessment")]
+        [InlineData("https://localhost:8080/homet")]
+        [InlineData("https://www.dfe.gov.uk/home")]
         public void HideBanner_Redirects_BackToPlaceOfOrigin(string url)
         {
             //Arrange
@@ -60,8 +60,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Theory]
-        [InlineData("https://localhost:8080/self-assessment", "true")]
-        [InlineData("https://www.dfe.gov.uk/self-assessment", "false")]
+        [InlineData("https://localhost:8080/home", "true")]
+        [InlineData("https://www.dfe.gov.uk/home", "false")]
         public void SetCookiePreference_Redirects_BackToPlaceOfOrigin(string url, string userAcceptsCookie)
         {
             //Arrange

@@ -43,7 +43,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
     {
         if (!contentfulOptions.UsePreviewApi)
         {
-            return new RedirectResult(UrlConstants.SelfAssessmentPage);
+            return new RedirectResult(UrlConstants.HomePage);
         }
 
         if (string.IsNullOrEmpty(sectionSlug))
@@ -68,6 +68,19 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
             true,
             this,
             cancellationToken);
+    }
+
+    [HttpGet("from-section/{sectionSlug}")]
+    public async Task<IActionResult> FromSection(
+        string sectionSlug,
+        [FromServices] IGetRecommendationRouter getRecommendationRouter,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+
+        var recommendationSlug = await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken);
+        return RedirectToAction(nameof(GetRecommendation), new { recommendationSlug });
     }
 }
 

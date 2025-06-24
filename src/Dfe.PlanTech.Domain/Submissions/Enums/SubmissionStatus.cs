@@ -2,8 +2,10 @@ namespace Dfe.PlanTech.Domain.Submissions.Enums;
 
 public enum SubmissionStatus
 {
+    None,
     NotStarted,
-    NextQuestion,
-    CheckAnswers,
-    Completed
+    InProgress,
+    CompleteNotReviewed,
+    CompleteReviewed,
+    Inaccessible
 }

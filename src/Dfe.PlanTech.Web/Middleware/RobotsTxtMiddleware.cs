@@ -7,7 +7,9 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// <summary>
 /// Middleware to handle /robots.txt path and generate the file
 /// </summary>
-public class RobotsTxtMiddleware(RequestDelegate _, IOptions<RobotsConfiguration> options)
+#pragma warning disable CS9113 // Parameter is unread.
+public class RobotsTxtMiddleware(RequestDelegate next, IOptions<RobotsConfiguration> options)
+#pragma warning restore CS9113 // Parameter is unread.
 {
     private const string UserAgentKey = "User-agent";
     private const string DisallowKey = "Disallow";

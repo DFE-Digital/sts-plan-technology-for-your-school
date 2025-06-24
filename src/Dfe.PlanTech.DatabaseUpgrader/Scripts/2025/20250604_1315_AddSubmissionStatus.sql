@@ -1,0 +1,18 @@
+BEGIN TRY
+    BEGIN TRAN
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = 'submission' AND COLUMN_NAME = 'status'
+    )
+    BEGIN
+        ALTER TABLE [dbo].[submission]
+        ADD [status] NVARCHAR(50) NULL;
+    END
+
+    COMMIT TRAN
+END TRY
+BEGIN CATCH
+    ROLLBACK TRAN
+END CATCH

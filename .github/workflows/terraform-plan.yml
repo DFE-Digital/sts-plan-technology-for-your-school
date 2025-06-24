@@ -41,12 +41,12 @@ env:
   TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
   TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
   TF_VAR_registry_server: ${{ secrets.AZ_ACR_URL }}
-  TF_VAR_registry_username: ${{ secrets.AZ_ACR_USERNAME }}
-  TF_VAR_registry_password: ${{ secrets.AZ_ACR_PASSWORD }}
+  TF_VAR_registry_username: ${{ secrets.AZ_CLIENT_ID }}
+  TF_VAR_registry_password: ${{ secrets.AZ_CLIENT_SECRET }}
   
-  container_app_min_replicas: ${{vars.CONTAINER_MIN_REPLICAS}}
-  container_app_max_replicas: ${{vars.CONTAINER_MAX_REPLICAS}}
-  container_app_http_concurrency: ${{vars.CONTAINER_HTTP_CONCURRENCY}}
+  container_app_min_replicas: ${{secrets.CONTAINER_MIN_REPLICAS}}
+  container_app_max_replicas: ${{secrets.CONTAINER_MAX_REPLICAS}}
+  container_app_http_concurrency: ${{secrets.CONTAINER_HTTP_CONCURRENCY}}
 
   container_environment: ${{ inputs.environment }}
 

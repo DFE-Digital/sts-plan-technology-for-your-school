@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -6,17 +5,30 @@ using Dfe.PlanTech.Domain.Submissions.Models;
 
 namespace Dfe.PlanTech.Domain.CategorySection;
 
+//Could be moved to another folder in future but only declared here for now
+public enum SectionProgressStatus
+{
+    NotStarted,
+    InProgress,
+    StartedNeverCompleted,
+    CompletedStartedNew,
+    Completed,
+    RetrievalError
+}
+
 public class CategorySectionDto
 {
     public string? Slug { get; init; }
 
     public string Name { get; init; }
 
-    public Tag Tag { get; init; }
+    public Tag Tag { get; init; } = new Tag();
 
     public string? ErrorMessage { get; init; }
 
     public CategorySectionRecommendationDto? Recommendation { get; init; }
+
+    public SectionProgressStatus ProgressStatus { get; init; }
 
     public CategorySectionDto(
         string? slug,
@@ -31,20 +43,38 @@ public class CategorySectionDto
         Recommendation = recommendation;
         var started = sectionStatus != null;
         var completed = sectionStatus?.Completed == true;
-        var lastEdited = LastEditedDate(sectionStatus?.DateUpdated, systemTime);
+        var completedStartedNew = sectionStatus?.LastCompletionDate != null && sectionStatus?.Completed == false && started;
+        var startedNeverCompleted = sectionStatus?.LastCompletionDate == null && sectionStatus?.Completed == false && started;
+
         if (string.IsNullOrWhiteSpace(slug))
         {
             ErrorMessage = $"{Name} unavailable";
-            Tag = new Tag();
+            ProgressStatus = SectionProgressStatus.RetrievalError;
         }
         else if (retrievalError)
-            Tag = new Tag("unable to retrieve status", TagColour.Red);
+        {
+            ProgressStatus = SectionProgressStatus.RetrievalError;
+        }
         else if (completed)
-            Tag = new Tag($"last completed {lastEdited}", TagColour.Grey);
+        {
+            ProgressStatus = SectionProgressStatus.Completed;
+        }
+        else if (startedNeverCompleted)
+        {
+            ProgressStatus = SectionProgressStatus.StartedNeverCompleted;
+        }
+        else if (completedStartedNew)
+        {
+            ProgressStatus = SectionProgressStatus.CompletedStartedNew;
+        }
         else if (started)
-            Tag = new Tag($"in progress {lastEdited}", TagColour.Grey);
+        {
+            ProgressStatus = SectionProgressStatus.InProgress;
+        }
         else
-            Tag = new Tag("not started", TagColour.Grey);
+        {
+            ProgressStatus = SectionProgressStatus.NotStarted;
+        }
     }
 
     private static string? LastEditedDate(DateTime? date, ISystemTime systemTime)
@@ -52,8 +82,6 @@ public class CategorySectionDto
         if (date == null)
             return null;
         var localTime = TimeZoneHelpers.ToUkTime(date.Value);
-        return localTime.Date == systemTime.Today.Date
-            ? DateTimeFormatter.FormattedTime(localTime)
-            : DateTimeFormatter.FormattedDateShort(localTime);
+        return DateTimeFormatter.FormattedDateShort(localTime);
     }
 }

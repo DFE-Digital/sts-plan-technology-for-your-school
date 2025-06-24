@@ -32,7 +32,7 @@ public class RobotsTxtMiddlewareTests
         var config = new RobotsConfiguration()
         {
             UserAgent = "example-user-agent",
-            DisallowedPaths = ["/", "2313", UrlConstants.SelfAssessmentPage],
+            DisallowedPaths = ["/", "2313", UrlConstants.HomePage],
         };
 
         _options.Value.Returns(config);

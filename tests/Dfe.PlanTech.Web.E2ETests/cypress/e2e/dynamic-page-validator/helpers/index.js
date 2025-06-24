@@ -6,7 +6,7 @@ export { ValidateContent } from "../../../helpers/content-validators/content-val
 export { ValidatePage } from "../../../helpers/content-validators/page-validator.js";
 export {
     FindPageForSlug,
-    selfAssessmentSlug,
+    homePageSlug,
     recommendationIntroFragment,
     checkAnswersSlug,
     recommendationSlug
@@ -20,6 +20,5 @@ export {
     continueButtonText,
     recommendationsSidebarTitle,
     recommendationIntroTitle,
-    saveAndContinueButtonText,
     changeAnswerText
 } from "../../../helpers/constants.js";

@@ -1,16 +1,31 @@
 @using Dfe.PlanTech.Domain.Questionnaire.Models
 @using GovUk.Frontend.AspNetCore.TagHelpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent
+@model Dfe.PlanTech.Web.Models.HeaderContentViewModel
+
+@{
+    var header = Model.Header;
+    var submissionDate = Model.SubmissionDate;
+    var sectionName = Model.SectionName;
+}
 
 <div class="recommendation-piece-content">
-    @foreach (var content in Model.Content)
+    @foreach (var content in header.Content)
     {
+        @if (header.SlugifiedLinkText == "overview" && !string.IsNullOrEmpty(submissionDate) && !string.IsNullOrEmpty(sectionName))
+        {
+            <div class="govuk-inset-text">
+                <p>
+                    The self-assessment for @sectionName.ToLower() was completed on
+                    @submissionDate. You can <a href="#your-self-assessment" class="govuk-link">change your answers at any time</a>.
+                </p>
+            </div>
+        }
         <partial name="Components/PageComponentFactory" model="@content" />
     }
 </div>
 
-@if (Model is RecommendationChunk chunk && chunk.CSLink != null)
+@if (header is RecommendationChunk chunk && chunk.CSLink != null)
 {
     <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
         <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@chunk.CSLink.Url>@chunk.CSLink.LinkText</a>
