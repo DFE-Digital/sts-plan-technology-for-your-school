@@ -5,7 +5,7 @@
   "scripts": {
     "test": "cucumber-js --format json:reports/cucumber-report.json",
     "test:record": "cucumber-js --format json:reports/cucumber-report.json --world-parameters=\"{\\\"record\\\": true}\"",
-    "test:login": "npx ts-node login-setup.ts",
+    "test:login": "npx ts-node login.setup.ts",
     "report": "node generate-report.ts"
   },
   "keywords": [],

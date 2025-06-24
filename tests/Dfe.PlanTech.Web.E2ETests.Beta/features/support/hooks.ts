@@ -22,7 +22,9 @@ function ensureDirExists(dirPath: string) {
 }
 
 BeforeAll(async () => {
-  browser = await chromium.launch({ headless: true });
+  const isHeadless = process.env.HEADLESS == 'true';
+  //browser = await chromium.launch({ headless: isHeadless });
+  browser = await chromium.launch({ headless: isHeadless });
 });
 
 Before(async function (scenario: ITestCaseHookParameter) {

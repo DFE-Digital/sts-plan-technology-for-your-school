@@ -14,6 +14,12 @@ Then('I should see the page heading {string}', async function (expectedHeading: 
   await expect(heading).toHaveText(expectedHeading);
 });
 
+Then('I should see the question heading {string}', async function (expectedHeading: string) {
+  const heading = this.page.locator('h1.govuk-fieldset__heading');
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveText(expectedHeading);
+});
+
 Then('I should see a subheading with tag {string} and class {string}', async function (tag: string, className: string) {
   const heading = this.page.locator(`${tag}.${className}`);
   await expect(heading).toBeVisible();
@@ -143,7 +149,7 @@ Then('I will be redirected to {string}', async function (expectedPath: string) {
   await expect(this.page.url()).toContain(expectedPath);
 });
 
-Given('I am on the self-assessment page and click on the category {string}', async function (section: string) {
+Given('I am on the self-assessment testing page and click on the category {string}', async function (section: string) {
   await this.page.goto(`${process.env.URL}self-assessment-testing`);
 
   const firstCard = this.page.locator(`.dfe-grid-container`).first();

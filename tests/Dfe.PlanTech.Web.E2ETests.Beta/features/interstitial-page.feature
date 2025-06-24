@@ -1,6 +1,6 @@
 Feature: Interstitial Paage
     Background:
-        Given I am on the self-assessment page and click on the category "Category One Section One"
+        Given I am on the self-assessment testing page and click on the category "Category One Section One"
 
     Scenario:
         Then I should see the page heading "Section One Interstitial Title"
