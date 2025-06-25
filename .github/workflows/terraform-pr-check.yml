@@ -79,7 +79,7 @@ jobs:
         with:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID_TEMP }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET_TEMP }}
 
       - name: Add Runner to KV whitelist
