@@ -23,6 +23,7 @@ env:
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
 
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
+  AZ_SA_COSTING_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}costing
 
   TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
   TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
@@ -82,6 +83,26 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
+      - name: Replace in secret environment variable
+        run: |
+          AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
+          SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
+          echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
+
+      - name: Add Runner to KV Blobforcost SA
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az storage account network-rule add --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+      - name: Add Runner to KV whitelist
+        uses: azure/CLI@v1
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
       - name: Terraform init
         id: init
         run: |
@@ -127,6 +148,22 @@ jobs:
           github_event_name: ${{ github.event_name }}
           tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
           github_workflow: ${{ github.workflow }}
+
+      - name: Remove Runner to Blobforcost SA
+        uses: azure/CLI@v1
+        if: always()
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az storage account network-rule remove --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+      - name: Remove Runner from KV whitelist
+        uses: azure/CLI@v1
+        if: always()
+        with:
+          azcliversion: 2.45.0
+          inlineScript: |
+            az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
   terraform-lint:
     name: Terraform Lint
