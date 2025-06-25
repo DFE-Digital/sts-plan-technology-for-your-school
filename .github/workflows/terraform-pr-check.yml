@@ -80,7 +80,7 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET_TEST_TEMP }}
 
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
