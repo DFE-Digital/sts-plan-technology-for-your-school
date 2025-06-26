@@ -93,19 +93,15 @@ jobs:
           SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
           echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
 
-      - name: Add Runner to KV Blobforcost SA
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.45.0
-          inlineScript: |
-            az storage account network-rule add --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+      - name: Add Runner to BlobForCost SA whitelist
+        shell: bash
+        run: |
+          az storage account network-rule add --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null 
 
       - name: Add Runner to KV whitelist
-        uses: azure/CLI@v1
-        with:
-          azcliversion: 2.45.0
-          inlineScript: |
-            az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+        shell: bash
+        run: |
+          az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Set container app image_tag env variables
         run: |
@@ -145,18 +141,12 @@ jobs:
         id: apply
         run: terraform apply -auto-approve
 
-      - name: Remove Runner to Blobforcost SA
-        uses: azure/CLI@v1
-        if: always()
-        with:
-          azcliversion: 2.45.0
-          inlineScript: |
-            az storage account network-rule remove --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+      - name: Remove Runner from BlobForCost SA whitelist
+        shell: bash
+        run: |
+          az storage account network-rule remove --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Remove Runner from KV whitelist
-        uses: azure/CLI@v1
-        if: always()
-        with:
-          azcliversion: 2.45.0
-          inlineScript: |
-            az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+        shell: bash
+        run: |
+          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
