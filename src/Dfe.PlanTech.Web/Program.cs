@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Application.Options;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;

@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
-using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;

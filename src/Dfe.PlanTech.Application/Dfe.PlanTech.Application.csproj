@@ -20,8 +20,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Extensions\" />
-    <Folder Include="Persistence\" />
     <Folder Include="Responses\Queries\" />
   </ItemGroup>
 </Project>

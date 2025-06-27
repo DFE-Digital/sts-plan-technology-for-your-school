@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Background;
-using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Caching.Models;
 using Dfe.PlanTech.Application.Content.Queries;
 using Dfe.PlanTech.Application.Cookie.Service;
@@ -15,13 +14,13 @@ using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Queries;
+using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Database;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
@@ -42,6 +41,9 @@ using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
+using Dfe.PlanTech.Web.Services;
+using Dfe.PlanTech.Web.Workflows;
+using Dfe.PlanTech.Web.Workflows.Options;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -176,11 +178,11 @@ public static class ProgramExtensions
     private static void ConfigureCookies(IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<ICookieService, CookieService>();
-        services.AddTransient<ICookiesCleaner, CookiesCleaner>((services) =>
+        services.AddTransient<ICookiesCleaner, CookieWorkflow>((services) =>
         {
-            var options = configuration.GetSection("Cookies").Get<CookiesCleanerOptions>();
+            var options = configuration.GetSection("Cookies").Get<CookieWorkflowOptions>();
 
-            return new CookiesCleaner(options ?? new CookiesCleanerOptions() { EssentialCookies = [] });
+            return new CookieWorkflow(options ?? new CookieWorkflowOptions() { EssentialCookies = [] });
         });
     }
 

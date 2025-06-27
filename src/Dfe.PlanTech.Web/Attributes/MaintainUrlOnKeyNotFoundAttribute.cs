@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Exceptions;
+﻿using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Web.Configurations;

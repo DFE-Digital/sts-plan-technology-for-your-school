@@ -1,29 +1,24 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Core.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
-public class QuestionEntity
+public class QuestionEntity : SqlEntity<SqlQuestionDto>
 {
-    [Required]
     public int Id { get; init; }
 
-    [Required]
     public string? QuestionText { get; init; } = null!;
 
-    [Required]
-    public string ContentfulRef { get; init; } = null!;
+    public string ContentfulSysId { get; init; } = null!;
 
-    [Required]
     public DateTime DateCreated { get; private set; } = DateTime.UtcNow;
 
-    public SqlQuestionDto ToDto()
+    protected override SqlQuestionDto CreateDto()
     {
         return new SqlQuestionDto
         {
             Id = Id,
             QuestionText = QuestionText,
-            ContentfulSysId = ContentfulRef,
+            ContentfulSysId = ContentfulSysId,
             DateCreated = DateCreated
         };
     }

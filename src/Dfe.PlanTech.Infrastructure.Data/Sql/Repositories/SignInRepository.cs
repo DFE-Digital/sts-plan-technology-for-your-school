@@ -1,5 +1,4 @@
-﻿using Dfe.PlanTech.Domain.DataTransferObjects;
-using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
+﻿using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
 

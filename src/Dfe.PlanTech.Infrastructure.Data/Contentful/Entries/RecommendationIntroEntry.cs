@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Dfe.PlanTech.Core.DataTransferObjects;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
 {

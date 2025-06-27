@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Constants;
+﻿using System.Data;
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -18,24 +19,46 @@ public class StoredProcedureRepository
     {
         var parameters = new List<SqlParameter>
         {
-            new() {
-                Direction = System.Data.ParameterDirection.Input,
-                ParameterName = DatabaseConstants.SubmissionIdParam,
-                Value = submissionId,
-            }
+            new(DatabaseConstants.SubmissionIdParam, submissionId)
         };
 
-        return _db.Database.ExecuteSqlRawAsync(DatabaseConstants.StoredProcedures.CalculateMaturity, parameters);
+        return _db.Database.ExecuteSqlRawAsync($"EXEC {DatabaseConstants.SpCalculateMaturity}", parameters);
     }
 
     public Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId)
     {
-        FormattableString sql = $"{DatabaseConstants.GetSectionStatuses} {sectionIds}, {establishmentId}";
-        return _db.SectionStatuses.FromSqlInterpolated(sql).ToListAsync();
+        return _db.SectionStatuses
+            .FromSqlInterpolated($"EXEC {DatabaseConstants.SpGetSectionStatuses} {sectionIds}, {establishmentId}")
+            .ToListAsync();
     }
 
-    public Task<int> ExecuteSqlAsync(FormattableString sql)
+    public async Task<int> RecordGroupSelection(
+        int userEstablishmentId,
+        int selectedEstablishmentId,
+        string? selectedEstablishmentName,
+        int userId
+    )
     {
-        return _db.Database.ExecuteSqlAsync(sql);
+        var selectionId = new SqlParameter(DatabaseConstants.SelectionIdParam, SqlDbType.Int)
+        {
+            Direction = ParameterDirection.Output
+        };
+
+        var parameters = new List<SqlParameter>
+        {
+            new(DatabaseConstants.EstablishmentIdParam, userEstablishmentId),
+            new(DatabaseConstants.SelectedEstablishmentIdParam, selectedEstablishmentId),
+            new(DatabaseConstants.SelectedEstablishmentNameParam, selectedEstablishmentName ?? (object)DBNull.Value),
+            new(DatabaseConstants.UserIdParam, userId),
+            selectionId
+        };
+
+        await _db.Database.ExecuteSqlRawAsync(
+            $"EXEC {DatabaseConstants.SpSubmitGroupSelection} {DatabaseConstants.EstablishmentIdParam}, {DatabaseConstants.SelectedEstablishmentIdParam}, {DatabaseConstants.SelectedEstablishmentNameParam}, {DatabaseConstants.UserIdParam}, {DatabaseConstants.SelectionIdParam} OUTPUT",
+            parameters);
+
+        return selectionId.Value is int id
+            ? id
+            : throw new InvalidCastException($"{nameof(selectionId)} is not an integer - value is {selectionId.Value}");
     }
 }

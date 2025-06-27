@@ -1,8 +1,8 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
-public class SubmissionEntity
+public class SubmissionEntity : SqlEntity<SqlSubmissionDto>
 {
     public int Id { get; set; }
 
@@ -24,7 +24,7 @@ public class SubmissionEntity
 
     public DateTime? DateCompleted { get; set; }
 
-    public List<ResponseEntity> Responses { get; set; } = new();
+    public IEnumerable<ResponseEntity> Responses { get; set; } = [];
 
     public bool Deleted { get; set; }
 
@@ -32,7 +32,7 @@ public class SubmissionEntity
 
     public string? Status { get; set; }
 
-    public SqlSubmissionDto ToDto()
+    protected override SqlSubmissionDto CreateDto()
     {
         return new SqlSubmissionDto
         {

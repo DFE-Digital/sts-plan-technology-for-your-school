@@ -202,7 +202,7 @@ public class GetLatestResponsesQueryTests
     {
         var responsesForIncompleteSubmissionsGroupedByQuestion = GetIncompleteSubmissionForIncompleteSection()
                                                                         .Responses
-                                                                        .GroupBy(r => r.Question.ContentfulRef)
+                                                                        .GroupBy(r => r.Question.ContentfulSysId)
                                                                         .ToArray();
 
         var sectionQuestionsWithResponses = _incompleteSections.SelectMany(section => section.Questions)
@@ -219,10 +219,10 @@ public class GetLatestResponsesQueryTests
 
         Assert.NotNull(latestResponse);
 
-        Assert.Equal(expectedMostRecentResponse.Question.ContentfulRef, latestResponse.QuestionRef);
+        Assert.Equal(expectedMostRecentResponse.Question.ContentfulSysId, latestResponse.QuestionRef);
         Assert.Equal(expectedMostRecentResponse.Question.QuestionText, latestResponse.QuestionText);
 
-        Assert.Equal(expectedMostRecentResponse.Answer.ContentfulRef, latestResponse.AnswerRef);
+        Assert.Equal(expectedMostRecentResponse.Answer.ContentfulSysId, latestResponse.AnswerRef);
         Assert.Equal(expectedMostRecentResponse.Answer.AnswerText, latestResponse.AnswerText);
     }
 
@@ -231,7 +231,7 @@ public class GetLatestResponsesQueryTests
     {
         var completedSubmission = GetCompletedSubmissionForCompletedSection();
 
-        var questionIdInCompletedSubmission = completedSubmission.Responses.Select(response => response.Question.ContentfulRef)
+        var questionIdInCompletedSubmission = completedSubmission.Responses.Select(response => response.Question.ContentfulSysId)
                                                                             .First();
 
         var latestResponse = await _getLatestResponseListForSubmissionQuery.GetLatestResponseForQuestion(ESTABLISHMENT_ID, completedSubmission.SectionId, questionIdInCompletedSubmission);
@@ -245,7 +245,7 @@ public class GetLatestResponsesQueryTests
         var incompleteSubmission = GetIncompleteSubmissionForIncompleteSection();
 
         var responsesForIncompleteSubmissionsGroupedByQuestion = incompleteSubmission.Responses
-                                                                            .GroupBy(response => response.Question.ContentfulRef)
+                                                                            .GroupBy(response => response.Question.ContentfulSysId)
                                                                             .Select(responses => responses.OrderByDescending(response => response.DateCreated).First())
                                                                             .ToArray();
 
@@ -258,8 +258,8 @@ public class GetLatestResponsesQueryTests
 
         foreach (var response in latestResponse.Responses)
         {
-            var matching = responsesForIncompleteSubmissionsGroupedByQuestion.FirstOrDefault(r => r.Question.ContentfulRef == response.QuestionRef &&
-                                                                                                  r.Answer.ContentfulRef == response.AnswerRef);
+            var matching = responsesForIncompleteSubmissionsGroupedByQuestion.FirstOrDefault(r => r.Question.ContentfulSysId == response.QuestionRef &&
+                                                                                                  r.Answer.ContentfulSysId == response.AnswerRef);
 
             Assert.NotNull(response);
         }

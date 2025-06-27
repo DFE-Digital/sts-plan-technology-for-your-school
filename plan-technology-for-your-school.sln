@@ -44,7 +44,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Web.SeedTestDa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dfe.PlanTech.Infrastructure.Redis.UnitTests", "tests\Dfe.PlanTech.Infrastructure.Redis.UnitTests\Dfe.PlanTech.Infrastructure.Redis.UnitTests.csproj", "{A96209F5-F5B2-4168-9CAB-FA98E8BDEABD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Core", "Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj", "{890AEB7F-20DD-4646-9C4C-09D9C0AA94A5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Core", "src\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj", "{890AEB7F-20DD-4646-9C4C-09D9C0AA94A5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

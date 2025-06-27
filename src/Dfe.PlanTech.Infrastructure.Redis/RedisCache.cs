@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
@@ -14,13 +13,18 @@ namespace Dfe.PlanTech.Infrastructure.Redis;
 /// </summary>
 public class RedisCache : ICmsCache
 {
-    private readonly IRedisConnectionManager _connectionManager;
-    private readonly AsyncRetryPolicy _retryPolicyAsync;
     private readonly ILogger<RedisCache> _logger;
+    private readonly IRedisConnectionManager _connectionManager;
     private readonly IRedisDependencyManager _dependencyManager;
     private readonly IBackgroundTaskQueue _backgroundTaskService;
+    private readonly AsyncRetryPolicy _retryPolicyAsync;
 
-    public RedisCache(IRedisConnectionManager connectionManager, ILogger<RedisCache> logger, IRedisDependencyManager dependencyManager, IBackgroundTaskQueue backgroundTaskQueue)
+    public RedisCache(
+        ILogger<RedisCache> logger,
+        IRedisConnectionManager connectionManager,
+        IRedisDependencyManager dependencyManager,
+        IBackgroundTaskQueue backgroundTaskQueue
+    )
     {
         _connectionManager = connectionManager;
         _logger = logger;

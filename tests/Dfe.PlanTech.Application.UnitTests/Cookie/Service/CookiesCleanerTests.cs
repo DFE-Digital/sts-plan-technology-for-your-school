@@ -11,7 +11,7 @@ public class CookiesCleanerTests
         var nonEssentialCookieKey = "nonessential_cookie";
         var essentialCookies = new string[] { "essential1", "essential2" };
 
-        var cleaner = new CookiesCleaner(new CookiesCleanerOptions() { EssentialCookies = essentialCookies });
+        var cleaner = new CookiesCleaner(new CookieWorkflowOptions() { EssentialCookies = essentialCookies });
         var context = new DefaultHttpContext();
 
         context.Request.Headers.TryAdd("Cookie", "essential1_cookie=value; essential2_cookie=value; nonessential_cookie=value;");

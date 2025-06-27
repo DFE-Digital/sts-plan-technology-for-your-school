@@ -1,6 +1,5 @@
 ﻿using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
-using Dfe.PlanTech.Web.Workflows.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Web.Workflows
@@ -23,16 +22,16 @@ namespace Dfe.PlanTech.Web.Workflows
         {
             return await _submissionRepository.GetPreviousSubmissions(establishmentId, sectionId, isCompleted: false, includeRelationships: true)
                 .SelectMany(submission => submission.Responses)
-                .Where(response => string.Equals(questionId, response.Question.ContentfulRef))
+                .Where(response => string.Equals(questionId, response.Question.ContentfulSysId))
                 .OrderByDescending(response => response.DateCreated)
-                .Select(response => new QuestionWithAnswerModel(response))
+                .Select(response => new QuestionWithAnswerModel(response.ToDto()))
                 .FirstOrDefaultAsync();
         }
 
         public async Task<SubmissionResponsesModel?> GetLatestResponses(int establishmentId, string sectionId, bool isCompletedSubmission)
         {
             var latestSubmission = await _submissionRepository.GetPreviousSubmissions(establishmentId, sectionId, isCompletedSubmission, includeRelationships: true)
-                .Select(submission => new SubmissionResponsesModel(submission))
+                .Select(submission => new SubmissionResponsesModel(submission.ToDto()))
                 .FirstOrDefaultAsync();
 
             return latestSubmission is not null && latestSubmission.HasResponses

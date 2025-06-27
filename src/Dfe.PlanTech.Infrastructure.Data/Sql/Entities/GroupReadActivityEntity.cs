@@ -1,8 +1,8 @@
-﻿using Dfe.PlanTech.Domain.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
-public class GroupReadActivityEntity
+public class GroupReadActivityEntity : SqlEntity<SqlGroupReadActivityDto>
 {
     public int Id { get; set; }
 
@@ -16,9 +16,9 @@ public class GroupReadActivityEntity
 
     public DateTime DateSelected { get; set; }
 
-    public GroupReadActivityDto ToDto()
+    protected override SqlGroupReadActivityDto CreateDto()
     {
-        return new GroupReadActivityDto
+        return new SqlGroupReadActivityDto
         {
             Id = Id,
             UserId = UserId,

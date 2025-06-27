@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Domain.DataTransferObjects;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
-public class EstablishmentEntity
+public class EstablishmentEntity : SqlEntity<SqlEstablishmentDto>
 {
     public const int EstablishmentRefLength = 50;
     public const int EstablishmentTypeLength = 50;
@@ -60,9 +60,9 @@ public class EstablishmentEntity
 
     public DateTime? DateLastUpdated { get; set; }
 
-    public EstablishmentDto ToDto()
+    protected override SqlEstablishmentDto CreateDto()
     {
-        return new EstablishmentDto
+        return new SqlEstablishmentDto
         {
             EstablishmentRef = EstablishmentRef,
             EstablishmentType = EstablishmentType,

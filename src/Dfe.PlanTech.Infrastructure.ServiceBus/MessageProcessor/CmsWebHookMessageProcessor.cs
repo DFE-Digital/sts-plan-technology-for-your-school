@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Core.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;

@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Core.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
 using static System.Collections.Specialized.BitVector32;

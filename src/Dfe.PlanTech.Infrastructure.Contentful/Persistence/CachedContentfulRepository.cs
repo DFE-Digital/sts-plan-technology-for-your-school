@@ -1,7 +1,5 @@
 using Dfe.PlanTech.Application.Caching.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,35 +20,35 @@ public class CachedContentfulRepository : IContentRepository
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));
     }
 
-    public async Task<int> GetEntitiesCount<TEntity>(CancellationToken cancellationToken = default)
+    public async Task<int> GetEntitiesCount<TEntity>()
     {
-        return await _contentRepository.GetEntitiesCount<TEntity>(cancellationToken);
+        return await _contentRepository.GetEntitiesCount<TEntity>();
     }
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>()
     {
         string contentType = GetContentTypeName<TEntity>();
         var key = $"{contentType}s";
 
-        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntities<TEntity>(cancellationToken)) ?? [];
+        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntities<TEntity>()) ?? [];
     }
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntriesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(GetEntriesOptions options)
     {
         var contentType = GetContentTypeName<TEntity>();
         var jsonOptions = options.SerializeToRedisFormat();
         var key = $"{contentType}{jsonOptions}";
 
-        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntities<TEntity>(options, cancellationToken)) ?? [];
+        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntities<TEntity>(options, )) ?? [];
     }
-    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntriesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(GetEntriesOptions options)
     {
-        return await _contentRepository.GetPaginatedEntities<TEntity>(options, cancellationToken) ?? [];
+        return await _contentRepository.GetPaginatedEntities<TEntity>(options, ) ?? [];
     }
 
-    public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
+    public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2)
     {
         var options = GetEntityByIdOptions(id, include);
-        var entities = (await GetEntities<TEntity>(options, cancellationToken)).ToList();
+        var entities = (await GetEntities<TEntity>(options, )).ToList();
 
         if (entities.Count > 1)
             throw new GetEntriesException($"Found more than 1 entity with id {id}");

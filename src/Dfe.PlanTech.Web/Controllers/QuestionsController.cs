@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
@@ -13,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
+using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Web.Controllers;
 

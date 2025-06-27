@@ -1,6 +1,8 @@
-﻿namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+
+namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
 {
-    public class PageEntry : ContentfulEntry
+    public class PageEntry : ContentfulEntry<CmsPageDto>
     {
         public string InternalName { get; init; } = null!;
 
@@ -25,5 +27,10 @@
         public string? OrganisationName { get; set; }
 
         public List<ContentfulEntry> Content { get; init; } = [];
+
+        protected override CmsPageDto CreateDto()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

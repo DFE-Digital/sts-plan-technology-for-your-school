@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using Dfe.PlanTech.Core.DataTransferObjects;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -201,7 +200,7 @@ public class SubmissionRepository
         var currentSubmission = await GetPreviousSubmissions(
                 establishmentId,
                 sectionId,
-                (string status) => Equals(status, SubmissionStatus.CompleteReviewed),
+                isCompleted: true,
                 includeRelationships: true
             )
             .FirstOrDefaultAsync();

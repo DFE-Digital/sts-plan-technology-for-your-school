@@ -1,8 +1,8 @@
-﻿using Dfe.PlanTech.Domain.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
-public class UserEntity
+public class UserEntity : SqlEntity<SqlUserDto>
 {
     public int Id { get; set; }
 
@@ -16,9 +16,9 @@ public class UserEntity
 
     public List<ResponseEntity> Responses { get; set; } = new();
 
-    public UserDto ToDto()
+    protected override SqlUserDto CreateDto()
     {
-        return new UserDto
+        return new SqlUserDto
         {
             Id = Id,
             DfeSignInRef = DfeSignInRef,

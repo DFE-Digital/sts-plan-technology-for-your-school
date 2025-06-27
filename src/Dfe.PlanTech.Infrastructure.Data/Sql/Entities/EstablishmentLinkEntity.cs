@@ -1,9 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using Dfe.PlanTech.Domain.DataTransferObjects;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
-public class EstablishmentLinkEntity
+public class EstablishmentLinkEntity : SqlEntity<SqlEstablishmentLinkDto>
 {
     public int Id { get; set; }
 
@@ -16,9 +16,9 @@ public class EstablishmentLinkEntity
     [NotMapped]
     public int? CompletedSectionsCount { get; set; }
 
-    public EstablishmentLinkDto ToDto()
+    protected override SqlEstablishmentLinkDto CreateDto()
     {
-        return new EstablishmentLinkDto
+        return new SqlEstablishmentLinkDto
         {
             Id = Id,
             GroupUid = GroupUid,

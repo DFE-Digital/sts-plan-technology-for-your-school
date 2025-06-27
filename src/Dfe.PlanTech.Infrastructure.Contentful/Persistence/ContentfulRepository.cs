@@ -3,10 +3,6 @@ using Contentful.Core.Models;
 using Contentful.Core.Search;
 using Dfe.PlanTech.Application.Options;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -51,14 +47,14 @@ public class ContentfulRepository : IContentRepository
         return entries.Items ?? [];
     }
 
-    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(string entityTypeId, IGetEntriesOptions options, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(string entityTypeId, IGetEntriesOptions options)
     {
         var limit = options?.Limit ?? 100;
         var queryBuilder = BuildQueryBuilder<TEntity>(entityTypeId, options)
             .Limit(limit)
             .Skip((options!.Page - 1) * limit);
 
-        var entries = await _client.GetEntries(queryBuilder, cancellationToken);
+        var entries = await _client.GetEntries(queryBuilder);
 
         ProcessContentfulErrors(entries);
 

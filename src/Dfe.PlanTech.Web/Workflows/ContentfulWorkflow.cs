@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Entries;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
@@ -10,13 +10,13 @@ namespace Dfe.PlanTech.Web.Workflows
         public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
 
         private readonly ILogger<ContentfulWorkflow> _logger;
-        private readonly ContentfulBaseRepository _contentfulRepository;
-        private readonly SubtopicRecommendationRepository _subtopicRecommendationRepository;
+        private readonly ContentfulContext _contentfulRepository;
+        private readonly SubtopicRecommendationEntryRepository _subtopicRecommendationRepository;
 
         public ContentfulWorkflow(
             ILogger<ContentfulWorkflow> logger,
-            ContentfulBaseRepository contentfulRepository,
-            SubtopicRecommendationRepository subtopicRecommendationRepository
+            ContentfulContext contentfulRepository,
+            SubtopicRecommendationEntryRepository subtopicRecommendationRepository
         )
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
@@ -26,7 +26,7 @@ namespace Dfe.PlanTech.Web.Workflows
 
 
         public async Task<TDto?> GetEntryById<TEntry, TDto>(string contentId)
-            where TEntry : ContentfulEntry
+            where TEntry : ContentfulEntry<TDto>
             where TDto : CmsEntryDto
         {
             try

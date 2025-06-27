@@ -1,13 +1,14 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
 {
-    public abstract class ContentfulEntry
+    public abstract class ContentfulEntry<TDto>
+        where TDto : CmsEntryDto, new()
     {
         public ContentfulEntrySystemDetails Sys { get; init; } = null!;
         public string Description { get; init; } = null!;
 
-        public CmsEntryDto ToDto()
+        public TDto ToDto()
         {
             var dto = CreateDto();
             dto.Sys = Sys.ToDto();
@@ -16,6 +17,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
             return dto;
         }
 
-        protected abstract CmsEntryDto CreateDto();
+        protected abstract TDto CreateDto();
     }
 }

@@ -1,6 +1,8 @@
-﻿namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+
+namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
 {
-    public class SectionEntry : ContentfulEntry
+    public class SectionEntry : ContentfulEntry<CmsSectionDto>
     {
         public string Name { get; init; } = null!;
 
@@ -11,5 +13,16 @@
         public string FirstQuestionSysId => Questions
             .Select(question => question.Sys.Id)
             .FirstOrDefault() ?? "";
+
+        protected override CmsSectionDto CreateDto()
+        {
+            return new CmsSectionDto
+            {
+                Name = Name,
+                InterstitialPage = InterstitialPage?.ToDto(),
+                Questions = Questions.Select(q => q.ToDto()).ToList(),
+                FirstQuestionSysId = FirstQuestionSysId
+            };
+        }
     }
 }

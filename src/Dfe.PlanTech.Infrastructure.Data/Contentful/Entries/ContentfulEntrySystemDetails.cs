@@ -1,4 +1,6 @@
-﻿namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+
+namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Entries
 {
     public class ContentfulEntrySystemDetails
     {

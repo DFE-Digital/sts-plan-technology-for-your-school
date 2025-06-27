@@ -1,8 +1,8 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
-public class SignInEntity
+public class SignInEntity : SqlEntity<SqlSignInDto>
 {
     public int Id { get; set; }
 
@@ -14,7 +14,7 @@ public class SignInEntity
 
     public UserEntity User { get; set; } = default!;
 
-    public SqlSignInDto CreateDto()
+    protected override SqlSignInDto CreateDto()
     {
         return new SqlSignInDto
         {

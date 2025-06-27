@@ -1,5 +1,5 @@
 ﻿using System.Linq.Expressions;
-using Dfe.PlanTech.Domain.Models;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,14 +32,13 @@ public class EstablishmentRepository
         return establishmentEntity;
     }
 
+    public Task<EstablishmentEntity?> GetEstablishmentByRefAsync(string establishmentRef)
+    {
+        return GetEstablishmentByAsync(establishment => establishment.EstablishmentRef == establishmentRef);
+    }
+
     public Task<EstablishmentEntity?> GetEstablishmentByAsync(Expression<Func<EstablishmentEntity, bool>> predicate)
     {
         return _db.Establishments.FirstOrDefaultAsync(predicate);
-    }
-
-    public async Task<EstablishmentEntity?> GetEstablishmentIdFromRefAsync(string establishmentRef)
-    {
-        var establishment = await GetEstablishmentByAsync(establishment => establishment.EstablishmentRef == establishmentRef);
-        return establishment;
     }
 }

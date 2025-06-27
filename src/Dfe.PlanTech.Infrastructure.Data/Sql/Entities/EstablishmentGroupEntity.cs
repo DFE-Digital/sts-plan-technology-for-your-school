@@ -1,8 +1,8 @@
-﻿using Dfe.PlanTech.Domain.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
-public class EstablishmentGroupEntity
+public class EstablishmentGroupEntity : SqlEntity<SqlEstablishmentGroupDto>
 {
     public int Id { get; set; }
 
@@ -14,9 +14,9 @@ public class EstablishmentGroupEntity
 
     public string GroupStatus { get; set; } = null!;
 
-    public EstablishmentGroupDto ToDto()
+    protected override SqlEstablishmentGroupDto CreateDto()
     {
-        return new EstablishmentGroupDto
+        return new SqlEstablishmentGroupDto
         {
             Id = Id,
             Uid = Uid,

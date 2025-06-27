@@ -9,11 +9,11 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
     public class RecommendationChunkEntryRepository
     {
         private readonly ILogger<PageEntryRepository> _logger;
-        private readonly ContentfulBaseRepository _contentful;
+        private readonly ContentfulContext _contentful;
 
         public RecommendationChunkEntryRepository(
             ILoggerFactory loggerFactory,
-            ContentfulBaseRepository contentfulBaseRepository
+            ContentfulContext contentfulBaseRepository
         )
         {
             _logger = loggerFactory.CreateLogger<PageEntryRepository>();

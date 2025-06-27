@@ -12,8 +12,11 @@ public class GroupReadActivityRepository
         _db = dbContext;
     }
 
-    public Task<List<GroupReadActivityEntity>> GetGroupReadActivitiesAsync()
+    public Task<List<GroupReadActivityEntity>> GetGroupReadActivitiesAsync(int userId, int userEstablishmentId)
     {
-        return _db.Set<GroupReadActivityEntity>().ToListAsync();
+        return _db.GroupReadActivities
+            .Where(x => x.UserId == userId && x.UserEstablishmentId == userEstablishmentId)
+            .OrderByDescending(x => x.DateSelected)
+            .ToListAsync();
     }
 }

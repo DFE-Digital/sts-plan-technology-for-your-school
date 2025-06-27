@@ -1,8 +1,8 @@
-﻿using Dfe.PlanTech.Domain.DataTransferObjects;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 
-public class ResponseEntity
+public class ResponseEntity : SqlEntity<SqlResponseDto>
 {
     public int Id { get; set; }
 
@@ -28,9 +28,9 @@ public class ResponseEntity
 
     public DateTime? DateLastUpdated { get; set; }
 
-    public ResponseDto ToDto()
+    protected override SqlResponseDto CreateDto()
     {
-        return new ResponseDto
+        return new SqlResponseDto
         {
             Id = Id,
             UserId = UserId,

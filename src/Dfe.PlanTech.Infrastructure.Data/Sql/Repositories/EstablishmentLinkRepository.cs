@@ -1,7 +1,6 @@
-﻿using Dfe.PlanTech.Domain.Establishments.Models;
+﻿using System.Linq.Expressions;
 using Dfe.PlanTech.Infrastructure.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
 

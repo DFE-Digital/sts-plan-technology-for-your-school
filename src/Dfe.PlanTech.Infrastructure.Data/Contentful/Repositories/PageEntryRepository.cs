@@ -1,7 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Entries;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Queries;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
@@ -12,11 +11,11 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
         private const int NumberOfReferenceLevels = 4;
 
         private readonly ILogger<PageEntryRepository> _logger;
-        private readonly ContentfulBaseRepository _contentful;
+        private readonly ContentfulContext _contentful;
 
         public PageEntryRepository(
             ILoggerFactory loggerFactory,
-            ContentfulBaseRepository contentfulBaseRepository
+            ContentfulContext contentfulBaseRepository
         )
         {
             _logger = loggerFactory.CreateLogger<PageEntryRepository>();
@@ -53,6 +52,6 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
         }
 
         private GetEntriesOptions CreateGetEntityOptions(string slug) =>
-            new(NumberOfReferenceLevels, [new ContentQuerySingleValue() { Field = "fields.slug", Value = slug }]);
+            new(NumberOfReferenceLevels, [new ContentfulQuerySingleValue() { Field = "fields.slug", Value = slug }]);
     }
 }
