@@ -27,4 +27,6 @@ public class Page : ContentComponent, IPageContent
     public string? OrganisationName { get; set; }
 
     public List<ContentComponent> Content { get; init; } = [];
+
+    public bool? IsLandingPage { get; set; }
 }

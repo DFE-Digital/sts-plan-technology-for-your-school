@@ -27,6 +27,7 @@ public class PagesController(
     private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
+    public const string CategoryLandingPageView = "~/Views/Recommendations/CategoryLandingPage.cshtml";
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
@@ -36,6 +37,13 @@ public class PagesController(
         {
             logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
             throw new ContentfulDataUnavailableException($"Could not find page at {Request.Path.Value}");
+        }
+
+        if (page.IsLandingPage == true)
+        {
+            var landingPageViewModel = new CategoryLandingPageViewModel { Slug = page.Slug };
+
+            return View(CategoryLandingPageView, landingPageViewModel);
         }
 
         var organisationClaim = User.FindFirst("organisation")?.Value;
