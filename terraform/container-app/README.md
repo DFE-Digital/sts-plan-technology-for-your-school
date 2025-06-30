@@ -126,10 +126,6 @@ Run the following command to execute the Plan command:
 
 For the moment, if you get a 403 then give IP-specific access to the `plantechcosting` storage account for the relevant environment to the person deploying the change. (Permissions may be needed.)
 
-TODO: this is not acceptable, require a proper fix, for now use the follwoing workaround.  
-* Go to plantechcosting | Networking > Enable `Public network access from all Network`
-* Disable after run Terraform
-
 ### Terraform Apply
 
 Use the apply command to apply the changes to the Azure environment.
