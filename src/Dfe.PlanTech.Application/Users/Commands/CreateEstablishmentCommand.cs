@@ -27,6 +27,7 @@ public class CreateEstablishmentCommand : ICreateEstablishmentCommand
             EstablishmentRef = establishmentDto.Reference,
             EstablishmentType = establishmentDto.Type?.Name,
             OrgName = establishmentDto.OrgName,
+            GroupUid = establishmentDto.GroupUid
         };
 
         _db.AddEstablishment(establishment);

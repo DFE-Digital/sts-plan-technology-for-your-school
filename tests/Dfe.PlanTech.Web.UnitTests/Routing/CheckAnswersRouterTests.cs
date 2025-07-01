@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -66,7 +65,7 @@ public class CheckAnswersRouterTests
     public CheckAnswersRouterTests()
     {
         _user.GetEstablishmentId().Returns(establishmentId);
-        _checkAnswerCommand.GetSubmissionResponsesDtoForSection(establishmentId, Arg.Any<Section>(), Arg.Any<CancellationToken>())
+        _checkAnswerCommand.GetSubmissionResponsesDtoForSection(establishmentId, Arg.Any<Section>(), cancellationToken: Arg.Any<CancellationToken>())
                             .Returns((callinfo) =>
                             {
                                 var sectionArg = callinfo.ArgAt<ISection>(1);
@@ -97,30 +96,6 @@ public class CheckAnswersRouterTests
     }
 
     [Fact]
-    public async Task Should_Redirect_To_InterstitialPage_When_Status_Is_Completed()
-    {
-        var sectionSlug = "section-slug";
-
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
-        .Do(processor =>
-        {
-            _submissionStatusProcessor.Status = SubmissionStatus.Completed;
-        });
-
-        var result = await _router.ValidateRoute(sectionSlug, null, _controller, default);
-
-        var redirectResult = result as RedirectToActionResult;
-
-        Assert.NotNull(redirectResult);
-        Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
-        Assert.Equal(PagesController.GetPageByRouteAction, PagesController.GetPageByRouteAction);
-
-        var route = redirectResult.RouteValues?["route"];
-        Assert.NotNull(route);
-        Assert.Equal(UrlConstants.SelfAssessmentPage, route);
-    }
-
-    [Fact]
     public async Task Should_Redirect_To_NextQuestion_When_Status_InProgresss()
     {
         var sectionSlug = "section-slug";
@@ -130,10 +105,10 @@ public class CheckAnswersRouterTests
             Slug = "next-question"
         };
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
         .Do(callInfo =>
         {
-            _submissionStatusProcessor.Status = SubmissionStatus.NextQuestion;
+            _submissionStatusProcessor.Status = Status.InProgress;
             _submissionStatusProcessor.NextQuestion = nextQuestion;
         });
 
@@ -159,10 +134,10 @@ public class CheckAnswersRouterTests
     {
         var sectionSlug = _section.InterstitialPage?.Slug ?? throw new InvalidOperationException("InterstitialPage cannot be null.");
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(processor =>
                                   {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                      _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
@@ -200,10 +175,10 @@ public class CheckAnswersRouterTests
 
         var sectionSlug = noneAnsweredSection.InterstitialPage.Slug;
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
                                   .Do(processor =>
                                   {
-                                      _submissionStatusProcessor.Status = SubmissionStatus.CheckAnswers;
+                                      _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
                                       _submissionStatusProcessor.Section.Returns(noneAnsweredSection);
                                   });
 

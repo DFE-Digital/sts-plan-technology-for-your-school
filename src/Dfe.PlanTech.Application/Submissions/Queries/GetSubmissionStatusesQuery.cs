@@ -11,33 +11,51 @@ namespace Dfe.PlanTech.Application.Submissions.Queries;
 public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper) : IGetSubmissionStatusesQuery
 {
 
-    public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(IEnumerable<Section> sections)
+    public async Task<List<SectionStatusDto>> GetSectionSubmissionStatuses(IEnumerable<Section> sections, int? establishmentId = null)
     {
-        int establishmentId = await userHelper.GetEstablishmentId();
+        if (establishmentId is null)
+        {
+            establishmentId = await userHelper.GetEstablishmentId();
+        }
 
         var sectionIds = String.Join(',', sections.Select(section => section.Sys.Id));
 
-        return await db.ToListAsync(db.GetSectionStatuses(sectionIds, establishmentId));
+        return await db.ToListAsync(db.GetSectionStatuses(sectionIds, establishmentId.Value));
     }
 
-    public async Task<SectionStatus> GetSectionSubmissionStatusAsync(int establishmentId,
-                                                                         ISectionComponent section,
-                                                                         bool completed,
-                                                                         CancellationToken cancellationToken)
+    public async Task<SectionStatus> GetSectionSubmissionStatusAsync(
+        int establishmentId,
+        ISectionComponent section,
+        bool completed,
+        CancellationToken cancellationToken)
     {
-        var sectionStatus = db.GetSubmissions.Where(submission => submission.EstablishmentId == establishmentId
-                                                                  && submission.SectionId == section.Sys.Id
-                                                                  && !submission.Deleted);
+        var sectionStatus = db.GetSubmissions
+            .Where(submission =>
+                submission.EstablishmentId == establishmentId &&
+                submission.SectionId == section.Sys.Id &&
+                !submission.Deleted &&
+                submission.Completed == completed);
 
-        var groupedAndLatest = GetLatestSubmissionStatus(sectionStatus, completed);
+        var ordered = sectionStatus.OrderByDescending(x => x.DateCreated);
 
-        var result = await db.FirstOrDefaultAsync(groupedAndLatest, cancellationToken);
+        var latestSubmission = await db.FirstOrDefaultAsync(ordered, cancellationToken);
 
-        return result ?? new SectionStatus()
+        if (latestSubmission != null)
+        {
+            return new SectionStatus
+            {
+                Maturity = latestSubmission.Maturity,
+                SectionId = latestSubmission.SectionId,
+                Completed = latestSubmission.Completed,
+                Status = latestSubmission.Completed ? Status.CompleteReviewed : Status.InProgress
+            };
+        }
+
+        return new SectionStatus
         {
             SectionId = section.Sys.Id,
             Completed = false,
-            Status = Status.NotStarted,
+            Status = Status.NotStarted
         };
     }
 
@@ -50,15 +68,23 @@ public class GetSubmissionStatusesQuery(IPlanTechDbContext db, IUser userHelper)
     /// <param name="submissionStatuses"></param>
     /// <param name="completed"></param>
     /// <returns></returns>
-    private static IQueryable<SectionStatus> GetLatestSubmissionStatus(IQueryable<Submission> submissionStatuses, bool completed)
-    => submissionStatuses.Select(submission => new SectionStatus()
+
+    private static Status GetStatus(Submission submission)
     {
-        DateCreated = submission.DateCreated,
-        Completed = submission.Completed,
-        Maturity = submission.Maturity,
-        SectionId = submission.SectionId,
-        Status = submission.Completed ? Status.Completed : submission.Responses.Count != 0 ? Status.InProgress : Status.NotStarted,
-    })
-    .GroupBy(submission => submission.SectionId)
-    .Select(grouping => grouping.OrderByDescending(status => completed && status.Completed).ThenByDescending(status => status.DateCreated).First());
+        if (submission.Deleted)
+            return Status.Inaccessible;
+
+        if (!submission.Completed)
+        {
+            return submission.Responses.Any()
+                ? Status.InProgress
+                : Status.NotStarted;
+        }
+
+        // Completed is true, now check if it's been reviewed
+        if (submission.DateCompleted != null)
+            return Status.CompleteReviewed;
+
+        return Status.CompleteNotReviewed;
+    }
 }

@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Helpers;
+using Dfe.PlanTech.Application.Options;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
@@ -38,6 +39,7 @@ builder.Services.AddCustomTelemetry();
 builder.Services.Configure<ErrorMessages>(builder.Configuration.GetSection("ErrorMessages"));
 builder.Services.Configure<ErrorPages>(builder.Configuration.GetSection("ErrorPages"));
 builder.Services.Configure<ContactOptions>(builder.Configuration.GetSection("ContactUs"));
+builder.Services.Configure<AutomatedTestingOptions>(builder.Configuration.GetSection("AutomatedTesting"));
 
 builder.AddContentAndSupportServices()
         .AddAuthorisationServices()
@@ -94,6 +96,12 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "group-recommendations",
+    pattern: "groups/recommendations/{sectionSlug}",
+    defaults: new { controller = "Groups", action = "GetGroupsRecommendation" }
+);
 
 app.MapControllerRoute(
     pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
