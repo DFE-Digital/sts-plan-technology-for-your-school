@@ -77,7 +77,6 @@ jobs:
   plan-terraform-for-dev-and-test:
     needs: check-for-terraform-changes
     name: Plan Terraform Infrastructure for Dev & Test
-    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' }}
     strategy:
       fail-fast: true
       matrix:
@@ -90,7 +89,6 @@ jobs:
   deploy-terraform-for-dev-and-test:
     needs: [check-for-terraform-changes, plan-terraform-for-dev-and-test]
     name: Deploy Terraform Infrastructure for Dev & Test
-    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' }}
     strategy:
       fail-fast: true
       matrix:
@@ -141,8 +139,7 @@ jobs:
     name: Plan Terraform Infrastructure for staging
     if: |
       always() &&
-      needs.set-env.outputs.branch == 'main' &&
-      needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true'
+      needs.set-env.outputs.branch == 'main'
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -158,8 +155,7 @@ jobs:
     name: Deploy Terraform Infrastructure for staging
     if: |
       always() &&
-      needs.set-env.outputs.branch == 'main' &&
-      needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true'
+      needs.set-env.outputs.branch == 'main'
     strategy:
       fail-fast: true
       matrix:
@@ -205,8 +201,7 @@ jobs:
     name: Plan Terraform Infrastructure for production
     if: |
       always() &&
-      needs.set-env.outputs.branch == 'main' &&
-      needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true'    
+      needs.set-env.outputs.branch == 'main'  
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -227,8 +222,7 @@ jobs:
     name: Deploy Terraform Infrastructure for production
     if: |
       always() &&
-      needs.set-env.outputs.branch == 'main' &&
-      needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true'
+      needs.set-env.outputs.branch == 'main'
     strategy:
       fail-fast: true
       matrix:
@@ -252,8 +246,7 @@ jobs:
     name: Deployment to Production
     if: |
       always() &&
-      needs.set-env.outputs.branch == 'main' &&
-      needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true'
+      needs.set-env.outputs.branch == 'main'
     strategy:
       max-parallel: 1
       fail-fast: true
