@@ -240,8 +240,7 @@ jobs:
     name: Deployment to Production
     if: |
       always() &&
-      needs.set-env.outputs.branch == 'main' &&
-      needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true'
+      needs.set-env.outputs.branch == 'main'
     strategy:
       max-parallel: 1
       fail-fast: true
