@@ -5,7 +5,6 @@ export const inProgressText = "in progress";
 
 // Navigation and question pages
 export const continueButtonText = "Continue";
-export const saveAndContinueButtonText = "Save and continue";
 export const backText = "Back";
 
 // Check answers

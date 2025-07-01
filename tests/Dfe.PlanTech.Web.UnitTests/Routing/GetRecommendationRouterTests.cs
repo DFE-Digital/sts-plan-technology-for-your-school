@@ -340,7 +340,7 @@ public class GetRecommendationRouterTests
 
         var route = redirectResult.RouteValues?["route"];
         Assert.NotNull(route);
-        Assert.Equal(UrlConstants.SelfAssessmentPage, route);
+        Assert.Equal(UrlConstants.HomePage, route);
     }
 
     [Theory]

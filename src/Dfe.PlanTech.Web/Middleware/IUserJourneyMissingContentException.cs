@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Web.Middleware;
 public interface IUserJourneyMissingContentExceptionHandler
 {
     /// <summary>
-    /// Deletes the submission, then redirects the user back to the self-assessment page with an appropriate error message. 
+    /// Deletes the submission, then redirects the user back to the homepage with an appropriate error message. 
     /// </summary>
     /// <param name="controller">Controller that threw the exception</param>
     /// <param name="exception"></param>
