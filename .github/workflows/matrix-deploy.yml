@@ -77,7 +77,7 @@ jobs:
   plan-terraform-for-dev-and-test:
     needs: check-for-terraform-changes
     name: Plan Terraform Infrastructure for Dev & Test
-    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' }}
+    if: false
     strategy:
       fail-fast: true
       matrix:
@@ -87,9 +87,29 @@ jobs:
       environment: ${{ matrix.target }}
     secrets: inherit
 
+  deploy-terraform-for-dev-and-test:
+    needs: [check-for-terraform-changes, plan-terraform-for-dev-and-test]
+    name: Deploy Terraform Infrastructure for Dev & Test
+    if: false
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [Dev, Tst]
+    uses: ./.github/workflows/terraform-deploy.yml
+    with:
+      environment: ${{ matrix.target }}
+    secrets: inherit
+
   deploy-to-dev-and-test:
-    needs: [set-env, create-and-publish-image, check-for-terraform-changes]
     name: Deployment to Dev & Test
+    needs: [
+              set-env, 
+              create-and-publish-image, 
+              check-for-terraform-changes, 
+              plan-terraform-for-dev-and-test,
+              deploy-terraform-for-dev-and-test
+            ]
+    if: always()
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -117,9 +137,9 @@ jobs:
     secrets: inherit
 
   plan-terraform-for-staging:
-    needs: [set-env, deploy-to-dev-and-test, check-for-terraform-changes]
+    needs: [set-env, check-for-terraform-changes, deploy-to-dev-and-test]
     name: Plan Terraform Infrastructure for staging
-    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' &&  needs.set-env.outputs.branch == 'main' }}
+    if: false
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -130,10 +150,32 @@ jobs:
       environment: ${{ matrix.target }}
     secrets: inherit
 
+  deploy-terraform-for-staging:
+    needs: [set-env, check-for-terraform-changes, plan-terraform-for-staging]
+    name: Deploy Terraform Infrastructure for staging
+    if: false
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [Staging]
+    uses: ./.github/workflows/terraform-deploy.yml
+    with:
+      environment: ${{ matrix.target }}
+    secrets: inherit
+
   deploy-to-staging:
-    needs: [set-env, create-and-publish-image, deploy-to-dev-and-test]
+    needs: [
+              set-env, 
+              create-and-publish-image, 
+              check-for-terraform-changes,
+              deploy-to-dev-and-test,
+              plan-terraform-for-staging,
+              deploy-terraform-for-staging
+            ]
     name: Deployment to Staging
-    if: ${{ needs.set-env.outputs.branch == 'main' }}
+    if: |
+      always() &&
+      needs.set-env.outputs.branch == 'main'
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -150,12 +192,12 @@ jobs:
     needs:
       [
         set-env,
-        deploy-to-dev-and-test,
         check-for-terraform-changes,
+        deploy-to-dev-and-test,
         deploy-to-staging,
       ]
     name: Plan Terraform Infrastructure for production
-    if: ${{ needs.check-for-terraform-changes.outputs.run_terraform_deploy == 'true' && needs.set-env.outputs.branch == 'main' }}
+    if: false
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -166,16 +208,39 @@ jobs:
       environment: ${{ matrix.target }}
     secrets: inherit
 
+  deploy-terraform-for-production:
+    needs: 
+      [
+        set-env, 
+        check-for-terraform-changes, 
+        plan-terraform-for-production
+      ]
+    name: Deploy Terraform Infrastructure for production
+    if: false
+    strategy:
+      fail-fast: true
+      matrix:
+        target: [Production]
+    uses: ./.github/workflows/terraform-deploy.yml
+    with:
+      environment: ${{ matrix.target }}
+    secrets: inherit
+
   deploy-to-production:
     needs:
       [
         set-env,
+        check-for-terraform-changes,
         create-and-publish-image,
         deploy-to-dev-and-test,
         deploy-to-staging,
+        plan-terraform-for-production,
+        deploy-terraform-for-production
       ]
     name: Deployment to Production
-    if: ${{ needs.set-env.outputs.branch == 'main' }}
+    if: |
+      always() &&
+      needs.set-env.outputs.branch == 'main'
     strategy:
       max-parallel: 1
       fail-fast: true
