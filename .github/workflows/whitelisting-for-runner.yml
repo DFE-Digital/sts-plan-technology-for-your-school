@@ -1,0 +1,75 @@
+# .github/workflows/whitelisting-for-runner.yml
+name: Whitelisting for Runner
+on:
+  workflow_call:
+    inputs:
+      runner-ip:
+        required: true
+        type: string
+      sa-costing-name:
+        required: true
+        type: string
+      az-keyvault-name:
+        required: true
+        type: string
+      AZ_ACA_RESOURCE_GROUP:
+        required: true
+        type: string
+      TF_BACKEND_RESOURCE_GROUP:
+        required: true
+        type: string
+      TF_SECRETS_KEYVAULT_NAME:
+        required: true
+        type: string
+      removeRules:
+        required: true
+        type: boolean
+jobs:
+  whitelist:
+    if: ${{ !inputs.removeRules }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Add Runner to BlobForCost SA whitelist
+        shell: bash
+        run: |
+          az storage account network-rule add \
+            --account-name ${{ inputs.sa-costing-name }} \
+            --ip-address ${{ inputs.runner-ip }} &> /dev/null
+      - name: Add Runner to KV whitelist
+        shell: bash
+        run: |
+          az keyvault network-rule add \
+            --resource-group ${{ inputs.AZ_ACA_RESOURCE_GROUP }} \
+            --name ${{ inputs.az-keyvault-name }} \
+            --ip-address ${{ inputs.runner-ip }} &> /dev/null
+      - name: Add Runner to TF KV whitelist
+        shell: bash
+        run: |
+          az keyvault network-rule add \
+            --resource-group ${{ inputs.TF_BACKEND_RESOURCE_GROUP }} \
+            --name ${{ inputs.TF_SECRETS_KEYVAULT_NAME }} \
+            --ip-address ${{ inputs.runner-ip }} &> /dev/null
+  remove:
+    if: ${{ inputs.removeRules }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Remove Runner from BlobForCost SA whitelist
+        shell: bash
+        run: |
+          az storage account network-rule remove \
+            --account-name ${{ inputs.sa-costing-name }} \
+            --ip-address ${{ inputs.runner-ip }} &> /dev/null
+      - name: Remove Runner from KV whitelist
+        shell: bash
+        run: |
+          az keyvault network-rule remove \
+            --resource-group ${{ inputs.AZ_ACA_RESOURCE_GROUP }} \
+            --name ${{ inputs.az-keyvault-name }} \
+            --ip-address ${{ inputs.runner-ip }} &> /dev/null
+      - name: Remove Runner from TF KV whitelist
+        shell: bash
+        run: |
+          az keyvault network-rule remove \
+            --resource-group ${{ inputs.TF_BACKEND_RESOURCE_GROUP }} \
+            --name ${{ inputs.TF_SECRETS_KEYVAULT_NAME }} \
+            --ip-address ${{ inputs.runner-ip }} &> /dev/null

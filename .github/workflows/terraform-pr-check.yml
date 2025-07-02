@@ -89,20 +89,16 @@ jobs:
           SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
           echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
 
-      - name: Add Runner to BlobForCost SA whitelist
-        shell: bash
-        run: |
-          az storage account network-rule add --account-name $SA_COSTING_NAME --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null 
-
-      - name: Add Runner to KV whitelist
-        shell: bash
-        run: |
-          az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
-
-      - name: Add Runner to TF KV whitelist
-        shell: bash
-        run: |
-          az keyvault network-rule add --resource-group ${{ secrets.TF_BACKEND_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
+        uses: ./.github/workflows/whitelisting-for-runner.yml
+        with:
+          runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
+          sa-costing-name: $SA_COSTING_NAME
+          az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
+          AZ_ACA_RESOURCE_GROUP: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+          TF_SECRETS_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          removeRules: false
 
       - name: Terraform init
         id: init
@@ -161,6 +157,17 @@ jobs:
           github_event_name: ${{ github.event_name }}
           tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
           github_workflow: ${{ github.workflow }}
+
+      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault Removal
+        uses: ./.github/workflows/whitelisting-for-runner.yml
+        with:
+          runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
+          sa-costing-name: $SA_COSTING_NAME
+          az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
+          AZ_ACA_RESOURCE_GROUP: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+          TF_SECRETS_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          removeRules: true
 
 
       - name: Remove Runner from BlobForCost SA whitelist
