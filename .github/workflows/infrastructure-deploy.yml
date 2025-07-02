@@ -150,6 +150,7 @@ jobs:
 
   deploy-terraform:
     needs: terraform-plan
+    if: false
     name: Deploy Terraform
     runs-on: ubuntu-22.04
     defaults:
