@@ -26,7 +26,7 @@ runs:
   using: "composite"
   steps:
     - name: Whitelist IP in storage and key vaults
-      if: ${{ toRemove == 'false' }}
+      if: ${{ inputs.toRemove == 'false' }}
       shell: bash
       run: |
         az storage account network-rule add \
@@ -41,7 +41,7 @@ runs:
           --name "${{ inputs.tf-secrets-keyvault-name }}" \
           --ip-address "${{ inputs.runner-ip }}" &> /dev/null
     - name: Remove IP in storage and key vaults
-      if: ${{ toRemove == 'true' }}
+      if: ${{ inputs.toRemove == 'true' }}
       shell: bash
       run: |
         az storage account network-rule remove \
