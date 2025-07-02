@@ -78,7 +78,7 @@ jobs:
       - name: Add Runner to TF KV whitelist
         shell: bash
         run: |
-          az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az keyvault network-rule add --resource-group ${{ secrets.TF_BACKEND_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Set container app image_tag env variables
         run: |
@@ -203,7 +203,7 @@ jobs:
       - name: Add Runner to TF KV whitelist
         shell: bash
         run: |
-          az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az keyvault network-rule add --resource-group ${{ secrets.TF_BACKEND_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Set container app image_tag env variables
         run: |
