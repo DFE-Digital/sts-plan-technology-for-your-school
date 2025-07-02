@@ -22,8 +22,8 @@ env:
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
 
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
-  AZ_TF_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}-tf-kv
-  AZ_TF_ENV_VARS: terraform${{secrets.AZ_ENVIRONMENT}}tfvars
+  AZ_TF_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+  AZ_TF_ENV_VARS: ${{ secrets.TF_SECRET_NAME }}
   AZ_SA_COSTING_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}costing
 
   TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
@@ -104,6 +104,11 @@ jobs:
         run: |
           az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
+      - name: Add Runner to TF KV whitelist
+        shell: bash
+        run: |
+          az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_TF_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
       - name: Set container app image_tag env variables
         run: |
           IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
@@ -144,7 +149,7 @@ jobs:
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           az keyvault secret show `
             --name "${{ env.AZ_TF_ENV_VARS }}" `
-            --vault-name "${{ env.AZ_KEYVAULT_NAME }}" `
+            --vault-name "${{ env.AZ_TF_KEYVAULT_NAME }}" `
             --query "value" `
             --output tsv > terraformVars.tfvars
           $content = Get-Content .\terraformVars.tfvars -Raw
@@ -167,6 +172,11 @@ jobs:
         shell: bash
         run: |
             az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+      - name: Add Runner to TF KV whitelist
+        shell: bash
+        run: |
+          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_TF_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
   deploy-terraform:
     needs: terraform-plan
@@ -263,7 +273,7 @@ jobs:
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           az keyvault secret show `
             --name "${{ env.AZ_TF_ENV_VARS }}" `
-            --vault-name "${{ env.AZ_KEYVAULT_NAME }}" `
+            --vault-name "${{ env.AZ_TF_KEYVAULT_NAME }}" `
             --query "value" `
             --output tsv > terraformVars.tfvars
           $content = Get-Content .\terraformVars.tfvars -Raw
@@ -287,3 +297,8 @@ jobs:
         shell: bash
         run: |
           az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+      - name: Add Runner to TF KV whitelist
+        shell: bash
+        run: |
+          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_TF_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
