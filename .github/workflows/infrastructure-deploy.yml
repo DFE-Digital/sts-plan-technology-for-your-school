@@ -76,9 +76,9 @@ jobs:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
           sa-costing-name: ${{ secrets.SA_COSTING_NAME }}
           az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
-          AZ_ACA_RESOURCE_GROUP: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          TF_SECRETS_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
           removeRules: 'false'
 
       - name: Set container app image_tag env variables
@@ -136,9 +136,9 @@ jobs:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
           sa-costing-name: ${{ secrets.SA_COSTING_NAME }}
           az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
-          AZ_ACA_RESOURCE_GROUP: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          TF_SECRETS_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
           removeRules: 'true'
 
   deploy-terraform:
@@ -188,9 +188,9 @@ jobs:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
           sa-costing-name: ${{ secrets.SA_COSTING_NAME }}
           az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
-          AZ_ACA_RESOURCE_GROUP: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          TF_SECRETS_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
           removeRules: 'false'
 
       - name: Set container app image_tag env variables
@@ -249,7 +249,7 @@ jobs:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
           sa-costing-name: ${{ secrets.SA_COSTING_NAME }}
           az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
-          AZ_ACA_RESOURCE_GROUP: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          TF_SECRETS_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
           removeRules: 'true'
