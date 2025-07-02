@@ -14,45 +14,15 @@ on:
         required: true
 
 env:
-  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
-
-  ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
-  ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-  ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
-
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
-  AZ_TF_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
-  AZ_TF_ENV_VARS: ${{ secrets.TF_SECRET_NAME }}
   AZ_SA_COSTING_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}costing
 
-  TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
-  TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
-  TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
-  TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-
-  TF_VAR_project_name: ${{ secrets.DFE_PROJECT_NAME }}
-  TF_VAR_environment: ${{ secrets.AZ_ENVIRONMENT }}
-  TF_VAR_azure_location: ${{ vars.AZ_LOCATION }}
-  TF_VAR_az_app_kestrel_endpoint: ${{ vars.KESTRELENDPOINT }}
-  TF_VAR_az_tag_environment: ${{ vars.AZ_TAG_ENVIRONMENT }}
-  TF_VAR_az_tag_product: ${{ vars.AZ_TAG_PRODUCT }}
-  TF_VAR_az_sql_azuread_admin_username: ${{ secrets.AZ_SERVICE_PRINCIPAL }}
-  TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
-  TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
-  TF_VAR_cdn_frontdoor_origin_host_header_override: ${{secrets.AZ_CDN_FRONTDOOR_ORIGIN_HOST_HEADER_OVERRIDE}}
-  TF_VAR_az_sql_admin_userid_postfix: ${{secrets.AZ_SQL_ADMIN_USERID_POSTFIX}}
-  TF_VAR_registry_server: ${{ secrets.AZ_ACR_URL }}
-  TF_VAR_registry_username: ${{ secrets.AZ_CLIENT_ID }}
-  TF_VAR_registry_password: ${{ secrets.AZ_CLIENT_SECRET }}
+  TF_WORKING_DIRECTORY: terraform/container-app
   
   container_app_min_replicas: ${{secrets.CONTAINER_MIN_REPLICAS}}
   container_app_max_replicas: ${{secrets.CONTAINER_MAX_REPLICAS}}
   container_app_http_concurrency: ${{secrets.CONTAINER_HTTP_CONCURRENCY}}
-
   container_environment: ${{ inputs.environment }}
-
-  TF_WORKING_DIRECTORY: terraform/container-app
 
 jobs:
   terraform-plan:
@@ -107,7 +77,7 @@ jobs:
       - name: Add Runner to TF KV whitelist
         shell: bash
         run: |
-          az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_TF_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Set container app image_tag env variables
         run: |
@@ -138,18 +108,18 @@ jobs:
         id: init
         run: |
           terraform init \
-            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}"  \
-            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
-            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"  \
-            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+            -backend-config="resource_group_name=${{ secrets.TF_BACKEND_RESOURCE_GROUP }}"  \
+            -backend-config="storage_account_name=${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
+            -backend-config="container_name=${{ secrets.TF_BACKEND_CONTAINER_NAME }}"  \
+            -backend-config="key=${{ secrets.TF_BACKEND_KEY }}"
 
       - name: Get secret and clean tfvars file (PowerShell)
         shell: pwsh
         run: |
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           az keyvault secret show `
-            --name "${{ env.AZ_TF_ENV_VARS }}" `
-            --vault-name "${{ env.AZ_TF_KEYVAULT_NAME }}" `
+            --name "${{ secrets.TF_SECRET_NAME }}" `
+            --vault-name "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}" `
             --query "value" `
             --output tsv > terraformVars.tfvars
           $content = Get-Content .\terraformVars.tfvars -Raw
@@ -176,7 +146,7 @@ jobs:
       - name: Add Runner to TF KV whitelist
         shell: bash
         run: |
-          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_TF_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
   deploy-terraform:
     needs: terraform-plan
@@ -231,7 +201,7 @@ jobs:
       - name: Add Runner to TF KV whitelist
         shell: bash
         run: |
-          az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_TF_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
       - name: Set container app image_tag env variables
         run: |
@@ -262,18 +232,18 @@ jobs:
         id: init
         run: |
           terraform init \
-            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}"  \
-            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
-            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"  \
-            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+            -backend-config="resource_group_name=${{ secrets.TF_BACKEND_RESOURCE_GROUP }}"  \
+            -backend-config="storage_account_name=${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
+            -backend-config="container_name=${{ secrets.TF_BACKEND_CONTAINER_NAME }}"  \
+            -backend-config="key=${{ secrets.TF_BACKEND_KEY }}"
 
       - name: Get secret and clean tfvars file (PowerShell)
         shell: pwsh
         run: |
           Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           az keyvault secret show `
-            --name "${{ env.AZ_TF_ENV_VARS }}" `
-            --vault-name "${{ env.AZ_TF_KEYVAULT_NAME }}" `
+            --name "${{ secrets.TF_SECRET_NAME }}" `
+            --vault-name "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}" `
             --query "value" `
             --output tsv > terraformVars.tfvars
           $content = Get-Content .\terraformVars.tfvars -Raw
@@ -301,4 +271,4 @@ jobs:
       - name: Add Runner to TF KV whitelist
         shell: bash
         run: |
-          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_TF_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
