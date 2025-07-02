@@ -24,6 +24,7 @@ on:
       removeRules:
         required: true
         type: boolean
+  push:
 jobs:
   whitelist:
     if: ${{ !inputs.removeRules }}
