@@ -99,6 +99,11 @@ jobs:
         run: |
           az keyvault network-rule add --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
+      - name: Add Runner to TF KV whitelist
+        shell: bash
+        run: |
+          az keyvault network-rule add --resource-group ${{ secrets.TF_BACKEND_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
       - name: Terraform init
         id: init
         run: |
@@ -112,9 +117,21 @@ jobs:
         id: validate
         run: terraform validate -no-color -compact-warnings
 
-      - name: Terraform plan
+      - name: Get secret and clean tfvars file (PowerShell)
+        shell: pwsh
+        run: |
+          ./scripts/get-and-normalise-tfvars.ps1 `
+            -SecretName "${{ secrets.TF_SECRET_NAME }}" `
+            -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
+
+      - name: Use normalisedTerraformVars.tfvars with Terraform
         id: plan
-        run: terraform plan -no-color
+        run: terraform plan -var-file="normalisedTerraformVars.tfvars" -no-color
+
+      - name: Delete generated files
+        shell: pwsh
+        run: |
+          ./scripts/remove-generated-files.ps1
 
       - name: Terraform fmt
         id: fmt
@@ -155,6 +172,11 @@ jobs:
         shell: bash
         run: |
           az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+
+      - name: Remove Runner from TF KV whitelist
+        shell: bash
+        run: |
+          az keyvault network-rule remove --resource-group ${{ secrets.TF_BACKEND_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
   terraform-lint:
     name: Terraform Lint

@@ -5,13 +5,7 @@ on:
     inputs:
       environment:
         type: string
-        description: "The environment to run infrastructure deploy for:"
-        required: true
-  push:
-  workflow_call:
-    inputs:
-      environment:
-        type: string
+        description: "The environment to run infrastructure deployment on:"
         required: true
 
 env:
@@ -128,22 +122,17 @@ jobs:
       - name: Get secret and clean tfvars file (PowerShell)
         shell: pwsh
         run: |
-          az keyvault secret show `
-            --name "${{ secrets.TF_SECRET_NAME }}" `
-            --vault-name "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}" `
-            --query "value" `
-            --output tsv > terraformVars.tfvars
-          $content = Get-Content .\terraformVars.tfvars -Raw
-          [System.IO.File]::WriteAllText("normalisedTerraformVars.tfvars", $content, [System.Text.Encoding]::UTF8)
+          ./scripts/get-and-normalise-tfvars.ps1 `
+            -SecretName "${{ secrets.TF_SECRET_NAME }}" `
+            -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
 
-      - name: Use normalisedTerraformVars.tfvars with Terraform
+      - name: Plan Terraform changes
         run: terraform plan -var-file="normalisedTerraformVars.tfvars"
 
       - name: Delete generated files
         shell: pwsh
         run: |
-          Remove-Item -Force terraformVars.tfvars
-          Remove-Item -Force normalisedTerraformVars.tfvars
+          ./scripts/remove-generated-files.ps1
 
       - name: Remove Runner from BlobForCost SA whitelist
         shell: bash
@@ -253,23 +242,18 @@ jobs:
       - name: Get secret and clean tfvars file (PowerShell)
         shell: pwsh
         run: |
-          Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
-          az keyvault secret show `
-            --name "${{ secrets.TF_SECRET_NAME }}" `
-            --vault-name "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}" `
-            --query "value" `
-            --output tsv > terraformVars.tfvars
-          $content = Get-Content .\terraformVars.tfvars -Raw
-          [System.IO.File]::WriteAllText("normalisedTerraformVars.tfvars", $content, [System.Text.Encoding]::UTF8)
+          ./scripts/get-and-normalise-tfvars.ps1 `
+            -SecretName "${{ secrets.TF_SECRET_NAME }}" `
+            -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
 
       - name: Apply Terraform changes
         id: apply
         run: terraform apply -var-file="normalisedTerraformVars.tfvars" -auto-approve
 
       - name: Delete generated files
+        shell: pwsh
         run: |
-          Remove-Item -Force terraformVars.tfvars
-          Remove-Item -Force normalisedTerraformVars.tfvars
+          ./scripts/remove-generated-files.ps1
 
       - name: Remove Runner from BlobForCost SA whitelist
         shell: bash
