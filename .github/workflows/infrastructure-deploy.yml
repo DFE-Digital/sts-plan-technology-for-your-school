@@ -155,10 +155,10 @@ jobs:
         run: |
             az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
-      - name: Add Runner to TF KV whitelist
+      - name: Remove Runner from TF KV whitelist
         shell: bash
         run: |
-          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az keyvault network-rule remove --resource-group ${{ secrets.TF_BACKEND_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
   deploy-terraform:
     needs: terraform-plan
@@ -281,7 +281,7 @@ jobs:
         run: |
           az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
 
-      - name: Add Runner to TF KV whitelist
+      - name: Remove Runner from TF KV whitelist
         shell: bash
         run: |
-          az keyvault network-rule remove --resource-group ${{ secrets.AZ_ACA_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          az keyvault network-rule remove --resource-group ${{ secrets.TF_BACKEND_RESOURCE_GROUP	}} --name ${{ secrets.TF_SECRETS_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
