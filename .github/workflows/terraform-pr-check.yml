@@ -124,7 +124,7 @@ jobs:
             -SecretName "${{ secrets.TF_SECRET_NAME }}" `
             -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
 
-      - name: Use normalisedTerraformVars.tfvars with Terraform
+      - name: Terraform Plan
         id: plan
         run: terraform plan -var-file="normalisedTerraformVars.tfvars" -no-color
 
