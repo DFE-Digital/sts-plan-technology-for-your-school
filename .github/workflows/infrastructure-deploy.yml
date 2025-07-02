@@ -7,6 +7,7 @@ on:
         type: string
         description: "The environment to run infrastructure deploy for:"
         required: true
+  push:
   workflow_call:
     inputs:
       environment:
