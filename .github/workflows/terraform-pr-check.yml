@@ -90,7 +90,7 @@ jobs:
           echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
 
       - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
-        uses: ./.github/workflows/whitelisting-for-runner.yml
+        uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
           sa-costing-name: $SA_COSTING_NAME
@@ -98,7 +98,7 @@ jobs:
           AZ_ACA_RESOURCE_GROUP: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
           TF_SECRETS_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
-          removeRules: false
+          removeRules: 'false'
 
       - name: Terraform init
         id: init
@@ -158,8 +158,8 @@ jobs:
           tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
           github_workflow: ${{ github.workflow }}
 
-      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault Removal
-        uses: ./.github/workflows/whitelisting-for-runner.yml
+      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault Remove
+        uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
           sa-costing-name: $SA_COSTING_NAME
@@ -167,8 +167,7 @@ jobs:
           AZ_ACA_RESOURCE_GROUP: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
           TF_SECRETS_KEYVAULT_NAME: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
-          removeRules: true
-
+          removeRules: 'true'
 
       - name: Remove Runner from BlobForCost SA whitelist
         shell: bash
