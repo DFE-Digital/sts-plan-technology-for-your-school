@@ -129,7 +129,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var asPage = model as CategoryLandingPageViewModel;
             Assert.Equal(CATEGORY_LANDING_PAGE_SLUG, asPage!.Slug);
-            Assert.Equal
         }
 
         [Fact]
