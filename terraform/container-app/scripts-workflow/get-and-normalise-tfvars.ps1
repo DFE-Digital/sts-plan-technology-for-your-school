@@ -1,4 +1,4 @@
-# scripts/get-and-clean-tfvars.ps1
+# scripts-workflow/get-and-clean-tfvars.ps1
 param (
     [string]$SecretName,
     [string]$KeyVaultName

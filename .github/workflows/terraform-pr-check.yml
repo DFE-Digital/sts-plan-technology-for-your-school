@@ -120,7 +120,7 @@ jobs:
       - name: Get secret and clean tfvars file (PowerShell)
         shell: pwsh
         run: |
-          ./scripts/get-and-normalise-tfvars.ps1 `
+          ./scripts-workflow/get-and-normalise-tfvars.ps1 `
             -SecretName "${{ secrets.TF_SECRET_NAME }}" `
             -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
 
@@ -131,7 +131,7 @@ jobs:
       - name: Delete generated files
         shell: pwsh
         run: |
-          ./scripts/remove-generated-files.ps1
+          ./scripts-workflow/remove-generated-files.ps1
 
       - name: Terraform fmt
         id: fmt
