@@ -21,7 +21,7 @@ env:
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
   ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
-  
+
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
   AZ_SA_COSTING_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}costing
 
@@ -128,7 +128,6 @@ jobs:
       - name: Get secret and clean tfvars file (PowerShell)
         shell: pwsh
         run: |
-          Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process -Force
           az keyvault secret show `
             --name "${{ secrets.TF_SECRET_NAME }}" `
             --vault-name "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}" `
