@@ -19,14 +19,14 @@ inputs:
   tf-secrets-keyvault-name:
     description: Name of the Terraform secrets key vault
     required: true
-  toRemove:
+  removeRules:
     description: Remove the IPs from the firewall
     required: true
 runs:
   using: "composite"
   steps:
     - name: Whitelist IP in storage and key vaults
-      if: ${{ inputs.toRemove == 'false' }}
+      if: ${{ inputs.removeRules == 'false' }}
       shell: bash
       run: |
         az storage account network-rule add \
@@ -41,7 +41,7 @@ runs:
           --name "${{ inputs.tf-secrets-keyvault-name }}" \
           --ip-address "${{ inputs.runner-ip }}" &> /dev/null
     - name: Remove IP in storage and key vaults
-      if: ${{ inputs.toRemove == 'true' }}
+      if: ${{ inputs.removeRules == 'true' }}
       shell: bash
       run: |
         az storage account network-rule remove \
