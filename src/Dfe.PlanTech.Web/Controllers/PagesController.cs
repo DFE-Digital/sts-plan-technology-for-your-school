@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
@@ -41,7 +42,13 @@ public class PagesController(
 
         if (page.IsLandingPage == true)
         {
-            var landingPageViewModel = new CategoryLandingPageViewModel { Slug = page.Slug };
+            var category = page.Content[0] as Category;
+            var landingPageViewModel = new CategoryLandingPageViewModel()
+            {
+                Slug = page.Slug,
+                Title = new Title { Text = category.Header.Text },
+                Category = category
+            };
 
             return View(CategoryLandingPageView, landingPageViewModel);
         }
