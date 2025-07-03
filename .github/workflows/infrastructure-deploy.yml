@@ -7,7 +7,6 @@ on:
         type: string
         description: "The environment to run infrastructure deployment on:"
         required: true
-  push:
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -196,7 +195,7 @@ jobs:
 
       - name: Apply Terraform changes
         id: apply
-        run: terraform apply -var-file="normalisedTerraformVars.tfvars" -var="image_tag=$TF_VAR_image_tag"
+        run: terraform apply -var-file="normalisedTerraformVars.tfvars" -var="image_tag=$TF_VAR_image_tag" -auto-approve
 
       - name: Delete generated files
         shell: pwsh
