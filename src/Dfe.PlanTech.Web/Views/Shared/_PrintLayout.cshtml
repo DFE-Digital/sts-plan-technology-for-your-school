@@ -28,6 +28,10 @@
 
 @RenderBody()
 
+@section Footer {
+    <partial name="_Footer" />
+}
+
 @section BodyEnd {
     <partial name="_BodyEnd"/>
     @await RenderSectionAsync("BodyEnd", required: false)
