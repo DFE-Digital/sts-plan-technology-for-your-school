@@ -82,10 +82,10 @@ jobs:
           tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
           removeRules: 'false'
 
-      # - name: Set container app image_tag env variables
-      #   run: |
-      #     IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
-      #     echo "TF_VAR_image_tag=$IMAGE_TAG" >> $GITHUB_ENV
+      - name: Set container app image_tag env variables
+        run: |
+          IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
+          echo "TF_VAR_image_tag=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Terraform init
         id: init
@@ -173,10 +173,10 @@ jobs:
           tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
           removeRules: 'false'
 
-      # - name: Set container app image_tag env variables
-      #   run: |
-      #     IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
-      #     echo "TF_VAR_image_tag=$IMAGE_TAG" >> $GITHUB_ENV
+      - name: Set container app image_tag env variables
+        run: |
+          IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
+          echo "TF_VAR_image_tag=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Terraform init
         id: init
