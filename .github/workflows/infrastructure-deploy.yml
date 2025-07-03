@@ -143,7 +143,6 @@ jobs:
 
   deploy-terraform:
     needs: terraform-plan
-    if: false
     name: Deploy Terraform
     runs-on: ubuntu-22.04
     defaults:
@@ -236,7 +235,7 @@ jobs:
 
       - name: Apply Terraform changes
         id: apply
-        run: terraform apply -var-file="normalisedTerraformVars.tfvars" -auto-approve
+        run: terraform apply -var-file="normalisedTerraformVars.tfvars"
 
       - name: Delete generated files
         shell: pwsh
