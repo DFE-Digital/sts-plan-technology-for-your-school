@@ -31,6 +31,6 @@ public class UserJourneyMissingContentExceptionHandler : IUserJourneyMissingCont
 
         controller.TempData[ErrorMessageTempDataKey] = _configuration[ErrorMessageConfigKey];
 
-        return controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route = "self-assessment" });
+        return controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route = "home" });
     }
 }

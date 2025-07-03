@@ -21,7 +21,7 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextData()
+            Data = new RichTextContentSupportData()
             {
                 Uri = url
             }
@@ -63,9 +63,10 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextData()
+            Data = new RichTextContentSupportData()
             {
-                Uri = url
+                Uri = url,
+                Target = new RichTextContentData(),
             }
         };
 
@@ -91,9 +92,10 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextData()
+            Data = new RichTextContentSupportData()
             {
-                Uri = url
+                Uri = url,
+                Target = new RichTextContentData(),
             }
         };
 
@@ -142,9 +144,10 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextData()
+            Data = new RichTextContentSupportData()
             {
-                Uri = url
+                Uri = url,
+                Target = new RichTextContentData(),
             }
         };
 

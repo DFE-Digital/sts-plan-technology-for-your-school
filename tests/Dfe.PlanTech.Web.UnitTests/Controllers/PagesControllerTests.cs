@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using System.Text.Json;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
@@ -23,7 +25,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private const string INDEX_SLUG = "/";
         private const string INDEX_TITLE = "Index";
-        private const string SELF_ASSESSMENT_SLUG = "self-assessment";
+        private const string HOME_PAGE_SLUG = "home";
+        private const string SELECT_SCHOOL_SLUG = "/groups/select-a-school";
         private const string INTERNAL_ERROR_ID = "InternalError";
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
@@ -121,11 +124,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var page = new Page()
             {
-                Sys = new SystemDetails { Id = "self-assessment-id" },
-                Slug = SELF_ASSESSMENT_SLUG,
+                Sys = new SystemDetails { Id = "home-id" },
+                Slug = HOME_PAGE_SLUG,
                 Title = new Title()
                 {
-                    Text = "Self assessment"
+                    Text = "Home page"
                 },
                 DisplayOrganisationName = true
             };
@@ -142,7 +145,69 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var asPage = model as PageViewModel;
             Assert.Equal(establishment.OrgName, asPage!.Page.OrganisationName);
-            Assert.Equal(SELF_ASSESSMENT_SLUG, asPage!.Page.Slug);
+            Assert.Equal(HOME_PAGE_SLUG, asPage!.Page.Slug);
+        }
+
+        [Fact]
+        public void Should_Redirects_When_MAT_User_And_HomeSlug()
+        {
+            var establishment = new EstablishmentDto()
+            {
+                OrgName = "Test Org",
+                Ukprn = "12345678",
+                Urn = "123456",
+                Type = new EstablishmentTypeDto()
+                {
+                    Name = "Test Name"
+                }
+            };
+
+            var organisation = new OrganisationDto
+            {
+                Id = "1",
+                Name = "",
+                Category = new OrganisationCategoryDto
+                {
+                    Id = "010",
+                    Name = "MAT"
+                }
+            };
+
+            var cookie = new DfeCookie { UserAcceptsCookies = true };
+            cookiesSubstitute.Cookie.Returns(cookie);
+            userSubstitute.GetOrganisationData().Returns(establishment);
+
+            var claims = new List<Claim>
+            {
+                new("organisation", JsonSerializer.Serialize(organisation))
+            };
+
+            var identity = new ClaimsIdentity(claims, "TestAuthType");
+            var claimsPrincipal = new ClaimsPrincipal(identity);
+
+            _controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = claimsPrincipal
+                }
+            };
+
+            var page = new Page
+            {
+                Sys = new SystemDetails { Id = "home-id" },
+                Slug = HOME_PAGE_SLUG,
+                Title = new Title
+                {
+                    Text = "Home page"
+                },
+                DisplayOrganisationName = true
+            };
+
+            var result = _controller.GetByRoute(page, userSubstitute);
+
+            var redirectResult = Assert.IsType<RedirectResult>(result);
+            Assert.Equal(SELECT_SCHOOL_SLUG, redirectResult.Url);
         }
 
         [Fact]
@@ -165,11 +230,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var page = new Page()
             {
-                Sys = new SystemDetails { Id = "self-assessment-id" },
-                Slug = SELF_ASSESSMENT_SLUG,
+                Sys = new SystemDetails { Id = "home-id" },
+                Slug = HOME_PAGE_SLUG,
                 Title = new Title()
                 {
-                    Text = "Self assessment"
+                    Text = "Home page"
                 },
                 DisplayOrganisationName = false
             };
@@ -186,7 +251,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var asPage = model as PageViewModel;
             Assert.Null(asPage!.Page.OrganisationName);
-            Assert.Equal(SELF_ASSESSMENT_SLUG, asPage!.Page.Slug);
+            Assert.Equal(HOME_PAGE_SLUG, asPage!.Page.Slug);
         }
 
         [Fact]
@@ -272,10 +337,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             userSubstitute.GetOrganisationData().Returns(establishment);
 
-            var result = _controller.GetByRoute(null, userSubstitute) as RedirectToActionResult;
+            var action = () => _controller.GetByRoute(null, userSubstitute);
 
-            Assert.NotNull(result);
-            Assert.Equal("NotFoundError", result.ActionName);
+            Assert.Throws<ContentfulDataUnavailableException>(action);
         }
 
         [Fact]

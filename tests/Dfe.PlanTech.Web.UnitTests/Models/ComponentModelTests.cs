@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using Dfe.PlanTech.Domain.Submissions.Models;
+using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Models
 {
@@ -79,7 +80,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
         [InlineData("Save a back-up...", "save-a-back-up")]
         [InlineData("This is a string with loads of spaces at the end        ", "this-is-a-string-with-loads-of-spaces-at-the-end")]
-        [InlineData("This is a string with loads of spaces at the end        and-this", "this-is-a-string-with-loads-of-spaces-at-the-end--------and-this")]
+        [InlineData("This is a string with loads of spaces at the end        and-this", "this-is-a-string-with-loads-of-spaces-at-the-end-and-this")]
         [InlineData(" spaces either side     ", "spaces-either-side")]
         [InlineData(@"Line
 separator
@@ -139,6 +140,26 @@ character
             {
                 Assert.Contains(chunk, allContent);
             }
+        }
+
+        [Fact]
+        public void Recommendation_View_Model_Should_Return_SubmissionResponses()
+        {
+            var submission = new List<QuestionWithAnswer>()
+            {
+                new QuestionWithAnswer { QuestionRef = "Q1", QuestionText = "First question", AnswerRef = "A1", AnswerText = "First answer", DateCreated = new DateTime() },
+                new QuestionWithAnswer { QuestionRef = "Q2", QuestionText = "Second question", AnswerRef = "A2", AnswerText = "Second answer", DateCreated = new DateTime() },
+                new QuestionWithAnswer { QuestionRef = "Q3", QuestionText = "Third question", AnswerRef = "A3", AnswerText = "Third answer", DateCreated = new DateTime() },
+                new QuestionWithAnswer { QuestionRef = "Q4", QuestionText = "Fourth question", AnswerRef = "A4", AnswerText = "Fourth answer", DateCreated = new DateTime() },
+            };
+
+            var recommendationViewModel = ComponentBuilder.BuildRecommendationViewModel(submission);
+
+            var responses = recommendationViewModel.SubmissionResponses.ToList();
+
+            Assert.Equal(4, responses.Count());
+            Assert.Contains(submission[3], responses);
+            Assert.Equal("Q1", responses[0].QuestionRef);
         }
     }
 }

@@ -19,4 +19,9 @@ public interface IGetEntitiesOptions
     /// If null, return all
     /// </remarks>
     public IEnumerable<string>? Select { get; set; }
+
+    public int? Limit { get; init; }
+    public int Page { get; init; }
+
+    public string SerializeToRedisFormat();
 }

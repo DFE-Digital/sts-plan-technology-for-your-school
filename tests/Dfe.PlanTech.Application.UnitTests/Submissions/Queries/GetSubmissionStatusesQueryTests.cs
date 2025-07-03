@@ -120,13 +120,15 @@ public class GetSubmissionStatusesQueryTests
 
         Db.GetSubmissions.Returns(submissions.AsQueryable());
 
-        Db.FirstOrDefaultAsync(Arg.Any<IQueryable<SectionStatus>>(), Arg.Any<CancellationToken>())
-            .Returns((callinfo) =>
-            {
-                var queryable = callinfo.ArgAt<IQueryable<SectionStatus>>(0);
-
-                return queryable.FirstOrDefault();
-            });
+        Db.FirstOrDefaultAsync(
+              Arg.Any<IQueryable<Submission>>(),
+              Arg.Any<CancellationToken>())
+        .Returns(callInfo =>
+        {
+            var queryable = callInfo.ArgAt<IQueryable<Submission>>(0);
+            var first = queryable.FirstOrDefault();
+            return Task.FromResult(first);
+        });
 
         Db.ToListAsync(Arg.Any<IQueryable<SectionStatusDto>>(), Arg.Any<CancellationToken>()).Returns((callinfo) =>
         {
@@ -158,12 +160,12 @@ public class GetSubmissionStatusesQueryTests
     [Fact]
     public async Task GetSectionSubmissionStatusAsync_Returns_Status_Completed_When_Found_With_Responses()
     {
-        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, completeSection, false, default);
+        var result = await CreateStrut().GetSectionSubmissionStatusAsync(establishmentId, completeSection, true, default);
 
         Assert.NotNull(result);
 
         Assert.Equal(completeSection.Sys.Id, result.SectionId);
-        Assert.Equal(Status.Completed, result.Status);
+        Assert.Equal(Status.CompleteReviewed, result.Status);
         Assert.Equal(maturity, result.Maturity);
         Assert.True(result.Completed);
     }

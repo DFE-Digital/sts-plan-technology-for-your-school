@@ -13,6 +13,32 @@ runs:
     - name: Test
       shell: bash
       run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
+
+    - name: Update apt-get packages
+      shell: bash
+      run: sudo apt-get update
+
+    - name: Install XML tools
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+
+    - name: Verify at least one test has run
+      shell: bash
+      run: |
+        total_count=0
+        while read file; do
+          count=$(xmllint --xpath "string(//*[local-name()='TestRun']/*[local-name()='ResultSummary']/*[local-name()='Counters']/@total)" "$file" 2>/dev/null)
+          echo "$file: $count tests executed"
+          total_count=$((total_count + count))
+        done < <(find tests -name "*.trx")
+          
+        if [ $total_count -le 0 ]; then
+          echo "Error: No unit tests have been executed."
+          exit 1
+        else
+          echo "Total tests executed: $total_count"
+        fi
+
     - name: Test Report
       uses: dorny/test-reporter@v1
       if: always()

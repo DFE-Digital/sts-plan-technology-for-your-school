@@ -8,6 +8,7 @@ on:
       - "src/**"
       - "tests/Dfe.PlanTech.Web.E2ETests/**"
       - ".github/workflows/e2e-tests.yml"
+      - ".github/actions/run-e2e-tests/action.yml"
       - ".gitmodules"
 
 concurrency:
@@ -79,7 +80,7 @@ jobs:
 
   run-tests:
     name: Run E2E Tests
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     needs: [clear-db]
     env:
       PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
@@ -103,6 +104,10 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Clear NuGet Cache
+        shell: bash
+        run: dotnet nuget locals all --clear
 
       - name: Install dependencies
         shell: bash
@@ -142,6 +147,8 @@ jobs:
           export DfeSignIn__FrontDoorUrl=https://localhost:8081
           export GTM__Id=gtm_id
           export GTM__SiteVerificationId=testing_site_verification_id
+          export AutomatedTesting__Contentful__Tag=e2e
+          export AutomatedTesting__Contentful__IncludeTaggedContent=true
           dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 &
 
       - name: Cypress tests

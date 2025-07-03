@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Http;
@@ -12,6 +13,7 @@ public class RobotsTxtMiddlewareTests
     private IOptions<RobotsConfiguration> _options = Substitute.For<IOptions<RobotsConfiguration>>();
     private readonly RobotsTxtMiddleware _middleware;
     private readonly HttpContext _httpContext;
+
     public RobotsTxtMiddlewareTests()
     {
         _httpContext = Substitute.For<HttpContext>();
@@ -24,14 +26,13 @@ public class RobotsTxtMiddlewareTests
         _middleware = new RobotsTxtMiddleware(new RequestDelegate(next), _options);
     }
 
-
     [Fact]
     public async Task Should_Create_Valid_File()
     {
         var config = new RobotsConfiguration()
         {
             UserAgent = "example-user-agent",
-            DisallowedPaths = ["/", "2313", "/self-assessment"],
+            DisallowedPaths = ["/", "2313", UrlConstants.HomePage],
         };
 
         _options.Value.Returns(config);

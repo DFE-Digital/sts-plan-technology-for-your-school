@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
+﻿using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
@@ -79,21 +79,6 @@ public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelpe
 
         var slug = firstCharacterIsSlash ? hasSlug.Slug.AsSpan(1) : hasSlug.Slug.AsSpan();
 
-        return Link.ContentToLinkTo switch
-        {
-            IPage => $"/{slug}",
-            IContentSupportPage => $"/content/{slug}",
-            _ => LogInvalidContentTypeAndReturnNull(Link.ContentToLinkTo)
-        };
-    }
-
-
-
-    private string? LogInvalidContentTypeAndReturnNull(object content)
-    {
-        logger.LogError("Unsupported content type {ContentType} in {TagHelper}",
-            content.GetType().Name,
-            nameof(FooterLinkTagHelper));
-        return null;
+        return $"/{slug}";
     }
 }

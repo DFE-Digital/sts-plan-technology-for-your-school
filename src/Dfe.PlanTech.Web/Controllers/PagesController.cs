@@ -1,7 +1,9 @@
 ﻿using System.Diagnostics;
 using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
@@ -25,7 +27,6 @@ public class PagesController(
     private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
-    public const string NotFoundPage = "NotFoundError";
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
@@ -34,7 +35,20 @@ public class PagesController(
         if (page == null)
         {
             logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
-            return RedirectToAction(NotFoundPage);
+            throw new ContentfulDataUnavailableException($"Could not find page at {Request.Path.Value}");
+        }
+
+        var organisationClaim = User.FindFirst("organisation")?.Value;
+
+        if (!string.IsNullOrEmpty(organisationClaim))
+        {
+            var organisation = System.Text.Json.JsonSerializer.Deserialize<OrganisationDto>(organisationClaim);
+
+            //MAT user org ID is 010
+            if (page.Slug == UrlConstants.HomePage.Replace("/", "") && organisation?.Category?.Id == "010")
+            {
+                return Redirect(UrlConstants.SelectASchoolPage);
+            }
         }
 
         var viewModel = new PageViewModel(page, this, user, Logger);

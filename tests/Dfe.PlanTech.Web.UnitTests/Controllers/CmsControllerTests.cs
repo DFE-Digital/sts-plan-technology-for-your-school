@@ -1,7 +1,14 @@
 using System.Text.Json;
 using Dfe.PlanTech.Application.Content.Commands;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Models;
+using Dfe.PlanTech.Application.Questionnaire.Queries;
+using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Queues.Models;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.Models.QaVisualiser;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -89,5 +96,67 @@ public class CmsControllerTests
         Assert.Single(loggedMessages);
 
         Assert.Contains("An error occured while trying to write the message to the queue:", loggedMessages[0].Message);
+    }
+
+    [Fact]
+    public async Task GetChunks_ReturnsOkWithCorrectData()
+    {
+        var repository = Substitute.For<IContentRepository>();
+        var getRecommendationQuery = new GetRecommendationQuery(repository);
+
+        var pageNumber = 1;
+        var expectedTotalCount = 2;
+
+        var fakeChunks = new List<RecommendationChunk>
+        {
+            new RecommendationChunk
+            {
+                Answers = new List<Answer> { new Answer { Sys = new SystemDetails { Id = "123" } } },
+                Header = "Test Header 1"
+            },
+            new RecommendationChunk
+            {
+                Answers = new List<Answer> { new Answer { Sys = new SystemDetails { Id = "456" } } },
+                Header = "Test Header 2"
+            }
+        };
+
+        repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(expectedTotalCount));
+
+        repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(fakeChunks));
+
+        var result = await _controller.GetChunks(pageNumber, getRecommendationQuery);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var pagedResult = Assert.IsType<PagedResultModel<ChunkAnswerResultModel>>(okResult.Value);
+
+        Assert.Equal(pageNumber, pagedResult.Page);
+        Assert.Equal(expectedTotalCount, pagedResult.Total);
+        Assert.Equal(fakeChunks.Count, pagedResult.Items.Count);
+        Assert.Contains(pagedResult.Items, item => item is { AnswerId: "123", RecommendationHeader: "Test Header 1" });
+        Assert.Contains(pagedResult.Items, item => item is { AnswerId: "456", RecommendationHeader: "Test Header 2" });
+    }
+
+    [Fact]
+    public async Task GetChunks_NullPage_ReturnsPageOne()
+    {
+        var repository = Substitute.For<IContentRepository>();
+
+        repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(0));
+
+        repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(new List<RecommendationChunk>()));
+
+        var getRecommendationQuery = new GetRecommendationQuery(repository);
+
+        var result = await _controller.GetChunks(null, getRecommendationQuery);
+
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var pagedResult = Assert.IsType<PagedResultModel<ChunkAnswerResultModel>>(okResult.Value);
+
+        Assert.Equal(1, pagedResult.Page);
     }
 }

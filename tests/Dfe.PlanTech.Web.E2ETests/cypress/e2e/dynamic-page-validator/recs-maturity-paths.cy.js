@@ -1,33 +1,47 @@
 import DataMapper from "export-processor/data-mapper.js";
-import { selfAssessmentSlug } from "./helpers/index.js";
+import { homePageSlug } from "./helpers/index.js";
 import { minimalSectionValidationForRecommendations } from "./validators/index.js";
 
-
-const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
+const dataMapper = new DataMapper(require("../../fixtures/contentful-data"));
 
 describe("Recommendations", { testIsolation: false }, () => {
-
     before(() => {
-        cy.loginWithEnv(`${selfAssessmentSlug}`);
+        cy.loginWithEnv(`${homePageSlug}`);
     });
 
     (dataMapper?.mappedSections ?? []).forEach((section) => {
-        describe(`${section.name} recommendations`, { testIsolation: false }, () => {
-
-            // Establish section status using self-assessment page tag    
-            before(function () {
-                cy.checkSectionStatus(section.name, selfAssessmentSlug)
-                    .then((inProgress) => {
+        describe(
+            `${section.name} recommendations`,
+            { testIsolation: false },
+            () => {
+                // Establish section status using self-assessment page tag
+                before(function () {
+                    const sectionSlug = section.interstitialPage.fields.slug;
+                    cy.checkSectionStatus(section.name, sectionSlug, homePageSlug)
+                        .then((inProgress) => {
                         if (inProgress) {
-                            console.log(`Skipping tests for section: ${section.name} (status is 'in progress')`);
+                            console.log(
+                                `Skipping tests for section: ${section.name} (status is 'in progress')`
+                            );
                             this.skip();
                         }
                     });
-            });
+                });
 
-            Object.keys(section.minimumPathsForRecommendations).forEach((maturity) => {
-                minimalSectionValidationForRecommendations(section, [section.minimumPathsForRecommendations[maturity]], maturity);
-            });
-        });
+                Object.keys(
+                    section.pathInfo.minimumPathsForRecommendations
+                ).forEach((maturity) => {
+                    minimalSectionValidationForRecommendations(
+                        section,
+                        [
+                            section.pathInfo.minimumPathsForRecommendations[
+                                maturity
+                            ],
+                        ],
+                        maturity
+                    );
+                });
+            }
+        );
     });
 });

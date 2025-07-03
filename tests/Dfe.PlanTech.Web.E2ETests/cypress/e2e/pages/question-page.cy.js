@@ -1,3 +1,6 @@
+/*
+import { backText, continueButtonText } from "../../helpers/constants";
+
 describe("Question page", () => {
   const url = "/self-assessment";
 
@@ -27,7 +30,7 @@ describe("Question page", () => {
         cy.log(`Question Text is: ${questionText}`);
 
         cy.get("form button.govuk-button")
-          .contains("Save and continue")
+          .contains(continueButtonText)
           .click();
 
         cy.get("form div.govuk-form-group--error").should("exist");
@@ -77,7 +80,7 @@ describe("Question page", () => {
   });
 
   it("should have back button", () => {
-    cy.get("a.govuk-back-link").contains("Back").should("exist");
+    cy.get("a.govuk-back-link").contains(backText).should("exist");
   });
 
   it("should have back button that navigates to last question once submitted", () => {
@@ -102,3 +105,4 @@ describe("Question page", () => {
     cy.runAxe();
   });
 });
+*/

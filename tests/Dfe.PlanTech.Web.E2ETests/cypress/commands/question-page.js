@@ -1,3 +1,5 @@
+import { continueButtonText } from "../helpers/constants";
+
 const selectFirstRadioButton = () => {
   const questionWithAnswer = {
     question: "",
@@ -32,7 +34,7 @@ const selectFirstRadioButton = () => {
 };
 
 const saveAndContinue = () =>
-  cy.get("form button.govuk-button").contains("Save and continue").click();
+  cy.get("form button.govuk-button").contains(continueButtonText).click();
 
 Cypress.Commands.add("selectFirstRadioButton", selectFirstRadioButton);
 Cypress.Commands.add("saveAndContinue", saveAndContinue);

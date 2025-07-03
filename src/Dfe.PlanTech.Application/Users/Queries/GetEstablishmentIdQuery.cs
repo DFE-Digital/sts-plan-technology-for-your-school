@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 
 namespace Dfe.PlanTech.Application.Users.Queries;
@@ -24,5 +25,10 @@ public class GetEstablishmentIdQuery : IGetEstablishmentIdQuery
     {
         var establishment = await _db.GetEstablishmentBy(establishment => establishment.EstablishmentRef == establishmentRef);
         return establishment?.Id;
+    }
+
+    public async Task<List<EstablishmentLink>> GetGroupEstablishments(int establishmentId)
+    {
+        return await _db.GetGroupEstablishmentsBy(establishment => establishment.Id == establishmentId);
     }
 }

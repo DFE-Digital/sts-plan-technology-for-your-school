@@ -12,6 +12,8 @@ on:
       - "src/**"
       - "tests/**"
       - ".github/workflows/code-pr-check.yml"
+      - ".github/actions/build-dotnet-app/action.yml"
+      - ".github/actions/run-unit-tests/action.yml"
 
 concurrency:
   group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
@@ -168,3 +170,47 @@ jobs:
           name: JEST Tests # Name of the check run which will be created
           path: ./tests/Dfe.PlanTech.Web.Node.UnitTests/junit.xml # Path to test results
           reporter: jest-junit # Format of test results
+
+  run-contentful-jest-tests:
+    name: Run Jest Tests for Contentful
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if contentful files changed
+        id: contentful-check
+        run: |
+          git fetch origin ${{ github.base_ref }} --depth=1
+          if git diff --name-only HEAD^ HEAD | grep '^contentful/'; then
+            echo "contentful_changes=true" >> $GITHUB_ENV
+            echo "::set-output name=changed::true"
+          else
+            echo "contentful_changes=false" >> $GITHUB_ENV
+            echo "::set-output name=changed::false"
+          fi
+
+      - name: Setup Node.js
+        if: steps.contentful-check.outputs.changed == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "latest"
+
+      - name: Install Dependencies
+        if: steps.contentful-check.outputs.changed == 'true'
+        working-directory: ./contentful
+        run: npm install
+
+      - name: Run Jest Tests
+        if: steps.contentful-check.outputs.changed == 'true'
+        working-directory: ./contentful/tests
+        run: npm test -- --ci --reporters=default --reporters=jest-junit
+
+      - name: Test Report
+        if: steps.contentful-check.outputs.changed == 'true' && (success() || failure())
+        uses: dorny/test-reporter@v1
+        with:
+          name: Contentful Jest Tests
+          path: ./contentful/junit.xml
+          reporter: jest-junit

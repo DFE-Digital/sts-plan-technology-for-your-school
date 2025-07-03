@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Routing;
@@ -12,7 +13,10 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class RecommendationsController(ILogger<RecommendationsController> logger)
     : BaseController<RecommendationsController>(logger)
 {
-    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = "GetRecommendation")]
+    public const string ControllerName = "Recommendations";
+    public const string GetRecommendationAction = "GetRecommendation";
+
+    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = GetRecommendationAction)]
     public async Task<IActionResult> GetRecommendation(string sectionSlug,
                                                        string recommendationSlug,
                                                        [FromServices] IGetRecommendationRouter getRecommendationValidator,
@@ -37,9 +41,9 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
                                                               [FromServices] IGetRecommendationRouter getRecommendationRouter,
                                                               CancellationToken cancellationToken)
     {
-        if (!contentfulOptions.UsePreview)
+        if (!contentfulOptions.UsePreviewApi)
         {
-            return new RedirectResult("/self-assessment");
+            return new RedirectResult(UrlConstants.HomePage);
         }
 
         if (string.IsNullOrEmpty(sectionSlug))
@@ -64,6 +68,19 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
             true,
             this,
             cancellationToken);
+    }
+
+    [HttpGet("from-section/{sectionSlug}")]
+    public async Task<IActionResult> FromSection(
+        string sectionSlug,
+        [FromServices] IGetRecommendationRouter getRecommendationRouter,
+        CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+
+        var recommendationSlug = await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken);
+        return RedirectToAction(nameof(GetRecommendation), new { recommendationSlug });
     }
 }
 

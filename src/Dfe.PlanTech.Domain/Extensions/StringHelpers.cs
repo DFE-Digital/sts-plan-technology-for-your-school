@@ -4,8 +4,8 @@ namespace Dfe.PlanTech;
 
 public static partial class StringHelpers
 {
-    private const string MatchNonAlphanumericExceptHyphensRegexPattern = @"[^a-zA-Z0-9-]";
-    private const string MatchWhitespaceCharacters = @"\s";
+    private const string MatchNonAlphanumericExceptHyphensRegexPattern = @"[^a-zA-Z0-9-]+";
+    private const string MatchWhitespaceCharacters = @"\s+";
 
     [GeneratedRegex(MatchNonAlphanumericExceptHyphensRegexPattern)]
     private static partial Regex MatchNonAlphaNumericExceptHyphensPattern();
@@ -21,4 +21,6 @@ public static partial class StringHelpers
 
     private static string ReplaceNonSlugCharacters(this string text, string replacement)
     => MatchNonAlphaNumericExceptHyphensPattern().Replace(text, replacement);
+
+    public static string FirstCharToLower(this string input) => char.ToLower(input[0]) + input[1..];
 }

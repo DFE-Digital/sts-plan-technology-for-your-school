@@ -9,7 +9,7 @@ Project containing Unit Tests for the [Dfe.PlanTech.Infrastructure.Contentful](.
 | Package | Purpose          |
 | ------- | ---------------- |
 | XUnit   | Test runner      |
-| Moq     | Substituteing services |
+| NSubstitute | Substituting services |
 
 ## How to run
 

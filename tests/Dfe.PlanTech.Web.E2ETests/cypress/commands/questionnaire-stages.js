@@ -1,3 +1,5 @@
+import { submitToSelfAssessmentButtonText, submitToRecommendationsButtonText } from "../helpers/constants";
+
 const navigateToRecommendationPage = () => {
     cy.get('a[href*="/recommendation/"]').first().click();
 };
@@ -10,7 +12,7 @@ const completeFirstSubtopic = () => {
   return cy
     .navigateToCheckAnswersPage(selectedQuestionsWithAnswers)
     .then((res) => cy.wrap(res))
-    .then(() => cy.submitAnswers());
+    .then(() => cy.submitAnswersAndGoToSelfAssessment());
 }
 
 const navigateToCheckAnswersPage = (selectedQuestionsWithAnswers) => {
@@ -38,8 +40,8 @@ const navigateThroughQuestions = (selectedQuestionsWithAnswers) => {
     .then(() => cy.wrap(selectedQuestionsWithAnswers));
 };
 
-const submitAnswers = () =>
-  cy.get("button.govuk-button").contains("Save and continue").click();
+const submitAnswersAndGoToSelfAssessment = () => cy.get("button.govuk-button").contains(submitToSelfAssessmentButtonText).click();
+const submitAnswersAndGoToRecommendation = () => cy.get("button.govuk-button").contains(submitToRecommendationsButtonText).click();
 
 Cypress.Commands.add(
   "navigateToRecommendationPage",
@@ -48,4 +50,5 @@ Cypress.Commands.add(
 Cypress.Commands.add("completeFirstSubtopic", completeFirstSubtopic);
 Cypress.Commands.add("navigateToCheckAnswersPage", navigateToCheckAnswersPage);
 Cypress.Commands.add("navigateThroughQuestions", navigateThroughQuestions);
-Cypress.Commands.add("submitAnswers", submitAnswers);
+Cypress.Commands.add("submitAnswersAndGoToSelfAssessment", submitAnswersAndGoToSelfAssessment);
+Cypress.Commands.add("submitAnswersAndGoToRecommendation", submitAnswersAndGoToRecommendation);

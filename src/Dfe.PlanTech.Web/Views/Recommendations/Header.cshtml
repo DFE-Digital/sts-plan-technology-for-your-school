@@ -1,0 +1,16 @@
+@model Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent
+
+<section class="dfe-page-header">
+    <div class="govuk-width-container">
+        <div class="govuk-grid-row">
+            <partial name="BetaHeader" />
+            <div class="govuk-grid-column-two-thirds">
+                <div>
+                    <div class="recommendation-piece-header">
+                        <h1 class="govuk-heading-xl govuk-!-margin-top-8">@Model.HeaderText</h1>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

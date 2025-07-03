@@ -34,7 +34,8 @@ public static class ContentfulSetup
 
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
         services.AddScoped<IContentfulClient, ContentfulClient>();
-        services.AddScoped<IContentRepository, ContentfulRepository>();
+        services.AddKeyedScoped<IContentRepository, ContentfulRepository>("contentfulRepository");
+        services.AddScoped<IContentRepository, CachedContentfulRepository>();
 
 
         services.SetupRichTextRenderer();
@@ -51,6 +52,8 @@ public static class ContentfulSetup
 
         services.AddScoped<IRichTextRenderer, RichTextRenderer>();
         services.AddScoped<IRichTextContentPartRendererCollection, RichTextRenderer>();
+        services.AddScoped<ICardContainerContentPartRenderer, GridContainerRenderer>();
+        services.AddScoped<ICardContentPartRenderer, CardComponent>();
 
         foreach (var partRenderer in richTextPartRenderers)
         {

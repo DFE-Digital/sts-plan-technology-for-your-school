@@ -46,7 +46,7 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_main_hosting"></a> [main\_hosting](#module\_main\_hosting) | github.com/DFE-Digital/terraform-azurerm-container-apps-hosting | 93096d1 |
+| <a name="module_main_hosting"></a> [main\_hosting](#module\_main\_hosting) | github.com/DFE-Digital/terraform-azurerm-container-apps-hosting | v1.17.1 |
 | <a name="module_waf"></a> [waf](#module\_waf) | github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf | f0ca7eb |
 
 ## Resources
@@ -85,8 +85,11 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/servicebus_namespace) | resource |
 | [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/servicebus_queue) | resource |
 | [azurerm_servicebus_queue_authorization_rule.azurefunction](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/servicebus_queue_authorization_rule) | resource |
+| [azurerm_storage_account.contentful_backup_storage](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_account) | resource |
 | [azurerm_storage_account.costing_storage](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_account) | resource |
+| [azurerm_storage_container.backups_container](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_container) | resource |
 | [azurerm_storage_container.blobforcost](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_container) | resource |
+| [azurerm_storage_management_policy.lifecycle_policy](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_management_policy) | resource |
 | [azurerm_subnet.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/subnet) | resource |
 | [azurerm_subnet_route_table_association.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/subnet_route_table_association) | resource |
 | [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/user_assigned_identity) | resource |
@@ -141,7 +144,6 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_registry_server"></a> [registry\_server](#input\_registry\_server) | Container registry server | `string` | n/a | yes |
 | <a name="input_registry_username"></a> [registry\_username](#input\_registry\_username) | Container registry username | `string` | n/a | yes |
 | <a name="input_storage_account_expiration_period"></a> [storage\_account\_expiration\_period](#input\_storage\_account\_expiration\_period) | The SAS expiration period in format of DD.HH:MM:SS | `string` | `"00.01:00:00"` | no |
-| <a name="input_storage_account_public_access_enabled"></a> [storage\_account\_public\_access\_enabled](#input\_storage\_account\_public\_access\_enabled) | Enable public network access | `bool` | `false` | no |
 | <a name="input_subdomains"></a> [subdomains](#input\_subdomains) | A list of subdomains that can be associated with the primary domain | `set(string)` | `[]` | no |
 
 ## Outputs

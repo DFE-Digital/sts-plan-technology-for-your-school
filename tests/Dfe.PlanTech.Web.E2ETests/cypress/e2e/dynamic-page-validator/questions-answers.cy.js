@@ -1,5 +1,5 @@
 import DataMapper from "export-processor/data-mapper.js";
-import { selfAssessmentSlug } from "./helpers/index.js";
+import { homePageSlug } from "./helpers/index.js";
 import { validateAndTestSections } from "./validators/index.js";
 
 
@@ -8,13 +8,14 @@ const dataMapper = new DataMapper(require('../../fixtures/contentful-data'));
 describe("Sections and all-questions paths", { testIsolation: false }, () => {
 
     before(() => {
-        cy.loginWithEnv(`${selfAssessmentSlug}`);
+        cy.loginWithEnv(`${homePageSlug}`);
     });
 
     (dataMapper?.mappedSections ?? []).forEach((section) => {
-        describe(`${section.name} self-assessment and question pages`, () => {
+        describe(`${section.name} home and question pages`, () => {
             before(function () {
-                cy.checkSectionStatus(section.name, selfAssessmentSlug)
+                const sectionSlug = section.interstitialPage.fields.slug;
+                cy.checkSectionStatus(section.name, sectionSlug, homePageSlug)
                     .then((inProgress) => {
                         if (inProgress) {
                             console.log(`Skipping tests for section: ${section.name} (status is 'in progress')`);
@@ -22,7 +23,7 @@ describe("Sections and all-questions paths", { testIsolation: false }, () => {
                         }
                     });
             });
-            validateAndTestSections(section, section.minimumPathsToNavigateQuestions, dataMapper);
+            validateAndTestSections(section, section.pathInfo.minimumPathsToNavigateQuestions, dataMapper);
         });
     });
 });

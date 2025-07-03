@@ -230,12 +230,6 @@ variable "image_tag" {
 # Storage Accounts #
 ####################
 
-variable "storage_account_public_access_enabled" {
-  description = "Enable public network access"
-  type        = bool
-  default     = false
-}
-
 variable "container_app_storage_account_shared_access_key_enabled" {
   description = "Enable shared access key"
   type        = bool

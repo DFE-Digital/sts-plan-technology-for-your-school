@@ -1,4 +1,4 @@
-import { CleanText } from "../helpers/index.js";
+import { CleanText, continueButtonText } from "../helpers/index.js";
 
 export const validateQuestionPages = (path, section, validateAnswersHintAndUrl) => {
 
@@ -22,6 +22,6 @@ export const validateQuestionPages = (path, section, validateAnswersHintAndUrl) 
         cy.get("div.govuk-radios div.govuk-radios__item label.govuk-radios__label.govuk-label")
             .contains(CleanText(question.answer.text))
             .click();
-        cy.get("button.govuk-button").contains("Save and continue").click();
+        cy.get("button.govuk-button").contains(continueButtonText).click();
     }
 }

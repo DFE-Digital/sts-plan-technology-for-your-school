@@ -4,6 +4,8 @@ content-errors*.md
 plan-tech-test-suite*.csv
 output/
 inserted-groups.json
+csv-test.csv
 
 #Env variables
 .env
+.env.*

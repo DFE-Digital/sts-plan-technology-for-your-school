@@ -8,11 +8,11 @@ Web application to help schools plan a technology roadmap
 
 ## Requirements
 
-- .Net 8.0 and any supported IDE for DEV running.
+- .Net 8.0 and any supported IDE for DEV running. 
 
 ## Running Locally
 
-- The startup project is [./src/Dfe.PlanTech.Web](./src/Dfe.PlanTech.Web)
+- The startup project is [./src/Dfe.PlanTech.Web](./src/Dfe.PlanTech.Web) with setup guidance in the [Readme](./src/Dfe.PlanTech.Web/README.md)
 
 ## Documentation 
 

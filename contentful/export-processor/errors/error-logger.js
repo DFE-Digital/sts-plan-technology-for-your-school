@@ -1,55 +1,79 @@
 import ContentError from "./content-error.js";
 import fs from "fs";
 
+/**
+ * @typedef {{id: string, contentType: string, message: string}} Error
+ */
+
 class ErrorLogger {
-  errors = [];
-  outputDir = "";
+    errors = [];
+    outputDir = "";
 
-  addError({ id, contentType, message }) {
-    const error = new ContentError({ id, contentType, message });
+    /**
+     *
+     * @param {Error} error
+     */
+    addError({ id, contentType, message }) {
+        const error = new ContentError({ id, contentType, message });
 
-    this.errors.push(error);
+        this.errors.push(error);
 
-    console.error(`${contentType} error for content ${id}: ${message}`);
-  }
+        console.error(`${contentType} error for content ${id}: ${message}`);
+    }
 
-  writeErrorsToFile(filePath = "content-errors.md") {
-    const groupedByContentType = this.groupBy(this.errors, "contentType");
+    writeErrorsToFile(filePath = "content-errors.md") {
+        console.log(`Writing errors to file ${filePath}`);
 
-    const errors = `# Content Errors: \n\n` + Object.entries(groupedByContentType)
-      .map(([contentType, contentErrors]) => this.errorMessagesForContentType(contentType, contentErrors))
-      .join("\n");
+        const groupedByContentType = this.groupBy(this.errors, "contentType");
 
+        const errors =
+            `# Content Errors: \n\n` +
+            Object.entries(groupedByContentType)
+                .map(([contentType, contentErrors]) =>
+                    this.errorMessagesForContentType(contentType, contentErrors)
+                )
+                .join("\n\n");
 
-    fs.writeFileSync(this.outputDir + filePath, errors);
-  }
+        fs.writeFileSync(this.outputDir + filePath, errors);
+        console.log(`Wrote errors to file ${filePath}`);
+    }
 
-  errorMessagesForContentType(contentType, errors) {
-    let errorString =
-      `## ${contentType}:
+    /**
+     *
+     * @param {string} contentType
+     * @param {Error[]} errors
+     * @returns {string} Error messages for a particular content type formatted as string
+     */
+    errorMessagesForContentType(contentType, errors) {
+        let errorString = `## ${contentType}:
 
 | Id | Message |
 | -- | ------- |
 `;
 
-    for (const error of errors) {
-      errorString += `| ${error.id} | ${error.message} | \n`;
+        for (const error of errors) {
+            errorString += `| ${error.id} | ${error.message} |\n`;
+        }
+
+        return errorString.trim();
     }
 
-    errorString += "\n\n";
-
-    return errorString;
-  }
-
-  groupBy(xs, key) {
-    return xs.reduce(function (rv, x) {
-      (rv[x[key]] = rv[x[key]] || []).push(x);
-      return rv;
-    }, {});
-  };
-
+    /**
+     * Groups an array of errors by a specified key
+     * @param {Error[]} errors Array of errors to group
+     * @param {string} key The property to group by
+     * @returns {Object} Grouped errors object
+     */
+    groupBy(errors, key) {
+        return errors.reduce(function (groups, error) {
+            (groups[error[key]] = groups[error[key]] || []).push(error);
+            return groups;
+        }, {});
+    }
 }
 
 const errorLogger = new ErrorLogger();
 
 export default errorLogger;
+
+export { ErrorLogger as ErrorLoggerClass };

@@ -1,11 +1,15 @@
 using Contentful.Core;
 using Contentful.Core.Models;
+using Contentful.Core.Search;
+using Dfe.PlanTech.Application.Options;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 
@@ -16,24 +20,48 @@ namespace Dfe.PlanTech.Infrastructure.Contentful.Persistence;
 public class ContentfulRepository : IContentRepository
 {
     private readonly IContentfulClient _client;
+    private readonly IHostEnvironment _hostEnvironment;
+    private readonly AutomatedTestingOptions _automatedTestingOptions;
     private readonly ILogger<ContentfulRepository> _logger;
 
-    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client)
+    public ContentfulRepository(ILoggerFactory loggerFactory, IContentfulClient client, IHostEnvironment hostEnvironment, IOptions<AutomatedTestingOptions> automatedTestingOptions)
     {
         _client = client ?? throw new ArgumentNullException(nameof(client));
+        _hostEnvironment = hostEnvironment;
+        _automatedTestingOptions = automatedTestingOptions.Value;
         _client.ContentTypeResolver = new EntityResolver(loggerFactory.CreateLogger<EntityResolver>());
         _logger = loggerFactory.CreateLogger<ContentfulRepository>();
     }
 
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
+        => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), null, cancellationToken);
+
+    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+        => await GetEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
+
     public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(string entityTypeId, IGetEntitiesOptions? options, CancellationToken cancellationToken = default)
     {
-        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(entityTypeId, options);
+        var queryBuilder = BuildQueryBuilder<TEntity>(entityTypeId, options);
 
         var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
         ProcessContentfulErrors(entries);
 
         return entries.Items ?? [];
+    }
+
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(string entityTypeId, IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+    {
+        var limit = options?.Limit ?? 100;
+        var queryBuilder = BuildQueryBuilder<TEntity>(entityTypeId, options)
+            .Limit(limit)
+            .Skip((options!.Page - 1) * limit);
+
+        var entries = await _client.GetEntries(queryBuilder, cancellationToken);
+
+        ProcessContentfulErrors(entries);
+
+        return entries.Items;
     }
 
     private void ProcessContentfulErrors<TEntity>(ContentfulCollection<TEntity> entries)
@@ -54,14 +82,33 @@ public class ContentfulRepository : IContentRepository
 
         return errorString + " " + error.SystemProperties.Id;
     }
+    public async Task<int> GetEntitiesCount<TEntity>(CancellationToken cancellationToken = default)
+    {
+        var queryBuilder = BuildQueryBuilder<TEntity>(GetContentTypeName<TEntity>(), null).Limit(0);
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(CancellationToken cancellationToken = default)
-    => await GetEntities<TEntity>(LowerCaseFirstLetter(typeof(TEntity).Name), null, cancellationToken);
+        var entries = await _client.GetEntries(queryBuilder, cancellationToken);
 
-    public async Task<IEnumerable<TEntity>> GetEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
-        => await GetEntities<TEntity>(LowerCaseFirstLetter(typeof(TEntity).Name), options, cancellationToken);
+        ProcessContentfulErrors(entries);
+
+        return entries.Total;
+
+    }
+
+    public async Task<IEnumerable<TEntity>> GetPaginatedEntities<TEntity>(IGetEntitiesOptions options, CancellationToken cancellationToken = default)
+        => await GetPaginatedEntities<TEntity>(GetContentTypeName<TEntity>(), options, cancellationToken);
 
     public async Task<TEntity?> GetEntityById<TEntity>(string id, int include = 2, CancellationToken cancellationToken = default)
+    {
+        var options = GetEntityByIdOptions(id, include);
+        var entities = (await GetEntities<TEntity>(options, cancellationToken)).ToList();
+
+        if (entities.Count > 1)
+            throw new GetEntitiesException($"Found more than 1 entity with id {id}");
+
+        return entities.FirstOrDefault();
+    }
+
+    public GetEntitiesOptions GetEntityByIdOptions(string id, int include = 2)
     {
         if (string.IsNullOrEmpty(id))
             throw new ArgumentNullException(nameof(id));
@@ -70,29 +117,31 @@ public class ContentfulRepository : IContentRepository
         //option doesn't seem to have any effect there - it only seems to return the main parent entry
         //with links to children. This was proving rather useless, so I have used the "GetEntries" option here
         //instead.
-        var options = new GetEntitiesOptions(include, new[] {
+        return new GetEntitiesOptions(include, new[] {
             new ContentQueryEquals(){
                 Field = "sys.id",
                 Value = id
-        }});
-
-        var entities = (await GetEntities<TEntity>(options, cancellationToken)).ToList();
-
-        if (entities.Count > 1)
-        {
-            throw new GetEntitiesException($"Found more than 1 entity with id {id}");
-        }
-
-        return entities.FirstOrDefault();
+            }});
     }
 
-    private static string LowerCaseFirstLetter(string input)
+    private static string GetContentTypeName<TEntity>()
     {
-        if (input == "ContentSupportPage")
-            return input;
+        var name = typeof(TEntity).Name;
+        return name == "ContentSupportPage" ? name : name.FirstCharToLower();
+    }
 
-        char[] array = input.ToCharArray();
-        array[0] = char.ToLower(array[0]);
-        return new string(array);
+    private QueryBuilder<TEntity> BuildQueryBuilder<TEntity>(string contentTypeId, IGetEntitiesOptions? options)
+    {
+        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntity>(contentTypeId, options);
+
+        var shouldExcludeTestingContent = _hostEnvironment.IsProduction() || (!_automatedTestingOptions?.Contentful!?.IncludeTaggedContent ?? false);
+
+        if (shouldExcludeTestingContent)
+        {
+            var tag = _automatedTestingOptions.Contentful?.Tag ?? null;
+            queryBuilder = queryBuilder.FieldExcludes("metadata.tags.sys.id", [tag]);
+        }
+
+        return queryBuilder;
     }
 }

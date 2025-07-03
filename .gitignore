@@ -507,5 +507,8 @@ contentful/migration-scripts/contentful-export-*.json
 # Secrets
 .env
 *.env
+.env.dev
+.env.master
+azure-secrets-expiring.yml
 
 StrykerOutput/

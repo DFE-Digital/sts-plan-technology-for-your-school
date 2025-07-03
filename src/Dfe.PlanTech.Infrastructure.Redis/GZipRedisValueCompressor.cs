@@ -59,7 +59,6 @@ public static class GZipRedisValueCompressor
     /// <returns>True if decompressed, false if not.</returns>
     public static bool Decompress(ref byte[] value)
     {
-
         if (value == null || value.Length == 0 || !value.Take(_gzipHeader.Length).SequenceEqual(_gzipHeader))
         {
             return false;

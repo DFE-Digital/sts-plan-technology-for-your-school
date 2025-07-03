@@ -20,5 +20,6 @@ public interface ICheckAnswersRouter
     Task<IActionResult> ValidateRoute(string sectionSlug,
                                       string? errorMessage,
                                       CheckAnswersController controller,
-                                      CancellationToken cancellationToken);
+                                      bool isChangeAnswersFlow = false,
+                                      CancellationToken cancellationToken = default);
 }

@@ -107,7 +107,7 @@ jobs:
         uses: azure/CLI@v1
         id: azure
         with:
-          azcliversion: 2.45.0
+          azcliversion: 2.73.0
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
             az containerapp update \
@@ -117,13 +117,40 @@ jobs:
               --output none
               &> /dev/null
 
+  flush-redis-cache:
+    runs-on: ubuntu-22.04
+    name: Flush Redis Cache on ${{ inputs.environment }}
+    environment: ${{ inputs.environment }}
+    needs: [upgrade-database, pull-image-from-gcr-and-publish-to-acr, deploy-image]
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Flush Redis Cache
+        uses: azure/CLI@v1
+        id: azure
+        with:
+          azcliversion: 2.73.0
+          inlineScript: |
+            az redis flush --name ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --yes
+
   run-e2e-testing:
     runs-on: ubuntu-22.04
     name: Clear Database & Run E2E Tests on ${{ inputs.environment }}
     if: ${{ inputs.environment == 'tst' || inputs.environment == 'staging' }}
     environment: ${{ inputs.environment }}
     needs:
-      [upgrade-database, pull-image-from-gcr-and-publish-to-acr, deploy-image]
+      [upgrade-database, pull-image-from-gcr-and-publish-to-acr, deploy-image, flush-redis-cache]
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
