@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Application.Constants
 @using Dfe.PlanTech.Domain.Questionnaire.Models
 @using GovUk.Frontend.AspNetCore.TagHelpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
@@ -5,22 +6,20 @@
 
 @{
     var header = Model.Header;
-    var submissionDate = Model.SubmissionDate;
     var sectionName = Model.SectionName;
+    var recommendationCount = Model.RecommendationCount;
+    var viewCount = Model.CurrentRecommendationPageCount;
 }
 
 <div class="recommendation-piece-content">
+    <span class="govuk-caption-xl">Recommendation @viewCount of @recommendationCount</span>
+
+    <h1 class="govuk-heading-xl">
+        @header?.HeaderText
+    </h1>
+
     @foreach (var content in header.Content)
     {
-        @if (header.SlugifiedLinkText == "overview" && !string.IsNullOrEmpty(submissionDate) && !string.IsNullOrEmpty(sectionName))
-        {
-            <div class="govuk-inset-text">
-                <p>
-                    The self-assessment for @sectionName.ToLower() was completed on
-                    <strong>@submissionDate</strong>. You can change your answers at any time.
-                </p>
-            </div>
-        }
         <partial name="Components/PageComponentFactory" model="@content" />
     }
 </div>
