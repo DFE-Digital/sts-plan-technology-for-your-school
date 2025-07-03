@@ -7,6 +7,7 @@ on:
         type: string
         description: "The environment to run infrastructure deployment on:"
         required: true
+  push:
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -64,11 +65,11 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
-      - name: Replace in secret environment variable
-        run: |
-          AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
-          SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
-          echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
+      # - name: Replace in secret environment variable
+      #   run: |
+      #     AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
+      #     SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
+      #     echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
 
       - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
         uses: ./.github/actions/whitelisting-for-runner
@@ -81,30 +82,10 @@ jobs:
           tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
           removeRules: 'false'
 
-      - name: Set container app image_tag env variables
-        run: |
-          IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
-          echo "TF_VAR_image_tag=$IMAGE_TAG" >> $GITHUB_ENV
-
-      - name: Set container app scaling env variables
-        run: |
-          declare -a env_vars=(
-            "container_app_min_replicas"
-            "container_app_max_replicas"
-            "container_app_http_concurrency"
-          )
-
-          for var in "${env_vars[@]}"; do
-            env_value="${!var}"
-            if [ -n "$env_value" ]; then
-              echo "TF_VAR_$var=$env_value" >> $GITHUB_ENV
-            fi
-          done
-
-          if [ "$container_environment" == "Tst" ]; then
-            export container_environment="Test"
-          fi
-            echo "TF_VAR_container_environment=$container_environment" >> $GITHUB_ENV
+      # - name: Set container app image_tag env variables
+      #   run: |
+      #     IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
+      #     echo "TF_VAR_image_tag=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Terraform init
         id: init
@@ -175,11 +156,11 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
           az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
-      - name: Replace in secret environment variable
-        run: |
-          AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
-          SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
-          echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
+      # - name: Replace in secret environment variable
+      #   run: |
+      #     AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
+      #     SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
+      #     echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
 
       - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
         uses: ./.github/actions/whitelisting-for-runner
@@ -192,30 +173,10 @@ jobs:
           tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
           removeRules: 'false'
 
-      - name: Set container app image_tag env variables
-        run: |
-          IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
-          echo "TF_VAR_image_tag=$IMAGE_TAG" >> $GITHUB_ENV
-
-      - name: Set container app scaling env variables
-        run: |
-          declare -a env_vars=(
-            "container_app_min_replicas"
-            "container_app_max_replicas"
-            "container_app_http_concurrency"
-          )
-
-          for var in "${env_vars[@]}"; do
-            env_value="${!var}"
-            if [ -n "$env_value" ]; then
-              echo "TF_VAR_$var=$env_value" >> $GITHUB_ENV
-            fi
-          done
-
-          if [ "$container_environment" == "Tst" ]; then
-            export container_environment="Test"
-          fi
-            echo "TF_VAR_container_environment=$container_environment" >> $GITHUB_ENV
+      # - name: Set container app image_tag env variables
+      #   run: |
+      #     IMAGE_TAG=$(az acr repository show-tags -n ${{ secrets.AZ_ACR_URL }} --repository plan-tech-app --top 1 --orderby time_desc |  jq '.[]' | tr -d "\"")
+      #     echo "TF_VAR_image_tag=$IMAGE_TAG" >> $GITHUB_ENV
 
       - name: Terraform init
         id: init
