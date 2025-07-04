@@ -25,7 +25,13 @@
         else
         {
             <p>Complete the remaining self-assessments to get recommendations for your school's @Model.CategoryName.ToLower().</p>
+
+            foreach (var topic in Model.CategoryLandingSections)
+            {
+                <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { Section = topic, Context = "Default" }' />
+            }
         }
     }
 </div>
+
 <partial name="Components/CategoryLanding/Sections" model="@Model" />

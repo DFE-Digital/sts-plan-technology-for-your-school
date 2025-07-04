@@ -2,60 +2,19 @@
 
 @foreach (var topic in Model.CategoryLandingSections)
 {
-    string statusText;
-    string linkText;
-    string? controller = null;
-    string? action = null;
-    Dictionary<string, string>? routeValues = null;
-
     <h2 class="govuk-heading-l">@topic.Name</h2>
     <p>@topic.ShortDescription</p>
 
-    switch (@topic.ProgressStatus.ToString())
+    <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { Section = topic, Context = "Sections" }' />
+
+    @if (topic.LastCompletionDate != null)
     {
-        case "InProgress":
-            statusText = $"A self-assessment was started on {topic.DateLastUpdated}. ";
-            linkText = $"Continue your self-assessment for {topic.Name.ToLower()}";
-            controller = "Questions";
-            action = "GetNextUnansweredQuestion";
-            routeValues = new Dictionary<string, string>
-            {
-                ["sectionSlug"] = $"{topic.Slug}" ?? string.Empty
-            };
-            break;
-
-        case "Completed":
-            statusText = $"The self-assessment for {topic.Name.ToLower()} was completed on {topic.LatestCompletionDate}. ";
-            linkText = $"View or update your self-assessment for {topic.Name.ToLower()}.";
-            controller = "ChangeAnswers";
-            action = "ChangeAnswersPage";
-            routeValues = new Dictionary<string, string>
-            {
-                ["sectionSlug"] = $"{topic.Slug}" ?? string.Empty
-            };
-            break;
-
-        default:
-
-            statusText = "";
-            linkText = $"Go to self-assessment for {topic.Name.ToLower()}";
-            controller = "Pages";
-            action = "GetByRoute";
-            routeValues = new Dictionary<string, string>
-            {
-                ["route"] = $"{topic.Slug}" ?? string.Empty
-            };
-            break;
+        <ul class="govuk-task-list">
+            <li class="govuk-task-list__item" style="border-top: none;">
+                <div class="govuk-task-list__name-and-hint">
+                    <strong>Recommendations</strong>
+                </div>
+            </li>
+        </ul>
     }
-    <p>
-        @if (statusText != "")
-        {
-            @statusText
-        }
-
-        <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
-           class="govuk-link">
-            @linkText
-        </a>
-    </p>
 }
