@@ -43,71 +43,11 @@ jobs:
     uses: ./.github/workflows/create-tag-release.yml
     secrets: inherit
 
-  check-for-terraform-changes:
-    needs: create-and-publish-image
-    runs-on: ubuntu-22.04
-    name: Check for Terraform File Changes
-    outputs:
-      run_terraform_deploy: ${{ steps.terraform_changes.outputs.run_terraform_deploy }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
-          fetch-depth: 2
-
-      - name: Check for Terraform File Changes
-        id: terraform_changes
-        run: |
-          LAST_COMMIT_SHA=${{ github.sha }}
-          PENULTIMATE_COMMIT_SHA=$(git rev-list -n 1 --skip 1 $LAST_COMMIT_SHA | tail -n 1)
-          echo "Last commit SHA: $LAST_COMMIT_SHA and Penultimate commit SHA: $PENULTIMATE_COMMIT_SHA"
-          changed_files="$(git diff --name-only $PENULTIMATE_COMMIT_SHA $LAST_COMMIT_SHA)"
-          echo "Changed files:"
-          echo "$changed_files"
-
-          if [[ "$changed_files" =~ terraform/container-app ]]; then
-            echo "Terraform files have changed. Running Terraform deploy..."
-            echo "run_terraform_deploy=true" >> $GITHUB_OUTPUT
-          else
-            echo "No Terraform file changes in terraform/container-app. Skipping Terraform deploy."
-            echo "run_terraform_deploy=false" >> $GITHUB_OUTPUT
-          fi
-
-  plan-terraform-for-dev-and-test:
-    needs: check-for-terraform-changes
-    name: Plan Terraform Infrastructure for Dev & Test
-    if: false
-    strategy:
-      fail-fast: true
-      matrix:
-        target: [Dev, Tst]
-    uses: ./.github/workflows/terraform-plan.yml
-    with:
-      environment: ${{ matrix.target }}
-    secrets: inherit
-
-  deploy-terraform-for-dev-and-test:
-    needs: [check-for-terraform-changes, plan-terraform-for-dev-and-test]
-    name: Deploy Terraform Infrastructure for Dev & Test
-    if: false
-    strategy:
-      fail-fast: true
-      matrix:
-        target: [Dev, Tst]
-    uses: ./.github/workflows/terraform-deploy.yml
-    with:
-      environment: ${{ matrix.target }}
-    secrets: inherit
-
   deploy-to-dev-and-test:
     name: Deployment to Dev & Test
     needs: [
               set-env, 
-              create-and-publish-image, 
-              check-for-terraform-changes, 
-              plan-terraform-for-dev-and-test,
-              deploy-terraform-for-dev-and-test
+              create-and-publish-image
             ]
     if: always()
     strategy:
@@ -136,41 +76,11 @@ jobs:
       environment: ${{ matrix.target }}
     secrets: inherit
 
-  plan-terraform-for-staging:
-    needs: [set-env, check-for-terraform-changes, deploy-to-dev-and-test]
-    name: Plan Terraform Infrastructure for staging
-    if: false
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        target: [Staging]
-    uses: ./.github/workflows/terraform-plan.yml
-    with:
-      environment: ${{ matrix.target }}
-    secrets: inherit
-
-  deploy-terraform-for-staging:
-    needs: [set-env, check-for-terraform-changes, plan-terraform-for-staging]
-    name: Deploy Terraform Infrastructure for staging
-    if: false
-    strategy:
-      fail-fast: true
-      matrix:
-        target: [Staging]
-    uses: ./.github/workflows/terraform-deploy.yml
-    with:
-      environment: ${{ matrix.target }}
-    secrets: inherit
-
   deploy-to-staging:
     needs: [
-              set-env, 
-              create-and-publish-image, 
-              check-for-terraform-changes,
-              deploy-to-dev-and-test,
-              plan-terraform-for-staging,
-              deploy-terraform-for-staging
+              set-env,
+              create-and-publish-image,
+              deploy-to-dev-and-test
             ]
     name: Deployment to Staging
     if: |
@@ -188,54 +98,13 @@ jobs:
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
     secrets: inherit
 
-  plan-terraform-for-production:
-    needs:
-      [
-        set-env,
-        check-for-terraform-changes,
-        deploy-to-dev-and-test,
-        deploy-to-staging,
-      ]
-    name: Plan Terraform Infrastructure for production
-    if: false
-    strategy:
-      max-parallel: 1
-      fail-fast: true
-      matrix:
-        target: [Production]
-    uses: ./.github/workflows/terraform-plan.yml
-    with:
-      environment: ${{ matrix.target }}
-    secrets: inherit
-
-  deploy-terraform-for-production:
-    needs: 
-      [
-        set-env, 
-        check-for-terraform-changes, 
-        plan-terraform-for-production
-      ]
-    name: Deploy Terraform Infrastructure for production
-    if: false
-    strategy:
-      fail-fast: true
-      matrix:
-        target: [Production]
-    uses: ./.github/workflows/terraform-deploy.yml
-    with:
-      environment: ${{ matrix.target }}
-    secrets: inherit
-
   deploy-to-production:
     needs:
       [
         set-env,
-        check-for-terraform-changes,
         create-and-publish-image,
         deploy-to-dev-and-test,
-        deploy-to-staging,
-        plan-terraform-for-production,
-        deploy-terraform-for-production
+        deploy-to-staging
       ]
     name: Deployment to Production
     if: |
