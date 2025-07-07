@@ -68,6 +68,15 @@ variable "az_sql_max_pool_size" {
   default     = 100
 }
 
+variable "az_mssql_ipv4_allow_list" {
+  description = "IPv4 allow list for SQL DB"
+  type = map(object({
+    start_ip_range : string,
+    end_ip_range : optional(string, "")
+  }))
+  default     = {}
+}
+
 #####################
 # Azure Redis Cache #
 #####################
