@@ -74,7 +74,7 @@ variable "az_mssql_ipv4_allow_list" {
     start_ip_range : string,
     end_ip_range : optional(string, "")
   }))
-  default     = {}
+  default = {}
 }
 
 #####################
