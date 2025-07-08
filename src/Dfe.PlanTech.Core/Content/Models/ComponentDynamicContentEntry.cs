@@ -2,8 +2,8 @@
 
 namespace Dfe.PlanTech.Core.Content.Models;
 
-public class ComponentAccordionEntry : Entry<ContentComponent>
+public class ComponentDynamicContentEntry : Entry<ContentComponent>
 {
     public string InternalName { get; init; } = null!;
-    public IReadOnlyList<RichTextField> Content { get; init; } = [];
+    public string DynamicField { get; init; } = null!;
 }

@@ -1,12 +1,10 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-
 namespace Dfe.PlanTech.Core.Content.Models;
 
 /// <summary>
 /// Content for a 'RichText' field in Contentful
 /// </summary>
 /// <inheritdoc/>
-public class RichTextContent : ContentComponent, IRichTextContent<RichTextMark, RichTextContent, RichTextContentSupportData>
+public class RichTextContent : ContentComponent
 {
     public string Value { get; set; } = "";
 

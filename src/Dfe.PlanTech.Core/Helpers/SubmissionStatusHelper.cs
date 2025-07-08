@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Content.Models;
 using Dfe.PlanTech.Domain.Helpers;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Core.Helpers;

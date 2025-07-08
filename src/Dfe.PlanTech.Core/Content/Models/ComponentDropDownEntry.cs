@@ -2,10 +2,6 @@
 
 namespace Dfe.PlanTech.Core.Content.Models;
 
-/// <summary>
-/// Model for DropDown type.
-/// </summary>
-/// <inheritdoc/>
 public class ComponentDropDownEntry : Entry<ContentComponent>
 {
     public string InternalName { get; set; } = null!;

@@ -1,8 +1,5 @@
-namespace Dfe.PlanTech.Domain.Questionnaire.Models;
+namespace Dfe.PlanTech.Core.Content.Models;
 
-public class Tag(string? text = null, string? colour = null)
+public record Tag(string? Text = null, string? Colour = null)
 {
-    public string? Text { get; } = text;
-
-    public string? Colour { get; } = colour;
 }

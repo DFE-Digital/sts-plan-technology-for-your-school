@@ -1,14 +1,6 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-
 namespace Dfe.PlanTech.Core.Content.Models;
 
-/// <summary>
-/// A navigation link
-/// </summary>
-/// <remarks>
-/// Currently only used in footer. Could be extended to be both in future
-/// </remarks>
-public class NavigationLink : ContentComponent
+public class NavigationLinkEntry : ContentComponent
 {
     public string InternalName { get; set; } = null!;
     public string DisplayText { get; set; } = null!;

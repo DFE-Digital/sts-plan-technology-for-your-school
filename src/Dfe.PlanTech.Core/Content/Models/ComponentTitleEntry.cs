@@ -1,10 +1,9 @@
-
 using Contentful.Core.Models;
 
 namespace Dfe.PlanTech.Core.Content.Models;
 
-public class ComponentWarningEntry : Entry<ContentComponent>
+public class ComponentTitleEntry : Entry<ContentComponent>
 {
     public string InternalName { get; set; } = null!;
-    public ComponentTextBodyEntry Text { get; init; } = null!;
+    public string Text { get; init; } = null!;
 }

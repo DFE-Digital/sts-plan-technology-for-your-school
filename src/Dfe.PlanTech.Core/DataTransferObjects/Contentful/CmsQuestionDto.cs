@@ -1,10 +1,10 @@
-﻿using Dfe.PlanTech.Domain.Questionnaire.Models;
+﻿using Dfe.PlanTech.Core.Content.Models;
 
 namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
 {
     public class CmsQuestionDto : CmsEntryDto
     {
-        public CmsQuestionDto(QuestionEntry questionEntry)
+        public CmsQuestionDto(QuestionnaireQuestionEntry questionEntry)
         {
             Slug = questionEntry.Slug;
             Text = questionEntry.Text;

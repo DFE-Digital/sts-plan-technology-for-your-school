@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+﻿using Dfe.PlanTech.Core.Content.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
 {
