@@ -2,7 +2,7 @@ using System.Text;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.ServiceBus.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;

@@ -2,11 +2,8 @@
 
 namespace Dfe.PlanTech.Core.Models;
 
-public class IdWithNameModel
+public class IdWithNameModel : IdModel
 {
-    [JsonPropertyName("id")]
-    public string Id { get; init; } = null!;
-
     [JsonPropertyName("name")]
     public string Name { get; init; } = null!;
 }

@@ -11,11 +11,11 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
         private const int NumberOfReferenceLevels = 4;
 
         private readonly ILogger<PageEntryRepository> _logger;
-        private readonly ContentfulContext _contentful;
+        private readonly ContentfulRepository _contentful;
 
         public PageEntryRepository(
             ILoggerFactory loggerFactory,
-            ContentfulContext contentfulBaseRepository
+            ContentfulRepository contentfulBaseRepository
         )
         {
             _logger = loggerFactory.CreateLogger<PageEntryRepository>();

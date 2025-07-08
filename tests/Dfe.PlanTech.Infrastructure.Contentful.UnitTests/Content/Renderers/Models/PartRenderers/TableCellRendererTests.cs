@@ -2,10 +2,10 @@
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
+using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
 public class TableCellRendererTests
 {

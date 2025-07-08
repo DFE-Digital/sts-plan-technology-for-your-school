@@ -2,17 +2,17 @@ using System.Web;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
-using Dfe.PlanTech.Application.Options;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
-using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
+using Dfe.PlanTech.Data.Contentful.Helpers;
+using Dfe.PlanTech.Data.Contentful.Persistence;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using Dfe.PlanTech.Core.Options;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
 {
     public class ContentfulRepositoryTests
     {

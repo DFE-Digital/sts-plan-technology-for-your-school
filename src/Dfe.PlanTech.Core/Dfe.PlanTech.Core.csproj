@@ -8,6 +8,11 @@
 
   <ItemGroup>
     <PackageReference Include="contentful.csharp" Version="8.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Content\Models\Fields\" />
   </ItemGroup>
 
 </Project>

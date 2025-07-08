@@ -1,4 +1,5 @@
-using Dfe.PlanTech.Domain.Caching.Interfaces;
+using Dfe.PlanTech.Core.Caching;
+using Dfe.PlanTech.Core.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.Extensions.Caching.Memory;

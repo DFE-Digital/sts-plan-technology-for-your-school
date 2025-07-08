@@ -1,9 +1,4 @@
-﻿using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Submissions.Enums;
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Users.Interfaces;
+﻿using Dfe.PlanTech.Application.Context;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -12,46 +7,26 @@ namespace Dfe.PlanTech.Web.Routing
 {
     public class ChangeAnswersRouter : IChangeAnswersRouter
     {
-        private const string PageTitle = "Change Answers";
-
-        private readonly IGetPageQuery _getPageQuery;
-        private readonly IProcessSubmissionResponsesCommand _processSubmissionResponsesCommand;
-        private readonly IUser _user;
-        private readonly ISubmissionStatusProcessor _router;
-        private readonly IGetLatestResponsesQuery _submissionQuery;
-        private readonly ISubmissionCommand _submissionCommand;
+        private readonly CurrentUser _currentUser;
 
         public ChangeAnswersRouter(
-            IGetPageQuery getPageQuery,
-            IProcessSubmissionResponsesCommand processSubmissionResponsesCommand,
-            IUser user,
-            ISubmissionStatusProcessor router,
-            IGetLatestResponsesQuery submissionQuery,
-            ISubmissionCommand submissionCommand)
+            CurrentUser currentUser
+        )
         {
-            _getPageQuery = getPageQuery;
-            _processSubmissionResponsesCommand = processSubmissionResponsesCommand;
-            _user = user;
-            _router = router;
-            _submissionQuery = submissionQuery;
-            _submissionCommand = submissionCommand;
+            _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         }
 
-        public async Task<IActionResult> ValidateRoute(
-            string sectionSlug,
-            string? errorMessage,
-            ChangeAnswersController controller,
-            CancellationToken cancellationToken)
+        public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage)
         {
             if (string.IsNullOrEmpty(sectionSlug))
                 throw new ArgumentNullException(nameof(sectionSlug));
 
-            await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, true, cancellationToken);
+            await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, isCompleted: true);
 
             switch (_router.Status)
             {
                 case Status.CompleteNotReviewed:
-                    return await ProcessChangeAnswers(sectionSlug, errorMessage, controller, cancellationToken);
+                    return await ProcessChangeAnswers(sectionSlug, errorMessage);
 
                 case Status.CompleteReviewed:
                 {
@@ -86,9 +61,7 @@ namespace Dfe.PlanTech.Web.Routing
 
         private async Task<IActionResult> ProcessChangeAnswers(
             string sectionSlug,
-            string? errorMessage,
-            ChangeAnswersController controller,
-            CancellationToken cancellationToken)
+            string? errorMessage)
         {
             var establishmentId = await _user.GetEstablishmentId();
 

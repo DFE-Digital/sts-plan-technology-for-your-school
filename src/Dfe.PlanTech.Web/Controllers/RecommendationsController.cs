@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Routing;
@@ -37,7 +38,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
     [HttpGet("{sectionSlug}/recommendation/preview/{maturity?}", Name = "GetRecommendationPreview")]
     public async Task<IActionResult> GetRecommendationPreview(string sectionSlug,
                                                               string? maturity,
-                                                              [FromServices] ContentfulOptions contentfulOptions,
+                                                              [FromServices] ContentfulOptionsConfiguration contentfulOptions,
                                                               [FromServices] IGetRecommendationRouter getRecommendationRouter,
                                                               CancellationToken cancellationToken)
     {

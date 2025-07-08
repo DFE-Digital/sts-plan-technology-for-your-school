@@ -1,9 +1,9 @@
 using System.Reflection;
-using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
+using Dfe.PlanTech.Data.Contentful.Serializers;
 using Newtonsoft.Json.Serialization;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Serializers
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Serializers
 {
     public class DependencyInjectionContractResolverTests
     {

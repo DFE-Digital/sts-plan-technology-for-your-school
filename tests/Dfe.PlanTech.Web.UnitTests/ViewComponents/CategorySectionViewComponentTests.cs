@@ -1,7 +1,7 @@
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Enums;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;

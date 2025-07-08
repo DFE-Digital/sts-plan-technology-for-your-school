@@ -1,7 +1,8 @@
 using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;

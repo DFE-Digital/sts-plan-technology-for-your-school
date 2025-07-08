@@ -9,11 +9,11 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
 
         private readonly ILogger<NavigationLinkEntryRepository> _logger;
 
-        private readonly ContentfulContext _contentful;
+        private readonly ContentfulRepository _contentful;
 
         public NavigationLinkEntryRepository(
             ILoggerFactory loggerFactory,
-            ContentfulContext contentfulBaseRepository
+            ContentfulRepository contentfulBaseRepository
         )
         {
             _logger = loggerFactory.CreateLogger<NavigationLinkEntryRepository>();

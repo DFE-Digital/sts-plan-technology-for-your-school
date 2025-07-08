@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Exceptions;
+﻿using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Entries;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Queries;
 using Microsoft.Extensions.Logging;
@@ -12,11 +12,11 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
 
         private readonly ILogger<SectionEntryRepository> _logger;
 
-        private readonly ContentfulContext _contentful;
+        private readonly ContentfulRepository _contentful;
 
         public SectionEntryRepository(
             ILoggerFactory loggerFactory,
-            ContentfulContext contentfulBaseRepository
+            ContentfulRepository contentfulBaseRepository
         )
         {
             _logger = loggerFactory.CreateLogger<SectionEntryRepository>();
@@ -71,9 +71,9 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
         /// Sections only contain the text and IDs required to see the paths through a section.
         /// Answers have details removed nextQuestion other than system details to avoid infinite reference loops.
         /// </summary>
-        public async Task<IEnumerable<SectionEntry>> GetSectionsForTraversalAsync()
+        public async Task<IEnumerable<Section>> GetSectionsForTraversalAsync()
         {
-            var summariseAnswer = (AnswerEntry answer) =>
+            var summariseAnswer = (Answer answer) =>
             {
                 return new AnswerEntry()
                 {

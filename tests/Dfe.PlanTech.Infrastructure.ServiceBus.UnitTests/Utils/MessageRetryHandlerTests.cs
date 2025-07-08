@@ -1,6 +1,6 @@
 using System.Text;
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Domain.ServiceBus.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Options;

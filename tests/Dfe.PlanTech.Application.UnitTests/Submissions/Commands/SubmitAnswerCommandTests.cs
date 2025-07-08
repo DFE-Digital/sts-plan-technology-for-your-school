@@ -15,7 +15,7 @@ public class SubmitAnswerCommandTests
     private readonly IPlanTechDbContext _db;
     private readonly IUser _user;
 
-    private readonly AnswerViewModelDto _chosenAnswer;
+    private readonly AnswerViewModel _chosenAnswer;
     private readonly SubmitAnswerDto _dto;
 
     public SubmitAnswerCommandTests()
@@ -25,7 +25,7 @@ public class SubmitAnswerCommandTests
 
         _submitAnswerCommand = new SubmitAnswerCommand(_db, _user);
 
-        _chosenAnswer = new AnswerViewModelDto()
+        _chosenAnswer = new AnswerViewModel()
         {
             Maturity = "Low",
             Answer = new IdWithText()

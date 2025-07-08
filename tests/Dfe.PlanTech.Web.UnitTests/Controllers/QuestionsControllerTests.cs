@@ -1,10 +1,11 @@
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -14,6 +15,7 @@ using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
@@ -242,7 +244,7 @@ public class QuestionsControllerTests
     };
         var sectionSlug = SectionSlug;
         var questionSlug = QuestionSlug;
-        var submitAnswerDto = new SubmitAnswerDto();
+        var submitAnswerDto = new SubmitAnswerViewModel();
         var cancellationToken = CancellationToken.None;
 
         var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
@@ -273,7 +275,7 @@ public class QuestionsControllerTests
     {
         var sectionSlug = SectionSlug;
         var questionSlug = QuestionSlug;
-        var submitAnswerDto = new SubmitAnswerDto();
+        var submitAnswerDto = new SubmitAnswerViewModel();
         var cancellationToken = CancellationToken.None;
 
         var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
@@ -281,7 +283,7 @@ public class QuestionsControllerTests
         var expectedErrorMessage = "Save failed. Please try again later.";
 
         submitAnswerCommand
-          .When(x => x.SubmitAnswer(Arg.Any<SubmitAnswerDto>(), Arg.Any<CancellationToken>()))
+          .When(x => x.SubmitAnswer(Arg.Any<SubmitAnswerViewModel>(), Arg.Any<CancellationToken>()))
           .Do(x => throw new Exception("A Dummy exception thrown by the test"));
 
         var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken: cancellationToken);
@@ -299,7 +301,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task SubmitAnswer_Should_Redirect_To_NextUnanswered_When_Not_ChangeAnswersFlow()
     {
-        var dto = new SubmitAnswerDto();
+        var dto = new SubmitAnswerViewModel();
         var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
         var nextUnanswered = Substitute.For<IGetNextUnansweredQuestionQuery>();
 
@@ -315,7 +317,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task SubmitAnswer_Should_Redirect_To_Next_Answered_Or_Unanswered_When_ChangeAnswersFlow()
     {
-        var dto = new SubmitAnswerDto();
+        var dto = new SubmitAnswerViewModel();
         var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
         var nextUnanswered = Substitute.For<IGetNextUnansweredQuestionQuery>();
 
@@ -347,7 +349,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task SubmitAnswer_Should_Redirect_To_CheckAnswers_When_No_More_Questions_And_ChangeAnswersFlow()
     {
-        var dto = new SubmitAnswerDto();
+        var dto = new SubmitAnswerViewModel();
         var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
         var nextUnanswered = Substitute.For<IGetNextUnansweredQuestionQuery>();
 
@@ -371,7 +373,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task SubmitAnswer_Should_Redirect_To_NextUnansweredQuestion_When_Success()
     {
-        var submitAnswerDto = new SubmitAnswerDto();
+        var submitAnswerDto = new SubmitAnswerViewModel();
 
         var cancellationToken = CancellationToken.None;
 
@@ -398,7 +400,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task QuestionPreview_Should_Redirect_When_UsePreview_Is_False()
     {
-        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(false));
+        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptionsConfiguration(false));
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
@@ -408,7 +410,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task QuestionPreview_Should_Return_Valid_Model_With_Section_Omitted_When_UsePreview_Is_True()
     {
-        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(true));
+        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptionsConfiguration(true));
 
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", viewResult.ViewName);
@@ -426,7 +428,7 @@ public class QuestionsControllerTests
     {
         _controller.ModelState.AddModelError("QuestionId", "QuestionId is required");
 
-        var dto = new SubmitAnswerDto();
+        var dto = new SubmitAnswerViewModel();
         var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
         var nextUnanswered = Substitute.For<IGetNextUnansweredQuestionQuery>();
 
@@ -440,7 +442,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task SubmitAnswer_Should_Return_View_With_Error_When_Exception_Thrown()
     {
-        var dto = new SubmitAnswerDto();
+        var dto = new SubmitAnswerViewModel();
         var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
         var nextUnanswered = Substitute.For<IGetNextUnansweredQuestionQuery>();
 

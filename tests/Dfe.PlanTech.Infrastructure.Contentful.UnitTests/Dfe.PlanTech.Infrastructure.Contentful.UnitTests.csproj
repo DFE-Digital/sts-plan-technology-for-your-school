@@ -23,7 +23,7 @@
         </PackageReference>
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
+        <ProjectReference Include="..\..\src\Dfe.PlanTech.Data.Contentful\Dfe.PlanTech.Data.Contentful.csproj" />
         <ProjectReference Include="..\..\src\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
     </ItemGroup>
 

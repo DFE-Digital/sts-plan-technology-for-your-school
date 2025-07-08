@@ -27,8 +27,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
-  </ItemGroup>
-
 </Project>

@@ -1,16 +1,21 @@
 ﻿using System.Text.Json;
 using Dfe.PlanTech.Domain.Cookie;
-using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Web.Workflows;
+using Microsoft.AspNetCore.Http;
 
-namespace Dfe.PlanTech.Web.Services;
+namespace Dfe.PlanTech.Application.Services;
 
-public class CookieService(IHttpContextAccessor context, CookieWorkflow cookiesCleaner) : ICookieService
+public class CookieService(
+    IHttpContextAccessor contextAccessor,
+    CookieWorkflow cookieWorkflow)
 {
+    private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(_contextAccessor));
+    private readonly CookieWorkflow _cookieWorkflow = cookieWorkflow ?? throw new ArgumentNullException(nameof(_cookieWorkflow));
+
     public const string Cookie_Key = "user_cookies_preferences";
 
-    private DfeCookie? _dfeCookie;
-    public DfeCookie Cookie => _dfeCookie ?? GetCookie();
+    private DfeCookieModel? _dfeCookie;
+    public DfeCookieModel Cookie => _dfeCookie ?? GetCookie();
 
     public void SetVisibility(bool visibility)
     {
@@ -19,34 +24,34 @@ public class CookieService(IHttpContextAccessor context, CookieWorkflow cookiesC
 
     public void SetCookieAcceptance(bool userAcceptsCookies)
     {
-        if (context.HttpContext is null)
+        if (_contextAccessor.HttpContext is null)
         {
-            throw new InvalidOperationException($"Cannot set cookie acceptance as {nameof(context.HttpContext)} is null");
+            throw new InvalidOperationException($"Cannot set cookie acceptance as {nameof(_contextAccessor.HttpContext)} is null");
         }
 
         CreateCookie(Cookie_Key, userAcceptsCookies: userAcceptsCookies);
 
         if (!userAcceptsCookies)
         {
-            cookiesCleaner.RemoveNonEssentialCookies(context.HttpContext);
+            _cookieWorkflow.RemoveNonEssentialCookies(_contextAccessor.HttpContext);
         }
     }
 
-    public DfeCookie GetCookie()
+    public DfeCookieModel GetCookie()
     {
-        var cookie = context.HttpContext?.Request.Cookies[Cookie_Key];
+        var cookie = _contextAccessor.HttpContext?.Request.Cookies[Cookie_Key];
         if (cookie is null)
         {
-            return new DfeCookie();
+            return new DfeCookieModel();
         }
 
-        var dfeCookie = JsonSerializer.Deserialize<DfeCookie>(cookie);
+        var dfeCookie = JsonSerializer.Deserialize<DfeCookieModel>(cookie);
         return dfeCookie;
     }
 
     private void DeleteCookie()
     {
-        context.HttpContext?.Response.Cookies.Delete(Cookie_Key);
+        _contextAccessor.HttpContext?.Response.Cookies.Delete(Cookie_Key);
     }
 
     private void CreateCookie(string key, bool? userAcceptsCookies = null, bool? visibility = null)
@@ -67,7 +72,7 @@ public class CookieService(IHttpContextAccessor context, CookieWorkflow cookiesC
         };
 
         var serializedCookie = JsonSerializer.Serialize(cookie);
-        context.HttpContext?.Response.Cookies.Append(key, serializedCookie, cookieOptions);
+        _contextAccessor.HttpContext?.Response.Cookies.Append(key, serializedCookie, cookieOptions);
         _dfeCookie = cookie;
     }
 }

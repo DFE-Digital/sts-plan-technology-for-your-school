@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Routing;
@@ -59,7 +60,7 @@ public class RecommendationsControllerTests
     {
         string sectionSlug = "section-slug";
 
-        await _recommendationsController.GetRecommendationPreview(sectionSlug, maturity, new ContentfulOptions(true), _recommendationsRouter, default);
+        await _recommendationsController.GetRecommendationPreview(sectionSlug, maturity, new ContentfulOptionsConfiguration(true), _recommendationsRouter, default);
 
         await _recommendationsRouter.Received().GetRecommendationPreview(sectionSlug, maturity, _recommendationsController, Arg.Any<CancellationToken>());
     }
@@ -69,7 +70,7 @@ public class RecommendationsControllerTests
     {
         string sectionSlug = "section-slug";
 
-        var result = await _recommendationsController.GetRecommendationPreview(sectionSlug, null, new ContentfulOptions(false), _recommendationsRouter, default);
+        var result = await _recommendationsController.GetRecommendationPreview(sectionSlug, null, new ContentfulOptionsConfiguration(false), _recommendationsRouter, default);
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
@@ -81,7 +82,7 @@ public class RecommendationsControllerTests
     [InlineData(null)]
     public async Task RecommendationsPage_Preview_Should_ThrowException_When_Args_Invalid(string? sectionSlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendationPreview(sectionSlug!, null, new ContentfulOptions(true), _recommendationsRouter, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendationPreview(sectionSlug!, null, new ContentfulOptionsConfiguration(true), _recommendationsRouter, default));
     }
 
     [Fact]

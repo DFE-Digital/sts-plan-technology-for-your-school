@@ -3,10 +3,10 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Infrastructure.Application.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
+using Dfe.PlanTech.Data.Contentful.Persistence;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Persistence
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
 {
     public class CachedContentfulRepositoryTests
     {

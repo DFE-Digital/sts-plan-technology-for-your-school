@@ -20,8 +20,7 @@
         <ProjectReference Include="..\..\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
-        <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
-        <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Contentful\Dfe.PlanTech.Infrastructure.Contentful.csproj" />
+        <ProjectReference Include="..\Dfe.PlanTech.Data.Contentful\Dfe.PlanTech.Data.Contentful.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.ServiceBus\Dfe.PlanTech.Infrastructure.ServiceBus.csproj" />
@@ -50,6 +49,7 @@
 
     <ItemGroup>
       <Folder Include="Content\" />
+      <Folder Include="Processors\" />
     </ItemGroup>
 
     <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">

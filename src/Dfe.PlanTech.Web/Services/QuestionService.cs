@@ -1,10 +1,10 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Entries;
 using Dfe.PlanTech.Web.Workflows;
 
-namespace Dfe.PlanTech.Web.Services;
+namespace Dfe.PlanTech.Application.Services;
 
 public class QuestionService(
     ContentfulWorkflow contentfulWorkflow,

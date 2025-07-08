@@ -9,26 +9,27 @@ using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Application.Responses.Commands;
 using Dfe.PlanTech.Application.Responses.Queries;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Submissions.Commands;
 using Dfe.PlanTech.Application.Submissions.Queries;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Application.Users.Helper;
 using Dfe.PlanTech.Application.Users.Queries;
-using Dfe.PlanTech.Core.Interfaces;
+using Dfe.PlanTech.Core.Caching;
+using Dfe.PlanTech.Core.Caching.Interfaces;
+using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Domain.Background;
-using Dfe.PlanTech.Domain.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
-using Dfe.PlanTech.Domain.Database;
 using Dfe.PlanTech.Domain.Groups.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Infrastructure.Contentful.Helpers;
-using Dfe.PlanTech.Infrastructure.Contentful.Serializers;
+using Dfe.PlanTech.Data.Contentful.Helpers;
+using Dfe.PlanTech.Data.Contentful.Serializers;
 using Dfe.PlanTech.Infrastructure.Data;
 using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation.Filters;
@@ -41,7 +42,6 @@ using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.Routing;
-using Dfe.PlanTech.Web.Services;
 using Dfe.PlanTech.Web.Workflows;
 using Dfe.PlanTech.Web.Workflows.Options;
 using Microsoft.ApplicationInsights.Extensibility;
@@ -99,7 +99,7 @@ public static class ProgramExtensions
 
         services.AddTransient<GetPageQuery>();
 
-        services.AddOptions<ContentfulOptions>()
+        services.AddOptions<ContentfulOptionsConfiguration>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
 
         services.AddOptions<ApiAuthenticationConfiguration>()
@@ -108,7 +108,7 @@ public static class ProgramExtensions
         services.AddOptions<SigningSecretConfiguration>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
 
-        services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptions>>().Value);
+        services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptionsConfiguration>>().Value);
         services.AddTransient((services) => services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value);
         services.AddTransient((services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value);
 

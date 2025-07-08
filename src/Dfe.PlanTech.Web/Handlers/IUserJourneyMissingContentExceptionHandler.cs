@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Exceptions;
+using Dfe.PlanTech.Core.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Handlers;
@@ -15,5 +15,5 @@ public interface IUserJourneyMissingContentExceptionHandler
     /// <param name="exception"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<IActionResult> Handle(Controller controller, UserJourneyMissingContentException exception, CancellationToken cancellationToken);
+    Task<IActionResult> Handle(Controller controller, UserJourneyMissingContentException exception);
 }

@@ -1,8 +1,8 @@
-# Dfe.PlanTech.Infrastructure.Contentful.UnitTests
+# Dfe.PlanTech.Data.Contentful.UnitTests
 
 ## Overview
 
-Project containing Unit Tests for the [Dfe.PlanTech.Infrastructure.Contentful](../../src/Dfe.PlanTech.Infrastructure.Contentful/) project
+Project containing Unit Tests for the [Dfe.PlanTech.Data.Contentful](../../src/Dfe.PlanTech.Data.Contentful/) project
 
 ## Packages
 

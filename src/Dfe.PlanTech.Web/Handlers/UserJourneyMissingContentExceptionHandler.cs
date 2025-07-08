@@ -1,5 +1,4 @@
-using Dfe.PlanTech.Domain.Exceptions;
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,7 +22,7 @@ public class UserJourneyMissingContentExceptionHandler : IUserJourneyMissingCont
         _deleteCurrentSubmissionCommand = deleteCurrentSubmissionCommand;
     }
 
-    public async Task<IActionResult> Handle(Controller controller, UserJourneyMissingContentException exception, CancellationToken cancellationToken)
+    public async Task<IActionResult> Handle(Controller controller, UserJourneyMissingContentException exception)
     {
         _logger.LogError(exception, "Handling errored user journey for section {Section}", exception.Section.Name);
 

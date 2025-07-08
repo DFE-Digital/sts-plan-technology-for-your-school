@@ -1,6 +1,4 @@
 ﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Entries;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Queries;
 using Microsoft.Extensions.Logging;
@@ -10,11 +8,11 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
     public class SubtopicRecommendationEntryRepository
     {
         private readonly ILogger<PageEntryRepository> _logger;
-        private readonly ContentfulContext _contentful;
+        private readonly ContentfulRepository _contentful;
 
         public SubtopicRecommendationEntryRepository(
             ILoggerFactory loggerFactory,
-            ContentfulContext contentfulBaseRepository
+            ContentfulRepository contentfulBaseRepository
         )
         {
             _logger = loggerFactory.CreateLogger<PageEntryRepository>();
@@ -56,7 +54,7 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
                 return null;
             }
 
-            return (CmsRecommendationDto)introForMaturity.ToDto();
+            return introForMaturity.AsDto();
         }
 
         private static GetEntriesOptions CreateGetEntityOptions(string subtopicId, int depth = 4, params IContentQuery[] additionalQueries) =>

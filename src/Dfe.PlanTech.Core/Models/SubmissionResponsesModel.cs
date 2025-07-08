@@ -4,11 +4,11 @@ namespace Dfe.PlanTech.Core.Models
 {
     public class SubmissionResponsesModel
     {
-        public List<QuestionWithAnswerModel> Responses { get; init; } = [];
-
         public int SubmissionId { get; init; }
 
-        public bool HasResponses => Responses != null && Responses.Count > 0;
+        public IEnumerable<QuestionWithAnswerModel> Responses { get; set; } = [];
+
+        public bool HasResponses => Responses != null && Responses.Any();
 
         public SubmissionResponsesModel(SqlSubmissionDto submission)
         {

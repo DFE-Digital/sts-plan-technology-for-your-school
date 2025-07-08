@@ -27,7 +27,7 @@ namespace Dfe.PlanTech.Web.Workflows
             var establishment = await UpsertEstablishmentAsync(organisationReference);
             var signIn = await _signInRepository.CreateSignInAsync(establishment.Id, user.Id);
 
-            return signIn.ToDto();
+            return signIn.AsDto();
         }
 
         private async Task<SqlUserDto> UpsertUserAsync(string dfeSignInRef)
@@ -35,11 +35,11 @@ namespace Dfe.PlanTech.Web.Workflows
             var existingUser = await _userRepository.GetUserBySignInRefAsync(dfeSignInRef);
             if (existingUser is not null)
             {
-                return existingUser.ToDto();
+                return existingUser.AsDto();
             }
 
             var newUser = await _userRepository.CreateUserBySignInRefAsync(dfeSignInRef);
-            return newUser.ToDto();
+            return newUser.AsDto();
         }
 
         private async Task<SqlEstablishmentDto> UpsertEstablishmentAsync(string organisationReference)
@@ -47,7 +47,7 @@ namespace Dfe.PlanTech.Web.Workflows
             var existingEstablishment = await _establishmentRepository.GetEstablishmentIdFromRefAsync(organisationReference);
             if (existingEstablishment is not null)
             {
-                return existingEstablishment.ToDto();
+                return existingEstablishment.AsDto();
             }
 
             var newEstablishmentData = new EstablishmentModel
@@ -65,7 +65,7 @@ namespace Dfe.PlanTech.Web.Workflows
             var newEstablishment = await _establishmentRepository
                 .CreateEstablishmentFromModelAsync(newEstablishmentData);
 
-            return newEstablishment.ToDto();
+            return newEstablishment.AsDto();
         }
     }
 }

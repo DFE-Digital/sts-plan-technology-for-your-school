@@ -1,8 +1,8 @@
 using Contentful.Core.Search;
 using Dfe.PlanTech.Infrastructure.Application.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Persistence;
+using Dfe.PlanTech.Data.Contentful.Persistence;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests;
+namespace Dfe.PlanTech.Data.Contentful.UnitTests;
 
 public class QueryBuilderWithQueryTests
 {

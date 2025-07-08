@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Dfe.PlanTech.Domain.Content.Models;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers
 {
     public class CardTests
     {

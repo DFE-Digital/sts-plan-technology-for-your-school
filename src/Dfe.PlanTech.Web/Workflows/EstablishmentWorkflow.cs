@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Web.Workflows
     public class EstablishmentWorkflow(
         EstablishmentRepository establishmentRepository,
         EstablishmentLinkRepository establishmentLinkRepository,
-        GroupReadActivityRepository groupReadActivityRepository
+        GroupReadActivityRepository groupReadActivityRepository,
         StoredProcedureRepository storedProcedureRepository
     )
     {
@@ -22,7 +22,7 @@ namespace Dfe.PlanTech.Web.Workflows
             var establishment = await _establishmentRepository.GetEstablishmentByRefAsync(establishmentModel.Reference);
             establishment ??= await _establishmentRepository.CreateEstablishmentFromModelAsync(establishmentModel);
 
-            return establishment.ToDto();
+            return establishment.AsDto();
         }
 
         public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(string establishmentUrn, string establishmentName)
@@ -45,7 +45,7 @@ namespace Dfe.PlanTech.Web.Workflows
         public async Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId)
         {
             var links = await _establishmentLinkRepository.GetGroupEstablishmentsByEstablishmentIdAsync(establishmentId);
-            return links.Select(l => l.ToDto()).ToList();
+            return links.Select(l => l.AsDto()).ToList();
         }
 
         public Task<int> RecordGroupSelection(
@@ -61,7 +61,7 @@ namespace Dfe.PlanTech.Web.Workflows
         public async Task<SqlGroupReadActivityDto?> GetLatestSelectedGroupSchool(int userId, int userEstablishmentId)
         {
             var latestSelectedGroupSchools = await _groupReadActivityRepository.GetGroupReadActivitiesAsync(userId, userEstablishmentId);
-            return latestSelectedGroupSchools.FirstOrDefault()?.ToDto();
+            return latestSelectedGroupSchools.FirstOrDefault()?.AsDto();
         }
     }
 }

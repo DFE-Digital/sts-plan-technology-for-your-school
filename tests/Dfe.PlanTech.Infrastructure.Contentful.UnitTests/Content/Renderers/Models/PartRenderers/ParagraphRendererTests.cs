@@ -1,11 +1,10 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
+using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
 public class ParagraphRendererTests
 {

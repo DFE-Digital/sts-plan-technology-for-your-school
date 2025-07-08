@@ -1,15 +1,15 @@
 ﻿using System.Text;
 using Contentful.Core.Models;
-using Dfe.PlanTech.Domain.Constants;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
+using Dfe.PlanTech.Data.Contentful.PartRenderers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using ContentfulFile = Contentful.Core.Models.File;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
 public class EmbeddedEntryBlockTests
 {

@@ -1,9 +1,10 @@
 ﻿using System.Security.Authentication;
+using Dfe.PlanTech.Application.Context;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Workflows;
+using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Web.Services;
+namespace Dfe.PlanTech.Application.Services;
 
 public class EstablishmentService(
     ILogger<EstablishmentService> logger,

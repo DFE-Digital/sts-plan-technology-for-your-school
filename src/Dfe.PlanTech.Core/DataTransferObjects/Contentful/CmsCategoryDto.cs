@@ -1,7 +1,21 @@
-﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
+
+namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
 {
     public class CmsCategoryDto : CmsEntryDto
     {
+        public CmsCategoryDto(QuestionnaireCategoryEntry categoryEntry)
+        {
+            InternalName = categoryEntry.InternalName;
+            Header = categoryEntry.Header.AsDto();
+            Content = categoryEntry.Content.Select(c => c.AsDto()).ToList();
+            Sections = categoryEntry.Sections.Select(s => s.AsDto()).ToList();
+            SectionStatuses = categoryEntry.Sections.Select(s => s.Status)).ToList();
+            Completed = categoryEntry.Completed;
+            RetrievalError = categoryEntry.RetrievalError;
+        }
+
         public string InternalName { get; set; } = "";
         public CmsHeaderDto Header { get; set; } = null!;
         public List<CmsEntryDto> Content { get; set; } = null!;

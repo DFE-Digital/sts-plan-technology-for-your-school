@@ -29,7 +29,7 @@ public class CookieServiceTests
         service.SetVisibility(visibility);
 
         var cookie = service.GetCookie();
-        Assert.IsType<DfeCookie>(cookie);
+        Assert.IsType<DfeCookieModel>(cookie);
         Assert.Equal(visibility, cookie.IsVisible);
         Assert.Null(cookie.UserAcceptsCookies);
     }
@@ -45,7 +45,7 @@ public class CookieServiceTests
         service.SetCookieAcceptance(userAcceptsCookies);
 
         var cookie = service.GetCookie();
-        Assert.IsType<DfeCookie>(cookie);
+        Assert.IsType<DfeCookieModel>(cookie);
         Assert.Equal(userAcceptsCookies, cookie.UserAcceptsCookies);
         Assert.True(cookie.IsVisible);
         Assert.True(cookie.UserPreferencesSet);
@@ -63,7 +63,7 @@ public class CookieServiceTests
 
         var service = CreateStrut();
         var cookie = service.GetCookie();
-        Assert.IsType<DfeCookie>(cookie);
+        Assert.IsType<DfeCookieModel>(cookie);
         Assert.True(cookie.UserAcceptsCookies);
         Assert.True(cookie.IsVisible);
     }
@@ -79,7 +79,7 @@ public class CookieServiceTests
 
         var service = CreateStrut();
         var cookie = service.GetCookie();
-        Assert.IsType<DfeCookie>(cookie);
+        Assert.IsType<DfeCookieModel>(cookie);
         Assert.Null(cookie.UserAcceptsCookies);
         Assert.True(cookie.IsVisible);
         Assert.False(cookie.UseCookies);
@@ -99,7 +99,7 @@ public class CookieServiceTests
 
         var service = CreateStrut();
         var cookie = service.GetCookie();
-        Assert.IsType<DfeCookie>(cookie);
+        Assert.IsType<DfeCookieModel>(cookie);
         Assert.Equal(userAcceptsCookies, cookie.UserAcceptsCookies);
         Assert.True(cookie.IsVisible);
         Assert.Equal(expectedResult, cookie.UserPreferencesSet);
@@ -118,7 +118,7 @@ public class CookieServiceTests
 
     private static string SerializeCookie(bool visibility, bool? userAcceptsCookies)
     {
-        var cookie = new DfeCookie { IsVisible = visibility, UserAcceptsCookies = userAcceptsCookies };
+        var cookie = new DfeCookieModel { IsVisible = visibility, UserAcceptsCookies = userAcceptsCookies };
         return JsonSerializer.Serialize(cookie);
     }
 }

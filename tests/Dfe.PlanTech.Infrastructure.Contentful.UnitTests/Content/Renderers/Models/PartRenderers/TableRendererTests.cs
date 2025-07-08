@@ -1,16 +1,15 @@
 using System.Text;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models;
-using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
+using Dfe.PlanTech.Data.Contentful.PartRenderers;
 using Microsoft.Extensions.Logging.Abstractions;
 using TableCellRenderer =
-    Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers.TableCellRenderer;
-using TableRenderer = Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers.TableRenderer;
-using TableRowRenderer = Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers.TableRowRenderer;
+    Dfe.PlanTech.Data.Contentful.PartRenderers.TableCellRenderer;
+using TableRenderer = Dfe.PlanTech.Data.Contentful.PartRenderers.TableRenderer;
+using TableRowRenderer = Dfe.PlanTech.Data.Contentful.PartRenderers.TableRowRenderer;
 
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
 public class TableRendererTests
 {

@@ -13,7 +13,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
-    <ProjectReference Include="..\Dfe.PlanTech.Domain\Dfe.PlanTech.Domain.csproj" />
   </ItemGroup>
 
 </Project>

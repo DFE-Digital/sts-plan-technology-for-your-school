@@ -11,8 +11,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Core.Constants;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -70,7 +71,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [LogInvalidModelState]
     [HttpGet("question/preview/{questionId}")]
     public async Task<IActionResult> GetQuestionPreviewById(string questionId,
-                                                            [FromServices] ContentfulOptions contentfulOptions,
+                                                            [FromServices] ContentfulOptionsConfiguration contentfulOptions,
                                                             CancellationToken cancellationToken = default)
     {
         if (!contentfulOptions.UsePreviewApi)
@@ -137,7 +138,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> SubmitAnswer(
         string sectionSlug,
         string questionSlug,
-        SubmitAnswerDto submitAnswerDto,
+        SubmitAnswerViewModel submitAnswerDto,
         [FromServices] ISubmitAnswerCommand submitAnswerCommand,
         [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
         string? returnTo = "",

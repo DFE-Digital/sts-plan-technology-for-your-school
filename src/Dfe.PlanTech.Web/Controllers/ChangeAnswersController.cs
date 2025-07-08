@@ -1,8 +1,12 @@
-﻿using Dfe.PlanTech.Domain.Exceptions;
+﻿using Dfe.PlanTech.Application.Context;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Routing;
+using Dfe.PlanTech.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,34 +23,37 @@ namespace Dfe.PlanTech.Web.Controllers
         public const string ChangeAnswersViewName = "ChangeAnswers";
         public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
 
-        private readonly IUser _user;
+        private readonly CurrentUser _currentUser;
+        private readonly Router _router;
+        private readonly SubmissionService _submissionService;
 
         public ChangeAnswersController(
             ILogger<ChangeAnswersController> logger,
-            IUser user
+            CurrentUser currentUser,
+            Router router,
+            SubmissionService submissionService
         ) : base(logger)
         {
-            _user = user;
+            _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+            _router = router ?? throw new ArgumentNullException(nameof(router));
+            _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
         }
 
         [HttpGet("{sectionSlug}/change-answers")]
         public async Task<IActionResult> ChangeAnswersPage(
             string sectionSlug,
             [FromServices] IChangeAnswersRouter changeAnswersValidator,
-            [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
-            CancellationToken cancellationToken = default)
+            [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler)
         {
+            ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
+
             try
             {
-                ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
-
-                var errorMessage = TempData["ErrorMessage"]?.ToString();
-
-                return await changeAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);
+                return await _router.RouteToNextPage(this, sectionSlug, isCompleted: true, TempData["ErrorMessage"]?.ToString());
             }
             catch (UserJourneyMissingContentException userJourneyException)
             {
-                return await userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException, cancellationToken);
+                return await userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException);
             }
         }
 
@@ -56,7 +63,6 @@ namespace Dfe.PlanTech.Web.Controllers
             [FromServices] IGetRecommendationRouter getRecommendationRouter,
             CancellationToken cancellationToken = default)
         {
-
             var recommendationSlug = await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken);
 
             return RedirectToAction(
