@@ -52,7 +52,7 @@ public static class SubmissionStatusHelper
             : $"on {DateTimeHelper.FormattedDateShort(localTime)}";
     }
 
-    public static async Task<CategoryEntry> RetrieveSectionStatuses(CategoryEntry category, ILogger logger, int? schoolId = null)
+    public static async Task<QuestionnaireCategoryEntry> RetrieveSectionStatuses(QuestionnaireCategoryEntry category, ILogger logger, int? schoolId = null)
     {
         try
         {

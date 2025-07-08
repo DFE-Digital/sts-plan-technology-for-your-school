@@ -1,0 +1,64 @@
+﻿using Dfe.PlanTech.Core.Content.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+
+namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
+{
+    public class SubtopicRecommendationWorflow
+    {
+        private readonly ILogger<SubtopicRecommendationWorflow> _logger;
+        private readonly ContentfulRepository _contentful;
+
+        public SubtopicRecommendationWorflow(
+            ILoggerFactory loggerFactory,
+            ContentfulRepository contentfulBaseRepository
+        )
+        {
+            _logger = loggerFactory.CreateLogger<SubtopicRecommendationWorflow>();
+            _contentful = contentfulBaseRepository;
+        }
+
+        public async Task<SubtopicRecommendationEntry?> GetFirstSubTopicRecommendationAsync(string subtopicId)
+        {
+            var options = CreateGetEntityOptions(subtopicId);
+            var subTopicRecommendations = await _contentful.GetEntries<SubtopicRecommendationEntry>(options);
+
+            var subtopicRecommendation = subTopicRecommendations.FirstOrDefault();
+            if (subtopicRecommendation is null)
+            {
+                LogMissingRecommendationError(subtopicId);
+            }
+
+            return subtopicRecommendation;
+        }
+
+        public async Task<CmsRecommendationDto?> GetIntroForMaturityAsync(string subtopicId, string maturity)
+        {
+            var options = CreateGetEntityOptions(subtopicId, 2);
+            options.Select = ["fields.intros", "sys"];
+
+            var subtopicRecommendations = await _contentful.GetEntries<SubtopicRecommendationEntry>(options);
+
+            var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
+            if (subtopicRecommendation is null)
+            {
+                LogMissingRecommendationError(subtopicId);
+                return null;
+            }
+
+            var introForMaturity = subtopicRecommendation.GetRecommendationByMaturity(maturity);
+            if (introForMaturity is null)
+            {
+                _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
+                return null;
+            }
+
+            return introForMaturity.AsDto();
+        }
+
+        private static GetEntriesOptions CreateGetEntityOptions(string subtopicId, int depth = 4, params IContentQuery[] additionalQueries) =>
+            new(depth, [new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId }, .. additionalQueries]);
+
+        private void LogMissingRecommendationError(string subtopicId)
+        => _logger.LogError("Could not find subtopic recommendation in Contentful for subtopic with ID '{SubtopicId}'", subtopicId);
+    }
+}

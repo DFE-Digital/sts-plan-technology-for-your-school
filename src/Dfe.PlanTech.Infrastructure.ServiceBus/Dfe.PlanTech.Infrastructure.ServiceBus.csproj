@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
-    <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.Data\Dfe.PlanTech.Infrastructure.Data.csproj" />
   </ItemGroup>
 
     <ItemGroup>

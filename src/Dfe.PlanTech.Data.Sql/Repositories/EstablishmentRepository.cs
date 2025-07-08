@@ -33,9 +33,9 @@ public class EstablishmentRepository
         return establishmentEntity;
     }
 
-    public Task<EstablishmentEntity?> GetEstablishmentByRefAsync(string establishmentRef)
+    public Task<EstablishmentEntity?> GetEstablishmentByRefAsync(string establishmentReference)
     {
-        return GetEstablishmentByAsync(establishment => establishment.EstablishmentRef == establishmentRef);
+        return GetEstablishmentByAsync(establishment => establishment.EstablishmentRef == establishmentReference);
     }
 
     public Task<EstablishmentEntity?> GetEstablishmentByAsync(Expression<Func<EstablishmentEntity, bool>> predicate)

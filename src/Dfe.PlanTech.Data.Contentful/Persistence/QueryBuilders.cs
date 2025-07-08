@@ -3,7 +3,7 @@ using Contentful.Core.Search;
 using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.Application.Models;
 using Dfe.PlanTech.Data.Contentful.Persistence.Queries;
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Queries;
+using Dfe.PlanTech.Data.Contentful.Queries;
 
 namespace Dfe.PlanTech.Data.Contentful.Persistence;
 

@@ -13,12 +13,11 @@ public class UserRepository
         _db = dbContext;
     }
 
-    public async Task<UserEntity> CreateUserBySignInRefAsync(string dfeSignInRef)
-
+    public async Task<UserEntity> CreateUserBySignInRefAsync(string dfeSignInReference)
     {
         var userEntity = new UserEntity
         {
-            DfeSignInRef = dfeSignInRef,
+            DfeSignInRef = dfeSignInReference,
             DateCreated = DateTime.UtcNow
         };
 
@@ -28,9 +27,9 @@ public class UserRepository
         return userEntity;
     }
 
-    public async Task<UserEntity?> GetUserBySignInRefAsync(string dfeSignInRef)
+    public async Task<UserEntity?> GetUserBySignInRefAsync(string dfeSignInReference)
     {
-        var user = await GetUserByAsync(user => user.DfeSignInRef == dfeSignInRef);
+        var user = await GetUserByAsync(user => user.DfeSignInRef == dfeSignInReference);
         return user;
     }
 

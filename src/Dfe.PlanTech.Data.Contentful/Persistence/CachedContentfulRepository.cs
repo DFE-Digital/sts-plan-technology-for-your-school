@@ -2,7 +2,7 @@ using Dfe.PlanTech.Core.Caching.Interfaces;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Persistence;
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Queries;
+using Dfe.PlanTech.Data.Contentful.Queries;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;

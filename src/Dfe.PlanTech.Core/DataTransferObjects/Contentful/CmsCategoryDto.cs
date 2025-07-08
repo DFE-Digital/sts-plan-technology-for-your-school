@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             Header = categoryEntry.Header.AsDto();
             Content = categoryEntry.Content.Select(c => c.AsDto()).ToList();
             Sections = categoryEntry.Sections.Select(s => s.AsDto()).ToList();
-            SectionStatuses = categoryEntry.Sections.Select(s => s.Status)).ToList();
+            SectionStatuses = categoryEntry.Sections.Select(s => s.Status.AsDto()).ToList();
             Completed = categoryEntry.Completed;
             RetrievalError = categoryEntry.RetrievalError;
         }

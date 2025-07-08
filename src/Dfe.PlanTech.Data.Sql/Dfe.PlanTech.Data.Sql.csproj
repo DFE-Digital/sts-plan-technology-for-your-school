@@ -16,7 +16,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
-    <ProjectReference Include="..\src\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
   </ItemGroup>
 
 </Project>

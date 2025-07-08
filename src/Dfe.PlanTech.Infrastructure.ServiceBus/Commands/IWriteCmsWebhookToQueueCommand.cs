@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Dfe.PlanTech.Domain.Queues.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
 using Microsoft.AspNetCore.Http;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.Commands;

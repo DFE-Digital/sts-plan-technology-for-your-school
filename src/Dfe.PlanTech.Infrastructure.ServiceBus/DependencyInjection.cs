@@ -7,7 +7,7 @@ using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Core.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Queues;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
 using Microsoft.Extensions.Azure;

@@ -16,11 +16,11 @@ public class EstablishmentModel
     [JsonPropertyName("groupUid")]
     public string? GroupUid { get; set; }
 
-    [JsonPropertyName("type")]
-    public EstablishmentTypeModel? Type { get; set; }
-
     [JsonPropertyName("name")]
     public string OrgName { get; set; } = null!;
+
+    [JsonPropertyName("type")]
+    public EstablishmentTypeModel? Type { get; set; }
 
     public bool IsValid => References()
         .Any(reference => !string.IsNullOrEmpty(reference));

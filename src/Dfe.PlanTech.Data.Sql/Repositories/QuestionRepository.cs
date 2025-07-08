@@ -1,6 +1,4 @@
-﻿using Dfe.PlanTech.Data.Sql;
-
-namespace Dfe.PlanTech.Data.Sql.Repositories;
+﻿namespace Dfe.PlanTech.Data.Sql.Repositories;
 
 public class QuestionRepository
 {

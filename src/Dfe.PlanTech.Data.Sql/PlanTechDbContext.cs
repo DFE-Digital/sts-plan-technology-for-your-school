@@ -14,7 +14,7 @@ public class PlanTechDbContext : DbContext
     public virtual DbSet<AnswerEntity> Answers { get; set; } = null!;
     public virtual DbSet<QuestionEntity> Questions { get; set; } = null!;
     public virtual DbSet<SectionStatusEntity> SectionStatuses { get; set; } = null!;
-    public virtual DbSet<SignInEntity> SignIn { get; set; } = null!;
+    public virtual DbSet<SignInEntity> SignIns { get; set; } = null!;
     public virtual DbSet<SubmissionEntity> Submissions { get; set; } = null!;
     public virtual DbSet<UserEntity> Users { get; set; } = null!;
     public virtual DbSet<GroupReadActivityEntity> GroupReadActivities { get; set; }

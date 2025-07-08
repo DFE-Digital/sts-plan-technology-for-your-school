@@ -1,5 +1,4 @@
 ﻿using Dfe.PlanTech.Data.Sql.Entities;
-using Dfe.PlanTech.Data.Sql;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;

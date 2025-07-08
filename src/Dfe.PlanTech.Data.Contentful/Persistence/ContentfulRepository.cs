@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Persistence;
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Queries;
+using Dfe.PlanTech.Data.Contentful.Queries;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

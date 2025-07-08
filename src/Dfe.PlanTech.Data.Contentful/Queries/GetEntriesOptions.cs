@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Queries;
+namespace Dfe.PlanTech.Data.Contentful.Queries;
 
 public class GetEntriesOptions
 {

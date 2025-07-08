@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Queries;
+using Dfe.PlanTech.Data.Contentful.Queries;
 
 namespace Dfe.PlanTech.Data.Contentful.Persistence;
 
