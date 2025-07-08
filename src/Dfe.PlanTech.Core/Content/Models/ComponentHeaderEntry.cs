@@ -1,5 +1,5 @@
+using Contentful.Core.Models;
 using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Core.Content.Models;
 
@@ -7,11 +7,9 @@ namespace Dfe.PlanTech.Core.Content.Models;
 /// Model for Header content type from Contentful
 /// </summary>
 /// <inheritdoc/>
-public class Header : ContentComponent, IHeader
+public class ComponentHeaderEntry : Entry<ContentComponent>
 {
     public string Text { get; init; } = null!;
-
     public HeaderTag Tag { get; init; }
-
     public HeaderSize Size { get; init; }
 }

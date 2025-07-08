@@ -8,25 +8,13 @@ namespace Dfe.PlanTech.Core.Content.Models;
 /// <remarks>
 /// Currently only used in footer. Could be extended to be both in future
 /// </remarks>
-public class NavigationLink : ContentComponent, INavigationLink
+public class NavigationLink : ContentComponent
 {
-    /// <summary>
-    /// Display text (i.e. <a>{DisplayText}</a>)
-    /// </summary>
+    public string InternalName { get; set; } = null!;
     public string DisplayText { get; set; } = null!;
-
-    /// <summary>
-    /// Href value (i.e. <a href="{Href}"></a>)
-    /// </summary>
     public string? Href { get; set; } = null;
-
-    /// <summary>
-    /// Should this link open in a new tab?
-    /// </summary>
     public bool OpenInNewTab { get; set; } = false;
 
-    /// <summary>
-    /// The content to link to.
-    /// </summary>
-    public IContentComponent? ContentToLinkTo { get; set; }
+    // TODO: Move to DTO
+    public ContentComponent? ContentToLinkTo { get; set; }
 }

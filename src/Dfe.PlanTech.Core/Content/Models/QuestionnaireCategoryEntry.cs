@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Domain.Questionnaire.Models;
 public class QuestionnaireCategoryEntry : Entry<ContentComponent>
 {
     public string InternalName { get; set; } = "";
-    public Header Header { get; set; } = null!;
+    public ComponentHeaderEntry Header { get; set; } = null!;
     public List<ContentComponent> Content { get; set; } = null!;
     public List<Section> Sections { get; set; } = [];
     public int Completed { get; set; }

@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
+﻿using Contentful.Core.Models;
 
 namespace Dfe.PlanTech.Core.Content.Models;
 
@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Core.Content.Models;
 /// Model for DropDown type.
 /// </summary>
 /// <inheritdoc/>
-public class DropDownEntry : ContentComponent, IComponentDropDown<RichTextContent>
+public class ComponentDropDownEntry : Entry<ContentComponent>
 {
     public string InternalName { get; set; } = null!;
     public string Title { get; set; } = null!;
