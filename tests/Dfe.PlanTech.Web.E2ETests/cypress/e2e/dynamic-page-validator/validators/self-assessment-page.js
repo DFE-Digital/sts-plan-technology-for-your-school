@@ -1,19 +1,19 @@
-import { FindPageForSlug, ValidatePage, dataLoaded, selfAssessmentSlug } from "../helpers/index.js";
+import { FindPageForSlug, ValidatePage, dataLoaded, homePageSlug } from "../helpers/index.js";
 
 export const validateSelfAssessmentPage = (dataMapper) => {
     if (!dataLoaded(dataMapper)) {
         return;
     }
 
-    const slug = selfAssessmentSlug.replace("/", "");
+    const slug = homePageSlug.replace("/", "");
     const selfAssessmentPage = FindPageForSlug({ slug, dataMapper });
 
     if (!selfAssessmentPage) {
         throw new Error(
-            `Could not find self-assessment page; not found page with slug ${selfAssessmentSlug}`
+            `Could not find self-assessment page; not found page with slug ${homePageSlug}`
         );
     }
 
-    cy.loginWithEnv(selfAssessmentSlug);
+    cy.loginWithEnv(homePageSlug);
     ValidatePage(slug, selfAssessmentPage)
 }

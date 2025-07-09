@@ -41,7 +41,7 @@ public class CheckAnswersRouter : ICheckAnswersRouter
         {
             Status.CompleteNotReviewed => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
             Status.CompleteReviewed when isChangeAnswersFlow => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
-            Status.NotStarted => PageRedirecter.RedirectToSelfAssessment(controller),
+            Status.NotStarted => PageRedirecter.RedirectToHomepage(controller),
             _ => ProcessQuestionStatus(sectionSlug, controller),
         };
     }

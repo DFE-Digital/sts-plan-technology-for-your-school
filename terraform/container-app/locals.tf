@@ -104,15 +104,19 @@ locals {
   cdn_create_custom_domain = var.cdn_create_custom_domain
   cdn_frontdoor_host_add_response_headers = length(var.cdn_frontdoor_host_add_response_headers) > 0 ? var.cdn_frontdoor_host_add_response_headers : [{
     "name"  = "Strict-Transport-Security",
-    "value" = "max-age=31536000",
+    "value" = "max-age=31536000; includeSubDomains; preload",
     },
     {
       "name"  = "X-Content-Type-Options",
       "value" = "nosniff",
     },
     {
+      "name"  = "X-Frame-Options",
+      "value" = "DENY",
+    },
+    {
       "name"  = "X-XSS-Protection",
-      "value" = "1",
+      "value" = "0",
   }]
   cdn_frontdoor_url_path_redirects = var.cdn_frontdoor_url_path_redirects
 
@@ -172,7 +176,6 @@ locals {
   # Storage Accounts #
   ####################
 
-  storage_account_public_access_enabled                   = var.storage_account_public_access_enabled
   container_app_storage_account_shared_access_key_enabled = var.container_app_storage_account_shared_access_key_enabled
   container_app_blob_storage_public_access_enabled        = var.container_app_blob_storage_public_access_enabled
   storage_account_expiration_period                       = var.storage_account_expiration_period

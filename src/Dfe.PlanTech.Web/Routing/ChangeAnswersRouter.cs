@@ -77,7 +77,7 @@ namespace Dfe.PlanTech.Web.Routing
                 }
 
                 case Status.NotStarted:
-                    return PageRedirecter.RedirectToSelfAssessment(controller);
+                    return PageRedirecter.RedirectToHomepage(controller);
 
                 default:
                     return ProcessQuestionStatus(sectionSlug, controller);
