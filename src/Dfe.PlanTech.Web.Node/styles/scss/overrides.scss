@@ -179,3 +179,16 @@ button.govuk-button--white {
     float: right !important;
   }
 }
+
+//Category landing page
+ul.landing-page-list > li {
+    height: 40px !important;
+}
+
+.landing-page-list__name-and-hint {
+    vertical-align: middle !important;
+}
+
+.landing-page-list-heading {
+    border-top: none !important;
+}
