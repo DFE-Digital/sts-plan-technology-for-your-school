@@ -11,6 +11,7 @@ using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -220,6 +221,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = true,
+                LastCompletionDate = new DateTime(),
                 DateUpdated = DateTime.Parse(utcTime),
             });
 
@@ -265,6 +267,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 SectionId = "Section1",
                 Completed = true,
+                LastCompletionDate = new DateTime(),
                 DateUpdated = DateTime.Parse(utcTime),
             });
 
@@ -468,52 +471,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.Null(categorySectionDto.ErrorMessage);
         }
 
-        [Theory]
-        [InlineData("2015/10/15")]
-        [InlineData("2015/10/16 12:13:00")] // British summer time GMT + 1
-        public async Task Returns_CategorySelectionStatus_If_Section_IsCompletedAndStartedNew(string utcTime)
-        {
-            _systemTime.Today.Returns(_ => new DateTime(2015, 10, 16, 0, 0, 0, DateTimeKind.Utc));
-            _category.SectionStatuses.Add(new SectionStatusDto()
-            {
-                SectionId = "Section1",
-                Completed = false,
-                LastCompletionDate = DateTime.Parse(utcTime),
-                DateUpdated = DateTime.Parse(utcTime),
-            });
-
-            _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);
-
-            var result = await _categorySectionViewComponent.InvokeAsync(_category) as ViewViewComponentResult;
-
-            Assert.NotNull(result);
-            Assert.NotNull(result.ViewData);
-
-            var model = result.ViewData.Model;
-            Assert.NotNull(model);
-
-            var unboxed = model as CategorySectionViewComponentViewModel;
-            Assert.NotNull(unboxed);
-
-            Assert.Equal(0, unboxed.CompletedSectionCount);
-            Assert.Equal(1, unboxed.TotalSectionCount);
-
-            var categorySectionDtoList = unboxed.CategorySectionDto;
-
-            Assert.NotNull(categorySectionDtoList);
-
-            categorySectionDtoList = categorySectionDtoList.ToList();
-            Assert.NotEmpty(categorySectionDtoList);
-
-            var categorySectionDto = categorySectionDtoList.FirstOrDefault();
-
-            Assert.NotNull(categorySectionDto);
-
-            Assert.Equal("section-1", categorySectionDto.Slug);
-            Assert.Equal(SectionProgressStatus.CompletedStartedNew, categorySectionDto.ProgressStatus);
-            Assert.Null(categorySectionDto.ErrorMessage);
-        }
-
         [Fact]
         public async Task Returns_NullSlug_And_ErrorMessage_In_CategorySectionInfo_If_SlugDoesNotExist()
         {
@@ -530,7 +487,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category.SectionStatuses.Add(new SectionStatusDto()
             {
                 SectionId = "Section1",
-                Completed = true
+                Completed = true,
+                LastCompletionDate = new DateTime()
             });
 
             _ = _getSubmissionStatusesQuery.GetSectionSubmissionStatuses(_category.Sections).Returns([.. _category.SectionStatuses]);

@@ -6,6 +6,8 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Controllers;
@@ -108,14 +110,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void Should_Return_Category_Landing_Page_When_IsCategoryLandingPage_Is_True()
         {
-            var categoryLandingPage = new Page
+            var category = new Category()
+            {
+                InternalName = "Category1",
+                Header = new Header { Text = "Category1 Header" }
+            };
+
+            var categoryLandingPage = new Page()
             {
                 Slug = CATEGORY_LANDING_PAGE_SLUG,
                 DisplayBackButton = false,
                 DisplayHomeButton = false,
                 DisplayTopicTitle = false,
                 DisplayOrganisationName = false,
-                IsLandingPage = true
+                IsLandingPage = true,
+                Content = [category]
             };
 
             var result = _controller.GetByRoute(categoryLandingPage, userSubstitute);
