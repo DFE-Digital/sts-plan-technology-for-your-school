@@ -4,7 +4,7 @@ using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,20 +13,24 @@ namespace Dfe.PlanTech.Web.ViewComponents;
 public class CategoryLandingViewComponent(
     ILogger<CategoryLandingViewComponent> logger,
     IGetSubmissionStatusesQuery query,
-    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : ViewComponent
+    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery,
+    IGetLatestResponsesQuery getLatestResponsesQuery,
+    IUser user) : ViewComponent
 {
     private readonly ILogger<CategoryLandingViewComponent> _logger = logger;
     private readonly IGetSubmissionStatusesQuery _query = query;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
+    private readonly IGetLatestResponsesQuery _getLatestResponsesQuery = getLatestResponsesQuery;
+    private readonly IUser _user = user;
 
-    public async Task<IViewComponentResult> InvokeAsync(Category category)
+    public async Task<IViewComponentResult> InvokeAsync(Category category, string slug)
     {
-        var viewModel = await GenerateViewModel(category);
+        var viewModel = await GenerateViewModel(category, slug);
 
         return View(viewModel);
     }
 
-    private async Task<CategoryLandingViewComponentViewModel> GenerateViewModel(Category category)
+    private async Task<CategoryLandingViewComponentViewModel> GenerateViewModel(Category category, string slug)
     {
         if (category is null)
         {
@@ -48,6 +52,7 @@ public class CategoryLandingViewComponent(
         var viewModel = new CategoryLandingViewComponentViewModel()
         {
             CategoryName = category.Header.Text,
+            CategorySlug = slug,
             Sections = category.Sections,
             AllSectionsCompleted = category.Completed == category.Sections.Count,
             AnySectionsCompleted = category.Completed > 0,
@@ -69,7 +74,7 @@ public class CategoryLandingViewComponent(
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
                 _logger.LogError("No Slug found for Subtopic with ID: {sectionId}/ name: {sectionName}", section.Sys.Id, section.Name);
 
-            var recommendations = await GetCategoryLandingSectionRecommendations(section, sectionStatus);
+            var recommendations = await GetCategoryLandingSectionRecommendations(section);
 
             yield return new CategoryLandingSection(
                 slug: section.InterstitialPage?.Slug,
@@ -82,39 +87,25 @@ public class CategoryLandingViewComponent(
         }
     }
 
-    private async Task<CategoryLandingSectionRecommendations> GetCategoryLandingSectionRecommendations(Section section, SectionStatusDto? sectionStatus)
+    private async Task<CategoryLandingSectionRecommendations> GetCategoryLandingSectionRecommendations(Section section)
     {
-        var recommendations = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {section.Name}");
-
-
-        if (string.IsNullOrEmpty(sectionStatus?.LastMaturity))
-            return new CategoryLandingSectionRecommendations();
-
         try
         {
-            var recommendation = await _getSubTopicRecommendationQuery.GetRecommendationsViewDto(section.Sys.Id, sectionStatus.LastMaturity);
-            if (recommendation == null)
-            {
-                return new CategoryLandingSectionRecommendations
-                {
-                    NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
-                };
-            }
+            var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _user.GetEstablishmentId(), section.Sys.Id, true) ?? throw new DatabaseException($"Could not find users answers for:  {section.Name}");
+            var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses).ToList();
+            var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {section.Name}");
+            var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
+
             return new CategoryLandingSectionRecommendations
             {
                 SectionName = section.Name,
                 SectionSlug = section.InterstitialPage.Slug,
-                Answers = new List<QuestionWithAnswer>(),
-                Chunks = recommendations.Section.Chunks,
-
+                Answers = latestResponses,
+                Chunks = subTopicChunks,
             };
         }
-        catch (Exception e)
+        catch
         {
-            _logger.LogError(e,
-                             "An exception has occurred while trying to retrieve the recommendation for Section {sectionName}, with the message {errMessage}",
-                             section.Name,
-                             e.Message);
             return new CategoryLandingSectionRecommendations
             {
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"

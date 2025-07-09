@@ -7,7 +7,8 @@
 
     <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { Section = topic, Context = "Sections" }' />
 
-    @if (topic.LastCompletionDate != null)
+    @if (topic.LastCompletionDate != "" && topic.LastCompletionDate != null)
+
     {
         <ul class="govuk-task-list">
             <li class="govuk-task-list__item" style="border-top: none;">
@@ -15,6 +16,14 @@
                     <strong>Recommendations</strong>
                 </div>
             </li>
+            @foreach (var chunk in topic.Recommendations.Chunks)
+            {
+                <li class="govuk-task-list__item govuk-task-list__item--with-link">
+                    <div class="govuk-task-list__name-and-hint landing-page-list__name-and-hint">
+                        <a class="govuk-link govuk-task-list__link" href="/@Model.CategorySlug/@topic.Slug/@chunk.SlugifiedLinkText">@chunk.LinkText</a>
+                    </div>
+                </li>
+            }
         </ul>
     }
 }

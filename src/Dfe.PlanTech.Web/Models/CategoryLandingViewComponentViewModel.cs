@@ -7,6 +7,8 @@ namespace Dfe.PlanTech.Web.Models
     {
         public string CategoryName { get; set; } = null!;
 
+        public string CategorySlug { get; set; } = null!;
+
         public List<Section> Sections { get; set; } = [];
 
         public List<CategoryLandingSection> CategoryLandingSections { get; init; } = null!;

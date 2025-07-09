@@ -40,6 +40,7 @@ public class CategoryLandingSection
         Slug = slug;
         Name = name;
         ShortDescription = shortDescription;
+        Recommendations = recommendations;
 
         if (sectionStatus != null)
         {
