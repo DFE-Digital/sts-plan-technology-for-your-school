@@ -7,6 +7,7 @@ on:
         type: string
         description: "The environment to run infrastructure deployment on:"
         required: true
+  push:
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -32,6 +33,8 @@ env:
 
 jobs:
   terraform-plan:
+    permissions:
+      id-token: write
     name: Terraform plan
     runs-on: ubuntu-22.04
     defaults:
@@ -56,13 +59,13 @@ jobs:
         run: |
           echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
 
-      - name: Login with AZ
-        uses: ./.github/actions/azure-login
+      - name: Azure CLI Login
+        uses: azure/login@v2
         with:
-          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+          client-id: ${{ secrets.AZ_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZ_TENANT_ID }}
+          subscription-id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          environment: 'Dev'
 
       - name: Replace in secret environment variable
         run: |
@@ -125,6 +128,7 @@ jobs:
     needs: terraform-plan
     name: Deploy Terraform
     runs-on: ubuntu-22.04
+    if: false
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
