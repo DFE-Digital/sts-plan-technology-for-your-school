@@ -26,6 +26,9 @@ env:
 
 jobs:
   upgrade-database:
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-22.04
     name: Update Database for ${{ inputs.environment }}
     environment: ${{ inputs.environment }}
@@ -41,7 +44,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Build & Run Database Upgrader
         uses: ./.github/actions/build-and-run-database-upgrader
@@ -85,6 +87,9 @@ jobs:
           docker push ${{ secrets.AZ_ACR_URL }}/${{ env.ACR_DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}-${{ inputs.environment }}
 
   deploy-image:
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-22.04
     name: Deploy Image To ${{ inputs.environment }}
     environment: ${{ inputs.environment }}
@@ -101,7 +106,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Update Azure Container Apps Revision
         uses: azure/CLI@v1
@@ -118,6 +122,9 @@ jobs:
               &> /dev/null
 
   flush-redis-cache:
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-22.04
     name: Flush Redis Cache on ${{ inputs.environment }}
     environment: ${{ inputs.environment }}
@@ -134,7 +141,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Flush Redis Cache
         uses: azure/CLI@v1
@@ -145,6 +151,9 @@ jobs:
             az redis flush --name ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --yes
 
   run-e2e-testing:
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-22.04
     name: Clear Database & Run E2E Tests on ${{ inputs.environment }}
     if: ${{ inputs.environment == 'tst' || inputs.environment == 'staging' }}
@@ -168,7 +177,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Get Workflow IP Address
         id: what-is-my-ip

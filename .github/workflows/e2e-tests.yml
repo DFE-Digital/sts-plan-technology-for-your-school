@@ -20,6 +20,9 @@ env:
 
 jobs:
   clear-db:
+    permissions:
+      id-token: write
+      contents: read
     name: Clear database
     runs-on: ubuntu-latest
     env:
@@ -38,7 +41,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Get workflow IP address
         id: whats-my-ip
@@ -79,6 +81,9 @@ jobs:
           az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
 
   run-tests:
+    permissions:
+      id-token: write
+      contents: read
     name: Run E2E Tests
     runs-on: ubuntu-22.04
     needs: [clear-db]
@@ -98,7 +103,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4

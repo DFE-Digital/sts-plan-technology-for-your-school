@@ -50,6 +50,9 @@ env:
 
 jobs:
   validate-terraform:
+    permissions:
+      id-token: write
+      contents: read
     name: Validate Terraform
     runs-on: ubuntu-22.04
     defaults:
@@ -81,7 +84,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Replace in secret environment variable
         run: |

@@ -60,12 +60,12 @@ jobs:
         run: |
           echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
 
-      - name: Azure CLI Login
-        uses: azure/login@v2
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
         with:
-          client-id: ${{ secrets.AZ_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZ_TENANT_ID }}
-          subscription-id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
       - name: Replace in secret environment variable
         run: |
@@ -125,6 +125,9 @@ jobs:
           removeRules: 'true'
 
   deploy-terraform:
+    permissions:
+      id-token: write
+      contents: read
     needs: terraform-plan
     name: Deploy Terraform
     runs-on: ubuntu-22.04
@@ -157,7 +160,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Replace in secret environment variable
         run: |
