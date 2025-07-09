@@ -33,14 +33,15 @@ env:
 
 jobs:
   terraform-plan:
+    environment: Dev
     permissions:
       id-token: write
+      contents: read
     name: Terraform plan
     runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
-    environment: ${{ inputs.environment }}
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
