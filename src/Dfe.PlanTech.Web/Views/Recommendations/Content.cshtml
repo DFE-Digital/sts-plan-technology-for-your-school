@@ -20,15 +20,6 @@
 
     @foreach (var content in header.Content)
     {
-        @if (header.SlugifiedLinkText == "overview" && !string.IsNullOrEmpty(submissionDate) && !string.IsNullOrEmpty(sectionName))
-        {
-            <div class="govuk-inset-text">
-                <p>
-                    The self-assessment for @sectionName.ToLower() was completed on
-                    @submissionDate. You can <a href="#your-self-assessment" class="govuk-link">change your answers at any time</a>.
-                </p>
-            </div>
-        }
         <partial name="Components/PageComponentFactory" model="@content" />
     }
 </div>
