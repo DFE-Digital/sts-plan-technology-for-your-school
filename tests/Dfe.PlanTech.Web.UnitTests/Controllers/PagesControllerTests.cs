@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Exceptions;
@@ -108,7 +109,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Return_Category_Landing_Page_When_IsCategoryLandingPage_Is_True()
+        public void Should_Return_Category_Landing_Page_When_IsLandingPage_Is_True()
         {
             var category = new Category()
             {
@@ -138,6 +139,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var asPage = model as CategoryLandingPageViewModel;
             Assert.Equal(CATEGORY_LANDING_PAGE_SLUG, asPage!.Slug);
+        }
+
+        [Fact]
+        public async Task ShouldThrowException_WhenIsLandingPage_And_CategoryIsNull()
+        {
+            var action = () => _controller.GetByRoute(null, userSubstitute);
+
+            Assert.Throws<ContentfulDataUnavailableException>(action);
         }
 
         [Fact]
