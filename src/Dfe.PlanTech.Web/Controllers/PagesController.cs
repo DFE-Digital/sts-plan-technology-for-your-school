@@ -43,6 +43,12 @@ public class PagesController(
         if (page.IsLandingPage == true)
         {
             var category = page.Content[0] as Category;
+
+            if (category == null)
+            {
+                throw new ContentfulDataUnavailableException($"Could not find Category at {Request.Path.Value}");
+            }
+
             var landingPageViewModel = new CategoryLandingPageViewModel()
             {
                 Slug = page.Slug,
