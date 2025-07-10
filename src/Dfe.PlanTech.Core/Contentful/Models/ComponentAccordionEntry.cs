@@ -1,14 +1,12 @@
 ﻿using Contentful.Core.Models;
-using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentAccordionEntry: TransformableEntry<ComponentAccordionEntry, CmsAccordionDto>
-{
-    public ComponentAccordionEntry() : base(entry => new CmsAccordionDto(entry)) {}
-
+public class ComponentAccordionEntry: TransformableEntry<ComponentAccordionEntry, CmsComponentAccordionDto>
 {
     public string Id => SystemProperties.Id;
     public string InternalName { get; init; } = null!;
-    public IReadOnlyList<RichTextFieldEntry> Content { get; init; } = [];
+    public IEnumerable<RichTextFieldEntry> Content { get; init; } = [];
+    public ComponentAccordionEntry() : base(entry => new CmsComponentAccordionDto(entry)) { }
 }

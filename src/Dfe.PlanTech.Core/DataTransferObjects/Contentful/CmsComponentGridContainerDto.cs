@@ -12,7 +12,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         {
             Id = gridContainerEntry.Id;
             InternalName = gridContainerEntry.InternalName;
-            Content = gridContainerEntry.Content?.Select(BuildContentDto).ToList();
+            Content = gridContainerEntry.Content?.Select(c => c.AsDto()).ToList();
         }
     }
 }

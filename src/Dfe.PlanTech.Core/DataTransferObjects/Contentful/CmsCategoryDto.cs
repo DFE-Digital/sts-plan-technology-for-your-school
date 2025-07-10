@@ -1,5 +1,4 @@
 ﻿using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
 {
@@ -9,19 +8,13 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         {
             InternalName = categoryEntry.InternalName;
             Header = categoryEntry.Header.AsDto();
-            Content = categoryEntry.Content.Select(c => c.AsDto()).ToList();
+            Content = categoryEntry.Content.Select(BuildContentDto).ToList();
             Sections = categoryEntry.Sections.Select(s => s.AsDto()).ToList();
-            SectionStatuses = categoryEntry.Sections.Select(s => s.Status.AsDto()).ToList();
-            Completed = categoryEntry.Completed;
-            RetrievalError = categoryEntry.RetrievalError;
         }
 
         public string InternalName { get; set; } = "";
-        public CmsHeaderDto Header { get; set; } = null!;
+        public CmsComponentHeaderDto Header { get; set; } = null!;
         public List<CmsEntryDto> Content { get; set; } = null!;
         public List<CmsQuestionnaireSectionDto> Sections { get; set; } = [];
-        public IList<SqlSectionStatusDto> SectionStatuses { get; set; } = [];
-        public int Completed { get; set; }
-        public bool RetrievalError { get; set; }
     }
 }
