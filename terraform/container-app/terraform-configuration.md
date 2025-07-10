@@ -106,6 +106,7 @@ We use two external modules to create the majority of the resources required:
 |------|-------------|------|---------|:--------:|
 | <a name="input_az_app_kestrel_endpoint"></a> [az\_app\_kestrel\_endpoint](#input\_az\_app\_kestrel\_endpoint) | Endpoint for Kestrel setup | `string` | n/a | yes |
 | <a name="input_az_container_port"></a> [az\_container\_port](#input\_az\_container\_port) | What port the container app is bound to | `number` | `8080` | no |
+| <a name="input_az_mssql_ipv4_allow_list"></a> [az\_mssql\_ipv4\_allow\_list](#input\_az\_mssql\_ipv4\_allow\_list) | IPv4 allow list for SQL DB | <pre>map(object({<br>    start_ip_range : string,<br>    end_ip_range : optional(string, "")<br>  }))</pre> | `{}` | no |
 | <a name="input_az_sql_admin_password"></a> [az\_sql\_admin\_password](#input\_az\_sql\_admin\_password) | Password for the admin listed in the 'az\_sql\_azuread\_admin\_username' variable | `string` | n/a | yes |
 | <a name="input_az_sql_azuread_admin_objectid"></a> [az\_sql\_azuread\_admin\_objectid](#input\_az\_sql\_azuread\_admin\_objectid) | Object ID for the admin listed in the 'az\_sql\_azuread\_admin\_username' variable | `string` | n/a | yes |
 | <a name="input_az_sql_azuread_admin_username"></a> [az\_sql\_azuread\_admin\_username](#input\_az\_sql\_azuread\_admin\_username) | Username/email/service principal name/etc of the Azure AD account to use as admin for the SQL Server | `string` | n/a | yes |
