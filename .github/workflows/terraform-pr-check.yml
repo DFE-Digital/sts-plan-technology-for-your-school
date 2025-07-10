@@ -50,6 +50,7 @@ env:
 
 jobs:
   validate-terraform:
+    environment: Dev
     permissions:
       id-token: write
       contents: read

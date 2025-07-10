@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        type: string
+        type: choice
         description: "The environment to run infrastructure deployment on:"
         required: true
-  push:
+        options: ['Dev', 'Tst', 'Staging', 'Production']
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -33,7 +33,7 @@ env:
 
 jobs:
   terraform-plan:
-    environment: Dev
+    environment: ${{ inputs.environment }}
     permissions:
       id-token: write
       contents: read
