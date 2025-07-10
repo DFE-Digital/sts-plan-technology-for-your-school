@@ -16,7 +16,7 @@ public class QuestionService(
 
     public async Task<CmsQuestionDto?> GetNextUnansweredQuestion(int establishmentId, string sectionId)
     {
-        var section = await _contentfulWorkflow.GetEntryById<SectionEntry, CmsSectionDto>(sectionId);
+        var section = await _contentfulWorkflow.GetEntryById<SectionEntry, CmsQuestionnaireSectionDto>(sectionId);
 
         var answeredQuestions = await _responseWorkflow.GetLatestResponses(establishmentId, section.Sys.Id, isCompletedSubmission: false);
         if (answeredQuestions is null)
@@ -36,7 +36,7 @@ public class QuestionService(
     /// <param name="answeredQuestions"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException"></exception>
-    private static CmsQuestionDto? GetValidatedNextUnansweredQuestion(CmsSectionDto section, SubmissionResponsesModel answeredQuestions)
+    private static CmsQuestionDto? GetValidatedNextUnansweredQuestion(CmsQuestionnaireSectionDto section, SubmissionResponsesModel answeredQuestions)
     {
         var lastAttachedResponse = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).LastOrDefault();
 

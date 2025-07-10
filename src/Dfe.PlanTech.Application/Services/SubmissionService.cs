@@ -29,11 +29,8 @@ public class SubmissionService(
     /// <returns></returns>
     /// <exception cref="InvalidDataException"></exception>
     /// <exception cref="ContentfulDataUnavailableException"></exception>
-    public async Task<SubmissionInformationModel> GetSubmissionInformationAsync(string sectionSlug, bool isCompleted)
+    public async Task<SubmissionInformationModel> GetSubmissionInformationAsync(int establishmentId, string sectionSlug, bool isCompleted)
     {
-        var establishmentId = _currentUser.EstablishmentId ??
-            throw new InvalidDataException($"User has no {nameof(_currentUser.EstablishmentId)}");
-
         var section = await _contentfulWorkflow.GetSectionBySlug(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
@@ -64,6 +61,8 @@ public class SubmissionService(
 
     public async Task<SubmissionResponsesModel?> GetSubmissionResponsesForSection(int establishmentId, string sectionId, bool completed = false, CancellationToken cancellationToken = default)
     {
+        var section = _contentfulWorkflow.GetSectionBySlug()
+
         var submissionResponses = await _responseWorkflow.GetLatestResponsesForJourney(establishmentId, sectionId, completed);
         if (submissionResponses is null || !submissionResponses.HasResponses)
         {

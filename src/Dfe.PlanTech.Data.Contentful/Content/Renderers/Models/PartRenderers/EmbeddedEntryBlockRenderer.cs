@@ -1,6 +1,6 @@
 ﻿using System.Text;
+using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Domain.Constants;
-using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging;

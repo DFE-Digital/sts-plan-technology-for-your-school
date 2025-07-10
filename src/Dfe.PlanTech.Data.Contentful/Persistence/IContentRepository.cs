@@ -1,4 +1,5 @@
-using Dfe.PlanTech.Data.Contentful.Queries;
+using Dfe.PlanTech.Application.Workflows.Options;
+using Dfe.PlanTech.Core.Content.Options;
 
 namespace Dfe.PlanTech.Data.Contentful.Persistence;
 

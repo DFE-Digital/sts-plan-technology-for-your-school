@@ -17,5 +17,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
+    <ProjectReference Include="..\Dfe.PlanTech.Data.Contentful\Dfe.PlanTech.Data.Contentful.csproj" />
+    <ProjectReference Include="..\Dfe.PlanTech.Data.Sql\Dfe.PlanTech.Data.Sql.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Workflows\ContentfulQueries\" />
   </ItemGroup>
 </Project>

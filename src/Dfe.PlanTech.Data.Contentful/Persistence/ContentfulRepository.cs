@@ -1,11 +1,12 @@
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
+using Dfe.PlanTech.Core.Content.Options;
+using Dfe.PlanTech.Core.Content.Queries;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Persistence;
-using Dfe.PlanTech.Data.Contentful.Queries;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -147,5 +148,17 @@ public abstract class ContentfulRepository : IContentRepository
 
             _logger.LogError("Error retrieving one or more {entryType} entries from Contentful:\n{Errors}", entryType, entries.Errors.Select(CreateErrorString));
         }
+    }
+
+    GetEntriesOptions IContentRepository.GetEntryByIdOptions(string id, int include = 2)
+    {
+        if (string.IsNullOrEmpty(id))
+            throw new ArgumentNullException(nameof(id));
+
+        return new GetEntriesOptions(include, [
+            new ContentfulQuerySingleValue(){
+                Field = "sys.id",
+                Value = id
+            }]);
     }
 }

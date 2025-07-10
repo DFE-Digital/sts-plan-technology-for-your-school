@@ -1,5 +1,5 @@
 using System.Text;
-using Dfe.PlanTech.Domain.Content.Enums;
+using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;

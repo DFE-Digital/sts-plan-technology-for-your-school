@@ -20,7 +20,7 @@ namespace Dfe.PlanTech.Application.Workflows
             _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
         }
 
-        public async Task<CmsQuestionDto?> GetNextUnansweredQuestion(int establishmentId, CmsSectionDto section)
+        public async Task<CmsQuestionDto?> GetNextUnansweredQuestion(int establishmentId, CmsQuestionnaireSectionDto section)
         {
             var answeredQuestions = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Sys.Id, false);
             if (answeredQuestions is null)

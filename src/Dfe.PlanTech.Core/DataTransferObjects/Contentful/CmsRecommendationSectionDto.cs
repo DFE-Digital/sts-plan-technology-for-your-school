@@ -1,0 +1,19 @@
+﻿using Dfe.PlanTech.Core.Contentful.Models;
+
+namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
+{
+    public class CmsRecommendationSectionDto : CmsEntryDto
+    {
+        public string Id { get; set; } = null!;
+        public string InternalName { get; set; } = null!;
+        public List<CmsQuestionnaireAnswerDto> Answers { get; init; } = [];
+        public IEnumerable<CmsRecommendationChunkDto> Chunks { get; init; } = [];
+
+        public CmsRecommendationSectionDto(RecommendationSectionEntry recommendationSectionEntry)
+        {
+            Id = recommendationSectionEntry.Id;
+            InternalName = recommendationSectionEntry.InternalName;
+            Answers = recommendationSectionEntry.Answers.Select(a => a.AsDto()).ToList();
+        }
+    }
+}

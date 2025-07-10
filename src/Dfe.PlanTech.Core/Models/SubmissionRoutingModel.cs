@@ -8,6 +8,6 @@ public class SubmissionRoutingModel
 {
     public SubmissionStatus Status { get; set; }
     public CmsQuestionDto? NextQuestion { get; set; }
-    public CmsSectionDto Section { get; }
+    public CmsQuestionnaireSectionDto Section { get; }
     public SqlSubmissionDto? SectionStatus { get; }
 }

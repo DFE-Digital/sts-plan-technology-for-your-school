@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Contentful.Persistence;
+using Dfe.PlanTech.Data.Sql.Repositories;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Entries;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
 using Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
@@ -37,8 +38,12 @@ public class ResponseWorkflow
             : null;
     }
 
-    public async Task<IEnumerable<QuestionWithAnswerModel>> GetOrderedResponsesForJourney(string sectionId, IEnumerable<QuestionWithAnswerModel> responses)
+    public async Task<IEnumerable<QuestionWithAnswerModel>> GetOrderedResponsesForJourney(int establishmentId, string sectionId)
     {
+        var submission = _submissionRepository. (establishmentId, sectionId);
+
+        var responses = _res
+
         var questionAnswerModelMap = responses
                 .Where(r => !string.IsNullOrWhiteSpace(r.QuestionSysId))
                 .GroupBy(r => r.QuestionSysId)

@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Core.Models
     {
         public int EstablishmentId { get; set; }
 
-        public CmsSectionDto Section { get; set; } = null!;
+        public CmsQuestionnaireSectionDto Section { get; set; } = null!;
 
         public SubmissionResponsesModel? SubmissionResponses { get; set; } = null!;
 
