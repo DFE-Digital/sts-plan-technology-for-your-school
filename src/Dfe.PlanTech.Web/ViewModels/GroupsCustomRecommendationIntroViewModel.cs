@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.RoutingDataModel;
 
 namespace Dfe.PlanTech.Domain.Groups.Models;
 

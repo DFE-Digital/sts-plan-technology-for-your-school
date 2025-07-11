@@ -46,7 +46,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         var query = _db.Submissions.Where(s => s.Id == submissionId);
 
         return includeRelationships
-            ? IncludeRelationships(query).FirstOrDefaultAsync()
+            ? IncludeResponses(query).FirstOrDefaultAsync()
             : query.FirstOrDefaultAsync();
     }
 
@@ -55,7 +55,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         var query = _db.Submissions.Where(predicate);
 
         return includeRelationships
-          ? IncludeRelationships(query)
+          ? IncludeResponses(query)
           : query;
     }
 
@@ -63,7 +63,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         int establishmentId,
         string sectionId,
         bool isCompleted,
-        bool includeRelationships = false
+        bool includeResponses = false
     )
     {
         Func<string, bool> statusCheck;
@@ -81,7 +81,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
                 !submission.Deleted &&
                 submission.EstablishmentId == establishmentId &&
                 submission.SectionId == sectionId,
-                includeRelationships)
+                includeResponses)
             .Where(s => statusCheck(s.Status!))
             .OrderByDescending(submission => submission.DateCreated);
     }
@@ -195,7 +195,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
                 establishmentId,
                 sectionId,
                 isCompleted: true,
-                includeRelationships: true
+                includeResponses: true
             )
             .FirstOrDefaultAsync();
 
@@ -216,7 +216,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         );
     }
 
-    private IQueryable<SubmissionEntity> IncludeRelationships(IQueryable<SubmissionEntity> query)
+    private IQueryable<SubmissionEntity> IncludeResponses(IQueryable<SubmissionEntity> query)
     {
         return query
             .Include(s => s.Responses)

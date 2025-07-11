@@ -1,8 +1,7 @@
-﻿using Dfe.PlanTech.Application.Workflows.ContentfulQueries;
-using Dfe.PlanTech.Application.Workflows.Options;
-using Dfe.PlanTech.Core.Content.Models;
-using Dfe.PlanTech.Core.Content.Options;
+﻿using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Content.Queries;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Data.Contentful.Persistence;
@@ -25,13 +24,13 @@ namespace Dfe.PlanTech.Application.Workflows
         private readonly SectionWorkflow _sectionEntryRepository = sectionEntryRepository ?? throw new ArgumentNullException(nameof(sectionEntryRepository));
 
         public async Task<TDto?> GetEntryById<TEntry, TDto>(string contentId)
-            where TEntry : ContentComponent, new()
-            where TDto : CmsEntryDto, new()
+            where TEntry : IDtoTransformable<TDto>
+            where TDto : CmsEntryDto
         {
             try
             {
                 var entry = await _contentfulRepository.GetEntryById<TEntry>(contentId);
-                return entry?.AsDto<TDto>();
+                return entry?.AsDtoInternal();
             }
             catch (Exception ex)
             {
@@ -48,10 +47,10 @@ namespace Dfe.PlanTech.Application.Workflows
                 _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
             }
 
-            return introForMaturity.AsDto() RecommendationsViewDto(introForMaturity!.Slug, introForMaturity.HeaderText);
+            return introForMaturity.AsDto();
         }
 
-        public async Task<CmsQuestionnaireSectionDto?> GetSectionBySlug(string sectionSlug)
+        public async Task<CmsQuestionnaireSectionDto> GetSectionBySlugAsync(string sectionSlug)
         {
             var options = new GetEntriesOptions()
             {
@@ -73,7 +72,13 @@ namespace Dfe.PlanTech.Application.Workflows
             try
             {
                 var sections = await _contentfulRepository.GetEntries<QuestionnaireSectionEntry>(options);
-                return sections.FirstOrDefault()?.Fields.AsDto;
+                var section = sections.FirstOrDefault();
+                if (section is null)
+                {
+                    throw new ContentfulDataUnavailableException($"Could not find a section matching slug '{sectionSlug}");
+                }
+
+                return section.AsDto();
             }
             catch (Exception ex)
             {

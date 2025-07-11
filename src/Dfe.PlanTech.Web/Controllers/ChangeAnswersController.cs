@@ -1,12 +1,9 @@
-﻿using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Enums;
+﻿using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Routing;
-using Dfe.PlanTech.Web.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,47 +20,46 @@ namespace Dfe.PlanTech.Web.Controllers
         public const string ChangeAnswersViewName = "ChangeAnswers";
         public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
 
+        IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler;
         private readonly CurrentUser _currentUser;
-        private readonly Router _router;
+        private readonly ChangeAnswersViewBuilder _viewBuilder;
         private readonly SubmissionService _submissionService;
 
         public ChangeAnswersController(
             ILogger<ChangeAnswersController> logger,
+            IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
+            ChangeAnswersViewBuilder viewBuilder,
             CurrentUser currentUser,
-            Router router,
             SubmissionService submissionService
         ) : base(logger)
         {
+            _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
             _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-            _router = router ?? throw new ArgumentNullException(nameof(router));
+            _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
             _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
         }
 
         [HttpGet("{sectionSlug}/change-answers")]
         public async Task<IActionResult> ChangeAnswersPage(
             string sectionSlug,
-            [FromServices] IChangeAnswersRouter changeAnswersValidator,
-            [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler)
+            [FromServices] )
         {
             ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
 
             try
             {
-                return await _router.RouteToNextPage(this, sectionSlug, isCompleted: true, TempData["ErrorMessage"]?.ToString());
+                return await _viewBuilder.RouteBasedOnSubmissionStatus(this, sectionSlug, TempData["ErrorMessage"]?.ToString());
             }
             catch (UserJourneyMissingContentException userJourneyException)
             {
-                return await userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException);
+                return await _userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException);
             }
         }
 
         [HttpGet("recommendations/from-section/{sectionSlug}")]
-        public async Task<IActionResult> RedirectToRecommendation(
-            string sectionSlug,
-            [FromServices] IGetRecommendationRouter getRecommendationRouter,
-            CancellationToken cancellationToken = default)
+        public async Task<IActionResult> RedirectToRecommendation(string sectionSlug)
         {
-            var recommendationSlug = await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken);
+            var recommendationSlug = await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug);
 
             return RedirectToAction(
                   RecommendationsController.GetRecommendationAction,

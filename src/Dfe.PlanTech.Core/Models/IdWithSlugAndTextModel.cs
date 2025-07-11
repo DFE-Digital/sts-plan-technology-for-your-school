@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Dfe.PlanTech.Core.Models;
+namespace Dfe.PlanTech.Core.RoutingDataModel;
 
 public class IdWithSlugAndTextModel : IdWithTextModel
 {

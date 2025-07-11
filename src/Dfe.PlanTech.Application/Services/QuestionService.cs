@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Application.Workflows;
 
 namespace Dfe.PlanTech.Application.Services;
@@ -14,7 +14,7 @@ public class QuestionService(
     private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
     private readonly ResponseWorkflow _responseWorkflow = responseWorkflow ?? throw new ArgumentNullException(nameof(responseWorkflow));
 
-    public async Task<CmsQuestionDto?> GetNextUnansweredQuestion(int establishmentId, string sectionId)
+    public async Task<CmsQuestionnaireQuestionDto?> GetNextUnansweredQuestion(int establishmentId, string sectionId)
     {
         var section = await _contentfulWorkflow.GetEntryById<SectionEntry, CmsQuestionnaireSectionDto>(sectionId);
 
@@ -36,7 +36,7 @@ public class QuestionService(
     /// <param name="answeredQuestions"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException"></exception>
-    private static CmsQuestionDto? GetValidatedNextUnansweredQuestion(CmsQuestionnaireSectionDto section, SubmissionResponsesModel answeredQuestions)
+    private static CmsQuestionnaireQuestionDto? GetValidatedNextUnansweredQuestion(CmsQuestionnaireSectionDto section, SubmissionResponsesModel answeredQuestions)
     {
         var lastAttachedResponse = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).LastOrDefault();
 

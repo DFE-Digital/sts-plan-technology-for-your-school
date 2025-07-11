@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
-using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.RoutingDataModel;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 

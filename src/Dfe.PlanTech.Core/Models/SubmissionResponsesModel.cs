@@ -1,6 +1,6 @@
 ﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-namespace Dfe.PlanTech.Core.Models
+namespace Dfe.PlanTech.Core.RoutingDataModel
 {
     public class SubmissionResponsesModel
     {

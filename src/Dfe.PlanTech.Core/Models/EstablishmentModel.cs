@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using Dfe.PlanTech.Core.Exceptions;
 
-namespace Dfe.PlanTech.Core.Models;
+namespace Dfe.PlanTech.Core.RoutingDataModel;
 
 public class EstablishmentModel
 {

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-namespace Dfe.PlanTech.Core.Models;
+namespace Dfe.PlanTech.Core.RoutingDataModel;
 
 public record QuestionWithAnswerModel
 {

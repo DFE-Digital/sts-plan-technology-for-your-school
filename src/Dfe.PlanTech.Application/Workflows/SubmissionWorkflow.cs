@@ -1,7 +1,7 @@
 ﻿using System.Security.Authentication;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
 using Dfe.PlanTech.Application.Context;
 using Dfe.PlanTech.Application.ViewModels;

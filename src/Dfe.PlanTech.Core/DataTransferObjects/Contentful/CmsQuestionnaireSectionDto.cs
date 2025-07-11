@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         public string InternalName { get; set; } = null!;
         public string Name { get; init; } = null!;
         public CmsPageDto InterstitialPage { get; set; } = null!;
-        public IEnumerable<CmsQuestionDto> Questions { get; init; } = [];
+        public IEnumerable<CmsQuestionnaireQuestionDto> Questions { get; init; } = [];
 
         public CmsQuestionnaireSectionDto(QuestionnaireSectionEntry questionnaireSectionEntry)
         {
