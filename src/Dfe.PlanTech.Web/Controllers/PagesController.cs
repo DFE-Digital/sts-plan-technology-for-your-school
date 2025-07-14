@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
@@ -27,6 +28,7 @@ public class PagesController(
     private readonly ContactOptions _contactOptions = contactOptions.Value;
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
+    public const string CategoryLandingPageView = "~/Views/Recommendations/CategoryLandingPage.cshtml";
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
@@ -36,6 +38,25 @@ public class PagesController(
         {
             logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
             throw new ContentfulDataUnavailableException($"Could not find page at {Request.Path.Value}");
+        }
+
+        if (page.IsLandingPage == true)
+        {
+            var category = page.Content[0] as Category;
+
+            if (category == null)
+            {
+                throw new ContentfulDataUnavailableException($"Could not find Category at {Request.Path.Value}");
+            }
+
+            var landingPageViewModel = new CategoryLandingPageViewModel()
+            {
+                Slug = page.Slug,
+                Title = new Title { Text = category.Header.Text },
+                Category = category
+            };
+
+            return View(CategoryLandingPageView, landingPageViewModel);
         }
 
         var organisationClaim = User.FindFirst("organisation")?.Value;

@@ -1,0 +1,86 @@
+﻿@model StatusLinkViewModel
+
+@{
+    string statusText;
+    string linkText;
+    string? controller = null;
+    string? action = null;
+    Dictionary<string, string>
+    ? routeValues = null;
+
+    var topic = Model.Section;
+    var topicName = topic.Name.ToLower().Trim();
+
+    switch (topic.ProgressStatus.ToString())
+    {
+        case "InProgress":
+            statusText = $"A self-assessment was started on {topic.DateUpdated}. ";
+            linkText = $"Continue your self-assessment for {topicName}";
+            controller = "Questions";
+            action = "GetNextUnansweredQuestion";
+            routeValues = new Dictionary<string, string>
+            {
+                ["sectionSlug"] = $"{topic.Slug}" ?? string.Empty
+            };
+                break;
+        case "Completed":
+            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
+            linkText = $"View or update your self-assessment for {topicName}";
+            controller = "ChangeAnswers";
+            action = "ChangeAnswersPage";
+            routeValues = new Dictionary<string, string>
+            {
+                ["sectionSlug"] = $"{topic.Slug}" ?? string.Empty
+            };
+                break;
+        default:
+            statusText = "";
+            linkText = $"Go to self-assessment for {topicName}";
+            controller = "Pages";
+            action = "GetByRoute";
+            routeValues = new Dictionary<string, string>
+            {
+                ["route"] = $"{topic.Slug}" ?? string.Empty
+            };
+                break;
+    }
+
+    @if (Model.Context == "Sections")
+    {
+        @if (topic.ProgressStatus.ToString() == "Completed")
+        {
+            <p>
+                @statusText
+            </p>
+            <p>
+                <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
+                    class="govuk-link">@linkText</a> at any time.
+            </p>
+        }
+        else if (topic.ProgressStatus.ToString() == "InProgress")
+        {
+            <p>
+                @statusText
+                <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
+                   class="govuk-link">@linkText</a>
+            </p>
+        }
+        else
+        {
+            <p>
+                <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
+                   class="govuk-link">@linkText</a>
+            </p>
+        }
+    }
+    else if (Model.Context == "Default")
+    {
+        if (topic.ProgressStatus.ToString() != "Completed")
+        {
+            <p>
+                <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
+                    class="govuk-link">@linkText</a>
+            </p>
+        }
+    }
+}

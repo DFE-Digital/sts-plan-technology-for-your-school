@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Exceptions;
@@ -6,6 +7,8 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Controllers;
@@ -28,6 +31,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string HOME_PAGE_SLUG = "home";
         private const string SELECT_SCHOOL_SLUG = "/groups/select-a-school";
         private const string INTERNAL_ERROR_ID = "InternalError";
+        private const string CATEGORY_LANDING_PAGE_SLUG = "category-landing-page";
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
         private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
@@ -102,6 +106,47 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var asPage = model as PageViewModel;
             Assert.Equal(INDEX_SLUG, asPage!.Page.Slug);
             Assert.Contains(INDEX_TITLE, asPage!.Page.Title!.Text);
+        }
+
+        [Fact]
+        public void Should_Return_Category_Landing_Page_When_IsLandingPage_Is_True()
+        {
+            var category = new Category()
+            {
+                InternalName = "Category1",
+                Header = new Header { Text = "Category1 Header" }
+            };
+
+            var categoryLandingPage = new Page()
+            {
+                Slug = CATEGORY_LANDING_PAGE_SLUG,
+                DisplayBackButton = false,
+                DisplayHomeButton = false,
+                DisplayTopicTitle = false,
+                DisplayOrganisationName = false,
+                IsLandingPage = true,
+                Content = [category]
+            };
+
+            var result = _controller.GetByRoute(categoryLandingPage, userSubstitute);
+            Assert.IsType<ViewResult>(result);
+
+            var viewResult = result as ViewResult;
+
+            var model = viewResult!.Model;
+
+            Assert.IsType<CategoryLandingPageViewModel>(model);
+
+            var asPage = model as CategoryLandingPageViewModel;
+            Assert.Equal(CATEGORY_LANDING_PAGE_SLUG, asPage!.Slug);
+        }
+
+        [Fact]
+        public async Task ShouldThrowException_WhenIsLandingPage_And_CategoryIsNull()
+        {
+            var action = () => _controller.GetByRoute(null, userSubstitute);
+
+            Assert.Throws<ContentfulDataUnavailableException>(action);
         }
 
         [Fact]

@@ -1,0 +1,37 @@
+@model CategoryLandingViewComponentViewModel
+
+@if (Model.NoSectionsErrorRedirectUrl != null)
+{
+    Context.Response.Redirect(Url.Content(Model.NoSectionsErrorRedirectUrl));
+}
+
+@if (Model.ProgressRetrievalErrorMessage != null)
+{
+<p id="progress-error" class="govuk-error-message">
+    <span class="govuk-visually-hidden">Error:</span>@Model.ProgressRetrievalErrorMessage
+</p>
+}
+
+<div class="govuk-inset-text">
+    @{
+        if (!Model.AnySectionsCompleted)
+        {
+            <p>You have not completed any self-assessments for the @Model.CategoryName.ToLower() standard. Complete self-assessments to view all recommendations.</p>
+        }
+        else if (Model.AllSectionsCompleted)
+        {
+            <p>You have completed all self-assessments for the @Model.CategoryName.ToLower() standard.</p>
+        }
+        else
+        {
+            <p>Complete the remaining self-assessments to get recommendations for your school's @Model.CategoryName.ToLower().</p>
+
+            foreach (var topic in Model.CategoryLandingSections)
+            {
+                <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { Section = topic, Context = "Default" }' />
+            }
+        }
+    }
+</div>
+
+<partial name="Components/CategoryLanding/Sections" model="@Model" />
