@@ -5,7 +5,7 @@ Feature: Accessibility Page
 
   Scenario: Accessibility page has correct heading and back link
     Then I should see the page heading "Accessibility statement for Plan technology for your school"
-    And I should see a back link with href containing "/self-assessment"
+    And I should see a back link with href containing "/home"
 
   Scenario: Accessibility page contains key content sections
     Then I should see multiple paragraphs of explanatory text

@@ -2,7 +2,7 @@
 Feature: Footer on different pages
 
   Scenario Outline: Footer is visible on key pages
-    Given I am on the "self-assessment" page
+    Given I am on the "home" page
     Then I should see the footer
     And I should see a footer link with text "Cookies" and href containing "/cookies"
     And I should see a footer link with text "Privacy notice" and href containing "/privacy-notice"
