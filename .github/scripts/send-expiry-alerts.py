@@ -55,11 +55,15 @@ for secret in all_secrets:
         
         secret_expiry_details += "\n"
 
+if secret_expiry_details == "":
+    exit
+
 recipient_addresses = [
     "drew.morgan@education.gov.uk",
     "gilaine.young@education.gov.uk",
     "jag.nahl@education.gov.uk",
-    "rian.thwaite@education.gov.uk"
+    "rian.thwaite@education.gov.uk",
+    "roger.howell@education.gov.uk"
 ]
 print(f"✉️  Sending expiry alert email{'' if len(recipient_addresses) == 1 else 's'}")
 send_email(recipient_addresses, secret_expiry_details)
