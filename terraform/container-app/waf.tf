@@ -27,8 +27,8 @@ module "waf" {
   cdn_sku = "Premium_AzureFrontDoor"
 
   cdn_waf_enable_rate_limiting              = true
-  cdn_waf_rate_limiting_duration_in_minutes = 5
-  cdn_waf_rate_limiting_threshold           = 1000
+  cdn_waf_rate_limiting_duration_in_minutes = 1
+  cdn_waf_rate_limiting_threshold           = 100
   cdn_waf_rate_limiting_action              = "Block"
 
   cdn_waf_managed_rulesets = {
@@ -37,19 +37,31 @@ module "waf" {
       action  = "Block",
       overrides = {
         "SQLI" = {
+          "942110" = {
+            action  = "AnomalyScoring"
+            enabled = true
+          },
+          "942150" = {
+            action  = "AnomalyScoring"
+            enabled = true
+          },
           "942200" = {
             action  = "Log"
-            enabled = false
+            enabled = true
+          },
+          "942260" = {
+            action  = "AnomalyScoring"
+            enabled = true
           },
           "942340" = {
             action  = "Log"
-            enabled = false
+            enabled = true
           },
-          "942450" = {
-            action  = "Log"
-            enabled = false
-          }
           "942370" = {
+            action  = "Log"
+            enabled = true
+          }
+          "942450" = {
             action  = "Log"
             enabled = false
           }
@@ -57,7 +69,7 @@ module "waf" {
         "RFI" = {
           "931130" = {
             action  = "Log"
-            enabled = false
+            enabled = true
           }
         }
       }
