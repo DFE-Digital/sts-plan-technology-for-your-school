@@ -7,4 +7,5 @@ resource "azurerm_redis_cache" "redis" {
   sku_name            = local.redis_sku_name
   minimum_tls_version = local.redis_tls_version
   tags                = local.tags
+  public_network_access_enabled = false
 }
