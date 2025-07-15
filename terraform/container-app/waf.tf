@@ -83,6 +83,30 @@ module "waf" {
             action  = "Log"
             enabled = false
           }
+        },
+        "MS-ThreatIntel-WebShells" = {
+          "99005006" = {
+            action  = "Block on Anomaly"
+            enabled = false
+          },
+          "99001015" = {
+            action  = "Block on Anomaly"
+            enabled = false
+          },
+          "99001016" = {
+            action  = "Block on Anomaly"
+            enabled = false
+          }
+        },
+        "MS-ThreatIntel-CVEs" = {
+          "99001014" = {
+            action  = "Block on Anomaly"
+            enabled = false
+          },
+          "99001017" = {
+            action  = "Block on Anomaly"
+            enabled = false
+          }
         }
       }
     },
