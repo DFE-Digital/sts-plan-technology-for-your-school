@@ -8,6 +8,7 @@ on:
         description: "The environment to run infrastructure deployment on:"
         required: true
         options: ['Dev', 'Tst', 'Staging', 'Production']
+  push:
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
