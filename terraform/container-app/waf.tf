@@ -38,29 +38,41 @@ module "waf" {
       overrides = {
         "SQLI" = {
           "942110" = {
-            action  = "AnomalyScoring"
-            enabled = true
+            action  = "Log"
+            enabled = false
           },
           "942150" = {
-            action  = "AnomalyScoring"
-            enabled = true
+            action  = "Log"
+            enabled = false
           },
           "942200" = {
             action  = "Log"
-            enabled = true
+            enabled = false
           },
           "942260" = {
-            action  = "AnomalyScoring"
-            enabled = true
+            action  = "Log"
+            enabled = false
+          },
+          "942330" = {
+            action  = "Log"
+            enabled = false
           },
           "942340" = {
             action  = "Log"
-            enabled = true
+            enabled = false
           },
           "942370" = {
             action  = "Log"
-            enabled = true
-          }
+            enabled = false
+          },
+          "942430" = {
+            action  = "Log"
+            enabled = false
+          },
+          "942440" = {
+            action  = "Log"
+            enabled = false
+          },
           "942450" = {
             action  = "Log"
             enabled = false
@@ -69,7 +81,7 @@ module "waf" {
         "RFI" = {
           "931130" = {
             action  = "Log"
-            enabled = true
+            enabled = false
           }
         }
       }
