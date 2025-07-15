@@ -88,7 +88,9 @@ module "waf" {
           "99005006" = {
             action  = "AnomalyScoring"
             enabled = false
-          },
+          }
+        },
+        "MS-ThreatIntel-CVEs" = {
           "99001015" = {
             action  = "AnomalyScoring"
             enabled = false
@@ -96,9 +98,7 @@ module "waf" {
           "99001016" = {
             action  = "AnomalyScoring"
             enabled = false
-          }
-        },
-        "MS-ThreatIntel-CVEs" = {
+          },
           "99001014" = {
             action  = "AnomalyScoring"
             enabled = false
