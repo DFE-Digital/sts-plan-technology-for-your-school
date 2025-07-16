@@ -75,6 +75,36 @@ public class SubmissionService(
         };
     }
 
+    public async Task<string> GetSubtopicRecommendationIntroSlug(int establishmentId, string sectionSlug)
+    {
+        var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
+
+        var latestCompletedSubmission = await _responseWorkflow.GetLatestSubmission(
+           establishmentId,
+           cmsQuestionnaireSection.Id,
+           isCompletedSubmission: true,
+           includeResponses: false);
+
+        if (latestCompletedSubmission is null)
+        {
+            throw new InvalidDataException($"No incomplete responses found for section with ID {cmsQuestionnaireSection.Id}.");
+        }
+
+        if (latestCompletedSubmission.Maturity is null)
+        {
+            throw new InvalidDataException($"No maturity recorded for submission with ID {latestCompletedSubmission.Id}.");
+        }
+
+        var maturity = latestCompletedSubmission.Maturity;
+        var introSlugForMaturity = await _contentfulWorkflow.GetIntroForMaturityAsync(cmsQuestionnaireSection.Id, maturity);
+        if (introSlugForMaturity is null)
+        {
+            throw new InvalidDataException($"No recommendation intro found maturity {maturity} for section with ID {cmsQuestionnaireSection.Id}.");
+        }
+
+        return introSlugForMaturity.Slug;
+    }
+
     public async Task DeleteCurrentSubmission(int establishmentId, string sectionId)
     {
         await _submissionWorkflow.SetSubmissionInaccessibleAsync(establishmentId, sectionId);

@@ -39,12 +39,28 @@ namespace Dfe.PlanTech.Application.Workflows
             }
         }
 
-        public async Task<RecommendationsViewDto?> GetIntroForMaturityAsync(string subtopicId, string maturity)
+        public async Task<CmsRecommendationIntroDto?> GetIntroForMaturityAsync(string subtopicId, string maturity)
         {
-            var introForMaturity = await _subtopicRecommendationRepository.GetIntroForMaturityAsync(subtopicId, maturity);
+            var query = new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId };
+            var options = new GetEntriesOptions(include: 2, [query]);
+
+            options.Select = ["fields.intros", "sys"];
+
+            var subtopicRecommendations = await _contentfulRepository.GetEntries<SubtopicRecommendationEntry>(options);
+
+            var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
+            if (subtopicRecommendation is null)
+            {
+                _logger.LogError("Could not find subtopic recommendation in Contentful for subtopic with ID '{SubtopicId}'", subtopicId);
+                return null;
+            }
+
+            var introForMaturity = subtopicRecommendation.Intros
+                .FirstOrDefault(intro => string.Equals(intro.Maturity, maturity, StringComparison.OrdinalIgnoreCase));
             if (introForMaturity is null)
             {
                 _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
+                return null;
             }
 
             return introForMaturity.AsDto();

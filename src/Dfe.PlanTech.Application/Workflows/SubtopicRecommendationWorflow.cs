@@ -1,4 +1,6 @@
 ﻿using Dfe.PlanTech.Core.Content.Models;
+using Dfe.PlanTech.Core.Content.Options;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
@@ -59,6 +61,5 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
             new(depth, [new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId }, .. additionalQueries]);
 
         private void LogMissingRecommendationError(string subtopicId)
-        => _logger.LogError("Could not find subtopic recommendation in Contentful for subtopic with ID '{SubtopicId}'", subtopicId);
     }
-}
+}  

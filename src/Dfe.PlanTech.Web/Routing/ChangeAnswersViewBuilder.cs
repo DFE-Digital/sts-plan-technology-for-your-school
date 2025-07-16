@@ -43,9 +43,24 @@ namespace Dfe.PlanTech.Web.Routing
                     return QuestionsController.RedirectToQuestionBySlug(sectionSlug, submissionRoutingData.NextQuestion!.Slug, controller);
 
             }
+
         }
 
-        public ChangeAnswersViewModel BuildChangeAnswersViewModel(SubmissionRoutingDataModel routingData, string sectionSlug, string? errorMessage)
+        public async Task<IActionResult> GetSubtopicRecommendationIntroSlugAsync(Controller controller, string sectionSlug)
+        {
+            var establishmentId = _currentUser.EstablishmentId
+                ?? throw new InvalidDataException(nameof(currentUser.EstablishmentId));
+
+            var subtopicRecommendationIntroSlug = _submissionService.GetSubtopicRecommendationIntroSlug(establishmentId, sectionSlug);
+
+            return controller.RedirectToAction(
+                  RecommendationsController.GetRecommendationAction,
+                  RecommendationsController.ControllerName,
+                  new { sectionSlug, subtopicRecommendationIntroSlug }
+              );
+        }
+
+        private ChangeAnswersViewModel BuildChangeAnswersViewModel(SubmissionRoutingDataModel routingData, string sectionSlug, string? errorMessage)
         {
             return new ChangeAnswersViewModel()
             {
@@ -59,7 +74,7 @@ namespace Dfe.PlanTech.Web.Routing
             };
         }
 
-        public SubmissionResponsesViewModel BuildSubmissionResponsesViewModel(SqlSubmissionDto? submission)
+        private SubmissionResponsesViewModel BuildSubmissionResponsesViewModel(SqlSubmissionDto? submission)
         {
             return new SubmissionResponsesViewModel
             {
@@ -68,7 +83,7 @@ namespace Dfe.PlanTech.Web.Routing
             };
         }
 
-        public SubmissionResponseViewModel BuildSubmissionResponseViewModel(SqlResponseDto response)
+        private SubmissionResponseViewModel BuildSubmissionResponseViewModel(SqlResponseDto response)
         {
             var question = response.Question;
             var answer = response.Answer;

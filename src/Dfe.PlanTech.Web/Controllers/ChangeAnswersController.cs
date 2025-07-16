@@ -22,33 +22,31 @@ namespace Dfe.PlanTech.Web.Controllers
 
         IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler;
         private readonly CurrentUser _currentUser;
-        private readonly ChangeAnswersViewBuilder _viewBuilder;
+        private readonly ChangeAnswersViewBuilder _changeAnswersViewBuilder;
         private readonly SubmissionService _submissionService;
 
         public ChangeAnswersController(
             ILogger<ChangeAnswersController> logger,
             IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
-            ChangeAnswersViewBuilder viewBuilder,
+            ChangeAnswersViewBuilder changeAnswersViewBuilder,
             CurrentUser currentUser,
             SubmissionService submissionService
         ) : base(logger)
         {
             _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
             _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-            _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
+            _changeAnswersViewBuilder = changeAnswersViewBuilder ?? throw new ArgumentNullException(nameof(changeAnswersViewBuilder));
             _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
         }
 
         [HttpGet("{sectionSlug}/change-answers")]
-        public async Task<IActionResult> ChangeAnswersPage(
-            string sectionSlug,
-            [FromServices] )
+        public async Task<IActionResult> ChangeAnswersPage(string sectionSlug)
         {
             ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
 
             try
             {
-                return await _viewBuilder.RouteBasedOnSubmissionStatus(this, sectionSlug, TempData["ErrorMessage"]?.ToString());
+                return await _changeAnswersViewBuilder.RouteBasedOnSubmissionStatus(this, sectionSlug, TempData["ErrorMessage"]?.ToString());
             }
             catch (UserJourneyMissingContentException userJourneyException)
             {
@@ -59,12 +57,12 @@ namespace Dfe.PlanTech.Web.Controllers
         [HttpGet("recommendations/from-section/{sectionSlug}")]
         public async Task<IActionResult> RedirectToRecommendation(string sectionSlug)
         {
-            var recommendationSlug = await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug);
+            var subtopicRecommendationIntroSlug = _changeAnswersViewBuilder.GetSubtopicRecommendationIntroSlugAsync(this, sectionSlug);
 
             return RedirectToAction(
                   RecommendationsController.GetRecommendationAction,
                   RecommendationsController.ControllerName,
-                  new { sectionSlug, recommendationSlug }
+                  new { sectionSlug, subtopicRecommendationIntroSlug }
               );
         }
     }
