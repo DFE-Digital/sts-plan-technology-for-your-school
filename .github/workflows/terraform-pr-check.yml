@@ -10,6 +10,11 @@ on:
     paths:
       - "terraform/**"
 
+permissions:
+  id-token: write
+  contents: read
+  pull-requests: write
+
 concurrency:
   group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
   cancel-in-progress: true
@@ -51,7 +56,6 @@ env:
 jobs:
   validate-terraform:
     environment: Dev
-    permissions: write-all
     name: Validate Terraform
     runs-on: ubuntu-22.04
     defaults:
@@ -204,7 +208,6 @@ jobs:
         run: tflint -f compact
 
   tfsec-pr-commenter:
-    permissions: write-all
     name: tfsec Check
     runs-on: ubuntu-22.04
     steps:
