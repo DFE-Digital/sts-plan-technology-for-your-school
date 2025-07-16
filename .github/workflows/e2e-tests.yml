@@ -20,6 +20,7 @@ env:
 
 jobs:
   clear-db:
+    environment: Dev
     permissions:
       id-token: write
       contents: read
