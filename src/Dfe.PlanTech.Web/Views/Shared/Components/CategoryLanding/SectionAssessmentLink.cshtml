@@ -1,4 +1,5 @@
-﻿@model StatusLinkViewModel
+﻿@using Dfe.PlanTech.Domain.CategoryLanding
+@model StatusLinkViewModel
 
 @{
     string statusText;
@@ -10,27 +11,28 @@
 
     var topic = Model.Section;
     var topicName = topic.Name.ToLower().Trim();
+    var topicSlug = topic.Slug ?? string.Empty;
 
-    switch (topic.ProgressStatus.ToString())
+    switch (topic.ProgressStatus)
     {
-        case "InProgress":
+        case SectionProgressStatus.InProgress:
             statusText = $"A self-assessment was started on {topic.DateUpdated}. ";
             linkText = $"Continue your self-assessment for {topicName}";
             controller = "Questions";
             action = "GetNextUnansweredQuestion";
             routeValues = new Dictionary<string, string>
             {
-                ["sectionSlug"] = $"{topic.Slug}" ?? string.Empty
+                ["sectionSlug"] = $"{topicSlug}"
             };
                 break;
-        case "Completed":
+        case SectionProgressStatus.Completed:
             statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
             linkText = $"View or update your self-assessment for {topicName}";
             controller = "ChangeAnswers";
             action = "ChangeAnswersPage";
             routeValues = new Dictionary<string, string>
             {
-                ["sectionSlug"] = $"{topic.Slug}" ?? string.Empty
+                ["sectionSlug"] = $"{topicSlug}"
             };
                 break;
         default:
@@ -40,14 +42,14 @@
             action = "GetByRoute";
             routeValues = new Dictionary<string, string>
             {
-                ["route"] = $"{topic.Slug}" ?? string.Empty
+                ["route"] = $"{topicSlug}"
             };
                 break;
     }
 
-    @if (Model.Context == "Sections")
+    if (Model.Context == "Sections")
     {
-        @if (topic.ProgressStatus.ToString() == "Completed")
+        if (topic.ProgressStatus == SectionProgressStatus.Completed)
         {
             <p>
                 @statusText
@@ -57,7 +59,7 @@
                     class="govuk-link">@linkText</a> at any time.
             </p>
         }
-        else if (topic.ProgressStatus.ToString() == "InProgress")
+        else if (topic.ProgressStatus == SectionProgressStatus.InProgress)
         {
             <p>
                 @statusText
@@ -75,7 +77,7 @@
     }
     else if (Model.Context == "Default")
     {
-        if (topic.ProgressStatus.ToString() != "Completed")
+        if (topic.ProgressStatus != SectionProgressStatus.Completed)
         {
             <p>
                 <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
