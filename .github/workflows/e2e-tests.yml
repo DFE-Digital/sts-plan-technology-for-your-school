@@ -82,6 +82,7 @@ jobs:
           az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
 
   run-tests:
+    environment: Dev
     permissions:
       id-token: write
       contents: read
