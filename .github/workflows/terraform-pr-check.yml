@@ -25,6 +25,7 @@ env:
   ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
+  ARM_USE_OIDC: true
 
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
   AZ_SA_COSTING_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}costing
