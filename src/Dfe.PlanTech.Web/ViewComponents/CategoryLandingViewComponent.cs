@@ -90,6 +90,11 @@ public class CategoryLandingViewComponent(
             var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {section.Name}");
             var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
 
+            if (section.InterstitialPage == null)
+            {
+                throw new ContentfulDataUnavailableException($"Could not find {section.Name} interstitial page");
+            }
+
             return new CategoryLandingSectionRecommendations
             {
                 SectionName = section.Name,
