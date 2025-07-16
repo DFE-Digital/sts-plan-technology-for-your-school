@@ -15,10 +15,6 @@ resource "azurerm_key_vault" "vault" {
     virtual_network_subnet_ids = [module.main_hosting.networking.subnet_id]
     ip_rules                   = local.kv_firewall_cidr_rules
   }
-
-  lifecycle {
-    ignore_changes = [network_acls[0].ip_rules]
-  }
 }
 
 ###################
