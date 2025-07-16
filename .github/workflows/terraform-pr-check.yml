@@ -51,9 +51,7 @@ env:
 jobs:
   validate-terraform:
     environment: Dev
-    permissions:
-      id-token: write
-      contents: read
+    permissions: write-all
     name: Validate Terraform
     runs-on: ubuntu-22.04
     defaults:
