@@ -129,6 +129,12 @@ variable "key_size" {
   default     = 2048
 }
 
+variable "key_vault_cidr_rules" {
+  description = "A set of CIDR rules representing allowed IP addresses for network access to the keyvault s190x0x-plantech-kv"
+  type        = set(string)
+  default     = []
+}
+
 #######################
 # Azure App Container #
 #######################
