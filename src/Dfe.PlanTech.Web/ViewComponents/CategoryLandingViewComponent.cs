@@ -32,12 +32,6 @@ public class CategoryLandingViewComponent(
 
     private async Task<CategoryLandingViewComponentViewModel> GenerateViewModel(Category category, string slug)
     {
-        if (category is null)
-        {
-            _logger.LogInformation("Could not find category at {Path}", Request.Path.Value);
-            throw new ContentfulDataUnavailableException($"Could not find category at {Request.Path.Value}");
-        }
-
         if (category.Sections.Count == 0)
         {
             _logger.LogError("Found no sections for category {id}", category.Sys.Id);
