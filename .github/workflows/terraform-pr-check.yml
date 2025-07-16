@@ -206,10 +206,7 @@ jobs:
         run: tflint -f compact
 
   tfsec-pr-commenter:
-    permissions:
-      contents: write
-      pull-requests: write
-      repository-projects: write
+    permissions: write-all
     name: tfsec Check
     runs-on: ubuntu-22.04
     steps:
