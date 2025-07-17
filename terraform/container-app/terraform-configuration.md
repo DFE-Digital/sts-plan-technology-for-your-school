@@ -129,6 +129,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_key_ops"></a> [key\_ops](#input\_key\_ops) | The permitted JSON web key operations of the key to be created. | `list(string)` | <pre>[<br>  "decrypt",<br>  "encrypt",<br>  "sign",<br>  "unwrapKey",<br>  "verify",<br>  "wrapKey"<br>]</pre> | no |
 | <a name="input_key_size"></a> [key\_size](#input\_key\_size) | The size in bits of the key to be created. | `number` | `2048` | no |
 | <a name="input_key_type"></a> [key\_type](#input\_key\_type) | The JsonWebKeyType of the key to be created. | `string` | `"RSA"` | no |
+| <a name="input_key_vault_cidr_rules"></a> [key\_vault\_cidr\_rules](#input\_key\_vault\_cidr\_rules) | A set of CIDR rules representing allowed IP addresses for network access to the keyvault s190x0x-plantech-kv | `set(string)` | `[]` | no |
 | <a name="input_msi_id"></a> [msi\_id](#input\_msi\_id) | The Managed Service Identity ID. If this value isn't null (the default), 'data.azurerm\_client\_config.current.object\_id' will be set to this value. | `string` | `null` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | project name, used along with `environment` as a prefix for all resources | `string` | n/a | yes |
 | <a name="input_redis_capacity"></a> [redis\_capacity](#input\_redis\_capacity) | Redis cache capacity (0-6 for C and 1-5 for P) | `number` | `0` | no |
