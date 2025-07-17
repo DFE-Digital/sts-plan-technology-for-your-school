@@ -1,4 +1,4 @@
-import { selfAssessmentSlug, continueButtonText, submitToRecommendationsButtonText } from "../helpers/index.js";
+import { homePageSlug, continueButtonText, submitToRecommendationsButtonText } from "../helpers/index.js";
 import { validateAndTestRecommendations, validateQuestionPages } from "./index.js";
 
 /**
@@ -15,7 +15,7 @@ export const minimalSectionValidationForRecommendations = (section, paths, matur
 
         it(`Navigates through ${section.name} using ${maturity} path`, () => {
 
-            cy.visit(`/${selfAssessmentSlug}`);
+            cy.visit(`/${homePageSlug}`);
 
             // Navigate through interstitial page
             const sectionSlug = section.interstitialPage.fields.slug;

@@ -24,7 +24,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IGetRecommendationRouter _getRecommendationRouter;
         private readonly string _sectionSlug = "section-slug";
         private readonly string _recommendationSlug = "recommendation-slug";
-        private readonly string _redirectOption = UrlConstants.SelfAssessmentPage;
+        private readonly string _redirectOption = UrlConstants.HomePage;
 
         public CheckAnswersControllerTests()
         {
@@ -109,7 +109,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ConfirmAnswers_Should_Redirect_To_SelfAssessmentPage()
+        public async Task ConfirmAnswers_Should_Redirect_To_HomePage()
         {
             var result = await _checkAnswersController.ConfirmCheckAnswers(_sectionSlug, 1, "section name", _redirectOption, _calculateMaturityCommand, _getRecommendationRouter, _markSubmissionAsReviewedCommand);
 
@@ -123,7 +123,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Equal(PagesController.GetPageByRouteAction, redirectToActionResult.ActionName);
             Assert.NotNull(redirectToActionResult.RouteValues);
             Assert.True(redirectToActionResult.RouteValues.ContainsKey("route"));
-            Assert.True(redirectToActionResult.RouteValues["route"] is string s && s == UrlConstants.SelfAssessmentPage);
+            Assert.True(redirectToActionResult.RouteValues["route"] is string s && s == UrlConstants.HomePage);
         }
 
         [Fact]

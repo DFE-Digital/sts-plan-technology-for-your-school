@@ -6,4 +6,5 @@ resource "azurerm_redis_cache" "redis" {
   family              = local.redis_family
   sku_name            = local.redis_sku_name
   minimum_tls_version = local.redis_tls_version
+  tags                = local.tags
 }

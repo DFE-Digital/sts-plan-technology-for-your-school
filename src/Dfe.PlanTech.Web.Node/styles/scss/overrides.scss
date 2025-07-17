@@ -170,6 +170,11 @@ button.govuk-button--white {
     }
 }
 
+.govuk-task-list__name-and-hint.custom-height {
+    height: 2.5rem;
+    vertical-align: middle !important;
+}
+
 .govuk-section-break--visible.custom-hr-blue {
   border-bottom: 2px solid #1d70b8 !important;
 }
@@ -180,7 +185,7 @@ button.govuk-button--white {
   }
 }
 
-//Category landing page
+//Progress tracking
 ul.landing-page-list > li {
     height: 40px !important;
 }
@@ -191,4 +196,7 @@ ul.landing-page-list > li {
 
 .landing-page-list-heading {
     border-top: none !important;
+
+.recommendation-content > div > div.noprint button#print-page-button {
+    margin-top: 0px;
 }
