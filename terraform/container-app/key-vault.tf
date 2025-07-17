@@ -13,7 +13,7 @@ resource "azurerm_key_vault" "vault" {
     bypass                     = "None"
     default_action             = "Deny"
     virtual_network_subnet_ids = [module.main_hosting.networking.subnet_id]
-    ip_rules                   = local.kv_firewall_cidr_rules
+    ip_rules                   = compact(concat(local.kv_firewall_cidr_rules , [var.workflow_runner_ip]))
   }
 }
 

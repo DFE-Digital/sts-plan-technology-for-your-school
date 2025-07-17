@@ -292,3 +292,12 @@ variable "contentful_webhook_name" {
   type        = string
   default     = "Plan Tech Webhook"
 }
+
+#########
+# Misc #
+#########
+
+variable "workflow_runner_ip" {
+  type    = string
+  default = null
+}
