@@ -6,6 +6,7 @@ from pathlib import Path
 
 ENVIRONMENT = os.environ.get("ENVIRONMENT") 
 NOTIFICATIONS_API_KEY = os.environ.get("NOTIFICATIONS_API_KEY")
+RECIPIENT_ADDRESSES = os.environ.get("RECIPIENT_ADDRESSES")
 
 TEMPLATE_ID = "b408feda-d358-4fcc-92fe-b9cd1986e1d8"
 
@@ -58,13 +59,6 @@ for secret in all_secrets:
 if secret_expiry_details == "":
     exit
 
-recipient_addresses = [
-    "drew.morgan@education.gov.uk",
-    "gilaine.young@education.gov.uk",
-    "jag.nahl@education.gov.uk",
-    "rian.thwaite@education.gov.uk",
-    "roger.howell@education.gov.uk"
-]
+recipient_addresses = [address.strip() for address in RECIPIENT_ADDRESSES.split(";") if address.strip()]
 print(f"✉️  Sending expiry alert email{'' if len(recipient_addresses) == 1 else 's'}")
 send_email(recipient_addresses, secret_expiry_details)
-
