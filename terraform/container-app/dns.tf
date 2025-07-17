@@ -41,5 +41,5 @@ resource "azurerm_dns_cname_record" "primary" {
   zone_name           = local.dns.enable_dns ? azurerm_dns_zone.primary[0].name : ""
   resource_group_name = local.dns.enable_dns ? azurerm_resource_group.dns_zone[0].name : local.dns.resource_group_name
   ttl                 = 3600
-  record              = module.main_hosting.container_fqdn
+  record              = local.dns.primary_fqdn
 }
