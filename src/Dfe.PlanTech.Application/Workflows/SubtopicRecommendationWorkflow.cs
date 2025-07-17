@@ -1,28 +1,28 @@
-﻿using Dfe.PlanTech.Core.Content.Models;
-using Dfe.PlanTech.Core.Content.Options;
+﻿using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
 {
-    public class SubtopicRecommendationWorflow
+    public class SubtopicRecommendationWorkflow
     {
-        private readonly ILogger<SubtopicRecommendationWorflow> _logger;
+        private readonly ILogger<SubtopicRecommendationWorkflow> _logger;
         private readonly ContentfulRepository _contentful;
 
-        public SubtopicRecommendationWorflow(
+        public SubtopicRecommendationWorkflow(
             ILoggerFactory loggerFactory,
             ContentfulRepository contentfulBaseRepository
         )
         {
-            _logger = loggerFactory.CreateLogger<SubtopicRecommendationWorflow>();
+            _logger = loggerFactory.CreateLogger<SubtopicRecommendationWorkflow>();
             _contentful = contentfulBaseRepository;
         }
 
         public async Task<SubtopicRecommendationEntry?> GetFirstSubTopicRecommendationAsync(string subtopicId)
         {
             var options = CreateGetEntityOptions(subtopicId);
-            var subTopicRecommendations = await _contentful.GetEntries<SubtopicRecommendationEntry>(options);
+            var subTopicRecommendations = await _contentful.GetEntriesAsync<SubtopicRecommendationEntry>(options);
 
             var subtopicRecommendation = subTopicRecommendations.FirstOrDefault();
             if (subtopicRecommendation is null)
@@ -38,7 +38,7 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories
             var options = CreateGetEntityOptions(subtopicId, 2);
             options.Select = ["fields.intros", "sys"];
 
-            var subtopicRecommendations = await _contentful.GetEntries<SubtopicRecommendationEntry>(options);
+            var subtopicRecommendations = await _contentful.GetEntriesAsync<SubtopicRecommendationEntry>(options);
 
             var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
             if (subtopicRecommendation is null)

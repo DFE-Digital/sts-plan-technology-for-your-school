@@ -9,6 +9,10 @@ namespace Dfe.PlanTech.Application.Services
     {
         private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
 
+        public Task<IEnumerable<CmsQuestionnaireSectionDto>> GetAllSectionsAsync()
+        {
+            return _contentfulWorkflow.GetAllSectionsAsync();
+        }
 
         public Task<CmsPageDto> GetPageBySlug(string slug)
         {

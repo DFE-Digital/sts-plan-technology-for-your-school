@@ -42,7 +42,7 @@ public abstract class ContentfulRepository : IContentRepository
     public async Task<TEntry?> GetEntryById<TEntry>(string id, int include = 2)
     {
         var options = GetEntryByIdOptions(id, include);
-        var entities = (await GetEntries<TEntry>(options)).ToList();
+        var entities = (await GetEntriesAsync<TEntry>(options)).ToList();
 
         if (entities.Count > 1)
             throw new GetEntriesException($"Found more than 1 entity with id {id}");
@@ -53,7 +53,7 @@ public abstract class ContentfulRepository : IContentRepository
     public async Task<IEnumerable<TEntry>> GetEntries<TEntry>()
         => await GetEntries<TEntry>(GetContentTypeName<TEntry>(), null);
 
-    public async Task<IEnumerable<TEntry>> GetEntries<TEntry>(GetEntriesOptions options)
+    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options)
         => await GetEntries<TEntry>(GetContentTypeName<TEntry>(), options);
 
     public async Task<IEnumerable<TEntry>> GetEntries<TEntry>(string entityTypeId, GetEntriesOptions? options)
@@ -66,7 +66,7 @@ public abstract class ContentfulRepository : IContentRepository
         return entries.Items ?? [];
     }
 
-    public async Task<IEnumerable<TEntry>> GetPaginatedEntries<TEntry>(GetEntriesOptions options)
+    public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options)
         => await GetPaginatedEntries<TEntry>(GetContentTypeName<TEntry>(), options);
 
     public async Task<IEnumerable<TEntry>> GetPaginatedEntries<TEntry>(string entryTypeId, GetEntriesOptions options)

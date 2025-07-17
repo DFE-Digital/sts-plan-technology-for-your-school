@@ -1,7 +1,6 @@
 using System.Text;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Microsoft.Extensions.Azure;
@@ -21,10 +20,11 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 /// <param name="serviceScopeFactory">Service factory - used to create transient services to prevent state problems</param>
 public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcessor> processorFactory,
                                            IServiceBusResultProcessor resultProcessor,
-                                           ILogger<ContentfulServiceBusProcessor> logger,
+                                           ILoggerFactory loggerFactory,
                                            IServiceScopeFactory serviceScopeFactory,
                                            IOptions<ServiceBusOptions> options) : BackgroundService
 {
+    private readonly ILogger<ContentfulServiceBusProcessor> _logger = loggerFactory.CreateLogger<ContentfulServiceBusProcessor>();
     private readonly ServiceBusProcessor _processor = processorFactory.CreateClient("contentfulprocessor");
 
     /// <summary>
@@ -34,7 +34,7 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     {
         if (!options.Value.EnableQueueReading)
         {
-            logger.LogInformation("{QueueReadingProperty} is set to disabling - not enabling processing queue reading", nameof(options.Value.EnableQueueReading));
+            _logger.LogInformation("{QueueReadingProperty} is set to disabling - not enabling processing queue reading", nameof(options.Value.EnableQueueReading));
             return;
         }
         _processor.ProcessMessageAsync += MessageHandler;
@@ -69,10 +69,10 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing message: {Message}", ex.Message);
+            _logger.LogError(ex, "Error processing message: {Message}", ex.Message);
             await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, ex.Message,
                 ex.StackTrace, processMessageEventArgs.CancellationToken);
-            logger.LogInformation("Abandoned message: {MessageId}", processMessageEventArgs.Message.MessageId);
+            _logger.LogInformation("Abandoned message: {MessageId}", processMessageEventArgs.Message.MessageId);
         }
     }
 
@@ -84,7 +84,7 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     /// </remarks>
     private Task ErrorHandler(ProcessErrorEventArgs args)
     {
-        logger.LogError("Error occurred: {Message}", args.Exception.Message);
+        _logger.LogError("Error occurred: {Message}", args.Exception.Message);
         return Task.CompletedTask;
     }
 
@@ -96,6 +96,6 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     {
         await _processor.StopProcessingAsync();
         await _processor.DisposeAsync();
-        logger.LogInformation("Stopped processing messages.");
+        _logger.LogInformation("Stopped processing messages.");
     }
 }

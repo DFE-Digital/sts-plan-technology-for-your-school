@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Workflows
 {
     public class ContentfulWorkflow(
-        ILogger<ContentfulWorkflow> logger,
+        ILoggerFactory loggerFactory,
         ContentfulRepository contentfulRepository,
         GetPageFromContentfulOptions getPageOptions
     )
@@ -19,7 +19,7 @@ namespace Dfe.PlanTech.Application.Workflows
         public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
         public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
 
-        private readonly ILogger<ContentfulWorkflow> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly ILogger<ContentfulWorkflow> _logger = loggerFactory.CreateLogger<ContentfulWorkflow>();
         private readonly ContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
         private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
 
@@ -39,6 +39,20 @@ namespace Dfe.PlanTech.Application.Workflows
             }
         }
 
+        public async Task<IEnumerable<CmsQuestionnaireSectionDto>> GetAllSectionsAsync()
+        {
+            try
+            {
+                var options = new GetEntriesOptions(include: 3);
+                var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(options);
+                return sections.Select(s => s.AsDto());
+            }
+            catch (Exception ex)
+            {
+                throw new ContentfulDataUnavailableException("Error getting sections from Contentful", ex);
+            }
+        }
+
         public async Task<CmsRecommendationIntroDto?> GetIntroForMaturityAsync(string subtopicId, string maturity)
         {
             var query = new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId };
@@ -46,7 +60,7 @@ namespace Dfe.PlanTech.Application.Workflows
 
             options.Select = ["fields.intros", "sys"];
 
-            var subtopicRecommendations = await _contentfulRepository.GetEntries<SubtopicRecommendationEntry>(options);
+            var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
 
             var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
             if (subtopicRecommendation is null)
@@ -73,7 +87,7 @@ namespace Dfe.PlanTech.Application.Workflows
 
             try
             {
-                var pages = await _contentfulRepository.GetEntries<PageEntry>(options);
+                var pages = await _contentfulRepository.GetEntriesAsync<PageEntry>(options);
                 var page = pages.FirstOrDefault();
                 if (page is null)
                 {
@@ -96,7 +110,7 @@ namespace Dfe.PlanTech.Application.Workflows
 
             try
             {
-                var sections = await _contentfulRepository.GetEntries<QuestionnaireSectionEntry>(options);
+                var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(options);
                 var section = sections.FirstOrDefault();
                 if (section is null)
                 {

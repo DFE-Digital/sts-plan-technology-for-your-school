@@ -34,9 +34,9 @@ public interface IContentRepository
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntry"></typeparam>
     /// <returns></returns>
-    Task<IEnumerable<TEntry>> GetEntries<TEntry>(GetEntriesOptions options);
+    Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options);
 
-    Task<IEnumerable<TEntry>> GetPaginatedEntries<TEntry>(GetEntriesOptions options);
+    Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options);
 
     Task<int> GetEntriesCount<TEntry>();
 
