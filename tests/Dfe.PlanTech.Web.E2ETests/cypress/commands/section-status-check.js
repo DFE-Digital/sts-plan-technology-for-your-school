@@ -4,9 +4,9 @@ import { inProgressText } from "../helpers/constants";
  * Click first section link on self-assessment page
  */
 
-Cypress.Commands.add("checkSectionStatus", (sectionName, sectionSlug, selfAssessmentSlug) => {
+Cypress.Commands.add("checkSectionStatus", (sectionName, sectionSlug, homePageSlug) => {
     let inProgress = false;
-    cy.visit(`${selfAssessmentSlug}`)
+    cy.visit(`${homePageSlug}`)
 
     cy.findSectionLink(sectionName, sectionSlug)
         .parent()

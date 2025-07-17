@@ -53,13 +53,13 @@ def create_questionnaire_flowchart(
         gradient="300",
     )
 
-    for question in section.questions:
+    for index, question in enumerate(section.questions):
         current_question_id = question.sys.id
         question_text = _wrap_text(question.text, 20)
 
         tree.node(
             current_question_id,
-            question_text,
+            f"Q{index+1}. {question_text}",
             shape="box",
             style="filled",
             fillcolor="grey:white",

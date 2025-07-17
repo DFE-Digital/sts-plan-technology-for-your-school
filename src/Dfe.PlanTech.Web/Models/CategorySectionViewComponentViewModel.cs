@@ -1,9 +1,12 @@
 using Dfe.PlanTech.Domain.CategorySection;
+using Dfe.PlanTech.Domain.Content.Models;
 
 namespace Dfe.PlanTech.Web.Models;
 
 public class CategorySectionViewComponentViewModel
 {
+    public ContentComponent Description { get; set; } = null!;
+
     public int CompletedSectionCount { get; init; }
 
     public int TotalSectionCount { get; init; }

@@ -4,5 +4,7 @@ public enum Status
 {
     NotStarted,
     InProgress,
-    Completed
+    CompleteNotReviewed,
+    CompleteReviewed,
+    Inaccessible
 }

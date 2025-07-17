@@ -49,17 +49,20 @@ public class QuestionsController : BaseController<QuestionsController>
         _contactOptions = contactOptions.Value;
     }
 
-    [LogInvalidModelState]
     [HttpGet("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
-                                                        string questionSlug,
-                                                        [FromServices] IGetQuestionBySlugRouter router,
-                                                        CancellationToken cancellationToken = default)
+                                                    string questionSlug,
+                                                    string? returnTo,
+                                                    [FromServices] IGetQuestionBySlugRouter router,
+                                                    CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug))
             throw new ArgumentNullException(nameof(questionSlug));
+
+        // Optionally store the returnTo value in TempData or pass it along if router needs it
+        TempData["ReturnTo"] = returnTo;
 
         return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
     }
@@ -71,7 +74,7 @@ public class QuestionsController : BaseController<QuestionsController>
                                                             CancellationToken cancellationToken = default)
     {
         if (!contentfulOptions.UsePreviewApi)
-            return new RedirectResult(UrlConstants.SelfAssessmentPage);
+            return new RedirectResult(UrlConstants.HomePage);
 
         var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
                        throw new ContentfulDataUnavailableException($"Could not find question with Id {questionId}");
@@ -106,14 +109,14 @@ public class QuestionsController : BaseController<QuestionsController>
         }
         catch (DatabaseException)
         {
-            // Remove the current invalid submission and redirect to self-assessment page
+            // Remove the current invalid submission and redirect to homepage
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
 
             TempData["SubtopicError"] = await BuildErrorMessage();
             return RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
-                new { route = "self-assessment" });
+                new { route = "home" });
         }
     }
 
@@ -136,6 +139,8 @@ public class QuestionsController : BaseController<QuestionsController>
         string questionSlug,
         SubmitAnswerDto submitAnswerDto,
         [FromServices] ISubmitAnswerCommand submitAnswerCommand,
+        [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
+        string? returnTo = "",
         CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
@@ -155,6 +160,46 @@ public class QuestionsController : BaseController<QuestionsController>
             var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
             viewModel.ErrorMessages = new[] { "Save failed. Please try again later." };
             return RenderView(viewModel);
+        }
+
+        var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
+
+        if (isChangeAnswersFlow)
+        {
+            var establishmentId = await _user.GetEstablishmentId();
+
+            var section = await GetSectionBySlug(sectionSlug, cancellationToken)
+                    ?? throw new InvalidOperationException($"Section not found for slug '{sectionSlug}'");
+
+            var submissionResponsesDto = await _getResponseQuery.GetLatestResponses(
+                establishmentId,
+                section.Sys.Id,
+                false,
+            cancellationToken);
+
+            if (submissionResponsesDto?.Responses == null)
+            {
+                return this.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
+            }
+
+            // Check answered questions
+            var nextQuestion = GetNextAnsweredQuestion(section, submissionResponsesDto, questionSlug);
+
+            // Check unanswered to see if we really have no more questions
+            nextQuestion ??= await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
+
+            if (nextQuestion != null)
+            {
+                return RedirectToAction(nameof(GetQuestionBySlug), new
+                {
+                    sectionSlug,
+                    questionSlug = nextQuestion.Slug,
+                    returnTo = FlowConstants.ChangeAnswersFlow
+                });
+            }
+
+            // No next questions so check answers
+            return this.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
         }
 
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
@@ -183,6 +228,12 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         ViewData["Title"] = question.Text;
 
+        var returnTo = TempData["ReturnTo"]?.ToString();
+        if (!string.IsNullOrEmpty(returnTo))
+        {
+            ViewData["ReturnTo"] = returnTo;
+        }
+
         return new QuestionViewModel()
         {
             Question = question,
@@ -191,6 +242,23 @@ public class QuestionsController : BaseController<QuestionsController>
             SectionSlug = sectionSlug,
             SectionId = section?.Sys.Id
         };
+    }
+
+    private static Question? GetNextAnsweredQuestion(Section section, SubmissionResponsesDto answeredQuestions, string currentQuestionSlug)
+    {
+        // Get the valid journey based on latest answers
+        var journey = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).ToList();
+
+        // This is the current position in the journey
+        var currentIndex = journey.FindIndex(q => q.QuestionSlug == currentQuestionSlug);
+
+        if (currentIndex == -1 || currentIndex + 1 >= journey.Count)
+            return null;
+
+        // The next question in the valid journey (even if unanswered)
+        var nextQuestionSlug = journey[currentIndex + 1].QuestionSlug;
+
+        return section.Questions.FirstOrDefault(q => q.Slug == nextQuestionSlug);
     }
 
     public static IActionResult RedirectToQuestionBySlug(string sectionSlug, string questionSlug, Controller controller)

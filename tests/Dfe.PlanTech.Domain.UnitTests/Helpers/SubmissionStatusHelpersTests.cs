@@ -12,7 +12,6 @@ public class SubmissionStatusHelpersTests
 {
     [Theory]
     [InlineData(true, null, null, "Unable to retrieve status", "Red")]
-    [InlineData(false, true, true, "Completed at", "Blue")] // completed today
     [InlineData(false, true, false, "Completed on", "Blue")] // previously completed
     [InlineData(false, false, null, "Not started", "Grey")] // never completed
     public void GetGroupsSubmissionStatusTag_ShouldReturnCorrectTagBasedOnStatus(
@@ -51,18 +50,6 @@ public class SubmissionStatusHelpersTests
     {
         var result = SubmissionStatusHelpers.LastEditedDate(null, Substitute.For<ISystemTime>());
         Assert.Null(result);
-    }
-
-    [Fact]
-    public void LastEditedDate_ShouldReturnTime_WhenDateIsToday()
-    {
-        var date = DateTime.UtcNow;
-        var systemTime = Substitute.For<ISystemTime>();
-        systemTime.Today.Returns(date.Date);
-
-        var result = SubmissionStatusHelpers.LastEditedDate(date, systemTime);
-
-        Assert.StartsWith("at ", result);
     }
 
     [Fact]

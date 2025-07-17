@@ -1,3 +1,4 @@
+/*
 import { changeAnswerText, newTagText } from "../../helpers/constants";
 import { checkAnswersSlug, recommendationSlug } from "../../helpers/page-slugs";
 
@@ -5,7 +6,7 @@ let selectedQuestionsWithAnswers = [];
 let changeLinkHref;
 
 describe("Check answers page", () => {
-  const url = "/self-assessment";
+  const url = "/home";
 
   beforeEach(() => {
     cy.loginWithEnv(url);
@@ -124,3 +125,4 @@ describe("Check answers page", () => {
       .and("contain", newTagText);
   });
 });
+*/

@@ -1,5 +1,5 @@
 const STORAGE_KEY = "BrowserHistory";
-export const DEFAULT_ROUTE = "/self-assessment";
+export const DEFAULT_ROUTE = "/home";
 export const BACK_BUTTON_ID = "back-button-link";
 export const NOTIFICATION_BANNER_GO_BACK_LINK_ID = "notification-go-back-link";
 /**

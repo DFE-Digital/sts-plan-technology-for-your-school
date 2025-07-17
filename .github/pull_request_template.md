@@ -1,6 +1,6 @@
 ## Overview
 
-Addresses ticket [#TICKET-NUMBER](www.ticket-link.com)
+Addresses ticket [#TICKET-NUMBER](example.com)
 
 High level overview of changes; one or two sentences.
 
@@ -58,7 +58,7 @@ Any additional notes, comments, etc. that might be required here.
 
 Delete any rows that do not apply to the PR.
 
-- [ ] Title uses [Angular commit convention](https://www.conventionalcommits.org/en/v1.0.0-beta.4/)
+- [ ] Title uses [Angular commit convention](https://www.conventionalcommits.org/en/v1.0.0/)
 - [ ] PR targets development branch
 - [ ] Unit tests have been added/updated
 - [ ] E2E tests have been added/updated

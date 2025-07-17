@@ -2,9 +2,11 @@ namespace Dfe.PlanTech.Application.Constants;
 
 public static class UrlConstants
 {
-    public const string SelfAssessmentPage = "/self-assessment";
+    public const string HomePage = "/home";
 
     public const string SelectASchoolPage = "/groups/select-a-school";
+
+    public const string RecommendationsPage = "/recommendations";
 
     public const string ServerError = "/server-error";
 

@@ -77,7 +77,7 @@ public class UserJourneyMissingContentExceptionHandlerTests
         Assert.NotNull(redirectResult);
         Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
         Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
-        Assert.Equal("self-assessment", redirectResult.RouteValues?["route"]);
+        Assert.Equal("home", redirectResult.RouteValues?["route"]);
     }
 
     private void TestLoggedMessages(string message, LogLevel logLevel, int receivedCount)

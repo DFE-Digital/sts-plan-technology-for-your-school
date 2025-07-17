@@ -1,8 +1,8 @@
-import { selfAssessmentSlug } from "../../helpers/page-slugs.js";
+import { homePageSlug } from "../../helpers/page-slugs.js";
 
 describe("Tests for users who are unauthorised, but authenticated", () => {
   beforeEach(() => {
-    cy.loginWithEnv(selfAssessmentSlug, { userHasOrg: false });
+    cy.loginWithEnv(homePageSlug, { userHasOrg: false });
   });
 
   it("Should redirect user to no org error page if user has no organisation", () => {
