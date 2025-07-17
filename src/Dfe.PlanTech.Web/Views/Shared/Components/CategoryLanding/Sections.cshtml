@@ -7,8 +7,7 @@
 
     <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { Section = topic, Context = "Sections" }' />
 
-    @if (topic.LastCompletionDate != "" && topic.LastCompletionDate != null)
-
+    @if (!string.IsNullOrEmpty(topic.LastCompletionDate))
     {
         <ul class="govuk-task-list landing-page-list">
             <li class="govuk-task-list__item landing-page-list-heading" style="border-top: none;">
