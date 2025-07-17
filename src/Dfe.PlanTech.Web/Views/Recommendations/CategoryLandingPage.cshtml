@@ -1,0 +1,15 @@
+@using Dfe.PlanTech.Application.Constants
+@using Dfe.PlanTech.Web.Controllers
+@model Dfe.PlanTech.Web.Models.CategoryLandingPageViewModel
+
+@section DfePageHeaderOuter {
+    <partial name="BackButton" />
+}
+
+@section DfePageHeaderInner {
+    <span class="govuk-caption-xl">How to meet the standard</></span>
+    <partial name="Components/PageComponentFactory" model="@Model.Title" />
+}
+
+@await Component.InvokeAsync("CategoryLanding", new { category = Model.Category, slug = Model.Slug })
+

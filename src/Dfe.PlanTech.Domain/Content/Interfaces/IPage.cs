@@ -15,6 +15,8 @@ public interface IPage : IHasSlug
     public bool DisplayOrganisationName { get; }
 
     public bool RequiresAuthorisation { get; }
+
+    public bool? IsLandingPage { get; }
 }
 
 public interface IPage<TContentComponent, TTitle> : IPage

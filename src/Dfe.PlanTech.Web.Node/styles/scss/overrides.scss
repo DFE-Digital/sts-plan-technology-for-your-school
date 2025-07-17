@@ -185,6 +185,18 @@ button.govuk-button--white {
   }
 }
 
+//Progress tracking
+ul.landing-page-list > li {
+    height: 40px !important;
+}
+
+.landing-page-list__name-and-hint {
+    vertical-align: middle !important;
+}
+
+.landing-page-list-heading {
+    border-top: none !important;
+
 .recommendation-content > div > div.noprint button#print-page-button {
     margin-top: 0px;
 }
