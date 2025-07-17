@@ -1,6 +1,9 @@
-﻿using Dfe.PlanTech.Application.Workflows;
+﻿using System.Runtime.CompilerServices;
+using System.Threading;
+using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.RoutingDataModels;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Services;
 
@@ -75,7 +78,7 @@ public class SubmissionService(
         };
     }
 
-    public async Task<string> GetSubtopicRecommendationIntroSlug(int establishmentId, string sectionSlug)
+    public async Task<string> GetRecommendationIntroSlug(int establishmentId, string sectionSlug)
     {
         var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
 
@@ -103,6 +106,11 @@ public class SubmissionService(
         }
 
         return introSlugForMaturity.Slug;
+    }
+
+    public Task ConfirmCheckAnswers(int submissionId)
+    {
+        return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
     public async Task DeleteCurrentSubmission(int establishmentId, string sectionId)

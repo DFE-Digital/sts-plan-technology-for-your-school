@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using Dfe.PlanTech.Core.Content.Models;
 using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Core.Extensions;

@@ -1,45 +1,50 @@
-using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Web.Handlers;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Authorize]
 [Route("/")]
-public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswersLogger) : BaseController<CheckAnswersController>(checkAnswersLogger)
+public class CheckAnswersController: BaseController<CheckAnswersController>
 {
     public const string ControllerName = "CheckAnswers";
     public const string CheckAnswersAction = nameof(CheckAnswersPage);
     public const string CheckAnswersPageSlug = "check-answers";
     public const string CheckAnswersViewName = "CheckAnswers";
 
-    public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
+
+    IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler;
+    private readonly ReviewAnswersViewBuilder _reviewAnswersViewBuilder;
+
+    public CheckAnswersController(
+          ILogger<CheckAnswersController> logger,
+          IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
+          ReviewAnswersViewBuilder reviewAnswersViewBuilder
+    ) : base(logger)
+    {
+        _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
+        _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
+    }
 
     [HttpGet("{sectionSlug}/check-answers")]
-    public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
-                                                      [FromQuery] bool isChangeAnswersFlow,
-                                                      [FromServices] ICheckAnswersRouter checkAnswersValidator,
-                                                      [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
-                                                      CancellationToken cancellationToken = default)
+    public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromQuery] bool isChangeAnswersFlow)
     {
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
+
         try
         {
-            ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
-
             var errorMessage = TempData["ErrorMessage"]?.ToString();
-
-            return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, isChangeAnswersFlow, cancellationToken);
+            return await _reviewAnswersViewBuilder.RouteBasedOnSubmissionStatus(this, sectionSlug, isChangeAnswersFlow, errorMessage);
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {
-            return await userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException, cancellationToken);
+            return await _userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException);
         }
     }
 
@@ -48,33 +53,20 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
         string sectionSlug,
         int submissionId,
         string sectionName,
-        string redirectOption,
-        [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
-        [FromServices] IGetRecommendationRouter getRecommendationRouter,
-        [FromServices] IMarkSubmissionAsReviewedCommand markSubmissionAsReviewedCommand,
-        CancellationToken cancellationToken = default)
+        string redirectOption
+    )
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
         ArgumentNullException.ThrowIfNullOrEmpty(sectionName);
 
         try
         {
-            await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
-            await markSubmissionAsReviewedCommand.MarkSubmissionAsReviewed(submissionId, cancellationToken);
+            return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(this, sectionSlug, sectionName, submissionId, redirectOption);
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "There has been an error while trying to calculate maturity");
-            TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
-            return this.RedirectToCheckAnswers(sectionSlug);
+            Logger.LogError(e, "An error occurred while confirming a user's answers");
+            throw;
         }
-
-        return redirectOption switch
-        {
-            RecommendationsController.GetRecommendationAction => this.RedirectToRecommendation(sectionSlug,
-                await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken)),
-            UrlConstants.SelfAssessmentPage => this.RedirectToSelfAssessment(),
-            _ => this.RedirectToCheckAnswers(sectionSlug)
-        };
     }
 }

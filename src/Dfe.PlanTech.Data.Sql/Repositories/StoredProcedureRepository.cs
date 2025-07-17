@@ -16,7 +16,7 @@ public class StoredProcedureRepository
         _db = dbContext;
     }
 
-    public Task<int> CalculateMaturityForSubmissionsAsync(int submissionId)
+    public Task<int> SetMaturityForSubmissionAsync(int submissionId)
     {
         var parameters = new List<SqlParameter>
         {

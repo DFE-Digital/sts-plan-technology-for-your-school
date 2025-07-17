@@ -1,5 +1,4 @@
-﻿using Dfe.PlanTech.Core.Content.Models;
-using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 
 namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
@@ -39,7 +38,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
                 return warningEntry.AsDtoInternal();
             }
 
-            if (contentComponent is IDtoTransformable<CmsComponentNotificationDto> notificationEntry)
+            if (contentComponent is IDtoTransformable<CmsComponentNotificationBannerDto> notificationEntry)
             {
                 return notificationEntry.AsDtoInternal();
             }

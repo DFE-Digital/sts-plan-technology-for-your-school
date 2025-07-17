@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Domain.Helpers;
 using Microsoft.Extensions.Logging;
 
@@ -7,7 +8,7 @@ namespace Dfe.PlanTech.Core.Helpers;
 
 public static class SubmissionStatusHelper
 {
-    public static Tag GetGroupsSubmissionStatusTag(bool retrievalError, SectionStatusDto? sectionStatus, SystemTime systemTime)
+    public static Tag GetGroupsSubmissionStatusTag(bool retrievalError, SqlSectionStatusDto? sectionStatus, SystemTime systemTime)
     {
 
         var previouslyCompleted = sectionStatus?.LastCompletionDate != null;

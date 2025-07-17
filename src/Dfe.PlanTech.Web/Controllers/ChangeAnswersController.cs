@@ -1,7 +1,5 @@
-﻿using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Core.Exceptions;
+﻿using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Attributes;
-using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
@@ -18,25 +16,20 @@ namespace Dfe.PlanTech.Web.Controllers
         public const string ChangeAnswersAction = nameof(ChangeAnswersPage);
         public const string ChangeAnswersPageSlug = "change-answers";
         public const string ChangeAnswersViewName = "ChangeAnswers";
+
         public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
 
         IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler;
-        private readonly CurrentUser _currentUser;
-        private readonly ChangeAnswersViewBuilder _changeAnswersViewBuilder;
-        private readonly SubmissionService _submissionService;
+        private readonly ReviewAnswersViewBuilder _reviewAnswersViewBuilder;
 
         public ChangeAnswersController(
             ILogger<ChangeAnswersController> logger,
             IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
-            ChangeAnswersViewBuilder changeAnswersViewBuilder,
-            CurrentUser currentUser,
-            SubmissionService submissionService
+            ReviewAnswersViewBuilder reviewAnswersViewBuilder
         ) : base(logger)
         {
             _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
-            _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-            _changeAnswersViewBuilder = changeAnswersViewBuilder ?? throw new ArgumentNullException(nameof(changeAnswersViewBuilder));
-            _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+            _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
         }
 
         [HttpGet("{sectionSlug}/change-answers")]
@@ -46,7 +39,8 @@ namespace Dfe.PlanTech.Web.Controllers
 
             try
             {
-                return await _changeAnswersViewBuilder.RouteBasedOnSubmissionStatus(this, sectionSlug, TempData["ErrorMessage"]?.ToString());
+                var errorMessage = TempData["ErrorMessage"]?.ToString();
+                return await _reviewAnswersViewBuilder.RouteBasedOnSubmissionStatus(this, sectionSlug, false, errorMessage);
             }
             catch (UserJourneyMissingContentException userJourneyException)
             {
@@ -57,7 +51,7 @@ namespace Dfe.PlanTech.Web.Controllers
         [HttpGet("recommendations/from-section/{sectionSlug}")]
         public async Task<IActionResult> RedirectToRecommendation(string sectionSlug)
         {
-            var subtopicRecommendationIntroSlug = _changeAnswersViewBuilder.GetSubtopicRecommendationIntroSlugAsync(this, sectionSlug);
+            var subtopicRecommendationIntroSlug = _reviewAnswersViewBuilder.GetSubtopicRecommendationIntroSlugAsync(this, sectionSlug);
 
             return RedirectToAction(
                   RecommendationsController.GetRecommendationAction,

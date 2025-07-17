@@ -9,7 +9,6 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             Id= pageRecommendationEntry.Id;
             InternalName = pageRecommendationEntry.InternalName;
             InsetText = pageRecommendationEntry.InsetText?.AsDto();
-
         }
 
         public string Id { get; init; } = null!;
@@ -17,7 +16,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         public CmsComponentTitleDto? Title { get; init; }
         public CmsInsetTextDto? InsetText { get; init; }
         public CmsComponentTextBodyDto? TextBody { get; init; }
-        public IEnumerable<CmsHeaderDto>? Header { get; init; }
+        public IEnumerable<CmsComponentHeaderDto>? Header { get; init; }
         public IEnumerable<CmsComponentTextBodyWithMaturityDto>? TextBodyWithMaturity { get; init; }
         public List<CmsEntryDto> Content { get; init; } = [];
     }

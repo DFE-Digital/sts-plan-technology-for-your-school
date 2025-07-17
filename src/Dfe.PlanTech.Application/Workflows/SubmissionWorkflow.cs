@@ -2,21 +2,16 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.RoutingDataModel;
-using Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
-using Dfe.PlanTech.Application.Context;
-using Dfe.PlanTech.Application.ViewModels;
-using Microsoft.EntityFrameworkCore;
 using Dfe.PlanTech.Data.Sql.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Application.Workflows
 {
     public class SubmissionWorkflow(
-        CurrentUser currentUser,
         StoredProcedureRepository storedProcedureRepository,
         SubmissionRepository submissionRepository
     )
     {
-        private readonly CurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         private readonly StoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
         private readonly SubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
@@ -75,6 +70,12 @@ namespace Dfe.PlanTech.Application.Workflows
             };
         }
 
+        public async Task SetMaturityAndMarkAsReviewedAsync(int submissionId)
+        {
+            await _storedProcedureRepository.SetMaturityForSubmissionAsync(submissionId);
+            await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
+        }
+
         public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
         {
             await _submissionRepository.SetLatestSubmissionViewedAsync(establishmentId, sectionId);
@@ -82,7 +83,7 @@ namespace Dfe.PlanTech.Application.Workflows
 
         public async Task SetSubmissionReviewedAsync(int submissionId)
         {
-            var submission = await _submissionRepository.SetSubmissionReviewedAsync(submissionId);
+            var submission = await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
             await _submissionRepository.SetPreviousCompletedReviewedSubmissionsInaccessible(submission);
         }
 

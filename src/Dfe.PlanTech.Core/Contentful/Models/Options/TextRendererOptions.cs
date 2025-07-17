@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Core.Content.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Domain.Content.Models.Options;

@@ -1,7 +1,8 @@
 ﻿using System.Linq.Expressions;
+using System.Threading;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
@@ -173,7 +174,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         await _db.SaveChangesAsync();
     }
 
-    public async Task<SubmissionEntity> SetSubmissionReviewedAsync(int submissionId)
+    public async Task<SubmissionEntity> SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(int submissionId)
     {
         var submission = await GetSubmissionByIdAsync(submissionId);
         if (submission is null)
@@ -183,6 +184,22 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
 
         submission.Status = SubmissionStatus.CompleteReviewed.ToString();
         submission.DateCompleted = DateTime.UtcNow;
+
+        var otherSubmissions = await _db.Submissions
+            .Where(s =>
+                s.SectionId == submission.SectionId &&
+                s.EstablishmentId == submission.EstablishmentId &&
+                s.Id != submission.Id &&
+                s.Status != null &&
+                s.Status.Equals(SubmissionStatus.CompleteReviewed)
+            )
+            .ToListAsync();
+
+        foreach (var oldSubmissions in otherSubmissions)
+        {
+            oldSubmissions.Status = SubmissionStatus.Inaccessible.ToString();
+            oldSubmissions.Deleted = true;
+        }
 
         await _db.SaveChangesAsync();
 

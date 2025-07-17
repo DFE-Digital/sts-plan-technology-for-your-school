@@ -4,7 +4,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Data.Contentful.Persistence;
+using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
 using Microsoft.Extensions.Logging;
 
@@ -13,7 +13,7 @@ namespace Dfe.PlanTech.Application.Workflows
     public class ContentfulWorkflow(
         ILogger<ContentfulWorkflow> logger,
         ContentfulRepository contentfulRepository,
-        SectionWorkflow sectionEntryRepository
+        GetPageFromContentfulOptions getPageOptions
     )
     {
         public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
@@ -21,7 +21,7 @@ namespace Dfe.PlanTech.Application.Workflows
 
         private readonly ILogger<ContentfulWorkflow> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         private readonly ContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
-        private readonly SectionWorkflow _sectionEntryRepository = sectionEntryRepository ?? throw new ArgumentNullException(nameof(sectionEntryRepository));
+        private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
 
         public async Task<TDto?> GetEntryById<TEntry, TDto>(string contentId)
             where TEntry : IDtoTransformable<TDto>
@@ -66,24 +66,33 @@ namespace Dfe.PlanTech.Application.Workflows
             return introForMaturity.AsDto();
         }
 
+        public async Task<CmsPageDto> GetPageBySlugAsync(string slug)
+        {
+            var query = new ContentfulQuerySingleValue { Field = "fields.slug", Value = slug };
+            var options = new GetEntriesOptions(_getPageOptions.Include, [query]);
+
+            try
+            {
+                var pages = await _contentfulRepository.GetEntries<PageEntry>(options);
+                var page = pages.FirstOrDefault();
+                if (page is null)
+                {
+                    throw new ContentfulDataUnavailableException($"Could not find a page matching slug '{slug}");
+                }
+
+                return page.AsDto();
+            }
+            catch (Exception ex)
+            {
+                throw new ContentfulDataUnavailableException($"Error getting page with slug {slug} from Contentful", ex);
+            }
+        }
+
         public async Task<CmsQuestionnaireSectionDto> GetSectionBySlugAsync(string sectionSlug)
         {
-            var options = new GetEntriesOptions()
-            {
-                Queries =
-                [
-                    new ContentfulQuerySingleValue()
-                    {
-                        Field = SlugFieldPath,
-                        Value = sectionSlug
-                    },
-                    new ContentfulQuerySingleValue()
-                    {
-                        Field = "fields.interstitialPage.sys.contentType.sys.id",
-                        Value = "page"
-                    }
-                ]
-            };
+            var sectionSlugQuery = new ContentfulQuerySingleValue { Field = SlugFieldPath, Value = sectionSlug };
+            var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.interstitialPage.sys.contentType.sys.id", Value = "page" };
+            var options = new GetEntriesOptions { Queries = [sectionSlugQuery, contentTypeQuery] };
 
             try
             {
