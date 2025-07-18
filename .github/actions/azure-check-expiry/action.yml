@@ -10,9 +10,6 @@ inputs:
   az_client_id:
     required: true
     type: string
-  az_client_secret:
-    required: true
-    type: string
   az_keyvault_name:
     required: true
     type: string
@@ -30,7 +27,6 @@ runs:
         az_tenant_id: ${{ inputs.az_tenant_id }}
         az_subscription_id: ${{ inputs.az_subscription_id }}
         az_client_id: ${{ inputs.az_client_id }}
-        az_client_secret: ${{ inputs.az_client_secret }}
     
     - name: Get GitHub Runner IP
       id: whats-my-ip

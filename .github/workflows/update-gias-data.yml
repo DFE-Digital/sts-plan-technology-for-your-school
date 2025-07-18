@@ -12,6 +12,9 @@ on:
 
 jobs:
   update_gias_data:
+    permissions:
+      id-token: write
+      contents: read
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment || 'Dev' }}
     name: Update GIAS data for ${{ inputs.environment || 'Dev' }}
@@ -35,7 +38,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Get workflow IP address
         id: whats-my-ip

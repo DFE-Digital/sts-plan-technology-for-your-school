@@ -11,15 +11,14 @@ inputs:
   az_client_id:
     required: true
     type: string
-  az_client_secret:
-    required: true
-    type: string
 
 runs:
   using: composite
 
   steps:
-    - name: Azure login with ACA credentials
-      uses: azure/login@v1
+    - name: Azure CLI Login with Federated Identity
+      uses: azure/login@v2
       with:
-        creds: '{"clientId":"${{ inputs.az_client_id }}","clientSecret":"${{ inputs.az_client_secret }}","subscriptionId":"${{ inputs.az_subscription_id }}","tenantId":"${{ inputs.az_tenant_id }}"}'
+        client-id: ${{ inputs.az_client_id }}
+        tenant-id: ${{ inputs.az_tenant_id }}
+        subscription-id: ${{ inputs.az_subscription_id }}
