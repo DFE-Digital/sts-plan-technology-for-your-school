@@ -14,7 +14,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         public string Id { get; init; } = null!;
         public string InternalName { get; init; } = null!;
         public CmsComponentTitleDto? Title { get; init; }
-        public CmsInsetTextDto? InsetText { get; init; }
+        public CmsComponentInsetTextDto? InsetText { get; init; }
         public CmsComponentTextBodyDto? TextBody { get; init; }
         public IEnumerable<CmsComponentHeaderDto>? Header { get; init; }
         public IEnumerable<CmsComponentTextBodyWithMaturityDto>? TextBodyWithMaturity { get; init; }

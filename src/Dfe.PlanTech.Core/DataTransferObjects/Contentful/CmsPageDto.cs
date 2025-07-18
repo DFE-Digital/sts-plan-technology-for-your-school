@@ -28,7 +28,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             RequiresAuthorisation = pageEntry.RequiresAuthorisation;
             BeforeTitleContent = pageEntry.BeforeTitleContent.Select(BuildBeforeTitleContentDto).ToList();
             Title = pageEntry.Title?.AsDto();
-            Content = pageEntry.Content.Select(c => c.AsDto()).ToList();
+            Content = pageEntry.Content.Select(BuildContentDto).ToList();
         }
 
         private CmsEntryDto BuildBeforeTitleContentDto(ContentComponent contentComponent)

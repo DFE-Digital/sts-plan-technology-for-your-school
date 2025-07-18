@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
-using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Core.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace Dfe.PlanTech.Application.Services;

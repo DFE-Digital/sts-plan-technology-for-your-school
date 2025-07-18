@@ -22,7 +22,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             InternalName = supportPageEntry.InternalName;
             Slug = supportPageEntry.Slug;
             Heading = supportPageEntry.Heading.AsDto();
-            Content = supportPageEntry.Content.AsDto();
+            Content = supportPageEntry.Content.Select(BuildContentDto).ToList();
             IncludeInSiteMap = supportPageEntry.IncludeInSiteMap;
             HasBackToTop = supportPageEntry.HasBackToTop;
             HasCitation = supportPageEntry.HasCitation;

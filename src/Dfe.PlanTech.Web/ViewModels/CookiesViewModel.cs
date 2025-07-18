@@ -1,15 +1,15 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Cookie;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Models;
 
-namespace Dfe.PlanTech.Web.Models;
+namespace Dfe.PlanTech.Web.ViewModels;
 
 public class CookiesViewModel
 {
-    public Title Title { get; init; } = null!;
+    public CmsComponentTitleDto Title { get; init; } = null!;
 
-    public List<ContentComponent> Content { get; init; } = null!;
+    public List<CmsEntryDto> Content { get; init; } = null!;
 
-    public DfeCookie Cookie { get; init; } = new DfeCookie();
+    public DfeCookieModel Cookie { get; init; } = new DfeCookieModel();
 
     public string ReferrerUrl { get; init; } = null!;
 }
