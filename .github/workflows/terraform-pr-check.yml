@@ -55,7 +55,6 @@ env:
 
 jobs:
   validate-terraform:
-    environment: Dev
     name: Validate Terraform
     runs-on: ubuntu-22.04
     defaults:
