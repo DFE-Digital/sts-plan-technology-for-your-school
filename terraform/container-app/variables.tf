@@ -129,6 +129,12 @@ variable "key_size" {
   default     = 2048
 }
 
+variable "key_vault_cidr_rules" {
+  description = "A set of CIDR rules representing allowed IP addresses for network access to the keyvault s190x0x-plantech-kv"
+  type        = set(string)
+  default     = []
+}
+
 #######################
 # Azure App Container #
 #######################
@@ -285,4 +291,13 @@ variable "contentful_webhook_name" {
   description = "Prefix for the Contentful webhook name"
   type        = string
   default     = "Plan Tech Webhook"
+}
+
+#########
+# Misc #
+#########
+
+variable "workflow_runner_ip" {
+  type    = string
+  default = null
 }
