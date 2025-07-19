@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Security.Authentication;
+using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.RoutingDataModel;
 
@@ -8,8 +9,10 @@ namespace Dfe.PlanTech.Web.Context
     {
         private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
 
-        public string? DsiRef => GetStringFromClaim(ClaimConstants.NameIdentifier);
-        public string? Email => GetNameIdentifierFromClaim(ClaimConstants.VerifiedEmail);
+        public string? DsiReference => GetStringFromClaim(ClaimConstants.NameIdentifier)
+            ?? throw new AuthenticationException("User is not authenticated");
+        public string? Email => GetNameIdentifierFromClaim(ClaimConstants.VerifiedEmail)
+            ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
         public int? EstablishmentId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
         public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 

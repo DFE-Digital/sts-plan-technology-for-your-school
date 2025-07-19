@@ -1,17 +1,17 @@
-﻿using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Establishments.Models;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-namespace Dfe.PlanTech.Web.Models
+namespace Dfe.PlanTech.Web.ViewModels;
 {
     public class GroupsSelectorViewModel
     {
         public string GroupName { get; set; } = null!;
 
-        public List<EstablishmentLink> GroupEstablishments { get; set; } = null!;
+        public List<SqlEstablishmentLinkDto> GroupEstablishments { get; set; } = null!;
 
-        public Title Title { get; init; } = null!;
+        public string Title { get; init; } = null!;
 
-        public List<ContentComponent> Content { get; init; } = null!;
+        public List<CmsEntryDto> Content { get; init; } = null!;
 
         public string? ErrorMessage { get; set; }
 

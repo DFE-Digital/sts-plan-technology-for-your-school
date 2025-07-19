@@ -13,7 +13,9 @@ using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Configurations;
+using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -22,78 +24,35 @@ namespace Dfe.PlanTech.Web.Controllers
     [Route("/")]
     public class GroupsController : BaseController<GroupsController>
     {
-        public const string GroupsSlug = UrlConstants.GroupsSlug;
-        public const string GroupsSelectorPageSlug = UrlConstants.GroupsSelectionPageSlug;
-        public const string GroupsSchoolDashboardSlug = UrlConstants.GroupsDashboardSlug;
         public const string GetSchoolDashboardAction = "GetSchoolDashboard";
-        private const string selectASchoolViewName = "~/Views/Groups/GroupsSelectSchool.cshtml";
         private const string schoolDashboardViewName = "~/Views/Groups/GroupsSchoolDashboard.cshtml";
         public const string GetGroupsRecommendationAction = "GetGroupsRecommendation";
 
         private readonly ILogger _logger;
-        private readonly IUser _user;
-        private readonly IGetEstablishmentIdQuery _getEstablishmentIdQuery;
-        private readonly IGetSubmissionStatusesQuery _getSubmissionStatusesQuery;
-        private readonly IGetGroupSelectionQuery _getGroupSelectionQuery;
-        private readonly IGetSectionQuery _getSectionQuery;
-        private readonly IGetLatestResponsesQuery _getLatestResponsesQuery;
-        private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
+        private readonly CurrentUser _currentUser;
+        private ContactOptionsConfiguration _contactOptions;
+        private GroupsViewBuilder _groupsViewBuilder;
 
-        public GroupsController(ILogger<GroupsController> logger, IUser user, IGetEstablishmentIdQuery getEstablishmentIdQuery, IGetSubmissionStatusesQuery getSubmissionStatusesQuery, IGetGroupSelectionQuery getGroupSelectionQuery, IGetSectionQuery getSectionQuery, IGetLatestResponsesQuery getLatestResponsesQuery, IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery) : base(logger)
+        public GroupsController(
+            ILogger<GroupsController> logger,
+            IOptions<ContactOptionsConfiguration> contactOptions,
+            CurrentUser currentUser,
+            GroupsViewBuilder groupsViewBuilder
+        ) : base(logger)
         {
-            _logger = logger;
-            _user = user;
-            _getEstablishmentIdQuery = getEstablishmentIdQuery;
-            _getSubmissionStatusesQuery = getSubmissionStatusesQuery;
-            _getGroupSelectionQuery = getGroupSelectionQuery;
-            _getSectionQuery = getSectionQuery;
-            _getLatestResponsesQuery = getLatestResponsesQuery;
-            _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+            _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+            _groupsViewBuilder = groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
         }
 
-        [HttpGet($"{GroupsSlug}/{GroupsSelectorPageSlug}")]
-        public async Task<IActionResult> GetSelectASchoolView([FromServices] IGetPageQuery getPageQuery, [FromServices] IGetNavigationQuery getNavigationQuery, [FromServices] IOptions<ContactOptionsConfiguration> contactOptions, CancellationToken cancellationToken)
+        [HttpGet($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
+        public async Task<IActionResult> GetSelectASchoolView()
         {
-            var selectASchoolPageContent = await getPageQuery.GetPageBySlug(GroupsSelectorPageSlug, cancellationToken);
-            var dashboardContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
-            var categories = dashboardContent.Content.OfType<Category>();
-
-            var schools = await _user.GetGroupEstablishments();
-
-            var groupSchools = await GetSchoolsWithSubmissionCounts(schools, categories);
-
-            var groupName = _user.GetOrganisationData().OrgName;
-            var title = new Title() { Text = groupName };
-            List<ContentComponent> content = selectASchoolPageContent?.Content ?? new List<ContentComponent>();
-
-            string totalSections = "";
-
-            if (categories != null)
-            {
-                totalSections = SubmissionStatusHelper.GetTotalSections(categories);
-            }
-
-            var contactLink = await getNavigationQuery.GetLinkById(contactOptions.Value.LinkId, cancellationToken);
-
-            var viewModel = new GroupsSelectorViewModel()
-            {
-                GroupName = groupName,
-                GroupEstablishments = groupSchools,
-                Title = title,
-                Content = content,
-                TotalSections = totalSections,
-                ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)
-                    ? "Unable to retrieve progress"
-                    : null,
-                ContactLinkHref = contactLink?.Href
-            };
-
-            ViewData["Title"] = "Select a school";
-
-            return View(selectASchoolViewName, viewModel);
+            return await _groupsViewBuilder.GetSelectASchoolView(this);
         }
 
-        [HttpPost($"{GroupsSlug}/{GroupsSelectorPageSlug}")]
+        [HttpPost($"{GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
         public async Task<IActionResult> SelectSchool(string schoolUrn, string schoolName, [FromServices] IRecordGroupSelectionCommand recordGroupSelectionCommand, CancellationToken cancellationToken = default)
         {
             var dto = new SubmitSelectionDto()
@@ -107,13 +66,13 @@ namespace Dfe.PlanTech.Web.Controllers
             return RedirectToAction("GetSchoolDashboardView");
         }
 
-        [HttpGet($"{GroupsSlug}/{GroupsSchoolDashboardSlug}", Name = GetSchoolDashboardAction)]
+        [HttpGet($"{GroupsSlug}/{UrlConstants.GroupsDashboardSlug}", Name = GetSchoolDashboardAction)]
         public async Task<IActionResult> GetSchoolDashboardView([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
         {
             var latestSelection = await GetCurrentSelection(cancellationToken);
 
-            var groupName = _user.GetOrganisationData().OrgName;
-            var pageContent = await getPageQuery.GetPageBySlug(GroupsSchoolDashboardSlug, cancellationToken);
+            var groupName = _currentUser.GetOrganisationData().OrgName;
+            var pageContent = await getPageQuery.GetPageBySlug(UrlConstants.GroupsDashboardSlug, cancellationToken);
             List<ContentComponent> content = pageContent?.Content ?? new List<ContentComponent>();
 
             var viewModel = new GroupsSchoolDashboardViewModel()
@@ -123,7 +82,7 @@ namespace Dfe.PlanTech.Web.Controllers
                 GroupName = groupName,
                 Title = new Title() { Text = "Plan technology for your school" },
                 Content = content,
-                Slug = GroupsSchoolDashboardSlug
+                Slug = UrlConstants.GroupsDashboardSlug
             };
 
             ViewData["Title"] = "Dashboard";
@@ -223,8 +182,8 @@ namespace Dfe.PlanTech.Web.Controllers
         [NonAction]
         public async Task<GroupReadActivityDto> GetCurrentSelection(CancellationToken cancellationToken)
         {
-            var userId = await _user.GetCurrentUserId();
-            var userEstablishmentId = await _user.GetEstablishmentId();
+            var userId = await _currentUser.GetCurrentUserId();
+            var userEstablishmentId = await _currentUser.GetEstablishmentId();
             var latestSelection = await _getGroupSelectionQuery.GetLatestSelectedGroupSchool(userId.Value, userEstablishmentId, cancellationToken)
                 ?? throw new DatabaseException($"Could not get latest selected group school for user with ID {userId.Value} in establishment: {userEstablishmentId}");
 

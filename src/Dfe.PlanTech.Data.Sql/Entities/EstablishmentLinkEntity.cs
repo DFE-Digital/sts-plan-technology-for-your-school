@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
@@ -13,9 +12,6 @@ public class EstablishmentLinkEntity
 
     public string Urn { get; set; } = null!;
 
-    [NotMapped]
-    public int? CompletedSectionsCount { get; set; }
-
     public SqlEstablishmentLinkDto AsDto()
     {
         return new SqlEstablishmentLinkDto
@@ -24,7 +20,6 @@ public class EstablishmentLinkEntity
             GroupUid = GroupUid,
             EstablishmentName = EstablishmentName,
             Urn = Urn,
-            CompletedSectionsCount = CompletedSectionsCount
         };
     }
 }

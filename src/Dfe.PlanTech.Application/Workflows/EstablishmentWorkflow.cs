@@ -1,7 +1,6 @@
-﻿using System.Threading;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.RoutingDataModel;
-using Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
+using Dfe.PlanTech.Data.Sql.Repositories;
 
 namespace Dfe.PlanTech.Application.Workflows
 {
@@ -19,7 +18,7 @@ namespace Dfe.PlanTech.Application.Workflows
 
         public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
         {
-            var establishment = await _establishmentRepository.GetEstablishmentByRefAsync(establishmentModel.Reference);
+            var establishment = await _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentModel.Reference);
             establishment ??= await _establishmentRepository.CreateEstablishmentFromModelAsync(establishmentModel);
 
             return establishment.AsDto();
@@ -38,8 +37,14 @@ namespace Dfe.PlanTech.Application.Workflows
 
         public async Task<int?> GetEstablishmentIdByReferenceAsync(string establishmentReference)
         {
-            var establishment = await _establishmentRepository.GetEstablishmentByRefAsync(establishmentReference);
-            return establishment?.Id;
+            var establishments = await _establishmentRepository.GetEstablishmentsByReferencesAsync([establishmentReference]);
+            return establishments.FirstOrDefault()?.Id;
+        }
+
+        public async Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)
+        {
+            var establishments = await _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentReferences);
+            return establishments.Select(e => e.AsDto());
         }
 
         public async Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId)
@@ -48,14 +53,9 @@ namespace Dfe.PlanTech.Application.Workflows
             return links.Select(l => l.AsDto()).ToList();
         }
 
-        public Task<int> RecordGroupSelection(
-            int userEstablishmentId,
-            int selectedEstablishmentId,
-            string? selectedEstablishmentName,
-            int userId
-        )
+        public Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
         {
-            return _storedProcedureRepository.RecordGroupSelection(userEstablishmentId, selectedEstablishmentId, selectedEstablishmentName, userId);
+            return _storedProcedureRepository.RecordGroupSelection(userGroupSelectionModel);
         }
 
         public async Task<SqlGroupReadActivityDto?> GetLatestSelectedGroupSchool(int userId, int userEstablishmentId)

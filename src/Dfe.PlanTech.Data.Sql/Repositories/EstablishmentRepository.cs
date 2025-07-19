@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Data.Sql.Entities;
-using Dfe.PlanTech.Data.Sql;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
@@ -33,13 +32,16 @@ public class EstablishmentRepository
         return establishmentEntity;
     }
 
-    public Task<EstablishmentEntity?> GetEstablishmentByRefAsync(string establishmentReference)
+    public Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)
     {
-        return GetEstablishmentByAsync(establishment => establishment.EstablishmentRef == establishmentReference);
+        return GetEstablishmentsByAsync(establishment => establishmentReferences.Contains(establishment.EstablishmentRef));
     }
 
-    public Task<EstablishmentEntity?> GetEstablishmentByAsync(Expression<Func<EstablishmentEntity, bool>> predicate)
+    public Task<List<EstablishmentEntity>> GetEstablishmentsByAsync(Expression<Func<EstablishmentEntity, bool>> predicate)
     {
-        return _db.Establishments.FirstOrDefaultAsync(predicate);
+        return _db.Establishments
+            .Where(predicate)
+            .Where(establishment => establishment != null)
+            .ToListAsync();
     }
 }

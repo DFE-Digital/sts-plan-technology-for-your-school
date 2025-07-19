@@ -39,6 +39,13 @@ namespace Dfe.PlanTech.Application.Workflows
             return responseId;
         }
 
+        public async Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(int establishmentId, IEnumerable<string> sectionIds)
+        {
+            var sectionIdsInput = string.Join(',', sectionIds);
+            var statuses = await _storedProcedureRepository.GetSectionStatusesAsync(sectionIdsInput, establishmentId);
+            return statuses.Select(s => s.AsDto()).ToList();
+        }
+
         public async Task<SqlSubmissionDto?> GetInProgressSubmissionAsync(int establishmentId, string sectionId)
         {
             var currentSubmission = await _submissionRepository.GetLatestSubmissionAsync(establishmentId, sectionId, isCompleted: false);

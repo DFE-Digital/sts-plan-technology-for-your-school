@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Handlers;
-using Dfe.PlanTech.Web.Routing;
+using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -51,7 +51,7 @@ namespace Dfe.PlanTech.Web.Controllers
         [HttpGet("recommendations/from-section/{sectionSlug}")]
         public async Task<IActionResult> RedirectToRecommendation(string sectionSlug)
         {
-            var subtopicRecommendationIntroSlug = _reviewAnswersViewBuilder.GetSubtopicRecommendationIntroSlugAsync(this, sectionSlug);
+            var subtopicRecommendationIntroSlug = _reviewAnswersViewBuilder.RouteToSubtopicRecommendationIntroSlugAsync(this, sectionSlug);
 
             return RedirectToAction(
                   RecommendationsController.GetRecommendationAction,
