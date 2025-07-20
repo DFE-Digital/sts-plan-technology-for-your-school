@@ -23,7 +23,7 @@ public class CookiesController(
     [HttpGet]
     public async Task<IActionResult> GetCookiesPage()
     {
-        var cookiesPageContent = await _contentfulService.GetPageBySlug(CookiesSlug);
+        var cookiesPageContent = await _contentfulService.GetPageBySlugAsync(CookiesSlug);
 
         var referrerUrl = HttpContext.Request.Headers.Referer.ToString();
 

@@ -2,8 +2,7 @@
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
 using Microsoft.Extensions.Logging;
 
@@ -21,12 +20,12 @@ public class EstablishmentService(
     private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
     private readonly UserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 
-    public Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId)
+    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
     {
-        return _establishmentWorkflow.GetGroupEstablishments(establishmentId);
+        return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
-    public Task<SqlGroupReadActivityDto?> GetLatestSelectedGroupSchool(int? userId, int? establishmentId)
+    public async Task<SqlGroupReadActivityDto> GetLatestSelectedGroupSchoolAsync(int? userId, int? establishmentId)
     {
         if (userId is null)
         {
@@ -38,10 +37,13 @@ public class EstablishmentService(
             throw new ArgumentException($"User's {nameof(establishmentId)} cannot be null");
         }
 
-        return _establishmentWorkflow.GetLatestSelectedGroupSchool(userId.Value, establishmentId.Value);
+        return await _establishmentWorkflow.GetLatestSelectedGroupSchool(userId.Value, establishmentId.Value)
+            ?? throw new DatabaseException($"Could not get latest selected group school for user with ID {userId.Value} in establishment: {establishmentId.Value}");
     }
-    public async Task<List<SqlEstablishmentLinkDto>> BuildSchoolsWithSubmissionCountsView(IEnumerable<CmsCategoryDto> categories, IEnumerable<SqlEstablishmentLinkDto> schools)
+
+    public async Task<List<SqlEstablishmentLinkDto>> BuildSchoolsWithSubmissionCountsView(IEnumerable<CmsCategoryDto> categories, int establishmentId)
     {
+        var schools = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
         var sectionIds = categories.SelectMany(c => c.Sections.Select(s => s.Id));
 
         var schoolUrns = schools.Select(s => s.Urn);
@@ -73,16 +75,12 @@ public class EstablishmentService(
             userEstablishmentId = userEstablishment.Id;
         }
 
-        var selectedEstablishmentId = await _establishmentWorkflow.GetEstablishmentIdByReferenceAsync(selectedEstablishmentUrn);
-        if (selectedEstablishmentId is null)
-        {
-            var selectedEstablishment = await _establishmentWorkflow.GetOrCreateEstablishmentAsync(selectedEstablishmentUrn, selectedEstablishmentName);
-            selectedEstablishmentId = selectedEstablishment.Id;
-        }
+        var selectedEstablishment = await _establishmentWorkflow.GetEstablishmentByReferenceAsync(selectedEstablishmentUrn);
+        selectedEstablishment ??= await _establishmentWorkflow.GetOrCreateEstablishmentAsync(selectedEstablishmentUrn, selectedEstablishmentName);
 
         var selectionModel = new UserGroupSelectionModel
         {
-            SelectedEstablishmentId = selectedEstablishmentId.Value,
+            SelectedEstablishmentId = selectedEstablishment.Id,
             SelectedEstablishmentName = selectedEstablishmentName,
             UserEstablishmentId = userEstablishmentId.Value,
             UserId = user.Id

@@ -16,10 +16,9 @@ public class ReviewAnswersViewBuilder(
     CurrentUser currentUser,
     ContentfulService contentfulService,
     SubmissionService submissionService
-)
+) : BaseViewBuilder(currentUser)
 {
     private readonly ILogger<ReviewAnswersViewBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly CurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
     private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
@@ -32,7 +31,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = _currentUser.EstablishmentId ?? throw new InvalidDataException(nameof(currentUser.EstablishmentId));
+        var establishmentId = GetEstablishmentIdOrThrowException();
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
         var model = BuildChangeAnswersViewModel(controller, submissionRoutingData, sectionSlug, errorMessage);
 
@@ -58,8 +57,7 @@ public class ReviewAnswersViewBuilder(
 
     public IActionResult RouteToSubtopicRecommendationIntroSlugAsync(Controller controller, string sectionSlug)
     {
-        var establishmentId = _currentUser.EstablishmentId
-            ?? throw new InvalidDataException(nameof(currentUser.EstablishmentId));
+        var establishmentId = GetEstablishmentIdOrThrowException();
 
         var recommendationIntroSlug = _submissionService.GetRecommendationIntroSlug(establishmentId, sectionSlug);
 
@@ -92,8 +90,7 @@ public class ReviewAnswersViewBuilder(
         switch (redirectOption)
         {
             case RecommendationsController.GetRecommendationAction:
-                var establishmentId = _currentUser.EstablishmentId
-                    ?? throw new InvalidDataException(nameof(currentUser.EstablishmentId));
+                var establishmentId = GetEstablishmentIdOrThrowException();
                 var recommendationIntroSlug = await _submissionService.GetRecommendationIntroSlug(establishmentId, sectionSlug);
                 return controller.RedirectToRecommendation(sectionSlug, recommendationIntroSlug);
             case UrlConstants.SelfAssessmentPage:
@@ -116,7 +113,7 @@ public class ReviewAnswersViewBuilder(
 
         if (controller is CheckAnswersController)
         {
-            var page = await _contentfulService.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug);
+            var page = await _contentfulService.GetPageBySlugAsync(CheckAnswersController.CheckAnswersPageSlug);
             content = page.Content;
             pageTitle = PageTitleConstants.CheckAnswers;
             slug = CheckAnswersController.CheckAnswersPageSlug;
@@ -134,7 +131,7 @@ public class ReviewAnswersViewBuilder(
 
         return new ReviewAnswersViewModel()
         {
-            Title = pageTitle,
+            Title = new CmsComponentTitleDto() { Text = pageTitle },
             Content = content,
             SectionName = routingData.QuestionnaireSection.Name,
             SectionSlug = sectionSlug,

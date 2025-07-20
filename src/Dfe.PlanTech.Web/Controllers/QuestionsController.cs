@@ -1,19 +1,13 @@
-using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Domain.Persistence.Models;
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.Routing;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Dfe.PlanTech.Web.Configurations;
-using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
-using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Web.ViewModels;
-using Dfe.PlanTech.Core.Constants;
 
 namespace Dfe.PlanTech.Web.Controllers;
 

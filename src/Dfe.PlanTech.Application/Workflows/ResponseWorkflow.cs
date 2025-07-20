@@ -19,7 +19,7 @@ public class ResponseWorkflow
     private readonly SectionWorkflow _sectionEntryRepository = sectionEntryRepository ?? throw new ArgumentNullException(nameof(sectionEntryRepository));
     private readonly SubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
-    public async Task<QuestionWithAnswerModel?> GetLatestResponseForQuestion(int establishmentId, string sectionId, string questionId)
+    public async Task<QuestionWithAnswerModel?> GetLatestResponseForQuestionAsync(int establishmentId, string sectionId, string questionId)
     {
         return await _submissionRepository.GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompleted: false, includeResponses: true)
             .SelectMany(submission => submission.Responses)
@@ -29,27 +29,9 @@ public class ResponseWorkflow
             .FirstOrDefaultAsync();
     }
 
-    public async Task<SqlSubmissionDto?> GetLatestSubmission(int establishmentId, string sectionId, bool isCompletedSubmission, bool includeResponses)
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionWithOrderedResponsesAsync(int establishmentId, CmsQuestionnaireSectionDto section, bool isCompletedSubmission)
     {
-        var latestSubmission = await _submissionRepository.GetPreviousSubmissionsInDescendingOrder(
-            establishmentId,
-            sectionId,
-            isCompletedSubmission,
-            includeResponses)
-            .FirstOrDefaultAsync();
-
-        return latestSubmission?.AsDto();
-    }
-
-    public async Task<SqlSubmissionDto?> GetLatestIncompleteSubmissionWithOrderedResponses(int establishmentId, CmsQuestionnaireSectionDto section)
-    {
-        var latestSubmission = await _submissionRepository.GetPreviousSubmissionsInDescendingOrder(
-            establishmentId,
-            section.Id,
-            isCompleted: false,
-            includeResponses: true)
-            .FirstOrDefaultAsync();
-
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, isCompletedSubmission);
         if (latestSubmission is null)
         {
             return null;
@@ -67,26 +49,20 @@ public class ResponseWorkflow
             .FirstOrDefault(q => q.Id.Equals(lastResponseInUserJourney.QuestionId))
                 ?? throw new UserJourneyMissingContentException($"Could not find question with ID {lastResponseInUserJourney.QuestionId} in section with ID {section.Id}", section);
 
-        var lastSelectedAnswer = lastSelectedQuestion.Answers
-            .FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.AnswerId))
-                ?? throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.AnswerId} in question {lastResponseInUserJourney.QuestionId}", section);
+        if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.AnswerId)) is null)
+        {
+            throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.AnswerId} in question {lastResponseInUserJourney.QuestionId}", section);
+        }
 
-        return latestSubmission.AsDto();
+        return new SubmissionResponsesModel(latestSubmission.AsDto());
     }
 
     private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, CmsQuestionnaireSectionDto section)
     {
-        var questionMap = responses
-            .Where(r => !string.IsNullOrWhiteSpace(r.Question.ContentfulSysId))
-            .GroupBy(r => r.Question.ContentfulSysId)
-            .Select(group => group
-                .OrderByDescending(r => r.DateCreated)
-                .First())
-            .ToDictionary(response => response.Question.ContentfulSysId, response => response);
+        var currentQuestion = section?.Questions.FirstOrDefault();
+        var questionMap = responses.ToDictionary(response => response.Question.ContentfulSysId, response => response);
 
         var orderedResponses = new List<ResponseEntity>();
-
-        var currentQuestion = section?.Questions.FirstOrDefault();
         while (currentQuestion is not null)
         {
             var questionSysId = currentQuestion.Sys.Id ?? string.Empty;

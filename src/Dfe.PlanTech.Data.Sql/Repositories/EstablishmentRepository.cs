@@ -32,6 +32,12 @@ public class EstablishmentRepository
         return establishmentEntity;
     }
 
+    public async Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(string establishmentReference)
+    {
+        var establishments = await GetEstablishmentsByAsync(establishment => establishment.EstablishmentRef.Equals(establishmentReference));
+        return establishments.FirstOrDefault();
+    }
+
     public Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)
     {
         return GetEstablishmentsByAsync(establishment => establishmentReferences.Contains(establishment.EstablishmentRef));

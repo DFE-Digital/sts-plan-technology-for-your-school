@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Web.Models;
 public class ReviewAnswersViewModel
 {
     [Required]
-    public string Title { get; init; } = null!;
+    public CmsComponentTitleDto Title { get; init; } = null!;
 
     public List<CmsEntryDto>? Content { get; init; }
 

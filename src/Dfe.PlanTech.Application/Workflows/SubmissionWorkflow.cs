@@ -21,6 +21,18 @@ namespace Dfe.PlanTech.Application.Workflows
             await _submissionRepository.CloneSubmission(submissionWithResponses);
         }
 
+        public async Task<SqlSubmissionDto?> GetLatestSubmissionAsync(int establishmentId, string sectionId, bool isCompletedSubmission, bool includeResponses)
+        {
+            var latestSubmission = await _submissionRepository.GetPreviousSubmissionsInDescendingOrder(
+                establishmentId,
+                sectionId,
+                isCompletedSubmission,
+                includeResponses)
+                .FirstOrDefaultAsync();
+
+            return latestSubmission?.AsDto();
+        }
+
         // On the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
         // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
         public async Task<int> SubmitAnswer(SubmitAnswerViewModel questionAnswer, CancellationToken cancellationToken = default)
@@ -90,8 +102,7 @@ namespace Dfe.PlanTech.Application.Workflows
 
         public async Task SetSubmissionReviewedAsync(int submissionId)
         {
-            var submission = await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
-            await _submissionRepository.SetPreviousCompletedReviewedSubmissionsInaccessible(submission);
+            await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
         }
 
         public Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)

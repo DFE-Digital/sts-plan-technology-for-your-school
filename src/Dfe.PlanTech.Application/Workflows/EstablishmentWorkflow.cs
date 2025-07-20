@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Application.Workflows
 
         public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
         {
-            var establishment = await _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentModel.Reference);
+            var establishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(establishmentModel.Reference);
             establishment ??= await _establishmentRepository.CreateEstablishmentFromModelAsync(establishmentModel);
 
             return establishment.AsDto();
@@ -35,10 +35,10 @@ namespace Dfe.PlanTech.Application.Workflows
             return GetOrCreateEstablishmentAsync(establishmentModel);
         }
 
-        public async Task<int?> GetEstablishmentIdByReferenceAsync(string establishmentReference)
+        public async Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(string establishmentReference)
         {
             var establishments = await _establishmentRepository.GetEstablishmentsByReferencesAsync([establishmentReference]);
-            return establishments.FirstOrDefault()?.Id;
+            return establishments.FirstOrDefault()?.AsDto();
         }
 
         public async Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)

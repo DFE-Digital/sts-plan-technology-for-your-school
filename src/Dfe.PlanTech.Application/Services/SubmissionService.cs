@@ -1,9 +1,7 @@
-﻿using System.Runtime.CompilerServices;
-using System.Threading;
-using Dfe.PlanTech.Application.Workflows;
+﻿using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Services;
 
@@ -29,11 +27,18 @@ public class SubmissionService(
         await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, sectionId);
     }
 
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionWithResponsesAsync(int establishmentId, string sectionSlug, bool isCompletedSubmission)
+    {
+        var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
+
+        return await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, cmsQuestionnaireSection, isCompletedSubmission);
+    }
+
     public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, string sectionSlug)
     {
         var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
 
-        var latestCompletedSubmission = await _responseWorkflow.GetLatestSubmission(
+        var latestCompletedSubmission = await _submissionWorkflow.GetLatestSubmissionAsync(
             establishmentId,
             cmsQuestionnaireSection.Id,
             isCompletedSubmission: true,
@@ -55,57 +60,31 @@ public class SubmissionService(
             };
         }
 
-        latestCompletedSubmission = await _responseWorkflow.GetLatestIncompleteSubmissionWithOrderedResponses(establishmentId, cmsQuestionnaireSection);
-        if (latestCompletedSubmission is null)
+        var latestCompletedSubmissionResponses = await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+            establishmentId,
+            cmsQuestionnaireSection,
+            isCompletedSubmission: false
+        );
+        if (latestCompletedSubmissionResponses is null)
         {
             throw new InvalidDataException($"No incomplete responses found for section with ID {cmsQuestionnaireSection.Id}.");
         }
 
-        var lastResponse = latestCompletedSubmission.Responses.Last();
+        var lastResponse = latestCompletedSubmissionResponses.Responses.Last();
         var cmsLastAnswer = cmsQuestionnaireSection.Questions
-            .FirstOrDefault(q => q.Id.Equals(lastResponse.Question.ContentfulSysId))?
+            .FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))?
             .Answers
-            .FirstOrDefault(a => a.Id.Equals(lastResponse.Answer.ContentfulSysId));
+            .FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
 
         return new SubmissionRoutingDataModel
         {
             NextQuestion = cmsLastAnswer?.NextQuestion ?? cmsQuestionnaireSection.Questions.First(),
             QuestionnaireSection = cmsQuestionnaireSection,
-            Submission = latestCompletedSubmission,
+            Submission = latestCompletedSubmissionResponses,
             Status = cmsLastAnswer?.NextQuestion is null
                 ? SubmissionStatus.CompleteNotReviewed
                 : SubmissionStatus.InProgress
         };
-    }
-
-    public async Task<string> GetRecommendationIntroSlug(int establishmentId, string sectionSlug)
-    {
-        var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
-
-        var latestCompletedSubmission = await _responseWorkflow.GetLatestSubmission(
-           establishmentId,
-           cmsQuestionnaireSection.Id,
-           isCompletedSubmission: true,
-           includeResponses: false);
-
-        if (latestCompletedSubmission is null)
-        {
-            throw new InvalidDataException($"No incomplete responses found for section with ID {cmsQuestionnaireSection.Id}.");
-        }
-
-        if (latestCompletedSubmission.Maturity is null)
-        {
-            throw new InvalidDataException($"No maturity recorded for submission with ID {latestCompletedSubmission.Id}.");
-        }
-
-        var maturity = latestCompletedSubmission.Maturity;
-        var introSlugForMaturity = await _contentfulWorkflow.GetIntroForMaturityAsync(cmsQuestionnaireSection.Id, maturity);
-        if (introSlugForMaturity is null)
-        {
-            throw new InvalidDataException($"No recommendation intro found maturity {maturity} for section with ID {cmsQuestionnaireSection.Id}.");
-        }
-
-        return introSlugForMaturity.Slug;
     }
 
     public Task ConfirmCheckAnswers(int submissionId)

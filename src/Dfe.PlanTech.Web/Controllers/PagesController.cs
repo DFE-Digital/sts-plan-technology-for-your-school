@@ -1,19 +1,13 @@
 ﻿using System.Diagnostics;
-using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Establishments.Models;
-using Dfe.PlanTech.Domain.Users.Interfaces;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Binders;
-using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Dfe.PlanTech.Web.Configurations;
-using Dfe.PlanTech.Core.Constants;
 
 namespace Dfe.PlanTech.Web.Controllers;
 

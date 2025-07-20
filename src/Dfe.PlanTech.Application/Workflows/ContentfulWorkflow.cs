@@ -8,121 +8,136 @@ using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Application.Workflows
+namespace Dfe.PlanTech.Application.Workflows;
+
+public class ContentfulWorkflow(
+    ILoggerFactory loggerFactory,
+    ContentfulRepository contentfulRepository,
+    GetPageFromContentfulOptions getPageOptions
+)
 {
-    public class ContentfulWorkflow(
-        ILoggerFactory loggerFactory,
-        ContentfulRepository contentfulRepository,
-        GetPageFromContentfulOptions getPageOptions
-    )
+    public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
+    public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
+
+    private readonly ILogger<ContentfulWorkflow> _logger = loggerFactory.CreateLogger<ContentfulWorkflow>();
+    private readonly ContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
+    private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
+
+    public async Task<TDto?> GetEntryById<TEntry, TDto>(string contentId)
+        where TEntry : IDtoTransformable<TDto>
+        where TDto : CmsEntryDto
     {
-        public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
-        public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
-
-        private readonly ILogger<ContentfulWorkflow> _logger = loggerFactory.CreateLogger<ContentfulWorkflow>();
-        private readonly ContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
-        private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
-
-        public async Task<TDto?> GetEntryById<TEntry, TDto>(string contentId)
-            where TEntry : IDtoTransformable<TDto>
-            where TDto : CmsEntryDto
+        try
         {
-            try
-            {
-                var entry = await _contentfulRepository.GetEntryById<TEntry>(contentId);
-                return entry?.AsDtoInternal();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, ExceptionMessageEntityContentful);
-                return null;
-            }
+            var entry = await _contentfulRepository.GetEntryById<TEntry>(contentId);
+            return entry?.AsDtoInternal();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ExceptionMessageEntityContentful);
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<CmsQuestionnaireSectionDto>> GetAllSectionsAsync()
+    {
+        try
+        {
+            var options = new GetEntriesOptions(include: 3);
+            var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(options);
+            return sections.Select(s => s.AsDto());
+        }
+        catch (Exception ex)
+        {
+            throw new ContentfulDataUnavailableException("Error getting sections from Contentful", ex);
+        }
+    }
+
+    public async Task<CmsRecommendationIntroDto?> GetIntroForMaturityAsync(string subtopicId, string maturity)
+    {
+        var query = new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId };
+        var options = new GetEntriesOptions(include: 2, [query]);
+
+        options.Select = ["fields.intros", "sys"];
+
+        var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
+
+        var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
+        if (subtopicRecommendation is null)
+        {
+            _logger.LogError("Could not find subtopic recommendation in Contentful for subtopic with ID '{SubtopicId}'", subtopicId);
+            return null;
         }
 
-        public async Task<IEnumerable<CmsQuestionnaireSectionDto>> GetAllSectionsAsync()
+        var introForMaturity = subtopicRecommendation.Intros
+            .FirstOrDefault(intro => string.Equals(intro.Maturity, maturity, StringComparison.OrdinalIgnoreCase));
+        if (introForMaturity is null)
         {
-            try
-            {
-                var options = new GetEntriesOptions(include: 3);
-                var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(options);
-                return sections.Select(s => s.AsDto());
-            }
-            catch (Exception ex)
-            {
-                throw new ContentfulDataUnavailableException("Error getting sections from Contentful", ex);
-            }
+            _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
+            return null;
         }
 
-        public async Task<CmsRecommendationIntroDto?> GetIntroForMaturityAsync(string subtopicId, string maturity)
+        return introForMaturity.AsDto();
+    }
+
+    public async Task<CmsPageDto> GetPageBySlugAsync(string slug)
+    {
+        var query = new ContentfulQuerySingleValue { Field = "fields.slug", Value = slug };
+        var options = new GetEntriesOptions(_getPageOptions.Include, [query]);
+
+        try
         {
-            var query = new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId };
-            var options = new GetEntriesOptions(include: 2, [query]);
-
-            options.Select = ["fields.intros", "sys"];
-
-            var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
-
-            var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
-            if (subtopicRecommendation is null)
+            var pages = await _contentfulRepository.GetEntriesAsync<PageEntry>(options);
+            var page = pages.FirstOrDefault();
+            if (page is null)
             {
-                _logger.LogError("Could not find subtopic recommendation in Contentful for subtopic with ID '{SubtopicId}'", subtopicId);
-                return null;
+                throw new ContentfulDataUnavailableException($"Could not find a page matching slug '{slug}");
             }
 
-            var introForMaturity = subtopicRecommendation.Intros
-                .FirstOrDefault(intro => string.Equals(intro.Maturity, maturity, StringComparison.OrdinalIgnoreCase));
-            if (introForMaturity is null)
+            return page.AsDto();
+        }
+        catch (Exception ex)
+        {
+            throw new ContentfulDataUnavailableException($"Error getting page with slug {slug} from Contentful", ex);
+        }
+    }
+
+    public async Task<CmsQuestionnaireSectionDto> GetSectionBySlugAsync(string sectionSlug)
+    {
+        var sectionSlugQuery = new ContentfulQuerySingleValue { Field = SlugFieldPath, Value = sectionSlug };
+        var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.interstitialPage.sys.contentType.sys.id", Value = "page" };
+        var options = new GetEntriesOptions { Queries = [sectionSlugQuery, contentTypeQuery] };
+
+        try
+        {
+            var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(options);
+            var section = sections.FirstOrDefault();
+            if (section is null)
             {
-                _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
-                return null;
+                throw new ContentfulDataUnavailableException($"Could not find a section matching slug '{sectionSlug}");
             }
 
-            return introForMaturity.AsDto();
+            return section.AsDto();
+        }
+        catch (Exception ex)
+        {
+            throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug} from Contentful", ex);
+        }
+    }
+
+    public async Task<CmsSubtopicRecommendationDto?> GetSubTopicRecommendation(string subtopicId)
+    {
+        var sectionIdQuery = new ContentfulQuerySingleValue { Field = "fields.subtopic.sys.id", Value = subtopicId };
+        var options = new GetEntriesOptions(4, [sectionIdQuery]);
+
+        var subTopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
+        var subtopicRecommendation = subTopicRecommendations.FirstOrDefault();
+
+        if (subtopicRecommendation == null)
+        {
+            _logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
         }
 
-        public async Task<CmsPageDto> GetPageBySlugAsync(string slug)
-        {
-            var query = new ContentfulQuerySingleValue { Field = "fields.slug", Value = slug };
-            var options = new GetEntriesOptions(_getPageOptions.Include, [query]);
-
-            try
-            {
-                var pages = await _contentfulRepository.GetEntriesAsync<PageEntry>(options);
-                var page = pages.FirstOrDefault();
-                if (page is null)
-                {
-                    throw new ContentfulDataUnavailableException($"Could not find a page matching slug '{slug}");
-                }
-
-                return page.AsDto();
-            }
-            catch (Exception ex)
-            {
-                throw new ContentfulDataUnavailableException($"Error getting page with slug {slug} from Contentful", ex);
-            }
-        }
-
-        public async Task<CmsQuestionnaireSectionDto> GetSectionBySlugAsync(string sectionSlug)
-        {
-            var sectionSlugQuery = new ContentfulQuerySingleValue { Field = SlugFieldPath, Value = sectionSlug };
-            var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.interstitialPage.sys.contentType.sys.id", Value = "page" };
-            var options = new GetEntriesOptions { Queries = [sectionSlugQuery, contentTypeQuery] };
-
-            try
-            {
-                var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(options);
-                var section = sections.FirstOrDefault();
-                if (section is null)
-                {
-                    throw new ContentfulDataUnavailableException($"Could not find a section matching slug '{sectionSlug}");
-                }
-
-                return section.AsDto();
-            }
-            catch (Exception ex)
-            {
-                throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug} from Contentful", ex);
-            }
-        }
+        return subtopicRecommendation?.AsDto();
     }
 }

@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Core.RoutingDataModel
     {
         public int SubmissionId { get; init; }
 
-        public IEnumerable<QuestionWithAnswerModel> Responses { get; set; } = [];
+        public List<QuestionWithAnswerModel> Responses { get; set; } = [];
 
         public bool HasResponses => Responses != null && Responses.Any();
 
