@@ -81,7 +81,7 @@ public class GroupsViewBuilder(
 
     public async Task<GroupsSchoolDashboardViewModel> GetSchoolDashboardViewAsync()
     {
-        var latestSelection = await GetCurrentSelection();
+        var latestSelection = await GetCurrentGroupSchoolSelection();
         var groupName = CurrentUser.GetEstablishmentModel().OrgName;
         var pageContent = await _contentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
         List<CmsEntryDto> content = pageContent?.Content ?? [];
@@ -99,18 +99,37 @@ public class GroupsViewBuilder(
         return viewModel;
     }
 
-    public async Task<GroupsRecommendationsViewModel> GetGroupsRecommendationAsync(string sectionSlug)
+    public async Task<GroupsRecommendationsViewModel?> GetGroupsRecommendationAsync(string sectionSlug)
     {
-        var latestSelection = await GetCurrentSelection();
+        var latestSelection = await GetCurrentGroupSchoolSelection();
         var schoolId = latestSelection.SelectedEstablishmentId;
         var schoolName = latestSelection.SelectedEstablishmentName;
 
-        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
+        return await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
+    }
+
+    public Task<GroupsRecommendationsViewModel?> GetRecommendationsPrintViewAsync(string sectionSlug, int schoolId, string schoolName)
+    {
+        return GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
+    }
+
+    private Task<SqlGroupReadActivityDto> GetCurrentGroupSchoolSelection()
+    {
+        var userId = GetUserIdOrThrowException();
+        var userEstablishmentId = GetEstablishmentIdOrThrowException();
+        return _establishmentService.GetLatestSelectedGroupSchoolAsync(userId, userEstablishmentId);
+    }
+
+    private async Task<GroupsRecommendationsViewModel?> GetGroupsRecommendationsViewModel(string sectionSlug, int schoolId, string schoolName)
+    {
+        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {sectionSlug}");
+
         var subTopicRecommendation = await _contentfulService.GetSubTopicRecommendation(section.Id)
-            ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section: {section.Name}");
+            ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
         var latestResponses = await _submissionService.GetLatestSubmissionWithResponsesAsync(schoolId, sectionSlug, true)
-            ?? throw new DatabaseException($"Could not find user's answers for section: {section.Name}");
+            ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
 
         var customIntro = new GroupsCustomRecommendationIntroViewModel()
         {
@@ -120,6 +139,11 @@ public class GroupsViewBuilder(
             SelectedEstablishmentName = schoolName,
             Responses = latestResponses.Responses.ToList(),
         };
+
+        if (subTopicRecommendation.Section is null)
+        {
+            return null;
+        }
 
         var answerIds = latestResponses.Responses.Select(r => r.AnswerSysId);
         var subTopicChunks = subTopicRecommendation
@@ -141,12 +165,5 @@ public class GroupsViewBuilder(
         };
 
         return viewModel;
-    }
-
-    private Task<SqlGroupReadActivityDto> GetCurrentSelection()
-    {
-        var userId = GetUserIdOrThrowException();
-        var userEstablishmentId = GetEstablishmentIdOrThrowException();
-        return _establishmentService.GetLatestSelectedGroupSchoolAsync(userId, userEstablishmentId);
     }
 }

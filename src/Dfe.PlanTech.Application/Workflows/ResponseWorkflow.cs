@@ -1,12 +1,10 @@
 ﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Data.Contentful.Persistence;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
