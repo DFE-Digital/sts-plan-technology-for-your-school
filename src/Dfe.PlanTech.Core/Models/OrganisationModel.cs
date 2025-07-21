@@ -1,9 +1,13 @@
 using System.Text.Json.Serialization;
+using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.RoutingDataModel;
 
-namespace Dfe.PlanTech.Core.RoutingDataModel;
+namespace Dfe.PlanTech.Core.Models;
 
 public sealed class OrganisationModel
 {
+    public const string InvalidEstablishmentErrorMessage = $"Both {nameof(Urn)} and {nameof(Ukprn)} are invalid";
+
     [JsonPropertyName("id")]
     public Guid Id { get; set; }
 
@@ -28,5 +32,17 @@ public sealed class OrganisationModel
     [JsonPropertyName("DistrictAdministrative_code")]
     public string DistrictAdministrativeCode { get; set; } = null!;
 
-    public string Reference => Urn ?? Ukprn ?? Uid ?? Id.ToString();
+    public bool IsValid => References.Any(reference => !string.IsNullOrWhiteSpace(reference));
+
+    public string Reference => References.FirstOrDefault(reference => !string.IsNullOrWhiteSpace(reference))
+        ?? throw new InvalidEstablishmentException(InvalidEstablishmentErrorMessage);
+
+    private IEnumerable<string?> References
+    {
+        get
+        {
+            yield return Urn;
+            yield return Ukprn;
+        }
+    }
 }

@@ -12,10 +12,10 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         public bool DisplayHomeButton { get; set; }
         public bool DisplayTopicTitle { get; set; }
         public bool DisplayOrganisationName { get; set; }
+        public bool RequiresAuthorisation { get; init; } = true;
         public List<CmsEntryDto> BeforeTitleContent { get; set; } = [];
         public CmsComponentTitleDto? Title { get; set; }
         public List<CmsEntryDto> Content { get; set; } = [];
-        public bool RequiresAuthorisation { get; init; } = true;
 
         public CmsPageDto(PageEntry pageEntry)
         {

@@ -1,13 +1,14 @@
 ﻿using System.Diagnostics;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Binders;
-using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -15,17 +16,17 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class PagesController(
     ILogger<PagesController> logger,
-    IGetNavigationQuery getNavigationQuery,
-    IOptions<ContactOptionsConfiguration> contactOptions,
-    IOptions<ErrorPagesConfiguration> errorPages) : BaseController<PagesController>(logger)
+    PagesViewBuilder pagesViewBuilder
+) : BaseController<PagesController>(logger)
 {
-    private readonly ContactOptionsConfiguration _contactOptions = contactOptions.Value;
+    private readonly PagesViewBuilder _pagesViewBuilder = pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
+
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
+    public async Task<IActionResult> GetByRoute([ModelBinder(typeof(PageModelBinder))] CmsPageDto? page)
     {
         if (page == null)
         {
@@ -33,26 +34,7 @@ public class PagesController(
             throw new ContentfulDataUnavailableException($"Could not find page at {Request.Path.Value}");
         }
 
-        var organisationClaim = User.FindFirst("organisation")?.Value;
-
-        if (!string.IsNullOrEmpty(organisationClaim))
-        {
-            var organisation = System.Text.Json.JsonSerializer.Deserialize<OrganisationDto>(organisationClaim);
-
-            //MAT user org ID is 010
-            if (page.Slug == UrlConstants.SelfAssessmentPage.Replace("/", "") && organisation?.Category?.Id == "010")
-            {
-                return Redirect(UrlConstants.SelectASchoolPage);
-            }
-        }
-
-        var viewModel = new PageViewModel(page, this, user, Logger);
-        if (page.Sys.Id == errorPages.Value.InternalErrorPageId)
-        {
-            viewModel.DisplayBlueBanner = false;
-        }
-
-        return View("Page", viewModel);
+        return _pagesViewBuilder.RouteBasedOnOrganisationType(this, page);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -63,18 +45,7 @@ public class PagesController(
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
     {
-        var contactLink = await GetContactLinkAsync();
-
-        var viewModel = new NotFoundViewModel
-        {
-            ContactLinkHref = contactLink?.Href
-        };
-
+        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModel();
         return View(viewModel);
-    }
-
-    private async Task<INavigationLink?> GetContactLinkAsync()
-    {
-        return await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
     }
 }
