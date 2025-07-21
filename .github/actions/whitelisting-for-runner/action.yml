@@ -1,0 +1,57 @@
+name: Whitelisting for Runner
+description: Adds the runner's IP to storage and key vault network rules
+inputs:
+  runner-ip:
+    description: Public IP of the runner
+    required: true
+  sa-costing-name:
+    description: Name of the storage account
+    required: true
+  az-keyvault-name:
+    description: Name of the application key vault
+    required: true
+  az-aca-resource-group:
+    description: Resource group for the application key vault
+    required: true
+  tf-backend-resource-group:
+    description: Resource group for the Terraform key vault
+    required: true
+  tf-secrets-keyvault-name:
+    description: Name of the Terraform secrets key vault
+    required: true
+  removeRules:
+    description: Remove the IPs from the firewall
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Whitelist IP in storage and key vaults
+      if: ${{ inputs.removeRules == 'false' }}
+      shell: bash
+      run: |
+        az storage account network-rule add \
+          --account-name "${{ inputs.sa-costing-name }}" \
+          --ip-address "${{ inputs.runner-ip }}" &> /dev/null
+        az keyvault network-rule add \
+          --resource-group "${{ inputs.az-aca-resource-group }}" \
+          --name "${{ inputs.az-keyvault-name }}" \
+          --ip-address "${{ inputs.runner-ip }}" &> /dev/null
+        az keyvault network-rule add \
+          --resource-group "${{ inputs.tf-backend-resource-group }}" \
+          --name "${{ inputs.tf-secrets-keyvault-name }}" \
+          --ip-address "${{ inputs.runner-ip }}" &> /dev/null
+    - name: Remove IP in storage and key vaults
+      if: ${{ inputs.removeRules == 'true' }}
+      shell: bash
+      run: |
+        az storage account network-rule remove \
+          --account-name "${{ inputs.sa-costing-name }}" \
+          --ip-address "${{ inputs.runner-ip }}" &> /dev/null
+        az keyvault network-rule remove \
+          --resource-group "${{ inputs.az-aca-resource-group }}" \
+          --name "${{ inputs.az-keyvault-name }}" \
+          --ip-address "${{ inputs.runner-ip }}" &> /dev/null
+        az keyvault network-rule remove \
+          --resource-group "${{ inputs.tf-backend-resource-group }}" \
+          --name "${{ inputs.tf-secrets-keyvault-name }}" \
+          --ip-address "${{ inputs.runner-ip }}" &> /dev/null
