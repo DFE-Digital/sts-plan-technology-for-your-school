@@ -8,6 +8,7 @@ on:
         description: "The environment to run infrastructure deployment on:"
         required: true
         options: ['Dev', 'Tst', 'Staging', 'Production']
+  push:
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -33,7 +34,7 @@ env:
 
 jobs:
   terraform-plan:
-    environment: ${{ inputs.environment }}
+    environment: dev
     permissions:
       id-token: write
       contents: read
