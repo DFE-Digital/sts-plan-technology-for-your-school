@@ -8,7 +8,6 @@ on:
         description: "The environment to run infrastructure deployment on:"
         required: true
         options: ['Dev', 'Tst', 'Staging', 'Production']
-  push:
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -34,7 +33,7 @@ env:
 
 jobs:
   terraform-plan:
-    environment: dev
+    environment: ${{ inputs.environment }}
     permissions:
       id-token: write
       contents: read
@@ -132,7 +131,6 @@ jobs:
     needs: terraform-plan
     name: Deploy Terraform
     runs-on: ubuntu-22.04
-    if: false
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
