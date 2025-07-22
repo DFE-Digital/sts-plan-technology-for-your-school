@@ -4,6 +4,7 @@ using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,48 +19,29 @@ public class QuestionsController : BaseController<QuestionsController>
     public const string Controller = "Questions";
     public const string GetQuestionBySlugActionName = nameof(GetQuestionBySlug);
 
-    private readonly IGetSectionQuery _getSectionQuery;
-    private readonly IGetLatestResponsesQuery _getResponseQuery;
-    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
-    private readonly IGetNavigationQuery _getNavigationQuery;
-    private readonly IUser _user;
-    private readonly ErrorMessagesConfiguration _errorMessages;
     private readonly ContactOptionsConfiguration _contactOptions;
+    private readonly ErrorMessagesConfiguration _errorMessages;
+    private readonly QuestionsViewBuilder _questionsViewBuilder;
 
-    public QuestionsController(ILogger<QuestionsController> logger,
-                               IGetSectionQuery getSectionQuery,
-                               IGetLatestResponsesQuery getResponseQuery,
-                               IGetEntityFromContentfulQuery getEntityByIdQuery,
-                               IGetNavigationQuery getNavigationQuery,
-                               IUser user,
-                               IOptions<ErrorMessagesConfiguration> errorMessageOptions,
-                               IOptions<ContactOptionsConfiguration> contactOptions) : base(logger)
+    public QuestionsController(
+        ILogger<QuestionsController> logger,
+        IOptions<ContactOptionsConfiguration> contactOptions,
+        IOptions<ErrorMessagesConfiguration> errorMessageOptions,
+        QuestionsViewBuilder questionsViewBuilder
+    ) : base(logger)
     {
-        _getResponseQuery = getResponseQuery;
-        _getSectionQuery = getSectionQuery;
-        _getEntityFromContentfulQuery = getEntityByIdQuery;
-        _getNavigationQuery = getNavigationQuery;
-        _user = user;
-        _errorMessages = errorMessageOptions.Value;
-        _contactOptions = contactOptions.Value;
+        _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+        _errorMessages = errorMessageOptions?.Value ?? throw new ArgumentNullException(nameof(errorMessageOptions));
+        _questionsViewBuilder = questionsViewBuilder ?? throw new ArgumentNullException(nameof(questionsViewBuilder));
     }
 
     [HttpGet("{sectionSlug}/{questionSlug}")]
-    public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
-                                                    string questionSlug,
-                                                    string? returnTo,
-                                                    [FromServices] IGetQuestionBySlugRouter router,
-                                                    CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetQuestionBySlug(string sectionSlug, string questionSlug, string? returnTo)
     {
-        if (string.IsNullOrEmpty(sectionSlug))
-            throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(questionSlug))
-            throw new ArgumentNullException(nameof(questionSlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(questionSlug, nameof(questionSlug));
 
-        // Optionally store the returnTo value in TempData or pass it along if router needs it
-        TempData["ReturnTo"] = returnTo;
-
-        return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
+        return await _questionsViewBuilder.RouteBySlugAndQuestionAsync(this, sectionSlug, questionSlug, returnTo);
     }
 
     [LogInvalidModelState]
@@ -69,7 +51,7 @@ public class QuestionsController : BaseController<QuestionsController>
                                                             CancellationToken cancellationToken = default)
     {
         if (!contentfulOptions.UsePreviewApi)
-            return new RedirectResult(UrlConstants.SelfAssessmentPage);
+            return Redirect(UrlConstants.SelfAssessmentPage);
 
         var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
                        throw new ContentfulDataUnavailableException($"Could not find question with Id {questionId}");
@@ -86,8 +68,7 @@ public class QuestionsController : BaseController<QuestionsController>
                                                                 [FromServices] IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand,
                                                                 CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(sectionSlug))
-            throw new ArgumentNullException(nameof(sectionSlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
 
         var section = await GetSectionBySlug(sectionSlug, cancellationToken);
 
