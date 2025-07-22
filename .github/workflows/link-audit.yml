@@ -1,0 +1,113 @@
+name: Check external links
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which environment to run the link auditor against
+        required: true
+        type: choice
+        options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
+        default: 'ProductionUnprotected'
+      includeGuidance:
+        type: boolean
+        description: Include gov.uk guidance pages
+        required: false
+        default: false
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+jobs:
+  link-audit:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    name: Find possible dead links in Contentful and on the Guidance pages 
+    env:
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_keyvault_contentful_api_key_name: contentful--deliveryapikey
+      az_keyvault_contentful_space_id_key_name: contentful--spaceid
+      IP_NAME: link-audit
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Add Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "add"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+
+      - name: Get api key
+        id: get-contentful-api-key
+        uses: ./.github/actions/azure-get-keyvault-secret
+        with:
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_keyvault_secret_name: ${{ env.az_keyvault_contentful_api_key_name }}
+
+      - name: Get space ID
+        id: get-contentful-space-id
+        uses: ./.github/actions/azure-get-keyvault-secret
+        with:
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_keyvault_secret_name: ${{ env.az_keyvault_contentful_space_id_key_name }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install beautifulsoup4 contentful requests
+
+      - name: Set CONTENTFUL_ENVIRONMENT
+        run: |
+          if [ "${{ inputs.environment }}" = "ProductionUnprotected" ]; then
+            echo "CONTENTFUL_ENVIRONMENT=master" >> $GITHUB_ENV
+          elif [ "${{ inputs.environment }}" = "StagingUnprotected" ] || [ "${{ inputs.environment }}" = "Tst" ]; then
+            echo "CONTENTFUL_ENVIRONMENT=work_in_progress" >> $GITHUB_ENV
+          elif [ "${{ inputs.environment }}" = "Dev" ]; then
+            echo "CONTENTFUL_ENVIRONMENT=development" >> $GITHUB_ENV
+          else
+            echo "Unknown environment: ${{ inputs.environment }}"
+            exit 1
+          fi
+
+      - name: Run link checker
+        env:
+          CONTENTFUL_CDA_TOKEN: ${{ steps.get-contentful-api-key.outputs.secret_value }}
+          CONTENTFUL_SPACE_ID: ${{ steps.get-contentful-space-id.outputs.secret_value }}
+          CONTENTFUL_ENVIRONMENT: ${{ env.CONTENTFUL_ENVIRONMENT }}
+          INCLUDE_GUIDANCE: ${{ inputs.includeGuidance }}
+        run: python scripts/link-audit.py
+      
+      - name: Remove Azure firewall rules
+        uses: ./.github/actions/azure-ip-whitelist
+        with:
+          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+          verb: "remove"
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_ip_name: ${{ env.IP_NAME }}
+          az_resource_group: ${{ env.az_resource_group_name}}
+          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
