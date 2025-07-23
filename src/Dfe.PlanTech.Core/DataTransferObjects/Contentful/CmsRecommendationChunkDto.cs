@@ -11,6 +11,11 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         public List<CmsQuestionnaireAnswerDto> Answers { get; init; } = [];
         public CmsCAndSLinkDto? CSLink { get; init; }
 
+        public CmsRecommendationChunkDto(string header)
+        {
+            Header = header;
+        }
+
         public CmsRecommendationChunkDto(RecommendationChunkEntry recommendationChunkEntry)
         {
             Id = recommendationChunkEntry.Id;

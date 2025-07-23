@@ -38,7 +38,7 @@ public class ReviewAnswersViewBuilder(
         switch (submissionRoutingData.Status)
         {
             case SubmissionStatus.NotStarted:
-                return controller.RedirectToSelfAssessment();
+                return controller.RedirectToHomePage();
 
             case SubmissionStatus.CompleteNotReviewed:
                 return controller.View(ChangeAnswersController.ChangeAnswersViewName, model);
@@ -93,8 +93,8 @@ public class ReviewAnswersViewBuilder(
                 var establishmentId = GetEstablishmentIdOrThrowException();
                 var recommendationIntroSlug = await _submissionService.GetRecommendationIntroSlug(establishmentId, sectionSlug);
                 return controller.RedirectToRecommendation(sectionSlug, recommendationIntroSlug);
-            case UrlConstants.SelfAssessmentPage:
-                return controller.RedirectToSelfAssessment();
+            case UrlConstants.HomePage:
+                return controller.RedirectToHomePage();
             default:
                 return controller.RedirectToCheckAnswers(sectionSlug);
         };

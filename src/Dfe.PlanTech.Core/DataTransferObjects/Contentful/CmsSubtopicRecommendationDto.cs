@@ -16,5 +16,8 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             InternalName = subtopicRecommendationEntry.InternalName;
             Intros = subtopicRecommendationEntry.Intros.Select(i => i.AsDto()).ToList();
         }
+
+        public CmsRecommendationIntroDto? GetRecommendationByMaturity(string? maturity) =>
+            Intros.FirstOrDefault(intro => !string.IsNullOrWhiteSpace(intro.Maturity) && intro.Maturity.Equals(maturity));
     }
 }

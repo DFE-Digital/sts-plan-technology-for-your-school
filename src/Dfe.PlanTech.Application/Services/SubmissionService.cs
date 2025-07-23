@@ -56,21 +56,24 @@ public class SubmissionService(
             {
                 NextQuestion = cmsQuestionnaireSection.Questions.First(),
                 QuestionnaireSection = cmsQuestionnaireSection,
+                Submission = latestCompletedSubmission is null
+                    ? null
+                    : new SubmissionResponsesModel(latestCompletedSubmission),
                 Status = status
             };
         }
 
-        var latestCompletedSubmissionResponses = await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+        var latestCompletedSubmissionWithResponses = await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
             cmsQuestionnaireSection,
             isCompletedSubmission: false
         );
-        if (latestCompletedSubmissionResponses is null)
+        if (latestCompletedSubmissionWithResponses is null)
         {
             throw new InvalidDataException($"No incomplete responses found for section with ID {cmsQuestionnaireSection.Id}.");
         }
 
-        var lastResponse = latestCompletedSubmissionResponses.Responses.Last();
+        var lastResponse = latestCompletedSubmissionWithResponses.Responses.Last();
         var cmsLastAnswer = cmsQuestionnaireSection.Questions
             .FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))?
             .Answers
@@ -80,11 +83,16 @@ public class SubmissionService(
         {
             NextQuestion = cmsLastAnswer?.NextQuestion ?? cmsQuestionnaireSection.Questions.First(),
             QuestionnaireSection = cmsQuestionnaireSection,
-            Submission = latestCompletedSubmissionResponses,
+            Submission = latestCompletedSubmissionWithResponses,
             Status = cmsLastAnswer?.NextQuestion is null
                 ? SubmissionStatus.CompleteNotReviewed
                 : SubmissionStatus.InProgress
         };
+    }
+
+    public Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
+    {
+        return _submissionWorkflow.SetLatestSubmissionViewedAsync(establishmentId, sectionId);
     }
 
     public Task<int> SubmitAnswerAsync(int userId, int establishmentId, SubmitAnswerModel answerModel)

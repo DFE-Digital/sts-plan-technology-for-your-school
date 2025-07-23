@@ -15,5 +15,13 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             InternalName = recommendationSectionEntry.InternalName;
             Answers = recommendationSectionEntry.Answers.Select(a => a.AsDto()).ToList();
         }
+
+        public List<CmsRecommendationChunkDto> GetRecommendationChunksByAnswerIds(IEnumerable<string> answerIds)
+        {
+            return Chunks
+                .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
+                .DistinctBy(chunk => chunk.Id)
+                .ToList();
+        }
     }
 }

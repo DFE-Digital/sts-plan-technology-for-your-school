@@ -6,6 +6,8 @@ namespace Dfe.PlanTech.Core.RoutingDataModel
     {
         public int SubmissionId { get; init; }
 
+        public DateTime? DateCompleted { get; init; }
+
         public List<QuestionWithAnswerModel> Responses { get; set; } = [];
 
         public bool HasResponses => Responses != null && Responses.Any();
@@ -13,6 +15,7 @@ namespace Dfe.PlanTech.Core.RoutingDataModel
         public SubmissionResponsesModel(SqlSubmissionDto submission)
         {
             SubmissionId = submission.Id;
+            DateCompleted = submission.DateCompleted;
             Responses = submission.Responses
                 .Select(response => new QuestionWithAnswerModel(response))
                 .GroupBy(questionWithAnswer => questionWithAnswer.QuestionSysId)

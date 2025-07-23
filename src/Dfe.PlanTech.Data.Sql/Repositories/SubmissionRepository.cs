@@ -193,7 +193,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
                 establishmentId,
                 sectionId,
                 isCompleted: true,
-                includeRelationships: true
+                includeRelationships: false
             );
 
         if (currentSubmission is not null)

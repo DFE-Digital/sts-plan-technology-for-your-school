@@ -25,7 +25,7 @@ public class PagesViewBuilder(
 
     public IActionResult RouteBasedOnOrganisationType(Controller controller, CmsPageDto page)
     {
-        if (string.Equals(page.Slug, UrlConstants.SelfAssessmentPage.Replace("/", "")) && CurrentUser.IsMat)
+        if (string.Equals(page.Slug, UrlConstants.HomePage.Replace("/", "")) && CurrentUser.IsMat)
         {
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }

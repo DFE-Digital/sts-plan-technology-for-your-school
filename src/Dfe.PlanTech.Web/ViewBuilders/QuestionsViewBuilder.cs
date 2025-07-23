@@ -1,12 +1,10 @@
-﻿using System.Threading;
-using Dfe.PlanTech.Application.Services;
+﻿using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
-using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Context;
@@ -14,9 +12,7 @@ using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -41,7 +37,6 @@ public class QuestionsViewBuilder(
     private QuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
     private SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    private const string GetQuestionBySlugActionName = nameof(QuestionsController.GetQuestionBySlug);
     private const string QuestionView = "Question";
 
 
@@ -75,7 +70,7 @@ public class QuestionsViewBuilder(
 
         if (submissionRoutingData.Status.Equals(SubmissionStatus.NotStarted))
         {
-            return PageRedirecter.RedirectToInterstitialPage(controller, sectionSlug);
+            return controller.RedirectToInterstitialPage(sectionSlug);
         }
 
         if (submissionRoutingData.Submission?.Responses is null)
@@ -130,7 +125,7 @@ public class QuestionsViewBuilder(
     public async Task<IActionResult> RouteByQuestionId(Controller controller, string questionId)
     {
         if (!_contentfulOptions.UsePreviewApi)
-            return controller.Redirect(UrlConstants.SelfAssessmentPage);
+            return controller.Redirect(UrlConstants.HomePage);
 
         var question = await _contentfulService.GetEntryById<QuestionnaireQuestionEntry, CmsQuestionnaireQuestionDto>(questionId);
 
@@ -148,7 +143,7 @@ public class QuestionsViewBuilder(
             var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
             if (nextQuestion is null)
             {
-                return PageRedirecter.RedirectToCheckAnswers(controller, sectionSlug);
+                return controller.RedirectToCheckAnswers(sectionSlug);
             }
 
             return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion.Slug });
@@ -214,7 +209,7 @@ public class QuestionsViewBuilder(
 
         if (submissionRoutingData.Submission?.Responses is null)
         {
-            return PageRedirecter.RedirectToCheckAnswers(controller, sectionSlug, isChangeAnswersFlow);
+            return controller.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
         }
 
         // Check answered questions
@@ -230,7 +225,7 @@ public class QuestionsViewBuilder(
         }
 
         // No next questions so check answers
-        return PageRedirecter.RedirectToCheckAnswers(controller, sectionSlug, isChangeAnswersFlow);
+        return controller.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
     }
 
     private async Task<string> BuildErrorMessage()
