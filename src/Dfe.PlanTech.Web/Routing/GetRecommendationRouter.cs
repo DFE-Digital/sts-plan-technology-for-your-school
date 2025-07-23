@@ -1,10 +1,12 @@
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Helpers;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -16,14 +18,20 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     private readonly ISubmissionStatusProcessor _router;
     private readonly IGetLatestResponsesQuery _getLatestResponsesQuery;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
+    private readonly IGetSectionQuery _getSectionQuery;
+    private readonly IUser _user;
 
     public GetRecommendationRouter(ISubmissionStatusProcessor router,
                                    IGetLatestResponsesQuery getLatestResponsesQuery,
-                                   IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery)
+                                   IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery,
+                                   IGetSectionQuery getSectionQuery,
+                                   IUser user)
     {
         _router = router;
         _getLatestResponsesQuery = getLatestResponsesQuery;
         _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
+        _getSectionQuery = getSectionQuery;
+        _user = user;
     }
 
     public async Task<IActionResult> ValidateRoute(
@@ -60,12 +68,9 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         await _router.GetJourneyStatusForSectionRecommendation(sectionSlug, cancellationToken: cancellationToken);
         var recommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(_router.Section.Sys.Id, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {_router.Section.Name}");
 
-        var intro = recommendation.Intros.Find(intro => string.Equals(intro.Maturity, maturity, StringComparison.InvariantCultureIgnoreCase)) ?? recommendation.Intros[0];
-
         var viewModel = new RecommendationsViewModel()
         {
             SectionName = _router.Section.Name,
-            Intro = intro,
             Chunks = recommendation.Section.Chunks,
             Slug = "preview",
         };
@@ -96,6 +101,23 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
 
         return (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses);
+    }
+
+    public async Task<(Section, RecommendationChunk, List<RecommendationChunk>)> GetSingleRecommendation(string sectionSlug, string recommendationSlug, RecommendationsController controller, CancellationToken cancellationToken)
+    {
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section with slug: {sectionSlug}");
+        var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _user.GetEstablishmentId(), section.Sys.Id, true)
+            ?? throw new DatabaseException($"Could not find users answers for:  {section.Name}");
+        var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses).ToList();
+        var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id)
+            ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {section.Name}");
+        var allChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef))
+            ?? throw new ContentfulDataUnavailableException($"Could not find recommendation chunks for section: {section.Name}");
+        var currentChunk = allChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == recommendationSlug)
+            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug mathing: {recommendationSlug}");
+
+        return (section, currentChunk, allChunks);
     }
 
     /// <summary>

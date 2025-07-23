@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,6 +16,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
 {
     public const string ControllerName = "Recommendations";
     public const string GetRecommendationAction = "GetRecommendation";
+    public const string GetSingleRecommendationAction = "GetSingleRecommendation";
 
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = GetRecommendationAction)]
     public async Task<IActionResult> GetRecommendation(string sectionSlug,
@@ -34,6 +36,42 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
           cancellationToken);
     }
 
+    [HttpGet("{categorySlug}/{sectionSlug}/{recommendationSlug}", Name = GetSingleRecommendationAction)]
+    public async Task<IActionResult> GetSingleRecommendation(string categorySlug,
+                                                         string sectionSlug,
+                                                         string recommendationSlug,
+                                                         [FromServices] IGetRecommendationRouter getRecommendationRouter,
+                                                         CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+        if (string.IsNullOrEmpty(recommendationSlug))
+            throw new ArgumentNullException(nameof(recommendationSlug));
+
+        var (section, currentChunk, allChunks) = await getRecommendationRouter.GetSingleRecommendation(sectionSlug, recommendationSlug, this, cancellationToken);
+        var currentChunkIndex = allChunks.IndexOf(currentChunk);
+        var previousChunk = currentChunkIndex > 0
+                            ? allChunks[currentChunkIndex - 1]
+                            : null;
+        var nextChunk = currentChunkIndex != allChunks.Count - 1
+                            ? allChunks[currentChunkIndex + 1]
+                            : null;
+
+        var viewModel = new SingleRecommendationViewModel
+        {
+            // TODO: Need category name for back link
+            CategorySlug = categorySlug,
+            Section = section,
+            Chunks = allChunks,
+            CurrentChunk = currentChunk,
+            PreviousChunk = previousChunk,
+            NextChunk = nextChunk,
+            CurrentChunkPosition = currentChunkIndex + 1,
+            TotalChunks = allChunks.Count
+        };
+        return View("~/Views/Recommendations/SingleRecommendation.cshtml", viewModel);
+    }
+
     [HttpGet("{sectionSlug}/recommendation/preview/{maturity?}", Name = "GetRecommendationPreview")]
     public async Task<IActionResult> GetRecommendationPreview(string sectionSlug,
                                                               string? maturity,
@@ -51,6 +89,8 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
 
         return await getRecommendationRouter.GetRecommendationPreview(sectionSlug, maturity, this, cancellationToken);
     }
+
+
 
     [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/print", Name = "GetRecommendationChecklist")]
     public async Task<IActionResult> GetRecommendationChecklist(string sectionSlug,

@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,4 +46,18 @@ public interface IGetRecommendationRouter
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<string> GetRecommendationSlugForSection(string sectionSlug, CancellationToken cancellationToken);
+
+
+    /// <summary>
+    /// Get a single recommendation chunk for a completed section by section slug and slugified chunk header
+    /// </summary>
+    /// <param name="sectionSlug"></param>
+    /// <param name="recommendationSlug"></param>
+    /// <param name="controller"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<(Section, RecommendationChunk, List<RecommendationChunk>)> GetSingleRecommendation(string sectionSlug,
+                                                                                          string recommendationSlug,
+                                                                                          RecommendationsController controller,
+                                                                                          CancellationToken cancellationToken);
 }
