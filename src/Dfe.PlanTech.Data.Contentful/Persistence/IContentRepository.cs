@@ -46,5 +46,5 @@ public interface IContentRepository
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntry"></typeparam>
     /// <returns></returns>
-    Task<IEnumerable<TEntry>> GetEntries<TEntry>();
+    Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>();
 }

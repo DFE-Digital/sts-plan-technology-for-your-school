@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Core.Constants
 @model Dfe.PlanTech.Web.Models.PageViewModel;
 
 @if (Model.DisplayBlueBanner)
@@ -49,7 +50,7 @@ else
 
     if (Model.Page.DisplayOrganisationName)
     {
-        <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
+        <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.OrganisationName</span>
     }
 
     if (Model.Page.Title != null)
@@ -59,7 +60,7 @@ else
 }
 
 @{
-    if (Model.Page.Slug == "self-assessment" && TempData.ContainsKey("SubtopicError"))
+    if (Model.Page.Slug == RouteConstants.Home && TempData.ContainsKey("SubtopicError"))
     {
         var error = TempData["SubtopicError"] as string;
         <div class="govuk-error-summary" data-module="govuk-error-summary">

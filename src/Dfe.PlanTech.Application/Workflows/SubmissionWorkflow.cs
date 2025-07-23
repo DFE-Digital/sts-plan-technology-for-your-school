@@ -35,17 +35,14 @@ namespace Dfe.PlanTech.Application.Workflows
 
         // On the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
         // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
-        public async Task<int> SubmitAnswer(SubmitAnswerViewModel questionAnswer, CancellationToken cancellationToken = default)
+        public async Task<int> SubmitAnswer(int userId, int establishmentId, SubmitAnswerModel answerModel)
         {
-            if (questionAnswer?.ChosenAnswer is null)
+            if (answerModel is null)
             {
-                throw new InvalidDataException($"{nameof(questionAnswer.ChosenAnswer)} is null");
+                throw new InvalidDataException($"{nameof(answerModel)} is null");
             }
 
-            int userId = _currentUser.UserId ?? throw new AuthenticationException("User is not authenticated");
-            int establishmentId = _currentUser.EstablishmentId ?? throw new AuthenticationException($"User has no {_currentUser.EstablishmentId}");
-
-            var model = new AssessmentResponseModel(userId, establishmentId, questionAnswer.ToModel());
+            var model = new AssessmentResponseModel(userId, establishmentId, answerModel);
             var responseId = await _storedProcedureRepository.SubmitResponse(model);
 
             return responseId;

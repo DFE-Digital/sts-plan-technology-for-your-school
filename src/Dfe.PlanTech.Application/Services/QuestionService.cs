@@ -2,23 +2,18 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
-using Dfe.PlanTech.Application.Workflows;
 
 namespace Dfe.PlanTech.Application.Services;
 
 public class QuestionService(
-    ContentfulWorkflow contentfulWorkflow,
     ResponseWorkflow responseWorkflow
 )
 {
-    private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
     private readonly ResponseWorkflow _responseWorkflow = responseWorkflow ?? throw new ArgumentNullException(nameof(responseWorkflow));
 
-    public async Task<CmsQuestionnaireQuestionDto?> GetNextUnansweredQuestion(int establishmentId, string sectionId)
+    public async Task<CmsQuestionnaireQuestionDto?> GetNextUnansweredQuestion(int establishmentId, CmsQuestionnaireSectionDto section)
     {
-        var section = await _contentfulWorkflow.GetEntryById<SectionEntry, CmsQuestionnaireSectionDto>(sectionId);
-
-        var answeredQuestions = await _responseWorkflow.GetLatestResponses(establishmentId, section.Sys.Id, isCompletedSubmission: false);
+        var answeredQuestions = await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
         if (answeredQuestions is null)
             return section.Questions.FirstOrDefault();
 
@@ -38,15 +33,15 @@ public class QuestionService(
     /// <exception cref="DatabaseException"></exception>
     private static CmsQuestionnaireQuestionDto? GetValidatedNextUnansweredQuestion(CmsQuestionnaireSectionDto section, SubmissionResponsesModel answeredQuestions)
     {
-        var lastAttachedResponse = section.GetOrderedResponsesForJourney(answeredQuestions.Responses).LastOrDefault();
-
-        if (lastAttachedResponse == null)
+        var lastAttachedResponse = answeredQuestions.Responses.LastOrDefault();
+        if (lastAttachedResponse is null)
             throw new DatabaseException($"The responses to the ongoing submission {answeredQuestions.SubmissionId} are out of sync with the topic");
 
-        return section.Questions.Where(question => question.Sys.Id == lastAttachedResponse.QuestionSysId)
-                              .SelectMany(question => question.Answers)
-                              .Where(answer => answer.Sys.Id == lastAttachedResponse.AnswerSysId)
-                              .Select(answer => answer.NextQuestion)
-                              .FirstOrDefault();
+        return section.Questions
+            .Where(question => question.Id.Equals(lastAttachedResponse.QuestionSysId))
+            .SelectMany(question => question.Answers)
+            .Where(answer => answer.Id.Equals(lastAttachedResponse.AnswerSysId))
+            .Select(answer => answer.NextQuestion)
+            .FirstOrDefault();
     }
 }

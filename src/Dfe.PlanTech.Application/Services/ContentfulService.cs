@@ -1,8 +1,8 @@
 ﻿using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Exceptions;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Dfe.PlanTech.Application.Services;
 
@@ -15,6 +15,16 @@ public class ContentfulService(
     public Task<IEnumerable<CmsQuestionnaireSectionDto>> GetAllSectionsAsync()
     {
         return _contentfulWorkflow.GetAllSectionsAsync();
+    }
+
+    public async Task<TDto> GetEntryById<TEntry, TDto>(string id)
+        where TEntry : IDtoTransformable<TDto>
+        where TDto : CmsEntryDto
+    {
+        var entryDto = await _contentfulWorkflow.GetEntryById<TEntry, TDto>(id)
+            ?? throw new ContentfulDataUnavailableException($"Could not find entry with ID {id}");
+
+        return entryDto!;
     }
 
     public Task<CmsNavigationLinkDto?> GetLinkByIdAsync(string contentId)

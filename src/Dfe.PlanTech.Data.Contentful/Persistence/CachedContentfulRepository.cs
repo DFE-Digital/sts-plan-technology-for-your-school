@@ -26,12 +26,12 @@ public class CachedContentfulRepository : IContentRepository
     {
         return await _contentRepository.GetEntriesCount<TEntry>();
     }
-    public async Task<IEnumerable<TEntry>> GetEntries<TEntry>()
+    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
     {
         string contentType = GetContentTypeName<TEntry>();
         var key = $"{contentType}s";
 
-        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntries<TEntry>()) ?? [];
+        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntriesAsync<TEntry>()) ?? [];
     }
 
     public async Task<IEnumerable<TEntry>> GetEntries<TEntry>(GetEntriesOptions options)

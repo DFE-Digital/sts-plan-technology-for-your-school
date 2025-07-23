@@ -1,6 +1,6 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects;
-using Dfe.PlanTech.Domain.Models;
-using Dfe.PlanTech.Infrastructure.Data.Sql.Repositories;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.RoutingDataModel;
+using Dfe.PlanTech.Data.Sql.Repositories;
 
 namespace Dfe.PlanTech.Application.Workflows
 {
@@ -44,7 +44,7 @@ namespace Dfe.PlanTech.Application.Workflows
 
         private async Task<SqlEstablishmentDto> UpsertEstablishmentAsync(string organisationReference)
         {
-            var existingEstablishment = await _establishmentRepository.GetEstablishmentIdFromRefAsync(organisationReference);
+            var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(organisationReference);
             if (existingEstablishment is not null)
             {
                 return existingEstablishment.AsDto();

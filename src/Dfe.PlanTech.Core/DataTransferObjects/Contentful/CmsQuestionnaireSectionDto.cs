@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
 {
@@ -17,6 +18,12 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             Name = questionnaireSectionEntry.Name;
             InterstitialPage = questionnaireSectionEntry.InterstitialPage.AsDto();
             Questions = questionnaireSectionEntry.Questions.Select(q => q.AsDto()).ToList();
+        }
+
+        public CmsQuestionnaireQuestionDto GetQuestionBySlug(string questionSlug)
+        {
+           return Questions.FirstOrDefault(question => question.Slug.Equals(questionSlug))
+                ?? throw new ContentfulDataUnavailableException($"Could not find question slug {questionSlug} under section {Name}");
         }
     }
 }

@@ -87,6 +87,11 @@ public class SubmissionService(
         };
     }
 
+    public Task<int> SubmitAnswerAsync(int userId, int establishmentId, SubmitAnswerModel answerModel)
+    {
+        return _submissionWorkflow.SubmitAnswer(userId, establishmentId, answerModel);
+    }
+
     public Task ConfirmCheckAnswers(int submissionId)
     {
         return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);

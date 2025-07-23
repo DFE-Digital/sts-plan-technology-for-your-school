@@ -50,13 +50,13 @@ public abstract class ContentfulRepository : IContentRepository
         return entities.FirstOrDefault();
     }
 
-    public async Task<IEnumerable<TEntry>> GetEntries<TEntry>()
-        => await GetEntries<TEntry>(GetContentTypeName<TEntry>(), null);
+    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
+        => await GetEntriesAsync<TEntry>(GetContentTypeName<TEntry>(), null);
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options)
-        => await GetEntries<TEntry>(GetContentTypeName<TEntry>(), options);
+        => await GetEntriesAsync<TEntry>(GetContentTypeName<TEntry>(), options);
 
-    public async Task<IEnumerable<TEntry>> GetEntries<TEntry>(string entityTypeId, GetEntriesOptions? options)
+    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(string entityTypeId, GetEntriesOptions? options)
     {
         var queryBuilder = BuildQueryBuilder<TEntry>(entityTypeId, options);
 

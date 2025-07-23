@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +31,6 @@ public class UserJourneyMissingContentExceptionHandler : IUserJourneyMissingCont
 
         controller.TempData[ErrorMessageTempDataKey] = _configuration[ErrorMessageConfigKey];
 
-        return controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route = "self-assessment" });
+        return controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route = RouteConstants.Home });
     }
 }

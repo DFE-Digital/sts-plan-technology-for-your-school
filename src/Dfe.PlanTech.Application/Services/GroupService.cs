@@ -1,5 +1,4 @@
-﻿using System.Security.Authentication;
-using Dfe.PlanTech.Application.Workflows;
+﻿using Dfe.PlanTech.Application.Workflows;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Services;

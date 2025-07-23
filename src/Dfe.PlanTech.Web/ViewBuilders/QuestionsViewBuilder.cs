@@ -1,15 +1,22 @@
-﻿using Contentful.Core.Models.Management;
+﻿using System.Threading;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Core.RoutingDataModels;
+using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -17,15 +24,21 @@ public class QuestionsViewBuilder(
     ILogger<QuestionsViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
+    ContentfulOptionsConfiguration contentfulOptions,
     CurrentUser currentUser,
     ContentfulService contentfulService,
+    ErrorMessagesConfiguration errorMessages,
+    QuestionService questionService,
     SubmissionService submissionService
 ) : BaseViewBuilder(currentUser)
 {
     private ILogger<QuestionsViewBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
     private ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private ErrorMessagesConfiguration _errorMessages = errorMessages ?? throw new ArgumentNullException(nameof(errorMessages));
+    private QuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
     private SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     private const string GetQuestionBySlugActionName = nameof(QuestionsController.GetQuestionBySlug);
@@ -51,9 +64,9 @@ public class QuestionsViewBuilder(
         {
             var nextQuestionViewModel = GenerateViewModel(
                 controller,
-                sectionSlug,
                 submissionRoutingData.NextQuestion!,
                 submissionRoutingData.QuestionnaireSection,
+                sectionSlug,
                 null,
                 returnTo
             );
@@ -88,9 +101,9 @@ public class QuestionsViewBuilder(
             var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(question.Id);
             var viewModel = GenerateViewModel(
                 controller,
-                sectionSlug,
                 question,
                 submissionRoutingData.QuestionnaireSection,
+                sectionSlug,
                 latestResponseForQuestion.AnswerSysId,
                 null
             );
@@ -114,14 +127,130 @@ public class QuestionsViewBuilder(
         throw new InvalidDataException("Should not be able to get here");
     }
 
-    public IActionResult RouteBasedOnOrganisationType(Controller controller, CmsPageDto page)
-    { }
+    public async Task<IActionResult> RouteByQuestionId(Controller controller, string questionId)
+    {
+        if (!_contentfulOptions.UsePreviewApi)
+            return controller.Redirect(UrlConstants.SelfAssessmentPage);
+
+        var question = await _contentfulService.GetEntryById<QuestionnaireQuestionEntry, CmsQuestionnaireQuestionDto>(questionId);
+
+        var viewModel = GenerateViewModel(controller, question, null, null, null, null);
+        return controller.View(QuestionView, viewModel);
+    }
+
+    public async Task<IActionResult> RouteToNextUnansweredQuestion(Controller controller, string sectionSlug)
+    {
+        var establishmentId = GetEstablishmentIdOrThrowException();
+        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
+
+        try
+        {
+            var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
+            if (nextQuestion is null)
+            {
+                return PageRedirecter.RedirectToCheckAnswers(controller, sectionSlug);
+            }
+
+            return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion.Slug });
+        }
+        catch (DatabaseException)
+        {
+            // Remove the current invalid submission and redirect to self-assessment page
+            await _submissionService.DeleteCurrentSubmission(establishmentId, section.Id);
+
+            controller.TempData["SubtopicError"] = await BuildErrorMessage();
+            return controller.RedirectToAction(
+                PagesController.GetPageByRouteAction,
+                PagesController.ControllerName,
+                new { route = RouteConstants.Home });
+        }
+    }
+
+    public async Task<IActionResult> SubmitAnswerAndRedirect(
+        Controller controller,
+        SubmitAnswerViewModel answerViewModel,
+        string sectionSlug,
+        string questionSlug,
+        string? returnTo
+    )
+    {
+        var userId = GetUserIdOrThrowException();
+        var establishmentId = GetEstablishmentIdOrThrowException();
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
+
+        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
+        var question = section.GetQuestionBySlug(questionSlug);
+
+        var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(question.Id);
+
+        if (!controller.ModelState.IsValid)
+        {
+            var viewModel = GenerateViewModel(controller, question, section, sectionSlug, latestResponseForQuestion.AnswerSysId, returnTo);
+            viewModel.ErrorMessages = controller.ModelState
+                .Values
+                .SelectMany(value => value.Errors.Select(err => err.ErrorMessage))
+                .ToArray();
+
+            return controller.View(QuestionView, viewModel);
+        }
+
+        try
+        {
+            await _submissionService.SubmitAnswerAsync(userId, establishmentId, answerViewModel.ToModel());
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "An error occurred while submitting an answer with the following message: {Message} ", e.Message);
+            var viewModel = GenerateViewModel(controller, question, section, sectionSlug, questionSlug, null);
+            viewModel.ErrorMessages = ["Save failed. Please try again later."];
+            return controller.View(QuestionView, viewModel);
+        }
+
+        var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
+        if (!isChangeAnswersFlow)
+        {
+            return await RouteToNextUnansweredQuestion(controller, sectionSlug);
+        }
+
+        if (submissionRoutingData.Submission?.Responses is null)
+        {
+            return PageRedirecter.RedirectToCheckAnswers(controller, sectionSlug, isChangeAnswersFlow);
+        }
+
+        // Check answered questions
+        var nextQuestionSlug = GetNextQuestionSlug(submissionRoutingData.Submission.Responses, questionSlug);
+        var nextQuestion = section.Questions.FirstOrDefault(q => q.Slug.Equals(nextQuestionSlug));
+
+        // Check unanswered to see if we really have no more questions
+        nextQuestion ??= await _questionService.GetNextUnansweredQuestion(establishmentId, section);
+
+        if (nextQuestion != null)
+        {
+            return await RouteBySlugAndQuestionAsync(controller, sectionSlug, nextQuestion.Slug, FlowConstants.ChangeAnswersFlow);
+        }
+
+        // No next questions so check answers
+        return PageRedirecter.RedirectToCheckAnswers(controller, sectionSlug, isChangeAnswersFlow);
+    }
+
+    private async Task<string> BuildErrorMessage()
+    {
+        var contactLink = await _contentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
+        var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
+
+        if (!string.IsNullOrEmpty(contactLink?.Href))
+        {
+            errorMessage = errorMessage.Replace("contact us", $"<a href=\"{contactLink.Href}\" target=\"_blank\">contact us</a>");
+        }
+
+        return errorMessage;
+    }
 
     private QuestionViewModel GenerateViewModel(
         Controller controller,
-        string sectionSlug,
         CmsQuestionnaireQuestionDto question,
-        CmsQuestionnaireSectionDto section,
+        CmsQuestionnaireSectionDto? section,
+        string? sectionSlug,
         string? latestAnswerContentfulId,
         string? returnTo
     )
@@ -136,30 +265,22 @@ public class QuestionsViewBuilder(
         return new QuestionViewModel()
         {
             Question = question,
-            AnswerRef = latestAnswerContentfulId,
+            AnswerSysId = latestAnswerContentfulId,
             SectionName = section?.Name,
             SectionSlug = sectionSlug,
-            SectionId = section?.Sys.Id
+            SectionId = section?.Id
         };
     }
 
-    /// <summary>
-    /// 
-    /// </remarks>
-    /// <param name="controller"></param>
-    /// <param name="submissionRoutingData"></param>
-    /// <param name="sectionSlug"></param>
-    /// <param name="questionSlug"></param>
-    /// <param name="isChangeAnswersFlow"
-    /// <returns></returns>
-    private async Task<IActionResult> ProcessOtherStatuses(
-        Controller controller,
-        SubmissionRoutingDataModel submissionRoutingData,
-        string sectionSlug,
-        string questionSlug,
-        bool isChangeAnswersFlow
-    )
+    private static string? GetNextQuestionSlug(List<QuestionWithAnswerModel> journey, string currentQuestionSlug)
     {
-        
+        var currentIndex = journey.FindIndex(q => q.QuestionSlug == currentQuestionSlug);
+        if (currentIndex == -1 || currentIndex + 1 >= journey.Count)
+        {
+            return null;
+        }
+
+        // The next question in the valid journey (even if unanswered)
+        return journey[currentIndex + 1].QuestionSlug;
     }
 }

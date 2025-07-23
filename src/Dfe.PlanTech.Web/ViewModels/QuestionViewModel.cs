@@ -1,14 +1,14 @@
 using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Web.Models;
 
 public class QuestionViewModel
 {
     [Required]
-    public Question Question { get; init; } = null!;
+    public CmsQuestionnaireQuestionDto Question { get; init; } = null!;
 
-    public string? AnswerRef { get; init; }
+    public string? AnswerSysId { get; init; }
 
     public IEnumerable<string>? ErrorMessages { get; set; }
 

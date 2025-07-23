@@ -1,6 +1,10 @@
 ﻿using Contentful.Core.Models;
-using Dfe.PlanTech.Core.Content.Models;
+using Dfe.PlanTech.Core.Content.Options;
+using Dfe.PlanTech.Core.Content.Queries;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Data.Contentful.Persistence
 {
@@ -43,7 +47,7 @@ namespace Dfe.PlanTech.Data.Contentful.Persistence
 
             try
             {
-                var sections = await _contentful.GetEntries<QuestionnaireSectionEntry>(options);
+                var sections = await _contentful.GetEntriesAsync<QuestionnaireSectionEntry>(options);
                 return sections.FirstOrDefault();
             }
             catch (Exception ex)
