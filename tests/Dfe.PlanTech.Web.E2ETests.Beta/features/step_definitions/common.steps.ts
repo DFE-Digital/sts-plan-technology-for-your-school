@@ -18,6 +18,18 @@ Then('I should see the page heading {string}', async function (expectedHeading: 
   await expect(heading).toHaveText(expectedHeading);
 });
 
+Then('I should see the section heading {string}', async function (expectedHeading: string) {
+  const heading = this.page.locator('h3.govuk-body-l:visible');
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveText(expectedHeading);
+});
+
+Then('I should see the caption heading {string}', async function (expectedHeading: string) {
+  const heading = this.page.locator('h3.govuk-caption-xl:visible');
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveText(expectedHeading);
+});
+
 Then('I should see the question heading {string}', async function (expectedHeading: string) {
   const heading = this.page.locator('h1.govuk-fieldset__heading');
   await expect(heading).toBeVisible();
