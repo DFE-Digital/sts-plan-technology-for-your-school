@@ -4,9 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        type: string
+        type: choice
         description: "The environment to run infrastructure deployment on:"
         required: true
+        options: ['Dev', 'Tst', 'Staging', 'Production']
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
@@ -14,7 +15,7 @@ env:
   ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
+  ARM_USE_OIDC: true
 
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
   AZ_SA_COSTING_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}costing
@@ -32,12 +33,15 @@ env:
 
 jobs:
   terraform-plan:
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
     name: Terraform plan
     runs-on: ubuntu-22.04
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY}}
-    environment: ${{ inputs.environment }}
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
@@ -62,7 +66,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Replace in secret environment variable
         run: |
@@ -122,6 +125,9 @@ jobs:
           removeRules: 'true'
 
   deploy-terraform:
+    permissions:
+      id-token: write
+      contents: read
     needs: terraform-plan
     name: Deploy Terraform
     runs-on: ubuntu-22.04
@@ -153,7 +159,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Replace in secret environment variable
         run: |
