@@ -99,6 +99,8 @@ locals {
     }
   }
 
+  kv_firewall_cidr_rules = var.key_vault_cidr_rules
+
   ##################
   # CDN/Front Door #
   ##################

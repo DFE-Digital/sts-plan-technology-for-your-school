@@ -134,6 +134,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_key_ops"></a> [key\_ops](#input\_key\_ops) | The permitted JSON web key operations of the key to be created. | `list(string)` | <pre>[<br>  "decrypt",<br>  "encrypt",<br>  "sign",<br>  "unwrapKey",<br>  "verify",<br>  "wrapKey"<br>]</pre> | no |
 | <a name="input_key_size"></a> [key\_size](#input\_key\_size) | The size in bits of the key to be created. | `number` | `2048` | no |
 | <a name="input_key_type"></a> [key\_type](#input\_key\_type) | The JsonWebKeyType of the key to be created. | `string` | `"RSA"` | no |
+| <a name="input_key_vault_cidr_rules"></a> [key\_vault\_cidr\_rules](#input\_key\_vault\_cidr\_rules) | A set of CIDR rules representing allowed IP addresses for network access to the keyvault s190x0x-plantech-kv | `set(string)` | `[]` | no |
 | <a name="input_msi_id"></a> [msi\_id](#input\_msi\_id) | The Managed Service Identity ID. If this value isn't null (the default), 'data.azurerm\_client\_config.current.object\_id' will be set to this value. | `string` | `null` | no |
 | <a name="input_primary_fqdn"></a> [primary\_fqdn](#input\_primary\_fqdn) | The fully qualified domain name for the primary dns zone | `string` | `null` | no |
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | project name, used along with `environment` as a prefix for all resources | `string` | n/a | yes |
@@ -145,6 +146,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_registry_server"></a> [registry\_server](#input\_registry\_server) | Container registry server | `string` | n/a | yes |
 | <a name="input_registry_username"></a> [registry\_username](#input\_registry\_username) | Container registry username | `string` | n/a | yes |
 | <a name="input_storage_account_expiration_period"></a> [storage\_account\_expiration\_period](#input\_storage\_account\_expiration\_period) | The SAS expiration period in format of DD.HH:MM:SS | `string` | `"00.01:00:00"` | no |
+| <a name="input_workflow_runner_ip"></a> [workflow\_runner\_ip](#input\_workflow\_runner\_ip) | n/a | `string` | `null` | no |
 | <a name="input_subdomains"></a> [subdomains](#input\_subdomains) | A list of subdomains that can be associated with the primary domain | `set(string)` | `[]` | no |
 
 ## Outputs

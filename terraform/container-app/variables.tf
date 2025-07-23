@@ -129,6 +129,12 @@ variable "key_size" {
   default     = 2048
 }
 
+variable "key_vault_cidr_rules" {
+  description = "A set of CIDR rules representing allowed IP addresses for network access to the keyvault s190x0x-plantech-kv"
+  type        = set(string)
+  default     = []
+}
+
 #######################
 # Azure App Container #
 #######################
@@ -301,4 +307,13 @@ variable "primary_fqdn" {
   description = "The fully qualified domain name for the primary dns zone"
   type        = string
   default     = null
+}
+
+#########
+# Misc #
+#########
+
+variable "workflow_runner_ip" {
+  type    = string
+  default = null
 }
