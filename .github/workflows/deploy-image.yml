@@ -67,6 +67,10 @@ jobs:
     needs: upgrade-database
 
     steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          
       - name: GitHub Container Registry Login
         uses: docker/login-action@v3
         with:
