@@ -44,7 +44,7 @@ jobs:
     secrets: inherit
 
   deploy-to-dev-and-test:
-    name: Deployment to Dev & Test
+    name: Deployment to Dev only temp
     needs: [
               set-env, 
               create-and-publish-image
@@ -54,7 +54,7 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [Dev, Tst]
+        target: [Dev]
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}
