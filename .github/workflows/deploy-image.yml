@@ -85,7 +85,7 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
       - name: Login to ACR via OIDC
-        run: az acr login --name ${{ secrets.AZ_ACR_URL }}
+        run: az acr login --name ${{ secrets.AZ_CONTAINER_REGISTRY }}
 
       - name: Push Image To ACR
         run: |
