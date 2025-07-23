@@ -16,6 +16,7 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
     {
     }
 
+
     public async Task<Section?> GetSectionBySlug(string sectionSlug, CancellationToken cancellationToken = default)
     {
         var options = new GetEntitiesOptions()
@@ -33,6 +34,7 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
                     Value = "page"
                 }
             ]
+
         };
 
         try
@@ -44,6 +46,7 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
         {
             throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug} from Contentful", ex);
         }
+
     }
 
     /// <summary>
