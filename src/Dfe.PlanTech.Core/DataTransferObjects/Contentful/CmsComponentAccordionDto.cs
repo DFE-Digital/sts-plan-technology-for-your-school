@@ -6,13 +6,13 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
     {
         public string Id { get; set; } = null!;
         public string InternalName { get; init; } = null!;
-        public List<CmsRichTextFieldDto> Content { get; init; } = [];
+        public List<CmsComponentAccordionSectionDto> Content { get; init; } = [];
 
         public CmsComponentAccordionDto(ComponentAccordionEntry accordionEntry)
         {
             Id = accordionEntry.Id;
             InternalName = accordionEntry.InternalName;
-            Content = accordionEntry.Content.Select(c => BuildContentDto(c)).ToList();
+            Content = accordionEntry.Content.Select(c => c.AsDto()).ToList();
         }
     }
 }

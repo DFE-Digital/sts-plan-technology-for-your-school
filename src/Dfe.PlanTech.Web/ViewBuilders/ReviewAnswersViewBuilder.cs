@@ -51,15 +51,17 @@ public class ReviewAnswersViewBuilder(
                 return controller.View(ChangeAnswersController.ChangeAnswersViewName, model);
 
             default:
-                return QuestionsController.RedirectToQuestionBySlug(sectionSlug, submissionRoutingData.NextQuestion!.Slug, controller);
+                return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), nameof(QuestionsController), new { sectionSlug, submissionRoutingData.NextQuestion!.Slug });
         }
     }
 
-    public IActionResult RouteToSubtopicRecommendationIntroSlugAsync(Controller controller, string sectionSlug)
+    public async Task<IActionResult> RouteToSubtopicRecommendationIntroSlugAsync(Controller controller, string sectionSlug)
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
 
-        var recommendationIntroSlug = _submissionService.GetRecommendationIntroSlug(establishmentId, sectionSlug);
+        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
+
+        var recommendationIntroSlug = _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
 
         return controller.RedirectToAction(
               RecommendationsController.GetRecommendationAction,
@@ -136,7 +138,7 @@ public class ReviewAnswersViewBuilder(
             SectionName = routingData.QuestionnaireSection.Name,
             SectionSlug = sectionSlug,
             Slug = slug,
-            SubmissionId = routingData.Submission?.Id,
+            SubmissionId = routingData.Submission?.SubmissionId,
             SubmissionResponses = submissionResponsesViewModel,
             ErrorMessage = errorMessage
         };

@@ -28,7 +28,7 @@ namespace Dfe.PlanTech.Application.Workflows
         {
             var establishmentModel = new EstablishmentModel()
             {
-                OrgName = establishmentName,
+                Name = establishmentName,
                 Urn = establishmentUrn
             };
 

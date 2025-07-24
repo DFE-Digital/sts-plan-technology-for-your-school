@@ -36,7 +36,7 @@ public class GroupsViewBuilder(
 
         var groupSchools = await _establishmentService.BuildSchoolsWithSubmissionCountsView(categories, establishmentId);
 
-        var groupName = CurrentUser.GetEstablishmentModel().OrgName;
+        var groupName = CurrentUser.GetEstablishmentModel().Name;
         var title = groupName;
         List<CmsEntryDto> content = selectASchoolPageContent?.Content ?? [];
 
@@ -82,7 +82,7 @@ public class GroupsViewBuilder(
     public async Task<GroupsSchoolDashboardViewModel> GetSchoolDashboardViewAsync()
     {
         var latestSelection = await GetCurrentGroupSchoolSelection();
-        var groupName = CurrentUser.GetEstablishmentModel().OrgName;
+        var groupName = CurrentUser.GetEstablishmentModel().Name;
         var pageContent = await _contentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
         List<CmsEntryDto> content = pageContent?.Content ?? [];
 

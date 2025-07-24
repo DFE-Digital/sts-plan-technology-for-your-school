@@ -7,6 +7,6 @@ public class ComponentAccordionEntry: TransformableEntry<ComponentAccordionEntry
 {
     public string Id => SystemProperties.Id;
     public string InternalName { get; init; } = null!;
-    public IEnumerable<RichTextFieldEntry> Content { get; init; } = [];
+    public IEnumerable<ComponentAccordionSectionEntry> Content { get; init; } = [];
     public ComponentAccordionEntry() : base(entry => new CmsComponentAccordionDto(entry)) { }
 }

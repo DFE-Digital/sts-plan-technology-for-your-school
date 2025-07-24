@@ -11,7 +11,6 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class QuestionsController : BaseController<QuestionsController>
 {
     public const string Controller = "Questions";
-    public const string GetQuestionBySlugActionName = nameof(GetQuestionBySlug);
 
     private readonly QuestionsViewBuilder _questionsViewBuilder;
 

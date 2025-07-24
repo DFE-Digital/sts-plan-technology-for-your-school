@@ -1,6 +1,7 @@
 using Contentful.Core.Configuration;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Helpers;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
+using Dfe.PlanTech.Core.Helpers;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Data.Contentful.Persistence;
@@ -15,8 +16,8 @@ public class EntryResolver(ILogger<EntryResolver> logger) : IContentTypeResolver
 
     private readonly ILogger<EntryResolver> _logger = logger;
 
-    private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<ContentComponent>()
-                                                                        .ToDictionary(type => type.Name.ToLower());
+    private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<IDtoTransformable>()
+                                                                       .ToDictionary(type => type.Name.ToLower());
 
     /// <summary>
     /// Returns matching type for ID, or <see chref="MissingComponent"/> if none found.
@@ -31,6 +32,6 @@ public class EntryResolver(ILogger<EntryResolver> logger) : IContentTypeResolver
         }
 
         _logger.LogWarning("Could not find content type for ID {contentTypeId}", contentTypeId);
-        return typeof(MissingComponent);
+        return typeof(MissingComponentEntry);
     }
 }

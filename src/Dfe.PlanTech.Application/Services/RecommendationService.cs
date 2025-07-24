@@ -22,11 +22,10 @@ namespace Dfe.PlanTech.Application.Services
         {
             var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
 
-            var latestCompletedSubmission = await _responseWorkflow.GetLatestSubmission(
+            var latestCompletedSubmission = await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
                establishmentId,
-               cmsQuestionnaireSection.Id,
-               isCompletedSubmission: true,
-               includeResponses: false);
+               cmsQuestionnaireSection,
+               isCompletedSubmission: true);
 
             if (latestCompletedSubmission is null)
             {
@@ -35,7 +34,7 @@ namespace Dfe.PlanTech.Application.Services
 
             if (latestCompletedSubmission.Maturity is null)
             {
-                throw new InvalidDataException($"No maturity recorded for submission with ID {latestCompletedSubmission.Id}.");
+                throw new InvalidDataException($"No maturity recorded for submission with ID {latestCompletedSubmission.SubmissionId}.");
             }
 
             var maturity = latestCompletedSubmission.Maturity;

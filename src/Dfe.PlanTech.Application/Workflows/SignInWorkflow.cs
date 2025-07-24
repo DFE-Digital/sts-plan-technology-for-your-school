@@ -21,16 +21,24 @@ namespace Dfe.PlanTech.Application.Workflows
             _userRepository = userRepository;
         }
 
-        public async Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, string organisationReference)
+        public async Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, EstablishmentModel establishmentModel)
         {
-            var user = await UpsertUserAsync(dfeSignInRef);
-            var establishment = await UpsertEstablishmentAsync(organisationReference);
-            var signIn = await _signInRepository.CreateSignInAsync(establishment.Id, user.Id);
+            var user = await GetOrCreateUserAsync(dfeSignInRef);
+            var establishment = await GetOrCreateEstablishmentAsync(establishmentModel);
+            var signIn = await _signInRepository.CreateSignInAsync(user.Id, establishment.Id);
 
             return signIn.AsDto();
         }
 
-        private async Task<SqlUserDto> UpsertUserAsync(string dfeSignInRef)
+        public async Task<SqlSignInDto> RecordSignInUserOnly(string dfeSignInRef)
+        {
+            var user = await GetOrCreateUserAsync(dfeSignInRef);
+            var signIn = await _signInRepository.CreateSignInAsync(user.Id);
+
+            return signIn.AsDto();
+        }
+
+        private async Task<SqlUserDto> GetOrCreateUserAsync(string dfeSignInRef)
         {
             var existingUser = await _userRepository.GetUserBySignInRefAsync(dfeSignInRef);
             if (existingUser is not null)
@@ -42,9 +50,9 @@ namespace Dfe.PlanTech.Application.Workflows
             return newUser.AsDto();
         }
 
-        private async Task<SqlEstablishmentDto> UpsertEstablishmentAsync(string organisationReference)
+        private async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
         {
-            var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(organisationReference);
+            var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(establishmentModel.Reference);
             if (existingEstablishment is not null)
             {
                 return existingEstablishment.AsDto();
@@ -52,14 +60,13 @@ namespace Dfe.PlanTech.Application.Workflows
 
             var newEstablishmentData = new EstablishmentModel
             {
-                Ukprn = recordUserSignInDto.Organisation.Ukprn,
-                Urn = recordUserSignInDto.Organisation.Urn,
-                Type = recordUserSignInDto.Organisation.Type?.Name == null ? null : new EstablishmentTypeModel()
-                {
-                    Name = recordUserSignInDto.Organisation.Type.Name
-                },
-                OrgName = recordUserSignInDto.Organisation.Name,
-                GroupUid = recordUserSignInDto.Organisation.Uid
+                Ukprn = establishmentModel.Ukprn,
+                Urn = establishmentModel.Urn,
+                Type = establishmentModel.Type?.Name is null
+                    ? null
+                    : new EstablishmentTypeModel { Name = establishmentModel.Type.Name },
+                Name = establishmentModel.Name,
+                GroupUid = establishmentModel.Uid
             };
 
             var newEstablishment = await _establishmentRepository

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.RoutingDataModel;
 
 namespace Dfe.PlanTech.Web.ViewModels
 {
@@ -12,9 +12,9 @@ namespace Dfe.PlanTech.Web.ViewModels
 
         public bool HasResponses => Responses != null && Responses.Count > 0;
 
-        public SubmissionResponsesViewModel(SqlSubmissionDto submission)
+        public SubmissionResponsesViewModel(SubmissionResponsesModel submission)
         {
-            SubmissionId = submission?.Id;
+            SubmissionId = submission.SubmissionId;
             Responses = submission?.Responses.Select(r => new SubmissionResponseViewModel(r)).ToList();
         }
     }

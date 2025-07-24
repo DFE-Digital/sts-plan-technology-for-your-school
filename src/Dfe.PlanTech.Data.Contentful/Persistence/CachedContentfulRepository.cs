@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Workflows.Options;
 using Dfe.PlanTech.Core.Caching.Interfaces;
+using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Persistence;
@@ -34,23 +34,23 @@ public class CachedContentfulRepository : IContentRepository
         return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntriesAsync<TEntry>()) ?? [];
     }
 
-    public async Task<IEnumerable<TEntry>> GetEntries<TEntry>(GetEntriesOptions options)
+    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options)
     {
         var contentType = GetContentTypeName<TEntry>();
         var jsonOptions = options.SerializeToRedisFormat();
         var key = $"{contentType}{jsonOptions}";
 
-        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntries<TEntry>(options)) ?? [];
+        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntriesAsync<TEntry>(options)) ?? [];
     }
-    public async Task<IEnumerable<TEntry>> GetPaginatedEntries<TEntry>(GetEntriesOptions options)
+    public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options)
     {
-        return await _contentRepository.GetPaginatedEntries<TEntry>(options) ?? [];
+        return await _contentRepository.GetPaginatedEntriesAsync<TEntry>(options) ?? [];
     }
 
     public async Task<TEntry?> GetEntryById<TEntry>(string id, int include = 2)
     {
         var options = GetEntryByIdOptions(id, include);
-        var entries = (await GetEntries<TEntry>(options)).ToList();
+        var entries = (await GetEntriesAsync<TEntry>(options)).ToList();
 
         if (entries.Count > 1)
             throw new GetEntriesException($"Found more than 1 entity with id {id}");

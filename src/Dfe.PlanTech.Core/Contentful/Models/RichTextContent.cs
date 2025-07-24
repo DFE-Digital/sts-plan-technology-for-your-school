@@ -10,7 +10,7 @@ public class RichTextContent : TransformableEntry<RichTextContent, CmsRichTextCo
 {
     public string Value { get; set; } = "";
     public string NodeType { get; set; } = "";
-    public List<RichTextMark> Marks { get; set; } = [];
+    public List<RichTextMarkEntry> Marks { get; set; } = [];
     public List<RichTextContent> Content { get; set; } = [];
     public RichTextContentSupportDataEntry? Data { get; set; }
 

@@ -8,6 +8,8 @@ namespace Dfe.PlanTech.Core.RoutingDataModel
 
         public DateTime? DateCompleted { get; init; }
 
+        public string? Maturity { get; set; }
+
         public List<QuestionWithAnswerModel> Responses { get; set; } = [];
 
         public bool HasResponses => Responses != null && Responses.Any();
@@ -16,6 +18,7 @@ namespace Dfe.PlanTech.Core.RoutingDataModel
         {
             SubmissionId = submission.Id;
             DateCompleted = submission.DateCompleted;
+            Maturity = submission.Maturity;
             Responses = submission.Responses
                 .Select(response => new QuestionWithAnswerModel(response))
                 .GroupBy(questionWithAnswer => questionWithAnswer.QuestionSysId)

@@ -12,7 +12,7 @@ public class SignInRepository
         _db = dbContext;
     }
 
-    public async Task<SignInEntity> CreateSignInAsync(int userId, int establishmentId)
+    public async Task<SignInEntity> CreateSignInAsync(int userId, int? establishmentId = null)
     {
         if (userId.Equals(0))
         {

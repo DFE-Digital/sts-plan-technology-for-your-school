@@ -54,6 +54,7 @@ public class SubmissionService(
         {
             return new SubmissionRoutingDataModel
             {
+                Maturity = latestCompletedSubmission?.Maturity,
                 NextQuestion = cmsQuestionnaireSection.Questions.First(),
                 QuestionnaireSection = cmsQuestionnaireSection,
                 Submission = latestCompletedSubmission is null
@@ -81,6 +82,7 @@ public class SubmissionService(
 
         return new SubmissionRoutingDataModel
         {
+            Maturity = latestCompletedSubmissionWithResponses.Maturity,
             NextQuestion = cmsLastAnswer?.NextQuestion ?? cmsQuestionnaireSection.Questions.First(),
             QuestionnaireSection = cmsQuestionnaireSection,
             Submission = latestCompletedSubmissionWithResponses,

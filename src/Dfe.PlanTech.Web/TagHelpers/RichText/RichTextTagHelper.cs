@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 

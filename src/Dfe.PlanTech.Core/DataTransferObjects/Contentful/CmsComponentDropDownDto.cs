@@ -14,7 +14,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             Id = dropDownEntry.Id;
             InternalName = dropDownEntry.InternalName;
             Title = dropDownEntry.Title;
-            Content = dropDownEntry.AsDto();
+            Content = dropDownEntry.Content?.AsDto();
         }
     }
 }

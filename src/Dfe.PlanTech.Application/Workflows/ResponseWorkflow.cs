@@ -1,7 +1,6 @@
 ﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
-using Dfe.PlanTech.Data.Contentful.Persistence;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +9,9 @@ namespace Dfe.PlanTech.Application.Workflows;
 
 public class ResponseWorkflow
 (
-    SectionWorkflow sectionEntryRepository,
     SubmissionRepository submissionRepository
 )
 {
-    private readonly SectionWorkflow _sectionEntryRepository = sectionEntryRepository ?? throw new ArgumentNullException(nameof(sectionEntryRepository));
     private readonly SubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
     public async Task<QuestionWithAnswerModel?> GetLatestResponseForQuestionAsync(int establishmentId, string sectionId, string questionId)

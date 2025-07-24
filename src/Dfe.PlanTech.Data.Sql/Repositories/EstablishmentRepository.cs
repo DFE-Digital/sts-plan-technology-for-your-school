@@ -22,7 +22,7 @@ public class EstablishmentRepository
         {
             EstablishmentRef = model.Reference,
             EstablishmentType = model.Type?.Name,
-            OrgName = model.OrgName,
+            OrgName = model.Name,
             GroupUid = model.GroupUid
         };
 

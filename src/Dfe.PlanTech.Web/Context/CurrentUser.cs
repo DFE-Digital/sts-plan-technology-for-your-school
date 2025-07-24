@@ -3,6 +3,7 @@ using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModel;
+using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 
 namespace Dfe.PlanTech.Web.Context
 {
@@ -39,17 +40,8 @@ namespace Dfe.PlanTech.Web.Context
 
         public EstablishmentModel GetEstablishmentModel()
         {
-            var organisationDetails = GetStringFromClaim(ClaimConstants.Organisation);
-            if (organisationDetails is null)
-            {
-                throw new KeyNotFoundException($"Could not find {ClaimConstants.Organisation} claim type");
-            }
-
-            var establishment = JsonSerializer.Deserialize<EstablishmentModel>(organisationDetails);
-            if (establishment is null || !establishment.IsValid)
-                throw new InvalidDataException("Establishment was not in expected format");
-
-            return establishment;
+            return _contextAccessor.HttpContext?.User.GetUserOrganisation()
+                ?? throw new InvalidDataException("Establishment was not in expected format");
         }
 
         private int? GetIntFromClaim(string claimType)
