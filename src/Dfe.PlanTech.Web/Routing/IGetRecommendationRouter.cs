@@ -58,7 +58,7 @@ public interface IGetRecommendationRouter
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<(Section, RecommendationChunk, List<RecommendationChunk>)> GetSingleRecommendation(string sectionSlug,
-                                                                                          string recommendationSlug,
+                                                                                          string chunkSlug,
                                                                                           RecommendationsController controller,
                                                                                           CancellationToken cancellationToken);
 }

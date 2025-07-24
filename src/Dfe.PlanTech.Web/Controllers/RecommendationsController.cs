@@ -40,10 +40,10 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
           cancellationToken);
     }
 
-    [HttpGet("{categorySlug}/{sectionSlug}/{recommendationSlug}", Name = GetSingleRecommendationAction)]
+    [HttpGet("{categorySlug}/{sectionSlug}/{chunkSlug}", Name = GetSingleRecommendationAction)]
     public async Task<IActionResult> GetSingleRecommendation(string categorySlug,
                                                          string sectionSlug,
-                                                         string recommendationSlug,
+                                                         string chunkSlug,
                                                          [FromServices] IGetRecommendationRouter getRecommendationRouter,
                                                          [FromServices] IGetPageQuery getPageQuery,
                                                          CancellationToken cancellationToken)
@@ -52,13 +52,13 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
             throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(recommendationSlug))
-            throw new ArgumentNullException(nameof(recommendationSlug));
+        if (string.IsNullOrEmpty(chunkSlug))
+            throw new ArgumentNullException(nameof(chunkSlug));
 
         var categoryLandingPage = await getPageQuery.GetPageBySlug(categorySlug);
         var category = categoryLandingPage?.Content[0] as Category ?? throw new ContentfulDataUnavailableException($"No category landing page found for slug: {categorySlug}");
 
-        var (section, currentChunk, allChunks) = await getRecommendationRouter.GetSingleRecommendation(sectionSlug, recommendationSlug, this, cancellationToken);
+        var (section, currentChunk, allChunks) = await getRecommendationRouter.GetSingleRecommendation(sectionSlug, chunkSlug, this, cancellationToken);
         var currentChunkIndex = allChunks.IndexOf(currentChunk);
         var previousChunk = currentChunkIndex > 0
                             ? allChunks[currentChunkIndex - 1]

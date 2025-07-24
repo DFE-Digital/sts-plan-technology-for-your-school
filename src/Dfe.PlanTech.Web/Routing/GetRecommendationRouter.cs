@@ -104,7 +104,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         return (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses);
     }
 
-    public async Task<(Section, RecommendationChunk, List<RecommendationChunk>)> GetSingleRecommendation(string sectionSlug, string recommendationSlug, RecommendationsController controller, CancellationToken cancellationToken)
+    public async Task<(Section, RecommendationChunk, List<RecommendationChunk>)> GetSingleRecommendation(string sectionSlug, string chunkSlug, RecommendationsController controller, CancellationToken cancellationToken)
     {
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section with slug: {sectionSlug}");
@@ -115,8 +115,8 @@ public class GetRecommendationRouter : IGetRecommendationRouter
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {section.Name}");
         var allChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef))
             ?? throw new ContentfulDataUnavailableException($"Could not find recommendation chunks for section: {section.Name}");
-        var currentChunk = allChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == recommendationSlug)
-            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug mathing: {recommendationSlug}");
+        var currentChunk = allChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
+            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug mathing: {chunkSlug}");
 
         return (section, currentChunk, allChunks);
     }
