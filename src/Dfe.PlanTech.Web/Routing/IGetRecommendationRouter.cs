@@ -13,14 +13,15 @@ public interface IGetRecommendationRouter
     /// Gets current user journey status, then either returns Recommendation page for slug (if appropriate), 
     /// or redirects to correct next part of user journey
     /// </summary>
+    /// <param name="categorySlug"></param>
     /// <param name="sectionSlug"></param>
     /// <param name="recommendationSlug"></param>
     /// <param name="checklist"></param>
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<IActionResult> ValidateRoute(string sectionSlug,
-                                             string recommendationSlug,
+    public Task<IActionResult> ValidateRoute(string categorySlug,
+                                             string sectionSlug,
                                              bool checklist,
                                              RecommendationsController controller,
                                              CancellationToken cancellationToken);

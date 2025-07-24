@@ -1,5 +1,8 @@
 using Dfe.PlanTech.Application.Constants;
+using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
@@ -18,8 +21,9 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
     public const string GetRecommendationAction = "GetRecommendation";
     public const string GetSingleRecommendationAction = "GetSingleRecommendation";
 
-    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}", Name = GetRecommendationAction)]
-    public async Task<IActionResult> GetRecommendation(string sectionSlug,
+    [HttpGet("{categorySlug}/{sectionSlug}/recommendation/{recommendationSlug}", Name = GetRecommendationAction)]
+    public async Task<IActionResult> GetRecommendation(string categorySlug,
+                                                       string sectionSlug,
                                                        string recommendationSlug,
                                                        [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                        CancellationToken cancellationToken)
@@ -29,8 +33,8 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
         if (string.IsNullOrEmpty(recommendationSlug))
             throw new ArgumentNullException(nameof(recommendationSlug));
 
-        return await getRecommendationValidator.ValidateRoute(sectionSlug,
-          recommendationSlug,
+        return await getRecommendationValidator.ValidateRoute(categorySlug,
+          sectionSlug,
           false,
           this,
           cancellationToken);
@@ -41,12 +45,18 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
                                                          string sectionSlug,
                                                          string recommendationSlug,
                                                          [FromServices] IGetRecommendationRouter getRecommendationRouter,
+                                                         [FromServices] IGetPageQuery getPageQuery,
                                                          CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(categorySlug))
+            throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(recommendationSlug))
             throw new ArgumentNullException(nameof(recommendationSlug));
+
+        var categoryLandingPage = await getPageQuery.GetPageBySlug(categorySlug);
+        var category = categoryLandingPage?.Content[0] as Category ?? throw new ContentfulDataUnavailableException($"No category landing page found for slug: {categorySlug}");
 
         var (section, currentChunk, allChunks) = await getRecommendationRouter.GetSingleRecommendation(sectionSlug, recommendationSlug, this, cancellationToken);
         var currentChunkIndex = allChunks.IndexOf(currentChunk);
@@ -59,7 +69,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
 
         var viewModel = new SingleRecommendationViewModel
         {
-            // TODO: Need category name for back link
+            CategoryName = category.Header.Text,
             CategorySlug = categorySlug,
             Section = section,
             Chunks = allChunks,
@@ -90,21 +100,16 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
         return await getRecommendationRouter.GetRecommendationPreview(sectionSlug, maturity, this, cancellationToken);
     }
 
-
-
-    [HttpGet("{sectionSlug}/recommendation/{recommendationSlug}/print", Name = "GetRecommendationChecklist")]
-    public async Task<IActionResult> GetRecommendationChecklist(string sectionSlug,
-                                                                string recommendationSlug,
+    [HttpGet("{categorySlug}/{sectionSlug}/print", Name = "GetRecommendationChecklist")]
+    public async Task<IActionResult> GetRecommendationChecklist(string categorySlug,
+                                                                string sectionSlug,
                                                                 [FromServices] IGetRecommendationRouter getRecommendationValidator,
                                                                 CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(recommendationSlug))
-            throw new ArgumentNullException(nameof(recommendationSlug));
 
-        return await getRecommendationValidator.ValidateRoute(sectionSlug,
-            recommendationSlug,
+        return await getRecommendationValidator.ValidateRoute(categorySlug, sectionSlug,
             true,
             this,
             cancellationToken);

@@ -4,9 +4,9 @@ namespace Dfe.PlanTech.Web.Models
 {
     public class SingleRecommendationViewModel
     {
-        public string CategorySlug { get; set; } = "";
-
         public string CategoryName { get; set; } = "";
+
+        public string CategorySlug { get; set; } = "";
 
         public Section Section { get; set; } = null!;
 

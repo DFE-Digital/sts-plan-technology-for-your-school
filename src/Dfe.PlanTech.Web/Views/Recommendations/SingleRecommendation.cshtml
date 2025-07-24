@@ -5,11 +5,10 @@
     Layout = "_RecommendationsLayout";
 }
 
-@* placeholder link text until we have the category name *@
 @section BeforeContent {
     <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">Home</govuk-back-link>
     <govuk-back-link id="back-button-link" href="@Model.CategorySlug" class="noprint js-only">
-        Back to digital leadership and governances
+        Back to @Model.CategoryName.ToLower()
     </govuk-back-link>
 }
 
@@ -20,7 +19,7 @@
 @{
     var recommendation = Model.CurrentChunk;
     var categorySlug = Model.CategorySlug;
-    var sectionSlug = Model.Section.InterstitialPage.Slug;
+    var sectionSlug = Model.Section.InterstitialPage?.Slug;
 
     <div class="recommendation-content">
         <div class="recommendation-piece-container" id="@recommendation.SlugifiedLinkText">
@@ -32,7 +31,7 @@
                         <a href="/@sectionSlug/change-answers">View or update your self-assessment for @Model.Section.Name.ToLower()</a>
                     </p>
                     <p class="govuk-body-s">
-                        <a class="govuk-link" href="@Model.Section.InterstitialPage.Slug/print">Print all recommendations for @Model.Section.Name.ToLower()</a>
+                        <a class="govuk-link" href="print">Print all recommendations for @Model.Section.Name.ToLower()</a>
                     </p>
                 </div>
                 <div class="govuk-grid-column-two-thirds">
