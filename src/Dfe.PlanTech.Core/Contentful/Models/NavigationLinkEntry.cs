@@ -4,7 +4,6 @@ namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class NavigationLinkEntry : TransformableEntry<NavigationLinkEntry, CmsNavigationLinkDto>
 {
-    public string Id => SystemProperties.Id;
     public string InternalName { get; set; } = null!;
     public string DisplayText { get; set; } = null!;
     public string? Href { get; set; } = null;

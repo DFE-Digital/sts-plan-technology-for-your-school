@@ -1,8 +1,10 @@
-﻿using Dfe.PlanTech.Core.Content.Options;
+﻿using Azure;
+using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Content.Queries;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
@@ -23,19 +25,21 @@ public class ContentfulWorkflow(
     private readonly ContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
     private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
 
-    public async Task<TDto?> GetEntryById<TEntry, TDto>(string contentId)
+    public async Task<TDto> GetEntryById<TEntry, TDto>(string entryId)
         where TEntry : IDtoTransformable<TDto>
         where TDto : CmsEntryDto
     {
         try
         {
-            var entry = await _contentfulRepository.GetEntryById<TEntry>(contentId);
-            return entry?.AsDtoInternal();
+            var entry = await _contentfulRepository.GetEntryById<TEntry>(entryId)
+                ?? throw new ContentfulDataUnavailableException($"Could not find entry with ID {entryId}");
+
+            return entry.AsDtoInternal();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ExceptionMessageEntityContentful);
-            return null;
+            throw new ContentfulDataUnavailableException($"Could not find entry with ID {entryId}", ex);
         }
     }
 
@@ -125,19 +129,42 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<CmsSubtopicRecommendationDto?> GetSubTopicRecommendation(string subtopicId)
+    public async Task<CmsSubtopicRecommendationDto?> GetSubtopicRecommendationByIdAsync(string subtopicId)
     {
         var sectionIdQuery = new ContentfulQuerySingleValue { Field = "fields.subtopic.sys.id", Value = subtopicId };
         var options = new GetEntriesOptions(4, [sectionIdQuery]);
 
-        var subTopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
-        var subtopicRecommendation = subTopicRecommendations.FirstOrDefault();
+        var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
+        var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
 
-        if (subtopicRecommendation == null)
+        if (subtopicRecommendation is null)
         {
             _logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
         }
 
         return subtopicRecommendation?.AsDto();
+    }
+
+    public async Task<CmsRecommendationIntroDto?> GetSubtopicRecommendationIntroByIdAndMaturityAsync(string subtopicId, string maturity)
+    {
+        var sectionIdQuery = new ContentfulQuerySingleValue { Field = "fields.subtopic.sys.id", Value = subtopicId };
+        var options = new GetEntriesOptions(4, [sectionIdQuery]);
+
+        var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
+        var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
+
+        if (subtopicRecommendation is null)
+        {
+            _logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
+            return null;
+        }
+
+        var introForMaturity = subtopicRecommendation?.Intros.FirstOrDefault(i => i.Maturity.Equals(maturity));
+        if (introForMaturity is null)
+        {
+            _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
+        }
+
+        return introForMaturity?.AsDto();
     }
 }

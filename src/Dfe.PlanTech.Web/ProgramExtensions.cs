@@ -1,49 +1,24 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Background;
-using Dfe.PlanTech.Application.Caching.Models;
-using Dfe.PlanTech.Application.Content.Queries;
-using Dfe.PlanTech.Application.Cookie.Service;
-using Dfe.PlanTech.Application.Groups.Commands;
-using Dfe.PlanTech.Application.Groups.Interfaces;
-using Dfe.PlanTech.Application.Persistence.Interfaces;
-using Dfe.PlanTech.Application.Questionnaire.Queries;
-using Dfe.PlanTech.Application.Responses.Commands;
-using Dfe.PlanTech.Application.Responses.Queries;
+using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Application.Submissions.Commands;
-using Dfe.PlanTech.Application.Submissions.Queries;
-using Dfe.PlanTech.Application.Users.Commands;
-using Dfe.PlanTech.Application.Users.Helper;
-using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Core.Caching;
 using Dfe.PlanTech.Core.Caching.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Rendering.Options;
 using Dfe.PlanTech.Core.Options;
-using Dfe.PlanTech.Domain.Background;
-using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Cookie.Interfaces;
-using Dfe.PlanTech.Domain.Groups.Interfaces;
-using Dfe.PlanTech.Domain.Persistence.Models;
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Serializers;
-using Dfe.PlanTech.Infrastructure.Data;
+using Dfe.PlanTech.Domain.Background;
+using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation.Filters;
 using Dfe.PlanTech.Web.Authorisation.Handlers;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Dfe.PlanTech.Web.Background;
-using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
-using Dfe.PlanTech.Web.Routing;
-using Dfe.PlanTech.Web.Workflows;
-using Dfe.PlanTech.Web.Workflows.Options;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -97,8 +72,6 @@ public static class ProgramExtensions
             };
         });
 
-        services.AddTransient<GetPageQuery>();
-
         services.AddOptions<ContentfulOptionsConfiguration>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetSection("Contentful").Bind(settings));
 
@@ -111,8 +84,6 @@ public static class ProgramExtensions
         services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptionsConfiguration>>().Value);
         services.AddTransient((services) => services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value);
         services.AddTransient((services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value);
-
-        services.AddTransient<IGetSubTopicRecommendationQuery, GetSubTopicRecommendationQuery>();
 
         services.AddScoped<ComponentViewsHelper>();
 
@@ -134,8 +105,7 @@ public static class ProgramExtensions
         services.AddHttpContextAccessor();
         services.AddSingleton<ICacheOptions>(new CacheOptions());
         services.AddTransient<ICacher, CacheHelper>();
-        services.AddTransient<IQuestionnaireCacher, QuestionnaireCacher>();
-        services.AddTransient<IUser, UserHelper>();
+        services.AddTransient<QuestionnaireCacher>();
 
         return services;
     }
@@ -251,7 +221,6 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddExceptionHandlingServices(this IServiceCollection services)
     {
-        services.AddTransient<IGetPageQuery, GetPageQuery>();
         services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleware>();
         services.AddTransient<IUserJourneyMissingContentExceptionHandler, UserJourneyMissingContentExceptionHandler>();
 

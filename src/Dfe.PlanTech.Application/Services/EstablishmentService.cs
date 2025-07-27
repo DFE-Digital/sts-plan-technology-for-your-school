@@ -41,7 +41,7 @@ public class EstablishmentService(
             ?? throw new DatabaseException($"Could not get latest selected group school for user with ID {userId.Value} in establishment: {establishmentId.Value}");
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> BuildSchoolsWithSubmissionCountsView(IEnumerable<CmsCategoryDto> categories, int establishmentId)
+    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<CmsCategoryDto> categories, int establishmentId)
     {
         var schools = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
         var sectionIds = categories.SelectMany(c => c.Sections.Select(s => s.Id));

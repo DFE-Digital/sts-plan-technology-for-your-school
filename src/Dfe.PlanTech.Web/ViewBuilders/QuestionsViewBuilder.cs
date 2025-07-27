@@ -1,16 +1,17 @@
-﻿using Dfe.PlanTech.Application.Services;
+﻿using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Configurations;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
-using Dfe.PlanTech.Domain.Persistence.Models;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.Models.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -127,7 +128,7 @@ public class QuestionsViewBuilder(
         if (!_contentfulOptions.UsePreviewApi)
             return controller.Redirect(UrlConstants.HomePage);
 
-        var question = await _contentfulService.GetEntryById<QuestionnaireQuestionEntry, CmsQuestionnaireQuestionDto>(questionId);
+        var question = await _contentfulService.GetQuestionByIdAsync(questionId);
 
         var viewModel = GenerateViewModel(controller, question, null, null, null, null);
         return controller.View(QuestionView, viewModel);
@@ -163,7 +164,7 @@ public class QuestionsViewBuilder(
 
     public async Task<IActionResult> SubmitAnswerAndRedirect(
         Controller controller,
-        SubmitAnswerViewModel answerViewModel,
+        SubmitAnswerInputModel answerViewModel,
         string sectionSlug,
         string questionSlug,
         string? returnTo

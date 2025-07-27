@@ -3,8 +3,9 @@
 public class SqlEstablishmentLinkDto : SqlDto
 {
     public int Id { get; set; }
-    public string GroupUid { get; set; } = null!;
-    public string EstablishmentName { get; set; } = null!;
-    public string Urn { get; set; } = null!;
     public int? CompletedSectionsCount { get; set; }
+    public string EstablishmentName { get; set; } = null!;
+    public string GroupUid { get; set; } = null!;
+    public List<SqlSectionStatusDto> SectionStatuses { get; set; }
+    public string Urn { get; set; } = null!;
 }

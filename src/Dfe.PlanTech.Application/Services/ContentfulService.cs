@@ -1,8 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Application.Services;
 
@@ -17,36 +15,38 @@ public class ContentfulService(
         return _contentfulWorkflow.GetAllSectionsAsync();
     }
 
-    public async Task<TDto> GetEntryById<TEntry, TDto>(string id)
-        where TEntry : IDtoTransformable<TDto>
-        where TDto : CmsEntryDto
-    {
-        var entryDto = await _contentfulWorkflow.GetEntryById<TEntry, TDto>(id)
-            ?? throw new ContentfulDataUnavailableException($"Could not find entry with ID {id}");
-
-        return entryDto!;
-    }
-
-    public Task<CmsNavigationLinkDto?> GetLinkByIdAsync(string contentId)
+    public Task<CmsNavigationLinkDto> GetLinkByIdAsync(string contentId)
     {
         return _contentfulWorkflow.GetEntryById<NavigationLinkEntry, CmsNavigationLinkDto>(contentId);
     }
 
+    public Task<CmsPageDto> GetPageByIdAsync(string pageId)
+    {
+        return _contentfulWorkflow.GetEntryById<PageEntry, CmsPageDto>(pageId);
+    }
+
     public Task<CmsPageDto> GetPageBySlugAsync(string slug)
     {
-        return _contentfulWorkflow.GetPageBySlugAsync(slug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find page for slug: {slug}");
+        return _contentfulWorkflow.GetPageBySlugAsync(slug);
+    }
+
+    public Task<CmsQuestionnaireQuestionDto> GetQuestionByIdAsync(string questionId)
+    {
+        return _contentfulWorkflow.GetEntryById<QuestionnaireQuestionEntry, CmsQuestionnaireQuestionDto>(questionId);
     }
 
     public Task<CmsQuestionnaireSectionDto> GetSectionBySlugAsync(string slug)
     {
-        return _contentfulWorkflow.GetSectionBySlugAsync(slug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {slug}");
+        return _contentfulWorkflow.GetSectionBySlugAsync(slug);
     }
 
-    public Task<CmsSubtopicRecommendationDto?> GetSubTopicRecommendation(string subtopicId)
+    public Task<CmsSubtopicRecommendationDto?> GetSubtopicRecommendationByIdAsync(string subtopicId)
     {
-        return _contentfulWorkflow.GetSubTopicRecommendation(subtopicId)
-            ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for subtopic with ID {subtopicId}");
+        return _contentfulWorkflow.GetSubtopicRecommendationByIdAsync(subtopicId);
+    }
+
+    public Task<CmsRecommendationIntroDto?> GetSubtopicRecommendationIntroAsync(string subtopicId, string maturity)
+    {
+        return _contentfulWorkflow.GetSubtopicRecommendationIntroByIdAndMaturityAsync(subtopicId, maturity);
     }
 }

@@ -14,6 +14,8 @@ public abstract class TransformableEntry<TSelf, TDto> : Entry<ContentComponent>,
         _constructor = constructor;
     }
 
+    public string Id => SystemProperties.Id;
+
     CmsEntryDto IDtoTransformable.AsDtoInternal() => _constructor((TSelf)this);
     TDto IDtoTransformable<TDto>.AsDtoInternal() => _constructor((TSelf)this);
 

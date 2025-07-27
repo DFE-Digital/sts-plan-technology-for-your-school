@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Services;
+﻿using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -7,7 +8,6 @@ using Dfe.PlanTech.Domain.Groups.Models;
 using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -34,7 +34,7 @@ public class GroupsViewBuilder(
         var dashboardContent = await _contentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
         var categories = dashboardContent.Content.OfType<CmsCategoryDto>();
 
-        var groupSchools = await _establishmentService.BuildSchoolsWithSubmissionCountsView(categories, establishmentId);
+        var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, establishmentId);
 
         var groupName = CurrentUser.GetEstablishmentModel().Name;
         var title = groupName;
@@ -125,7 +125,7 @@ public class GroupsViewBuilder(
         var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {sectionSlug}");
 
-        var subTopicRecommendation = await _contentfulService.GetSubTopicRecommendation(section.Id)
+        var subtopicRecommendation = await _contentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
         var latestResponses = await _submissionService.GetLatestSubmissionWithResponsesAsync(schoolId, sectionSlug, true)
@@ -140,13 +140,13 @@ public class GroupsViewBuilder(
             Responses = latestResponses.Responses.ToList(),
         };
 
-        if (subTopicRecommendation.Section is null)
+        if (subtopicRecommendation.Section is null)
         {
             return null;
         }
 
         var answerIds = latestResponses.Responses.Select(r => r.AnswerSysId);
-        var subTopicChunks = subTopicRecommendation
+        var subtopicChunks = subtopicRecommendation
             .Section
             .Chunks
             .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
@@ -155,11 +155,11 @@ public class GroupsViewBuilder(
 
         var viewModel = new GroupsRecommendationsViewModel
         {
-            SectionName = subTopicRecommendation.Subtopic.Name,
+            SectionName = subtopicRecommendation.Subtopic.Name,
             SelectedEstablishmentId = schoolId,
             SelectedEstablishmentName = schoolName,
             Slug = sectionSlug,
-            Chunks = subTopicChunks,
+            Chunks = subtopicChunks,
             GroupsCustomRecommendationIntro = customIntro,
             SubmissionResponses = latestResponses.Responses
         };

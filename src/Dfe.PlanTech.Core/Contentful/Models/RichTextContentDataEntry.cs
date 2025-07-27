@@ -6,7 +6,6 @@ namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class RichTextContentDataEntry: TransformableEntry<RichTextContentDataEntry, CmsRichTextContentDataDto>, IHasUri
 {
-    public string Id => SystemProperties.Id;
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
     public string? Title { get; init; }

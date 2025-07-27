@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Models.Inputs;
 using Dfe.PlanTech.Web.ViewBuilders;
-using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -54,7 +54,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public async Task<IActionResult> SubmitAnswer(
         string sectionSlug,
         string questionSlug,
-        SubmitAnswerViewModel answerViewModel,
+        SubmitAnswerInputModel answerViewModel,
         string? returnTo = ""
     )
     {

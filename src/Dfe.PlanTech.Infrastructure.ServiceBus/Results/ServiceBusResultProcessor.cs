@@ -1,13 +1,12 @@
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Domain.ServiceBus.Models;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 
-public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogger<ServiceBusResultProcessor> logger) : IServiceBusResultProcessor
+public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogger<ServiceBusResultProcessor> logger)
 {
-    public async Task ProcessMessageResult(ProcessMessageEventArgs processMessageEventArgs, IServiceBusResult result, CancellationToken cancellationToken)
+    public async Task ProcessMessageResult(ProcessMessageEventArgs processMessageEventArgs, ServiceBusResult result, CancellationToken cancellationToken)
     {
         try
         {

@@ -1,4 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Core.RoutingDataModels;
@@ -90,6 +92,12 @@ public class SubmissionService(
                 ? SubmissionStatus.CompleteNotReviewed
                 : SubmissionStatus.InProgress
         };
+    }
+
+    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(CmsCategoryDto category, int establishmentId)
+    {
+        var sectionIds = category.Sections.Select(s => s.Id);
+        return _submissionWorkflow.GetSectionStatusesAsync(establishmentId, sectionIds);
     }
 
     public Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)

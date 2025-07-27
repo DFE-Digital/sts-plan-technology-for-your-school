@@ -1,11 +1,9 @@
-using Contentful.Core.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class ContentSupportPageEntry: TransformableEntry<ContentSupportPageEntry, CmsContentSupportPageDto>
 {
-    public string Id => SystemProperties.Id;
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
     public ComponentHeroEntry Heading { get; init; } = null!;

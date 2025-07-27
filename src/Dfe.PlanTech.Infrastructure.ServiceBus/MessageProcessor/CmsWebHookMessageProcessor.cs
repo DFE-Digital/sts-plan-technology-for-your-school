@@ -1,18 +1,16 @@
 using System.Text.Json;
 using Dfe.PlanTech.Core.Caching.Interfaces;
-using Dfe.PlanTech.Core.Persistence.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Persistence.Commands;
 
-/// <inheritdoc cref="ICmsWebHookMessageProcessor" />
 public class CmsWebHookMessageProcessor(
     ICmsCache cache,
     JsonSerializerOptions jsonSerialiserOptions,
     ILogger<CmsWebHookMessageProcessor> logger
-) : ICmsWebHookMessageProcessor
+)
 {
     public async Task<ServiceBusResult> ProcessMessage(string subject, string body, string id, CancellationToken cancellationToken)
     {

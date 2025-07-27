@@ -20,12 +20,12 @@ public class SubtopicRecommendationWorkflow
         _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
     }
 
-    public async Task<SubtopicRecommendationEntry?> GetFirstSubTopicRecommendationAsync(string subtopicId)
+    public async Task<SubtopicRecommendationEntry?> GetFirstSubtopicRecommendationAsync(string subtopicId)
     {
         var options = CreateGetEntityOptions(subtopicId, 4);
-        var subTopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
+        var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
 
-        var subtopicRecommendation = subTopicRecommendations.FirstOrDefault();
+        var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
         if (subtopicRecommendation is null)
         {
             LogMissingRecommendationError(subtopicId);

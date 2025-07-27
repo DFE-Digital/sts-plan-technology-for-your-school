@@ -89,18 +89,18 @@ public class RecommendationsViewBuilder(
         var establishmentId = GetEstablishmentIdOrThrowException();
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
 
-        var subTopicRecommendation = await _contentfulService.GetSubTopicRecommendation(submissionRoutingData.QuestionnaireSection.Id)
+        var subtopicRecommendation = await _contentfulService.GetSubtopicRecommendationByIdAsync(submissionRoutingData.QuestionnaireSection.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for: {submissionRoutingData.QuestionnaireSection.Name}");
 
-        var intro = subTopicRecommendation.Intros
+        var intro = subtopicRecommendation.Intros
             .Find(intro => string.Equals(intro.Maturity, maturity, StringComparison.InvariantCultureIgnoreCase))
-                ?? subTopicRecommendation.Intros[0];
+                ?? subtopicRecommendation.Intros[0];
 
         var viewModel = new RecommendationsViewModel()
         {
             SectionName = submissionRoutingData.QuestionnaireSection.Name,
             Intro = intro,
-            Chunks = subTopicRecommendation.Section.Chunks,
+            Chunks = subtopicRecommendation.Section.Chunks,
             Slug = "preview",
         };
 
@@ -112,13 +112,13 @@ public class RecommendationsViewBuilder(
         var establishmentId = GetEstablishmentIdOrThrowException();
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
         var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
-        var subTopicRecommendation = await _contentfulService.GetSubTopicRecommendation(section.Id)
+        var subtopicRecommendation = await _contentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Id}'");
 
-        var subTopicIntro = subTopicRecommendation.GetRecommendationByMaturity(submissionRoutingData.Maturity)
-            ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro subtopic ID '{subTopicRecommendation.Id}'");
+        var subtopicIntro = subtopicRecommendation.GetRecommendationByMaturity(submissionRoutingData.Maturity)
+            ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro subtopic ID '{subtopicRecommendation.Id}'");
 
-        var recommendationSlug = subTopicIntro.Slug;
+        var recommendationSlug = subtopicIntro.Slug;
         return await RouteBySectionAndRecommendation(controller, sectionSlug, recommendationSlug, false);
     }
 
@@ -131,27 +131,27 @@ public class RecommendationsViewBuilder(
     )
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var subTopicRecommendation = await _contentfulService.GetSubTopicRecommendation(section.Id);
-        var subTopicIntro = subTopicRecommendation?.GetRecommendationByMaturity(submissionRoutingData.Maturity);
+        var subtopicRecommendation = await _contentfulService.GetSubtopicRecommendationByIdAsync(section.Id);
+        var subtopicIntro = subtopicRecommendation?.GetRecommendationByMaturity(submissionRoutingData.Maturity);
 
-        if (subTopicRecommendation is null)
+        if (subtopicRecommendation is null)
         {
             throw new ContentfulDataUnavailableException("Could not find subtopic for section with ID '{section.Id}'");
         }
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var subTopicChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(answerIds);
+        var subtopicChunks = subtopicRecommendation.Section.GetRecommendationChunksByAnswerIds(answerIds);
 
         if (showYourSelfAssessmentChunk)
         {
-            subTopicChunks.Add(new("Your self-assessment"));
+            subtopicChunks.Add(new("Your self-assessment"));
         }
 
         return new RecommendationsViewModel()
         {
-            SectionName = subTopicRecommendation.Subtopic.Name,
-            Intro = subTopicIntro,
-            Chunks = subTopicChunks,
+            SectionName = subtopicRecommendation.Subtopic.Name,
+            Intro = subtopicIntro,
+            Chunks = subtopicChunks,
             LatestCompletionDate = submissionRoutingData.Submission!.DateCompleted.HasValue
                                 ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission!.DateCompleted.Value)
                                 : null,

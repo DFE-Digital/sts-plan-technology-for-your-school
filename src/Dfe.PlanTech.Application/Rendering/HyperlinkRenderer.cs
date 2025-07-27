@@ -1,7 +1,7 @@
 using System.Text;
+using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Rendering.Options;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Microsoft.Extensions.Logging;
 

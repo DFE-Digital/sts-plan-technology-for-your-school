@@ -1,5 +1,5 @@
 using System.Text.RegularExpressions;
-using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Application.Configuration;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 

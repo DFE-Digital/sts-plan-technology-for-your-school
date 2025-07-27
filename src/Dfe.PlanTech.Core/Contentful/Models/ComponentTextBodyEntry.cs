@@ -1,11 +1,9 @@
-using Contentful.Core.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class ComponentTextBodyEntry: TransformableEntry<ComponentTextBodyEntry, CmsComponentTextBodyDto>
 {
-    public string Id => SystemProperties.Id;
     public string InternalName { get; set; } = null!;
     public RichTextContent RichText { get; init; } = null!;
 

@@ -5,7 +5,6 @@ namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class ComponentCardEntry: TransformableEntry<ComponentCardEntry, CmsComponentCardDto>
 {
-    public string Id => SystemProperties.Id;
     public string InternalName { get; init; } = null!;
     public string? Title { get; init; } = null!;
     public string? Description { get; init; } = null!;

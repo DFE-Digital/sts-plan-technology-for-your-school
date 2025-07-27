@@ -1,12 +1,10 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Contentful.Core.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class RecommendationSectionEntry: TransformableEntry<RecommendationSectionEntry, CmsRecommendationSectionDto>
 {
-    public string Id => SystemProperties.Id;
     public string InternalName { get; set; } = null!;
     [NotMapped]
     public List<QuestionnaireAnswerEntry> Answers { get; init; } = [];

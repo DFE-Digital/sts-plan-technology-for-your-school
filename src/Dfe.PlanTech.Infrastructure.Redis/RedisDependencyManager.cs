@@ -1,5 +1,5 @@
+using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Domain.Background;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis;
@@ -52,26 +52,26 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     => value switch
     {
         null => [],
-        IEnumerable<IContentComponent> collection => collection.SelectMany(GetDependencies),
-        IContentComponent item => GetContentDependenciesAsync(item),
-        _ => throw new InvalidOperationException($"{value!.GetType()} is not a {typeof(IContentComponent)} or a {typeof(IEnumerable<IContentComponent>)}"),
+        IEnumerable<IDtoTransformable> collection => collection.SelectMany(GetDependencies),
+        IDtoTransformable item => GetContentDependenciesAsync(item),
+        _ => throw new InvalidOperationException($"{value!.GetType()} is not a {typeof(IDtoTransformable)} or a {typeof(IEnumerable<IDtoTransformable>)}"),
     };
 
     /// <summary>
     /// Uses reflection to check for any ContentIds within the <see cref="IContentComponent">, and returns the Id value of any found
     /// </summary>
     /// <param name="value"></param>
-    private IEnumerable<string> GetContentDependenciesAsync(IContentComponent value)
+    private IEnumerable<string> GetContentDependenciesAsync(IDtoTransformable value)
     {
         // RichText is a sub-component that doesn't have SystemDetails, exit for such types
-        if (value.Sys is null)
+        if (value.SystemProperties is null)
             yield break;
 
-        yield return value.Sys.Id;
+        yield return value.SystemProperties.Id;
         var properties = value.GetType().GetProperties();
         foreach (var property in properties)
         {
-            if (typeof(IContentComponent).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<IContentComponent>).IsAssignableFrom(property.PropertyType))
+            if (typeof(IDtoTransformable).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<IDtoTransformable>).IsAssignableFrom(property.PropertyType))
             {
                 foreach (var dependency in GetDependencies(property.GetValue(value)))
                 {

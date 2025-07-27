@@ -1,28 +1,19 @@
-﻿using Dfe.PlanTech.Application.Constants;
+﻿using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Domain.Constants;
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Exceptions;
-using Dfe.PlanTech.Web.Configurations;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Middleware;
 
-public class ServiceExceptionHandlerMiddleware : IExceptionHandlerMiddleware
+public class ServiceExceptionHandlerMiddleware(
+    IOptions<ErrorPagesConfiguration> errorPages,
+    ContentfulService contentfulService
+) : IExceptionHandlerMiddleware
 {
-    private readonly IGetPageQuery _pageQuery;
-    private readonly ErrorPagesConfiguration _errorPages;
-
-    public ServiceExceptionHandlerMiddleware(
-        IOptions<ErrorPagesConfiguration> errorPagesOptions,
-        IGetPageQuery getPageQuery
-    )
-    {
-        _errorPages = errorPagesOptions.Value;
-        _pageQuery = getPageQuery;
-    }
+    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     public async Task HandleExceptionAsync(HttpContext context)
     {
@@ -30,7 +21,7 @@ public class ServiceExceptionHandlerMiddleware : IExceptionHandlerMiddleware
         var exception = exceptionHandlerPathFeature?.Error;
 
 
-        var internalErrorPage = await _pageQuery.GetPageById(_errorPages.InternalErrorPageId);
+        var internalErrorPage = await _contentfulService.GetPageByIdAsync(_errorPages.InternalErrorPageId);
         var internalErrorSlug = internalErrorPage?.Slug ?? UrlConstants.Error;
 
         ContextRedirect(internalErrorSlug, context);

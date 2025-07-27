@@ -1,11 +1,9 @@
-﻿using Contentful.Core.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class ComponentAccordionSectionEntry: TransformableEntry<ComponentAccordionSectionEntry, CmsComponentAccordionSectionDto>
 {
-    public string Id => SystemProperties.Id;
     public string InternalName { get; init; } = null!;
     public string? Title { get; init; }
     public string SummaryLine { get; init; } = null!;

@@ -4,8 +4,8 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
 {
     public class CmsComponentButtonWithLinkDto : CmsEntryDto
     {
-        public string Id { get; set; } = null!;
-        public string InternalName { get; set; } = null!;
+        public string? Id { get; set; }
+        public string? InternalName { get; set; }
         public CmsComponentButtonDto Button { get; init; } = null!;
         public string Href { get; init; } = null!;
 
@@ -15,6 +15,12 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             InternalName = button.InternalName;
             Button = button.Button.AsDto();
             Href = button.Href;
+        }
+
+        public CmsComponentButtonWithLinkDto(CmsComponentButtonDto button, string href)
+        {
+            Button = button;
+            Href = href;
         }
     }
 }

@@ -1,6 +1,6 @@
-using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Exceptions;
-using Dfe.PlanTech.Domain.Helpers;
+using Dfe.PlanTech.Core.Caching;
+using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 

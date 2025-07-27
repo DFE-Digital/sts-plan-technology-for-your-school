@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Core.Caching;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 

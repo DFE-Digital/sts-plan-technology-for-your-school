@@ -19,7 +19,7 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 /// <param name="logger"></param>
 /// <param name="serviceScopeFactory">Service factory - used to create transient services to prevent state problems</param>
 public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcessor> processorFactory,
-                                           IServiceBusResultProcessor resultProcessor,
+                                           ServiceBusResultProcessor resultProcessor,
                                            ILoggerFactory loggerFactory,
                                            IServiceScopeFactory serviceScopeFactory,
                                            IOptions<ServiceBusOptions> options) : BackgroundService
@@ -52,7 +52,7 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     private async Task MessageHandler(ProcessMessageEventArgs processMessageEventArgs)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var webhookToDbCommand = scope.ServiceProvider.GetRequiredService<IContentfulMessageProcessor>();
+        var webhookToDbCommand = scope.ServiceProvider.GetRequiredService<CmsWebHookMessageProcessor>();
 
         try
         {
