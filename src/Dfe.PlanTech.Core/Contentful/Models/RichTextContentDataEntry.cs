@@ -4,7 +4,7 @@ using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class RichTextContentDataEntry: TransformableEntry<RichTextContentDataEntry, CmsRichTextContentDataDto>, IHasUri
+public class RichTextContentDataEntry : TransformableEntry<RichTextContentDataEntry, CmsRichTextContentDataDto>, IHasSlug, IHasUri
 {
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;

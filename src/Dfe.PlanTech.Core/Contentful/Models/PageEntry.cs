@@ -11,6 +11,7 @@ public class PageEntry: TransformableEntry<PageEntry, CmsPageDto>
     public bool DisplayOrganisationName { get; init; }
     public bool DisplayTopicTitle { get; init; }
     public bool RequiresAuthorisation { get; init; } = true;
+    public string? SectionTitle { get; init; }
     public List<ContentComponent> BeforeTitleContent { get; init; } = [];
     public ComponentTitleEntry? Title { get; init; }
     public List<ContentComponent> Content { get; init; } = [];

@@ -4,7 +4,8 @@ public static class DatabaseConstants
 {
     #region Stored Procedures
 
-    public const string SpCalculateMaturity = "[dbo].[calculateMaturityForSubmission]";
+    public const string SpCalculateMaturity = "[dbo].[CalculateMaturityForSubmission]";
+    public const string SpDeleteCurrentSubmission = "[dbo].[DeleteCurrentSubmission]";
     public const string SpGetSectionStatuses = "[dbo].[GetSectionStatuses]";
     public const string SpSubmitAnswer = "[dbo].[SubmitAnswer]";
     public const string SpSubmitGroupSelection = "[dbo].[SubmitGroupSelection]";

@@ -31,7 +31,7 @@ public class ContentfulWorkflow(
     {
         try
         {
-            var entry = await _contentfulRepository.GetEntryById<TEntry>(entryId)
+            var entry = await _contentfulRepository.GetEntryByIdAsync<TEntry>(entryId)
                 ?? throw new ContentfulDataUnavailableException($"Could not find entry with ID {entryId}");
 
             return entry.AsDtoInternal();
@@ -40,6 +40,24 @@ public class ContentfulWorkflow(
         {
             _logger.LogError(ex, ExceptionMessageEntityContentful);
             throw new ContentfulDataUnavailableException($"Could not find entry with ID {entryId}", ex);
+        }
+    }
+
+    public async Task<List<TDto>> GetEntries<TEntry, TDto>()
+        where TEntry : IDtoTransformable<TDto>
+        where TDto : CmsEntryDto
+    {
+        try
+        {
+            var entries = await _contentfulRepository.GetEntriesAsync<TEntry>()
+                ?? throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TDto).Name}");
+
+            return entries.Select(e => e.AsDtoInternal()).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, ExceptionMessageEntityContentful);
+            throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TDto).Name}", ex);
         }
     }
 

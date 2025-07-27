@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
@@ -10,7 +10,7 @@ namespace Dfe.PlanTech.Web.TagHelpers;
 /// <remarks>Should be refactored in future to be any <see cref="NavigationLink"/>, and pass in HTML class used</remarks>
 public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelper
 {
-    public INavigationLink? Link { get; set; }
+    public CmsNavigationLinkDto? Link { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
@@ -18,7 +18,7 @@ public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelpe
         {
             output.TagName = null;
             output.Content.SetHtmlContent("");
-            logger.LogWarning("Missing or invalid {Name} {Link}", nameof(NavigationLink), Link);
+            logger.LogWarning("Missing or invalid {Name} {Link}", nameof(CmsNavigationLinkDto), Link);
             return;
         }
 
@@ -55,7 +55,7 @@ public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelpe
     {
         if (Link!.ContentToLinkTo == null && string.IsNullOrEmpty(Link.Href))
         {
-            logger.LogError("No href or content to link to for {LinkType}", nameof(NavigationLink));
+            logger.LogError("No href or content to link to for {LinkType}", nameof(CmsNavigationLinkDto));
             return string.Empty;
         }
 
@@ -64,7 +64,7 @@ public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelpe
 
     private string? GetUrlForContent()
     {
-        if (Link?.ContentToLinkTo == null)
+        if (Link?.ContentToLinkTo is null)
         {
             return null;
         }

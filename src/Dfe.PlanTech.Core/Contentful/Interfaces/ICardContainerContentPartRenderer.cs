@@ -4,5 +4,5 @@ namespace Dfe.PlanTech.Core.Contentful.Interfaces;
 
 public interface ICardContainerContentPartRenderer
 {
-    public string ToHtml(IReadOnlyList<CmsCardComponentDto>? content);
+    public string ToHtml(IReadOnlyList<CmsComponentCardDto>? content);
 }

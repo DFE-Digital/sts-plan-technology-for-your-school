@@ -1,8 +1,7 @@
-@using Dfe.PlanTech.Domain.Questionnaire.Models
-@using Dfe.PlanTech.Domain.Groups.Models
+@using Dfe.PlanTech.Core.Contentful.Interfaces
 @using GovUk.Frontend.AspNetCore.TagHelpers
 @using Microsoft.AspNetCore.Mvc.TagHelpers
-@model             IHeaderWithContent
+@model IHeaderWithContent
 
 <div class="recommendation-piece-content">
     @foreach (var content in Model.Content)
@@ -11,14 +10,14 @@
     }
 </div>
 
-@if (Model is RecoRecommendationChunkEntrynk && chunk.CSLink != null)
+@if (Model is CmsRecommendationChunkDto chunk && chunk.CSLink != null)
 {
     <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
         <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@chunk.CSLink.Url>@chunk.CSLink.LinkText</a>
     </div>
 }
 
-@if(Model is GroupsCustomRecommendationIntro groupsCustomRecommendationIntro && groupsCustomRecommendationIntro.Responses != null)
+@if(Model is GroupsCustomRecommendationIntroViewModel groupsCustomRecommendationIntro && groupsCustomRecommendationIntro.Responses != null)
 {
     <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
         <div class="govuk-grid-row" id="checkYourAnswers-page">

@@ -15,7 +15,7 @@ public interface IContentRepository
     /// <param name="cancellationToken"></param>
     /// <typeparam name="TEntry"></typeparam>
     /// <returns></returns>
-    Task<TEntry?> GetEntryById<TEntry>(string id, int include = 2);
+    Task<TEntry?> GetEntryByIdAsync<TEntry>(string id, int include = 2);
 
     /// <summary>
     /// Get options to use for fetching an Entry by Id

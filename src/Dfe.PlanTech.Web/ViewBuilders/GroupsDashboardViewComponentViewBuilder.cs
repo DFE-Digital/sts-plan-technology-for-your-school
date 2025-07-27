@@ -3,30 +3,37 @@ using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.ViewComponents;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
-public class CategorySectionViewComponentViewBuilder(
-    ILogger<CategorySectionViewComponent> logger,
-    ContentfulService contentfulService,
+public class GroupsDashboardViewComponentViewBuilder(
+    ILogger<GroupsDashboardViewComponentViewBuilder> logger,
     CurrentUser currentUser,
+    ContentfulService contentfulService,
+    EstablishmentService establishmentService,
     SubmissionService submissionService
 ) : BaseViewBuilder(contentfulService, currentUser)
 {
-    private readonly ILogger<CategorySectionViewComponent> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly ILogger<GroupsDashboardViewComponentViewBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(CmsCategoryDto category)
+    public Task<GroupsDashboardViewComponentViewModel> BuildViewModelAsync(CmsCategoryDto category)
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("Found no sections for category {id}", category.Sys.Id);
-            throw new InvalidDataException($"Found no sections for category {category.Sys.Id}");
+            _logger.LogError("No sections found for category {id}", category.Id);
+            throw new InvalidDataException($"No sections found for category {category.Id}");
         }
 
+        return GenerateViewModel(category);
+    }
+
+    private async Task<GroupsDashboardViewComponentViewModel> GenerateViewModel(CmsCategoryDto category)
+    {
+        var userId = GetUserIdOrThrowException();
         var establishmentId = GetEstablishmentIdOrThrowException();
+        var selectedSchool = await _establishmentService.GetLatestSelectedGroupSchoolAsync(userId, establishmentId);
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;
@@ -48,23 +55,22 @@ public class CategorySectionViewComponentViewBuilder(
             ? content[0]
             : new CmsMissingComponentDto();
 
-        return new CategorySectionViewComponentViewModel
+        return new GroupsDashboardViewComponentViewModel
         {
-            CategorySections = await BuildCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync(),
-            CompletedSectionCount = sectionStatuses.Count(ss => ss.Completed),
             Description = description,
+            GroupsCategorySection = GetGroupsCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToList(),
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
-            TotalSectionCount = category.Sections.Count
         };
     }
 
-    private async IAsyncEnumerable<CategorySectionViewModel> BuildCategorySectionViewModel(
+        
+    private async IAsyncEnumerable<GroupsCategorySectionViewModel> GetGroupsCategorySectionViewModel(
         CmsCategoryDto category,
         List<SqlSectionStatusDto> sectionStatuses,
         bool hadRetrievalError
     )
     {
-        List<CategorySectionViewModel> viewModels = [];
+        List<GroupsCategorySectionViewModel> viewModels = [];
         foreach (var section in category.Sections)
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
@@ -75,7 +81,7 @@ public class CategorySectionViewComponentViewBuilder(
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
             var recommendationIntro = await BuildCategorySectionRecommendationViewModel(section, sectionStatus);
 
-            yield return new CategorySectionViewModel(section, recommendationIntro, sectionStatus, hadRetrievalError);
+            yield return new GroupsCategorySectionViewModel(section, recommendationIntro, sectionStatus, hadRetrievalError);
         }
     }
 }

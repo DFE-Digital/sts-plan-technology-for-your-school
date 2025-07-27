@@ -11,6 +11,11 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         public HeaderTag Tag { get; init; }
         public HeaderSize Size { get; init; }
 
+        public CmsComponentHeaderDto(string text)
+        {
+            Text = text;
+        }
+
         public CmsComponentHeaderDto(ComponentHeaderEntry headerEntry)
         {
             Id = headerEntry.Id;

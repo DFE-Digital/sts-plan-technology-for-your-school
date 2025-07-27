@@ -1,5 +1,4 @@
-﻿using System.Security.Authentication;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Data.Sql.Repositories;
@@ -110,6 +109,11 @@ namespace Dfe.PlanTech.Application.Workflows
         public Task SetSubmissionInaccessibleAsync(int submissionId)
         {
             return _submissionRepository.SetSubmissionInaccessibleAsync(submissionId);
+        }
+
+        public Task HardDeleteSubmissionAsync(int establishmentId, string sectionId)
+        {
+            return _storedProcedureRepository.HardDeleteCurrentSubmissionAsync(establishmentId, sectionId);
         }
     }
 }

@@ -13,9 +13,10 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         public bool DisplayTopicTitle { get; set; }
         public bool DisplayOrganisationName { get; set; }
         public bool RequiresAuthorisation { get; init; } = true;
+        public string? SectionTitle { get; set; }
         public List<CmsEntryDto> BeforeTitleContent { get; set; } = [];
         public CmsComponentTitleDto? Title { get; set; }
-        public List<CmsEntryDto> Content { get; set; } = [];
+        public List<CmsEntryDto?> Content { get; set; } = [];
 
         public CmsPageDto(PageEntry pageEntry)
         {
@@ -26,6 +27,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             DisplayTopicTitle = pageEntry.DisplayTopicTitle;
             DisplayOrganisationName = pageEntry.DisplayOrganisationName;
             RequiresAuthorisation = pageEntry.RequiresAuthorisation;
+            SectionTitle = pageEntry.SectionTitle;
             BeforeTitleContent = pageEntry.BeforeTitleContent.Select(BuildBeforeTitleContentDto).ToList();
             Title = pageEntry.Title?.AsDto();
             Content = pageEntry.Content.Select(BuildContentDto).ToList();

@@ -1,19 +1,16 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Dfe.PlanTech.Application.Configurations;
-using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Web.Authorisation.Policies;
 
 public class SignedRequestAuthorisationPolicy(
-    [FromServices] ISystemTime systemTime,
     SigningSecretConfiguration signingSecretConfiguration,
     ILogger<SignedRequestAuthorisationPolicy> logger
 ) : AuthorizationHandler<SignedRequestAuthorisationRequirement>
@@ -64,7 +61,7 @@ public class SignedRequestAuthorisationPolicy(
 
         // Check timestamp is within the TTL
         var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(requestTimestamp!, CultureInfo.InvariantCulture));
-        if (timestamp.AddMinutes(RequestTimeToLiveMinutes) <= systemTime.UtcNow)
+        if (timestamp.AddMinutes(RequestTimeToLiveMinutes) <= DateTime.UtcNow)
         {
             logger.LogError("Request to CMS route denied due to expired timestamp");
             return false;

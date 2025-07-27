@@ -1,11 +1,9 @@
-@using Dfe.PlanTech.Domain.Helpers
-@using Dfe.PlanTech.Domain.Interfaces
-@model Dfe.PlanTech.Web.Models.RecommendationsViewModel
-@inject ISystemTime SystemTime
+@using Dfe.PlanTech.Core.Helpers
+@model RecommendationsViewModel
 
 @{
     Layout = "_PrintLayout";
-    var currentTime = SystemTime.UkNow;
+    var currentTime = TimeZoneHelper.ToUkTime(DateTime.UtcNow);
 }
 
 <div class="recommendation-content">

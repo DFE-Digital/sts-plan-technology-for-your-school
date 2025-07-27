@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Rendering;
 
 public class CardComponentRenderer : ICardContentPartRenderer
 {
-    public StringBuilder AddHtml(CmsCardComponentDto? cardComponent, StringBuilder stringBuilder)
+    public StringBuilder AddHtml(CmsComponentCardDto? cardComponent, StringBuilder stringBuilder)
     {
         if (cardComponent is null)
         {

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Web.Configurations;
+using Dfe.PlanTech.Application.Configuration;
 
 namespace Dfe.PlanTech.Web.Middleware;
 

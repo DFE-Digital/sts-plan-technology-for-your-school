@@ -47,7 +47,7 @@ public class CachedContentfulRepository : IContentRepository
         return await _contentRepository.GetPaginatedEntriesAsync<TEntry>(options) ?? [];
     }
 
-    public async Task<TEntry?> GetEntryById<TEntry>(string id, int include = 2)
+    public async Task<TEntry?> GetEntryByIdAsync<TEntry>(string id, int include = 2)
     {
         var options = GetEntryByIdOptions(id, include);
         var entries = (await GetEntriesAsync<TEntry>(options)).ToList();

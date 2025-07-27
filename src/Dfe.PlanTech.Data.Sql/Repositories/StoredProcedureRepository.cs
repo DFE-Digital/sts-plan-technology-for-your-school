@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using Contentful.Core.Models.Management;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Data.Sql.Entities;
@@ -14,16 +15,6 @@ public class StoredProcedureRepository
     public StoredProcedureRepository(PlanTechDbContext dbContext)
     {
         _db = dbContext;
-    }
-
-    public Task<int> SetMaturityForSubmissionAsync(int submissionId)
-    {
-        var parameters = new List<SqlParameter>
-        {
-            new(DatabaseConstants.SubmissionIdParam, submissionId)
-        };
-
-        return _db.Database.ExecuteSqlRawAsync($"EXEC {DatabaseConstants.SpCalculateMaturity}", parameters);
     }
 
     public Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId)
@@ -55,6 +46,15 @@ public class StoredProcedureRepository
         ?? throw new InvalidCastException($"{nameof(selectionId)} is not an integer - value is {selectionId.Value}"));
     }
 
+    public Task<int> SetMaturityForSubmissionAsync(int submissionId)
+    {
+        var parameters = new List<SqlParameter>
+        {
+            new(DatabaseConstants.SubmissionIdParam, submissionId)
+        };
+
+        return _db.Database.ExecuteSqlRawAsync($"EXEC {DatabaseConstants.SpCalculateMaturity}", parameters);
+    }
 
     public async Task<int> SubmitResponse(AssessmentResponseModel response)
     {
@@ -87,6 +87,17 @@ public class StoredProcedureRepository
 
         return (int)(responseId.Value
             ?? throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value}"));
+    }
+
+    public Task HardDeleteCurrentSubmissionAsync(int establishmentId, string sectionId)
+    {
+        var parameters = new List<SqlParameter>
+        {
+            new(DatabaseConstants.EstablishmentIdParam, establishmentId),
+            new(DatabaseConstants.SectionIdParam, sectionId)
+        };
+
+        return _db.Database.ExecuteSqlRawAsync($@"EXEC {DatabaseConstants.SpDeleteCurrentSubmission}", parameters);
     }
 
     private static object SqlValueOrDbNull(string? value) => value ?? (object)DBNull.Value;

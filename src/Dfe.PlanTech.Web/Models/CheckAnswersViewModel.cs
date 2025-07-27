@@ -1,20 +1,21 @@
 using System.ComponentModel.DataAnnotations;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Web.Models;
 
 public class CheckAnswersViewModel
 {
     [Required]
-    public Title Title { get; init; } = null!;
+    public CmsComponentTitleDto Title { get; init; } = null!;
 
     [Required]
     public string SectionName { get; init; } = null!;
 
     [Required]
-    public SubmissionResponsesDto SubmissionResponses { get; init; } = null!;
+    public SubmissionResponsesViewModel SubmissionResponses { get; init; } = null!;
 
     [Required]
-    public List<ContentComponent> Content { get; init; } = null!;
+    public List<CmsEntryDto> Content { get; init; } = null!;
 
     public int? SubmissionId { get; init; }
 

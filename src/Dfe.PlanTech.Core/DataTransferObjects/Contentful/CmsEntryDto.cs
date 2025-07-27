@@ -8,8 +8,13 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         public CmsEntrySystemDetailsDto Sys { get; set; } = null!;
         public string? Description { get; set; } = null!;
 
-        protected CmsEntryDto BuildContentDto(ContentComponent contentComponent)
+        protected CmsEntryDto? BuildContentDto(ContentComponent? contentComponent)
         {
+            if (contentComponent is null)
+            {
+                return null;
+            }
+
             if (contentComponent is IDtoTransformable entry)
             {
                 return entry.AsDtoInternal();

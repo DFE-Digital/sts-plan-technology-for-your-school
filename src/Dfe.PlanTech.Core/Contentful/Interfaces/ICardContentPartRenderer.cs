@@ -5,5 +5,5 @@ namespace Dfe.PlanTech.Domain.Content.Interfaces;
 
 public interface ICardContentPartRenderer
 {
-    public StringBuilder AddHtml(CmsCardComponentDto? content, StringBuilder stringBuilder);
+    public StringBuilder AddHtml(CmsComponentCardDto? content, StringBuilder stringBuilder);
 }

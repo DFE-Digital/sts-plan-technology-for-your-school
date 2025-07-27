@@ -1,24 +1,19 @@
-using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.RoutingDataModel;
 
 namespace Dfe.PlanTech.Web.Models;
 
 public class RecommendationsViewModel
 {
-    public string SectionName { get; init; } = null!;
-
-    public string SectionSlug { get; init; } = null!;
-
-    public RecommendationIntro Intro { get; init; } = null!;
-
-    public List<RecommendationChunk> Chunks { get; init; } = null!;
-
-    public string? LatestCompletionDate { get; init; } = null!;
-
     public IEnumerable<IHeaderWithContent> AllContent => GetAllContent();
-
+    public string SectionName { get; init; } = null!;
+    public string SectionSlug { get; init; } = null!;
+    public CmsRecommendationChunkDto Intro { get; init; } = null!;
+    public List<CmsRecommendationChunkDto> Chunks { get; init; } = null!;
+    public string? LatestCompletionDate { get; init; } = null!;
     public string Slug { get; init; } = null!;
+    public IEnumerable<QuestionWithAnswerModel> SubmissionResponses { get; init; } = null!;
 
     private IEnumerable<IHeaderWithContent> GetAllContent()
     {
@@ -28,5 +23,4 @@ public class RecommendationsViewModel
             yield return chunk;
         }
     }
-    public IEnumerable<Workflows.Models.QuestionWithAnswerModel> SubmissionResponses { get; init; } = null!;
 }

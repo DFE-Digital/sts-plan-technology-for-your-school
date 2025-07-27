@@ -1,6 +1,6 @@
-namespace Dfe.PlanTech.Domain.Helpers;
+namespace Dfe.PlanTech.Core.Helpers;
 
-public static class TimeZoneHelpers
+public static class TimeZoneHelper
 {
     public static DateTime ToUkTime(DateTime utcDateTime)
     {

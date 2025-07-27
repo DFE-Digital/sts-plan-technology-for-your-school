@@ -20,6 +20,11 @@ public class ContentfulService(
         return _contentfulWorkflow.GetEntryById<NavigationLinkEntry, CmsNavigationLinkDto>(contentId);
     }
 
+    public Task<List<CmsNavigationLinkDto>> GetNavigationLinks()
+    {
+        return contentfulWorkflow.GetEntries<NavigationLinkEntry, CmsNavigationLinkDto>();
+    }
+
     public Task<CmsPageDto> GetPageByIdAsync(string pageId)
     {
         return _contentfulWorkflow.GetEntryById<PageEntry, CmsPageDto>(pageId);

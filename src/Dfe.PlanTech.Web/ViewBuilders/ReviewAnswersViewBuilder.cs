@@ -80,7 +80,7 @@ public class ReviewAnswersViewBuilder(
     {
         try
         {
-            await _submissionService.ConfirmCheckAnswers(submissionId);
+            await _submissionService.ConfirmCheckAnswersAsync(submissionId);
         }
         catch (Exception e)
         {

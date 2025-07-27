@@ -23,39 +23,47 @@ namespace Dfe.PlanTech.Web.Models
             Recommendation = recommendation;
             Slug = section.InterstitialPage?.Slug;
 
-            var started = sectionStatus is not null;
-            var completed = started && sectionStatus!.Completed;
-            var startedNeverCompleted = started && !completed && sectionStatus!.LastCompletionDate is null;
-            var completedStartedNew = started && !completed && sectionStatus!.LastCompletionDate is not null;
-
             if (string.IsNullOrWhiteSpace(Slug))
             {
                 ErrorMessage = $"Slug {Slug} unavailable";
                 ProgressStatus = SectionProgressStatus.RetrievalError;
             }
-            else if (hadRetrievalError)
+            else
             {
-                ProgressStatus = SectionProgressStatus.RetrievalError;
+                ProgressStatus = GetSectionProgressStatus(sectionStatus, hadRetrievalError);
+            }
+        }
+
+        private SectionProgressStatus GetSectionProgressStatus(SqlSectionStatusDto? sectionStatus, bool hadRetrievalError)
+        {
+            var started = sectionStatus is not null;
+            var completed = started && sectionStatus!.Completed;
+            var startedNeverCompleted = started && !completed && sectionStatus!.LastCompletionDate is null;
+            var completedStartedNew = started && !completed && sectionStatus!.LastCompletionDate is not null;
+
+            if (hadRetrievalError)
+            {
+                return SectionProgressStatus.RetrievalError;
             }
             else if (completed)
             {
-                ProgressStatus = SectionProgressStatus.Completed;
+                return SectionProgressStatus.Completed;
             }
             else if (startedNeverCompleted)
             {
-                ProgressStatus = SectionProgressStatus.StartedNeverCompleted;
+                return SectionProgressStatus.StartedNeverCompleted;
             }
             else if (completedStartedNew)
             {
-                ProgressStatus = SectionProgressStatus.CompletedStartedNew;
+                return SectionProgressStatus.CompletedStartedNew;
             }
             else if (started)
             {
-                ProgressStatus = SectionProgressStatus.InProgress;
+                return SectionProgressStatus.InProgress;
             }
             else
             {
-                ProgressStatus = SectionProgressStatus.NotStarted;
+                return SectionProgressStatus.NotStarted;
             }
         }
     }

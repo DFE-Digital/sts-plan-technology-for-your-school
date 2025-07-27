@@ -1,13 +1,10 @@
 ﻿using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Application.Configurations;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
-using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
@@ -27,13 +24,12 @@ public class QuestionsViewBuilder(
     ErrorMessagesConfiguration errorMessages,
     QuestionService questionService,
     SubmissionService submissionService
-) : BaseViewBuilder(currentUser)
+) : BaseViewBuilder(contentfulService, currentUser)
 {
     private ILogger<QuestionsViewBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
     private ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
-    private ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     private ErrorMessagesConfiguration _errorMessages = errorMessages ?? throw new ArgumentNullException(nameof(errorMessages));
     private QuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
     private SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
@@ -128,7 +124,7 @@ public class QuestionsViewBuilder(
         if (!_contentfulOptions.UsePreviewApi)
             return controller.Redirect(UrlConstants.HomePage);
 
-        var question = await _contentfulService.GetQuestionByIdAsync(questionId);
+        var question = await ContentfulService.GetQuestionByIdAsync(questionId);
 
         var viewModel = GenerateViewModel(controller, question, null, null, null, null);
         return controller.View(QuestionView, viewModel);
@@ -137,7 +133,7 @@ public class QuestionsViewBuilder(
     public async Task<IActionResult> RouteToNextUnansweredQuestion(Controller controller, string sectionSlug)
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
 
         try
         {
@@ -152,7 +148,7 @@ public class QuestionsViewBuilder(
         catch (DatabaseException)
         {
             // Remove the current invalid submission and redirect to self-assessment page
-            await _submissionService.DeleteCurrentSubmission(establishmentId, section.Id);
+            await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Id);
 
             controller.TempData["SubtopicError"] = await BuildErrorMessage();
             return controller.RedirectToAction(
@@ -174,7 +170,7 @@ public class QuestionsViewBuilder(
         var establishmentId = GetEstablishmentIdOrThrowException();
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
 
-        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
         var question = section.GetQuestionBySlug(questionSlug);
 
         var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(question.Id);
@@ -231,7 +227,7 @@ public class QuestionsViewBuilder(
 
     private async Task<string> BuildErrorMessage()
     {
-        var contactLink = await _contentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
+        var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
         var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
 
         if (!string.IsNullOrEmpty(contactLink?.Href))

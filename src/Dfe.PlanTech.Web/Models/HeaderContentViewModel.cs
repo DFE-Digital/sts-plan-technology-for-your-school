@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
+﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Web.Models.Inputs;
 

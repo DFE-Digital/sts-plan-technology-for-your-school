@@ -110,12 +110,17 @@ public class SubmissionService(
         return _submissionWorkflow.SubmitAnswer(userId, establishmentId, answerModel);
     }
 
-    public Task ConfirmCheckAnswers(int submissionId)
+    public Task ConfirmCheckAnswersAsync(int submissionId)
     {
         return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
-    public async Task DeleteCurrentSubmission(int establishmentId, string sectionId)
+    public async Task DeleteCurrentSubmissionHardAsync(int establishmentId, string sectionId)
+    {
+        await _submissionWorkflow.HardDeleteSubmissionAsync(establishmentId, sectionId);
+    }
+
+    public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
     {
         await _submissionWorkflow.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
     }

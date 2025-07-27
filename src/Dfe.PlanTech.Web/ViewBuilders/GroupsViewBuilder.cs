@@ -4,8 +4,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Domain.Groups.Models;
-using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -19,10 +17,9 @@ public class GroupsViewBuilder(
     ContentfulService contentfulService,
     EstablishmentService establishmentService,
     SubmissionService submissionService
-) : BaseViewBuilder(currentUser)
+) : BaseViewBuilder(contentfulService, currentUser)
 {
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
@@ -30,8 +27,8 @@ public class GroupsViewBuilder(
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
 
-        var selectASchoolPageContent = await _contentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
-        var dashboardContent = await _contentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
+        var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
+        var dashboardContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
         var categories = dashboardContent.Content.OfType<CmsCategoryDto>();
 
         var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, establishmentId);
@@ -46,7 +43,7 @@ public class GroupsViewBuilder(
             totalSections = categories.Sum(category => category.Sections.Count).ToString();
         }
 
-        var contactLink = await _contentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
+        var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 
         var viewModel = new GroupsSelectorViewModel
         {
@@ -83,7 +80,7 @@ public class GroupsViewBuilder(
     {
         var latestSelection = await GetCurrentGroupSchoolSelection();
         var groupName = CurrentUser.GetEstablishmentModel().Name;
-        var pageContent = await _contentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
+        var pageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
         List<CmsEntryDto> content = pageContent?.Content ?? [];
 
         var viewModel = new GroupsSchoolDashboardViewModel
@@ -116,16 +113,16 @@ public class GroupsViewBuilder(
     private Task<SqlGroupReadActivityDto> GetCurrentGroupSchoolSelection()
     {
         var userId = GetUserIdOrThrowException();
-        var userEstablishmentId = GetEstablishmentIdOrThrowException();
-        return _establishmentService.GetLatestSelectedGroupSchoolAsync(userId, userEstablishmentId);
+        var establishmentId = GetEstablishmentIdOrThrowException();
+        return _establishmentService.GetLatestSelectedGroupSchoolAsync(userId, establishmentId);
     }
 
     private async Task<GroupsRecommendationsViewModel?> GetGroupsRecommendationsViewModel(string sectionSlug, int schoolId, string schoolName)
     {
-        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {sectionSlug}");
 
-        var subtopicRecommendation = await _contentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
         var latestResponses = await _submissionService.GetLatestSubmissionWithResponsesAsync(schoolId, sectionSlug, true)

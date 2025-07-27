@@ -1,18 +1,14 @@
-﻿namespace Dfe.PlanTech.Web.Models;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+
+namespace Dfe.PlanTech.Web.Models;
 
 public class GroupsSchoolDashboardViewModel
 {
-    public string Slug { get; set; } = null!;
-
-    public string? SchoolName { get; set; }
-
-    public int SchoolId { get; set; }
-
-    public string GroupName { get; set; } = null!;
-
-    public Title Title { get; set; } = null!;
-
-    public List<ContentComponent> Content { get; init; } = null!;
-
+    public List<CmsEntryDto> Content { get; init; } = null!;
     public string? ErrorMessage { get; set; }
+    public string GroupName { get; set; } = null!;
+    public int SchoolId { get; set; }
+    public string? SchoolName { get; set; }
+    public string Slug { get; set; } = null!;
+    public CmsComponentTitleDto Title { get; set; } = null!;
 }

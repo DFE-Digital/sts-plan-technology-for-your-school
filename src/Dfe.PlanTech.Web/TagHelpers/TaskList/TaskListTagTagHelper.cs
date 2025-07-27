@@ -1,6 +1,5 @@
 using System.Text;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Domain.Constants;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers.TaskList;

@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 using Dfe.PlanTech.Infrastructure.SignIns.Models;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
@@ -12,8 +12,14 @@ namespace Dfe.PlanTech.Web.Authorisation.Policies;
 /// <summary>
 /// Checks user authorisation for the current page, and retrieves a given <see cref="Page"/> from Contentful if needed for the request.
 /// </summary>
-public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> logger) : AuthorizationHandler<PageAuthorisationRequirement>
+public class PageModelAuthorisationPolicy(
+    ILogger<PageModelAuthorisationPolicy> logger,
+    ContentfulService contentfulService
+) : AuthorizationHandler<PageAuthorisationRequirement>
 {
+    private readonly ILogger<PageModelAuthorisationPolicy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+
     private const string IndexSlug = "/";
     public const string PolicyName = "UsePageAuthentication";
     public const string RouteValuesActionNameKey = "action";
@@ -67,10 +73,7 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
             return new UserAuthorisationResult(true, userAuthorisationStatus);
         }
 
-        using var scope = httpContext.RequestServices.CreateAsyncScope();
-        var pageQuery = scope.ServiceProvider.GetRequiredService<IGetPageQuery>();
-
-        Page? page = await GetPageForSlug(httpContext, slug, pageQuery);
+        CmsPageDto? page = await GetPageForSlug(httpContext, slug);
 
         if (page == null)
         {
@@ -87,10 +90,10 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
     /// The page ias added to the HttpContext for use in the <see cref="PageModelBinder"/>, 
     /// to prevent the page being loaded multiple times for a single request
     /// </remarks>
-    private static async Task<Page?> GetPageForSlug(HttpContext httpContext, string slug, IGetPageQuery pageQuery)
+    private async Task<CmsPageDto?> GetPageForSlug(HttpContext httpContext, string slug)
     {
-        var page = await pageQuery.GetPageBySlug(slug, httpContext.RequestAborted);
-        httpContext.Items.Add(nameof(Page), page);
+        var page = await _contentfulService.GetPageBySlugAsync(slug);
+        httpContext.Items.Add(nameof(CmsPageDto), page);
 
         return page;
     }

@@ -39,7 +39,7 @@ public abstract class ContentfulRepository : IContentRepository
         _client.ContentTypeResolver = new EntryResolver(loggerFactory.CreateLogger<EntryResolver>());
     }
 
-    public async Task<TEntry?> GetEntryById<TEntry>(string id, int include = 2)
+    public async Task<TEntry?> GetEntryByIdAsync<TEntry>(string id, int include = 2)
     {
         var options = GetEntryByIdOptions(id, include);
         var entities = (await GetEntriesAsync<TEntry>(options)).ToList();

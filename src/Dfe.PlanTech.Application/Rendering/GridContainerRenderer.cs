@@ -12,7 +12,7 @@ public class GridContainerRenderer : ICardContainerContentPartRenderer
     {
         _cardContentPartRenderer = cardContentPartRenderer;
     }
-    public string ToHtml(IReadOnlyList<CmsCardComponentDto>? content)
+    public string ToHtml(IReadOnlyList<CmsComponentCardDto>? content)
     {
         if (content is null || !content.Any())
         {
