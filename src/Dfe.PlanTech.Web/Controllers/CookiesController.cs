@@ -10,7 +10,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 [LogInvalidModelState]
 [Route("/cookies")]
 public class CookiesController(
-    ILogger<CookiesController> logger,
+    ILoggerFactory logger,
     ContentfulService contentfulService,
     CookieService cookieService
 ) : BaseController<CookiesController>(logger)

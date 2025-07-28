@@ -4,8 +4,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 
-public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogger<ServiceBusResultProcessor> logger)
+public class ServiceBusResultProcessor(
+    ILoggerFactory loggerFactory,
+    IMessageRetryHandler retryHandler
+)
 {
+    private readonly ILogger<ServiceBusResultProcessor> logger = loggerFactory.CreateLogger<ServiceBusResultProcessor>();
+    private readonly IMessageRetryHandler _retryHandler = retryHandler ?? throw new ArgumentNullException(nameof(retryHandler));
+
     public async Task ProcessMessageResult(ProcessMessageEventArgs processMessageEventArgs, ServiceBusResult result, CancellationToken cancellationToken)
     {
         try
@@ -34,7 +40,7 @@ public class ServiceBusResultProcessor(IMessageRetryHandler retryHandler, ILogge
 
     private async Task ProcessErrorResult(ProcessMessageEventArgs processMessageEventArgs, ServiceBusErrorResult errorResult, CancellationToken cancellationToken)
     {
-        var shouldRetry = await retryHandler.RetryRequired(processMessageEventArgs.Message, cancellationToken);
+        var shouldRetry = await _retryHandler.RetryRequired(processMessageEventArgs.Message, cancellationToken);
 
         if (shouldRetry)
         {

@@ -3,16 +3,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Domain.Content.Models.Options;
 
-public class TextRendererOptions
+public class TextRendererOptions(
+    ILoggerFactory loggerFactory,
+    List<MarkOption> markOptions
+)
 {
-    private readonly ILogger<TextRendererOptions> _logger;
-    private readonly List<MarkOption> _markOptions;
-
-    public TextRendererOptions(ILogger<TextRendererOptions> logger, List<MarkOption> markOptions)
-    {
-        _logger = logger;
-        _markOptions = markOptions;
-    }
+    private readonly ILogger<TextRendererOptions> _logger = loggerFactory.CreateLogger<TextRendererOptions>();
+    private readonly List<MarkOption> _markOptions = markOptions ?? throw new ArgumentNullException(nameof(markOptions));
 
     public MarkOption? GetMatchingOptionForMark(CmsRichTextMarkDto mark)
     {

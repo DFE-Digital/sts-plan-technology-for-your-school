@@ -2,7 +2,7 @@ using Dfe.PlanTech.Core.Caching.Interfaces;
 using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Data.Contentful.Helpers;
-using Dfe.PlanTech.Data.Contentful.Persistence;
+using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
@@ -11,12 +11,12 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
 /// Encapsulates ContentfulClient functionality, whilst abstracting through the IEntryRepository interface
 /// </summary>
 /// <see href="IEntryRepository"/>
-public class CachedContentfulRepository : IContentRepository
+public class CachedContentfulRepository : IContentfulRepository
 {
-    private readonly IContentRepository _contentRepository;
+    private readonly IContentfulRepository _contentRepository;
     private readonly ICmsCache _cache;
 
-    public CachedContentfulRepository([FromKeyedServices("contentfulRepository")] IContentRepository contentRepository, ICmsCache cache)
+    public CachedContentfulRepository([FromKeyedServices("contentfulRepository")] IContentfulRepository contentRepository, ICmsCache cache)
     {
         _contentRepository = contentRepository ?? throw new ArgumentNullException(nameof(contentRepository));
         _cache = cache ?? throw new ArgumentNullException(nameof(cache));

@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Workflows;
 ///<remarks>
 ///Removes non-essential cookies from the browser when user rejects cookies.
 ///</remarks>
-public class CookieWorkflow(CookieWorkflowOptions opts)
+public class CookieWorkflow(CookieWorkflowOptions options)
 {
     public void RemoveNonEssentialCookies(HttpContext context)
     {
@@ -53,6 +53,6 @@ public class CookieWorkflow(CookieWorkflowOptions opts)
     /// <param name="context"></param>
     /// <returns></returns>
     private IEnumerable<string> GetNonEssentialCookies(HttpContext context)
-      => context.Request.Cookies.Where(cookie => !Array.Exists(opts.EssentialCookies, essentialCookie => cookie.Key.StartsWith(essentialCookie)))
+      => context.Request.Cookies.Where(cookie => !Array.Exists(options.EssentialCookies, essentialCookie => cookie.Key.StartsWith(essentialCookie)))
                                 .Select(cookie => cookie.Key);
 }

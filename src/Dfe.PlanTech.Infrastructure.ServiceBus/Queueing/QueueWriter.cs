@@ -9,8 +9,12 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
 /// </summary>
 /// <param name="serviceBusSenderFactory"></param>
 /// <param name="logger"></param>
-public class QueueWriter(IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory, ILogger<QueueWriter> logger) : IQueueWriter
+public class QueueWriter(
+    ILoggerFactory loggerFactory,
+    IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory
+) : IQueueWriter
 {
+    private readonly ILogger<QueueWriter> _logger = loggerFactory.CreateLogger<QueueWriter>();
     private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient("contentfulsender");
 
     public async Task<QueueWriteResult> WriteMessage(string body, string subject)
@@ -23,7 +27,7 @@ public class QueueWriter(IAzureClientFactory<ServiceBusSender> serviceBusSenderF
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error sending service bus message. Body: \"{Body}\". Subject: \"{Subject}\".", body, subject);
+            _logger.LogError(ex, "Error sending service bus message. Body: \"{Body}\". Subject: \"{Subject}\".", body, subject);
             return new QueueWriteResult(ex.Message);
         }
     }

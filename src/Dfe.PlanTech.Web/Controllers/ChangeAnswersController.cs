@@ -23,10 +23,10 @@ public class ChangeAnswersController : BaseController<ChangeAnswersController>
     private readonly ReviewAnswersViewBuilder _reviewAnswersViewBuilder;
 
     public ChangeAnswersController(
-        ILogger<ChangeAnswersController> logger,
+        ILoggerFactory loggerFactory,
         IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
         ReviewAnswersViewBuilder reviewAnswersViewBuilder
-    ) : base(logger)
+    ) : base(loggerFactory)
     {
         _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
         _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));

@@ -9,7 +9,7 @@ public class RecommendationsViewModel
     public IEnumerable<IHeaderWithContent> AllContent => GetAllContent();
     public string SectionName { get; init; } = null!;
     public string SectionSlug { get; init; } = null!;
-    public CmsRecommendationChunkDto Intro { get; init; } = null!;
+    public CmsRecommendationIntroDto Intro { get; init; } = null!;
     public List<CmsRecommendationChunkDto> Chunks { get; init; } = null!;
     public string? LatestCompletionDate { get; init; } = null!;
     public string Slug { get; init; } = null!;

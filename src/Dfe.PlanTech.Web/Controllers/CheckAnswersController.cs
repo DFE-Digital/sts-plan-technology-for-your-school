@@ -10,7 +10,11 @@ namespace Dfe.PlanTech.Web.Controllers;
 [LogInvalidModelState]
 [Authorize]
 [Route("/")]
-public class CheckAnswersController: BaseController<CheckAnswersController>
+public class CheckAnswersController(
+    ILoggerFactory loggerFactory,
+    IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
+    ReviewAnswersViewBuilder reviewAnswersViewBuilder
+) : BaseController<CheckAnswersController>(loggerFactory)
 {
     public const string ControllerName = "CheckAnswers";
     public const string CheckAnswersAction = nameof(CheckAnswersPage);
@@ -18,18 +22,8 @@ public class CheckAnswersController: BaseController<CheckAnswersController>
     public const string CheckAnswersViewName = "CheckAnswers";
 
 
-    IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler;
-    private readonly ReviewAnswersViewBuilder _reviewAnswersViewBuilder;
-
-    public CheckAnswersController(
-          ILogger<CheckAnswersController> logger,
-          IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
-          ReviewAnswersViewBuilder reviewAnswersViewBuilder
-    ) : base(logger)
-    {
-        _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
-        _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
-    }
+    IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
+    private readonly ReviewAnswersViewBuilder _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
 
     [HttpGet("{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromQuery] bool isChangeAnswersFlow)

@@ -11,8 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 namespace Dfe.PlanTech.Web.Authorisation.Policies;
 
 public class SignedRequestAuthorisationPolicy(
-    SigningSecretConfiguration signingSecretConfiguration,
-    ILogger<SignedRequestAuthorisationPolicy> logger
+    ILoggerFactory loggerFactory,
+    SigningSecretConfiguration signingSecretConfiguration
 ) : AuthorizationHandler<SignedRequestAuthorisationRequirement>
 {
     public const string PolicyName = "UseSignedRequestAuthentication";
@@ -22,12 +22,15 @@ public class SignedRequestAuthorisationPolicy(
     public const string HeaderSignedValues = "x-contentful-signed-headers";
     public const int RequestTimeToLiveMinutes = 5;
 
+    private readonly ILogger<SignedRequestAuthorisationPolicy> _logger = loggerFactory.CreateLogger<SignedRequestAuthorisationPolicy>();
+    private readonly SigningSecretConfiguration _signingSecretConfiguration = signingSecretConfiguration ?? throw new ArgumentNullException(nameof(signingSecretConfiguration));
+
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, SignedRequestAuthorisationRequirement requirement)
     {
-        var signingSecret = signingSecretConfiguration.SigningSecret;
+        var signingSecret = _signingSecretConfiguration.SigningSecret;
         if (signingSecret.IsNullOrEmpty())
         {
-            logger.LogError("Signing secret config value missing");
+            _logger.LogError("Signing secret configuration value missing");
             context.Fail();
             return;
         }
@@ -38,7 +41,7 @@ public class SignedRequestAuthorisationPolicy(
             return;
         }
 
-        logger.LogError("Request verification with signing secret failed");
+        _logger.LogError("Request verification with signing secret failed");
         context.Fail();
     }
 
@@ -55,7 +58,7 @@ public class SignedRequestAuthorisationPolicy(
             string.IsNullOrEmpty(requestTimestamp) ||
             string.IsNullOrEmpty(requestSignedHeaders))
         {
-            logger.LogError("Request to CMS route denied due to missing headers");
+            _logger.LogError("Request to CMS route denied due to missing headers");
             return false;
         }
 
@@ -63,7 +66,7 @@ public class SignedRequestAuthorisationPolicy(
         var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(requestTimestamp!, CultureInfo.InvariantCulture));
         if (timestamp.AddMinutes(RequestTimeToLiveMinutes) <= DateTime.UtcNow)
         {
-            logger.LogError("Request to CMS route denied due to expired timestamp");
+            _logger.LogError("Request to CMS route denied due to expired timestamp");
             return false;
         }
 

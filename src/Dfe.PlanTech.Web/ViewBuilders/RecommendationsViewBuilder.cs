@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using Contentful.Core.Configuration;
+﻿using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Enums;
@@ -11,22 +10,20 @@ using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class RecommendationsViewBuilder(
-    ILogger<RecommendationsViewBuilder> logger,
+    ILoggerFactory loggerFactory,
     IOptions<ContentfulOptions> contentfulOptions,
     CurrentUser currentUser,
     ContentfulService contentfulService,
     RecommendationService recommendationService,
     SubmissionService submissionService
-) : BaseViewBuilder(currentUser)
+) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
 {
-    private readonly ILogger<RecommendationsViewBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<RecommendationsViewBuilder> _logger = loggerFactory.CreateLogger<RecommendationsViewBuilder>();
     private readonly ContentfulOptions _contentfulOptions = contentfulOptions?.Value ?? throw new ArgumentNullException(nameof(contentfulOptions));
-    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     private readonly RecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
@@ -41,7 +38,7 @@ public class RecommendationsViewBuilder(
     )
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
 
         switch (submissionRoutingData.Status)
@@ -89,7 +86,7 @@ public class RecommendationsViewBuilder(
         var establishmentId = GetEstablishmentIdOrThrowException();
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
 
-        var subtopicRecommendation = await _contentfulService.GetSubtopicRecommendationByIdAsync(submissionRoutingData.QuestionnaireSection.Id)
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(submissionRoutingData.QuestionnaireSection.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for: {submissionRoutingData.QuestionnaireSection.Name}");
 
         var intro = subtopicRecommendation.Intros
@@ -100,7 +97,7 @@ public class RecommendationsViewBuilder(
         {
             SectionName = submissionRoutingData.QuestionnaireSection.Name,
             Intro = intro,
-            Chunks = subtopicRecommendation.Section.Chunks,
+            Chunks = subtopicRecommendation.Section.Chunks.ToList(),
             Slug = "preview",
         };
 
@@ -111,8 +108,8 @@ public class RecommendationsViewBuilder(
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
-        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
-        var subtopicRecommendation = await _contentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Id}'");
 
         var subtopicIntro = subtopicRecommendation.GetRecommendationByMaturity(submissionRoutingData.Maturity)
@@ -131,16 +128,20 @@ public class RecommendationsViewBuilder(
     )
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var subtopicRecommendation = await _contentfulService.GetSubtopicRecommendationByIdAsync(section.Id);
-        var subtopicIntro = subtopicRecommendation?.GetRecommendationByMaturity(submissionRoutingData.Maturity);
-
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id);
         if (subtopicRecommendation is null)
         {
-            throw new ContentfulDataUnavailableException("Could not find subtopic for section with ID '{section.Id}'");
+            throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Id}'");
+        }
+
+        var subtopicIntro = subtopicRecommendation?.GetRecommendationByMaturity(submissionRoutingData.Maturity);
+        if (subtopicIntro is null)
+        {
+            throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section with ID '{section.Id}' and maturity '{submissionRoutingData.Maturity}");
         }
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var subtopicChunks = subtopicRecommendation.Section.GetRecommendationChunksByAnswerIds(answerIds);
+        var subtopicChunks = subtopicRecommendation!.Section.GetRecommendationChunksByAnswerIds(answerIds);
 
         if (showYourSelfAssessmentChunk)
         {

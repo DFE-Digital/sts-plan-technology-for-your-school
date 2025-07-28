@@ -6,19 +6,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
 
-public class SubtopicRecommendationWorkflow
+public class SubtopicRecommendationWorkflow(
+    ILoggerFactory loggerFactory,
+    ContentfulRepository contentfulRepository
+)
 {
-    private readonly ILogger<SubtopicRecommendationWorkflow> _logger;
-    private readonly ContentfulRepository _contentfulRepository;
-
-    public SubtopicRecommendationWorkflow(
-        ILoggerFactory loggerFactory,
-        ContentfulRepository contentfulRepository
-    )
-    {
-        _logger = loggerFactory.CreateLogger<SubtopicRecommendationWorkflow>();
-        _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
-    }
+    private readonly ILogger<SubtopicRecommendationWorkflow> _logger = loggerFactory.CreateLogger<SubtopicRecommendationWorkflow>();
+    private readonly ContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
 
     public async Task<SubtopicRecommendationEntry?> GetFirstSubtopicRecommendationAsync(string subtopicId)
     {

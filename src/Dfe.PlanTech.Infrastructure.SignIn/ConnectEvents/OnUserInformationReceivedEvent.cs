@@ -16,7 +16,7 @@ public static class OnUserInformationReceivedEvent
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static async Task RecordUserSignIn(ILogger logger, UserInformationReceivedContext context)
+    public static async Task RecordUserSignIn(ILogger<DfeSignIn> logger, UserInformationReceivedContext context)
     {
         if (context.Principal?.Identity == null || !context.Principal.Identity.IsAuthenticated)
         {

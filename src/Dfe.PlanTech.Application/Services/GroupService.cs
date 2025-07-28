@@ -5,12 +5,12 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Services;
 
 public class GroupService(
-    ILogger<GroupService> logger,
+    ILoggerFactory loggerFactory,
     EstablishmentWorkflow establishmentWorkflow,
     UserWorkflow userWorkflow
 )
 {
-    private readonly ILogger<GroupService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<GroupService> _logger = loggerFactory.CreateLogger<GroupService>();
     private readonly EstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
     private readonly UserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 

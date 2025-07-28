@@ -1,13 +1,17 @@
 using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Workflows.Options;
 using Dfe.PlanTech.Core.Caching;
 using Dfe.PlanTech.Core.Caching.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Rendering.Options;
 using Dfe.PlanTech.Core.Options;
+using Dfe.PlanTech.Data.Contentful;
 using Dfe.PlanTech.Data.Contentful.Serializers;
+using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Redis;
@@ -19,6 +23,7 @@ using Dfe.PlanTech.Web.Background;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -37,17 +42,18 @@ public static class ProgramExtensions
         services.AddTransient<IContractResolver, DependencyInjectionContractResolver>();
 
         services.SetupContentfulClient(configuration, "Contentful", HttpClientPolicyExtensions.AddRetryPolicy);
+        services.SetupRichTextRenderers();
 
         services.AddScoped((services) =>
         {
-            var logger = services.GetRequiredService<ILogger<TextRendererOptions>>();
+            var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
-            return new TextRendererOptions(logger, new List<MarkOption>() {
+            return new TextRendererOptions(loggerFactory, [
                 new(){
                     Mark = "bold",
                     HtmlTag = "span",
                     Classes = "govuk-body govuk-!-font-weight-bold",
-                }});
+                }]);
         });
 
         services.AddScoped((_) => new ParagraphRendererOptions());
@@ -119,36 +125,16 @@ public static class ProgramExtensions
             opts.EnableRetryOnFailure(databaseRetryOptions.MaxRetryCount, TimeSpan.FromMilliseconds(databaseRetryOptions.MaxDelayInMilliseconds), null);
         });
 
-        services.AddDbContext<IPlanTechDbContext, PlanTechDbContext>(databaseOptionsAction);
+        services.AddDbContext<PlanTechDbContext>(databaseOptionsAction);
         ConfigureCookies(services, configuration);
-
-        services.AddTransient<ICalculateMaturityCommand, CalculateMaturityCommand>();
-        services.AddScoped<IMarkSubmissionAsReviewedCommand, MarkSubmissionAsReviewedCommand>();
-        services.AddTransient<ICreateEstablishmentCommand, CreateEstablishmentCommand>();
-        services.AddTransient<ICreateUserCommand, CreateUserCommand>();
-        services.AddTransient<IGetEntityFromContentfulQuery, GetEntityFromContentfulQuery>();
-        services.AddTransient<IGetEstablishmentIdQuery, GetEstablishmentIdQuery>();
-        services.AddTransient<IGetLatestResponsesQuery, GetLatestResponsesQuery>();
-        services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
-        services.AddTransient<IGetNextUnansweredQuestionQuery, GetNextUnansweredQuestionQuery>();
-        services.AddTransient<IGetSectionQuery, GetSectionQuery>();
-        services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
-        services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
-        services.AddTransient<IProcessSubmissionResponsesCommand, ProcessSubmissionResponsesDto>();
-        services.AddTransient<IRecordUserSignInCommand, RecordUserSignInCommand>();
-        services.AddTransient<ISubmitAnswerCommand, SubmitAnswerCommand>();
-        services.AddTransient<IDeleteCurrentSubmissionCommand, DeleteCurrentSubmissionCommand>();
-        services.AddTransient<IRecordGroupSelectionCommand, RecordGroupSelectionCommand>();
-        services.AddTransient<IGetGroupSelectionQuery, GetGroupSelectionQuery>();
-        services.AddTransient<ISubmissionCommand, SubmissionCommand>();
 
         return services;
     }
 
     private static void ConfigureCookies(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<ICookieService, CookieService>();
-        services.AddTransient<ICookiesCleaner, CookieWorkflow>((services) =>
+        services.AddScoped<CookieService>();
+        services.AddTransient<CookieWorkflow>((services) =>
         {
             var options = configuration.GetSection("Cookies").Get<CookieWorkflowOptions>();
 
@@ -199,15 +185,15 @@ public static class ProgramExtensions
 
     public static IServiceCollection AddRoutingServices(this IServiceCollection services)
     {
-        services.AddTransient<ISubmissionStatusProcessor, SubmissionStatusProcessor>();
-        services.AddTransient<IGetRecommendationRouter, GetRecommendationRouter>();
-        services.AddTransient<IGetQuestionBySlugRouter, GetQuestionBySlugRouter>();
-        services.AddTransient<ICheckAnswersRouter, CheckAnswersRouter>();
-        services.AddTransient<IChangeAnswersRouter, ChangeAnswersRouter>();
-
-        services.AddTransient((_) => SectionCompleteStatusChecker.SectionComplete);
-        services.AddTransient((_) => SectionNotStartedStatusChecker.SectionNotStarted);
-        services.AddTransient((_) => CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion);
+        services.AddTransient<CategorySectionViewComponentViewBuilder>();
+        services.AddTransient<CmsViewBuilder>();
+        services.AddTransient<FooterLinksViewComponentViewBuilder>();
+        services.AddTransient<GroupsDashboardViewComponentViewBuilder>();
+        services.AddTransient<GroupsViewBuilder>();
+        services.AddTransient<PagesViewBuilder>();
+        services.AddTransient<QuestionsViewBuilder>();
+        services.AddTransient<RecommendationsViewBuilder>();
+        services.AddTransient<ReviewAnswersViewBuilder>();
 
         return services;
     }

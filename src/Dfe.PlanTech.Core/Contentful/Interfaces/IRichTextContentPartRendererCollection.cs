@@ -8,7 +8,7 @@ public interface IRichTextContentPartRendererCollection
 {
     public ILogger Logger { get; }
 
-    IReadOnlyList<IRichTextContentPartRenderer> Renders { get; }
+    IReadOnlyList<IRichTextContentPartRenderer> Renderers { get; }
 
     /// <summary>
     /// Finds matching renderer for the given content, based on the content's node type

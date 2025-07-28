@@ -10,11 +10,13 @@ namespace Dfe.PlanTech.Data.Contentful.Persistence;
 /// For mapping fields/properties of type <see chref="ContentfulEntry"/> to their concrete type,
 /// when serialising the returned API response from Contentful
 /// </summary>
-public class EntryResolver(ILogger<EntryResolver> logger) : IContentTypeResolver
+public class EntryResolver(
+    ILoggerFactory loggerFactory
+) : IContentTypeResolver
 {
     public Dictionary<string, Type> Types => _types;
 
-    private readonly ILogger<EntryResolver> _logger = logger;
+    private readonly ILogger<EntryResolver> _logger = loggerFactory.CreateLogger<EntryResolver>();
 
     private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<IDtoTransformable>()
                                                                        .ToDictionary(type => type.Name.ToLower());

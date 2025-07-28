@@ -9,18 +9,16 @@ namespace Dfe.PlanTech.Application.Rendering;
 /// Parent class to render <see chref="IRichTextContent"/> RichTextContent
 /// </summary>
 /// <inheritdoc/>
-public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererCollection
+public class RichTextRenderer(
+    ILoggerFactory loggerFactory,
+    IEnumerable<IRichTextContentPartRenderer> renderers
+): IRichTextRenderer, IRichTextContentPartRendererCollection
 {
-    private readonly ILogger<RichTextRenderer> _logger;
-    public IReadOnlyList<IRichTextContentPartRenderer> Renders { get; }
+    public IReadOnlyList<IRichTextContentPartRenderer> Renderers => renderers.ToList();
+
+    private readonly ILogger<RichTextRenderer> _logger = loggerFactory.CreateLogger<RichTextRenderer>();
 
     public ILogger Logger => _logger;
-
-    public RichTextRenderer(ILogger<RichTextRenderer> logger, IEnumerable<IRichTextContentPartRenderer> renderers)
-    {
-        _logger = logger;
-        Renders = renderers.ToList();
-    }
 
     public string ToHtml(CmsRichTextContentDto content)
     {
@@ -48,5 +46,5 @@ public class RichTextRenderer : IRichTextRenderer, IRichTextContentPartRendererC
     }
 
     public IRichTextContentPartRenderer? GetRendererForContent(CmsRichTextContentDto content)
-        => Renders.FirstOrDefault(renderer => renderer.Accepts(content));
+        => Renderers.FirstOrDefault(renderer => renderer.Accepts(content));
 }

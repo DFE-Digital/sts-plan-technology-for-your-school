@@ -2,19 +2,15 @@ using System.Reflection;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
-public class ComponentViewsFactory
+public class ComponentViewsFactory(
+    ILoggerFactory loggerFactory
+)
 {
     private const string GENERATED_VIEW_NAMESPACE = "AspNetCoreGeneratedDocument";
     private const string SHARED_PATH = "Views_Shared";
 
-    private readonly Type[] _viewTypes;
-    private readonly ILogger<ComponentViewsFactory> _logger;
-
-    public ComponentViewsFactory(ILogger<ComponentViewsFactory> logger)
-    {
-        _viewTypes = GetSharedViewTypes().ToArray();
-        _logger = logger;
-    }
+    private readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
+    private readonly ILogger<ComponentViewsFactory> _logger = loggerFactory.CreateLogger<ComponentViewsFactory>();
 
     /// <summary>
     /// Tries to find matching shared view for the passed model, based on the model's name

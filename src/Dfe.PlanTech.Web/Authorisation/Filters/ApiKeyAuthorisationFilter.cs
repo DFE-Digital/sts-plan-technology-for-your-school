@@ -4,10 +4,16 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Dfe.PlanTech.Web.Authorisation.Filters;
 
-public class ApiKeyAuthorisationFilter(ApiAuthenticationConfiguration config, ILogger<ApiKeyAuthorisationFilter> logger) : IAuthorizationFilter
+public class ApiKeyAuthorisationFilter(
+    ILoggerFactory loggerFactory,
+    ApiAuthenticationConfiguration authenticationConfiguration
+) : IAuthorizationFilter
 {
     public const string AuthHeaderKey = "Authorization";
     public const string AuthValuePrefix = "Bearer ";
+
+    private readonly ILogger<ApiKeyAuthorisationFilter> _logger = loggerFactory.CreateLogger<ApiKeyAuthorisationFilter>();
+    private readonly ApiAuthenticationConfiguration _authenticationConfiguration = authenticationConfiguration ?? throw new ArgumentNullException(nameof(authenticationConfiguration));
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
@@ -19,24 +25,23 @@ public class ApiKeyAuthorisationFilter(ApiAuthenticationConfiguration config, IL
 
     private bool HaveValidConfiguration()
     {
-        if (config.HaveApiKey)
+        if (!_authenticationConfiguration.HasApiKey)
         {
-            return true;
+            _logger.LogError("API key {KeyName} is missing", nameof(_authenticationConfiguration.KeyValue));
         }
 
-        logger.LogError("API key {KeyName} is missing", nameof(config.KeyValue));
-        return false;
+        return _authenticationConfiguration.HasApiKey;
     }
 
     private bool AuthorisationHeaderValid(AuthorizationFilterContext context)
     {
         if (!TryGetProvidedApiKey(context, out string? providedApiKey) || string.IsNullOrEmpty(providedApiKey))
         {
-            logger.LogInformation("Request to authorised route denied due to missing authentication header");
+            _logger.LogInformation("Request to authorised route denied due to missing authentication header");
             return false;
         }
 
-        return config.ApiKeyMatches(providedApiKey);
+        return _authenticationConfiguration.ApiKeyMatches(providedApiKey);
     }
 
     private static bool TryGetProvidedApiKey(AuthorizationFilterContext context, out string? apiKey)

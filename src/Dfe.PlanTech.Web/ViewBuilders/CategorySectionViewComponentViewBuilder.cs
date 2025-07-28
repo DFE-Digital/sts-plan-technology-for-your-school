@@ -8,14 +8,13 @@ using Dfe.PlanTech.Web.ViewComponents;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class CategorySectionViewComponentViewBuilder(
-    ILogger<CategorySectionViewComponent> logger,
+    ILoggerFactory loggerFactory,
     ContentfulService contentfulService,
     CurrentUser currentUser,
     SubmissionService submissionService
-) : BaseViewBuilder(contentfulService, currentUser)
+) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
 {
-    private readonly ILogger<CategorySectionViewComponent> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly ILogger<CategorySectionViewComponent> _logger = loggerFactory.CreateLogger<CategorySectionViewComponent>();
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public async Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(CmsCategoryDto category)
@@ -36,7 +35,7 @@ public class CategorySectionViewComponentViewBuilder(
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            _logger.LogError(
                 ex,
                 "An exception has occurred while trying to retrieve section progress with the following message: {message}",
                 ex.Message

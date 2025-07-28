@@ -7,14 +7,14 @@ using Dfe.PlanTech.Web.Models;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class GroupsDashboardViewComponentViewBuilder(
-    ILogger<GroupsDashboardViewComponentViewBuilder> logger,
+    ILoggerFactory loggerFactory,
     CurrentUser currentUser,
     ContentfulService contentfulService,
     EstablishmentService establishmentService,
     SubmissionService submissionService
-) : BaseViewBuilder(contentfulService, currentUser)
+) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
 {
-    private readonly ILogger<GroupsDashboardViewComponentViewBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<GroupsDashboardViewComponentViewBuilder> _logger = loggerFactory.CreateLogger<GroupsDashboardViewComponentViewBuilder>();
     private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
@@ -43,7 +43,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         }
         catch (Exception ex)
         {
-            logger.LogError(
+            _logger.LogError(
                 ex,
                 "An exception has occurred while trying to retrieve section progress with the following message: {message}",
                 ex.Message
@@ -58,7 +58,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         return new GroupsDashboardViewComponentViewModel
         {
             Description = description,
-            GroupsCategorySection = GetGroupsCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToList(),
+            GroupsCategorySection = await GetGroupsCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync(),
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
         };
     }

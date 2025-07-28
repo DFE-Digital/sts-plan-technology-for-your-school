@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Dfe.PlanTech.Web.Binders;
@@ -6,22 +6,26 @@ namespace Dfe.PlanTech.Web.Binders;
 /// <summary>
 /// Retrieves <see cref="Page"/> from the HttpContext items, as set by <see cref="Authorisation.Policies.PageModelAuthorisationPolicy"/>
 /// </summary>
-public class PageModelBinder(ILogger<PageModelBinder> logger) : IModelBinder
+public class PageModelBinder(
+    ILoggerFactory loggerFactory
+) : IModelBinder
 {
+    private readonly ILogger<PageModelBinder> _logger = loggerFactory.CreateLogger<PageModelBinder>();
+
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
         ArgumentNullException.ThrowIfNull(bindingContext);
 
-        if (!bindingContext.HttpContext.Items.TryGetValue(nameof(Page), out var pageItem))
+        if (!bindingContext.HttpContext.Items.TryGetValue(nameof(CmsPageDto), out var pageItem))
         {
-            logger.LogError("Page is not set");
+            _logger.LogError("Page is not set");
             bindingContext.Result = ModelBindingResult.Failed();
             return Task.CompletedTask;
         }
 
-        if (pageItem is not Page page)
+        if (pageItem is not CmsPageDto page)
         {
-            logger.LogError("Page is not {type}", typeof(Page));
+            _logger.LogError("Page is not {type}", typeof(CmsPageDto));
             bindingContext.Result = ModelBindingResult.Failed();
             return Task.CompletedTask;
         }

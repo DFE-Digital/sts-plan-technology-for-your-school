@@ -1,14 +1,9 @@
 using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Application.Configurations;
-using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Domain.Helpers;
-using Dfe.PlanTech.Domain.Interfaces;
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Options;
+using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Attributes;
-using Dfe.PlanTech.Web.Configurations;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 
@@ -46,7 +41,6 @@ builder.AddContentAndSupportServices()
         .AddAuthorisationServices()
         .AddCaching()
         .AddContentfulServices(builder.Configuration)
-        .AddCQRSServices()
         .AddCspConfiguration()
         .AddDatabase(builder.Configuration)
         .AddDfeSignIn(builder.Configuration)
@@ -57,7 +51,6 @@ builder.AddContentAndSupportServices()
         .AddRoutingServices()
         .AddRedisServices(builder.Configuration);
 
-builder.Services.AddSingleton<ISystemTime, SystemTime>();
 builder.Services.Configure<RobotsConfiguration>(builder.Configuration.GetSection("Robots"));
 
 var app = builder.Build();

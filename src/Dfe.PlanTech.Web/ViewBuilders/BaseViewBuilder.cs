@@ -8,9 +8,11 @@ using Dfe.PlanTech.Web.Models;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class BaseViewBuilder(
+    ILoggerFactory loggerFactory,
     ContentfulService contentfulService,
     CurrentUser currentUser)
 {
+    ILogger<BaseViewBuilder> _logger = loggerFactory.CreateLogger<BaseViewBuilder>();
     protected ContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     protected CurrentUser CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 

@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class QuestionsViewBuilder(
-    ILogger<QuestionsViewBuilder> logger,
+    ILoggerFactory loggerFactory,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     ContentfulOptionsConfiguration contentfulOptions,
@@ -24,9 +24,9 @@ public class QuestionsViewBuilder(
     ErrorMessagesConfiguration errorMessages,
     QuestionService questionService,
     SubmissionService submissionService
-) : BaseViewBuilder(contentfulService, currentUser)
+) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
 {
-    private ILogger<QuestionsViewBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private ILogger<QuestionsViewBuilder> _logger = loggerFactory.CreateLogger<QuestionsViewBuilder>();
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
     private ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));

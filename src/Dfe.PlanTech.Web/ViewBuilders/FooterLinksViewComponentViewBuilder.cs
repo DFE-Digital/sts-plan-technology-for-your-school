@@ -5,19 +5,18 @@ using Dfe.PlanTech.Web.Context;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class FooterLinksViewComponentViewBuilder(
-    ILogger<FooterLinksViewComponentViewBuilder> logger,
-    CurrentUser currentUser,
-    ContentfulService contentfulService
-) : BaseViewBuilder(currentUser)
+    ILoggerFactory loggerFactory,
+    ContentfulService contentfulService,
+    CurrentUser currentUser
+) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
 {
-    private readonly ILogger<FooterLinksViewComponentViewBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly ILogger<FooterLinksViewComponentViewBuilder> _logger = loggerFactory.CreateLogger<FooterLinksViewComponentViewBuilder>();
 
     public Task<List<CmsNavigationLinkDto>> GetNavigationLinksAsync()
     {
         try
         {
-            return _contentfulService.GetNavigationLinks();
+            return ContentfulService.GetNavigationLinks();
         }
         catch (Exception ex)
         {

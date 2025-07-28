@@ -9,12 +9,11 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 [Route("/")]
 public class RecommendationsController(
-    ILogger<RecommendationsController> logger,
+    ILoggerFactory loggerFactory,
     RecommendationsViewBuilder recommendationsViewBuilder
 )
-    : BaseController<RecommendationsController>(logger)
+    : BaseController<RecommendationsController>(loggerFactory)
 {
-    private readonly ILogger<RecommendationsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly RecommendationsViewBuilder _recommendationsViewBuilder = recommendationsViewBuilder ?? throw new ArgumentNullException(nameof(recommendationsViewBuilder));
 
     public const string ControllerName = "Recommendations";

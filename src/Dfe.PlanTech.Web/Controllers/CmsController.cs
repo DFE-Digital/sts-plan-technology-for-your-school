@@ -12,11 +12,10 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("api/cms")]
 [LogInvalidModelState]
 public class CmsController(
-    ILogger<CmsController> logger,
+    ILoggerFactory loggerFactory,
     CmsViewBuilder viewBuilder
-) : BaseController<CmsController>(logger)
+) : BaseController<CmsController>(loggerFactory)
 {
-    private readonly ILogger<CmsController> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly CmsViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
     [HttpPost("webhook")]

@@ -13,11 +13,11 @@ namespace Dfe.PlanTech.Web.Authorisation.Policies;
 /// Checks user authorisation for the current page, and retrieves a given <see cref="Page"/> from Contentful if needed for the request.
 /// </summary>
 public class PageModelAuthorisationPolicy(
-    ILogger<PageModelAuthorisationPolicy> logger,
+    ILoggerFactory loggerFactory,
     ContentfulService contentfulService
 ) : AuthorizationHandler<PageAuthorisationRequirement>
 {
-    private readonly ILogger<PageModelAuthorisationPolicy> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ILogger<PageModelAuthorisationPolicy> _logger = loggerFactory.CreateLogger<PageModelAuthorisationPolicy>();
     private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     private const string IndexSlug = "/";
@@ -30,7 +30,7 @@ public class PageModelAuthorisationPolicy(
     {
         if (context.Resource is not HttpContext httpContext)
         {
-            logger.LogError("Expected resource to be HttpContext but received {type}", context.Resource?.GetType());
+            _logger.LogError("Expected resource to be HttpContext but received {type}", context.Resource?.GetType());
             return;
         }
 
@@ -107,7 +107,7 @@ public class PageModelAuthorisationPolicy(
     {
         if (!ControllerIsPagesController(httpContext))
         {
-            logger.LogTrace("Request is not from/to the Pages controller. Request is to controller {ControllerName} and action {ActioName}",
+            _logger.LogTrace("Request is not from/to the Pages controller. Request is to controller {ControllerName} and action {ActioName}",
                             httpContext.Request.RouteValues[RouteValuesControllerNameKey],
                             httpContext.Request.RouteValues[RouteValuesActionNameKey]);
 
@@ -128,12 +128,12 @@ public class PageModelAuthorisationPolicy(
 
         if (slug is not string slugString)
         {
-            logger.LogTrace("Route is null - request is to index page");
+            _logger.LogTrace("Route is null - request is to index page");
             httpContext.Request.RouteValues[RoutesValuesRouteNameKey] = IndexSlug;
             return IndexSlug;
         }
 
-        logger.LogTrace("Route slug for request is {Slug}", slug);
+        _logger.LogTrace("Route slug for request is {Slug}", slug);
         return slugString;
     }
 

@@ -5,16 +5,13 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
 
-public class HeaderComponentTagHelper : TagHelper
+public class HeaderComponentTagHelper(
+    ILoggerFactory loggerFactory
+) : TagHelper
 {
-    private readonly ILogger<HeaderComponentTagHelper> _logger;
+    private readonly ILogger<HeaderComponentTagHelper> _logger = loggerFactory.CreateLogger<HeaderComponentTagHelper>();
 
     public CmsComponentHeaderDto? Model { get; set; }
-
-    public HeaderComponentTagHelper(ILogger<HeaderComponentTagHelper> logger)
-    {
-        _logger = logger;
-    }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {

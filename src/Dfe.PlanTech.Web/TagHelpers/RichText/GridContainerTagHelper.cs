@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers.RichText;
 
-public class GridContainerTagHelper(ILogger<GridContainerTagHelper> logger, ICardContainerContentPartRenderer cardContentPartRenderer) : TagHelper
+public class GridContainerTagHelper(
+    ILoggerFactory loggerFactory,
+    ICardContainerContentPartRenderer cardContentPartRenderer
+) : TagHelper
 {
-    private readonly ILogger<GridContainerTagHelper> _logger = logger;
-    private readonly ICardContainerContentPartRenderer _cardContentPartRenderer = cardContentPartRenderer;
+    private readonly ILogger<GridContainerTagHelper> _logger = loggerFactory.CreateLogger<GridContainerTagHelper>();
+    private readonly ICardContainerContentPartRenderer _cardContentPartRenderer = cardContentPartRenderer ?? throw new ArgumentNullException(nameof(cardContentPartRenderer));
 
     public IReadOnlyList<CmsComponentCardDto>? Content { get; set; }
 

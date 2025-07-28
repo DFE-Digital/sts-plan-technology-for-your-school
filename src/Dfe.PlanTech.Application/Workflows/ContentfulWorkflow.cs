@@ -1,10 +1,8 @@
-﻿using Azure;
-using Dfe.PlanTech.Core.Content.Options;
+﻿using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Content.Queries;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;

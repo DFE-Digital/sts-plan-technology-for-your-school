@@ -21,14 +21,16 @@ public class RedisCache : ICmsCache
     private readonly AsyncRetryPolicy _retryPolicyAsync;
 
     public RedisCache(
-        ILogger<RedisCache> logger,
+        ILoggerFactory loggerFactory,
+        IBackgroundTaskQueue backgroundTaskQueue,
         IRedisConnectionManager connectionManager,
-        IRedisDependencyManager dependencyManager,
-        IBackgroundTaskQueue backgroundTaskQueue
+        IRedisDependencyManager dependencyManager
     )
     {
-        _connectionManager = connectionManager;
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger<RedisCache>();
+        _backgroundTaskService = backgroundTaskQueue ?? throw new ArgumentNullException(nameof(backgroundTaskQueue));
+        _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
+        _dependencyManager = dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager));
 
         var retryPolicyBuilder = Policy.Handle<TimeoutException>()
             .Or<RedisServerException>()
@@ -38,8 +40,6 @@ public class RedisCache : ICmsCache
             .OrInner<RedisException>();
 
         _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(50));
-        _dependencyManager = dependencyManager;
-        _backgroundTaskService = backgroundTaskQueue;
     }
 
     /// <inheritdoc/>

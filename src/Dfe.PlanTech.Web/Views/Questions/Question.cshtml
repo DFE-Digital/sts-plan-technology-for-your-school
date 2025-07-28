@@ -37,9 +37,8 @@
             @{
                 foreach (var answer in Model.Question.Answers)
                 {
-                    var answerDto = answer.AsDto;
                     var isChecked = Model.AnswerSysId != null && Model.AnswerSysId.Equals(answer.Sys.Id);
-                    var radioValue = JsonSerializer.Serialize(answerDto);
+                    var radioValue = JsonSerializer.Serialize(answer);
 
                     <govuk-radios-item value="@radioValue" checked="@isChecked">@answer.Text</govuk-radios-item>
                 }

@@ -6,20 +6,20 @@ using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class ReviewAnswersViewBuilder(
-    ILogger<ReviewAnswersViewBuilder> logger,
+    ILoggerFactory loggerFactory,
     CurrentUser currentUser,
     ContentfulService contentfulService,
+    RecommendationService recommendationService,
     SubmissionService submissionService
-) : BaseViewBuilder(currentUser)
+) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
 {
-    private readonly ILogger<ReviewAnswersViewBuilder> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly ILogger<ReviewAnswersViewBuilder> _logger = loggerFactory.CreateLogger<ReviewAnswersViewBuilder>();
+    private readonly RecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
@@ -59,7 +59,7 @@ public class ReviewAnswersViewBuilder(
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
 
-        var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug);
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
 
         var recommendationIntroSlug = _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
 
@@ -93,13 +93,14 @@ public class ReviewAnswersViewBuilder(
         {
             case RecommendationsController.GetRecommendationAction:
                 var establishmentId = GetEstablishmentIdOrThrowException();
-                var recommendationIntroSlug = await _submissionService.GetRecommendationIntroSlug(establishmentId, sectionSlug);
+                var recommendationIntroSlug = await _recommendationService.GetRecommendationIntroSlug(establishmentId, sectionSlug);
                 return controller.RedirectToRecommendation(sectionSlug, recommendationIntroSlug);
             case UrlConstants.HomePage:
                 return controller.RedirectToHomePage();
             default:
                 return controller.RedirectToCheckAnswers(sectionSlug);
-        };
+        }
+        ;
     }
 
     private async Task<ReviewAnswersViewModel> BuildChangeAnswersViewModel(
@@ -109,13 +110,13 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage
     )
     {
-        List<CmsEntryDto>? content = null;
+        List<CmsEntryDto> content = [];
         string pageTitle = string.Empty;
         string slug = string.Empty;
 
         if (controller is CheckAnswersController)
         {
-            var page = await _contentfulService.GetPageBySlugAsync(CheckAnswersController.CheckAnswersPageSlug);
+            var page = await ContentfulService.GetPageBySlugAsync(CheckAnswersController.CheckAnswersPageSlug);
             content = page.Content;
             pageTitle = PageTitleConstants.CheckAnswers;
             slug = CheckAnswersController.CheckAnswersPageSlug;

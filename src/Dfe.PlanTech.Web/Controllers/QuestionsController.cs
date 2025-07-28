@@ -15,9 +15,9 @@ public class QuestionsController : BaseController<QuestionsController>
     private readonly QuestionsViewBuilder _questionsViewBuilder;
 
     public QuestionsController(
-        ILogger<QuestionsController> logger,
+        ILoggerFactory loggerFactory,
         QuestionsViewBuilder questionsViewBuilder
-    ) : base(logger)
+    ) : base(loggerFactory)
     {
         _questionsViewBuilder = questionsViewBuilder ?? throw new ArgumentNullException(nameof(questionsViewBuilder));
     }

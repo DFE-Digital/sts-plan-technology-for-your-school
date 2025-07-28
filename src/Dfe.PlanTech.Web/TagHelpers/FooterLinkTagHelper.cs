@@ -8,9 +8,13 @@ namespace Dfe.PlanTech.Web.TagHelpers;
 /// Renders a single navigation link in the footer.
 /// </summary>
 /// <remarks>Should be refactored in future to be any <see cref="NavigationLink"/>, and pass in HTML class used</remarks>
-public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelper
+public class FooterLinkTagHelper(
+    ILoggerFactory loggerFactory
+) : TagHelper
 {
     public CmsNavigationLinkDto? Link { get; set; }
+
+    private readonly ILogger<FooterLinkTagHelper> _logger = loggerFactory.CreateLogger<FooterLinkTagHelper>();
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
@@ -18,7 +22,7 @@ public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelpe
         {
             output.TagName = null;
             output.Content.SetHtmlContent("");
-            logger.LogWarning("Missing or invalid {Name} {Link}", nameof(CmsNavigationLinkDto), Link);
+            _logger.LogWarning("Missing or invalid {Name} {Link}", nameof(CmsNavigationLinkDto), Link);
             return;
         }
 
@@ -55,7 +59,7 @@ public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelpe
     {
         if (Link!.ContentToLinkTo == null && string.IsNullOrEmpty(Link.Href))
         {
-            logger.LogError("No href or content to link to for {LinkType}", nameof(CmsNavigationLinkDto));
+            _logger.LogError("No href or content to link to for {LinkType}", nameof(CmsNavigationLinkDto));
             return string.Empty;
         }
 
@@ -71,7 +75,7 @@ public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelpe
 
         if (Link.ContentToLinkTo is not IHasSlug hasSlug)
         {
-            logger.LogError("Invalid content type received for Link. Expected {Interface} but type is {Concrete}", typeof(IHasSlug), Link.ContentToLinkTo.GetType());
+            _logger.LogError("Invalid content type received for Link. Expected {Interface} but type is {Concrete}", typeof(IHasSlug), Link.ContentToLinkTo.GetType());
             return null;
         }
 

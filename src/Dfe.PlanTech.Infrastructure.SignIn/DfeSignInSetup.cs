@@ -86,11 +86,11 @@ public static class DfeSignInSetup
         options.SaveTokens = config.SaveTokens;
 
         var serviceProvider = services.BuildServiceProvider();
-        var logger = serviceProvider.GetRequiredService<ILogger<DfeSignIn>>();
+        var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
 
         options.Events = new OpenIdConnectEvents()
         {
-            OnUserInformationReceived = (UserInformationReceivedContext context) => OnUserInformationReceivedEvent.RecordUserSignIn(logger, context),
+            OnUserInformationReceived = (UserInformationReceivedContext context) => OnUserInformationReceivedEvent.RecordUserSignIn(loggerFactory.CreateLogger<DfeSignIn>(), context),
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,
             OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut,
         };

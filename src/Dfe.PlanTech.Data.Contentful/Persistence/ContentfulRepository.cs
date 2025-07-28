@@ -6,6 +6,7 @@ using Dfe.PlanTech.Core.Content.Queries;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Contentful.Helpers;
+using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Dfe.PlanTech.Data.Contentful.Persistence;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -17,12 +18,12 @@ namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
 /// Encapsulates ContentfulClient functionality, whilst abstracting through the IEntityRepository interface
 /// </summary>
 /// <see href="IEntityRepository"/>
-public abstract class ContentfulRepository : IContentRepository
+public abstract class ContentfulRepository : IContentfulRepository
 {
+    private readonly ILogger<ContentfulRepository> _logger;
     private readonly IContentfulClient _client;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly AutomatedTestingOptions _automatedTestingOptions;
-    private readonly ILogger<ContentfulRepository> _logger;
 
     public ContentfulRepository(
         ILoggerFactory loggerFactory,
@@ -34,9 +35,9 @@ public abstract class ContentfulRepository : IContentRepository
         _logger = loggerFactory.CreateLogger<ContentfulRepository>();
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
-        _automatedTestingOptions = automatedTestingOptions.Value;
+        _automatedTestingOptions = automatedTestingOptions?.Value ?? throw new ArgumentNullException(nameof(automatedTestingOptions));
 
-        _client.ContentTypeResolver = new EntryResolver(loggerFactory.CreateLogger<EntryResolver>());
+        _client.ContentTypeResolver = new EntryResolver(loggerFactory);
     }
 
     public async Task<TEntry?> GetEntryByIdAsync<TEntry>(string id, int include = 2)
@@ -150,7 +151,7 @@ public abstract class ContentfulRepository : IContentRepository
         }
     }
 
-    GetEntriesOptions IContentRepository.GetEntryByIdOptions(string id, int include = 2)
+    GetEntriesOptions IContentfulRepository.GetEntryByIdOptions(string id, int include = 2)
     {
         if (string.IsNullOrEmpty(id))
             throw new ArgumentNullException(nameof(id));

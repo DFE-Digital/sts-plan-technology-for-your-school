@@ -15,9 +15,9 @@ namespace Dfe.PlanTech.Web.Controllers;
 [LogInvalidModelState]
 [Route("/")]
 public class PagesController(
-    ILogger<PagesController> logger,
+    ILoggerFactory loggerFactory,
     PagesViewBuilder pagesViewBuilder
-) : BaseController<PagesController>(logger)
+) : BaseController<PagesController>(loggerFactory)
 {
     private readonly PagesViewBuilder _pagesViewBuilder = pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
 
@@ -30,7 +30,7 @@ public class PagesController(
     {
         if (page == null)
         {
-            logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
+            Logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
             throw new ContentfulDataUnavailableException($"Could not find page at {Request.Path.Value}");
         }
 

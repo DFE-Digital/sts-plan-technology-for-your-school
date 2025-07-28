@@ -5,19 +5,17 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class AccordionComponent : IRichTextContentPartRendererCollection
+public class AccordionComponent(
+    ILoggerFactory loggerFactory
+) : IRichTextContentPartRendererCollection
 {
-    private readonly ILogger<AccordionComponent> _logger;
+    private readonly ILogger<AccordionComponent> _logger = loggerFactory.CreateLogger<AccordionComponent>();
     public ILogger Logger => _logger;
-    public IReadOnlyList<IRichTextContentPartRenderer> Renders { get; private set; } = new List<IRichTextContentPartRenderer>();
-    public AccordionComponent(ILogger<AccordionComponent> logger)
-    {
-        _logger = logger;
-    }
+    public IReadOnlyList<IRichTextContentPartRenderer> Renderers { get; private set; } = new List<IRichTextContentPartRenderer>();
 
     public StringBuilder AddHtml(CmsRichTextContentDto content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
-        Renders = rendererCollection.Renders;
+        Renderers = rendererCollection.Renderers;
 
         var nestedContent = content?.Data?.Target?.Content ?? null;
         if (nestedContent != null && nestedContent.Any())
@@ -62,5 +60,5 @@ public class AccordionComponent : IRichTextContentPartRendererCollection
     }
 
     public IRichTextContentPartRenderer? GetRendererForContent(CmsRichTextContentDto content)
-    => Renders.FirstOrDefault(renderer => renderer.Accepts(content));
+    => Renderers.FirstOrDefault(renderer => renderer.Accepts(content));
 }

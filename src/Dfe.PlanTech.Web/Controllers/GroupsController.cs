@@ -16,9 +16,9 @@ public class GroupsController : BaseController<GroupsController>
     private GroupsViewBuilder _groupsViewBuilder;
 
     public GroupsController(
-        ILogger<GroupsController> logger,
+        ILoggerFactory loggerFactory,
         GroupsViewBuilder groupsViewBuilder
-    ) : base(logger)
+    ) : base(loggerFactory)
     {
         _groupsViewBuilder = groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
     }

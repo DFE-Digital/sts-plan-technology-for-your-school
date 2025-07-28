@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers.RichText;
 
-public class RichTextTagHelper(ILogger<RichTextTagHelper> logger, IRichTextRenderer richTextRenderer) : TagHelper
+public class RichTextTagHelper(
+    ILoggerFactory loggerFactory,
+    IRichTextRenderer richTextRenderer
+) : TagHelper
 {
-    private readonly ILogger<RichTextTagHelper> _logger = logger;
-    private readonly IRichTextRenderer _richTextRenderer = richTextRenderer;
+    private readonly ILogger<RichTextTagHelper> _logger = loggerFactory.CreateLogger<RichTextTagHelper>();
+    private readonly IRichTextRenderer _richTextRenderer = richTextRenderer ?? throw new ArgumentNullException(nameof(richTextRenderer));
 
     public CmsRichTextContentDto? Content { get; set; }
 

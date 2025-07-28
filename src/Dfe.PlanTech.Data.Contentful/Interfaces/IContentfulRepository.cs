@@ -1,11 +1,11 @@
 using Dfe.PlanTech.Core.Content.Options;
 
-namespace Dfe.PlanTech.Data.Contentful.Persistence;
+namespace Dfe.PlanTech.Data.Contentful.Interfaces;
 
 /// <summary>
 /// Abstraction around repositories used for retrieving Content
 /// </summary>
-public interface IContentRepository
+public interface IContentfulRepository
 {
     /// <summary>
     /// Get an entity by Id
