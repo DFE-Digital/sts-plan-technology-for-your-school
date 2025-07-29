@@ -40,7 +40,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
           cancellationToken);
     }
 
-    [HttpGet("{categorySlug}/{sectionSlug}/{chunkSlug}", Name = GetSingleRecommendationAction)]
+    [HttpGet("{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}", Name = GetSingleRecommendationAction)]
     public async Task<IActionResult> GetSingleRecommendation(string categorySlug,
                                                          string sectionSlug,
                                                          string chunkSlug,
@@ -100,7 +100,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
         return await getRecommendationRouter.GetRecommendationPreview(sectionSlug, maturity, this, cancellationToken);
     }
 
-    [HttpGet("{categorySlug}/{sectionSlug}/print", Name = "GetRecommendationChecklist")]
+    [HttpGet("{categorySlug}/{sectionSlug}/recommendations/print", Name = "GetRecommendationChecklist")]
     public async Task<IActionResult> GetRecommendationChecklist(string categorySlug,
                                                                 string sectionSlug,
                                                                 [FromServices] IGetRecommendationRouter getRecommendationValidator,
