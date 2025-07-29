@@ -5,7 +5,7 @@
     <h2 class="govuk-heading-l">@topic.Name</h2>
     <p>@topic.ShortDescription</p>
 
-    <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { Section = topic, Context = "Sections" }' />
+    <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = Model.CategorySlug, Section = topic, Context = "Sections" }' />
 
     @if (!string.IsNullOrEmpty(topic.LastCompletionDate))
     {
@@ -17,10 +17,10 @@
             </li>
             @foreach (var chunk in topic.Recommendations.Chunks)
             {
-                var routeValues = new Dictionary<string, string>
+                @* var routeValues = new Dictionary<string, string>
                 {
                     ["route"] = $"{Model.CategorySlug}/{topic.Slug}/{chunk.SlugifiedLinkText}"
-                };
+                }; *@
                 <li class="govuk-task-list__item govuk-task-list__item--with-link">
                     <div class="govuk-task-list__name-and-hint landing-page-list__name-and-hint">
                         <a href=@Url.RouteUrl("GetSingleRecommendation", new {
