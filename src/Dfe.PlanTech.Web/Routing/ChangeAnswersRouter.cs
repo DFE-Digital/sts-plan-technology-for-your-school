@@ -38,6 +38,7 @@ namespace Dfe.PlanTech.Web.Routing
         }
 
         public async Task<IActionResult> ValidateRoute(
+            string categorySlug,
             string sectionSlug,
             string? errorMessage,
             ChangeAnswersController controller,
@@ -51,7 +52,7 @@ namespace Dfe.PlanTech.Web.Routing
             switch (_router.Status)
             {
                 case Status.CompleteNotReviewed:
-                    return await ProcessChangeAnswers(sectionSlug, errorMessage, controller, cancellationToken);
+                    return await ProcessChangeAnswers(categorySlug, sectionSlug, errorMessage, controller, cancellationToken);
 
                 case Status.CompleteReviewed:
                 {
@@ -73,7 +74,7 @@ namespace Dfe.PlanTech.Web.Routing
                     var clonedSubmission = await _submissionCommand.CloneSubmission(
                         latestSubmission, cancellationToken);
 
-                    return await ProcessChangeAnswers(sectionSlug, errorMessage, controller, cancellationToken);
+                    return await ProcessChangeAnswers(categorySlug, sectionSlug, errorMessage, controller, cancellationToken);
                 }
 
                 case Status.NotStarted:
@@ -85,6 +86,7 @@ namespace Dfe.PlanTech.Web.Routing
         }
 
         private async Task<IActionResult> ProcessChangeAnswers(
+            string categorySlug,
             string sectionSlug,
             string? errorMessage,
             ChangeAnswersController controller,
@@ -108,7 +110,8 @@ namespace Dfe.PlanTech.Web.Routing
                 SectionSlug = sectionSlug,
                 SubmissionId = submissionResponsesDto.SubmissionId,
                 Slug = ChangeAnswersController.ChangeAnswersPageSlug,
-                ErrorMessage = errorMessage
+                ErrorMessage = errorMessage,
+                CategorySlug = categorySlug
             };
 
             return controller.View(ChangeAnswersController.ChangeAnswersViewName, model);

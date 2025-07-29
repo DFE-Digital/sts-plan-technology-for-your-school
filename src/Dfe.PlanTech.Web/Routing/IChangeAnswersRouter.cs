@@ -17,7 +17,8 @@ public interface IChangeAnswersRouter
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    Task<IActionResult> ValidateRoute(string sectionSlug,
+    Task<IActionResult> ValidateRoute(string categorySlug,
+                                      string sectionSlug,
                                       string? errorMessage,
                                       ChangeAnswersController controller,
                                       CancellationToken cancellationToken);
