@@ -92,7 +92,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
             Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
-            Assert.Equal(_categorySlug, redirect.RouteValues?["categorySlug"]);
+            Assert.Equal(_categorySlug, redirect.RouteValues?["route"]);
         }
     }
 }

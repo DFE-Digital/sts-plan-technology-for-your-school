@@ -159,9 +159,10 @@ public class QuestionsControllerTests
         _getQuestionBySlugRouter.ValidateRoute(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<QuestionsController>(), Arg.Any<CancellationToken>())
                                 .Returns((callinfo) =>
                                 {
-                                    sectionSlug = callinfo.ArgAt<string>(0);
-                                    questionSlug = callinfo.ArgAt<string>(1);
-                                    controller = callinfo.ArgAt<QuestionsController>(2);
+                                    categorySlug = callinfo.ArgAt<string>(0);
+                                    sectionSlug = callinfo.ArgAt<string>(1);
+                                    questionSlug = callinfo.ArgAt<string>(2);
+                                    controller = callinfo.ArgAt<QuestionsController>(3);
 
                                     return new AcceptedResult();
                                 });
