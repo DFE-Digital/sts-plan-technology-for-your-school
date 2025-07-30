@@ -60,6 +60,8 @@ public class QuestionsController : BaseController<QuestionsController>
                                                     [FromServices] IGetQuestionBySlugRouter router,
                                                     CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(categorySlug))
+            throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug))
@@ -109,6 +111,8 @@ public class QuestionsController : BaseController<QuestionsController>
                                                                 [FromServices] IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand,
                                                                 CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(categorySlug))
+            throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
 
