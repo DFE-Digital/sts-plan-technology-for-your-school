@@ -21,25 +21,6 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
     public const string GetRecommendationAction = "GetRecommendation";
     public const string GetSingleRecommendationAction = "GetSingleRecommendation";
 
-    [HttpGet("{categorySlug}/{sectionSlug}/recommendation/{recommendationSlug}", Name = GetRecommendationAction)]
-    public async Task<IActionResult> GetRecommendation(string categorySlug,
-                                                       string sectionSlug,
-                                                       string recommendationSlug,
-                                                       [FromServices] IGetRecommendationRouter getRecommendationValidator,
-                                                       CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrEmpty(sectionSlug))
-            throw new ArgumentNullException(nameof(sectionSlug));
-        if (string.IsNullOrEmpty(recommendationSlug))
-            throw new ArgumentNullException(nameof(recommendationSlug));
-
-        return await getRecommendationValidator.ValidateRoute(categorySlug,
-          sectionSlug,
-          false,
-          this,
-          cancellationToken);
-    }
-
     [HttpGet("{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}", Name = GetSingleRecommendationAction)]
     public async Task<IActionResult> GetSingleRecommendation(string categorySlug,
                                                          string sectionSlug,
