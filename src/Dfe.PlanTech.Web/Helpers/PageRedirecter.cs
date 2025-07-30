@@ -18,11 +18,7 @@ public static class PageRedirecter
     private static RedirectToActionResult RedirectToPage(this Controller controller, string route)
     => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route });
 
-    public static RedirectToActionResult RedirectToRecommendation(this Controller controller, string sectionSlug, string recommendationSlug)
-    => controller.RedirectToAction(RecommendationsController.GetRecommendationAction, RecommendationsController.ControllerName, new { sectionSlug, recommendationSlug });
-
     public static RedirectToActionResult RedirectToCategoryLandingPage(this Controller controller, string categorySlug)
         => controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route = categorySlug });
-
 }
 

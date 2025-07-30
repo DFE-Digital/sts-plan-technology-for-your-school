@@ -51,7 +51,6 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
         string sectionSlug,
         int submissionId,
         string sectionName,
-        string redirectOption,
         [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
         [FromServices] IGetRecommendationRouter getRecommendationRouter,
         [FromServices] IMarkSubmissionAsReviewedCommand markSubmissionAsReviewedCommand,
