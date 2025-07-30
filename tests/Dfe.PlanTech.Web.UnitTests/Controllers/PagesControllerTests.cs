@@ -1,4 +1,3 @@
-using System;
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Exceptions;
@@ -8,7 +7,6 @@ using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Configuration;
 using Dfe.PlanTech.Web.Controllers;
@@ -142,7 +140,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task ShouldThrowException_WhenIsLandingPage_And_CategoryIsNull()
+        public void ShouldThrowException_WhenIsLandingPage_And_CategoryIsNull()
         {
             var action = () => _controller.GetByRoute(null, userSubstitute);
 

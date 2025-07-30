@@ -2,10 +2,12 @@ using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
@@ -26,6 +28,10 @@ public class GetRecommendationRouterTests
 
     private readonly IGetLatestResponsesQuery _getLatestResponsesQuery;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
+    private readonly IGetPageQuery _getPageQuery;
+    private readonly IGetSectionQuery _getSectionQuery;
+
+    private readonly IUser _user;
 
     private static Answer AnswerOne = new()
     {
@@ -238,9 +244,23 @@ public class GetRecommendationRouterTests
         _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
         _getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
+        _getPageQuery = Substitute.For<IGetPageQuery>();
+        _getSectionQuery = Substitute.For<IGetSectionQuery>();
+        _user = Substitute.For<IUser>();
 
         _controller = new RecommendationsController(new NullLogger<RecommendationsController>());
-        _router = new GetRecommendationRouter(_submissionStatusProcessor, _getLatestResponsesQuery, _getSubTopicRecommendationQuery);
+        _router = new GetRecommendationRouter(_submissionStatusProcessor, _getLatestResponsesQuery, _getSubTopicRecommendationQuery, _getSectionQuery, _getPageQuery, _user);
+    }
+
+    [Theory]
+    [InlineData(null, false)]
+    [InlineData(null, true)]
+    [InlineData("", false)]
+    [InlineData("", true)]
+    public async Task Should_ThrowException_When_CategorySlug_NullOrEmpty(string? categorySlug, bool checklist)
+    {
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _router.ValidateRoute(categorySlug!, "section-slug", checklist, _controller, default));
     }
 
     [Theory]
@@ -251,19 +271,7 @@ public class GetRecommendationRouterTests
     public async Task Should_ThrowException_When_SectionSlug_NullOrEmpty(string? sectionSlug, bool checklist)
     {
         await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
-            _router.ValidateRoute(sectionSlug!, "recommendation-slug", checklist, _controller, default));
-    }
-
-
-    [Theory]
-    [InlineData(null, false)]
-    [InlineData(null, true)]
-    [InlineData("", false)]
-    [InlineData("", true)]
-    public async Task Should_ThrowException_When_RecommendationSlug_NullOrEmpty(string? recommendationSlug, bool checklist)
-    {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
-            _router.ValidateRoute("section-slug", recommendationSlug!, checklist, _controller, default));
+            _router.ValidateRoute("category-slug", sectionSlug!, checklist, _controller, default));
     }
 
     [Theory]
@@ -287,7 +295,7 @@ public class GetRecommendationRouterTests
             });
 
         var sectionSlug = _section.InterstitialPage?.Slug ?? "default-section-slug"; // Handle null appropriately
-        var result = await _router.ValidateRoute(sectionSlug, "recommendation-slug", checklist, _controller,
+        var result = await _router.ValidateRoute("category-slug", sectionSlug, checklist, _controller,
             default);
 
         var redirectResult = result as RedirectToActionResult;
@@ -298,10 +306,13 @@ public class GetRecommendationRouterTests
         Assert.Equal(QuestionsController.GetQuestionBySlugActionName, redirectResult.ActionName);
 
         var section = redirectResult.RouteValues?["sectionSlug"];
+        var category = redirectResult.RouteValues?["categorySlug"];
 
+        Assert.NotNull(category);
         Assert.NotNull(section);
         Assert.NotNull(_section.InterstitialPage);
         Assert.Equal(_section.InterstitialPage.Slug, section);
+        Assert.Equal("category-slug", category);
 
         var questionSlug = redirectResult.RouteValues?["questionSlug"];
 
@@ -328,7 +339,7 @@ public class GetRecommendationRouterTests
                 _submissionStatusProcessor.NextQuestion = nextQuestion;
             });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", checklist, _controller,
+        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, checklist, _controller,
             default);
 
         var redirectResult = result as RedirectToActionResult;
@@ -361,7 +372,7 @@ public class GetRecommendationRouterTests
             });
 
         await Assert.ThrowsAnyAsync<DatabaseException>(() =>
-            _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", checklist, _controller, default));
+            _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, checklist, _controller, default));
     }
 
     [Theory]
@@ -385,7 +396,7 @@ public class GetRecommendationRouterTests
                                 .Returns((callinfo) => MockValidLatestResponse(callinfo));
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
-            _router.ValidateRoute(_section.InterstitialPage.Slug, "other-recommendation-slug", checklist, _controller, default));
+            _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, checklist, _controller, default));
     }
 
     [Theory]
@@ -412,7 +423,7 @@ public class GetRecommendationRouterTests
         _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopicRecommendation);
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
-            _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", checklist, _controller,
+            _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, checklist, _controller,
                 default));
     }
 
@@ -421,7 +432,7 @@ public class GetRecommendationRouterTests
     {
         Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation();
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", false, _controller, default);
+        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, false, _controller, default);
 
         var viewResult = result as ViewResult;
 
@@ -430,7 +441,6 @@ public class GetRecommendationRouterTests
         var model = viewResult.Model as RecommendationsViewModel;
 
         Assert.NotNull(model);
-        Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);
         Assert.NotNull(model.SubmissionResponses);
     }
 
@@ -477,7 +487,7 @@ public class GetRecommendationRouterTests
 
         Setup_Valid_Recommendation(responses);
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", true, _controller, default);
+        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, true, _controller, default);
 
         var viewResult = result as ViewResult;
 
@@ -486,7 +496,6 @@ public class GetRecommendationRouterTests
         var model = viewResult.Model as RecommendationsViewModel;
 
         Assert.NotNull(model);
-        Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);
 
         Assert.Contains(AnswerOne, model.Chunks.SelectMany(chunk => chunk.Answers));
         Assert.Contains(AnswerThree, model.Chunks.SelectMany(chunk => chunk.Answers));
@@ -509,8 +518,7 @@ public class GetRecommendationRouterTests
         var model = viewResult.Model as RecommendationsViewModel;
 
         Assert.NotNull(model);
-        //If no maturity given it should use first intro
-        Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);
+        Assert.NotNull(_subtopicRecommendation);
         Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, model.Chunks.Count);
     }
 
@@ -534,7 +542,6 @@ public class GetRecommendationRouterTests
         Assert.NotNull(model);
 
         var expectedIntro = _subtopicRecommendation!.Intros.FirstOrDefault(intro => intro.Maturity == maturity);
-        Assert.Equal(expectedIntro, model.Intro);
         Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, model.Chunks.Count);
     }
 
@@ -569,7 +576,7 @@ public class GetRecommendationRouterTests
         var model = viewResult.Model as RecommendationsViewModel;
 
         Assert.NotNull(model);
-        Assert.Equal(_subtopicRecommendation!.Intros[0], model.Intro);
+        Assert.NotNull(_subtopicRecommendation);
         Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, model.Chunks.Count);
     }
 

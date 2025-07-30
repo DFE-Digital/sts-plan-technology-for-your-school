@@ -90,14 +90,23 @@ public class CheckAnswersRouterTests
     [Theory]
     [InlineData("")]
     [InlineData(null)]
+    public async Task Should_Throw_Exception_When_CategorySlug_NullOrEmpty(string? categorySlug)
+    {
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(categorySlug!, "section-slug", null, _controller, default));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
     public async Task Should_Throw_Exception_When_SectionSlug_NullOrEmpty(string? sectionSlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(sectionSlug!, null, _controller, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute("category-slug", sectionSlug!, null, _controller, default));
     }
 
     [Fact]
     public async Task Should_Redirect_To_NextQuestion_When_Status_InProgresss()
     {
+        var categorySlug = "category-slug";
         var sectionSlug = "section-slug";
 
         var nextQuestion = new Question()
@@ -112,13 +121,17 @@ public class CheckAnswersRouterTests
             _submissionStatusProcessor.NextQuestion = nextQuestion;
         });
 
-        var result = await _router.ValidateRoute(sectionSlug, null, _controller, default);
+        var result = await _router.ValidateRoute(categorySlug, sectionSlug, null, _controller, default);
 
         var redirectResult = result as RedirectToActionResult;
 
         Assert.NotNull(redirectResult);
         Assert.Equal(QuestionsController.Controller, redirectResult.ControllerName);
         Assert.Equal(QuestionsController.GetQuestionBySlugActionName, redirectResult.ActionName);
+
+        var categorySlugValue = redirectResult.RouteValues?["categorySlug"];
+        Assert.NotNull(categorySlugValue);
+        Assert.Equal(categorySlug, categorySlugValue);
 
         var sectionSlugValue = redirectResult.RouteValues?["sectionSlug"];
         Assert.NotNull(sectionSlugValue);
@@ -132,6 +145,7 @@ public class CheckAnswersRouterTests
     [Fact]
     public async Task Should_Return_CheckAnswersPage_When_Status_Is_CheckAnswers()
     {
+        var categorySlug = "category-slug";
         var sectionSlug = _section.InterstitialPage?.Slug ?? throw new InvalidOperationException("InterstitialPage cannot be null.");
 
         _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
@@ -141,7 +155,7 @@ public class CheckAnswersRouterTests
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
-        var result = await _router.ValidateRoute(sectionSlug, null, _controller, default);
+        var result = await _router.ValidateRoute(categorySlug, sectionSlug, null, _controller, default);
 
         var pageResult = result as ViewResult;
 
@@ -153,6 +167,7 @@ public class CheckAnswersRouterTests
 
         Assert.Equal(_section.Name, model.SectionName);
         Assert.Equal(sectionSlug, model.SectionSlug);
+        Assert.Equal(categorySlug, model.CategorySlug);
         Assert.Equal(_checkAnswersDto, model.SubmissionResponses);
         Assert.Equal(_checkAnswersDto.SubmissionId, model.SubmissionId);
         Assert.Equal(_checkAnswersPageContent, model.Content);
@@ -182,6 +197,6 @@ public class CheckAnswersRouterTests
                                       _submissionStatusProcessor.Section.Returns(noneAnsweredSection);
                                   });
 
-        await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute(sectionSlug, null, _controller, default));
+        await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute("category-slug", sectionSlug, null, _controller, default));
     }
 }

@@ -27,6 +27,7 @@ public class GetQuestionBySlugRouterTests
     private readonly ISubmissionStatusProcessor _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
     private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
     private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
+    private readonly IGetPageQuery _getPageQuery = Substitute.For<IGetPageQuery>();
     private readonly IUser _user = Substitute.For<IUser>();
     private readonly IOptions<ErrorMessages> _errorMessages = Substitute.For<IOptions<ErrorMessages>>();
     private readonly IOptions<ContactOptions> _contactOptions = Substitute.For<IOptions<ContactOptions>>();
@@ -42,7 +43,7 @@ public class GetQuestionBySlugRouterTests
 
     public GetQuestionBySlugRouterTests()
     {
-        _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _getNavigationQuery, _user, _errorMessages, _contactOptions);
+        _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _getNavigationQuery, _getPageQuery, _user, _errorMessages, _contactOptions);
         _user.GetEstablishmentId().Returns(1);
 
         // Global TempData setup for all tests
@@ -133,9 +134,17 @@ public class GetQuestionBySlugRouterTests
     [Theory]
     [InlineData("")]
     [InlineData(null)]
+    public async Task Should_Throw_Exception_When_CategorySlug_NullOrEmpty(string? categorySlug)
+    {
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(categorySlug!, "section-slug", "question slug", _controller, default));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
     public async Task Should_Throw_Exception_When_SectionSlug_NullOrEmpty(string? sectionSlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(sectionSlug!, "question slug", _controller, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute("categorySlug", sectionSlug!, "question slug", _controller, default));
     }
 
     [Theory]
@@ -143,7 +152,7 @@ public class GetQuestionBySlugRouterTests
     [InlineData(null)]
     public async Task Should_Throw_Exception_When_QuestionSlug_NullOrEmpty(string? questionSlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute("section soug", questionSlug!, _controller, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute("categorySlug", "section slug", questionSlug!, _controller, default));
     }
 
     [Theory]
@@ -162,7 +171,7 @@ public class GetQuestionBySlugRouterTests
                                       _submissionStatusProcessor.Status = submissionStatus;
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, nextQuestion.Slug, _controller, default);
+        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, nextQuestion.Slug, _controller, default);
 
         Assert.NotNull(result);
 
@@ -199,7 +208,7 @@ public class GetQuestionBySlugRouterTests
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, thirdQuestion.Slug, _controller, default);
+        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, thirdQuestion.Slug, _controller, default);
 
         var redirectResult = result as RedirectToActionResult;
 
@@ -208,11 +217,14 @@ public class GetQuestionBySlugRouterTests
         Assert.Equal(QuestionsController.Controller, redirectResult.ControllerName);
         Assert.Equal(QuestionsController.GetQuestionBySlugActionName, redirectResult.ActionName);
 
+        var categorySlug = redirectResult.RouteValues?["categorySlug"];
         var sectionSlug = redirectResult.RouteValues?["sectionSlug"];
         var questionSlug = redirectResult.RouteValues?["questionSlug"];
 
+        Assert.NotNull(categorySlug);
         Assert.NotNull(sectionSlug);
         Assert.NotNull(questionSlug);
+        Assert.Equal("category-slug", categorySlug);
         Assert.Equal(_section.InterstitialPage.Slug, sectionSlug);
         Assert.Equal(secondQuestion.Slug, questionSlug);
     }
@@ -237,7 +249,7 @@ public class GetQuestionBySlugRouterTests
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, firstQuestion.Slug, _controller, default);
+        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, firstQuestion.Slug, _controller, default);
 
         var viewResult = result as ViewResult ?? throw new InvalidOperationException("Result is not a ViewResult.");
 
@@ -277,7 +289,7 @@ public class GetQuestionBySlugRouterTests
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, thirdQuestion.Slug, _controller, default);
+        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, thirdQuestion.Slug, _controller, default);
 
         var redirectResult = result as RedirectToActionResult;
 
@@ -306,7 +318,7 @@ public class GetQuestionBySlugRouterTests
         _getResponseQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, false, Arg.Any<CancellationToken>())
                           .Returns(_responses);
 
-        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => _router.ValidateRoute(_section.InterstitialPage.Slug, "fourth-question", _controller, default));
+        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() => _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, "fourth-question", _controller, default));
     }
 
     [Fact]
@@ -320,7 +332,7 @@ public class GetQuestionBySlugRouterTests
                                     _submissionStatusProcessor.Section.Returns(_section);
                                 });
 
-        await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute(_section.InterstitialPage.Slug, _section.Questions[0].Slug, _controller, default));
+        await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, _section.Questions[0].Slug, _controller, default));
     }
 
     [Fact]
@@ -342,7 +354,7 @@ public class GetQuestionBySlugRouterTests
                                       _submissionStatusProcessor.Section.Returns(_section);
                                   });
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, firstQuestion.Slug, _controller, default);
+        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, firstQuestion.Slug, _controller, default);
 
         var viewResult = result as ViewResult;
 

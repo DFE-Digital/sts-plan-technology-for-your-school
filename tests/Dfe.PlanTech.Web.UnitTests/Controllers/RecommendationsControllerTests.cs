@@ -26,9 +26,17 @@ public class RecommendationsControllerTests
     [Theory]
     [InlineData("")]
     [InlineData(null)]
+    public async Task RecommendationsPagePage_Should_ThrowException_When_CategorySlug_NullOrEmpty(string? category)
+    {
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendation(category!, "section-slug", "recommendation", _recommendationsRouter, default));
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData(null)]
     public async Task RecommendationsPagePage_Should_ThrowException_When_SectionSlug_NullOrEmpty(string? section)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendation(section!, "recommendation", _recommendationsRouter, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendation("category-slug", section!, "recommendation", _recommendationsRouter, default));
     }
 
 
@@ -37,18 +45,19 @@ public class RecommendationsControllerTests
     [InlineData(null)]
     public async Task RecommendationsPagePage_Should_ThrowException_When_RecommendationSlug_NullOrEmpty(string? recommendation)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendation("section slug", recommendation!, _recommendationsRouter, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendation("category-slug", "section slug", recommendation!, _recommendationsRouter, default));
     }
 
     [Fact]
     public async Task RecommendationsPagePage_Should_Call_RecommendationsRouter_When_Args_Valid()
     {
+        string categorySlug = "categorySlug";
         string sectionSlug = "section-slug";
         string recommendationSlug = "recommendation-slug";
 
-        await _recommendationsController.GetRecommendation(sectionSlug, recommendationSlug, _recommendationsRouter, default);
+        await _recommendationsController.GetRecommendation(categorySlug, sectionSlug, recommendationSlug, _recommendationsRouter, default);
 
-        await _recommendationsRouter.Received().ValidateRoute(sectionSlug, recommendationSlug, false, _recommendationsController, Arg.Any<CancellationToken>());
+        await _recommendationsRouter.Received().ValidateRoute(categorySlug, sectionSlug, false, _recommendationsController, Arg.Any<CancellationToken>());
     }
 
     [Theory]
@@ -87,11 +96,11 @@ public class RecommendationsControllerTests
     [Fact]
     public async Task RecommendationsPagePageChecklist_Should_Call_RecommendationsRouter_When_Args_Valid()
     {
+        string categorySlug = "category-slug";
         string sectionSlug = "section-slug";
-        string recommendationSlug = "recommendation-slug";
 
-        await _recommendationsController.GetRecommendationChecklist(sectionSlug, recommendationSlug, _recommendationsRouter, default);
+        await _recommendationsController.GetRecommendationChecklist(categorySlug, sectionSlug, _recommendationsRouter, default);
 
-        await _recommendationsRouter.Received().ValidateRoute(sectionSlug, recommendationSlug, true, _recommendationsController, Arg.Any<CancellationToken>());
+        await _recommendationsRouter.Received().ValidateRoute(categorySlug, sectionSlug, true, _recommendationsController, Arg.Any<CancellationToken>());
     }
 }
