@@ -54,7 +54,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
             Status.CompleteReviewed => checklist ?
                 await HandleChecklist(controller, categorySlug, sectionSlug, cancellationToken) :
                 await HandleCompleteStatus(controller, categorySlug, sectionSlug, cancellationToken),
-            Status.CompleteNotReviewed => controller.RedirectToCheckAnswers(sectionSlug),
+            Status.CompleteNotReviewed => controller.RedirectToCheckAnswers(categorySlug, sectionSlug),
             Status.InProgress => HandleQuestionStatus(sectionSlug, controller),
             Status.NotStarted => PageRedirecter.RedirectToHomepage(controller),
             _ => throw new InvalidOperationException($"Invalid journey status - {_router.Status}"),

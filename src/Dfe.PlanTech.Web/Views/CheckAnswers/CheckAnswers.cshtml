@@ -28,6 +28,7 @@
                     </dd>
                     <dd class="noprint govuk-summary-list__actions spacer">
                         <a asp-controller="Questions" asp-action="GetQuestionBySlug"
+                           asp-route-categorySlug="@Model.CategorySlug"
                            asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
                            asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
                            title="@questionWithAnswer.QuestionText">
@@ -42,6 +43,7 @@
             <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>
             <input type="hidden" name="sectionName" value="@Model.SectionName">
             <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
+            <input type="hidden" name="categorySlug" value="@Model.CategorySlug" />
 
             @{
                 foreach (var content in Model.Content)
@@ -50,7 +52,7 @@
                 }
             }
 
-            <govuk-button class="govuk-!-margin-right-5" type="submit" name="redirectOption" value="@RecommendationsController.GetRecommendationAction">Submit and view recommendations</govuk-button>
+            <govuk-button class="govuk-!-margin-right-5" type="submit">Submit and view recommendations</govuk-button>
 
             @if (Model.ErrorMessage != null)
             {

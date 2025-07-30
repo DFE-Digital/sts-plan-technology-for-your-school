@@ -121,7 +121,7 @@ public class QuestionsController : BaseController<QuestionsController>
             var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
             if (nextQuestion == null)
-                return this.RedirectToCheckAnswers(sectionSlug);
+                return this.RedirectToCheckAnswers(categorySlug, sectionSlug);
 
             return RedirectToAction(nameof(GetQuestionBySlug), new { categorySlug, sectionSlug, questionSlug = nextQuestion.Slug });
         }
@@ -198,7 +198,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
             if (submissionResponsesDto?.Responses == null)
             {
-                return this.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
+                return this.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
             }
 
             // Check answered questions
@@ -219,7 +219,7 @@ public class QuestionsController : BaseController<QuestionsController>
             }
 
             // No next questions so check answers
-            return this.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
+            return this.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
         }
 
         return RedirectToAction(nameof(GetNextUnansweredQuestion), new { categorySlug, sectionSlug });
