@@ -28,7 +28,7 @@
                     <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
                     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
                     <p class="govuk-body-s">
-                        <a href="/@sectionSlug/change-answers">View or update your self-assessment for @Model.Section.Name.ToLower()</a>
+                        <a href="/@categorySlug/@sectionSlug/change-answers">View or update your self-assessment for @Model.Section.Name.ToLower()</a>
                     </p>
                     <p class="govuk-body-s">
                         <a class="govuk-link" href="print">Print all recommendations for @Model.Section.Name.ToLower()</a>
@@ -56,14 +56,12 @@
                         <govuk-pagination>
                             @if (Model.PreviousChunk != null)
                             {
-                                <govuk-pagination-previous href="/@categorySlug/@sectionSlug/@Model.PreviousChunk.SlugifiedLinkText" label-text="@Model.PreviousChunk.LinkText"
-                                                           class="govuk-link--no-visited-state" />
+                                <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.SlugifiedLinkText" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state" />
                             }
 
                             @if (Model.NextChunk != null)
                             {
-                                <govuk-pagination-next href="/@categorySlug/@sectionSlug/@Model.NextChunk.SlugifiedLinkText" label-text="@Model.NextChunk.LinkText"
-                                                       class="govuk-link--no-visited-state" />
+                                <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.SlugifiedLinkText" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state" />
                             }
                         </govuk-pagination>
                     </div>
