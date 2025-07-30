@@ -44,6 +44,8 @@ namespace Dfe.PlanTech.Web.Routing
             ChangeAnswersController controller,
             CancellationToken cancellationToken)
         {
+            if (string.IsNullOrEmpty(categorySlug))
+                throw new ArgumentNullException(nameof(categorySlug));
             if (string.IsNullOrEmpty(sectionSlug))
                 throw new ArgumentNullException(nameof(sectionSlug));
 
