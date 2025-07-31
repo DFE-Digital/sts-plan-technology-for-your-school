@@ -1,9 +1,10 @@
-@model Dfe.PlanTech.Web.Models.PageViewModel;
+﻿@using Dfe.PlanTech.Application.Constants
+@model Dfe.PlanTech.Web.Models.PageViewModel
 
 @if (Model.DisplayBlueBanner)
 {
     @section DfePageHeaderOuter {
-        @if (Model.Page.DisplayBackButton)
+    @if (Model.Page.DisplayBackButton)
         {
             await Html.RenderPartialAsync("BackButton", Model);
         }
@@ -14,7 +15,7 @@
     }
 
     @section DfePageHeaderInner {
-        @foreach (var content in Model.Page.BeforeTitleContent)
+    @foreach (var content in Model.Page.BeforeTitleContent)
         {
             await Html.RenderPartialAsync("Components/PageComponentFactory", content);
         }
@@ -33,7 +34,7 @@
 else
 {
     @section BeforeContent {
-        @if (Model.Page.DisplayBackButton)
+    @if (Model.Page.DisplayBackButton)
         {
             await Html.RenderPartialAsync("BackButton", Model);
         }
@@ -42,6 +43,7 @@ else
             await Html.RenderPartialAsync("HomeButton", Model);
         }
     }
+
     foreach (var content in Model.Page.BeforeTitleContent)
     {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
@@ -75,5 +77,31 @@ else
         </div>
     }
 
-    await Html.RenderPartialAsync("Components/Page", Model.Page);
+    var isHomeCategoryPage = Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
+    var categories = Model.Page.Content.OfType<Dfe.PlanTech.Domain.Questionnaire.Models.Category>().ToList();
+    var otherComponents = Model.Page.Content.Where(c => c is not Dfe.PlanTech.Domain.Questionnaire.Models.Category);
+
+    @if (isHomeCategoryPage && categories.Any())
+    {
+        <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            @{
+                await Html.RenderPartialAsync("Components/Page", Model.Page);
+            }
+
+            <h2 class="govuk-heading-l">How to meet the digital and technology standards</h2>
+                <p>Complete self-assessments to receive recommendations for your school.</p>
+            <div class="dfe-grid-container">
+                @foreach (var category in categories)
+                {
+                    @await Component.InvokeAsync("CategorySection", new { category })
+                }
+            </div>
+        </div>
+        </div>
+    }
+    else
+    {
+        await Html.RenderPartialAsync("Components/Page", Model.Page);
+    }
 }

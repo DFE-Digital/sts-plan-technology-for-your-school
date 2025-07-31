@@ -1,9 +1,5 @@
 @using Dfe.PlanTech.Application.Constants
-@model Dfe.PlanTech.Domain.Questionnaire.Models.Category;
-
-@{
-    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
-}
+@model Dfe.PlanTech.Domain.Questionnaire.Models.Category
 
 @{
     var pageSlug = ViewData["PageSlug"] as string;
@@ -11,11 +7,8 @@
 
 @if (pageSlug == UrlConstants.GroupsDashboardSlug)
 {
+    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
+
     // Invoke GroupsDashboardViewComponent for Category content when the page slug is "dashboard"
     @await Component.InvokeAsync("GroupsDashboard", new { category = Model });
-}
-else
-{
-    // Default behavior
-    @await Component.InvokeAsync("CategorySection", new { category = Model });
 }
