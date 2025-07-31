@@ -104,6 +104,12 @@ variable "redis_tls_version" {
   default     = "1.2"
 }
 
+variable "redis_public_access_enabled" {
+  description = "Enable public access on the redis cache"
+  type        = bool
+  default     = false
+}
+
 ############
 # KeyVault #
 ############

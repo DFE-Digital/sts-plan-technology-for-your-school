@@ -75,6 +75,8 @@ locals {
     endpoint_name = "${local.resource_prefix}-redis-cache"
   }
 
+  redis_public_access_enabled = var.redis_public_access_enabled
+
   ##################
   # Azure KeyVault #
   ##################
