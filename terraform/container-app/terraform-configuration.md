@@ -134,6 +134,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | project name, used along with `environment` as a prefix for all resources | `string` | n/a | yes |
 | <a name="input_redis_capacity"></a> [redis\_capacity](#input\_redis\_capacity) | Redis cache capacity (0-6 for C and 1-5 for P) | `number` | `0` | no |
 | <a name="input_redis_family"></a> [redis\_family](#input\_redis\_family) | Redis cache family (C for basic/standard, P for premium) | `string` | `"C"` | no |
+| <a name="input_redis_public_access_enabled"></a> [redis\_public\_access\_enabled](#input\_redis\_public\_access\_enabled) | Enable public access on the redis cache | `bool` | `false` | no |
 | <a name="input_redis_sku_name"></a> [redis\_sku\_name](#input\_redis\_sku\_name) | SKU for Redis cache (Basic, Standard or Premium) | `string` | `"Standard"` | no |
 | <a name="input_redis_tls_version"></a> [redis\_tls\_version](#input\_redis\_tls\_version) | Minimum TLS version for Redis | `string` | `"1.2"` | no |
 | <a name="input_registry_password"></a> [registry\_password](#input\_registry\_password) | Container registry password | `string` | n/a | yes |
