@@ -90,12 +90,6 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
         var responses = await GetLatestResponsesForSection(isChangeAnswersFlow, cancellationToken);
 
-        if (responses is null)
-        {
-            throw new InvalidOperationException(
-                $"No responses were found for section '{_router.Section.Sys.Id}'");
-        }
-
         var isAttachedQuestion = IsQuestionAttached(responses, question);
 
         if (!isAttachedQuestion)
