@@ -78,6 +78,8 @@ public class QuestionsController : BaseController<QuestionsController>
     {
         if (string.IsNullOrEmpty(categorySlug))
             throw new ArgumentNullException(nameof(categorySlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
 
         var interstitialPage = await _getPageQuery.GetPageBySlug(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section: {sectionSlug}");

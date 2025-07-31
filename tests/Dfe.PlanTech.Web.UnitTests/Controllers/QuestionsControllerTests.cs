@@ -253,10 +253,11 @@ public class QuestionsControllerTests
     [Fact]
     public async Task SubmitAnswer_Should_Return_To_Question_When_Invalid_ModelState()
     {
-        var errorMessages = new[] {
-      "QuestionId cannot be null",
-      "QuestionText cannot be null"
-    };
+        var errorMessages = new[]
+        {
+            "QuestionId cannot be null",
+            "QuestionText cannot be null"
+        };
         var submitAnswerDto = new SubmitAnswerDto();
         var cancellationToken = CancellationToken.None;
 
@@ -470,5 +471,49 @@ public class QuestionsControllerTests
         var model = Assert.IsType<QuestionViewModel>(viewResult.Model);
         Assert.NotNull(model.ErrorMessages);
         Assert.Contains("Save failed. Please try again later.", model.ErrorMessages);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task GetInterstitialPage_Should_Throw_Exception_When_CategorySlug_NullOrEmpty(string? categorySlug)
+    {
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetInterstitialPage(categorySlug!, SectionSlug));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public async Task GetInterstitialPage_Should_Throw_Exception_When_SectionSlug_NullOrEmpty(string? sectionSlug)
+    {
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetInterstitialPage(CategorySlug, sectionSlug!));
+    }
+
+    [Fact]
+    public async Task GetInterstitialPage_Should_Throw_Exception_When_No_InterstitialPage_For_Slug()
+    {
+        var action = () => _controller.GetInterstitialPage(CategorySlug, "invalid-section");
+        await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(action);
+    }
+
+    [Fact]
+    public async Task GetInterstitialPage_Should_Return_Valid_ViewModel()
+    {
+        var sectionSlug = "interstitial-page";
+        var interstitialPage = new Page()
+        {
+            Slug = sectionSlug
+        };
+        _getPageQuery.GetPageBySlug(sectionSlug).Returns(interstitialPage);
+
+        var result = await _controller.GetInterstitialPage("category-slug", sectionSlug);
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal("~/Views/Pages/Page.cshtml", viewResult.ViewName);
+
+        var viewModel = Assert.IsType<PageViewModel>(viewResult.Model);
+
+        Assert.NotNull(viewModel);
+        Assert.Equal(interstitialPage, viewModel.Page);
     }
 }

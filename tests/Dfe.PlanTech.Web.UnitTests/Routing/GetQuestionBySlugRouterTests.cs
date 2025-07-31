@@ -367,4 +367,32 @@ public class GetQuestionBySlugRouterTests
         Assert.Equal(responseForQuestion.AnswerRef, model.AnswerRef);
         Assert.Equal(firstQuestion, model.Question);
     }
+
+    [Fact]
+    public async Task Should_Redirect_To_InterstitialPage_If_SectionStatus_NotStarted()
+    {
+        Assert.NotNull(_section.InterstitialPage);
+
+        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
+                                  .Do(callinfo =>
+                                  {
+                                      _submissionStatusProcessor.NextQuestion = _section.Questions[0];
+                                      _submissionStatusProcessor.Status = Status.NotStarted;
+                                      _submissionStatusProcessor.Section.Returns(_section);
+                                  });
+
+        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, "different-question-slug", _controller, default);
+
+        var redirectResult = result as RedirectToActionResult;
+
+        Assert.NotNull(redirectResult);
+
+        Assert.Equal(PagesController.ControllerName, redirectResult.ControllerName);
+        Assert.Equal(PagesController.GetPageByRouteAction, redirectResult.ActionName);
+
+        var route = redirectResult.RouteValues?["route"];
+
+        Assert.NotNull(route);
+        Assert.Equal(_section.InterstitialPage.Slug, route);
+    }
 }
