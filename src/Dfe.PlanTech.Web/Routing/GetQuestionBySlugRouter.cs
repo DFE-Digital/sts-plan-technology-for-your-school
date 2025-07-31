@@ -42,6 +42,8 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <exception cref="ArgumentNullException"></exception>
     public async Task<IActionResult> ValidateRoute(string categorySlug, string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(categorySlug))
+            throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug))
