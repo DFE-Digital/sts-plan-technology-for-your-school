@@ -1,7 +1,8 @@
-using System.Data;
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Routing;
 using Microsoft.AspNetCore.Mvc;
@@ -57,11 +58,35 @@ public class RecommendationsControllerTests
     {
         string categorySlug = "categorySlug";
         string sectionSlug = "section-slug";
-        string recommendationSlug = "recommendation-slug";
+        string chunkSlug = "test-chunk-one";
 
-        await _recommendationsController.GetSingleRecommendation(categorySlug, sectionSlug, recommendationSlug, _recommendationsRouter, _getPageQuery, default);
+        var categoryLandingPage = new Page()
+        {
+            Slug = categorySlug,
+            Content = new List<ContentComponent>()
+            {
+                new Category()
+                {
+                    Header = new Header(){ Text = "Test category" }
+                }
+            }
+        };
 
-        await _recommendationsRouter.Received().ValidateRoute(categorySlug, sectionSlug, false, _recommendationsController, Arg.Any<CancellationToken>());
+        var section = new Section() { InterstitialPage = new Page() { Slug = sectionSlug } };
+        var testChunk1 = new RecommendationChunk() { Header = "Test chunk one" };
+        var testChunk2 = new RecommendationChunk() { Header = "Test chunk two" };
+        var testChunk3 = new RecommendationChunk() { Header = "Test chunk three" };
+        var allTestChunks = new List<RecommendationChunk> { testChunk1, testChunk2, testChunk3 };
+
+        _getPageQuery.GetPageBySlug(categorySlug).Returns(categoryLandingPage);
+        _recommendationsRouter.GetSingleRecommendation(sectionSlug, chunkSlug, _recommendationsController, Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult((section, testChunk1, allTestChunks)));
+
+        var result = await _recommendationsController.GetSingleRecommendation(
+            categorySlug, sectionSlug, chunkSlug, _recommendationsRouter, _getPageQuery, CancellationToken.None);
+
+        await _recommendationsRouter.Received().GetSingleRecommendation(
+            sectionSlug, chunkSlug, _recommendationsController, Arg.Any<CancellationToken>());
     }
 
     [Theory]

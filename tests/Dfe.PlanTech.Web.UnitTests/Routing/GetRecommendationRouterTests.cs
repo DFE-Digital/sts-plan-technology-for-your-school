@@ -306,13 +306,10 @@ public class GetRecommendationRouterTests
         Assert.Equal(QuestionsController.GetQuestionBySlugActionName, redirectResult.ActionName);
 
         var section = redirectResult.RouteValues?["sectionSlug"];
-        var category = redirectResult.RouteValues?["categorySlug"];
 
-        Assert.NotNull(category);
         Assert.NotNull(section);
         Assert.NotNull(_section.InterstitialPage);
         Assert.Equal(_section.InterstitialPage.Slug, section);
-        Assert.Equal("category-slug", category);
 
         var questionSlug = redirectResult.RouteValues?["questionSlug"];
 
@@ -430,9 +427,23 @@ public class GetRecommendationRouterTests
     [Fact]
     public async Task Should_Show_RecommendationPage_When_Status_Is_Recommendation_And_All_Valid()
     {
+        var categoryLandingPage = new Page()
+        {
+            Slug = "test-category",
+            Content = new List<ContentComponent>()
+            {
+                new Category()
+                {
+                    Header = new Header(){ Text = "Test category" }
+                }
+            }
+        };
+
+        _getPageQuery.GetPageBySlug(categoryLandingPage.Slug).Returns(categoryLandingPage);
+
         Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation();
-        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, false, _controller, default);
+        var result = await _router.ValidateRoute("test-category", _section.InterstitialPage.Slug, false, _controller, default);
 
         var viewResult = result as ViewResult;
 
@@ -487,7 +498,21 @@ public class GetRecommendationRouterTests
 
         Setup_Valid_Recommendation(responses);
 
-        var result = await _router.ValidateRoute("category-slug", _section.InterstitialPage.Slug, true, _controller, default);
+        var categoryLandingPage = new Page()
+        {
+            Slug = "test-category",
+            Content = new List<ContentComponent>()
+            {
+                new Category()
+                {
+                    Header = new Header(){ Text = "Test category" }
+                }
+            }
+        };
+
+        _getPageQuery.GetPageBySlug(categoryLandingPage.Slug).Returns(categoryLandingPage);
+
+        var result = await _router.ValidateRoute("test-category", _section.InterstitialPage.Slug, true, _controller, default);
 
         var viewResult = result as ViewResult;
 

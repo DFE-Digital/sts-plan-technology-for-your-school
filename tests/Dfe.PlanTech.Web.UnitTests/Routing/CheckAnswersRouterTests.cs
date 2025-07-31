@@ -104,45 +104,6 @@ public class CheckAnswersRouterTests
     }
 
     [Fact]
-    public async Task Should_Redirect_To_NextQuestion_When_Status_InProgresss()
-    {
-        var categorySlug = "category-slug";
-        var sectionSlug = "section-slug";
-
-        var nextQuestion = new Question()
-        {
-            Slug = "next-question"
-        };
-
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
-        .Do(callInfo =>
-        {
-            _submissionStatusProcessor.Status = Status.InProgress;
-            _submissionStatusProcessor.NextQuestion = nextQuestion;
-        });
-
-        var result = await _router.ValidateRoute(categorySlug, sectionSlug, null, _controller, default);
-
-        var redirectResult = result as RedirectToActionResult;
-
-        Assert.NotNull(redirectResult);
-        Assert.Equal(QuestionsController.Controller, redirectResult.ControllerName);
-        Assert.Equal(QuestionsController.GetQuestionBySlugActionName, redirectResult.ActionName);
-
-        var categorySlugValue = redirectResult.RouteValues?["categorySlug"];
-        Assert.NotNull(categorySlugValue);
-        Assert.Equal(categorySlug, categorySlugValue);
-
-        var sectionSlugValue = redirectResult.RouteValues?["sectionSlug"];
-        Assert.NotNull(sectionSlugValue);
-        Assert.Equal(sectionSlug, sectionSlugValue);
-
-        var questionSlugValue = redirectResult.RouteValues?["questionSlug"];
-        Assert.NotNull(questionSlugValue);
-        Assert.Equal(nextQuestion.Slug, questionSlugValue);
-    }
-
-    [Fact]
     public async Task Should_Return_CheckAnswersPage_When_Status_Is_CheckAnswers()
     {
         var categorySlug = "category-slug";

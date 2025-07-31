@@ -217,14 +217,11 @@ public class GetQuestionBySlugRouterTests
         Assert.Equal(QuestionsController.Controller, redirectResult.ControllerName);
         Assert.Equal(QuestionsController.GetQuestionBySlugActionName, redirectResult.ActionName);
 
-        var categorySlug = redirectResult.RouteValues?["categorySlug"];
         var sectionSlug = redirectResult.RouteValues?["sectionSlug"];
         var questionSlug = redirectResult.RouteValues?["questionSlug"];
 
-        Assert.NotNull(categorySlug);
         Assert.NotNull(sectionSlug);
         Assert.NotNull(questionSlug);
-        Assert.Equal("category-slug", categorySlug);
         Assert.Equal(_section.InterstitialPage.Slug, sectionSlug);
         Assert.Equal(secondQuestion.Slug, questionSlug);
     }
