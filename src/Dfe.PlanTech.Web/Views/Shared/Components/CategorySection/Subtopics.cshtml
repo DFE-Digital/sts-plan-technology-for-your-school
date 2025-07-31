@@ -1,87 +1,39 @@
 @using Dfe.PlanTech.Domain.CategorySection
+@using Dfe.PlanTech.Web.Helpers
 @using Dfe.PlanTech.Web.TagHelpers.TaskList
 @using GovUk.Frontend.AspNetCore.TagHelpers
 @using AnchorTagHelper = Microsoft.AspNetCore.Mvc.TagHelpers.AnchorTagHelper
 @model CategorySectionViewComponentViewModel
 
-<dl class="dfe-grid-container govuk-!-width-two-thirds">
-    @foreach (var categorySectionDtoItem in Model.CategorySectionDto)
-    {
-        <div class="dfe-card">
-            <div class="dfe-card-container">
-                @if (categorySectionDtoItem.Slug != null)
-                {
-                    string statusText;
-                    string? controller = null;
-                    string? action = null;
-                    Dictionary<string, string>? routeValues = null;
-                    string? sectionSlug = null;
-                    string? recommendationSlug = null;
+    <div class="dfe-card">
+        <div class="dfe-card-container">
+            <h3 class="govuk-heading-m">
+                <a href="@Model.CategorySlug" class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
+                    @Model.CategoryHeaderText
+                </a>
+            </h3>
 
-                    switch (categorySectionDtoItem.ProgressStatus)
-                    {
-                        case SectionProgressStatus.StartedNeverCompleted:
-                            statusText = "Continue self-assessment";
-                            controller = "Questions";
-                            action = "GetNextUnansweredQuestion";
-                            routeValues = new Dictionary<string, string>
-                            {                             
-                                ["sectionSlug"] = $"{categorySectionDtoItem.Slug}" ?? string.Empty,
-                            };
-                            break;
-
-                        case SectionProgressStatus.InProgress:
-                        case SectionProgressStatus.CompletedStartedNew:
-                        case SectionProgressStatus.Completed:
-                            statusText = "View recommendations";
-                            if (categorySectionDtoItem.Recommendation != null)
-                            {
-                                sectionSlug = categorySectionDtoItem.Recommendation.SectionSlug;
-                                recommendationSlug = categorySectionDtoItem.Recommendation.RecommendationSlug;
-                            }
-                            break;
-
-                        default:
-                            statusText = "Start self-assessment";
-                            controller = "Pages";
-                            action = "GetByRoute";
-                            routeValues = new Dictionary<string, string>
-                            {
-                                ["route"] = categorySectionDtoItem.Slug ?? string.Empty
-                            };
-                            break;
-                    }
-
-                    <h3 class="govuk-heading-m">
-                        @if (!string.IsNullOrEmpty(controller) && !string.IsNullOrEmpty(action))
-                        {
-                            <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
-                               class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
-                                @categorySectionDtoItem.Name
-                            </a>
-                        }
-                        else
-                        {
-                            @await Html.PartialAsync("Components/CategorySection/SubtopicRecommendation", (
-                                     categorySectionDtoItem.Name,
-                                     sectionSlug,
-                                     recommendationSlug,
-                                     categorySectionDtoItem.Recommendation?.NoRecommendationFoundErrorMessage
-                            ))
-                        }
-                    </h3>
-
-                    <p class="govuk-body-s">
-                        @statusText
-                    </p>
-                }
-                else
-                {
-                    <dt class="govuk-summary-list__key">
-                        <govuk-error-message>@categorySectionDtoItem.ErrorMessage</govuk-error-message>
-                    </dt>
-                }
-            </div>
+            <p class="govuk-body-s">
+                @GetStatusText(Model.CompletedSectionCount, Model.TotalSectionCount)
+            </p>
         </div>
+    </div>
+
+@functions {
+    public static string GetStatusText(int completed, int total)
+    {
+        if (completed == 0 && total == 1)
+        {
+            return "Start self-assessment";
+        }
+
+        if (completed == 0)
+        {
+            return "Start self-assessments";
+        }
+
+        return completed < total
+            ? "Continue self-assessments"
+            : "View recommendations";
     }
-</dl>
+}

@@ -46,8 +46,10 @@ public class CategorySectionViewComponent(
         return new CategorySectionViewComponentViewModel
         {
             Description = category.Content is { Count: > 0 } content ? content[0] : new MissingComponent(),
+            CategoryHeaderText = category.Header.Text,
             CompletedSectionCount = category.Completed,
             TotalSectionCount = category.Sections.Count,
+            CategorySlug = category.LandingPage?.Slug,
             CategorySectionDto = await GetCategorySectionDto(category).ToListAsync(),
             ProgressRetrievalErrorMessage = category.RetrievalError
                 ? "Unable to retrieve progress, please refresh your browser."
