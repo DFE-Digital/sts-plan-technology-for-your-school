@@ -49,7 +49,7 @@ public class ChangeAnswersController : BaseController<ChangeAnswersController>
     }
 
     [HttpGet("recommendations/from-section/{sectionSlug}")]
-    public async Task<IActionResult> RedirectToRecommendation(string sectionSlug)
+    public IActionResult RedirectToRecommendation(string sectionSlug)
     {
         var subtopicRecommendationIntroSlug = _reviewAnswersViewBuilder.RouteToSubtopicRecommendationIntroSlugAsync(this, sectionSlug);
 

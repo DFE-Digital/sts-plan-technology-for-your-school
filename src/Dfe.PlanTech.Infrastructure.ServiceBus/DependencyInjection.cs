@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
@@ -57,7 +58,7 @@ public static class DependencyInjection
         services.AddTransient<IQueueWriter, QueueWriter>();
         services.AddTransient<IWriteCmsWebhookToQueueCommand, WriteCmsWebhookToQueueCommand>();
 
-        services.Configure<ServiceBusOptions>(configuration.GetSection(nameof(ServiceBusOptions)));
+        services.Configure<ServiceBusOptions>(configuration.GetRequiredSection(ConfigurationConstants.ServiceBusOptions));
         return services;
     }
 
@@ -66,7 +67,7 @@ public static class DependencyInjection
         services.AddOptions<MessageRetryHandlingOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>
                 {
-                    configuration.GetSection("MessageRetryHandlingOptions").Bind(settings);
+                    configuration.GetSection(ConfigurationConstants.MessageRetryHandlingOptions).Bind(settings);
                 });
 
         services.AddTransient<IMessageRetryHandler, MessageRetryHandler>();

@@ -1,6 +1,8 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Rendering;
+using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,6 +28,29 @@ public static class ServiceCollectionExtensions
         }
 
         return services;
+    }
+
+    public static IServiceCollection AddApplicationServices(this IServiceCollection services)
+    {
+        return services
+            .AddScoped<ContentfulService>()
+            .AddScoped<EstablishmentService>()
+            .AddScoped<GroupService>()
+            .AddScoped<QuestionService>()
+            .AddScoped<RecommendationService>()
+            .AddScoped<SubmissionService>();
+    }
+
+    public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)
+    {
+        return services
+            .AddScoped<ContentfulWorkflow>()
+            .AddScoped<EstablishmentWorkflow>()
+            .AddScoped<RecommendationWorkflow>()
+            .AddScoped<ResponseWorkflow>()
+            .AddScoped<SignInWorkflow>()
+            .AddScoped<SubmissionWorkflow>()
+            .AddScoped<UserWorkflow>();
     }
 
     private static Func<Type, bool> IsContentRenderer(Type contentRendererType) => (type) =>

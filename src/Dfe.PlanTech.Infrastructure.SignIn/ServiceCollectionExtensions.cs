@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -14,16 +16,8 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 namespace Dfe.PlanTech.Infrastructure.SignIns;
 
-/// <summary>
-/// Class for creating ILogger, as that requires a type
-/// </summary>
-public class DfeSignIn
-{
-
-}
-
 [ExcludeFromCodeCoverage]
-public static class DfeSignInSetup
+public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddDfeSignIn(this IServiceCollection services, IConfiguration configuration)
     {
@@ -99,7 +93,7 @@ public static class DfeSignInSetup
     private static DfeSignInConfiguration GetDfeSignInConfig(IConfiguration configuration)
     {
         var config = new DfeSignInConfiguration();
-        configuration.GetSection("DfeSignIn").Bind(config);
+        configuration.GetRequiredSection(ConfigurationConstants.DfeSignIn).Bind(config);
         return config;
     }
 }

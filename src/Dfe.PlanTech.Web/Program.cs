@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Core.Options;
+using Dfe.PlanTech.Application;
+using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIns;
 using Dfe.PlanTech.Web;
@@ -31,27 +31,31 @@ if (builder.Environment.EnvironmentName != "E2E")
     builder.Services.AddDbWriterServices(builder.Configuration);
 }
 
-builder.Services.AddCustomTelemetry();
-builder.Services.Configure<ErrorMessagesConfiguration>(builder.Configuration.GetSection("ErrorMessages"));
-builder.Services.Configure<ErrorPagesConfiguration>(builder.Configuration.GetSection("ErrorPages"));
-builder.Services.Configure<ContactOptionsConfiguration>(builder.Configuration.GetSection("ContactUs"));
-builder.Services.Configure<AutomatedTestingOptions>(builder.Configuration.GetSection("AutomatedTesting"));
+builder.AddSystemConfiguration();
+builder.AddContentAndSupportConfiguration();
 
-builder.AddContentAndSupportServices()
-        .AddAuthorisationServices()
-        .AddCaching()
-        .AddContentfulServices(builder.Configuration)
-        .AddCspConfiguration()
-        .AddDatabase(builder.Configuration)
-        .AddDfeSignIn(builder.Configuration)
-        .AddExceptionHandlingServices()
-        .AddGoogleTagManager()
-        .AddGovUkFrontend()
-        .AddHttpContextAccessor()
-        .AddRoutingServices()
-        .AddRedisServices(builder.Configuration);
+builder.Services
+    .AddGovUkFrontend()
+    .AddHttpContextAccessor();
 
-builder.Services.Configure<RobotsConfiguration>(builder.Configuration.GetSection("Robots"));
+builder.Services
+    .AddAuthorisationServices()
+    .AddCaching()
+    .AddContentfulServices(builder.Configuration)
+    .AddCookies(builder.Configuration)
+    .AddCurrentUser()
+    .AddCustomTelemetry()
+    .AddDatabase(builder.Configuration)
+    .AddDfeSignIn(builder.Configuration)
+    .AddExceptionHandlingServices()
+    .AddGoogleTagManager()
+    .AddRoutingServices()
+    .AddRedisServices(builder.Configuration)
+    .AddRepositories();
+
+builder.Services
+    .AddApplicationServices()
+    .AddApplicationWorkflows();
 
 var app = builder.Build();
 
@@ -64,7 +68,8 @@ app.UseCookiePolicy(
     new CookiePolicyOptions
     {
         Secure = CookieSecurePolicy.Always
-    });
+    }
+);
 
 app.UseForwardedHeaders();
 

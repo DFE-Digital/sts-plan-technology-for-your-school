@@ -1,15 +1,15 @@
 ﻿using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
+using Dfe.PlanTech.Data.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows
 {
     public class RecommendationWorkflow(
-        ContentfulRepository contentfulRepository
+        IContentfulRepository contentfulRepository
     )
     {
-        private readonly ContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
+        private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
 
         public async Task<int> GetRecommendationChunkCount(int page)
         {

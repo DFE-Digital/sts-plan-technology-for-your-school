@@ -17,20 +17,20 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class QuestionsViewBuilder(
     ILoggerFactory loggerFactory,
     IOptions<ContactOptionsConfiguration> contactOptions,
+    IOptions<ErrorMessagesConfiguration> errorMessages,
     IOptions<ErrorPagesConfiguration> errorPages,
     ContentfulOptionsConfiguration contentfulOptions,
     CurrentUser currentUser,
     ContentfulService contentfulService,
-    ErrorMessagesConfiguration errorMessages,
     QuestionService questionService,
     SubmissionService submissionService
 ) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
 {
     private ILogger<QuestionsViewBuilder> _logger = loggerFactory.CreateLogger<QuestionsViewBuilder>();
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private ErrorMessagesConfiguration _errorMessages = errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
     private ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
-    private ErrorMessagesConfiguration _errorMessages = errorMessages ?? throw new ArgumentNullException(nameof(errorMessages));
     private QuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
     private SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 

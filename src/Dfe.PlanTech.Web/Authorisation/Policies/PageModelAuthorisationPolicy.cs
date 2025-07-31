@@ -13,12 +13,10 @@ namespace Dfe.PlanTech.Web.Authorisation.Policies;
 /// Checks user authorisation for the current page, and retrieves a given <see cref="Page"/> from Contentful if needed for the request.
 /// </summary>
 public class PageModelAuthorisationPolicy(
-    ILoggerFactory loggerFactory,
-    ContentfulService contentfulService
+    ILoggerFactory loggerFactory
 ) : AuthorizationHandler<PageAuthorisationRequirement>
 {
     private readonly ILogger<PageModelAuthorisationPolicy> _logger = loggerFactory.CreateLogger<PageModelAuthorisationPolicy>();
-    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     private const string IndexSlug = "/";
     public const string PolicyName = "UsePageAuthentication";
@@ -92,7 +90,9 @@ public class PageModelAuthorisationPolicy(
     /// </remarks>
     private async Task<CmsPageDto?> GetPageForSlug(HttpContext httpContext, string slug)
     {
-        var page = await _contentfulService.GetPageBySlugAsync(slug);
+        using var scope = httpContext.RequestServices.CreateAsyncScope();
+        var contentfulService = scope.ServiceProvider.GetRequiredService<ContentfulService>();
+        var page = await contentfulService.GetPageBySlugAsync(slug);
         httpContext.Items.Add(nameof(CmsPageDto), page);
 
         return page;

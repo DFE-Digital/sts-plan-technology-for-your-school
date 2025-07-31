@@ -7,20 +7,18 @@ using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
-using Dfe.PlanTech.Data.Contentful.Persistence;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
+namespace Dfe.PlanTech.Data.Contentful.Persistence;
 
 /// <summary>
 /// Encapsulates ContentfulClient functionality, whilst abstracting through the IEntityRepository interface
 /// </summary>
-/// <see href="IEntityRepository"/>
-public abstract class ContentfulRepository : IContentfulRepository
+public class ContentfulRepository : IContentfulRepository
 {
-    private readonly ILogger<ContentfulRepository> _logger;
+    private readonly ILogger<IContentfulRepository> _logger;
     private readonly IContentfulClient _client;
     private readonly IHostEnvironment _hostEnvironment;
     private readonly AutomatedTestingOptions _automatedTestingOptions;
@@ -32,7 +30,7 @@ public abstract class ContentfulRepository : IContentfulRepository
         IOptions<AutomatedTestingOptions> automatedTestingOptions
     )
     {
-        _logger = loggerFactory.CreateLogger<ContentfulRepository>();
+        _logger = loggerFactory.CreateLogger<IContentfulRepository>();
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
         _automatedTestingOptions = automatedTestingOptions?.Value ?? throw new ArgumentNullException(nameof(automatedTestingOptions));
@@ -151,7 +149,7 @@ public abstract class ContentfulRepository : IContentfulRepository
         }
     }
 
-    GetEntriesOptions IContentfulRepository.GetEntryByIdOptions(string id, int include = 2)
+    GetEntriesOptions IContentfulRepository.GetEntryByIdOptions(string id, int include)
     {
         if (string.IsNullOrEmpty(id))
             throw new ArgumentNullException(nameof(id));

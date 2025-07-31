@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,7 +17,10 @@ public static class OnUserInformationReceivedEvent
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static async Task RecordUserSignIn(ILogger<DfeSignIn> logger, UserInformationReceivedContext context)
+    public static async Task RecordUserSignIn(
+        ILogger<DfeSignIn> logger,
+        UserInformationReceivedContext context
+    )
     {
         if (context.Principal?.Identity == null || !context.Principal.Identity.IsAuthenticated)
         {

@@ -19,7 +19,9 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
         public CmsNavigationLinkDto(NavigationLinkEntry navigationLinkEntry)
         {
             Id = navigationLinkEntry.Id;
-            ContentToLinkTo = BuildContentDto(navigationLinkEntry.ContentToLinkTo);
+            ContentToLinkTo = navigationLinkEntry.ContentToLinkTo is null
+                ? null
+                : BuildContentDto(navigationLinkEntry.ContentToLinkTo);
             InternalName = navigationLinkEntry.InternalName;
             DisplayText = navigationLinkEntry.DisplayText;
             Href = navigationLinkEntry.Href;

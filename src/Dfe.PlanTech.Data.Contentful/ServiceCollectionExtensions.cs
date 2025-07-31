@@ -1,9 +1,9 @@
-
 using System.Diagnostics.CodeAnalysis;
 using Contentful.Core;
 using Contentful.Core.Configuration;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
+using Dfe.PlanTech.Data.Contentful.Persistence;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,22 +17,26 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="configuration"></param>
-    /// <param name="section"></param>
-    /// <param name="setupClient">Action to setup ContentfulClient (e.g. retry policy)</param>
+    /// <param name="addRetryPolicy">Action to set up Contentful client (add retry policy)</param>
     /// <see cref="IContentfulClient"/>
     /// <see cref="ContentfulClient"/>
-    public static IServiceCollection SetupContentfulClient(this IServiceCollection services, IConfiguration configuration, string section, Action<IHttpClientBuilder> setupClient)
+    public static IServiceCollection SetupContentfulClient(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        Action<IHttpClientBuilder> addRetryPolicy
+    )
     {
-        var options = configuration.GetSection(section).Get<ContentfulOptions>() ?? throw new KeyNotFoundException(nameof(ContentfulOptions));
+        var options = configuration.GetRequiredSection(ConfigurationConstants.Contentful).Get<ContentfulOptions>()
+            ?? throw new KeyNotFoundException(nameof(ContentfulOptions));
 
         services.AddSingleton(options);
 
-        services.AddScoped<IContentfulClient, ContentfulClient>();
-        services.AddKeyedScoped<IContentfulRepository, ContentfulRepository>("contentfulRepository");
-        services.AddScoped<IContentfulRepository, CachedContentfulRepository>();
+        services
+            .AddScoped<IContentfulClient, ContentfulClient>()
+            .AddKeyedScoped<IContentfulRepository, ContentfulRepository>(KeyedServiceConstants.ContentfulRepository)
+            .AddScoped<IContentfulRepository, CachedContentfulRepository>();
 
-
-        setupClient(services.AddHttpClient<ContentfulClient>());
+        addRetryPolicy(services.AddHttpClient<ContentfulClient>());
 
         return services;
     }

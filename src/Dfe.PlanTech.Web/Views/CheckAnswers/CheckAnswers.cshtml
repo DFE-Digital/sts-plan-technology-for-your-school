@@ -15,28 +15,31 @@
             await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
         }
         <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-            @foreach (var questionWithAnswer in Model.SubmissionResponses.Responses)
-            {
-                var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
+			@if (Model.SubmissionResponses?.Responses is not null)
+			{
+				@foreach (var questionWithAnswer in Model.SubmissionResponses.Responses)
+				{
+					var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
 
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key spacer">
-                        @questionWithAnswer.QuestionText
-                    </dt>
-                    <dd class="govuk-summary-list__value spacer">
-                        @questionWithAnswer.AnswerText
-                    </dd>
-                    <dd class="noprint govuk-summary-list__actions spacer">
-                        <a asp-controller="Questions" asp-action="GetQuestionBySlug"
-                           asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
-                           asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
-                           title="@questionWithAnswer.QuestionText">
-                            Change
-                            <span class="govuk-visually-hidden">@anchorLabel</span>
-                        </a>
-                    </dd>
-                </div>
-            }
+					<div class="govuk-summary-list__row">
+						<dt class="govuk-summary-list__key spacer">
+							@questionWithAnswer.QuestionText
+						</dt>
+						<dd class="govuk-summary-list__value spacer">
+							@questionWithAnswer.AnswerText
+						</dd>
+						<dd class="noprint govuk-summary-list__actions spacer">
+							<a asp-controller="Questions" asp-action="GetQuestionBySlug"
+							   asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
+							   asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
+							   title="@questionWithAnswer.QuestionText">
+								Change
+								<span class="govuk-visually-hidden">@anchorLabel</span>
+							</a>
+						</dd>
+					</div>
+				}
+			}
         </dl>
         <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post" class="noprint">
             <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>

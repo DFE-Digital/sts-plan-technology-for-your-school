@@ -26,7 +26,7 @@ public class PagesController(
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public async Task<IActionResult> GetByRoute([ModelBinder(typeof(PageModelBinder))] CmsPageDto? page)
+    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] CmsPageDto? page)
     {
         if (page == null)
         {

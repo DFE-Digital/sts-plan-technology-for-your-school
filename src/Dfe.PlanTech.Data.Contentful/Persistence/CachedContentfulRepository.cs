@@ -1,37 +1,35 @@
 using Dfe.PlanTech.Core.Caching.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
+namespace Dfe.PlanTech.Data.Contentful.Persistence;
 
 /// <summary>
 /// Encapsulates ContentfulClient functionality, whilst abstracting through the IEntryRepository interface
 /// </summary>
-/// <see href="IEntryRepository"/>
-public class CachedContentfulRepository : IContentfulRepository
-{
-    private readonly IContentfulRepository _contentRepository;
-    private readonly ICmsCache _cache;
+public class CachedContentfulRepository(
+    [FromKeyedServices(KeyedServiceConstants.ContentfulRepository)] IContentfulRepository contentfulRepository,
+    ICmsCache cmsCache
 
-    public CachedContentfulRepository([FromKeyedServices("contentfulRepository")] IContentfulRepository contentRepository, ICmsCache cache)
-    {
-        _contentRepository = contentRepository ?? throw new ArgumentNullException(nameof(contentRepository));
-        _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-    }
+) : IContentfulRepository
+{
+    private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
+    private readonly ICmsCache _cmsCache = cmsCache ?? throw new ArgumentNullException(nameof(cmsCache));
 
     public async Task<int> GetEntriesCount<TEntry>()
     {
-        return await _contentRepository.GetEntriesCount<TEntry>();
+        return await _contentfulRepository.GetEntriesCount<TEntry>();
     }
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
     {
         string contentType = GetContentTypeName<TEntry>();
         var key = $"{contentType}s";
 
-        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntriesAsync<TEntry>()) ?? [];
+        return await _cmsCache.GetOrCreateAsync(key, async () => await _contentfulRepository.GetEntriesAsync<TEntry>()) ?? [];
     }
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options)
@@ -40,11 +38,11 @@ public class CachedContentfulRepository : IContentfulRepository
         var jsonOptions = options.SerializeToRedisFormat();
         var key = $"{contentType}{jsonOptions}";
 
-        return await _cache.GetOrCreateAsync(key, async () => await _contentRepository.GetEntriesAsync<TEntry>(options)) ?? [];
+        return await _cmsCache.GetOrCreateAsync(key, async () => await _contentfulRepository.GetEntriesAsync<TEntry>(options)) ?? [];
     }
     public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options)
     {
-        return await _contentRepository.GetPaginatedEntriesAsync<TEntry>(options) ?? [];
+        return await _contentfulRepository.GetPaginatedEntriesAsync<TEntry>(options) ?? [];
     }
 
     public async Task<TEntry?> GetEntryByIdAsync<TEntry>(string id, int include = 2)
@@ -60,7 +58,7 @@ public class CachedContentfulRepository : IContentfulRepository
 
     public GetEntriesOptions GetEntryByIdOptions(string id, int include = 2)
     {
-        return _contentRepository.GetEntryByIdOptions(id, include);
+        return _contentfulRepository.GetEntryByIdOptions(id, include);
     }
 
     private static string GetContentTypeName<TEntry>()

@@ -4,15 +4,15 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class ContentfulWorkflow(
     ILoggerFactory loggerFactory,
-    ContentfulRepository contentfulRepository,
+    IContentfulRepository contentfulRepository,
     GetPageFromContentfulOptions getPageOptions
 )
 {
@@ -20,7 +20,7 @@ public class ContentfulWorkflow(
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
 
     private readonly ILogger<ContentfulWorkflow> _logger = loggerFactory.CreateLogger<ContentfulWorkflow>();
-    private readonly ContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
+    private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
     private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
 
     public async Task<TDto> GetEntryById<TEntry, TDto>(string entryId)

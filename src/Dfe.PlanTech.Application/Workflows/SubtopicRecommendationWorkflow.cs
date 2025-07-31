@@ -2,17 +2,18 @@
 using Dfe.PlanTech.Core.Content.Queries;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
 
 public class SubtopicRecommendationWorkflow(
     ILoggerFactory loggerFactory,
-    ContentfulRepository contentfulRepository
+    IContentfulRepository contentfulRepository
 )
 {
     private readonly ILogger<SubtopicRecommendationWorkflow> _logger = loggerFactory.CreateLogger<SubtopicRecommendationWorkflow>();
-    private readonly ContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
+    private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
 
     public async Task<SubtopicRecommendationEntry?> GetFirstSubtopicRecommendationAsync(string subtopicId)
     {
