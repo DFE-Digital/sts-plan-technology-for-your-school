@@ -16,14 +16,15 @@
 }
 
 @section BeforeContent {
+    <partial name="BetaHeader" />
     <partial name="_BeforeContent" />
     @await RenderSectionAsync("BeforeContent", required: false)
 }
 
-@section Header {    
+@section Header {
     <partial name="GoogleTagManager/_Body" />
     <partial name="CookiesBanner/_CookieBanner" />
-    <partial name="_Header" /> 
+    <partial name="_Header" />
     @await RenderSectionAsync("Header", required: false)
 }
 

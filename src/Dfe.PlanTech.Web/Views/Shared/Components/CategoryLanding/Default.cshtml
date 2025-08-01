@@ -12,6 +12,18 @@
 </p>
 }
 
+@if (!string.IsNullOrEmpty(Model.SectionName))
+{
+    <div class="govuk-panel govuk-panel--confirmation">
+        <h1 class="govuk-panel__title">
+            Your self-assessment for @Model.SectionName.ToLower() is complete
+        </h1>
+        <div class="govuk-panel__body">
+            Recommendations are available
+        </div>
+    </div>
+}
+
 <div class="govuk-inset-text">
     @{
         if (!Model.AnySectionsCompleted)

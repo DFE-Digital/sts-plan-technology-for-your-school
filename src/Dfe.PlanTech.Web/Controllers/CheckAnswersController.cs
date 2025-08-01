@@ -62,7 +62,7 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
         try
         {
             await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
-            // TODO: move this action to after the landing page has been revisited
+
             await markSubmissionAsReviewedCommand.MarkSubmissionAsReviewed(submissionId, cancellationToken);
         }
         catch (Exception e)
@@ -71,6 +71,8 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
             TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return this.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
+
+        TempData["SectionName"] = sectionName;
 
         return this.RedirectToCategoryLandingPage(categorySlug);
     }

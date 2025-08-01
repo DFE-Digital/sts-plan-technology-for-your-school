@@ -53,7 +53,8 @@ public class PagesController(
             {
                 Slug = page.Slug,
                 Title = new Title { Text = category.Header.Text },
-                Category = category
+                Category = category,
+                SectionName = TempData["SectionName"] as string
             };
 
             return View(CategoryLandingPageView, landingPageViewModel);

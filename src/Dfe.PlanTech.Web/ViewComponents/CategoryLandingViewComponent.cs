@@ -23,14 +23,14 @@ public class CategoryLandingViewComponent(
     private readonly IGetLatestResponsesQuery _getLatestResponsesQuery = getLatestResponsesQuery;
     private readonly IUser _user = user;
 
-    public async Task<IViewComponentResult> InvokeAsync(Category category, string slug)
+    public async Task<IViewComponentResult> InvokeAsync(Category category, string slug, string? sectionName = null)
     {
-        var viewModel = await GenerateViewModel(category, slug);
+        var viewModel = await GenerateViewModel(category, slug, sectionName);
 
         return View(viewModel);
     }
 
-    private async Task<CategoryLandingViewComponentViewModel> GenerateViewModel(Category category, string slug)
+    private async Task<CategoryLandingViewComponentViewModel> GenerateViewModel(Category category, string slug, string? sectionName = null)
     {
         if (category.Sections.Count == 0)
         {
@@ -51,6 +51,7 @@ public class CategoryLandingViewComponent(
             AllSectionsCompleted = category.Completed == category.Sections.Count,
             AnySectionsCompleted = category.Completed > 0,
             CategoryLandingSections = await GetCategoryLandingSections(category).ToListAsync(),
+            SectionName = sectionName,
             ProgressRetrievalErrorMessage = category.RetrievalError
                 ? "Unable to retrieve progress, please refresh your browser."
                 : null

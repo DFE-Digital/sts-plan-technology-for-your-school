@@ -10,5 +10,7 @@ namespace Dfe.PlanTech.Web.Models
         public Title Title { get; set; } = null!;
 
         public Category Category { get; set; } = null!;
+
+        public string? SectionName { get; set; }
     }
 }
