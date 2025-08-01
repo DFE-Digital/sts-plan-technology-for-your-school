@@ -32,6 +32,7 @@
                         <a asp-controller="Questions" asp-action="GetQuestionBySlug"
                            asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
                            asp-route-sectionSlug="@Model.SectionSlug"
+                           asp-route-categorySlug="@Model.CategorySlug"
                            asp-route-returnTo="ChangeAnswers"
                            title="@questionWithAnswer.QuestionText"
                            class="govuk-link">
@@ -48,7 +49,7 @@
             <input type="hidden" name="sectionName" value="@Model.SectionName">
             <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
 
-            <a href="@($"{UrlConstants.RecommendationsPage}/from-section/{Model.SectionSlug}")" role="button" draggable="false"
+            <a href="@($"/{Model.CategorySlug}")" role="button" draggable="false"
                class="govuk-button govuk-button--secondary" data-module="govuk-button">
                 Back to recommendations
             </a>

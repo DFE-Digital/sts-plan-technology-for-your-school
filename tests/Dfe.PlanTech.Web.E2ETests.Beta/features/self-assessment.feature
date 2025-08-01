@@ -1,8 +1,8 @@
 @user-school
-Feature: Self-assessment page
+Feature: home page
 
   Background:
-    Given I am logged in and visit the self-assessment page
+    Given I visit the homepage
 
   Scenario: Page has a main heading
     Then I should see the page heading "Technology self‑assessment"

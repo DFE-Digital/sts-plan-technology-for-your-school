@@ -9,6 +9,7 @@ import {
 import { chromium, Browser, BrowserContext, Page } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
+import { clearTestEstablishmentData } from '../../clearTestData';
 
 let browser: Browser;
 
@@ -55,6 +56,30 @@ Before(async function (scenario: ITestCaseHookParameter) {
   this.context = context;
   this.page = page;
   this.shouldRecord = shouldRecord;
+
+const resetTag = scenario.pickle.tags.find(t =>
+  t.name === '@clear-data-school' || t.name === '@clear-data-mat'
+);
+
+if (resetTag) {
+  const tagName = resetTag.name;
+
+  let establishmentRef: string | undefined;
+
+  if (tagName === '@clear-data-school') {
+    establishmentRef = process.env.DSI_SCHOOL_ESTABLISHMENT_REF;
+  } else if (tagName === '@clear-data-mat') {
+    establishmentRef = process.env.DSI_MAT_ESTABLISHMENT_REF;
+  }
+
+  if (!establishmentRef) {
+    throw new Error(`No establishmentRef found for tag ${tagName}. Check the environment variables.`);
+  }
+
+  console.log(`Clearing establishment data for establishmentRef: ${establishmentRef}`);
+
+  await clearTestEstablishmentData(establishmentRef); 
+}
 });
 
 After(async function (scenario: ITestCaseHookParameter) {

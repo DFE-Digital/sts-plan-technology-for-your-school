@@ -8,5 +8,5 @@
       "esModuleInterop": true,
       "skipLibCheck": true
     },
-    "include": ["features/**/*.ts"]
+  "include": ["**/*.ts"]
   }

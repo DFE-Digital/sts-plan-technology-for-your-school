@@ -240,14 +240,6 @@ namespace Dfe.PlanTech.Web.Controllers
                 {
                     var categoryWithStatus = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _getSubmissionStatusesQuery, establishmentId);
                     completedSectionsCount += categoryWithStatus.Completed;
-
-                    foreach (var sectionStatus in categoryWithStatus.SectionStatuses)
-                    {
-                        if (sectionStatus.Completed == false && sectionStatus.LastCompletionDate is not null)
-                        {
-                            completedSectionsCount++;
-                        }
-                    }
                 }
                 school.CompletedSectionsCount = completedSectionsCount;
             }

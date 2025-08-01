@@ -74,7 +74,7 @@ public class SubmissionStatusHelpersTests
         var category = new Category { Sections = sections };
         var sectionStatuses = new List<SectionStatusDto>
         {
-            new() { Completed = true },
+            new() { Completed = true, LastCompletionDate = new DateTime() },
             new() { Completed = false }
         };
         query.GetSectionSubmissionStatuses(sections, 123).Returns(sectionStatuses);

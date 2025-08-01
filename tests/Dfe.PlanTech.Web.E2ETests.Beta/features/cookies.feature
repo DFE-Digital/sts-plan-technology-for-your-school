@@ -5,7 +5,7 @@ Feature: Cookies Page
 
   Scenario: Cookies page has correct heading and back link
     Then I should see the page heading "Cookies"
-    And I should see a back link with href containing "self-assessment"
+    And I should see a back link with href containing "home"
 
   Scenario: Cookies page has explanatory text and sections
     Then I should see multiple paragraphs of explanatory text

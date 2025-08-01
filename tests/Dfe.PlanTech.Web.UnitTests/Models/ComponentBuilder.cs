@@ -68,12 +68,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         public static RecommendationsViewModel BuildRecommendationViewModel(List<QuestionWithAnswer>? submission = null)
         => new()
         {
-            Intro = BuildRecommendationIntro("intro"),
             Chunks = [BuildRecommendationChunk("First", "Title one"), BuildRecommendationChunk("Second", "Title two"), BuildRecommendationChunk("Third", "Title three")],
             SubmissionResponses = submission ?? BuildSubmissionResponses()
         };
-
-        public static RecommendationIntro BuildRecommendationIntro(string header) => new() { Header = new Header() { Text = header } };
 
         public static RecommendationChunk BuildRecommendationChunk(string header, string title = "Title") => new() { Header = header };
 

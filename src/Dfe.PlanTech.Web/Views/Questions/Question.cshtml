@@ -7,7 +7,7 @@
     }
 }
 
-<form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-sectionSlug=@Model.SectionSlug
+<form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-categorySlug=@Model.CategorySlug asp-route-sectionSlug=@Model.SectionSlug
       asp-route-questionSlug=@Model.Question.Slug method="post">
     <input id="QuestionText" type="hidden" value="@Model.Question.Text" name="QuestionText"/>
     <input id="QuestionId" type="hidden" value=@Model.Question.Sys.Id name="QuestionId"/>

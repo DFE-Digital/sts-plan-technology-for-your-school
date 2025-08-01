@@ -13,4 +13,5 @@ public class Category : ContentComponent, ICategoryComponent
     public IList<SectionStatusDto> SectionStatuses { get; set; } = [];
     public int Completed { get; set; }
     public bool RetrievalError { get; set; }
+    public Page? LandingPage { get; set; }
 }

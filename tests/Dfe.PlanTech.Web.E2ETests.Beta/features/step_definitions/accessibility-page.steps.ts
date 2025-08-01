@@ -15,8 +15,9 @@ Then('I should see the accessibility page heading', async function () {
 });
 
 Then('I should see a back link to the previous page', async function () {
-  const backLink = this.page.getByRole('link', { name: /back/i });
+  const backLink = this.page.locator('a#back-button-link', { hasText: /back/i });
   await expect(backLink).toBeVisible();
+  
   const href = await backLink.getAttribute('href');
   expect(href).toContain('/');
 });

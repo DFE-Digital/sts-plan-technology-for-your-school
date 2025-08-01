@@ -71,6 +71,7 @@ public class GetSectionQuery : ContentRetriever, IGetSectionQuery
         return new Section()
         {
             Name = section.Name,
+            ShortDescription = section.ShortDescription,
             Sys = section.Sys,
             Questions = section.Questions.Select(question => new Question()
             {

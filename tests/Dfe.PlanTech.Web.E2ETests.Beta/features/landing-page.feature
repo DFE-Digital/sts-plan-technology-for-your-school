@@ -18,8 +18,8 @@ Feature: Landing page
   Scenario: The page has a start button
     Then I should see a start button
 
-  Scenario: The start button links to the self-assessment page
-    Then the start button should link to "/self-assessment"
+  Scenario: The start button links to the home page
+    Then the start button should link to "/home"
 
   Scenario: The page passes accessibility checks
     Then the page should be accessible

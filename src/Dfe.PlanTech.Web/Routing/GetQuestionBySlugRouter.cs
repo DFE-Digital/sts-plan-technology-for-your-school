@@ -40,8 +40,10 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentNullException"></exception>
-    public async Task<IActionResult> ValidateRoute(string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
+    public async Task<IActionResult> ValidateRoute(string categorySlug, string sectionSlug, string questionSlug, QuestionsController controller, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrEmpty(categorySlug))
+            throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug))
@@ -54,14 +56,14 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
 
         if (IsSlugForNextQuestion(questionSlug))
         {
-            var viewModel = controller.GenerateViewModel(sectionSlug, _router.NextQuestion!, _router.Section, null);
+            var viewModel = controller.GenerateViewModel(categorySlug, sectionSlug, _router.NextQuestion!, _router.Section, null);
             return controller.RenderView(viewModel);
         }
 
         if (SectionIsAtStart)
             return PageRedirecter.RedirectToInterstitialPage(controller, sectionSlug);
 
-        return await ProcessOtherStatuses(sectionSlug, questionSlug, controller, isChangeAnswersFlow, cancellationToken);
+        return await ProcessOtherStatuses(categorySlug, sectionSlug, questionSlug, controller, isChangeAnswersFlow, cancellationToken);
     }
 
     /// <summary>
@@ -82,26 +84,21 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task<IActionResult> ProcessOtherStatuses(string sectionSlug, string questionSlug, QuestionsController controller, bool isChangeAnswersFlow, CancellationToken cancellationToken)
+    private async Task<IActionResult> ProcessOtherStatuses(string categorySlug, string sectionSlug, string questionSlug, QuestionsController controller, bool isChangeAnswersFlow, CancellationToken cancellationToken)
     {
         var question = GetQuestionForSlug(questionSlug);
 
         var responses = await GetLatestResponsesForSection(isChangeAnswersFlow, cancellationToken);
 
-        if (responses is null)
-        {
-            throw new InvalidOperationException(
-                $"No responses were found for section '{_router.Section.Sys.Id}'");
-        }
-
         var isAttachedQuestion = IsQuestionAttached(responses, question);
 
         if (!isAttachedQuestion)
-            return HandleNotAttachedQuestion(sectionSlug, controller);
+            return HandleNotAttachedQuestion(categorySlug, sectionSlug, controller);
 
         var latestResponseForQuestion = GetLatestResponseForQuestion(responses, question);
 
-        var viewModel = controller.GenerateViewModel(sectionSlug,
+        var viewModel = controller.GenerateViewModel(categorySlug,
+                                                     sectionSlug,
                                                      question,
                                                      _router.Section,
                                                      latestResponseForQuestion.AnswerRef);
@@ -169,10 +166,10 @@ public class GetQuestionBySlugRouter : IGetQuestionBySlugRouter
     /// <param name="controller"></param>
     /// <returns></returns>
     /// <exception cref="InvalidDataException"></exception>
-    private IActionResult HandleNotAttachedQuestion(string sectionSlug, QuestionsController controller)
+    private IActionResult HandleNotAttachedQuestion(string categorySlug, string sectionSlug, QuestionsController controller)
     => _router.Status switch
     {
-        Status.CompleteNotReviewed => controller.RedirectToCheckAnswers(sectionSlug),
+        Status.CompleteNotReviewed => controller.RedirectToCheckAnswers(categorySlug, sectionSlug),
         Status.InProgress => QuestionsController.RedirectToQuestionBySlug(sectionSlug, _router.NextQuestion?.Slug ?? throw new InvalidDataException("NextQuestion is null"), controller),
         _ => throw new InvalidDataException("Should not be here"),
     };

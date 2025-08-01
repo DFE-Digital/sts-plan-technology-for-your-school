@@ -89,7 +89,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var section = new Section { Sys = new SystemDetails { Id = "s1" } };
             var category = new Category { Sections = new List<Section> { section } };
 
-            var statuses = new List<SectionStatusDto> { new SectionStatusDto { SectionId = "s1", Completed = true } };
+            var statuses = new List<SectionStatusDto> { new SectionStatusDto { SectionId = "s1", Completed = true, LastCompletionDate = new DateTime() } };
 
             _submissionStatusesQuery
                 .GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), Arg.Any<int>())

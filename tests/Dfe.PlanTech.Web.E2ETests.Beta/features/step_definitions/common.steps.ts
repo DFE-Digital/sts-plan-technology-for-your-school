@@ -4,12 +4,28 @@ import AxeBuilder from '@axe-core/playwright';
 import { textToHyphenatedUrl } from '../../helpers/url'
 import { text } from 'node:stream/consumers';
 
-Given('I am on the homepage', async function () {
-  await this.page.goto(process.env.URL);
+Given('I visit the homepage', async function () {
+  await this.page.goto(`${process.env.URL}home`);
+});
+
+Given('I visit the self-assessment-testing page', async function () {
+  await this.page.goto(`${process.env.URL}self-assessment-testing`);
 });
 
 Then('I should see the page heading {string}', async function (expectedHeading: string) {
-  const heading = this.page.locator('h1.govuk-heading-xl');
+  const heading = this.page.locator('h1.govuk-heading-xl:visible');
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveText(expectedHeading);
+});
+
+Then('I should see the section heading {string}', async function (expectedHeading: string) {
+  const heading = this.page.locator('h3.govuk-body-l:visible');
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveText(expectedHeading);
+});
+
+Then('I should see the caption heading {string}', async function (expectedHeading: string) {
+  const heading = this.page.locator('h3.govuk-caption-xl:visible');
   await expect(heading).toBeVisible();
   await expect(heading).toHaveText(expectedHeading);
 });
@@ -170,6 +186,39 @@ Given('I am on the self-assessment testing page and click on the category {strin
 Then('I should see a button with the text {string}', async function (linkText: string) {
   const button = this.page.locator('a.govuk-button.govuk-link', { hasText: linkText });
   await expect(button).toHaveCount(1);
-  await expect(button).toBeVisible(); 
+  await expect(button).toBeVisible();
 });
 
+
+Given('I start an assessment and reach the recommendations page', async function (section: string) {
+  await this.page.goto(`${process.env.URL}self-assessment-testing`);
+
+  const firstCard = this.page.locator(`.dfe-grid-container`).first();
+  const firstCardLink = firstCard.locator(`a`);
+
+  const linkText = await firstCardLink.textContent();
+  if (!linkText) {
+    throw new Error('Could not get text from first card link');
+  }
+
+  await firstCardLink.click();
+
+});
+
+
+Then('I should see the GOV.UK footer with expected links', async function () {
+  const footer = this.page.locator('footer.govuk-footer');
+  await expect(footer).toBeVisible();
+
+  const expectedLinks = [
+    'Contact us',
+    'Privacy notice',
+    'Cookies',
+    'Accessibility statement'
+  ];
+
+  for (const text of expectedLinks) {
+    const link = footer.locator('a.govuk-footer__link', { hasText: text });
+    await expect(link).toBeVisible();
+  }
+});

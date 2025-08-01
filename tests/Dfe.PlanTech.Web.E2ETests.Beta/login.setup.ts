@@ -35,7 +35,7 @@ const browser = await chromium.launch({ headless: false, slowMo: 100 });
 }
 
 (async () => {
-  const loginUrl = `${process.env.URL}self-assessment`; 
+  const loginUrl = `${process.env.URL}home`; 
 
   const users = [
     {

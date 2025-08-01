@@ -1,20 +1,8 @@
-@model IEnumerable<Dfe.PlanTech.Domain.Questionnaire.Interfaces.IHeaderWithContent>
+@model Dfe.PlanTech.Web.Models.RecommendationsViewModel
 
-<nav class="dfe-vertical-nav">
-    <div class="dfe-vertical-nav__back-button govuk-!-margin-bottom-2">
-        <a href="/home" class="govuk-back-link noprint">Back</a>
-    </div>
-    <h2 class="dfe-vertical-nav__theme govuk-heading-m">Recommendations</h2>
-    <ul class="dfe-vertical-nav__section govuk-!-padding-left-0">
-        @foreach (var content in Model)
-        {
-            var classes = content.SlugifiedLinkText == ViewBag.VerticalNavigationSection?.ToString()
-            ? "dfe-vertical-nav__link--selected"
-            : "";
-
-            <li class="dfe-vertical-nav__section-item">
-                <a class="dfe-vertical-nav__link @classes" href="#@content.SlugifiedLinkText">@content.LinkText</a>
-            </li>
-        }
-    </ul>
-</nav>
+<div class="govuk-grid-column-one-third govuk-float-right">
+    <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
+    <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+    <p class="govuk-body-s"><a href="/@Model.SectionSlug/change-answers">View or update your self-assessment for @Model.SectionName.ToLower()</a></p>
+    <partial name="Print" model="@Model" />
+</div>

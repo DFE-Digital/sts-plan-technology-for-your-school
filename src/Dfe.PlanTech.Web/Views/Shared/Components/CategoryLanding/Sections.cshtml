@@ -1,0 +1,36 @@
+@model CategoryLandingViewComponentViewModel
+
+@foreach (var topic in Model.CategoryLandingSections)
+{
+    <h2 class="govuk-heading-l">@topic.Name</h2>
+    <p>@topic.ShortDescription</p>
+
+    <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = Model.CategorySlug, Section = topic, Context = "Sections" }' />
+
+    @if (!string.IsNullOrEmpty(topic.LastCompletionDate))
+    {
+        <ul class="govuk-task-list landing-page-list">
+            <li class="govuk-task-list__item landing-page-list-heading" style="border-top: none;">
+                <div class="govuk-task-list__name-and-hint landing-page-list__name-and-hint">
+                    <strong>Recommendations</strong>
+                </div>
+            </li>
+            @foreach (var chunk in topic.Recommendations.Chunks)
+            {
+                @* var routeValues = new Dictionary<string, string>
+                {
+                    ["route"] = $"{Model.CategorySlug}/{topic.Slug}/{chunk.SlugifiedLinkText}"
+                }; *@
+                <li class="govuk-task-list__item govuk-task-list__item--with-link">
+                    <div class="govuk-task-list__name-and-hint landing-page-list__name-and-hint">
+                        <a href=@Url.RouteUrl("GetSingleRecommendation", new {
+                            categorySlug = Model.CategorySlug,
+                            sectionSlug = topic.Slug,
+                            chunkSlug = chunk.SlugifiedLinkText
+                        }) class="govuk-link">@chunk.LinkText</a>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+}

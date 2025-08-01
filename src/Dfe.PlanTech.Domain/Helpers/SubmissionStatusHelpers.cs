@@ -59,7 +59,7 @@ public static class SubmissionStatusHelpers
         try
         {
             category.SectionStatuses = await query.GetSectionSubmissionStatuses(category.Sections, schoolId);
-            category.Completed = category.SectionStatuses.Count(x => x.Completed);
+            category.Completed = category.SectionStatuses.Count(x => x.LastCompletionDate != null);
             category.RetrievalError = false;
             return category;
         }

@@ -94,28 +94,6 @@ character
         }
 
         [Theory]
-        [InlineData("Random test Topic")]
-        [InlineData("Y867as ()&ycj Cool Thing")]
-        public void RecommendationIntro_Should_Return_Correct_Header_And_Title(string header)
-        {
-            var recommendationIntro = ComponentBuilder.BuildRecommendationIntro(header);
-
-            Assert.Equal(header, recommendationIntro.Header.Text);
-            Assert.Equal(header, recommendationIntro.HeaderText);
-        }
-
-        [Theory]
-        [InlineData("Random test Topic", "overview")]
-        [InlineData("Pasdw!345      dsdoiu()=2 Yo ", "overview")]
-        public void RecommendationIntro_Should_Return_Correct_LinkText(string header, string expectedResult)
-        {
-            var recommendationIntro = ComponentBuilder.BuildRecommendationIntro(header);
-
-            Assert.Equal("Overview", recommendationIntro.LinkText);
-            Assert.Equal(expectedResult, recommendationIntro.SlugifiedLinkText);
-        }
-
-        [Theory]
         [InlineData("Random test Topic", "random-test-topic")]
         [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
         public void RecommendationChunk_Should_Return_Correct_Header_Title_And_LinkText(string header, string expectedResult)
@@ -125,21 +103,6 @@ character
             Assert.Equal(header, recommendationChunk.HeaderText);
             Assert.Equal(header, recommendationChunk.LinkText);
             Assert.Equal(expectedResult, recommendationChunk.SlugifiedLinkText);
-        }
-
-        [Fact]
-        public void RecommendationViewModel_Should_Return_All_Content()
-        {
-            var recommendationViewModel = ComponentBuilder.BuildRecommendationViewModel();
-
-            var allContent = recommendationViewModel.AllContent.ToList();
-
-            Assert.Contains(recommendationViewModel.Intro, allContent);
-
-            foreach (var chunk in recommendationViewModel.Chunks)
-            {
-                Assert.Contains(chunk, allContent);
-            }
         }
 
         [Fact]
