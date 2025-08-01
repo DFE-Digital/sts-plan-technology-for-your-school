@@ -28,7 +28,7 @@
 
             foreach (var topic in Model.CategoryLandingSections)
             {
-                <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { Section = topic, Context = "Default" }' />
+                <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = @Model.CategorySlug, Section = topic, Context = "Default" }' />
             }
         }
     }

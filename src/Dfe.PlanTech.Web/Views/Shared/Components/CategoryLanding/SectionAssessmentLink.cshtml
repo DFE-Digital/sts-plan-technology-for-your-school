@@ -6,12 +6,11 @@
     string linkText;
     string? controller = null;
     string? action = null;
-    Dictionary<string, string>
-    ? routeValues = null;
 
     var topic = Model.Section;
     var topicName = topic.Name.ToLower().Trim();
     var topicSlug = topic.Slug ?? string.Empty;
+    var categorySlug = Model.CategorySlug;
 
     switch (topic.ProgressStatus)
     {
@@ -20,42 +19,31 @@
             linkText = $"Continue your self-assessment for {topicName}";
             controller = "Questions";
             action = "GetNextUnansweredQuestion";
-            routeValues = new Dictionary<string, string>
-            {
-                ["sectionSlug"] = $"{topicSlug}"
-            };
                 break;
         case SectionProgressStatus.Completed:
             statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
             linkText = $"View or update your self-assessment for {topicName}";
             controller = "ChangeAnswers";
             action = "ChangeAnswersPage";
-            routeValues = new Dictionary<string, string>
-            {
-                ["sectionSlug"] = $"{topicSlug}"
-            };
                 break;
         default:
             statusText = "";
             linkText = $"Go to self-assessment for {topicName}";
-            controller = "Pages";
-            action = "GetByRoute";
-            routeValues = new Dictionary<string, string>
-            {
-                ["route"] = $"{topicSlug}"
-            };
+            controller = "Questions";
+            action = "GetInterstitialPage";
                 break;
     }
 
     if (Model.Context == "Sections")
     {
+
         if (topic.ProgressStatus == SectionProgressStatus.Completed)
         {
             <p>
                 @statusText
             </p>
             <p>
-                <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
+                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
                     class="govuk-link">@linkText</a> at any time.
             </p>
         }
@@ -63,14 +51,14 @@
         {
             <p>
                 @statusText
-                <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
+                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
                    class="govuk-link">@linkText</a>
             </p>
         }
         else
         {
             <p>
-                <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
+                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
                    class="govuk-link">@linkText</a>
             </p>
         }
@@ -80,8 +68,8 @@
         if (topic.ProgressStatus != SectionProgressStatus.Completed)
         {
             <p>
-                <a asp-controller="@controller" asp-action="@action" asp-all-route-data="@routeValues"
-                    class="govuk-link">@linkText</a>
+                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
+                   class="govuk-link">@linkText</a>
             </p>
         }
     }

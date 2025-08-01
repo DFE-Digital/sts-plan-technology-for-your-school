@@ -25,4 +25,6 @@ public class CheckAnswersViewModel
     public string? Slug { get; init; } = null;
 
     public string? ErrorMessage { get; set; } = null;
+
+    public string? CategorySlug { get; init; }
 }

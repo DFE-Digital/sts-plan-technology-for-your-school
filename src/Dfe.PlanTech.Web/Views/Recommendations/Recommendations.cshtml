@@ -25,7 +25,7 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
 }
     <div class="recommendation-content">
             @{
-                var allContent = Model.AllContent.ToArray();
+                var allContent = Model.Chunks.ToArray();
             } 
 
             @for (var x = 0; x < allContent.Length; x++)
