@@ -643,4 +643,113 @@ public class GetRecommendationRouterTests
             ]
         };
     }
+
+    [Fact]
+    public async Task GetSingleRecommendation_Throws_Exception_When_SectionSlug_Not_Valid_Section()
+    {
+        var sectionSlug = "invalid-section";
+        var message = $"Could not find section with slug: {sectionSlug}";
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() => _router.GetSingleRecommendation(sectionSlug, "chunk-slug", _controller, default));
+        Assert.Equal(message, exception.Message);
+
+    }
+
+    [Fact]
+    public async Task GetSingleRecommendation_Throws_Exception_When_No_Responses_For_Section()
+    {
+        Assert.NotNull(_section.InterstitialPage);
+        var sectionSlug = _section.InterstitialPage.Slug;
+        SubmissionResponsesDto responses = null!;
+        _getSectionQuery.GetSectionBySlug(sectionSlug).Returns(_section);
+        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), sectionSlug, true, default).Returns(responses);
+        var message = $"Could not find users answers for: {_section.Name}";
+        var exception = await Assert.ThrowsAsync<DatabaseException>(() => _router.GetSingleRecommendation(sectionSlug, "chunk-slug", _controller, default));
+        Assert.Equal(message, exception.Message);
+    }
+
+    [Fact]
+    public async Task GetSingleRecommendation_Throws_Exception_When_No_SubtopicRecommendation_Found()
+    {
+        Assert.NotNull(_section.InterstitialPage);
+        var sectionSlug = _section.InterstitialPage.Slug;
+
+        _getSectionQuery.GetSectionBySlug(sectionSlug).Returns(_section);
+        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                                 .Returns((callinfo) => MockValidLatestResponse(callinfo));
+
+        var message = $"Could not find subtopic recommendation for: {_section.Name}";
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() => _router.GetSingleRecommendation(sectionSlug, "chunk-slug", _controller, default));
+        Assert.Equal(message, exception.Message);
+    }
+
+    [Fact]
+    public async Task GetSingleRecommendation_Throws_Exception_When_No_Chunks_Found()
+    {
+        Assert.NotNull(_section.InterstitialPage);
+        var sectionSlug = _section.InterstitialPage.Slug;
+
+        var subtopicRecommendation = new SubtopicRecommendation()
+        {
+            Intros =
+            [
+                new()
+                {
+                    Slug = "high-slug",
+                    Maturity = "High",
+                },
+                new()
+                {
+                    Slug = "medium-slug",
+                    Maturity = "Medium",
+                },
+                new()
+                {
+                    Slug = "low-slug",
+                    Maturity = "Low",
+                }
+            ],
+            Section = new RecommendationSection()
+            {
+                Chunks =
+                [
+                    new()
+                    {
+                        Header = "test-header-1",
+                        Answers = []
+                    },
+                    new()
+                    {
+                        Header = "test-header-2",
+                        Answers = []
+                    }
+                ]
+            },
+            Subtopic = _section
+        };
+
+        _getSectionQuery.GetSectionBySlug(sectionSlug).Returns(_section);
+        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                                 .Returns((callinfo) => MockValidLatestResponse(callinfo));
+        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(subtopicRecommendation);
+        var message = $"Could not find recommendation chunks for section: {_section.Name}";
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() => _router.GetSingleRecommendation(sectionSlug, "chunk-slug", _controller, default));
+        Assert.Equal(message, exception.Message);
+    }
+
+    [Fact]
+    public async Task GetSingleRecommendation_Throws_Exception_When_Specific_Chunk_Not_Found()
+    {
+        Assert.NotNull(_section.InterstitialPage);
+        var sectionSlug = _section.InterstitialPage.Slug;
+        var chunkSlug = "random-chunk-slug";
+
+        _getSectionQuery.GetSectionBySlug(sectionSlug).Returns(_section);
+        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), _section.Sys.Id, Arg.Any<bool>(), Arg.Any<CancellationToken>())
+                                 .Returns((callinfo) => MockValidLatestResponse(callinfo));
+        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopicRecommendation);
+
+        var message = $"No recommendation chunk found with slug matching: {chunkSlug}";
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() => _router.GetSingleRecommendation(sectionSlug, chunkSlug, _controller, default));
+        Assert.Equal(message, exception.Message);
+    }
 }
