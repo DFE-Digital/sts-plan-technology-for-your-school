@@ -315,6 +315,10 @@ def update_database(
             )
 
             # Execute the stored procedure to update the data
+            # Note the sproc appears to handle inserts, updates, and deletes
+            # (e.g. it will delete records that are no longer present GIAS data)
+            # ref: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250403_1100_AddEstablishmentGroupTable.sql
+            # Given this, it is not required to do so within python code.
             stored_procedure_name = "dbo.UpdateEstablishmentData"
             if not _execute_stored_procedure(cursor, stored_procedure_name):
                 logger.error(
