@@ -15,32 +15,37 @@ logger = getLogger(__name__)
 CONNECTION_STRING = os.getenv("CONNECTION_STRING")
 SQL_COPT_SS_ACCESS_TOKEN = 1256
 
-test_links = pd.DataFrame([
-    {
-        "groupUid": "99999",
-        "establishmentName": "DSI TEST Establishment (001) Community School (01)",
-        "urn": 2,
-    },
-    {
-        "groupUid": "99999",
-        "establishmentName": "DSI TEST Establishment (001) Miscellaneous (27)",
-        "urn": 18,
-    },
-    {
-        "groupUid": "99999",
-        "establishmentName": "DSI TEST Establishment (001) Foundation School (05)",
-        "urn": 5,
-    },
-])
+test_links = pd.DataFrame(
+    [
+        {
+            "groupUid": "99999",
+            "establishmentName": "DSI TEST Establishment (001) Community School (01)",
+            "urn": 2,
+        },
+        {
+            "groupUid": "99999",
+            "establishmentName": "DSI TEST Establishment (001) Miscellaneous (27)",
+            "urn": 18,
+        },
+        {
+            "groupUid": "99999",
+            "establishmentName": "DSI TEST Establishment (001) Foundation School (05)",
+            "urn": 5,
+        },
+    ]
+)
 
-test_groups = pd.DataFrame([
-    {
-        "uid": "99999",
-        "groupName": "DSI TEST Multi-Academy Trust (010)",
-        "groupType": "Multi-academy trust",
-        "groupStatus": "Open",
-    }
-])
+test_groups = pd.DataFrame(
+    [
+        {
+            "uid": "99999",
+            "groupName": "DSI TEST Multi-Academy Trust (010)",
+            "groupType": "Multi-academy trust",
+            "groupStatus": "Open",
+        }
+    ]
+)
+
 
 def _get_connection(connection_string: str):
     """Fetch a token for accessing the database and connect"""
@@ -129,7 +134,9 @@ def _validate_required_tables_exist(cursor: Cursor) -> bool:
     table_count = cursor.fetchone()[0]
 
     if table_count < 2:
-        logger.error("Required tables (establishmentLink and/or establishmentGroup) not found in the database")
+        logger.error(
+            "Required tables (establishmentLink and/or establishmentGroup) not found in the database"
+        )
         logger.error("This is likely not the correct database for this operation")
         logger.error("No data will be updated")
         return False
@@ -173,15 +180,21 @@ def _execute_stored_procedure(cursor: Cursor, procedure_name: str) -> bool:
         raise
 
 
-def _prepare_combined_test_and_real_data(groups: pd.DataFrame, links: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+def _prepare_combined_test_and_real_data(
+    groups: pd.DataFrame, links: pd.DataFrame
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Combine the provided data with test data"""
     combined_links = pd.concat([links, test_links], ignore_index=True)
     combined_groups = pd.concat([groups, test_groups], ignore_index=True)
     return combined_groups, combined_links
 
 
-def _validate_data_for_update(combined_groups: pd.DataFrame, combined_links: pd.DataFrame,
-                        row_counts_before: dict[str, int], skip_gias_validation: bool = False) -> bool:
+def _validate_data_for_update(
+    combined_groups: pd.DataFrame,
+    combined_links: pd.DataFrame,
+    row_counts_before: dict[str, int],
+    skip_gias_validation: bool = False,
+) -> bool:
     """
     Validate that the data to be updated meets all requirements.
     Returns True if data is valid, False otherwise.
@@ -194,7 +207,9 @@ def _validate_data_for_update(combined_groups: pd.DataFrame, combined_links: pd.
     """
     # If skip validation is enabled, bypass validation
     if skip_gias_validation:
-        logger.warning("GIAS data validation checks bypassed. Proceeding regardless of data quality concerns.")
+        logger.warning(
+            "GIAS data validation checks bypassed. Proceeding regardless of data quality concerns."
+        )
         return True
 
     # Check for empty dataframes
@@ -204,7 +219,10 @@ def _validate_data_for_update(combined_groups: pd.DataFrame, combined_links: pd.
 
     # Validate there are not a suspicious number of records
     threshold_min_records = 1000
-    if len(combined_groups) < threshold_min_records or len(combined_links) < threshold_min_records:
+    if (
+        len(combined_groups) < threshold_min_records
+        or len(combined_links) < threshold_min_records
+    ):
         logger.warning(
             f"Exiting early due to suspiciously low number of group and/or link records: "
             f"{len(combined_groups)} groups, {len(combined_links)} links"
@@ -213,7 +231,9 @@ def _validate_data_for_update(combined_groups: pd.DataFrame, combined_links: pd.
 
     # If there is a significant _change_ in the number of records, log a warning and exit
     threshold_substantial_change = 1000
-    current_establishment_group_count = row_counts_before.get("dbo.establishmentGroup", 0)
+    current_establishment_group_count = row_counts_before.get(
+        "dbo.establishmentGroup", 0
+    )
     proposed_establishment_group_count = len(combined_groups)
     current_establishment_link_count = row_counts_before.get("dbo.establishmentLink", 0)
     proposed_establishment_link_count = len(combined_links)
@@ -229,9 +249,12 @@ def _validate_data_for_update(combined_groups: pd.DataFrame, combined_links: pd.
         f"{proposed_establishment_link_count} links ({proposed_establishment_link_count - current_establishment_link_count:+})"
     )
 
-
-    if abs(proposed_establishment_group_count - current_establishment_group_count) > threshold_substantial_change or \
-       abs(proposed_establishment_link_count - current_establishment_link_count) > threshold_substantial_change:
+    if (
+        abs(proposed_establishment_group_count - current_establishment_group_count)
+        > threshold_substantial_change
+        or abs(proposed_establishment_link_count - current_establishment_link_count)
+        > threshold_substantial_change
+    ):
         logger.warning(
             f"Exiting early due to a suspisciously large change in establishment group ({current_establishment_group_count} -> {proposed_establishment_group_count}) and/or link ({current_establishment_link_count} -> {proposed_establishment_link_count}) counts."
         )
@@ -242,7 +265,12 @@ def _validate_data_for_update(combined_groups: pd.DataFrame, combined_links: pd.
     return True
 
 
-def update_database(groups: pd.DataFrame, links: pd.DataFrame, connection_string: str, skip_gias_validation: bool = False):
+def update_database(
+    groups: pd.DataFrame,
+    links: pd.DataFrame,
+    connection_string: str,
+    skip_gias_validation: bool = False,
+):
     """
     Use a single transaction to update establishment groups and relationships, commit on success
 
@@ -268,22 +296,30 @@ def update_database(groups: pd.DataFrame, links: pd.DataFrame, connection_string
                 logger.info(f"  - {table}: {count}")
 
             # Prepare and load data into temp tables
-            combined_groups, combined_links = _prepare_combined_test_and_real_data(groups, links)
+            combined_groups, combined_links = _prepare_combined_test_and_real_data(
+                groups, links
+            )
 
             # Validate the proposed data updates prior to execution
-            if not _validate_data_for_update(combined_groups, combined_links, row_counts_before, skip_gias_validation):
+            if not _validate_data_for_update(
+                combined_groups, combined_links, row_counts_before, skip_gias_validation
+            ):
                 return
 
             # Create temporary tables for staging data
             _create_temp_groups(cursor, combined_groups)
             _create_temp_links(cursor, combined_links)
 
-            logger.info("Updating dbo.establishmentLink and dbo.establishmentGroup with staging tables")
+            logger.info(
+                "Updating dbo.establishmentLink and dbo.establishmentGroup with staging tables"
+            )
 
             # Execute the stored procedure to update the data
             stored_procedure_name = "dbo.UpdateEstablishmentData"
             if not _execute_stored_procedure(cursor, stored_procedure_name):
-                logger.error(f"Stored procedure {stored_procedure_name} failed to execute")
+                logger.error(
+                    f"Stored procedure {stored_procedure_name} failed to execute"
+                )
                 return
 
             # Get row counts after update
