@@ -111,14 +111,17 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         var section = await _getSectionQuery.GetSectionBySlug(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section with slug: {sectionSlug}");
         var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _user.GetEstablishmentId(), section.Sys.Id, true)
-            ?? throw new DatabaseException($"Could not find users answers for:  {section.Name}");
+            ?? throw new DatabaseException($"Could not find users answers for: {section.Name}");
         var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses).ToList();
         var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id)
-            ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for:  {section.Name}");
-        var allChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef))
-            ?? throw new ContentfulDataUnavailableException($"Could not find recommendation chunks for section: {section.Name}");
+            ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for: {section.Name}");
+        var allChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
+
+        if (allChunks.Count == 0)
+            throw new ContentfulDataUnavailableException($"Could not find recommendation chunks for section: {section.Name}");
+
         var currentChunk = allChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
-            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug mathing: {chunkSlug}");
+            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
 
         return (section, currentChunk, allChunks);
     }
