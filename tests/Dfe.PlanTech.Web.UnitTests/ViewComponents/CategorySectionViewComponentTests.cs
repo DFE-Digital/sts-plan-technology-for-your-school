@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -789,6 +790,15 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(unboxed);
             Assert.IsType<MissingComponent>(unboxed.Description);
 
+        }
+
+        [Fact]
+        public async Task Returns_LandingSlugIsNull_ThrowsContentfulDataUnavailableException()
+        {
+            _category.LandingPage = null;
+
+            await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+                _categorySectionViewComponent.InvokeAsync(_category));
         }
     }
 }
