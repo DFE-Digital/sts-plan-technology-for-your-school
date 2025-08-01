@@ -1,8 +1,9 @@
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class PageRecommendationEntry: TransformableEntry<PageRecommendationEntry, CmsPageRecommendationDto>
+public class PageRecommendationEntry: TransformableEntry<PageRecommendationEntry, CmsPageRecommendationDto>, IContentfulEntry
 {
     public string InternalName { get; init; } = null!;
     public ComponentTitleEntry? Title { get; init; }

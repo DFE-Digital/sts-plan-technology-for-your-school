@@ -1,8 +1,9 @@
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentButtonEntry: TransformableEntry<ComponentButtonEntry, CmsComponentButtonDto>
+public class ComponentButtonEntry: TransformableEntry<ComponentButtonEntry, CmsComponentButtonDto>, IContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public string Value { get; init; } = null!;

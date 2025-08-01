@@ -1,4 +1,6 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Contentful.Core.Models;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 
 namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
@@ -33,7 +35,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
             Content = pageEntry.Content.Select(BuildContentDto).Where(c => c is not null).Select(c => c!).ToList();
         }
 
-        private CmsEntryDto BuildBeforeTitleContentDto(ContentComponent contentComponent)
+        private CmsEntryDto BuildBeforeTitleContentDto(Entry<ContentComponent> contentComponent)
         {
             if (contentComponent is IDtoTransformable<CmsComponentWarningDto> warningEntry)
             {
@@ -45,7 +47,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
                 return notificationEntry.AsDtoInternal();
             }
 
-            throw new ArgumentException($"{nameof(ContentComponent)} in {nameof(RecommendationIntroEntry)} was not of an expected type.");
+            throw new ArgumentException($"{nameof(IContentfulEntry)} in {nameof(RecommendationIntroEntry)} was not of an expected type.");
         }
     }
 }

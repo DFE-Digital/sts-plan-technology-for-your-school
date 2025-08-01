@@ -1,8 +1,9 @@
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class QuestionnaireSectionEntry : TransformableEntry<QuestionnaireSectionEntry, CmsQuestionnaireSectionDto>
+public class QuestionnaireSectionEntry : TransformableEntry<QuestionnaireSectionEntry, CmsQuestionnaireSectionDto>, IContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public string Name { get; init; } = null!;

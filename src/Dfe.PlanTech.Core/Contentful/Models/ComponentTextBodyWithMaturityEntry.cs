@@ -1,8 +1,9 @@
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentTextBodyWithMaturityEntry: TransformableEntry<ComponentTextBodyWithMaturityEntry, CmsComponentTextBodyWithMaturityDto>
+public class ComponentTextBodyWithMaturityEntry: TransformableEntry<ComponentTextBodyWithMaturityEntry, CmsComponentTextBodyWithMaturityDto>, IContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public RichTextContent TextBody { get; init; } = null!;

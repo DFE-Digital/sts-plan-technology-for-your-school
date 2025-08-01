@@ -1,9 +1,10 @@
 ﻿using Contentful.Core.Models;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentCardEntry: TransformableEntry<ComponentCardEntry, CmsComponentCardDto>
+public class ComponentCardEntry: TransformableEntry<ComponentCardEntry, CmsComponentCardDto>, IContentfulEntry
 {
     public string InternalName { get; init; } = null!;
     public string? Title { get; init; } = null!;

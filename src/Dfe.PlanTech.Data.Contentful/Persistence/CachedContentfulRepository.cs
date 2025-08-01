@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Core.Caching.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Content.Options;
-using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,7 +62,12 @@ public class CachedContentfulRepository(
 
     private static string GetContentTypeName<TEntry>()
     {
-        var name = typeof(TEntry).Name;
-        return name == "ContentSupportPage" ? name : name.FirstCharToLower();
+        var typeName = typeof(TEntry).Name;
+        if (ContentTypeConstants.EntryClassToContentTypeMap.TryGetValue(typeName, out var contentTypeId))
+        {
+            return contentTypeId!;
+        }
+
+        throw new InvalidOperationException($"Could not find content type ID for class type {typeName}");
     }
 }

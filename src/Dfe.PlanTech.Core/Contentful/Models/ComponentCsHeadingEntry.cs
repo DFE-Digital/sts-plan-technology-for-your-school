@@ -1,9 +1,10 @@
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
 // Type name in Contentful is CsHeading
-public class ComponentCsHeadingEntry: TransformableEntry<ComponentCsHeadingEntry, CmsComponentCsHeadingDto>
+public class ComponentCsHeadingEntry: TransformableEntry<ComponentCsHeadingEntry, CmsComponentCsHeadingDto>, IContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public string Text { get; init; } = null!;

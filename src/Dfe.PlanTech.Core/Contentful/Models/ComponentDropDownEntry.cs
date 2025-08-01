@@ -1,8 +1,9 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentDropDownEntry: TransformableEntry<ComponentDropDownEntry, CmsComponentDropDownDto>
+public class ComponentDropDownEntry: TransformableEntry<ComponentDropDownEntry, CmsComponentDropDownDto>, IContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public string Title { get; set; } = null!;

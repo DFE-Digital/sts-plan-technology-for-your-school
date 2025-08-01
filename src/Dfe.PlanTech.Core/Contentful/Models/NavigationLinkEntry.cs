@@ -1,10 +1,12 @@
+using Contentful.Core.Models;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class NavigationLinkEntry : TransformableEntry<NavigationLinkEntry, CmsNavigationLinkDto>
+public class NavigationLinkEntry : TransformableEntry<NavigationLinkEntry, CmsNavigationLinkDto>, IContentfulEntry
 {
-    public ContentComponent? ContentToLinkTo { get; set; }
+    public Entry<ContentComponent>? ContentToLinkTo { get; set; }
     public string InternalName { get; set; } = null!;
     public string DisplayText { get; set; } = null!;
     public string? Href { get; set; } = null;

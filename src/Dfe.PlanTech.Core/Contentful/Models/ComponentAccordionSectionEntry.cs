@@ -4,7 +4,7 @@ using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentAccordionSectionEntry : TransformableEntry<ComponentAccordionSectionEntry, CmsComponentAccordionSectionDto>, IHasSlug, IHasUri
+public class ComponentAccordionSectionEntry : TransformableEntry<ComponentAccordionSectionEntry, CmsComponentAccordionSectionDto>, IContentfulEntry, IHasSlug, IHasUri
 {
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;

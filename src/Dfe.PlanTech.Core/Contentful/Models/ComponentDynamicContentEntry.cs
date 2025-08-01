@@ -1,8 +1,9 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentDynamicContentEntry: TransformableEntry<ComponentDynamicContentEntry, CmsComponentDynamicContentDto>
+public class ComponentDynamicContentEntry: TransformableEntry<ComponentDynamicContentEntry, CmsComponentDynamicContentDto>, IContentfulEntry
 {
     public string InternalName { get; init; } = null!;
     public string DynamicField { get; init; } = null!;

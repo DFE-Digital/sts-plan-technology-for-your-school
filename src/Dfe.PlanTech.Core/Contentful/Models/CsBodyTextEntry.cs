@@ -1,8 +1,9 @@
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class CsBodyTextEntry: TransformableEntry<CsBodyTextEntry, CmsCsBodyTextDto>
+public class CsBodyTextEntry: TransformableEntry<CsBodyTextEntry, CmsCsBodyTextDto>, IContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public RichTextContent RichText { get; set; } = null!;
