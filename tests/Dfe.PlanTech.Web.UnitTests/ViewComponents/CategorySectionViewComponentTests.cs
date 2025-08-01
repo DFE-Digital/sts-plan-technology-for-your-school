@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -11,7 +12,6 @@ using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
-using Microsoft.EntityFrameworkCore.Storage.Json;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -176,27 +176,39 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             _category = new Category()
             {
                 Completed = 1,
+                Header = new Header()
+                {
+                    Text = "Test Header Text 1"
+                },
                 Sys = new()
                 {
                     Id = "Category-Test-Id"
                 },
                 Sections = new(){
-                {
-                    new ()
                     {
-                        Sys = new SystemDetails() { Id = "Section1" },
-                        Name = "Test Section 1",
-                        InterstitialPage = new Page()
+                        new ()
                         {
-                            Slug = "section-1",
-                        },
+                            Sys = new SystemDetails() { Id = "Section1" },
+                            Name = "Test Section 1",
+                            InterstitialPage = new Page()
+                            {
+                                Slug = "section-1",
+                            },
+                        }
                     }
+                },
+                LandingPage = new Page()
+                {
+                    Slug = "landing-slug-1"
                 }
-            }
             };
             _categoryTwo = new Category()
             {
                 Completed = 1,
+                Header = new Header()
+                {
+                    Text = "Test Header Text 2"
+                },
                 Sections = [
                     new()
                     {
@@ -208,6 +220,10 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                         },
                     },
                 ],
+                LandingPage = new Page()
+                {
+                    Slug = "landing-slug-2"
+                }
             };
         }
 
@@ -615,6 +631,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
+            Assert.NotNull(model.CategoryHeaderText);
+            Assert.NotNull(model.CategorySlug);
             var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
@@ -645,6 +663,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
+            Assert.NotNull(model.CategoryHeaderText);
+            Assert.NotNull(model.CategorySlug);
             var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
 
@@ -677,6 +697,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
+            Assert.NotNull(model.CategoryHeaderText);
+            Assert.NotNull(model.CategorySlug);
             var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
 
@@ -708,6 +730,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
+            Assert.NotNull(model.CategoryHeaderText);
+            Assert.NotNull(model.CategorySlug);
             var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             Assert.Null(recommendation.RecommendationSlug);
@@ -738,6 +762,8 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 
             Assert.NotNull(_subtopic);
             Assert.NotEmpty(model.CategorySectionDto);
+            Assert.NotNull(model.CategoryHeaderText);
+            Assert.NotNull(model.CategorySlug);
             var recommendation = model.CategorySectionDto.First().Recommendation;
             Assert.NotNull(recommendation);
             Assert.Equal(_subtopic.Intros[0].Slug, recommendation.RecommendationSlug);
@@ -764,6 +790,15 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             Assert.NotNull(unboxed);
             Assert.IsType<MissingComponent>(unboxed.Description);
 
+        }
+
+        [Fact]
+        public async Task Returns_LandingSlugIsNull_ThrowsContentfulDataUnavailableException()
+        {
+            _category.LandingPage = null;
+
+            await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+                _categorySectionViewComponent.InvokeAsync(_category));
         }
     }
 }

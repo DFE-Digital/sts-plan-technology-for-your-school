@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.CategorySection;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
@@ -42,12 +43,15 @@ public class CategorySectionViewComponent(
         }
 
         category = await SubmissionStatusHelpers.RetrieveSectionStatuses(category, _logger, _query);
+        var categoryLandingSlug = GetLandingPageSlug(category);
 
         return new CategorySectionViewComponentViewModel
         {
             Description = category.Content is { Count: > 0 } content ? content[0] : new MissingComponent(),
+            CategoryHeaderText = category.Header.Text,
             CompletedSectionCount = category.Completed,
             TotalSectionCount = category.Sections.Count,
+            CategorySlug = categoryLandingSlug,
             CategorySectionDto = await GetCategorySectionDto(category).ToListAsync(),
             ProgressRetrievalErrorMessage = category.RetrievalError
                 ? "Unable to retrieve progress, please refresh your browser."
@@ -109,5 +113,15 @@ public class CategorySectionViewComponent(
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
             };
         }
+    }
+
+    private static string GetLandingPageSlug(Category category)
+    {
+        if (category?.LandingPage?.Slug is string slug)
+        {
+            return slug;
+        }
+
+        throw new ContentfulDataUnavailableException($"Could not find category landing slug for category {category?.InternalName ?? "unknown"}");
     }
 }
