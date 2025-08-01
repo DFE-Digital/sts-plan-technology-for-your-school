@@ -1,0 +1,44 @@
+name: Update GIAS Data (Scheduled)
+
+on:
+  schedule:
+    # Run at 7:30 AM UTC every day
+    - cron: '30 7 * * *'
+  # Allow manual triggering for testing purposes
+  workflow_dispatch:
+
+jobs:
+  update_dev:
+    name: Update Dev environment
+    uses: ./.github/workflows/update-gias-data-common.yml
+    with:
+      environment: Dev
+      skip_gias_validation: false
+    secrets: inherit
+
+  update_test:
+    name: Update Test environment
+    needs: update_dev
+    uses: ./.github/workflows/update-gias-data-common.yml
+    with:
+      environment: Tst
+      skip_gias_validation: false
+    secrets: inherit
+
+  update_staging:
+    name: Update Staging environment
+    needs: update_test
+    uses: ./.github/workflows/update-gias-data-common.yml
+    with:
+      environment: StagingUnprotected
+      skip_gias_validation: false
+    secrets: inherit
+
+  update_production:
+    name: Update Production environment
+    needs: update_staging
+    uses: ./.github/workflows/update-gias-data-common.yml
+    with:
+      environment: ProductionUnprotected
+      skip_gias_validation: false
+    secrets: inherit
