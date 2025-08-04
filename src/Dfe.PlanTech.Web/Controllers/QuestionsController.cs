@@ -52,6 +52,7 @@ public class QuestionsController : BaseController<QuestionsController>
         _contactOptions = contactOptions.Value;
     }
 
+    [LogInvalidModelState]
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string categorySlug,
                                                     string sectionSlug,
