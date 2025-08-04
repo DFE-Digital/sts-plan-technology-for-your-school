@@ -7,7 +7,7 @@ public enum SectionProgressStatus
 {
     NotStarted,
     InProgress,
-    Completed, 
+    Completed,
     RetrievalError
 }
 

@@ -32,7 +32,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         private SectionStatusDto _inProgressSectionStatus;
 
         public CategoryLandingViewComponentTests()
-        {         
+        {
             _getSubmissionStatusesQuery = Substitute.For<IGetSubmissionStatusesQuery>();
             _logger = Substitute.For<ILogger<CategoryLandingViewComponent>>();
             _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
@@ -51,9 +51,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 _getSubTopicRecommendationQuery,
                 _getLatestResponsesQuery,
                 _user)
-                {
-                    ViewComponentContext = viewComponentContext
-                };
+            {
+                ViewComponentContext = viewComponentContext
+            };
 
             _completedSection = new Section()
             {
@@ -113,7 +113,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
                 Sys = new SystemDetails { Id = "Category-Test-Id" },
                 Sections = new List<Section> { _completedSection, _notStartedSection, _inProgressSection }
             };
-           
+
             category.SectionStatuses = new List<SectionStatusDto> { _completedSectionStatus, _notStartedSectionStatus, _inProgressSectionStatus };
 
             int establishmentId = 99;
@@ -346,7 +346,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var section = viewModel.CategoryLandingSections.First();
             Assert.Null(section.Recommendations.Answers);
             Assert.Null(section.Recommendations.Chunks);
-            Assert.Equal($"Unable to retrieve {sectionName} recommendation", section.Recommendations.NoRecommendationFoundErrorMessage); 
+            Assert.Equal($"Unable to retrieve {sectionName} recommendation", section.Recommendations.NoRecommendationFoundErrorMessage);
         }
 
         [Fact]
