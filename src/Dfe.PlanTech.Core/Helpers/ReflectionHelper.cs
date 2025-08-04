@@ -15,8 +15,8 @@ public static class ReflectionHelper
 
     private static Type[] AssemblyTypes(Assembly assembly) => assembly.GetTypes();
 
-    private static bool IsNotTestProject(Assembly assembly, bool internalProjectsOnly)
-    => assembly.FullName != null && !assembly.FullName.Contains("Test") && (!internalProjectsOnly || assembly.FullName.Contains("Dfe.PlanTech."));
+    private static bool IsNotTestProject(Assembly assembly, bool internalProjectsOnly) =>
+        assembly.FullName != null && !assembly.FullName.Contains("Test") && (!internalProjectsOnly || assembly.FullName.Contains("Dfe.PlanTech."));
 
     public static bool HasParameterlessConstructor(this Type type) => type.GetConstructor(Type.EmptyTypes) != null || type.GetConstructors().Length == 0;
 

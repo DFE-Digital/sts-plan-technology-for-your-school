@@ -6,13 +6,14 @@ namespace Dfe.PlanTech.Core.Contentful.Models;
 /// Content for a 'RichText' field in Contentful
 /// </summary>
 /// <inheritdoc/>
-public class RichTextContent : TransformableEntry<RichTextContent, CmsRichTextContentDto>
+public class RichTextContentEntry : TransformableEntry<RichTextContentEntry, CmsRichTextContentDto>
 {
     public string Value { get; set; } = "";
     public string NodeType { get; set; } = "";
     public List<RichTextMarkEntry> Marks { get; set; } = [];
-    public List<RichTextContent> Content { get; set; } = [];
+    public List<RichTextContentEntry> Content { get; set; } = [];
     public RichTextContentSupportDataEntry? Data { get; set; }
 
-    public RichTextContent() : base(entry => new CmsRichTextContentDto(entry)) { }
+
+    protected override Func<RichTextContentEntry, CmsRichTextContentDto> Constructor => entry => new(entry);
 }

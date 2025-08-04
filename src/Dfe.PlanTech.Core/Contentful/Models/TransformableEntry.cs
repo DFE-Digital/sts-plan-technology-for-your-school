@@ -3,21 +3,26 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
-public abstract class TransformableEntry<TSelf, TDto> : Entry<ContentComponent>, IDtoTransformable<TDto>
+public abstract class TransformableEntry<TSelf, TDto> : ContentComponent, IDtoTransformable<TDto>
     where TSelf : TransformableEntry<TSelf, TDto>
     where TDto : CmsEntryDto
 {
-    private readonly Func<TSelf, TDto> _constructor;
+    public string Id => Sys.Id;
 
-    protected TransformableEntry(Func<TSelf, TDto> constructor)
+    protected abstract Func<TSelf, TDto> Constructor { get; }
+
+    protected TransformableEntry() { }
+
+    CmsEntryDto IDtoTransformable.AsDtoInternal() => AsDto();
+    TDto IDtoTransformable<TDto>.AsDtoInternal() => AsDto();
+
+    public TDto AsDto()
     {
-        _constructor = constructor;
+        if (Constructor is null)
+        {
+            throw new InvalidOperationException($"{GetType().Name} was deserialized without a transformation function. You must call SetTransformConstructor first.");
+        }
+
+        return Constructor((TSelf)this);
     }
-
-    public string Id => SystemProperties.Id;
-
-    CmsEntryDto IDtoTransformable.AsDtoInternal() => _constructor((TSelf)this);
-    TDto IDtoTransformable<TDto>.AsDtoInternal() => _constructor((TSelf)this);
-
-    public TDto AsDto() => _constructor((TSelf)this);
 }

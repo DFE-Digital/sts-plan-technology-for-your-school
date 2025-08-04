@@ -5,7 +5,8 @@ namespace Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 
 public interface IDtoTransformable
 {
-    public SystemProperties SystemProperties { get; set; }
+    public SystemProperties Sys { get; set; }
+    public string Description { get; set; }
 
     public CmsEntryDto AsDtoInternal();
 }

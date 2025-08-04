@@ -1,10 +1,8 @@
-using Contentful.Core.Models;
-using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class PageEntry: TransformableEntry<PageEntry, CmsPageDto>, IContentfulEntry
+public class PageEntry: TransformableEntry<PageEntry, CmsPageDto>
 {
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
@@ -14,9 +12,9 @@ public class PageEntry: TransformableEntry<PageEntry, CmsPageDto>, IContentfulEn
     public bool DisplayTopicTitle { get; init; }
     public bool RequiresAuthorisation { get; init; } = true;
     public string? SectionTitle { get; init; }
-    public List<Entry<ContentComponent>> BeforeTitleContent { get; init; } = [];
+    public List<ContentComponent> BeforeTitleContent { get; init; } = [];
     public ComponentTitleEntry? Title { get; init; }
-    public List<Entry<ContentComponent>> Content { get; init; } = [];
+    public List<ContentComponent> Content { get; init; } = [];
 
-    public PageEntry() : base(entry => new CmsPageDto(entry)) {}
+    protected override Func<PageEntry, CmsPageDto> Constructor => entry => new(entry);
 }

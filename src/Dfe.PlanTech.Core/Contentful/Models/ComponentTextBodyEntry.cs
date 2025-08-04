@@ -1,12 +1,11 @@
-using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentTextBodyEntry: TransformableEntry<ComponentTextBodyEntry, CmsComponentTextBodyDto>, IContentfulEntry
+public class ComponentTextBodyEntry: TransformableEntry<ComponentTextBodyEntry, CmsComponentTextBodyDto>
 {
     public string InternalName { get; set; } = null!;
-    public RichTextContent RichText { get; init; } = null!;
+    public RichTextContentEntry RichText { get; init; } = null!;
 
-    public ComponentTextBodyEntry() : base(entry => new CmsComponentTextBodyDto(entry)) {}
+    protected override Func<ComponentTextBodyEntry, CmsComponentTextBodyDto> Constructor => entry => new(entry);
 }

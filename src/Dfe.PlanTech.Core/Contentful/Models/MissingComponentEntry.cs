@@ -4,5 +4,5 @@ namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class MissingComponentEntry : TransformableEntry<MissingComponentEntry, CmsMissingComponentDto>
 {
-    public MissingComponentEntry() : base(entry => new CmsMissingComponentDto()) { }
+    protected override Func<MissingComponentEntry, CmsMissingComponentDto> Constructor => entry => new();
 }

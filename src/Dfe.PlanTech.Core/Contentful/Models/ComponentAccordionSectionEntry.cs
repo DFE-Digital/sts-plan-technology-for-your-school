@@ -4,7 +4,7 @@ using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentAccordionSectionEntry : TransformableEntry<ComponentAccordionSectionEntry, CmsComponentAccordionSectionDto>, IContentfulEntry, IHasSlug, IHasUri
+public class ComponentAccordionSectionEntry : TransformableEntry<ComponentAccordionSectionEntry, CmsComponentAccordionSectionDto>, IHasSlug, IHasUri
 {
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
@@ -13,7 +13,7 @@ public class ComponentAccordionSectionEntry : TransformableEntry<ComponentAccord
     public IReadOnlyList<RichTextContentDataEntry> Content { get; init; } = [];
     public string SummaryLine { get; init; } = null!;
     public string? Uri { get; init; } = null!;
-    public RichTextContent RichText { get; init; } = null!;
+    public RichTextContentEntry RichText { get; init; } = null!;
 
-    public ComponentAccordionSectionEntry() : base(entry => new CmsComponentAccordionSectionDto(entry)) { }
+    protected override Func<ComponentAccordionSectionEntry, CmsComponentAccordionSectionDto> Constructor => entry => new(entry);
 }

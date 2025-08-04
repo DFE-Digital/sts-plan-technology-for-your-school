@@ -1,8 +1,7 @@
-﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful
+﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+
+public class CmsMissingComponentDto : CmsEntryDto
 {
-    public class CmsMissingComponentDto : CmsEntryDto
-    {
-        public CmsMissingComponentDto()
-        { }
-    }
+    public CmsMissingComponentDto()
+    { }
 }

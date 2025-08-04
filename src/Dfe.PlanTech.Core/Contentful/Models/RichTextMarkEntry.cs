@@ -10,5 +10,5 @@ public class RichTextMarkEntry : TransformableEntry<RichTextMarkEntry, CmsRichTe
 {
     public string Type { get; set; } = "";
 
-    public RichTextMarkEntry() : base(entry => new CmsRichTextMarkDto(entry)) { }
+    protected override Func<RichTextMarkEntry, CmsRichTextMarkDto> Constructor => entry => new(entry);
 }

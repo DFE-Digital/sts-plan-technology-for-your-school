@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
+namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 public class CmsTagDto
 {

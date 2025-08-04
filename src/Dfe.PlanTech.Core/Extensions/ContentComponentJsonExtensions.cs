@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Core.Extensions;
@@ -10,22 +12,15 @@ namespace Dfe.PlanTech.Core.Extensions;
 public static class ContentComponentJsonExtensions
 {
     /// <summary>
-    /// Gets all types inheriting <see cref="Type"/> that would be valid for serialisation
-    /// </summary>
-    /// <param name="type"></param>
-    /// <returns></returns>
-    private static List<JsonDerivedType> GetInheritingTypes(Type type) => [.. ReflectionHelper
-        .GetTypesInheritingFrom(type)
-        .Where(derivedType => derivedType != type && derivedType.IsConcreteClass() && derivedType.HasParameterlessConstructor())
-        .Select(type => new JsonDerivedType(type, type.Name))];
-
-    /// <summary>
     /// Adds polymorphism support for the <see cref="ContentComponent"/> class.
     /// </summary>
     /// <param name="jsonTypeInfo"></param>
     public static void AddContentComponentPolymorphicInfo<TType>(JsonTypeInfo jsonTypeInfo)
     {
-        if (jsonTypeInfo.Type != typeof(TType))
+        if (!jsonTypeInfo.Type.Equals(typeof(TType)))
+            return;
+
+        if (jsonTypeInfo.PolymorphismOptions is not null)
             return;
 
         var options = new JsonPolymorphismOptions
@@ -38,8 +33,21 @@ public static class ContentComponentJsonExtensions
         foreach (var derivedType in GetInheritingTypes(typeof(TType)))
         {
             options.DerivedTypes.Add(derivedType);
+            Console.WriteLine($"Name: {derivedType.DerivedType.Name}, Has ctor: {derivedType.DerivedType.GetConstructor(Type.EmptyTypes) != null}, Discriminator: {ContentTypeConstants.EntryClassToContentTypeMap[derivedType.DerivedType.Name]}");
         }
 
         jsonTypeInfo.PolymorphismOptions = options;
     }
+
+    /// <summary>
+    /// Gets all types inheriting <see cref="Type"/> that would be valid for serialisation
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    private static List<JsonDerivedType> GetInheritingTypes(Type type) => [.. ReflectionHelper
+        .GetTypesInheritingFrom(type)
+        .Where(derivedType => derivedType != type &&
+                              derivedType.IsConcreteClass() &&
+                              derivedType.HasParameterlessConstructor())
+        .Select(type => new JsonDerivedType(type, ContentTypeConstants.EntryClassToContentTypeMap[type.Name]))];
 }

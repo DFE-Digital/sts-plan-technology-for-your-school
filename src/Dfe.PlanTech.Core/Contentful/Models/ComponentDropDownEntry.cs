@@ -1,13 +1,12 @@
-﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentDropDownEntry: TransformableEntry<ComponentDropDownEntry, CmsComponentDropDownDto>, IContentfulEntry
+public class ComponentDropDownEntry: TransformableEntry<ComponentDropDownEntry, CmsComponentDropDownDto>
 {
     public string InternalName { get; set; } = null!;
     public string Title { get; set; } = null!;
-    public RichTextContent? Content { get; set; } = null!;
+    public RichTextContentEntry? Content { get; set; } = null!;
 
-    public ComponentDropDownEntry() : base(entry => new CmsComponentDropDownDto(entry)) { }
+    protected override Func<ComponentDropDownEntry, CmsComponentDropDownDto> Constructor => entry => new(entry);
 }

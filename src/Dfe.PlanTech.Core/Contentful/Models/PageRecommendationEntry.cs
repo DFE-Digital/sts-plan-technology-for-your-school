@@ -1,9 +1,8 @@
-using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class PageRecommendationEntry: TransformableEntry<PageRecommendationEntry, CmsPageRecommendationDto>, IContentfulEntry
+public class PageRecommendationEntry: TransformableEntry<PageRecommendationEntry, CmsPageRecommendationDto>
 {
     public string InternalName { get; init; } = null!;
     public ComponentTitleEntry? Title { get; init; }
@@ -13,5 +12,5 @@ public class PageRecommendationEntry: TransformableEntry<PageRecommendationEntry
     public IEnumerable<ComponentTextBodyWithMaturityEntry>? TextBodyWithMaturity { get; init; }
     public List<ContentComponent> Content { get; init; } = [];
 
-    public PageRecommendationEntry() : base(entry => new CmsPageRecommendationDto(entry)) {}
+    protected override Func<PageRecommendationEntry, CmsPageRecommendationDto> Constructor => entry => new(entry);
 }

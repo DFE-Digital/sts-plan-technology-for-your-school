@@ -64,10 +64,10 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     private IEnumerable<string> GetContentDependenciesAsync(IDtoTransformable value)
     {
         // RichText is a sub-component that doesn't have SystemDetails, exit for such types
-        if (value.SystemProperties is null)
+        if (value.Sys is null)
             yield break;
 
-        yield return value.SystemProperties.Id;
+        yield return value.Sys.Id;
         var properties = value.GetType().GetProperties();
         foreach (var property in properties)
         {

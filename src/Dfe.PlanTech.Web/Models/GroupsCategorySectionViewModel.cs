@@ -2,7 +2,6 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 
 namespace Dfe.PlanTech.Web.Models;
 

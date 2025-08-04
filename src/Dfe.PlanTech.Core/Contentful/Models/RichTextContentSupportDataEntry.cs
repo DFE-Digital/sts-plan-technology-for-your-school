@@ -7,5 +7,5 @@ public class RichTextContentSupportDataEntry: TransformableEntry<RichTextContent
     public string? Uri { get; init; }
     public RichTextContentDataEntry? Target { get; init; }
 
-    public RichTextContentSupportDataEntry() : base(entry => new CmsRichTextContentSupportDataDto(entry)) {}
+    protected override Func<RichTextContentSupportDataEntry, CmsRichTextContentSupportDataDto> Constructor => entry => new(entry);
 }

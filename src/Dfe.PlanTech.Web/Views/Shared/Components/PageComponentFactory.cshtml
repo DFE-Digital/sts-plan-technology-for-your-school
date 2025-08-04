@@ -2,7 +2,7 @@
 
 @inject ComponentViewsHelper ComponentViewsHelper;
 
-@model Dfe.PlanTech.Core.Contentful.Models.Interfaces.IDtoTransformable;
+@model CmsEntryDto;
 
 @{
 	if (ComponentViewsHelper.TryGetViewForType(Model, out string? path) && !string.IsNullOrEmpty(path))
