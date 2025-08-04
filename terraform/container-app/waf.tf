@@ -27,8 +27,8 @@ module "waf" {
   cdn_sku = "Premium_AzureFrontDoor"
 
   cdn_waf_enable_rate_limiting              = true
-  cdn_waf_rate_limiting_duration_in_minutes = 5
-  cdn_waf_rate_limiting_threshold           = 1000
+  cdn_waf_rate_limiting_duration_in_minutes = 1
+  cdn_waf_rate_limiting_threshold           = 100
   cdn_waf_rate_limiting_action              = "Block"
 
   cdn_waf_managed_rulesets = {
@@ -37,7 +37,23 @@ module "waf" {
       action  = "Block",
       overrides = {
         "SQLI" = {
+          "942110" = {
+            action  = "Log"
+            enabled = false
+          },
+          "942150" = {
+            action  = "Log"
+            enabled = false
+          },
           "942200" = {
+            action  = "Log"
+            enabled = false
+          },
+          "942260" = {
+            action  = "Log"
+            enabled = false
+          },
+          "942330" = {
             action  = "Log"
             enabled = false
           },
@@ -45,11 +61,19 @@ module "waf" {
             action  = "Log"
             enabled = false
           },
-          "942450" = {
+          "942370" = {
             action  = "Log"
             enabled = false
-          }
-          "942370" = {
+          },
+          "942430" = {
+            action  = "Log"
+            enabled = false
+          },
+          "942440" = {
+            action  = "Log"
+            enabled = false
+          },
+          "942450" = {
             action  = "Log"
             enabled = false
           }
@@ -57,6 +81,30 @@ module "waf" {
         "RFI" = {
           "931130" = {
             action  = "Log"
+            enabled = false
+          }
+        },
+        "MS-ThreatIntel-WebShells" = {
+          "99005006" = {
+            action  = "AnomalyScoring"
+            enabled = false
+          }
+        },
+        "MS-ThreatIntel-CVEs" = {
+          "99001015" = {
+            action  = "AnomalyScoring"
+            enabled = false
+          },
+          "99001016" = {
+            action  = "AnomalyScoring"
+            enabled = false
+          },
+          "99001014" = {
+            action  = "AnomalyScoring"
+            enabled = false
+          },
+          "99001017" = {
+            action  = "AnomalyScoring"
             enabled = false
           }
         }

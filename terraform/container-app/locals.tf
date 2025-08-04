@@ -53,6 +53,7 @@ locals {
   az_sql_sku                    = var.az_sql_sku
   az_sql_max_pool_size          = var.az_sql_max_pool_size
   az_sql_max_size_gb            = local.az_sql_sku == "Basic" ? null : 10
+  az_mssql_ipv4_allow_list      = var.az_mssql_ipv4_allow_list
 
   az_sql_vnet = {
     dns_zone_name = "privatelink.database.windows.net"
@@ -73,6 +74,8 @@ locals {
     nic_name      = "${local.resource_prefix}-redis-cache-nic"
     endpoint_name = "${local.resource_prefix}-redis-cache"
   }
+
+  redis_public_access_enabled = var.redis_public_access_enabled
 
   ##################
   # Azure KeyVault #
@@ -97,6 +100,8 @@ locals {
       name     = "${local.resource_prefix}-keyvault"
     }
   }
+
+  kv_firewall_cidr_rules = var.key_vault_cidr_rules
 
   ##################
   # CDN/Front Door #

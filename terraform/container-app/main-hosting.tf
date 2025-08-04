@@ -1,5 +1,5 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.17.1"
+  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.20.0"
 
   ###########
   # General #
@@ -42,6 +42,7 @@ module "main_hosting" {
   mssql_managed_identity_assign_role = false
   mssql_sku_name                     = local.az_sql_sku
   mssql_max_size_gb                  = local.az_sql_max_size_gb
+  mssql_firewall_ipv4_allow_list     = local.az_mssql_ipv4_allow_list
 
   ##############
   # Networking #

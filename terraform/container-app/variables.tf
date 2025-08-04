@@ -68,6 +68,15 @@ variable "az_sql_max_pool_size" {
   default     = 100
 }
 
+variable "az_mssql_ipv4_allow_list" {
+  description = "IPv4 allow list for SQL DB"
+  type = map(object({
+    start_ip_range : string,
+    end_ip_range : optional(string, "")
+  }))
+  default = {}
+}
+
 #####################
 # Azure Redis Cache #
 #####################
@@ -95,6 +104,12 @@ variable "redis_tls_version" {
   default     = "1.2"
 }
 
+variable "redis_public_access_enabled" {
+  description = "Enable public access on the redis cache"
+  type        = bool
+  default     = false
+}
+
 ############
 # KeyVault #
 ############
@@ -118,6 +133,12 @@ variable "key_size" {
   type        = number
   description = "The size in bits of the key to be created."
   default     = 2048
+}
+
+variable "key_vault_cidr_rules" {
+  description = "A set of CIDR rules representing allowed IP addresses for network access to the keyvault s190x0x-plantech-kv"
+  type        = set(string)
+  default     = []
 }
 
 #######################
@@ -276,4 +297,13 @@ variable "contentful_webhook_name" {
   description = "Prefix for the Contentful webhook name"
   type        = string
   default     = "Plan Tech Webhook"
+}
+
+#########
+# Misc #
+#########
+
+variable "workflow_runner_ip" {
+  type    = string
+  default = null
 }

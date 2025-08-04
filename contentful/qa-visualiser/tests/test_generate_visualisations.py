@@ -19,7 +19,7 @@ def test_create_questionnaire_flowchart(mock_edge, mock_node, mock_sections):
     rec_id_2 = f"rec_{hash(wrapped_recommendation_2)}"
 
     expected_nodes = {
-        ("question-1", "First Question?"),
+        ("question-1", "Q1. First Question?"),
         ("end", "Check Answers"),
         ("question-2", "Next Question"),
         ("ans_answer-1", "first answer"),

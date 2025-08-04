@@ -17,8 +17,8 @@ env:
   ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
-  ARM_CLIENT_SECRET: ${{ secrets.AZ_CLIENT_SECRET }}
-
+  ARM_USE_OIDC: true
+  
   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
 
   TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
@@ -36,6 +36,9 @@ env:
 
 jobs:
   terraform-plan:
+    permissions:
+      id-token: write
+      contents: read
     name: Terraform plan
     runs-on: ubuntu-22.04
     defaults:
@@ -66,7 +69,6 @@ jobs:
           az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-          az_client_secret: ${{ secrets.AZ_CLIENT_SECRET }}
 
       - name: Add Runner to KV whitelist
         uses: azure/CLI@v1
