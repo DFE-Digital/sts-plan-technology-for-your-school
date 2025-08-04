@@ -25,10 +25,6 @@ public class PlanTechDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //Use singular table names
-        foreach (var entity in modelBuilder.Model.GetEntityTypes())
-        {
-            entity.SetTableName(entity.DisplayName());
-        }
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(PlanTechDbContext).Assembly);
     }
 }

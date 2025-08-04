@@ -29,7 +29,7 @@ public class UserRepository
 
     public async Task<UserEntity?> GetUserBySignInRefAsync(string dfeSignInReference)
     {
-        var user = await GetUserByAsync(user => user.DfeSignInRef == dfeSignInReference);
+        var user = await GetUserByAsync(u => u.DfeSignInRef.Equals(dfeSignInReference));
         return user;
     }
 

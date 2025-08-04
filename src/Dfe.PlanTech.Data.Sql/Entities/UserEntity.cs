@@ -1,7 +1,9 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
+[Table("user")]
 public class UserEntity
 {
     public int Id { get; set; }
@@ -24,7 +26,6 @@ public class UserEntity
             DfeSignInRef = DfeSignInRef,
             DateCreated = DateCreated,
             DateLastUpdated = DateLastUpdated,
-            SignIns = SignIns.Select(si => si.AsDto()).ToList(),
             Responses = Responses.Select(r => r.AsDto()).ToList()
         };
     }

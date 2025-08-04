@@ -1,7 +1,9 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
+[Table("question")]
 public class QuestionEntity
 {
     public int Id { get; init; }

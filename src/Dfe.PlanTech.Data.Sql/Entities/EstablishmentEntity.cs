@@ -1,8 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
+[Table("establishment")]
 public class EstablishmentEntity
 {
     public const int EstablishmentRefLength = 50;
@@ -64,6 +66,7 @@ public class EstablishmentEntity
     {
         return new SqlEstablishmentDto
         {
+            Id = Id,
             EstablishmentRef = EstablishmentRef,
             EstablishmentType = EstablishmentType,
             OrgName = OrgName,
