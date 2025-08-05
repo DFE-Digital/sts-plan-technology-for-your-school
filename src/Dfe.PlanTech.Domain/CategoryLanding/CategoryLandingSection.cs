@@ -25,7 +25,7 @@ public class CategoryLandingSection
 
     public string? LastCompletionDate { get; init; } = null;
 
-    public CategoryLandingSectionRecommendations Recommendations { get; init; } = null!;
+    public CategoryLandingSectionRecommendations Recommendations { get; init; }
 
     public SectionProgressStatus ProgressStatus { get; init; }
 

@@ -34,7 +34,7 @@ public class CategoryLandingViewComponent(
     {
         if (category.Sections.Count == 0)
         {
-            _logger.LogError("Found no sections for category {id}", category.Sys.Id);
+            _logger.LogError("Found no sections for category {Id}", category.Sys.Id);
             return new CategoryLandingViewComponentViewModel
             {
                 NoSectionsErrorRedirectUrl = "ServiceUnavailable"
@@ -67,7 +67,7 @@ public class CategoryLandingViewComponent(
             var sectionStatus = category.SectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId == section.Sys.Id);
 
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
-                _logger.LogError("No Slug found for Subtopic with ID: {sectionId}/ name: {sectionName}", section.Sys.Id, section.Name);
+                _logger.LogError("No Slug found for Subtopic with ID: {SectionId}/ name: {SectionName}", section.Sys.Id, section.Name);
 
             var recommendations = await GetCategoryLandingSectionRecommendations(section);
 

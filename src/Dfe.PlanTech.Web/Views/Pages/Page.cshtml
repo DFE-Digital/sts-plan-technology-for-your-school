@@ -79,7 +79,6 @@ else
 
     var isHomeCategoryPage = Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
     var categories = Model.Page.Content.OfType<Dfe.PlanTech.Domain.Questionnaire.Models.Category>().ToList();
-    var otherComponents = Model.Page.Content.Where(c => c is not Dfe.PlanTech.Domain.Questionnaire.Models.Category);
 
     @if (isHomeCategoryPage && categories.Any())
     {
