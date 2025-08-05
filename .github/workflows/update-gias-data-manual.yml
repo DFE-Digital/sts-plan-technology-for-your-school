@@ -7,7 +7,7 @@ on:
         description: Which environment to update
         required: true
         type: choice
-        # Note that the `Unprotected` variants of environments are reserved only for autamated/scheduled actions
+        # Note that the `Unprotected` variants of environments are reserved only for automated/scheduled actions
         options: ['Dev', 'Tst', 'Staging', 'Production']
         default: 'Dev'
       skip_gias_validation:
