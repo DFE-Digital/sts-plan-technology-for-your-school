@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
@@ -25,9 +24,7 @@ public class GetQuestionBySlugRouterTests
 {
     private readonly IGetLatestResponsesQuery _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
     private readonly ISubmissionStatusProcessor _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
-    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
-    private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
-    private readonly IGetPageQuery _getPageQuery = Substitute.For<IGetPageQuery>();
+    private readonly IGetNextUnansweredQuestionQuery _getNextUnansweredQuestionQuery = Substitute.For<IGetNextUnansweredQuestionQuery>();
     private readonly IUser _user = Substitute.For<IUser>();
     private readonly IOptions<ErrorMessages> _errorMessages = Substitute.For<IOptions<ErrorMessages>>();
     private readonly IOptions<ContactOptions> _contactOptions = Substitute.For<IOptions<ContactOptions>>();
@@ -43,7 +40,7 @@ public class GetQuestionBySlugRouterTests
 
     public GetQuestionBySlugRouterTests()
     {
-        _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _getNavigationQuery, _getPageQuery, _user, _errorMessages, _contactOptions);
+        _controller = new QuestionsController(new NullLogger<QuestionsController>(), _getSectionQuery, _getResponseQuery, _getNextUnansweredQuestionQuery, _user, _errorMessages, _contactOptions);
         _user.GetEstablishmentId().Returns(1);
 
         // Global TempData setup for all tests

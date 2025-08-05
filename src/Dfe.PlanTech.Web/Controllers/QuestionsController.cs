@@ -161,7 +161,6 @@ public class QuestionsController : BaseController<QuestionsController>
         string questionSlug,
         SubmitAnswerDto submitAnswerDto,
         [FromServices] ISubmitAnswerCommand submitAnswerCommand,
-
         string? returnTo = "",
         CancellationToken cancellationToken = default)
     {
