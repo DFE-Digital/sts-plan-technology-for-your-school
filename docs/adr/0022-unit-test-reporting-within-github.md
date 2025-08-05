@@ -1,5 +1,4 @@
-# 0022 - Deploy Database Schema Changes
-
+# 0022 - Unit Test Reporting Within GitHub
 * **Status**: accepted
 
 ## Context and Problem Statement
