@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Application.Questionnaire.Queries;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
