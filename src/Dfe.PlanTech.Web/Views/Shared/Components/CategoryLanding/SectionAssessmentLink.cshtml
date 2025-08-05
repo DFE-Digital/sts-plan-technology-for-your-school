@@ -63,14 +63,11 @@
             </p>
         }
     }
-    else if (Model.Context == "Default")
+    else if (Model.Context == "Default" && topic.ProgressStatus != SectionProgressStatus.Completed)
     {
-        if (topic.ProgressStatus != SectionProgressStatus.Completed)
-        {
-            <p>
-                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-                   class="govuk-link">@linkText</a>
-            </p>
-        }
+        <p>
+            <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
+                class="govuk-link">@linkText</a>
+        </p>
     }
 }

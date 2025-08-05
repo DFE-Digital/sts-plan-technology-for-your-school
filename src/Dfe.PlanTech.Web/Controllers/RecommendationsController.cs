@@ -36,7 +36,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
         if (string.IsNullOrEmpty(chunkSlug))
             throw new ArgumentNullException(nameof(chunkSlug));
 
-        var categoryLandingPage = await getPageQuery.GetPageBySlug(categorySlug);
+        var categoryLandingPage = await getPageQuery.GetPageBySlug(categorySlug, cancellationToken);
         var category = categoryLandingPage?.Content[0] as Category ?? throw new ContentfulDataUnavailableException($"No category landing page found for slug: {categorySlug}");
 
         var (section, currentChunk, allChunks) = await getRecommendationRouter.GetSingleRecommendation(sectionSlug, chunkSlug, this, cancellationToken);

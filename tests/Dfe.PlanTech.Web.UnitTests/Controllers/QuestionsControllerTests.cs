@@ -414,7 +414,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task QuestionPreview_Should_Redirect_When_UsePreview_Is_False()
     {
-        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(false));
+        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(false), _getEntityFromContentfulQuery);
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
@@ -424,7 +424,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task QuestionPreview_Should_Return_Valid_Model_With_Section_Omitted_When_UsePreview_Is_True()
     {
-        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(true));
+        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptions(true), _getEntityFromContentfulQuery);
 
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", viewResult.ViewName);
@@ -478,7 +478,7 @@ public class QuestionsControllerTests
     [InlineData("")]
     public async Task GetInterstitialPage_Should_Throw_Exception_When_CategorySlug_NullOrEmpty(string? categorySlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetInterstitialPage(categorySlug!, SectionSlug));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetInterstitialPage(categorySlug!, SectionSlug, _getPageQuery));
     }
 
     [Theory]
@@ -486,13 +486,13 @@ public class QuestionsControllerTests
     [InlineData("")]
     public async Task GetInterstitialPage_Should_Throw_Exception_When_SectionSlug_NullOrEmpty(string? sectionSlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetInterstitialPage(CategorySlug, sectionSlug!));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetInterstitialPage(CategorySlug, sectionSlug!, _getPageQuery));
     }
 
     [Fact]
     public async Task GetInterstitialPage_Should_Throw_Exception_When_No_InterstitialPage_For_Slug()
     {
-        var action = () => _controller.GetInterstitialPage(CategorySlug, "invalid-section");
+        var action = () => _controller.GetInterstitialPage(CategorySlug, "invalid-section", _getPageQuery);
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(action);
     }
 
@@ -506,7 +506,7 @@ public class QuestionsControllerTests
         };
         _getPageQuery.GetPageBySlug(sectionSlug).Returns(interstitialPage);
 
-        var result = await _controller.GetInterstitialPage("category-slug", sectionSlug);
+        var result = await _controller.GetInterstitialPage("category-slug", sectionSlug, _getPageQuery);
 
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.Equal("~/Views/Pages/Page.cshtml", viewResult.ViewName);

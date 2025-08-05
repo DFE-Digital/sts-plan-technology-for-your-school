@@ -108,12 +108,12 @@ public class GetRecommendationRouter : IGetRecommendationRouter
 
     public async Task<(Section, RecommendationChunk, List<RecommendationChunk>)> GetSingleRecommendation(string sectionSlug, string chunkSlug, RecommendationsController controller, CancellationToken cancellationToken)
     {
-        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug)
+        var section = await _getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
             ?? throw new ContentfulDataUnavailableException($"Could not find section with slug: {sectionSlug}");
-        var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _user.GetEstablishmentId(), section.Sys.Id, true)
+        var submissionResponses = await _getLatestResponsesQuery.GetLatestResponses(await _user.GetEstablishmentId(), section.Sys.Id, true, cancellationToken)
             ?? throw new DatabaseException($"Could not find users answers for: {section.Name}");
         var latestResponses = section.GetOrderedResponsesForJourney(submissionResponses.Responses).ToList();
-        var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id)
+        var subTopicRecommendation = await _getSubTopicRecommendationQuery.GetSubTopicRecommendation(section.Sys.Id, cancellationToken)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for: {section.Name}");
         var allChunks = subTopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Select(answer => answer.AnswerRef));
 
@@ -132,7 +132,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     private async Task<RecommendationsViewModel> GetRecommendationViewModel(string categorySlug, string sectionSlug, bool isChecklist = false, CancellationToken cancellationToken = default)
     {
         var (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses) = await GetSubtopicRecommendation(cancellationToken);
-        var categoryLandingPage = await _getPageQuery.GetPageBySlug(categorySlug);
+        var categoryLandingPage = await _getPageQuery.GetPageBySlug(categorySlug, cancellationToken);
         var category = categoryLandingPage?.Content[0] as Category ?? throw new ContentfulDataUnavailableException($"No category landing page found for slug: {categorySlug}");
 
         var latestCompletionDate = new DateTime?();
@@ -141,7 +141,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         {
             var establishmentId = await _router.User.GetEstablishmentId();
 
-            latestCompletionDate = await _getLatestResponsesQuery.GetLatestCompletionDate(establishmentId, _router.Section.Sys.Id, true);
+            latestCompletionDate = await _getLatestResponsesQuery.GetLatestCompletionDate(establishmentId, _router.Section.Sys.Id, true, cancellationToken);
         }
 
         return new RecommendationsViewModel()

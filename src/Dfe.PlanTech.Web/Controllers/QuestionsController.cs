@@ -25,9 +25,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
-    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
-    private readonly IGetNavigationQuery _getNavigationQuery;
-    private readonly IGetPageQuery _getPageQuery;
+    private readonly IGetNextUnansweredQuestionQuery _getNextUnansweredQuestionQuery;
     private readonly IUser _user;
     private readonly ErrorMessages _errorMessages;
     private readonly ContactOptions _contactOptions;
@@ -35,18 +33,14 @@ public class QuestionsController : BaseController<QuestionsController>
     public QuestionsController(ILogger<QuestionsController> logger,
                                IGetSectionQuery getSectionQuery,
                                IGetLatestResponsesQuery getResponseQuery,
-                               IGetEntityFromContentfulQuery getEntityByIdQuery,
-                               IGetNavigationQuery getNavigationQuery,
-                               IGetPageQuery getPageQuery,
+                               IGetNextUnansweredQuestionQuery getNextUnansweredQuestionQuery,
                                IUser user,
                                IOptions<ErrorMessages> errorMessageOptions,
                                IOptions<ContactOptions> contactOptions) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
-        _getEntityFromContentfulQuery = getEntityByIdQuery;
-        _getNavigationQuery = getNavigationQuery;
-        _getPageQuery = getPageQuery;
+        _getNextUnansweredQuestionQuery = getNextUnansweredQuestionQuery;
         _user = user;
         _errorMessages = errorMessageOptions.Value;
         _contactOptions = contactOptions.Value;
@@ -74,15 +68,16 @@ public class QuestionsController : BaseController<QuestionsController>
         return await router.ValidateRoute(categorySlug, sectionSlug, questionSlug, this, cancellationToken);
     }
 
+    [LogInvalidModelState]
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment", Name = "GetInterstitialPage")]
-    public async Task<IActionResult> GetInterstitialPage(string categorySlug, string sectionSlug)
+    public async Task<IActionResult> GetInterstitialPage(string categorySlug, string sectionSlug, [FromServices] IGetPageQuery getPageQuery)
     {
         if (string.IsNullOrEmpty(categorySlug))
             throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
 
-        var interstitialPage = await _getPageQuery.GetPageBySlug(sectionSlug)
+        var interstitialPage = await getPageQuery.GetPageBySlug(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section: {sectionSlug}");
 
         var viewModel = new PageViewModel(interstitialPage, this, _user, Logger);
@@ -93,12 +88,13 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("question/preview/{questionId}")]
     public async Task<IActionResult> GetQuestionPreviewById(string questionId,
                                                             [FromServices] ContentfulOptions contentfulOptions,
+                                                            [FromServices] IGetEntityFromContentfulQuery getEntityFromContentfulQuery,
                                                             CancellationToken cancellationToken = default)
     {
         if (!contentfulOptions.UsePreviewApi)
             return new RedirectResult(UrlConstants.HomePage);
 
-        var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
+        var question = await getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
                        throw new ContentfulDataUnavailableException($"Could not find question with Id {questionId}");
 
         var viewModel = GenerateViewModel(null, null, question, null, null);
@@ -110,8 +106,8 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string categorySlug,
                                                                 string sectionSlug,
-                                                                [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
                                                                 [FromServices] IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand,
+                                                                [FromServices] IGetNavigationQuery getNavigationQuery,
                                                                 CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(categorySlug))
@@ -125,7 +121,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
         try
         {
-            var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
+            var nextQuestion = await _getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
             if (nextQuestion == null)
                 return this.RedirectToCheckAnswers(categorySlug, sectionSlug);
@@ -137,7 +133,7 @@ public class QuestionsController : BaseController<QuestionsController>
             // Remove the current invalid submission and redirect to homepage
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
 
-            TempData["SubtopicError"] = await BuildErrorMessage();
+            TempData["SubtopicError"] = await BuildErrorMessage(getNavigationQuery);
             return RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
@@ -145,9 +141,9 @@ public class QuestionsController : BaseController<QuestionsController>
         }
     }
 
-    private async Task<string> BuildErrorMessage()
+    private async Task<string> BuildErrorMessage([FromServices] IGetNavigationQuery getNavigationQuery)
     {
-        var contactLink = await _getNavigationQuery.GetLinkById(_contactOptions.LinkId);
+        var contactLink = await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
         var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
 
         if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))
@@ -165,7 +161,7 @@ public class QuestionsController : BaseController<QuestionsController>
         string questionSlug,
         SubmitAnswerDto submitAnswerDto,
         [FromServices] ISubmitAnswerCommand submitAnswerCommand,
-        [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
+
         string? returnTo = "",
         CancellationToken cancellationToken = default)
     {
@@ -212,7 +208,7 @@ public class QuestionsController : BaseController<QuestionsController>
             var nextQuestion = GetNextAnsweredQuestion(section, submissionResponsesDto, questionSlug);
 
             // Check unanswered to see if we really have no more questions
-            nextQuestion ??= await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
+            nextQuestion ??= await _getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
             if (nextQuestion != null)
             {
