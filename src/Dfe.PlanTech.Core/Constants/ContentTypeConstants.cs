@@ -45,8 +45,7 @@ public static class ContentTypeConstants
             { nameof(RichTextContentDataEntry), RichTextContentDataContentTypeId },
             { nameof(RichTextContentSupportDataEntry), RichTextContentSupportDataContentTypeId },
             { nameof(RichTextMarkEntry), RichTextMarkContentTypeId },
-            { nameof(SubtopicRecommendationEntry), SubtopicRecommendationContentTypeId },
-            { nameof(TextBodyEntry), TextBodyContentTypeId }
+            { nameof(SubtopicRecommendationEntry), SubtopicRecommendationContentTypeId }
         };
 
     public const string CAndSLinkContentTypeId = "csLink";
@@ -66,7 +65,7 @@ public static class ContentTypeConstants
     public const string ComponentInsetTextContentTypeId = "insetText";
     public const string ComponentJumpLinkContentTypeId = "csJumpLinkComponent";
     public const string ComponentNotificationBannerContentTypeId = "NotificationBanner";
-    public const string ComponentTextBodyContentTypeId = "textBody";
+    public const string ComponentTextBodyContentTypeId = "TextBody";
     public const string ComponentTextBodyWithMaturityContentTypeId = "componentTextBodyWithMaturity";
     public const string ComponentTitleContentTypeId = "title";
     public const string ComponentWarningContentTypeId = "WarningComponent";
@@ -89,5 +88,4 @@ public static class ContentTypeConstants
     public const string RichTextContentSupportDataContentTypeId = "RichTextContentSupportData";
     public const string RichTextMarkContentTypeId = "RichTextMark";
     public const string SubtopicRecommendationContentTypeId = "subtopicRecommendation";
-    public const string TextBodyContentTypeId = "TextBody";
 }

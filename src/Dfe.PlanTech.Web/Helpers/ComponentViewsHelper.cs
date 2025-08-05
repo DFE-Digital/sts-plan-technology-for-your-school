@@ -21,10 +21,11 @@ public class ComponentViewsHelper(
     public bool TryGetViewForType(object model, out string? viewPath)
     {
         var componentTypeName = model.GetType().Name;
+        componentTypeName = componentTypeName[3..^3].Replace("Component", "");
 
         var matchingViewType = _viewTypes.FirstOrDefault(FileNameMatchesComponentTypeName(componentTypeName));
 
-        if (matchingViewType == null)
+        if (matchingViewType is null)
         {
             _logger.LogWarning("Could not find matching view for {model}", model);
             viewPath = null;

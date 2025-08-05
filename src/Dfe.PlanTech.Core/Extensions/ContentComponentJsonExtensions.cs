@@ -33,7 +33,6 @@ public static class ContentComponentJsonExtensions
         foreach (var derivedType in GetInheritingTypes(typeof(TType)))
         {
             options.DerivedTypes.Add(derivedType);
-            Console.WriteLine($"Name: {derivedType.DerivedType.Name}, Has ctor: {derivedType.DerivedType.GetConstructor(Type.EmptyTypes) != null}, Discriminator: {ContentTypeConstants.EntryClassToContentTypeMap[derivedType.DerivedType.Name]}");
         }
 
         jsonTypeInfo.PolymorphismOptions = options;

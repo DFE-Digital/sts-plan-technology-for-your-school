@@ -10,14 +10,14 @@ public class CmsCategoryDto : CmsEntryDto
         Id = categoryEntry.Id;
         InternalName = categoryEntry.InternalName;
         Header = categoryEntry.Header.AsDto();
-        Content = categoryEntry.Content.Select(BuildContentDto).ToList();
+        Content = categoryEntry.Content?.Select(BuildContentDto).ToList();
         Sections = categoryEntry.Sections.Select(s => s.AsDto()).ToList();
     }
 
     public string Id { get; set; }
     public string InternalName { get; set; } = "";
     public CmsComponentHeaderDto Header { get; set; } = null!;
-    public List<CmsEntryDto> Content { get; set; } = null!;
+    public List<CmsEntryDto>? Content { get; set; } = null!;
     public List<CmsQuestionnaireSectionDto> Sections { get; set; } = [];
     public List<SqlSectionStatusDto> SectionStatuses { get; set; } = [];
 }
