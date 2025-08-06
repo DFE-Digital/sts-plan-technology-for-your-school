@@ -10,7 +10,7 @@ public class QuestionEntity
 
     public string? QuestionText { get; init; } = null!;
 
-    public string ContentfulSysId { get; init; } = null!;
+    public string ContentfulRef { get; init; } = null!;
 
     public DateTime DateCreated { get; private set; } = DateTime.UtcNow;
 
@@ -20,7 +20,7 @@ public class QuestionEntity
         {
             Id = Id,
             QuestionText = QuestionText,
-            ContentfulSysId = ContentfulSysId,
+            ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated
         };
     }

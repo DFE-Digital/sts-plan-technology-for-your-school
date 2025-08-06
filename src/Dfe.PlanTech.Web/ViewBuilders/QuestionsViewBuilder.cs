@@ -173,11 +173,9 @@ public class QuestionsViewBuilder(
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
         var question = section.GetQuestionBySlug(questionSlug);
 
-        var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(question.Id);
-
         if (!controller.ModelState.IsValid)
         {
-            var viewModel = GenerateViewModel(controller, question, section, sectionSlug, latestResponseForQuestion.AnswerSysId, returnTo);
+            var viewModel = GenerateViewModel(controller, question, section, sectionSlug, answerViewModel.ChosenAnswer?.Answer.Id, returnTo);
             viewModel.ErrorMessages = controller.ModelState
                 .Values
                 .SelectMany(value => value.Errors.Select(err => err.ErrorMessage))

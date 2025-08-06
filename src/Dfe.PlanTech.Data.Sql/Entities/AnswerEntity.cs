@@ -14,7 +14,7 @@ public class AnswerEntity
     public string? AnswerText { get; init; } = null!;
 
     [Required]
-    public string ContentfulSysId { get; init; } = null!;
+    public string ContentfulRef { get; init; } = null!;
 
     [Required]
     public DateTime DateCreated { get; private set; } = DateTime.UtcNow;
@@ -25,7 +25,7 @@ public class AnswerEntity
         {
             Id = Id,
             AnswerText = AnswerText,
-            ContentfulSysId = ContentfulSysId,
+            ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated
         };
     }

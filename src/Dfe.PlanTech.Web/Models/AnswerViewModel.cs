@@ -16,7 +16,24 @@ public class AnswerViewModel
         };
     }
 
-    public IdWithTextModel Answer { get; set; }
+    public AnswerViewModel()
+    {
+        Answer = new IdWithTextModel();
+    }
+
+    public string Id
+    {
+        get => Answer.Id;
+        set => Answer.Id = value!;
+    }
+
+    public string Text
+    {
+        get => Answer.Text;
+        set => Answer.Text = value!;
+    }
+
+    public IdWithTextModel Answer { get; set; } = null!;
 
     public string Maturity { get; init; } = null!;
 

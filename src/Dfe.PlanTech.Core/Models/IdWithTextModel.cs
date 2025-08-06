@@ -5,5 +5,5 @@ namespace Dfe.PlanTech.Core.RoutingDataModel;
 public class IdWithTextModel : IdModel
 {
     [JsonPropertyName("text")]
-    public string Text { get; init; } = null!;
+    public string Text { get; set; } = null!;
 }

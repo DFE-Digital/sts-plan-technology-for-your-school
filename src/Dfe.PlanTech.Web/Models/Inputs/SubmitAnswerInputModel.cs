@@ -21,9 +21,10 @@ public class SubmitAnswerInputModel
     [Required(AllowEmptyStrings = false, ErrorMessage = "You must select an answer to continue")]
     public string ChosenAnswerJson { get; init; } = null!;
 
-    public AnswerViewModel? ChosenAnswer => !string.IsNullOrEmpty(ChosenAnswerJson)
-        ? JsonSerializer.Deserialize<AnswerViewModel>(ChosenAnswerJson)
-        : null;
+    public AnswerViewModel? ChosenAnswer =>
+        !string.IsNullOrEmpty(ChosenAnswerJson)
+            ? JsonSerializer.Deserialize<AnswerViewModel>(ChosenAnswerJson)
+            : null;
 
     public SubmitAnswerModel ToModel()
     {

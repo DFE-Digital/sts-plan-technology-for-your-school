@@ -18,7 +18,7 @@ public class ResponseWorkflow
     {
         return await _submissionRepository.GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompleted: false, includeResponses: true)
             .SelectMany(submission => submission.Responses)
-            .Where(response => string.Equals(questionId, response.Question.ContentfulSysId))
+            .Where(response => string.Equals(questionId, response.Question.ContentfulRef))
             .OrderByDescending(response => response.DateCreated)
             .Select(response => new QuestionWithAnswerModel(response.AsDto()))
             .FirstOrDefaultAsync();
@@ -55,7 +55,7 @@ public class ResponseWorkflow
     private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, CmsQuestionnaireSectionDto section)
     {
         var currentQuestion = section?.Questions.FirstOrDefault();
-        var questionMap = responses.ToDictionary(response => response.Question.ContentfulSysId, response => response);
+        var questionMap = responses.ToDictionary(response => response.Question.ContentfulRef, response => response);
 
         var orderedResponses = new List<ResponseEntity>();
         while (currentQuestion is not null)
@@ -69,7 +69,7 @@ public class ResponseWorkflow
             orderedResponses.Add(response);
 
             currentQuestion = currentQuestion.Answers
-                .Find(a => a.Sys.Id!.Equals(response.Answer.ContentfulSysId))?
+                .Find(a => a.Sys.Id!.Equals(response.Answer.ContentfulRef))?
                 .NextQuestion;
         }
 

@@ -12,7 +12,7 @@ internal class AnswerEntityConfiguration : IEntityTypeConfiguration<AnswerEntity
         builder.HasKey(answer => answer.Id);
         builder.Property(answer => answer.Id).ValueGeneratedOnAdd();
         builder.Property(answer => answer.AnswerText).HasMaxLength(4000); // NVARCHAR Max Length
-        builder.Property(answer => answer.ContentfulSysId).HasMaxLength(50);
+        builder.Property(answer => answer.ContentfulRef).HasMaxLength(50);
         builder.Property(answer => answer.DateCreated).ValueGeneratedOnAdd();
     }
 }

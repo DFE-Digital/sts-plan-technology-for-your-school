@@ -1,7 +1,5 @@
 ﻿using System.Linq.Expressions;
-using System.Threading;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -78,38 +76,40 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         bool includeResponses = false
     )
     {
-        Func<string, bool> statusCheck;
+        List<string> statusFilters = [];
         if (isCompleted)
         {
-            statusCheck = (string status) => Equals(status, SubmissionStatus.CompleteReviewed);
+            statusFilters = [
+                SubmissionStatus.CompleteReviewed.ToString()
+            ];
         }
         else
         {
-            statusCheck = (string status) => Equals(status, SubmissionStatus.InProgress) ||
-                                             Equals(status, SubmissionStatus.CompleteNotReviewed);
+            statusFilters = [
+                SubmissionStatus.InProgress.ToString(),
+                SubmissionStatus.CompleteNotReviewed.ToString()
+            ];
         }
 
         return GetSubmissionsBy(submission =>
                 !submission.Deleted &&
                 submission.EstablishmentId == establishmentId &&
-                submission.SectionId == sectionId,
+                submission.SectionId == sectionId &&
+                statusFilters.Contains(submission.Status!),
                 includeResponses)
-            .Where(s => statusCheck(s.Status!))
             .OrderByDescending(submission => submission.DateCreated);
     }
 
     public Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId, bool includeRelationships = false)
     {
-        var query = _db.Submissions.Where(s => s.Id == submissionId);
-
-        return includeRelationships
-            ? IncludeResponses(query).FirstOrDefaultAsync()
-            : query.FirstOrDefaultAsync();
+        return GetSubmissionsBy(s => s.Id == submissionId).FirstOrDefaultAsync();
     }
 
     public IQueryable<SubmissionEntity> GetSubmissionsBy(Expression<Func<SubmissionEntity, bool>> predicate, bool includeRelationships = false)
     {
-        var query = _db.Submissions.Where(predicate);
+        var query = _db.Submissions
+            .Where(predicate)
+            .Include(s => s.Establishment);
 
         return includeRelationships
           ? IncludeResponses(query)

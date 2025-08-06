@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using Contentful.Core.Models.Management;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Data.Sql.Entities;
@@ -31,7 +30,7 @@ public class StoredProcedureRepository
             Direction = ParameterDirection.Output
         };
 
-        var parameters = new List<SqlParameter>
+        var parameters = new SqlParameter[]
         {
             new(DatabaseConstants.EstablishmentIdParam, userGroupSelectionModel.UserEstablishmentId),
             new(DatabaseConstants.SelectedEstablishmentIdParam, userGroupSelectionModel.SelectedEstablishmentId),
@@ -40,20 +39,26 @@ public class StoredProcedureRepository
             selectionId
         };
 
-        await _db.Database.ExecuteSqlRawAsync($"EXEC {DatabaseConstants.SpSubmitGroupSelection}", parameters);
+        var command = BuildCommand(DatabaseConstants.SpSubmitGroupSelection, parameters);
+        await _db.Database.ExecuteSqlRawAsync(command, parameters);
 
-        return (int)(selectionId.Value
-        ?? throw new InvalidCastException($"{nameof(selectionId)} is not an integer - value is {selectionId.Value}"));
+        if (selectionId.Value is int id)
+        {
+            return id;
+        }
+
+        throw new InvalidCastException($"{nameof(selectionId)} is not an integer - value is {selectionId.Value ?? "null"}");
     }
 
     public Task<int> SetMaturityForSubmissionAsync(int submissionId)
     {
-        var parameters = new List<SqlParameter>
+        var parameters = new SqlParameter[]
         {
             new(DatabaseConstants.SubmissionIdParam, submissionId)
         };
 
-        return _db.Database.ExecuteSqlRawAsync($"EXEC {DatabaseConstants.SpCalculateMaturity}", parameters);
+        var command = BuildCommand(DatabaseConstants.SpCalculateMaturity, parameters);
+        return _db.Database.ExecuteSqlRawAsync(command, parameters);
     }
 
     public async Task<int> SubmitResponse(AssessmentResponseModel response)
@@ -68,36 +73,58 @@ public class StoredProcedureRepository
             Direction = ParameterDirection.Output
         };
 
-        var parameters = new List<SqlParameter>
+        var parameters = new SqlParameter[]
         {
-            new(DatabaseConstants.EstablishmentIdParam, response.EstablishmentId),
-            new(DatabaseConstants.UserIdParam, response.UserId),
             new(DatabaseConstants.SectionIdParam, response.SectionId),
             new(DatabaseConstants.SectionNameParam, response.SectionName),
             new(DatabaseConstants.QuestionContentfulIdParam, response.Question.Id),
             new(DatabaseConstants.QuestionTextParam, response.Question.Text),
             new(DatabaseConstants.AnswerContentfulIdParam, response.Answer.Id),
             new(DatabaseConstants.AnswerTextParam, response.Answer.Text),
+            new(DatabaseConstants.UserIdParam, response.UserId),
+            new(DatabaseConstants.EstablishmentIdParam, response.EstablishmentId),
             new(DatabaseConstants.MaturityParam, response.Maturity),
             responseId,
             submissionId
         };
 
-        await _db.Database.ExecuteSqlRawAsync($@"EXEC {DatabaseConstants.SpSubmitAnswer}", parameters);
+        var command = BuildCommand(DatabaseConstants.SpSubmitAnswer, parameters);
+        await _db.Database.ExecuteSqlRawAsync(command, parameters);
 
-        return (int)(responseId.Value
-            ?? throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value}"));
+        if (responseId.Value is int id)
+        {
+            return id;
+        }
+
+        throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}");
     }
 
     public Task HardDeleteCurrentSubmissionAsync(int establishmentId, string sectionId)
     {
-        var parameters = new List<SqlParameter>
+        var parameters = new SqlParameter[]
         {
             new(DatabaseConstants.EstablishmentIdParam, establishmentId),
             new(DatabaseConstants.SectionIdParam, sectionId)
         };
 
-        return _db.Database.ExecuteSqlRawAsync($@"EXEC {DatabaseConstants.SpDeleteCurrentSubmission}", parameters);
+        var command = BuildCommand(DatabaseConstants.SpDeleteCurrentSubmission, parameters);
+        return _db.Database.ExecuteSqlRawAsync(command, parameters);
+    }
+
+    private static string BuildCommand(string storedProcedureName, SqlParameter[] parameters)
+    {
+        ParameterDirection[] outputParameterTypes =
+        {
+            ParameterDirection.InputOutput,
+            ParameterDirection.Output
+        };
+
+        var parameterNames = parameters.Select(p =>
+            outputParameterTypes.Contains(p.Direction)
+                ? $"{p.ParameterName} OUTPUT"
+                : p.ParameterName);
+
+        return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
     }
 
     private static object SqlValueOrDbNull(string? value) => value ?? (object)DBNull.Value;
