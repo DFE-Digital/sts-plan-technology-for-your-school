@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
@@ -86,6 +87,12 @@ public class PagesController(
     [HttpGet(UrlConstants.Error, Name = UrlConstants.Error)]
     public IActionResult Error()
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+
+    [HttpGet("{categorySlug}/{sectionSlug}/{*path}")]
+    public IActionResult HandleUnknownRoutes(string path)
+    {
+        throw new KeyNotFoundException(path);
+    }
 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
