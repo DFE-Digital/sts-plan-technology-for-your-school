@@ -2,12 +2,12 @@
 
 namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
-public class CmsRichTextContentSupportDataDto : CmsEntryDto
+public class CmsRichTextContentSupportDataDto : CmsFieldDto
 {
     public string? Uri { get; set; } = null!;
     public CmsRichTextContentDataDto? Target { get; set; }
 
-    public CmsRichTextContentSupportDataDto(RichTextContentSupportDataEntry contentSupportData)
+    public CmsRichTextContentSupportDataDto(RichTextContentSupportDataField contentSupportData)
     {
         Uri = contentSupportData.Uri;
         Target = contentSupportData.Target?.AsDto();

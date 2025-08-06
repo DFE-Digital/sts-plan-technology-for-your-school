@@ -6,7 +6,7 @@ public class QuestionnaireCategoryEntry : TransformableEntry<QuestionnaireCatego
 {
     public string InternalName { get; set; } = "";
     public ComponentHeaderEntry Header { get; set; } = null!;
-    public List<ContentComponent>? Content { get; set; }
+    public List<ContentfulEntry>? Content { get; set; }
     public List<QuestionnaireSectionEntry> Sections { get; set; } = [];
 
     protected override Func<QuestionnaireCategoryEntry, CmsCategoryDto> Constructor => entry => new(entry);

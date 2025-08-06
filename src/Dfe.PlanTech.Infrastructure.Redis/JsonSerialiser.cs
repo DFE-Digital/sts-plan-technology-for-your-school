@@ -8,7 +8,7 @@ using StackExchange.Redis;
 namespace Dfe.PlanTech.Infrastructure.Redis;
 
 /// <summary>
-/// Provides functionality for serialising the <see cref="ContentComponent"/> class, due to issues with a base class
+/// Provides functionality for serialising the <see cref="ContentfulEntry"/> class, due to issues with a base class
 /// </summary>
 public static class JsonSerialiser
 {
@@ -18,7 +18,7 @@ public static class JsonSerialiser
     private static readonly JsonSerializerOptions JsonSerialiserOptions = new()
     {
         TypeInfoResolver = new DefaultJsonTypeInfoResolver()
-            .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentComponent>),
+            .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentfulEntry>),
         ReferenceHandler = ReferenceHandler.Preserve,
         MaxDepth = 256
     };

@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Core.Caching.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Content.Options;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +26,7 @@ public class CachedContentfulRepository(
     }
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
     {
-        string contentType = GetContentTypeName<TEntry>();
+        string contentType = ContentTypeHelper.GetContentTypeName<TEntry>();
         var key = $"{contentType}s";
 
         return await _cmsCache.GetOrCreateAsync(key, async () => await _contentfulRepository.GetEntriesAsync<TEntry>()) ?? [];
@@ -33,7 +34,7 @@ public class CachedContentfulRepository(
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options)
     {
-        var contentType = GetContentTypeName<TEntry>();
+        var contentType = ContentTypeHelper.GetContentTypeName<TEntry>();
         var jsonOptions = options.SerializeToRedisFormat();
         var key = $"{contentType}{jsonOptions}";
 
@@ -58,16 +59,5 @@ public class CachedContentfulRepository(
     public GetEntriesOptions GetEntryByIdOptions(string id, int include = 2)
     {
         return _contentfulRepository.GetEntryByIdOptions(id, include);
-    }
-
-    private static string GetContentTypeName<TEntry>()
-    {
-        var typeName = typeof(TEntry).Name;
-        if (ContentTypeConstants.EntryClassToContentTypeMap.TryGetValue(typeName, out var contentTypeId))
-        {
-            return contentTypeId!;
-        }
-
-        throw new InvalidOperationException($"Could not find content type ID for class type {typeName}");
     }
 }

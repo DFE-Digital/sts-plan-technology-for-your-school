@@ -3,7 +3,7 @@ using Contentful.Core.Models;
 using Contentful.Core.Search;
 using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Content.Queries;
-using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
@@ -50,10 +50,10 @@ public class ContentfulRepository : IContentfulRepository
     }
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
-        => await GetEntriesAsync<TEntry>(GetContentTypeName<TEntry>(), null);
+        => await GetEntriesAsync<TEntry>(ContentTypeHelper.GetContentTypeName<TEntry>(), null);
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options)
-        => await GetEntriesAsync<TEntry>(GetContentTypeName<TEntry>(), options);
+        => await GetEntriesAsync<TEntry>(ContentTypeHelper.GetContentTypeName<TEntry>(), options);
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(string entityTypeId, GetEntriesOptions? options)
     {
@@ -66,7 +66,7 @@ public class ContentfulRepository : IContentfulRepository
     }
 
     public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options)
-        => await GetPaginatedEntries<TEntry>(GetContentTypeName<TEntry>(), options);
+        => await GetPaginatedEntries<TEntry>(ContentTypeHelper.GetContentTypeName<TEntry>(), options);
 
     public async Task<IEnumerable<TEntry>> GetPaginatedEntries<TEntry>(string entryTypeId, GetEntriesOptions options)
     {
@@ -84,7 +84,7 @@ public class ContentfulRepository : IContentfulRepository
 
     public async Task<int> GetEntriesCount<TEntry>()
     {
-        var queryBuilder = BuildQueryBuilder<TEntry>(GetContentTypeName<TEntry>(), null).Limit(0);
+        var queryBuilder = BuildQueryBuilder<TEntry>(ContentTypeHelper.GetContentTypeName<TEntry>(), null).Limit(0);
         var entries = await _client.GetEntries(queryBuilder);
 
         ProcessContentfulErrors(entries);
@@ -131,12 +131,6 @@ public class ContentfulRepository : IContentfulRepository
         }
 
         return errorString + " " + error.SystemProperties.Id;
-    }
-
-    private static string GetContentTypeName<TEntry>()
-    {
-        var name = typeof(TEntry).Name;
-        return name == "ContentSupportPage" ? name : name.FirstCharToLower();
     }
 
     private void ProcessContentfulErrors<TEntry>(ContentfulCollection<TEntry> entries)

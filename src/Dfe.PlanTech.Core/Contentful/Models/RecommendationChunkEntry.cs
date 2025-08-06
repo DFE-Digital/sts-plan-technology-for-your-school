@@ -6,7 +6,7 @@ public class RecommendationChunkEntry: TransformableEntry<RecommendationChunkEnt
 {
     public string InternalName { get; set; } = null!;
     public string Header { get; init; } = null!;
-    public List<ContentComponent> Content { get; init; } = [];
+    public List<ContentfulEntry> Content { get; init; } = [];
     public List<QuestionnaireAnswerEntry> Answers { get; init; } = [];
     public CAndSLinkEntry? CSLink { get; init; }
 

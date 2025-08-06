@@ -1,4 +1,5 @@
 using Contentful.Core.Configuration;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.Helpers;
@@ -18,7 +19,7 @@ public class EntryResolver(
 
     private readonly ILogger<EntryResolver> _logger = loggerFactory.CreateLogger<EntryResolver>();
 
-    private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<IDtoTransformable>()
+    private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<IDtoTransformableEntry>()
                                                                        .ToDictionary(type => type.Name.ToLower());
 
     /// <summary>
@@ -28,7 +29,7 @@ public class EntryResolver(
     /// <returns></returns>
     public Type Resolve(string contentTypeId)
     {
-        if (_types.TryGetValue(contentTypeId.ToLower(), out var type))
+        if (ContentTypeConstants.ContentTypeToEntryClassTypeMap.TryGetValue(contentTypeId.ToLower(), out var type))
         {
             return type;
         }

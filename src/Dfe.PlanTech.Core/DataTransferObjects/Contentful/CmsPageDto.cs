@@ -33,18 +33,18 @@ public class CmsPageDto : CmsEntryDto
         Content = pageEntry.Content.Select(BuildContentDto).Where(c => c is not null).Select(c => c!).ToList();
     }
 
-    private CmsEntryDto BuildBeforeTitleContentDto(ContentComponent contentComponent)
+    private CmsEntryDto BuildBeforeTitleContentDto(ContentfulEntry contentComponent)
     {
-        if (contentComponent is IDtoTransformable<CmsComponentWarningDto> warningEntry)
+        if (contentComponent is IDtoTransformableEntry<CmsComponentWarningDto> warningEntry)
         {
             return warningEntry.AsDtoInternal();
         }
 
-        if (contentComponent is IDtoTransformable<CmsComponentNotificationBannerDto> notificationEntry)
+        if (contentComponent is IDtoTransformableEntry<CmsComponentNotificationBannerDto> notificationEntry)
         {
             return notificationEntry.AsDtoInternal();
         }
 
-        throw new ArgumentException($"{nameof(ContentComponent)} in {nameof(RecommendationIntroEntry)} was not of an expected type.");
+        throw new ArgumentException($"{nameof(ContentfulEntry)} in {nameof(RecommendationIntroEntry)} was not of an expected type.");
     }
 }

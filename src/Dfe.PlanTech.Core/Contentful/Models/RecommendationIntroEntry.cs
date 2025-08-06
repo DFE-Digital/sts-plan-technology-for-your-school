@@ -10,7 +10,7 @@ public class RecommendationIntroEntry: TransformableEntry<RecommendationIntroEnt
     public ComponentHeaderEntry Header { get; init; } = null!;
 
     [NotMapped]
-    public List<ContentComponent> Content { get; init; } = [];
+    public List<ContentfulEntry> Content { get; init; } = [];
     public string Maturity { get; init; } = null!;
 
     protected override Func<RecommendationIntroEntry, CmsRecommendationIntroDto> Constructor => entry => new(entry);

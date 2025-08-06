@@ -2,18 +2,16 @@
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
-public abstract class TransformableEntry<TSelf, TDto> : ContentfulEntry, IDtoTransformableEntry<TDto>
-    where TSelf : TransformableEntry<TSelf, TDto>
-    where TDto : CmsEntryDto
+public abstract class TransformableField<TSelf, TDto> : ContentfulField, IDtoTransformableField<TDto>
+    where TSelf : TransformableField<TSelf, TDto>
+    where TDto : CmsFieldDto
 {
-    public string Id => Sys.Id;
-
     protected abstract Func<TSelf, TDto> Constructor { get; }
 
-    protected TransformableEntry() { }
+    protected TransformableField() { }
 
-    CmsEntryDto IDtoTransformableEntry.AsDtoInternal() => AsDto();
-    TDto IDtoTransformableEntry<TDto>.AsDtoInternal() => AsDto();
+    CmsFieldDto IDtoTransformableField.AsDtoInternal() => AsDto();
+    TDto IDtoTransformableField<TDto>.AsDtoInternal() => AsDto();
 
     public TDto AsDto()
     {

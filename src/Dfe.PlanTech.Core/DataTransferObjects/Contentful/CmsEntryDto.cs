@@ -8,13 +8,13 @@ public class CmsEntryDto
     public CmsEntrySystemDetailsDto Sys { get; set; } = null!;
     public string? Description { get; set; } = null!;
 
-    protected CmsEntryDto BuildContentDto(ContentComponent contentComponent)
+    protected CmsEntryDto BuildContentDto(ContentfulEntry contentComponent)
     {
-        if (contentComponent is IDtoTransformable entry)
+        if (contentComponent is IDtoTransformableEntry entry)
         {
             return entry.AsDtoInternal();
         }
 
-        throw new ArgumentException($"{nameof(ContentComponent)} cannot be transformed to a DTO.");
+        throw new ArgumentException($"{nameof(ContentfulEntry)} cannot be transformed to a DTO.");
     }
 }

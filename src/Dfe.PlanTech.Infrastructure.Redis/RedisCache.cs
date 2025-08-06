@@ -61,7 +61,7 @@ public class RedisCache : ICmsCache
 
             if (redisResult.ExistedInCache == true && !cacheValueIsNull)
             {
-                var hasContent = redisResult.CacheValue is IEnumerable<IDtoTransformable> cacheValue
+                var hasContent = redisResult.CacheValue is IEnumerable<IDtoTransformableEntry> cacheValue
                     ? cacheValue.Any()
                     : !cacheValueIsNull;
 

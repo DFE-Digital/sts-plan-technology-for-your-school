@@ -52,16 +52,16 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     => value switch
     {
         null => [],
-        IEnumerable<IDtoTransformable> collection => collection.SelectMany(GetDependencies),
-        IDtoTransformable item => GetContentDependenciesAsync(item),
-        _ => throw new InvalidOperationException($"{value!.GetType()} is not a {typeof(IDtoTransformable)} or a {typeof(IEnumerable<IDtoTransformable>)}"),
+        IEnumerable<IDtoTransformableEntry> collection => collection.SelectMany(GetDependencies),
+        IDtoTransformableEntry item => GetContentDependenciesAsync(item),
+        _ => throw new InvalidOperationException($"{value!.GetType()} is not a {typeof(IDtoTransformableEntry)} or a {typeof(IEnumerable<IDtoTransformableEntry>)}"),
     };
 
     /// <summary>
     /// Uses reflection to check for any ContentIds within the <see cref="IContentComponent">, and returns the Id value of any found
     /// </summary>
     /// <param name="value"></param>
-    private IEnumerable<string> GetContentDependenciesAsync(IDtoTransformable value)
+    private IEnumerable<string> GetContentDependenciesAsync(IDtoTransformableEntry value)
     {
         // RichText is a sub-component that doesn't have SystemDetails, exit for such types
         if (value.Sys is null)
@@ -71,7 +71,7 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
         var properties = value.GetType().GetProperties();
         foreach (var property in properties)
         {
-            if (typeof(IDtoTransformable).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<IDtoTransformable>).IsAssignableFrom(property.PropertyType))
+            if (typeof(IDtoTransformableEntry).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<IDtoTransformableEntry>).IsAssignableFrom(property.PropertyType))
             {
                 foreach (var dependency in GetDependencies(property.GetValue(value)))
                 {

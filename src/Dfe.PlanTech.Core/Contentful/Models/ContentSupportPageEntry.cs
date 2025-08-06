@@ -7,7 +7,7 @@ public class ContentSupportPageEntry : TransformableEntry<ContentSupportPageEntr
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
     public ComponentHeroEntry Heading { get; init; } = null!;
-    public IEnumerable<ContentComponent> Content { get; init; } = [];
+    public IEnumerable<ContentfulEntry> Content { get; init; } = [];
     public bool IncludeInSiteMap { get; init; } = false;
     public bool HasBackToTop { get; init; } = false;
     public bool HasCitation { get; init; } = false;

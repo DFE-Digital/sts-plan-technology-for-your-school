@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
-public partial class CmsRichTextContentDto : CmsEntryDto, IRichTextContent
+public partial class CmsRichTextContentDto : CmsFieldDto, IRichTextContent
 {
     public string Value { get; set; } = "";
     public string NodeType { get; set; } = "";
@@ -13,7 +13,7 @@ public partial class CmsRichTextContentDto : CmsEntryDto, IRichTextContent
     public List<CmsRichTextContentDto> Content { get; set; } = [];
     public CmsRichTextContentSupportDataDto? Data { get; set; }
 
-    public CmsRichTextContentDto(RichTextContentEntry richTextContent)
+    public CmsRichTextContentDto(RichTextContentField richTextContent)
     {
         Value = richTextContent.Value;
         NodeType = richTextContent.NodeType;

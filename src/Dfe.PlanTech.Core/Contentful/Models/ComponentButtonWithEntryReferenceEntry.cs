@@ -6,7 +6,7 @@ public class ComponentButtonWithEntryReferenceEntry: TransformableEntry<Componen
 {
     public string InternalName { get; set; } = null!;
     public ComponentButtonEntry Button { get; init; } = null!;
-    public ContentComponent LinkToEntry { get; init; } = null!;
+    public ContentfulEntry LinkToEntry { get; init; } = null!;
 
     protected override Func<ComponentButtonWithEntryReferenceEntry, CmsComponentButtonWithEntryReferenceDto> Constructor => entry => new(entry);
 }

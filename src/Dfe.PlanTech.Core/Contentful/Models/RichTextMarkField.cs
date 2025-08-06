@@ -6,9 +6,9 @@ namespace Dfe.PlanTech.Core.Contentful.Models;
 /// Mark type for the rich text (e.g. bold, underline)
 /// </summary>
 /// <inheritdoc/>
-public class RichTextMarkEntry : TransformableEntry<RichTextMarkEntry, CmsRichTextMarkDto>
+public class RichTextMarkField : TransformableField<RichTextMarkField, CmsRichTextMarkDto>
 {
     public string Type { get; set; } = "";
 
-    protected override Func<RichTextMarkEntry, CmsRichTextMarkDto> Constructor => entry => new(entry);
+    protected override Func<RichTextMarkField, CmsRichTextMarkDto> Constructor => entry => new(entry);
 }

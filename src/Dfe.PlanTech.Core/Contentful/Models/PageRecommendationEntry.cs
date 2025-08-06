@@ -10,7 +10,7 @@ public class PageRecommendationEntry: TransformableEntry<PageRecommendationEntry
     public ComponentTextBodyEntry? TextBody { get; init; }
     public IEnumerable<ComponentHeaderEntry>? Header { get; init; }
     public IEnumerable<ComponentTextBodyWithMaturityEntry>? TextBodyWithMaturity { get; init; }
-    public List<ContentComponent> Content { get; init; } = [];
+    public List<ContentfulEntry> Content { get; init; } = [];
 
     protected override Func<PageRecommendationEntry, CmsPageRecommendationDto> Constructor => entry => new(entry);
 }

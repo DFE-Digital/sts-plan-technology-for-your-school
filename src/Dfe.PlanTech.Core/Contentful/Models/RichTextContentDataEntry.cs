@@ -13,7 +13,7 @@ public class RichTextContentDataEntry : TransformableEntry<RichTextContentDataEn
     public IReadOnlyList<RichTextContentDataEntry> Content { get; init; } = [];
     public string SummaryLine { get; init; } = null!;
     public string? Uri { get; init; } = null!;
-    public RichTextContentEntry RichText { get; init; } = null!;
+    public RichTextContentField RichText { get; init; } = null!;
 
     protected override Func<RichTextContentDataEntry, CmsRichTextContentDataDto> Constructor => entry => new(entry);
 }

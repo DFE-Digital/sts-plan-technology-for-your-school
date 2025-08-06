@@ -12,9 +12,9 @@ public class PageEntry: TransformableEntry<PageEntry, CmsPageDto>
     public bool DisplayTopicTitle { get; init; }
     public bool RequiresAuthorisation { get; init; } = true;
     public string? SectionTitle { get; init; }
-    public List<ContentComponent> BeforeTitleContent { get; init; } = [];
+    public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
     public ComponentTitleEntry? Title { get; init; }
-    public List<ContentComponent> Content { get; init; } = [];
+    public List<ContentfulEntry> Content { get; init; } = [];
 
     protected override Func<PageEntry, CmsPageDto> Constructor => entry => new(entry);
 }

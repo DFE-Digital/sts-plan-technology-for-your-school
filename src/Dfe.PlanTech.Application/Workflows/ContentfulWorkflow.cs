@@ -24,7 +24,7 @@ public class ContentfulWorkflow(
     private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
 
     public async Task<TDto> GetEntryById<TEntry, TDto>(string entryId)
-        where TEntry : IDtoTransformable<TDto>
+        where TEntry : IDtoTransformableEntry<TDto>
         where TDto : CmsEntryDto
     {
         try
@@ -42,7 +42,7 @@ public class ContentfulWorkflow(
     }
 
     public async Task<List<TDto>> GetEntries<TEntry, TDto>()
-        where TEntry : IDtoTransformable<TDto>
+        where TEntry : IDtoTransformableEntry<TDto>
         where TDto : CmsEntryDto
     {
         try

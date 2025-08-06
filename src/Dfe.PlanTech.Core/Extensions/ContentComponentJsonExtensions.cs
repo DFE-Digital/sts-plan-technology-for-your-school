@@ -7,12 +7,12 @@ using Dfe.PlanTech.Core.Helpers;
 namespace Dfe.PlanTech.Core.Extensions;
 
 /// <summary>
-/// Provides Json type info mapping for <see cref="ContentComponent"/> to handle deserialising objects to their concrete classes 
+/// Provides Json type info mapping for <see cref="ContentfulEntry"/> to handle deserialising objects to their concrete classes 
 /// </summary>
 public static class ContentComponentJsonExtensions
 {
     /// <summary>
-    /// Adds polymorphism support for the <see cref="ContentComponent"/> class.
+    /// Adds polymorphism support for the <see cref="ContentfulEntry"/> class.
     /// </summary>
     /// <param name="jsonTypeInfo"></param>
     public static void AddContentComponentPolymorphicInfo<TType>(JsonTypeInfo jsonTypeInfo)

@@ -12,9 +12,9 @@ namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
         public bool DisplayOrganisationName { get; init; }
         public bool RequiresAuthorisation { get; init; } = true;
         public string? SectionTitle { get; set; }
-        public List<ContentComponent> BeforeTitleContent { get; init; } = [];
+        public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
         public TitleViewModel? Title { get; init; }
         public string? OrganisationName { get; set; }
-        public List<ContentComponent> Content { get; init; } = [];
+        public List<ContentfulEntry> Content { get; init; } = [];
     }
 }

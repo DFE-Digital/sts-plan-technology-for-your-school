@@ -6,7 +6,7 @@ public class ComponentDropDownEntry: TransformableEntry<ComponentDropDownEntry, 
 {
     public string InternalName { get; set; } = null!;
     public string Title { get; set; } = null!;
-    public RichTextContentEntry? Content { get; set; } = null!;
+    public RichTextContentField? Content { get; set; } = null!;
 
     protected override Func<ComponentDropDownEntry, CmsComponentDropDownDto> Constructor => entry => new(entry);
 }
