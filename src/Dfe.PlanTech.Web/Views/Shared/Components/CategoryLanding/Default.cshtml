@@ -24,26 +24,29 @@
     </div>
 }
 
-<div class="govuk-inset-text">
-    @{
-        if (!Model.AnySectionsCompleted)
-        {
-            <p>You have not completed any self-assessments for the @Model.CategoryName.ToLower() standard. Complete self-assessments to view all recommendations.</p>
-        }
-        else if (Model.AllSectionsCompleted)
-        {
-            <p>You have completed all self-assessments for the @Model.CategoryName.ToLower() standard.</p>
-        }
-        else
-        {
-            <p>Complete the remaining self-assessments to get recommendations for your school's @Model.CategoryName.ToLower().</p>
-
-            foreach (var topic in Model.CategoryLandingSections)
+@if (Model.CategoryLandingSections.Count != 1)
+{
+    <div class="govuk-inset-text">
+        @{
+            if (!Model.AnySectionsCompleted)
             {
-                <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = @Model.CategorySlug, Section = topic, Context = "Default" }' />
+                <p>You have not completed any self-assessments for the @Model.CategoryName.ToLower() standard. Complete self-assessments to view all recommendations.</p>
+            }
+            else if (Model.AllSectionsCompleted)
+            {
+                <p>You have completed all self-assessments for the @Model.CategoryName.ToLower() standard.</p>
+            }
+            else
+            {
+                <p>Complete the remaining self-assessments to get recommendations for your school's @Model.CategoryName.ToLower().</p>
+
+                foreach (var topic in Model.CategoryLandingSections)
+                {
+                    <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = @Model.CategorySlug, Section = topic, Context = "Default" }' />
+                }
             }
         }
-    }
-</div>
+    </div>
+}
 
 <partial name="Components/CategoryLanding/Sections" model="@Model" />
