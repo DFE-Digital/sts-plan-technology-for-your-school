@@ -135,7 +135,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient((services) => services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value);
         services.AddTransient((services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value);
 
-        services.AddScoped<ComponentViewsHelper>();
+        services.AddScoped<ComponentViewsFactory>();
 
         return services;
     }

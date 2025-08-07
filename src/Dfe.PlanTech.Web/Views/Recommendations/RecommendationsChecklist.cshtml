@@ -1,34 +1,29 @@
-@using Dfe.PlanTech.Core.Helpers
 @model RecommendationsViewModel
 
 @{
     Layout = "_PrintLayout";
-    var currentTime = TimeZoneHelper.ToUkTime(DateTime.UtcNow);
+	var currentTime = TimeZoneHelper.ToUkTime(DateTime.UtcNow);
 }
 
-<div class="recommendation-content">
-    <div class="dfe-header__logo print-header">
-        <img src="/assets/images/dfe-logo-alt.png" class="dfe-logo govuk-!-padding-bottom-2" alt="DfE Logo">
-        <p class="govuk-body">Plan technology for your school</p>
-    </div>
-    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
-    <p class="govuk-!-margin-top-4 govuk-body" id="printed-date-time">Date and time this document was printed: @($"{DateTimeHelper.FormattedDateLong(currentTime)} at {DateTimeHelper.FormattedTime(currentTime)}")</p>
-    <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
-    <div id="back-button-container" class="noprint">
-        @{
-            await Html.RenderPartialAsync("BackButton", Model);
-        }
-    </div>
-    <div class="govuk-!-margin-bottom-6 govuk-!-margin-top-4">
+@section BeforeContent {
+    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.RecommendationsPage" class="noprint non-js-only govuk-back-link">Home</govuk-back-link>
+    <govuk-back-link id="back-button-link" href="@UrlConstants.RecommendationsPage" class="noprint js-only">
+        Back
+    </govuk-back-link>
+}
+
+<div class="recommendation-content"> 
+    <div class="govuk-!-margin-bottom-2">
         @{
             await Html.RenderPartialAsync("PrintButton", Model);
         }
     </div>
-    <partial name="RecommendationPrintContent" model="@Model.AllContent"/>
+
     <div class="govuk-grid-row" id="checkYourAnswers-page">
         <div class="govuk-grid-column-two-thirds-from-desktop">
-            <h2 class="govuk-body-l">@Model.SectionName</h2>
-            <h1 class="govuk-body-xl">Your answers</h1>
+            <partial name="RecommendationPrintContent" model="@Model" />
+            <h2>Your self-assessment</h2>
+            <p>The self-assessment for @Model.SectionName.ToLower() was completed on <strong>@Model.LatestCompletionDate</strong>. You can change your answers at any time.</p>
              <dl class="govuk-summary-list govuk-!-margin-bottom-9">
                 @foreach (var questionWithAnswer in Model.SubmissionResponses)
                 {
@@ -36,10 +31,8 @@
                         <dt class="govuk-summary-list__key spacer">
                             @questionWithAnswer.QuestionText
                         </dt>
-                        <dd class="govuk-summary-list__value spacer">
+                        <dd class="govuk-summary-list__value spacer govuk-!-margin-bottom-2">
                             @questionWithAnswer.AnswerText
-                        </dd>
-                        <dd class="noprint govuk-summary-list__actions spacer">
                         </dd>
                     </div>
                 }

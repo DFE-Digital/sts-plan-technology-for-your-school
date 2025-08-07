@@ -1,12 +1,13 @@
-﻿@using Dfe.PlanTech.Core.Constants
-@model Dfe.PlanTech.Web.Models.CategorySectionRecommendationViewModel
+﻿@model CategorySectionRecommendationViewModel
+
 
 @if (Model.NoRecommendationFoundErrorMessage != null)
 {
     <govuk-error-message>@Model.NoRecommendationFoundErrorMessage</govuk-error-message>
 }
-else if (Model.RecommendationSlug is not null)
+else if (Model.RecommendationSlug != null)
 {
+
     <a asp-controller="Groups" asp-action="GetGroupsRecommendation" asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link">
         @Model.SectionName
     </a>

@@ -6,7 +6,7 @@ public class GroupsDashboardViewComponentViewModel
 {
     public CmsEntryDto Description { get; set; } = null!;
 
-    public List<GroupsCategorySectionViewModel> GroupsCategorySection { get; init; } = null!;
+    public List<GroupsCategorySectionViewModel> GroupsCategorySections { get; init; } = null!;
 
     public string? NoSectionsErrorRedirectUrl { get; set; }
 

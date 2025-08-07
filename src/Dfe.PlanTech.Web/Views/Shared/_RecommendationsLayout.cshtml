@@ -1,5 +1,3 @@
-@using Dfe.PlanTech.Web.Helpers
-@using Microsoft.AspNetCore.Mvc.TagHelpers
 @section Head {
     <partial name="_Head" />
     @await RenderSectionAsync("Head", required: false)
@@ -12,6 +10,12 @@
         var routeData = Context.GetRouteData();
         ViewData["Title"] = routeData.GetTitleForPage();
     }
+}
+
+@section BeforeContent {
+    <partial name="BetaHeader" />
+    <partial name="_BeforeContent" />
+    @await RenderSectionAsync("BeforeContent", required: false)
 }
 
 @section Header {

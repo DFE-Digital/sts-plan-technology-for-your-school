@@ -76,6 +76,10 @@ public class CategoryLandingViewComponentViewBuilder(
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
+            if (sectionStatus is null)
+            {
+                _logger.LogError("No section status found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+            }
 
             var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sectionStatus);
 
@@ -91,7 +95,7 @@ public class CategoryLandingViewComponentViewBuilder(
     private async Task<CategoryLandingSectionRecommendationsViewModel> GetCategoryLandingSectionRecommendations(
         int establishmentId,
         CmsQuestionnaireSectionDto section,
-        SqlSectionStatusDto sectionStatus
+        SqlSectionStatusDto? sectionStatus
     )
     {
         if (string.IsNullOrEmpty(sectionStatus?.LastMaturity))

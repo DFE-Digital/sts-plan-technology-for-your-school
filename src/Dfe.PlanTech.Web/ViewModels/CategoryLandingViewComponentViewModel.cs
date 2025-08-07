@@ -16,6 +16,8 @@ public class CategoryLandingViewComponentViewModel
 
     public bool AnySectionsCompleted { get; init; }
 
+    public string? SectionName { get; set; }
+
     public string? NoSectionsErrorRedirectUrl { get; set; }
 
     public string? ProgressRetrievalErrorMessage { get; set; }

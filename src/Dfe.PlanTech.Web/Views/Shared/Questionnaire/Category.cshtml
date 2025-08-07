@@ -1,9 +1,4 @@
-@using Dfe.PlanTech.Core.Constants
-@model CmsCategoryDto;
-
-@{
-    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
-}
+@model CmsCategoryDto
 
 @{
     var pageSlug = ViewData["PageSlug"] as string;
@@ -11,11 +6,8 @@
 
 @if (pageSlug == UrlConstants.GroupsDashboardSlug)
 {
+    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Header);
+
     // Invoke GroupsDashboardViewComponent for Category content when the page slug is "dashboard"
     @await Component.InvokeAsync("GroupsDashboard", new { category = Model });
-}
-else
-{
-    // Default behavior
-    @await Component.InvokeAsync("CategorySection", new { category = Model });
 }

@@ -17,11 +17,9 @@ public class CheckAnswersViewModel
     [Required]
     public List<CmsEntryDto> Content { get; init; } = null!;
 
+    public string? CategorySlug { get; init; }
     public int? SubmissionId { get; init; }
-
     public string? SectionSlug { get; init; } = null;
-
     public string? Slug { get; init; } = null;
-
     public string? ErrorMessage { get; set; } = null;
 }

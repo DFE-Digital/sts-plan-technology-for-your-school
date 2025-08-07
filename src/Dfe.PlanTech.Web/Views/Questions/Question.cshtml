@@ -1,5 +1,4 @@
-@model Dfe.PlanTech.Web.Models.QuestionViewModel
-@using System.Text.Json;
+@model QuestionViewModel
 
 @section BeforeContent {
     @{
@@ -7,10 +6,10 @@
     }
 }
 
-<form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-sectionSlug=@Model.SectionSlug
-      asp-route-questionSlug=@Model.Question.Slug method="post">
+<form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-categorySlug="@Model.CategorySlug" asp-route-sectionSlug="@Model.SectionSlug"
+      asp-route-questionSlug="@Model.Question.Slug" method="post">
     <input id="QuestionText" type="hidden" value="@Model.Question.Text" name="QuestionText"/>
-    <input id="QuestionId" type="hidden" value=@Model.Question.Id name="QuestionId"/>
+    <input id="QuestionId" type="hidden" value=@Model.Question.Sys.Id name="QuestionId"/>
     <input id="SectionId" type="hidden" value="@Model.SectionId" name="SectionId"/>
     <input id="SectionName" type="hidden" value="@Model.SectionName" name="SectionName"/>
     @if (!string.IsNullOrEmpty(ViewData["ReturnTo"]?.ToString()))
@@ -37,7 +36,7 @@
             @{
                 foreach (var answer in Model.Question.Answers)
                 {
-                    var isChecked = Model.AnswerSysId != null && Model.AnswerSysId.Equals(answer.Sys.Id);
+                    var isChecked = Model.AnswerSysId != null && Model.AnswerSysId.Equals(answer.Id);
                     var radioValue = JsonSerializer.Serialize(answer);
 
                     <govuk-radios-item value="@radioValue" checked="@isChecked">@answer.Text</govuk-radios-item>
@@ -50,7 +49,7 @@
     @{
         // Question preview omits section details and submission should be disabled in this case
         var disabled = Model.SectionSlug == null;
-        <govuk-button type="submit" disabled="disabled">Save and continue</govuk-button>
+        <govuk-button type="submit" disabled="disabled">Continue</govuk-button>
     }
 
 </form>

@@ -1,8 +1,15 @@
-@using Dfe.PlanTech.Web.Models.Inputs
 @model RecommendationsViewModel
 
 @{
     Layout = "_RecommendationsLayout";
+}
+
+@* placeholder button name until we have the new tsubtopic page created *@
+@section BeforeContent {
+    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">Home</govuk-back-link>
+    <govuk-back-link id="back-button-link" href="@UrlConstants.HomePage" class="noprint js-only">
+        Back to digital leadership and governance
+    </govuk-back-link>
 }
 
 <!-- The page is rendered within the header section to allow for both a full width blue backdrop,
@@ -10,46 +17,33 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
 
 @section Header {
     <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
-
+}
     <div class="recommendation-content">
             @{
-                var allContent = Model.AllContent.ToArray();
-            }
+                var allContent = Model.Chunks.ToArray();
+            } 
+
             @for (var x = 0; x < allContent.Length; x++)
             {
                 var headerWithContent = allContent[x];
                 var previousContent = x - 1 >= 0 ? allContent[x - 1] : null;
-                var nextContent = x + 1 < allContent.Length ? allContent[x + 1] : null;
+                var nextContent = x + 1 < allContent.Length ? allContent[x + 1] : null;         
 
-            <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
-                <partial name="Header" model="@headerWithContent" />
-                <div class="govuk-width-container govuk-main-wrapper">
-                    <div class="govuk-grid-row">
-                        <div class="govuk-grid-column-one-quarter">
-                                @{
-                                    ViewBag.VerticalNavigationSection = headerWithContent.SlugifiedLinkText;
-                                }
-                            <partial name="Components/VerticalNavigation/Default" model="@Model.AllContent" />
-                        </div>
-                        <div class="govuk-grid-column-three-quarters">
-                            @if (!headerWithContent.SlugifiedLinkText.Equals("your-self-assessment"))
-                            {
+                <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
+                        <div class="govuk-grid-row">
+
+                            <partial name="Components/VerticalNavigation/Default" model="@Model" />
+
+                            <div class="govuk-grid-column-two-thirds">
                                 <partial name="Content" model="new HeaderContentViewModel {
-                                                    Header = headerWithContent,
-                                                    SubmissionDate = Model.LatestCompletionDate,
-                                                    SectionName = Model.SectionName
-                                }" />
-                                
-                            }
-                            else {
-                                <partial name="YSA" model="@Model" />
-                            }
-                            <partial name="Print" model="@Model" />
-                            <partial name="Pagination" model="@(Previous: previousContent, Next:nextContent)" />
+                                                        Header = headerWithContent,
+                                                        SectionName = Model.SectionName,
+                                                        RecommendationCount = allContent.Length,
+                                                        CurrentRecommendationPageCount = x + 1
+                                }" />                                                   
+                                <partial name="Pagination" model="@(Previous: previousContent, Next:nextContent)" />
+                            </div>
                         </div>
-                    </div>
                 </div>
-            </div>
             }
     </div>
-}

@@ -1,6 +1,4 @@
-﻿@using Dfe.PlanTech.Web.Helpers;
-
-@section Head {
+﻿@section Head {
     <partial name="_Head"/>
     @await RenderSectionAsync("Head", false)
 }
@@ -17,6 +15,7 @@
 
 @section Header {
     <partial name="GoogleTagManager/_Body" />
+    <partial name="_Header" />
     @await RenderSectionAsync("Header", false)
 }
 
@@ -27,6 +26,10 @@
 }
 
 @RenderBody()
+
+@section Footer {
+    <partial name="_Footer" />
+}
 
 @section BodyEnd {
     <partial name="_BodyEnd"/>

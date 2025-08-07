@@ -1,12 +1,9 @@
-@using Dfe.PlanTech.Web.Helpers;
-
-@inject ComponentViewsHelper ComponentViewsHelper;
+@inject ComponentViewsFactory ComponentViewsFactory;
 
 @model CmsEntryDto;
 
 @{
-	if (ComponentViewsHelper.TryGetViewForType(Model, out string? path) && !string.IsNullOrEmpty(path))
-	{
+    if(ComponentViewsFactory.TryGetViewForType(Model, out string? path) && !string.IsNullOrEmpty(path)){
         await Html.RenderPartialAsync(path, Model);
     }
 }

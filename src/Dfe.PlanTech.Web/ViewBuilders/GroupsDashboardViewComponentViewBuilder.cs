@@ -58,7 +58,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         return new GroupsDashboardViewComponentViewModel
         {
             Description = description,
-            GroupsCategorySection = await GetGroupsCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync(),
+            GroupsCategorySections = await GetGroupsCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync(),
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
         };
     }

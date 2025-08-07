@@ -1,10 +1,9 @@
-@using Dfe.PlanTech.Core.Constants
-@model Dfe.PlanTech.Web.Models.PageViewModel;
+﻿@model PageViewModel
 
 @if (Model.DisplayBlueBanner)
 {
     @section DfePageHeaderOuter {
-        @if (Model.Page.DisplayBackButton)
+    @if (Model.Page.DisplayBackButton)
         {
             await Html.RenderPartialAsync("BackButton", Model);
         }
@@ -15,7 +14,7 @@
     }
 
     @section DfePageHeaderInner {
-        @foreach (var content in Model.Page.BeforeTitleContent)
+    @foreach (var content in Model.Page.BeforeTitleContent)
         {
             await Html.RenderPartialAsync("Components/PageComponentFactory", content);
         }
@@ -34,7 +33,7 @@
 else
 {
     @section BeforeContent {
-        @if (Model.Page.DisplayBackButton)
+    @if (Model.Page.DisplayBackButton)
         {
             await Html.RenderPartialAsync("BackButton", Model);
         }
@@ -43,6 +42,7 @@ else
             await Html.RenderPartialAsync("HomeButton", Model);
         }
     }
+
     foreach (var content in Model.Page.BeforeTitleContent)
     {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
@@ -60,7 +60,7 @@ else
 }
 
 @{
-    if (Model.Page.Slug == RouteConstants.Home && TempData.ContainsKey("SubtopicError"))
+    if (Model.Page.Slug == "home" && TempData.ContainsKey("SubtopicError"))
     {
         var error = TempData["SubtopicError"] as string;
         <div class="govuk-error-summary" data-module="govuk-error-summary">
@@ -76,5 +76,29 @@ else
         </div>
     }
 
-    await Html.RenderPartialAsync("Components/Page", Model.Page);
+    var isHomeCategoryPage = Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
+    var categories = Model.Page.Content.OfType<CmsCategoryDto>().ToList();
+
+    @if (isHomeCategoryPage && categories.Any())
+    {
+        <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            @{
+                await Html.RenderPartialAsync("Components/Page", Model.Page);
+            }
+
+            <h2 class="govuk-heading-l">How to meet the digital and technology standards</h2>
+            <div class="dfe-grid-container">
+                @foreach (var category in categories)
+                {
+                    @await Component.InvokeAsync("CategorySection", new { category })
+                }
+            </div>
+        </div>
+        </div>
+    }
+    else
+    {
+        await Html.RenderPartialAsync("Components/Page", Model.Page);
+    }
 }

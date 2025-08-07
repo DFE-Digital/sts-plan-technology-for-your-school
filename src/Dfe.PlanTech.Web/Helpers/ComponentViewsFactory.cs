@@ -9,8 +9,8 @@ public class ComponentViewsFactory(
     private const string GENERATED_VIEW_NAMESPACE = "AspNetCoreGeneratedDocument";
     private const string SHARED_PATH = "Views_Shared";
 
-    private readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
     private readonly ILogger<ComponentViewsFactory> _logger = loggerFactory.CreateLogger<ComponentViewsFactory>();
+    private readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
 
     /// <summary>
     /// Tries to find matching shared view for the passed model, based on the model's name
@@ -20,11 +20,10 @@ public class ComponentViewsFactory(
     /// <returns>Whether a view was successfully found or not</returns>
     public bool TryGetViewForType(object model, out string? viewPath)
     {
-        var componentTypeName = model.GetType().Name;
-
+        var componentTypeName = model.GetType().Name[3..^3].Replace("Component", "");
         var matchingViewType = _viewTypes.FirstOrDefault(FileNameMatchesComponentTypeName(componentTypeName));
 
-        if (matchingViewType == null)
+        if (matchingViewType is null)
         {
             _logger.LogWarning("Could not find matching view for {model}", model);
             viewPath = null;
@@ -59,7 +58,10 @@ public class ComponentViewsFactory(
     /// Get all Types generated from Views that are in the "Shared" folder (or sub-folder)
     /// </summary>
     private static IEnumerable<Type> GetSharedViewTypes() =>
-        Assembly.GetExecutingAssembly().GetTypes().Where(IsSharedViewType);
+        Assembly
+            .GetExecutingAssembly()
+            .GetTypes()
+            .Where(IsSharedViewType);
 
     /// <summary>
     /// Is this type a View type, which is in the Shared folder path?

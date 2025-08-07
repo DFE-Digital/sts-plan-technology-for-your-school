@@ -13,7 +13,7 @@
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </Content>
         <Content Update="Views\Shared\NotFoundError.cshtml">
-          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
     </ItemGroup>
     <ItemGroup>
@@ -45,7 +45,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="ViewModels\Interfaces\" />
+        <Folder Include="ViewModels\Interfaces\" />
     </ItemGroup>
 
     <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">
