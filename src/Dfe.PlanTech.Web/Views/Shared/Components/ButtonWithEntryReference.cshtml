@@ -27,7 +27,7 @@
             }
         case Question _:
             {
-                <govuk-button-link asp-controller="Questions" asp-action="GetNextUnansweredQuestion" asp-route-sectionSlug=@sectionSlug asp-route-categorySlug=@categorySlug class="govuk-link">
+                <govuk-button-link asp-controller="Questions" asp-action="GetNextUnansweredQuestion" asp-route-sectionSlug="@sectionSlug" asp-route-categorySlug="@categorySlug" class="govuk-link">
                     @Model.Button.Value
                 </govuk-button-link>
                 break;
