@@ -11,8 +11,6 @@ namespace Dfe.PlanTech.Web.Context
     {
         private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
 
-        private const string MatOrganisationCategoryId = "010";
-
         private OrganisationModel? _organisationModel;
 
         public string? DsiReference => GetStringFromClaim(ClaimConstants.NameIdentifier)
@@ -21,7 +19,7 @@ namespace Dfe.PlanTech.Web.Context
             ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
         public int? EstablishmentId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
         public bool IsAuthenticated => GetIsAuthenticated();
-        public bool IsMat => Organisation?.Category?.Id.Equals(MatOrganisationCategoryId) ?? false;
+        public bool IsMat => Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;
         public OrganisationModel? Organisation
         {
             get

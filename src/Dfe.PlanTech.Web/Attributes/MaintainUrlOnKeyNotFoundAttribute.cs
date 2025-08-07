@@ -2,7 +2,7 @@
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;

@@ -6,6 +6,7 @@ public class QuestionnaireSectionEntry : TransformableEntry<QuestionnaireSection
 {
     public string InternalName { get; set; } = null!;
     public string Name { get; init; } = null!;
+    public string ShortDescription { get; init; } = null!;
     public PageEntry InterstitialPage { get; set; } = null!;
     public IEnumerable<QuestionnaireQuestionEntry> Questions { get; init; } = [];
 

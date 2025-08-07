@@ -10,8 +10,9 @@ public class CmsPageDto : CmsEntryDto
     public string Slug { get; set; } = null!;
     public bool DisplayBackButton { get; set; }
     public bool DisplayHomeButton { get; set; }
-    public bool DisplayTopicTitle { get; set; }
     public bool DisplayOrganisationName { get; set; }
+    public bool DisplayTopicTitle { get; set; }
+    public bool? IsLandingPage { get; set; }
     public bool RequiresAuthorisation { get; init; } = true;
     public string? SectionTitle { get; set; }
     public List<CmsEntryDto> BeforeTitleContent { get; set; } = [];
@@ -26,6 +27,7 @@ public class CmsPageDto : CmsEntryDto
         DisplayHomeButton = pageEntry.DisplayHomeButton;
         DisplayTopicTitle = pageEntry.DisplayTopicTitle;
         DisplayOrganisationName = pageEntry.DisplayOrganisationName;
+        IsLandingPage = pageEntry.IsLandingPage;
         RequiresAuthorisation = pageEntry.RequiresAuthorisation;
         SectionTitle = pageEntry.SectionTitle;
         BeforeTitleContent = pageEntry.BeforeTitleContent.Select(BuildBeforeTitleContentDto).ToList();

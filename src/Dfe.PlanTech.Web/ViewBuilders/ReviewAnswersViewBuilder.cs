@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;

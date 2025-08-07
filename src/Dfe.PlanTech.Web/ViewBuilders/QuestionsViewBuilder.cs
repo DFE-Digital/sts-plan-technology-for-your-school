@@ -7,8 +7,8 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.Models.Inputs;
+using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -160,7 +160,7 @@ public class QuestionsViewBuilder(
 
     public async Task<IActionResult> SubmitAnswerAndRedirect(
         Controller controller,
-        SubmitAnswerInputModel answerViewModel,
+        SubmitAnswerInputViewModel answerViewModel,
         string sectionSlug,
         string questionSlug,
         string? returnTo

@@ -2,8 +2,8 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context;
-using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.ViewComponents;
+using Dfe.PlanTech.Web.ViewModels;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -21,8 +21,8 @@ public class CategorySectionViewComponentViewBuilder(
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("Found no sections for category {id}", category.Sys.Id);
-            throw new InvalidDataException($"Found no sections for category {category.Sys.Id}");
+            _logger.LogError("Found no sections for category {id}", category.Id);
+            throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 
         var establishmentId = GetEstablishmentIdOrThrowException();
@@ -43,13 +43,15 @@ public class CategorySectionViewComponentViewBuilder(
             progressRetrievalErrorMessage = "Unable to retrieve progress, please refresh your browser.";
         }
 
+        var categorySections = await BuildCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync();
+
         var description = category.Content is { Count: > 0 } content
             ? content[0]
             : new CmsMissingComponentDto();
 
         return new CategorySectionViewComponentViewModel
         {
-            CategorySections = await BuildCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync(),
+            CategorySections = categorySections,
             CompletedSectionCount = sectionStatuses.Count(ss => ss.Completed),
             Description = description,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
@@ -63,7 +65,6 @@ public class CategorySectionViewComponentViewBuilder(
         bool hadRetrievalError
     )
     {
-        List<CategorySectionViewModel> viewModels = [];
         foreach (var section in category.Sections)
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))

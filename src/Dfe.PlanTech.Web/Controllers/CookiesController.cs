@@ -2,7 +2,7 @@ using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Web.Attributes;
-using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;

@@ -45,7 +45,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\Interfaces\" />
+      <Folder Include="ViewModels\Interfaces\" />
     </ItemGroup>
 
     <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">

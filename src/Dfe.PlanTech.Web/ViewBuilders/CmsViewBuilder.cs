@@ -1,6 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.Models.QaVisualiser;
+using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.QaVisualiser;
 using Microsoft.AspNetCore.Mvc;
 

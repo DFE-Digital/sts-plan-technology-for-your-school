@@ -20,7 +20,6 @@ public class ServiceExceptionHandlerMiddleware(
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
         var exception = exceptionHandlerPathFeature?.Error;
 
-
         var internalErrorPage = await _contentfulService.GetPageByIdAsync(_errorPages.InternalErrorPageId);
         var internalErrorSlug = internalErrorPage?.Slug ?? UrlConstants.Error;
 

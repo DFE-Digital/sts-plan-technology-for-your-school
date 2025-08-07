@@ -4,8 +4,8 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 public class CmsComponentTitleDto : CmsEntryDto
 {
-    public string Id { get; set; } = null!;
-    public string InternalName { get; set; } = null!;
+    public string? Id { get; set; }
+    public string? InternalName { get; set; }
     public string Text { get; set; } = null!;
 
     public CmsComponentTitleDto() { }

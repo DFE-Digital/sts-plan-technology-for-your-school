@@ -8,6 +8,7 @@ public class CmsQuestionnaireSectionDto : CmsEntryDto
     public string Id { get; set; } = null!;
     public string InternalName { get; set; } = null!;
     public string Name { get; init; } = null!;
+    public string ShortDescription { get; set; } = null!;
     public CmsPageDto InterstitialPage { get; set; } = null!;
     public IEnumerable<CmsQuestionnaireQuestionDto> Questions { get; init; } = [];
 
@@ -16,6 +17,7 @@ public class CmsQuestionnaireSectionDto : CmsEntryDto
         Id = questionnaireSectionEntry.Id;
         InternalName = questionnaireSectionEntry.InternalName;
         Name = questionnaireSectionEntry.Name;
+        ShortDescription = questionnaireSectionEntry.ShortDescription;
         InterstitialPage = questionnaireSectionEntry.InterstitialPage.AsDto();
         Questions = questionnaireSectionEntry.Questions.Select(q => q.AsDto()).ToList();
     }
