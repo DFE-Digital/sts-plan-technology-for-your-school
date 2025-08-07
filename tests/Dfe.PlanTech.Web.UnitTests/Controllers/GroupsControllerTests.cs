@@ -22,10 +22,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly IUser _user;
         private readonly IGetGroupSelectionQuery _getGroupSelectionQuery;
         private readonly IGetPageQuery _getPageQuery;
-        private readonly IGetSectionQuery _getSectionQuery;
-        private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
-        private readonly IOptions<ContactOptions> _contactOptions;
-        private readonly IGetNavigationQuery _getNavigationQuery;
 
         private readonly GroupsController _controller;
 
@@ -35,8 +31,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _user = Substitute.For<IUser>();
             _getGroupSelectionQuery = Substitute.For<IGetGroupSelectionQuery>();
             _getPageQuery = Substitute.For<IGetPageQuery>();
-            _getSectionQuery = Substitute.For<IGetSectionQuery>();
-            _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
             _controller = new GroupsController(
                 logger,

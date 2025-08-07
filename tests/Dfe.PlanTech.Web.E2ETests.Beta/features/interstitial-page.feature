@@ -1,3 +1,4 @@
+@clear-data-school
 Feature: Interstitial Paage
     Background:
         Given I am on the self-assessment testing page and click on the category "Category One Section One"

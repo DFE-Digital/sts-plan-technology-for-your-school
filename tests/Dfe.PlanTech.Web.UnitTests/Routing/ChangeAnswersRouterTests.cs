@@ -34,6 +34,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
 
         private readonly ChangeAnswersRouter _router;
 
+        private readonly string _categorySlug = "category-slug";
         private readonly string _sectionSlug = "section-slug";
         private readonly int _establishmentId = 1;
         private readonly Section _section;
@@ -73,7 +74,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
 
         public ChangeAnswersRouterTests()
         {
-            _router = new ChangeAnswersRouter(_getPageQuery, _processCommand, _user, _statusProcessor, _responsesQuery, _submissionCommand);
+            _router = new ChangeAnswersRouter(_getPageQuery, _processCommand, _user, _statusProcessor, _responsesQuery!, _submissionCommand);
             _responsesQuery = new GetLatestResponsesQuery(_dbContext);
 
             _section = new Section
@@ -99,10 +100,19 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public async Task ValidateRoute_ShouldThrow_WhenSectionSlugIsNullOrEmpty(string? slug)
+        public async Task ValidateRoute_ShouldThrow_WhenCategorySlugIsNullOrEmpty(string? categorySlug)
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _router.ValidateRoute(slug!, null, _controller, default));
+                _router.ValidateRoute(categorySlug!, _sectionSlug, null, _controller, default));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public async Task ValidateRoute_ShouldThrow_WhenSectionSlugIsNullOrEmpty(string? sectionSlug)
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _router.ValidateRoute(_categorySlug, sectionSlug!, null, _controller, default));
         }
 
         [Fact]
@@ -113,13 +123,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
             _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, true, Arg.Any<CancellationToken>())
                            .Returns(_responsesDto);
 
-            var result = await _router.ValidateRoute(_sectionSlug, "error", _controller, default);
+            var result = await _router.ValidateRoute(_categorySlug, _sectionSlug, "error", _controller, default);
 
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<ChangeAnswersViewModel>(viewResult.Model);
 
             Assert.Equal("Change Answers", model.Title.Text);
             Assert.Equal("Test Section", model.SectionName);
+            Assert.Equal(_categorySlug, model.CategorySlug);
             Assert.Equal(_sectionSlug, model.SectionSlug);
             Assert.Equal(_responsesDto, model.SubmissionResponses);
             Assert.Equal("error", model.ErrorMessage);
@@ -213,7 +224,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
             _statusProcessor.User.Returns(_user);
             _user.GetEstablishmentId().Returns(_establishmentId);
 
-            var result = await router.ValidateRoute(_sectionSlug, null, _controller, default);
+            var result = await router.ValidateRoute(_categorySlug, _sectionSlug, null, _controller, default);
 
             await _submissionCommand.Received(1).DeleteSubmission(inProgressSubmission.Id, Arg.Any<CancellationToken>());
             await _submissionCommand.Received(1).CloneSubmission(latestCompletedSubmission, Arg.Any<CancellationToken>());
@@ -229,7 +240,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
         {
             _statusProcessor.Status = Status.NotStarted;
 
-            var result = await _router.ValidateRoute(_sectionSlug, null, _controller, default);
+            var result = await _router.ValidateRoute(_categorySlug, _sectionSlug, null, _controller, default);
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
@@ -241,7 +252,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
             _statusProcessor.Status = Status.InProgress;
             _statusProcessor.NextQuestion.Returns(new Question { Slug = "next-q" });
 
-            var result = await _router.ValidateRoute(_sectionSlug, null, _controller, default);
+            var result = await _router.ValidateRoute(_categorySlug, _sectionSlug, null, _controller, default);
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("next-q", redirect.RouteValues?["questionSlug"]);
@@ -256,7 +267,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
                            .Returns((SubmissionResponsesDto?)null);
 
             await Assert.ThrowsAsync<DatabaseException>(() =>
-                _router.ValidateRoute(_sectionSlug, null, _controller, default));
+                _router.ValidateRoute(_categorySlug, _sectionSlug, null, _controller, default));
         }
     }
 }

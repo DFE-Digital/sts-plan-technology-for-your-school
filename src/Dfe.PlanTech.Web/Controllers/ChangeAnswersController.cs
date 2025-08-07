@@ -29,8 +29,9 @@ namespace Dfe.PlanTech.Web.Controllers
             _user = user;
         }
 
-        [HttpGet("{sectionSlug}/change-answers")]
+        [HttpGet("{categorySlug}/{sectionSlug}/change-answers")]
         public async Task<IActionResult> ChangeAnswersPage(
+            string categorySlug,
             string sectionSlug,
             [FromServices] IChangeAnswersRouter changeAnswersValidator,
             [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
@@ -38,32 +39,17 @@ namespace Dfe.PlanTech.Web.Controllers
         {
             try
             {
+                ArgumentNullException.ThrowIfNullOrEmpty(categorySlug);
                 ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
 
                 var errorMessage = TempData["ErrorMessage"]?.ToString();
 
-                return await changeAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, cancellationToken);
+                return await changeAnswersValidator.ValidateRoute(categorySlug, sectionSlug, errorMessage, this, cancellationToken);
             }
             catch (UserJourneyMissingContentException userJourneyException)
             {
                 return await userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException, cancellationToken);
             }
-        }
-
-        [HttpGet("recommendations/from-section/{sectionSlug}")]
-        public async Task<IActionResult> RedirectToRecommendation(
-            string sectionSlug,
-            [FromServices] IGetRecommendationRouter getRecommendationRouter,
-            CancellationToken cancellationToken = default)
-        {
-
-            var recommendationSlug = await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken);
-
-            return RedirectToAction(
-                  RecommendationsController.GetRecommendationAction,
-                  RecommendationsController.ControllerName,
-                  new { sectionSlug, recommendationSlug }
-              );
         }
     }
 }

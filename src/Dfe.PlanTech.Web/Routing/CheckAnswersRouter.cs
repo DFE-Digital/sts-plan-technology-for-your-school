@@ -30,8 +30,10 @@ public class CheckAnswersRouter : ICheckAnswersRouter
         _router = router;
     }
 
-    public async Task<IActionResult> ValidateRoute(string sectionSlug, string? errorMessage, CheckAnswersController controller, bool isChangeAnswersFlow = false, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> ValidateRoute(string categorySlug, string sectionSlug, string? errorMessage, CheckAnswersController controller, bool isChangeAnswersFlow = false, CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(categorySlug))
+            throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
 
@@ -39,14 +41,14 @@ public class CheckAnswersRouter : ICheckAnswersRouter
 
         return _router.Status switch
         {
-            Status.CompleteNotReviewed => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
-            Status.CompleteReviewed when isChangeAnswersFlow => await ProcessCheckAnswers(sectionSlug, errorMessage, controller, cancellationToken),
+            Status.CompleteNotReviewed => await ProcessCheckAnswers(categorySlug, sectionSlug, errorMessage, controller, cancellationToken),
+            Status.CompleteReviewed when isChangeAnswersFlow => await ProcessCheckAnswers(categorySlug, sectionSlug, errorMessage, controller, cancellationToken),
             Status.NotStarted => PageRedirecter.RedirectToHomepage(controller),
             _ => ProcessQuestionStatus(sectionSlug, controller),
         };
     }
 
-    private async Task<IActionResult> ProcessCheckAnswers(string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
+    private async Task<IActionResult> ProcessCheckAnswers(string categorySlug, string sectionSlug, string? errorMessage, CheckAnswersController controller, CancellationToken cancellationToken)
     {
         var establishmentId = await _user.GetEstablishmentId();
 
@@ -66,7 +68,8 @@ public class CheckAnswersRouter : ICheckAnswersRouter
             SectionSlug = sectionSlug,
             SubmissionId = submissionResponsesDto.SubmissionId,
             Slug = checkAnswerPageContent.Slug,
-            ErrorMessage = errorMessage
+            ErrorMessage = errorMessage,
+            CategorySlug = categorySlug
         };
 
         return controller.View(CheckAnswersController.CheckAnswersViewName, model);

@@ -25,8 +25,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IGetLatestResponsesQuery _getResponseQuery;
-    private readonly IGetEntityFromContentfulQuery _getEntityFromContentfulQuery;
-    private readonly IGetNavigationQuery _getNavigationQuery;
+    private readonly IGetNextUnansweredQuestionQuery _getNextUnansweredQuestionQuery;
     private readonly IUser _user;
     private readonly ErrorMessages _errorMessages;
     private readonly ContactOptions _contactOptions;
@@ -34,28 +33,30 @@ public class QuestionsController : BaseController<QuestionsController>
     public QuestionsController(ILogger<QuestionsController> logger,
                                IGetSectionQuery getSectionQuery,
                                IGetLatestResponsesQuery getResponseQuery,
-                               IGetEntityFromContentfulQuery getEntityByIdQuery,
-                               IGetNavigationQuery getNavigationQuery,
+                               IGetNextUnansweredQuestionQuery getNextUnansweredQuestionQuery,
                                IUser user,
                                IOptions<ErrorMessages> errorMessageOptions,
                                IOptions<ContactOptions> contactOptions) : base(logger)
     {
         _getResponseQuery = getResponseQuery;
         _getSectionQuery = getSectionQuery;
-        _getEntityFromContentfulQuery = getEntityByIdQuery;
-        _getNavigationQuery = getNavigationQuery;
+        _getNextUnansweredQuestionQuery = getNextUnansweredQuestionQuery;
         _user = user;
         _errorMessages = errorMessageOptions.Value;
         _contactOptions = contactOptions.Value;
     }
 
-    [HttpGet("{sectionSlug}/{questionSlug}")]
-    public async Task<IActionResult> GetQuestionBySlug(string sectionSlug,
+    [LogInvalidModelState]
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}")]
+    public async Task<IActionResult> GetQuestionBySlug(string categorySlug,
+                                                    string sectionSlug,
                                                     string questionSlug,
                                                     string? returnTo,
                                                     [FromServices] IGetQuestionBySlugRouter router,
                                                     CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(categorySlug))
+            throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
         if (string.IsNullOrEmpty(questionSlug))
@@ -64,33 +65,53 @@ public class QuestionsController : BaseController<QuestionsController>
         // Optionally store the returnTo value in TempData or pass it along if router needs it
         TempData["ReturnTo"] = returnTo;
 
-        return await router.ValidateRoute(sectionSlug, questionSlug, this, cancellationToken);
+        return await router.ValidateRoute(categorySlug, sectionSlug, questionSlug, this, cancellationToken);
+    }
+
+    [LogInvalidModelState]
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment", Name = "GetInterstitialPage")]
+    public async Task<IActionResult> GetInterstitialPage(string categorySlug, string sectionSlug, [FromServices] IGetPageQuery getPageQuery)
+    {
+        if (string.IsNullOrEmpty(categorySlug))
+            throw new ArgumentNullException(nameof(categorySlug));
+        if (string.IsNullOrEmpty(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+
+        var interstitialPage = await getPageQuery.GetPageBySlug(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section: {sectionSlug}");
+
+        var viewModel = new PageViewModel(interstitialPage, this, _user, Logger);
+        return View("~/Views/Pages/Page.cshtml", viewModel);
     }
 
     [LogInvalidModelState]
     [HttpGet("question/preview/{questionId}")]
     public async Task<IActionResult> GetQuestionPreviewById(string questionId,
                                                             [FromServices] ContentfulOptions contentfulOptions,
+                                                            [FromServices] IGetEntityFromContentfulQuery getEntityFromContentfulQuery,
                                                             CancellationToken cancellationToken = default)
     {
         if (!contentfulOptions.UsePreviewApi)
             return new RedirectResult(UrlConstants.HomePage);
 
-        var question = await _getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
+        var question = await getEntityFromContentfulQuery.GetEntityById<Question>(questionId, cancellationToken) ??
                        throw new ContentfulDataUnavailableException($"Could not find question with Id {questionId}");
 
-        var viewModel = GenerateViewModel(null, question, null, null);
+        var viewModel = GenerateViewModel(null, null, question, null, null);
         return RenderView(viewModel);
     }
 
 
     [LogInvalidModelState]
-    [HttpGet("{sectionSlug}/next-question")]
-    public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug,
-                                                                [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/next-question")]
+    public async Task<IActionResult> GetNextUnansweredQuestion(string categorySlug,
+                                                                string sectionSlug,
                                                                 [FromServices] IDeleteCurrentSubmissionCommand deleteCurrentSubmissionCommand,
+                                                                [FromServices] IGetNavigationQuery getNavigationQuery,
                                                                 CancellationToken cancellationToken = default)
     {
+        if (string.IsNullOrEmpty(categorySlug))
+            throw new ArgumentNullException(nameof(categorySlug));
         if (string.IsNullOrEmpty(sectionSlug))
             throw new ArgumentNullException(nameof(sectionSlug));
 
@@ -100,19 +121,19 @@ public class QuestionsController : BaseController<QuestionsController>
 
         try
         {
-            var nextQuestion = await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
+            var nextQuestion = await _getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
             if (nextQuestion == null)
-                return this.RedirectToCheckAnswers(sectionSlug);
+                return this.RedirectToCheckAnswers(categorySlug, sectionSlug);
 
-            return RedirectToAction(nameof(GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion.Slug });
+            return RedirectToAction(nameof(GetQuestionBySlug), new { categorySlug, sectionSlug, questionSlug = nextQuestion.Slug });
         }
         catch (DatabaseException)
         {
             // Remove the current invalid submission and redirect to homepage
             await deleteCurrentSubmissionCommand.DeleteCurrentSubmission(section, cancellationToken);
 
-            TempData["SubtopicError"] = await BuildErrorMessage();
+            TempData["SubtopicError"] = await BuildErrorMessage(getNavigationQuery);
             return RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
@@ -120,9 +141,9 @@ public class QuestionsController : BaseController<QuestionsController>
         }
     }
 
-    private async Task<string> BuildErrorMessage()
+    private async Task<string> BuildErrorMessage([FromServices] IGetNavigationQuery getNavigationQuery)
     {
-        var contactLink = await _getNavigationQuery.GetLinkById(_contactOptions.LinkId);
+        var contactLink = await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
         var errorMessage = _errorMessages.ConcurrentUsersOrContentChange;
 
         if (contactLink != null && !string.IsNullOrEmpty(contactLink.Href))
@@ -133,19 +154,19 @@ public class QuestionsController : BaseController<QuestionsController>
         return errorMessage;
     }
 
-    [HttpPost("{sectionSlug}/{questionSlug}")]
+    [HttpPost("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}")]
     public async Task<IActionResult> SubmitAnswer(
+        string categorySlug,
         string sectionSlug,
         string questionSlug,
         SubmitAnswerDto submitAnswerDto,
         [FromServices] ISubmitAnswerCommand submitAnswerCommand,
-        [FromServices] IGetNextUnansweredQuestionQuery getQuestionQuery,
         string? returnTo = "",
         CancellationToken cancellationToken = default)
     {
         if (!ModelState.IsValid)
         {
-            var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
+            var viewModel = await GenerateViewModel(categorySlug, sectionSlug, questionSlug, cancellationToken);
             viewModel.ErrorMessages = ModelState.Values.SelectMany(value => value.Errors.Select(err => err.ErrorMessage)).ToArray();
             return RenderView(viewModel);
         }
@@ -157,7 +178,7 @@ public class QuestionsController : BaseController<QuestionsController>
         catch (Exception e)
         {
             Logger.LogError(e, "An error has occurred while submitting an answer with the following message: {Message} ", e.Message);
-            var viewModel = await GenerateViewModel(sectionSlug, questionSlug, cancellationToken);
+            var viewModel = await GenerateViewModel(categorySlug, sectionSlug, questionSlug, cancellationToken);
             viewModel.ErrorMessages = new[] { "Save failed. Please try again later." };
             return RenderView(viewModel);
         }
@@ -179,19 +200,20 @@ public class QuestionsController : BaseController<QuestionsController>
 
             if (submissionResponsesDto?.Responses == null)
             {
-                return this.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
+                return this.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
             }
 
             // Check answered questions
             var nextQuestion = GetNextAnsweredQuestion(section, submissionResponsesDto, questionSlug);
 
             // Check unanswered to see if we really have no more questions
-            nextQuestion ??= await getQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
+            nextQuestion ??= await _getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(establishmentId, section, cancellationToken);
 
             if (nextQuestion != null)
             {
                 return RedirectToAction(nameof(GetQuestionBySlug), new
                 {
+                    categorySlug,
                     sectionSlug,
                     questionSlug = nextQuestion.Slug,
                     returnTo = FlowConstants.ChangeAnswersFlow
@@ -199,17 +221,17 @@ public class QuestionsController : BaseController<QuestionsController>
             }
 
             // No next questions so check answers
-            return this.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
+            return this.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
         }
 
-        return RedirectToAction(nameof(GetNextUnansweredQuestion), new { sectionSlug });
+        return RedirectToAction(nameof(GetNextUnansweredQuestion), new { categorySlug, sectionSlug });
     }
 
     [NonAction]
     public IActionResult RenderView(QuestionViewModel viewModel) => View("Question", viewModel);
 
     [NonAction]
-    private async Task<QuestionViewModel> GenerateViewModel(string sectionSlug, string questionSlug, CancellationToken cancellationToken)
+    private async Task<QuestionViewModel> GenerateViewModel(string categorySlug, string sectionSlug, string questionSlug, CancellationToken cancellationToken)
     {
         var section = await GetSectionBySlug(sectionSlug, cancellationToken);
         var question = GetQuestionFromSection(section, questionSlug);
@@ -220,11 +242,11 @@ public class QuestionsController : BaseController<QuestionsController>
                                                                                 question.Sys.Id,
                                                                                 cancellationToken);
 
-        return GenerateViewModel(sectionSlug, question, section, latestResponseForQuestion?.AnswerRef);
+        return GenerateViewModel(categorySlug, sectionSlug, question, section, latestResponseForQuestion?.AnswerRef);
     }
 
     [NonAction]
-    public QuestionViewModel GenerateViewModel(string? sectionSlug, Question question, ISectionComponent? section, string? latestAnswerContentfulId)
+    public QuestionViewModel GenerateViewModel(string? categorySlug, string? sectionSlug, Question question, ISectionComponent? section, string? latestAnswerContentfulId)
     {
         ViewData["Title"] = question.Text;
 
@@ -240,7 +262,8 @@ public class QuestionsController : BaseController<QuestionsController>
             AnswerRef = latestAnswerContentfulId,
             SectionName = section?.Name,
             SectionSlug = sectionSlug,
-            SectionId = section?.Sys.Id
+            SectionId = section?.Sys.Id,
+            CategorySlug = categorySlug
         };
     }
 

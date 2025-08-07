@@ -32,6 +32,7 @@
                         <a asp-controller="Questions" asp-action="GetQuestionBySlug"
                            asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
                            asp-route-sectionSlug="@Model.SectionSlug"
+                           asp-route-categorySlug="@Model.CategorySlug"
                            asp-route-returnTo="ChangeAnswers"
                            title="@questionWithAnswer.QuestionText"
                            class="govuk-link">
@@ -48,10 +49,6 @@
             <input type="hidden" name="sectionName" value="@Model.SectionName">
             <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
 
-            <a href="@($"{UrlConstants.RecommendationsPage}/from-section/{Model.SectionSlug}")" role="button" draggable="false"
-               class="govuk-button govuk-button--secondary" data-module="govuk-button">
-                Back to recommendations
-            </a>
 
             @if (Model.ErrorMessage != null)
             {
@@ -60,7 +57,10 @@
                         href="@UrlConstants.HomePage">Return to the homepage</a>
                 </p>
             }
-
         </form>
+        <a href="@($"/{Model.CategorySlug}")" draggable="false"
+            class="govuk-button govuk-button--secondary" data-module="govuk-button">
+            Back to recommendations
+        </a>
     </div>
 </div>

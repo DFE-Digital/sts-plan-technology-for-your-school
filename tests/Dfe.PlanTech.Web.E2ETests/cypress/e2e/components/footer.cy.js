@@ -1,6 +1,6 @@
 describe("Footer", () => {
     const FOOTER_SELECTOR = "footer.govuk-footer";
-    const URLS = ["/", "/content/hello-world"];
+    const URLS = ["/"];
 
     URLS.map((url) => {
         describe(`${url} footer`, () => {
