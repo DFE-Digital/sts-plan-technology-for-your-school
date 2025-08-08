@@ -1,0 +1,26 @@
+name: Update GIAS Data (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which environment to update
+        required: true
+        type: choice
+        # Note that the `Unprotected` variants of environments are reserved only for automated/scheduled actions
+        options: ['Dev', 'Tst', 'Staging', 'Production']
+        default: 'Dev'
+      skip_gias_validation:
+        description: Skip GIAS data validation checks (use when expecting abnormal data patterns)
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  update_single_environment:
+    name: Update ${{ inputs.environment }} environment
+    uses: ./.github/workflows/update-gias-data-common.yml
+    with:
+      environment: ${{ inputs.environment }}
+      skip_gias_validation: ${{ inputs.skip_gias_validation }}
+    secrets: inherit
