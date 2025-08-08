@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,14 +13,15 @@ public interface IGetRecommendationRouter
     /// Gets current user journey status, then either returns Recommendation page for slug (if appropriate), 
     /// or redirects to correct next part of user journey
     /// </summary>
+    /// <param name="categorySlug"></param>
     /// <param name="sectionSlug"></param>
     /// <param name="recommendationSlug"></param>
     /// <param name="checklist"></param>
     /// <param name="controller"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    public Task<IActionResult> ValidateRoute(string sectionSlug,
-                                             string recommendationSlug,
+    public Task<IActionResult> ValidateRoute(string categorySlug,
+                                             string sectionSlug,
                                              bool checklist,
                                              RecommendationsController controller,
                                              CancellationToken cancellationToken);
@@ -45,4 +47,18 @@ public interface IGetRecommendationRouter
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
     public Task<string> GetRecommendationSlugForSection(string sectionSlug, CancellationToken cancellationToken);
+
+
+    /// <summary>
+    /// Get a single recommendation chunk for a completed section by section slug and slugified chunk header
+    /// </summary>
+    /// <param name="sectionSlug"></param>
+    /// <param name="recommendationSlug"></param>
+    /// <param name="controller"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public Task<(Section, RecommendationChunk, List<RecommendationChunk>)> GetSingleRecommendation(string sectionSlug,
+                                                                                          string chunkSlug,
+                                                                                          RecommendationsController controller,
+                                                                                          CancellationToken cancellationToken);
 }

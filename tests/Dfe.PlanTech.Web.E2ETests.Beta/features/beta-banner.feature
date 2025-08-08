@@ -1,7 +1,7 @@
 Feature: Beta Phase Banner
 
   Background:
-    Given I am on the homepage
+    Given I visit the homepage
 
   Scenario: Phase banner is visible
     Then I should see the phase banner

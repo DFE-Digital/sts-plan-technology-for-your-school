@@ -30,7 +30,7 @@ We use two external modules to create the majority of the resources required:
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
 | <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | = 1.15.0 |
-| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | = 4.4.0 |
+| <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | = 4.26 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | = 3.2.3 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | = 3.6.3 |
 
@@ -38,7 +38,7 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.4.0 |
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.26.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | 3.2.3 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
 
@@ -46,54 +46,54 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_main_hosting"></a> [main\_hosting](#module\_main\_hosting) | github.com/DFE-Digital/terraform-azurerm-container-apps-hosting | v1.17.1 |
+| <a name="module_main_hosting"></a> [main\_hosting](#module\_main\_hosting) | github.com/DFE-Digital/terraform-azurerm-container-apps-hosting | v1.20.0 |
 | <a name="module_waf"></a> [waf](#module\_waf) | github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf | f0ca7eb |
 
 ## Resources
 
 | Name | Type |
 |------|------|
-| [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault) | resource |
-| [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_access_policy) | resource |
-| [azurerm_key_vault_access_policy.vault_access_policy_tf](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_access_policy) | resource |
-| [azurerm_key_vault_key.data_protection_key](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_key) | resource |
-| [azurerm_key_vault_secret.api_key](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.csp_connect_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.csp_default_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.csp_frame_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.csp_img_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_contentful_deliveryapikey](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_contentful_environment](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_contentful_previewapikey](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/key_vault_secret) | resource |
-| [azurerm_private_dns_zone.database](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_dns_zone) | resource |
-| [azurerm_private_dns_zone.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_dns_zone) | resource |
-| [azurerm_private_dns_zone.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_dns_zone) | resource |
-| [azurerm_private_dns_zone_virtual_network_link.database_default](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
-| [azurerm_private_dns_zone_virtual_network_link.keyvault_to_defaultvnet](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
-| [azurerm_private_dns_zone_virtual_network_link.redis_default](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_dns_zone_virtual_network_link) | resource |
-| [azurerm_private_endpoint.database](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_endpoint) | resource |
-| [azurerm_private_endpoint.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_endpoint) | resource |
-| [azurerm_private_endpoint.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/private_endpoint) | resource |
-| [azurerm_redis_cache.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/redis_cache) | resource |
-| [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/servicebus_namespace) | resource |
-| [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/servicebus_queue) | resource |
-| [azurerm_servicebus_queue_authorization_rule.azurefunction](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/servicebus_queue_authorization_rule) | resource |
-| [azurerm_storage_account.contentful_backup_storage](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_account) | resource |
-| [azurerm_storage_account.costing_storage](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_account) | resource |
-| [azurerm_storage_container.backups_container](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_container) | resource |
-| [azurerm_storage_container.blobforcost](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_container) | resource |
-| [azurerm_storage_management_policy.lifecycle_policy](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/storage_management_policy) | resource |
-| [azurerm_subnet.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/subnet) | resource |
-| [azurerm_subnet_route_table_association.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/subnet_route_table_association) | resource |
-| [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/resources/user_assigned_identity) | resource |
+| [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault) | resource |
+| [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_access_policy.vault_access_policy_tf](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_access_policy) | resource |
+| [azurerm_key_vault_key.data_protection_key](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_key) | resource |
+| [azurerm_key_vault_secret.api_key](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.csp_connect_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.csp_default_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.csp_frame_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.csp_img_src](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_deliveryapikey](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_environment](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_previewapikey](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_secret) | resource |
+| [azurerm_private_dns_zone.database](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_dns_zone) | resource |
+| [azurerm_private_dns_zone.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_dns_zone) | resource |
+| [azurerm_private_dns_zone.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_dns_zone) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.database_default](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_dns_zone_virtual_network_link) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.keyvault_to_defaultvnet](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_dns_zone_virtual_network_link) | resource |
+| [azurerm_private_dns_zone_virtual_network_link.redis_default](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_dns_zone_virtual_network_link) | resource |
+| [azurerm_private_endpoint.database](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_endpoint) | resource |
+| [azurerm_private_endpoint.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_endpoint) | resource |
+| [azurerm_private_endpoint.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_endpoint) | resource |
+| [azurerm_redis_cache.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/redis_cache) | resource |
+| [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/servicebus_namespace) | resource |
+| [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/servicebus_queue) | resource |
+| [azurerm_servicebus_queue_authorization_rule.azurefunction](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/servicebus_queue_authorization_rule) | resource |
+| [azurerm_storage_account.contentful_backup_storage](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_account) | resource |
+| [azurerm_storage_account.costing_storage](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_account) | resource |
+| [azurerm_storage_container.backups_container](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_container) | resource |
+| [azurerm_storage_container.blobforcost](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_container) | resource |
+| [azurerm_storage_management_policy.lifecycle_policy](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_management_policy) | resource |
+| [azurerm_subnet.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/subnet) | resource |
+| [azurerm_subnet_route_table_association.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/subnet_route_table_association) | resource |
+| [azurerm_user_assigned_identity.user_assigned_identity](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/user_assigned_identity) | resource |
 | [null_resource.upsert_contentful_webhook](https://registry.terraform.io/providers/hashicorp/null/3.2.3/docs/resources/resource) | resource |
 | [random_password.api_key_value](https://registry.terraform.io/providers/hashicorp/random/3.6.3/docs/resources/password) | resource |
-| [azurerm_cdn_frontdoor_endpoint.app](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/data-sources/cdn_frontdoor_endpoint) | data source |
-| [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/data-sources/client_config) | data source |
-| [azurerm_mssql_server.database](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/data-sources/mssql_server) | data source |
-| [azurerm_route_table.default](https://registry.terraform.io/providers/hashicorp/azurerm/4.4.0/docs/data-sources/route_table) | data source |
+| [azurerm_cdn_frontdoor_endpoint.app](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/data-sources/cdn_frontdoor_endpoint) | data source |
+| [azurerm_client_config.current](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/data-sources/client_config) | data source |
+| [azurerm_mssql_server.database](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/data-sources/mssql_server) | data source |
+| [azurerm_route_table.default](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/data-sources/route_table) | data source |
 
 ## Inputs
 
@@ -134,6 +134,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_project_name"></a> [project\_name](#input\_project\_name) | project name, used along with `environment` as a prefix for all resources | `string` | n/a | yes |
 | <a name="input_redis_capacity"></a> [redis\_capacity](#input\_redis\_capacity) | Redis cache capacity (0-6 for C and 1-5 for P) | `number` | `0` | no |
 | <a name="input_redis_family"></a> [redis\_family](#input\_redis\_family) | Redis cache family (C for basic/standard, P for premium) | `string` | `"C"` | no |
+| <a name="input_redis_public_access_enabled"></a> [redis\_public\_access\_enabled](#input\_redis\_public\_access\_enabled) | Enable public access on the redis cache | `bool` | `false` | no |
 | <a name="input_redis_sku_name"></a> [redis\_sku\_name](#input\_redis\_sku\_name) | SKU for Redis cache (Basic, Standard or Premium) | `string` | `"Standard"` | no |
 | <a name="input_redis_tls_version"></a> [redis\_tls\_version](#input\_redis\_tls\_version) | Minimum TLS version for Redis | `string` | `"1.2"` | no |
 | <a name="input_registry_password"></a> [registry\_password](#input\_registry\_password) | Container registry password | `string` | n/a | yes |

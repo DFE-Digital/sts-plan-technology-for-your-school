@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Submissions.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
@@ -18,11 +17,14 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
     public const string CheckAnswersAction = nameof(CheckAnswersPage);
     public const string CheckAnswersPageSlug = "check-answers";
     public const string CheckAnswersViewName = "CheckAnswers";
+    public const string RedirectToCategoryLandingPageAction = "RedirectToCategoryLandingPage";
+
 
     public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
 
-    [HttpGet("{sectionSlug}/check-answers")]
-    public async Task<IActionResult> CheckAnswersPage(string sectionSlug,
+    [HttpGet("{categorySlug}/{sectionSlug}/check-answers")]
+    public async Task<IActionResult> CheckAnswersPage(string categorySlug,
+                                                      string sectionSlug,
                                                       [FromQuery] bool isChangeAnswersFlow,
                                                       [FromServices] ICheckAnswersRouter checkAnswersValidator,
                                                       [FromServices] IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
@@ -30,11 +32,12 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
     {
         try
         {
+            ArgumentNullException.ThrowIfNullOrEmpty(categorySlug);
             ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
 
             var errorMessage = TempData["ErrorMessage"]?.ToString();
 
-            return await checkAnswersValidator.ValidateRoute(sectionSlug, errorMessage, this, isChangeAnswersFlow, cancellationToken);
+            return await checkAnswersValidator.ValidateRoute(categorySlug, sectionSlug, errorMessage, this, isChangeAnswersFlow, cancellationToken);
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {
@@ -44,10 +47,10 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
 
     [HttpPost("ConfirmCheckAnswers")]
     public async Task<IActionResult> ConfirmCheckAnswers(
+        string categorySlug,
         string sectionSlug,
         int submissionId,
         string sectionName,
-        string redirectOption,
         [FromServices] ICalculateMaturityCommand calculateMaturityCommand,
         [FromServices] IGetRecommendationRouter getRecommendationRouter,
         [FromServices] IMarkSubmissionAsReviewedCommand markSubmissionAsReviewedCommand,
@@ -59,21 +62,18 @@ public class CheckAnswersController(ILogger<CheckAnswersController> checkAnswers
         try
         {
             await calculateMaturityCommand.CalculateMaturityAsync(submissionId, cancellationToken);
+
             await markSubmissionAsReviewedCommand.MarkSubmissionAsReviewed(submissionId, cancellationToken);
         }
         catch (Exception e)
         {
             Logger.LogError(e, "There has been an error while trying to calculate maturity");
             TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
-            return this.RedirectToCheckAnswers(sectionSlug);
+            return this.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
 
-        return redirectOption switch
-        {
-            RecommendationsController.GetRecommendationAction => this.RedirectToRecommendation(sectionSlug,
-                await getRecommendationRouter.GetRecommendationSlugForSection(sectionSlug, cancellationToken)),
-            UrlConstants.HomePage => this.RedirectToHomepage(),
-            _ => this.RedirectToCheckAnswers(sectionSlug)
-        };
+        TempData["SectionName"] = sectionName;
+
+        return this.RedirectToCategoryLandingPage(categorySlug);
     }
 }
