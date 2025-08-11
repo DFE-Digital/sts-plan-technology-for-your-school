@@ -132,7 +132,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     private async Task<RecommendationsViewModel> GetRecommendationViewModel(string categorySlug, string sectionSlug, bool isChecklist = false, CancellationToken cancellationToken = default)
     {
         var (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses) = await GetSubtopicRecommendation(cancellationToken);
-        var category = await _getCategoryQuery.GetCategoryBySlug(categorySlug);
+        var category = await _getCategoryQuery.GetCategoryBySlug(categorySlug) ?? throw new ContentfulDataUnavailableException($"Unable to retrieve category with slug {categorySlug}");
 
         var latestCompletionDate = new DateTime?();
 
