@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Persistence.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Routing;
@@ -15,7 +15,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 public class RecommendationsControllerTests
 {
     private readonly IGetRecommendationRouter _recommendationsRouter;
-    private readonly IGetPageQuery _getPageQuery;
+    private readonly IGetCategoryQuery _getCategoryQuery;
 
     private readonly RecommendationsController _recommendationsController;
 
@@ -25,7 +25,7 @@ public class RecommendationsControllerTests
 
         var loggerSubstitute = Substitute.For<ILogger<RecommendationsController>>();
         _recommendationsController = new RecommendationsController(loggerSubstitute);
-        _getPageQuery = Substitute.For<IGetPageQuery>();
+        _getCategoryQuery = Substitute.For<IGetCategoryQuery>();
     }
 
     [Theory]
@@ -33,7 +33,7 @@ public class RecommendationsControllerTests
     [InlineData(null)]
     public async Task GetSingleRecommendation_Should_ThrowException_When_CategorySlug_NullOrEmpty(string? category)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetSingleRecommendation(category!, "section-slug", "recommendation", _recommendationsRouter, _getPageQuery, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetSingleRecommendation(category!, "section-slug", "recommendation", _recommendationsRouter, _getCategoryQuery, default));
     }
 
     [Theory]
@@ -41,7 +41,7 @@ public class RecommendationsControllerTests
     [InlineData(null)]
     public async Task GetSingleRecommendation_Should_ThrowException_When_SectionSlug_NullOrEmpty(string? section)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetSingleRecommendation("category-slug", section!, "recommendation", _recommendationsRouter, _getPageQuery, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetSingleRecommendation("category-slug", section!, "recommendation", _recommendationsRouter, _getCategoryQuery, default));
     }
 
 
@@ -50,7 +50,7 @@ public class RecommendationsControllerTests
     [InlineData(null)]
     public async Task GetSingleRecommendation_Should_ThrowException_When_RecommendationSlug_NullOrEmpty(string? recommendation)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetSingleRecommendation("category-slug", "section slug", recommendation!, _recommendationsRouter, _getPageQuery, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetSingleRecommendation("category-slug", "section slug", recommendation!, _recommendationsRouter, _getCategoryQuery, default));
     }
 
     [Fact]
@@ -60,16 +60,9 @@ public class RecommendationsControllerTests
         string sectionSlug = "section-slug";
         string chunkSlug = "test-chunk-one";
 
-        var categoryLandingPage = new Page()
+        var category = new Category()
         {
-            Slug = categorySlug,
-            Content = new List<ContentComponent>()
-            {
-                new Category()
-                {
-                    Header = new Header(){ Text = "Test category" }
-                }
-            }
+            Header = new Header(){ Text = "Test category" }
         };
 
         var section = new Section() { InterstitialPage = new Page() { Slug = sectionSlug } };
@@ -78,12 +71,12 @@ public class RecommendationsControllerTests
         var testChunk3 = new RecommendationChunk() { Header = "Test chunk three" };
         var allTestChunks = new List<RecommendationChunk> { testChunk1, testChunk2, testChunk3 };
 
-        _getPageQuery.GetPageBySlug(categorySlug).Returns(categoryLandingPage);
+        _getCategoryQuery.GetCategoryBySlug(categorySlug).Returns(category);
         _recommendationsRouter.GetSingleRecommendation(sectionSlug, chunkSlug, _recommendationsController, Arg.Any<CancellationToken>())
             .Returns(Task.FromResult((section, testChunk1, allTestChunks)));
 
         var result = await _recommendationsController.GetSingleRecommendation(
-            categorySlug, sectionSlug, chunkSlug, _recommendationsRouter, _getPageQuery, CancellationToken.None);
+            categorySlug, sectionSlug, chunkSlug, _recommendationsRouter, _getCategoryQuery, CancellationToken.None);
 
         await _recommendationsRouter.Received().GetSingleRecommendation(
             sectionSlug, chunkSlug, _recommendationsController, Arg.Any<CancellationToken>());

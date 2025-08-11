@@ -6,6 +6,7 @@ using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Cookie;
 using Dfe.PlanTech.Domain.Cookie.Interfaces;
 using Dfe.PlanTech.Domain.Establishments.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Configuration;
@@ -37,6 +38,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly ControllerContext _controllerContext;
         private readonly IOptions<ContactOptions> _contactOptions;
         private readonly IOptions<ErrorPages> _errorPages;
+        private readonly IGetCategoryQuery _getCategoryQuery = Substitute.For<IGetCategoryQuery>();
 
         public PagesControllerTests()
         {
@@ -44,7 +46,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controllerContext = ControllerHelpers.SubstituteControllerContext();
             _getNavigationQuery.GetLinkById(Arg.Any<string>()).Returns(new NavigationLink { DisplayText = "contact us", Href = "/contact-us", OpenInNewTab = true });
-
+            
             var contactUs = new ContactOptions
             {
                 LinkId = "LinkId"
@@ -52,7 +54,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _contactOptions = Options.Create(contactUs);
             _errorPages = Options.Create(new ErrorPages { InternalErrorPageId = INTERNAL_ERROR_ID });
 
-            _controller = new PagesController(Logger, _getNavigationQuery, _contactOptions, _errorPages)
+            _controller = new PagesController(Logger, _getNavigationQuery, _getCategoryQuery, _contactOptions, _errorPages)
             {
                 ControllerContext = _controllerContext,
                 TempData = Substitute.For<ITempDataDictionary>()
@@ -63,7 +65,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_ReturnLandingPage_When_IndexRouteLoaded()
+        public async Task Should_ReturnLandingPage_When_IndexRouteLoaded()
         {
             var cookie = new DfeCookie { UserAcceptsCookies = true };
             cookiesSubstitute.Cookie.Returns(cookie);
@@ -91,7 +93,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 }
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -107,14 +109,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Return_Category_Landing_Page_When_IsLandingPage_Is_True()
+        public async Task Should_Return_Category_Landing_Page_When_IsLandingPage_Is_True()
         {
-            var category = new Category()
-            {
-                InternalName = "Category1",
-                Header = new Header { Text = "Category1 Header" }
-            };
-
             var categoryLandingPage = new Page()
             {
                 Slug = CATEGORY_LANDING_PAGE_SLUG,
@@ -123,10 +119,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 DisplayTopicTitle = false,
                 DisplayOrganisationName = false,
                 IsLandingPage = true,
-                Content = [category]
             };
 
-            var result = _controller.GetByRoute(categoryLandingPage, userSubstitute);
+            var category = new Category()
+            {
+                InternalName = "Category1",
+                Header = new Header { Text = "Category1 Header" },
+                LandingPage = categoryLandingPage
+            };
+
+            _getCategoryQuery.GetCategoryBySlug(CATEGORY_LANDING_PAGE_SLUG).Returns(category);
+
+            var result = await _controller.GetByRoute(categoryLandingPage, userSubstitute);
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -140,15 +144,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void ShouldThrowException_WhenIsLandingPage_And_CategoryIsNull()
+        public async Task ShouldThrowException_WhenIsLandingPage_And_CategoryIsNull()
         {
-            var action = () => _controller.GetByRoute(null, userSubstitute);
-
-            Assert.Throws<ContentfulDataUnavailableException>(action);
+            await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await _controller.GetByRoute(null, userSubstitute));
         }
 
         [Fact]
-        public void Should_SetOrganisationName_When_DisplayOrganisationNameIsTrue()
+        public async Task Should_SetOrganisationName_When_DisplayOrganisationNameIsTrue()
         {
             var cookie = new DfeCookie { UserAcceptsCookies = true };
             cookiesSubstitute.Cookie.Returns(cookie);
@@ -176,7 +178,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 DisplayOrganisationName = true
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -192,7 +194,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Redirects_When_MAT_User_And_HomeSlug()
+        public async Task Should_Redirects_When_MAT_User_And_HomeSlug()
         {
             var establishment = new EstablishmentDto()
             {
@@ -247,14 +249,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 DisplayOrganisationName = true
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             var redirectResult = Assert.IsType<RedirectResult>(result);
             Assert.Equal(SELECT_SCHOOL_SLUG, redirectResult.Url);
         }
 
         [Fact]
-        public void Should_Not_OrganisationName_When_DisplayOrganisationName_Is_False()
+        public async Task Should_Not_OrganisationName_When_DisplayOrganisationName_Is_False()
         {
             var cookie = new DfeCookie { UserAcceptsCookies = true };
             cookiesSubstitute.Cookie.Returns(cookie);
@@ -282,7 +284,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 DisplayOrganisationName = false
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -298,14 +300,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Disable_Blue_Banner_For_ServerError_Page()
+        public async Task Should_Disable_Blue_Banner_For_ServerError_Page()
         {
             var page = new Page()
             {
                 Sys = new SystemDetails { Id = INTERNAL_ERROR_ID },
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -321,14 +323,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_Not_Disable_Blue_Banner_For_Non_Error_Pages()
+        public async Task Should_Not_Disable_Blue_Banner_For_Non_Error_Pages()
         {
             var page = new Page()
             {
                 Sys = new SystemDetails { Id = "normal-page" },
             };
 
-            var result = _controller.GetByRoute(page, userSubstitute);
+            var result = await _controller.GetByRoute(page, userSubstitute);
 
             Assert.IsType<ViewResult>(result);
 
@@ -365,7 +367,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public void Should_ReturnNotFoundError_Page_When_Page_Is_Null()
+        public async Task Should_ReturnNotFoundError_Page_When_Page_Is_Null()
         {
             var establishment = new EstablishmentDto()
             {
@@ -380,9 +382,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             userSubstitute.GetOrganisationData().Returns(establishment);
 
-            var action = () => _controller.GetByRoute(null, userSubstitute);
-
-            Assert.Throws<ContentfulDataUnavailableException>(action);
+            await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await _controller.GetByRoute(null, userSubstitute));
         }
 
         [Fact]
