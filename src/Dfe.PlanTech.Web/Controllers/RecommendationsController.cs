@@ -2,7 +2,7 @@ using Dfe.PlanTech.Application.Constants;
 using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Persistence.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Models;
 using Dfe.PlanTech.Web.Routing;
@@ -26,7 +26,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
                                                          string sectionSlug,
                                                          string chunkSlug,
                                                          [FromServices] IGetRecommendationRouter getRecommendationRouter,
-                                                         [FromServices] IGetPageQuery getPageQuery,
+                                                         [FromServices] IGetCategoryQuery getCategoryQuery,
                                                          CancellationToken cancellationToken)
     {
         if (string.IsNullOrEmpty(categorySlug))
@@ -36,8 +36,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
         if (string.IsNullOrEmpty(chunkSlug))
             throw new ArgumentNullException(nameof(chunkSlug));
 
-        var categoryLandingPage = await getPageQuery.GetPageBySlug(categorySlug, cancellationToken);
-        var category = categoryLandingPage?.Content[0] as Category ?? throw new ContentfulDataUnavailableException($"No category landing page found for slug: {categorySlug}");
+        var category = await getCategoryQuery.GetCategoryBySlug(categorySlug) ?? throw new ContentfulDataUnavailableException($"Unable to retrieve category with slug {categorySlug}");
 
         var (section, currentChunk, allChunks) = await getRecommendationRouter.GetSingleRecommendation(sectionSlug, chunkSlug, this, cancellationToken);
         var currentChunkIndex = allChunks.IndexOf(currentChunk);

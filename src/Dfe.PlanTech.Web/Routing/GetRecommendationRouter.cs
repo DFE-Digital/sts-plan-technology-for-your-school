@@ -20,13 +20,13 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
     private readonly IGetSectionQuery _getSectionQuery;
     private readonly IUser _user;
-    private readonly IGetPageQuery _getPageQuery;
+    private readonly IGetCategoryQuery _getCategoryQuery;
 
     public GetRecommendationRouter(ISubmissionStatusProcessor router,
                                    IGetLatestResponsesQuery getLatestResponsesQuery,
                                    IGetSubTopicRecommendationQuery getSubTopicRecommendationQuery,
                                    IGetSectionQuery getSectionQuery,
-                                   IGetPageQuery getPageQuery,
+                                   IGetCategoryQuery getCategoryQuery,
                                    IUser user)
     {
         _router = router;
@@ -34,7 +34,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
         _getSubTopicRecommendationQuery = getSubTopicRecommendationQuery;
         _getSectionQuery = getSectionQuery;
         _user = user;
-        _getPageQuery = getPageQuery;
+        _getCategoryQuery = getCategoryQuery;
     }
 
     public async Task<IActionResult> ValidateRoute(
@@ -132,8 +132,7 @@ public class GetRecommendationRouter : IGetRecommendationRouter
     private async Task<RecommendationsViewModel> GetRecommendationViewModel(string categorySlug, string sectionSlug, bool isChecklist = false, CancellationToken cancellationToken = default)
     {
         var (subTopicRecommendation, subTopicIntro, subTopicChunks, latestResponses) = await GetSubtopicRecommendation(cancellationToken);
-        var categoryLandingPage = await _getPageQuery.GetPageBySlug(categorySlug, cancellationToken);
-        var category = categoryLandingPage?.Content[0] as Category ?? throw new ContentfulDataUnavailableException($"No category landing page found for slug: {categorySlug}");
+        var category = await _getCategoryQuery.GetCategoryBySlug(categorySlug);
 
         var latestCompletionDate = new DateTime?();
 
