@@ -4,7 +4,7 @@ using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Establishments.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Authorisation;
 using Dfe.PlanTech.Web.Binders;
@@ -22,6 +22,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class PagesController(
     ILogger<PagesController> logger,
     IGetNavigationQuery getNavigationQuery,
+    IGetCategoryQuery getCategoryQuery,
     IOptions<ContactOptions> contactOptions,
     IOptions<ErrorPages> errorPages) : BaseController<PagesController>(logger)
 {
@@ -32,7 +33,7 @@ public class PagesController(
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
+    public async Task<IActionResult> GetByRoute([ModelBinder(typeof(PageModelBinder))] Page? page, [FromServices] IUser user)
     {
         if (page == null)
         {
@@ -42,7 +43,7 @@ public class PagesController(
 
         if (page.IsLandingPage == true)
         {
-            var category = page.Content[0] as Category;
+            var category = await getCategoryQuery.GetCategoryBySlug(page.Slug);
 
             if (category == null)
             {
@@ -88,13 +89,27 @@ public class PagesController(
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [HttpGet("{categorySlug}/{sectionSlug}/{*path}")]
-    public IActionResult HandleUnknownRoutes(string path)
+    public async Task<IActionResult> HandleUnknownRoutes(string path)
     {
-        throw new KeyNotFoundException(path);
+        var viewModel = await BuildNotFoundViewModel();
+
+        return View("NotFoundError", viewModel);
     }
 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
+    {
+        var viewModel = await BuildNotFoundViewModel();
+
+        return View(viewModel);
+    }
+
+    private async Task<INavigationLink?> GetContactLinkAsync()
+    {
+        return await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
+    }
+
+    private async Task<NotFoundViewModel> BuildNotFoundViewModel()
     {
         var contactLink = await GetContactLinkAsync();
 
@@ -103,11 +118,6 @@ public class PagesController(
             ContactLinkHref = contactLink?.Href
         };
 
-        return View(viewModel);
-    }
-
-    private async Task<INavigationLink?> GetContactLinkAsync()
-    {
-        return await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
+        return viewModel;
     }
 }
