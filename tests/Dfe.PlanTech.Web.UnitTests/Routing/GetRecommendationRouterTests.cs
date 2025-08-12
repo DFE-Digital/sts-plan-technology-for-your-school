@@ -429,7 +429,7 @@ public class GetRecommendationRouterTests
     {
         var category = new Category()
         {
-            Header = new Header(){ Text = "Test category" }
+            Header = new Header() { Text = "Test category" }
         };
 
         _getCategoryQuery.GetCategoryBySlug("test-category").Returns(category);
@@ -495,7 +495,7 @@ public class GetRecommendationRouterTests
         {
             Header = new Header() { Text = "Test category" }
         };
-          
+
         _getCategoryQuery.GetCategoryBySlug("test-category").Returns(category);
 
         var result = await _router.ValidateRoute("test-category", _section.InterstitialPage.Slug, true, _controller, default);

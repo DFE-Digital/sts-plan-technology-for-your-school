@@ -46,7 +46,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controllerContext = ControllerHelpers.SubstituteControllerContext();
             _getNavigationQuery.GetLinkById(Arg.Any<string>()).Returns(new NavigationLink { DisplayText = "contact us", Href = "/contact-us", OpenInNewTab = true });
-            
+
             var contactUs = new ContactOptions
             {
                 LinkId = "LinkId"

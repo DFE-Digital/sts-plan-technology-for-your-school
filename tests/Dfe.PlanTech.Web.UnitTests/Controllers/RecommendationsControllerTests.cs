@@ -62,7 +62,7 @@ public class RecommendationsControllerTests
 
         var category = new Category()
         {
-            Header = new Header(){ Text = "Test category" }
+            Header = new Header() { Text = "Test category" }
         };
 
         var section = new Section() { InterstitialPage = new Page() { Slug = sectionSlug } };
