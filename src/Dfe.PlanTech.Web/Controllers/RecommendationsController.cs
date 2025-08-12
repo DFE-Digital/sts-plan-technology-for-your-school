@@ -35,7 +35,7 @@ public class RecommendationsController(ILogger<RecommendationsController> logger
         if (string.IsNullOrEmpty(chunkSlug))
             throw new ArgumentNullException(nameof(chunkSlug));
 
-        var category = await getCategoryQuery.GetCategoryBySlug(categorySlug) ?? throw new ContentfulDataUnavailableException($"Unable to retrieve category with slug {categorySlug}");
+        var category = await getCategoryQuery.GetCategoryBySlug(categorySlug, cancellationToken) ?? throw new ContentfulDataUnavailableException($"Unable to retrieve category with slug {categorySlug}");
 
         var (section, currentChunk, allChunks) = await getRecommendationRouter.GetSingleRecommendation(sectionSlug, chunkSlug, this, cancellationToken);
         var currentChunkIndex = allChunks.IndexOf(currentChunk);
