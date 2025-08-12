@@ -65,7 +65,7 @@ public class GetCategoryQueryTests
         var cancellationToken = CancellationToken.None;
 
         var repository = Substitute.For<IContentRepository>();
-        
+
         repository.GetEntities<Category>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
         .Returns(callInfo =>
         {
