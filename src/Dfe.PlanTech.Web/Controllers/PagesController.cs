@@ -89,13 +89,27 @@ public class PagesController(
     => View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [HttpGet("{categorySlug}/{sectionSlug}/{*path}")]
-    public IActionResult HandleUnknownRoutes(string path)
+    public async Task<IActionResult> HandleUnknownRoutes(string path)
     {
-        throw new KeyNotFoundException(path);
+        var viewModel = await BuildNotFoundViewModel();
+
+        return View("NotFoundError", viewModel);
     }
 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
+    {
+        var viewModel = await BuildNotFoundViewModel();
+
+        return View(viewModel);
+    }
+
+    private async Task<INavigationLink?> GetContactLinkAsync()
+    {
+        return await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
+    }
+
+    private async Task<NotFoundViewModel> BuildNotFoundViewModel()
     {
         var contactLink = await GetContactLinkAsync();
 
@@ -104,11 +118,6 @@ public class PagesController(
             ContactLinkHref = contactLink?.Href
         };
 
-        return View(viewModel);
-    }
-
-    private async Task<INavigationLink?> GetContactLinkAsync()
-    {
-        return await getNavigationQuery.GetLinkById(_contactOptions.LinkId);
+        return viewModel;
     }
 }
