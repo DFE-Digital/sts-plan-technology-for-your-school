@@ -156,6 +156,7 @@ public static class ProgramExtensions
         services.AddTransient<IGetNavigationQuery, GetNavigationQuery>();
         services.AddTransient<IGetNextUnansweredQuestionQuery, GetNextUnansweredQuestionQuery>();
         services.AddTransient<IGetSectionQuery, GetSectionQuery>();
+        services.AddTransient<IGetCategoryQuery, GetCategoryQuery>();
         services.AddTransient<IGetSubmissionStatusesQuery, GetSubmissionStatusesQuery>();
         services.AddTransient<IGetUserIdQuery, GetUserIdQuery>();
         services.AddTransient<IProcessSubmissionResponsesCommand, ProcessSubmissionResponsesDto>();

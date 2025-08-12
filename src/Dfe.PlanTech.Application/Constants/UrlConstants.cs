@@ -21,4 +21,6 @@ public static class UrlConstants
     public const string GroupsSelectionPageSlug = "select-a-school";
 
     public const string GroupsDashboardSlug = "dashboard";
+
+    public const string AutomatedTestingHomePage = "/self-assessment-testing";
 }

@@ -28,7 +28,7 @@ public class GetRecommendationRouterTests
 
     private readonly IGetLatestResponsesQuery _getLatestResponsesQuery;
     private readonly IGetSubTopicRecommendationQuery _getSubTopicRecommendationQuery;
-    private readonly IGetPageQuery _getPageQuery;
+    private readonly IGetCategoryQuery _getCategoryQuery;
     private readonly IGetSectionQuery _getSectionQuery;
 
     private readonly IUser _user;
@@ -244,12 +244,12 @@ public class GetRecommendationRouterTests
         _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
         _getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
         _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
-        _getPageQuery = Substitute.For<IGetPageQuery>();
+        _getCategoryQuery = Substitute.For<IGetCategoryQuery>();
         _getSectionQuery = Substitute.For<IGetSectionQuery>();
         _user = Substitute.For<IUser>();
 
         _controller = new RecommendationsController(new NullLogger<RecommendationsController>());
-        _router = new GetRecommendationRouter(_submissionStatusProcessor, _getLatestResponsesQuery, _getSubTopicRecommendationQuery, _getSectionQuery, _getPageQuery, _user);
+        _router = new GetRecommendationRouter(_submissionStatusProcessor, _getLatestResponsesQuery, _getSubTopicRecommendationQuery, _getSectionQuery, _getCategoryQuery, _user);
     }
 
     [Theory]
@@ -427,19 +427,12 @@ public class GetRecommendationRouterTests
     [Fact]
     public async Task Should_Show_RecommendationPage_When_Status_Is_Recommendation_And_All_Valid()
     {
-        var categoryLandingPage = new Page()
+        var category = new Category()
         {
-            Slug = "test-category",
-            Content = new List<ContentComponent>()
-            {
-                new Category()
-                {
-                    Header = new Header(){ Text = "Test category" }
-                }
-            }
+            Header = new Header() { Text = "Test category" }
         };
 
-        _getPageQuery.GetPageBySlug(categoryLandingPage.Slug).Returns(categoryLandingPage);
+        _getCategoryQuery.GetCategoryBySlug("test-category").Returns(category);
 
         Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation();
@@ -498,19 +491,12 @@ public class GetRecommendationRouterTests
 
         Setup_Valid_Recommendation(responses);
 
-        var categoryLandingPage = new Page()
+        var category = new Category()
         {
-            Slug = "test-category",
-            Content = new List<ContentComponent>()
-            {
-                new Category()
-                {
-                    Header = new Header(){ Text = "Test category" }
-                }
-            }
+            Header = new Header() { Text = "Test category" }
         };
 
-        _getPageQuery.GetPageBySlug(categoryLandingPage.Slug).Returns(categoryLandingPage);
+        _getCategoryQuery.GetCategoryBySlug("test-category").Returns(category);
 
         var result = await _router.ValidateRoute("test-category", _section.InterstitialPage.Slug, true, _controller, default);
 
