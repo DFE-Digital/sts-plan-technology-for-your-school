@@ -10,7 +10,7 @@ public class CategoryLandingViewComponent(
 {
     private readonly CategoryLandingViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
-    public async Task<IViewComponentResult> InvokeAsync(CmsCategoryDto category, string categorySlug)
+    public async Task<IViewComponentResult> InvokeAsync(CmsQuestionnaireCategoryDto category, string categorySlug)
     {
         var viewModel = await _viewBuilder.BuildViewModelAsync(category, categorySlug);
         return View(viewModel);

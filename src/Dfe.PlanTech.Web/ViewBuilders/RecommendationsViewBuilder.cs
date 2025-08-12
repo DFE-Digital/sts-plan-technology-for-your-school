@@ -96,7 +96,7 @@ public class RecommendationsViewBuilder(
         var viewModel = new RecommendationsViewModel()
         {
             SectionName = submissionRoutingData.QuestionnaireSection.Name,
-            Intro = intro,
+            //Intro = intro,
             Chunks = subtopicRecommendation.Section.Chunks.ToList(),
             Slug = "preview",
         };
@@ -151,7 +151,7 @@ public class RecommendationsViewBuilder(
         return new RecommendationsViewModel()
         {
             SectionName = subtopicRecommendation.Subtopic.Name,
-            Intro = subtopicIntro,
+            //Intro = subtopicIntro,
             Chunks = subtopicChunks,
             LatestCompletionDate = submissionRoutingData.Submission!.DateCompleted.HasValue
                                 ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission!.DateCompleted.Value)

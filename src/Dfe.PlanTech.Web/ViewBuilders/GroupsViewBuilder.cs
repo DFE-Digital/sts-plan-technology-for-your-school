@@ -30,7 +30,7 @@ public class GroupsViewBuilder(
 
         var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
         var dashboardContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
-        var categories = dashboardContent.Content.OfType<CmsCategoryDto>();
+        var categories = dashboardContent.Content.OfType<CmsQuestionnaireCategoryDto>();
 
         var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, establishmentId);
 

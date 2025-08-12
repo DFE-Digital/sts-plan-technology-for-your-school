@@ -73,6 +73,23 @@ public class ContentfulWorkflow(
         }
     }
 
+    public async Task<CmsQuestionnaireCategoryDto?> GetCategoryBySlugAsync(string slug)
+    {
+        var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.sys.contentType.sys.id", Value = "page" };
+        var slugQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.fields.slug", Value = slug };
+        var options = new GetEntriesOptions(5, [contentTypeQuery, slugQuery]);
+
+        var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(options);
+        var category = categories.FirstOrDefault();
+
+        if (category is null)
+        {
+            _logger.LogError("Could not find questionnaire category with slug {Slug} from Contentful", slug);
+        }
+
+        return category?.AsDto();
+    }
+
     public async Task<CmsRecommendationIntroDto?> GetIntroForMaturityAsync(string subtopicId, string maturity)
     {
         var query = new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId };

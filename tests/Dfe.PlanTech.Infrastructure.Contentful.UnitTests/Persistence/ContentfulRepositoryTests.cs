@@ -73,7 +73,7 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
         public async Task Should_Call_Client_Method_When_Using_GetEntities()
         {
             var repository = new ContentfulRepository(new NullLoggerFactory(), _clientSubstitute, _hostEnvironmentMock, _automatedTestingOptions);
-            var result = await repository.GetEntities<TestClass>();
+            var result = await repository.GetEntriesAsync<TestClass>();
             Assert.NotNull(result);
         }
 

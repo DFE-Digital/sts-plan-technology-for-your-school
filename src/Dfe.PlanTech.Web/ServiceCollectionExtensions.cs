@@ -219,4 +219,11 @@ public static class ServiceCollectionExtensions
 
         return services;
     }
+
+    public static IServiceCollection AddViewComponents(this IServiceCollection services)
+    {
+        services.AddTransient<CategoryLandingViewComponentViewBuilder>();
+
+        return services;
+    }
 }

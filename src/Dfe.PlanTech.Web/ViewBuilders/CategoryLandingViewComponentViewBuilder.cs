@@ -18,7 +18,7 @@ public class CategoryLandingViewComponentViewBuilder(
     private readonly ILogger<CategoryLandingViewComponent> _logger = loggerFactory.CreateLogger<CategoryLandingViewComponent>();
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(CmsCategoryDto category, string categorySlug)
+    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(CmsQuestionnaireCategoryDto category, string categorySlug)
     {
         if (!category.Sections.Any())
         {
@@ -63,7 +63,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
     private async IAsyncEnumerable<CategoryLandingSectionViewModel> BuildCategoryLandingSectionViewModel(
         int establishmentId,
-        CmsCategoryDto category,
+        CmsQuestionnaireCategoryDto category,
         List<SqlSectionStatusDto> sectionStatuses,
         bool hadRetrievalError
     )

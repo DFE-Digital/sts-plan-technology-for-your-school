@@ -18,7 +18,7 @@ public class GroupsDashboardViewComponentViewBuilder(
     private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public Task<GroupsDashboardViewComponentViewModel> BuildViewModelAsync(CmsCategoryDto category)
+    public Task<GroupsDashboardViewComponentViewModel> BuildViewModelAsync(CmsQuestionnaireCategoryDto category)
     {
         if (!category.Sections.Any())
         {
@@ -29,7 +29,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         return GenerateViewModel(category);
     }
 
-    private async Task<GroupsDashboardViewComponentViewModel> GenerateViewModel(CmsCategoryDto category)
+    private async Task<GroupsDashboardViewComponentViewModel> GenerateViewModel(CmsQuestionnaireCategoryDto category)
     {
         var userId = GetUserIdOrThrowException();
         var establishmentId = GetEstablishmentIdOrThrowException();
@@ -65,7 +65,7 @@ public class GroupsDashboardViewComponentViewBuilder(
 
         
     private async IAsyncEnumerable<GroupsCategorySectionViewModel> GetGroupsCategorySectionViewModel(
-        CmsCategoryDto category,
+        CmsQuestionnaireCategoryDto category,
         List<SqlSectionStatusDto> sectionStatuses,
         bool hadRetrievalError
     )

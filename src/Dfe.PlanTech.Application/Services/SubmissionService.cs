@@ -94,7 +94,7 @@ public class SubmissionService(
         };
     }
 
-    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(CmsCategoryDto category, int establishmentId)
+    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(CmsQuestionnaireCategoryDto category, int establishmentId)
     {
         var sectionIds = category.Sections.Select(s => s.Id);
         return _submissionWorkflow.GetSectionStatusesAsync(establishmentId, sectionIds);

@@ -51,7 +51,8 @@ builder.Services
     .AddGoogleTagManager()
     .AddRoutingServices()
     .AddRedisServices(builder.Configuration)
-    .AddRepositories();
+    .AddRepositories()
+    .AddViewComponents();
 
 builder.Services
     .AddApplicationServices()

@@ -15,7 +15,7 @@ public class PageEntry: TransformableEntry<PageEntry, CmsPageDto>
     public string? SectionTitle { get; init; }
     public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
     public ComponentTitleEntry? Title { get; init; }
-    public List<ContentfulEntry> Content { get; init; } = [];
+    public List<ContentfulEntry>? Content { get; set; }
 
     protected override Func<PageEntry, CmsPageDto> Constructor => entry => new(entry);
 }

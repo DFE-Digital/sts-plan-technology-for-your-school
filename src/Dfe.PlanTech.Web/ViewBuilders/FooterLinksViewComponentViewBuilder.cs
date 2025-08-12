@@ -16,7 +16,7 @@ public class FooterLinksViewComponentViewBuilder(
     {
         try
         {
-            return ContentfulService.GetNavigationLinks();
+            return ContentfulService.GetNavigationLinksAsync();
         }
         catch (Exception ex)
         {

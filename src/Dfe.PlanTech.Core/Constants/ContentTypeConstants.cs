@@ -4,92 +4,54 @@ namespace Dfe.PlanTech.Core.Constants;
 
 public static class ContentTypeConstants
 {
-    public static readonly Dictionary<string, string> EntryClassToContentTypeMap = new()
-        {
-            { nameof(CAndSLinkEntry), CAndSLinkContentTypeId },
-            { nameof(ComponentAccordionEntry), ComponentAccordionContentTypeId },
-            { nameof(ComponentAccordionSectionEntry), ComponentAccordionSectionContentTypeId },
-            { nameof(ComponentAttachmentEntry), ComponentAttachmentContentTypeId },
-            { nameof(ComponentButtonEntry), ComponentButtonContentTypeId },
-            { nameof(ComponentButtonWithEntryReferenceEntry), ComponentButtonWithEntryReferenceContentTypeId },
-            { nameof(ComponentButtonWithLinkEntry), ComponentButtonWithLinkContentTypeId },
-            { nameof(ComponentCardEntry), ComponentCardContentTypeId },
-            { nameof(ComponentDropDownEntry), ComponentDropDownContentTypeId },
-            { nameof(ComponentCsHeadingEntry), ComponentCsHeadingContentTypeId},
-            { nameof(ComponentDynamicContentEntry), ComponentDynamicContentContentTypeId },
-            { nameof(ComponentGridContainerEntry), ComponentGridContainerContentTypeId },
-            { nameof(ComponentHeaderEntry), ComponentHeaderContentTypeId },
-            { nameof(ComponentHeroEntry), ComponentHeroContentTypeId },
-            { nameof(ComponentInsetTextEntry), ComponentInsetTextContentTypeId },
-            { nameof(ComponentJumpLinkEntry), ComponentJumpLinkContentTypeId },
-            { nameof(ComponentNotificationBannerEntry), ComponentNotificationBannerContentTypeId },
-            { nameof(ComponentTextBodyEntry), ComponentTextBodyContentTypeId },
-            { nameof(ComponentTextBodyWithMaturityEntry), ComponentTextBodyWithMaturityContentTypeId },
-            { nameof(ComponentTitleEntry), ComponentTitleContentTypeId },
-            { nameof(ComponentWarningEntry), ComponentWarningContentTypeId },
-            { nameof(ContentSupportPageEntry), ContentSupportPageContentTypeId },
-            { nameof(CsBodyTextEntry), CsBodyTextContentTypeId },
-            { nameof(MissingComponentEntry), MissingComponentContentTypeId },
-            { nameof(NavigationLinkEntry), NavigationLinkContentTypeId },
-            { nameof(PageEntry), PageContentTypeId },
-            { nameof(PageRecommendationEntry), PageRecommendationContentTypeId },
-            { nameof(QuestionnaireAnswerEntry), QuestionnaireAnswerContentTypeId },
-            { nameof(QuestionnaireCategoryEntry), QuestionnaireCategoryContentTypeId },
-            { nameof(QuestionnaireQuestionEntry), QuestionnaireQuestionContentTypeId },
-            { nameof(QuestionnaireSectionEntry), QuestionnaireSectionContentTypeId },
-            { nameof(RecommendationChunkEntry), RecommendationChunkContentTypeId },
-            { nameof(RecommendationIntroEntry), RecommendationIntroContentTypeId },
-            { nameof(RecommendationPageEntry), RecommendationPageContentTypeId },
-            { nameof(RecommendationSectionEntry), RecommendationSectionContentTypeId },
-            { nameof(RichTextContentField), RichTextContentContentTypeId },
-            { nameof(RichTextContentDataEntry), RichTextContentDataContentTypeId },
-            { nameof(RichTextContentSupportDataField), RichTextContentSupportDataContentTypeId },
-            { nameof(RichTextMarkField), RichTextMarkContentTypeId },
-            { nameof(SubtopicRecommendationEntry), SubtopicRecommendationContentTypeId }
-        };
+    public static Dictionary<string, Type> ContentTypeToEntryClassTypeMap =>
+        EntryClassToContentTypeMapBasis.Keys.ToDictionary(key => EntryClassToContentTypeMapBasis[key], key => key);
 
-    public static readonly Dictionary<string, Type> ContentTypeToEntryClassTypeMap = new()
+    public static Dictionary<string, string> EntryClassToContentTypeMap =>
+        EntryClassToContentTypeMapBasis.Keys.ToDictionary(key => key.Name, key => EntryClassToContentTypeMapBasis[key]);
+
+    private static readonly Dictionary<Type, string> EntryClassToContentTypeMapBasis = new()
         {
-            { CAndSLinkContentTypeId.ToLower(), typeof(CAndSLinkEntry) },
-            { ComponentAccordionContentTypeId.ToLower(), typeof(ComponentAccordionEntry) },
-            { ComponentAccordionSectionContentTypeId.ToLower(), typeof(ComponentAccordionSectionEntry) },
-            { ComponentAttachmentContentTypeId.ToLower(), typeof(ComponentAttachmentEntry) },
-            { ComponentButtonContentTypeId.ToLower(), typeof(ComponentButtonEntry) },
-            { ComponentButtonWithEntryReferenceContentTypeId.ToLower(), typeof(ComponentButtonWithEntryReferenceEntry) },
-            { ComponentButtonWithLinkContentTypeId.ToLower(), typeof(ComponentButtonWithLinkEntry) },
-            { ComponentCardContentTypeId.ToLower(), typeof(ComponentCardEntry) },
-            { ComponentDropDownContentTypeId.ToLower(), typeof(ComponentDropDownEntry) },
-            { ComponentCsHeadingContentTypeId.ToLower(), typeof(ComponentCsHeadingEntry) },
-            { ComponentDynamicContentContentTypeId.ToLower(), typeof(ComponentDynamicContentEntry) },
-            { ComponentGridContainerContentTypeId.ToLower(), typeof(ComponentGridContainerEntry) },
-            { ComponentHeaderContentTypeId.ToLower(), typeof(ComponentHeaderEntry) },
-            { ComponentHeroContentTypeId.ToLower(), typeof(ComponentHeroEntry) },
-            { ComponentInsetTextContentTypeId.ToLower(), typeof(ComponentInsetTextEntry) },
-            { ComponentJumpLinkContentTypeId.ToLower(), typeof(ComponentJumpLinkEntry) },
-            { ComponentNotificationBannerContentTypeId.ToLower(), typeof(ComponentNotificationBannerEntry) },
-            { ComponentTextBodyContentTypeId.ToLower(), typeof(ComponentTextBodyEntry) },
-            { ComponentTextBodyWithMaturityContentTypeId.ToLower(), typeof(ComponentTextBodyWithMaturityEntry) },
-            { ComponentTitleContentTypeId.ToLower(), typeof(ComponentTitleEntry) },
-            { ComponentWarningContentTypeId.ToLower(), typeof(ComponentWarningEntry) },
-            { ContentSupportPageContentTypeId.ToLower(), typeof(ContentSupportPageEntry) },
-            { CsBodyTextContentTypeId.ToLower(), typeof(CsBodyTextEntry) },
-            { MissingComponentContentTypeId.ToLower(), typeof(MissingComponentEntry) },
-            { NavigationLinkContentTypeId.ToLower(), typeof(NavigationLinkEntry) },
-            { PageContentTypeId.ToLower(), typeof(PageEntry) },
-            { PageRecommendationContentTypeId.ToLower(), typeof(PageRecommendationEntry) },
-            { QuestionnaireAnswerContentTypeId.ToLower(), typeof(QuestionnaireAnswerEntry) },
-            { QuestionnaireCategoryContentTypeId.ToLower(), typeof(QuestionnaireCategoryEntry) },
-            { QuestionnaireQuestionContentTypeId.ToLower(), typeof(QuestionnaireQuestionEntry) },
-            { QuestionnaireSectionContentTypeId.ToLower(), typeof(QuestionnaireSectionEntry) },
-            { RecommendationChunkContentTypeId.ToLower(), typeof(RecommendationChunkEntry) },
-            { RecommendationIntroContentTypeId.ToLower(), typeof(RecommendationIntroEntry) },
-            { RecommendationPageContentTypeId.ToLower(), typeof(RecommendationPageEntry) },
-            { RecommendationSectionContentTypeId.ToLower(), typeof(RecommendationSectionEntry) },
-            { RichTextContentContentTypeId.ToLower(), typeof(RichTextContentField) },
-            { RichTextContentDataContentTypeId.ToLower(), typeof(RichTextContentDataEntry) },
-            { RichTextContentSupportDataContentTypeId.ToLower(), typeof(RichTextContentSupportDataField) },
-            { RichTextMarkContentTypeId.ToLower(), typeof(RichTextMarkField) },
-            { SubtopicRecommendationContentTypeId.ToLower(), typeof(SubtopicRecommendationEntry) }
+            { typeof(CAndSLinkEntry), CAndSLinkContentTypeId },
+            { typeof(ComponentAccordionEntry), ComponentAccordionContentTypeId },
+            { typeof(ComponentAccordionSectionEntry), ComponentAccordionSectionContentTypeId },
+            { typeof(ComponentAttachmentEntry), ComponentAttachmentContentTypeId },
+            { typeof(ComponentButtonEntry), ComponentButtonContentTypeId },
+            { typeof(ComponentButtonWithEntryReferenceEntry), ComponentButtonWithEntryReferenceContentTypeId },
+            { typeof(ComponentButtonWithLinkEntry), ComponentButtonWithLinkContentTypeId },
+            { typeof(ComponentCardEntry), ComponentCardContentTypeId },
+            { typeof(ComponentDropDownEntry), ComponentDropDownContentTypeId },
+            { typeof(ComponentCsHeadingEntry), ComponentCsHeadingContentTypeId},
+            { typeof(ComponentDynamicContentEntry), ComponentDynamicContentContentTypeId },
+            { typeof(ComponentGridContainerEntry), ComponentGridContainerContentTypeId },
+            { typeof(ComponentHeaderEntry), ComponentHeaderContentTypeId },
+            { typeof(ComponentHeroEntry), ComponentHeroContentTypeId },
+            { typeof(ComponentInsetTextEntry), ComponentInsetTextContentTypeId },
+            { typeof(ComponentJumpLinkEntry), ComponentJumpLinkContentTypeId },
+            { typeof(ComponentNotificationBannerEntry), ComponentNotificationBannerContentTypeId },
+            { typeof(ComponentTextBodyEntry), ComponentTextBodyContentTypeId },
+            { typeof(ComponentTextBodyWithMaturityEntry), ComponentTextBodyWithMaturityContentTypeId },
+            { typeof(ComponentTitleEntry), ComponentTitleContentTypeId },
+            { typeof(ComponentWarningEntry), ComponentWarningContentTypeId },
+            { typeof(ContentSupportPageEntry), ContentSupportPageContentTypeId },
+            { typeof(CsBodyTextEntry), CsBodyTextContentTypeId },
+            { typeof(MissingComponentEntry), MissingComponentContentTypeId },
+            { typeof(NavigationLinkEntry), NavigationLinkContentTypeId },
+            { typeof(PageEntry), PageContentTypeId },
+            { typeof(PageRecommendationEntry), PageRecommendationContentTypeId },
+            { typeof(QuestionnaireAnswerEntry), QuestionnaireAnswerContentTypeId },
+            { typeof(QuestionnaireCategoryEntry), QuestionnaireCategoryContentTypeId },
+            { typeof(QuestionnaireQuestionEntry), QuestionnaireQuestionContentTypeId },
+            { typeof(QuestionnaireSectionEntry), QuestionnaireSectionContentTypeId },
+            { typeof(RecommendationChunkEntry), RecommendationChunkContentTypeId },
+            { typeof(RecommendationIntroEntry), RecommendationIntroContentTypeId },
+            { typeof(RecommendationPageEntry), RecommendationPageContentTypeId },
+            { typeof(RecommendationSectionEntry), RecommendationSectionContentTypeId },
+            { typeof(RichTextContentField), RichTextContentContentTypeId },
+            { typeof(RichTextContentDataEntry), RichTextContentDataContentTypeId },
+            { typeof(RichTextContentSupportDataField), RichTextContentSupportDataContentTypeId },
+            { typeof(RichTextMarkField), RichTextMarkContentTypeId },
+            { typeof(SubtopicRecommendationEntry), SubtopicRecommendationContentTypeId }
         };
 
     public const string CAndSLinkContentTypeId = "csLink";
@@ -120,7 +82,7 @@ public static class ContentTypeConstants
     public const string PageContentTypeId = "page";
     public const string PageRecommendationContentTypeId = "pageRecommendation";
     public const string QuestionnaireAnswerContentTypeId = "answer";
-    public const string QuestionnaireCategoryContentTypeId = "Category";
+    public const string QuestionnaireCategoryContentTypeId = "category";
     public const string QuestionnaireQuestionContentTypeId = "Question";
     public const string QuestionnaireSectionContentTypeId = "section";
     public const string RecommendationChunkContentTypeId = "recommendationChunk";

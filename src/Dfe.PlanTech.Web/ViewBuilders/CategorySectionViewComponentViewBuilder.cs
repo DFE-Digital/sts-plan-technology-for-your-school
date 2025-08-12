@@ -17,7 +17,7 @@ public class CategorySectionViewComponentViewBuilder(
     private readonly ILogger<CategorySectionViewComponent> _logger = loggerFactory.CreateLogger<CategorySectionViewComponent>();
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(CmsCategoryDto category)
+    public async Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(CmsQuestionnaireCategoryDto category)
     {
         if (!category.Sections.Any())
         {
@@ -43,15 +43,17 @@ public class CategorySectionViewComponentViewBuilder(
             progressRetrievalErrorMessage = "Unable to retrieve progress, please refresh your browser.";
         }
 
+        var categoryLandingSlug = GetLandingPageSlug(category);
         var categorySections = await BuildCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync();
-
         var description = category.Content is { Count: > 0 } content
             ? content[0]
             : new CmsMissingComponentDto();
 
         return new CategorySectionViewComponentViewModel
         {
+            CategoryHeaderText = category.Header.Text,
             CategorySections = categorySections,
+            CategorySlug = categoryLandingSlug,
             CompletedSectionCount = sectionStatuses.Count(ss => ss.Completed),
             Description = description,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
@@ -60,7 +62,7 @@ public class CategorySectionViewComponentViewBuilder(
     }
 
     private async IAsyncEnumerable<CategorySectionViewModel> BuildCategorySectionViewModel(
-        CmsCategoryDto category,
+        CmsQuestionnaireCategoryDto category,
         List<SqlSectionStatusDto> sectionStatuses,
         bool hadRetrievalError
     )
@@ -77,5 +79,16 @@ public class CategorySectionViewComponentViewBuilder(
 
             yield return new CategorySectionViewModel(section, recommendationIntro, sectionStatus, hadRetrievalError);
         }
+    }
+
+    private string? GetLandingPageSlug(CmsQuestionnaireCategoryDto category)
+    {
+        if (category?.LandingPage?.Slug is string slug)
+        {
+            return slug;
+        }
+
+        _logger.LogError("Could not find category landing slug for category {CategoryInternalName}", category?.InternalName ?? "unknown category");
+        return null;
     }
 }

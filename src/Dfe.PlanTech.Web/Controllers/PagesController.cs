@@ -26,15 +26,15 @@ public class PagesController(
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public IActionResult GetByRoute([ModelBinder(typeof(PageModelBinder))] CmsPageDto? page)
+    public Task<IActionResult> GetByRoute([ModelBinder(typeof(PageModelBinder))] CmsPageDto? page)
     {
-        if (page == null)
+        if (page is null)
         {
             Logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
             throw new ContentfulDataUnavailableException($"Could not find page at {Request.Path.Value}");
         }
 
-        return _pagesViewBuilder.RouteBasedOnOrganisationType(this, page);
+        return _pagesViewBuilder.RouteBasedOnOrganisationTypeAsync(this, page);
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

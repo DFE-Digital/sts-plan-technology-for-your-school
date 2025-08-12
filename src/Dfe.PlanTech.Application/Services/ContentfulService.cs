@@ -15,12 +15,17 @@ public class ContentfulService(
         return _contentfulWorkflow.GetAllSectionsAsync();
     }
 
+    public Task<CmsQuestionnaireCategoryDto?> GetCategoryBySlugAsync(string slug)
+    {
+        return _contentfulWorkflow.GetCategoryBySlugAsync(slug);
+    }
+
     public Task<CmsNavigationLinkDto> GetLinkByIdAsync(string contentId)
     {
         return _contentfulWorkflow.GetEntryById<NavigationLinkEntry, CmsNavigationLinkDto>(contentId);
     }
 
-    public Task<List<CmsNavigationLinkDto>> GetNavigationLinks()
+    public Task<List<CmsNavigationLinkDto>> GetNavigationLinksAsync()
     {
         return contentfulWorkflow.GetEntries<NavigationLinkEntry, CmsNavigationLinkDto>();
     }

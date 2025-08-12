@@ -25,7 +25,7 @@ public class PagesViewBuilder(
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
 
-    public IActionResult RouteBasedOnOrganisationType(Controller controller, CmsPageDto page)
+    public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, CmsPageDto page)
     {
         if (string.Equals(page.Slug, UrlConstants.HomePage.Replace("/", "")) && CurrentUser.IsMat)
         {
@@ -34,7 +34,7 @@ public class PagesViewBuilder(
 
         if (page.IsLandingPage == true)
         {
-            return BuildLandingPage(controller, page);
+            return await BuildLandingPageAsync(controller, page);
         }
 
         controller.ViewData["Title"] = StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text)
@@ -62,9 +62,9 @@ public class PagesViewBuilder(
         return controller.View("Page", viewModel);
     }
 
-    private IActionResult BuildLandingPage(Controller controller, CmsPageDto page)
+    private async Task<IActionResult> BuildLandingPageAsync(Controller controller, CmsPageDto page)
     {
-        var category = page.Content[0] as CmsCategoryDto;
+        var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug);
         if (category is null)
         {
             throw new ContentfulDataUnavailableException($"Could not find category at {controller.Request.Path.Value}");

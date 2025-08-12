@@ -84,7 +84,6 @@ public class RedisCache : ICmsCache
     /// <inheritdoc/>
     public async Task<string> SetAsync<T>(string key, T value, TimeSpan? expiry = null, int databaseId = -1)
     {
-        _logger.LogInformation("Setting cache item with key: {Key}", key);
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         await _dependencyManager.RegisterDependenciesAsync(database, key, value);
         return await SetAsync(database, key, value, expiry);
@@ -166,7 +165,8 @@ public class RedisCache : ICmsCache
     private async Task<string> SetAsync<T>(IDatabase database, string key, T value, TimeSpan? expiry = null)
     {
         var redisValue = value as string ?? value.Serialise();
-        _logger.LogInformation("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
+        _logger.LogInformation("Setting cache item with key: {Key}", key);
+        _logger.LogTrace("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
         await _retryPolicyAsync.ExecuteAsync(() => database.StringSetAsync(key, GZipRedisValueCompressor.Compress(redisValue), expiry));
         await _dependencyManager.RegisterDependenciesAsync(database, key, value, default);
         return key;

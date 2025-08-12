@@ -17,7 +17,7 @@ public class CmsPageDto : CmsEntryDto
     public string? SectionTitle { get; set; }
     public List<CmsEntryDto> BeforeTitleContent { get; set; } = [];
     public CmsComponentTitleDto? Title { get; set; }
-    public List<CmsEntryDto> Content { get; set; } = [];
+    public List<CmsEntryDto>? Content { get; set; } = [];
 
     public CmsPageDto(PageEntry pageEntry)
     {
@@ -32,7 +32,7 @@ public class CmsPageDto : CmsEntryDto
         SectionTitle = pageEntry.SectionTitle;
         BeforeTitleContent = pageEntry.BeforeTitleContent.Select(BuildBeforeTitleContentDto).ToList();
         Title = pageEntry.Title?.AsDto();
-        Content = pageEntry.Content.Select(BuildContentDto).Where(c => c is not null).Select(c => c!).ToList();
+        Content = pageEntry.Content?.Select(BuildContentDto).Where(c => c is not null).Select(c => c!).ToList();
     }
 
     private CmsEntryDto BuildBeforeTitleContentDto(ContentfulEntry contentComponent)

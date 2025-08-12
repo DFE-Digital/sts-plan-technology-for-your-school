@@ -76,8 +76,8 @@ else
         </div>
     }
 
-    var isHomeCategoryPage = Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
-    var categories = Model.Page.Content.OfType<CmsCategoryDto>().ToList();
+    var isHomeCategoryPage = Model.Page.Slug.Equals(UrlConstants.HomePage.Replace("/", ""));
+    var categories = Model.Page.Content.OfType<CmsQuestionnaireCategoryDto>().ToList();
 
     @if (isHomeCategoryPage && categories.Any())
     {
