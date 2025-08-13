@@ -32,6 +32,7 @@ public class RecommendationsViewBuilder(
 
     public async Task<IActionResult> RouteBySectionAndRecommendation(
         Controller controller,
+        string categorySlug,
         string sectionSlug,
         string recommendationSlug,
         bool useChecklist
@@ -53,7 +54,7 @@ public class RecommendationsViewBuilder(
                     new { sectionSlug, submissionRoutingData.NextQuestion!.Slug });
 
             case SubmissionStatus.CompleteNotReviewed:
-                return controller.RedirectToCheckAnswers(sectionSlug);
+                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
 
             case SubmissionStatus.CompleteReviewed:
                 if (!useChecklist)
@@ -104,7 +105,7 @@ public class RecommendationsViewBuilder(
         return controller.View(RecommendationsViewName, viewModel);
     }
 
-    public async Task<IActionResult> RouteFromSection(Controller controller, string sectionSlug)
+    public async Task<IActionResult> RouteFromSection(Controller controller, string categorySlug, string sectionSlug)
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
@@ -116,7 +117,7 @@ public class RecommendationsViewBuilder(
             ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro subtopic ID '{subtopicRecommendation.Id}'");
 
         var recommendationSlug = subtopicIntro.Slug;
-        return await RouteBySectionAndRecommendation(controller, sectionSlug, recommendationSlug, false);
+        return await RouteBySectionAndRecommendation(controller, categorySlug, sectionSlug, recommendationSlug, false);
     }
 
     private async Task<RecommendationsViewModel> BuildViewModel(

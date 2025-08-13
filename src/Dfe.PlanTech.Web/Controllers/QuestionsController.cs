@@ -23,12 +23,23 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [HttpGet("{sectionSlug}/{questionSlug}")]
-    public async Task<IActionResult> GetQuestionBySlug(string sectionSlug, string questionSlug, string? returnTo)
+    public async Task<IActionResult> GetQuestionBySlug(string categorySlug, string sectionSlug, string questionSlug, string? returnTo)
     {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
         ArgumentNullException.ThrowIfNullOrWhiteSpace(questionSlug, nameof(questionSlug));
 
-        return await _questionsViewBuilder.RouteBySlugAndQuestionAsync(this, sectionSlug, questionSlug, returnTo);
+        return await _questionsViewBuilder.RouteBySlugAndQuestionAsync(this, categorySlug, sectionSlug, questionSlug, returnTo);
+    }
+
+    [LogInvalidModelState]
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment", Name = "GetInterstitialPage")]
+    public async Task<IActionResult> GetInterstitialPage(string categorySlug, string sectionSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
+
+        return await _questionsViewBuilder.RouteToInterstitialPage(this, categorySlug, sectionSlug);
     }
 
     [LogInvalidModelState]
@@ -43,21 +54,22 @@ public class QuestionsController : BaseController<QuestionsController>
 
     [LogInvalidModelState]
     [HttpGet("{sectionSlug}/next-question")]
-    public async Task<IActionResult> GetNextUnansweredQuestion(string sectionSlug)
+    public async Task<IActionResult> GetNextUnansweredQuestion(string categorySlug, string sectionSlug)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
 
-        return await _questionsViewBuilder.RouteToNextUnansweredQuestion(this, sectionSlug);
+        return await _questionsViewBuilder.RouteToNextUnansweredQuestion(this, categorySlug, sectionSlug);
     }
 
     [HttpPost("{sectionSlug}/{questionSlug}")]
     public async Task<IActionResult> SubmitAnswer(
+        string categorySlug,
         string sectionSlug,
         string questionSlug,
         SubmitAnswerInputViewModel answerViewModel,
         string? returnTo = ""
     )
     {
-        return await _questionsViewBuilder.SubmitAnswerAndRedirect(this, answerViewModel, sectionSlug, questionSlug, returnTo);
+        return await _questionsViewBuilder.SubmitAnswerAndRedirect(this, answerViewModel, categorySlug, sectionSlug, questionSlug, returnTo);
     }
 }

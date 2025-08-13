@@ -33,30 +33,19 @@ public class ChangeAnswersController : BaseController<ChangeAnswersController>
     }
 
     [HttpGet("{sectionSlug}/change-answers")]
-    public async Task<IActionResult> ChangeAnswersPage(string sectionSlug)
+    public async Task<IActionResult> ChangeAnswersPage(string categorySlug, string sectionSlug)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
 
         try
         {
             var errorMessage = TempData["ErrorMessage"]?.ToString();
-            return await _reviewAnswersViewBuilder.RouteBasedOnSubmissionStatus(this, sectionSlug, false, errorMessage);
+            return await _reviewAnswersViewBuilder.RouteBasedOnSubmissionStatus(this, categorySlug, sectionSlug, false, errorMessage);
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {
             return await _userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException);
         }
-    }
-
-    [HttpGet("recommendations/from-section/{sectionSlug}")]
-    public IActionResult RedirectToRecommendation(string sectionSlug)
-    {
-        var subtopicRecommendationIntroSlug = _reviewAnswersViewBuilder.RouteToSubtopicRecommendationIntroSlugAsync(this, sectionSlug);
-
-        return RedirectToAction(
-              RecommendationsController.GetRecommendationAction,
-              RecommendationsController.ControllerName,
-              new { sectionSlug, subtopicRecommendationIntroSlug }
-          );
     }
 }

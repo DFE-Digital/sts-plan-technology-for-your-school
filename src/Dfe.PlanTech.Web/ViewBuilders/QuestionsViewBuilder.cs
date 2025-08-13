@@ -35,9 +35,12 @@ public class QuestionsViewBuilder(
     private SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     private const string QuestionView = "Question";
+    private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
 
 
-    public async Task<IActionResult> RouteBySlugAndQuestionAsync(Controller controller,
+    public async Task<IActionResult> RouteBySlugAndQuestionAsync(
+        Controller controller,
+        string categorySlug,
         string sectionSlug,
         string questionSlug,
         string? returnTo
@@ -58,6 +61,7 @@ public class QuestionsViewBuilder(
                 controller,
                 submissionRoutingData.NextQuestion!,
                 submissionRoutingData.QuestionnaireSection,
+                categorySlug,
                 sectionSlug,
                 null,
                 returnTo
@@ -95,6 +99,7 @@ public class QuestionsViewBuilder(
                 controller,
                 question,
                 submissionRoutingData.QuestionnaireSection,
+                categorySlug,
                 sectionSlug,
                 latestResponseForQuestion.AnswerSysId,
                 null
@@ -105,7 +110,7 @@ public class QuestionsViewBuilder(
 
         if (submissionRoutingData.Status.Equals(SubmissionStatus.CompleteNotReviewed))
         {
-            return controller.RedirectToCheckAnswers(sectionSlug);
+            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
 
         if (submissionRoutingData.Status.Equals(SubmissionStatus.InProgress))
@@ -113,10 +118,19 @@ public class QuestionsViewBuilder(
             var nextQuestionSlug = submissionRoutingData.NextQuestion?.Slug
                 ?? throw new InvalidDataException("NextQuestion is null");
 
-            return await RouteBySlugAndQuestionAsync(controller, sectionSlug, nextQuestionSlug, returnTo);
+            return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestionSlug, returnTo);
         }
 
         throw new InvalidDataException("Should not be able to get here");
+    }
+
+    public async Task<IActionResult> RouteToInterstitialPage(Controller controller, string categorySlug, string sectionSlug)
+    {
+        var interstitialPage = await ContentfulService.GetPageBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
+
+        var viewModel = new PageViewModel(interstitialPage);
+        return controller.View(InterstitialPagePath, viewModel);
     }
 
     public async Task<IActionResult> RouteByQuestionId(Controller controller, string questionId)
@@ -126,11 +140,11 @@ public class QuestionsViewBuilder(
 
         var question = await ContentfulService.GetQuestionByIdAsync(questionId);
 
-        var viewModel = GenerateViewModel(controller, question, null, null, null, null);
+        var viewModel = GenerateViewModel(controller, question, null, null, null, null, null);
         return controller.View(QuestionView, viewModel);
     }
 
-    public async Task<IActionResult> RouteToNextUnansweredQuestion(Controller controller, string sectionSlug)
+    public async Task<IActionResult> RouteToNextUnansweredQuestion(Controller controller, string categorySlug, string sectionSlug)
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
@@ -140,10 +154,10 @@ public class QuestionsViewBuilder(
             var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
             if (nextQuestion is null)
             {
-                return controller.RedirectToCheckAnswers(sectionSlug);
+                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
             }
 
-            return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), new { sectionSlug, questionSlug = nextQuestion.Slug });
+            return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), new { categorySlug, sectionSlug, questionSlug = nextQuestion.Slug });
         }
         catch (DatabaseException)
         {
@@ -161,6 +175,7 @@ public class QuestionsViewBuilder(
     public async Task<IActionResult> SubmitAnswerAndRedirect(
         Controller controller,
         SubmitAnswerInputViewModel answerViewModel,
+        string categorySlug,
         string sectionSlug,
         string questionSlug,
         string? returnTo
@@ -175,7 +190,7 @@ public class QuestionsViewBuilder(
 
         if (!controller.ModelState.IsValid)
         {
-            var viewModel = GenerateViewModel(controller, question, section, sectionSlug, answerViewModel.ChosenAnswer?.Answer.Id, returnTo);
+            var viewModel = GenerateViewModel(controller, question, section, categorySlug, sectionSlug, answerViewModel.ChosenAnswer?.Answer.Id, returnTo);
             viewModel.ErrorMessages = controller.ModelState
                 .Values
                 .SelectMany(value => value.Errors.Select(err => err.ErrorMessage))
@@ -191,7 +206,7 @@ public class QuestionsViewBuilder(
         catch (Exception e)
         {
             _logger.LogError(e, "An error occurred while submitting an answer with the following message: {Message} ", e.Message);
-            var viewModel = GenerateViewModel(controller, question, section, sectionSlug, questionSlug, null);
+            var viewModel = GenerateViewModel(controller, question, section, categorySlug, sectionSlug, questionSlug, null);
             viewModel.ErrorMessages = ["Save failed. Please try again later."];
             return controller.View(QuestionView, viewModel);
         }
@@ -199,12 +214,12 @@ public class QuestionsViewBuilder(
         var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
         if (!isChangeAnswersFlow)
         {
-            return await RouteToNextUnansweredQuestion(controller, sectionSlug);
+            return await RouteToNextUnansweredQuestion(controller, categorySlug, sectionSlug);
         }
 
         if (submissionRoutingData.Submission?.Responses is null)
         {
-            return controller.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
+            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
         }
 
         // Check answered questions
@@ -216,11 +231,11 @@ public class QuestionsViewBuilder(
 
         if (nextQuestion != null)
         {
-            return await RouteBySlugAndQuestionAsync(controller, sectionSlug, nextQuestion.Slug, FlowConstants.ChangeAnswersFlow);
+            return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestion.Slug, FlowConstants.ChangeAnswersFlow);
         }
 
         // No next questions so check answers
-        return controller.RedirectToCheckAnswers(sectionSlug, isChangeAnswersFlow);
+        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
     }
 
     private async Task<string> BuildErrorMessage()
@@ -240,6 +255,7 @@ public class QuestionsViewBuilder(
         Controller controller,
         CmsQuestionnaireQuestionDto question,
         CmsQuestionnaireSectionDto? section,
+        string? categorySlug,
         string? sectionSlug,
         string? latestAnswerContentfulId,
         string? returnTo
@@ -257,6 +273,7 @@ public class QuestionsViewBuilder(
             Question = question,
             AnswerSysId = latestAnswerContentfulId,
             SectionName = section?.Name,
+            CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
             SectionId = section?.Id
         };

@@ -16,7 +16,7 @@ public class EstablishmentRepository
 
     public async Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(EstablishmentModel model)
     {
-        ArgumentNullException.ThrowIfNull(model);
+        ArgumentNullException.ThrowIfNull(model, nameof(model));
 
         var establishmentEntity = new EstablishmentEntity()
         {

@@ -18,7 +18,7 @@ public class CategoryLandingViewComponentViewBuilder(
     private readonly ILogger<CategoryLandingViewComponent> _logger = loggerFactory.CreateLogger<CategoryLandingViewComponent>();
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(CmsQuestionnaireCategoryDto category, string categorySlug)
+    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(CmsQuestionnaireCategoryDto category, string slug)
     {
         if (!category.Sections.Any())
         {
@@ -53,7 +53,7 @@ public class CategoryLandingViewComponentViewBuilder(
             AnySectionsCompleted = completedSectionCount > 0,
             CategoryLandingSections = categoryLandingSections,
             CategoryName = category.Header.Text,
-            CategorySlug = categorySlug,
+            CategorySlug = slug,
             Sections = category.Sections,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage
         };

@@ -133,7 +133,7 @@ public class RedisCache : ICmsCache
     {
         _logger.LogInformation("Adding item to set with key: {Key}", key);
 
-        ArgumentNullException.ThrowIfNull(item);
+        ArgumentNullException.ThrowIfNull(item, nameof(item));
 
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         await _retryPolicyAsync.ExecuteAsync(() => database.SetAddAsync(key, item));

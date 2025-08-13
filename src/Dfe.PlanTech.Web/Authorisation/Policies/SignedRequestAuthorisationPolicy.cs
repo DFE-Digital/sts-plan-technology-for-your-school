@@ -6,7 +6,6 @@ using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.Extensions.Primitives;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Web.Authorisation.Policies;
 
@@ -28,7 +27,7 @@ public class SignedRequestAuthorisationPolicy(
     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, SignedRequestAuthorisationRequirement requirement)
     {
         var signingSecret = _signingSecretConfiguration.SigningSecret;
-        if (signingSecret.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(signingSecret))
         {
             _logger.LogError("Signing secret configuration value missing");
             context.Fail();

@@ -14,7 +14,7 @@ public class PageModelBinder(
 
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        ArgumentNullException.ThrowIfNull(bindingContext);
+        ArgumentNullException.ThrowIfNull(bindingContext, nameof(bindingContext));
 
         if (!bindingContext.HttpContext.Items.TryGetValue(nameof(CmsPageDto), out var pageItem))
         {

@@ -26,14 +26,15 @@ public class CheckAnswersController(
     private readonly ReviewAnswersViewBuilder _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
 
     [HttpGet("{sectionSlug}/check-answers")]
-    public async Task<IActionResult> CheckAnswersPage(string sectionSlug, [FromQuery] bool isChangeAnswersFlow)
+    public async Task<IActionResult> CheckAnswersPage(string categorySlug, string sectionSlug, [FromQuery] bool isChangeAnswersFlow)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
 
         try
         {
             var errorMessage = TempData["ErrorMessage"]?.ToString();
-            return await _reviewAnswersViewBuilder.RouteBasedOnSubmissionStatus(this, sectionSlug, isChangeAnswersFlow, errorMessage);
+            return await _reviewAnswersViewBuilder.RouteBasedOnSubmissionStatus(this, categorySlug, sectionSlug, isChangeAnswersFlow, errorMessage);
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {
@@ -43,6 +44,7 @@ public class CheckAnswersController(
 
     [HttpPost("ConfirmCheckAnswers")]
     public async Task<IActionResult> ConfirmCheckAnswers(
+        string categorySlug,
         string sectionSlug,
         int submissionId,
         string sectionName,
@@ -50,11 +52,13 @@ public class CheckAnswersController(
     )
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
-        ArgumentNullException.ThrowIfNullOrEmpty(sectionName);
+        ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionName, nameof(sectionName));
 
         try
         {
-            return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(this, sectionSlug, sectionName, submissionId, redirectOption);
+            return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(this, categorySlug, sectionSlug, sectionName, submissionId, redirectOption);
         }
         catch (Exception e)
         {
