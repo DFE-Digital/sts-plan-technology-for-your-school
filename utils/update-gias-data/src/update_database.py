@@ -15,6 +15,9 @@ logger = getLogger(__name__)
 CONNECTION_STRING = os.getenv("CONNECTION_STRING")
 SQL_COPT_SS_ACCESS_TOKEN = 1256
 
+THRESHOLD_MIN_RECORDS = 1000
+THRESHOLD_SUBSTANTIAL_CHANGE = 1000
+
 test_links = pd.DataFrame(
     [
         {
@@ -218,10 +221,9 @@ def _validate_data_for_update(
         return False
 
     # Validate there are not a suspicious number of records
-    threshold_min_records = 1000
     if (
-        len(combined_groups) < threshold_min_records
-        or len(combined_links) < threshold_min_records
+        len(combined_groups) < THRESHOLD_MIN_RECORDS
+        or len(combined_links) < THRESHOLD_MIN_RECORDS
     ):
         logger.warning(
             f"Exiting early due to suspiciously low number of group and/or link records: "
@@ -230,7 +232,6 @@ def _validate_data_for_update(
         return False
 
     # If there is a significant _change_ in the number of records, log a warning and exit
-    threshold_substantial_change = 1000
     current_establishment_group_count = row_counts_before.get(
         "dbo.establishmentGroup", 0
     )
@@ -250,10 +251,8 @@ def _validate_data_for_update(
     )
 
     if (
-        abs(proposed_establishment_group_count - current_establishment_group_count)
-        > threshold_substantial_change
-        or abs(proposed_establishment_link_count - current_establishment_link_count)
-        > threshold_substantial_change
+        abs(proposed_establishment_group_count - current_establishment_group_count) > THRESHOLD_SUBSTANTIAL_CHANGE
+        or abs(proposed_establishment_link_count - current_establishment_link_count) > THRESHOLD_SUBSTANTIAL_CHANGE
     ):
         logger.warning(
             f"Exiting early due to a suspisciously large change in establishment group ({current_establishment_group_count} -> {proposed_establishment_group_count}) and/or link ({current_establishment_link_count} -> {proposed_establishment_link_count}) counts."
