@@ -49,7 +49,7 @@ def _parse_links() -> pd.DataFrame:
     return _read_csv(DOWNLOAD_PATH / "links.csv", columns)
 
 
-def extract_groups_and_links() -> tuple[pd.DataFrame, pd.DataFrame]:
+def extract_groups_and_links_from_csv() -> tuple[pd.DataFrame, pd.DataFrame]:
     """Extract the downloaded zip folder and retrieve groups and links"""
     _extract_data(DOWNLOAD_PATH / "extract.zip")
     groups = _parse_groups()

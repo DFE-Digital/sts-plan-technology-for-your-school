@@ -1,14 +1,17 @@
-name: Update GIAS Data
+name: Update GIAS Data (Reusable)
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       environment:
-        description: Which environment to update
+        description: Environment to update
         required: true
-        type: choice
-        options: ['Dev', 'Tst', 'Staging', 'Production', 'StagingUnprotected', 'ProductionUnprotected']
-        default: 'Staging'
+        type: string
+      skip_gias_validation:
+        description: Skip GIAS data validation checks
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   update_gias_data:
@@ -16,8 +19,8 @@ jobs:
       id-token: write
       contents: read
     runs-on: ubuntu-latest
-    environment: ${{ inputs.environment || 'Dev' }}
-    name: Update GIAS data for ${{ inputs.environment || 'Dev' }}
+    environment: ${{ inputs.environment }}
+    name: Update GIAS data for ${{ inputs.environment }}
     defaults:
       run:
         working-directory: ./utils/update-gias-data
@@ -76,11 +79,13 @@ jobs:
         run: uv run playwright install --with-deps webkit
 
       - name: Fetch data and update database
-        run: uv run main.py
+        run: uv run python main.py ${{ inputs.skip_gias_validation && '--skip-validation' || '' }}
         env:
-          CONNECTION_STRING: ${{ steps.get-connection-string.outputs.secret_value }}
+            CONNECTION_STRING_PLANTECH_GIAS_UPDATE: ${{ steps.get-connection-string.outputs.secret_value }}
 
+        ## Always run this step to ensure cleanup, even if previous steps fail
       - name: Remove Azure firewall rules
+        if: always()
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
