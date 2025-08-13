@@ -255,7 +255,7 @@ def _validate_data_for_update(
         or abs(proposed_establishment_link_count - current_establishment_link_count) > THRESHOLD_SUBSTANTIAL_CHANGE
     ):
         logger.warning(
-            f"Exiting early due to a suspisciously large change in establishment group ({current_establishment_group_count} -> {proposed_establishment_group_count}) and/or link ({current_establishment_link_count} -> {proposed_establishment_link_count}) counts."
+            f"Exiting early due to a suspiciously large change in establishment group ({current_establishment_group_count} -> {proposed_establishment_group_count}) and/or link ({current_establishment_link_count} -> {proposed_establishment_link_count}) counts."
         )
         return False
 
