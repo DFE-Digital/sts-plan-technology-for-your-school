@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Dfe.PlanTech.Infrastructure.Data.Sql.Configurations;
+namespace Dfe.PlanTech.Data.Sql.Configurations;
 
 internal class SignInEntityConfiguration : IEntityTypeConfiguration<SignInEntity>
 {

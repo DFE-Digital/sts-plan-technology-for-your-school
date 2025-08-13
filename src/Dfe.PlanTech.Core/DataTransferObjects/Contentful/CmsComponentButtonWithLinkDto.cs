@@ -9,8 +9,6 @@ public class CmsComponentButtonWithLinkDto : CmsEntryDto
     public CmsComponentButtonDto Button { get; init; } = null!;
     public string Href { get; init; } = null!;
 
-    public CmsComponentButtonWithLinkDto() { }
-
     public CmsComponentButtonWithLinkDto(ComponentButtonWithLinkEntry button)
     {
         Id = button.Id;

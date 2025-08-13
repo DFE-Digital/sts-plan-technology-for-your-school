@@ -14,9 +14,14 @@ public class ResponseWorkflow
 {
     private readonly SubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
-    public async Task<QuestionWithAnswerModel?> GetLatestResponseForQuestionAsync(int establishmentId, string sectionId, string questionId)
+    public Task<QuestionWithAnswerModel?> GetLatestResponseForQuestionAsync(int establishmentId, string sectionId, string questionId)
     {
-        return await _submissionRepository.GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompleted: false, includeResponses: true)
+        return _submissionRepository.GetPreviousSubmissionsInDescendingOrder(
+                establishmentId,
+                sectionId,
+                isCompleted:
+                false, includeResponses: true
+            )
             .SelectMany(submission => submission.Responses)
             .Where(response => string.Equals(questionId, response.Question.ContentfulRef))
             .OrderByDescending(response => response.DateCreated)
@@ -41,27 +46,28 @@ public class ResponseWorkflow
         }
 
         var lastSelectedQuestion = section.Questions
-            .FirstOrDefault(q => q.Id.Equals(lastResponseInUserJourney.QuestionId))
-                ?? throw new UserJourneyMissingContentException($"Could not find question with ID {lastResponseInUserJourney.QuestionId} in section with ID {section.Id}", section);
+            .FirstOrDefault(q => q.Id.Equals(lastResponseInUserJourney.Question.ContentfulRef))
+                ?? throw new UserJourneyMissingContentException($"Could not find question with database ID {lastResponseInUserJourney.QuestionId} (Contentful ref {lastResponseInUserJourney.Question.ContentfulRef}) in section with ID {section.Id}", section);
 
-        if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.AnswerId)) is null)
+        if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
         {
-            throw new UserJourneyMissingContentException($"Could not find answer with ID {lastResponseInUserJourney.AnswerId} in question {lastResponseInUserJourney.QuestionId}", section);
+            throw new UserJourneyMissingContentException($"Could not find answer with Contentful reference {lastResponseInUserJourney.Answer.ContentfulRef} in question with Contentful reference {lastResponseInUserJourney.Question.ContentfulRef}", section);
         }
 
         return new SubmissionResponsesModel(latestSubmission.AsDto());
     }
 
-    private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, CmsQuestionnaireSectionDto section)
+    private static ICollection<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, CmsQuestionnaireSectionDto section)
     {
         var currentQuestion = section?.Questions.FirstOrDefault();
-        var questionMap = responses.ToDictionary(response => response.Question.ContentfulRef, response => response);
+        var responsesInDateOrder = responses.OrderByDescending(r => r.DateCreated);
 
         var orderedResponses = new List<ResponseEntity>();
         while (currentQuestion is not null)
         {
-            var questionSysId = currentQuestion.Sys.Id ?? string.Empty;
-            if (!questionMap.TryGetValue(questionSysId, out var response))
+            var questionContentfulRef = currentQuestion.Id ?? string.Empty;
+            var response = responsesInDateOrder.FirstOrDefault(response => response.Question.ContentfulRef.Equals(questionContentfulRef));
+            if (response is null)
             {
                 break;
             }
@@ -69,7 +75,7 @@ public class ResponseWorkflow
             orderedResponses.Add(response);
 
             currentQuestion = currentQuestion.Answers
-                .Find(a => a.Sys.Id!.Equals(response.Answer.ContentfulRef))?
+                .Find(a => a.Id!.Equals(response.Answer.ContentfulRef))?
                 .NextQuestion;
         }
 

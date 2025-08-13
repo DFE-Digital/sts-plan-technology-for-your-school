@@ -40,12 +40,10 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         return newSubmission;
     }
 
-    public async Task<SubmissionEntity?> GetLatestSubmissionAsync(int establishmentId, string sectionId, bool isCompleted, bool includeRelationships = false)
+    public Task<SubmissionEntity?> GetLatestSubmissionAsync(int establishmentId, string sectionId, bool isCompleted, bool includeRelationships = false)
     {
-        var submission = await GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompleted, includeRelationships)
+        return GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompleted, includeRelationships)
             .FirstOrDefaultAsync();
-
-        return submission;
     }
 
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(int establishmentId, string sectionId, bool isCompleted)
@@ -76,27 +74,13 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         bool includeResponses = false
     )
     {
-        List<string> statusFilters = [];
-        if (isCompleted)
-        {
-            statusFilters = [
-                SubmissionStatus.CompleteReviewed.ToString()
-            ];
-        }
-        else
-        {
-            statusFilters = [
-                SubmissionStatus.InProgress.ToString(),
-                SubmissionStatus.CompleteNotReviewed.ToString()
-            ];
-        }
-
         return GetSubmissionsBy(submission =>
-                !submission.Deleted &&
-                submission.EstablishmentId == establishmentId &&
-                submission.SectionId == sectionId &&
-                statusFilters.Contains(submission.Status!),
-                includeResponses)
+            !submission.Deleted &&
+            submission.EstablishmentId == establishmentId &&
+            submission.SectionId == sectionId &&
+            submission.Completed == isCompleted,
+            includeResponses
+            )
             .OrderByDescending(submission => submission.DateCreated);
     }
 

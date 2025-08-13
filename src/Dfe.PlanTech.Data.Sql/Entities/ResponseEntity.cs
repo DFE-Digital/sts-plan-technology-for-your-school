@@ -10,7 +10,7 @@ public class ResponseEntity
 
     public int UserId { get; set; }
 
-    public UserEntity User { get; set; } = null!;
+    public UserEntity? User { get; set; }
 
     public int SubmissionId { get; set; }
 
@@ -36,7 +36,7 @@ public class ResponseEntity
         {
             Id = Id,
             UserId = UserId,
-            User = User.AsDto(),
+            User = User?.AsDto(),
             SubmissionId = SubmissionId,
             Submission = Submission.AsDto(),
             QuestionId = QuestionId,

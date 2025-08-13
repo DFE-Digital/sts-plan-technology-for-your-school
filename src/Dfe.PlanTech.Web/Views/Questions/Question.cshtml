@@ -9,7 +9,7 @@
 <form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-categorySlug="@Model.CategorySlug" asp-route-sectionSlug="@Model.SectionSlug"
       asp-route-questionSlug="@Model.Question.Slug" method="post">
     <input id="QuestionText" type="hidden" value="@Model.Question.Text" name="QuestionText"/>
-    <input id="QuestionId" type="hidden" value=@Model.Question.Sys.Id name="QuestionId"/>
+    <input id="QuestionId" type="hidden" value=@Model.Question.Id name="QuestionId"/>
     <input id="SectionId" type="hidden" value="@Model.SectionId" name="SectionId"/>
     <input id="SectionName" type="hidden" value="@Model.SectionName" name="SectionName"/>
     @if (!string.IsNullOrEmpty(ViewData["ReturnTo"]?.ToString()))

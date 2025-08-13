@@ -21,12 +21,13 @@ public class CmsPageDto : CmsEntryDto
 
     public CmsPageDto(PageEntry pageEntry)
     {
+        Id = pageEntry.Id;
         InternalName = pageEntry.InternalName;
         Slug = pageEntry.Slug;
         DisplayBackButton = pageEntry.DisplayBackButton;
         DisplayHomeButton = pageEntry.DisplayHomeButton;
-        DisplayTopicTitle = pageEntry.DisplayTopicTitle;
         DisplayOrganisationName = pageEntry.DisplayOrganisationName;
+        DisplayTopicTitle = pageEntry.DisplayTopicTitle;
         IsLandingPage = pageEntry.IsLandingPage;
         RequiresAuthorisation = pageEntry.RequiresAuthorisation;
         SectionTitle = pageEntry.SectionTitle;

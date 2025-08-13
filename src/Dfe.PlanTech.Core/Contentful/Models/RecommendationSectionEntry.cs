@@ -6,8 +6,10 @@ namespace Dfe.PlanTech.Core.Contentful.Models;
 public class RecommendationSectionEntry: TransformableEntry<RecommendationSectionEntry, CmsRecommendationSectionDto>
 {
     public string InternalName { get; set; } = null!;
+
     [NotMapped]
     public List<QuestionnaireAnswerEntry> Answers { get; init; } = [];
+
     [NotMapped]
     public IEnumerable<RecommendationChunkEntry> Chunks { get; init; } = [];
 

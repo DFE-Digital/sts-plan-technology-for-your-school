@@ -73,7 +73,7 @@ public class PagesViewBuilder(
         var landingPageViewModel = new CategoryLandingPageViewModel()
         {
             Slug = page.Slug,
-            Title = new CmsComponentTitleDto { Text = category.Header.Text },
+            Title = new CmsComponentTitleDto(category.Header.Text),
             Category = category,
             SectionName = controller.TempData["SectionName"] as string
         };

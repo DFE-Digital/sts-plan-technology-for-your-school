@@ -19,7 +19,7 @@ public class AttachmentComponentRenderer
             return stringBuilder;
         }
 
-        var customAttachment = GenerateCustomAttachment(target);
+        var customAttachment = new CmsCustomAttachmentDto(target);
 
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
         stringBuilder.Append("<div class=\"attachment\">");
@@ -48,28 +48,6 @@ public class AttachmentComponentRenderer
         stringBuilder.Append("</div></div></div>");
 
         return stringBuilder;
-    }
-
-    private CmsCustomAttachmentDto GenerateCustomAttachment(CmsRichTextContentDataDto content)
-    {
-        var contentType = content?.Asset.File.ContentType;
-        var fileExtension = contentType?.Split('/')[^1].ToLower();
-
-        if (fileExtension == FileExtensionConstants.XLSXSPREADSHEET)
-        {
-            fileExtension = FileExtensionConstants.XLSX;
-        }
-
-        return new CmsCustomAttachmentDto
-        {
-            InternalName = content?.InternalName ?? string.Empty,
-            ContentType = contentType ?? string.Empty,
-            Size = content?.Asset?.File?.Details?.Size / 1024 ?? 0,
-            Title = content?.Title,
-            Uri = content?.Asset.File.Url ?? string.Empty,
-            UpdatedAt = content?.Asset.SystemProperties.UpdatedAt,
-            FileExtension = fileExtension ?? string.Empty,
-        };
     }
 
     private string GetImageTag(string fileExtension)

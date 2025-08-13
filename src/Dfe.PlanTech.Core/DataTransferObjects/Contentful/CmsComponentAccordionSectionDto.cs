@@ -15,6 +15,7 @@ public class CmsComponentAccordionSectionDto : CmsEntryDto
         Id = accordionSectionEntry.Id;
         InternalName = accordionSectionEntry.InternalName;
         Title = accordionSectionEntry.Title;
+        SummaryLine = accordionSectionEntry.SummaryLine;
         RichText = accordionSectionEntry.RichText.AsDto();
     }
 }

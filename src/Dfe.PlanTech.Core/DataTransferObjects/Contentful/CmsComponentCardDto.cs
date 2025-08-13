@@ -15,10 +15,11 @@ public class CmsComponentCardDto : CmsEntryDto
 
     public CmsComponentCardDto(ComponentCardEntry cardEntry)
     {
+        Description = cardEntry.Description;
+
         Id = cardEntry.Id;
         InternalName = cardEntry.InternalName;
         Title = cardEntry.Title;
-        Description = cardEntry.Description;
         Meta = cardEntry.Meta;
         Image = cardEntry.Image;
         ImageAlt = cardEntry.ImageAlt;

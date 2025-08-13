@@ -12,11 +12,7 @@
 	{
 		case CmsPageDto pageContent:
 			{
-				var buttonWithLink = new CmsComponentButtonWithLinkDto
-				{
-					Button = Model.Button!,
-					Href = pageContent.Slug
-				};
+				var buttonWithLink = new CmsComponentButtonWithLinkDto(Model.Button!, pageContent.Slug);
 
 				<partial name="components/ButtonWithLink" model=@buttonWithLink />
 				break;

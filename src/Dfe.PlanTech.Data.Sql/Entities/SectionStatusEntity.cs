@@ -27,6 +27,7 @@ public class SectionStatusEntity
             LastMaturity = LastMaturity,
             DateCreated = DateCreated,
             DateUpdated = DateUpdated,
+            HasBeenViewed = Viewed,
             LastCompletionDate = LastCompletionDate
         };
     }

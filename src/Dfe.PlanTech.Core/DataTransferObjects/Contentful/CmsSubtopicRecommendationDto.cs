@@ -15,6 +15,8 @@ public class CmsSubtopicRecommendationDto : CmsEntryDto
         Id = subtopicRecommendationEntry.Id;
         InternalName = subtopicRecommendationEntry.InternalName;
         Intros = subtopicRecommendationEntry.Intros.Select(i => i.AsDto()).ToList();
+        Section = subtopicRecommendationEntry.Section.AsDto();
+        Subtopic = subtopicRecommendationEntry.Subtopic.AsDto();
     }
 
     public CmsRecommendationIntroDto? GetRecommendationByMaturity(string? maturity) =>

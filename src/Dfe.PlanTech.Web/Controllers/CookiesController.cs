@@ -29,7 +29,7 @@ public class CookiesController(
 
         CookiesViewModel cookiesViewModel = new()
         {
-            Title = cookiesPageContent?.Title ?? new CmsComponentTitleDto { Text = "Cookies" },
+            Title = cookiesPageContent?.Title ?? new CmsComponentTitleDto("Cookies"),
             Content = cookiesPageContent?.Content ?? [],
             Cookie = _cookieService.Cookie,
             ReferrerUrl = referrerUrl ?? "",

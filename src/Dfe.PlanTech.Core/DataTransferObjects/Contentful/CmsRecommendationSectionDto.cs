@@ -14,12 +14,13 @@ public class CmsRecommendationSectionDto : CmsEntryDto
         Id = recommendationSectionEntry.Id;
         InternalName = recommendationSectionEntry.InternalName;
         Answers = recommendationSectionEntry.Answers.Select(a => a.AsDto()).ToList();
+        Chunks = recommendationSectionEntry.Chunks.Select(c => c.AsDto()).ToList();
     }
 
     public List<CmsRecommendationChunkDto> GetRecommendationChunksByAnswerIds(IEnumerable<string> answerIds)
     {
         return Chunks
-            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
+            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Id)))
             .DistinctBy(chunk => chunk.Id)
             .ToList();
     }

@@ -46,7 +46,7 @@ public class ReviewAnswersViewBuilder(
             case SubmissionStatus.CompleteReviewed:
                 if (!isChangeAnswersFlow)
                 {
-                    await _submissionService.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(establishmentId, submissionRoutingData.QuestionnaireSection.Sys.Id!);
+                    await _submissionService.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(establishmentId, submissionRoutingData.QuestionnaireSection.Id!);
                 }
                 return controller.View(ChangeAnswersController.ChangeAnswersViewName, model);
 
@@ -134,7 +134,7 @@ public class ReviewAnswersViewBuilder(
 
         return new ReviewAnswersViewModel()
         {
-            Title = new CmsComponentTitleDto() { Text = pageTitle },
+            Title = new CmsComponentTitleDto(pageTitle),
             Content = content,
             SectionName = routingData.QuestionnaireSection.Name,
             SectionSlug = sectionSlug,

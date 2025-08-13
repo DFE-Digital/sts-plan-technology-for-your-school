@@ -8,7 +8,10 @@ public class CmsComponentTitleDto : CmsEntryDto
     public string? InternalName { get; set; }
     public string Text { get; set; } = null!;
 
-    public CmsComponentTitleDto() { }
+    public CmsComponentTitleDto(string text)
+    {
+        Text = text;
+    }
 
     public CmsComponentTitleDto(ComponentTitleEntry titleEntry)
     {

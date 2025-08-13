@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Infrastructure.Data.Contentful.Repositories;
+namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubtopicRecommendationWorkflow(
     ILoggerFactory loggerFactory,

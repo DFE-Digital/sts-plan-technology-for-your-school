@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Core.Constants;
 public static class ContentTypeConstants
 {
     public static Dictionary<string, Type> ContentTypeToEntryClassTypeMap =>
-        EntryClassToContentTypeMapBasis.Keys.ToDictionary(key => EntryClassToContentTypeMapBasis[key], key => key);
+        EntryClassToContentTypeMapBasis.Keys.ToDictionary(key => EntryClassToContentTypeMapBasis[key].ToLower(), key => key);
 
     public static Dictionary<string, string> EntryClassToContentTypeMap =>
         EntryClassToContentTypeMapBasis.Keys.ToDictionary(key => key.Name, key => EntryClassToContentTypeMapBasis[key]);

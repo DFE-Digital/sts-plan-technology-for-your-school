@@ -19,6 +19,7 @@ public partial class CmsRichTextContentDto : CmsFieldDto, IRichTextContent
         NodeType = richTextContent.NodeType;
         Marks = richTextContent.Marks.Select(m => m.AsDto()).ToList();
         Content = richTextContent.Content.Select(c => c.AsDto()).ToList();
+        Data = richTextContent.Data?.AsDto();
     }
 
     public RichTextNodeType MappedNodeType =>

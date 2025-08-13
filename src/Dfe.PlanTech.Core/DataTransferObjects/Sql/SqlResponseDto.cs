@@ -4,7 +4,7 @@ public class SqlResponseDto : SqlDto
 {
     public int Id { get; set; }
     public int UserId { get; set; }
-    public SqlUserDto User { get; set; } = null!;
+    public SqlUserDto? User { get; set; }
     public int SubmissionId { get; set; }
     public SqlSubmissionDto Submission { get; set; } = null!;
     public int QuestionId { get; set; }

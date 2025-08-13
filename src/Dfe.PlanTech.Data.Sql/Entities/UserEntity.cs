@@ -14,9 +14,9 @@ public class UserEntity
 
     public DateTime? DateLastUpdated { get; set; }
 
-    public List<SignInEntity> SignIns { get; set; } = new();
+    public ICollection<SignInEntity> SignIns { get; set; } = [];
 
-    public List<ResponseEntity> Responses { get; set; } = new();
+    public ICollection<ResponseEntity>? Responses { get; set; } = [];
 
     public SqlUserDto AsDto()
     {
@@ -26,7 +26,7 @@ public class UserEntity
             DfeSignInRef = DfeSignInRef,
             DateCreated = DateCreated,
             DateLastUpdated = DateLastUpdated,
-            Responses = Responses.Select(r => r.AsDto()).ToList()
+            Responses = Responses?.Select(r => r.AsDto()).ToList()
         };
     }
 }

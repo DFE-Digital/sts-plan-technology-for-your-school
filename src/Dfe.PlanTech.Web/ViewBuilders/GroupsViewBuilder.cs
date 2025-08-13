@@ -89,7 +89,7 @@ public class GroupsViewBuilder(
             SchoolName = latestSelection.SelectedEstablishmentName,
             SchoolId = latestSelection.SelectedEstablishmentId,
             GroupName = groupName,
-            Title = new CmsComponentTitleDto() { Text = "Plan technology for your school" },
+            Title = new CmsComponentTitleDto("Plan technology for your school"),
             Content = content,
             Slug = UrlConstants.GroupsDashboardSlug
         };
@@ -126,7 +126,7 @@ public class GroupsViewBuilder(
         var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
-        var latestResponses = await _submissionService.GetLatestSubmissionWithResponsesAsync(schoolId, sectionSlug, true)
+        var latestResponses = await _submissionService.GetLatestSubmissionWithResponsesAsync(schoolId, section, true)
             ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
 
         var customIntro = new GroupsCustomRecommendationIntroViewModel()
@@ -147,7 +147,7 @@ public class GroupsViewBuilder(
         var subtopicChunks = subtopicRecommendation
             .Section
             .Chunks
-            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
+            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Id)))
             .Distinct()
             .ToList();
 

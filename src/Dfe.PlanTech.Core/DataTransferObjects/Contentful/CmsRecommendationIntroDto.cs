@@ -17,9 +17,6 @@ public class CmsRecommendationIntroDto : CmsEntryDto, IHeaderWithContent
     public string LinkText => "Overview";
     public string SlugifiedLinkText => LinkText.Slugify();
 
-    public CmsRecommendationIntroDto()
-    { }
-
     public CmsRecommendationIntroDto(RecommendationIntroEntry recommendationIntroEntry)
     {
         Id = recommendationIntroEntry.Id;

@@ -11,10 +11,8 @@ public class CmsNavigationLinkDto : CmsEntryDto
     public string? Href { get; set; } = null;
     public bool OpenInNewTab { get; set; } = false;
 
-    public bool IsValid => !string.IsNullOrEmpty(DisplayText) && !(string.IsNullOrEmpty(Href) && ContentToLinkTo == null);
-
-    // Can't work out where this comes from based on the previous codebase
-    //public ContentComponent? ContentToLinkTo { get; set; }
+    // To be valid, a link entry must contain display text, and must have either a href or some content to link to
+    public bool IsValid => !string.IsNullOrEmpty(DisplayText) && (!string.IsNullOrEmpty(Href) || ContentToLinkTo is not null);
 
     public CmsNavigationLinkDto(NavigationLinkEntry navigationLinkEntry)
     {

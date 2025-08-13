@@ -12,10 +12,12 @@ public class CmsRecommendationChunkDto : CmsEntryDto, IHeaderWithContent
     public List<CmsEntryDto> Content { get; init; } = [];
     public List<CmsQuestionnaireAnswerDto> Answers { get; init; } = [];
     public CmsCAndSLinkDto? CSLink { get; init; }
+
     public string LinkText => HeaderText;
-    public string SlugifiedLinkText => _slugifiedLinkText ??= LinkText.Slugify();
 
     private string? _slugifiedLinkText;
+    public string SlugifiedLinkText => _slugifiedLinkText ??= LinkText.Slugify();
+
     public CmsRecommendationChunkDto(string header)
     {
         HeaderText = header;

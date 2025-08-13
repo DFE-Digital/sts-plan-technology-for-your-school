@@ -29,11 +29,9 @@ public class SubmissionService(
         await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, sectionId);
     }
 
-    public async Task<SubmissionResponsesModel?> GetLatestSubmissionWithResponsesAsync(int establishmentId, string sectionSlug, bool isCompletedSubmission)
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionWithResponsesAsync(int establishmentId, CmsQuestionnaireSectionDto questionnaireSection, bool isCompletedSubmission)
     {
-        var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
-
-        return await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, cmsQuestionnaireSection, isCompletedSubmission);
+        return await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, questionnaireSection, isCompletedSubmission);
     }
 
     public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, string sectionSlug)

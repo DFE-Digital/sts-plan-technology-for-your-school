@@ -22,11 +22,8 @@ namespace Dfe.PlanTech.Application.Workflows
 
         public async Task<SqlSubmissionDto?> GetLatestSubmissionAsync(int establishmentId, string sectionId, bool isCompletedSubmission, bool includeResponses)
         {
-            var latestSubmission = await _submissionRepository.GetPreviousSubmissionsInDescendingOrder(
-                establishmentId,
-                sectionId,
-                isCompletedSubmission,
-                includeResponses)
+            var latestSubmission = await _submissionRepository
+                .GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission, includeResponses)
                 .FirstOrDefaultAsync();
 
             return latestSubmission?.AsDto();

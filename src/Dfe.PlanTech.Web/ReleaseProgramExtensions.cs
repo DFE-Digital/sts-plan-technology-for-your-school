@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Azure.Identity;
-using Dfe.PlanTech.Infrastructure.Data;
+using Dfe.PlanTech.Data.Sql;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 

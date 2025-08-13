@@ -26,7 +26,7 @@ public class SubmissionEntity
 
     public DateTime? DateCompleted { get; set; }
 
-    public IEnumerable<ResponseEntity> Responses { get; set; } = [];
+    public ICollection<ResponseEntity> Responses { get; set; } = [];
 
     public bool Deleted { get; set; }
 

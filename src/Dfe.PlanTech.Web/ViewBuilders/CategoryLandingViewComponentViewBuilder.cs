@@ -44,8 +44,8 @@ public class CategoryLandingViewComponentViewBuilder(
             progressRetrievalErrorMessage = "Unable to retrieve progress, please refresh your browser.";
         }
 
-        var categoryLandingSections = await BuildCategoryLandingSectionViewModel(establishmentId, category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync();
-        var completedSectionCount = sectionStatuses.Count(ss => ss.Completed);
+        var categoryLandingSections = await BuildCategoryLandingSectionViewModels(establishmentId, category, sectionStatuses, progressRetrievalErrorMessage is not null).ToListAsync();
+        var completedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate != null);
 
         var viewModel = new CategoryLandingViewComponentViewModel()
         {
@@ -61,7 +61,7 @@ public class CategoryLandingViewComponentViewBuilder(
         return viewModel;
     }
 
-    private async IAsyncEnumerable<CategoryLandingSectionViewModel> BuildCategoryLandingSectionViewModel(
+    private async IAsyncEnumerable<CategoryLandingSectionViewModel> BuildCategoryLandingSectionViewModels(
         int establishmentId,
         CmsQuestionnaireCategoryDto category,
         List<SqlSectionStatusDto> sectionStatuses,
@@ -114,7 +114,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 };
             }
 
-            var latestResponses = await _submissionService.GetLatestSubmissionWithResponsesAsync(establishmentId, section.Id, true)
+            var latestResponses = await _submissionService.GetLatestSubmissionWithResponsesAsync(establishmentId, section, true)
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
             var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
                ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");

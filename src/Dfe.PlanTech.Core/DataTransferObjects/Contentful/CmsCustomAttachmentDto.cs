@@ -1,4 +1,6 @@
-﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Constants;
+
+namespace Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 public class CmsCustomAttachmentDto
 {
@@ -9,4 +11,23 @@ public class CmsCustomAttachmentDto
     public string? Uri { get; set; }
     public DateTime? UpdatedAt { get; set; }
     public string? FileExtension { get; set; }
+
+    public CmsCustomAttachmentDto(CmsRichTextContentDataDto content)
+    {
+        var contentType = content?.Asset.File.ContentType;
+        var fileExtension = contentType?.Split('/')[^1].ToLower();
+
+        if (fileExtension == FileExtensionConstants.XLSXSPREADSHEET)
+        {
+            fileExtension = FileExtensionConstants.XLSX;
+        }
+
+        InternalName = content?.InternalName ?? string.Empty;
+        ContentType = contentType ?? string.Empty;
+        Size = content?.Asset?.File?.Details?.Size / 1024 ?? 0;
+        Title = content?.Title;
+        Uri = content?.Asset.File.Url ?? string.Empty;
+        UpdatedAt = content?.Asset.SystemProperties.UpdatedAt;
+        FileExtension = fileExtension ?? string.Empty;
+    }
 }
