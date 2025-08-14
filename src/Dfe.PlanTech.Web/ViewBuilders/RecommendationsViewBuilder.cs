@@ -29,18 +29,72 @@ public class RecommendationsViewBuilder(
 
     private const string RecommendationsChecklistViewName = "~/Views/Recommendations/RecommendationsChecklist.cshtml";
     private const string RecommendationsViewName = "~/Views/Recommendations/Recommendations.cshtml";
+    private const string SingleRecommendationViewName = "~/Views/Recommendations/SingleRecommendation.cshtml";
+
+    public async Task<IActionResult> RouteToSingleRecommendation(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug,
+        bool useChecklist
+    )
+    {
+        var establishmentId = GetEstablishmentIdOrThrowException();
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find category for slug {categorySlug}");
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: true);
+
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id);
+        if (subtopicRecommendation is null)
+        {
+            throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Id}'");
+        }
+
+        var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
+        var subtopicChunks = subtopicRecommendation!.Section.GetRecommendationChunksByAnswerIds(answerIds);
+
+        var currentChunk = subtopicChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
+           ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
+
+        var currentChunkIndex = subtopicChunks.IndexOf(currentChunk);
+        var previousChunk = currentChunkIndex > 0
+                            ? subtopicChunks[currentChunkIndex - 1]
+                            : null;
+        var nextChunk = currentChunkIndex != subtopicChunks.Count - 1
+                            ? subtopicChunks[currentChunkIndex + 1]
+                            : null;
+
+        var viewModel = new SingleRecommendationViewModel()
+        {
+            CategoryName = category.Header.Text,
+            CategorySlug = categorySlug,
+            Section = section,
+            Chunks = subtopicChunks,
+            CurrentChunk = currentChunk,
+            PreviousChunk = previousChunk,
+            NextChunk = nextChunk,
+            CurrentChunkPosition = currentChunkIndex + 1,
+            TotalChunks = subtopicChunks.Count
+        };
+
+        return controller.View(SingleRecommendationViewName, viewModel);
+    }
 
     public async Task<IActionResult> RouteBySectionAndRecommendation(
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        string recommendationSlug,
         bool useChecklist
     )
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find category for slug {categorySlug}");
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: true);
 
         switch (submissionRoutingData.Status)
         {
@@ -51,26 +105,24 @@ public class RecommendationsViewBuilder(
                 return controller.RedirectToAction(
                     nameof(QuestionsController.GetQuestionBySlug),
                     nameof(QuestionsController),
-                    new { sectionSlug, submissionRoutingData.NextQuestion!.Slug });
+                    new { categorySlug, sectionSlug, submissionRoutingData.NextQuestion!.Slug });
 
             case SubmissionStatus.CompleteNotReviewed:
                 return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
 
             case SubmissionStatus.CompleteReviewed:
-                if (!useChecklist)
-                {
-                    await _submissionService.SetLatestSubmissionViewedAsync(establishmentId, section.Id);
-                }
-
-                var viewModel = await BuildViewModel(
-                    sectionSlug,
-                    recommendationSlug,
-                    section,
+                var viewModel = await BuildRecommendationsViewModel(
+                    category,
                     submissionRoutingData,
-                    showYourSelfAssessmentChunk: !useChecklist
+                    section.Id,
+                    sectionSlug
                 );
 
-                return controller.View(RecommendationsChecklistViewName, viewModel);
+                var viewName = useChecklist
+                    ? RecommendationsChecklistViewName
+                    : RecommendationsViewName;
+
+                return controller.View(viewName, viewModel);
 
             default:
                 throw new InvalidOperationException($"Invalid journey status - {submissionRoutingData.Status}");
@@ -85,7 +137,7 @@ public class RecommendationsViewBuilder(
         }
 
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: false);
 
         var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(submissionRoutingData.QuestionnaireSection.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for: {submissionRoutingData.QuestionnaireSection.Name}");
@@ -105,59 +157,37 @@ public class RecommendationsViewBuilder(
         return controller.View(RecommendationsViewName, viewModel);
     }
 
-    public async Task<IActionResult> RouteFromSection(Controller controller, string categorySlug, string sectionSlug)
-    {
-        var establishmentId = GetEstablishmentIdOrThrowException();
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
-        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
-            ?? throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Id}'");
-
-        var subtopicIntro = subtopicRecommendation.GetRecommendationByMaturity(submissionRoutingData.Maturity)
-            ?? throw new ContentfulDataUnavailableException($"Could not find recommendation intro subtopic ID '{subtopicRecommendation.Id}'");
-
-        var recommendationSlug = subtopicIntro.Slug;
-        return await RouteBySectionAndRecommendation(controller, categorySlug, sectionSlug, recommendationSlug, false);
-    }
-
-    private async Task<RecommendationsViewModel> BuildViewModel(
-        string sectionSlug,
-        string recommendationSlug,
-        CmsQuestionnaireSectionDto section,
+    private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(
+        CmsQuestionnaireCategoryDto category,
         SubmissionRoutingDataModel submissionRoutingData,
-        bool showYourSelfAssessmentChunk
+        string sectionId,
+        string sectionSlug
     )
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id);
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(sectionId);
         if (subtopicRecommendation is null)
         {
-            throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Id}'");
+            throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{sectionId}'");
         }
 
         var subtopicIntro = subtopicRecommendation?.GetRecommendationByMaturity(submissionRoutingData.Maturity);
         if (subtopicIntro is null)
         {
-            throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section with ID '{section.Id}' and maturity '{submissionRoutingData.Maturity}");
+            throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section with ID '{sectionId}' and maturity '{submissionRoutingData.Maturity}");
         }
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
         var subtopicChunks = subtopicRecommendation!.Section.GetRecommendationChunksByAnswerIds(answerIds);
 
-        if (showYourSelfAssessmentChunk)
-        {
-            subtopicChunks.Add(new("Your self-assessment"));
-        }
-
         return new RecommendationsViewModel()
         {
+            CategoryName = category.Header.Text,
             SectionName = subtopicRecommendation.Subtopic.Name,
-            //Intro = subtopicIntro,
             Chunks = subtopicChunks,
             LatestCompletionDate = submissionRoutingData.Submission!.DateCompleted.HasValue
                                 ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission!.DateCompleted.Value)
                                 : null,
-            Slug = recommendationSlug,
             SectionSlug = sectionSlug,
             SubmissionResponses = submissionRoutingData.Submission.Responses
         };

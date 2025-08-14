@@ -7,7 +7,7 @@ public class CmsRecommendationSectionDto : CmsEntryDto
     public string Id { get; set; } = null!;
     public string InternalName { get; set; } = null!;
     public List<CmsQuestionnaireAnswerDto> Answers { get; init; } = [];
-    public IEnumerable<CmsRecommendationChunkDto> Chunks { get; init; } = [];
+    public List<CmsRecommendationChunkDto> Chunks { get; init; } = [];
 
     public CmsRecommendationSectionDto(RecommendationSectionEntry recommendationSectionEntry)
     {

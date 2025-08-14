@@ -37,7 +37,7 @@ public class ResponseWorkflow
             return null;
         }
 
-        latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses, section);
+        latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses, section).ToList();
 
         var lastResponseInUserJourney = latestSubmission.Responses.LastOrDefault();
         if (lastResponseInUserJourney is null)
@@ -57,28 +57,26 @@ public class ResponseWorkflow
         return new SubmissionResponsesModel(latestSubmission.AsDto());
     }
 
-    private static ICollection<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, CmsQuestionnaireSectionDto section)
+    private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, CmsQuestionnaireSectionDto section)
     {
-        var currentQuestion = section?.Questions.FirstOrDefault();
-        var responsesInDateOrder = responses.OrderByDescending(r => r.DateCreated);
+        var questionWithAnswerMap = responses
+            .OrderByDescending(r => r.DateCreated)
+            .GroupBy(r => r.Question.ContentfulRef)
+            .ToDictionary(group => group.Key, group => group.First());
 
-        var orderedResponses = new List<ResponseEntity>();
+        var currentQuestion = section?.Questions.FirstOrDefault();
         while (currentQuestion is not null)
         {
-            var questionContentfulRef = currentQuestion.Id ?? string.Empty;
-            var response = responsesInDateOrder.FirstOrDefault(response => response.Question.ContentfulRef.Equals(questionContentfulRef));
-            if (response is null)
+            if (!questionWithAnswerMap.TryGetValue(currentQuestion.Id ?? string.Empty, out var response))
             {
                 break;
             }
 
-            orderedResponses.Add(response);
+            yield return response;
 
             currentQuestion = currentQuestion.Answers
                 .Find(a => a.Id!.Equals(response.Answer.ContentfulRef))?
                 .NextQuestion;
         }
-
-        return orderedResponses;
     }
 }

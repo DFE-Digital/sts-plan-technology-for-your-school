@@ -33,7 +33,7 @@ public class ReviewAnswersViewBuilder(
     )
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: true);
         var model = BuildChangeAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
 
         switch (submissionRoutingData.Status)
@@ -56,28 +56,12 @@ public class ReviewAnswersViewBuilder(
         }
     }
 
-    public async Task<IActionResult> RouteToSubtopicRecommendationIntroSlugAsync(Controller controller, string sectionSlug)
-    {
-        var establishmentId = GetEstablishmentIdOrThrowException();
-
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
-
-        var recommendationIntroSlug = _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
-
-        return controller.RedirectToAction(
-              RecommendationsController.GetRecommendationAction,
-              RecommendationsController.ControllerName,
-              new { sectionSlug, recommendationIntroSlug }
-          );
-    }
-
     public async Task<IActionResult> ConfirmCheckAnswers(
         Controller controller,
         string categorySlug,
         string sectionSlug,
         string sectionName,
-        int submissionId,
-        string redirectOption
+        int submissionId
     )
     {
         try
@@ -91,18 +75,8 @@ public class ReviewAnswersViewBuilder(
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
 
-        switch (redirectOption)
-        {
-            case RecommendationsController.GetRecommendationAction:
-                var establishmentId = GetEstablishmentIdOrThrowException();
-                var recommendationIntroSlug = await _recommendationService.GetRecommendationIntroSlug(establishmentId, sectionSlug);
-                return controller.RedirectToRecommendation(sectionSlug, recommendationIntroSlug);
-            case UrlConstants.HomePage:
-                return controller.RedirectToHomePage();
-            default:
-                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
-        }
-        ;
+        controller.TempData["SectionName"] = sectionName;
+        return controller.RedirectToCategoryLandingPage(categorySlug);
     }
 
     private async Task<ReviewAnswersViewModel> BuildChangeAnswersViewModel(

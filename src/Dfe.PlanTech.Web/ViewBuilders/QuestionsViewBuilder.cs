@@ -50,7 +50,7 @@ public class QuestionsViewBuilder(
 
         controller.TempData["ReturnTo"] = returnTo;
 
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: false);
 
         var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
         var isSlugForNextQuestion = submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug) ?? false;
@@ -183,7 +183,7 @@ public class QuestionsViewBuilder(
     {
         var userId = GetUserIdOrThrowException();
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug);
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: false);
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
         var question = section.GetQuestionBySlug(questionSlug);

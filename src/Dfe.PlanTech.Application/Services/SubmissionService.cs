@@ -29,20 +29,20 @@ public class SubmissionService(
         await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, sectionId);
     }
 
-    public async Task<SubmissionResponsesModel?> GetLatestSubmissionWithResponsesAsync(int establishmentId, CmsQuestionnaireSectionDto questionnaireSection, bool isCompletedSubmission)
+    public Task<SubmissionResponsesModel?> GetLatestSubmissionWithResponsesAsync(int establishmentId, CmsQuestionnaireSectionDto questionnaireSection, bool isCompletedSubmission)
     {
-        return await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, questionnaireSection, isCompletedSubmission);
+        return _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, questionnaireSection, isCompletedSubmission);
     }
 
-    public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, string sectionSlug)
+    public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, string sectionSlug, bool isCompletedSubmission)
     {
         var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
 
         var latestCompletedSubmission = await _submissionWorkflow.GetLatestSubmissionAsync(
             establishmentId,
             cmsQuestionnaireSection.Id,
-            isCompletedSubmission: true,
-            includeResponses: false);
+            isCompletedSubmission,
+            includeResponses: true);
 
         var status = latestCompletedSubmission is null
             ? SubmissionStatus.NotStarted
@@ -50,7 +50,7 @@ public class SubmissionService(
                 ? SubmissionStatus.CompleteReviewed
                 : SubmissionStatus.InProgress;
 
-        if (status.Equals(SubmissionStatus.NotStarted) || status.Equals(SubmissionStatus.CompleteReviewed))
+        if (status.Equals(SubmissionStatus.NotStarted))
         {
             return new SubmissionRoutingDataModel
             {
@@ -67,7 +67,7 @@ public class SubmissionService(
         var latestCompletedSubmissionWithResponses = await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
             cmsQuestionnaireSection,
-            isCompletedSubmission: false
+            isCompletedSubmission
         );
         if (latestCompletedSubmissionWithResponses is null)
         {

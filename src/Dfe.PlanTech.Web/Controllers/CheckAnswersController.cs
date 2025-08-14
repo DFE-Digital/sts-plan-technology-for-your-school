@@ -46,19 +46,18 @@ public class CheckAnswersController(
     public async Task<IActionResult> ConfirmCheckAnswers(
         string categorySlug,
         string sectionSlug,
-        int submissionId,
         string sectionName,
-        string redirectOption
+        int submissionId
     )
     {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
         ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
         ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
         ArgumentNullException.ThrowIfNullOrEmpty(sectionName, nameof(sectionName));
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
 
         try
         {
-            return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(this, categorySlug, sectionSlug, sectionName, submissionId, redirectOption);
+            return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(this, categorySlug, sectionSlug, sectionName, submissionId);
         }
         catch (Exception e)
         {

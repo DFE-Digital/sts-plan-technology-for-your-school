@@ -24,7 +24,9 @@ public class RedisConnectionManager : IRedisConnectionManager
     /// <inheritdoc/>
     public async Task<IDatabase> GetDatabaseAsync(int databaseId)
     {
-        _connection ??= await ConnectionMultiplexer.ConnectAsync(_options.ConnectionString) ?? throw new InvalidOperationException("Failed to create Redis connection");
+        _connection ??= await ConnectionMultiplexer.ConnectAsync(_options.ConnectionString)
+            ?? throw new InvalidOperationException("Failed to create Redis connection");
+
         return _connection.GetDatabase(databaseId);
     }
 
