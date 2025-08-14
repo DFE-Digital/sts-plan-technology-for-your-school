@@ -3,7 +3,10 @@
 @model Dfe.PlanTech.Web.Models.CategoryLandingPageViewModel
 
 @section DfePageHeaderOuter {
-    <partial name="BackButton" />
+    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">Back to homepage</govuk-back-link>
+    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint js-only">
+        Back to homepage
+    </govuk-back-link>
 }
 
 @section DfePageHeaderInner {
