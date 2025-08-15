@@ -86,6 +86,8 @@ jobs:
       contents: read
     name: Run E2E Tests
     runs-on: ubuntu-22.04
+    container:
+      image: cypress/browsers:node-22.18.0-chrome-138.0.7204.183-1-ff-141.0-edge-138.0.3351.121-1
     needs: [clear-db]
     env:
       PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
@@ -157,6 +159,10 @@ jobs:
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
+        env:
+          CHROME_BIN: /usr/bin/google-chrome
+          CYPRESS_CHROME_BINARY: /usr/bin/google-chrome
+          CYPRESS_baseUrl: https://localhost:8081
         with:
           url: https://localhost:8081
           dsi_url: ${{ secrets.DSI_URL }}
@@ -165,6 +171,8 @@ jobs:
           environment: "E2E"
           dsi_noorg_username: ${{ secrets.DSI_NOORG_USERNAME }}
           dsi_noorg_password: ${{ secrets.DSI_NOORG_PASSWORD }}
+          browser: chrome
+          headless: true
 
       - name: Remove Azure firewall rules
         if: always()
