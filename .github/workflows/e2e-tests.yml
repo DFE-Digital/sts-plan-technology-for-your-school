@@ -34,7 +34,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+        
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
@@ -86,8 +86,6 @@ jobs:
       contents: read
     name: Run E2E Tests
     runs-on: ubuntu-22.04
-    container:
-      image: cypress/browsers:node-22.18.0-chrome-138.0.7204.183-1-ff-141.0-edge-138.0.3351.121-1
     needs: [clear-db]
     env:
       PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
