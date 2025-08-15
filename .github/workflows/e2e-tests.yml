@@ -34,7 +34,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+        
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
@@ -157,6 +157,8 @@ jobs:
 
       - name: Cypress tests
         uses: ./.github/actions/run-e2e-tests
+        env:
+          CYPRESS_baseUrl: https://localhost:8081
         with:
           url: https://localhost:8081
           dsi_url: ${{ secrets.DSI_URL }}
@@ -165,6 +167,8 @@ jobs:
           environment: "E2E"
           dsi_noorg_username: ${{ secrets.DSI_NOORG_USERNAME }}
           dsi_noorg_password: ${{ secrets.DSI_NOORG_PASSWORD }}
+          browser: chrome
+          headless: true
 
       - name: Remove Azure firewall rules
         if: always()
