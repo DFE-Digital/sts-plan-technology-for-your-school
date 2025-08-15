@@ -53,7 +53,7 @@ public class GroupsController : BaseController<GroupsController>
         return View(SchoolDashboardViewName, viewModel);
     }
 
-    [HttpGet($"{UrlConstants.GroupsSlug}/recommendations/{{SectionSlug}}")]
+    [HttpGet($"{UrlConstants.GroupsSlug}/recommendations/{{sectionSlug}}")]
     public async Task<IActionResult> GetGroupsRecommendation(string sectionSlug)
     {
         var viewModel = await _groupsViewBuilder.GetGroupsRecommendationAsync(sectionSlug);

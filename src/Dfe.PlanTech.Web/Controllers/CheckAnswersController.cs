@@ -25,7 +25,7 @@ public class CheckAnswersController(
     IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
     private readonly ReviewAnswersViewBuilder _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
 
-    [HttpGet("{sectionSlug}/check-answers")]
+    [HttpGet("{categorySlug}/{sectionSlug}/check-answers")]
     public async Task<IActionResult> CheckAnswersPage(string categorySlug, string sectionSlug, [FromQuery] bool isChangeAnswersFlow)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));

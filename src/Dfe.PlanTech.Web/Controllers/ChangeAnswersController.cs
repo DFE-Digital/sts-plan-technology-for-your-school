@@ -32,7 +32,7 @@ public class ChangeAnswersController : BaseController<ChangeAnswersController>
         _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
     }
 
-    [HttpGet("{sectionSlug}/change-answers")]
+    [HttpGet("{categorySlug}/{sectionSlug}/change-answers")]
     public async Task<IActionResult> ChangeAnswersPage(string categorySlug, string sectionSlug)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));

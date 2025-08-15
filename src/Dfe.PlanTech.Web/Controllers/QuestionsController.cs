@@ -22,7 +22,7 @@ public class QuestionsController : BaseController<QuestionsController>
         _questionsViewBuilder = questionsViewBuilder ?? throw new ArgumentNullException(nameof(questionsViewBuilder));
     }
 
-    [HttpGet("{sectionSlug}/{questionSlug}")]
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}")]
     public async Task<IActionResult> GetQuestionBySlug(string categorySlug, string sectionSlug, string questionSlug, string? returnTo)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
@@ -53,7 +53,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
 
     [LogInvalidModelState]
-    [HttpGet("{sectionSlug}/next-question")]
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string categorySlug, string sectionSlug)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
@@ -61,7 +61,7 @@ public class QuestionsController : BaseController<QuestionsController>
         return await _questionsViewBuilder.RouteToNextUnansweredQuestion(this, categorySlug, sectionSlug);
     }
 
-    [HttpPost("{sectionSlug}/{questionSlug}")]
+    [HttpPost("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}")]
     public async Task<IActionResult> SubmitAnswer(
         string categorySlug,
         string sectionSlug,
