@@ -3,6 +3,9 @@ Feature: Unauthorised
     Background:
         Given I visit the homepage
         Then I should be on the URL containing "/dsi-error-not-associated-organisation"
+    
+    Scenario: Unauthorised page has the correct header
+        Then the header should contain all the correct content
 
     Scenario: Page has a main heading
         Then I should see the page heading "You are not associated with an organisation"

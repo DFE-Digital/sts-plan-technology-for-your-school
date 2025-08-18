@@ -12,6 +12,7 @@ Feature: Recommendations Page
       And I should not see any recommendation links
       And I should see the GOV.UK footer with expected links
       And I should see the beta header
+      And the header should contain all the correct content
 
     Scenario: Completing an assessment shows the correct recommendations on the section landing page 
       Given I start a test assessment on "Category One" standard "Category One Section One" section with answers "1, 1"

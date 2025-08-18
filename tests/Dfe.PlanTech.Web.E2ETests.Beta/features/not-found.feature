@@ -18,4 +18,3 @@ Feature: 404 Not Found page
 
   Scenario: The page has the beta header
     And I should see the beta header
-

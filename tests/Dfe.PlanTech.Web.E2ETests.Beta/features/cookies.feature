@@ -1,3 +1,4 @@
+@user-school
 Feature: Cookies Page
 
   Background:

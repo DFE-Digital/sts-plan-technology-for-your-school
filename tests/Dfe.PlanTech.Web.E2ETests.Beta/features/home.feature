@@ -4,6 +4,9 @@ Feature: home page
   Background:
     Given I visit the homepage
 
+  Scenario: Homepage has the correct header
+    Then the header should contain all the correct content
+
   Scenario: Page has a main heading
     Then I should see the page heading "Technology self‑assessment"
 

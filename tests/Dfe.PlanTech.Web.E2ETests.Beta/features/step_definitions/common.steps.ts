@@ -36,6 +36,10 @@ Then('I should see the question heading {string}', async function (expectedHeadi
   await expect(heading).toHaveText(expectedHeading);
 });
 
+Then('I should see a subheading with the text {string}', async function (text: string) {
+  const heading = this.page.locator(`h2:has-text("${text}")`);
+  await expect(heading).toBeVisible();
+});
 
 Then('the page should be accessible', async function () {
   const results = await new AxeBuilder({ page: this.page }).analyze();
@@ -181,4 +185,30 @@ Then('I should see a paragraph with text {string}', async function (paragraphTex
 When('I click the back to {string} link', async function (standardName: string) {
   const link = this.page.getByRole('link', { name: `Back to ${standardName}` });
   await link.click();
+});
+
+Then('the header should contain all the correct content', async function () {
+
+  // wrapper
+  const header = this.page.locator('header.dfe-header[role="banner"]');
+  await expect(header).toBeVisible();
+
+  // check link to the logo
+  const logoLink = header.locator('.dfe-header__logo a.dfe-header__link--service');
+  await expect(logoLink).toBeVisible();
+  await expect(logoLink).toHaveAttribute('href', '/home');
+  await expect(logoLink).toHaveAttribute('aria-label', 'DfE homepage');
+
+  // check the logo images
+  const logoImages = logoLink.locator('img');
+  await expect(logoImages).toHaveCount(3);
+  await expect(logoImages.first()).toHaveAttribute('alt', 'DfE Homepage');
+
+  const signOutLink = header.getByRole('link', { name: /sign out/i });
+  await expect(signOutLink).toBeVisible();
+  await expect(signOutLink).toHaveAttribute('href', '/auth/sign-out');
+
+  const serviceName = header.getByRole('link', { name: 'Plan technology for your school' });
+  await expect(serviceName).toBeVisible();
+  await expect(serviceName).toHaveAttribute('href', '/home');
 });
