@@ -37,12 +37,6 @@ Then('I should see the recommendation caption text {string}', async function (ex
   await expect(caption).toHaveText(expectedText);
 });
 
-Then('I should see the related actions sidebar', async function () {
-  const sidebar = this.page.locator('div.govuk-grid-column-one-third:visible');
-  await expect(sidebar).toBeVisible();
-  await expect(sidebar.locator('h2')).toHaveText('Related actions');
-});
-
 Then('the sidebar link with text {string} should have href {string}', async function (linkText: string, expectedHref: string) {
   const link = this.page.locator('div.govuk-grid-column-one-third a:visible', { hasText: linkText });
   await expect(link).toBeVisible();

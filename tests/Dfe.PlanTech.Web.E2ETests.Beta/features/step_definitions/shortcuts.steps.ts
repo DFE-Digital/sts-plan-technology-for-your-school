@@ -57,36 +57,42 @@ Given('I start an assessment on category {string}', async function (section: str
 });
 
 Given('I click the submit and view recommendations button', async function () {
-  const submitBtn = this.page.locator('button[value="GetRecommendation"]');
+  const submitBtn = this.page.getByRole('button', { name: 'Submit and view recommendations' })
   await submitBtn.click();
 });
 
-Given('I start a test assessment on {string} with answers {string}', async function (section: string, answers: string) {
+Given('I start a test assessment on {string} standard {string} section with answers {string}', async function (standard:string, section: string, answers: string) {
  
-  await startAndAnswerAssessment(this, section, answers);
+  await startAndAnswerAssessment(this, standard, section, answers);
 
   // Final submit to reach recommendations
-  const submitBtn = this.page.locator('button[value="GetRecommendation"]');
+  const submitBtn = this.page.getByRole('button', { name: 'Submit and view recommendations' })
   await submitBtn.click();
+  
 });
 
-Given('I start a test assessment on {string} with answers {string} and I do not click submit recommendations', async function (section: string, answers: string) {
-    await startAndAnswerAssessment(this, section, answers);
+Given('I start a test assessment on {string} standard {string} section with answers {string} and I do not click submit recommendations', async function (standard:string, section: string, answers: string) {
+    await startAndAnswerAssessment(this, standard, section, answers);
 });
 
-async function startAndAnswerAssessment(context:any, section:string, answers:string ) {
+async function startAndAnswerAssessment(context:any, standard: string, section:string,  answers:string ) {
   //Go to page
    await context.page.goto(`${process.env.URL}self-assessment-testing`);
 
    //Select and click the card
-  const sectionCard = context.page.locator('.dfe-card', {
-    has: context.page.locator('a', { hasText: section }),
+  const standardCard = context.page.locator('.dfe-card', {
+    has: context.page.locator('a', { hasText: standard }),
   }).first();
 
-  await sectionCard.locator('a').click();
+  await standardCard.locator('a').click();
   //Check the expected path
-  const expectedPath = `${textToHyphenatedUrl(section)}`;
+  const expectedPath = `${textToHyphenatedUrl(standard)}`;
   await context.page.waitForURL(`${process.env.URL}${expectedPath}`);
+
+  //Find the and click the go to self assessment link
+
+  const sectionCard = await context.page.locator('a', { hasText: section});
+  await sectionCard.click();
 
   //Get the start self assessment button on interstitial page
   const startSelfAssessmentBtn = context.page.getByRole('button', { name: 'Start self-assessment' });

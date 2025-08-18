@@ -1,5 +1,6 @@
 import { Then, When } from "@cucumber/cucumber";
 import { expect } from "@playwright/test";
+import { textToHyphenatedUrl } from "../../helpers/url";
 
 function toKebabCase(input: string): string {
   return input
@@ -27,18 +28,18 @@ Then('I click the view or update self-assessment link for {string}', async funct
   expect(currentUrl.endsWith(expectedPath)).toBe(true);
 });
 
-Then('I should see the back to recommendations button for {string}', async function (sectionName: string) {
-  const kebabCaseSection = toKebabCase(sectionName);
-  const expectedHref = `/recommendations/from-section/${kebabCaseSection}`;
+Then('I should see the back to recommendations button for the standard {string}', async function (standardName: string) {
+  const expectedStandard = textToHyphenatedUrl(standardName.toLowerCase());
+  const expectedHref = `/${expectedStandard}`;
 
-  const backButton = this.page.getByRole('button', { name: 'Back to recommendations' });
+  const backLink = this.page.getByRole('link', { name: 'Back to recommendations' });
 
-  // Check button exists and has correct text
-  await expect(backButton).toHaveCount(1);
-  await expect(backButton).toHaveText('Back to recommendations');
+  // Check link exists and has correct text
+  await expect(backLink).toHaveCount(1);
+  await expect(backLink).toHaveText('Back to recommendations');
 
   // Check href
-  const actualHref = await backButton.getAttribute('href');
+  const actualHref = await backLink.getAttribute('href');
   expect(actualHref).toBe(expectedHref);
 });
 

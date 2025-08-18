@@ -1,4 +1,4 @@
-import { Given, Then } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { textToHyphenatedUrl } from '../../helpers/url'
@@ -36,32 +36,6 @@ Then('I should see the question heading {string}', async function (expectedHeadi
   await expect(heading).toHaveText(expectedHeading);
 });
 
-Then('I should see a subheading with tag {string} and class {string}', async function (tag: string, className: string) {
-  const heading = this.page.locator(`${tag}.${className}`);
-  await expect(heading).toBeVisible();
-});
-
-Then('I should see a subheading with the text {string}', async function (text: string) {
-  const heading = this.page.locator(`h2:has-text("${text}")`);
-  await expect(heading).toBeVisible();
-});
-
-Then('I should see at least {int} elements matching {string}', async function (minCount: number, selector: string) {
-  const elements = this.page.locator(selector);
-  const count = await elements.count();
-  expect(count).toBeGreaterThanOrEqual(minCount);
-});
-
-Then('each element matching {string} should have a non-empty href', async function (selector: string) {
-  const links = this.page.locator(selector);
-  const count = await links.count();
-
-  for (let i = 0; i < count; i++) {
-    const href = await links.nth(i).getAttribute('href');
-    expect(href).not.toBeNull();
-    expect(href).not.toEqual('');
-  }
-});
 
 Then('the page should be accessible', async function () {
   const results = await new AxeBuilder({ page: this.page }).analyze();
@@ -77,27 +51,9 @@ Then('the page should be accessible', async function () {
   }
 });
 
-Then('each element matching {string} should contain the text {string}', async function (selector: string, expectedText: string) {
-  const elements = this.page.locator(selector);
-  const count = await elements.count();
-
-  for (let i = 0; i < count; i++) {
-    const text = await elements.nth(i).innerText();
-    expect(text).toContain(expectedText);
-  }
-});
-
 Then('I should see a link with text {string}', async function (text: string) {
   const link = this.page.locator(`a:has-text("${text}")`);
   await expect(link).toBeVisible();
-});
-
-Then('I should see a link with href {string} and text {string}', async function (expectedHref: string, expectedText: string) {
-  const link = this.page.locator(`a[href="${expectedHref}"]`);
-  await expect(link).toBeVisible();
-
-  const actualText = await link.innerText();
-  expect(actualText.trim()).toBe(expectedText);
 });
 
 Then('I should see the main page heading', async function () {
@@ -115,11 +71,6 @@ Then('I should see multiple explanatory text blocks', async function () {
   const paragraphs = this.page.locator('p');
   const count = await paragraphs.count();
   expect(count).toBeGreaterThanOrEqual(4);
-});
-
-Then('I should see an unordered list', async function () {
-  const ul = this.page.locator('ul');
-  await expect(ul).toBeVisible();
 });
 
 Then('I should see multiple list items', async function () {
@@ -160,7 +111,7 @@ Given('I am on the {string} page', async function (path: string) {
   await this.page.goto(`${process.env.URL}${path}`);
 });
 
-Then('I will be redirected to {string}', async function (expectedPath: string) {
+Then('I should be on the URL containing {string}', async function (expectedPath: string) {
   await this.page.waitForURL(`**${expectedPath}`);
   await expect(this.page.url()).toContain(expectedPath);
 });
@@ -189,36 +140,45 @@ Then('I should see a button with the text {string}', async function (linkText: s
   await expect(button).toBeVisible();
 });
 
-
-Given('I start an assessment and reach the recommendations page', async function (section: string) {
-  await this.page.goto(`${process.env.URL}self-assessment-testing`);
-
-  const firstCard = this.page.locator(`.dfe-grid-container`).first();
-  const firstCardLink = firstCard.locator(`a`);
-
-  const linkText = await firstCardLink.textContent();
-  if (!linkText) {
-    throw new Error('Could not get text from first card link');
-  }
-
-  await firstCardLink.click();
-
-});
-
-
 Then('I should see the GOV.UK footer with expected links', async function () {
   const footer = this.page.locator('footer.govuk-footer');
   await expect(footer).toBeVisible();
 
-  const expectedLinks = [
-    'Contact us',
-    'Privacy notice',
-    'Cookies',
-    'Accessibility statement'
-  ];
+  const expectedLinks: Record<string, string> = {
+    'Cookies': '/cookies',
+    'Privacy notice': '/privacy-notice',
+    'Contact us': 'https://schooltech.support.education.gov.uk/hc/en-gb/requests/new?ticket_form_id=22398112507922',
+    'Accessibility statement': '/accessibility-statement',
+  };
 
-  for (const text of expectedLinks) {
+  for (const [text, href] of Object.entries(expectedLinks)) {
     const link = footer.locator('a.govuk-footer__link', { hasText: text });
     await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute('href', expect.stringContaining(href));
   }
+});
+
+Then('I click the go to self-assessment link for {string}',
+  async function (sectionName: string) {
+    const link = this.page.getByRole('link', {
+      name: `Go to self-assessment for ${sectionName}`,
+    });
+
+    await link.click();
+  }
+);
+
+When('I refresh the page', async function () {
+  await this.page.reload();
+});
+
+Then('I should see a paragraph with text {string}', async function (paragraphText: string) {
+  const paragraph = this.page.locator('p', { hasText: paragraphText });
+  await expect(paragraph).toBeVisible();
+});
+
+
+When('I click the back to {string} link', async function (standardName: string) {
+  const link = this.page.getByRole('link', { name: `Back to ${standardName}` });
+  await link.click();
 });
