@@ -22,15 +22,7 @@ namespace Dfe.PlanTech.Web.Context
         public bool IsMat => Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;
         public OrganisationModel? Organisation
         {
-            get
-            {
-                if (_organisationModel is null)
-                {
-                    ParseOrganisationModel();
-                }
-
-                return _organisationModel;
-            }
+            get => ParseOrganisationModel();
         }
         public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 
@@ -62,7 +54,7 @@ namespace Dfe.PlanTech.Web.Context
             return _contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type.Contains(claimType))?.Value;
         }
 
-        private void ParseOrganisationModel()
+        private OrganisationModel? ParseOrganisationModel()
         {
             var organisationClaim = GetNameIdentifierFromClaim(ClaimConstants.Organisation);
             if (string.IsNullOrWhiteSpace(organisationClaim))
@@ -70,11 +62,8 @@ namespace Dfe.PlanTech.Web.Context
                 throw new AuthenticationException($"User's {nameof(Organisation)} is null or empty");
             }
 
-            _organisationModel = JsonSerializer.Deserialize<OrganisationModel>(organisationClaim);
-            if (_organisationModel is null)
-            {
-                throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
-            }
+            return JsonSerializer.Deserialize<OrganisationModel>(organisationClaim)
+                ?? throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
         }
     }
 }

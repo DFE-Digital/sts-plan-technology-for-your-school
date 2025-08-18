@@ -4,8 +4,6 @@ using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context;
-using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 

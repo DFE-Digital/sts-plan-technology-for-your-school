@@ -61,7 +61,7 @@ public class GroupsViewBuilder(
         {
             GroupName = groupName,
             GroupEstablishments = groupSchools,
-            Title = title,
+            Title = new CmsComponentTitleDto(title),
             Content = content,
             TotalSections = totalSections,
             ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)

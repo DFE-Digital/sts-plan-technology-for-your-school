@@ -9,7 +9,7 @@ public class GroupsSelectorViewModel
 
     public List<SqlEstablishmentLinkDto> GroupEstablishments { get; set; } = null!;
 
-    public string Title { get; init; } = null!;
+    public CmsComponentTitleDto Title { get; init; } = null!;
 
     public List<CmsEntryDto> Content { get; init; } = null!;
 
