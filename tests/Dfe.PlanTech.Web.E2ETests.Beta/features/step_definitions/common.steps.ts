@@ -181,6 +181,10 @@ Then('I should see a paragraph with text {string}', async function (paragraphTex
   await expect(paragraph).toBeVisible();
 });
 
+Then('I should not see a paragraph with text {string}', async function (paragraphText: string) {
+  const paragraph = this.page.locator('p', { hasText: paragraphText });
+  await expect(paragraph).not.toBeVisible();
+});
 
 When('I click the back to {string} link', async function (standardName: string) {
   const link = this.page.getByRole('link', { name: `Back to ${standardName}` });

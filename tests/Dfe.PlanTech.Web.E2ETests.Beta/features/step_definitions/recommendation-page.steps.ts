@@ -30,6 +30,11 @@ Then('I click the next recommendation link', async function () {
   await link.click();
 });
 
+Then('I click the previous recommendation link', async function () {
+  const link = this.page.locator('a.govuk-pagination__link[rel="prev"]:visible');
+  await link.click();
+});
+
 Then('I should see the recommendation caption text {string}', async function (expectedText: string) {
   const caption = this.page.locator('div.recommendation-piece-content span.govuk-caption-xl:visible');
   await expect(caption).toBeVisible();

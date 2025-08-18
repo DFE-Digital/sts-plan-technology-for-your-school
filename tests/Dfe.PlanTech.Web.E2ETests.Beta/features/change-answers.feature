@@ -1,6 +1,6 @@
 Feature: Change answers page
 @clear-data-school
-    Scenario: Change answers has all the correct elements on the page
+    Scenario: Change answers has all the correct elements on the page 
         Given I start a test assessment on "Category One" standard "Category One Section One" section with answers "1, 1"
         Then I click the view or update self-assessment link for "Category One Section One"
         And I should see the page heading "Change your answers"
