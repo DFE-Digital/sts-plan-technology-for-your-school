@@ -48,6 +48,7 @@ public class ReviewAnswersViewBuilder(
             case SubmissionStatus.NotStarted:
                 return controller.RedirectToHomePage();
 
+            case SubmissionStatus.InProgress:
             case SubmissionStatus.CompleteNotReviewed:
                 viewModel = await BuildCheckAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
                 return controller.View(CheckAnswersViewName, viewModel);
@@ -61,7 +62,7 @@ public class ReviewAnswersViewBuilder(
                 return controller.View(ChangeAnswersViewName, viewModel);
 
             default:
-                return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), nameof(QuestionsController).GetControllerNameSlug(), new { sectionSlug, submissionRoutingData.NextQuestion!.Slug });
+                return controller.RedirectToGetQuestionBySlug(categorySlug, sectionSlug, submissionRoutingData.NextQuestion!.Slug);
         }
     }
 
@@ -94,7 +95,7 @@ public class ReviewAnswersViewBuilder(
                 return controller.View(ChangeAnswersViewName, viewModel);
 
             default:
-                return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), nameof(QuestionsController).GetControllerNameSlug(), new { sectionSlug, submissionRoutingData.NextQuestion!.Slug });
+                return controller.RedirectToGetQuestionBySlug(categorySlug, sectionSlug, submissionRoutingData.NextQuestion!.Slug);
         }
     }
 
