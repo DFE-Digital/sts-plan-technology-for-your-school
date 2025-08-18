@@ -77,7 +77,7 @@ public class ContentfulWorkflow(
     {
         var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.sys.contentType.sys.id", Value = "page" };
         var slugQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.fields.slug", Value = slug };
-        var options = new GetEntriesOptions(5, [contentTypeQuery, slugQuery]);
+        var options = new GetEntriesOptions(_getPageOptions.Include, [contentTypeQuery, slugQuery]);
 
         var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(options);
         var category = categories.FirstOrDefault();
@@ -120,7 +120,7 @@ public class ContentfulWorkflow(
     public async Task<CmsPageDto> GetPageBySlugAsync(string slug)
     {
         var query = new ContentfulQuerySingleValue { Field = "fields.slug", Value = slug };
-        var options = new GetEntriesOptions(_getPageOptions.Include, [query]);
+        var options = new GetEntriesOptions(5, [query]);
 
         try
         {

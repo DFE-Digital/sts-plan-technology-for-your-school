@@ -102,7 +102,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton((_) =>
         {
-            var configValue = configuration["CONTENTFUL_GET_ENTITY_INT"] ?? "4";
+            var configValue = configuration["CONTENTFUL_GET_ENTITY_INT"] ?? "5";
 
             if (!int.TryParse(configValue, out int include))
             {

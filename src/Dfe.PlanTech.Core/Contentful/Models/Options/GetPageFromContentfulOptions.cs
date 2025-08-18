@@ -8,6 +8,6 @@ namespace Dfe.PlanTech.Domain.Content.Models.Options
         /// <remarks>
         /// E.g. 1 == just the parent, 2 == parent and child, etc.
         /// </remarks>
-        public int Include { get; init; } = 4;
+        public int Include { get; init; } = 5;
     }
 }
