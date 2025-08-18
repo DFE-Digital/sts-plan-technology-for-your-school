@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,7 +61,7 @@ public class ReviewAnswersViewBuilder(
                 return controller.View(ChangeAnswersViewName, viewModel);
 
             default:
-                return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), nameof(QuestionsController), new { sectionSlug, submissionRoutingData.NextQuestion!.Slug });
+                return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), nameof(QuestionsController).GetControllerNameSlug(), new { sectionSlug, submissionRoutingData.NextQuestion!.Slug });
         }
     }
 
@@ -93,7 +94,7 @@ public class ReviewAnswersViewBuilder(
                 return controller.View(ChangeAnswersViewName, viewModel);
 
             default:
-                return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), nameof(QuestionsController), new { sectionSlug, submissionRoutingData.NextQuestion!.Slug });
+                return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), nameof(QuestionsController).GetControllerNameSlug(), new { sectionSlug, submissionRoutingData.NextQuestion!.Slug });
         }
     }
 

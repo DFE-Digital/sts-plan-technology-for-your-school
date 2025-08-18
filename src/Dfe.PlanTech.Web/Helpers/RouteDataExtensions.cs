@@ -5,6 +5,11 @@ public static class RouteDataExtensions
     public const string DefaultPageTitle = "Plan Technology For Your School";
     public const string SectionSlugKey = "sectionSlug";
 
+    public static string GetControllerNameSlug(this string controllerName)
+    {
+        return controllerName.Replace("Controller", "");
+    }
+
     // Returns the title for the page based on the given RouteData. It retrieves the sectionSlug
     // from the routeData.Values, processes it to ensure it is not empty, and then formats it
     // as a title by replacing hyphens with spaces, converting to Title Case, and adding

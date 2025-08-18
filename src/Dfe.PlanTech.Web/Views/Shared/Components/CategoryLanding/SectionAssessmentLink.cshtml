@@ -33,7 +33,7 @@
 			break;
 	}
 
-	controller = controller.Replace("Controller", "");
+	controller = controller.GetControllerNameSlug();
 
     if (Model.Context == "Sections")
     {

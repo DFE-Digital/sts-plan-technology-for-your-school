@@ -123,7 +123,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
     {
         var query = GetSubmissionsBy(submission =>
                 submission.EstablishmentId == establishmentId &&
-                string.Equals(submission.SectionId, sectionId)
+                submission.SectionId == sectionId
             );
 
         var submission = await query.FirstOrDefaultAsync();
