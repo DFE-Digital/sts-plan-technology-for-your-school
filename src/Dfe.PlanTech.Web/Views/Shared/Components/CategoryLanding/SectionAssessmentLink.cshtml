@@ -1,37 +1,39 @@
 ﻿@model StatusLinkViewModel
 
 @{
-    string statusText;
-    string linkText;
-    string? controller = null;
-    string? action = null;
+	string statusText;
+	string linkText;
+	string? controller = null;
+	string? action = null;
 
-    var topic = Model.Section;
-    var topicName = topic.Name.ToLower().Trim();
-    var topicSlug = topic.Slug ?? string.Empty;
-    var categorySlug = Model.CategorySlug;
+	var topic = Model.Section;
+	var topicName = topic.Name.ToLower().Trim();
+	var topicSlug = topic.Slug ?? string.Empty;
+	var categorySlug = Model.CategorySlug;
 
-    switch (topic.ProgressStatus)
-    {
-        case SectionProgressStatus.InProgress:
-            statusText = $"A self-assessment was started on {topic.DateUpdated}. ";
-            linkText = $"Continue your self-assessment for {topicName}";
-            controller = "Questions";
-            action = "GetNextUnansweredQuestion";
-                break;
-        case SectionProgressStatus.Completed:
-            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
-            linkText = $"View or update your self-assessment for {topicName}";
-            controller = "ChangeAnswers";
-            action = "ChangeAnswersPage";
-                break;
-        default:
-            statusText = "";
-            linkText = $"Go to self-assessment for {topicName}";
-            controller = "Questions";
-            action = "GetInterstitialPage";
-                break;
-    }
+	switch (topic.ProgressStatus)
+	{
+		case SectionProgressStatus.InProgress:
+			statusText = $"A self-assessment was started on {topic.DateUpdated}. ";
+			linkText = $"Continue your self-assessment for {topicName}";
+			controller = nameof(QuestionsController);
+			action = nameof(QuestionsController.GetNextUnansweredQuestion);
+			break;
+		case SectionProgressStatus.Completed:
+			statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
+			linkText = $"View or update your self-assessment for {topicName}";
+			controller = nameof(ReviewAnswersController);
+			action = nameof(ReviewAnswersController.ChangeAnswers);
+			break;
+		default:
+			statusText = "";
+			linkText = $"Go to self-assessment for {topicName}";
+			controller = nameof(QuestionsController);
+			action = nameof(QuestionsController.GetInterstitialPage);
+			break;
+	}
+
+	controller = controller.Replace("Controller", "");
 
     if (Model.Context == "Sections")
     {

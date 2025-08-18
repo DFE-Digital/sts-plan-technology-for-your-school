@@ -6,12 +6,12 @@ namespace Dfe.PlanTech.Application.Services
     public class RecommendationService(
         ContentfulWorkflow contentfulWorkflow,
         RecommendationWorkflow recommendationWorkflow,
-        ResponseWorkflow responseWorkflow
+        SubmissionWorkflow submissionWorkflow
     )
     {
         private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
         private readonly RecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
-        private readonly ResponseWorkflow _responseWorkflow = responseWorkflow ?? throw new ArgumentNullException(nameof(responseWorkflow));
+        private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
         public Task<int> GetRecommendationChunkCount(int page)
         {
@@ -22,7 +22,7 @@ namespace Dfe.PlanTech.Application.Services
         {
             var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
 
-            var latestCompletedSubmission = await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+            var latestCompletedSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
                establishmentId,
                cmsQuestionnaireSection,
                isCompletedSubmission: true);
@@ -34,7 +34,7 @@ namespace Dfe.PlanTech.Application.Services
 
             if (latestCompletedSubmission.Maturity is null)
             {
-                throw new InvalidDataException($"No maturity recorded for submission with ID {latestCompletedSubmission.SubmissionId}.");
+                throw new InvalidDataException($"No maturity recorded for submission with ID {latestCompletedSubmission.Id}.");
             }
 
             var maturity = latestCompletedSubmission.Maturity;

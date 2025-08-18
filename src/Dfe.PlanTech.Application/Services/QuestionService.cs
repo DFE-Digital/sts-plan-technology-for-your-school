@@ -6,21 +6,23 @@ using Dfe.PlanTech.Core.RoutingDataModel;
 namespace Dfe.PlanTech.Application.Services;
 
 public class QuestionService(
-    ResponseWorkflow responseWorkflow
+    SubmissionWorkflow submissionWorkflow
 )
 {
-    private readonly ResponseWorkflow _responseWorkflow = responseWorkflow ?? throw new ArgumentNullException(nameof(responseWorkflow));
+    private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
     public async Task<CmsQuestionnaireQuestionDto?> GetNextUnansweredQuestion(int establishmentId, CmsQuestionnaireSectionDto section)
     {
-        var answeredQuestions = await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
-        if (answeredQuestions is null)
+        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+        if (submission is null)
             return section.Questions.FirstOrDefault();
 
-        if (answeredQuestions.Responses.Count == 0)
-            throw new DatabaseException($"There are no responses in the database for ongoing submission {answeredQuestions.SubmissionId}, linked to establishment {establishmentId}");
+        if (!submission.Responses.Any())
+            throw new DatabaseException($"There are no responses in the database for ongoing submission '{submission.Id}' linked to establishment '{establishmentId}'");
 
-        return GetValidatedNextUnansweredQuestion(section, answeredQuestions);
+        var submissionResponsesModel = new SubmissionResponsesModel(submission, section);
+
+        return GetValidatedNextUnansweredQuestion(section, submissionResponsesModel);
     }
 
     /// <summary>

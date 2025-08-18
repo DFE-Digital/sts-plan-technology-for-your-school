@@ -19,7 +19,7 @@ public class RecommendationsController(
     public const string ControllerName = "Recommendations";
     public const string GetSingleRecommendationAction = nameof(GetSingleRecommendation);
 
-    [HttpGet("{categorySlug}/{sectionSlug}/recommendation/{chunkSlug}", Name = GetSingleRecommendationAction)]
+    [HttpGet("{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}", Name = GetSingleRecommendationAction)]
     public async Task<IActionResult> GetSingleRecommendation(string categorySlug, string sectionSlug, string chunkSlug)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));

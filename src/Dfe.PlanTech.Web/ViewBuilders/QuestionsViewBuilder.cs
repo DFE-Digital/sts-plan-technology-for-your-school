@@ -110,7 +110,7 @@ public class QuestionsViewBuilder(
 
         if (submissionRoutingData.Status.Equals(SubmissionStatus.CompleteNotReviewed))
         {
-            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
+            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
         }
 
         if (submissionRoutingData.Status.Equals(SubmissionStatus.InProgress))
@@ -154,7 +154,7 @@ public class QuestionsViewBuilder(
             var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
             if (nextQuestion is null)
             {
-                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
+                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
             }
 
             return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), new { categorySlug, sectionSlug, questionSlug = nextQuestion.Slug });
@@ -228,8 +228,7 @@ public class QuestionsViewBuilder(
 
         // Check unanswered to see if we really have no more questions
         nextQuestion ??= await _questionService.GetNextUnansweredQuestion(establishmentId, section);
-
-        if (nextQuestion != null)
+        if (nextQuestion is not null)
         {
             return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestion.Slug, FlowConstants.ChangeAnswersFlow);
         }
@@ -266,6 +265,16 @@ public class QuestionsViewBuilder(
         if (!string.IsNullOrEmpty(returnTo))
         {
             controller.ViewData["ReturnTo"] = returnTo;
+        }
+
+        foreach(var answer in question.Answers)
+        {
+            if (answer.NextQuestion is null)
+            {
+                continue;
+            }
+
+            answer.NextQuestion.Answers = [];
         }
 
         return new QuestionViewModel()

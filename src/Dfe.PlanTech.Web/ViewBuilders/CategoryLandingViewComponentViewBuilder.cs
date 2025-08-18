@@ -114,7 +114,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 };
             }
 
-            var latestResponses = await _submissionService.GetLatestSubmissionWithResponsesAsync(establishmentId, section, true)
+            var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, true)
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
             var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
                ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");

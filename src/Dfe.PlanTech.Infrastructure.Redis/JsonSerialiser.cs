@@ -1,6 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Extensions;
 using StackExchange.Redis;
@@ -18,6 +19,7 @@ public static class JsonSerialiser
     private static readonly JsonSerializerOptions JsonSerialiserOptions = new()
     {
         TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+            .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<IContentfulEntry>)
             .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentfulEntry>),
         ReferenceHandler = ReferenceHandler.Preserve,
         MaxDepth = 256

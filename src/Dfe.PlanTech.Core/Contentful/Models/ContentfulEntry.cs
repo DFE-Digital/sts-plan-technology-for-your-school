@@ -1,10 +1,10 @@
-using Contentful.Core.Models;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public abstract class ContentfulEntry
+public abstract class ContentfulEntry : IContentfulEntry
 {
-    public SystemProperties Sys { get; set; } = null!;
+    public SystemDetails Sys { get; set; } = null!;
     public string Description { get; set; } = null!;
 
     public ContentfulEntry() { }

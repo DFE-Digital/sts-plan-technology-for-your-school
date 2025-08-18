@@ -40,16 +40,11 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         return newSubmission;
     }
 
-    public Task<SubmissionEntity?> GetLatestSubmissionAsync(int establishmentId, string sectionId, bool isCompleted, bool includeRelationships = false)
-    {
-        return GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompleted, includeRelationships)
-            .FirstOrDefaultAsync();
-    }
-
-    public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(int establishmentId, string sectionId, bool isCompleted)
+    public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(int establishmentId, string sectionId, bool? isCompletedSubmission)
     {
         // Get latest submission
-        var submission = await GetLatestSubmissionAsync(establishmentId, sectionId, isCompleted, true);
+        var submission = await GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission)
+            .FirstOrDefaultAsync();
         if (submission is null)
         {
             return null;
@@ -67,77 +62,27 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         return submission;
     }
 
-    public IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
-        int establishmentId,
-        string sectionId,
-        bool isCompleted,
-        bool includeResponses = false
-    )
-    {
-        return GetSubmissionsBy(submission =>
-            !submission.Deleted &&
-            submission.EstablishmentId == establishmentId &&
-            submission.SectionId == sectionId &&
-            submission.Completed == isCompleted,
-            includeResponses
-            )
-            .OrderByDescending(submission => submission.DateCreated);
-    }
+    
 
-    public Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId, bool includeRelationships = false)
+    public Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId)
     {
         return GetSubmissionsBy(s => s.Id == submissionId).FirstOrDefaultAsync();
     }
 
-    public IQueryable<SubmissionEntity> GetSubmissionsBy(Expression<Func<SubmissionEntity, bool>> predicate, bool includeRelationships = false)
+    public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
     {
-        var query = _db.Submissions
-            .Where(predicate)
-            .Include(s => s.Establishment);
-
-        return includeRelationships
-          ? IncludeResponses(query)
-          : query;
-    }
-
-    public async Task<SubmissionEntity> SetSubmissionInaccessibleAsync(int submissionId)
-    {
-        var submission = await GetSubmissionByIdAsync(submissionId);
-        if (submission is null)
-        {
-            throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
-        }
-
-        submission.Status = SubmissionStatus.Inaccessible.ToString();
-        await _db.SaveChangesAsync();
-
-        return submission;
-    }
-
-    public async Task SetSubmissionInaccessibleAsync(
-        int establishmentId,
-        string sectionId,
-        SubmissionStatus? submissionStatus = null
-    )
-    {
-        var query = GetSubmissionsBy(submission =>
-                submission.EstablishmentId == establishmentId &&
-                string.Equals(submission.SectionId, sectionId)
+        var currentSubmission = await GetLatestSubmissionAndResponsesAsync(
+                establishmentId,
+                sectionId,
+                isCompletedSubmission: true
             );
 
-        if (submissionStatus is not null)
+        if (currentSubmission is not null)
         {
-            query = query
-                .Where(s => string.Equals(s.Status, submissionStatus.ToString()));
+            currentSubmission.Viewed = true;
         }
 
-        var submission = await query.FirstOrDefaultAsync();
-        if (submission is null)
-        {
-            return;
-        }
-
-        await SetSubmissionInaccessibleAsync(submission.Id);
+        await _db.SaveChangesAsync();
     }
 
     public async Task<SubmissionEntity> SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(int submissionId)
@@ -171,21 +116,37 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         return submission;
     }
 
-    public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
+    public async Task SetSubmissionInaccessibleAsync(
+        int establishmentId,
+        string sectionId
+    )
     {
-        var currentSubmission = await GetLatestSubmissionAsync(
-                establishmentId,
-                sectionId,
-                isCompleted: true,
-                includeRelationships: false
+        var query = GetSubmissionsBy(submission =>
+                submission.EstablishmentId == establishmentId &&
+                string.Equals(submission.SectionId, sectionId)
             );
 
-        if (currentSubmission is not null)
+        var submission = await query.FirstOrDefaultAsync();
+        if (submission is null)
         {
-            currentSubmission.Viewed = true;
+            throw new InvalidOperationException($"Submission not found for establishment ID '{establishmentId}' and section ID '{sectionId}'");
         }
 
+        await SetSubmissionInaccessibleAsync(submission.Id);
+    }
+
+    public async Task<SubmissionEntity> SetSubmissionInaccessibleAsync(int submissionId)
+    {
+        var submission = await GetSubmissionByIdAsync(submissionId);
+        if (submission is null)
+        {
+            throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
+        }
+
+        submission.Status = SubmissionStatus.Inaccessible.ToString();
         await _db.SaveChangesAsync();
+
+        return submission;
     }
 
     public Task DeleteCurrentSubmission(int establishmentId, int sectionId)
@@ -197,12 +158,31 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         );
     }
 
-    private IQueryable<SubmissionEntity> IncludeResponses(IQueryable<SubmissionEntity> query)
+    private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
+        int establishmentId,
+        string sectionId,
+        bool? isCompletedSubmission
+    )
     {
-        return query
+        return GetSubmissionsBy(submission =>
+            !submission.Deleted &&
+            submission.EstablishmentId == establishmentId &&
+            submission.SectionId == sectionId &&
+            (isCompletedSubmission == null || submission.Completed == isCompletedSubmission)
+            )
+            .OrderByDescending(submission => submission.DateCreated);
+    }
+
+    private IQueryable<SubmissionEntity> GetSubmissionsBy(Expression<Func<SubmissionEntity, bool>> predicate)
+    {
+        var query = _db.Submissions
+            .Where(predicate)
+            .Include(s => s.Establishment)
             .Include(s => s.Responses)
                 .ThenInclude(r => r.Question)
             .Include(s => s.Responses)
                 .ThenInclude(r => r.Answer);
+
+        return query;
     }
 }

@@ -27,9 +27,9 @@ public class RecommendationsViewBuilder(
     private readonly RecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    private const string RecommendationsChecklistViewName = "~/Views/Recommendations/RecommendationsChecklist.cshtml";
-    private const string RecommendationsViewName = "~/Views/Recommendations/Recommendations.cshtml";
-    private const string SingleRecommendationViewName = "~/Views/Recommendations/SingleRecommendation.cshtml";
+    private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
+    private const string RecommendationsViewName = "Recommendations";
+    private const string SingleRecommendationViewName = "SingleRecommendation";
 
     public async Task<IActionResult> RouteToSingleRecommendation(
         Controller controller,
@@ -108,7 +108,7 @@ public class RecommendationsViewBuilder(
                     new { categorySlug, sectionSlug, submissionRoutingData.NextQuestion!.Slug });
 
             case SubmissionStatus.CompleteNotReviewed:
-                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
+                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, null);
 
             case SubmissionStatus.CompleteReviewed:
                 var viewModel = await BuildRecommendationsViewModel(

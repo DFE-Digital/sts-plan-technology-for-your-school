@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Core.RoutingDataModel
 {
@@ -12,15 +13,15 @@ namespace Dfe.PlanTech.Core.RoutingDataModel
 
         public List<QuestionWithAnswerModel> Responses { get; set; } = [];
 
-        public bool HasResponses => Responses != null && Responses.Any();
+        public bool HasResponses => Responses is not null && Responses.Count != 0;
 
-        public SubmissionResponsesModel(SqlSubmissionDto submission)
+        public SubmissionResponsesModel(SqlSubmissionDto submission, CmsQuestionnaireSectionDto section)
         {
             SubmissionId = submission.Id;
             DateCompleted = submission.DateCompleted;
             Maturity = submission.Maturity;
             Responses = submission.Responses
-                .Select(response => new QuestionWithAnswerModel(response))
+                .Select(response => new QuestionWithAnswerModel(response, section))
                 .GroupBy(questionWithAnswer => questionWithAnswer.QuestionSysId)
                 .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First())
                 .ToList();

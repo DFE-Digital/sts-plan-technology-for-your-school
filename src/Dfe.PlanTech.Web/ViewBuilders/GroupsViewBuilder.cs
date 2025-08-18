@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -24,13 +25,23 @@ public class GroupsViewBuilder(
     private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<GroupsSelectorViewModel> GetSelectASchoolViewModelAsync(Controller controller)
+    private const string SelectASchoolViewName = "GroupsSelectSchool";
+    private const string SchoolDashboardViewName = "GroupsSchoolDashboard";
+    private const string SchoolRecommendationsViewName = "Recommendations";
+    private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
+
+    public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
 
         var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
         var dashboardContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
-        var categories = dashboardContent.Content.OfType<CmsQuestionnaireCategoryDto>();
+        var categories = dashboardContent.Content?.OfType<CmsQuestionnaireCategoryDto>();
+
+        if (categories is null)
+        {
+            throw new InvalidDataException("There are no categories to display for the selected page.");
+        }
 
         var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, establishmentId);
 
@@ -59,7 +70,9 @@ public class GroupsViewBuilder(
             ContactLinkHref = contactLink?.Href
         };
 
-        return viewModel;
+
+        controller.ViewData["Title"] = "Select a school";
+        return controller.View(SelectASchoolViewName, viewModel);
     }
 
     public async Task<int> RecordGroupSelectionAsync(string selectedEstablishmentUrn, string selectedEstablishmentName)
@@ -77,7 +90,7 @@ public class GroupsViewBuilder(
         return selectionId;
     }
 
-    public async Task<GroupsSchoolDashboardViewModel> GetSchoolDashboardViewAsync()
+    public async Task<IActionResult> RouteToSchoolDashboardViewAsync(Controller controller)
     {
         var latestSelection = await GetCurrentGroupSchoolSelection();
         var groupName = CurrentUser.GetEstablishmentModel().Name;
@@ -94,21 +107,46 @@ public class GroupsViewBuilder(
             Slug = UrlConstants.GroupsDashboardSlug
         };
 
-        return viewModel;
+        if (viewModel is null)
+        {
+            return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
+        }
+
+        controller.ViewData["Title"] = "Dashboard";
+        return controller.View(SchoolDashboardViewName, viewModel);
     }
 
-    public async Task<GroupsRecommendationsViewModel?> GetGroupsRecommendationAsync(string sectionSlug)
+    public async Task<IActionResult> RouteToGroupsRecommendationAsync(Controller controller, string sectionSlug)
     {
         var latestSelection = await GetCurrentGroupSchoolSelection();
         var schoolId = latestSelection.SelectedEstablishmentId;
         var schoolName = latestSelection.SelectedEstablishmentName;
 
-        return await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
+        var viewModel = await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
+
+        if (viewModel is null)
+        {
+            return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
+        }
+
+        // Passes the school name to the Header
+        controller.ViewData["SelectedEstablishmentName"] = viewModel.SelectedEstablishmentName;
+        controller.ViewData["Title"] = viewModel.SectionName;
+
+        return controller.View(SchoolRecommendationsViewName, viewModel);
     }
 
-    public Task<GroupsRecommendationsViewModel?> GetRecommendationsPrintViewAsync(string sectionSlug, int schoolId, string schoolName)
+    public async Task<IActionResult> RouteToRecommendationsPrintViewAsync(Controller controller, string sectionSlug, int schoolId, string schoolName)
     {
-        return GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
+        var viewModel = await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
+
+        if (viewModel is null)
+        {
+            return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
+        }
+
+        controller.ViewData["Title"] = viewModel.SectionName;
+        return controller.View(RecommendationsChecklistViewName, viewModel);
     }
 
     private Task<SqlGroupReadActivityDto> GetCurrentGroupSchoolSelection()
@@ -126,7 +164,7 @@ public class GroupsViewBuilder(
         var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
-        var latestResponses = await _submissionService.GetLatestSubmissionWithResponsesAsync(schoolId, section, true)
+        var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(schoolId, section, true)
             ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
 
         var customIntro = new GroupsCustomRecommendationIntroViewModel()

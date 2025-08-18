@@ -30,14 +30,14 @@ public class ContentfulWorkflow(
         try
         {
             var entry = await _contentfulRepository.GetEntryByIdAsync<TEntry>(entryId)
-                ?? throw new ContentfulDataUnavailableException($"Could not find entry with ID {entryId}");
+                ?? throw new ContentfulDataUnavailableException($"Could not find entry with ID '{entryId}'");
 
             return entry.AsDtoInternal();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ExceptionMessageEntityContentful);
-            throw new ContentfulDataUnavailableException($"Could not find entry with ID {entryId}", ex);
+            throw new ContentfulDataUnavailableException($"Could not find entry with ID '{entryId}'", ex);
         }
     }
 
@@ -128,7 +128,7 @@ public class ContentfulWorkflow(
             var page = pages.FirstOrDefault();
             if (page is null)
             {
-                throw new ContentfulDataUnavailableException($"Could not find a page matching slug '{slug}");
+                throw new ContentfulDataUnavailableException($"Could not find a page matching slug '{slug}'");
             }
 
             return page.AsDto();
@@ -151,7 +151,7 @@ public class ContentfulWorkflow(
             var section = sections.FirstOrDefault();
             if (section is null)
             {
-                throw new ContentfulDataUnavailableException($"Could not find a section matching slug '{sectionSlug}");
+                throw new ContentfulDataUnavailableException($"Could not find a section matching slug '{sectionSlug}'");
             }
 
             return section.AsDto();

@@ -31,7 +31,7 @@
                            asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
                            asp-route-sectionSlug="@Model.SectionSlug"
                            asp-route-categorySlug="@Model.CategorySlug"
-                           asp-route-returnTo="ChangeAnswers"
+                           asp-route-returnTo="ReviewAnswers"
                            title="@questionWithAnswer.QuestionText"
                            class="govuk-link">
                             Change <span class="govuk-visually-hidden">@anchorLabel</span>
@@ -42,7 +42,7 @@
                 </div>
             }
         </dl>
-        <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post" class="noprint">
+        <form asp-controller="ReviewAnswers" asp-action="ConfirmCheckAnswers" method="post" class="noprint">
             <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>
             <input type="hidden" name="sectionName" value="@Model.SectionName">
             <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">

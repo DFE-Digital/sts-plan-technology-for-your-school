@@ -55,12 +55,12 @@
 						<govuk-pagination>
 							@if (Model.PreviousChunk != null)
 							{
-								<govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendation/@Model.PreviousChunk.SlugifiedLinkText" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state" />
+								<govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.SlugifiedLinkText" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state" />
 							}
 
 							@if (Model.NextChunk != null)
 							{
-								<govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendation/@Model.NextChunk.SlugifiedLinkText" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state" />
+								<govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.SlugifiedLinkText" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state" />
 							}
 						</govuk-pagination>
 					</div>

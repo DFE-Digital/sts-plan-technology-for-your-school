@@ -13,6 +13,21 @@ namespace Dfe.PlanTech.Core.RoutingDataModels
         public SubmissionResponsesModel? Submission { get; set; }
         public SubmissionStatus Status { get; init; }
 
+        public SubmissionRoutingDataModel(
+            string? maturity,
+            CmsQuestionnaireQuestionDto? nextQuestion,
+            CmsQuestionnaireSectionDto questionnaireSection,
+            SubmissionResponsesModel? submission,
+            SubmissionStatus status
+        )
+        {
+            Maturity = maturity;
+            NextQuestion = nextQuestion;
+            QuestionnaireSection = questionnaireSection;
+            Submission = submission;
+            Status = status;
+        }
+
         public bool IsQuestionInResponses(string questionSysId) =>
             Submission?.Responses.Any(response => response.QuestionSysId.Equals(questionSysId)) ?? false;
 

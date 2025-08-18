@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.RoutingDataModel;
 
 namespace Dfe.PlanTech.Web.ViewModels;
@@ -10,7 +9,10 @@ public class SubmissionResponseViewModel
     public string QuestionRef { get; init; } = null!;
 
     [Required]
-    public string? QuestionText { get; init; } = "";
+    public string? QuestionSlug { get; init; } = string.Empty;
+
+    [Required]
+    public string? QuestionText { get; init; } = string.Empty;
 
     [Required]
     public string AnswerRef { get; init; } = null!;
@@ -21,23 +23,10 @@ public class SubmissionResponseViewModel
     [Required]
     public DateTime? DateCreated { get; init; } = null!;
 
-    public string? QuestionSlug { get; set; }
-
-    public SubmissionResponseViewModel(SqlResponseDto response)
-    {
-        var question = response.Question;
-        var answer = response.Answer;
-
-        QuestionRef = question.ContentfulSysId;
-        QuestionText = question.QuestionText;
-        AnswerRef = answer.ContentfulSysId;
-        AnswerText = answer.AnswerText;
-        DateCreated = response.DateCreated;
-    }
-
     public SubmissionResponseViewModel(QuestionWithAnswerModel response)
     {
         QuestionRef = response.QuestionSysId;
+        QuestionSlug = response.QuestionSlug;
         QuestionText = response.QuestionText;
         AnswerRef = response.AnswerSysId;
         AnswerText = response.AnswerText;

@@ -9,40 +9,43 @@ namespace Dfe.PlanTech.Application.Services;
 
 public class SubmissionService(
     ContentfulWorkflow contentfulWorkflow,
-    ResponseWorkflow responseWorkflow,
     SubmissionWorkflow submissionWorkflow
 )
 {
     private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
-    private readonly ResponseWorkflow _responseWorkflow = responseWorkflow ?? throw new ArgumentNullException(nameof(responseWorkflow));
     private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
-    public async Task RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, string sectionId)
+    public async Task RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, CmsQuestionnaireSectionDto section)
     {
         // Check if an in-progress submission already exists
-        var inProgressSubmission = await _submissionWorkflow.GetInProgressSubmissionAsync(establishmentId, sectionId);
+        var inProgressSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+            establishmentId,
+            section,
+            isCompletedSubmission: false);
         if (inProgressSubmission != null)
         {
-            await _submissionWorkflow.SetSubmissionInaccessibleAsync(inProgressSubmission.Id);
+            await _submissionWorkflow.DeleteSubmissionSoftAsync(inProgressSubmission.Id);
         }
 
-        await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, sectionId);
+        await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section.Id);
     }
 
-    public Task<SubmissionResponsesModel?> GetLatestSubmissionWithResponsesAsync(int establishmentId, CmsQuestionnaireSectionDto questionnaireSection, bool isCompletedSubmission)
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, CmsQuestionnaireSectionDto section, bool isCompletedSubmission)
     {
-        return _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, questionnaireSection, isCompletedSubmission);
+        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission);
+        return submission is null
+            ? null
+            : new SubmissionResponsesModel(submission, section);
     }
 
-    public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, string sectionSlug, bool isCompletedSubmission)
+    public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, string sectionSlug, bool? isCompletedSubmission)
     {
-        var cmsQuestionnaireSection = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
+        var section = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
 
-        var latestCompletedSubmission = await _submissionWorkflow.GetLatestSubmissionAsync(
+        var latestCompletedSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
-            cmsQuestionnaireSection.Id,
-            isCompletedSubmission,
-            includeResponses: true);
+            section,
+            isCompletedSubmission);
 
         var status = latestCompletedSubmission is null
             ? SubmissionStatus.NotStarted
@@ -50,46 +53,43 @@ public class SubmissionService(
                 ? SubmissionStatus.CompleteReviewed
                 : SubmissionStatus.InProgress;
 
+        var submissionResponsesModel = latestCompletedSubmission is null
+            ? null
+            : new SubmissionResponsesModel(latestCompletedSubmission, section);
+
         if (status.Equals(SubmissionStatus.NotStarted))
         {
             return new SubmissionRoutingDataModel
-            {
-                Maturity = latestCompletedSubmission?.Maturity,
-                NextQuestion = cmsQuestionnaireSection.Questions.First(),
-                QuestionnaireSection = cmsQuestionnaireSection,
-                Submission = latestCompletedSubmission is null
-                    ? null
-                    : new SubmissionResponsesModel(latestCompletedSubmission),
-                Status = status
-            };
+            (
+                maturity: latestCompletedSubmission?.Maturity,
+                nextQuestion: section.Questions.First(),
+                questionnaireSection: section,
+                submission: submissionResponsesModel,
+                status
+            );
         }
 
-        var latestCompletedSubmissionWithResponses = await _responseWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
-            establishmentId,
-            cmsQuestionnaireSection,
-            isCompletedSubmission
-        );
-        if (latestCompletedSubmissionWithResponses is null)
-        {
-            throw new InvalidDataException($"No incomplete responses found for section with ID {cmsQuestionnaireSection.Id}.");
-        }
-
-        var lastResponse = latestCompletedSubmissionWithResponses.Responses.Last();
-        var cmsLastAnswer = cmsQuestionnaireSection.Questions
+        var lastResponse = submissionResponsesModel!.Responses.Last();
+        var cmsLastAnswer = section.Questions
             .FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))?
             .Answers
             .FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
 
-        return new SubmissionRoutingDataModel
+        if (!Enum.TryParse<SubmissionStatus>(latestCompletedSubmission?.Status, out var sectionStatus))
         {
-            Maturity = latestCompletedSubmissionWithResponses.Maturity,
-            NextQuestion = cmsLastAnswer?.NextQuestion ?? cmsQuestionnaireSection.Questions.First(),
-            QuestionnaireSection = cmsQuestionnaireSection,
-            Submission = latestCompletedSubmissionWithResponses,
-            Status = cmsLastAnswer?.NextQuestion is null
-                ? SubmissionStatus.CompleteNotReviewed
-                : SubmissionStatus.InProgress
-        };
+            sectionStatus = cmsLastAnswer?.NextQuestion is null
+               ? SubmissionStatus.CompleteNotReviewed
+               : SubmissionStatus.InProgress;
+        }
+
+        return new SubmissionRoutingDataModel
+        (
+            maturity: submissionResponsesModel.Maturity,
+            nextQuestion: cmsLastAnswer?.NextQuestion ?? section.Questions.First(),
+            questionnaireSection: section,
+            submission: submissionResponsesModel,
+            status: sectionStatus
+        );
     }
 
     public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(CmsQuestionnaireCategoryDto category, int establishmentId)
@@ -115,11 +115,11 @@ public class SubmissionService(
 
     public async Task DeleteCurrentSubmissionHardAsync(int establishmentId, string sectionId)
     {
-        await _submissionWorkflow.HardDeleteSubmissionAsync(establishmentId, sectionId);
+        await _submissionWorkflow.DeleteSubmissionHardAsync(establishmentId, sectionId);
     }
 
     public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
     {
-        await _submissionWorkflow.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
+        await _submissionWorkflow.DeleteSubmissionSoftAsync(establishmentId, sectionId);
     }
 }
