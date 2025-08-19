@@ -1,6 +1,7 @@
 ﻿using System.Text;
+using Dfe.PlanTech.Application.Rendering.Models;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Application.Rendering;
 
@@ -10,7 +11,7 @@ public class AttachmentComponentRenderer
     {
     }
 
-    public StringBuilder AddHtml(CmsRichTextContentDto content, StringBuilder stringBuilder)
+    public StringBuilder AddHtml(RichTextContentField content, StringBuilder stringBuilder)
     {
         var target = content?.Data?.Target;
 
@@ -19,7 +20,7 @@ public class AttachmentComponentRenderer
             return stringBuilder;
         }
 
-        var customAttachment = new CmsCustomAttachmentDto(target);
+        var customAttachment = new CustomAttachmentModel(target);
 
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
         stringBuilder.Append("<div class=\"attachment\">");

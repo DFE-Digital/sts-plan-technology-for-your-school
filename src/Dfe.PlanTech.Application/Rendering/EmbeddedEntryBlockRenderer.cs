@@ -2,7 +2,7 @@
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 using Microsoft.Extensions.Logging;
 
@@ -12,7 +12,7 @@ public class EmbeddedEntryBlockRenderer(
     ILoggerFactory loggerFactory
 ) : BaseRichTextContentPartRenderer(RichTextNodeType.EmbeddedEntryBlock)
 {
-    public override StringBuilder AddHtml(CmsRichTextContentDto content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         var richTextData = content.Data?.Target ?? null;
         if (richTextData == null)
@@ -20,22 +20,21 @@ public class EmbeddedEntryBlockRenderer(
             return stringBuilder;
         }
 
-        if (richTextData.Sys is null)
-        {
-            if (richTextData.Asset is not null)
-            {
-                var attachment = new AttachmentComponentRenderer();
-                return attachment.AddHtml(content, stringBuilder);
-            }
-            else
-            {
-                var accordionComponent = new AccordionComponentRenderer(loggerFactory);
-                return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
-            }
-        }
-        
+        //if (richTextData.SystemProperties is null)
+        //{
+        //    if (richTextData.Asset is not null)
+        //    {
+        //        var attachment = new AttachmentComponentRenderer();
+        //        return attachment.AddHtml(content, stringBuilder);
+        //    }
+        //    else
+        //    {
+        //        var accordionComponent = new AccordionComponentRenderer(loggerFactory);
+        //        return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
+        //    }
+        //}
 
-        switch (richTextData.Sys.ContentType)
+        switch (richTextData.SystemProperties.ContentType.SystemProperties.Id)
         {
             case ContentTypeConstants.ComponentAttachmentContentTypeId:
                 var attachment = new AttachmentComponentRenderer();

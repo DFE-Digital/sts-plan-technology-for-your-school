@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
@@ -77,7 +77,7 @@ public class QuestionsViewBuilder(
         if (submissionRoutingData.Submission?.Responses is null)
         {
             throw new InvalidOperationException(
-                $"No responses were found for section '{submissionRoutingData.QuestionnaireSection.Id}'");
+                $"No responses were found for section '{submissionRoutingData.QuestionnaireSection.Sys.Id}'");
         }
 
         /*
@@ -90,11 +90,11 @@ public class QuestionsViewBuilder(
          */
 
         var question = submissionRoutingData.GetQuestionForSlug(questionSlug);
-        var isQuestionInResponses = submissionRoutingData.IsQuestionInResponses(question.Id);
+        var isQuestionInResponses = submissionRoutingData.IsQuestionInResponses(question.Sys.Id);
 
         if (isQuestionInResponses)
         {
-            var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(question.Id);
+            var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(question.Sys.Id);
             var viewModel = GenerateViewModel(
                 controller,
                 question,
@@ -162,7 +162,7 @@ public class QuestionsViewBuilder(
         catch (DatabaseException)
         {
             // Remove the current invalid submission and redirect to self-assessment page
-            await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Id);
+            await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Sys.Id);
 
             controller.TempData["SubtopicError"] = await BuildErrorMessage();
             return controller.RedirectToAction(
@@ -252,8 +252,8 @@ public class QuestionsViewBuilder(
 
     private QuestionViewModel GenerateViewModel(
         Controller controller,
-        CmsQuestionnaireQuestionDto question,
-        CmsQuestionnaireSectionDto? section,
+        QuestionnaireQuestionEntry question,
+        QuestionnaireSectionEntry? section,
         string? categorySlug,
         string? sectionSlug,
         string? latestAnswerContentfulId,
@@ -284,7 +284,7 @@ public class QuestionsViewBuilder(
             SectionName = section?.Name,
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
-            SectionId = section?.Id
+            SectionId = section?.Sys.Id
         };
     }
 

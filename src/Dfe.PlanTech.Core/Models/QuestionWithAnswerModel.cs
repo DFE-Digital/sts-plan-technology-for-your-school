@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Core.RoutingDataModel;
@@ -23,10 +23,10 @@ public record QuestionWithAnswerModel
     [Required]
     public DateTime? DateCreated { get; init; } = null!;
 
-    public QuestionWithAnswerModel(SqlResponseDto response, CmsQuestionnaireSectionDto section)
+    public QuestionWithAnswerModel(SqlResponseDto response, QuestionnaireSectionEntry section)
     {
         QuestionSysId = response.Question.ContentfulSysId;
-        QuestionSlug = section.Questions.FirstOrDefault(q => q.Id.Equals(response.Question.ContentfulSysId))?.Slug;
+        QuestionSlug = section.Questions.FirstOrDefault(q => q.Sys.Id.Equals(response.Question.ContentfulSysId))?.Slug;
         QuestionText = response.Question.QuestionText ?? string.Empty; //Should this come from Contentful?
         AnswerSysId = response.Answer.ContentfulSysId;
         AnswerText = response.Answer.AnswerText ?? string.Empty; //Should this come from Contentful?

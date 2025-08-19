@@ -30,7 +30,7 @@ namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests
             Console.WriteLine($"Fetching of section took {elapsed1}ms");
 
             stopwatch.Restart();
-            var dto = sections.Items.FirstOrDefault()?.AsDto();
+            var dto = sections.Items.FirstOrDefault();
             stopwatch.Stop();
             var elapsed2 = stopwatch.ElapsedMilliseconds;
 

@@ -1,7 +1,7 @@
 using System.Text;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Extensions;
 
 namespace Dfe.PlanTech.Application.Rendering;
@@ -16,7 +16,7 @@ public class TableCellRenderer : BaseRichTextContentPartRenderer
     {
     }
 
-    public override StringBuilder AddHtml(CmsRichTextContentDto content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         if (stringBuilder.EndsWith(BeginningOfRowString))
         {
@@ -34,7 +34,7 @@ public class TableCellRenderer : BaseRichTextContentPartRenderer
         return stringBuilder;
     }
 
-    private StringBuilder AppendContent(StringBuilder stringBuilder, List<CmsRichTextContentDto> content)
+    private StringBuilder AppendContent(StringBuilder stringBuilder, List<RichTextContentField> content)
     {
         if (content.Count == 0)
         {

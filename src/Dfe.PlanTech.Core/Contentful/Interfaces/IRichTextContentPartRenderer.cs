@@ -1,5 +1,5 @@
 using System.Text;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Core.Contentful.Interfaces;
 
@@ -19,5 +19,5 @@ public interface IRichTextContentPartRenderer
     /// <param name="rendererCollection"></param>
     /// <param name="stringBuilder"></param>
     /// <returns></returns>
-    public StringBuilder AddHtml(CmsRichTextContentDto content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder);
+    public StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder);
 }

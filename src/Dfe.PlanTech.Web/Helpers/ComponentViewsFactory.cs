@@ -20,7 +20,7 @@ public class ComponentViewsFactory(
     /// <returns>Whether a view was successfully found or not</returns>
     public bool TryGetViewForType(object model, out string? viewPath)
     {
-        var componentTypeName = model.GetType().Name[3..^3].Replace("Component", "");
+        var componentTypeName = model.GetType().Name[0..^5].Replace("Component", "");
         var matchingViewType = _viewTypes.FirstOrDefault(FileNameMatchesComponentTypeName(componentTypeName));
 
         if (matchingViewType is null)

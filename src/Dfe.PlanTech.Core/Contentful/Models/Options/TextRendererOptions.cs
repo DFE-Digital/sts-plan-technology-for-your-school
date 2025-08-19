@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Domain.Content.Models.Options;
@@ -11,7 +11,7 @@ public class TextRendererOptions(
     private readonly ILogger<TextRendererOptions> _logger = loggerFactory.CreateLogger<TextRendererOptions>();
     private readonly List<MarkOption> _markOptions = markOptions ?? throw new ArgumentNullException(nameof(markOptions));
 
-    public MarkOption? GetMatchingOptionForMark(CmsRichTextMarkDto mark)
+    public MarkOption? GetMatchingOptionForMark(RichTextMarkField mark)
     {
         var matchingOption = _markOptions.Find(option => option.Mark == mark.Type);
 

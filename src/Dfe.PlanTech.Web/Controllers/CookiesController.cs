@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -29,7 +29,7 @@ public class CookiesController(
 
         CookiesViewModel cookiesViewModel = new()
         {
-            Title = cookiesPageContent?.Title ?? new CmsComponentTitleDto("Cookies"),
+            Title = cookiesPageContent?.Title ?? new ComponentTitleEntry("Cookies"),
             Content = cookiesPageContent?.Content ?? [],
             Cookie = _cookieService.Cookie,
             ReferrerUrl = referrerUrl ?? "",

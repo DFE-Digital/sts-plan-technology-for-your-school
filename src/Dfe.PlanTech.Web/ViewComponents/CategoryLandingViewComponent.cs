@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,7 +10,7 @@ public class CategoryLandingViewComponent(
 {
     private readonly CategoryLandingViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
-    public async Task<IViewComponentResult> InvokeAsync(CmsQuestionnaireCategoryDto category, string slug)
+    public async Task<IViewComponentResult> InvokeAsync(QuestionnaireCategoryEntry category, string slug)
     {
         var viewModel = await _viewBuilder.BuildViewModelAsync(category, slug);
         return View(viewModel);

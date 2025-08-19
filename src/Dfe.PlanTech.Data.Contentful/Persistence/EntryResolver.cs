@@ -1,7 +1,6 @@
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Data.Contentful.Persistence;
@@ -15,7 +14,7 @@ public class EntryResolver(
 {
     public Dictionary<string, Type> Types => _types;
 
-    private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<IDtoTransformableEntry>()
+    private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<ContentfulEntry>()
                                                                        .ToDictionary(type => type.Name.ToLower());
 
     /// <summary>

@@ -1,17 +1,17 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class RecommendationIntroEntry: TransformableEntry<RecommendationIntroEntry, CmsRecommendationIntroDto>
+public class RecommendationIntroEntry: ContentfulEntry, IHeaderWithContent
 {
-    public string InternalName { get; set; } = null!;
-    public string Slug { get; init; } = null!;
-    public ComponentHeaderEntry Header { get; init; } = null!;
-
     [NotMapped]
     public List<ContentfulEntry> Content { get; init; } = [];
     public string Maturity { get; init; } = null!;
-
-    protected override Func<RecommendationIntroEntry, CmsRecommendationIntroDto> Constructor => entry => new(entry);
+    public ComponentHeaderEntry Header { get; init; } = null!;
+    public string HeaderText { get; } = null!;
+    public string InternalName { get; set; } = null!;
+    public string LinkText { get; } = null!;
+    public string SlugifiedLinkText { get; } = null!;
+    public string Slug { get; init; } = null!;
 }

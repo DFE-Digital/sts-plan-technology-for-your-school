@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Application.Rendering;
 
@@ -12,7 +12,7 @@ public partial class HeadingRenderer : BaseRichTextContentPartRenderer
     {
     }
 
-    public override StringBuilder AddHtml(CmsRichTextContentDto content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         var tag = GetHeaderTag().Replace(content.NodeType, "$1$2");
 

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -12,5 +12,5 @@ public class CategoryLandingViewComponentViewModel
     public string? NoSectionsErrorRedirectUrl { get; set; }
     public string? ProgressRetrievalErrorMessage { get; set; }
     public string? SectionName { get; set; }
-    public List<CmsQuestionnaireSectionDto> Sections { get; set; } = [];
+    public List<QuestionnaireSectionEntry> Sections { get; set; } = [];
 }

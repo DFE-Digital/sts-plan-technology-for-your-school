@@ -1,12 +1,12 @@
 using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
 public class QuestionViewModel
 {
     [Required]
-    public CmsQuestionnaireQuestionDto Question { get; init; } = null!;
+    public QuestionnaireQuestionEntry Question { get; init; } = null!;
 
     public string? AnswerSysId { get; init; }
     public string? CategorySlug { get; init; }

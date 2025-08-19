@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -8,15 +8,15 @@ public class SingleRecommendationViewModel
 
     public string CategorySlug { get; set; } = "";
 
-    public CmsQuestionnaireSectionDto Section { get; set; } = null!;
+    public QuestionnaireSectionEntry Section { get; set; } = null!;
 
-    public List<CmsRecommendationChunkDto> Chunks { get; set; } = [];
+    public List<RecommendationChunkEntry> Chunks { get; set; } = [];
 
-    public CmsRecommendationChunkDto CurrentChunk { get; set; } = null!;
+    public RecommendationChunkEntry CurrentChunk { get; set; } = null!;
 
-    public CmsRecommendationChunkDto? PreviousChunk { get; set; } = null!;
+    public RecommendationChunkEntry? PreviousChunk { get; set; } = null!;
 
-    public CmsRecommendationChunkDto? NextChunk { get; set; } = null!;
+    public RecommendationChunkEntry? NextChunk { get; set; } = null!;
 
     public int CurrentChunkPosition { get; set; }
 

@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Context;
@@ -36,7 +36,7 @@ public class GroupsViewBuilder(
 
         var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
         var dashboardContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
-        var categories = dashboardContent.Content?.OfType<CmsQuestionnaireCategoryDto>();
+        var categories = dashboardContent.Content?.OfType<QuestionnaireCategoryEntry>();
 
         if (categories is null)
         {
@@ -47,7 +47,7 @@ public class GroupsViewBuilder(
 
         var groupName = CurrentUser.GetEstablishmentModel().Name;
         var title = groupName;
-        List<CmsEntryDto> content = selectASchoolPageContent?.Content ?? [];
+        List<ContentfulEntry> content = selectASchoolPageContent?.Content ?? [];
 
         string totalSections = string.Empty;
         if (categories != null)
@@ -61,7 +61,7 @@ public class GroupsViewBuilder(
         {
             GroupName = groupName,
             GroupEstablishments = groupSchools,
-            Title = new CmsComponentTitleDto(title),
+            Title = new ComponentTitleEntry(title),
             Content = content,
             TotalSections = totalSections,
             ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)
@@ -95,14 +95,14 @@ public class GroupsViewBuilder(
         var latestSelection = await GetCurrentGroupSchoolSelection();
         var groupName = CurrentUser.GetEstablishmentModel().Name;
         var pageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
-        List<CmsEntryDto> content = pageContent?.Content ?? [];
+        List<ContentfulEntry> content = pageContent?.Content ?? [];
 
         var viewModel = new GroupsSchoolDashboardViewModel
         {
             SchoolName = latestSelection.SelectedEstablishmentName,
             SchoolId = latestSelection.SelectedEstablishmentId,
             GroupName = groupName,
-            Title = new CmsComponentTitleDto("Plan technology for your school"),
+            Title = new ComponentTitleEntry("Plan technology for your school"),
             Content = content,
             Slug = UrlConstants.GroupsDashboardSlug
         };
@@ -161,7 +161,7 @@ public class GroupsViewBuilder(
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {sectionSlug}");
 
-        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Sys.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
         var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(schoolId, section, true)
@@ -185,7 +185,7 @@ public class GroupsViewBuilder(
         var subtopicChunks = subtopicRecommendation
             .Section
             .Chunks
-            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Id)))
+            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
             .Distinct()
             .ToList();
 

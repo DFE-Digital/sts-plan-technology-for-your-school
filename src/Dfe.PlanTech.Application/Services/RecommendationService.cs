@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Workflows;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Application.Services
 {
@@ -29,7 +29,7 @@ namespace Dfe.PlanTech.Application.Services
 
             if (latestCompletedSubmission is null)
             {
-                throw new InvalidDataException($"No incomplete responses found for section with ID {cmsQuestionnaireSection.Id}.");
+                throw new InvalidDataException($"No incomplete responses found for section with ID {cmsQuestionnaireSection.Sys.Id}.");
             }
 
             if (latestCompletedSubmission.Maturity is null)
@@ -38,16 +38,16 @@ namespace Dfe.PlanTech.Application.Services
             }
 
             var maturity = latestCompletedSubmission.Maturity;
-            var introSlugForMaturity = await _contentfulWorkflow.GetIntroForMaturityAsync(cmsQuestionnaireSection.Id, maturity);
+            var introSlugForMaturity = await _contentfulWorkflow.GetIntroForMaturityAsync(cmsQuestionnaireSection.Sys.Id, maturity);
             if (introSlugForMaturity is null)
             {
-                throw new InvalidDataException($"No recommendation intro found maturity {maturity} for section with ID {cmsQuestionnaireSection.Id}.");
+                throw new InvalidDataException($"No recommendation intro found maturity {maturity} for section with ID {cmsQuestionnaireSection.Sys.Id}.");
             }
 
             return introSlugForMaturity.Slug;
         }
 
-        public Task<IEnumerable<CmsRecommendationChunkDto>> GetPaginatedRecommendationEntries(int page)
+        public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntries(int page)
         {
             return _recommendationWorkflow.GetPaginatedRecommendationEntries(page);
         }

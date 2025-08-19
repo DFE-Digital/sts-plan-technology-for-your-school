@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
@@ -26,7 +26,7 @@ public class PagesController(
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
-    public Task<IActionResult> GetByRoute([ModelBinder(typeof(PageModelBinder))] CmsPageDto? page)
+    public Task<IActionResult> GetByRoute([ModelBinder(typeof(PageModelBinder))] PageEntry? page)
     {
         if (page is null)
         {

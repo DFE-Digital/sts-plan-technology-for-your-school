@@ -1,10 +1,10 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
 public class GroupsDashboardViewComponentViewModel
 {
-    public CmsEntryDto Description { get; set; } = null!;
+    public ContentfulEntry Description { get; set; } = null!;
 
     public List<GroupsCategorySectionViewModel> GroupsCategorySections { get; init; } = null!;
 

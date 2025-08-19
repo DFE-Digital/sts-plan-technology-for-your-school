@@ -1,6 +1,6 @@
 ﻿using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
@@ -47,10 +47,10 @@ public class RecommendationsViewBuilder(
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: true);
 
-        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id);
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Sys.Id);
         if (subtopicRecommendation is null)
         {
-            throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Id}'");
+            throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Sys.Id}'");
         }
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
@@ -115,7 +115,7 @@ public class RecommendationsViewBuilder(
                 var viewModel = await BuildRecommendationsViewModel(
                     category,
                     submissionRoutingData,
-                    section.Id,
+                    section.Sys.Id,
                     sectionSlug
                 );
 
@@ -140,7 +140,7 @@ public class RecommendationsViewBuilder(
         var establishmentId = GetEstablishmentIdOrThrowException();
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: false);
 
-        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(submissionRoutingData.QuestionnaireSection.Id)
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(submissionRoutingData.QuestionnaireSection.Sys.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for: {submissionRoutingData.QuestionnaireSection.Name}");
 
         var intro = subtopicRecommendation.Intros
@@ -159,7 +159,7 @@ public class RecommendationsViewBuilder(
     }
 
     private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(
-        CmsQuestionnaireCategoryDto category,
+        QuestionnaireCategoryEntry category,
         SubmissionRoutingDataModel submissionRoutingData,
         string sectionId,
         string sectionSlug

@@ -1,8 +1,6 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class NavigationLinkEntry : TransformableEntry<NavigationLinkEntry, CmsNavigationLinkDto>
+public class NavigationLinkEntry : ContentfulEntry
 {
     public ContentfulEntry? ContentToLinkTo { get; set; }
     public string InternalName { get; set; } = null!;
@@ -10,5 +8,5 @@ public class NavigationLinkEntry : TransformableEntry<NavigationLinkEntry, CmsNa
     public string? Href { get; set; } = null;
     public bool OpenInNewTab { get; set; } = false;
 
-    protected override Func<NavigationLinkEntry, CmsNavigationLinkDto> Constructor => entry => new(entry);
+    public bool IsValid => !string.IsNullOrEmpty(DisplayText) && (!string.IsNullOrEmpty(Href) || ContentToLinkTo != null);
 }

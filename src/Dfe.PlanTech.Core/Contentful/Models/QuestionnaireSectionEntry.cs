@@ -1,8 +1,8 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class QuestionnaireSectionEntry : TransformableEntry<QuestionnaireSectionEntry, CmsQuestionnaireSectionDto>
+public class QuestionnaireSectionEntry : ContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public string Name { get; init; } = null!;
@@ -10,5 +10,9 @@ public class QuestionnaireSectionEntry : TransformableEntry<QuestionnaireSection
     public PageEntry InterstitialPage { get; set; } = null!;
     public IEnumerable<QuestionnaireQuestionEntry> Questions { get; set; } = [];
 
-    protected override Func<QuestionnaireSectionEntry, CmsQuestionnaireSectionDto> Constructor => entry => new(entry);
+    public QuestionnaireQuestionEntry GetQuestionBySlug(string questionSlug)
+    {
+        return Questions.FirstOrDefault(question => question.Slug.Equals(questionSlug))
+             ?? throw new ContentfulDataUnavailableException($"Could not find question slug '{questionSlug}' under section '{Name}'");
+    }
 }

@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Context;
@@ -18,12 +18,12 @@ public class CategoryLandingViewComponentViewBuilder(
     private readonly ILogger<CategoryLandingViewComponent> _logger = loggerFactory.CreateLogger<CategoryLandingViewComponent>();
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(CmsQuestionnaireCategoryDto category, string slug)
+    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category, string slug)
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("Found no sections for category {id}", category.Id);
-            throw new InvalidDataException($"Found no sections for category {category.Id}");
+            _logger.LogError("Found no sections for category {id}", category.Sys.Id);
+            throw new InvalidDataException($"Found no sections for category {category.Sys.Id}");
         }
 
         var establishmentId = GetEstablishmentIdOrThrowException();
@@ -63,7 +63,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
     private async IAsyncEnumerable<CategoryLandingSectionViewModel> BuildCategoryLandingSectionViewModels(
         int establishmentId,
-        CmsQuestionnaireCategoryDto category,
+        QuestionnaireCategoryEntry category,
         List<SqlSectionStatusDto> sectionStatuses,
         bool hadRetrievalError
     )
@@ -72,13 +72,13 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Sys.Id, section.Name);
             }
 
-            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
+            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Sys.Id));
             if (sectionStatus is null)
             {
-                _logger.LogError("No section status found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+                _logger.LogError("No section status found for subtopic with ID {sectionId} and name {sectionName}", section.Sys.Id, section.Name);
             }
 
             var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sectionStatus);
@@ -94,7 +94,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
     private async Task<CategoryLandingSectionRecommendationsViewModel> GetCategoryLandingSectionRecommendations(
         int establishmentId,
-        CmsQuestionnaireSectionDto section,
+        QuestionnaireSectionEntry section,
         SqlSectionStatusDto? sectionStatus
     )
     {
@@ -105,7 +105,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
         try
         {
-            var recommendationIntro = await ContentfulService.GetSubtopicRecommendationIntroAsync(section.Id, sectionStatus.LastMaturity);
+            var recommendationIntro = await ContentfulService.GetSubtopicRecommendationIntroAsync(section.Sys.Id, sectionStatus.LastMaturity);
             if (recommendationIntro == null)
             {
                 return new CategoryLandingSectionRecommendationsViewModel
@@ -116,7 +116,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
             var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, true)
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
-            var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
+            var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Sys.Id)
                ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
             var subTopicChunks = subtopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Responses.Select(answer => answer.AnswerSysId));

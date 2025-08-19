@@ -2,7 +2,7 @@ using System.Text;
 using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Rendering;
@@ -16,7 +16,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
         _options = options;
     }
 
-    public override StringBuilder AddHtml(CmsRichTextContentDto content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         if (string.IsNullOrEmpty(content.Data?.Uri))
         {
@@ -44,7 +44,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
         return stringBuilder;
     }
 
-    private static void AddAttributes(CmsRichTextContentDto content, StringBuilder stringBuilder, bool isExternalLink)
+    private static void AddAttributes(RichTextContentField content, StringBuilder stringBuilder, bool isExternalLink)
     {
         stringBuilder.Append("href=\"");
         stringBuilder.Append(content.Data?.Uri ?? "");
@@ -56,7 +56,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
         }
     }
 
-    private static void AddLinkText(CmsRichTextContentDto content, StringBuilder stringBuilder, bool isExternalLink)
+    private static void AddLinkText(RichTextContentField content, StringBuilder stringBuilder, bool isExternalLink)
     {
         stringBuilder.Append(content.Value);
 
@@ -71,7 +71,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
         stringBuilder.Append("target=\"_blank\" rel=\"noopener\"");
     }
 
-    private static bool IsExternalLink(CmsRichTextContentDto content)
+    private static bool IsExternalLink(RichTextContentField content)
     {
         var uri = content.Data?.Uri ?? "";
         return uri.StartsWith("http", StringComparison.InvariantCultureIgnoreCase);

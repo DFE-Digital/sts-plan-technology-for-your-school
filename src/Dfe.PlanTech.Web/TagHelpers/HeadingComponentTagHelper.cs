@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Core.Contentful.Enums;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
@@ -11,7 +11,7 @@ public class HeaderComponentTagHelper(
 {
     private readonly ILogger<HeaderComponentTagHelper> _logger = loggerFactory.CreateLogger<HeaderComponentTagHelper>();
 
-    public CmsComponentHeaderDto? Model { get; set; }
+    public ComponentHeaderEntry? Model { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {

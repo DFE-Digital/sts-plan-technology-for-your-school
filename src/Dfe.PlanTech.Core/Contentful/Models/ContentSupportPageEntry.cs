@@ -1,8 +1,6 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ContentSupportPageEntry : TransformableEntry<ContentSupportPageEntry, CmsContentSupportPageDto>
+public class ContentSupportPageEntry : ContentfulEntry
 {
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
@@ -14,6 +12,4 @@ public class ContentSupportPageEntry : TransformableEntry<ContentSupportPageEntr
     public bool ShowVerticalNavigation { get; init; } = false;
     public bool HasFeedbackBanner { get; init; } = false;
     public bool HasPrint { get; init; } = false;
-
-    protected override Func<ContentSupportPageEntry, CmsContentSupportPageDto> Constructor => entry => new(entry);
 }

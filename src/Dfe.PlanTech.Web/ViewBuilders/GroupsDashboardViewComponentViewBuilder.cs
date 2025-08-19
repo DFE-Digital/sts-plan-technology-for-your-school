@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.ViewModels;
@@ -18,18 +18,18 @@ public class GroupsDashboardViewComponentViewBuilder(
     private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public Task<GroupsDashboardViewComponentViewModel> BuildViewModelAsync(CmsQuestionnaireCategoryDto category)
+    public Task<GroupsDashboardViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category)
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("No sections found for category {id}", category.Id);
-            throw new InvalidDataException($"No sections found for category {category.Id}");
+            _logger.LogError("No sections found for category {id}", category.Sys.Id);
+            throw new InvalidDataException($"No sections found for category {category.Sys.Id}");
         }
 
         return GenerateViewModel(category);
     }
 
-    private async Task<GroupsDashboardViewComponentViewModel> GenerateViewModel(CmsQuestionnaireCategoryDto category)
+    private async Task<GroupsDashboardViewComponentViewModel> GenerateViewModel(QuestionnaireCategoryEntry category)
     {
         var userId = GetUserIdOrThrowException();
         var establishmentId = GetEstablishmentIdOrThrowException();
@@ -53,7 +53,7 @@ public class GroupsDashboardViewComponentViewBuilder(
 
         var description = category.Content is { Count: > 0 } content
             ? content[0]
-            : new CmsMissingComponentDto();
+            : new MissingComponentEntry();
 
         return new GroupsDashboardViewComponentViewModel
         {
@@ -65,7 +65,7 @@ public class GroupsDashboardViewComponentViewBuilder(
 
         
     private async IAsyncEnumerable<GroupsCategorySectionViewModel> GetGroupsCategorySectionViewModel(
-        CmsQuestionnaireCategoryDto category,
+        QuestionnaireCategoryEntry category,
         List<SqlSectionStatusDto> sectionStatuses,
         bool hadRetrievalError
     )
@@ -75,10 +75,10 @@ public class GroupsDashboardViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Sys.Id, section.Name);
             }
 
-            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
+            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Sys.Id));
             var recommendationIntro = await BuildCategorySectionRecommendationViewModel(section, sectionStatus);
 
             yield return new GroupsCategorySectionViewModel(section, recommendationIntro, sectionStatus, hadRetrievalError);

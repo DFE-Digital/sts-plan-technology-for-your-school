@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Core.RoutingDataModel
@@ -15,7 +15,7 @@ namespace Dfe.PlanTech.Core.RoutingDataModel
 
         public bool HasResponses => Responses is not null && Responses.Count != 0;
 
-        public SubmissionResponsesModel(SqlSubmissionDto submission, CmsQuestionnaireSectionDto section)
+        public SubmissionResponsesModel(SqlSubmissionDto submission, QuestionnaireSectionEntry section)
         {
             SubmissionId = submission.Id;
             DateCompleted = submission.DateCompleted;

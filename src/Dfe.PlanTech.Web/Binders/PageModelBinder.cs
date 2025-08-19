@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Dfe.PlanTech.Web.Binders;
@@ -16,16 +16,16 @@ public class PageModelBinder(
     {
         ArgumentNullException.ThrowIfNull(bindingContext, nameof(bindingContext));
 
-        if (!bindingContext.HttpContext.Items.TryGetValue(nameof(CmsPageDto), out var pageItem))
+        if (!bindingContext.HttpContext.Items.TryGetValue(nameof(PageEntry), out var pageItem))
         {
             _logger.LogError("Page is not set");
             bindingContext.Result = ModelBindingResult.Failed();
             return Task.CompletedTask;
         }
 
-        if (pageItem is not CmsPageDto page)
+        if (pageItem is not PageEntry page)
         {
-            _logger.LogError("Page is not {type}", typeof(CmsPageDto));
+            _logger.LogError("Page is not {type}", typeof(PageEntry));
             bindingContext.Result = ModelBindingResult.Failed();
             return Task.CompletedTask;
         }

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Core.Exceptions;
 
@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Core.Exceptions;
 /// Used for when a question, answer, or some other key piece of user journey content is not found.
 /// </summary>
 /// <param name="message"></param>
-public class UserJourneyMissingContentException(string message, CmsQuestionnaireSectionDto section) : Exception(message)
+public class UserJourneyMissingContentException(string message, QuestionnaireSectionEntry section) : Exception(message)
 {
-    public readonly CmsQuestionnaireSectionDto Section = section;
+    public readonly QuestionnaireSectionEntry Section = section;
 }

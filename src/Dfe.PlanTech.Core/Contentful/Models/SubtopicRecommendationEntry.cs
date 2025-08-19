@@ -1,13 +1,12 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class SubtopicRecommendationEntry : TransformableEntry<SubtopicRecommendationEntry, CmsSubtopicRecommendationDto>
+public class SubtopicRecommendationEntry : ContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public List<RecommendationIntroEntry> Intros { get; init; } = [];
     public RecommendationSectionEntry Section { get; init; } = null!;
     public QuestionnaireSectionEntry Subtopic { get; init; } = null!;
 
-    protected override Func<SubtopicRecommendationEntry, CmsSubtopicRecommendationDto> Constructor => entry => new(entry);
+    public RecommendationIntroEntry? GetRecommendationByMaturity(string? maturity) =>
+        Intros.FirstOrDefault(intro => !string.IsNullOrWhiteSpace(intro.Maturity) && intro.Maturity.Equals(maturity));
 }

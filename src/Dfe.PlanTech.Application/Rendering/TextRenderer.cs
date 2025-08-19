@@ -2,7 +2,7 @@
 using System.Text;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
 
 namespace Dfe.PlanTech.Application.Rendering;
@@ -16,7 +16,7 @@ public class TextRenderer : BaseRichTextContentPartRenderer
         _textRendererOptions = textRendererOptions;
     }
 
-    public override StringBuilder AddHtml(CmsRichTextContentDto content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         var markOptions = content.Marks
             .Select(_textRendererOptions.GetMatchingOptionForMark)

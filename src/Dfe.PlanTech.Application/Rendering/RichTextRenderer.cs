@@ -1,6 +1,6 @@
 using System.Text;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Rendering;
@@ -20,7 +20,7 @@ public class RichTextRenderer(
 
     public ILogger Logger => _logger;
 
-    public string ToHtml(CmsRichTextContentDto content)
+    public string ToHtml(RichTextContentField content)
     {
         var stringBuilder = new StringBuilder();
 
@@ -29,7 +29,7 @@ public class RichTextRenderer(
         return stringBuilder.ToString();
     }
 
-    public void RenderChildren(CmsRichTextContentDto content, StringBuilder stringBuilder)
+    public void RenderChildren(RichTextContentField content, StringBuilder stringBuilder)
     {
         foreach (var subContent in content.Content)
         {
@@ -45,6 +45,6 @@ public class RichTextRenderer(
         }
     }
 
-    public IRichTextContentPartRenderer? GetRendererForContent(CmsRichTextContentDto content)
+    public IRichTextContentPartRenderer? GetRendererForContent(RichTextContentField content)
         => Renderers.FirstOrDefault(renderer => renderer.Accepts(content));
 }

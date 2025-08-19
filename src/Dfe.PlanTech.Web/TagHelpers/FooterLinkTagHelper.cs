@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
@@ -12,7 +12,7 @@ public class FooterLinkTagHelper(
     ILoggerFactory loggerFactory
 ) : TagHelper
 {
-    public CmsNavigationLinkDto? Link { get; set; }
+    public NavigationLinkEntry? Link { get; set; }
 
     private readonly ILogger<FooterLinkTagHelper> _logger = loggerFactory.CreateLogger<FooterLinkTagHelper>();
 
@@ -22,7 +22,7 @@ public class FooterLinkTagHelper(
         {
             output.TagName = null;
             output.Content.SetHtmlContent("");
-            _logger.LogWarning("Missing or invalid {Name} {Link}", nameof(CmsNavigationLinkDto), Link);
+            _logger.LogWarning("Missing or invalid {Name} {Link}", nameof(NavigationLinkEntry), Link);
             return;
         }
 
@@ -59,7 +59,7 @@ public class FooterLinkTagHelper(
     {
         if (Link!.ContentToLinkTo == null && string.IsNullOrEmpty(Link.Href))
         {
-            _logger.LogError("No href or content to link to for {LinkType}", nameof(CmsNavigationLinkDto));
+            _logger.LogError("No href or content to link to for {LinkType}", nameof(NavigationLinkEntry));
             return string.Empty;
         }
 

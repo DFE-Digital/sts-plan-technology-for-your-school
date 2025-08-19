@@ -1,8 +1,8 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Core.Contentful.Interfaces;
 
 public interface ICardContainerContentPartRenderer
 {
-    public string ToHtml(IReadOnlyList<CmsComponentCardDto>? content);
+    public string ToHtml(IReadOnlyList<ComponentCardEntry>? content);
 }

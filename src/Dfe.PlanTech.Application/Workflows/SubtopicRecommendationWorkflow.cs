@@ -1,7 +1,6 @@
 ﻿using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Content.Queries;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.Logging;
 
@@ -29,13 +28,12 @@ public class SubtopicRecommendationWorkflow(
         return subtopicRecommendation;
     }
 
-    public async Task<CmsRecommendationIntroDto?> GetIntroForMaturityAsync(string subtopicId, string maturity)
+    public async Task<RecommendationIntroEntry?> GetIntroForMaturityAsync(string subtopicId, string maturity)
     {
         var options = CreateGetEntityOptions(subtopicId, 2);
         options.Select = ["fields.intros", "sys"];
 
-        var subtopicRecommendationEntries = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
-        var subtopicRecommendations = subtopicRecommendationEntries.Select(entry => entry.AsDto());
+        var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
 
         var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
         if (subtopicRecommendation is null)

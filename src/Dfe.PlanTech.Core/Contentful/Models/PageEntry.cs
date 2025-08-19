@@ -1,8 +1,6 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class PageEntry: TransformableEntry<PageEntry, CmsPageDto>
+public class PageEntry: ContentfulEntry
 {
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
@@ -16,6 +14,4 @@ public class PageEntry: TransformableEntry<PageEntry, CmsPageDto>
     public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
     public ComponentTitleEntry? Title { get; init; }
     public List<ContentfulEntry>? Content { get; set; }
-
-    protected override Func<PageEntry, CmsPageDto> Constructor => entry => new(entry);
 }

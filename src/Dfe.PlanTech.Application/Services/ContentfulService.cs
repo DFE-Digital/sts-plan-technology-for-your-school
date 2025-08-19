@@ -1,6 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Application.Services;
 
@@ -10,52 +9,52 @@ public class ContentfulService(
 {
     private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
 
-    public Task<IEnumerable<CmsQuestionnaireSectionDto>> GetAllSectionsAsync()
+    public Task<IEnumerable<QuestionnaireSectionEntry>> GetAllSectionsAsync()
     {
         return _contentfulWorkflow.GetAllSectionsAsync();
     }
 
-    public Task<CmsQuestionnaireCategoryDto?> GetCategoryBySlugAsync(string slug)
+    public Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug)
     {
         return _contentfulWorkflow.GetCategoryBySlugAsync(slug);
     }
 
-    public Task<CmsNavigationLinkDto> GetLinkByIdAsync(string contentId)
+    public Task<NavigationLinkEntry> GetLinkByIdAsync(string contentId)
     {
-        return _contentfulWorkflow.GetEntryById<NavigationLinkEntry, CmsNavigationLinkDto>(contentId);
+        return _contentfulWorkflow.GetEntryById<NavigationLinkEntry>(contentId);
     }
 
-    public Task<List<CmsNavigationLinkDto>> GetNavigationLinksAsync()
+    public Task<List<NavigationLinkEntry>> GetNavigationLinksAsync()
     {
-        return contentfulWorkflow.GetEntries<NavigationLinkEntry, CmsNavigationLinkDto>();
+        return contentfulWorkflow.GetEntries<NavigationLinkEntry>();
     }
 
-    public Task<CmsPageDto> GetPageByIdAsync(string pageId)
+    public Task<PageEntry> GetPageByIdAsync(string pageId)
     {
-        return _contentfulWorkflow.GetEntryById<PageEntry, CmsPageDto>(pageId);
+        return _contentfulWorkflow.GetEntryById<PageEntry>(pageId);
     }
 
-    public Task<CmsPageDto> GetPageBySlugAsync(string slug)
+    public Task<PageEntry> GetPageBySlugAsync(string slug)
     {
         return _contentfulWorkflow.GetPageBySlugAsync(slug);
     }
 
-    public Task<CmsQuestionnaireQuestionDto> GetQuestionByIdAsync(string questionId)
+    public Task<QuestionnaireQuestionEntry> GetQuestionByIdAsync(string questionId)
     {
-        return _contentfulWorkflow.GetEntryById<QuestionnaireQuestionEntry, CmsQuestionnaireQuestionDto>(questionId);
+        return _contentfulWorkflow.GetEntryById<QuestionnaireQuestionEntry>(questionId);
     }
 
-    public Task<CmsQuestionnaireSectionDto> GetSectionBySlugAsync(string slug)
+    public Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug)
     {
         return _contentfulWorkflow.GetSectionBySlugAsync(slug);
     }
 
-    public Task<CmsSubtopicRecommendationDto?> GetSubtopicRecommendationByIdAsync(string subtopicId)
+    public Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId)
     {
         return _contentfulWorkflow.GetSubtopicRecommendationByIdAsync(subtopicId);
     }
 
-    public Task<CmsRecommendationIntroDto?> GetSubtopicRecommendationIntroAsync(string subtopicId, string maturity)
+    public Task<RecommendationIntroEntry?> GetSubtopicRecommendationIntroAsync(string subtopicId, string maturity)
     {
         return _contentfulWorkflow.GetSubtopicRecommendationIntroByIdAndMaturityAsync(subtopicId, maturity);
     }

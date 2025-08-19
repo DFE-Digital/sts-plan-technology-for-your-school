@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Core.Contentful.Interfaces;
 
@@ -12,5 +12,5 @@ public interface IRichTextRenderer
     /// </summary>
     /// <param name="content">Content to convert</param>
     /// <returns>Content converted to HTML string (including tags, classes, etc.)</returns>
-    public string ToHtml(CmsRichTextContentDto content);
+    public string ToHtml(RichTextContentField content);
 }

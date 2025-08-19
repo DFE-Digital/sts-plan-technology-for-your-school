@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModel;
 
@@ -6,12 +6,12 @@ namespace Dfe.PlanTech.Web.ViewModels;
 
 public class AnswerViewModel
 {
-    public AnswerViewModel(CmsQuestionnaireAnswerDto answer)
+    public AnswerViewModel(QuestionnaireAnswerEntry answer)
     {
         Maturity = answer.Maturity;
         Answer = new IdWithTextModel
         {
-            Id = answer.Id!,
+            Id = answer.Sys.Id!,
             Text = answer.Text
         };
     }

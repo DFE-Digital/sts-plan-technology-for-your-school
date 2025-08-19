@@ -1,4 +1,4 @@
-@model CmsComponentButtonWithEntryReferenceDto;
+@model ComponentButtonWithEntryReferenceEntry;
 
 @{
 	var sectionSlug = Context.GetRouteData().Values.First(value => value.Key == "sectionSlug" || value.Key == "route").Value
@@ -8,16 +8,22 @@
 }
 
 @{
+
 	switch (Model.LinkToEntry)
 	{
-		case CmsPageDto pageContent:
+		case PageEntry pageContent:
 			{
-				var buttonWithLink = new CmsComponentButtonWithLinkDto(Model.Button!, pageContent.Slug);
+
+				var buttonWithLink = new ComponentButtonWithLinkEntry
+				{
+					Button = Model.Button!,
+					Href = pageContent.Slug
+				};
 
 				<partial name="components/ButtonWithLink" model=@buttonWithLink />
 				break;
 			}
-		case CmsQuestionnaireQuestionDto _:
+		case QuestionnaireQuestionEntry _:
 			{
 				<govuk-button-link asp-controller="Questions" asp-action="GetNextUnansweredQuestion" asp-route-sectionSlug="@sectionSlug" asp-route-categorySlug="@categorySlug" class="govuk-link">
 					@Model.Button!.Value

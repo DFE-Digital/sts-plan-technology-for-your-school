@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Core.Caching.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Domain.Caching.Models;
 using Microsoft.Extensions.Logging;
@@ -61,7 +61,7 @@ public class RedisCache : ICmsCache
 
             if (redisResult.ExistedInCache == true && !cacheValueIsNull)
             {
-                var hasContent = redisResult.CacheValue is IEnumerable<IDtoTransformableEntry> cacheValue
+                var hasContent = redisResult.CacheValue is IEnumerable<ContentfulEntry> cacheValue
                     ? cacheValue.Any()
                     : !cacheValueIsNull;
 

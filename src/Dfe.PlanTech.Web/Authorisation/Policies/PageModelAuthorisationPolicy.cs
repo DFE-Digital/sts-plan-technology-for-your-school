@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
 using Dfe.PlanTech.Infrastructure.SignIns.Models;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
@@ -71,7 +71,7 @@ public class PageModelAuthorisationPolicy(
             return new UserAuthorisationResult(true, userAuthorisationStatus);
         }
 
-        CmsPageDto? page = await GetPageForSlug(httpContext, slug);
+        PageEntry? page = await GetPageForSlug(httpContext, slug);
 
         if (page == null)
         {
@@ -88,12 +88,12 @@ public class PageModelAuthorisationPolicy(
     /// The page ias added to the HttpContext for use in the <see cref="PageModelBinder"/>, 
     /// to prevent the page being loaded multiple times for a single request
     /// </remarks>
-    private async Task<CmsPageDto?> GetPageForSlug(HttpContext httpContext, string slug)
+    private async Task<PageEntry?> GetPageForSlug(HttpContext httpContext, string slug)
     {
         using var scope = httpContext.RequestServices.CreateAsyncScope();
         var contentfulService = scope.ServiceProvider.GetRequiredService<ContentfulService>();
         var page = await contentfulService.GetPageBySlugAsync(slug);
-        httpContext.Items.Add(nameof(CmsPageDto), page);
+        httpContext.Items.Add(nameof(PageEntry), page);
 
         return page;
     }

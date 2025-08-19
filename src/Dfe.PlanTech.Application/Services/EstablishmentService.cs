@@ -1,6 +1,6 @@
 ﻿using System.Security.Authentication;
 using Dfe.PlanTech.Application.Workflows;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
@@ -41,10 +41,10 @@ public class EstablishmentService(
             ?? throw new DatabaseException($"Could not get latest selected group school for user with ID '{userId.Value}' in establishment with ID '{establishmentId.Value}'");
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<CmsQuestionnaireCategoryDto> categories, int establishmentId)
+    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId)
     {
         var schools = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
-        var sectionIds = categories.SelectMany(c => c.Sections.Select(s => s.Id));
+        var sectionIds = categories.SelectMany(c => c.Sections.Select(s => s.Sys.Id));
 
         var schoolUrns = schools.Select(s => s.Urn);
         var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(schoolUrns);

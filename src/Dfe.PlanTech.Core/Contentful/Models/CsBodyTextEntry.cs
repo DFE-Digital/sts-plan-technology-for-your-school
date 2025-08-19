@@ -1,13 +1,9 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class CsBodyTextEntry: TransformableEntry<CsBodyTextEntry, CmsCsBodyTextDto>
+public class CsBodyTextEntry : ContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public RichTextContentField RichText { get; set; } = null!;
     public string Title { get; set; } = null!;
     public string Subtitle { get; set; } = null!;
-
-    protected override Func<CsBodyTextEntry, CmsCsBodyTextDto> Constructor => entry => new(entry);
 }

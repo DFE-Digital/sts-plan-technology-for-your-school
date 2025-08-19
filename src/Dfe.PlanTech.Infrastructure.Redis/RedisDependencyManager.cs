@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Domain.Background;
 using StackExchange.Redis;
 
@@ -52,16 +52,16 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     => value switch
     {
         null => [],
-        IEnumerable<IDtoTransformableEntry> collection => collection.SelectMany(GetDependencies),
-        IDtoTransformableEntry item => GetContentDependenciesAsync(item),
-        _ => throw new InvalidOperationException($"{value!.GetType()} is not a {typeof(IDtoTransformableEntry)} or a {typeof(IEnumerable<IDtoTransformableEntry>)}"),
+        IEnumerable<ContentfulEntry> collection => collection.SelectMany(GetDependencies),
+        ContentfulEntry item => GetContentDependenciesAsync(item),
+        _ => throw new InvalidOperationException($"{value!.GetType()} is not a {typeof(ContentfulEntry)} or a {typeof(IEnumerable<ContentfulEntry>)}"),
     };
 
     /// <summary>
     /// Uses reflection to check for any ContentIds within the <see cref="IContentComponent">, and returns the Id value of any found
     /// </summary>
     /// <param name="value"></param>
-    private IEnumerable<string> GetContentDependenciesAsync(IDtoTransformableEntry value)
+    private IEnumerable<string> GetContentDependenciesAsync(ContentfulEntry value)
     {
         // RichText is a sub-component that doesn't have SystemDetails, exit for such types
         if (value.Sys is null)
@@ -71,7 +71,7 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
         var properties = value.GetType().GetProperties();
         foreach (var property in properties)
         {
-            if (typeof(IDtoTransformableEntry).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<IDtoTransformableEntry>).IsAssignableFrom(property.PropertyType))
+            if (typeof(ContentfulEntry).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<ContentfulEntry>).IsAssignableFrom(property.PropertyType))
             {
                 foreach (var dependency in GetDependencies(property.GetValue(value)))
                 {

@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Workflows;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
 
@@ -11,7 +11,7 @@ public class QuestionService(
 {
     private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
-    public async Task<CmsQuestionnaireQuestionDto?> GetNextUnansweredQuestion(int establishmentId, CmsQuestionnaireSectionDto section)
+    public async Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(int establishmentId, QuestionnaireSectionEntry section)
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
         if (submission is null)
@@ -33,16 +33,16 @@ public class QuestionService(
     /// <param name="answeredQuestions"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException"></exception>
-    private static CmsQuestionnaireQuestionDto? GetValidatedNextUnansweredQuestion(CmsQuestionnaireSectionDto section, SubmissionResponsesModel answeredQuestions)
+    private static QuestionnaireQuestionEntry? GetValidatedNextUnansweredQuestion(QuestionnaireSectionEntry section, SubmissionResponsesModel answeredQuestions)
     {
         var lastAttachedResponse = answeredQuestions.Responses.LastOrDefault();
         if (lastAttachedResponse is null)
             throw new DatabaseException($"The responses to the ongoing submission {answeredQuestions.SubmissionId} are out of sync with the topic");
 
         return section.Questions
-            .Where(question => question.Id.Equals(lastAttachedResponse.QuestionSysId))
+            .Where(question => question.Sys.Id.Equals(lastAttachedResponse.QuestionSysId))
             .SelectMany(question => question.Answers)
-            .Where(answer => answer.Id.Equals(lastAttachedResponse.AnswerSysId))
+            .Where(answer => answer.Sys.Id.Equals(lastAttachedResponse.AnswerSysId))
             .Select(answer => answer.NextQuestion)
             .FirstOrDefault();
     }

@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
 {
@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
     {
         public SystemDetailsViewModel Sys { get; init; } = null!;
 
-        public QuestionReferenceViewModel(CmsQuestionnaireQuestionDto questionDto)
+        public QuestionReferenceViewModel(QuestionnaireQuestionEntry questionDto)
         {
             Sys = new SystemDetailsViewModel(questionDto.Sys);
         }

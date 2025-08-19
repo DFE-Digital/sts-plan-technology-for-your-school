@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Web.Context;
@@ -25,7 +25,7 @@ public class PagesViewBuilder(
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
 
-    public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, CmsPageDto page)
+    public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, PageEntry page)
     {
         if (string.Equals(page.Slug, UrlConstants.HomePage.Replace("/", "")) && CurrentUser.IsMat)
         {
@@ -46,7 +46,7 @@ public class PagesViewBuilder(
         {
             if (!CurrentUser.IsAuthenticated)
             {
-                _logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Id);
+                _logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Sys.Id);
             }
             else
             {
@@ -54,7 +54,7 @@ public class PagesViewBuilder(
             }
         }
 
-        if (string.Equals(page.Id, _errorPages.InternalErrorPageId))
+        if (string.Equals(page.Sys.Id, _errorPages.InternalErrorPageId))
         {
             viewModel.DisplayBlueBanner = false;
         }
@@ -62,7 +62,7 @@ public class PagesViewBuilder(
         return controller.View("Page", viewModel);
     }
 
-    private async Task<IActionResult> BuildLandingPageAsync(Controller controller, CmsPageDto page)
+    private async Task<IActionResult> BuildLandingPageAsync(Controller controller, PageEntry page)
     {
         var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug);
         if (category is null)
@@ -73,7 +73,7 @@ public class PagesViewBuilder(
         var landingPageViewModel = new CategoryLandingPageViewModel()
         {
             Slug = page.Slug,
-            Title = new CmsComponentTitleDto(category.Header.Text),
+            Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
             SectionName = controller.TempData["SectionName"] as string
         };

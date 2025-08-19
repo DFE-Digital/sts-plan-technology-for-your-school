@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Web.ViewModels;
@@ -9,9 +9,9 @@ public class GroupsSelectorViewModel
 
     public List<SqlEstablishmentLinkDto> GroupEstablishments { get; set; } = null!;
 
-    public CmsComponentTitleDto Title { get; init; } = null!;
+    public ComponentTitleEntry Title { get; init; } = null!;
 
-    public List<CmsEntryDto> Content { get; init; } = null!;
+    public List<ContentfulEntry> Content { get; init; } = null!;
 
     public string? ErrorMessage { get; set; }
 

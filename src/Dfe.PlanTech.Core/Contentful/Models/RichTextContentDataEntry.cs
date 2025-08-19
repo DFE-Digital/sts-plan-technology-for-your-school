@@ -1,10 +1,8 @@
 ﻿using Contentful.Core.Models;
-using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class RichTextContentDataEntry : TransformableEntry<RichTextContentDataEntry, CmsRichTextContentDataDto>, IHasSlug, IHasUri
+public class RichTextContentDataEntry : Entry<ContentfulEntry>
 {
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
@@ -14,6 +12,4 @@ public class RichTextContentDataEntry : TransformableEntry<RichTextContentDataEn
     public string SummaryLine { get; init; } = null!;
     public string? Uri { get; init; } = null!;
     public RichTextContentField RichText { get; init; } = null!;
-
-    protected override Func<RichTextContentDataEntry, CmsRichTextContentDataDto> Constructor => entry => new(entry);
 }

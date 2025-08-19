@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
@@ -24,11 +24,11 @@ public class SubmissionWorkflow(
 
     public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
         int establishmentId,
-        CmsQuestionnaireSectionDto section,
+        QuestionnaireSectionEntry section,
         bool? isCompletedSubmission
     )
     {
-        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, isCompletedSubmission);
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Sys.Id, isCompletedSubmission);
         if (latestSubmission is null)
         {
             return null;
@@ -40,10 +40,10 @@ public class SubmissionWorkflow(
         if (lastResponseInUserJourney is not null)
         {
             var lastSelectedQuestion = section.Questions
-                .FirstOrDefault(q => q.Id.Equals(lastResponseInUserJourney.Question.ContentfulRef))
-                    ?? throw new UserJourneyMissingContentException($"Could not find question with database ID {lastResponseInUserJourney.QuestionId} (Contentful ref {lastResponseInUserJourney.Question.ContentfulRef}) in section with ID {section.Id}", section);
+                .FirstOrDefault(q => q.Sys.Id.Equals(lastResponseInUserJourney.Question.ContentfulRef))
+                    ?? throw new UserJourneyMissingContentException($"Could not find question with database ID {lastResponseInUserJourney.QuestionId} (Contentful ref {lastResponseInUserJourney.Question.ContentfulRef}) in section with ID {section.Sys.Id}", section);
 
-            if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
+            if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Sys.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
             {
                 throw new UserJourneyMissingContentException($"Could not find answer with Contentful reference {lastResponseInUserJourney.Answer.ContentfulRef} in question with Contentful reference {lastResponseInUserJourney.Question.ContentfulRef}", section);
             }
@@ -129,7 +129,7 @@ public class SubmissionWorkflow(
         return _storedProcedureRepository.HardDeleteCurrentSubmissionAsync(establishmentId, sectionId);
     }
 
-    private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, CmsQuestionnaireSectionDto section)
+    private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, QuestionnaireSectionEntry section)
     {
         var questionWithAnswerMap = responses
             .OrderByDescending(r => r.DateCreated)
@@ -139,15 +139,15 @@ public class SubmissionWorkflow(
         var currentQuestion = section?.Questions.FirstOrDefault();
         while (currentQuestion is not null)
         {
-            if (!questionWithAnswerMap.TryGetValue(currentQuestion.Id ?? string.Empty, out var response))
+            if (!questionWithAnswerMap.TryGetValue(currentQuestion.Sys.Id ?? string.Empty, out var response))
             {
                 break;
             }
 
             yield return response;
 
-            currentQuestion = currentQuestion.Answers
-                .Find(a => a.Id!.Equals(response.Answer.ContentfulRef))?
+            currentQuestion = currentQuestion.Answers.ToList()
+                .Find(a => a.Sys.Id!.Equals(response.Answer.ContentfulRef))?
                 .NextQuestion;
         }
     }

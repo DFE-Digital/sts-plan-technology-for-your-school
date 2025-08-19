@@ -1,6 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context;
@@ -155,7 +155,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage
     )
     {
-        List<CmsEntryDto> content = [];
+        List<ContentfulEntry> content = [];
 
         if (pageTitle.Equals(PageTitleConstants.CheckAnswers))
         {
@@ -169,7 +169,7 @@ public class ReviewAnswersViewBuilder(
 
         return new ReviewAnswersViewModel()
         {
-            Title = new CmsComponentTitleDto(pageTitle),
+            Title = new ComponentTitleEntry(pageTitle),
             Content = content,
             SectionName = routingData.QuestionnaireSection.Name,
             CategorySlug = categorySlug,

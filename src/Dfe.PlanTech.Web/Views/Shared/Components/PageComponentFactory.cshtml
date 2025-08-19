@@ -1,6 +1,6 @@
 @inject ComponentViewsFactory ComponentViewsFactory;
 
-@model CmsEntryDto;
+@model ContentfulEntry;
 
 @{
     if(ComponentViewsFactory.TryGetViewForType(Model, out string? path) && !string.IsNullOrEmpty(path)){

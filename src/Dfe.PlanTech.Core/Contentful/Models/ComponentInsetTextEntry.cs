@@ -1,11 +1,7 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
-
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentInsetTextEntry: TransformableEntry<ComponentInsetTextEntry, CmsComponentInsetTextDto>
+public class ComponentInsetTextEntry: ContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public string Text { get; init; } = null!;
-
-    protected override Func<ComponentInsetTextEntry, CmsComponentInsetTextDto> Constructor => entry => new(entry);
 }

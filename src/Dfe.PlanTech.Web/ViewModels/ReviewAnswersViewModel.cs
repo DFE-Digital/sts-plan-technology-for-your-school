@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -12,9 +12,9 @@ public class ReviewAnswersViewModel
     public SubmissionResponsesViewModel? SubmissionResponses { get; init; } = null!;
 
     [Required]
-    public CmsComponentTitleDto Title { get; init; } = null!;
+    public ComponentTitleEntry Title { get; init; } = null!;
 
-    public List<CmsEntryDto>? Content { get; init; }
+    public List<ContentfulEntry>? Content { get; init; }
     public string? CategorySlug { get; init; } = null;
     public string? ErrorMessage { get; set; } = null;
     public string? SectionSlug { get; init; } = null;

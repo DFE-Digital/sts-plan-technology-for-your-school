@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
@@ -13,7 +13,7 @@ public class AccordionComponentRenderer(
     public ILogger Logger => _logger;
     public IReadOnlyList<IRichTextContentPartRenderer> Renderers { get; private set; } = new List<IRichTextContentPartRenderer>();
 
-    public StringBuilder AddHtml(CmsRichTextContentDto content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         Renderers = rendererCollection.Renderers;
 
@@ -43,7 +43,7 @@ public class AccordionComponentRenderer(
         return stringBuilder;
     }
 
-    public void RenderChildren(CmsRichTextContentDto content, StringBuilder stringBuilder)
+    public void RenderChildren(RichTextContentField content, StringBuilder stringBuilder)
     {
         foreach (var subContent in content.Content)
         {
@@ -59,6 +59,6 @@ public class AccordionComponentRenderer(
         }
     }
 
-    public IRichTextContentPartRenderer? GetRendererForContent(CmsRichTextContentDto content)
+    public IRichTextContentPartRenderer? GetRendererForContent(RichTextContentField content)
     => Renderers.FirstOrDefault(renderer => renderer.Accepts(content));
 }

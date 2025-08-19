@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Helpers;
 
@@ -12,10 +12,10 @@ public class GroupsCategorySectionViewModel
     public CategorySectionRecommendationViewModel? Recommendation { get; init; }
     public string? RecommendationSlug { get; init; }
     public string? Slug { get; init; }
-    public CmsTagDto Tag { get; init; }
+    public Tag Tag { get; init; }
 
     public GroupsCategorySectionViewModel(
-        CmsQuestionnaireSectionDto section,
+        QuestionnaireSectionEntry section,
         CategorySectionRecommendationViewModel recommendation,
         SqlSectionStatusDto? sectionStatus,
         bool hadRetrievalError
@@ -31,12 +31,12 @@ public class GroupsCategorySectionViewModel
         if (string.IsNullOrWhiteSpace(Name))
         {
             ErrorMessage = $"{Name} unavailable";
-            Tag = new CmsTagDto();
+            Tag = new Tag();
         }
         Tag = GetGroupSubmissionStatusTag(sectionStatus, hadRetrievalError);
     }
 
-    private CmsTagDto GetGroupSubmissionStatusTag(SqlSectionStatusDto? sectionStatus, bool hadRetrievalError)
+    private Tag GetGroupSubmissionStatusTag(SqlSectionStatusDto? sectionStatus, bool hadRetrievalError)
     {
         var currentCompleted = sectionStatus?.Completed == true;
         var lastCompleted = LastEditedDate(sectionStatus?.LastCompletionDate);
@@ -67,7 +67,7 @@ public class GroupsCategorySectionViewModel
             colour = "Grey";
         }
 
-        return new CmsTagDto($"{message}", TagColourHelper.GetMatchingColour(colour));
+        return new Tag($"{message}", TagColourHelper.GetMatchingColour(colour));
     }
 
     private static string? LastEditedDate(DateTime? date)

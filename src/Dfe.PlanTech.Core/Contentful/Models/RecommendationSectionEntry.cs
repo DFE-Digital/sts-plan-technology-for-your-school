@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class RecommendationSectionEntry: TransformableEntry<RecommendationSectionEntry, CmsRecommendationSectionDto>
+public class RecommendationSectionEntry: ContentfulEntry
 {
     public string InternalName { get; set; } = null!;
 
@@ -13,5 +12,11 @@ public class RecommendationSectionEntry: TransformableEntry<RecommendationSectio
     [NotMapped]
     public IEnumerable<RecommendationChunkEntry> Chunks { get; init; } = [];
 
-    protected override Func<RecommendationSectionEntry, CmsRecommendationSectionDto> Constructor => entry => new(entry);
+    public List<RecommendationChunkEntry> GetRecommendationChunksByAnswerIds(IEnumerable<string> answerIds)
+    {
+        return Chunks
+            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
+            .DistinctBy(chunk => chunk.Sys.Id)
+            .ToList();
+    }
 }

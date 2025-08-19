@@ -1,6 +1,5 @@
-﻿using System.Text.Json;
-using Dfe.PlanTech.Application.Workflows;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.RoutingDataModel;
@@ -16,7 +15,7 @@ public class SubmissionService(
     private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
     private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
-    public async Task RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, CmsQuestionnaireSectionDto section)
+    public async Task RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section)
     {
         // Check if an in-progress submission already exists
         var inProgressSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
@@ -28,10 +27,10 @@ public class SubmissionService(
             await _submissionWorkflow.DeleteSubmissionSoftAsync(inProgressSubmission.Id);
         }
 
-        await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section.Id);
+        await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section.Sys.Id);
     }
 
-    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, CmsQuestionnaireSectionDto section, bool isCompletedSubmission)
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, bool isCompletedSubmission)
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission);
         return submission is null
@@ -72,9 +71,9 @@ public class SubmissionService(
 
         var lastResponse = submissionResponsesModel!.Responses.Last();
         var cmsLastAnswer = section.Questions
-            .FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))?
+            .FirstOrDefault(q => q.Sys.Id.Equals(lastResponse.QuestionSysId))?
             .Answers
-            .FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
+            .FirstOrDefault(a => a.Sys.Id.Equals(lastResponse.AnswerSysId));
 
         if (!Enum.TryParse<SubmissionStatus>(latestCompletedSubmission?.Status, out var sectionStatus))
         {
@@ -93,9 +92,9 @@ public class SubmissionService(
         );
     }
 
-    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(CmsQuestionnaireCategoryDto category, int establishmentId)
+    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(QuestionnaireCategoryEntry category, int establishmentId)
     {
-        var sectionIds = category.Sections.Select(s => s.Id);
+        var sectionIds = category.Sections.Select(s => s.Sys.Id);
         return _submissionWorkflow.GetSectionStatusesAsync(establishmentId, sectionIds);
     }
 

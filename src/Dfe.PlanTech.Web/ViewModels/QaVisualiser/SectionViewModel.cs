@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
 {
@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
         public string Name { get; init; } = null!;
         public List<QuestionViewModel> Questions { get; init; } = [];
 
-        public SectionViewModel(CmsQuestionnaireSectionDto sectionDto)
+        public SectionViewModel(QuestionnaireSectionEntry sectionDto)
         {
             Sys = new SystemDetailsViewModel(sectionDto.Sys);
             Name = sectionDto.Name;

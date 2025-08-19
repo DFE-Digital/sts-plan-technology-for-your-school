@@ -1,11 +1,11 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
 public class CategoryLandingPageViewModel
 {
-    public CmsQuestionnaireCategoryDto Category { get; set; } = null!;
+    public QuestionnaireCategoryEntry Category { get; set; } = null!;
     public string? SectionName { get; set; }
     public string Slug { get; set; } = null!;
-    public CmsComponentTitleDto Title { get; set; } = null!;
+    public ComponentTitleEntry Title { get; set; } = null!;
 }

@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.ViewComponents;
@@ -17,12 +17,12 @@ public class CategorySectionViewComponentViewBuilder(
     private readonly ILogger<CategorySectionViewComponent> _logger = loggerFactory.CreateLogger<CategorySectionViewComponent>();
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(CmsQuestionnaireCategoryDto category)
+    public async Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category)
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("Found no sections for category {id}", category.Id);
-            throw new InvalidDataException($"Found no sections for category {category.Id}");
+            _logger.LogError("Found no sections for category {id}", category.Sys.Id);
+            throw new InvalidDataException($"Found no sections for category {category.Sys.Id}");
         }
 
         var establishmentId = GetEstablishmentIdOrThrowException();
@@ -47,7 +47,7 @@ public class CategorySectionViewComponentViewBuilder(
         var categorySections = await BuildCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync();
         var description = category.Content is { Count: > 0 } content
             ? content[0]
-            : new CmsMissingComponentDto();
+            : new MissingComponentEntry();
 
         return new CategorySectionViewComponentViewModel
         {
@@ -62,7 +62,7 @@ public class CategorySectionViewComponentViewBuilder(
     }
 
     private async IAsyncEnumerable<CategorySectionViewModel> BuildCategorySectionViewModel(
-        CmsQuestionnaireCategoryDto category,
+        QuestionnaireCategoryEntry category,
         List<SqlSectionStatusDto> sectionStatuses,
         bool hadRetrievalError
     )
@@ -71,17 +71,17 @@ public class CategorySectionViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Sys.Id, section.Name);
             }
 
-            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
+            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Sys.Id));
             var recommendationIntro = await BuildCategorySectionRecommendationViewModel(section, sectionStatus);
 
             yield return new CategorySectionViewModel(section, recommendationIntro, sectionStatus, hadRetrievalError);
         }
     }
 
-    private string? GetLandingPageSlug(CmsQuestionnaireCategoryDto category)
+    private string? GetLandingPageSlug(QuestionnaireCategoryEntry category)
     {
         if (category?.LandingPage?.Slug is string slug)
         {

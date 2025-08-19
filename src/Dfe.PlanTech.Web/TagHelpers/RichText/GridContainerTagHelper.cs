@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers.RichText;
@@ -12,7 +12,7 @@ public class GridContainerTagHelper(
     private readonly ILogger<GridContainerTagHelper> _logger = loggerFactory.CreateLogger<GridContainerTagHelper>();
     private readonly ICardContainerContentPartRenderer _cardContentPartRenderer = cardContentPartRenderer ?? throw new ArgumentNullException(nameof(cardContentPartRenderer));
 
-    public IReadOnlyList<CmsComponentCardDto>? Content { get; set; }
+    public IReadOnlyList<ComponentCardEntry>? Content { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {

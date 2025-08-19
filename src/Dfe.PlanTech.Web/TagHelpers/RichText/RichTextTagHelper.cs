@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers.RichText;
@@ -12,7 +12,7 @@ public class RichTextTagHelper(
     private readonly ILogger<RichTextTagHelper> _logger = loggerFactory.CreateLogger<RichTextTagHelper>();
     private readonly IRichTextRenderer _richTextRenderer = richTextRenderer ?? throw new ArgumentNullException(nameof(richTextRenderer));
 
-    public CmsRichTextContentDto? Content { get; set; }
+    public RichTextContentField? Content { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {

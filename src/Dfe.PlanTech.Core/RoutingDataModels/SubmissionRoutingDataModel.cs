@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModel;
@@ -8,15 +8,15 @@ namespace Dfe.PlanTech.Core.RoutingDataModels
     public class SubmissionRoutingDataModel
     {
         public string? Maturity { get; set; }
-        public CmsQuestionnaireQuestionDto? NextQuestion { get; set; }
-        public CmsQuestionnaireSectionDto QuestionnaireSection { get; set; } = null!;
+        public QuestionnaireQuestionEntry? NextQuestion { get; set; }
+        public QuestionnaireSectionEntry QuestionnaireSection { get; set; } = null!;
         public SubmissionResponsesModel? Submission { get; set; }
         public SubmissionStatus Status { get; init; }
 
         public SubmissionRoutingDataModel(
             string? maturity,
-            CmsQuestionnaireQuestionDto? nextQuestion,
-            CmsQuestionnaireSectionDto questionnaireSection,
+            QuestionnaireQuestionEntry? nextQuestion,
+            QuestionnaireSectionEntry questionnaireSection,
             SubmissionResponsesModel? submission,
             SubmissionStatus status
         )
@@ -35,7 +35,7 @@ namespace Dfe.PlanTech.Core.RoutingDataModels
             Submission?.Responses.FirstOrDefault(response => response.QuestionSysId.Equals(questionSysId))
                 ?? throw new DatabaseException($"Could not find response for question entry with sys ID '{questionSysId}'");
 
-        public CmsQuestionnaireQuestionDto GetQuestionForSlug(string questionSlug) =>
+        public QuestionnaireQuestionEntry GetQuestionForSlug(string questionSlug) =>
             QuestionnaireSection.Questions.FirstOrDefault(q => q.Slug == questionSlug)
                 ?? throw new ContentfulDataUnavailableException($"Could not find question with slug '{questionSlug}'");
     }

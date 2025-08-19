@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
@@ -17,7 +17,7 @@ public class CategoryLandingSectionViewModel
     public string? Slug { get; init; }
 
     public CategoryLandingSectionViewModel(
-        CmsQuestionnaireSectionDto section,
+        QuestionnaireSectionEntry section,
         CategoryLandingSectionRecommendationsViewModel recommendations,
         SqlSectionStatusDto? sectionStatus,
         bool hadRetrievalError

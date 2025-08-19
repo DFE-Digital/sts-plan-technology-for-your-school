@@ -1,12 +1,12 @@
 ﻿using System.Text;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Application.Rendering;
 
 public class CardComponentRenderer : ICardContentPartRenderer
 {
-    public StringBuilder AddHtml(CmsComponentCardDto? cardComponent, StringBuilder stringBuilder)
+    public StringBuilder AddHtml(ComponentCardEntry? cardComponent, StringBuilder stringBuilder)
     {
         if (cardComponent is null)
         {

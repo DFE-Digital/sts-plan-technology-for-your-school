@@ -1,8 +1,6 @@
 ﻿using Dfe.PlanTech.Core.Content.Options;
 using Dfe.PlanTech.Core.Content.Queries;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models.Options;
@@ -23,16 +21,15 @@ public class ContentfulWorkflow(
     private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
     private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
 
-    public async Task<TDto> GetEntryById<TEntry, TDto>(string entryId)
-        where TEntry : IDtoTransformableEntry<TDto>
-        where TDto : CmsEntryDto
+    public async Task<TEntry> GetEntryById<TEntry>(string entryId)
+        where TEntry : ContentfulEntry
     {
         try
         {
             var entry = await _contentfulRepository.GetEntryByIdAsync<TEntry>(entryId)
                 ?? throw new ContentfulDataUnavailableException($"Could not find entry with ID '{entryId}'");
 
-            return entry.AsDtoInternal();
+            return entry;
         }
         catch (Exception ex)
         {
@@ -41,31 +38,30 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<List<TDto>> GetEntries<TEntry, TDto>()
-        where TEntry : IDtoTransformableEntry<TDto>
-        where TDto : CmsEntryDto
+    public async Task<List<TEntry>> GetEntries<TEntry>()
+        where TEntry : ContentfulEntry
     {
         try
         {
             var entries = await _contentfulRepository.GetEntriesAsync<TEntry>()
-                ?? throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TDto).Name}");
+                ?? throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TEntry).Name}");
 
-            return entries.Select(e => e.AsDtoInternal()).ToList();
+            return entries.ToList();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, ExceptionMessageEntityContentful);
-            throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TDto).Name}", ex);
+            throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TEntry).Name}", ex);
         }
     }
 
-    public async Task<IEnumerable<CmsQuestionnaireSectionDto>> GetAllSectionsAsync()
+    public async Task<IEnumerable<QuestionnaireSectionEntry>> GetAllSectionsAsync()
     {
         try
         {
             var options = new GetEntriesOptions(include: 3);
             var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(options);
-            return sections.Select(s => s.AsDto());
+            return sections;
         }
         catch (Exception ex)
         {
@@ -73,7 +69,7 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<CmsQuestionnaireCategoryDto?> GetCategoryBySlugAsync(string slug)
+    public async Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug)
     {
         var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.sys.contentType.sys.id", Value = "page" };
         var slugQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.fields.slug", Value = slug };
@@ -87,10 +83,10 @@ public class ContentfulWorkflow(
             _logger.LogError("Could not find questionnaire category with slug {Slug} from Contentful", slug);
         }
 
-        return category?.AsDto();
+        return category;
     }
 
-    public async Task<CmsRecommendationIntroDto?> GetIntroForMaturityAsync(string subtopicId, string maturity)
+    public async Task<RecommendationIntroEntry?> GetIntroForMaturityAsync(string subtopicId, string maturity)
     {
         var query = new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId };
         var options = new GetEntriesOptions(include: 2, [query]);
@@ -114,13 +110,13 @@ public class ContentfulWorkflow(
             return null;
         }
 
-        return introForMaturity.AsDto();
+        return introForMaturity;
     }
 
-    public async Task<CmsPageDto> GetPageBySlugAsync(string slug)
+    public async Task<PageEntry> GetPageBySlugAsync(string slug)
     {
         var query = new ContentfulQuerySingleValue { Field = "fields.slug", Value = slug };
-        var options = new GetEntriesOptions(5, [query]);
+        var options = new GetEntriesOptions(_getPageOptions.Include, [query]);
 
         try
         {
@@ -131,7 +127,7 @@ public class ContentfulWorkflow(
                 throw new ContentfulDataUnavailableException($"Could not find a page matching slug '{slug}'");
             }
 
-            return page.AsDto();
+            return page;
         }
         catch (Exception ex)
         {
@@ -139,7 +135,7 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<CmsQuestionnaireSectionDto> GetSectionBySlugAsync(string sectionSlug)
+    public async Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string sectionSlug)
     {
         var sectionSlugQuery = new ContentfulQuerySingleValue { Field = SlugFieldPath, Value = sectionSlug };
         var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.interstitialPage.sys.contentType.sys.id", Value = "page" };
@@ -154,7 +150,7 @@ public class ContentfulWorkflow(
                 throw new ContentfulDataUnavailableException($"Could not find a section matching slug '{sectionSlug}'");
             }
 
-            return section.AsDto();
+            return section;
         }
         catch (Exception ex)
         {
@@ -162,7 +158,7 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<CmsSubtopicRecommendationDto?> GetSubtopicRecommendationByIdAsync(string subtopicId)
+    public async Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId)
     {
         var sectionIdQuery = new ContentfulQuerySingleValue { Field = "fields.subtopic.sys.id", Value = subtopicId };
         var options = new GetEntriesOptions(4, [sectionIdQuery]);
@@ -175,10 +171,10 @@ public class ContentfulWorkflow(
             _logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
         }
 
-        return subtopicRecommendation?.AsDto();
+        return subtopicRecommendation;
     }
 
-    public async Task<CmsRecommendationIntroDto?> GetSubtopicRecommendationIntroByIdAndMaturityAsync(string subtopicId, string maturity)
+    public async Task<RecommendationIntroEntry?> GetSubtopicRecommendationIntroByIdAndMaturityAsync(string subtopicId, string maturity)
     {
         var sectionIdQuery = new ContentfulQuerySingleValue { Field = "fields.subtopic.sys.id", Value = subtopicId };
         var options = new GetEntriesOptions(4, [sectionIdQuery]);
@@ -198,6 +194,6 @@ public class ContentfulWorkflow(
             _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
         }
 
-        return introForMaturity?.AsDto();
+        return introForMaturity;
     }
 }

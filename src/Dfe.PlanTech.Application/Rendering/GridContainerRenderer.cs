@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Application.Rendering;
@@ -12,7 +12,7 @@ public class GridContainerRenderer : ICardContainerContentPartRenderer
     {
         _cardContentPartRenderer = cardContentPartRenderer;
     }
-    public string ToHtml(IReadOnlyList<CmsComponentCardDto>? content)
+    public string ToHtml(IReadOnlyList<ComponentCardEntry>? content)
     {
         if (content is null || !content.Any())
         {

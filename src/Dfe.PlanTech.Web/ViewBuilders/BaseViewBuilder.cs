@@ -1,6 +1,6 @@
 ﻿using System.Security.Authentication;
 using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Core.DataTransferObjects.Contentful;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.ViewModels;
@@ -32,7 +32,7 @@ public class BaseViewBuilder(
     }
 
     protected async Task<CategorySectionRecommendationViewModel> BuildCategorySectionRecommendationViewModel(
-        CmsQuestionnaireSectionDto section,
+        QuestionnaireSectionEntry section,
         SqlSectionStatusDto? sectionStatus
     )
     {
@@ -43,7 +43,7 @@ public class BaseViewBuilder(
 
         try
         {
-            var recommendationIntro = await ContentfulService.GetSubtopicRecommendationIntroAsync(section.Id, sectionStatus.LastMaturity);
+            var recommendationIntro = await ContentfulService.GetSubtopicRecommendationIntroAsync(section.Sys.Id, sectionStatus.LastMaturity);
             if (recommendationIntro == null)
             {
                 return new CategorySectionRecommendationViewModel
