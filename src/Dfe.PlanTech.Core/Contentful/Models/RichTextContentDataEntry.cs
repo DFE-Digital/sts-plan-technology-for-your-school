@@ -9,7 +9,7 @@ public class RichTextContentDataEntry : TransformableEntry<RichTextContentDataEn
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
     public string? Title { get; init; }
-    public Asset Asset { get; init; } = null!;
+    public Asset? Asset { get; init; }
     public IReadOnlyList<RichTextContentDataEntry> Content { get; init; } = [];
     public string SummaryLine { get; init; } = null!;
     public string? Uri { get; init; } = null!;

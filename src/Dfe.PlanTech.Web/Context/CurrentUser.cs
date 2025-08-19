@@ -11,19 +11,23 @@ namespace Dfe.PlanTech.Web.Context
     {
         private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
 
-        private OrganisationModel? _organisationModel;
-
         public string? DsiReference => GetStringFromClaim(ClaimConstants.NameIdentifier)
             ?? throw new AuthenticationException("User is not authenticated");
+
         public string? Email => GetNameIdentifierFromClaim(ClaimConstants.VerifiedEmail)
             ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
+
         public int? EstablishmentId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
+
         public bool IsAuthenticated => GetIsAuthenticated();
+
         public bool IsMat => Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;
+
         public OrganisationModel? Organisation
         {
             get => ParseOrganisationModel();
         }
+
         public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 
         public bool IsInRole(string role) => contextAccessor.HttpContext?.User.IsInRole(role) ?? false;

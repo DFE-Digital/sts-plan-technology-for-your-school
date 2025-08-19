@@ -5,11 +5,11 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
 
-public class AccordionComponent(
+public class AccordionComponentRenderer(
     ILoggerFactory loggerFactory
 ) : IRichTextContentPartRendererCollection
 {
-    private readonly ILogger<AccordionComponent> _logger = loggerFactory.CreateLogger<AccordionComponent>();
+    private readonly ILogger<AccordionComponentRenderer> _logger = loggerFactory.CreateLogger<AccordionComponentRenderer>();
     public ILogger Logger => _logger;
     public IReadOnlyList<IRichTextContentPartRenderer> Renderers { get; private set; } = new List<IRichTextContentPartRenderer>();
 

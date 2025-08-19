@@ -57,7 +57,7 @@ public static class ContentTypeConstants
     public const string CAndSLinkContentTypeId = "csLink";
     public const string ComponentAccordionContentTypeId = "csAccordion";
     public const string ComponentAccordionSectionContentTypeId = "accordionSection";
-    public const string ComponentAttachmentContentTypeId = "attachment";
+    public const string ComponentAttachmentContentTypeId = "Attachment";
     public const string ComponentButtonContentTypeId = "button";
     public const string ComponentButtonWithEntryReferenceContentTypeId = "buttonWithEntryReference";
     public const string ComponentButtonWithLinkContentTypeId = "buttonWithLink";

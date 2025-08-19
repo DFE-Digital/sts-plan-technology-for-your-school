@@ -10,11 +10,11 @@ public class CmsRichTextContentDataDto : CmsEntryDto, IHasUri
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
     public string? Title { get; init; }
-    public Asset Asset { get; init; } = null!;
+    public Asset? Asset { get; init; }
     public IReadOnlyList<CmsRichTextContentDataDto> Content { get; init; } = [];
     public string SummaryLine { get; init; } = null!;
     public string? Uri { get; init; } = null!;
-    public CmsRichTextContentDto RichText { get; init; } = null!;
+    public CmsRichTextContentDto? RichText { get; init; } = null!;
 
     public CmsRichTextContentDataDto(RichTextContentDataEntry richTextField)
     {
@@ -26,6 +26,6 @@ public class CmsRichTextContentDataDto : CmsEntryDto, IHasUri
         Content = richTextField.Content.Select(c => c.AsDto()).ToList();
         SummaryLine = richTextField.SummaryLine;
         Uri = richTextField.Uri;
-        RichText = richTextField.RichText.AsDto();
+        RichText = richTextField.RichText?.AsDto();
     }
 }

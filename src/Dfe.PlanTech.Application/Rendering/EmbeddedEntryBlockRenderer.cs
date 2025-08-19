@@ -20,13 +20,28 @@ public class EmbeddedEntryBlockRenderer(
             return stringBuilder;
         }
 
+        if (richTextData.Sys is null)
+        {
+            if (richTextData.Asset is not null)
+            {
+                var attachment = new AttachmentComponentRenderer();
+                return attachment.AddHtml(content, stringBuilder);
+            }
+            else
+            {
+                var accordionComponent = new AccordionComponentRenderer(loggerFactory);
+                return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
+            }
+        }
+        
+
         switch (richTextData.Sys.ContentType)
         {
             case ContentTypeConstants.ComponentAttachmentContentTypeId:
                 var attachment = new AttachmentComponentRenderer();
                 return attachment.AddHtml(content, stringBuilder);
             case ContentTypeConstants.ComponentAccordionContentTypeId:
-                var accordionComponent = new AccordionComponent(loggerFactory);
+                var accordionComponent = new AccordionComponentRenderer(loggerFactory);
                 return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
             default:
                 break;
