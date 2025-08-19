@@ -1,7 +1,7 @@
 using System.Globalization;
-using Dfe.PlanTech.Domain.Helpers;
+using Dfe.PlanTech.Core.Helpers;
 
-namespace Dfe.PlanTech.Domain.UnitTests.Helpers;
+namespace Dfe.PlanTech.Core.UnitTests.Helpers;
 
 public class TimeZoneHelpersTests
 {
@@ -13,6 +13,6 @@ public class TimeZoneHelpersTests
     {
         var dateTime = DateTime.Parse(inputDate, new CultureInfo("en-GB"));
         var expected = DateTime.Parse(ukTime, new CultureInfo("en-GB"));
-        Assert.Equal(expected, TimeZoneHelpers.ToUkTime(dateTime));
+        Assert.Equal(expected, TimeZoneHelper.ToUkTime(dateTime));
     }
 }

@@ -41,6 +41,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Core", "src\Df
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Data.Sql", "src\Dfe.PlanTech.Data.Sql\Dfe.PlanTech.Data.Sql.csproj", "{FC7C922D-243F-436D-B03E-B3F71FB4F584}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Core.UnitTests", "tests\Dfe.PlanTech.Core.UnitTests\Dfe.PlanTech.Core.UnitTests.csproj", "{83602389-1A70-42FC-B59F-5D047A036381}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,10 @@ Global
 		{FC7C922D-243F-436D-B03E-B3F71FB4F584}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC7C922D-243F-436D-B03E-B3F71FB4F584}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FC7C922D-243F-436D-B03E-B3F71FB4F584}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83602389-1A70-42FC-B59F-5D047A036381}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83602389-1A70-42FC-B59F-5D047A036381}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83602389-1A70-42FC-B59F-5D047A036381}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83602389-1A70-42FC-B59F-5D047A036381}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -137,6 +143,7 @@ Global
 		{A96209F5-F5B2-4168-9CAB-FA98E8BDEABD} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{890AEB7F-20DD-4646-9C4C-09D9C0AA94A5} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
 		{FC7C922D-243F-436D-B03E-B3F71FB4F584} = {20FD2D0C-81CA-4337-B00D-9CB0BB36FE46}
+		{83602389-1A70-42FC-B59F-5D047A036381} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2661FAF0-D2EA-4265-846E-E6AB213C854C}

@@ -1,6 +1,6 @@
-using Dfe.PlanTech.Domain.Database;
+using Dfe.PlanTech.Core.Options;
 
-namespace Dfe.PlanTech.Domain.UnitTests.Database;
+namespace Dfe.PlanTech.Core.UnitTests.Options;
 
 public class DatabaseRetryOptionsTests
 {
@@ -15,5 +15,13 @@ public class DatabaseRetryOptionsTests
 
         Assert.Equal(maxRetryCount, options.MaxRetryCount);
         Assert.Equal(maxDelayInMilliseconds, options.MaxDelayInMilliseconds);
+    }
+
+    [Fact]
+    public void DatabaseRetryOptions_Should_Use_Defaults_When_No_Parameters()
+    {
+        var options = new DatabaseOptions();
+        Assert.Equal(5, options.MaxRetryCount);
+        Assert.Equal(5000, options.MaxDelayInMilliseconds);
     }
 }

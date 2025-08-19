@@ -1,7 +1,7 @@
 using System.Globalization;
-using Dfe.PlanTech.Domain.Helpers;
+using Dfe.PlanTech.Core.Helpers;
 
-namespace Dfe.PlanTech.Domain.UnitTests.Helpers;
+namespace Dfe.PlanTech.Core.UnitTests.Helpers;
 
 public class DateTimeFormatterTests
 {
