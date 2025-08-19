@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Exceptions;
+using Dfe.PlanTech.Core.Exceptions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Exceptions;

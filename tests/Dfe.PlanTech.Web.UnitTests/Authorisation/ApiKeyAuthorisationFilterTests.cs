@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Persistence.Models;
+using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Web.Authorisation.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

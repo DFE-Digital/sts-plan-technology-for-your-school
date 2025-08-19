@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.Binders;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -14,7 +14,7 @@ public class PageModelBinderTests
     [Fact]
     public async Task Should_Get_Page_From_Items()
     {
-        var page = new Page()
+        var page = new PageEntry()
         {
             Slug = "Testing Slug"
         };
@@ -28,7 +28,7 @@ public class PageModelBinderTests
 
         httpContext.Items = new Dictionary<object, object?>
         {
-            [nameof(Page)] = page
+            [nameof(PageEntry)] = page
         };
 
         modelBinderContext.HttpContext.Returns(httpContext);
@@ -52,14 +52,14 @@ public class PageModelBinderTests
 
         httpContext.Items = new Dictionary<object, object?>
         {
-            [nameof(Page)] = "Not a page type"
+            [nameof(PageEntry)] = "Not a page type"
         };
 
         modelBinderContext.HttpContext.Returns(httpContext);
 
         await pageModelBinder.BindModelAsync(modelBinderContext);
 
-        Assert.Single(logger.GetMatchingReceivedMessages($"Page is not {typeof(Page)}", LogLevel.Error));
+        Assert.Single(logger.GetMatchingReceivedMessages($"Page is not {typeof(PageEntry)}", LogLevel.Error));
         Assert.False(modelBinderContext.Result.IsModelSet);
     }
 

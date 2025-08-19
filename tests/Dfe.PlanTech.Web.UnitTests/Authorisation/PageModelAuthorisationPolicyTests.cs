@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
-using Page = Dfe.PlanTech.Domain.Content.Models.Page;
+using Page = Dfe.PlanTech.Core.Contentful.Models.PageEntry;
 
 namespace Dfe.PlanTech.Web.UnitTests.Authorisation;
 
