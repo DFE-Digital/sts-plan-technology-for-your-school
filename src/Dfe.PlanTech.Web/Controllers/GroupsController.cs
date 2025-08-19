@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,14 +10,17 @@ public class GroupsController : BaseController<GroupsController>
 {
     public const string GetGroupsRecommendationAction = "GetGroupsRecommendation";
     public const string GetSchoolDashboardAction = "GetSchoolDashboard";
-    
-    private GroupsViewBuilder _groupsViewBuilder;
+
+    private readonly CurrentUser _currentUser;
+    private readonly GroupsViewBuilder _groupsViewBuilder;
 
     public GroupsController(
         ILoggerFactory loggerFactory,
+        CurrentUser currentUser,
         GroupsViewBuilder groupsViewBuilder
     ) : base(loggerFactory)
     {
+        _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _groupsViewBuilder = groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
     }
 
@@ -30,6 +34,7 @@ public class GroupsController : BaseController<GroupsController>
     public async Task<IActionResult> SelectSchool(string schoolUrn, string schoolName)
     {
         await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
+        _currentUser.SetMatSelectedSchoolId(schoolUrn);
 
         return RedirectToAction(nameof(GetSchoolDashboardView));
     }
