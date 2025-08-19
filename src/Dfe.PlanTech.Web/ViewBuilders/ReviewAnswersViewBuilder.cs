@@ -100,7 +100,6 @@ public class ReviewAnswersViewBuilder(
         }
     }
 
-
     public async Task<IActionResult> ConfirmCheckAnswers(
         Controller controller,
         string categorySlug,

@@ -32,10 +32,10 @@ public class StoredProcedureRepository
 
         var parameters = new SqlParameter[]
         {
+            new(DatabaseConstants.UserIdParam, userGroupSelectionModel.UserId),
             new(DatabaseConstants.EstablishmentIdParam, userGroupSelectionModel.UserEstablishmentId),
             new(DatabaseConstants.SelectedEstablishmentIdParam, userGroupSelectionModel.SelectedEstablishmentId),
             new(DatabaseConstants.SelectedEstablishmentNameParam, SqlValueOrDbNull(userGroupSelectionModel.SelectedEstablishmentName)),
-            new(DatabaseConstants.UserIdParam, userGroupSelectionModel.UserId),
             selectionId
         };
 
