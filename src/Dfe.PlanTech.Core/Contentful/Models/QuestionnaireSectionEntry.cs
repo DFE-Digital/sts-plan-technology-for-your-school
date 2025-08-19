@@ -8,7 +8,7 @@ public class QuestionnaireSectionEntry : TransformableEntry<QuestionnaireSection
     public string Name { get; init; } = null!;
     public string ShortDescription { get; init; } = null!;
     public PageEntry InterstitialPage { get; set; } = null!;
-    public IEnumerable<QuestionnaireQuestionEntry> Questions { get; init; } = [];
+    public IEnumerable<QuestionnaireQuestionEntry> Questions { get; set; } = [];
 
     protected override Func<QuestionnaireSectionEntry, CmsQuestionnaireSectionDto> Constructor => entry => new(entry);
 }

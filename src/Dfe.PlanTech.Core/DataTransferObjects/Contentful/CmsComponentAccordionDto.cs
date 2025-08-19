@@ -6,7 +6,7 @@ public class CmsComponentAccordionDto : CmsEntryDto
 {
     public string Id { get; set; } = null!;
     public string InternalName { get; init; } = null!;
-    public List<CmsComponentAccordionSectionDto> Content { get; init; } = [];
+    public List<CmsRichTextContentDataDto> Content { get; init; } = [];
 
     public CmsComponentAccordionDto(ComponentAccordionEntry accordionEntry)
     {

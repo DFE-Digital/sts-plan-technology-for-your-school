@@ -87,6 +87,11 @@ public class ContentfulWorkflow(
             _logger.LogError("Could not find questionnaire category with slug {Slug} from Contentful", slug);
         }
 
+        foreach(var section in category!.Sections)
+        {
+            section.Questions = [];
+        }
+
         return category?.AsDto();
     }
 
