@@ -4,7 +4,6 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Xunit;
 
 namespace Dfe.PlanTech.Core.UnitTests.RoutingDataModels;
 

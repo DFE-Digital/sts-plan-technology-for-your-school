@@ -1,6 +1,5 @@
 using System.Text;
 using Dfe.PlanTech.Core.Extensions;
-using Xunit;
 
 namespace Dfe.PlanTech.Core.UnitTests.Extensions;
 
