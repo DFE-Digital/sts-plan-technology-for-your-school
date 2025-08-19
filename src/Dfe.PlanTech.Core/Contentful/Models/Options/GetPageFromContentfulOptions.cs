@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Domain.Content.Models.Options
+namespace Dfe.PlanTech.Core.Contentful.Models.Options
 {
     public class GetPageFromContentfulOptions
     {

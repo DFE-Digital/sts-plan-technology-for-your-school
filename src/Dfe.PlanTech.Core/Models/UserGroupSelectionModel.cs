@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Core.RoutingDataModel
+﻿namespace Dfe.PlanTech.Core.Models
 {
     public class UserGroupSelectionModel
     {

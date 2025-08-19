@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.Content.Options;
+using Dfe.PlanTech.Core.Contentful.Options;
 
 namespace Dfe.PlanTech.Data.Contentful.Interfaces;
 

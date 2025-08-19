@@ -1,9 +1,8 @@
 using System.Reflection;
 using Contentful.Core.Search;
-using Dfe.PlanTech.Core.Content.ContentfulQueries;
-using Dfe.PlanTech.Core.Content.Options;
+using Dfe.PlanTech.Core.Contentful.Options;
 
-namespace Dfe.PlanTech.Core.Content.Queries;
+namespace Dfe.PlanTech.Core.Contentful.Queries;
 
 public static class QueryBuilders
 {

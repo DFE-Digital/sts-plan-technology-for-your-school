@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Content.Models.Options;
+﻿using Dfe.PlanTech.Core.Contentful.Models.Options;
 
 namespace Dfe.PlanTech.Application.Rendering.Options;
 

@@ -1,11 +1,11 @@
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
-using Dfe.PlanTech.Core.Content.Options;
-using Dfe.PlanTech.Core.Content.Queries;
+using Dfe.PlanTech.Core.Contentful.Options;
+using Dfe.PlanTech.Core.Contentful.Queries;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Options;
-using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

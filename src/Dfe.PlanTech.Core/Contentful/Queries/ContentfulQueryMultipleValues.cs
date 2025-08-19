@@ -1,6 +1,4 @@
-using Dfe.PlanTech.Core.Content.Queries;
-
-namespace Dfe.PlanTech.Core.Content.ContentfulQueries;
+namespace Dfe.PlanTech.Core.Contentful.Queries;
 
 public class ContentfulQueryMultipleValues : ContentfulQuery
 {

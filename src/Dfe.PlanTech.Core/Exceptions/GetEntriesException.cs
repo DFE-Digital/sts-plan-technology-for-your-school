@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Dfe.PlanTech.Data.Contentful.Helpers;
+namespace Dfe.PlanTech.Core.Exceptions;
 
 [Serializable]
 public class GetEntriesException : Exception

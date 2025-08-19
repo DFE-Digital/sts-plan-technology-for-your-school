@@ -1,6 +1,6 @@
 ﻿using System.Text;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 
 namespace Dfe.PlanTech.Application.Rendering;
 

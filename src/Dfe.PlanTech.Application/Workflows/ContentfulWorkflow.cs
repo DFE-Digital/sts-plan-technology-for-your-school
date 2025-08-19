@@ -1,9 +1,9 @@
-﻿using Dfe.PlanTech.Core.Content.Options;
-using Dfe.PlanTech.Core.Content.Queries;
-using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Models.Options;
+using Dfe.PlanTech.Core.Contentful.Options;
+using Dfe.PlanTech.Core.Contentful.Queries;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models.Options;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Workflows;

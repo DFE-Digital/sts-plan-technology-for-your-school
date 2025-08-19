@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.RoutingDataModel;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;

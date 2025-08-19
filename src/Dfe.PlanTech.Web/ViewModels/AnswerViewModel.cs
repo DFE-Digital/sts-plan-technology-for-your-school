@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Core.RoutingDataModel;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 

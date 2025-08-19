@@ -1,6 +1,4 @@
-﻿using Dfe.PlanTech.Core.Models;
-
-namespace Dfe.PlanTech.Core.RoutingDataModel;
+﻿namespace Dfe.PlanTech.Core.Models;
 
 public class SubmitAnswerModel
 {

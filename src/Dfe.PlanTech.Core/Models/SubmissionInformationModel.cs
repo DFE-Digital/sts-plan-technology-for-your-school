@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-namespace Dfe.PlanTech.Core.RoutingDataModel
+namespace Dfe.PlanTech.Core.Models
 {
     public class SubmissionInformationModel
     {

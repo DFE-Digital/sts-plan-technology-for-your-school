@@ -3,7 +3,7 @@ using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.RoutingDataModel;
+using Dfe.PlanTech.Core.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Services;

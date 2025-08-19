@@ -1,8 +1,7 @@
 using System.Text;
-using Dfe.PlanTech.Core.Content.ContentfulQueries;
-using Dfe.PlanTech.Core.Content.Queries;
+using Dfe.PlanTech.Core.Contentful.Queries;
 
-namespace Dfe.PlanTech.Core.Content.Options;
+namespace Dfe.PlanTech.Core.Contentful.Options;
 
 public class GetEntriesOptions
 {

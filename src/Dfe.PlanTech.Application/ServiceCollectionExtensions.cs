@@ -4,7 +4,6 @@ using Dfe.PlanTech.Application.Rendering;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.Application;

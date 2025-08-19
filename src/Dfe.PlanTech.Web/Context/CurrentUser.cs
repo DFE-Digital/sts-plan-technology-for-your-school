@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Core.RoutingDataModel;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
 namespace Dfe.PlanTech.Web.Context

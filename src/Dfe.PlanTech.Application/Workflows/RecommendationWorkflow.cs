@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Core.Content.Options;
-using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Options;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows

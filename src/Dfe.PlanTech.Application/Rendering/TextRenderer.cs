@@ -3,7 +3,7 @@ using System.Text;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Domain.Content.Models.Options;
+using Dfe.PlanTech.Core.Contentful.Models.Options;
 
 namespace Dfe.PlanTech.Application.Rendering;
 

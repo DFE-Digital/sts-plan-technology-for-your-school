@@ -1,6 +1,6 @@
-﻿using Dfe.PlanTech.Core.Content.Options;
-using Dfe.PlanTech.Core.Content.Queries;
-using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Options;
+using Dfe.PlanTech.Core.Contentful.Queries;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.Logging;
 

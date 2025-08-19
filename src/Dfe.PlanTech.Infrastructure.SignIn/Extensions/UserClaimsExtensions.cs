@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.RoutingDataModel;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Models;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn.Extensions;

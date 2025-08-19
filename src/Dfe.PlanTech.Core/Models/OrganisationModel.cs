@@ -1,6 +1,5 @@
 using System.Text.Json.Serialization;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.RoutingDataModel;
 
 namespace Dfe.PlanTech.Core.Models;
 

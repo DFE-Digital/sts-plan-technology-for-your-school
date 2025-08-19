@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Dfe.PlanTech.Core.RoutingDataModel;
+using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 

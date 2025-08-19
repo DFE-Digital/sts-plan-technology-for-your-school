@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Domain.Caching.Models;
+namespace Dfe.PlanTech.Core.Caching;
 
 public record CacheResult<T>(bool? ExistedInCache = null, T? CacheValue = default, string? Error = null)
 {

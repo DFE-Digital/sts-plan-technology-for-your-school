@@ -1,7 +1,6 @@
-using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Domain.Content.Models.Options;
+namespace Dfe.PlanTech.Core.Contentful.Models.Options;
 
 public class TextRendererOptions(
     ILoggerFactory loggerFactory,

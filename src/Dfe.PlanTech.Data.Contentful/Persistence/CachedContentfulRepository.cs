@@ -1,8 +1,8 @@
 using Dfe.PlanTech.Core.Caching.Interfaces;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Content.Options;
+using Dfe.PlanTech.Core.Contentful.Options;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Data.Contentful.Helpers;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 

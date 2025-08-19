@@ -1,7 +1,6 @@
 ﻿using Contentful.Core.Search;
-using Dfe.PlanTech.Core.Content.ContentfulQueries;
 
-namespace Dfe.PlanTech.Core.Content.Queries;
+namespace Dfe.PlanTech.Core.Contentful.Queries;
 
 public static class QueryBuilderExtensions
 {
