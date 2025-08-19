@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
+using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -14,7 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns;
+namespace Dfe.PlanTech.Infrastructure.SignIn;
 
 [ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions

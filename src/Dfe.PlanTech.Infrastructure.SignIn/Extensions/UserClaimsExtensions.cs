@@ -2,9 +2,9 @@ using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.RoutingDataModel;
-using Dfe.PlanTech.Infrastructure.SignIns.Models;
+using Dfe.PlanTech.Infrastructure.SignIn.Models;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns.Extensions;
+namespace Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
 public static class UserClaimsExtensions
 {

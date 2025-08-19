@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Infrastructure.SignIns.Models;
+using Dfe.PlanTech.Infrastructure.SignIn.Models;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authorization;
 

@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
-using Dfe.PlanTech.Infrastructure.SignIns;
+using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Middleware;

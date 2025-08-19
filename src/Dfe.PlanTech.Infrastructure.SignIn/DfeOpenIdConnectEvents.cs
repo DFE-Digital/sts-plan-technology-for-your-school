@@ -3,7 +3,7 @@ using Dfe.PlanTech.Application.Configuration;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns;
+namespace Dfe.PlanTech.Infrastructure.SignIn;
 
 public static partial class DfeOpenIdConnectEvents
 {
@@ -53,6 +53,7 @@ public static partial class DfeOpenIdConnectEvents
     /// Uses the X-Forwarded-Host header if available, otherwise the FrontDoorUrl field from the <see cref="DfeSignInConfiguration">config</see>
     /// <param name="context">The context of the redirect request</param>
     /// <param name="config">The configuration for OpenID Connect sign-ins</param>
+    /// </remarks>
     public static string GetOriginUrl(RedirectContext context, DfeSignInConfiguration config)
     {
         var forwardHostHeader = context.HttpContext.Request.Headers

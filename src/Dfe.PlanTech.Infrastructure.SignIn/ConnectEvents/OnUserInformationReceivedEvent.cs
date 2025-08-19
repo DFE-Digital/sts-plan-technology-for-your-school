@@ -3,12 +3,12 @@ using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
+using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
+namespace Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 
 public static class OnUserInformationReceivedEvent
 {

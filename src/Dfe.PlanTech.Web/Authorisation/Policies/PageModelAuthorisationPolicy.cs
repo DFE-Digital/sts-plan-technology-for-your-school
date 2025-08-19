@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
-using Dfe.PlanTech.Infrastructure.SignIns.Models;
+using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
+using Dfe.PlanTech.Infrastructure.SignIn.Models;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Dfe.PlanTech.Web.Binders;
 using Dfe.PlanTech.Web.Controllers;
