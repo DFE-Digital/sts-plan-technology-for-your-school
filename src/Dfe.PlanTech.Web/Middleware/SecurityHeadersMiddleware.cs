@@ -61,7 +61,7 @@ public class SecurityHeadersMiddleware
     {
         var nonce = GenerateNonce(context);
         var whitelist = GetAllowedScriptHashes();
-        var config = context.RequestServices.GetRequiredService<CspConfiguration>();
+        var config = context.RequestServices.GetRequiredService<ContentSecurityPolicyConfiguration>();
         var cspDirectives = new List<string>
         {
             "frame-ancestors 'none'",

@@ -33,7 +33,7 @@ namespace Dfe.PlanTech.Web
                 options.ConsentCookieValue = "false";
             });
 
-            app.Services.AddTransient<CspConfiguration>();
+            app.Services.AddTransient<ContentSecurityPolicyConfiguration>();
         }
     }
 }
