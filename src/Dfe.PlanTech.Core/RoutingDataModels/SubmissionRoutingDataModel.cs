@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Core.RoutingDataModels
     {
         public string? Maturity { get; set; }
         public QuestionnaireQuestionEntry? NextQuestion { get; set; }
-        public QuestionnaireSectionEntry QuestionnaireSection { get; set; } = null!;
+        public QuestionnaireSectionEntry QuestionnaireSection { get; set; }
         public SubmissionResponsesModel? Submission { get; set; }
         public SubmissionStatus Status { get; init; }
 
