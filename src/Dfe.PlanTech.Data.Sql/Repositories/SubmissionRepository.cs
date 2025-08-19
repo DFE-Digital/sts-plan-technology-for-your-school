@@ -100,8 +100,8 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
             .Where(s =>
                 s.Id != submission.Id &&
                 s.EstablishmentId == submission.EstablishmentId &&
-                string.Equals(submission.SectionId, submission.SectionId) &&
-                string.Equals(submission.Status, SubmissionStatus.CompleteReviewed.ToString())
+                string.Equals(s.SectionId, submission.SectionId) &&
+                string.Equals(s.Status, SubmissionStatus.CompleteReviewed.ToString())
             )
             .ToListAsync();
 

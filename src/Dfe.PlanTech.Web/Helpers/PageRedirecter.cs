@@ -22,6 +22,9 @@ public static class PageRedirecter
     public static RedirectToActionResult RedirectToGetQuestionBySlug(this Controller controller, string categorySlug, string sectionSlug, string nextQuestionSlug) =>
         controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), nameof(QuestionsController).GetControllerNameSlug(), new { categorySlug, sectionSlug, nextQuestionSlug });
 
+    public static RedirectToActionResult RedirectToGetNextUnansweredQuestion(this Controller controller, string categorySlug, string sectionSlug) =>
+        controller.RedirectToAction(nameof(QuestionsController.GetNextUnansweredQuestion), nameof(QuestionsController).GetControllerNameSlug(), new { categorySlug, sectionSlug });
+
     private static RedirectToActionResult RedirectToPage(this Controller controller, string route) =>
         controller.RedirectToAction(PagesController.GetPageByRouteAction, nameof(PagesController).GetControllerNameSlug(), new { route });
 }

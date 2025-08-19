@@ -84,6 +84,9 @@ public class ReviewAnswersViewBuilder(
             case SubmissionStatus.NotStarted:
                 return controller.RedirectToHomePage();
 
+            case SubmissionStatus.InProgress:
+                return controller.RedirectToGetNextUnansweredQuestion(categorySlug, sectionSlug);
+
             case SubmissionStatus.CompleteNotReviewed:
                 viewModel = await BuildCheckAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
                 return controller.View(CheckAnswersViewName, viewModel);

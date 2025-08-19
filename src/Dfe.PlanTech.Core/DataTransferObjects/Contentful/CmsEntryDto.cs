@@ -15,6 +15,8 @@ public class CmsEntryDto
             return entry.AsDtoInternal();
         }
 
+        bool stop = true;
+
         throw new ArgumentException($"{nameof(ContentfulEntry)} cannot be transformed to a DTO.");
     }
 }

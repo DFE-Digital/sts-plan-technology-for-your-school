@@ -35,7 +35,7 @@ public class ContentfulRepository : IContentfulRepository
         _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
         _automatedTestingOptions = automatedTestingOptions?.Value ?? throw new ArgumentNullException(nameof(automatedTestingOptions));
 
-        _client.ContentTypeResolver = new EntryResolver(loggerFactory);
+        _client.ContentTypeResolver = new EntryResolver();
     }
 
     public async Task<TEntry?> GetEntryByIdAsync<TEntry>(string id, int include = 2)

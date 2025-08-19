@@ -3,7 +3,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Interfaces;
 using Dfe.PlanTech.Core.Helpers;
-using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Data.Contentful.Persistence;
 
@@ -12,12 +11,9 @@ namespace Dfe.PlanTech.Data.Contentful.Persistence;
 /// when serialising the returned API response from Contentful
 /// </summary>
 public class EntryResolver(
-    ILoggerFactory loggerFactory
 ) : IContentTypeResolver
 {
     public Dictionary<string, Type> Types => _types;
-
-    private readonly ILogger<EntryResolver> _logger = loggerFactory.CreateLogger<EntryResolver>();
 
     private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<IDtoTransformableEntry>()
                                                                        .ToDictionary(type => type.Name.ToLower());
@@ -34,7 +30,6 @@ public class EntryResolver(
             return type;
         }
 
-        _logger.LogWarning("Could not find content type for ID {contentTypeId}", contentTypeId);
         return typeof(MissingComponentEntry);
     }
 }
