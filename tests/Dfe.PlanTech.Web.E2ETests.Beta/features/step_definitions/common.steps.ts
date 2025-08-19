@@ -186,8 +186,8 @@ Then('I should not see a paragraph with text {string}', async function (paragrap
   await expect(paragraph).not.toBeVisible();
 });
 
-When('I click the back to {string} link', async function (standardName: string) {
-  const link = this.page.getByRole('link', { name: `Back to ${standardName}` });
+When('I click the back to {string} link', async function (categoryName: string) {
+  const link = this.page.getByRole('link', { name: `Back to ${categoryName}` });
   await link.click();
 });
 

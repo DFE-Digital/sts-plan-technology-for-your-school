@@ -1,7 +1,7 @@
 Feature: Check answers page
   @clear-data-school
   Scenario: Check answers page has all the correct elements
-    Given I start a test assessment on "Category One" standard "Category One Section One" section with answers "1, 1" and I do not click submit recommendations
+    Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 1" and I do not click submit recommendations
 
     Then I should see the page heading "Check your answers"
     And the header should contain all the correct content
@@ -21,7 +21,7 @@ Feature: Check answers page
 
   @clear-data-school
   Scenario: Check answers page change answer link navigates to the correct question
-    Given I start a test assessment on "Category One" standard "Category One Section One" section with answers "1, 1" and I do not click submit recommendations
+    Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 1" and I do not click submit recommendations
     And I click the change link on check answers for "Are you able to choose an answer to this first question?" and should see the question heading
     
 

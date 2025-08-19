@@ -2,7 +2,7 @@
 Feature: Questions Page
 
   Background:
-    Given I start an assessment on standard "Category One" section "Category One Section One"
+    Given I start an assessment on category "Category One" section "Category One Section One"
 
   @clear-data-school
   Scenario: Page has the correct content on first load

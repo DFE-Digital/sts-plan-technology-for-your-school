@@ -1,20 +1,19 @@
 import { Given, When } from "@cucumber/cucumber";
 import { textToHyphenatedUrl } from "../../helpers/url";
-import { expect } from "@playwright/test";
 
-Given('I start an assessment on standard {string} section {string}', async function (standard: string, section: string) {
+Given('I start an assessment on category {string} section {string}', async function (category: string, section: string) {
 
   //Go to page
    await this.page.goto(`${process.env.URL}self-assessment-testing`);
 
    //Select and click the card
-  const standardCard = this.page.locator('.dfe-card', {
-    has: this.page.locator('a', { hasText: standard }),
+  const categoryCard = this.page.locator('.dfe-card', {
+    has: this.page.locator('a', { hasText: category }),
   }).first();
 
-  await standardCard.locator('a').click();
+  await categoryCard.locator('a').click();
   //Check the expected path
-  const expectedPath = `${textToHyphenatedUrl(standard)}`;
+  const expectedPath = `${textToHyphenatedUrl(category)}`;
   await this.page.waitForURL(`${process.env.URL}${expectedPath}`);
 
   //Find the and click the go to self assessment link
@@ -35,9 +34,9 @@ Given('I click the submit and view recommendations button', async function () {
   await submitBtn.click();
 });
 
-Given('I start a test assessment on {string} standard {string} section with answers {string}', async function (standard:string, section: string, answers: string) {
+Given('I start a test assessment on {string} category {string} section with answers {string}', async function (category:string, section: string, answers: string) {
  
-  await startAndAnswerAssessment(this, standard, section, answers);
+  await startAndAnswerAssessment(this, category, section, answers);
 
   // Final submit to reach recommendations
   const submitBtn = this.page.getByRole('button', { name: 'Submit and view recommendations' })
@@ -45,22 +44,22 @@ Given('I start a test assessment on {string} standard {string} section with answ
   
 });
 
-Given('I start a test assessment on {string} standard {string} section with answers {string} and I do not click submit recommendations', async function (standard:string, section: string, answers: string) {
-    await startAndAnswerAssessment(this, standard, section, answers);
+Given('I start a test assessment on {string} category {string} section with answers {string} and I do not click submit recommendations', async function (category:string, section: string, answers: string) {
+    await startAndAnswerAssessment(this, category, section, answers);
 });
 
-async function startAndAnswerAssessment(context:any, standard: string, section:string,  answers:string ) {
+async function startAndAnswerAssessment(context:any, category: string, section:string,  answers:string ) {
   //Go to page
    await context.page.goto(`${process.env.URL}self-assessment-testing`);
 
    //Select and click the card
-  const standardCard = context.page.locator('.dfe-card', {
-    has: context.page.locator('a', { hasText: standard }),
+  const categoryCard = context.page.locator('.dfe-card', {
+    has: context.page.locator('a', { hasText: category }),
   }).first();
 
-  await standardCard.locator('a').click();
+  await categoryCard.locator('a').click();
   //Check the expected path
-  const expectedPath = `${textToHyphenatedUrl(standard)}`;
+  const expectedPath = `${textToHyphenatedUrl(category)}`;
   await context.page.waitForURL(`${process.env.URL}${expectedPath}`);
 
   //Find the and click the go to self assessment link

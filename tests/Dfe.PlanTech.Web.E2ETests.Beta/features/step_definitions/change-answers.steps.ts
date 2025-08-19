@@ -28,9 +28,9 @@ Then('I click the view or update self-assessment link for {string}', async funct
   expect(currentUrl.endsWith(expectedPath)).toBe(true);
 });
 
-Then('I should see the back to recommendations button for the standard {string}', async function (standardName: string) {
-  const expectedStandard = textToHyphenatedUrl(standardName.toLowerCase());
-  const expectedHref = `/${expectedStandard}`;
+Then('I should see the back to recommendations button for the category {string}', async function (categoryName: string) {
+  const expectedCategory = textToHyphenatedUrl(categoryName.toLowerCase());
+  const expectedHref = `/${expectedCategory}`;
 
   const backLink = this.page.getByRole('link', { name: 'Back to recommendations' });
 

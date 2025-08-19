@@ -47,7 +47,7 @@ Then('I should see the related actions sidebar', async function () {
   await expect(sidebar.locator('h2')).toHaveText('Related actions');
 });
 
-Then('I should see the related actions links for standard {string} section {string}', async function (standardName: string, sectionName:string) {
+Then('I should see the related actions links for category {string} section {string}', async function (categoryName: string, sectionName:string) {
 
   const container = this.page.locator('.govuk-grid-column-one-third.govuk-float-right');
   await expect(container).toBeVisible();
@@ -57,8 +57,8 @@ Then('I should see the related actions links for standard {string} section {stri
   await expect(heading).toHaveText('Related actions');
 
   const slugSectionName = textToHyphenatedUrl(sectionName); 
-  const slugStandardName = textToHyphenatedUrl(standardName);
-  const expectedSelfAssessmentHref = `/${slugStandardName}/${slugSectionName}/change-answers`;
+  const slugCategoryName = textToHyphenatedUrl(categoryName);
+  const expectedSelfAssessmentHref = `/${slugCategoryName}/${slugSectionName}/change-answers`;
   const expectedPrintHref = 'print';
 
   const sectionNameLowercase = sectionName.toLowerCase();
