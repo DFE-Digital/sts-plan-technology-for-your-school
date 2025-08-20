@@ -20,20 +20,6 @@ public class EmbeddedEntryBlockRenderer(
             return stringBuilder;
         }
 
-        //if (richTextData.SystemProperties is null)
-        //{
-        //    if (richTextData.Asset is not null)
-        //    {
-        //        var attachment = new AttachmentComponentRenderer();
-        //        return attachment.AddHtml(content, stringBuilder);
-        //    }
-        //    else
-        //    {
-        //        var accordionComponent = new AccordionComponentRenderer(loggerFactory);
-        //        return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
-        //    }
-        //}
-
         switch (richTextData.SystemProperties.ContentType.SystemProperties.Id)
         {
             case ContentTypeConstants.ComponentAttachmentContentTypeId:
