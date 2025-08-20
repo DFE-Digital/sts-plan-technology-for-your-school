@@ -10,7 +10,7 @@ namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
 
         public AnswerViewModel(QuestionnaireAnswerEntry answerDto)
         {
-            Sys = new SystemDetailsViewModel(answerDto.Sys);
+            Sys = new SystemDetailsViewModel(answerDto.Sys!);
 
             if (answerDto.NextQuestion is not null)
             {

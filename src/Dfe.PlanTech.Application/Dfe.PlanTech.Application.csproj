@@ -4,6 +4,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Workflows\ContentfulQueries\**" />
+    <EmbeddedResource Remove="Workflows\ContentfulQueries\**" />
+    <None Remove="Workflows\ContentfulQueries\**" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
@@ -19,9 +24,5 @@
     <ProjectReference Include="..\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
     <ProjectReference Include="..\Dfe.PlanTech.Data.Contentful\Dfe.PlanTech.Data.Contentful.csproj" />
     <ProjectReference Include="..\Dfe.PlanTech.Data.Sql\Dfe.PlanTech.Data.Sql.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Workflows\ContentfulQueries\" />
   </ItemGroup>
 </Project>

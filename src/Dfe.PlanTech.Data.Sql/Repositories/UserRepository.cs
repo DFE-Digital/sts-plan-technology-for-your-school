@@ -1,10 +1,11 @@
 ﻿using System.Linq.Expressions;
 using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class UserRepository
+public class UserRepository : IUserRepository
 {
     protected readonly PlanTechDbContext _db;
 

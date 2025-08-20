@@ -30,16 +30,16 @@ public static class OnUserInformationReceivedEvent
 
         var dsiReference = context.Principal.Claims.GetDsiReference();
         var establishment = context.Principal.Claims.GetOrganisation();
-        var recordUserSignInCommand = context.HttpContext.RequestServices.GetRequiredService<SignInWorkflow>();
+        var signInWorkflow = context.HttpContext.RequestServices.GetRequiredService<SignInWorkflow>();
 
         if (establishment is null)
         {
             logger.LogWarning("User {UserId} is authenticated but has no establishment", dsiReference);
-            await recordUserSignInCommand.RecordSignInUserOnly(dsiReference);
+            await signInWorkflow.RecordSignInUserOnly(dsiReference);
             return;
         }
 
-        var signin = await recordUserSignInCommand.RecordSignIn(dsiReference, establishment);
+        var signin = await signInWorkflow.RecordSignIn(dsiReference, establishment);
 
         AddClaimsToPrincipal(context, signin);
     }

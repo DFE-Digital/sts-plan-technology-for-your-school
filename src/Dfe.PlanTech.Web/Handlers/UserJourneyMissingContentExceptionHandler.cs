@@ -33,6 +33,6 @@ public class UserJourneyMissingContentExceptionHandler(
 
         controller.TempData[ErrorMessageTempDataKey] = _configuration[ErrorMessageConfigKey];
 
-        return controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route = RouteConstants.Home });
+        return controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route = UrlConstants.Home });
     }
 }

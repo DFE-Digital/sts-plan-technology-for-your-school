@@ -34,7 +34,6 @@ public static class ServiceCollectionExtensions
         return services
             .AddScoped<ContentfulService>()
             .AddScoped<EstablishmentService>()
-            .AddScoped<GroupService>()
             .AddScoped<QuestionService>()
             .AddScoped<RecommendationService>()
             .AddScoped<SubmissionService>();

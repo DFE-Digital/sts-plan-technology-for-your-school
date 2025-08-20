@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
 
         public QuestionReferenceViewModel(QuestionnaireQuestionEntry questionDto)
         {
-            Sys = new SystemDetailsViewModel(questionDto.Sys);
+            Sys = new SystemDetailsViewModel(questionDto.Sys!);
         }
     }
 }

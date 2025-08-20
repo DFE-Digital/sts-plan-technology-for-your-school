@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Options;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -28,15 +29,12 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         return services
-            .AddScoped<AnswerRepository>()
-            .AddScoped<EstablishmentGroupRepository>()
-            .AddScoped<EstablishmentLinkRepository>()
-            .AddScoped<EstablishmentRepository>()
-            .AddScoped<GroupReadActivityRepository>()
-            .AddScoped<QuestionRepository>()
-            .AddScoped<SignInRepository>()
-            .AddScoped<StoredProcedureRepository>()
-            .AddScoped<SubmissionRepository>()
-            .AddScoped<UserRepository>();
+            .AddScoped<IEstablishmentLinkRepository, EstablishmentLinkRepository>()
+            .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
+            .AddScoped<IGroupReadActivityRepository, GroupReadActivityRepository>()
+            .AddScoped<ISignInRepository, SignInRepository>()
+            .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
+            .AddScoped<ISubmissionRepository, SubmissionRepository>()
+            .AddScoped<IUserRepository, UserRepository>();
     }
 }

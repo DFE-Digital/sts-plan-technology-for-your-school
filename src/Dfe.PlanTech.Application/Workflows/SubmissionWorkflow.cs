@@ -4,17 +4,17 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
-using Dfe.PlanTech.Data.Sql.Repositories;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubmissionWorkflow(
-    StoredProcedureRepository storedProcedureRepository,
-    SubmissionRepository submissionRepository
+    IStoredProcedureRepository storedProcedureRepository,
+    ISubmissionRepository submissionRepository
 )
 {
-    private readonly StoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
-    private readonly SubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
+    private readonly IStoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
+    private readonly ISubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
     public async Task<SqlSubmissionDto> CloneLatestCompletedSubmission(int establishmentId, QuestionnaireSectionEntry section)
     {

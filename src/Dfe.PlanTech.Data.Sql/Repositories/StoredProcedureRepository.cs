@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,7 +29,7 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
  * As you'll note in SubmitResponse below, the parameters are sent in that order.
  */
 
-public class StoredProcedureRepository
+public class StoredProcedureRepository : IStoredProcedureRepository
 {
     protected readonly PlanTechDbContext _db;
 

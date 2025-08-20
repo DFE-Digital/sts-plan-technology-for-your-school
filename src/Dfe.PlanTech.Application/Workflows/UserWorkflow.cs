@@ -1,18 +1,13 @@
 ﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Data.Sql.Repositories;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class UserWorkflow
+public class UserWorkflow(
+    IUserRepository userRepository
+)
 {
-    private readonly UserRepository _userRepository;
-
-    public UserWorkflow(
-        UserRepository userRepository
-    )
-    {
-        _userRepository = userRepository;
-    }
+    private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 
     public async Task<SqlUserDto?> GetUserBySignInRefAsync(string dfeSignInRef)
     {

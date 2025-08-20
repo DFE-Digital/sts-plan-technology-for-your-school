@@ -2,23 +2,28 @@ namespace Dfe.PlanTech.Core.Constants;
 
 public static class UrlConstants
 {
+    #region Routes
+
     public const string HomePage = "/home";
-
-    public const string SelectASchoolPage = "/groups/select-a-school";
-
+    public const string Error = "/error";
+    public const string NotFound = "/not-found";
+    public const string OrgErrorPage = "/dsi-error-not-associated-organisation";
     public const string RecommendationsPage = "/recommendations";
-
+    public const string SelectASchoolPage = "/groups/select-a-school";
     public const string ServerError = "/server-error";
 
-    public const string Error = "/error";
+    #endregion Routes
 
-    public const string OrgErrorPage = "/dsi-error-not-associated-organisation";
+    #region Slugs
 
-    public const string NotFound = "/not-found";
-
-    public const string GroupsSlug = "groups";
-
-    public const string GroupsSelectionPageSlug = "select-a-school";
+    public const string CheckAnswersSlug = "check-answers";
+    public const string ChangeAnswersSlug = "change-answers";
 
     public const string GroupsDashboardSlug = "dashboard";
+    public const string GroupsSelectionPageSlug = "select-a-school";
+    public const string GroupsSlug = "groups";
+
+    public const string Home = "home";
+
+    #endregion Slugs
 }

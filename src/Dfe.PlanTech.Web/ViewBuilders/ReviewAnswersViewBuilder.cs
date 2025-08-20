@@ -148,7 +148,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage
     )
     {
-        return BuildViewModel(controller, routingData, categorySlug, sectionSlug, PageTitleConstants.ChangeAnswers, RouteConstants.ChangeAnswersSlug, errorMessage);
+        return BuildViewModel(controller, routingData, categorySlug, sectionSlug, PageTitleConstants.ChangeAnswers, UrlConstants.ChangeAnswersSlug, errorMessage);
     }
 
     private Task<ReviewAnswersViewModel> BuildCheckAnswersViewModel(
@@ -159,7 +159,7 @@ public class ReviewAnswersViewBuilder(
        string? errorMessage
    )
     {
-        return BuildViewModel(controller, routingData, categorySlug, sectionSlug, PageTitleConstants.CheckAnswers, RouteConstants.CheckAnswersSlug, errorMessage);
+        return BuildViewModel(controller, routingData, categorySlug, sectionSlug, PageTitleConstants.CheckAnswers, UrlConstants.CheckAnswersSlug, errorMessage);
     }
 
     private async Task<ReviewAnswersViewModel> BuildViewModel(
@@ -176,7 +176,7 @@ public class ReviewAnswersViewBuilder(
 
         if (pageTitle.Equals(PageTitleConstants.CheckAnswers))
         {
-            var page = await ContentfulService.GetPageBySlugAsync(RouteConstants.CheckAnswersSlug);
+            var page = await ContentfulService.GetPageBySlugAsync(UrlConstants.CheckAnswersSlug);
             content = page.Content ?? [];
         }
 

@@ -1,78 +1,70 @@
 ﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Data.Sql.Repositories;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
-namespace Dfe.PlanTech.Application.Workflows
+namespace Dfe.PlanTech.Application.Workflows;
+
+public class SignInWorkflow(
+    IEstablishmentRepository establishmentRepository,
+    ISignInRepository signInRepository,
+    IUserRepository userRepository
+)
 {
-    public class SignInWorkflow
+    private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
+    private readonly ISignInRepository _signInRepository = signInRepository ?? throw new ArgumentNullException(nameof(signInRepository));
+    private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+
+    public virtual async Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, EstablishmentModel establishmentModel)
     {
-        private readonly EstablishmentRepository _establishmentRepository;
-        private readonly SignInRepository _signInRepository;
-        private readonly UserRepository _userRepository;
+        var user = await GetOrCreateUserAsync(dfeSignInRef);
+        var establishment = await GetOrCreateEstablishmentAsync(establishmentModel);
+        var signIn = await _signInRepository.CreateSignInAsync(user.Id, establishment.Id);
 
-        public SignInWorkflow(
-            EstablishmentRepository establishmentRepository,
-            SignInRepository signInRepository,
-            UserRepository userRepository
-        )
+        return signIn.AsDto();
+    }
+
+    public async Task<SqlSignInDto> RecordSignInUserOnly(string dfeSignInRef)
+    {
+        var user = await GetOrCreateUserAsync(dfeSignInRef);
+        var signIn = await _signInRepository.CreateSignInAsync(user.Id);
+
+        return signIn.AsDto();
+    }
+
+    private async Task<SqlUserDto> GetOrCreateUserAsync(string dfeSignInRef)
+    {
+        var existingUser = await _userRepository.GetUserBySignInRefAsync(dfeSignInRef);
+        if (existingUser is not null)
         {
-            _establishmentRepository = establishmentRepository;
-            _signInRepository = signInRepository;
-            _userRepository = userRepository;
+            return existingUser.AsDto();
         }
 
-        public async Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, EstablishmentModel establishmentModel)
-        {
-            var user = await GetOrCreateUserAsync(dfeSignInRef);
-            var establishment = await GetOrCreateEstablishmentAsync(establishmentModel);
-            var signIn = await _signInRepository.CreateSignInAsync(user.Id, establishment.Id);
+        var newUser = await _userRepository.CreateUserBySignInRefAsync(dfeSignInRef);
+        return newUser.AsDto();
+    }
 
-            return signIn.AsDto();
+    private async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
+    {
+        var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(establishmentModel.Reference);
+        if (existingEstablishment is not null)
+        {
+            return existingEstablishment.AsDto();
         }
 
-        public async Task<SqlSignInDto> RecordSignInUserOnly(string dfeSignInRef)
+        var newEstablishmentData = new EstablishmentModel
         {
-            var user = await GetOrCreateUserAsync(dfeSignInRef);
-            var signIn = await _signInRepository.CreateSignInAsync(user.Id);
+            Ukprn = establishmentModel.Ukprn,
+            Urn = establishmentModel.Urn,
+            Type = establishmentModel.Type?.Name is null
+                ? null
+                : new EstablishmentTypeModel { Name = establishmentModel.Type.Name },
+            Name = establishmentModel.Name,
+            GroupUid = establishmentModel.Uid
+        };
 
-            return signIn.AsDto();
-        }
+        var newEstablishment = await _establishmentRepository
+            .CreateEstablishmentFromModelAsync(newEstablishmentData);
 
-        private async Task<SqlUserDto> GetOrCreateUserAsync(string dfeSignInRef)
-        {
-            var existingUser = await _userRepository.GetUserBySignInRefAsync(dfeSignInRef);
-            if (existingUser is not null)
-            {
-                return existingUser.AsDto();
-            }
-
-            var newUser = await _userRepository.CreateUserBySignInRefAsync(dfeSignInRef);
-            return newUser.AsDto();
-        }
-
-        private async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
-        {
-            var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(establishmentModel.Reference);
-            if (existingEstablishment is not null)
-            {
-                return existingEstablishment.AsDto();
-            }
-
-            var newEstablishmentData = new EstablishmentModel
-            {
-                Ukprn = establishmentModel.Ukprn,
-                Urn = establishmentModel.Urn,
-                Type = establishmentModel.Type?.Name is null
-                    ? null
-                    : new EstablishmentTypeModel { Name = establishmentModel.Type.Name },
-                Name = establishmentModel.Name,
-                GroupUid = establishmentModel.Uid
-            };
-
-            var newEstablishment = await _establishmentRepository
-                .CreateEstablishmentFromModelAsync(newEstablishmentData);
-
-            return newEstablishment.AsDto();
-        }
+        return newEstablishment.AsDto();
     }
 }
