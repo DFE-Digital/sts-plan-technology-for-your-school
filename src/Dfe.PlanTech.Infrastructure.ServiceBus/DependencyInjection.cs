@@ -6,6 +6,7 @@ using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
@@ -30,7 +31,7 @@ public static class DependencyInjection
         services.AddServiceBusServices(configuration)
             .AddMessageRetryHandler();
 
-        services.AddTransient<CmsWebHookMessageProcessor>();
+        services.AddTransient<IWebHookMessageProcessor, CmsWebHookMessageProcessor>();
         services.AddSingleton(new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -53,7 +54,7 @@ public static class DependencyInjection
         });
 
         services.AddHostedService<ContentfulServiceBusProcessor>();
-        services.AddTransient<ServiceBusResultProcessor>();
+        services.AddTransient<IServiceBusResultProcessor, ServiceBusResultProcessor>();
         services.AddTransient<IMessageRetryHandler, MessageRetryHandler>();
         services.AddTransient<IQueueWriter, QueueWriter>();
         services.AddTransient<IWriteCmsWebhookToQueueCommand, WriteCmsWebhookToQueueCommand>();

@@ -1,6 +1,7 @@
-﻿namespace Dfe.PlanTech.Infrastructure.ServiceBus.Results
+﻿using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
+
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.Results;
+
+public class ServiceBusSuccessResult : IServiceBusResult
 {
-    public class ServiceBusSuccessResult : ServiceBusResult
-    {
-    }
 }

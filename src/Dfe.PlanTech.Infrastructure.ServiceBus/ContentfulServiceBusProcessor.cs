@@ -1,6 +1,7 @@
 using System.Text;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Microsoft.Extensions.Azure;
@@ -19,12 +20,12 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 /// <param name="logger"></param>
 /// <param name="serviceScopeFactory">Service factory - used to create transient services to prevent state problems</param>
 public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcessor> processorFactory,
-                                           ServiceBusResultProcessor resultProcessor,
-                                           ILoggerFactory loggerFactory,
+                                           IServiceBusResultProcessor resultProcessor,
+                                           ILogger<ContentfulServiceBusProcessor> logger,
                                            IServiceScopeFactory serviceScopeFactory,
                                            IOptions<ServiceBusOptions> options) : BackgroundService
 {
-    private readonly ILogger<ContentfulServiceBusProcessor> _logger = loggerFactory.CreateLogger<ContentfulServiceBusProcessor>();
+    private readonly ILogger<ContentfulServiceBusProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ServiceBusProcessor _processor = processorFactory.CreateClient("contentfulprocessor");
 
     /// <summary>
@@ -52,13 +53,13 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     private async Task MessageHandler(ProcessMessageEventArgs processMessageEventArgs)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var webhookToDbCommand = scope.ServiceProvider.GetRequiredService<CmsWebHookMessageProcessor>();
+        var webHookMessageProcessor = scope.ServiceProvider.GetRequiredService<IWebHookMessageProcessor>();
 
         try
         {
             var body = Encoding.UTF8.GetString(processMessageEventArgs.Message.Body);
 
-            var result = await webhookToDbCommand.ProcessMessage(processMessageEventArgs.Message.Subject,
+            var result = await webHookMessageProcessor.ProcessMessage(processMessageEventArgs.Message.Subject,
                                                                  body,
                                                                  processMessageEventArgs.Message.MessageId,
                                                                  processMessageEventArgs.CancellationToken);
