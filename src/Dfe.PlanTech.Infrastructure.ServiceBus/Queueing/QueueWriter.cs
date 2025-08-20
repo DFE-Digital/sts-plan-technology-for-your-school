@@ -1,4 +1,5 @@
 using Azure.Messaging.ServiceBus;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 
@@ -10,11 +11,11 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
 /// <param name="serviceBusSenderFactory"></param>
 /// <param name="logger"></param>
 public class QueueWriter(
-    ILoggerFactory loggerFactory,
+    ILogger<QueueWriter> logger,
     IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory
 ) : IQueueWriter
 {
-    private readonly ILogger<QueueWriter> _logger = loggerFactory.CreateLogger<QueueWriter>();
+    private readonly ILogger<QueueWriter> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient("contentfulsender");
 
     public async Task<QueueWriteResult> WriteMessage(string body, string subject)

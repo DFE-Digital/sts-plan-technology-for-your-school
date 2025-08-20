@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Dfe.PlanTech.Core.Caching.Interfaces;
 using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Microsoft.Extensions.Logging;
 
@@ -10,13 +11,13 @@ public class CmsWebHookMessageProcessor(
     ILoggerFactory loggerFactory,
     ICmsCache cache,
     JsonSerializerOptions jsonSerialiserOptions
-)
+) : IWebHookMessageProcessor
 {
     private readonly ILogger<CmsWebHookMessageProcessor> _logger = loggerFactory.CreateLogger<CmsWebHookMessageProcessor>();
     private readonly ICmsCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
     private readonly JsonSerializerOptions _jsonSerialiserOptions = jsonSerialiserOptions ?? throw new ArgumentNullException(nameof(jsonSerialiserOptions));
 
-    public async Task<ServiceBusResult> ProcessMessage(string subject, string body, string id, CancellationToken cancellationToken)
+    public async Task<IServiceBusResult> ProcessMessage(string subject, string body, string id, CancellationToken cancellationToken)
     {
         try
         {

@@ -1,5 +1,6 @@
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Queues;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -18,7 +19,7 @@ public class QueueWriterTests
     public QueueWriterTests()
     {
         _serviceBusFactory.CreateClient(Arg.Any<string>()).Returns((callInfo) => _serviceBusSender);
-        _queueWriter = new QueueWriter(_serviceBusFactory, _logger);
+        _queueWriter = new QueueWriter(_logger, _serviceBusFactory);
     }
 
     [Fact]

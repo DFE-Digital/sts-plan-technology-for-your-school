@@ -1,7 +1,7 @@
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
 
-namespace Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 
 /// <summary>
 /// Handles Service Bus messages that the <see cref="CmsWebHookMessageProcessor"/> failed to process; will re-queue the message if not exceeded retry count

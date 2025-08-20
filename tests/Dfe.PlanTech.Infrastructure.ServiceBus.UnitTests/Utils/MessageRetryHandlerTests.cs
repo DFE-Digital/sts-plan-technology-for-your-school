@@ -16,7 +16,7 @@ public class MessageRetryHandlerTests
     private readonly IAzureClientFactory<ServiceBusSender> _serviceBusFactory = Substitute.For<IAzureClientFactory<ServiceBusSender>>();
     private readonly ServiceBusSender _serviceBusSender = Substitute.For<ServiceBusSender>();
     private readonly MessageRetryHandler _messageRetryHandler;
-    private readonly IOptions<MessageRetryHandlingOptions> _options = Options.Create(new MessageRetryHandlingOptions());
+    private readonly IOptions<MessageRetryHandlingOptions> _options = Microsoft.Extensions.Options.Options.Create(new MessageRetryHandlingOptions());
 
     public MessageRetryHandlerTests()
     {

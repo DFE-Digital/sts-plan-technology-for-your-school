@@ -2,7 +2,7 @@ using System.Text.Json;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
 using Microsoft.AspNetCore.Http;
 
-namespace Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 
 /// <summary>
 /// Processes webhook payloads from Contentful and saves them to the DB
