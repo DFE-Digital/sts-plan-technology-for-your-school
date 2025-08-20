@@ -10,7 +10,7 @@ public class AnswerViewModel
         Maturity = answer.Maturity;
         Answer = new IdWithTextModel
         {
-            Id = answer.Sys.Id!,
+            Id = answer.Id!,
             Text = answer.Text
         };
     }

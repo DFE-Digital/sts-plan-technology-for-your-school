@@ -47,10 +47,10 @@ public class RecommendationsViewBuilder(
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: true);
 
-        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Sys.Id, 3);
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id, 3);
         if (subtopicRecommendation is null)
         {
-            throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Sys.Id}'");
+            throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Id}'");
         }
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
@@ -116,7 +116,7 @@ public class RecommendationsViewBuilder(
                 var viewModel = await BuildRecommendationsViewModel(
                     category,
                     submissionRoutingData,
-                    section.Sys.Id,
+                    section.Id,
                     sectionSlug
                 );
 
@@ -143,7 +143,7 @@ public class RecommendationsViewBuilder(
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
 
-        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(submissionRoutingData.QuestionnaireSection.Sys.Id)
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(submissionRoutingData.QuestionnaireSection.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for: {submissionRoutingData.QuestionnaireSection.Name}");
 
         var intro = subtopicRecommendation.Intros

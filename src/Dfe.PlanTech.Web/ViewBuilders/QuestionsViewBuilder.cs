@@ -48,13 +48,13 @@ public class QuestionsViewBuilder(
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
 
-        controller.TempData["ReturnTo"] = returnTo;
+        controller.ViewData["ReturnTo"] = returnTo;
+        var isChangeAnswersFlow = IsChangeAnswersFlow(returnTo);
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: isChangeAnswersFlow);
 
-        var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
         var isSlugForNextQuestion = submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug) ?? false;
 
         if (isSlugForNextQuestion)
@@ -79,7 +79,7 @@ public class QuestionsViewBuilder(
         if (submissionRoutingData.Submission?.Responses is null)
         {
             throw new InvalidOperationException(
-                $"No responses were found for section '{submissionRoutingData.QuestionnaireSection.Sys.Id}'");
+                $"No responses were found for section '{submissionRoutingData.QuestionnaireSection.Id}'");
         }
 
         /*
@@ -92,11 +92,11 @@ public class QuestionsViewBuilder(
          */
 
         var question = submissionRoutingData.GetQuestionForSlug(questionSlug);
-        var isQuestionInResponses = submissionRoutingData.IsQuestionInResponses(question.Sys.Id);
+        var isQuestionInResponses = submissionRoutingData.IsQuestionInResponses(question.Id);
 
         if (isQuestionInResponses)
         {
-            var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(question.Sys.Id);
+            var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(question.Id);
             var viewModel = GenerateViewModel(
                 controller,
                 question,
@@ -104,15 +104,10 @@ public class QuestionsViewBuilder(
                 categorySlug,
                 sectionSlug,
                 latestResponseForQuestion.AnswerSysId,
-                null
+                returnTo
             );
 
             return controller.View(QuestionView, viewModel);
-        }
-
-        if (submissionRoutingData.Status.Equals(SubmissionStatus.CompleteNotReviewed))
-        {
-            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
         }
 
         if (submissionRoutingData.Status.Equals(SubmissionStatus.InProgress))
@@ -123,7 +118,7 @@ public class QuestionsViewBuilder(
             return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestionSlug, returnTo);
         }
 
-        throw new InvalidDataException("Should not be able to get here");
+        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
     }
 
     public async Task<IActionResult> RouteToInterstitialPage(Controller controller, string categorySlug, string sectionSlug)
@@ -164,7 +159,7 @@ public class QuestionsViewBuilder(
         catch (DatabaseException)
         {
             // Remove the current invalid submission and redirect to self-assessment page
-            await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Sys.Id);
+            await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Id);
 
             controller.TempData["SubtopicError"] = await BuildErrorMessage();
             return controller.RedirectToAction(
@@ -215,7 +210,7 @@ public class QuestionsViewBuilder(
             return controller.View(QuestionView, viewModel);
         }
 
-        var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
+        var isChangeAnswersFlow = IsChangeAnswersFlow(returnTo);
         if (!isChangeAnswersFlow)
         {
             return await RouteToNextUnansweredQuestion(controller, categorySlug, sectionSlug);
@@ -226,15 +221,10 @@ public class QuestionsViewBuilder(
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
         }
 
-        // Check answered questions
-        var nextQuestionSlug = GetNextQuestionSlug(submissionRoutingData.Submission.Responses, questionSlug);
-        var nextQuestion = section.Questions.FirstOrDefault(q => q.Slug.Equals(nextQuestionSlug));
-
-        // Check unanswered to see if we really have no more questions
-        nextQuestion ??= await _questionService.GetNextUnansweredQuestion(establishmentId, section);
+        var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
         if (nextQuestion is not null)
         {
-            return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestion.Slug, FlowConstants.ChangeAnswersFlow);
+            return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestion.Slug, returnTo);
         }
 
         // No next questions so check answers
@@ -288,19 +278,7 @@ public class QuestionsViewBuilder(
             SectionName = section?.Name,
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
-            SectionId = section?.Sys.Id
+            SectionId = section?.Id
         };
-    }
-
-    private static string? GetNextQuestionSlug(List<QuestionWithAnswerModel> journey, string currentQuestionSlug)
-    {
-        var currentIndex = journey.FindIndex(q => q.QuestionSlug == currentQuestionSlug);
-        if (currentIndex == -1 || currentIndex + 1 >= journey.Count)
-        {
-            return null;
-        }
-
-        // The next question in the valid journey (even if unanswered)
-        return journey[currentIndex + 1].QuestionSlug;
     }
 }

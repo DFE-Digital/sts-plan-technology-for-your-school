@@ -21,8 +21,8 @@ public class CategorySectionViewComponentViewBuilder(
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("Found no sections for category {id}", category.Sys.Id);
-            throw new InvalidDataException($"Found no sections for category {category.Sys.Id}");
+            _logger.LogError("Found no sections for category {id}", category.Id);
+            throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 
         var establishmentId = GetEstablishmentIdOrThrowException();
@@ -31,7 +31,7 @@ public class CategorySectionViewComponentViewBuilder(
         string? progressRetrievalErrorMessage = null;
         try
         {
-            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(establishmentId, category.Sections.Select(s => s.Sys.Id));
+            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(establishmentId, category.Sections.Select(s => s.Id));
         }
         catch (Exception ex)
         {
@@ -71,10 +71,10 @@ public class CategorySectionViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Sys.Id, section.Name);
+                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
             }
 
-            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Sys.Id));
+            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
             var recommendationIntro = await BuildCategorySectionRecommendationViewModel(section, sectionStatus);
 
             yield return new CategorySectionViewModel(section, recommendationIntro, sectionStatus, hadRetrievalError);

@@ -22,8 +22,8 @@ public class CategoryLandingViewComponentViewBuilder(
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("Found no sections for category {id}", category.Sys.Id);
-            throw new InvalidDataException($"Found no sections for category {category.Sys.Id}");
+            _logger.LogError("Found no sections for category {id}", category.Id);
+            throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 
         var establishmentId = GetEstablishmentIdOrThrowException();
@@ -32,7 +32,7 @@ public class CategoryLandingViewComponentViewBuilder(
         string? progressRetrievalErrorMessage = null;
         try
         {
-            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(establishmentId, category.Sections.Select(s => s.Sys.Id));
+            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(establishmentId, category.Sections.Select(s => s.Id));
         }
         catch (Exception ex)
         {
@@ -72,13 +72,13 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Sys.Id, section.Name);
+                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
             }
 
-            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Sys.Id));
+            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
             if (sectionStatus is null)
             {
-                _logger.LogError("No section status found for subtopic with ID {sectionId} and name {sectionName}", section.Sys.Id, section.Name);
+                _logger.LogError("No section status found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
             }
 
             var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sectionStatus);
@@ -105,7 +105,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
         try
         {
-            var recommendationIntro = await ContentfulService.GetSubtopicRecommendationIntroAsync(section.Sys.Id, sectionStatus.LastMaturity);
+            var recommendationIntro = await ContentfulService.GetSubtopicRecommendationIntroAsync(section.Id, sectionStatus.LastMaturity);
             if (recommendationIntro == null)
             {
                 return new CategoryLandingSectionRecommendationsViewModel
@@ -116,7 +116,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
             var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, true)
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
-            var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Sys.Id)
+            var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
                ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
             var subTopicChunks = subtopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Responses.Select(answer => answer.AnswerSysId));

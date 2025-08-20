@@ -29,7 +29,7 @@ namespace Dfe.PlanTech.Application.Services
 
             if (latestCompletedSubmission is null)
             {
-                throw new InvalidDataException($"No incomplete responses found for section with ID {cmsQuestionnaireSection.Sys.Id}.");
+                throw new InvalidDataException($"No incomplete responses found for section with ID {cmsQuestionnaireSection.Id}.");
             }
 
             if (latestCompletedSubmission.Maturity is null)
@@ -38,10 +38,10 @@ namespace Dfe.PlanTech.Application.Services
             }
 
             var maturity = latestCompletedSubmission.Maturity;
-            var introSlugForMaturity = await _contentfulWorkflow.GetIntroForMaturityAsync(cmsQuestionnaireSection.Sys.Id, maturity);
+            var introSlugForMaturity = await _contentfulWorkflow.GetIntroForMaturityAsync(cmsQuestionnaireSection.Id, maturity);
             if (introSlugForMaturity is null)
             {
-                throw new InvalidDataException($"No recommendation intro found maturity {maturity} for section with ID {cmsQuestionnaireSection.Sys.Id}.");
+                throw new InvalidDataException($"No recommendation intro found maturity {maturity} for section with ID {cmsQuestionnaireSection.Id}.");
             }
 
             return introSlugForMaturity.Slug;

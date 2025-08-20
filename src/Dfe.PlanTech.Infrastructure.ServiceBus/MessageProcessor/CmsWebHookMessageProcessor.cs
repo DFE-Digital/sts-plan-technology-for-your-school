@@ -22,7 +22,7 @@ public class CmsWebHookMessageProcessor(
         {
             var payload = MapMessageToPayload(body);
 
-            await _cache.InvalidateCacheAsync(payload.Sys.Id, payload.ContentType);
+            await _cache.InvalidateCacheAsync(payload.Id, payload.ContentType);
             return new ServiceBusSuccessResult();
         }
         catch (Exception ex) when (ex is JsonException)

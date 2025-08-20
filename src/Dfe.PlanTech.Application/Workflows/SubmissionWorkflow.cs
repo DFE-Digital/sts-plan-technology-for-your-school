@@ -16,10 +16,13 @@ public class SubmissionWorkflow(
     private readonly StoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
     private readonly SubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
-    public async Task CloneLatestCompletedSubmission(int establishmentId, string sectionId)
+    public async Task<SqlSubmissionDto> CloneLatestCompletedSubmission(int establishmentId, QuestionnaireSectionEntry section)
     {
-        var submissionWithResponses = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, sectionId, isCompletedSubmission: false);
-        await _submissionRepository.CloneSubmission(submissionWithResponses);
+        var submissionWithResponses = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, isCompletedSubmission: true);
+        var newSubmission = await _submissionRepository.CloneSubmission(submissionWithResponses);
+        newSubmission.Responses = GetOrderedResponses(newSubmission.Responses, section).ToList();
+
+        return newSubmission.AsDto();
     }
 
     public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
@@ -28,7 +31,7 @@ public class SubmissionWorkflow(
         bool? isCompletedSubmission
     )
     {
-        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Sys.Id, isCompletedSubmission);
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, isCompletedSubmission);
         if (latestSubmission is null)
         {
             return null;
@@ -40,10 +43,10 @@ public class SubmissionWorkflow(
         if (lastResponseInUserJourney is not null)
         {
             var lastSelectedQuestion = section.Questions
-                .FirstOrDefault(q => q.Sys.Id.Equals(lastResponseInUserJourney.Question.ContentfulRef))
-                    ?? throw new UserJourneyMissingContentException($"Could not find question with database ID {lastResponseInUserJourney.QuestionId} (Contentful ref {lastResponseInUserJourney.Question.ContentfulRef}) in section with ID {section.Sys.Id}", section);
+                .FirstOrDefault(q => q.Id.Equals(lastResponseInUserJourney.Question.ContentfulRef))
+                    ?? throw new UserJourneyMissingContentException($"Could not find question with database ID {lastResponseInUserJourney.QuestionId} (Contentful ref {lastResponseInUserJourney.Question.ContentfulRef}) in section with ID {section.Id}", section);
 
-            if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Sys.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
+            if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
             {
                 throw new UserJourneyMissingContentException($"Could not find answer with Contentful reference {lastResponseInUserJourney.Answer.ContentfulRef} in question with Contentful reference {lastResponseInUserJourney.Question.ContentfulRef}", section);
             }
@@ -139,7 +142,7 @@ public class SubmissionWorkflow(
         var currentQuestion = section?.Questions.FirstOrDefault();
         while (currentQuestion is not null)
         {
-            if (!questionWithAnswerMap.TryGetValue(currentQuestion.Sys.Id ?? string.Empty, out var response))
+            if (!questionWithAnswerMap.TryGetValue(currentQuestion.Id ?? string.Empty, out var response))
             {
                 break;
             }
@@ -147,7 +150,7 @@ public class SubmissionWorkflow(
             yield return response;
 
             currentQuestion = currentQuestion.Answers.ToList()
-                .Find(a => a.Sys.Id!.Equals(response.Answer.ContentfulRef))?
+                .Find(a => a.Id!.Equals(response.Answer.ContentfulRef))?
                 .NextQuestion;
         }
     }

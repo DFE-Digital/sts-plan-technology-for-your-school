@@ -15,8 +15,8 @@ public class RecommendationSectionEntry: ContentfulEntry
     public List<RecommendationChunkEntry> GetRecommendationChunksByAnswerIds(IEnumerable<string> answerIds)
     {
         return Chunks
-            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
-            .DistinctBy(chunk => chunk.Sys.Id)
+            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Id)))
+            .DistinctBy(chunk => chunk.Id)
             .ToList();
     }
 }

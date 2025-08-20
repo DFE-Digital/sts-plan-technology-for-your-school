@@ -27,8 +27,8 @@ public class CmsViewBuilder(
 
         var chunkModels = entries
             .SelectMany(chunk => chunk.Answers
-                .Where(a => a.Sys.Id is not null)
-                .Select(a => new ChunkModel(a.Sys.Id!, chunk.HeaderText)))
+                .Where(a => a.Id is not null)
+                .Select(a => new ChunkModel(a.Id!, chunk.HeaderText)))
             .ToList();
 
         var resultModel = new PagedResultViewModel<ChunkModel>

@@ -67,7 +67,7 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
         if (value.Sys is null)
             yield break;
 
-        yield return value.Sys.Id;
+        yield return value.Id;
         var properties = value.GetType().GetProperties();
         foreach (var property in properties)
         {

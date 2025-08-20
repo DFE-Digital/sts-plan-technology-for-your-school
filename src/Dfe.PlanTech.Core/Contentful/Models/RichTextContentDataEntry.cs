@@ -4,6 +4,7 @@ namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class RichTextContentDataEntry : Entry<ContentfulEntry>
 {
+    public string Id => SystemProperties.Id;
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;
     public string? Title { get; init; }

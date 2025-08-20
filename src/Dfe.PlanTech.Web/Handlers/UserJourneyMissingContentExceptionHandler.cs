@@ -29,7 +29,7 @@ public class UserJourneyMissingContentExceptionHandler(
         var establishmentId = _currentUser.EstablishmentId
             ?? throw new InvalidDataException($"Current user has no {nameof(_currentUser.EstablishmentId)}");
 
-        await _submissionService.DeleteCurrentSubmissionHardAsync(establishmentId, exception.Section.Sys.Id);
+        await _submissionService.DeleteCurrentSubmissionHardAsync(establishmentId, exception.Section.Id);
 
         controller.TempData[ErrorMessageTempDataKey] = _configuration[ErrorMessageConfigKey];
 

@@ -3,6 +3,8 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.ViewModels;
@@ -42,7 +44,7 @@ public class ReviewAnswersViewBuilder(
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
             establishmentId,
             section,
-            isCompletedSubmission: isChangeAnswersFlow
+            isCompletedSubmission: false
         );
         ReviewAnswersViewModel viewModel;
 
@@ -53,14 +55,11 @@ public class ReviewAnswersViewBuilder(
 
             case SubmissionStatus.InProgress:
             case SubmissionStatus.CompleteNotReviewed:
+            case SubmissionStatus.CompleteReviewed when isChangeAnswersFlow != false:
                 viewModel = await BuildCheckAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
                 return controller.View(CheckAnswersViewName, viewModel);
 
-            case SubmissionStatus.CompleteReviewed:
-                if (isChangeAnswersFlow == false)
-                {
-                    await _submissionService.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(establishmentId, submissionRoutingData.QuestionnaireSection);
-                }
+            case SubmissionStatus.CompleteReviewed when isChangeAnswersFlow == false:
                 viewModel = await BuildChangeAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
                 return controller.View(ChangeAnswersViewName, viewModel);
 
@@ -100,6 +99,16 @@ public class ReviewAnswersViewBuilder(
                 return controller.View(CheckAnswersViewName, viewModel);
 
             case SubmissionStatus.CompleteReviewed:
+                var newSubmission = await _submissionService.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(establishmentId, submissionRoutingData.QuestionnaireSection);
+                var responsesModel = new SubmissionResponsesModel(newSubmission, section);
+                submissionRoutingData = new SubmissionRoutingDataModel
+                (
+                    maturity: responsesModel.Maturity,
+                    nextQuestion: section.Questions.First(),
+                    questionnaireSection: section,
+                    submission: responsesModel,
+                    status: newSubmission!.Status!.ToSubmissionStatus()
+                );
                 viewModel = await BuildChangeAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
                 return controller.View(ChangeAnswersViewName, viewModel);
 

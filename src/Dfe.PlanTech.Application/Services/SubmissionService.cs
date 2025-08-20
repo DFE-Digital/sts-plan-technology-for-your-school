@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 
@@ -15,7 +16,7 @@ public class SubmissionService(
     private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
     private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
-    public async Task RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section)
+    public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section)
     {
         // Check if an in-progress submission already exists
         var inProgressSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
@@ -27,7 +28,7 @@ public class SubmissionService(
             await _submissionWorkflow.DeleteSubmissionSoftAsync(inProgressSubmission.Id);
         }
 
-        await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section.Sys.Id);
+        return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
     }
 
     public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, bool isCompletedSubmission)
@@ -69,21 +70,20 @@ public class SubmissionService(
 
         var lastResponse = submissionResponsesModel!.Responses.Last();
         var cmsLastAnswer = section.Questions
-            .FirstOrDefault(q => q.Sys.Id.Equals(lastResponse.QuestionSysId))?
+            .FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))?
             .Answers
-            .FirstOrDefault(a => a.Sys.Id.Equals(lastResponse.AnswerSysId));
+            .FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
 
-        if (!Enum.TryParse<SubmissionStatus>(latestCompletedSubmission?.Status, out var sectionStatus))
-        {
-            sectionStatus = cmsLastAnswer?.NextQuestion is null
+        var sectionStatus = latestCompletedSubmission?.Status is null
+            ? cmsLastAnswer?.NextQuestion is null
                ? SubmissionStatus.CompleteNotReviewed
-               : SubmissionStatus.InProgress;
-        }
+               : SubmissionStatus.InProgress
+            : latestCompletedSubmission.Status.ToSubmissionStatus();
 
         return new SubmissionRoutingDataModel
         (
             maturity: submissionResponsesModel.Maturity,
-            nextQuestion: cmsLastAnswer?.NextQuestion ?? section.Questions.First(),
+            nextQuestion: cmsLastAnswer?.NextQuestion,
             questionnaireSection: section,
             submission: submissionResponsesModel,
             status: sectionStatus

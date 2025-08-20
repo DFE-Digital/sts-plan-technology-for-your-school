@@ -40,9 +40,9 @@ public class QuestionService(
             throw new DatabaseException($"The responses to the ongoing submission {answeredQuestions.SubmissionId} are out of sync with the topic");
 
         return section.Questions
-            .Where(question => question.Sys.Id.Equals(lastAttachedResponse.QuestionSysId))
+            .Where(question => question.Id.Equals(lastAttachedResponse.QuestionSysId))
             .SelectMany(question => question.Answers)
-            .Where(answer => answer.Sys.Id.Equals(lastAttachedResponse.AnswerSysId))
+            .Where(answer => answer.Id.Equals(lastAttachedResponse.AnswerSysId))
             .Select(answer => answer.NextQuestion)
             .FirstOrDefault();
     }

@@ -46,7 +46,7 @@ public class PagesViewBuilder(
         {
             if (!CurrentUser.IsAuthenticated)
             {
-                _logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Sys.Id);
+                _logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Id);
             }
             else
             {
@@ -54,7 +54,7 @@ public class PagesViewBuilder(
             }
         }
 
-        if (string.Equals(page.Sys.Id, _errorPages.InternalErrorPageId))
+        if (string.Equals(page.Id, _errorPages.InternalErrorPageId))
         {
             viewModel.DisplayBlueBanner = false;
         }

@@ -26,7 +26,7 @@ public record QuestionWithAnswerModel
     public QuestionWithAnswerModel(SqlResponseDto response, QuestionnaireSectionEntry section)
     {
         QuestionSysId = response.Question.ContentfulSysId;
-        QuestionSlug = section.Questions.FirstOrDefault(q => q.Sys.Id.Equals(response.Question.ContentfulSysId))?.Slug;
+        QuestionSlug = section.Questions.FirstOrDefault(q => q.Id.Equals(response.Question.ContentfulSysId))?.Slug;
         QuestionText = response.Question.QuestionText ?? string.Empty; //Should this come from Contentful?
         AnswerSysId = response.Answer.ContentfulSysId;
         AnswerText = response.Answer.AnswerText ?? string.Empty; //Should this come from Contentful?

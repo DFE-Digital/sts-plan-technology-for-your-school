@@ -44,7 +44,7 @@ public class EstablishmentService(
     public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId)
     {
         var schools = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
-        var sectionIds = categories.SelectMany(c => c.Sections.Select(s => s.Sys.Id));
+        var sectionIds = categories.SelectMany(c => c.Sections.Select(s => s.Id));
 
         var schoolUrns = schools.Select(s => s.Urn);
         var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(schoolUrns);

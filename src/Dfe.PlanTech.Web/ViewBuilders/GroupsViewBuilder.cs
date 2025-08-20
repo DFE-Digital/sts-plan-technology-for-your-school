@@ -161,7 +161,7 @@ public class GroupsViewBuilder(
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug: {sectionSlug}");
 
-        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Sys.Id)
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
         var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(schoolId, section, true)
@@ -185,7 +185,7 @@ public class GroupsViewBuilder(
         var subtopicChunks = subtopicRecommendation
             .Section
             .Chunks
-            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Sys.Id)))
+            .Where(chunk => chunk.Answers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Id)))
             .Distinct()
             .ToList();
 

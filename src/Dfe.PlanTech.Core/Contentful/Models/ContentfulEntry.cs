@@ -4,7 +4,8 @@ namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public abstract class ContentfulEntry : IContentfulEntry
 {
-    public SystemDetails Sys { get; set; } = null!;
+    public string Id => Sys?.Id ?? string.Empty;
+    public SystemDetails? Sys { get; set; }
     public string Description { get; set; } = null!;
 
     public ContentfulEntry() { }

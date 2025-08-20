@@ -15,7 +15,7 @@
         <dl class="govuk-summary-list govuk-!-margin-bottom-0">
             @foreach (var questionWithAnswer in Model.SubmissionResponses?.Responses ?? [])
             {
-                var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
+                var anchorLabel = $" your answer for {questionWithAnswer.QuestionText}";
 
                 <div class="govuk-!-margin-bottom-5">
                     <div class="govuk-!-margin-bottom-1">
@@ -27,14 +27,14 @@
                     </div>
 
                     <div class="noprint govuk-!-margin-bottom-5">
-                        <a asp-controller="Questions" asp-action="GetQuestionBySlug"
-                           asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
-                           asp-route-sectionSlug="@Model.SectionSlug"
+                        <a asp-controller="@nameof(QuestionsController).GetControllerNameSlug()" asp-action="@nameof(QuestionsController.GetQuestionBySlug)"
                            asp-route-categorySlug="@Model.CategorySlug"
-                           asp-route-returnTo="ReviewAnswers"
+                           asp-route-sectionSlug="@Model.SectionSlug"
+                           asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
+                           asp-route-returnTo="@nameof(ReviewAnswersController).GetControllerNameSlug()"
                            title="@questionWithAnswer.QuestionText"
                            class="govuk-link">
-                            Change <span class="govuk-visually-hidden">@anchorLabel</span>
+                            Change<span class="govuk-visually-hidden">@anchorLabel</span>
                         </a>
                     </div>
 
@@ -46,7 +46,6 @@
             <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>
             <input type="hidden" name="sectionName" value="@Model.SectionName">
             <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
-
 
             @if (Model.ErrorMessage != null)
             {

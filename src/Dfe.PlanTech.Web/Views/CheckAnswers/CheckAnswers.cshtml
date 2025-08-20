@@ -37,7 +37,7 @@
                 </div>
             }
         </dl>
-        <form asp-controller="ReviewAnswers" asp-action="ConfirmCheckAnswers" method="post" class="noprint">
+        <form asp-controller="@nameof(ReviewAnswersController).GetControllerNameSlug()" asp-action="@nameof(ReviewAnswersController.ConfirmCheckAnswers)" method="post" class="noprint">
             <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>
             <input type="hidden" name="categorySlug" value="@Model.CategorySlug" />
             <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
