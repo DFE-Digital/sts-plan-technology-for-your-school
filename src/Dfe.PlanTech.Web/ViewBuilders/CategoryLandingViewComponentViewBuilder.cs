@@ -18,7 +18,7 @@ public class CategoryLandingViewComponentViewBuilder(
     private readonly ILogger<CategoryLandingViewComponent> _logger = loggerFactory.CreateLogger<CategoryLandingViewComponent>();
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category, string slug)
+    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName)
     {
         if (!category.Sections.Any())
         {
@@ -55,6 +55,7 @@ public class CategoryLandingViewComponentViewBuilder(
             CategoryName = category.Header.Text,
             CategorySlug = slug,
             Sections = category.Sections,
+            SectionName = sectionName,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage
         };
 
