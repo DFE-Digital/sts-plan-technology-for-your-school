@@ -7,6 +7,27 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
+/*
+ * IMPORTANT:
+ * Any stored procedure parameters must send the params in the order they're notated in the DB.
+ * 
+ * For example the SubmitAnswer SP looks like this:
+ * ALTER PROCEDURE [dbo].[SubmitAnswer]
+    @sectionId NVARCHAR(50),
+    @sectionName NVARCHAR(50),
+    @questionContentfulId NVARCHAR(50),
+    @questionText NVARCHAR(MAX),
+    @answerContentfulId NVARCHAR(50),
+    @answerText NVARCHAR(MAX),
+    @userId INT,
+    @establishmentId INT,
+    @maturity NVARCHAR(20),
+    @responseId INT OUTPUT,
+    @submissionId INT OUTPUT
+ *
+ * As you'll note in SubmitResponse below, the parameters are sent in that order.
+ */
+
 public class StoredProcedureRepository
 {
     protected readonly PlanTechDbContext _db;
