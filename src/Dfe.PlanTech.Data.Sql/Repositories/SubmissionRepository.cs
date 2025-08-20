@@ -1,11 +1,12 @@
 ﻿using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class SubmissionRepository(PlanTechDbContext dbContext)
+public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepository
 {
     protected readonly PlanTechDbContext _db = dbContext;
 
@@ -62,7 +63,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext)
         return submission;
     }
 
-    
+
 
     public Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId)
     {

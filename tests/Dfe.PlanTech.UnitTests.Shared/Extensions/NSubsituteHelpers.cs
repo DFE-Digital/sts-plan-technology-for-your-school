@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.UnitTests.Shared.Extensions;
 
 public static class NSubstituteExtensions
 {
-    public static void HadMethodCalled<TSubstitute>(this TSubstitute substitute, string methodName, IEnumerable<object> expectedArguments = null, int timesCalled = 1)
+    public static void HadMethodCalled<TSubstitute>(this TSubstitute substitute, string methodName, IEnumerable<object>? expectedArguments = null, int timesCalled = 1)
       where TSubstitute : class
     {
         var Calls = substitute.ReceivedCalls();
@@ -16,7 +16,7 @@ public static class NSubstituteExtensions
 
         Assert.Equal(timesCalled, methodCalls.Length);
 
-        if (expectedArguments == null)
+        if (expectedArguments is null)
             return;
 
         foreach (var methodCall in methodCalls)

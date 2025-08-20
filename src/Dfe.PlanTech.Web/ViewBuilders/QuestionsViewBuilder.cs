@@ -4,7 +4,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewModels;
@@ -165,7 +164,7 @@ public class QuestionsViewBuilder(
             return controller.RedirectToAction(
                 PagesController.GetPageByRouteAction,
                 PagesController.ControllerName,
-                new { route = RouteConstants.Home });
+                new { route = UrlConstants.Home });
         }
     }
 

@@ -1,11 +1,12 @@
 ﻿using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class EstablishmentRepository
+public class EstablishmentRepository : IEstablishmentRepository
 {
     protected readonly PlanTechDbContext _db;
 

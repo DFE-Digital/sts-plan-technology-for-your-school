@@ -1,9 +1,10 @@
 ﻿using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class GroupReadActivityRepository
+public class GroupReadActivityRepository : IGroupReadActivityRepository
 {
     protected readonly PlanTechDbContext _db;
 

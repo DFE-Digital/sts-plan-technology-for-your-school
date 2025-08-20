@@ -10,7 +10,7 @@ namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
 
         public SectionViewModel(QuestionnaireSectionEntry sectionDto)
         {
-            Sys = new SystemDetailsViewModel(sectionDto.Sys);
+            Sys = new SystemDetailsViewModel(sectionDto.Sys!);
             Name = sectionDto.Name;
             Questions = sectionDto.Questions.Select(q => new QuestionViewModel(q)).ToList();
         }
