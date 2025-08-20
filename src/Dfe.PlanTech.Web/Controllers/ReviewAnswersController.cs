@@ -73,6 +73,7 @@ public class ReviewAnswersController(
 
         try
         {
+            TempData["SectionName"] = sectionName;
             return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(this, categorySlug, sectionSlug, sectionName, submissionId);
         }
         catch (Exception e)
