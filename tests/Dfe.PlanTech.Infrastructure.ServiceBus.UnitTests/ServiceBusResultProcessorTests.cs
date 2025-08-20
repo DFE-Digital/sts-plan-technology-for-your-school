@@ -1,7 +1,7 @@
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Domain.ServiceBus.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
@@ -21,7 +21,7 @@ public class ServiceBusResultProcessorTests
     public ServiceBusResultProcessorTests()
     {
         _eventArgs = Substitute.For<ProcessMessageEventArgs>(_message, _receiver, CancellationToken.None);
-        _processor = new ServiceBusResultProcessor(_retryHandler, _logger);
+        _processor = new ServiceBusResultProcessor(_logger, _retryHandler);
     }
 
     [Fact]

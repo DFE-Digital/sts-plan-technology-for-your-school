@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Domain.Caching.Exceptions;
-using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
 public class GuardTests
@@ -12,13 +12,13 @@ public class GuardTests
     {
         string name = "test";
 
-        Assert.Throws<GuardException>(() => Guard.IsNotNull(null, name));
+        Assert.Throws<GuardException>(() => GuardModel.IsNotNull(null, name));
     }
 
     [Fact]
     public void IsNotNull_ThrowsCustomException_WhenObjectIsNull()
     {
-        Assert.Throws<GuardException>(() => Guard.IsNotNull(null, ExceptionFactory));
+        Assert.Throws<GuardException>(() => GuardModel.IsNotNull(null, ExceptionFactory));
     }
 
     [Fact]
@@ -27,7 +27,7 @@ public class GuardTests
         var obj = new object();
         string name = "test";
 
-        Guard.IsNotNull(obj, name);
+        GuardModel.IsNotNull(obj, name);
         Assert.True(true);
     }
 
@@ -37,7 +37,7 @@ public class GuardTests
         bool condition = true;
         string message = "Test message";
 
-        Assert.Throws<GuardException>(() => Guard.IsFalse(condition, message));
+        Assert.Throws<GuardException>(() => GuardModel.IsFalse(condition, message));
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class GuardTests
         bool condition = false;
         string message = "Test message";
 
-        Guard.IsFalse(condition, message);
+        GuardModel.IsFalse(condition, message);
         Assert.True(true);
     }
 
@@ -56,7 +56,7 @@ public class GuardTests
         bool condition = false;
         string message = "Test message";
 
-        Assert.Throws<GuardException>(() => Guard.IsTrue(condition, message));
+        Assert.Throws<GuardException>(() => GuardModel.IsTrue(condition, message));
     }
 
     [Fact]
@@ -65,7 +65,7 @@ public class GuardTests
         bool condition = true;
         string message = "Test message";
 
-        Guard.IsTrue(condition, message);
+        GuardModel.IsTrue(condition, message);
         Assert.True(true);
     }
 
@@ -76,7 +76,7 @@ public class GuardTests
         static bool constraint(int x) => x > 10;
         string message = "Value must be greater than {0}";
 
-        Assert.Throws<GuardException>(() => Guard.IsTrue(value, constraint, message));
+        Assert.Throws<GuardException>(() => GuardModel.IsTrue(value, constraint, message));
     }
 
     [Fact]
@@ -85,7 +85,7 @@ public class GuardTests
         int value = 15;
         string message = "Value must be greater than {0}";
 
-        Guard.IsTrue(value, Constraint, message);
+        GuardModel.IsTrue(value, Constraint, message);
         Assert.True(true);
     }
 
@@ -94,7 +94,7 @@ public class GuardTests
     {
         bool condition = false;
 
-        Assert.ThrowsAny<GuardException>(() => Guard.IsTrue(condition, "error"));
+        Assert.ThrowsAny<GuardException>(() => GuardModel.IsTrue(condition, "error"));
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public class GuardTests
     {
         bool condition = true;
 
-        Guard.IsTrue(condition, "not an error");
+        GuardModel.IsTrue(condition, "not an error");
         Assert.True(true);
     }
 
@@ -110,7 +110,7 @@ public class GuardTests
     public void IsTrue_ThrowsTypedException()
     {
         bool condition = false;
-        Assert.Throws<InvalidOperationException>(() => Guard.IsTrue<InvalidOperationException>(condition));
+        Assert.Throws<InvalidOperationException>(() => GuardModel.IsTrue<InvalidOperationException>(condition));
     }
 
     [Fact]
@@ -118,7 +118,7 @@ public class GuardTests
     {
         bool condition = true;
 
-        Guard.IsTrue(condition, ExceptionFactory);
+        GuardModel.IsTrue(condition, ExceptionFactory);
         Assert.True(true);
     }
 
@@ -126,7 +126,7 @@ public class GuardTests
     public void IsTrueWithFunc_ThrowsException_WhenConditionIsFalse()
     {
         bool condition = false;
-        Assert.Throws<GuardException>(() => Guard.IsTrue(condition, ExceptionFactory));
+        Assert.Throws<GuardException>(() => GuardModel.IsTrue(condition, ExceptionFactory));
     }
 
 
@@ -135,7 +135,7 @@ public class GuardTests
     {
         bool condition = true;
 
-        Assert.ThrowsAny<GuardException>(() => Guard.IsFalse(condition, "error"));
+        Assert.ThrowsAny<GuardException>(() => GuardModel.IsFalse(condition, "error"));
     }
 
     [Fact]
@@ -143,7 +143,7 @@ public class GuardTests
     {
         bool condition = false;
 
-        Guard.IsFalse(condition, "should not error");
+        GuardModel.IsFalse(condition, "should not error");
         Assert.True(true);
     }
 
@@ -151,7 +151,7 @@ public class GuardTests
     public void IsFalseWithFunc_ThrowsException_WhenConditionIsTrue()
     {
         bool condition = true;
-        Assert.Throws<GuardException>(() => Guard.IsFalse(condition, ExceptionFactory));
+        Assert.Throws<GuardException>(() => GuardModel.IsFalse(condition, ExceptionFactory));
     }
 
     [Fact]
@@ -159,7 +159,7 @@ public class GuardTests
     {
         bool condition = false;
 
-        Guard.IsFalse(condition, ExceptionFactory);
+        GuardModel.IsFalse(condition, ExceptionFactory);
         Assert.True(true);
     }
 
@@ -167,7 +167,7 @@ public class GuardTests
     public void IsFalse_ThrowsTypedException()
     {
         bool condition = true;
-        Assert.Throws<InvalidOperationException>(() => Guard.IsFalse<InvalidOperationException>(condition));
+        Assert.Throws<InvalidOperationException>(() => GuardModel.IsFalse<InvalidOperationException>(condition));
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public class GuardTests
         var stringToModify = "";
         var expectedResult = "modified";
         void action() => stringToModify = expectedResult;
-        Guard.When(true, action);
+        GuardModel.When(true, action);
 
         Assert.Equal(expectedResult, stringToModify);
     }
@@ -187,7 +187,7 @@ public class GuardTests
         var stringToModify = "";
         var shouldNotEqualThis = "modified";
         void action() => stringToModify = shouldNotEqualThis;
-        Guard.When(false, action);
+        GuardModel.When(false, action);
 
         Assert.Equal("", stringToModify);
     }

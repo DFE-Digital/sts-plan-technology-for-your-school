@@ -1,4 +1,6 @@
-namespace Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
+
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 
 /// <summary>
 /// Writes messages to pub/sub queues

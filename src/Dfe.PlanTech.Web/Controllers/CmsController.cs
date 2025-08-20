@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.ViewBuilders;

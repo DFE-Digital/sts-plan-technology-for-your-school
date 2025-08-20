@@ -1,5 +1,6 @@
-using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Exceptions;
+using Dfe.PlanTech.Core.Caching;
+using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using StackExchange.Redis;
@@ -16,7 +17,7 @@ public class RedisLockProviderUnitTests
 
     public RedisLockProviderUnitTests()
     {
-        _provider = new(_options, _connectionManager, _logger);
+        _provider = new(_logger, _connectionManager, _options);
         _connectionManager.GetDatabaseAsync(Arg.Any<int>()).Returns(_database);
     }
 

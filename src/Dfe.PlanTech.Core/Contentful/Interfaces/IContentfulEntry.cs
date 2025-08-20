@@ -4,6 +4,6 @@ namespace Dfe.PlanTech.Core.Contentful.Interfaces
 {
     public interface IContentfulEntry
     {
-        public SystemDetails Sys { get; }
+        public SystemDetails? Sys { get; }
     }
 }

@@ -1,18 +1,18 @@
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 
 public class ServiceBusResultProcessor(
-    ILoggerFactory loggerFactory,
+    ILogger<ServiceBusResultProcessor> logger,
     IMessageRetryHandler retryHandler
-)
+) : IServiceBusResultProcessor
 {
-    private readonly ILogger<ServiceBusResultProcessor> logger = loggerFactory.CreateLogger<ServiceBusResultProcessor>();
+    private readonly ILogger<ServiceBusResultProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IMessageRetryHandler _retryHandler = retryHandler ?? throw new ArgumentNullException(nameof(retryHandler));
 
-    public async Task ProcessMessageResult(ProcessMessageEventArgs processMessageEventArgs, ServiceBusResult result, CancellationToken cancellationToken)
+    public async Task ProcessMessageResult(ProcessMessageEventArgs processMessageEventArgs, IServiceBusResult result, CancellationToken cancellationToken)
     {
         try
         {
@@ -25,13 +25,13 @@ public class ServiceBusResultProcessor(
                     await ProcessErrorResult(processMessageEventArgs, deadLetterResult, cancellationToken);
                     break;
                 default:
-                    logger.LogError("Unexpected service bus result type: {Type}", result.GetType().Name);
+                    _logger.LogError("Unexpected service bus result type: {Type}", result.GetType().Name);
                     break;
             }
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing message result: {Message}", ex.Message);
+            _logger.LogError(ex, "Error processing message result: {Message}", ex.Message);
         }
     }
 
@@ -44,12 +44,12 @@ public class ServiceBusResultProcessor(
 
         if (shouldRetry)
         {
-            logger.LogWarning("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nWill retry again", processMessageEventArgs.Message.MessageId, errorResult.Reason, errorResult.Description ?? "");
+            _logger.LogWarning("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nWill retry again", processMessageEventArgs.Message.MessageId, errorResult.Reason, errorResult.Description ?? "");
             await processMessageEventArgs.CompleteMessageAsync(processMessageEventArgs.Message, cancellationToken);
             return;
         }
 
-        logger.LogError("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nThe maximum delivery count has been reached", processMessageEventArgs.Message.MessageId, errorResult.Reason, errorResult.Description ?? "");
+        _logger.LogError("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nThe maximum delivery count has been reached", processMessageEventArgs.Message.MessageId, errorResult.Reason, errorResult.Description ?? "");
         await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, errorResult.Reason, errorResult.Description, cancellationToken);
     }
 }

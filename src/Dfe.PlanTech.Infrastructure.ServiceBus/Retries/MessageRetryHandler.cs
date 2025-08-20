@@ -1,4 +1,5 @@
 using Azure.Messaging.ServiceBus;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Options;
