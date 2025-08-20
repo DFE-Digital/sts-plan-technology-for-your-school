@@ -7,12 +7,12 @@ using StackExchange.Redis;
 namespace Dfe.PlanTech.Infrastructure.Redis;
 
 public class RedisLockProvider(
-    ILoggerFactory loggerFactory,
+    ILogger<RedisLockProvider> logger,
     IRedisConnectionManager connectionManager,
     DistributedCachingOptions options
 ) : IDistributedLockProvider
 {
-    private readonly ILogger<RedisLockProvider> _logger = loggerFactory.CreateLogger<RedisLockProvider>();
+    private readonly ILogger<RedisLockProvider> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IRedisConnectionManager _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
     private readonly DistributedCachingOptions _options = options ?? throw new ArgumentNullException(nameof(options));
 

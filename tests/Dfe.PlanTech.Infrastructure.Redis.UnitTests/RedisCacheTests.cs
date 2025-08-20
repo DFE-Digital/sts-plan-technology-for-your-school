@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using StackExchange.Redis;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
 
@@ -17,10 +18,10 @@ public class RedisCacheTests : RedisCacheTestsBase
     public RedisCacheTests()
     {
         _cache = new RedisCache(
+            backgroundTaskQueue: BackgroundTaskQueue,
             connectionManager: _connectionManager,
-            logger: _logger,
             dependencyManager: _dependencyManager,
-            backgroundTaskQueue: BackgroundTaskQueue
+            logger: _logger
         );
 
         _connectionManager.GetDatabaseAsync(Arg.Any<int>()).Returns(Database);
@@ -188,7 +189,7 @@ public class RedisCacheTests : RedisCacheTestsBase
     [Fact]
     public async Task InvalidateCacheAsync_RemovesAllDependencies()
     {
-        var firstAnswerKey = _dependencyManager.GetDependencyKey(RedisCacheTestHelpers.FirstAnswer.Sys.Id);
+        var firstAnswerKey = _dependencyManager.GetDependencyKey(RedisCacheTestHelpers.FirstAnswer.Sys!.Id);
         var keys = new List<string> { "one", "two", "three" };
         var missingKeys = new List<string> { "four" };
         var dependencies = keys.Select(dep => new RedisValue(dep)).ToArray();

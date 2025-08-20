@@ -3,11 +3,11 @@ using System.Reflection;
 using NSubstitute;
 using Xunit;
 
-namespace Dfe.PlanTech;
+namespace Dfe.PlanTech.UnitTests.Shared.Extensions;
 
 public static class NSubstituteExtensions
 {
-    public static void HadMethodCalled<TSubstitute>(this TSubstitute substitute, string methodName, IEnumerable<object>? expectedArguments = null, int timesCalled = 1)
+    public static void HadMethodCalled<TSubstitute>(this TSubstitute substitute, string methodName, IEnumerable<object> expectedArguments = null, int timesCalled = 1)
       where TSubstitute : class
     {
         var Calls = substitute.ReceivedCalls();

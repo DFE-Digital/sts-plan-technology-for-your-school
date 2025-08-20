@@ -25,9 +25,9 @@ public class RedisDependencyManagerTests : RedisCacheTestsBase
 
         await QueuedFunc(default);
 
-        await batch.Received(1).SetAddAsync(_dependencyManager.GetDependencyKey(RedisCacheTestHelpers.Question.Sys.Id), Key, CommandFlags.FireAndForget);
-        await batch.Received(1).SetAddAsync(_dependencyManager.GetDependencyKey(RedisCacheTestHelpers.FirstAnswer.Sys.Id), Key, CommandFlags.FireAndForget);
-        await batch.Received(1).SetAddAsync(_dependencyManager.GetDependencyKey(RedisCacheTestHelpers.SecondAnswer.Sys.Id), Key, CommandFlags.FireAndForget);
+        await batch.Received(1).SetAddAsync(_dependencyManager.GetDependencyKey(RedisCacheTestHelpers.Question.Sys!.Id), Key, CommandFlags.FireAndForget);
+        await batch.Received(1).SetAddAsync(_dependencyManager.GetDependencyKey(RedisCacheTestHelpers.FirstAnswer.Sys!.Id), Key, CommandFlags.FireAndForget);
+        await batch.Received(1).SetAddAsync(_dependencyManager.GetDependencyKey(RedisCacheTestHelpers.SecondAnswer.Sys!.Id), Key, CommandFlags.FireAndForget);
     }
 
     [Fact]

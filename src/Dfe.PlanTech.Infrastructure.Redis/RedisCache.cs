@@ -21,13 +21,13 @@ public class RedisCache : ICmsCache
     private readonly AsyncRetryPolicy _retryPolicyAsync;
 
     public RedisCache(
-        ILoggerFactory loggerFactory,
+        ILogger<RedisCache> logger,
         IBackgroundTaskQueue backgroundTaskQueue,
         IRedisConnectionManager connectionManager,
         IRedisDependencyManager dependencyManager
     )
     {
-        _logger = loggerFactory.CreateLogger<RedisCache>();
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         _backgroundTaskService = backgroundTaskQueue ?? throw new ArgumentNullException(nameof(backgroundTaskQueue));
         _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
         _dependencyManager = dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager));
