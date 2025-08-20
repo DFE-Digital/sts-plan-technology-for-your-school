@@ -50,7 +50,9 @@ public class QuestionsViewBuilder(
 
         controller.TempData["ReturnTo"] = returnTo;
 
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: false);
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
 
         var isChangeAnswersFlow = returnTo == FlowConstants.ChangeAnswersFlow;
         var isSlugForNextQuestion = submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug) ?? false;
@@ -183,9 +185,11 @@ public class QuestionsViewBuilder(
     {
         var userId = GetUserIdOrThrowException();
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: false);
 
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
+
         var question = section.GetQuestionBySlug(questionSlug);
 
         if (!controller.ModelState.IsValid)

@@ -38,10 +38,8 @@ public class SubmissionService(
             : new SubmissionResponsesModel(submission, section);
     }
 
-    public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, string sectionSlug, bool? isCompletedSubmission)
+    public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission)
     {
-        var section = await _contentfulWorkflow.GetSectionBySlugAsync(sectionSlug);
-
         var latestCompletedSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
             section,
@@ -92,9 +90,8 @@ public class SubmissionService(
         );
     }
 
-    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(QuestionnaireCategoryEntry category, int establishmentId)
+    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(int establishmentId, IEnumerable<string> sectionIds)
     {
-        var sectionIds = category.Sections.Select(s => s.Sys.Id);
         return _submissionWorkflow.GetSectionStatusesAsync(establishmentId, sectionIds);
     }
 

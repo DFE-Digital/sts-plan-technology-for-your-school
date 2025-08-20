@@ -41,13 +41,13 @@ public class RecommendationsViewBuilder(
     )
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find category for slug {categorySlug}");
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+        var categoryHeaderText = await ContentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find category header text for slug {categorySlug}");
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: true);
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: true);
 
-        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Sys.Id);
+        var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Sys.Id, 3);
         if (subtopicRecommendation is null)
         {
             throw new ContentfulDataUnavailableException($"Could not find subtopic for section with ID '{section.Sys.Id}'");
@@ -67,10 +67,11 @@ public class RecommendationsViewBuilder(
                             ? subtopicChunks[currentChunkIndex + 1]
                             : null;
 
-        var viewModel = new SingleRecommendationViewModel()
+        var viewModel = new SingleRecommendationViewModel
         {
-            CategoryName = category.Header.Text,
+            CategoryName = categoryHeaderText,
             CategorySlug = categorySlug,
+            SectionSlug = sectionSlug,
             Section = section,
             Chunks = subtopicChunks,
             CurrentChunk = currentChunk,
@@ -95,7 +96,7 @@ public class RecommendationsViewBuilder(
             ?? throw new ContentfulDataUnavailableException($"Could not find category for slug {categorySlug}");
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: true);
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: true);
 
         switch (submissionRoutingData.Status)
         {
@@ -138,7 +139,9 @@ public class RecommendationsViewBuilder(
         }
 
         var establishmentId = GetEstablishmentIdOrThrowException();
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, sectionSlug, isCompletedSubmission: false);
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
 
         var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(submissionRoutingData.QuestionnaireSection.Sys.Id)
             ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for: {submissionRoutingData.QuestionnaireSection.Name}");

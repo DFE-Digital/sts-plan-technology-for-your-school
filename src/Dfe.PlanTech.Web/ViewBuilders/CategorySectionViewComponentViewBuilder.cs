@@ -31,7 +31,7 @@ public class CategorySectionViewComponentViewBuilder(
         string? progressRetrievalErrorMessage = null;
         try
         {
-            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(category, establishmentId);
+            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(establishmentId, category.Sections.Select(s => s.Sys.Id));
         }
         catch (Exception ex)
         {
@@ -44,7 +44,7 @@ public class CategorySectionViewComponentViewBuilder(
         }
 
         var categoryLandingSlug = GetLandingPageSlug(category);
-        var categorySections = await BuildCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync();
+        var categorySections = await BuildCategorySectionViewModel(category.Sections, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync();
         var description = category.Content is { Count: > 0 } content
             ? content[0]
             : new MissingComponentEntry();
@@ -62,12 +62,12 @@ public class CategorySectionViewComponentViewBuilder(
     }
 
     private async IAsyncEnumerable<CategorySectionViewModel> BuildCategorySectionViewModel(
-        QuestionnaireCategoryEntry category,
+        ICollection<QuestionnaireSectionEntry> sections,
         List<SqlSectionStatusDto> sectionStatuses,
         bool hadRetrievalError
     )
     {
-        foreach (var section in category.Sections)
+        foreach (var section in sections)
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {

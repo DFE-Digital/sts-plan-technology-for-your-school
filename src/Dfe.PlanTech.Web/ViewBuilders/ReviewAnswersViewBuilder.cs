@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.ViewModels;
@@ -34,9 +35,13 @@ public class ReviewAnswersViewBuilder(
     )
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
+
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
             establishmentId,
-            sectionSlug,
+            section,
             isCompletedSubmission: isChangeAnswersFlow
         );
         ReviewAnswersViewModel viewModel;
@@ -72,9 +77,12 @@ public class ReviewAnswersViewBuilder(
     )
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
             establishmentId,
-            sectionSlug,
+            section,
             isCompletedSubmission: true
         );
 

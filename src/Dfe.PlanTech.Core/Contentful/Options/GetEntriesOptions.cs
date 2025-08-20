@@ -34,7 +34,7 @@ public class GetEntriesOptions
 
     public IEnumerable<ContentfulQuery>? Queries { get; init; }
 
-    public int Include { get; init; } = 5;
+    public int Include { get; init; } = 2;
 
     public string SerializeToRedisFormat()
     {

@@ -39,7 +39,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         string? progressRetrievalErrorMessage = null;
         try
         {
-            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(category, establishmentId);
+            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(establishmentId, category.Sections.Select(s => s.Sys.Id));
         }
         catch (Exception ex)
         {
@@ -58,7 +58,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         return new GroupsDashboardViewComponentViewModel
         {
             Description = description,
-            GroupsCategorySections = await GetGroupsCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is not null).ToListAsync(),
+            GroupsCategorySections = await GetGroupsCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync(),
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
         };
     }

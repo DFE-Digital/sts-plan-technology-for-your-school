@@ -32,7 +32,7 @@ public class CategoryLandingViewComponentViewBuilder(
         string? progressRetrievalErrorMessage = null;
         try
         {
-            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(category, establishmentId);
+            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(establishmentId, category.Sections.Select(s => s.Sys.Id));
         }
         catch (Exception ex)
         {

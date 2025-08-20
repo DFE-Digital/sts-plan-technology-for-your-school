@@ -15,7 +15,7 @@ namespace Dfe.PlanTech.Application.Rendering.Models
 
         public CustomAttachmentModel(RichTextContentDataEntry content)
         {
-            var contentType = content?.Asset.File.ContentType;
+            var contentType = content?.Asset?.File.ContentType;
             var fileExtension = contentType?.Split('/')[^1].ToLower();
 
             if (fileExtension == FileExtensionConstants.XLSXSPREADSHEET)
@@ -27,8 +27,8 @@ namespace Dfe.PlanTech.Application.Rendering.Models
             ContentType = contentType ?? string.Empty;
             Size = content?.Asset?.File?.Details?.Size / 1024 ?? 0;
             Title = content?.Title;
-            Uri = content?.Asset.File.Url ?? string.Empty;
-            UpdatedAt = content?.Asset.SystemProperties.UpdatedAt;
+            Uri = content?.Asset?.File.Url ?? string.Empty;
+            UpdatedAt = content?.Asset?.SystemProperties.UpdatedAt;
             FileExtension = fileExtension ?? string.Empty;
         }
     }

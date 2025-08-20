@@ -64,7 +64,7 @@ public class PagesViewBuilder(
 
     private async Task<IActionResult> BuildLandingPageAsync(Controller controller, PageEntry page)
     {
-        var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug);
+        var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4);
         if (category is null)
         {
             throw new ContentfulDataUnavailableException($"Could not find category at {controller.Request.Path.Value}");

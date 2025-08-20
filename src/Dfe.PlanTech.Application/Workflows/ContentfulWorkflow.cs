@@ -69,11 +69,27 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug)
+    public async Task<string?> GetCategoryHeaderTextBySlugAsync(string slug)
     {
         var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.sys.contentType.sys.id", Value = "page" };
         var slugQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.fields.slug", Value = slug };
-        var options = new GetEntriesOptions(_getPageOptions.Include, [contentTypeQuery, slugQuery]);
+        var options = new GetEntriesOptions(include: 2, [contentTypeQuery, slugQuery]);
+
+        var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(options);
+        var headerText = categories.FirstOrDefault()?.Header.Text;
+        if (headerText is null)
+        {
+            _logger.LogError("Could not find header text for questionnaire category with slug {Slug} from Contentful", slug);
+        }
+
+        return headerText;
+    }
+
+    public async Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug, int? includeLevel = null)
+    {
+        var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.sys.contentType.sys.id", Value = "page" };
+        var slugQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.fields.slug", Value = slug };
+        var options = new GetEntriesOptions(includeLevel ?? 5, [contentTypeQuery, slugQuery]);
 
         var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(options);
         var category = categories.FirstOrDefault();
@@ -90,7 +106,6 @@ public class ContentfulWorkflow(
     {
         var query = new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId };
         var options = new GetEntriesOptions(include: 2, [query]);
-
         options.Select = ["fields.intros", "sys"];
 
         var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
@@ -135,11 +150,13 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string sectionSlug)
+    public async Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string sectionSlug, int? includeLevel = null)
     {
         var sectionSlugQuery = new ContentfulQuerySingleValue { Field = SlugFieldPath, Value = sectionSlug };
         var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.interstitialPage.sys.contentType.sys.id", Value = "page" };
-        var options = new GetEntriesOptions { Queries = [sectionSlugQuery, contentTypeQuery] };
+        var options = includeLevel is null
+            ? new GetEntriesOptions([sectionSlugQuery, contentTypeQuery])
+            : new GetEntriesOptions(includeLevel.Value, [sectionSlugQuery, contentTypeQuery]);
 
         try
         {
@@ -158,10 +175,10 @@ public class ContentfulWorkflow(
         }
     }
 
-    public async Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId)
+    public async Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId, int? includeLevel = null)
     {
         var sectionIdQuery = new ContentfulQuerySingleValue { Field = "fields.subtopic.sys.id", Value = subtopicId };
-        var options = new GetEntriesOptions(4, [sectionIdQuery]);
+        var options = new GetEntriesOptions(includeLevel ?? 4, [sectionIdQuery]);
 
         var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
         var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
@@ -176,17 +193,7 @@ public class ContentfulWorkflow(
 
     public async Task<RecommendationIntroEntry?> GetSubtopicRecommendationIntroByIdAndMaturityAsync(string subtopicId, string maturity)
     {
-        var sectionIdQuery = new ContentfulQuerySingleValue { Field = "fields.subtopic.sys.id", Value = subtopicId };
-        var options = new GetEntriesOptions(4, [sectionIdQuery]);
-
-        var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
-        var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
-
-        if (subtopicRecommendation is null)
-        {
-            _logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
-            return null;
-        }
+        var subtopicRecommendation = await GetSubtopicRecommendationByIdAsync(subtopicId);
 
         var introForMaturity = subtopicRecommendation?.Intros.FirstOrDefault(i => i.Maturity.Equals(maturity));
         if (introForMaturity is null)

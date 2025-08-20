@@ -77,9 +77,9 @@ else
     }
 
     var isHomeCategoryPage = Model.Page.Slug.Equals(UrlConstants.HomePage.Replace("/", ""));
-    var categories = Model.Page.Content.OfType<QuestionnaireCategoryEntry>().ToList();
+    var categories = Model.Page.Content?.OfType<QuestionnaireCategoryEntry>().ToList();
 
-    @if (isHomeCategoryPage && categories.Any())
+    @if (isHomeCategoryPage && categories is not null && categories.Any())
     {
         <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">

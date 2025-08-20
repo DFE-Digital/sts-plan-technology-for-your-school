@@ -6,7 +6,7 @@
         <span class="govuk-caption-xl">@Model.SectionTitle</span>
     }
 
-    foreach (var content in Model.Content)
+    foreach (var content in Model.Content ?? [])
     {
         await Html.RenderPartialAsync("Components/PageComponentFactory", content);
     }

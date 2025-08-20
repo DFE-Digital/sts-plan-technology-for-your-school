@@ -14,9 +14,14 @@ public class ContentfulService(
         return _contentfulWorkflow.GetAllSectionsAsync();
     }
 
-    public Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug)
+    public Task<string?> GetCategoryHeaderTextBySlugAsync(string slug)
     {
-        return _contentfulWorkflow.GetCategoryBySlugAsync(slug);
+        return _contentfulWorkflow.GetCategoryHeaderTextBySlugAsync(slug);
+    }
+
+    public Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug, int? includeLevel = null)
+    {
+        return _contentfulWorkflow.GetCategoryBySlugAsync(slug, includeLevel);
     }
 
     public Task<NavigationLinkEntry> GetLinkByIdAsync(string contentId)
@@ -44,14 +49,14 @@ public class ContentfulService(
         return _contentfulWorkflow.GetEntryById<QuestionnaireQuestionEntry>(questionId);
     }
 
-    public Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug)
+    public Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null)
     {
-        return _contentfulWorkflow.GetSectionBySlugAsync(slug);
+        return _contentfulWorkflow.GetSectionBySlugAsync(slug, includeLevel);
     }
 
-    public Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId)
+    public Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId, int? includeLevel = null)
     {
-        return _contentfulWorkflow.GetSubtopicRecommendationByIdAsync(subtopicId);
+        return _contentfulWorkflow.GetSubtopicRecommendationByIdAsync(subtopicId, includeLevel);
     }
 
     public Task<RecommendationIntroEntry?> GetSubtopicRecommendationIntroAsync(string subtopicId, string maturity)
