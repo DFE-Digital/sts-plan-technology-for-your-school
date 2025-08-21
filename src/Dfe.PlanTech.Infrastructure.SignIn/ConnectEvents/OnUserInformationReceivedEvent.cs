@@ -1,14 +1,14 @@
 using System.Security.Claims;
-using Dfe.PlanTech.Domain.SignIns.Enums;
-using Dfe.PlanTech.Domain.SignIns.Models;
-using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Domain.Users.Models;
-using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
+using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
+namespace Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 
 public static class OnUserInformationReceivedEvent
 {
@@ -17,7 +17,10 @@ public static class OnUserInformationReceivedEvent
     /// </summary>
     /// <param name="context"></param>
     /// <returns></returns>
-    public static async Task RecordUserSignIn(ILogger logger, UserInformationReceivedContext context)
+    public static async Task RecordUserSignIn(
+        ILogger<DfeSignIn> logger,
+        UserInformationReceivedContext context
+    )
     {
         if (context.Principal?.Identity == null || !context.Principal.Identity.IsAuthenticated)
         {
@@ -25,39 +28,37 @@ public static class OnUserInformationReceivedEvent
             return;
         }
 
-        var userId = context.Principal.Claims.GetUserId();
+        var dsiReference = context.Principal.Claims.GetDsiReference();
         var establishment = context.Principal.Claims.GetOrganisation();
-        var recordUserSignInCommand = context.HttpContext.RequestServices.GetRequiredService<IRecordUserSignInCommand>();
+        var signInWorkflow = context.HttpContext.RequestServices.GetRequiredService<SignInWorkflow>();
 
-        if (establishment == null)
+        if (establishment is null)
         {
-            logger.LogWarning("User {UserId} is authenticated but has no establishment", userId);
-            await recordUserSignInCommand.RecordSignInUserOnly(userId);
+            logger.LogWarning("User {UserId} is authenticated but has no establishment", dsiReference);
+            await signInWorkflow.RecordSignInUserOnly(dsiReference);
             return;
         }
 
-        var signin = await recordUserSignInCommand.RecordSignIn(new RecordUserSignInDto()
-        {
-            DfeSignInRef = userId,
-            Organisation = establishment
-        });
+        var signin = await signInWorkflow.RecordSignIn(dsiReference, establishment);
 
         AddClaimsToPrincipal(context, signin);
     }
 
-    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, SignIn signin)
+    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, SqlSignInDto signin)
     {
         var principal = context.Principal;
 
-        if (principal == null)
+        if (principal is null)
+        {
             return;
+        }
 
-        string establishmentId = (signin.EstablishmentId?.ToString()) ?? throw new ArgumentNullException(nameof(signin.EstablishmentId));
+        string establishmentId = (signin.EstablishmentId?.ToString()) ?? throw new InvalidDataException(nameof(signin.EstablishmentId));
 
-        ClaimsIdentity claimsIdentity = new(new[]{
+        ClaimsIdentity claimsIdentity = new([
             new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),
             new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, establishmentId)
-        });
+        ]);
 
         principal.AddIdentity(claimsIdentity);
     }

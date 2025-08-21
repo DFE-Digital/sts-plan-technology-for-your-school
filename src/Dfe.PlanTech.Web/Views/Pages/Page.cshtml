@@ -1,5 +1,4 @@
-﻿@using Dfe.PlanTech.Application.Constants
-@model Dfe.PlanTech.Web.Models.PageViewModel
+﻿@model PageViewModel
 
 @if (Model.DisplayBlueBanner)
 {
@@ -22,7 +21,7 @@
 
         @if (Model.Page.DisplayOrganisationName)
         {
-            <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
+            <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.OrganisationName</span>
         }
 
         @if (Model.Page.Title != null)
@@ -51,7 +50,7 @@ else
 
     if (Model.Page.DisplayOrganisationName)
     {
-        <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.Page.OrganisationName</span>
+        <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.OrganisationName</span>
     }
 
     if (Model.Page.Title != null)
@@ -77,11 +76,10 @@ else
         </div>
     }
 
-    var isHomeCategoryPage = Model.Page.Slug == UrlConstants.HomePage.Replace("/", "");
-    var isAutomatedTestingHomePage = Model.Page.Slug == UrlConstants.AutomatedTestingHomePage.Replace("/", "");
-    var categories = Model.Page.Content.OfType<Dfe.PlanTech.Domain.Questionnaire.Models.Category>().ToList();
+    var isHomeCategoryPage = Model.Page.Slug.Equals(UrlConstants.HomePage.Replace("/", ""));
+    var categories = Model.Page.Content?.OfType<QuestionnaireCategoryEntry>().ToList();
 
-    @if ((isHomeCategoryPage || isAutomatedTestingHomePage) && categories.Any())
+    @if (isHomeCategoryPage && categories is not null && categories.Any())
     {
         <div class="govuk-grid-row">
         <div class="govuk-grid-column-two-thirds">

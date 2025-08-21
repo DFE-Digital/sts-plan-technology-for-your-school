@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Caching.Models;
+using Dfe.PlanTech.Core.Caching;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -6,25 +6,27 @@ namespace Dfe.PlanTech.Infrastructure.Redis;
 
 public class RedisConnectionManager : IRedisConnectionManager
 {
+    private readonly ILogger<RedisConnectionManager> _logger;
     private ConnectionMultiplexer? _connection;
-    private readonly DistributedCachingOptions options;
-    private readonly ILogger<RedisConnectionManager> logger;
+    private readonly DistributedCachingOptions _options;
 
-    public RedisConnectionManager(DistributedCachingOptions options, ILogger<RedisConnectionManager> logger)
+    public RedisConnectionManager(ILoggerFactory loggerFactory, DistributedCachingOptions options)
     {
         if (string.IsNullOrEmpty(options.ConnectionString))
         {
             throw new InvalidDataException($"{nameof(options.ConnectionString)} is null or empty");
         }
 
-        this.options = options;
-        this.logger = logger;
+        _logger = loggerFactory.CreateLogger<RedisConnectionManager>();
+        _options = options;
     }
 
     /// <inheritdoc/>
     public async Task<IDatabase> GetDatabaseAsync(int databaseId)
     {
-        _connection ??= await ConnectionMultiplexer.ConnectAsync(options.ConnectionString) ?? throw new InvalidOperationException("Failed to create Redis connection");
+        _connection ??= await ConnectionMultiplexer.ConnectAsync(_options.ConnectionString)
+            ?? throw new InvalidOperationException("Failed to create Redis connection");
+
         return _connection.GetDatabase(databaseId);
     }
 
@@ -37,7 +39,7 @@ public class RedisConnectionManager : IRedisConnectionManager
     {
         if (_connection == null)
         {
-            logger.LogInformation("Attempted to flush Redis but connection was not set");
+            _logger.LogInformation("Attempted to flush Redis but connection was not set");
             return;
         }
 

@@ -1,0 +1,27 @@
+﻿using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Web.Context;
+
+namespace Dfe.PlanTech.Web.ViewBuilders;
+
+public class FooterLinksViewComponentViewBuilder(
+    ILoggerFactory loggerFactory,
+    ContentfulService contentfulService,
+    CurrentUser currentUser
+) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+{
+    private readonly ILogger<FooterLinksViewComponentViewBuilder> _logger = loggerFactory.CreateLogger<FooterLinksViewComponentViewBuilder>();
+
+    public Task<List<NavigationLinkEntry>> GetNavigationLinksAsync()
+    {
+        try
+        {
+            return ContentfulService.GetNavigationLinksAsync();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogCritical(ex, "Error retrieving navigation links for footer");
+            return Task.FromResult(new List<NavigationLinkEntry>());
+        }
+    }
+}

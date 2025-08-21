@@ -7,8 +7,14 @@ namespace Dfe.PlanTech.Web.Background;
 /// </summary>
 /// <param name="logger"></param>
 /// <param name="taskQueue"></param>
-public class BackgroundTaskHostedService(ILogger<BackgroundTaskHostedService> logger, IBackgroundTaskQueue taskQueue) : BackgroundService
+public class BackgroundTaskHostedService(
+    ILoggerFactory loggerFactory,
+    IBackgroundTaskQueue taskQueue
+) : BackgroundService
 {
+    private readonly ILogger<BackgroundTaskHostedService> _logger = loggerFactory.CreateLogger<BackgroundTaskHostedService>();
+    private readonly IBackgroundTaskQueue _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
+
     /// <summary>
     /// Starts processing the queue
     /// </summary>
@@ -16,7 +22,7 @@ public class BackgroundTaskHostedService(ILogger<BackgroundTaskHostedService> lo
     /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Starting processing background tasks");
+        _logger.LogInformation("Starting processing background tasks");
         await BackgroundProcessing(stoppingToken);
     }
 
@@ -29,9 +35,9 @@ public class BackgroundTaskHostedService(ILogger<BackgroundTaskHostedService> lo
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var workItem = await taskQueue.DequeueAsync(stoppingToken);
+            var workItem = await _taskQueue.DequeueAsync(stoppingToken);
 
-            logger.LogInformation("Read item from the queue");
+            _logger.LogInformation("Read item from the queue");
 
             try
             {
@@ -39,7 +45,7 @@ public class BackgroundTaskHostedService(ILogger<BackgroundTaskHostedService> lo
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error occurred executing {WorkItem}.", nameof(workItem));
+                _logger.LogError(ex, "Error occurred executing {WorkItem}.", nameof(workItem));
             }
         }
     }
@@ -51,7 +57,7 @@ public class BackgroundTaskHostedService(ILogger<BackgroundTaskHostedService> lo
     /// <returns></returns>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Stopping processing background tasks");
+        _logger.LogInformation("Stopping processing background tasks");
 
         await base.StopAsync(cancellationToken);
     }

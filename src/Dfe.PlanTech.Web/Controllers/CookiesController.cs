@@ -1,30 +1,35 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Cookie;
-using Dfe.PlanTech.Domain.Cookie.Interfaces;
-using Dfe.PlanTech.Web.Helpers;
-using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Route("/cookies")]
-public class CookiesController(ILogger<CookiesController> logger, ICookieService cookieService) : BaseController<CookiesController>(logger)
+public class CookiesController(
+    ILoggerFactory logger,
+    ContentfulService contentfulService,
+    CookieService cookieService
+) : BaseController<CookiesController>(logger)
 {
     private const string CookiesSlug = "cookies";
-    private readonly ICookieService _cookieService = cookieService;
+
+    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly CookieService _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
 
     [HttpGet]
-    public async Task<IActionResult> GetCookiesPage([FromServices] IGetPageQuery getPageQuery, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetCookiesPage()
     {
-        var cookiesPageContent = await getPageQuery.GetPageBySlug(CookiesSlug, cancellationToken);
+        var cookiesPageContent = await _contentfulService.GetPageBySlugAsync(CookiesSlug);
 
         var referrerUrl = HttpContext.Request.Headers.Referer.ToString();
 
         CookiesViewModel cookiesViewModel = new()
         {
-            Title = cookiesPageContent?.Title ?? new Title() { Text = "Cookies" },
+            Title = cookiesPageContent?.Title ?? new ComponentTitleEntry("Cookies"),
             Content = cookiesPageContent?.Content ?? [],
             Cookie = _cookieService.Cookie,
             ReferrerUrl = referrerUrl ?? "",

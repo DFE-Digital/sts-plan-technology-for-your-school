@@ -1,20 +1,17 @@
-using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Enums;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
 
-public class HeaderComponentTagHelper : TagHelper
+public class HeaderComponentTagHelper(
+    ILoggerFactory loggerFactory
+) : TagHelper
 {
-    private readonly ILogger<HeaderComponentTagHelper> _logger;
+    private readonly ILogger<HeaderComponentTagHelper> _logger = loggerFactory.CreateLogger<HeaderComponentTagHelper>();
 
-    public Header? Model { get; set; }
-
-    public HeaderComponentTagHelper(ILogger<HeaderComponentTagHelper> logger)
-    {
-        _logger = logger;
-    }
+    public ComponentHeaderEntry? Model { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
@@ -22,7 +19,7 @@ public class HeaderComponentTagHelper : TagHelper
         {
             output.TagName = null;
             output.Content.SetHtmlContent("");
-            _logger.LogWarning("Missing or invalid {Name} {Model}", nameof(Header), Model);
+            _logger.LogWarning("Missing or invalid {Name} {Model}", nameof(HeaderTag), Model);
             return;
         }
 

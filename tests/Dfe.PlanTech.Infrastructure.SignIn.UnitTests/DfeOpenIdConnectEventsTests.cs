@@ -1,9 +1,14 @@
 using System.Security.Claims;
 using System.Text.RegularExpressions;
-using Dfe.PlanTech.Domain.SignIns.Enums;
-using Dfe.PlanTech.Domain.SignIns.Models;
-using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Infrastructure.SignIns.ConnectEvents;
+using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Data.Sql.Interfaces;
+using Dfe.PlanTech.Infrastructure.SignIn;
+using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +36,7 @@ public partial class DfeOpenIdConnectEventsTests
         };
 
         var contextSubstitute = Substitute.For<HttpContext>();
-        contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
+        contextSubstitute.RequestServices.GetService(typeof(DfeSignInConfiguration)).Returns(config);
 
         var context = new RedirectContext(contextSubstitute,
             new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
@@ -62,7 +67,7 @@ public partial class DfeOpenIdConnectEventsTests
         };
 
         var contextSubstitute = Substitute.For<HttpContext>();
-        contextSubstitute.RequestServices.GetService(typeof(IDfeSignInConfiguration)).Returns(config);
+        contextSubstitute.RequestServices.GetService(typeof(DfeSignInConfiguration)).Returns(config);
 
         var context = new RedirectContext(contextSubstitute,
             new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
@@ -89,23 +94,43 @@ public partial class DfeOpenIdConnectEventsTests
         Guid userId = Guid.NewGuid();
 
         var identitySubstitute = Substitute.For<ClaimsIdentity>();
-
         identitySubstitute.Claims.Returns([new Claim(ClaimConstants.NameIdentifier, userId.ToString()),]);
-
         identitySubstitute.IsAuthenticated.Returns(true);
 
-        var claimsPrincipal = new ClaimsPrincipal(identitySubstitute);
+        var user = new UserEntity
+        {
+            Id = 2,
+            DfeSignInRef = "testSignInRef",
+            DateCreated = DateTime.UtcNow,
+            DateLastUpdated = DateTime.UtcNow,
+            Responses = []
+        };
+
+        var signIn = new SignInEntity
+        {
+            Id = 3,
+            UserId = 2,
+            EstablishmentId = 3,
+            SignInDateTime = DateTime.UtcNow,
+            User = user
+        };
+        var establishmentRepositorySubstitute = Substitute.For<IEstablishmentRepository>();
+
+        var userRepositorySubstitute = Substitute.For<IUserRepository>();
+        userRepositorySubstitute.CreateUserBySignInRefAsync(Arg.Any<string>()).Returns(user);
+
+        var signInRepositorySubstitute = Substitute.For<ISignInRepository>();
+        signInRepositorySubstitute.CreateSignInAsync(Arg.Any<int>()).Returns(signIn);
+
+        var signInWorkflowSubstitute = Substitute.For<SignInWorkflow>(establishmentRepositorySubstitute, signInRepositorySubstitute, userRepositorySubstitute);
+
+        var serviceProvider = Substitute.For<IServiceProvider>();
+        serviceProvider.GetService(typeof(SignInWorkflow)).Returns(signInWorkflowSubstitute);
 
         var contextSubstitute = Substitute.For<HttpContext>();
-        var signInSubstitute = Substitute.For<IRecordUserSignInCommand>();
-        var serviceProvider = Substitute.For<IServiceProvider>();
-
         contextSubstitute.RequestServices.Returns(serviceProvider);
 
-        serviceProvider
-            .GetService(typeof(IRecordUserSignInCommand))
-            .Returns(signInSubstitute);
-
+        var claimsPrincipal = new ClaimsPrincipal(identitySubstitute);
         var context = new UserInformationReceivedContext(contextSubstitute,
             new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
             new OpenIdConnectOptions(),
@@ -116,7 +141,7 @@ public partial class DfeOpenIdConnectEventsTests
         await OnUserInformationReceivedEvent.RecordUserSignIn(logger, context);
 
         Assert.Single(logger.GetMatchingReceivedMessages($"User {userId} is authenticated but has no establishment", LogLevel.Warning));
-        await signInSubstitute.Received(1).RecordSignInUserOnly(Arg.Any<string>());
+        await signInWorkflowSubstitute.Received(1).RecordSignInUserOnly(Arg.Any<string>());
     }
 
     [Theory]

@@ -2,19 +2,15 @@ using System.Reflection;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
-public class ComponentViewsFactory
+public class ComponentViewsFactory(
+    ILoggerFactory loggerFactory
+)
 {
     private const string GENERATED_VIEW_NAMESPACE = "AspNetCoreGeneratedDocument";
     private const string SHARED_PATH = "Views_Shared";
 
-    private readonly Type[] _viewTypes;
-    private readonly ILogger<ComponentViewsFactory> _logger;
-
-    public ComponentViewsFactory(ILogger<ComponentViewsFactory> logger)
-    {
-        _viewTypes = GetSharedViewTypes().ToArray();
-        _logger = logger;
-    }
+    private readonly ILogger<ComponentViewsFactory> _logger = loggerFactory.CreateLogger<ComponentViewsFactory>();
+    private readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
 
     /// <summary>
     /// Tries to find matching shared view for the passed model, based on the model's name
@@ -24,11 +20,10 @@ public class ComponentViewsFactory
     /// <returns>Whether a view was successfully found or not</returns>
     public bool TryGetViewForType(object model, out string? viewPath)
     {
-        var componentTypeName = model.GetType().Name;
-
+        var componentTypeName = model.GetType().Name[0..^5].Replace("Component", "");
         var matchingViewType = _viewTypes.FirstOrDefault(FileNameMatchesComponentTypeName(componentTypeName));
 
-        if (matchingViewType == null)
+        if (matchingViewType is null)
         {
             _logger.LogWarning("Could not find matching view for {model}", model);
             viewPath = null;
@@ -48,28 +43,31 @@ public class ComponentViewsFactory
     /// </remarks>
     /// <param name="matchingViewType"></param>
     /// <returns>Folder path to the view for this type</returns>
-    private static string GetFolderPathForType(Type matchingViewType)
-    => matchingViewType.Name!.Replace("Views_Shared_", "").Replace("_", "/");
+    private static string GetFolderPathForType(Type matchingViewType) =>
+        matchingViewType.Name!.Replace("Views_Shared_", "").Replace("_", "/");
 
     /// <summary>
     /// Does the passed component type name match the type name?
     /// </summary>
     /// <param name="componentTypeName"></param>
     /// <returns></returns>
-    private static Func<Type, bool> FileNameMatchesComponentTypeName(string componentTypeName)
-    => type => type.Name.EndsWith($"_{componentTypeName}");
+    private static Func<Type, bool> FileNameMatchesComponentTypeName(string componentTypeName) =>
+        type => type.Name.EndsWith($"_{componentTypeName}");
 
     /// <summary>
     /// Get all Types generated from Views that are in the "Shared" folder (or sub-folder)
     /// </summary>
-    private static IEnumerable<Type> GetSharedViewTypes() => Assembly.GetExecutingAssembly()
-                                                                .GetTypes()
-                                                                .Where(IsSharedViewType);
+    private static IEnumerable<Type> GetSharedViewTypes() =>
+        Assembly
+            .GetExecutingAssembly()
+            .GetTypes()
+            .Where(IsSharedViewType);
 
     /// <summary>
     /// Is this type a View type, which is in the Shared folder path?
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    private static bool IsSharedViewType(Type type) => type.Namespace == GENERATED_VIEW_NAMESPACE && type.Name.StartsWith(SHARED_PATH);
+    private static bool IsSharedViewType(Type type) =>
+        type.Namespace == GENERATED_VIEW_NAMESPACE && type.Name.StartsWith(SHARED_PATH);
 }

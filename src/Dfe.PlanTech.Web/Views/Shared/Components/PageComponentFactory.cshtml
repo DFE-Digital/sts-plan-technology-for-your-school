@@ -1,8 +1,6 @@
-@using Dfe.PlanTech.Web.Helpers;
-
 @inject ComponentViewsFactory ComponentViewsFactory;
 
-@model Dfe.PlanTech.Domain.Content.Models.ContentComponent;
+@model ContentfulEntry;
 
 @{
     if(ComponentViewsFactory.TryGetViewForType(Model, out string? path) && !string.IsNullOrEmpty(path)){

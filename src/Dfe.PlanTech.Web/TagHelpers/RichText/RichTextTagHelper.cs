@@ -1,15 +1,18 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers.RichText;
 
-public class RichTextTagHelper(ILogger<RichTextTagHelper> logger, IRichTextRenderer richTextRenderer) : TagHelper
+public class RichTextTagHelper(
+    ILoggerFactory loggerFactory,
+    IRichTextRenderer richTextRenderer
+) : TagHelper
 {
-    private readonly ILogger<RichTextTagHelper> _logger = logger;
-    private readonly IRichTextRenderer _richTextRenderer = richTextRenderer;
+    private readonly ILogger<RichTextTagHelper> _logger = loggerFactory.CreateLogger<RichTextTagHelper>();
+    private readonly IRichTextRenderer _richTextRenderer = richTextRenderer ?? throw new ArgumentNullException(nameof(richTextRenderer));
 
-    public RichTextContent? Content { get; set; }
+    public RichTextContentField? Content { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {

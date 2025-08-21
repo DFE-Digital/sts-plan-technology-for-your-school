@@ -6,7 +6,6 @@ namespace Dfe.PlanTech.Web.Helpers;
 
 public class CustomRequestDimensionsTelemetryInitializer : ITelemetryInitializer
 {
-
     private readonly IHttpContextAccessor _httpContextAccessor;
 
     public CustomRequestDimensionsTelemetryInitializer(IHttpContextAccessor httpContextAccessor)

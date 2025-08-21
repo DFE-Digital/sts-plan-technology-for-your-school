@@ -1,7 +1,7 @@
-using Dfe.PlanTech.Application.Caching.Interfaces;
+using Dfe.PlanTech.Core.Caching;
+using Dfe.PlanTech.Core.Caching.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Domain.Background;
-using Dfe.PlanTech.Domain.Caching.Models;
-using Dfe.PlanTech.Domain.Content.Interfaces;
 using Microsoft.Extensions.Logging;
 using Polly;
 using Polly.Retry;
@@ -14,16 +14,23 @@ namespace Dfe.PlanTech.Infrastructure.Redis;
 /// </summary>
 public class RedisCache : ICmsCache
 {
-    private readonly IRedisConnectionManager _connectionManager;
-    private readonly AsyncRetryPolicy _retryPolicyAsync;
     private readonly ILogger<RedisCache> _logger;
+    private readonly IRedisConnectionManager _connectionManager;
     private readonly IRedisDependencyManager _dependencyManager;
     private readonly IBackgroundTaskQueue _backgroundTaskService;
+    private readonly AsyncRetryPolicy _retryPolicyAsync;
 
-    public RedisCache(IRedisConnectionManager connectionManager, ILogger<RedisCache> logger, IRedisDependencyManager dependencyManager, IBackgroundTaskQueue backgroundTaskQueue)
+    public RedisCache(
+        ILogger<RedisCache> logger,
+        IBackgroundTaskQueue backgroundTaskQueue,
+        IRedisConnectionManager connectionManager,
+        IRedisDependencyManager dependencyManager
+    )
     {
-        _connectionManager = connectionManager;
-        _logger = logger;
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _backgroundTaskService = backgroundTaskQueue ?? throw new ArgumentNullException(nameof(backgroundTaskQueue));
+        _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
+        _dependencyManager = dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager));
 
         var retryPolicyBuilder = Policy.Handle<TimeoutException>()
             .Or<RedisServerException>()
@@ -33,8 +40,6 @@ public class RedisCache : ICmsCache
             .OrInner<RedisException>();
 
         _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(50));
-        _dependencyManager = dependencyManager;
-        _backgroundTaskService = backgroundTaskQueue;
     }
 
     /// <inheritdoc/>
@@ -56,7 +61,7 @@ public class RedisCache : ICmsCache
 
             if (redisResult.ExistedInCache == true && !cacheValueIsNull)
             {
-                var hasContent = redisResult.CacheValue is IEnumerable<IContentComponent> cacheValue
+                var hasContent = redisResult.CacheValue is IEnumerable<ContentfulEntry> cacheValue
                     ? cacheValue.Any()
                     : !cacheValueIsNull;
 
@@ -79,7 +84,6 @@ public class RedisCache : ICmsCache
     /// <inheritdoc/>
     public async Task<string> SetAsync<T>(string key, T value, TimeSpan? expiry = null, int databaseId = -1)
     {
-        _logger.LogInformation("Setting cache item with key: {Key}", key);
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         await _dependencyManager.RegisterDependenciesAsync(database, key, value);
         return await SetAsync(database, key, value, expiry);
@@ -129,7 +133,7 @@ public class RedisCache : ICmsCache
     {
         _logger.LogInformation("Adding item to set with key: {Key}", key);
 
-        ArgumentNullException.ThrowIfNull(item);
+        ArgumentNullException.ThrowIfNull(item, nameof(item));
 
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         await _retryPolicyAsync.ExecuteAsync(() => database.SetAddAsync(key, item));
@@ -161,7 +165,8 @@ public class RedisCache : ICmsCache
     private async Task<string> SetAsync<T>(IDatabase database, string key, T value, TimeSpan? expiry = null)
     {
         var redisValue = value as string ?? value.Serialise();
-        _logger.LogInformation("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
+        _logger.LogInformation("Setting cache item with key: {Key}", key);
+        _logger.LogTrace("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
         await _retryPolicyAsync.ExecuteAsync(() => database.StringSetAsync(key, GZipRedisValueCompressor.Compress(redisValue), expiry));
         await _dependencyManager.RegisterDependenciesAsync(database, key, value, default);
         return key;
