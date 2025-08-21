@@ -13,7 +13,7 @@ public class EstablishmentWorkflow(
 {
     private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository = establishmentLinkRepository ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
-    private readonly IGroupReadActivityRepository _groupReadActivityRepository = groupReadActivityRepository ?? throw new ArgumentNullException( nameof(groupReadActivityRepository));
+    private readonly IGroupReadActivityRepository _groupReadActivityRepository = groupReadActivityRepository ?? throw new ArgumentNullException(nameof(groupReadActivityRepository));
     private readonly IStoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
 
     public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)

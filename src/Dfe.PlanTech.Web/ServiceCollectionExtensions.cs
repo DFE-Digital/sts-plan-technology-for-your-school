@@ -36,7 +36,7 @@ namespace Dfe.PlanTech.Web;
 public static class ServiceCollectionExtensions
 {
     public const string ContentAndSupportServiceKey = "content-and-support";
-      
+
     public static IServiceCollection AddAuthorisationServices(this IServiceCollection services)
     {
         services.AddAuthentication();

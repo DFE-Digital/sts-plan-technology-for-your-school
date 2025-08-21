@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class RecommendationSectionEntry: ContentfulEntry
+public class RecommendationSectionEntry : ContentfulEntry
 {
     public string InternalName { get; set; } = null!;
 

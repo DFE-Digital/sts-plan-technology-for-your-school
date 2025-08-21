@@ -12,7 +12,7 @@ namespace Dfe.PlanTech.Application.Rendering;
 public class RichTextRenderer(
     ILoggerFactory loggerFactory,
     IEnumerable<IRichTextContentPartRenderer> renderers
-): IRichTextRenderer, IRichTextContentPartRendererCollection
+) : IRichTextRenderer, IRichTextContentPartRendererCollection
 {
     public IReadOnlyList<IRichTextContentPartRenderer> Renderers => renderers.ToList();
 

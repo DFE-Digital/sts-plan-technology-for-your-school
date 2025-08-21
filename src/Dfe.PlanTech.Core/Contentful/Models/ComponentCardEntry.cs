@@ -2,7 +2,7 @@
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentCardEntry: ContentfulEntry
+public class ComponentCardEntry : ContentfulEntry
 {
     public string InternalName { get; init; } = null!;
     public string? Title { get; init; } = null!;

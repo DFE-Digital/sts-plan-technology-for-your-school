@@ -260,7 +260,7 @@ public class QuestionsViewBuilder(
             controller.ViewData["ReturnTo"] = returnTo;
         }
 
-        foreach(var answer in question.Answers)
+        foreach (var answer in question.Answers)
         {
             if (answer.NextQuestion is null)
             {
