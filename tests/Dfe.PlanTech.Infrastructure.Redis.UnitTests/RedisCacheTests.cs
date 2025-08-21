@@ -1,9 +1,9 @@
 using System.Text.Json;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using StackExchange.Redis;
-using Dfe.PlanTech.UnitTests.Shared.Extensions;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
 

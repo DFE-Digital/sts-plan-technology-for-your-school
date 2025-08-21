@@ -3,7 +3,7 @@ using Dfe.PlanTech.Core.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class RecommendationIntroEntry: ContentfulEntry, IHeaderWithContent
+public class RecommendationIntroEntry : ContentfulEntry, IHeaderWithContent
 {
     [NotMapped]
     public List<ContentfulEntry> Content { get; init; } = [];

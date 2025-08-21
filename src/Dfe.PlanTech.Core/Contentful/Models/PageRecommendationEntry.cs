@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class PageRecommendationEntry: ContentfulEntry
+public class PageRecommendationEntry : ContentfulEntry
 {
     public string InternalName { get; init; } = null!;
     public ComponentTitleEntry? Title { get; init; }

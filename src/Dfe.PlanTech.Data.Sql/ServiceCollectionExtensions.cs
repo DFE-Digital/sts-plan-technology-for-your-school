@@ -18,8 +18,8 @@ public static class ServiceCollectionExtensions
         opts =>
             {
                 var databaseRetryOptions = configuration.GetRequiredSection(ConfigurationConstants.Database).Get<DatabaseOptions>();
-            opts.EnableRetryOnFailure(databaseRetryOptions.MaxRetryCount, TimeSpan.FromMilliseconds(databaseRetryOptions.MaxDelayInMilliseconds), null);
-        });
+                opts.EnableRetryOnFailure(databaseRetryOptions.MaxRetryCount, TimeSpan.FromMilliseconds(databaseRetryOptions.MaxDelayInMilliseconds), null);
+            });
 
         services.AddDbContext<PlanTechDbContext>(databaseOptionsAction);
 

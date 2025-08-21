@@ -1,6 +1,6 @@
 ﻿namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentDropDownEntry: ContentfulEntry
+public class ComponentDropDownEntry : ContentfulEntry
 {
     public string InternalName { get; set; } = null!;
     public string Title { get; set; } = null!;

@@ -3,7 +3,7 @@ using Dfe.PlanTech.Core.Extensions;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class RecommendationChunkEntry: ContentfulEntry, IHeaderWithContent
+public class RecommendationChunkEntry : ContentfulEntry, IHeaderWithContent
 {
     public string InternalName { get; set; } = null!;
     public string Header { get; init; } = null!;

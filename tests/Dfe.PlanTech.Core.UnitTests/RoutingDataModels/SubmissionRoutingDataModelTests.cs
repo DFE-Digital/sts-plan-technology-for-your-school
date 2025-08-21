@@ -151,10 +151,10 @@ public class SubmissionRoutingDataModelTests
     {
         // Arrange
         var slug = "test-slug";
-        var expectedQuestion = new QuestionnaireQuestionEntry {Slug = slug};
+        var expectedQuestion = new QuestionnaireQuestionEntry { Slug = slug };
         var questionnaireSection = new QuestionnaireSectionEntry
         {
-            Questions = new List<QuestionnaireQuestionEntry> {expectedQuestion}
+            Questions = new List<QuestionnaireQuestionEntry> { expectedQuestion }
         };
 
         var routingData = new SubmissionRoutingDataModel(

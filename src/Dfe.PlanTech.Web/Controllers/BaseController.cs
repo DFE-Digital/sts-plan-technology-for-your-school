@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 public class BaseController<TConcreteController>(
     ILoggerFactory loggerFactory
-): Controller
+) : Controller
 {
     protected readonly ILogger<TConcreteController> Logger = loggerFactory.CreateLogger<TConcreteController>();
 }

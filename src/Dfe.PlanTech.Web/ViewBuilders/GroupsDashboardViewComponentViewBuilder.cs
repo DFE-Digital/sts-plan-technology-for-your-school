@@ -63,7 +63,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         };
     }
 
-        
+
     private async IAsyncEnumerable<GroupsCategorySectionViewModel> GetGroupsCategorySectionViewModel(
         QuestionnaireCategoryEntry category,
         List<SqlSectionStatusDto> sectionStatuses,

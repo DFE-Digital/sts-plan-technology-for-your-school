@@ -18,7 +18,7 @@ public class CategorySectionViewModel
         SqlSectionStatusDto? sectionStatus,
         bool hadRetrievalError
     )
-    { 
+    {
         Name = section.Name;
         Recommendation = recommendation;
         Slug = section.InterstitialPage?.Slug;

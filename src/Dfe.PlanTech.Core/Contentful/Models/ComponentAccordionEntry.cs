@@ -1,5 +1,5 @@
 ﻿namespace Dfe.PlanTech.Core.Contentful.Models;
 
-public class ComponentAccordionEntry: RichTextContentDataEntry
+public class ComponentAccordionEntry : RichTextContentDataEntry
 {
 }
