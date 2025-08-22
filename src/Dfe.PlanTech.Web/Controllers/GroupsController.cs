@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.AspNetCore.Mvc;
@@ -51,6 +52,7 @@ public class GroupsController : BaseController<GroupsController>
         return await _groupsViewBuilder.RouteToGroupsRecommendationAsync(this, sectionSlug);
     }
 
+    [LogInvalidModelState]
     [HttpGet("groups/recommendations/{sectionSlug}/print", Name = "GetRecommendationsPrintView")]
     public async Task<IActionResult> GetRecommendationsPrintView(int schoolId, string schoolName, string sectionSlug)
     {
