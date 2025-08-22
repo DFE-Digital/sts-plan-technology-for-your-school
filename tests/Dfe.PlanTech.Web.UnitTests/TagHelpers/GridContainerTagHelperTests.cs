@@ -1,5 +1,5 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.TagHelpers.RichText;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
@@ -17,9 +17,8 @@ public class GridContainerTagHelperTests
         string expectedHtml = "has executed";
 
         var loggerSubstitute = Substitute.For<ILogger<GridContainerTagHelper>>();
-
         var cardContainerRenderer = Substitute.For<ICardContainerContentPartRenderer>();
-        cardContainerRenderer.ToHtml(Arg.Any<IReadOnlyList<CsCard>>()).Returns(expectedHtml);
+        cardContainerRenderer.ToHtml(Arg.Any<IReadOnlyList<ComponentCardEntry>>()).Returns(expectedHtml);
 
         var context = new TagHelperContext(tagName: "grid-container",
                                             allAttributes: new TagHelperAttributeList(),
@@ -38,11 +37,11 @@ public class GridContainerTagHelperTests
         var gridContainerTagHelper = new GridContainerTagHelper(loggerSubstitute, cardContainerRenderer)
         {
             Content = [
-                new CsCard()
+                new ComponentCardEntry()
                 {
                     Description = "this is a test"
                 },
-                new CsCard()
+                new ComponentCardEntry()
                 {
                     Description = "second card test"
                 },
@@ -62,9 +61,8 @@ public class GridContainerTagHelperTests
         string expectedHtml = "has executed";
 
         var loggerSubstitute = Substitute.For<ILogger<GridContainerTagHelper>>();
-
         var cardContainerRenderer = Substitute.For<ICardContainerContentPartRenderer>();
-        cardContainerRenderer.ToHtml(Arg.Any<IReadOnlyList<CsCard>>()).Returns(expectedHtml);
+        cardContainerRenderer.ToHtml(Arg.Any<IReadOnlyList<ComponentCardEntry>>()).Returns(expectedHtml);
 
         var context = new TagHelperContext(tagName: "grid-container",
                                             allAttributes: new TagHelperAttributeList(),

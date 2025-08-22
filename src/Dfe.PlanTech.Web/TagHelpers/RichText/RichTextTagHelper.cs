@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 namespace Dfe.PlanTech.Web.TagHelpers.RichText;
 
 public class RichTextTagHelper(
-    ILoggerFactory loggerFactory,
+    ILogger<RichTextTagHelper> logger,
     IRichTextRenderer richTextRenderer
 ) : TagHelper
 {
-    private readonly ILogger<RichTextTagHelper> _logger = loggerFactory.CreateLogger<RichTextTagHelper>();
     private readonly IRichTextRenderer _richTextRenderer = richTextRenderer ?? throw new ArgumentNullException(nameof(richTextRenderer));
 
     public RichTextContentField? Content { get; set; }
@@ -18,7 +17,7 @@ public class RichTextTagHelper(
     {
         if (Content == null)
         {
-            _logger.LogWarning("Missing content");
+            logger.LogWarning("Missing content");
             return;
         }
 

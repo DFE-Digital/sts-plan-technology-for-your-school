@@ -5,11 +5,10 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 namespace Dfe.PlanTech.Web.TagHelpers.RichText;
 
 public class GridContainerTagHelper(
-    ILoggerFactory loggerFactory,
+    ILogger<GridContainerTagHelper> logger,
     ICardContainerContentPartRenderer cardContentPartRenderer
 ) : TagHelper
 {
-    private readonly ILogger<GridContainerTagHelper> _logger = loggerFactory.CreateLogger<GridContainerTagHelper>();
     private readonly ICardContainerContentPartRenderer _cardContentPartRenderer = cardContentPartRenderer ?? throw new ArgumentNullException(nameof(cardContentPartRenderer));
 
     public IReadOnlyList<ComponentCardEntry>? Content { get; set; }
@@ -18,7 +17,7 @@ public class GridContainerTagHelper(
     {
         if (Content is null)
         {
-            _logger.LogWarning("Missing content");
+            logger.LogWarning("Missing content");
             return;
         }
 

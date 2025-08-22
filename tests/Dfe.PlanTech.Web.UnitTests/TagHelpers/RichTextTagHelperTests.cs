@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.TagHelpers.RichText;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
@@ -46,9 +46,8 @@ public class RichTextTagHelperTests
         string expectedHtml = "has executed";
 
         var loggerSubstitute = Substitute.For<ILogger<RichTextTagHelper>>();
-
         var richTextRendererSubstitute = Substitute.For<IRichTextRenderer>();
-        richTextRendererSubstitute.ToHtml(Arg.Any<RichTextContent>()).Returns(expectedHtml);
+        richTextRendererSubstitute.ToHtml(Arg.Any<RichTextContentField>()).Returns(expectedHtml);
 
         var context = new TagHelperContext(tagName: "rich-text",
                                             allAttributes: new TagHelperAttributeList(),
@@ -66,7 +65,7 @@ public class RichTextTagHelperTests
 
         var richTextTagHelper = new RichTextTagHelper(loggerSubstitute, richTextRendererSubstitute)
         {
-            Content = new RichTextContent()
+            Content = new RichTextContentField()
             {
                 Value = expectedHtml
             }
