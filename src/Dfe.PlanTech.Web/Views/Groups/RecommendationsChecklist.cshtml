@@ -1,11 +1,8 @@
-@using Dfe.PlanTech.Domain.Helpers
-@using Dfe.PlanTech.Domain.Interfaces
-@model Dfe.PlanTech.Web.Models.GroupsRecommendationsViewModel
-@inject ISystemTime SystemTime
+@model GroupsRecommendationsViewModel
 
 @{
     Layout = "_PrintLayout";
-    var currentTime = SystemTime.UkNow;
+	var currentTime = TimeZoneHelper.ToUkTime(DateTime.UtcNow);
 }
 
 <div class="recommendation-content">
@@ -14,7 +11,9 @@
         <p class="govuk-body">Plan technology for your school</p>
     </div>
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
-    <p class="govuk-!-margin-top-4 govuk-body" id="printed-date-time">Date and time this document was printed: @($"{DateTimeFormatter.FormattedDateLong(currentTime)} at {DateTimeFormatter.FormattedTime(currentTime)}")</p>
+    <p class="govuk-!-margin-top-4 govuk-body" id="printed-date-time">
+		Date and time this document was printed:
+		@($"{DateTimeHelper.FormattedDateLong(currentTime)} at {DateTimeHelper.FormattedTime(currentTime)}")</p>
     <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible"/>
     <div id="back-button-container" class="noprint">
         @{

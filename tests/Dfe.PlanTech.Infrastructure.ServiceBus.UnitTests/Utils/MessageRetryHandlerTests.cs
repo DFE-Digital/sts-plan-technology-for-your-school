@@ -1,7 +1,7 @@
 using System.Text;
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Domain.ServiceBus.Models;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -16,7 +16,7 @@ public class MessageRetryHandlerTests
     private readonly IAzureClientFactory<ServiceBusSender> _serviceBusFactory = Substitute.For<IAzureClientFactory<ServiceBusSender>>();
     private readonly ServiceBusSender _serviceBusSender = Substitute.For<ServiceBusSender>();
     private readonly MessageRetryHandler _messageRetryHandler;
-    private readonly IOptions<MessageRetryHandlingOptions> _options = Options.Create(new MessageRetryHandlingOptions());
+    private readonly IOptions<MessageRetryHandlingOptions> _options = Microsoft.Extensions.Options.Options.Create(new MessageRetryHandlingOptions());
 
     public MessageRetryHandlerTests()
     {

@@ -1,7 +1,4 @@
-﻿@using Dfe.PlanTech.Web.TagHelpers.TaskList
-@using GovUk.Frontend.AspNetCore.TagHelpers
-@using AnchorTagHelper = Microsoft.AspNetCore.Mvc.TagHelpers.AnchorTagHelper
-@model GroupsDashboardViewComponentViewModel
+﻿@model GroupsDashboardViewComponentViewModel
 
 <div class="dfe-mat-self-assessment-list">
     <ul class="govuk-task-list">
@@ -13,36 +10,36 @@
                 <strong>Self-assessment status</strong>
             </div>
         </li>
-        @foreach (var groupsCategorySectionDtoItem in Model.GroupsCategorySectionDto)
+        @foreach (var groupsCategorySection in Model.GroupsCategorySections)
         {
             <li class="govuk-task-list__item govuk-task-list__item--with-link">
-                @if (groupsCategorySectionDtoItem.Slug != null)
+                @if (groupsCategorySection.Slug != null)
                 {
-                    @if (!string.IsNullOrEmpty(groupsCategorySectionDtoItem.RecommendationSlug))
+                    @if (!string.IsNullOrEmpty(groupsCategorySection.RecommendationSlug))
                     {
                         <div class="govuk-task-list__name-and-hint">
                             <partial name="Components/GroupsDashboard/GroupsSubtopicRecommendations"
-                                     model="@groupsCategorySectionDtoItem.Recommendation"/>
+                                     model="@groupsCategorySection.Recommendation"/>
                         </div>
                     }
                     else
                     {
                         <div class="govuk-task-list__name-and-hint">
                             <a class="govuk-task-list">
-                                @groupsCategorySectionDtoItem.Name
+                                @groupsCategorySection.Name
                             </a>
                         </div>
                     }
                     <div class="govuk-task-list__status">
-                        <task-list-tag colour=@groupsCategorySectionDtoItem.Tag.Colour>
-                            @groupsCategorySectionDtoItem.Tag.Text
+                        <task-list-tag colour=@groupsCategorySection.Tag.Colour>
+                            @groupsCategorySection.Tag.Text
                         </task-list-tag>
                     </div>
                 }
                 else
                 {
                     <div class="govuk-task-list__status">
-                        <govuk-error-message>@groupsCategorySectionDtoItem.ErrorMessage</govuk-error-message>
+                        <govuk-error-message>@groupsCategorySection.ErrorMessage</govuk-error-message>
                     </div>
                 }
             </li>

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
@@ -10,7 +10,7 @@ public static class RichTextMarkExtensions
     public const string BOLD_CLASS = "govuk-!-font-weight-bold";
     public const string BOLD_MARK = "bold";
 
-    public static string GetClass(this RichTextMark mark) => mark.Type switch
+    public static string GetClass(this IRichTextMark mark) => mark.Type switch
     {
         UNDERLINE_MARK => UNDERLINE_CLASS,
         BOLD_MARK => BOLD_CLASS,

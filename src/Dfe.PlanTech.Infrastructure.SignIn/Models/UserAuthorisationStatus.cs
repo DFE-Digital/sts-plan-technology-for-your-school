@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Infrastructure.SignIns.Models;
+namespace Dfe.PlanTech.Infrastructure.SignIn.Models;
 
 public record UserAuthorisationStatus(bool IsAuthenticated, bool HasOrganisation)
 {

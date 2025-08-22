@@ -1,14 +1,15 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Extensions;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis;
 
 /// <summary>
-/// Provides functionality for serialising the <see cref="ContentComponent"/> class, due to issues with a base class
+/// Provides functionality for serialising the <see cref="ContentfulEntry"/> class, due to issues with a base class
 /// </summary>
 public static class JsonSerialiser
 {
@@ -17,9 +18,9 @@ public static class JsonSerialiser
     /// </summary>
     private static readonly JsonSerializerOptions JsonSerialiserOptions = new()
     {
-        TypeInfoResolver =
-            new DefaultJsonTypeInfoResolver().WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<IContentComponent>)
-            .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentComponent>),
+        TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+            .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<IContentfulEntry>)
+            .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentfulEntry>),
         ReferenceHandler = ReferenceHandler.Preserve,
         MaxDepth = 256
     };

@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
 {
@@ -41,9 +40,10 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
 
             tagHelper.Process(context, output);
 
-            var htmlString = output.ToHtmlString();
+            var classAttribute = output.Attributes["class"].Value.ToString();
 
-            Assert.Contains($"class=\"app-task-list__tag govuk-tag govuk-tag--{colour.ToLower()}\"", htmlString);
+            Assert.Contains($"app-task-list__tag govuk-tag govuk-tag--{colour.ToLower()}", classAttribute);
+            Assert.Equal("strong", output.TagName);
         }
 
         [Fact]
@@ -72,9 +72,10 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
 
             tagHelper.Process(context, output);
 
-            var htmlString = output.ToHtmlString();
+            var classAttribute = output.Attributes["class"].Value.ToString();
 
-            Assert.Contains("class=\"app-task-list__tag govuk-tag\"", htmlString);
+            Assert.Contains("app-task-list__tag govuk-tag", classAttribute);
+            Assert.Equal("strong", output.TagName);
         }
 
         [Fact]
@@ -101,10 +102,7 @@ namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
 
             tagHelper.Process(context, output);
 
-            var htmlString = output.ToHtmlString();
-
-            Assert.StartsWith("<strong", htmlString);
-            Assert.EndsWith("</strong>", htmlString);
+            Assert.Equal("strong", output.TagName);
         }
     }
 }

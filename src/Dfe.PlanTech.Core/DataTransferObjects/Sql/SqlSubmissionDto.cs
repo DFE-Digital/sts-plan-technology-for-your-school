@@ -1,0 +1,19 @@
+﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
+
+public class SqlSubmissionDto : SqlDto
+{
+    public int Id { get; set; }
+    public int EstablishmentId { get; set; }
+    public SqlEstablishmentDto Establishment { get; set; } = null!;
+    public bool Completed { get; set; }
+    public string SectionId { get; set; } = null!;
+    public string SectionName { get; set; } = null!;
+    public string? Maturity { get; set; }
+    public DateTime DateCreated { get; set; }
+    public DateTime? DateLastUpdated { get; set; }
+    public DateTime? DateCompleted { get; set; }
+    public IEnumerable<SqlResponseDto> Responses { get; set; } = [];
+    public bool Deleted { get; set; }
+    public bool Viewed { get; set; }
+    public string? Status { get; set; }
+}

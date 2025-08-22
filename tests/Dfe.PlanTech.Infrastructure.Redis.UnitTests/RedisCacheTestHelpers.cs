@@ -1,23 +1,22 @@
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
 
 public static class RedisCacheTestHelpers
 {
-    private static readonly Answer _firstAnswer = new()
+    private static readonly QuestionnaireAnswerEntry _firstAnswer = new()
     {
         Sys = new SystemDetails { Id = "answer-one-id" },
         Maturity = "high",
         Text = "answer-one-text",
     };
-    private static readonly Answer _secondAnswer = new()
+    private static readonly QuestionnaireAnswerEntry _secondAnswer = new()
     {
         Sys = new SystemDetails { Id = "answer-two-id" },
         Maturity = "medium",
         Text = "answer-two-text",
     };
-    private static readonly Question _question = new()
+    private static readonly QuestionnaireQuestionEntry _question = new()
     {
         Sys = new SystemDetails { Id = "question-one-id" },
         Slug = "question-one-slug",
@@ -25,8 +24,8 @@ public static class RedisCacheTestHelpers
         Answers = [_firstAnswer, _secondAnswer]
     };
 
-    public static Answer FirstAnswer => _firstAnswer;
-    public static Answer SecondAnswer => _secondAnswer;
-    public static Question Question => _question;
-    public static List<Question> EmptyQuestionCollection => [];
+    public static QuestionnaireAnswerEntry FirstAnswer => _firstAnswer;
+    public static QuestionnaireAnswerEntry SecondAnswer => _secondAnswer;
+    public static QuestionnaireQuestionEntry Question => _question;
+    public static List<QuestionnaireQuestionEntry> EmptyQuestionCollection => [];
 }

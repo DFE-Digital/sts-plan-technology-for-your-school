@@ -1,5 +1,5 @@
 using System.Text;
-using Dfe.PlanTech.Domain.Constants;
+using Dfe.PlanTech.Core.Constants;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers.TaskList;
@@ -18,7 +18,7 @@ public class TaskListTagTagHelper : BaseTaskListTagHelper
         TagName = "strong";
     }
 
-    protected string TagClassColour => TagColour.GetMatchingColour(Colour);
+    protected string TagClassColour => TagColourConstants.GetMatchingColour(Colour);
 
     protected override string CreateClassesAttribute()
     {
@@ -43,7 +43,7 @@ public class TaskListTagTagHelper : BaseTaskListTagHelper
     private void AppendTagColour(StringBuilder stringBuilder)
     {
         stringBuilder.Append($" {_colourClass}");
-        if (TagClassColour != TagColour.Default)
+        if (TagClassColour != TagColourConstants.Default)
         {
             stringBuilder.Append($" {_colourClass}--{TagClassColour}");
         }

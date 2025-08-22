@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using System.Text.Json;
-using Dfe.PlanTech.Domain.SignIns.Enums;
-using Dfe.PlanTech.Domain.SignIns.Models;
-using Dfe.PlanTech.Infrastructure.SignIns.Models;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Infrastructure.SignIn.Models;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns.Extensions;
+namespace Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
 public static class UserClaimsExtensions
 {
@@ -13,9 +13,9 @@ public static class UserClaimsExtensions
         PropertyNameCaseInsensitive = true
     };
 
-    public static string GetUserId(this IEnumerable<Claim> claims)
+    public static string GetDsiReference(this IEnumerable<Claim> claims)
     {
-        ArgumentNullException.ThrowIfNull(claims);
+        ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
         return claims
             .Where(c => c.Type.Contains(ClaimConstants.NameIdentifier))
@@ -33,19 +33,17 @@ public static class UserClaimsExtensions
     /// <exception cref="ArgumentNullException">
     /// If <paramref name="principal"/> is <c>null</c>
     /// </exception>
-    public static Organisation? GetOrganisation(this IEnumerable<Claim> claims)
+    public static EstablishmentModel? GetOrganisation(this IEnumerable<Claim> claims)
     {
-        ArgumentNullException.ThrowIfNull(claims);
+        ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
         string? organisationJson = GetUserOrganisationClaim(claims);
-
         if (organisationJson == null)
         {
             return null;
         }
 
-        var organisation = JsonSerializer.Deserialize<Organisation>(organisationJson, _jsonSerialiserOptions);
-
+        var organisation = JsonSerializer.Deserialize<EstablishmentModel>(organisationJson, _jsonSerialiserOptions);
         if (organisation?.Id == Guid.Empty)
         {
             return null;
@@ -54,9 +52,14 @@ public static class UserClaimsExtensions
         return organisation;
     }
 
-    public static Organisation? GetUserOrganisation(this ClaimsPrincipal claimsPrincipal) => claimsPrincipal.Claims.GetOrganisation();
+    public static EstablishmentModel? GetUserOrganisation(this ClaimsPrincipal claimsPrincipal) =>
+        claimsPrincipal.Claims.GetOrganisation();
 
-    public static UserAuthorisationStatus AuthorisationStatus(this ClaimsPrincipal claimsPrincipal) => new(claimsPrincipal.Identity?.IsAuthenticated == true, claimsPrincipal.GetUserOrganisation() != null);
+    public static UserAuthorisationStatus AuthorisationStatus(this ClaimsPrincipal claimsPrincipal) =>
+        new(claimsPrincipal.Identity?.IsAuthenticated == true, claimsPrincipal.GetUserOrganisation() != null);
 
-    private static string? GetUserOrganisationClaim(IEnumerable<Claim> claims) => claims.Where(c => c.Type == ClaimConstants.Organisation).Select(c => c.Value).FirstOrDefault();
+    private static string? GetUserOrganisationClaim(IEnumerable<Claim> claims) =>
+        claims
+            .Where(c => c.Type == ClaimConstants.Organisation).Select(c => c.Value)
+            .FirstOrDefault();
 }

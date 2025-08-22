@@ -1,8 +1,8 @@
 using System.Text;
 using Azure.Messaging.ServiceBus;
 using Dfe.PlanTech.Application.Persistence.Commands;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.ServiceBus.Models;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,10 +13,10 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 
 /// <summary>
-/// Processes messages from Service Bus, and saves them into the DB using the <see cref="WebhookMessageProcessor"/>.
+/// Processes messages from Service Bus, and saves them into the DB using the <see cref="CmsWebHookMessageProcessor"/>.
 /// </summary>
 /// <param name="processorFactory"></param>
-/// <param name="resultProcessor">Processes results from the <see cref="WebhookMessageProcessor"/> </param>
+/// <param name="resultProcessor">Processes results from the <see cref="CmsWebHookMessageProcessor"/> </param>
 /// <param name="logger"></param>
 /// <param name="serviceScopeFactory">Service factory - used to create transient services to prevent state problems</param>
 public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcessor> processorFactory,
@@ -25,6 +25,7 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
                                            IServiceScopeFactory serviceScopeFactory,
                                            IOptions<ServiceBusOptions> options) : BackgroundService
 {
+    private readonly ILogger<ContentfulServiceBusProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ServiceBusProcessor _processor = processorFactory.CreateClient("contentfulprocessor");
 
     /// <summary>
@@ -34,7 +35,7 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     {
         if (!options.Value.EnableQueueReading)
         {
-            logger.LogInformation("{QueueReadingProperty} is set to disabling - not enabling processing queue reading", nameof(options.Value.EnableQueueReading));
+            _logger.LogInformation("{QueueReadingProperty} is set to disabling - not enabling processing queue reading", nameof(options.Value.EnableQueueReading));
             return;
         }
         _processor.ProcessMessageAsync += MessageHandler;
@@ -46,19 +47,19 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     }
 
     /// <summary>
-    /// Receives messages from the <see cref="ServiceBusProcessor"/>, saves them to the DB using the <see cref="WebhookMessageProcessor"/>, and then processses the results with <see cref="ServiceBusResultProcessor"/>
+    /// Receives messages from the <see cref="ServiceBusProcessor"/>, saves them to the DB using the <see cref="CmsWebHookMessageProcessor"/>, and then processses the results with <see cref="ServiceBusResultProcessor"/>
     /// </summary>
     /// <param name="processMessageEventArgs">Received Service Bus message</param>
     private async Task MessageHandler(ProcessMessageEventArgs processMessageEventArgs)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var webhookToDbCommand = scope.ServiceProvider.GetRequiredService<IWebhookToDbCommand>();
+        var webHookMessageProcessor = scope.ServiceProvider.GetRequiredService<IWebHookMessageProcessor>();
 
         try
         {
             var body = Encoding.UTF8.GetString(processMessageEventArgs.Message.Body);
 
-            var result = await webhookToDbCommand.ProcessMessage(processMessageEventArgs.Message.Subject,
+            var result = await webHookMessageProcessor.ProcessMessage(processMessageEventArgs.Message.Subject,
                                                                  body,
                                                                  processMessageEventArgs.Message.MessageId,
                                                                  processMessageEventArgs.CancellationToken);
@@ -69,10 +70,10 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Error processing message: {Message}", ex.Message);
+            _logger.LogError(ex, "Error processing message: {Message}", ex.Message);
             await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, ex.Message,
                 ex.StackTrace, processMessageEventArgs.CancellationToken);
-            logger.LogInformation("Abandoned message: {MessageId}", processMessageEventArgs.Message.MessageId);
+            _logger.LogInformation("Abandoned message: {MessageId}", processMessageEventArgs.Message.MessageId);
         }
     }
 
@@ -84,7 +85,7 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     /// </remarks>
     private Task ErrorHandler(ProcessErrorEventArgs args)
     {
-        logger.LogError("Error occurred: {Message}", args.Exception.Message);
+        _logger.LogError("Error occurred: {Message}", args.Exception.Message);
         return Task.CompletedTask;
     }
 
@@ -96,6 +97,6 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     {
         await _processor.StopProcessingAsync();
         await _processor.DisposeAsync();
-        logger.LogInformation("Stopped processing messages.");
+        _logger.LogInformation("Stopped processing messages.");
     }
 }

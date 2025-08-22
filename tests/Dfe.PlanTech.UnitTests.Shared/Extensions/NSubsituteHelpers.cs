@@ -3,7 +3,7 @@ using System.Reflection;
 using NSubstitute;
 using Xunit;
 
-namespace Dfe.PlanTech;
+namespace Dfe.PlanTech.UnitTests.Shared.Extensions;
 
 public static class NSubstituteExtensions
 {
@@ -16,7 +16,7 @@ public static class NSubstituteExtensions
 
         Assert.Equal(timesCalled, methodCalls.Length);
 
-        if (expectedArguments == null)
+        if (expectedArguments is null)
             return;
 
         foreach (var methodCall in methodCalls)
