@@ -10,13 +10,13 @@ namespace Dfe.PlanTech.Application.Rendering;
 /// </summary>
 /// <inheritdoc/>
 public class RichTextRenderer(
-    ILoggerFactory loggerFactory,
+    ILogger<RichTextRenderer> logger,
     IEnumerable<IRichTextContentPartRenderer> renderers
 ) : IRichTextRenderer, IRichTextContentPartRendererCollection
 {
     public IReadOnlyList<IRichTextContentPartRenderer> Renderers => renderers.ToList();
 
-    private readonly ILogger<RichTextRenderer> _logger = loggerFactory.CreateLogger<RichTextRenderer>();
+    private readonly ILogger<RichTextRenderer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
     public ILogger Logger => _logger;
 

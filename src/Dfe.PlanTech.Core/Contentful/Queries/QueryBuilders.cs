@@ -14,7 +14,7 @@ public static class QueryBuilders
     /// <param name="contentfulContentTypeId">Content Type Id</param>
     /// <typeparam name="T">Entity type</typeparam>
     /// <returns></returns>
-    public static QueryBuilder<T> ByContentType<T>(string contentfulContentTypeId)
+    public static QueryBuilder<T> ByContentType<T>(string? contentfulContentTypeId)
     {
         if (string.IsNullOrEmpty(contentfulContentTypeId))
             throw new ArgumentNullException(nameof(contentfulContentTypeId));
