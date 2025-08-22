@@ -84,7 +84,7 @@ public class EmbeddedEntryBlockRendererTests
                         {
                             SystemProperties = new SystemProperties()
                             {
-                                Id = ContentTypeConstants.ComponentAttachmentContentTypeId,
+                                Id = ContentfulContentTypeConstants.ComponentAttachmentContentfulContentTypeId,
                             }
                         }
                     },
@@ -140,7 +140,7 @@ public class EmbeddedEntryBlockRendererTests
                         {
                             SystemProperties = new SystemProperties()
                             {
-                                Id = ContentTypeConstants.ComponentAccordionContentTypeId,
+                                Id = ContentfulContentTypeConstants.ComponentAccordionContentfulContentTypeId,
                             }
                         }
                     },

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -21,10 +22,10 @@ public class EmbeddedEntryBlockRenderer(
 
         switch (richTextData.SystemProperties.ContentType.SystemProperties.Id)
         {
-            case ContentTypeConstants.ComponentAttachmentContentTypeId:
+            case ContentfulContentTypeConstants.ComponentAttachmentContentfulContentTypeId:
                 var attachment = new AttachmentComponentRenderer();
                 return attachment.AddHtml(content, stringBuilder);
-            case ContentTypeConstants.ComponentAccordionContentTypeId:
+            case ContentfulContentTypeConstants.ComponentAccordionContentfulContentTypeId:
                 var accordionComponent = new AccordionComponentRenderer(loggerFactory.CreateLogger<AccordionComponentRenderer>());
                 return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
             default:
