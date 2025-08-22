@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Web.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
 

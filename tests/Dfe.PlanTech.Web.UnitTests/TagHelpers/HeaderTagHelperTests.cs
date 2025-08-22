@@ -7,7 +7,6 @@ using Dfe.PlanTech.Web.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
 
