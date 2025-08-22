@@ -61,6 +61,7 @@ public class QuestionsController : BaseController<QuestionsController>
         return await _questionsViewBuilder.RouteToNextUnansweredQuestion(this, categorySlug, sectionSlug);
     }
 
+    [LogInvalidModelState]
     [HttpPost("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}")]
     public async Task<IActionResult> SubmitAnswer(
         string categorySlug,
