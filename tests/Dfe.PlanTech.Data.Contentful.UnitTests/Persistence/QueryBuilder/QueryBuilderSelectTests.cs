@@ -1,8 +1,10 @@
 using Contentful.Core.Search;
-using Dfe.PlanTech.Application.Persistence.Models;
-using Dfe.PlanTech.Data.Contentful.Persistence;
+using Dfe.PlanTech.Core.Contentful.Options;
+using Dfe.PlanTech.Core.Contentful.Queries;
+using Xunit.Sdk;
+using TestClass = Dfe.PlanTech.Data.Contentful.UnitTests.Entities.TestClass;
 
-namespace Dfe.PlanTech.Data.Contentful.UnitTests;
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence.QueryBuilder;
 
 public class QueryBuilderSelectTests
 {

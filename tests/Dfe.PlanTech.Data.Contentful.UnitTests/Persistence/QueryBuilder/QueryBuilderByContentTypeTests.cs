@@ -1,6 +1,8 @@
-using Dfe.PlanTech.Data.Contentful.Persistence;
+using Dfe.PlanTech.Core.Contentful.Queries;
+using Xunit.Sdk;
+using TestClass = Dfe.PlanTech.Data.Contentful.UnitTests.Entities.TestClass;
 
-namespace Dfe.PlanTech.Data.Contentful.UnitTests;
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence.QueryBuilder;
 
 public class QueryBuilderByContentTypeTests
 {
@@ -9,9 +11,9 @@ public class QueryBuilderByContentTypeTests
     [Fact]
     public void Should_Create_When_String()
     {
-        const string contentTypeId = TEST_CONTENT_TYPE;
+        const string contentfulContentTypeId = TEST_CONTENT_TYPE;
 
-        var queryBuilder = QueryBuilders.ByContentType<TestClass>(contentTypeId);
+        var queryBuilder = QueryBuilders.ByContentType<TestClass>(contentfulContentTypeId);
 
         Assert.NotNull(queryBuilder);
     }
@@ -19,9 +21,9 @@ public class QueryBuilderByContentTypeTests
     [Fact]
     public void Should_Create_Have_ContentType_Fulter_When_String()
     {
-        const string contentTypeId = TEST_CONTENT_TYPE;
+        const string contentfulContentTypeId = TEST_CONTENT_TYPE;
 
-        var queryBuilder = QueryBuilders.ByContentType<TestClass>(contentTypeId);
+        var queryBuilder = QueryBuilders.ByContentType<TestClass>(contentfulContentTypeId);
 
         var built = queryBuilder.Build();
 

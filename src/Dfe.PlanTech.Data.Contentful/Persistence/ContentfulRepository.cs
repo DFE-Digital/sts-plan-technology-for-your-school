@@ -50,10 +50,10 @@ public class ContentfulRepository : IContentfulRepository
     }
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
-        => await GetEntriesAsync<TEntry>(ContentTypeHelper.GetContentTypeName<TEntry>(), null);
+        => await GetEntriesAsync<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), null);
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options)
-        => await GetEntriesAsync<TEntry>(ContentTypeHelper.GetContentTypeName<TEntry>(), options);
+        => await GetEntriesAsync<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), options);
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(string entityTypeId, GetEntriesOptions? options)
     {
@@ -66,7 +66,7 @@ public class ContentfulRepository : IContentfulRepository
     }
 
     public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options)
-        => await GetPaginatedEntries<TEntry>(ContentTypeHelper.GetContentTypeName<TEntry>(), options);
+        => await GetPaginatedEntries<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), options);
 
     public async Task<IEnumerable<TEntry>> GetPaginatedEntries<TEntry>(string entryTypeId, GetEntriesOptions options)
     {
@@ -84,7 +84,7 @@ public class ContentfulRepository : IContentfulRepository
 
     public async Task<int> GetEntriesCount<TEntry>()
     {
-        var queryBuilder = BuildQueryBuilder<TEntry>(ContentTypeHelper.GetContentTypeName<TEntry>(), null).Limit(0);
+        var queryBuilder = BuildQueryBuilder<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), null).Limit(0);
         var entries = await _client.GetEntries(queryBuilder);
 
         ProcessContentfulErrors(entries);
@@ -108,9 +108,9 @@ public class ContentfulRepository : IContentfulRepository
             }]);
     }
 
-    private QueryBuilder<TEntry> BuildQueryBuilder<TEntry>(string contentTypeId, GetEntriesOptions? options)
+    private QueryBuilder<TEntry> BuildQueryBuilder<TEntry>(string contentfulContentTypeId, GetEntriesOptions? options)
     {
-        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntry>(contentTypeId, options);
+        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntry>(contentfulContentTypeId, options);
 
         var shouldExcludeTestingContent = _hostEnvironment.IsProduction() || (!_automatedTestingOptions?.Contentful!?.IncludeTaggedContent ?? false);
         if (shouldExcludeTestingContent)

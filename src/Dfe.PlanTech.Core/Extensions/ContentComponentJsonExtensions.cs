@@ -7,7 +7,7 @@ using Dfe.PlanTech.Core.Helpers;
 namespace Dfe.PlanTech.Core.Extensions;
 
 /// <summary>
-/// Provides Json type info mapping for <see cref="ContentfulEntry"/> to handle deserialising objects to their concrete classes 
+/// Provides JSON type info mapping for <see cref="ContentfulEntry"/> to handle deserialising objects to their concrete classes
 /// </summary>
 public static class ContentComponentJsonExtensions
 {
@@ -48,5 +48,5 @@ public static class ContentComponentJsonExtensions
         .Where(derivedType => derivedType != type &&
                               derivedType.IsConcreteClass() &&
                               derivedType.HasParameterlessConstructor())
-        .Select(type => new JsonDerivedType(type, ContentTypeConstants.EntryClassToContentTypeMap[type.Name]))];
+        .Select(type => new JsonDerivedType(type, ContentfulContentTypeConstants.EntryClassToContentTypeMap[type.Name]))];
 }

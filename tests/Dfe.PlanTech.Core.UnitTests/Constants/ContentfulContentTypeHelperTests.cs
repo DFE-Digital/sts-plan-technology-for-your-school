@@ -4,19 +4,19 @@ using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Core.UnitTests.Constants;
 
-public class ContentTypeHelperTests
+public class ContentfulContentTypeHelperTests
 {
     [Fact]
-    public void GetContentTypeName_ReturnsCorrectContentTypeId_ForValidEntryClass()
+    public void GetContentTypeName_ReturnsExpectedContentfulContentTypeId_ForValidEntryClass()
     {
         // Arrange
-        var expectedContentTypeId = ContentTypeConstants.ComponentAccordionContentTypeId;
+        var expectedContentfulContentTypeId = ContentfulContentTypeConstants.ComponentAccordionContentfulContentTypeId;
 
         // Act
-        var actualContentTypeId = ContentTypeHelper.GetContentTypeName<ComponentAccordionEntry>();
+        var actualContentfulContentTypeId = ContentfulContentTypeHelper.GetContentTypeName<ComponentAccordionEntry>();
 
         // Assert
-        Assert.Equal(expectedContentTypeId, actualContentTypeId);
+        Assert.Equal(expectedContentfulContentTypeId, actualContentfulContentTypeId);
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public class ContentTypeHelperTests
         var invalidEntryClassType = typeof(InvalidEntryClass);
 
         // Act & Assert
-        var exception = Assert.Throws<InvalidOperationException>(() => ContentTypeHelper.GetContentTypeName<InvalidEntryClass>());
+        var exception = Assert.Throws<InvalidOperationException>(() => ContentfulContentTypeHelper.GetContentTypeName<InvalidEntryClass>());
         Assert.Equal($"Could not find content type ID for class type {invalidEntryClassType.Name}", exception.Message);
     }
 

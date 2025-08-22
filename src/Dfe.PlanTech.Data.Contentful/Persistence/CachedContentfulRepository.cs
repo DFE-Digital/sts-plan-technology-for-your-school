@@ -26,7 +26,7 @@ public class CachedContentfulRepository(
     }
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
     {
-        string contentType = ContentTypeHelper.GetContentTypeName<TEntry>();
+        string contentType = ContentfulContentTypeHelper.GetContentTypeName<TEntry>();
         var key = $"{contentType}s";
 
         return await _cmsCache.GetOrCreateAsync(key, async () => await _contentfulRepository.GetEntriesAsync<TEntry>()) ?? [];
@@ -34,7 +34,7 @@ public class CachedContentfulRepository(
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options)
     {
-        var contentType = ContentTypeHelper.GetContentTypeName<TEntry>();
+        var contentType = ContentfulContentTypeHelper.GetContentTypeName<TEntry>();
         var jsonOptions = options.SerializeToRedisFormat();
         var key = $"{contentType}{jsonOptions}";
 

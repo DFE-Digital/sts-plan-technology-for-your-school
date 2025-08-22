@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Data.Contentful.UnitTests;
+namespace Dfe.PlanTech.Data.Contentful.UnitTests.Entities;
 
 public class TestClass
 {

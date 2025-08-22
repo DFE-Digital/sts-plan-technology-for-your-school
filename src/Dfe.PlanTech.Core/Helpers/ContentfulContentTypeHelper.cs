@@ -2,14 +2,14 @@
 
 namespace Dfe.PlanTech.Core.Helpers
 {
-    public static class ContentTypeHelper
+    public static class ContentfulContentTypeHelper
     {
         public static string GetContentTypeName<TEntry>()
         {
             var typeName = typeof(TEntry).Name;
-            if (ContentTypeConstants.EntryClassToContentTypeMap.TryGetValue(typeName, out var contentTypeId))
+            if (ContentfulContentTypeConstants.EntryClassToContentTypeMap.TryGetValue(typeName, out var contentfulContentTypeId))
             {
-                return contentTypeId!;
+                return contentfulContentTypeId!;
             }
 
             throw new InvalidOperationException($"Could not find content type ID for class type {typeName}");
