@@ -13,11 +13,9 @@ namespace Dfe.PlanTech.Web.Authorisation.Policies;
 /// Checks user authorisation for the current page, and retrieves a given <see cref="Page"/> from Contentful if needed for the request.
 /// </summary>
 public class PageModelAuthorisationPolicy(
-    ILoggerFactory loggerFactory
+    ILogger<PageModelAuthorisationPolicy> logger
 ) : AuthorizationHandler<PageAuthorisationRequirement>
 {
-    private readonly ILogger<PageModelAuthorisationPolicy> _logger = loggerFactory.CreateLogger<PageModelAuthorisationPolicy>();
-
     private const string IndexSlug = "/";
     public const string PolicyName = "UsePageAuthentication";
     public const string RouteValuesActionNameKey = "action";
@@ -28,7 +26,7 @@ public class PageModelAuthorisationPolicy(
     {
         if (context.Resource is not HttpContext httpContext)
         {
-            _logger.LogError("Expected resource to be HttpContext but received {type}", context.Resource?.GetType());
+            logger.LogError("Expected resource to be HttpContext but received {type}", context.Resource?.GetType());
             return;
         }
 
@@ -85,7 +83,7 @@ public class PageModelAuthorisationPolicy(
     /// Retrieves the relevant page from Contentful/DB, and adds it to the HttpContext.
     /// </summary>
     /// <remarks>
-    /// The page ias added to the HttpContext for use in the <see cref="PageModelBinder"/>, 
+    /// The page ias added to the HttpContext for use in the <see cref="PageModelBinder"/>,
     /// to prevent the page being loaded multiple times for a single request
     /// </remarks>
     private async Task<PageEntry?> GetPageForSlug(HttpContext httpContext, string slug)
@@ -107,7 +105,7 @@ public class PageModelAuthorisationPolicy(
     {
         if (!ControllerIsPagesController(httpContext))
         {
-            _logger.LogTrace("Request is not from/to the Pages controller. Request is to controller {ControllerName} and action {ActioName}",
+            logger.LogTrace("Request is not from/to the Pages controller. Request is to controller {ControllerName} and action {ActioName}",
                             httpContext.Request.RouteValues[RouteValuesControllerNameKey],
                             httpContext.Request.RouteValues[RouteValuesActionNameKey]);
 
@@ -128,12 +126,12 @@ public class PageModelAuthorisationPolicy(
 
         if (slug is not string slugString)
         {
-            _logger.LogTrace("Route is null - request is to index page");
+            logger.LogTrace("Route is null - request is to index page");
             httpContext.Request.RouteValues[RoutesValuesRouteNameKey] = IndexSlug;
             return IndexSlug;
         }
 
-        _logger.LogTrace("Route slug for request is {Slug}", slug);
+        logger.LogTrace("Route slug for request is {Slug}", slug);
         return slugString;
     }
 

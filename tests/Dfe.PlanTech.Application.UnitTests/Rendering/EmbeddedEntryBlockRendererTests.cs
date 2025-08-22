@@ -14,15 +14,15 @@ namespace Dfe.PlanTech.Application.UnitTests.Rendering;
 
 public class EmbeddedEntryBlockRendererTests
 {
+    private readonly ILogger<EmbeddedEntryBlockRenderer> _embeddedEntryBlockRendererLogger = Substitute.For<ILogger<EmbeddedEntryBlockRenderer>>();
     private readonly ILoggerFactory _loggerFactory = Substitute.For<ILoggerFactory>();
     private readonly ILogger<AccordionComponentRenderer> _accordionLogger = Substitute.For<ILogger<AccordionComponentRenderer>>();
-    private readonly ILogger<EmbeddedEntryBlockRenderer> _embeddedEntryBlockRendererLogger = Substitute.For<ILogger<EmbeddedEntryBlockRenderer>>();
     private readonly IRichTextContentPartRendererCollection _richTextContentPartRendererCollection = Substitute.For<IRichTextContentPartRendererCollection>();
 
     [Fact]
     public void ShouldReturnNull_WhenNoRichTextContent()
     {
-        var renderer = new EmbeddedEntryBlockRenderer(_loggerFactory);
+        var renderer = new EmbeddedEntryBlockRenderer(_embeddedEntryBlockRendererLogger, _loggerFactory);
 
         var stringBuilder = new StringBuilder();
 
@@ -34,7 +34,7 @@ public class EmbeddedEntryBlockRendererTests
     [Fact]
     public void ShouldReturnData_WhenAttachmentSystemPropertyId()
     {
-        var renderer = new EmbeddedEntryBlockRenderer(_loggerFactory);
+        var renderer = new EmbeddedEntryBlockRenderer(_embeddedEntryBlockRendererLogger, _loggerFactory);
 
         var result = renderer.AddHtml(GetGenericAttachmentContent(), _richTextContentPartRendererCollection, new StringBuilder());
 
@@ -44,7 +44,7 @@ public class EmbeddedEntryBlockRendererTests
     [Fact]
     public void ShouldReturnData_WhenAccordionSystemPropertyId()
     {
-        var renderer = new EmbeddedEntryBlockRenderer(_loggerFactory);
+        var renderer = new EmbeddedEntryBlockRenderer(_embeddedEntryBlockRendererLogger, _loggerFactory);
 
         var result = renderer.AddHtml(GetCsAccordionContent(), new AccordionComponentRenderer(_accordionLogger), new StringBuilder());
 

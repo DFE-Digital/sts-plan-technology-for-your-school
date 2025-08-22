@@ -14,7 +14,7 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class QuestionsViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
     IOptions<ErrorPagesConfiguration> errorPages,
@@ -23,9 +23,8 @@ public class QuestionsViewBuilder(
     ContentfulService contentfulService,
     QuestionService questionService,
     SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private ILogger<QuestionsViewBuilder> _logger = loggerFactory.CreateLogger<QuestionsViewBuilder>();
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private ErrorMessagesConfiguration _errorMessages = errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
@@ -83,11 +82,11 @@ public class QuestionsViewBuilder(
 
         /*
          * Now check to see if the question is part of the latest user responses.
-         * If so: 
+         * If so:
          *   show page
          * If not:
-         *   if on "check answers" status, redirect to check answers page 
-         *   if on "next question" status, redirect to next question 
+         *   if on "check answers" status, redirect to check answers page
+         *   if on "next question" status, redirect to next question
          */
 
         var question = submissionRoutingData.GetQuestionForSlug(questionSlug);
@@ -203,7 +202,7 @@ public class QuestionsViewBuilder(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error occurred while submitting an answer with the following message: {Message} ", e.Message);
+            Logger.LogError(e, "An error occurred while submitting an answer with the following message: {Message} ", e.Message);
             var viewModel = GenerateViewModel(controller, question, section, categorySlug, sectionSlug, questionSlug, null);
             viewModel.ErrorMessages = ["Save failed. Please try again later."];
             return controller.View(QuestionView, viewModel);

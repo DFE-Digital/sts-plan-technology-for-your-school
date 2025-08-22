@@ -24,13 +24,13 @@ public class ContentfulRepository : IContentfulRepository
     private readonly AutomatedTestingOptions _automatedTestingOptions;
 
     public ContentfulRepository(
-        ILoggerFactory loggerFactory,
+        ILogger<ContentfulRepository> logger,
         IContentfulClient client,
         IHostEnvironment hostEnvironment,
         IOptions<AutomatedTestingOptions> automatedTestingOptions
     )
     {
-        _logger = loggerFactory.CreateLogger<IContentfulRepository>();
+        _logger = logger;
         _client = client ?? throw new ArgumentNullException(nameof(client));
         _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
         _automatedTestingOptions = automatedTestingOptions?.Value ?? throw new ArgumentNullException(nameof(automatedTestingOptions));

@@ -3,13 +3,12 @@ using System.Reflection;
 namespace Dfe.PlanTech.Web.Helpers;
 
 public class ComponentViewsFactory(
-    ILoggerFactory loggerFactory
+    ILogger<ComponentViewsFactory> logger
 )
 {
     private const string GENERATED_VIEW_NAMESPACE = "AspNetCoreGeneratedDocument";
     private const string SHARED_PATH = "Views_Shared";
 
-    private readonly ILogger<ComponentViewsFactory> _logger = loggerFactory.CreateLogger<ComponentViewsFactory>();
     private readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
 
     /// <summary>
@@ -25,7 +24,7 @@ public class ComponentViewsFactory(
 
         if (matchingViewType is null)
         {
-            _logger.LogWarning("Could not find matching view for {model}", model);
+            logger.LogWarning("Could not find matching view for {model}", model);
             viewPath = null;
             return false;
         }

@@ -80,11 +80,11 @@ public static class ServiceCollectionExtensions
         options.SaveTokens = config.SaveTokens;
 
         var serviceProvider = services.BuildServiceProvider();
-        var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
+        var logger = serviceProvider.GetRequiredService<ILogger<DfeSignIn>>();
 
         options.Events = new OpenIdConnectEvents()
         {
-            OnUserInformationReceived = (UserInformationReceivedContext context) => OnUserInformationReceivedEvent.RecordUserSignIn(loggerFactory.CreateLogger<DfeSignIn>(), context),
+            OnUserInformationReceived = (UserInformationReceivedContext context) => OnUserInformationReceivedEvent.RecordUserSignIn(logger, context),
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,
             OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut,
         };

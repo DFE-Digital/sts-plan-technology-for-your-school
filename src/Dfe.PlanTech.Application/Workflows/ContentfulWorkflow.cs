@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class ContentfulWorkflow(
-    ILoggerFactory loggerFactory,
+    ILogger<ContentfulWorkflow> logger,
     IContentfulRepository contentfulRepository,
     GetPageFromContentfulOptions getPageOptions
 )
@@ -17,7 +17,6 @@ public class ContentfulWorkflow(
     public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
 
-    private readonly ILogger<ContentfulWorkflow> _logger = loggerFactory.CreateLogger<ContentfulWorkflow>();
     private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
     private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
 
@@ -33,7 +32,7 @@ public class ContentfulWorkflow(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ExceptionMessageEntityContentful);
+            logger.LogError(ex, ExceptionMessageEntityContentful);
             throw new ContentfulDataUnavailableException($"Could not find entry with ID '{entryId}'", ex);
         }
     }
@@ -50,7 +49,7 @@ public class ContentfulWorkflow(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, ExceptionMessageEntityContentful);
+            logger.LogError(ex, ExceptionMessageEntityContentful);
             throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TEntry).Name}", ex);
         }
     }
@@ -79,7 +78,7 @@ public class ContentfulWorkflow(
         var headerText = categories.FirstOrDefault()?.Header.Text;
         if (headerText is null)
         {
-            _logger.LogError("Could not find header text for questionnaire category with slug {Slug} from Contentful", slug);
+            logger.LogError("Could not find header text for questionnaire category with slug {Slug} from Contentful", slug);
         }
 
         return headerText;
@@ -96,7 +95,7 @@ public class ContentfulWorkflow(
 
         if (category is null)
         {
-            _logger.LogError("Could not find questionnaire category with slug {Slug} from Contentful", slug);
+            logger.LogError("Could not find questionnaire category with slug {Slug} from Contentful", slug);
         }
 
         return category;
@@ -113,7 +112,7 @@ public class ContentfulWorkflow(
         var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
         if (subtopicRecommendation is null)
         {
-            _logger.LogError("Could not find subtopic recommendation in Contentful for subtopic with ID '{SubtopicId}'", subtopicId);
+            logger.LogError("Could not find subtopic recommendation in Contentful for subtopic with ID '{SubtopicId}'", subtopicId);
             return null;
         }
 
@@ -121,7 +120,7 @@ public class ContentfulWorkflow(
             .FirstOrDefault(intro => string.Equals(intro.Maturity, maturity, StringComparison.OrdinalIgnoreCase));
         if (introForMaturity is null)
         {
-            _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
+            logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
             return null;
         }
 
@@ -185,7 +184,7 @@ public class ContentfulWorkflow(
 
         if (subtopicRecommendation is null)
         {
-            _logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
+            logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
         }
 
         return subtopicRecommendation;
@@ -198,7 +197,7 @@ public class ContentfulWorkflow(
         var introForMaturity = subtopicRecommendation?.Intros.FirstOrDefault(i => i.Maturity.Equals(maturity));
         if (introForMaturity is null)
         {
-            _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
+            logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
         }
 
         return introForMaturity;

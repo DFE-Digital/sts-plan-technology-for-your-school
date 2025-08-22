@@ -12,39 +12,38 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
 /// <param name="queueWriter"></param>
 /// <param name="logger"></param>
 public class WriteCmsWebhookToQueueCommand(
-    ILoggerFactory loggerFactory,
+    ILogger<WriteCmsWebhookToQueueCommand> logger,
     IQueueWriter queueWriter
 ) : IWriteCmsWebhookToQueueCommand
 {
     public const string ContentfulTopicHeaderKey = "X-Contentful-Topic";
 
-    private readonly ILogger<WriteCmsWebhookToQueueCommand> _logger = loggerFactory.CreateLogger<WriteCmsWebhookToQueueCommand>();
     private readonly IQueueWriter _queueWriter = queueWriter ?? throw new ArgumentNullException(nameof(queueWriter));
 
     public async Task<QueueWriteResult> WriteMessageToQueue(JsonDocument json, HttpRequest request)
     {
         try
         {
-            _logger.LogTrace("Received CMS webhook payload");
+            logger.LogTrace("Received CMS webhook payload");
 
             var cmsEvent = GetCmsEvent(request);
             if (cmsEvent == null)
             {
                 var errorMessage = $"Couldn't find header {ContentfulTopicHeaderKey}";
-                _logger.LogError("Couldn't find header {ContentfulTopicHeaderKey}", ContentfulTopicHeaderKey);
+                logger.LogError("Couldn't find header {ContentfulTopicHeaderKey}", ContentfulTopicHeaderKey);
                 return new QueueWriteResult(errorMessage);
             }
 
-            _logger.LogTrace("CMS Event is {CmsEvent}", cmsEvent);
+            logger.LogTrace("CMS Event is {CmsEvent}", cmsEvent);
 
             var body = JsonSerializer.Serialize(json);
 
-            _logger.LogTrace("Message body is {Body}", body);
+            logger.LogTrace("Message body is {Body}", body);
             return await _queueWriter.WriteMessage(body, cmsEvent);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to save message to queue");
+            logger.LogError(ex, "Failed to save message to queue");
             return new QueueWriteResult(ex.Message);
         }
     }

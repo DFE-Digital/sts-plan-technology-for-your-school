@@ -15,15 +15,14 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class RecommendationsViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     IOptions<ContentfulOptions> contentfulOptions,
     CurrentUser currentUser,
     ContentfulService contentfulService,
     RecommendationService recommendationService,
     SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly ILogger<RecommendationsViewBuilder> _logger = loggerFactory.CreateLogger<RecommendationsViewBuilder>();
     private readonly ContentfulOptions _contentfulOptions = contentfulOptions?.Value ?? throw new ArgumentNullException(nameof(contentfulOptions));
     private readonly RecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));

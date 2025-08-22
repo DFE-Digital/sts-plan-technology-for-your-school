@@ -16,10 +16,10 @@ public class GroupsController : BaseController<GroupsController>
     private readonly GroupsViewBuilder _groupsViewBuilder;
 
     public GroupsController(
-        ILoggerFactory loggerFactory,
+        ILogger<GroupsController> logger,
         CurrentUser currentUser,
         GroupsViewBuilder groupsViewBuilder
-    ) : base(loggerFactory)
+    ) : base(logger)
     {
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _groupsViewBuilder = groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));

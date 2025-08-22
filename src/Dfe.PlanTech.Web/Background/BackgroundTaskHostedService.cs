@@ -3,16 +3,15 @@ using Dfe.PlanTech.Domain.Background;
 namespace Dfe.PlanTech.Web.Background;
 
 /// <summary>
-/// Reads tasks from a <see cref="IBackgroundTaskQueue"/>, and runs them. 
+/// Reads tasks from a <see cref="IBackgroundTaskQueue"/>, and runs them.
 /// </summary>
 /// <param name="logger"></param>
 /// <param name="taskQueue"></param>
 public class BackgroundTaskHostedService(
-    ILoggerFactory loggerFactory,
+    ILogger<BackgroundTaskHostedService> logger,
     IBackgroundTaskQueue taskQueue
 ) : BackgroundService
 {
-    private readonly ILogger<BackgroundTaskHostedService> _logger = loggerFactory.CreateLogger<BackgroundTaskHostedService>();
     private readonly IBackgroundTaskQueue _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
 
     /// <summary>
@@ -22,7 +21,7 @@ public class BackgroundTaskHostedService(
     /// <returns></returns>
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Starting processing background tasks");
+        logger.LogInformation("Starting processing background tasks");
         await BackgroundProcessing(stoppingToken);
     }
 
@@ -37,7 +36,7 @@ public class BackgroundTaskHostedService(
         {
             var workItem = await _taskQueue.DequeueAsync(stoppingToken);
 
-            _logger.LogInformation("Read item from the queue");
+            logger.LogInformation("Read item from the queue");
 
             try
             {
@@ -45,7 +44,7 @@ public class BackgroundTaskHostedService(
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred executing {WorkItem}.", nameof(workItem));
+                logger.LogError(ex, "Error occurred executing {WorkItem}.", nameof(workItem));
             }
         }
     }
@@ -57,7 +56,7 @@ public class BackgroundTaskHostedService(
     /// <returns></returns>
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("Stopping processing background tasks");
+        logger.LogInformation("Stopping processing background tasks");
 
         await base.StopAsync(cancellationToken);
     }

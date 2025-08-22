@@ -7,11 +7,10 @@ namespace Dfe.PlanTech.Web.ViewComponents;
 /// View component that retrieves and displays links in the layout's footer
 /// </summary>
 public class FooterLinksViewComponent(
-    ILoggerFactory loggerFactory,
+    ILogger<FooterLinksViewComponent> logger,
     FooterLinksViewComponentViewBuilder viewBuilder
 ) : ViewComponent
 {
-    private readonly ILogger<FooterLinksViewComponent> _logger = loggerFactory.CreateLogger<FooterLinksViewComponent>();
     private readonly FooterLinksViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
     /// <summary>

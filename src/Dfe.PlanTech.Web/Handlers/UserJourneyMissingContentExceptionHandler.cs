@@ -8,13 +8,12 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.Handlers;
 
 public class UserJourneyMissingContentExceptionHandler(
-    ILoggerFactory loggerFactory,
+    ILogger<UserJourneyMissingContentExceptionHandler> logger,
     IConfiguration configuration,
     CurrentUser currentUser,
     SubmissionService submissionService
 ) : IUserJourneyMissingContentExceptionHandler
 {
-    private readonly ILogger<UserJourneyMissingContentExceptionHandler> _logger = loggerFactory.CreateLogger<UserJourneyMissingContentExceptionHandler>();
     private readonly IConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     private readonly CurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
@@ -24,7 +23,7 @@ public class UserJourneyMissingContentExceptionHandler(
 
     public async Task<IActionResult> Handle(Controller controller, UserJourneyMissingContentException exception)
     {
-        _logger.LogError(exception, "Handling errored user journey for section {Section}", exception.Section.Name);
+        logger.LogError(exception, "Handling errored user journey for section {Section}", exception.Section.Name);
 
         var establishmentId = _currentUser.EstablishmentId
             ?? throw new InvalidDataException($"Current user has no {nameof(_currentUser.EstablishmentId)}");

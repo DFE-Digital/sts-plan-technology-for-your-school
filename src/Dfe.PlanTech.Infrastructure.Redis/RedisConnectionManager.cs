@@ -10,14 +10,14 @@ public class RedisConnectionManager : IRedisConnectionManager
     private ConnectionMultiplexer? _connection;
     private readonly DistributedCachingOptions _options;
 
-    public RedisConnectionManager(ILoggerFactory loggerFactory, DistributedCachingOptions options)
+    public RedisConnectionManager(ILogger<RedisConnectionManager> logger, DistributedCachingOptions options)
     {
         if (string.IsNullOrEmpty(options.ConnectionString))
         {
             throw new InvalidDataException($"{nameof(options.ConnectionString)} is null or empty");
         }
 
-        _logger = loggerFactory.CreateLogger<RedisConnectionManager>();
+        _logger = logger;
         _options = options;
     }
 

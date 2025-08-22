@@ -13,14 +13,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class ReviewAnswersViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     CurrentUser currentUser,
     ContentfulService contentfulService,
     RecommendationService recommendationService,
     SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly ILogger<ReviewAnswersViewBuilder> _logger = loggerFactory.CreateLogger<ReviewAnswersViewBuilder>();
     private readonly RecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
@@ -131,7 +130,7 @@ public class ReviewAnswersViewBuilder(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
+            logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
             controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
         }

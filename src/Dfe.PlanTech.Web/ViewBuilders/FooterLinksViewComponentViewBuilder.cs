@@ -5,13 +5,11 @@ using Dfe.PlanTech.Web.Context;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class FooterLinksViewComponentViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<FooterLinksViewComponentViewBuilder> logger,
     ContentfulService contentfulService,
     CurrentUser currentUser
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly ILogger<FooterLinksViewComponentViewBuilder> _logger = loggerFactory.CreateLogger<FooterLinksViewComponentViewBuilder>();
-
     public Task<List<NavigationLinkEntry>> GetNavigationLinksAsync()
     {
         try
@@ -20,7 +18,7 @@ public class FooterLinksViewComponentViewBuilder(
         }
         catch (Exception ex)
         {
-            _logger.LogCritical(ex, "Error retrieving navigation links for footer");
+            Logger.LogCritical(ex, "Error retrieving navigation links for footer");
             return Task.FromResult(new List<NavigationLinkEntry>());
         }
     }

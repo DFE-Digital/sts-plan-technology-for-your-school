@@ -10,11 +10,11 @@ using Dfe.PlanTech.Web.ViewModels;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class BaseViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     ContentfulService contentfulService,
     CurrentUser currentUser)
 {
-    ILogger<BaseViewBuilder> _logger = loggerFactory.CreateLogger<BaseViewBuilder>();
+    protected readonly ILogger<BaseViewBuilder> Logger = logger;
     protected ContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     protected CurrentUser CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
@@ -64,7 +64,7 @@ public class BaseViewBuilder(
         }
         catch (Exception e)
         {
-            _logger.LogError(
+            Logger.LogError(
                 e,
                 "An exception has occurred while trying to retrieve the recommendation for Section {sectionName}, with the message {errMessage}",
                 section.Name,

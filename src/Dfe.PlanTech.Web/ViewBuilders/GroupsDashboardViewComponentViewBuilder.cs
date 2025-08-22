@@ -7,14 +7,13 @@ using Dfe.PlanTech.Web.ViewModels;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class GroupsDashboardViewComponentViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     CurrentUser currentUser,
     ContentfulService contentfulService,
     EstablishmentService establishmentService,
     SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly ILogger<GroupsDashboardViewComponentViewBuilder> _logger = loggerFactory.CreateLogger<GroupsDashboardViewComponentViewBuilder>();
     private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
@@ -22,7 +21,7 @@ public class GroupsDashboardViewComponentViewBuilder(
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("No sections found for category {id}", category.Id);
+            Logger.LogError("No sections found for category {id}", category.Id);
             throw new InvalidDataException($"No sections found for category {category.Id}");
         }
 
@@ -43,7 +42,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         }
         catch (Exception ex)
         {
-            _logger.LogError(
+            Logger.LogError(
                 ex,
                 "An exception has occurred while trying to retrieve section progress with the following message: {message}",
                 ex.Message
@@ -75,7 +74,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+                Logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));

@@ -13,13 +13,13 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class GroupsViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     CurrentUser currentUser,
     ContentfulService contentfulService,
     EstablishmentService establishmentService,
     SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));

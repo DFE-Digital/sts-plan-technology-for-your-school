@@ -9,13 +9,12 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Services;
 
 public class EstablishmentService(
-    ILoggerFactory loggerFactory,
+    ILogger<EstablishmentService> logger,
     EstablishmentWorkflow establishmentWorkflow,
     SubmissionWorkflow submissionWorkflow,
     UserWorkflow userWorkflow
 )
 {
-    private readonly ILogger<EstablishmentService> _logger = loggerFactory.CreateLogger<EstablishmentService>();
     private readonly EstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
     private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
     private readonly UserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));

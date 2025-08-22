@@ -88,11 +88,11 @@ public static class ServiceCollectionExtensions
         services.SetupContentfulClient(configuration, HttpClientPolicyExtensions.AddRetryPolicy);
         services.SetupRichTextRenderers();
 
-        services.AddScoped((services) =>
+        services.AddScoped((servicesInner) =>
         {
-            var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+            var logger = servicesInner.GetRequiredService<ILogger<TextRendererOptions>>();
 
-            return new TextRendererOptions(loggerFactory.CreateLogger<TextRendererOptions>(), [
+            return new TextRendererOptions(logger, [
                 new(){
                     Mark = "bold",
                     HtmlTag = "span",

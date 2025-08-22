@@ -12,16 +12,15 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class PagesViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     ContentfulService contentfulService,
     CurrentUser currentUser
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
     public const string CategoryLandingPageView = "~/Views/Recommendations/CategoryLandingPage.cshtml";
 
-    private ILogger<PagesViewBuilder> _logger = loggerFactory.CreateLogger<PagesViewBuilder>();
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
 
@@ -46,7 +45,7 @@ public class PagesViewBuilder(
         {
             if (!CurrentUser.IsAuthenticated)
             {
-                _logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Id);
+                Logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Id);
             }
             else
             {

@@ -8,20 +8,19 @@ using Dfe.PlanTech.Web.ViewModels;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class CategorySectionViewComponentViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     ContentfulService contentfulService,
     CurrentUser currentUser,
     SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly ILogger<CategorySectionViewComponent> _logger = loggerFactory.CreateLogger<CategorySectionViewComponent>();
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public async Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category)
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("Found no sections for category {id}", category.Id);
+            Logger.LogError("Found no sections for category {id}", category.Id);
             throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 
@@ -35,7 +34,7 @@ public class CategorySectionViewComponentViewBuilder(
         }
         catch (Exception ex)
         {
-            _logger.LogError(
+            Logger.LogError(
                 ex,
                 "An exception has occurred while trying to retrieve section progress with the following message: {message}",
                 ex.Message
@@ -71,7 +70,7 @@ public class CategorySectionViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+                Logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
@@ -88,7 +87,7 @@ public class CategorySectionViewComponentViewBuilder(
             return slug;
         }
 
-        _logger.LogError("Could not find category landing slug for category {CategoryInternalName}", category?.InternalName ?? "unknown category");
+        Logger.LogError("Could not find category landing slug for category {CategoryInternalName}", category?.InternalName ?? "unknown category");
         return null;
     }
 }

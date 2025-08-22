@@ -12,10 +12,10 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 [Route("/")]
 public class ReviewAnswersController(
-    ILoggerFactory loggerFactory,
+    ILogger<ReviewAnswersController> logger,
     IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
     ReviewAnswersViewBuilder reviewAnswersViewBuilder
-) : BaseController<ReviewAnswersController>(loggerFactory)
+) : BaseController<ReviewAnswersController>(logger)
 {
     public const string ControllerName = "CheckAnswers";
     public const string CheckAnswersAction = nameof(CheckAnswers);
