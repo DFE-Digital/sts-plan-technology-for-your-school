@@ -21,11 +21,11 @@ public class EmbeddedEntryBlockRenderer(
 
         switch (richTextData.SystemProperties.ContentType.SystemProperties.Id)
         {
-            case "Attachment":
+            case ContentTypeConstants.ComponentAttachmentContentTypeId:
                 var attachment = new AttachmentComponentRenderer();
                 return attachment.AddHtml(content, stringBuilder);
-            case "CSAccordion":
-                var accordionComponent = new AccordionComponentRenderer(loggerFactory);
+            case ContentTypeConstants.ComponentAccordionContentTypeId:
+                var accordionComponent = new AccordionComponentRenderer(loggerFactory.CreateLogger<AccordionComponentRenderer>());
                 return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
             default:
                 break;

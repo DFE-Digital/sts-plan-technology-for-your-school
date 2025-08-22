@@ -92,7 +92,7 @@ public static class ServiceCollectionExtensions
         {
             var loggerFactory = services.GetRequiredService<ILoggerFactory>();
 
-            return new TextRendererOptions(loggerFactory, [
+            return new TextRendererOptions(loggerFactory.CreateLogger<TextRendererOptions>(), [
                 new(){
                     Mark = "bold",
                     HtmlTag = "span",
