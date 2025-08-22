@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Core.Contentful.Queries;
-using Xunit.Sdk;
 using TestClass = Dfe.PlanTech.Data.Contentful.UnitTests.Entities.TestClass;
 
 namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence.QueryBuilder;
