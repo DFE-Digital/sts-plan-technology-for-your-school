@@ -1,9 +1,11 @@
-﻿using Dfe.PlanTech.Data.Sql.Entities;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
+[ExcludeFromCodeCoverage]
 internal class GroupReadActivityEntityConfiguration : IEntityTypeConfiguration<GroupReadActivityEntity>
 {
     public void Configure(EntityTypeBuilder<GroupReadActivityEntity> builder)
