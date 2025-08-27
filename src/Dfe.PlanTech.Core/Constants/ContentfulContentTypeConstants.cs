@@ -1,7 +1,9 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Core.Constants;
 
+[ExcludeFromCodeCoverage]
 public static class ContentfulContentTypeConstants
 {
     // Contentful ID to C# class type mappings

@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Application.Configuration;
 
+[ExcludeFromCodeCoverage]
 public record RobotsConfiguration
 {
     public string UserAgent { get; init; } = "*";

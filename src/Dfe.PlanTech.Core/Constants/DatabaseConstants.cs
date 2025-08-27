@@ -1,5 +1,8 @@
-﻿namespace Dfe.PlanTech.Core.Constants;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Dfe.PlanTech.Core.Constants;
+
+[ExcludeFromCodeCoverage]
 public static class DatabaseConstants
 {
     #region Stored Procedures

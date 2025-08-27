@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
+[ExcludeFromCodeCoverage]
 public class PageEntry : ContentfulEntry, IHasSlug
 {
     public string InternalName { get; init; } = null!;

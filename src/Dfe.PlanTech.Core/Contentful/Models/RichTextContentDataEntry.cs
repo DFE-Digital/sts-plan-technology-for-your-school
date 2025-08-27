@@ -1,7 +1,9 @@
-﻿using Contentful.Core.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Contentful.Core.Models;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
+[ExcludeFromCodeCoverage]
 public class RichTextContentDataEntry : Entry<ContentfulEntry>
 {
     public string Id => SystemProperties.Id;

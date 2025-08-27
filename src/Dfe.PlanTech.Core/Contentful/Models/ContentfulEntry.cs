@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
+[ExcludeFromCodeCoverage]
 public abstract class ContentfulEntry : IContentfulEntry
 {
     public string Id => Sys?.Id ?? string.Empty;
