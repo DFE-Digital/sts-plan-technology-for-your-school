@@ -6,7 +6,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
-using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication;
@@ -16,7 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
+namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
 
 public partial class DfeOpenIdConnectEventsTests
 {

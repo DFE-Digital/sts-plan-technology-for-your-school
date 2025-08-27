@@ -1,11 +1,11 @@
 using System.Text.Json;
 using Dfe.PlanTech.Core.Caching.Interfaces;
-using Dfe.PlanTech.Domain.Caching.Models;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Models;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Application.Persistence.Commands;
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.MessageProcessor;
 
 public class CmsWebHookMessageProcessor(
     ILogger<CmsWebHookMessageProcessor> logger,

@@ -1,5 +1,5 @@
+using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Domain.Background;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis;

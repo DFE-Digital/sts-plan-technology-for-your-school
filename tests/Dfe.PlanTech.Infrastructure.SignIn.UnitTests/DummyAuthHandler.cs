@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
+namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
 
 public class DummyAuthHandlerOptions : AuthenticationSchemeOptions
 {
