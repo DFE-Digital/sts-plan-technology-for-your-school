@@ -34,7 +34,7 @@ public class SignInEntityTests
         // Act
         SqlSignInDto dto = entity.AsDto();
 
-        // Assert
+        // Assert - properties explicitly set by `AsDto()`
         Assert.Equal(expectedId, dto.Id);
         Assert.Equal(expectedUserId, dto.UserId);
         Assert.Equal(expectedEstablishmentId, dto.EstablishmentId);
@@ -42,5 +42,17 @@ public class SignInEntityTests
         Assert.NotNull(dto.User);
         Assert.Equal(expectedUserId, dto.User.Id);
         Assert.Equal("Arbitrary string - dsi ref", dto.User.DfeSignInRef);
+
+        // Assert - ensure all DTO properties are accounted for
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlSignInDto>(
+            new[]
+            {
+                nameof(SqlSignInDto.Id),
+                nameof(SqlSignInDto.UserId),
+                nameof(SqlSignInDto.EstablishmentId),
+                nameof(SqlSignInDto.SignInDateTime),
+                nameof(SqlSignInDto.User)
+            }
+        );
     }
 }

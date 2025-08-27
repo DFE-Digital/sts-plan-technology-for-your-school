@@ -26,11 +26,22 @@ public class AnswerEntityTests
         // Act
         SqlAnswerDto sqlAnswerDto = answerEntity.AsDto();
 
-        // Assert
+        // Assert - properties explicitly set by `AsDto()`
         Assert.Equal(expectedId, sqlAnswerDto.Id);
         Assert.Equal(expectedAnswerText, sqlAnswerDto.AnswerText);
         Assert.Equal(expectedContentfulRef, sqlAnswerDto.ContentfulSysId);
         Assert.Equal(expectedDateCreated, sqlAnswerDto.DateCreated);
+
+        // Assert - ensure all DTO properties are accounted for
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlAnswerDto>(
+            new[]
+            {
+                nameof(SqlAnswerDto.Id),
+                nameof(SqlAnswerDto.AnswerText),
+                nameof(SqlAnswerDto.ContentfulSysId),
+                nameof(SqlAnswerDto.DateCreated)
+            }
+        );
     }
 
     [Fact]

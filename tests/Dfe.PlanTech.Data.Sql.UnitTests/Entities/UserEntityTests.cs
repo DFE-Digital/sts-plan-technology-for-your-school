@@ -26,12 +26,24 @@ public class UserEntityTests
         // Act
         SqlUserDto dto = entity.AsDto();
 
-        // Assert
+        // Assert - properties explicitly set by `AsDto()`
         Assert.Equal(expectedId, dto.Id);
         Assert.Equal(expectedDsiRef, dto.DfeSignInRef);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedDateLastUpdated, dto.DateLastUpdated);
         Assert.Null(dto.Responses);
+
+        // Assert - ensure all DTO properties are accounted for
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlUserDto>(
+            new[]
+            {
+                nameof(SqlUserDto.Id),
+                nameof(SqlUserDto.DfeSignInRef),
+                nameof(SqlUserDto.DateCreated),
+                nameof(SqlUserDto.DateLastUpdated),
+                nameof(SqlUserDto.Responses)
+            }
+        );
     }
 
     [Fact]

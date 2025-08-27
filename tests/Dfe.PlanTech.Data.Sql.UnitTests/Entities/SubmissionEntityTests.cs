@@ -52,7 +52,7 @@ public class SubmissionEntityTests
         // Act
         SqlSubmissionDto dto = entity.AsDto();
 
-        // Assert
+        // Assert - properties explicitly set by `AsDto()`
         Assert.Equal(expectedId, dto.Id);
         Assert.Equal(expectedEstablishmentId, dto.EstablishmentId);
         Assert.NotNull(dto.Establishment);
@@ -68,5 +68,26 @@ public class SubmissionEntityTests
         Assert.Equal(expectedDeleted, dto.Deleted);
         Assert.Equal(expectedViewed, dto.Viewed);
         Assert.Equal(expectedStatus, dto.Status);
+
+        // Assert - ensure all DTO properties are accounted for
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlSubmissionDto>(
+            new[]
+            {
+                nameof(SqlSubmissionDto.Id),
+                nameof(SqlSubmissionDto.EstablishmentId),
+                nameof(SqlSubmissionDto.Establishment),
+                nameof(SqlSubmissionDto.Completed),
+                nameof(SqlSubmissionDto.SectionId),
+                nameof(SqlSubmissionDto.SectionName),
+                nameof(SqlSubmissionDto.Maturity),
+                nameof(SqlSubmissionDto.DateCreated),
+                nameof(SqlSubmissionDto.DateLastUpdated),
+                nameof(SqlSubmissionDto.DateCompleted),
+                nameof(SqlSubmissionDto.Responses),
+                nameof(SqlSubmissionDto.Deleted),
+                nameof(SqlSubmissionDto.Viewed),
+                nameof(SqlSubmissionDto.Status)
+            }
+        );
     }
 }

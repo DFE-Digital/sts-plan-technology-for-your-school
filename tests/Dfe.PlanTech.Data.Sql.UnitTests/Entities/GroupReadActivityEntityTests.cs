@@ -29,12 +29,25 @@ public class GroupReadActivityEntityTests
         // Act
         SqlGroupReadActivityDto dto = entity.AsDto();
 
-        // Assert
+        // Assert - properties explicitly set by `AsDto()`
         Assert.Equal(expectedId, dto.Id);
         Assert.Equal(expectedUserId, dto.UserId);
         Assert.Equal(expectedUserEstablishmentId, dto.UserEstablishmentId);
         Assert.Equal(expectedSelectedEstablishmentId, dto.SelectedEstablishmentId);
         Assert.Equal(expectedSelectedEstablishmentName, dto.SelectedEstablishmentName);
         Assert.Equal(expectedDateSelected, dto.DateSelected);
+
+        // Assert - ensure all DTO properties are accounted for
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlGroupReadActivityDto>(
+            new[]
+            {
+                nameof(SqlGroupReadActivityDto.Id),
+                nameof(SqlGroupReadActivityDto.UserId),
+                nameof(SqlGroupReadActivityDto.UserEstablishmentId),
+                nameof(SqlGroupReadActivityDto.SelectedEstablishmentId),
+                nameof(SqlGroupReadActivityDto.SelectedEstablishmentName),
+                nameof(SqlGroupReadActivityDto.DateSelected)
+            }
+        );
     }
 }

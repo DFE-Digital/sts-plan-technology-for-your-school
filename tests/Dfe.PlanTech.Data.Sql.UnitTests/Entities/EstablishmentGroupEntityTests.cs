@@ -27,11 +27,23 @@ public class EstablishmentGroupEntityTests
         // Act
         SqlEstablishmentGroupDto dto = entity.AsDto();
 
-        // Assert
+        // Assert - properties explicitly set by `AsDto()`
         Assert.Equal(expectedId, dto.Id);
         Assert.Equal(expectedUid, dto.Uid);
         Assert.Equal(expectedGroupName, dto.GroupName);
         Assert.Equal(expectedGroupType, dto.GroupType);
         Assert.Equal(expectedGroupStatus, dto.GroupStatus);
+
+        // Assert - ensure all DTO properties are accounted for
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlEstablishmentGroupDto>(
+            new[]
+            {
+                nameof(SqlEstablishmentGroupDto.Id),
+                nameof(SqlEstablishmentGroupDto.Uid),
+                nameof(SqlEstablishmentGroupDto.GroupName),
+                nameof(SqlEstablishmentGroupDto.GroupType),
+                nameof(SqlEstablishmentGroupDto.GroupStatus)
+            }
+        );
     }
 }

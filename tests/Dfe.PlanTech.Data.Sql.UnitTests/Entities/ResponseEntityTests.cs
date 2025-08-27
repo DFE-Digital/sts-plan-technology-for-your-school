@@ -80,7 +80,7 @@ public class ResponseEntityTests
         // Act
         SqlResponseDto dto = entity.AsDto();
 
-        // Assert
+        // Assert - properties explicitly set by `AsDto()`
         Assert.Equal(expectedId, dto.Id);
         Assert.Equal(expectedUserId, dto.UserId);
         Assert.NotNull(dto.User);
@@ -97,6 +97,25 @@ public class ResponseEntityTests
         Assert.Equal(expectedMaturity, dto.Maturity);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedDateLastUpdated, dto.DateLastUpdated);
+
+        // Assert - ensure all DTO properties are accounted for
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlResponseDto>(
+            new[]
+            {
+                nameof(SqlResponseDto.Id),
+                nameof(SqlResponseDto.UserId),
+                nameof(SqlResponseDto.User),
+                nameof(SqlResponseDto.SubmissionId),
+                nameof(SqlResponseDto.Submission),
+                nameof(SqlResponseDto.QuestionId),
+                nameof(SqlResponseDto.Question),
+                nameof(SqlResponseDto.AnswerId),
+                nameof(SqlResponseDto.Answer),
+                nameof(SqlResponseDto.Maturity),
+                nameof(SqlResponseDto.DateCreated),
+                nameof(SqlResponseDto.DateLastUpdated)
+            }
+        );
     }
 
     [Fact]

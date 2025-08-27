@@ -31,7 +31,7 @@ public class EstablishmentEntityTests
         // Act
         SqlEstablishmentDto dto = entity.AsDto();
 
-        // Assert
+        // Assert - properties explicitly set by `AsDto()`
         Assert.Equal(expectedId, dto.Id);
         Assert.Equal(expectedRef, dto.EstablishmentRef);
         Assert.Equal(expectedType, dto.EstablishmentType);
@@ -39,6 +39,20 @@ public class EstablishmentEntityTests
         Assert.Equal(expectedGroupUid, dto.GroupUid);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedDateLastUpdated, dto.DateLastUpdated);
+
+        // Assert - ensure all DTO properties are accounted for
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlEstablishmentDto>(
+            new[]
+            {
+                nameof(SqlEstablishmentDto.Id),
+                nameof(SqlEstablishmentDto.EstablishmentRef),
+                nameof(SqlEstablishmentDto.EstablishmentType),
+                nameof(SqlEstablishmentDto.OrgName),
+                nameof(SqlEstablishmentDto.GroupUid),
+                nameof(SqlEstablishmentDto.DateCreated),
+                nameof(SqlEstablishmentDto.DateLastUpdated)
+            }
+        );
     }
 
     [Fact]

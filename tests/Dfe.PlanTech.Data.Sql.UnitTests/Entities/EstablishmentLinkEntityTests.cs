@@ -25,10 +25,27 @@ public class EstablishmentLinkEntityTests
         // Act
         SqlEstablishmentLinkDto dto = entity.AsDto();
 
-        // Assert
+        // Assert - properties explicitly set by `AsDto()`
         Assert.Equal(expectedId, dto.Id);
         Assert.Equal(expectedGroupUid, dto.GroupUid);
         Assert.Equal(expectedEstablishmentName, dto.EstablishmentName);
         Assert.Equal(expectedUrn, dto.Urn);
+
+        // Assert - properties not explicitly set by `AsDto()`:
+        Assert.Null(dto.SectionStatuses);
+        Assert.Null(dto.CompletedSectionsCount);
+
+        // Assert - ensure all DTO properties are accounted for
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlEstablishmentLinkDto>(
+            new[]
+            {
+                nameof(SqlEstablishmentLinkDto.Id),
+                nameof(SqlEstablishmentLinkDto.GroupUid),
+                nameof(SqlEstablishmentLinkDto.EstablishmentName),
+                nameof(SqlEstablishmentLinkDto.Urn),
+                nameof(SqlEstablishmentLinkDto.SectionStatuses),
+                nameof(SqlEstablishmentLinkDto.CompletedSectionsCount)
+            }
+        );
     }
 }
