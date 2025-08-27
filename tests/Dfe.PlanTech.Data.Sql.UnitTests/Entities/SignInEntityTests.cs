@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
 public class SignInEntityTests
 {
     [Fact]
-    public void SignInEntity_AsDto_PropertiesMapCorrectly()
+    public void SignInEntity_AsDto_WhenEntityHasValues_PropertiesMappedCorrectly()
     {
         // Arrange
         var expectedId = 31;

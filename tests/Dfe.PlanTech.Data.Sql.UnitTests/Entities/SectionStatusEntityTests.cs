@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
 public class SectionStatusEntityTests
 {
     [Fact]
-    public void SectionStatusEntity_AsDto_PropertiesMapCorrectly()
+    public void SectionStatusEntity_AsDto_WhenEntityHasValues_PropertiesMappedCorrectly()
     {
         // Arrange
         var expectedSectionId = "Arbitrary string - section id";

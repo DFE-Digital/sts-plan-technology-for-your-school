@@ -7,7 +7,7 @@ public class AnswerEntityTests
 {
     // Validate that the `AsDto()` method correctly maps properties
     [Fact]
-    public void AnswerEntity_AsDto_PropertiesMapCorrectly()
+    public void AnswerEntity_AsDto_WhenEntityHasValues_PropertiesMappedCorrectly()
     {
         // Arrange
         var expectedId = 1;
@@ -45,7 +45,7 @@ public class AnswerEntityTests
     }
 
     [Fact]
-    public void AnswerEntity_AsDto_DefaultsDateCreatedToUtcNow()
+    public void AnswerEntity_AsDto_WhenDateCreatedNotProvided_DefaultsToUtcNow()
     {
         // Arrange
         var before = System.DateTime.UtcNow;

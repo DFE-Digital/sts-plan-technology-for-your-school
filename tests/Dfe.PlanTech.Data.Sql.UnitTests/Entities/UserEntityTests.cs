@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
 public class UserEntityTests
 {
     [Fact]
-    public void UserEntity_AsDto_PropertiesMapCorrectly()
+    public void UserEntity_AsDto_WhenEntityHasValues_PropertiesMappedCorrectly()
     {
         // Arrange
         var expectedId = 21;
@@ -47,7 +47,7 @@ public class UserEntityTests
     }
 
     [Fact]
-    public void UserEntity_AsDto_DefaultsDateCreatedToUtcNow()
+    public void UserEntity_AsDto_WhenDateCreatedNotProvided_DefaultsToUtcNow()
     {
         // Arrange
         var before = DateTime.UtcNow;

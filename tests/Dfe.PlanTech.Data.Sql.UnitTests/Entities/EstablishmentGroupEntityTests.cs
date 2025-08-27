@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
 public class EstablishmentGroupEntityTests
 {
     [Fact]
-    public void EstablishmentGroupEntity_AsDto_PropertiesMapCorrectly()
+    public void EstablishmentGroupEntity_AsDto_WhenEntityHasValues_PropertiesMappedCorrectly()
     {
         // Arrange
         var expectedId = 7;

@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
 public class GroupReadActivityEntityTests
 {
     [Fact]
-    public void GroupReadActivityEntity_AsDto_PropertiesMapCorrectly()
+    public void GroupReadActivityEntity_AsDto_WhenEntityHasValues_PropertiesMappedCorrectly()
     {
         // Arrange
         var expectedId = 1;

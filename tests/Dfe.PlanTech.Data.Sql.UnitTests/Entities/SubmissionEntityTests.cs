@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
 public class SubmissionEntityTests
 {
     [Fact]
-    public void SubmissionEntity_AsDto_PropertiesMapCorrectly()
+    public void SubmissionEntity_AsDto_WhenEntityHasValues_PropertiesMappedCorrectly()
     {
         // Arrange
         var expectedId = 61;

@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
 public class EstablishmentLinkEntityTests
 {
     [Fact]
-    public void EstablishmentLinkEntity_AsDto_PropertiesMapCorrectly()
+    public void EstablishmentLinkEntity_AsDto_WhenEntityHasValues_PropertiesMappedCorrectly()
     {
         // Arrange
         var expectedId = 11;
