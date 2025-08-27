@@ -119,9 +119,6 @@ public class EstablishmentServiceTests
     [Fact]
     public async Task GetEstablishmentLinksWithSubmissionStatusesAndCounts_Computes_Completed_Counts()
     {
-        var section1Sys = new SystemDetails { Id = "S1" };
-        var section2Sys = new SystemDetails { Id = "S2" };
-
         // Arrange
         var categories = new List<QuestionnaireCategoryEntry>
         {
@@ -132,12 +129,12 @@ public class EstablishmentServiceTests
                 {
                     new QuestionnaireSectionEntry
                     {
-                        Sys = section1Sys,
+                        Sys = new SystemDetails("S1"),
                         InternalName = "Test Internal Section Name 1",
                         Name = "Section 1"
                     },
                     new QuestionnaireSectionEntry {
-                        Sys = section2Sys,
+                        Sys = new SystemDetails("S2"),
                         InternalName = "Test Internal Section Name 2",
                         Name = "Section 2"
                     }
