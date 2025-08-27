@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
@@ -14,12 +14,12 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class ReviewAnswersViewBuilder(
     ILogger<BaseViewBuilder> logger,
-    CurrentUser currentUser,
-    ContentfulService contentfulService,
-    SubmissionService submissionService
+    IContentfulService contentfulService,
+    ISubmissionService submissionService,
+    CurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public const string ChangeAnswersViewName = "~/Views/ChangeAnswers/ChangeAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";

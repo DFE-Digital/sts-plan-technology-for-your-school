@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context;
@@ -8,14 +8,14 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class GroupsDashboardViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
-    CurrentUser currentUser,
-    ContentfulService contentfulService,
-    EstablishmentService establishmentService,
-    SubmissionService submissionService
+    IContentfulService contentfulService,
+    IEstablishmentService establishmentService,
+    ISubmissionService submissionService,
+    CurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public Task<GroupsDashboardViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category)
     {
