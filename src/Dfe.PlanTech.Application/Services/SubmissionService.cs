@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Workflows;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
@@ -9,12 +10,10 @@ using Dfe.PlanTech.Core.RoutingDataModels;
 namespace Dfe.PlanTech.Application.Services;
 
 public class SubmissionService(
-    ContentfulWorkflow contentfulWorkflow,
-    SubmissionWorkflow submissionWorkflow
-)
+    ISubmissionWorkflow submissionWorkflow
+) : ISubmissionService
 {
-    private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
-    private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
+    private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
     public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section)
     {
@@ -23,7 +22,7 @@ public class SubmissionService(
             establishmentId,
             section,
             isCompletedSubmission: false);
-        if (inProgressSubmission != null)
+        if (inProgressSubmission is not null)
         {
             await _submissionWorkflow.DeleteSubmissionSoftAsync(inProgressSubmission.Id);
         }

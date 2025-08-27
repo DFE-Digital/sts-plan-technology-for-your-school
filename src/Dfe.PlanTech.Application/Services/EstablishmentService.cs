@@ -1,5 +1,5 @@
-﻿using System.Security.Authentication;
-using Dfe.PlanTech.Application.Workflows;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
@@ -10,34 +10,25 @@ namespace Dfe.PlanTech.Application.Services;
 
 public class EstablishmentService(
     ILogger<EstablishmentService> logger,
-    EstablishmentWorkflow establishmentWorkflow,
-    SubmissionWorkflow submissionWorkflow,
-    UserWorkflow userWorkflow
-)
+    IEstablishmentWorkflow establishmentWorkflow,
+    ISubmissionWorkflow submissionWorkflow,
+    IUserWorkflow userWorkflow
+) : IEstablishmentService
 {
-    private readonly EstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
-    private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
-    private readonly UserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
+    private readonly ILogger<EstablishmentService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IEstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
+    private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
+    private readonly IUserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
     {
         return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
-    public async Task<SqlGroupReadActivityDto> GetLatestSelectedGroupSchoolAsync(int? userId, int? establishmentId)
+    public async Task<SqlGroupReadActivityDto> GetLatestSelectedGroupSchoolAsync(int userId, int establishmentId)
     {
-        if (userId is null)
-        {
-            throw new AuthenticationException("User is not authenticated");
-        }
-
-        if (establishmentId is null)
-        {
-            throw new ArgumentException($"User's {nameof(establishmentId)} cannot be null");
-        }
-
-        return await _establishmentWorkflow.GetLatestSelectedGroupSchool(userId.Value, establishmentId.Value)
-            ?? throw new DatabaseException($"Could not get latest selected group school for user with ID '{userId.Value}' in establishment with ID '{establishmentId.Value}'");
+        return await _establishmentWorkflow.GetLatestSelectedGroupSchool(userId, establishmentId)
+            ?? throw new DatabaseException($"Could not get latest selected group school for user with ID '{userId}' in establishment with ID '{establishmentId}'");
     }
 
     public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId)

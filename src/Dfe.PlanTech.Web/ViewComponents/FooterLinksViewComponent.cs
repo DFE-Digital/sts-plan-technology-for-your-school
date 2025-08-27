@@ -7,7 +7,6 @@ namespace Dfe.PlanTech.Web.ViewComponents;
 /// View component that retrieves and displays links in the layout's footer
 /// </summary>
 public class FooterLinksViewComponent(
-    ILogger<FooterLinksViewComponent> logger,
     FooterLinksViewComponentViewBuilder viewBuilder
 ) : ViewComponent
 {

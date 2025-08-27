@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Options;
 using Dfe.PlanTech.Core.Contentful.Queries;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
@@ -9,7 +10,7 @@ namespace Dfe.PlanTech.Application.Workflows;
 public class SubtopicRecommendationWorkflow(
     ILogger<SubtopicRecommendationWorkflow> logger,
     IContentfulRepository contentfulRepository
-)
+) : ISubtopicRecommendationWorkflow
 {
     private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
 

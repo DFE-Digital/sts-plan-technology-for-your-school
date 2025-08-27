@@ -16,11 +16,9 @@ public class ReviewAnswersViewBuilder(
     ILogger<BaseViewBuilder> logger,
     CurrentUser currentUser,
     ContentfulService contentfulService,
-    RecommendationService recommendationService,
     SubmissionService submissionService
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly RecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public const string ChangeAnswersViewName = "~/Views/ChangeAnswers/ChangeAnswers.cshtml";
@@ -130,7 +128,7 @@ public class ReviewAnswersViewBuilder(
         }
         catch (Exception e)
         {
-            logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
+            Logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
             controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
         }

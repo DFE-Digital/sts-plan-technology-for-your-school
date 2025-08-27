@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Dfe.PlanTech.Core.Contentful.Options;
 using Dfe.PlanTech.Core.Contentful.Queries;
@@ -12,7 +13,7 @@ public class ContentfulWorkflow(
     ILogger<ContentfulWorkflow> logger,
     IContentfulRepository contentfulRepository,
     GetPageFromContentfulOptions getPageOptions
-)
+) : IContentfulWorkflow
 {
     public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
