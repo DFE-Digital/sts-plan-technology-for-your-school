@@ -21,39 +21,21 @@ public class EstablishmentEntity
     public string EstablishmentRef
     {
         get => _establishmentRef;
-        set
-        {
-            _establishmentRef = value.Length <= EstablishmentRefMaxLengthInclusive
-                ? value
-                : value.AsSpan(0, EstablishmentRefMaxLengthInclusive).ToString();
-        }
+        set => _establishmentRef = TrimToMax(value, EstablishmentRefMaxLengthInclusive);
     }
 
     [StringLength(EstablishmentTypeMaxLengthInclusive)]
     public string? EstablishmentType
     {
         get => _establishmentType;
-        set
-        {
-            if (value == null)
-                _establishmentType = null;
-            else
-                _establishmentType = value.Length <= EstablishmentTypeMaxLengthInclusive
-                    ? value
-                    : value.AsSpan(0, EstablishmentTypeMaxLengthInclusive).ToString();
-        }
+        set => _establishmentType = TrimToMaxOrNull(value, EstablishmentTypeMaxLengthInclusive);
     }
 
     [StringLength(OrgNameMaxLengthInclusive)]
     public string OrgName
     {
         get => _orgName;
-        set
-        {
-            _orgName = value.Length <= OrgNameMaxLengthInclusive
-                ? value
-                : value.AsSpan(0, OrgNameMaxLengthInclusive).ToString();
-        }
+        set => _orgName = TrimToMax(value, OrgNameMaxLengthInclusive);
     }
 
     public string? GroupUid { get; set; }
@@ -61,6 +43,23 @@ public class EstablishmentEntity
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public DateTime? DateLastUpdated { get; set; }
+
+    private static string TrimToMax(string value, int maxLengthInclusive)
+    {
+        return value.Length <= maxLengthInclusive
+            ? value
+            : value.AsSpan(0, maxLengthInclusive).ToString();
+    }
+
+    private static string? TrimToMaxOrNull(string? value, int maxLengthInclusive)
+    {
+        if (value is null)
+            return null;
+
+        return value.Length <= maxLengthInclusive
+            ? value
+            : value.AsSpan(0, maxLengthInclusive).ToString();
+    }
 
     public SqlEstablishmentDto AsDto()
     {
