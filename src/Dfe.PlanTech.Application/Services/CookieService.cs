@@ -1,5 +1,6 @@
 ﻿using System.Text.Json;
-using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Models;
 using Microsoft.AspNetCore.Http;
 
@@ -7,19 +8,20 @@ namespace Dfe.PlanTech.Application.Services;
 
 public class CookieService(
     IHttpContextAccessor contextAccessor,
-    CookieWorkflow cookieWorkflow)
+    ICookieWorkflow cookieWorkflow
+) : ICookieService
 {
     private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(_contextAccessor));
-    private readonly CookieWorkflow _cookieWorkflow = cookieWorkflow ?? throw new ArgumentNullException(nameof(_cookieWorkflow));
+    private readonly ICookieWorkflow _cookieWorkflow = cookieWorkflow ?? throw new ArgumentNullException(nameof(_cookieWorkflow));
 
-    public const string Cookie_Key = "user_cookies_preferences";
+    public const string CookieKey = "user_cookies_preferences";
 
     private DfeCookieModel? _dfeCookie;
     public DfeCookieModel Cookie => _dfeCookie ?? GetCookie();
 
     public void SetVisibility(bool visibility)
     {
-        CreateCookie(Cookie_Key, visibility: visibility);
+        CreateCookie(CookieKey, visibility: visibility);
     }
 
     public void SetCookieAcceptance(bool userAcceptsCookies)
@@ -29,7 +31,7 @@ public class CookieService(
             throw new InvalidOperationException($"Cannot set cookie acceptance as {nameof(_contextAccessor.HttpContext)} is null");
         }
 
-        CreateCookie(Cookie_Key, userAcceptsCookies: userAcceptsCookies);
+        CreateCookie(CookieKey, userAcceptsCookies: userAcceptsCookies);
 
         if (!userAcceptsCookies)
         {
@@ -39,7 +41,7 @@ public class CookieService(
 
     public DfeCookieModel GetCookie()
     {
-        var cookie = _contextAccessor.HttpContext?.Request.Cookies[Cookie_Key];
+        var cookie = _contextAccessor.HttpContext?.Request.Cookies[CookieKey];
         if (cookie is null)
         {
             return new DfeCookieModel();
@@ -51,7 +53,7 @@ public class CookieService(
 
     private void DeleteCookie()
     {
-        _contextAccessor.HttpContext?.Response.Cookies.Delete(Cookie_Key);
+        _contextAccessor.HttpContext?.Response.Cookies.Delete(CookieKey);
     }
 
     private void CreateCookie(string key, bool? userAcceptsCookies = null, bool? visibility = null)

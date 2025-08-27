@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Rendering;
 
 public class EmbeddedEntryBlockRenderer(
-    ILogger<EmbeddedEntryBlockRenderer> logger,
     ILoggerFactory loggerFactory
 ) : BaseRichTextContentPartRenderer(RichTextNodeType.EmbeddedEntryBlock)
 {

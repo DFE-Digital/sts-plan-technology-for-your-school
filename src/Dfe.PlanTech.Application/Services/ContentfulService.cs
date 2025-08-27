@@ -1,13 +1,14 @@
-﻿using Dfe.PlanTech.Application.Workflows;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Application.Services;
 
 public class ContentfulService(
-    ContentfulWorkflow contentfulWorkflow
-)
+    IContentfulWorkflow contentfulWorkflow
+) : IContentfulService
 {
-    private readonly ContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
+    private readonly IContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
 
     public Task<IEnumerable<QuestionnaireSectionEntry>> GetAllSectionsAsync()
     {
