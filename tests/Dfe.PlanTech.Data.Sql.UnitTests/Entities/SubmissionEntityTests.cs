@@ -43,6 +43,9 @@ public class SubmissionEntityTests
             DateCreated = expectedDateCreated,
             DateLastUpdated = expectedDateLastUpdated,
             DateCompleted = expectedDateCompleted,
+            // Note deliberate empty collection here to prevent circular references (a full response has a reference to the submission).
+            // TODO: Additional tests to validate the mapping (e.g. to verify no infinite recursion occurs with circular references).
+            // TODO: Consider if it is reasonable to redesign this to remove the circular references / risk for infinite recursion when mapping.
             Responses = new List<ResponseEntity>(),
             Deleted = expectedDeleted,
             Viewed = expectedViewed,
