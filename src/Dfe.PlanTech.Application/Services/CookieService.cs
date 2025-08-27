@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Application.Services;
 public class CookieService(
     IHttpContextAccessor contextAccessor,
     ICookieWorkflow cookieWorkflow
-): ICookieService
+) : ICookieService
 {
     private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(_contextAccessor));
     private readonly ICookieWorkflow _cookieWorkflow = cookieWorkflow ?? throw new ArgumentNullException(nameof(_cookieWorkflow));
