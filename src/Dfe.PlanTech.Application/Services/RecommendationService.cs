@@ -1,11 +1,12 @@
-﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Application.Services;
 
 public class RecommendationService(
     IRecommendationWorkflow recommendationWorkflow
-)
+) : IRecommendationService
 {
     private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
 

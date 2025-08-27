@@ -2,7 +2,9 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Rendering;
 using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -32,22 +34,22 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
         return services
-            .AddScoped<ContentfulService>()
-            .AddScoped<EstablishmentService>()
-            .AddScoped<QuestionService>()
-            .AddScoped<RecommendationService>()
-            .AddScoped<SubmissionService>();
+            .AddScoped<IContentfulService, ContentfulService>()
+            .AddScoped<IEstablishmentService, EstablishmentService>()
+            .AddScoped<IQuestionService, QuestionService>()
+            .AddScoped<IRecommendationService, RecommendationService>()
+            .AddScoped<ISubmissionService, SubmissionService>();
     }
 
     public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)
     {
         return services
-            .AddScoped<ContentfulWorkflow>()
-            .AddScoped<EstablishmentWorkflow>()
-            .AddScoped<RecommendationWorkflow>()
-            .AddScoped<SignInWorkflow>()
-            .AddScoped<SubmissionWorkflow>()
-            .AddScoped<UserWorkflow>();
+            .AddScoped<IContentfulWorkflow, ContentfulWorkflow>()
+            .AddScoped<IEstablishmentWorkflow, EstablishmentWorkflow>()
+            .AddScoped<IRecommendationWorkflow, RecommendationWorkflow>()
+            .AddScoped<ISignInWorkflow, SignInWorkflow>()
+            .AddScoped<ISubmissionWorkflow, SubmissionWorkflow>()
+            .AddScoped<IUserWorkflow, UserWorkflow>();
     }
 
     private static Func<Type, bool> IsContentRenderer(Type contentRendererType) => (type) =>
