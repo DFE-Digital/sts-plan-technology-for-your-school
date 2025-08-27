@@ -7,9 +7,9 @@ namespace Dfe.PlanTech.Data.Sql.Entities;
 [Table("establishment")]
 public class EstablishmentEntity
 {
-    public const int EstablishmentRefLength = 50;
-    public const int EstablishmentTypeLength = 50;
-    public const int OrgNameLength = 200;
+    public const int EstablishmentRefMaxLengthInclusive = 50;
+    public const int EstablishmentTypeMaxLengthInclusive = 50;
+    public const int OrgNameMaxLengthInclusive = 200;
 
     private string _establishmentRef = null!;
     private string? _establishmentType;
@@ -17,19 +17,19 @@ public class EstablishmentEntity
 
     public int Id { get; set; }
 
-    [StringLength(EstablishmentRefLength)]
+    [StringLength(EstablishmentRefMaxLengthInclusive)]
     public string EstablishmentRef
     {
         get => _establishmentRef;
         set
         {
-            _establishmentRef = value.Length < EstablishmentRefLength
+            _establishmentRef = value.Length <= EstablishmentRefMaxLengthInclusive
                 ? value
-                : value.AsSpan(0, EstablishmentRefLength).ToString();
+                : value.AsSpan(0, EstablishmentRefMaxLengthInclusive).ToString();
         }
     }
 
-    [StringLength(EstablishmentTypeLength)]
+    [StringLength(EstablishmentTypeMaxLengthInclusive)]
     public string? EstablishmentType
     {
         get => _establishmentType;
@@ -38,21 +38,21 @@ public class EstablishmentEntity
             if (value == null)
                 _establishmentType = null;
             else
-                _establishmentType = value.Length < EstablishmentTypeLength
+                _establishmentType = value.Length <= EstablishmentTypeMaxLengthInclusive
                     ? value
-                    : value.AsSpan(0, EstablishmentTypeLength).ToString();
+                    : value.AsSpan(0, EstablishmentTypeMaxLengthInclusive).ToString();
         }
     }
 
-    [StringLength(OrgNameLength)]
+    [StringLength(OrgNameMaxLengthInclusive)]
     public string OrgName
     {
         get => _orgName;
         set
         {
-            _orgName = value.Length < OrgNameLength
+            _orgName = value.Length <= OrgNameMaxLengthInclusive
                 ? value
-                : value.AsSpan(0, OrgNameLength).ToString();
+                : value.AsSpan(0, OrgNameMaxLengthInclusive).ToString();
         }
     }
 

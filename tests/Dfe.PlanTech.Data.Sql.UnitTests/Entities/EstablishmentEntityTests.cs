@@ -85,7 +85,7 @@ public class EstablishmentEntityTests
     // -------------------------
 
     [Theory]
-    [InlineData(EstablishmentEntity.OrgNameLength + 1)] // over max by 1 (boundary)
+    [InlineData(EstablishmentEntity.OrgNameMaxLengthInclusive + 1)] // over max by 1 (boundary)
     public void EstablishmentEntity_OrgName_WhenInputLengthExceedsMax_AdditionalCharactersTrimmed(int inputLength)
     {
         // Arrange
@@ -95,19 +95,19 @@ public class EstablishmentEntityTests
         var entity = new EstablishmentEntity
         {
             OrgName = original,
-            EstablishmentRef = new string('R', EstablishmentEntity.EstablishmentRefLength - 1),
-            EstablishmentType = new string('T', EstablishmentEntity.EstablishmentTypeLength - 1),
+            EstablishmentRef = new string('R', EstablishmentEntity.EstablishmentRefMaxLengthInclusive - 1),
+            EstablishmentType = new string('T', EstablishmentEntity.EstablishmentTypeMaxLengthInclusive - 1),
         };
 
         // Assert
-        Assert.Equal(EstablishmentEntity.OrgNameLength, entity.OrgName.Length);
-        Assert.Equal(original.Substring(0, EstablishmentEntity.OrgNameLength), entity.OrgName);
+        Assert.Equal(EstablishmentEntity.OrgNameMaxLengthInclusive, entity.OrgName.Length);
+        Assert.Equal(original.Substring(0, EstablishmentEntity.OrgNameMaxLengthInclusive), entity.OrgName);
         Assert.NotEqual(original, entity.OrgName);
     }
 
     [Theory]
-    [InlineData(EstablishmentEntity.OrgNameLength - 1)] // under max (boundary)
-    [InlineData(EstablishmentEntity.OrgNameLength)]     // exactly max (boundary)
+    [InlineData(EstablishmentEntity.OrgNameMaxLengthInclusive - 1)] // under max (boundary)
+    [InlineData(EstablishmentEntity.OrgNameMaxLengthInclusive)]     // exactly max (boundary)
     public void EstablishmentEntity_OrgName_WhenInputLengthAtOrUnderMax_NoChange(int inputLength)
     {
         // Arrange
@@ -126,7 +126,7 @@ public class EstablishmentEntityTests
     }
 
     [Theory]
-    [InlineData(EstablishmentEntity.EstablishmentRefLength + 1)] // over max by 1 (boundary)
+    [InlineData(EstablishmentEntity.EstablishmentRefMaxLengthInclusive + 1)] // over max by 1 (boundary)
     public void EstablishmentEntity_EstablishmentRef_WhenInputLengthExceedsMax_AdditionalCharactersTrimmed(int inputLength)
     {
         // Arrange
@@ -135,20 +135,20 @@ public class EstablishmentEntityTests
         // Act
         var entity = new EstablishmentEntity
         {
-            OrgName = new string('O', EstablishmentEntity.OrgNameLength - 1),
+            OrgName = new string('O', EstablishmentEntity.OrgNameMaxLengthInclusive - 1),
             EstablishmentRef = original,
-            EstablishmentType = new string('T', EstablishmentEntity.EstablishmentTypeLength - 1),
+            EstablishmentType = new string('T', EstablishmentEntity.EstablishmentTypeMaxLengthInclusive - 1),
         };
 
         // Assert
-        Assert.Equal(EstablishmentEntity.EstablishmentRefLength, entity.EstablishmentRef.Length);
-        Assert.Equal(original.Substring(0, EstablishmentEntity.EstablishmentRefLength), entity.EstablishmentRef);
+        Assert.Equal(EstablishmentEntity.EstablishmentRefMaxLengthInclusive, entity.EstablishmentRef.Length);
+        Assert.Equal(original.Substring(0, EstablishmentEntity.EstablishmentRefMaxLengthInclusive), entity.EstablishmentRef);
         Assert.NotEqual(original, entity.EstablishmentRef);
     }
 
     [Theory]
-    [InlineData(EstablishmentEntity.EstablishmentRefLength - 1)] // under max (boundary)
-    [InlineData(EstablishmentEntity.EstablishmentRefLength)]     // exactly max (boundary)
+    [InlineData(EstablishmentEntity.EstablishmentRefMaxLengthInclusive - 1)] // under max (boundary)
+    [InlineData(EstablishmentEntity.EstablishmentRefMaxLengthInclusive)]     // exactly max (boundary)
     public void EstablishmentEntity_EstablishmentRef_WhenInputLengthAtOrUnderMax_NoChange(int inputLength)
     {
         // Arrange
@@ -167,7 +167,7 @@ public class EstablishmentEntityTests
     }
 
     [Theory]
-    [InlineData(EstablishmentEntity.EstablishmentTypeLength + 1)] // over max by 1 (boundary)
+    [InlineData(EstablishmentEntity.EstablishmentTypeMaxLengthInclusive + 1)] // over max by 1 (boundary)
     public void EstablishmentEntity_EstablishmentType_WhenInputLengthExceedsMax_AdditionalCharactersTrimmed(int inputLength)
     {
         // Arrange
@@ -176,21 +176,21 @@ public class EstablishmentEntityTests
         // Act
         var entity = new EstablishmentEntity
         {
-            OrgName = new string('O', EstablishmentEntity.OrgNameLength - 1),
-            EstablishmentRef = new string('R', EstablishmentEntity.EstablishmentRefLength - 1),
+            OrgName = new string('O', EstablishmentEntity.OrgNameMaxLengthInclusive - 1),
+            EstablishmentRef = new string('R', EstablishmentEntity.EstablishmentRefMaxLengthInclusive - 1),
             EstablishmentType = original
         };
 
         // Assert
         Assert.NotNull(entity.EstablishmentType);
-        Assert.Equal(EstablishmentEntity.EstablishmentTypeLength, entity.EstablishmentType!.Length);
-        Assert.Equal(original.Substring(0, EstablishmentEntity.EstablishmentTypeLength), entity.EstablishmentType);
+        Assert.Equal(EstablishmentEntity.EstablishmentTypeMaxLengthInclusive, entity.EstablishmentType!.Length);
+        Assert.Equal(original.Substring(0, EstablishmentEntity.EstablishmentTypeMaxLengthInclusive), entity.EstablishmentType);
         Assert.NotEqual(original, entity.EstablishmentType);
     }
 
     [Theory]
-    [InlineData(EstablishmentEntity.EstablishmentTypeLength - 1)] // under max (boundary)
-    [InlineData(EstablishmentEntity.EstablishmentTypeLength)]     // exactly max (boundary)
+    [InlineData(EstablishmentEntity.EstablishmentTypeMaxLengthInclusive - 1)] // under max (boundary)
+    [InlineData(EstablishmentEntity.EstablishmentTypeMaxLengthInclusive)]     // exactly max (boundary)
     public void EstablishmentEntity_EstablishmentType_WhenInputLengthAtOrUnderMax_NoChange(int inputLength)
     {
         // Arrange
