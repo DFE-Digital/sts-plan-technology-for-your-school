@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
 public class EstablishmentEntityTests
 {
     [Fact]
-    public void EstablishmentEntity_AsDto_PropertiesMapCorrectly()
+    public void EstablishmentEntity_AsDto_WhenEntityHasValues_PropertiesMappedCorrectly()
     {
         // Arrange
         var expectedId = 10;
@@ -56,7 +56,7 @@ public class EstablishmentEntityTests
     }
 
     [Fact]
-    public void EstablishmentEntity_AsDto_DefaultsDateCreatedToUtcNow()
+    public void EstablishmentEntity_AsDto_WhenDateCreatedNotProvided_DefaultsToUtcNow()
     {
         // Arrange
         var before = DateTime.UtcNow;
@@ -78,5 +78,148 @@ public class EstablishmentEntityTests
         // Assert
         Assert.InRange(dto.DateCreated, before, after);
         Assert.Equal(DateTimeKind.Utc, dto.DateCreated.Kind);
+    }
+
+    // -------------------------
+    // Property behavior tests
+    // -------------------------
+
+    [Theory]
+    [InlineData(EstablishmentEntity.OrgNameLength + 1)] // over max by 1 (boundary)
+    public void EstablishmentEntity_OrgName_WhenInputLengthExceedsMax_AdditionalCharactersTrimmed(int inputLength)
+    {
+        // Arrange
+        string original = new string('O', inputLength);
+
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = original,
+            EstablishmentRef = new string('R', EstablishmentEntity.EstablishmentRefLength - 1),
+            EstablishmentType = new string('T', EstablishmentEntity.EstablishmentTypeLength - 1),
+        };
+
+        // Assert
+        Assert.Equal(EstablishmentEntity.OrgNameLength, entity.OrgName.Length);
+        Assert.Equal(original.Substring(0, EstablishmentEntity.OrgNameLength), entity.OrgName);
+        Assert.NotEqual(original, entity.OrgName);
+    }
+
+    [Theory]
+    [InlineData(EstablishmentEntity.OrgNameLength - 1)] // under max (boundary)
+    [InlineData(EstablishmentEntity.OrgNameLength)]     // exactly max (boundary)
+    public void EstablishmentEntity_OrgName_WhenInputLengthAtOrUnderMax_NoChange(int inputLength)
+    {
+        // Arrange
+        string original = new string('O', inputLength);
+
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = original,
+            EstablishmentRef = "R",
+            EstablishmentType = "T"
+        };
+
+        // Assert
+        Assert.Equal(original, entity.OrgName);
+    }
+
+    [Theory]
+    [InlineData(EstablishmentEntity.EstablishmentRefLength + 1)] // over max by 1 (boundary)
+    public void EstablishmentEntity_EstablishmentRef_WhenInputLengthExceedsMax_AdditionalCharactersTrimmed(int inputLength)
+    {
+        // Arrange
+        string original = new string('R', inputLength);
+
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = new string('O', EstablishmentEntity.OrgNameLength - 1),
+            EstablishmentRef = original,
+            EstablishmentType = new string('T', EstablishmentEntity.EstablishmentTypeLength - 1),
+        };
+
+        // Assert
+        Assert.Equal(EstablishmentEntity.EstablishmentRefLength, entity.EstablishmentRef.Length);
+        Assert.Equal(original.Substring(0, EstablishmentEntity.EstablishmentRefLength), entity.EstablishmentRef);
+        Assert.NotEqual(original, entity.EstablishmentRef);
+    }
+
+    [Theory]
+    [InlineData(EstablishmentEntity.EstablishmentRefLength - 1)] // under max (boundary)
+    [InlineData(EstablishmentEntity.EstablishmentRefLength)]     // exactly max (boundary)
+    public void EstablishmentEntity_EstablishmentRef_WhenInputLengthAtOrUnderMax_NoChange(int inputLength)
+    {
+        // Arrange
+        string original = new string('R', inputLength);
+
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = "O",
+            EstablishmentRef = original,
+            EstablishmentType = "T"
+        };
+
+        // Assert
+        Assert.Equal(original, entity.EstablishmentRef);
+    }
+
+    [Theory]
+    [InlineData(EstablishmentEntity.EstablishmentTypeLength + 1)] // over max by 1 (boundary)
+    public void EstablishmentEntity_EstablishmentType_WhenInputLengthExceedsMax_AdditionalCharactersTrimmed(int inputLength)
+    {
+        // Arrange
+        string original = new string('T', inputLength);
+
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = new string('O', EstablishmentEntity.OrgNameLength - 1),
+            EstablishmentRef = new string('R', EstablishmentEntity.EstablishmentRefLength - 1),
+            EstablishmentType = original
+        };
+
+        // Assert
+        Assert.NotNull(entity.EstablishmentType);
+        Assert.Equal(EstablishmentEntity.EstablishmentTypeLength, entity.EstablishmentType!.Length);
+        Assert.Equal(original.Substring(0, EstablishmentEntity.EstablishmentTypeLength), entity.EstablishmentType);
+        Assert.NotEqual(original, entity.EstablishmentType);
+    }
+
+    [Theory]
+    [InlineData(EstablishmentEntity.EstablishmentTypeLength - 1)] // under max (boundary)
+    [InlineData(EstablishmentEntity.EstablishmentTypeLength)]     // exactly max (boundary)
+    public void EstablishmentEntity_EstablishmentType_WhenInputLengthAtOrUnderMax_NoChange(int inputLength)
+    {
+        // Arrange
+        string original = new string('T', inputLength);
+
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = "O",
+            EstablishmentRef = "R",
+            EstablishmentType = original
+        };
+
+        // Assert
+        Assert.Equal(original, entity.EstablishmentType);
+    }
+
+    [Fact]
+    public void EstablishmentEntity_EstablishmentType_WhenNull_RemainsNull()
+    {
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = "O",
+            EstablishmentRef = "R",
+            EstablishmentType = null
+        };
+
+        // Assert
+        Assert.Null(entity.EstablishmentType);
     }
 }
