@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
@@ -18,19 +18,19 @@ public class QuestionsViewBuilder(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
     IOptions<ErrorPagesConfiguration> errorPages,
+    IContentfulService contentfulService,
+    IQuestionService questionService,
+    ISubmissionService submissionService,
     ContentfulOptionsConfiguration contentfulOptions,
-    CurrentUser currentUser,
-    ContentfulService contentfulService,
-    QuestionService questionService,
-    SubmissionService submissionService
+    CurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
+    private IQuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
+    private ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private ErrorMessagesConfiguration _errorMessages = errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
     private ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
-    private QuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
-    private SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";

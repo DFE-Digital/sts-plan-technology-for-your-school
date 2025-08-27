@@ -1,5 +1,5 @@
 ﻿using System.Security.Authentication;
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context;
@@ -11,11 +11,11 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class BaseViewBuilder(
     ILogger<BaseViewBuilder> logger,
-    ContentfulService contentfulService,
+    IContentfulService contentfulService,
     CurrentUser currentUser)
 {
     protected readonly ILogger<BaseViewBuilder> Logger = logger;
-    protected ContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    protected IContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     protected CurrentUser CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     protected int GetUserIdOrThrowException()

@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.Context;
 
@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class FooterLinksViewComponentViewBuilder(
     ILogger<FooterLinksViewComponentViewBuilder> logger,
-    ContentfulService contentfulService,
+    IContentfulService contentfulService,
     CurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {

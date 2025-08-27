@@ -4,7 +4,9 @@ using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Options;
 using Dfe.PlanTech.Core.Caching;
 using Dfe.PlanTech.Core.Caching.Interfaces;
@@ -142,8 +144,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddCookies(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<CookieService>();
-        services.AddTransient<CookieWorkflow>((services) =>
+        services.AddScoped<ICookieService, CookieService>();
+        services.AddTransient<ICookieWorkflow, CookieWorkflow>((services) =>
         {
             var options = configuration.GetRequiredSection(ConfigurationConstants.Cookies).Get<CookieWorkflowOptions>();
 
