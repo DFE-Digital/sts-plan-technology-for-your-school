@@ -1,3 +1,26 @@
-﻿@addTagHelper *, GovUk.Frontend.AspNetCore
+﻿@using Dfe.PlanTech.Application.Configuration
+@using Dfe.PlanTech.Application.Services.Interfaces
+
+@using Dfe.PlanTech.Core.Constants
+@using Dfe.PlanTech.Core.Contentful.Interfaces
+@using Dfe.PlanTech.Core.Contentful.Models
+@using Dfe.PlanTech.Core.Enums
+@using Dfe.PlanTech.Core.Extensions
+@using Dfe.PlanTech.Core.Helpers
+@using Dfe.PlanTech.Core.Models
+
+@using Dfe.PlanTech.Web
+@using Dfe.PlanTech.Web.Controllers
+@using Dfe.PlanTech.Web.Helpers
+@using Dfe.PlanTech.Web.ViewModels
+
+@using GovUk.Frontend.AspNetCore.TagHelpers
+
+@using Microsoft.AspNetCore.Http.Features;
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+
+@using System.Text.Json;
+
+@addTagHelper *, GovUk.Frontend.AspNetCore
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 @addTagHelper *, Dfe.PlanTech.Web
