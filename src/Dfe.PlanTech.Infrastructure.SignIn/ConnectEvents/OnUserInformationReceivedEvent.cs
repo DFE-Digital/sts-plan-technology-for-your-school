@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
@@ -30,7 +30,7 @@ public static class OnUserInformationReceivedEvent
 
         var dsiReference = context.Principal.Claims.GetDsiReference();
         var establishment = context.Principal.Claims.GetOrganisation();
-        var signInWorkflow = context.HttpContext.RequestServices.GetRequiredService<SignInWorkflow>();
+        var signInWorkflow = context.HttpContext.RequestServices.GetRequiredService<ISignInWorkflow>();
 
         if (establishment is null)
         {
