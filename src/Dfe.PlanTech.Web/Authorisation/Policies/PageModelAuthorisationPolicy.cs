@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Dfe.PlanTech.Infrastructure.SignIn.Models;
@@ -89,7 +89,7 @@ public class PageModelAuthorisationPolicy(
     private async Task<PageEntry?> GetPageForSlug(HttpContext httpContext, string slug)
     {
         using var scope = httpContext.RequestServices.CreateAsyncScope();
-        var contentfulService = scope.ServiceProvider.GetRequiredService<ContentfulService>();
+        var contentfulService = scope.ServiceProvider.GetRequiredService<IContentfulService>();
         var page = await contentfulService.GetPageBySlugAsync(slug);
         httpContext.Items.Add(nameof(PageEntry), page);
 

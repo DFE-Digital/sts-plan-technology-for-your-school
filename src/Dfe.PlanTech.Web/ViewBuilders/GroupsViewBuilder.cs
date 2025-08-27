@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -15,15 +15,15 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class GroupsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
-    CurrentUser currentUser,
-    ContentfulService contentfulService,
-    EstablishmentService establishmentService,
-    SubmissionService submissionService
+    IContentfulService contentfulService,
+    IEstablishmentService establishmentService,
+    ISubmissionService submissionService,
+    CurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
+    private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private readonly EstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     private const string SelectASchoolViewName = "GroupsSelectSchool";
     private const string SchoolDashboardViewName = "GroupsSchoolDashboard";

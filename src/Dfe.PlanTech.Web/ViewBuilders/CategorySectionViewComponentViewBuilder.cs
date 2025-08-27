@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context;
@@ -8,12 +8,12 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class CategorySectionViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
-    ContentfulService contentfulService,
-    CurrentUser currentUser,
-    SubmissionService submissionService
+    IContentfulService contentfulService,
+    ISubmissionService submissionService,
+    CurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public async Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category)
     {

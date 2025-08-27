@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
@@ -15,7 +15,7 @@ public class PagesViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
-    ContentfulService contentfulService,
+    IContentfulService contentfulService,
     CurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
