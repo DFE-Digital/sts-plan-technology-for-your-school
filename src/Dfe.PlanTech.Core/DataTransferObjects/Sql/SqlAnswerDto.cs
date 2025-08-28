@@ -1,6 +1,6 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-public class SqlAnswerDto : SqlDto
+public class SqlAnswerDto : ISqlDto
 {
     public int Id { get; init; }
     public string? AnswerText { get; init; } = null!;

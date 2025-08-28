@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -25,10 +25,10 @@ public class EstablishmentService(
         return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
-    public async Task<SqlGroupReadActivityDto> GetLatestSelectedGroupSchoolAsync(int userId, int establishmentId)
+    public async Task<SqlEstablishmentDto> GetLatestSelectedGroupSchoolAsync(string selectedEstablishmentUrn)
     {
-        return await _establishmentWorkflow.GetLatestSelectedGroupSchool(userId, establishmentId)
-            ?? throw new DatabaseException($"Could not get latest selected group school for user with ID '{userId}' in establishment with ID '{establishmentId}'");
+        return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(selectedEstablishmentUrn)
+            ?? throw new DatabaseException($"Could not get latest selected group school for {selectedEstablishmentUrn}");
     }
 
     public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId)
@@ -49,7 +49,7 @@ public class EstablishmentService(
         return establishmentLinkMap.Values.ToList();
     }
 
-    public async Task<int> RecordGroupSelection(
+    public async Task RecordGroupSelection(
         string userDsiReference,
         int? userEstablishmentId,
         EstablishmentModel userEstablishmentModel,
@@ -76,8 +76,6 @@ public class EstablishmentService(
             UserId = user.Id
         };
 
-        var selectionId = await _establishmentWorkflow.RecordGroupSelection(selectionModel);
-
-        return selectionId;
+        await _establishmentWorkflow.RecordGroupSelection(selectionModel);
     }
 }

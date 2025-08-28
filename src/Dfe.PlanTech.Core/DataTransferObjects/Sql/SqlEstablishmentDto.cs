@@ -1,6 +1,6 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-public class SqlEstablishmentDto : SqlDto
+public class SqlEstablishmentDto : ISqlDto
 {
     public int Id { get; set; }
     public string EstablishmentRef { get; set; } = null!;

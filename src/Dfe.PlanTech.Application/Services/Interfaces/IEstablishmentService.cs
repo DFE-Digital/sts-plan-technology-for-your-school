@@ -7,8 +7,8 @@ namespace Dfe.PlanTech.Application.Services.Interfaces
     public interface IEstablishmentService
     {
         Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId);
-        Task<SqlGroupReadActivityDto> GetLatestSelectedGroupSchoolAsync(int userId, int establishmentId);
+        Task<SqlEstablishmentDto> GetLatestSelectedGroupSchoolAsync(string selectedEstablishmentUrn);
         Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel);
-        Task<int> RecordGroupSelection(string userDsiReference, int? userEstablishmentId, EstablishmentModel userEstablishmentModel, string selectedEstablishmentUrn, string selectedEstablishmentName);
+        Task RecordGroupSelection(string userDsiReference, int? userEstablishmentId, EstablishmentModel userEstablishmentModel, string selectedEstablishmentUrn, string selectedEstablishmentName);
     }
 }
