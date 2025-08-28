@@ -1,6 +1,6 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-public class SqlSubmissionDto : SqlDto
+public class SqlSubmissionDto : ISqlDto
 {
     public int Id { get; set; }
     public int EstablishmentId { get; set; }

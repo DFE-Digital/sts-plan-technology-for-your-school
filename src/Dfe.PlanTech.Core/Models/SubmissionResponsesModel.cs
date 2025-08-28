@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Core.Models
 
         public string? Maturity { get; set; }
 
-        public List<QuestionWithAnswerModel> Responses { get; set; } = [];
+        public List<QuestionWithAnswerModel> Responses { get; set; }
 
         public bool HasResponses => Responses is not null && Responses.Count != 0;
 

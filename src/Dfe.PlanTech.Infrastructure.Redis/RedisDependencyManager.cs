@@ -65,18 +65,21 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     {
         // RichText is a sub-component that doesn't have SystemDetails, exit for such types
         if (value.Sys is null)
+        {
             yield break;
+        }
 
         yield return value.Id;
-        var properties = value.GetType().GetProperties();
+
+        var properties = value.GetType()
+            .GetProperties()
+            .Where(property => typeof(ContentfulEntry).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<ContentfulEntry>).IsAssignableFrom(property.PropertyType));
+
         foreach (var property in properties)
         {
-            if (typeof(ContentfulEntry).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<ContentfulEntry>).IsAssignableFrom(property.PropertyType))
+            foreach (var dependency in GetDependencies(property.GetValue(value)))
             {
-                foreach (var dependency in GetDependencies(property.GetValue(value)))
-                {
-                    yield return dependency;
-                }
+                yield return dependency;
             }
         }
     }

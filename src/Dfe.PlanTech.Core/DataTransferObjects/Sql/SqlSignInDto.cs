@@ -1,6 +1,6 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-public class SqlSignInDto : SqlDto
+public class SqlSignInDto : ISqlDto
 {
     public int Id { get; set; }
     public int UserId { get; set; }

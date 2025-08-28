@@ -1,6 +1,6 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-public class SqlResponseDto : SqlDto
+public class SqlResponseDto : ISqlDto
 {
     public int Id { get; set; }
     public int UserId { get; set; }
