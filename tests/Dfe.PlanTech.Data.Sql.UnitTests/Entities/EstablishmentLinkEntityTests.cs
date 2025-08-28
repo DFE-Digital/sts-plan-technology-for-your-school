@@ -32,7 +32,6 @@ public class EstablishmentLinkEntityTests
         Assert.Equal(expectedUrn, dto.Urn);
 
         // Assert - properties not explicitly set by `AsDto()`:
-        Assert.Null(dto.SectionStatuses); // TODO: Remove this property - not used/not required
         Assert.Null(dto.CompletedSectionsCount); // Assigned dynamically within `Dfe.PlanTech.Application.Services.EstablishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts`
 
         // Assert - ensure all DTO properties are accounted for
@@ -43,7 +42,6 @@ public class EstablishmentLinkEntityTests
                 nameof(SqlEstablishmentLinkDto.GroupUid),
                 nameof(SqlEstablishmentLinkDto.EstablishmentName),
                 nameof(SqlEstablishmentLinkDto.Urn),
-                nameof(SqlEstablishmentLinkDto.SectionStatuses)
             },
             new[]
             {
