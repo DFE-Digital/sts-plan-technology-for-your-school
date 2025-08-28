@@ -15,9 +15,9 @@ namespace Dfe.PlanTech.Web.Controllers;
 [LogInvalidModelState]
 [Route("/")]
 public class PagesController(
-    ILoggerFactory loggerFactory,
+    ILogger<PagesController> logger,
     PagesViewBuilder pagesViewBuilder
-) : BaseController<PagesController>(loggerFactory)
+) : BaseController<PagesController>(logger)
 {
     private readonly PagesViewBuilder _pagesViewBuilder = pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
 

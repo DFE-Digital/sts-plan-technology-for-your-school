@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
+namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
 
 public class UserClaimsExtensionsTests
 {

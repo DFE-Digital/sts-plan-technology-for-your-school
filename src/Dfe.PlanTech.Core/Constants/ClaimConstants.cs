@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Core.Constants;
 
+[ExcludeFromCodeCoverage]
 public static class ClaimConstants
 {
     public const string Issuer = "iss";

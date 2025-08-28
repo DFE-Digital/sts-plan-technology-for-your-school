@@ -12,9 +12,9 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("api/cms")]
 [LogInvalidModelState]
 public class CmsController(
-    ILoggerFactory loggerFactory,
+    ILogger<CmsController> logger,
     CmsViewBuilder viewBuilder
-) : BaseController<CmsController>(loggerFactory)
+) : BaseController<CmsController>(logger)
 {
     private readonly CmsViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 

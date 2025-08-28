@@ -1,11 +1,12 @@
 ﻿using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
@@ -14,24 +15,23 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class QuestionsViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
     IOptions<ErrorPagesConfiguration> errorPages,
+    IContentfulService contentfulService,
+    IQuestionService questionService,
+    ISubmissionService submissionService,
     ContentfulOptionsConfiguration contentfulOptions,
-    CurrentUser currentUser,
-    ContentfulService contentfulService,
-    QuestionService questionService,
-    SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+    CurrentUser currentUser
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private ILogger<QuestionsViewBuilder> _logger = loggerFactory.CreateLogger<QuestionsViewBuilder>();
+    private IQuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
+    private ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private ErrorMessagesConfiguration _errorMessages = errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
     private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
     private ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
-    private QuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
-    private SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
@@ -83,11 +83,11 @@ public class QuestionsViewBuilder(
 
         /*
          * Now check to see if the question is part of the latest user responses.
-         * If so: 
+         * If so:
          *   show page
          * If not:
-         *   if on "check answers" status, redirect to check answers page 
-         *   if on "next question" status, redirect to next question 
+         *   if on "check answers" status, redirect to check answers page
+         *   if on "next question" status, redirect to next question
          */
 
         var question = submissionRoutingData.GetQuestionForSlug(questionSlug);
@@ -203,7 +203,7 @@ public class QuestionsViewBuilder(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "An error occurred while submitting an answer with the following message: {Message} ", e.Message);
+            Logger.LogError(e, "An error occurred while submitting an answer with the following message: {Message} ", e.Message);
             var viewModel = GenerateViewModel(controller, question, section, categorySlug, sectionSlug, questionSlug, null);
             viewModel.ErrorMessages = ["Save failed. Please try again later."];
             return controller.View(QuestionView, viewModel);

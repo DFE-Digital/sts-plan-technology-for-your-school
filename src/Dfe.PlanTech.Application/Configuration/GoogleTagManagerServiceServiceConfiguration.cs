@@ -1,9 +1,11 @@
-using Dfe.PlanTech.Application.Services;
+using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Application.Services.Interfaces;
 
 namespace Dfe.PlanTech.Application.Configuration;
 
-public record GoogleTagManagerServiceServiceConfiguration(GoogleTagManagerConfiguration config, CookieService cookies)
+[ExcludeFromCodeCoverage]
+public record GoogleTagManagerServiceServiceConfiguration(ICookieService cookieService, GoogleTagManagerConfiguration config)
 {
+    public ICookieService CookieService { get; } = cookieService;
     public GoogleTagManagerConfiguration Config { get; } = config;
-    public CookieService Cookies { get; } = cookies;
 }

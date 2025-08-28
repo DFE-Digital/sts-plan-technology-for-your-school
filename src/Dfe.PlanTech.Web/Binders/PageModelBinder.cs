@@ -7,25 +7,23 @@ namespace Dfe.PlanTech.Web.Binders;
 /// Retrieves <see cref="Page"/> from the HttpContext items, as set by <see cref="Authorisation.Policies.PageModelAuthorisationPolicy"/>
 /// </summary>
 public class PageModelBinder(
-    ILoggerFactory loggerFactory
+    ILogger<PageModelBinder> logger
 ) : IModelBinder
 {
-    private readonly ILogger<PageModelBinder> _logger = loggerFactory.CreateLogger<PageModelBinder>();
-
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
         ArgumentNullException.ThrowIfNull(bindingContext, nameof(bindingContext));
 
         if (!bindingContext.HttpContext.Items.TryGetValue(nameof(PageEntry), out var pageItem))
         {
-            _logger.LogError("Page is not set");
+            logger.LogError("Page is not set");
             bindingContext.Result = ModelBindingResult.Failed();
             return Task.CompletedTask;
         }
 
         if (pageItem is not PageEntry page)
         {
-            _logger.LogError("Page is not {type}", typeof(PageEntry));
+            logger.LogError("Page is not of type {type}", typeof(PageEntry));
             bindingContext.Result = ModelBindingResult.Failed();
             return Task.CompletedTask;
         }

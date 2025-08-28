@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.Attributes;
@@ -10,15 +10,15 @@ namespace Dfe.PlanTech.Web.Controllers;
 [LogInvalidModelState]
 [Route("/cookies")]
 public class CookiesController(
-    ILoggerFactory logger,
-    ContentfulService contentfulService,
-    CookieService cookieService
+    ILogger<CookiesController> logger,
+    IContentfulService contentfulService,
+    ICookieService cookieService
 ) : BaseController<CookiesController>(logger)
 {
     private const string CookiesSlug = "cookies";
 
-    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    private readonly CookieService _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
+    private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly ICookieService _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
 
     [HttpGet]
     public async Task<IActionResult> GetCookiesPage()

@@ -1,7 +1,9 @@
-﻿using Contentful.Core.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Contentful.Core.Models;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
+[ExcludeFromCodeCoverage]
 public class ComponentCardEntry : ContentfulEntry
 {
     public string InternalName { get; init; } = null!;

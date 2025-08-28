@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Core.Constants;
 
+[ExcludeFromCodeCoverage]
 public static class RichTextTagConstants
 {
     public const string Document = "document";

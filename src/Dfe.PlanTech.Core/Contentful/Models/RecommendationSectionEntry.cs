@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
+[ExcludeFromCodeCoverage]
 public class RecommendationSectionEntry : ContentfulEntry
 {
     public string InternalName { get; set; } = null!;

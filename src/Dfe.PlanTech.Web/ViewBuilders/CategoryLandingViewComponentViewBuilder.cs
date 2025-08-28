@@ -1,28 +1,26 @@
-﻿using Dfe.PlanTech.Application.Services;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Context;
-using Dfe.PlanTech.Web.ViewComponents;
 using Dfe.PlanTech.Web.ViewModels;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class CategoryLandingViewComponentViewBuilder(
-    ILoggerFactory loggerFactory,
-    ContentfulService contentfulService,
-    CurrentUser currentUser,
-    SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+    ILogger<BaseViewBuilder> logger,
+    IContentfulService contentfulService,
+    ISubmissionService submissionService,
+    CurrentUser currentUser
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly ILogger<CategoryLandingViewComponent> _logger = loggerFactory.CreateLogger<CategoryLandingViewComponent>();
-    private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName)
     {
         if (!category.Sections.Any())
         {
-            _logger.LogError("Found no sections for category {id}", category.Id);
+            Logger.LogError("Found no sections for category {id}", category.Id);
             throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 
@@ -36,7 +34,7 @@ public class CategoryLandingViewComponentViewBuilder(
         }
         catch (Exception ex)
         {
-            _logger.LogError(
+            Logger.LogError(
                 ex,
                 "An exception has occurred while trying to retrieve section progress with the following message: {message}",
                 ex.Message
@@ -73,13 +71,13 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                _logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+                Logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
             if (sectionStatus is null)
             {
-                _logger.LogError("No section status found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+                Logger.LogError("No section status found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
             }
 
             var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sectionStatus);

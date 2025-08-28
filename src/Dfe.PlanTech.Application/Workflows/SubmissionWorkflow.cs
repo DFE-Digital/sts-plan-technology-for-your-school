@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
@@ -11,7 +12,7 @@ namespace Dfe.PlanTech.Application.Workflows;
 public class SubmissionWorkflow(
     IStoredProcedureRepository storedProcedureRepository,
     ISubmissionRepository submissionRepository
-)
+) : ISubmissionWorkflow
 {
     private readonly IStoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
     private readonly ISubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));

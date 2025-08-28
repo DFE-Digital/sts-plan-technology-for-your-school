@@ -9,10 +9,10 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Authorize]
 [Route("/")]
 public class RecommendationsController(
-    ILoggerFactory loggerFactory,
+    ILogger<RecommendationsController> logger,
     RecommendationsViewBuilder recommendationsViewBuilder
 )
-    : BaseController<RecommendationsController>(loggerFactory)
+    : BaseController<RecommendationsController>(logger)
 {
     private readonly RecommendationsViewBuilder _recommendationsViewBuilder = recommendationsViewBuilder ?? throw new ArgumentNullException(nameof(recommendationsViewBuilder));
 
@@ -46,4 +46,3 @@ public class RecommendationsController(
         return await _recommendationsViewBuilder.RouteBySectionAndRecommendation(this, categorySlug, sectionSlug, true);
     }
 }
-

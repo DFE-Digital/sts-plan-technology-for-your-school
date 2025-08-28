@@ -1,5 +1,5 @@
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Application.Persistence.Commands;
+using Dfe.PlanTech.Infrastructure.ServiceBus.MessageProcessor;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 

@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Workflows;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
@@ -6,10 +7,10 @@ using Dfe.PlanTech.Core.Models;
 namespace Dfe.PlanTech.Application.Services;
 
 public class QuestionService(
-    SubmissionWorkflow submissionWorkflow
-)
+    ISubmissionWorkflow submissionWorkflow
+) : IQuestionService
 {
-    private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
+    private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
     public async Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(int establishmentId, QuestionnaireSectionEntry section)
     {

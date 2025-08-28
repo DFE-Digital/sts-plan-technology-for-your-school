@@ -4,7 +4,9 @@ using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Options;
 using Dfe.PlanTech.Core.Caching;
 using Dfe.PlanTech.Core.Caching.Interfaces;
@@ -12,7 +14,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Dfe.PlanTech.Data.Contentful;
 using Dfe.PlanTech.Data.Contentful.Serializers;
-using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation.Filters;
 using Dfe.PlanTech.Web.Authorisation.Handlers;
@@ -88,11 +89,11 @@ public static class ServiceCollectionExtensions
         services.SetupContentfulClient(configuration, HttpClientPolicyExtensions.AddRetryPolicy);
         services.SetupRichTextRenderers();
 
-        services.AddScoped((services) =>
+        services.AddScoped((servicesInner) =>
         {
-            var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+            var logger = servicesInner.GetRequiredService<ILogger<TextRendererOptions>>();
 
-            return new TextRendererOptions(loggerFactory, [
+            return new TextRendererOptions(logger, [
                 new(){
                     Mark = "bold",
                     HtmlTag = "span",
@@ -142,8 +143,8 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddCookies(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<CookieService>();
-        services.AddTransient<CookieWorkflow>((services) =>
+        services.AddScoped<ICookieService, CookieService>();
+        services.AddTransient<ICookieWorkflow, CookieWorkflow>((services) =>
         {
             var options = configuration.GetRequiredSection(ConfigurationConstants.Cookies).Get<CookieWorkflowOptions>();
 

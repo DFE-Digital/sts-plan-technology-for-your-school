@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Extensions;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
+[ExcludeFromCodeCoverage]
 public class RecommendationChunkEntry : ContentfulEntry, IHeaderWithContent
 {
     public string InternalName { get; set; } = null!;

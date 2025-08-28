@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
@@ -7,22 +7,20 @@ using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class ReviewAnswersViewBuilder(
-    ILoggerFactory loggerFactory,
-    CurrentUser currentUser,
-    ContentfulService contentfulService,
-    RecommendationService recommendationService,
-    SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+    ILogger<BaseViewBuilder> logger,
+    IContentfulService contentfulService,
+    ISubmissionService submissionService,
+    CurrentUser currentUser
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly ILogger<ReviewAnswersViewBuilder> _logger = loggerFactory.CreateLogger<ReviewAnswersViewBuilder>();
-    private readonly RecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
-    private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public const string ChangeAnswersViewName = "~/Views/ChangeAnswers/ChangeAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
@@ -131,7 +129,7 @@ public class ReviewAnswersViewBuilder(
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
+            Logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
             controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
         }

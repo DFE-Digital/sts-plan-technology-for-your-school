@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
@@ -8,16 +8,16 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Services;
 
 public class EstablishmentService(
-    ILoggerFactory loggerFactory,
-    EstablishmentWorkflow establishmentWorkflow,
-    SubmissionWorkflow submissionWorkflow,
-    UserWorkflow userWorkflow
-)
+    ILogger<EstablishmentService> logger,
+    IEstablishmentWorkflow establishmentWorkflow,
+    ISubmissionWorkflow submissionWorkflow,
+    IUserWorkflow userWorkflow
+) : IEstablishmentService
 {
-    private readonly ILogger<EstablishmentService> _logger = loggerFactory.CreateLogger<EstablishmentService>();
-    private readonly EstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
-    private readonly SubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
-    private readonly UserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
+    private readonly ILogger<EstablishmentService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IEstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
+    private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
+    private readonly IUserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
     {

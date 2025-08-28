@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
@@ -8,7 +9,7 @@ public class EstablishmentWorkflow(
     IEstablishmentRepository establishmentRepository,
     IEstablishmentLinkRepository establishmentLinkRepository,
     IStoredProcedureRepository storedProcedureRepository
-)
+) : IEstablishmentWorkflow
 {
     private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository = establishmentLinkRepository ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));

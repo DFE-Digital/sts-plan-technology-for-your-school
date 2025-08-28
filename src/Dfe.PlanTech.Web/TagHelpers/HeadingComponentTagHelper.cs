@@ -6,11 +6,9 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 namespace Dfe.PlanTech.Web.TagHelpers;
 
 public class HeaderComponentTagHelper(
-    ILoggerFactory loggerFactory
+    ILogger<HeaderComponentTagHelper> logger
 ) : TagHelper
 {
-    private readonly ILogger<HeaderComponentTagHelper> _logger = loggerFactory.CreateLogger<HeaderComponentTagHelper>();
-
     public ComponentHeaderEntry? Model { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
@@ -19,7 +17,7 @@ public class HeaderComponentTagHelper(
         {
             output.TagName = null;
             output.Content.SetHtmlContent("");
-            _logger.LogWarning("Missing or invalid {Name} {Model}", nameof(HeaderTag), Model);
+            logger.LogWarning("Missing or invalid {Name} {Model}", nameof(HeaderTag), Model);
             return;
         }
 

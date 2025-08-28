@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Options;
 using Microsoft.AspNetCore.Http;
 
@@ -6,7 +7,7 @@ namespace Dfe.PlanTech.Application.Workflows;
 ///<remarks>
 ///Removes non-essential cookies from the browser when user rejects cookies.
 ///</remarks>
-public class CookieWorkflow(CookieWorkflowOptions options)
+public class CookieWorkflow(CookieWorkflowOptions options) : ICookieWorkflow
 {
     public void RemoveNonEssentialCookies(HttpContext context)
     {

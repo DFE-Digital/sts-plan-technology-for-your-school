@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Application.Configuration;
 
+[ExcludeFromCodeCoverage]
 public sealed class DfeSignInConfiguration
 {
     public string Authority { get; set; } = null!;

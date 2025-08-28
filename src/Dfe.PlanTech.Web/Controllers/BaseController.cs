@@ -3,8 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.Controllers;
 
 public class BaseController<TConcreteController>(
-    ILoggerFactory loggerFactory
+    ILogger<TConcreteController> logger
 ) : Controller
 {
-    protected readonly ILogger<TConcreteController> Logger = loggerFactory.CreateLogger<TConcreteController>();
+    protected readonly ILogger<TConcreteController> Logger = logger;
 }

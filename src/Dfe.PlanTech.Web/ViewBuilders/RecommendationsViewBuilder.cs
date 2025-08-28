@@ -1,5 +1,5 @@
 ﻿using Contentful.Core.Configuration;
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
@@ -15,18 +15,17 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class RecommendationsViewBuilder(
-    ILoggerFactory loggerFactory,
+    ILogger<BaseViewBuilder> logger,
     IOptions<ContentfulOptions> contentfulOptions,
-    CurrentUser currentUser,
-    ContentfulService contentfulService,
-    RecommendationService recommendationService,
-    SubmissionService submissionService
-) : BaseViewBuilder(loggerFactory, contentfulService, currentUser)
+    IContentfulService contentfulService,
+    IRecommendationService recommendationService,
+    ISubmissionService submissionService,
+    CurrentUser currentUser
+) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private readonly ILogger<RecommendationsViewBuilder> _logger = loggerFactory.CreateLogger<RecommendationsViewBuilder>();
+    private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly ContentfulOptions _contentfulOptions = contentfulOptions?.Value ?? throw new ArgumentNullException(nameof(contentfulOptions));
-    private readonly RecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
-    private readonly SubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
     private const string RecommendationsViewName = "Recommendations";

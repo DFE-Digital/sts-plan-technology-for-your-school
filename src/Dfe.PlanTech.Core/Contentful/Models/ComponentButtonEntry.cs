@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
+[ExcludeFromCodeCoverage]
 public class ComponentButtonEntry : ContentfulEntry
 {
     public string InternalName { get; set; } = null!;

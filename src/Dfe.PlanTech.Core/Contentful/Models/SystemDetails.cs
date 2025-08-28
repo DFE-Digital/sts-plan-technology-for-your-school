@@ -1,7 +1,9 @@
-﻿namespace Dfe.PlanTech.Core.Contentful.Models
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Dfe.PlanTech.Core.Contentful.Models;
+
+[ExcludeFromCodeCoverage]
+public class SystemDetails
 {
-    public class SystemDetails
-    {
-        public string Id { get; init; } = null!;
-    }
+    public string Id { get; set; } = null!;
 }

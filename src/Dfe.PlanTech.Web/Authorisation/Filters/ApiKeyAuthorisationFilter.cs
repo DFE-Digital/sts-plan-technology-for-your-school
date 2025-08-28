@@ -5,14 +5,13 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace Dfe.PlanTech.Web.Authorisation.Filters;
 
 public class ApiKeyAuthorisationFilter(
-    ILoggerFactory loggerFactory,
+    ILogger<ApiKeyAuthorisationFilter> logger,
     ApiAuthenticationConfiguration authenticationConfiguration
 ) : IAuthorizationFilter
 {
     public const string AuthHeaderKey = "Authorization";
     public const string AuthValuePrefix = "Bearer ";
 
-    private readonly ILogger<ApiKeyAuthorisationFilter> _logger = loggerFactory.CreateLogger<ApiKeyAuthorisationFilter>();
     private readonly ApiAuthenticationConfiguration _authenticationConfiguration = authenticationConfiguration ?? throw new ArgumentNullException(nameof(authenticationConfiguration));
 
     public void OnAuthorization(AuthorizationFilterContext context)
@@ -27,7 +26,7 @@ public class ApiKeyAuthorisationFilter(
     {
         if (!_authenticationConfiguration.HasApiKey)
         {
-            _logger.LogError("API key {KeyName} is missing", nameof(_authenticationConfiguration.KeyValue));
+            logger.LogError("API key {KeyName} is missing", nameof(_authenticationConfiguration.KeyValue));
         }
 
         return _authenticationConfiguration.HasApiKey;
@@ -37,7 +36,7 @@ public class ApiKeyAuthorisationFilter(
     {
         if (!TryGetProvidedApiKey(context, out string? providedApiKey) || string.IsNullOrEmpty(providedApiKey))
         {
-            _logger.LogInformation("Request to authorised route denied due to missing authentication header");
+            logger.LogInformation("Request to authorised route denied due to missing authentication header");
             return false;
         }
 

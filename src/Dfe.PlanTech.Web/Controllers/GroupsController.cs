@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +16,10 @@ public class GroupsController : BaseController<GroupsController>
     private readonly GroupsViewBuilder _groupsViewBuilder;
 
     public GroupsController(
-        ILoggerFactory loggerFactory,
+        ILogger<GroupsController> logger,
         CurrentUser currentUser,
         GroupsViewBuilder groupsViewBuilder
-    ) : base(loggerFactory)
+    ) : base(logger)
     {
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _groupsViewBuilder = groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
@@ -51,6 +52,7 @@ public class GroupsController : BaseController<GroupsController>
         return await _groupsViewBuilder.RouteToGroupsRecommendationAsync(this, sectionSlug);
     }
 
+    [LogInvalidModelState]
     [HttpGet("groups/recommendations/{sectionSlug}/print", Name = "GetRecommendationsPrintView")]
     public async Task<IActionResult> GetRecommendationsPrintView(int schoolId, string schoolName, string sectionSlug)
     {

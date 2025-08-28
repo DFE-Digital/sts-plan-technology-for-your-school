@@ -2,11 +2,11 @@ using System.Security.Claims;
 using System.Text.RegularExpressions;
 using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
-using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication;
@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
+namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
 
 public partial class DfeOpenIdConnectEventsTests
 {
@@ -125,7 +125,7 @@ public partial class DfeOpenIdConnectEventsTests
         var signInWorkflowSubstitute = Substitute.For<SignInWorkflow>(establishmentRepositorySubstitute, signInRepositorySubstitute, userRepositorySubstitute);
 
         var serviceProvider = Substitute.For<IServiceProvider>();
-        serviceProvider.GetService(typeof(SignInWorkflow)).Returns(signInWorkflowSubstitute);
+        serviceProvider.GetService(typeof(ISignInWorkflow)).Returns(signInWorkflowSubstitute);
 
         var contextSubstitute = Substitute.For<HttpContext>();
         contextSubstitute.RequestServices.Returns(serviceProvider);

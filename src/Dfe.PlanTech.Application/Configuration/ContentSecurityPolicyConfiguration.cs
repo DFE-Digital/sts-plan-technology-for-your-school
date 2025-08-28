@@ -1,7 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Configuration;
 
 namespace Dfe.PlanTech.Application.Configuration;
 
+[ExcludeFromCodeCoverage]
 public record ContentSecurityPolicyConfiguration(IConfiguration configuration)
 {
     private const string CONFIG_KEY = "CSP";

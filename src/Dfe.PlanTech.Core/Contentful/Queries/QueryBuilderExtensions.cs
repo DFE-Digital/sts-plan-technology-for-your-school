@@ -1,7 +1,9 @@
-﻿using Contentful.Core.Search;
+﻿using System.Diagnostics.CodeAnalysis;
+using Contentful.Core.Search;
 
 namespace Dfe.PlanTech.Core.Contentful.Queries;
 
+[ExcludeFromCodeCoverage]
 public static class QueryBuilderExtensions
 {
     public static QueryBuilder<T> AddToQuery<T>(this ContentfulQuerySingleValue query, QueryBuilder<T> queryBuilder)

@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Enums;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
+[ExcludeFromCodeCoverage]
 public class ComponentHeaderEntry : ContentfulEntry
 {
     public string InternalName { get; set; } = null!;

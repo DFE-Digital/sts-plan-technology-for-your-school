@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
+[ExcludeFromCodeCoverage]
 public class PageRecommendationEntry : ContentfulEntry
 {
     public string InternalName { get; init; } = null!;

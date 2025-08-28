@@ -8,8 +8,9 @@ public sealed class LogInvalidModelStateAttribute : ActionFilterAttribute
     public override void OnActionExecuting(ActionExecutingContext context)
     {
         var svc = context.HttpContext.RequestServices;
-        var loggerFactory = svc.GetService<ILoggerFactory>();
-        var logger = loggerFactory?.CreateLogger<LogInvalidModelStateAttribute>() ?? throw new ArgumentNullException(nameof(loggerFactory));
+        var logger = svc.GetService<ILogger<LogInvalidModelStateAttribute>>();
+        if (logger == null)
+            throw new ArgumentNullException(nameof(logger));
 
         if (!context.ModelState.IsValid)
         {

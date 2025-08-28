@@ -7,10 +7,6 @@ namespace Dfe.PlanTech.Application.Rendering;
 
 public class AttachmentComponentRenderer
 {
-    public AttachmentComponentRenderer()
-    {
-    }
-
     public StringBuilder AddHtml(RichTextContentField content, StringBuilder stringBuilder)
     {
         var target = content?.Data?.Target;

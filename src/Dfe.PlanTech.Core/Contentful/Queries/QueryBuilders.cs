@@ -11,16 +11,16 @@ public static class QueryBuilders
     /// <summary>
     /// Builds query builder, filtering by content type
     /// </summary>
-    /// <param name="contentTypeId">Content Type Id</param>
+    /// <param name="contentfulContentTypeId">Content Type Id</param>
     /// <typeparam name="T">Entity type</typeparam>
     /// <returns></returns>
-    public static QueryBuilder<T> ByContentType<T>(string contentTypeId)
+    public static QueryBuilder<T> ByContentType<T>(string? contentfulContentTypeId)
     {
-        if (string.IsNullOrEmpty(contentTypeId))
-            throw new ArgumentNullException(nameof(contentTypeId));
+        if (string.IsNullOrEmpty(contentfulContentTypeId))
+            throw new ArgumentNullException(nameof(contentfulContentTypeId));
 
         var queryBuilder = new QueryBuilder<T>();
-        queryBuilder.ContentTypeIs(contentTypeId);
+        queryBuilder.ContentTypeIs(contentfulContentTypeId);
 
         return queryBuilder;
     }
@@ -53,9 +53,9 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> BuildQueryBuilder<T>(string contentTypeId, GetEntriesOptions? options)
+    public static QueryBuilder<T> BuildQueryBuilder<T>(string contentfulContentTypeId, GetEntriesOptions? options)
     {
-        var queryBuilder = ByContentType<T>(contentTypeId);
+        var queryBuilder = ByContentType<T>(contentfulContentTypeId);
 
         if (options != null)
         {

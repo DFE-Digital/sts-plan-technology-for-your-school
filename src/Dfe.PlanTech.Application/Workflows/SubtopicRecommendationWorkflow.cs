@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Options;
 using Dfe.PlanTech.Core.Contentful.Queries;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
@@ -7,11 +8,10 @@ using Microsoft.Extensions.Logging;
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubtopicRecommendationWorkflow(
-    ILoggerFactory loggerFactory,
+    ILogger<SubtopicRecommendationWorkflow> logger,
     IContentfulRepository contentfulRepository
-)
+) : ISubtopicRecommendationWorkflow
 {
-    private readonly ILogger<SubtopicRecommendationWorkflow> _logger = loggerFactory.CreateLogger<SubtopicRecommendationWorkflow>();
     private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
 
     public async Task<SubtopicRecommendationEntry?> GetFirstSubtopicRecommendationAsync(string subtopicId)
@@ -45,7 +45,7 @@ public class SubtopicRecommendationWorkflow(
         var introForMaturity = subtopicRecommendation.GetRecommendationByMaturity(maturity);
         if (introForMaturity is null)
         {
-            _logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
+            logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
             return null;
         }
 
@@ -56,6 +56,5 @@ public class SubtopicRecommendationWorkflow(
         new(depth, [new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId }]);
 
     private void LogMissingRecommendationError(string subtopicId) =>
-        _logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
+        logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
 }
-

@@ -1,5 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.ViewModels;
@@ -13,11 +13,11 @@ namespace Dfe.PlanTech.Web.Attributes;
 
 public class MaintainUrlOnKeyNotFoundAttribute(
     IOptions<ContactOptionsConfiguration> contactOptions,
-    ContentfulService contentfulService
+    IContentfulService contentfulService
 ) : ExceptionFilterAttribute, IAsyncExceptionFilter
 {
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private readonly ContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     public override async Task OnExceptionAsync(ExceptionContext context)
     {

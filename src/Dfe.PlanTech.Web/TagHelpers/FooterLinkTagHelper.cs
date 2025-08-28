@@ -9,12 +9,10 @@ namespace Dfe.PlanTech.Web.TagHelpers;
 /// </summary>
 /// <remarks>Should be refactored in future to be any <see cref="NavigationLink"/>, and pass in HTML class used</remarks>
 public class FooterLinkTagHelper(
-    ILoggerFactory loggerFactory
+    ILogger<FooterLinkTagHelper> logger
 ) : TagHelper
 {
     public NavigationLinkEntry? Link { get; set; }
-
-    private readonly ILogger<FooterLinkTagHelper> _logger = loggerFactory.CreateLogger<FooterLinkTagHelper>();
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
@@ -22,7 +20,7 @@ public class FooterLinkTagHelper(
         {
             output.TagName = null;
             output.Content.SetHtmlContent("");
-            _logger.LogWarning("Missing or invalid {Name} {Link}", nameof(NavigationLinkEntry), Link);
+            logger.LogWarning("Missing or invalid {Name} {Link}", nameof(NavigationLinkEntry), Link);
             return;
         }
 
@@ -59,7 +57,7 @@ public class FooterLinkTagHelper(
     {
         if (Link!.ContentToLinkTo == null && string.IsNullOrEmpty(Link.Href))
         {
-            _logger.LogError("No href or content to link to for {LinkType}", nameof(NavigationLinkEntry));
+            logger.LogError("No href or content to link to for {LinkType}", nameof(NavigationLinkEntry));
             return string.Empty;
         }
 
@@ -75,7 +73,7 @@ public class FooterLinkTagHelper(
 
         if (Link.ContentToLinkTo is not IHasSlug hasSlug)
         {
-            _logger.LogError("Invalid content type received for Link. Expected {Interface} but type is {Concrete}", typeof(IHasSlug), Link.ContentToLinkTo.GetType());
+            logger.LogError("Invalid content type received for Link. Expected {Interface} but type is {Concrete}", typeof(IHasSlug), Link.ContentToLinkTo.GetType());
             return null;
         }
 

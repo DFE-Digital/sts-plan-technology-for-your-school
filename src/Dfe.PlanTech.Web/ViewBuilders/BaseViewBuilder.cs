@@ -1,5 +1,5 @@
 ﻿using System.Security.Authentication;
-using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context;
@@ -10,12 +10,12 @@ using Dfe.PlanTech.Web.ViewModels;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class BaseViewBuilder(
-    ILoggerFactory loggerFactory,
-    ContentfulService contentfulService,
+    ILogger<BaseViewBuilder> logger,
+    IContentfulService contentfulService,
     CurrentUser currentUser)
 {
-    ILogger<BaseViewBuilder> _logger = loggerFactory.CreateLogger<BaseViewBuilder>();
-    protected ContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    protected readonly ILogger<BaseViewBuilder> Logger = logger;
+    protected IContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     protected CurrentUser CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     protected int GetUserIdOrThrowException()
@@ -64,7 +64,7 @@ public class BaseViewBuilder(
         }
         catch (Exception e)
         {
-            _logger.LogError(
+            Logger.LogError(
                 e,
                 "An exception has occurred while trying to retrieve the recommendation for Section {sectionName}, with the message {errMessage}",
                 section.Name,

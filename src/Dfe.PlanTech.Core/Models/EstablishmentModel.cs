@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Core.Models;
 
 public class EstablishmentModel
 {
-    public const string InvalidEstablishmentErrorMessage = $"Both {nameof(Urn)} and {nameof(Ukprn)} are invalid";
+    public const string InvalidEstablishmentErrorMessage = $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
 
     public Guid Id { get; set; }
 
