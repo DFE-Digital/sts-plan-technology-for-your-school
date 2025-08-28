@@ -149,7 +149,7 @@ public class SignInWorkflowTests
         {
             Urn = urn,
             Name = name,
-            Type = new EstablishmentTypeModel { Name = null }
+            Type = new EstablishmentTypeModel { Name = null! }
         };
 
         var user = new UserEntity
