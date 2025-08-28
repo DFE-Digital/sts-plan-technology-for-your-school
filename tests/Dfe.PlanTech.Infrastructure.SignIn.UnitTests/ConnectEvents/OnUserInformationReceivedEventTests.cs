@@ -62,10 +62,7 @@ public class OnUserInformationReceivedEventTests
     public async Task RecordUserSignIn_When_EstablishmentMissing_LogsWarning_And_RecordsUserOnly()
     {
         // Arrange: authenticated principal but no establishment-related claims
-        var principal = AuthenticatedPrincipal(
-            // if your GetDsiReference extension expects a specific claim (e.g., "sub"), include it:
-            new Claim("sub", "dsi-ref-123")
-        );
+        var principal = AuthenticatedPrincipal(new Claim(ClaimConstants.NameIdentifier, "dsi-ref-123"));
         var (ctx, wf, logger) = BuildContext(principal);
 
         // Act

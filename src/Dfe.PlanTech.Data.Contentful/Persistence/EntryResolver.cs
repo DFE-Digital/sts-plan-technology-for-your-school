@@ -20,11 +20,11 @@ public class EntryResolver(
     /// <summary>
     /// Returns matching type for ID, or <see chref="MissingComponent"/> if none found.
     /// </summary>
-    /// <param name="contentfulContentTypeId"></param>
+    /// <param name="contentTypeId"></param>
     /// <returns></returns>
-    public Type Resolve(string contentfulContentTypeId)
+    public Type Resolve(string contentTypeId)
     {
-        if (ContentfulContentTypeConstants.ContentTypeToEntryClassTypeMap.TryGetValue(contentfulContentTypeId.ToLower(), out var type))
+        if (ContentfulContentTypeConstants.ContentTypeToEntryClassTypeMap.TryGetValue(contentTypeId.ToLower(), out var type))
         {
             return type;
         }
