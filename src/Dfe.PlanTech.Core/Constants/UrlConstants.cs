@@ -28,5 +28,7 @@ public static class UrlConstants
 
     public const string Home = "home";
 
+    public const string AutomatedTestingHomePage = "/self-assessment-testing";
+
     #endregion Slugs
 }
