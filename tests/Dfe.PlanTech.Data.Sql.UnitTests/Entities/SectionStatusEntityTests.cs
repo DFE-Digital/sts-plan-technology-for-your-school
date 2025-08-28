@@ -57,7 +57,7 @@ public class SectionStatusEntityTests
                 nameof(SqlSectionStatusDto.DateUpdated),
                 nameof(SqlSectionStatusDto.HasBeenViewed),
                 nameof(SqlSectionStatusDto.LastCompletionDate),
-            }
+            },
             new[]
             {
                 // Synthetic property, not directly mapped from database entity
