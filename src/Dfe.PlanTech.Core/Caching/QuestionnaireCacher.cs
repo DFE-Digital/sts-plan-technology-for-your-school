@@ -1,8 +1,9 @@
-﻿using Dfe.PlanTech.Core.Caching.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Caching.Interfaces;
 
 namespace Dfe.PlanTech.Core.Caching;
 
-
+[ExcludeFromCodeCoverage]
 public class QuestionnaireCacher
 {
     private const string CACHE_KEY = "QuestionnaireCache";
