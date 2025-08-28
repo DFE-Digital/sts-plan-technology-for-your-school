@@ -17,7 +17,7 @@ public class AnswerEntity
     public string ContentfulRef { get; init; } = null!;
 
     [Required]
-    public DateTime DateCreated { get; init; } = DateTime.UtcNow;
+    public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public SqlAnswerDto AsDto()
     {

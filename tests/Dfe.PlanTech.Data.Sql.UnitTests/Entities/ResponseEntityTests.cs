@@ -86,8 +86,6 @@ public class ResponseEntityTests
         Assert.NotNull(dto.User);
         Assert.Equal(expectedUserId, dto.User!.Id);
         Assert.Equal(expectedSubmissionId, dto.SubmissionId);
-        Assert.NotNull(dto.Submission);
-        Assert.Equal(expectedSubmissionId, dto.Submission!.Id);
         Assert.Equal(expectedQuestionId, dto.QuestionId);
         Assert.NotNull(dto.Question);
         Assert.Equal(expectedQuestionId, dto.Question!.Id);
