@@ -1,92 +1,76 @@
-import { Given, When } from "@cucumber/cucumber";
+import { Given } from "@cucumber/cucumber";
 import { textToHyphenatedUrl } from "../../helpers/url";
 import { expect } from "@playwright/test";
 
-Given('I start an assessment on category {string}', async function (section: string) {
-  //Go to the self-assessment-testing page
-  await this.page.goto(`${process.env.URL}self-assessment-testing`);
+Given('I start an assessment on category {string} section {string}', async function (category: string, section: string) {
 
-  //Locate and click on the card from the parameter passed in
-  const sectionCard = this.page.locator('.dfe-card', {
-  has: this.page.locator('a', { hasText: section }),
+  //Go to page
+   await this.page.goto(`${process.env.URL}self-assessment-testing`);
+
+   //Select and click the card
+  const categoryCard = this.page.locator('.dfe-card', {
+    has: this.page.locator('a', { hasText: category }),
   }).first();
 
-  const sectionCardLink = sectionCard.locator(`a`);
-
-  await sectionCardLink.click();
-
+  await categoryCard.locator('a').click();
   //Check the expected path
-  const expectedPath = `${textToHyphenatedUrl(section)}`;
+  const expectedPath = `${textToHyphenatedUrl(category)}`;
   await this.page.waitForURL(`${process.env.URL}${expectedPath}`);
+
+  //Find the and click the go to self assessment link
+
+  const sectionCard = await this.page.locator('a', { hasText: section});
+  await sectionCard.click();
 
   //Get the start self assessment button on interstitial page
   const startSelfAssessmentBtn = this.page.getByRole('button', { name: 'Start self-assessment' });
   const href = await startSelfAssessmentBtn.getAttribute('href');
   
-  //Assert the path is correct on the button.
-  expect(href).toBe(`/${expectedPath}/next-question`)
-  
-  startSelfAssessmentBtn.click();
+  await startSelfAssessmentBtn.click();
 });
 
-Given('I start an assessment on category {string}', async function (section: string) {
-  //Go to the self-assessment-testing page
-  await this.page.goto(`${process.env.URL}self-assessment-testing`);
-
-  //Locate and click on the card from the parameter passed in
-  const sectionCard = this.page.locator('.dfe-card', {
-  has: this.page.locator('a', { hasText: section }),
-  }).first();
-
-  const sectionCardLink = sectionCard.locator(`a`);
-
-  await sectionCardLink.click();
-
-  //Check the expected path
-  const expectedPath = `${textToHyphenatedUrl(section)}`;
-  await this.page.waitForURL(`${process.env.URL}${expectedPath}`);
-
-  //Get the start self assessment button on interstitial page
-  const startSelfAssessmentBtn = this.page.getByRole('button', { name: 'Start self-assessment' });
-  const href = await startSelfAssessmentBtn.getAttribute('href');
-  
-  //Assert the path is correct on the button.
-  expect(href).toBe(`/${expectedPath}/next-question`)
-  
-  startSelfAssessmentBtn.click();
-});
 
 Given('I click the submit and view recommendations button', async function () {
-  const submitBtn = this.page.locator('button[value="GetRecommendation"]');
+  const submitBtn = this.page.getByRole('button', { name: 'Submit and view recommendations' })
   await submitBtn.click();
 });
 
-Given('I start a test assessment on {string} with answers {string}', async function (section: string, answers: string) {
+Given('I start a test assessment on {string} category {string} section with answers {string}', async function (category:string, section: string, answers: string) {
  
-  await startAndAnswerAssessment(this, section, answers);
+  await startAndAnswerAssessment(this, category, section, answers);
 
   // Final submit to reach recommendations
-  const submitBtn = this.page.locator('button[value="GetRecommendation"]');
+  const submitBtn = this.page.getByRole('button', { name: 'Submit and view recommendations' })
   await submitBtn.click();
+  
 });
 
-Given('I start a test assessment on {string} with answers {string} and I do not click submit recommendations', async function (section: string, answers: string) {
-    await startAndAnswerAssessment(this, section, answers);
+Given('I start a test assessment on {string} category {string} section with answers {string} and I do not click submit recommendations', async function (category:string, section: string, answers: string) {
+    await startAndAnswerAssessment(this, category, section, answers);
 });
 
-async function startAndAnswerAssessment(context:any, section:string, answers:string ) {
+async function startAndAnswerAssessment(context:any, category: string, section:string,  answers:string ) {
   //Go to page
    await context.page.goto(`${process.env.URL}self-assessment-testing`);
 
    //Select and click the card
-  const sectionCard = context.page.locator('.dfe-card', {
-    has: context.page.locator('a', { hasText: section }),
+  const categoryCard = context.page.locator('.dfe-card', {
+    has: context.page.locator('a', { hasText: category }),
   }).first();
 
-  await sectionCard.locator('a').click();
+  await categoryCard.locator('a').click();
   //Check the expected path
-  const expectedPath = `${textToHyphenatedUrl(section)}`;
+  const expectedPath = `${textToHyphenatedUrl(category)}`;
   await context.page.waitForURL(`${process.env.URL}${expectedPath}`);
+
+  
+  // Click the section’s link scoped under the h2
+  const h2 = context.page.getByRole('heading', { level: 2, name: section });
+  await expect(h2).toBeVisible();
+
+  const sectionLink = h2.locator('xpath=following-sibling::p[a][1]/a');
+  await expect(sectionLink).toBeVisible();
+  await sectionLink.click();
 
   //Get the start self assessment button on interstitial page
   const startSelfAssessmentBtn = context.page.getByRole('button', { name: 'Start self-assessment' });

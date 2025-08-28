@@ -1,11 +1,11 @@
-import { When, Then } from '@cucumber/cucumber';
+import { Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
+import { textToHyphenatedUrl } from '../../helpers/url';
 
 Then('I should see the paragraph text {string} inside the recommendation content', async function (expectedText: string) {
   const paragraph = this.page.locator('.recommendation-piece-content p', { hasText: expectedText });
   await expect(paragraph).toBeVisible();
 });
-
 
 Then('I should see a visible Next pagination link with text {string}', async function (nextLinkText:string) {
   const link = this.page.locator('a.govuk-pagination__link:visible');
@@ -28,7 +28,11 @@ Then('I should see a visible Previous pagination link with text {string}', async
 Then('I click the next recommendation link', async function () {
   const link = this.page.locator('a.govuk-pagination__link[rel="next"]:visible');
   await link.click();
+});
 
+Then('I click the previous recommendation link', async function () {
+  const link = this.page.locator('a.govuk-pagination__link[rel="prev"]:visible');
+  await link.click();
 });
 
 Then('I should see the recommendation caption text {string}', async function (expectedText: string) {
@@ -43,8 +47,33 @@ Then('I should see the related actions sidebar', async function () {
   await expect(sidebar.locator('h2')).toHaveText('Related actions');
 });
 
-Then('the sidebar link with text {string} should have href {string}', async function (linkText: string, expectedHref: string) {
-  const link = this.page.locator('div.govuk-grid-column-one-third a:visible', { hasText: linkText });
-  await expect(link).toBeVisible();
-  await expect(link).toHaveAttribute('href', expectedHref);
+Then('I should see the related actions links for category {string} section {string}', async function (categoryName: string, sectionName:string) {
+
+  const container = this.page.locator('.govuk-grid-column-one-third.govuk-float-right');
+  await expect(container).toBeVisible();
+
+  // check heading is there
+  const heading = container.locator('h2.govuk-heading-m');
+  await expect(heading).toHaveText('Related actions');
+
+  const slugSectionName = textToHyphenatedUrl(sectionName); 
+  const slugCategoryName = textToHyphenatedUrl(categoryName);
+  const expectedSelfAssessmentHref = `/${slugCategoryName}/${slugSectionName}/change-answers`;
+  const expectedPrintHref = 'print';
+
+  const sectionNameLowercase = sectionName.toLowerCase();
+
+  // check the view or update your self assessment url
+  const viewUpdateLink = container.getByRole('link', {
+    name: `View or update your self-assessment for ${sectionNameLowercase}`,
+  });
+  await expect(viewUpdateLink).toBeVisible();
+  await expect(viewUpdateLink).toHaveAttribute('href', expectedSelfAssessmentHref);
+
+  // check the print all recommendations url
+  const printLink = container.getByRole('link', {
+    name: `Print all recommendations for ${sectionNameLowercase}`,
+  });
+  await expect(printLink).toBeVisible();
+  await expect(printLink).toHaveAttribute('href', expectedPrintHref);
 });
