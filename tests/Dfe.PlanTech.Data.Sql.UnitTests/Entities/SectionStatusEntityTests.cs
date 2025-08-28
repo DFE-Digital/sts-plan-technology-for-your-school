@@ -17,7 +17,7 @@ public class SectionStatusEntityTests
         var expectedDateUpdated = new DateTime(2024, 02, 01, 10, 00, 00, DateTimeKind.Utc);
         bool? expectedViewed = true;
         var expectedLastCompletionDate = new DateTime(2024, 03, 01, 10, 00, 00, DateTimeKind.Utc);
-        var expectedStatus = SubmissionStatus.None;
+        var expectedStatus = SubmissionStatus.None; // Non-nullable property, default value
 
         var entity = new SectionStatusEntity
         {
@@ -28,7 +28,7 @@ public class SectionStatusEntityTests
             DateUpdated = expectedDateUpdated,
             Viewed = expectedViewed,
             LastCompletionDate = expectedLastCompletionDate,
-            // Note: `Status` is not a property of `SectionStatusEntity`, so is not set here
+            // Note: `Status` is a derived value and not a property of `SectionStatusEntity` (not set in the database), so is not set here
         };
 
         // Act
@@ -44,8 +44,6 @@ public class SectionStatusEntityTests
         Assert.Equal(expectedLastCompletionDate, dto.LastCompletionDate);
 
         // Assert - properties not explicitly set by `AsDto()`:
-        // TODO: Convert `Status` to a lambda / autoproperty in `SectionStatusEntity` so it can be set here
-        // TODO: `Status` will not be required in near future - leave as is for now
         Assert.Equal(expectedStatus, dto.Status);
 
         // Assert - ensure all DTO properties are accounted for
@@ -59,6 +57,12 @@ public class SectionStatusEntityTests
                 nameof(SqlSectionStatusDto.DateUpdated),
                 nameof(SqlSectionStatusDto.HasBeenViewed),
                 nameof(SqlSectionStatusDto.LastCompletionDate),
+            }
+            new[]
+            {
+                // Synthetic property, not directly mapped from database entity
+                // Not enough information in `SectionStatusEntity` to set this property
+                // This is assigned dynamically in a handful of locations (#277270 tracks centralising this logic, though it may be removed in future)
                 nameof(SqlSectionStatusDto.Status),
             }
         );
