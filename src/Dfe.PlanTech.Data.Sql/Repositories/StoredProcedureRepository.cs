@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
@@ -29,6 +30,7 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
  * As you'll note in SubmitResponse below, the parameters are sent in that order.
  */
 
+[ExcludeFromCodeCoverage]
 public class StoredProcedureRepository : IStoredProcedureRepository
 {
     protected readonly PlanTechDbContext _db;

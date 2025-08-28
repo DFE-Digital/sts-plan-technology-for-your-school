@@ -1,9 +1,11 @@
-﻿using Dfe.PlanTech.Data.Sql.Entities;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
+[ExcludeFromCodeCoverage]
 public class SignInRepository : ISignInRepository
 {
     protected readonly PlanTechDbContext _db;

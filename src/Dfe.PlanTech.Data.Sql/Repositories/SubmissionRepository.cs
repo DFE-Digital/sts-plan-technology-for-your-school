@@ -164,10 +164,10 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
     )
     {
         return GetSubmissionsBy(submission =>
-            !submission.Deleted &&
-            submission.EstablishmentId == establishmentId &&
-            submission.SectionId == sectionId &&
-            (isCompletedSubmission == null || submission.Completed == isCompletedSubmission)
+                !submission.Deleted &&
+                submission.EstablishmentId == establishmentId &&
+                submission.SectionId == sectionId &&
+                (isCompletedSubmission == null || submission.Completed == isCompletedSubmission)
             )
             .OrderByDescending(submission => submission.DateCreated);
     }

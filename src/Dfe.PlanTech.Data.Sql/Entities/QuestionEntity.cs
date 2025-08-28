@@ -12,7 +12,7 @@ public class QuestionEntity
 
     public string ContentfulRef { get; init; } = null!;
 
-    public DateTime DateCreated { get; private set; } = DateTime.UtcNow;
+    public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public SqlQuestionDto AsDto()
     {
