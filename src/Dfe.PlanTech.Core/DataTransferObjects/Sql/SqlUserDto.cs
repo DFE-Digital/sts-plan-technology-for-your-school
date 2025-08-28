@@ -1,6 +1,6 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-public class SqlUserDto : SqlDto
+public class SqlUserDto : ISqlDto
 {
     public int Id { get; set; }
     public string DfeSignInRef { get; set; } = null!;

@@ -31,7 +31,6 @@ public static class ServiceCollectionExtensions
         return services
             .AddScoped<IEstablishmentLinkRepository, EstablishmentLinkRepository>()
             .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
-            .AddScoped<IGroupReadActivityRepository, GroupReadActivityRepository>()
             .AddScoped<ISignInRepository, SignInRepository>()
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
             .AddScoped<ISubmissionRepository, SubmissionRepository>()

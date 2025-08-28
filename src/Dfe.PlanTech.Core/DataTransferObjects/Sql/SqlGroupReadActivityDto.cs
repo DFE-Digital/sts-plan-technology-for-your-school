@@ -1,6 +1,6 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-public class SqlGroupReadActivityDto : SqlDto
+public class SqlGroupReadActivityDto : ISqlDto
 {
     public int Id { get; set; }
     public int UserId { get; set; }

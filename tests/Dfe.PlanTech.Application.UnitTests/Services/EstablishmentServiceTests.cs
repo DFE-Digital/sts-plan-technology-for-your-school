@@ -2,7 +2,6 @@
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -59,61 +58,6 @@ public class EstablishmentServiceTests
         await _establishmentWorkflow
             .Received(1)
             .GetOrCreateEstablishmentAsync(establishmentModel);
-    }
-
-    [Fact]
-    public async Task GetLatestSelectedGroupSchoolAsync_Returns_Value_When_Found()
-    {
-        // Arrange
-        const int userId = 1;
-        const int userEstablishmentId = 2;
-        const int selectedEstablishmentId = 3;
-        const string selectedEstablishmentName = "Selected Establishment";
-
-        var expected = new SqlGroupReadActivityDto
-        {
-            Id = 5,
-            UserId = userId,
-            UserEstablishmentId = userEstablishmentId,
-            SelectedEstablishmentId = selectedEstablishmentId,
-            SelectedEstablishmentName = selectedEstablishmentName
-        };
-
-        _establishmentWorkflow
-            .GetLatestSelectedGroupSchool(userId, userEstablishmentId)
-            .Returns(Task.FromResult<SqlGroupReadActivityDto?>(expected));
-
-        var sut = CreateServiceUnderTest();
-
-        // Act
-        var actual = await sut.GetLatestSelectedGroupSchoolAsync(userId, userEstablishmentId);
-
-        // Assert
-        Assert.Same(expected, actual);
-        await _establishmentWorkflow
-            .Received(1)
-            .GetLatestSelectedGroupSchool(userId, userEstablishmentId);
-    }
-
-    [Fact]
-    public async Task GetLatestSelectedGroupSchoolAsync_Throws_When_Not_Found()
-    {
-        // Arrange
-        const int userId = 1;
-        const int userEstablishmentId = 2;
-
-        _establishmentWorkflow
-            .GetLatestSelectedGroupSchool(userId, userEstablishmentId)
-            .Returns(Task.FromResult<SqlGroupReadActivityDto?>(null));
-
-        var sut = CreateServiceUnderTest();
-
-        // Act + Assert
-        var ex = await Assert.ThrowsAsync<DatabaseException>(
-            () => sut.GetLatestSelectedGroupSchoolAsync(userId, userEstablishmentId));
-
-        Assert.Contains($"user with ID '{userId}'", ex.Message);
-        Assert.Contains($"establishment with ID '{userEstablishmentId}'", ex.Message);
     }
 
     [Fact]
@@ -238,15 +182,12 @@ public class EstablishmentServiceTests
         var sut = CreateServiceUnderTest();
 
         // Act
-        var actualSelectionId = await sut.RecordGroupSelection(
+        await sut.RecordGroupSelection(
             dsiRef,
             userEstablishmentId: null,
             userEstablishmentModel: establishmentModel,
             selectedEstablishmentUrn: urn,
             selectedEstablishmentName: orgName);
-
-        // Assert
-        Assert.Equal(expectedSelectionId, actualSelectionId);
 
         await _userWorkflow.Received(1).GetUserBySignInRefAsync(dsiRef);
 
