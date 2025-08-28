@@ -13,11 +13,6 @@ public class SubmissionServiceTests
 
     private SubmissionService CreateServiceUnderTest() => new SubmissionService(_submissionWorkflow);
 
-    private static SystemDetails BuildSystemDetails(string id)
-    {
-        return new SystemDetails { Id = id };
-    }
-
     private static (QuestionnaireSectionEntry section,
                     QuestionnaireQuestionEntry q1,
                     QuestionnaireQuestionEntry q2,
@@ -25,14 +20,14 @@ public class SubmissionServiceTests
                     QuestionnaireAnswerEntry a2_to_null)
     BuildSectionGraph()
     {
-        var q2 = new QuestionnaireQuestionEntry { Sys = BuildSystemDetails("2"), Answers = new List<QuestionnaireAnswerEntry>() };
-        var a1 = new QuestionnaireAnswerEntry { Sys = BuildSystemDetails("1"), NextQuestion = q2 };
-        var a2 = new QuestionnaireAnswerEntry { Sys = BuildSystemDetails("2"), NextQuestion = null };
-        var q1 = new QuestionnaireQuestionEntry { Sys = BuildSystemDetails("1"), Answers = new List<QuestionnaireAnswerEntry> { a1, a2 } };
+        var q2 = new QuestionnaireQuestionEntry { Sys = new SystemDetails("2"), Answers = new List<QuestionnaireAnswerEntry>() };
+        var a1 = new QuestionnaireAnswerEntry { Sys = new SystemDetails("1"), NextQuestion = q2 };
+        var a2 = new QuestionnaireAnswerEntry { Sys = new SystemDetails("2"), NextQuestion = null };
+        var q1 = new QuestionnaireQuestionEntry { Sys = new SystemDetails("1"), Answers = new List<QuestionnaireAnswerEntry> { a1, a2 } };
 
         var section = new QuestionnaireSectionEntry
         {
-            Sys = BuildSystemDetails("S1"),
+            Sys = new SystemDetails("S1"),
             Questions = new List<QuestionnaireQuestionEntry> { q1, q2 }
         };
 

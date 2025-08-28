@@ -11,43 +11,38 @@ public class QuestionServiceTests
 {
     private readonly ISubmissionWorkflow _mockSubmissionWorkflow = Substitute.For<ISubmissionWorkflow>();
 
-    private static SystemDetails BuildSystemDetails(string id)
-    {
-        return new SystemDetails { Id = id };
-    }
-
     // Helper: build a minimal section graph with 2 questions.
     // Q1 has answers A1 (-> Q2) and A2 (-> null). Q2 has no answers.
     private static QuestionnaireSectionEntry BuildSectionGraph()
     {
         var q2 = new QuestionnaireQuestionEntry
         {
-            Sys = BuildSystemDetails("Q2"),
+            Sys = new SystemDetails("Q2"),
             Answers = []
         };
 
         var a1 = new QuestionnaireAnswerEntry
         {
-            Sys = BuildSystemDetails("A1"),
+            Sys = new SystemDetails("A1"),
             NextQuestion = q2
         };
 
         var a2 = new QuestionnaireAnswerEntry
         {
-            Sys = BuildSystemDetails("A2"),
+            Sys = new SystemDetails("A2"),
             NextQuestion = null
         };
 
         var q1 = new QuestionnaireQuestionEntry
         {
-            Sys = BuildSystemDetails("Q1"),
+            Sys = new SystemDetails("Q1"),
             Answers = new List<QuestionnaireAnswerEntry> { a1, a2 }
         };
 
 
         return new QuestionnaireSectionEntry
         {
-            Sys = BuildSystemDetails("S1"),
+            Sys = new SystemDetails("S1"),
             Questions = [q1, q2]
         };
     }

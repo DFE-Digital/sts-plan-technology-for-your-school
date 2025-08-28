@@ -6,15 +6,15 @@ public class AssessmentResponseModel
 
     public int EstablishmentId { get; set; }
 
-    public string SectionId { get; set; } = null!;
+    public string SectionId { get; set; }
 
-    public string SectionName { get; set; } = null!;
+    public string SectionName { get; set; }
 
     public IdWithTextModel Question { get; init; }
 
     public IdWithTextModel Answer { get; init; }
 
-    public string Maturity { get; set; } = null!;
+    public string Maturity { get; set; }
 
     public AssessmentResponseModel(int userId, int establishmentId, SubmitAnswerModel questionAnswer)
     {

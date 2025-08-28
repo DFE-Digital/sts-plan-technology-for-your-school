@@ -15,4 +15,8 @@
     <PackageReference Include="xunit" Version="2.9.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
+  </ItemGroup>
+
 </Project>

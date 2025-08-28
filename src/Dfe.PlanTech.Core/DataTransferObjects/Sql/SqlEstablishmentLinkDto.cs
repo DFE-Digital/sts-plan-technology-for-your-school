@@ -1,6 +1,6 @@
 ﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-public class SqlEstablishmentLinkDto : SqlDto
+public class SqlEstablishmentLinkDto : ISqlDto
 {
     public int Id { get; set; }
     public int? CompletedSectionsCount { get; set; }

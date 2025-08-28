@@ -59,6 +59,7 @@ public class BaseViewBuilder(
                 RecommendationSlug = recommendationIntro.Slug,
                 RecommendationDisplayName = recommendationIntro.Header.Text,
                 SectionSlug = section.InterstitialPage?.Slug,
+                SectionName = section.Name,
                 Viewed = sectionStatus.HasBeenViewed
             };
         }

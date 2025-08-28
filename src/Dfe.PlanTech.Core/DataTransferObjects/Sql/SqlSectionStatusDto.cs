@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 /// <summary>
 /// Used to handle data from stored procedure [dbo].[GetSectionStatuses]
 /// </summary>
-public class SqlSectionStatusDto : SqlDto
+public class SqlSectionStatusDto : ISqlDto
 {
     public string SectionId { get; set; } = null!;
     public bool Completed { get; set; }

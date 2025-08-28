@@ -35,7 +35,7 @@ public class GroupsController : BaseController<GroupsController>
     public async Task<IActionResult> SelectSchool(string schoolUrn, string schoolName)
     {
         await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
-        _currentUser.SetMatSelectedSchoolId(schoolUrn);
+        _currentUser.SetGroupSelectedSchool(schoolUrn);
 
         return RedirectToAction(nameof(GetSchoolDashboardView));
     }

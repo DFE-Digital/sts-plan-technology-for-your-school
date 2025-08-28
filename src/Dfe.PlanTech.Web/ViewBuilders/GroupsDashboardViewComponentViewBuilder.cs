@@ -30,15 +30,14 @@ public class GroupsDashboardViewComponentViewBuilder(
 
     private async Task<GroupsDashboardViewComponentViewModel> GenerateViewModel(QuestionnaireCategoryEntry category)
     {
-        var userId = GetUserIdOrThrowException();
-        var establishmentId = GetEstablishmentIdOrThrowException();
-        var selectedSchool = await _establishmentService.GetLatestSelectedGroupSchoolAsync(userId, establishmentId);
+        var selectedSchoolUrn = CurrentUser.GroupSelectedSchoolUrn ?? throw new InvalidDataException("GroupSelectedSchoolUrn is null");
+        var selectedSchool = await _establishmentService.GetLatestSelectedGroupSchoolAsync(selectedSchoolUrn);
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;
         try
         {
-            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(establishmentId, category.Sections.Select(s => s.Id));
+            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(selectedSchool.Id, category.Sections.Select(s => s.Id));
         }
         catch (Exception ex)
         {
@@ -57,7 +56,7 @@ public class GroupsDashboardViewComponentViewBuilder(
         return new GroupsDashboardViewComponentViewModel
         {
             Description = description,
-            GroupsCategorySections = await GetGroupsCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync(),
+            GroupsCategorySections = await GetGroupsCategorySectionViewModel(category, sectionStatuses, progressRetrievalErrorMessage is not null).ToListAsync(),
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
         };
     }

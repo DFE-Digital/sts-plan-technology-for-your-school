@@ -24,8 +24,7 @@ public class ContentfulServiceTests
     public async Task GetAllSections_Delegates_And_Returns()
     {
         var (contentfulService, contentfulWorkflow) = Build();
-        var systemDetails = new SystemDetails { Id = "S1" };
-        var expected = new List<QuestionnaireSectionEntry> { new() { Sys = systemDetails } };
+        var expected = new List<QuestionnaireSectionEntry> { new() { Sys = new SystemDetails("S1") } };
         contentfulWorkflow.GetAllSectionsAsync().Returns(expected);
 
         var result = await contentfulService.GetAllSectionsAsync();
@@ -69,8 +68,7 @@ public class ContentfulServiceTests
     {
         var (contentfulService, contentfulWorkflow) = Build();
         const string id = "N1";
-        var systemDetails = new SystemDetails { Id = id };
-        var expected = new NavigationLinkEntry { Sys = systemDetails };
+        var expected = new NavigationLinkEntry { Sys = new SystemDetails(id) };
 
         contentfulWorkflow.GetEntryById<NavigationLinkEntry>(id).Returns(expected);
 
@@ -85,8 +83,7 @@ public class ContentfulServiceTests
     {
         var (contentfulService, contentfulWorkflow) = Build();
         const string id = "N1";
-        var systemDetails = new SystemDetails { Id = id };
-        var expected = new List<NavigationLinkEntry> { new() { Sys = systemDetails } };
+        var expected = new List<NavigationLinkEntry> { new() { Sys = new SystemDetails(id) } };
 
         contentfulWorkflow.GetEntries<NavigationLinkEntry>().Returns(expected);
 
@@ -101,8 +98,7 @@ public class ContentfulServiceTests
     {
         var (contentfulService, contentfulWorkflow) = Build();
         const string id = "P1";
-        var systemDetails = new SystemDetails { Id = id };
-        var expected = new PageEntry { Sys = systemDetails };
+        var expected = new PageEntry { Sys = new SystemDetails(id) };
 
         contentfulWorkflow.GetEntryById<PageEntry>(id).Returns(expected);
 
@@ -132,8 +128,7 @@ public class ContentfulServiceTests
     {
         var (contentfulService, contentfulWorkflow) = Build();
         const string id = "Q1";
-        var systemDetails = new SystemDetails { Id = id };
-        var expected = new QuestionnaireQuestionEntry { Sys = systemDetails };
+        var expected = new QuestionnaireQuestionEntry { Sys = new SystemDetails(id) };
 
         contentfulWorkflow.GetEntryById<QuestionnaireQuestionEntry>(id).Returns(expected);
 
@@ -167,8 +162,7 @@ public class ContentfulServiceTests
     {
         var (contentfulService, contentfulWorkflow) = Build();
         const string id = "S1";
-        var systemDetails = new SystemDetails { Id = id };
-        var expected = new SubtopicRecommendationEntry { Sys = systemDetails };
+        var expected = new SubtopicRecommendationEntry { Sys = new SystemDetails(id) };
 
         contentfulWorkflow.GetSubtopicRecommendationByIdAsync(id, include).Returns(expected);
 
@@ -183,9 +177,8 @@ public class ContentfulServiceTests
     {
         var (contentfulService, contentfulWorkflow) = Build();
         const string id = "S1";
-        var systemDetails = new SystemDetails { Id = id };
         const string maturity = "medium";
-        var expected = new RecommendationIntroEntry { Sys = systemDetails };
+        var expected = new RecommendationIntroEntry { Sys = new SystemDetails(id) };
 
         contentfulWorkflow.GetSubtopicRecommendationIntroByIdAndMaturityAsync(id, maturity).Returns(expected);
 

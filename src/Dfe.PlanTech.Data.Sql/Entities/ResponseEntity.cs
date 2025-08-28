@@ -38,7 +38,6 @@ public class ResponseEntity
             UserId = UserId,
             User = User?.AsDto(),
             SubmissionId = SubmissionId,
-            Submission = Submission.AsDto(),
             QuestionId = QuestionId,
             Question = Question.AsDto(),
             AnswerId = AnswerId,
