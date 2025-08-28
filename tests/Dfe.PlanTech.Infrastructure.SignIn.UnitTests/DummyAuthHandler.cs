@@ -9,6 +9,7 @@ public class DummyAuthHandlerOptions : AuthenticationSchemeOptions
 {
 
 }
+
 public class DummyAuthHandler : AuthenticationHandler<DummyAuthHandlerOptions>
 {
     public DummyAuthHandler(IOptionsMonitor<DummyAuthHandlerOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
