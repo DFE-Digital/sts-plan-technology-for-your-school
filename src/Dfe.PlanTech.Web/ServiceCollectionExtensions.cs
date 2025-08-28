@@ -14,7 +14,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Dfe.PlanTech.Data.Contentful;
 using Dfe.PlanTech.Data.Contentful.Serializers;
-using Dfe.PlanTech.Domain.Background;
 using Dfe.PlanTech.Infrastructure.Redis;
 using Dfe.PlanTech.Web.Authorisation.Filters;
 using Dfe.PlanTech.Web.Authorisation.Handlers;

@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 
-namespace Dfe.PlanTech.Web.UnitTests;
+namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
 
 public class TaskListTagHelperTests
 {

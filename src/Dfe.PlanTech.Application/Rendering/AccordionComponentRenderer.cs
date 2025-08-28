@@ -3,7 +3,7 @@ using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Infrastructure.Contentful.Content.Renderers.Models.PartRenderers;
+namespace Dfe.PlanTech.Application.Rendering;
 
 public class AccordionComponentRenderer(
     ILogger<AccordionComponentRenderer> logger

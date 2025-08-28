@@ -1,8 +1,8 @@
 using System.Threading.Channels;
-using Dfe.PlanTech.Domain.Background;
+using Dfe.PlanTech.Application.Background;
 using Microsoft.Extensions.Options;
 
-namespace Dfe.PlanTech.Application.Background;
+namespace Dfe.PlanTech.Web.Background;
 
 /// <inheritdoc cref="IBackgroundTaskQueue" />
 public class BackgroundTaskQueue(IOptions<BackgroundTaskQueueOptions> options) : IBackgroundTaskQueue
