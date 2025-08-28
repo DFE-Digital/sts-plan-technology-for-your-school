@@ -44,6 +44,8 @@ public class SectionStatusEntityTests
         Assert.Equal(expectedLastCompletionDate, dto.LastCompletionDate);
 
         // Assert - properties not explicitly set by `AsDto()`:
+        // TODO: Convert `Status` to a lambda / autoproperty in `SectionStatusEntity` so it can be set here
+        // TODO: `Status` will not be required in near future - leave as is for now
         Assert.Equal(expectedStatus, dto.Status);
 
         // Assert - ensure all DTO properties are accounted for

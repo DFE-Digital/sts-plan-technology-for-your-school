@@ -260,6 +260,7 @@ public class QuestionsViewBuilder(
             controller.ViewData["ReturnTo"] = returnTo;
         }
 
+        // Workaround, to avoid infinite loop due to bi-directional/circular references:
         foreach (var answer in question.Answers)
         {
             if (answer.NextQuestion is null)
