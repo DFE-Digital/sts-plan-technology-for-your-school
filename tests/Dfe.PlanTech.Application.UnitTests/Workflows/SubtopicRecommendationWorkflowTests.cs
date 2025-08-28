@@ -34,7 +34,7 @@ public class SubtopicRecommendationWorkflowTests
         _repo.GetEntriesAsync<SubtopicRecommendationEntry>(
             Arg.Is<GetEntriesOptions>(o =>
                 o.Include == 4 &&
-                o.Queries.OfType<ContentfulQuerySingleValue>().Any(q =>
+                o.Queries!.OfType<ContentfulQuerySingleValue>().Any(q =>
                     q.Field == "fields.subtopic.sys.id" && (string)q.Value! == subId)))
         .Returns(new[] { entry });
 
@@ -74,8 +74,8 @@ public class SubtopicRecommendationWorkflowTests
         _repo.GetEntriesAsync<SubtopicRecommendationEntry>(
             Arg.Is<GetEntriesOptions>(o =>
                 o.Include == 2 &&
-                o.Select.SequenceEqual(new[] { "fields.intros", "sys" }) &&
-                o.Queries.OfType<ContentfulQuerySingleValue>().Any(q =>
+                o.Select!.SequenceEqual(new[] { "fields.intros", "sys" }) &&
+                o.Queries!.OfType<ContentfulQuerySingleValue>().Any(q =>
                     q.Field == "fields.subtopic.sys.id" && (string)q.Value! == subId)))
         .Returns(new[] { rec });
 
