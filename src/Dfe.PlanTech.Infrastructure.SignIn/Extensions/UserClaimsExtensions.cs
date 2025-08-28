@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
@@ -6,6 +7,7 @@ using Dfe.PlanTech.Infrastructure.SignIn.Models;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
+[ExcludeFromCodeCoverage]
 public static class UserClaimsExtensions
 {
     private static readonly JsonSerializerOptions _jsonSerialiserOptions = new JsonSerializerOptions()
