@@ -20,9 +20,9 @@ public class CachedContentfulRepository(
     private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
     private readonly ICmsCache _cmsCache = cmsCache ?? throw new ArgumentNullException(nameof(cmsCache));
 
-    public async Task<int> GetEntriesCount<TEntry>()
+    public async Task<int> GetEntriesCountAsync<TEntry>()
     {
-        return await _contentfulRepository.GetEntriesCount<TEntry>();
+        return await _contentfulRepository.GetEntriesCountAsync<TEntry>();
     }
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
     {

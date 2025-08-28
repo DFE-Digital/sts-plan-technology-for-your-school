@@ -66,9 +66,9 @@ public class ContentfulRepository : IContentfulRepository
     }
 
     public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options)
-        => await GetPaginatedEntries<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), options);
+        => await GetPaginatedEntriesAsync<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), options);
 
-    public async Task<IEnumerable<TEntry>> GetPaginatedEntries<TEntry>(string entryTypeId, GetEntriesOptions options)
+    public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(string entryTypeId, GetEntriesOptions options)
     {
         var limit = options?.Limit ?? 100;
         var queryBuilder = BuildQueryBuilder<TEntry>(entryTypeId, options)
@@ -82,7 +82,7 @@ public class ContentfulRepository : IContentfulRepository
         return entries.Items;
     }
 
-    public async Task<int> GetEntriesCount<TEntry>()
+    public async Task<int> GetEntriesCountAsync<TEntry>()
     {
         var queryBuilder = BuildQueryBuilder<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), null).Limit(0);
         var entries = await _client.GetEntries(queryBuilder);

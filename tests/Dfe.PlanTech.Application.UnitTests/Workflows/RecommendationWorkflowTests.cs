@@ -22,12 +22,12 @@ public class RecommendationWorkflowTests
     public async Task GetRecommendationChunkCount_Delegates_To_Repo_Ignores_Page_Param()
     {
         var serviceUnderTest = CreateServiceUnderTest();
-        _repo.GetEntriesCount<RecommendationChunkEntry>().Returns(123);
+        _repo.GetEntriesCountAsync<RecommendationChunkEntry>().Returns(123);
 
         var count = await serviceUnderTest.GetRecommendationChunkCount(page: 7);
 
         Assert.Equal(123, count);
-        await _repo.Received(1).GetEntriesCount<RecommendationChunkEntry>();
+        await _repo.Received(1).GetEntriesCountAsync<RecommendationChunkEntry>();
         // page parameter is intentionally not used by the workflow
     }
 
@@ -35,7 +35,7 @@ public class RecommendationWorkflowTests
     public async Task GetRecommendationChunkCount_Bubbles_Repo_Exception()
     {
         var serviceUnderTest = CreateServiceUnderTest();
-        _repo.GetEntriesCount<RecommendationChunkEntry>()
+        _repo.GetEntriesCountAsync<RecommendationChunkEntry>()
              .Returns<Task<int>>(_ => throw new InvalidOperationException("boom"));
 
         await Assert.ThrowsAsync<InvalidOperationException>(() => serviceUnderTest.GetRecommendationChunkCount(1));

@@ -37,7 +37,7 @@ public interface IContentfulRepository
 
     Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options);
 
-    Task<int> GetEntriesCount<TEntry>();
+    Task<int> GetEntriesCountAsync<TEntry>();
 
     /// <summary>
     /// Get entities without filtering

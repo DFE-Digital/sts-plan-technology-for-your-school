@@ -13,7 +13,7 @@ public class RecommendationWorkflow(
 
     public async Task<int> GetRecommendationChunkCount(int page)
     {
-        return await _contentfulRepository.GetEntriesCount<RecommendationChunkEntry>();
+        return await _contentfulRepository.GetEntriesCountAsync<RecommendationChunkEntry>();
     }
 
     public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntries(int page)
