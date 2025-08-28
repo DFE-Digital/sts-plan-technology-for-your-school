@@ -48,7 +48,7 @@ public class SubmissionEntity
             DateCreated = DateCreated,
             DateLastUpdated = DateLastUpdated,
             DateCompleted = DateCompleted,
-            Responses = Responses.Select(r => r.AsDto()),
+            Responses = Responses.Select(r => r.AsDto()).ToList(),
             Deleted = Deleted,
             Viewed = Viewed,
             Status = Status

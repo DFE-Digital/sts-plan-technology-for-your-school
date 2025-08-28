@@ -43,8 +43,11 @@ public class ContentfulWorkflow(
     {
         try
         {
-            var entries = await _contentfulRepository.GetEntriesAsync<TEntry>()
-                ?? throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TEntry).Name}");
+            var entries = await _contentfulRepository.GetEntriesAsync<TEntry>();
+            if (!entries.Any())
+            {
+                throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TEntry).Name}");
+            }
 
             return entries.ToList();
         }

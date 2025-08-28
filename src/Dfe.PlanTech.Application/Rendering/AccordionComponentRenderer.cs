@@ -51,7 +51,7 @@ public class AccordionComponentRenderer(
 
             if (renderer == null)
             {
-                Logger.LogWarning("Could not find renderer for {subContent}", subContent);
+                Logger.LogWarning("Could not find renderer for {SubContent}", subContent);
                 continue;
             }
 

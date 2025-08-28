@@ -26,12 +26,12 @@ public class QuestionsViewBuilder(
     CurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
-    private IQuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
-    private ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private ErrorMessagesConfiguration _errorMessages = errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
-    private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
-    private ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
+    private readonly IQuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ErrorMessagesConfiguration _errorMessages = errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
+    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
@@ -47,12 +47,10 @@ public class QuestionsViewBuilder(
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
 
-        controller.ViewData["ReturnTo"] = returnTo;
-        var isChangeAnswersFlow = IsChangeAnswersFlow(returnTo);
-
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: isChangeAnswersFlow);
+
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
 
         var isSlugForNextQuestion = submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug) ?? false;
 

@@ -63,8 +63,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         return submission;
     }
 
-
-
     public Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId)
     {
         return GetSubmissionsBy(s => s.Id == submissionId).FirstOrDefaultAsync();
