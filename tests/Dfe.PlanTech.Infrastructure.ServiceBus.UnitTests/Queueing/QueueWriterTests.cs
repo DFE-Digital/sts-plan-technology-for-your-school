@@ -7,7 +7,7 @@ using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 using NSubstitute.ReceivedExtensions;
 
-namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests;
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests.Queueing;
 
 public class QueueWriterTests
 {

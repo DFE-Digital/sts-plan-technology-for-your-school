@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
-namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests;
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests.Results;
 
 public class ServiceBusResultProcessorTests
 {

@@ -10,8 +10,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Services;
 
 public class CookieServiceTests
 {
-    private static (CookieService cookieService, DefaultHttpContext httpContext, ICookieWorkflow cookieWorkflow)
-    Build(DfeCookieModel? cookieModel = null)
+    private static (CookieService cookieService, DefaultHttpContext httpContext, ICookieWorkflow cookieWorkflow) Build(DfeCookieModel? cookieModel = null)
     {
         var httpContext = new DefaultHttpContext();
 

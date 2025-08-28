@@ -49,8 +49,7 @@ public class WriteCmsWebhookToQueueCommand(
     }
 
     private static string? GetCmsEvent(HttpRequest request) =>
-        !request.Headers.TryGetValue(ContentfulTopicHeaderKey,
-            out var value)
+        !request.Headers.TryGetValue(ContentfulTopicHeaderKey, out var value)
             ? null
             : value.FirstOrDefault();
 }

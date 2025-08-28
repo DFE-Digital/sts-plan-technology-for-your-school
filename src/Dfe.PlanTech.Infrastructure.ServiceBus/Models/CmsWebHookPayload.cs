@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Nodes;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.Models;
 
+[ExcludeFromCodeCoverage]
 public class CmsWebHookPayload
 {
     public string Id => Sys.Id;

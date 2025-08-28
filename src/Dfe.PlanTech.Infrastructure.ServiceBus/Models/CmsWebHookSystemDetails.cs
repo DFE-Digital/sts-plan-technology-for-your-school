@@ -1,5 +1,8 @@
-﻿namespace Dfe.PlanTech.Infrastructure.ServiceBus.Models;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Dfe.PlanTech.Infrastructure.ServiceBus.Models;
+
+[ExcludeFromCodeCoverage]
 public class CmsWebHookSystemDetails
 {
     public string Id { get; init; } = null!;
