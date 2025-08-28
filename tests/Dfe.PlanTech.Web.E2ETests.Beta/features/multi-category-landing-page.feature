@@ -117,17 +117,17 @@ Feature: Multi Category Landing Page
 
       Then I should see an inset text containing "You have completed all self-assessments for the category two standard."
 
-      #Section One
+      # Section One
       And I should see a link to the recommendation "Recommendation Header C2 - S1 - Q1 - Answer Four"
       And I should see a link to the recommendation "Recommendation Header C2 - S1 - Q2 - Answer One"
       And I should see a link to the recommendation "Recommendation Header C2 - S1 - Q3 - Answer One"
 
-      #Section Two
+      # Section Two
       And I should see a link to the recommendation "Recommendation Header C2 - S2 - Q1 - Answer Three"
       And I should see a link to the recommendation "Recommendation Header C2 - S2 - Q2 - Answer Two"
       And I should see a link to the recommendation "Recommendation Header C2 - S2 - Q3 - Answer Two"
 
-      #Section Three
+      # Section Three
       And I should see a link to the recommendation "Recommendation Header C2 - S3 - Q5 - Answer Two"
       And I should see a link to the recommendation "Recommendation Header C2 - S3 - Q4 - Answer One"
       And I should see a link to the recommendation "Recommendation Header C2 - S3 - Q3 - Answer Two"

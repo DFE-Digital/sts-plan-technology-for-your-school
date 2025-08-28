@@ -28,7 +28,7 @@ Feature: Conditional questions
     And I click the continue button
     Then I should see the question heading 'What colour can an apple be?'
     And I should see the question help text "Category two section three question four help text"
-    And I should see a continue button that submits to "/category-two/category-two-section-three/self-assessment/testing-category-two-section-three-question-two"
+    And I should see a continue button that submits to "/category-two/category-two-section-three/self-assessment/testing-category-two-section-three-question-four"
     And the question answer radio options should appear in this order:
       | Green |
       | Blue |

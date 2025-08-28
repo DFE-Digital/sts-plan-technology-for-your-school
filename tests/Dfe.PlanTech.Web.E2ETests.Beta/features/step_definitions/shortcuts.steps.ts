@@ -65,10 +65,15 @@ async function startAndAnswerAssessment(context:any, category: string, section:s
 
   
   // Click the section’s link scoped under the h2
-  const h2 = context.page.getByRole('heading', { level: 2, name: section });
-  await expect(h2).toBeVisible();
+  let sectionLink = context.page.locator('a', { hasText: `Go to self-assessment for ${section.toLowerCase()}` });
+  const linkCount = await sectionLink.count();
 
-  const sectionLink = h2.locator('xpath=following-sibling::p[a][1]/a');
+  //Handles the "Go to self assessment" link on multi category pages
+  if (linkCount > 1) {
+  const h2 = context.page.getByRole('heading', { level: 2, name: section });
+  sectionLink = h2.locator('xpath=following-sibling::p[a][1]/a');
+  }
+
   await expect(sectionLink).toBeVisible();
   await sectionLink.click();
 

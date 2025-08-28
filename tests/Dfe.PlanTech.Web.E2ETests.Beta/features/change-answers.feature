@@ -69,13 +69,3 @@ Feature: Change answers page
         | What colour can an apple be?                      | Green       | /category-two/category-two-section-three/self-assessment/testing-category-two-section-three-question-four      |
         | Which of these are known as the "Red planet"?     | Mars        | /category-two/category-two-section-three/self-assessment/testing-category-two-section-three-question-three    |
         | What do bees make?                                | Honey       | /category-two/category-two-section-three/self-assessment/testing-category-two-section-three-question-five     |
-
-
-
-
-
-
-
-
-
-

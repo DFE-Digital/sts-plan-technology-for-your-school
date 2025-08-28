@@ -4,8 +4,9 @@ Feature: home page
   Background:
     Given I visit the homepage
 
-  Scenario: Homepage has the correct header
+  Scenario: Homepage has the correct header and beta-header
     Then the header should contain all the correct content
+    And I should see the beta header
 
   Scenario: Page has a main heading
     Then I should see the page heading "Technology self‑assessment"
