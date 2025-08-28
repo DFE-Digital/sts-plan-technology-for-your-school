@@ -7,9 +7,9 @@ namespace Dfe.PlanTech.Data.Sql.Entities;
 [Table("establishment")]
 public class EstablishmentEntity
 {
-    public const int EstablishmentRefLength = 50;
-    public const int EstablishmentTypeLength = 50;
-    public const int OrgNameLength = 200;
+    public const int EstablishmentRefMaxLengthInclusive = 50;
+    public const int EstablishmentTypeMaxLengthInclusive = 50;
+    public const int OrgNameMaxLengthInclusive = 200;
 
     private string _establishmentRef = null!;
     private string? _establishmentType;
@@ -17,43 +17,25 @@ public class EstablishmentEntity
 
     public int Id { get; set; }
 
-    [StringLength(EstablishmentRefLength)]
+    [StringLength(EstablishmentRefMaxLengthInclusive)]
     public string EstablishmentRef
     {
         get => _establishmentRef;
-        set
-        {
-            _establishmentRef = value.Length < EstablishmentRefLength
-                ? value
-                : value.AsSpan(0, EstablishmentRefLength).ToString();
-        }
+        set => _establishmentRef = TrimToMax(value, EstablishmentRefMaxLengthInclusive);
     }
 
-    [StringLength(EstablishmentTypeLength)]
+    [StringLength(EstablishmentTypeMaxLengthInclusive)]
     public string? EstablishmentType
     {
         get => _establishmentType;
-        set
-        {
-            if (value == null)
-                _establishmentType = null;
-            else
-                _establishmentType = value.Length < EstablishmentTypeLength
-                    ? value
-                    : value.AsSpan(0, EstablishmentTypeLength).ToString();
-        }
+        set => _establishmentType = TrimToMaxOrNull(value, EstablishmentTypeMaxLengthInclusive);
     }
 
-    [StringLength(OrgNameLength)]
+    [StringLength(OrgNameMaxLengthInclusive)]
     public string OrgName
     {
         get => _orgName;
-        set
-        {
-            _orgName = value.Length < OrgNameLength
-                ? value
-                : value.AsSpan(0, OrgNameLength).ToString();
-        }
+        set => _orgName = TrimToMax(value, OrgNameMaxLengthInclusive);
     }
 
     public string? GroupUid { get; set; }
@@ -61,6 +43,23 @@ public class EstablishmentEntity
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public DateTime? DateLastUpdated { get; set; }
+
+    private static string TrimToMax(string value, int maxLengthInclusive)
+    {
+        return value.Length <= maxLengthInclusive
+            ? value
+            : value.AsSpan(0, maxLengthInclusive).ToString();
+    }
+
+    private static string? TrimToMaxOrNull(string? value, int maxLengthInclusive)
+    {
+        if (value is null)
+            return null;
+
+        return value.Length <= maxLengthInclusive
+            ? value
+            : value.AsSpan(0, maxLengthInclusive).ToString();
+    }
 
     public SqlEstablishmentDto AsDto()
     {
