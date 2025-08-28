@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Domain.Background;
+namespace Dfe.PlanTech.Application.Background;
 
 /// <summary>
 /// Queue for tasks to be ran in background

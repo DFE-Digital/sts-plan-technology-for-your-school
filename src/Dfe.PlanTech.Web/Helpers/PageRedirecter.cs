@@ -1,9 +1,8 @@
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dfe.PlanTech.Web;
+namespace Dfe.PlanTech.Web.Helpers;
 
 public static class PageRedirecter
 {

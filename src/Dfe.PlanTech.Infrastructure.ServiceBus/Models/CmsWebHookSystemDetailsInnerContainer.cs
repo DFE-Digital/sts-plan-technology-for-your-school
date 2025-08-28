@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Domain.Caching.Models;
+﻿namespace Dfe.PlanTech.Infrastructure.ServiceBus.Models;
 
 public class CmsWebHookSystemDetailsInnerContainer
 {
