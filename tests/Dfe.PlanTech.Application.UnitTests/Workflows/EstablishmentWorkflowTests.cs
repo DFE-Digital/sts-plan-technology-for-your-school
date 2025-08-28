@@ -10,11 +10,10 @@ public class EstablishmentWorkflowTests
 {
     private readonly IEstablishmentRepository _estRepo = Substitute.For<IEstablishmentRepository>();
     private readonly IEstablishmentLinkRepository _linkRepo = Substitute.For<IEstablishmentLinkRepository>();
-    private readonly IGroupReadActivityRepository _readRepo = Substitute.For<IGroupReadActivityRepository>();
     private readonly IStoredProcedureRepository _spRepo = Substitute.For<IStoredProcedureRepository>();
 
     private EstablishmentWorkflow CreateServiceUnderTest() =>
-        new EstablishmentWorkflow(_estRepo, _linkRepo, _readRepo, _spRepo);
+        new EstablishmentWorkflow(_estRepo, _linkRepo, _spRepo);
 
     // ── Helpers: create minimal entities that map via AsDto() in YOUR codebase ──
     // Replace these types with your real entity classes (what the repos return),
@@ -196,43 +195,14 @@ public class EstablishmentWorkflowTests
     }
 
     // ────────────────────────────────────────────────────────────────────────────
-    // GetLatestSelectedGroupSchool
-    // ────────────────────────────────────────────────────────────────────────────
-
-    [Fact]
-    public async Task GetLatestSelectedGroupSchool_Returns_First_Or_Null()
-    {
-        var serviceUnderTest = CreateServiceUnderTest();
-        var activities = new[]
-        {
-            MakeRead(1, 5, 10),
-            MakeRead(2, 5, 10)
-        }.ToList();
-
-        _readRepo.GetGroupReadActivitiesAsync(5, 10)
-                 .Returns(activities);
-
-        var one = await serviceUnderTest.GetLatestSelectedGroupSchool(5, 10);
-        Assert.NotNull(one);
-        Assert.Equal(1, one!.Id);
-
-        _readRepo.GetGroupReadActivitiesAsync(6, 10)
-                 .Returns([]);
-
-        var none = await serviceUnderTest.GetLatestSelectedGroupSchool(6, 10);
-        Assert.Null(none);
-    }
-
-    // ────────────────────────────────────────────────────────────────────────────
     // Constructor guard clauses
     // ────────────────────────────────────────────────────────────────────────────
 
     [Fact]
     public void Ctor_Null_Repos_Throw()
     {
-        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(null!, _linkRepo, _readRepo, _spRepo));
-        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(_estRepo, null!, _readRepo, _spRepo));
-        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(_estRepo, _linkRepo, null!, _spRepo));
-        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(_estRepo, _linkRepo, _readRepo, null!));
+        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(null!, _linkRepo, _spRepo));
+        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(_estRepo, null!, _spRepo));
+        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(_estRepo, _linkRepo, null!));
     }
 }
