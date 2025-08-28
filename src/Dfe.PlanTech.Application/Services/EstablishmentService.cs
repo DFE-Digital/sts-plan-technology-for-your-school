@@ -1,5 +1,4 @@
-﻿using System.Security.Authentication;
-using Dfe.PlanTech.Application.Workflows;
+﻿using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
@@ -25,20 +24,10 @@ public class EstablishmentService(
         return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
-    public async Task<SqlGroupReadActivityDto> GetLatestSelectedGroupSchoolAsync(int? userId, int? establishmentId)
+    public async Task<SqlEstablishmentDto> GetLatestSelectedGroupSchoolAsync(string selectedEstablishmentUrn)
     {
-        if (userId is null)
-        {
-            throw new AuthenticationException("User is not authenticated");
-        }
-
-        if (establishmentId is null)
-        {
-            throw new ArgumentException($"User's {nameof(establishmentId)} cannot be null");
-        }
-
-        return await _establishmentWorkflow.GetLatestSelectedGroupSchool(userId.Value, establishmentId.Value)
-            ?? throw new DatabaseException($"Could not get latest selected group school for user with ID '{userId.Value}' in establishment with ID '{establishmentId.Value}'");
+        return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(selectedEstablishmentUrn)
+            ?? throw new DatabaseException($"Could not get latest selected group school for {selectedEstablishmentUrn}");
     }
 
     public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId)
@@ -59,7 +48,7 @@ public class EstablishmentService(
         return establishmentLinkMap.Values.ToList();
     }
 
-    public async Task<int> RecordGroupSelection(
+    public async Task RecordGroupSelection(
         string userDsiReference,
         int? userEstablishmentId,
         EstablishmentModel userEstablishmentModel,
@@ -86,8 +75,6 @@ public class EstablishmentService(
             UserId = user.Id
         };
 
-        var selectionId = await _establishmentWorkflow.RecordGroupSelection(selectionModel);
-
-        return selectionId;
+        await _establishmentWorkflow.RecordGroupSelection(selectionModel);
     }
 }

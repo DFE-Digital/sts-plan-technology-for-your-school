@@ -16,7 +16,9 @@ namespace Dfe.PlanTech.Web.Context
         public string? Email => GetNameIdentifierFromClaim(ClaimConstants.VerifiedEmail)
             ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
 
-        public int? EstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID) ?? GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
+        public int? EstablishmentId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
+
+        public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool();
 
         public bool IsAuthenticated => GetIsAuthenticated();
 
@@ -31,10 +33,33 @@ namespace Dfe.PlanTech.Web.Context
 
         public bool IsInRole(string role) => contextAccessor.HttpContext?.User.IsInRole(role) ?? false;
 
-        public void SetMatSelectedSchoolId(string schoolUrn)
+        public void SetGroupSelectedSchool(string selectedSchoolUrn)
         {
-            throw new NotImplementedException();
-            // Set ClaimConstants.DB_MAT_ESTABLISHMENT_ID to the database's establishment ID for the selected school
+            if (string.IsNullOrEmpty(selectedSchoolUrn))
+            {
+                throw new InvalidDataException("No Urn for selection");
+            };    
+
+            _contextAccessor.HttpContext?.Response.Cookies.Delete("SelectedSchoolUrn");
+
+            _contextAccessor.HttpContext?.Response.Cookies.Append("SelectedSchoolUrn", selectedSchoolUrn, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+            });
+        }
+
+        public string? GetGroupSelectedSchool()
+        {
+            var httpContext = _contextAccessor.HttpContext;
+
+            if (httpContext != null && httpContext.Request.Cookies.TryGetValue("SelectedSchoolUrn", out var selectedSchoolUrn))
+            {
+                return selectedSchoolUrn;
+            }
+
+            return null;
         }
 
         public EstablishmentModel GetEstablishmentModel()

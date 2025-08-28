@@ -49,11 +49,7 @@ public class GroupsViewBuilder(
         var title = groupName;
         List<ContentfulEntry> content = selectASchoolPageContent?.Content ?? [];
 
-        string totalSections = string.Empty;
-        if (categories != null)
-        {
-            totalSections = categories.Sum(category => category.Sections.Count).ToString();
-        }
+        string totalSections = categories.Sum(category => category.Sections.Count).ToString();
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 
@@ -70,47 +66,40 @@ public class GroupsViewBuilder(
             ContactLinkHref = contactLink?.Href
         };
 
-
         controller.ViewData["Title"] = "Select a school";
         return controller.View(SelectASchoolViewName, viewModel);
     }
 
-    public async Task<int> RecordGroupSelectionAsync(string selectedEstablishmentUrn, string selectedEstablishmentName)
+    public async Task RecordGroupSelectionAsync(string selectedEstablishmentUrn, string selectedEstablishmentName)
     {
         var userDsiReference = GetDsiReferenceOrThrowException();
 
-        var selectionId = await _establishmentService.RecordGroupSelection(
+        await _establishmentService.RecordGroupSelection(
             userDsiReference,
             CurrentUser.EstablishmentId,
             CurrentUser.GetEstablishmentModel(),
             selectedEstablishmentUrn,
             selectedEstablishmentName
         );
-
-        return selectionId;
     }
 
     public async Task<IActionResult> RouteToSchoolDashboardViewAsync(Controller controller)
     {
-        var latestSelection = await GetCurrentGroupSchoolSelection();
         var groupName = CurrentUser.GetEstablishmentModel().Name;
         var pageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
         List<ContentfulEntry> content = pageContent?.Content ?? [];
 
+        var selectedSchool = await GetCurrentGroupSchoolSelection();
+
         var viewModel = new GroupsSchoolDashboardViewModel
         {
-            SchoolName = latestSelection.SelectedEstablishmentName,
-            SchoolId = latestSelection.SelectedEstablishmentId,
+            SchoolName = selectedSchool.OrgName,
+            SchoolId = selectedSchool.Id,
             GroupName = groupName,
             Title = new ComponentTitleEntry("Plan technology for your school"),
             Content = content,
             Slug = UrlConstants.GroupsDashboardSlug
         };
-
-        if (viewModel is null)
-        {
-            return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
-        }
 
         controller.ViewData["Title"] = "Dashboard";
         return controller.View(SchoolDashboardViewName, viewModel);
@@ -119,8 +108,8 @@ public class GroupsViewBuilder(
     public async Task<IActionResult> RouteToGroupsRecommendationAsync(Controller controller, string sectionSlug)
     {
         var latestSelection = await GetCurrentGroupSchoolSelection();
-        var schoolId = latestSelection.SelectedEstablishmentId;
-        var schoolName = latestSelection.SelectedEstablishmentName;
+        var schoolId = latestSelection.Id;
+        var schoolName = latestSelection.OrgName;
 
         var viewModel = await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
 
@@ -149,11 +138,11 @@ public class GroupsViewBuilder(
         return controller.View(RecommendationsChecklistViewName, viewModel);
     }
 
-    private Task<SqlGroupReadActivityDto> GetCurrentGroupSchoolSelection()
+    private async Task<SqlEstablishmentDto> GetCurrentGroupSchoolSelection()
     {
-        var userId = GetUserIdOrThrowException();
-        var establishmentId = GetEstablishmentIdOrThrowException();
-        return _establishmentService.GetLatestSelectedGroupSchoolAsync(userId, establishmentId);
+        var latestSelectionUrn = CurrentUser.GroupSelectedSchoolUrn ?? throw new InvalidDataException("GroupSelectedSchoolUrn is null");
+
+        return await _establishmentService.GetLatestSelectedGroupSchoolAsync(latestSelectionUrn);
     }
 
     private async Task<GroupsRecommendationsViewModel?> GetGroupsRecommendationsViewModel(string sectionSlug, int schoolId, string schoolName)
