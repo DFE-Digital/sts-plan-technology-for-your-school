@@ -24,7 +24,7 @@
     </div>
 }
 
-@if (Model.CategoryLandingSections.Count != 1)
+@if (Model.CategoryLandingSections.Count != 1 && !Model.AllSectionsCompleted)
 {
     <div class="govuk-inset-text">
         @{

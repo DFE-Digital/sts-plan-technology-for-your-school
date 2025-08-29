@@ -50,6 +50,7 @@
         }
         else if (topic.ProgressStatus == SectionProgressStatus.InProgress)
         {
+            <p>@topic.ShortDescription</p>
             <p>
                 @statusText
                 <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
@@ -58,6 +59,7 @@
         }
         else
         {
+            <p>@topic.ShortDescription</p>
             <p>
                 <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
                    class="govuk-link">@linkText</a>
