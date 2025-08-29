@@ -8,6 +8,7 @@ using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
@@ -18,7 +19,7 @@ public class ReviewAnswersViewBuilder(
     IContentfulService contentfulService,
     ISubmissionService submissionService,
     CurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 

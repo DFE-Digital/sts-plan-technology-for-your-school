@@ -217,7 +217,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IPagesViewBuilder, PagesViewBuilder>();
         services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();
         services.AddTransient<RecommendationsViewBuilder>();
-        services.AddTransient<ReviewAnswersViewBuilder>();
+        services.AddTransient<IReviewAnswersViewBuilder, ReviewAnswersViewBuilder>();
 
         return services;
     }
