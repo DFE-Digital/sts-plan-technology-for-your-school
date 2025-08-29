@@ -1,17 +1,10 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-import AxeBuilder from '@axe-core/playwright';
 
 
 Given('I am on the accessibility page', async function () {
   await this.page.goto(`${process.env.URL}accessibility-statement`);
   await expect(this.page).toHaveURL(/\/accessibility-statement/);
-});
-
-Then('I should see the accessibility page heading', async function () {
-  const heading = this.page.getByRole('heading', { level: 1 });
-  await expect(heading).toBeVisible();
-  await expect(heading).toHaveText(/Accessibility statement for Plan technology for your school/);
 });
 
 Then('I should see a back link to the previous page', async function () {

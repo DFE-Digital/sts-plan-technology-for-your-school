@@ -1,7 +1,7 @@
 Feature: Content & Support Page Richtext components
 
   Background:
-    Given I visit the content support page
+    Given I visit the information asset register content support page
 
   Scenario: The page displays an attachment
     Then I should see an attachment block
@@ -21,3 +21,9 @@ Feature: Content & Support Page Richtext components
     Then the first accordion section should be expanded
     When I collapse the first accordion section
     Then the first accordion section should be collapsed
+
+  Scenario: The page has the correct footer links
+    And I should see the GOV.UK footer with expected links
+    
+  Scenario: The page has the beta header
+    And I should see the beta header
