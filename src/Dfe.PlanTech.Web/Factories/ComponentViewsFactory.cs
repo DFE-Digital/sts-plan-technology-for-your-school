@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace Dfe.PlanTech.Web.Helpers;
+namespace Dfe.PlanTech.Web.Factories;
 
 public class ComponentViewsFactory(
     ILogger<ComponentViewsFactory> logger
