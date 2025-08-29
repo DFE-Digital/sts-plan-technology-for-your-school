@@ -36,7 +36,12 @@ public class BackgroundTaskHostedServiceTests
         await queue.Received(1).DequeueAsync(Arg.Any<CancellationToken>());
 
         // At least two info logs: starting + read item
-        logger.ReceivedWithAnyArgs().Log(LogLevel.Information, 0, default!, null, default!);
+        var infoLogs = logger.ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == nameof(ILogger.Log))
+            .Where(c => c.GetArguments().Length > 0 && c.GetArguments()[0] is LogLevel lvl && lvl == LogLevel.Information)
+            .ToList();
+
+        Assert.True(infoLogs.Count >= 2, $"Expected >= 2 info logs, got {infoLogs.Count}");
     }
 
     [Fact]
