@@ -17,21 +17,23 @@ public static class RouteDataExtensions
     // DefaultPageTitle.
     public static string GetTitleForPage(this RouteData routeData)
     {
-        var sectionSlug = routeData.Values.Where(routePart =>
-                                        {
-                                            if (routePart.Key == SectionSlugKey)
-                                            {
-                                                return true;
-                                            }
+        var sectionSlug = routeData.Values
+            .Where(routePart =>
+                {
+                    if (routePart.Key == SectionSlugKey)
+                    {
+                        return true;
+                    }
 
-                                            var routePartValue = routePart.Value as string;
+                    var routePartValue = routePart.Value as string;
 
 
-                                            return !string.IsNullOrEmpty(routePartValue) && routePartValue != "/" && !routePartValue.Any(char.IsNumber);
-                                        })
-                                        .OrderByDescending(routePart => routePart.Key)
-                                        .Select(routePart => routePart.Value!.ToString())
-                                        .FirstOrDefault();
+                    return !string.IsNullOrEmpty(routePartValue) && routePartValue != "/" && !routePartValue.Any(char.IsNumber);
+                }
+            )
+            .OrderByDescending(routePart => routePart.Key)
+            .Select(routePart => routePart.Value!.ToString())
+            .FirstOrDefault();
 
         if (string.IsNullOrEmpty(sectionSlug))
             return DefaultPageTitle;

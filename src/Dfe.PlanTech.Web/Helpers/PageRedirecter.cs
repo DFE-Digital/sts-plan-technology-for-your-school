@@ -1,9 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
+[ExcludeFromCodeCoverage]
 public static class PageRedirecter
 {
     public static RedirectToActionResult RedirectToCategoryLandingPage(this Controller controller, string categorySlug) =>
