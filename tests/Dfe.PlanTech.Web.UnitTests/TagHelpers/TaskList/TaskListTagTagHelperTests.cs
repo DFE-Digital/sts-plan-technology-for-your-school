@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
-namespace Dfe.PlanTech.Web.UnitTests.TagHelpers
+namespace Dfe.PlanTech.Web.UnitTests.TagHelpers.TaskList
 {
     public class TaskListTagTagHelperTests
     {

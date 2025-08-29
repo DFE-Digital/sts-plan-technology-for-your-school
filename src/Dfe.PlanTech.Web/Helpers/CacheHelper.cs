@@ -63,5 +63,4 @@ public class CacheHelper(ICacheOptions options, IMemoryCache memoryCache) : ICac
 
         _memoryCache.Set(key, value, cacheEntryOptions);
     }
-
 }
