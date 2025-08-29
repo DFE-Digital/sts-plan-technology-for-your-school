@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Binders;
-using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +16,10 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class PagesController(
     ILogger<PagesController> logger,
-    PagesViewBuilder pagesViewBuilder
+    IPagesViewBuilder pagesViewBuilder
 ) : BaseController<PagesController>(logger)
 {
-    private readonly PagesViewBuilder _pagesViewBuilder = pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
+    private readonly IPagesViewBuilder _pagesViewBuilder = pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
 
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
