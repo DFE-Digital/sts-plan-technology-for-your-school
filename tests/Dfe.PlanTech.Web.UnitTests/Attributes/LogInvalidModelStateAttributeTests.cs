@@ -58,7 +58,7 @@ public class LogInvalidModelStateAttributeTests
 
         attribute.OnActionExecuting(ctx);
 
-        logger.DidNotReceiveWithAnyArgs().Log(default, default, default!, default, default!);
+        Assert.Empty(logger.ReceivedCalls());
     }
 
     [Fact]
