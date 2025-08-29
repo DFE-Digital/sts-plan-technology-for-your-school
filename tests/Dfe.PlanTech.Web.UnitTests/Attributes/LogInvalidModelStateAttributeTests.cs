@@ -35,11 +35,9 @@ public class LogInvalidModelStateAttributeTests
         var actionDescriptor = new ActionDescriptor { DisplayName = displayName };
         var actionContext = new ActionContext(http, new RouteData(), actionDescriptor, modelState);
 
-        return new ActionExecutingContext(
-            actionContext,
-            new List<IFilterMetadata>(),
-            new Dictionary<string, object?>(),
-            controller: null);
+        var controller = Substitute.For<Controller>();
+
+        return new ActionExecutingContext(actionContext, new List<IFilterMetadata>(), new Dictionary<string, object?>(), controller);
     }
 
     [Fact]
@@ -60,8 +58,7 @@ public class LogInvalidModelStateAttributeTests
 
         attribute.OnActionExecuting(ctx);
 
-        logger.DidNotReceiveWithAnyArgs().Log(
-            default, default, default!, default, default!);
+        logger.DidNotReceiveWithAnyArgs().Log(default, default, default!, default, default!);
     }
 
     [Fact]
@@ -83,4 +80,8 @@ public class LogInvalidModelStateAttributeTests
             Arg.Is<Exception?>(e => e == null),
             Arg.Any<Func<object, Exception?, string>>());
     }
+}
+
+internal class NullController : Controller
+{
 }

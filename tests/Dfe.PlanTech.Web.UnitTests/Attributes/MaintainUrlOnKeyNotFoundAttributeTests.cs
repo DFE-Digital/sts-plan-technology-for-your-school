@@ -1,8 +1,11 @@
-﻿using Dfe.PlanTech.Application.Configuration;
+﻿using System.Runtime.Intrinsics.Arm;
+using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -28,7 +31,7 @@ public class MaintainUrlOnKeyNotFoundAttributeTests
         return new ExceptionContext(actionContext, new List<IFilterMetadata>());
     }
 
-    private static MaintainUrlOnKeyNotFoundAttribute BuildSut(
+    private static MaintainUrlOnKeyNotFoundAttribute BuildServiceUnderTest(
         string linkId,
         IContentfulService? contentful = null)
     {
@@ -56,15 +59,119 @@ public class MaintainUrlOnKeyNotFoundAttributeTests
     // ---------- Handles ContentfulDataUnavailableException ----------
 
     [Fact]
-    public void OnExceptionAsync_When_ContentfulDataUnavailable_Returns_NotFound_View_And_Sets_ContactLink()
+    public async Task OnExceptionAsync_When_ContentfulDataUnavailable_Returns_NotFound_View_And_Sets_ContactLink()
     {
         // Arrange
         var linkId = "contact-link-id";
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetLinkByIdAsync(linkId).Returns(new NavigationLinkEntry { Href = "/contact-us" });
+        contentful.GetLinkByIdAsync(linkId).Returns(new NavigationLinkEntry { Sys = new SystemDetails(linkId), Href = "/contact-us" });
 
-        var sut = BuildSut(linkId, contentful);
+        var sut = BuildServiceUnderTest(linkId, contentful);
         var ctx = BuildExceptionContext();
         ctx.Exception = new ContentfulDataUnavailableException("boom");
+
+        await sut.OnExceptionAsync(ctx);
+
+        Assert.True(ctx.ExceptionHandled);
+        var view = Assert.IsType<ViewResult>(ctx.Result);
+        Assert.Equal("NotFoundError", view.ViewName);
+        var vm = Assert.IsType<NotFoundViewModel>(view.ViewData.Model);
+        Assert.Equal("/contact-us", vm.ContactLinkHref);
+        await contentful.Received(1).GetLinkByIdAsync(linkId);
+    }
+
+    // ---------- Handles KeyNotFoundException (NOT organisation) ----------
+
+    [Fact]
+    public async Task OnExceptionAsync_When_KeyNotFound_And_NotOrganisation_Handled_With_View_And_ContactLink()
+    {
+        // Arrange
+        var linkId = "contact-link-id";
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetLinkByIdAsync(linkId)
+            .Returns(new NavigationLinkEntry { Sys = new SystemDetails(linkId), Href = "/help" });
+
+        var sut = BuildServiceUnderTest(linkId, contentful);
+        var ctx = BuildExceptionContext();
+        ctx.Exception = new KeyNotFoundException("missing some key");
+
+        // Act
+        await sut.OnExceptionAsync(ctx);
+
+        // Assert
+        Assert.True(ctx.ExceptionHandled);
+        var view = Assert.IsType<ViewResult>(ctx.Result);
+        Assert.Equal("NotFoundError", view.ViewName);
+        var vm = Assert.IsType<NotFoundViewModel>(view.ViewData.Model);
+        Assert.Equal("/help", vm.ContactLinkHref);
+        await contentful.Received(1).GetLinkByIdAsync(linkId);
+    }
+
+    // ---------- Does NOT handle KeyNotFoundException mentioning Organisation ----------
+
+    [Fact]
+    public async Task OnExceptionAsync_When_KeyNotFound_For_Organisation_Is_NotHandled()
+    {
+        // Arrange
+        var linkId = "contact-link-id";
+        var contentful = Substitute.For<IContentfulService>();
+        var sut = BuildServiceUnderTest(linkId, contentful);
+        var ctx = BuildExceptionContext();
+        ctx.Exception = new KeyNotFoundException($"Could not find {ClaimConstants.Organisation}");
+
+        // Act
+        await sut.OnExceptionAsync(ctx);
+
+        // Assert
+        Assert.False(ctx.ExceptionHandled);
+        Assert.Null(ctx.Result);
+        await contentful.DidNotReceiveWithAnyArgs().GetLinkByIdAsync(default!);
+    }
+
+    // ---------- Does NOT handle unrelated exceptions ----------
+
+    [Fact]
+    public async Task OnExceptionAsync_When_Other_Exception_Is_NotHandled()
+    {
+        // Arrange
+        var linkId = "contact-link-id";
+        var contentful = Substitute.For<IContentfulService>();
+        var sut = BuildServiceUnderTest(linkId, contentful);
+        var ctx = BuildExceptionContext();
+        ctx.Exception = new InvalidOperationException("nope");
+
+        // Act
+        await sut.OnExceptionAsync(ctx);
+
+        // Assert
+        Assert.False(ctx.ExceptionHandled);
+        Assert.Null(ctx.Result);
+        await contentful.DidNotReceiveWithAnyArgs().GetLinkByIdAsync(default!);
+    }
+
+    // ---------- Safe when Contentful returns null link ----------
+
+    [Fact]
+    public async Task OnExceptionAsync_When_Contentful_Returns_Null_Link_Sets_Null_Href_And_Handles()
+    {
+        // Arrange
+        var linkId = "contact-link-id";
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetLinkByIdAsync(linkId).Returns((NavigationLinkEntry?)null);
+
+        var sut = BuildServiceUnderTest(linkId, contentful);
+        var ctx = BuildExceptionContext();
+        ctx.Exception = new ContentfulDataUnavailableException("boom");
+
+        // Act
+        await sut.OnExceptionAsync(ctx);
+
+        // Assert
+        Assert.True(ctx.ExceptionHandled);
+        var view = Assert.IsType<ViewResult>(ctx.Result);
+        Assert.Equal("NotFoundError", view.ViewName);
+        var vm = Assert.IsType<NotFoundViewModel>(view.ViewData.Model);
+        Assert.Null(vm.ContactLinkHref);
+        await contentful.Received(1).GetLinkByIdAsync(linkId);
     }
 }
