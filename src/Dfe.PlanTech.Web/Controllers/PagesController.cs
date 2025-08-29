@@ -42,10 +42,19 @@ public class PagesController(
     public IActionResult Error() =>
         View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
+    [HttpGet("{categorySlug}/{sectionSlug}/{*path}")]
+    public async Task<IActionResult> HandleUnknownRoutes(string path)
+    {
+        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModel();
+
+        return View("NotFoundError", viewModel);
+    }
+
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
     {
         var viewModel = await _pagesViewBuilder.BuildNotFoundViewModel();
+
         return View(viewModel);
     }
 }
