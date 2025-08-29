@@ -25,6 +25,7 @@ using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -209,7 +210,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRoutingServices(this IServiceCollection services)
     {
         services.AddTransient<CategorySectionViewComponentViewBuilder>();
-        services.AddTransient<CmsViewBuilder>();
+        services.AddTransient<ICmsViewBuilder, CmsViewBuilder>();
         services.AddTransient<FooterLinksViewComponentViewBuilder>();
         services.AddTransient<GroupsDashboardViewComponentViewBuilder>();
         services.AddTransient<GroupsViewBuilder>();
