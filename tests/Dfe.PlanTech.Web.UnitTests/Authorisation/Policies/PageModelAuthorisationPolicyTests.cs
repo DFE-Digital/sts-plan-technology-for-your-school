@@ -1,17 +1,4 @@
-﻿using System.Security.Claims;
-using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Models;
-using Dfe.PlanTech.Web.Authorisation.Policies;
-using Dfe.PlanTech.Web.Authorisation.Requirements;
-using Dfe.PlanTech.Web.Controllers;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-
-namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Policies;
+﻿namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Policies;
 
 using System.Security.Claims;
 using System.Threading.Tasks;
