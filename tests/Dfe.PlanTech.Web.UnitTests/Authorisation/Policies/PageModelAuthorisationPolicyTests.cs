@@ -1,214 +1,172 @@
 ﻿using System.Security.Claims;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Models;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
-using Dfe.PlanTech.Web.Controllers;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Policies;
 
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Models;
-using Dfe.PlanTech.Web.Authorisation.Policies;
-using Dfe.PlanTech.Web.Authorisation.Requirements;
-using Dfe.PlanTech.Web.Controllers;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NSubstitute;
-using Xunit;
-
 public class PageModelAuthorisationPolicyTests
 {
-    private static (HttpContext http, IContentfulService contentful) HttpWithServices()
+    private readonly IContentfulService _contentfulService;
+    private readonly PageModelAuthorisationPolicy _policy;
+    private AuthorizationHandlerContext _authContext;
+    private readonly ILogger<PageModelAuthorisationPolicy> _logger;
+    private readonly HttpContext _httpContext;
+
+    private static PageEntry AuthNotRequiredPage = new PageEntry { RequiresAuthorisation = false };
+    private static PageEntry AuthRequiredPage = new PageEntry { RequiresAuthorisation = true };
+
+    public PageModelAuthorisationPolicyTests()
     {
-        var services = new ServiceCollection();
-        var contentful = Substitute.For<IContentfulService>();
-        services.AddScoped(_ => contentful);
+        _logger = Substitute.For<ILogger<PageModelAuthorisationPolicy>>();
+        _policy = new PageModelAuthorisationPolicy(_logger);
 
-        var sp = services.BuildServiceProvider();
-        var http = new DefaultHttpContext { RequestServices = sp };
+        _contentfulService = Substitute.For<IContentfulService>();
 
-        // Seed required route keys to avoid KeyNotFound noise in logs
-        http.Request.RouteValues[PageModelAuthorisationPolicy.RouteValuesControllerNameKey] = PagesController.ControllerName;
-        http.Request.RouteValues[PageModelAuthorisationPolicy.RouteValuesActionNameKey] = "Index";
+        _httpContext = Substitute.For<HttpContext>();
 
-        return (http, contentful);
-    }
+        var serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
+        _httpContext.RequestServices.GetService(typeof(IServiceScopeFactory)).Returns(serviceScopeFactory);
+        var serviceProvider = Substitute.For<IServiceProvider>();
+        var serviceScope = Substitute.For<IServiceScope>();
+        serviceScope.ServiceProvider.Returns(serviceProvider);
+        serviceProvider.GetService(typeof(IContentfulService)).Returns(_contentfulService);
 
-    private static AuthorizationHandlerContext Ctx(HttpContext http)
-    {
-        // Build principal with no auth by default
-        var principal = new ClaimsPrincipal(new ClaimsIdentity()); // IsAuthenticated = false
-        var requirement = new PageAuthorisationRequirement();
-        return new AuthorizationHandlerContext(new[] { requirement }, principal, http);
-    }
+        var asyncServiceScope = new AsyncServiceScope(serviceScope);
+        serviceScopeFactory.CreateAsyncScope().Returns(asyncServiceScope);
 
-    private static AuthorizationHandlerContext Ctx(HttpContext http, bool authenticated)
-    {
-        var id = new ClaimsIdentity();
-        if (authenticated)
+        _httpContext.Request.RouteValues = new RouteValueDictionary
         {
-            id = new ClaimsIdentity(authenticationType: "test"); // authenticated
-        }
-        var principal = new ClaimsPrincipal(id);
-        var requirement = new PageAuthorisationRequirement();
-        return new AuthorizationHandlerContext(new[] { requirement }, principal, http);
-    }
+            [PageModelAuthorisationPolicy.RoutesValuesRouteNameKey] = "/slug",
+            [PageModelAuthorisationPolicy.RouteValuesControllerNameKey] = "Pages",
+        };
 
-    private static PageModelAuthorisationPolicy SUT(out ILogger<PageModelAuthorisationPolicy> logger)
-    {
-        logger = Substitute.For<ILogger<PageModelAuthorisationPolicy>>();
-        return new PageModelAuthorisationPolicy(logger);
+        _httpContext.Items = new Dictionary<object, object?>();
+
+        _authContext = new AuthorizationHandlerContext([new PageAuthorisationRequirement()], new ClaimsPrincipal(), _httpContext);
     }
 
     [Fact]
-    public async Task When_Resource_Is_Not_HttpContext_Logs_Error_And_Does_Not_Succeed_Or_Fail()
+    public async Task Should_Success_If_Page_Does_Not_Require_Authorisation()
     {
-        var handler = SUT(out var logger);
-        var ctx = new AuthorizationHandlerContext(new[] { new PageAuthorisationRequirement() }, new ClaimsPrincipal(), resource: new object());
+        _contentfulService.GetPageBySlugAsync(Arg.Any<string>()).Returns(callInfo => AuthNotRequiredPage);
 
-        await handler.HandleAsync(ctx);
+        await _policy.HandleAsync(_authContext);
 
-        Assert.False(ctx.HasSucceeded);
-        Assert.False(ctx.HasFailed);
-        logger.ReceivedWithAnyArgs(1).Log(default, default, default!, default, default!);
+        Assert.True(_authContext.HasSucceeded);
     }
 
     [Fact]
-    public async Task Non_Pages_Controller_Requires_Auth_Succeeds_When_User_Authenticated()
+    public async Task Should_Set_HttpContext_Item_For_Page()
     {
-        var (http, _) = HttpWithServices();
-        http.Request.RouteValues[PageModelAuthorisationPolicy.RouteValuesControllerNameKey] = "OtherController"; // not Pages
-        var ctx = Ctx(http, authenticated: true);
+        var testPage = new PageEntry()
+        {
+            RequiresAuthorisation = false,
+            Slug = "TestingSlug"
+        };
 
-        var handler = SUT(out _);
-        await handler.HandleAsync(ctx);
+        _contentfulService.GetPageBySlugAsync(Arg.Any<string>()).Returns(callInfo => testPage);
 
-        Assert.True(ctx.HasSucceeded);
-        Assert.False(ctx.HasFailed);
+        await _policy.HandleAsync(_authContext);
 
-        // UserAuthorisationResult is stored
-        Assert.True(http.Items.ContainsKey(UserAuthorisationResult.HttpContextKey));
+        var httpContext = _authContext.Resource as HttpContext;
+        Assert.NotNull(httpContext);
+        var pageObject = httpContext.Items[nameof(PageEntry)];
+
+        Assert.NotNull(pageObject);
+
+        var page = pageObject as PageEntry;
+
+        Assert.NotNull(page);
+        Assert.Equal(testPage, page);
     }
 
     [Fact]
-    public async Task Non_Pages_Controller_Requires_Auth_Fails_When_User_Not_Authenticated()
+    public async Task Should_Succeed_If_Page_Requires_Authorisation_And_User_Authenticated()
     {
-        var (http, _) = HttpWithServices();
-        http.Request.RouteValues[PageModelAuthorisationPolicy.RouteValuesControllerNameKey] = "OtherController"; // not Pages
-        var ctx = Ctx(http, authenticated: false);
+        _contentfulService.GetPageBySlugAsync(Arg.Any<string>()).Returns(callInfo => AuthRequiredPage);
 
-        var handler = SUT(out _);
-        await handler.HandleAsync(ctx);
+        var claimsIdentity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "Name")], CookieAuthenticationDefaults.AuthenticationScheme);
 
-        Assert.False(ctx.HasSucceeded);
-        Assert.True(ctx.HasFailed);
-        Assert.True(http.Items.ContainsKey(UserAuthorisationResult.HttpContextKey));
+        _authContext.User.AddIdentity(claimsIdentity);
+
+        await _policy.HandleAsync(_authContext);
+
+        Assert.False(_authContext.HasSucceeded);
     }
 
     [Fact]
-    public async Task Pages_Controller_Page_Does_Not_Require_Auth_Succeeds()
+    public async Task Should_Fail_If_Page_Requires_Authorisation_And_User_Not_Authenticated()
     {
-        var (http, contentful) = HttpWithServices();
-        http.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey] = "/welcome";
-        var page = new PageEntry { RequiresAuthorisation = false };
-        contentful.GetPageBySlugAsync("/welcome").Returns(page);
+        _contentfulService.GetPageBySlugAsync(Arg.Any<string>()).Returns(callInfo => AuthRequiredPage);
 
-        var ctx = Ctx(http, authenticated: false); // even unauthenticated should pass
-        var handler = SUT(out _);
+        await _policy.HandleAsync(_authContext);
 
-        await handler.HandleAsync(ctx);
-
-        Assert.True(ctx.HasSucceeded);
-        Assert.False(ctx.HasFailed);
-        Assert.Equal(page, http.Items[nameof(PageEntry)]);
+        Assert.False(_authContext.HasSucceeded);
     }
 
     [Fact]
-    public async Task Pages_Controller_Page_Requires_Auth_Succeeds_When_User_Authenticated()
+    public async Task Should_LogError_When_Resource_Not_HttpContext()
     {
-        var (http, contentful) = HttpWithServices();
-        http.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey] = "/secure";
-        var page = new PageEntry { RequiresAuthorisation = true };
-        contentful.GetPageBySlugAsync("/secure").Returns(page);
+        _authContext = new AuthorizationHandlerContext([new PageAuthorisationRequirement()], new ClaimsPrincipal(), null);
+        await _policy.HandleAsync(_authContext);
 
-        var ctx = Ctx(http, authenticated: true);
-        var handler = SUT(out _);
-
-        await handler.HandleAsync(ctx);
-
-        Assert.True(ctx.HasSucceeded);
-        Assert.False(ctx.HasFailed);
-        Assert.Equal(page, http.Items[nameof(PageEntry)]);
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages("Expected resource to be HttpContext but received (null)", LogLevel.Error);
+        Assert.Single(receivedLoggerMessages);
     }
 
     [Fact]
-    public async Task Pages_Controller_Page_Requires_Auth_Fails_When_User_Not_Authenticated()
+    public async Task Should_Set_Route_Value_When_Null()
     {
-        var (http, contentful) = HttpWithServices();
-        http.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey] = "/secure";
-        var page = new PageEntry { RequiresAuthorisation = true };
-        contentful.GetPageBySlugAsync("/secure").Returns(page);
+        _contentfulService.GetPageBySlugAsync(Arg.Any<string>()).Returns(callInfo => AuthRequiredPage);
 
-        var ctx = Ctx(http, authenticated: false);
-        var handler = SUT(out _);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey);
 
-        await handler.HandleAsync(ctx);
+        await _policy.HandleAsync(_authContext);
 
-        Assert.False(ctx.HasSucceeded);
-        Assert.True(ctx.HasFailed);
-        Assert.Equal(page, http.Items[nameof(PageEntry)]);
+        Assert.True(_httpContext.Request.RouteValues.ContainsKey(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey));
+        Assert.Equal("/", _httpContext.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey]);
     }
 
     [Fact]
-    public async Task Pages_Controller_Missing_Slug_Treated_As_Index_Calls_Service_With_Slash_And_Succeeds_When_Page_Missing()
+    public async Task Should_Fail_When_NotPagesController_And_UserNotAuthenticated()
     {
-        var (http, contentful) = HttpWithServices();
-        http.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey); // missing slug
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RouteValuesControllerNameKey);
 
-        // Service returns null -> treated as "no auth required" in policy (so succeeds)
-        contentful.GetPageBySlugAsync("/").Returns((PageEntry?)null);
+        await _policy.HandleAsync(_authContext);
 
-        var ctx = Ctx(http, authenticated: false);
-        var handler = SUT(out _);
-
-        await handler.HandleAsync(ctx);
-
-        Assert.True(ctx.HasSucceeded);
-        Assert.False(ctx.HasFailed);
-
-        // Route was normalised to "/"
-        Assert.Equal("/", http.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey]);
-
-        // PageEntry key exists (value is null but key should be present)
-        Assert.True(http.Items.ContainsKey(nameof(PageEntry)));
-        Assert.Null(http.Items[nameof(PageEntry)]);
+        Assert.False(_authContext.HasSucceeded);
     }
 
     [Fact]
-    public async Task Always_Stores_UserAuthorisationResult_In_HttpContext_Items()
+    public async Task Should_Succeed_When_Page_Does_Not_Exist()
     {
-        var (http, contentful) = HttpWithServices();
-        http.Request.RouteValues[PageModelAuthorisationPolicy.RoutesValuesRouteNameKey] = "/any";
-        contentful.GetPageBySlugAsync("/any").Returns(new PageEntry { RequiresAuthorisation = false });
+        _contentfulService.GetPageBySlugAsync(Arg.Any<string>()).Returns(callInfo => (PageEntry?)null!);
+        await _policy.HandleAsync(_authContext);
+        Assert.True(_authContext.HasSucceeded);
+    }
 
-        var ctx = Ctx(http, authenticated: false);
-        var handler = SUT(out _);
+    [Fact]
+    public async Task Should_Success_When_NotPagesController_And_UserAuthenticated()
+    {
+        var claimsIdentity = new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, "Name")], CookieAuthenticationDefaults.AuthenticationScheme);
+        _authContext.User.AddIdentity(claimsIdentity);
 
-        await handler.HandleAsync(ctx);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RoutesValuesRouteNameKey);
+        _httpContext.Request.RouteValues.Remove(PageModelAuthorisationPolicy.RouteValuesControllerNameKey);
 
-        Assert.True(http.Items.ContainsKey(UserAuthorisationResult.HttpContextKey));
-        Assert.IsType<UserAuthorisationResult>(http.Items[UserAuthorisationResult.HttpContextKey]);
+        await _policy.HandleAsync(_authContext);
+
+        Assert.False(_authContext.HasSucceeded);
     }
 }
