@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -17,7 +18,7 @@ public class PagesViewBuilder(
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
     CurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView = "~/Views/Recommendations/CategoryLandingPage.cshtml";
 
