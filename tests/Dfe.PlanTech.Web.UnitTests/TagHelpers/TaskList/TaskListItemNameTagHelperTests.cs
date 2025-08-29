@@ -1,13 +1,13 @@
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 
-namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
+namespace Dfe.PlanTech.Web.UnitTests.TagHelpers.TaskList;
 
-public class TaskListTagHelperTests
+public class TaskListItemNameTagHelperTests
 {
     [Fact]
     public void Should_Set_Variables()
     {
-        var taskListItemNameTagHelper = new TaskListTagHelper();
+        var taskListItemNameTagHelper = new TaskListItemNameTagHelper();
 
         Assert.NotNull(taskListItemNameTagHelper.Class);
         Assert.NotNull(taskListItemNameTagHelper.TagName);
