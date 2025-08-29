@@ -5,7 +5,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context;
 using Microsoft.AspNetCore.Http;
-using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
 
