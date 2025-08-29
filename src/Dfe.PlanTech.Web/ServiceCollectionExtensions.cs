@@ -215,7 +215,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<GroupsDashboardViewComponentViewBuilder>();
         services.AddTransient<GroupsViewBuilder>();
         services.AddTransient<IPagesViewBuilder, PagesViewBuilder>();
-        services.AddTransient<QuestionsViewBuilder>();
+        services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();
         services.AddTransient<RecommendationsViewBuilder>();
         services.AddTransient<ReviewAnswersViewBuilder>();
 

@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Web.Attributes;
-using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,11 +12,11 @@ public class QuestionsController : BaseController<QuestionsController>
 {
     public const string Controller = "Questions";
 
-    private readonly QuestionsViewBuilder _questionsViewBuilder;
+    private readonly IQuestionsViewBuilder _questionsViewBuilder;
 
     public QuestionsController(
         ILogger<QuestionsController> logger,
-        QuestionsViewBuilder questionsViewBuilder
+        IQuestionsViewBuilder questionsViewBuilder
     ) : base(logger)
     {
         _questionsViewBuilder = questionsViewBuilder ?? throw new ArgumentNullException(nameof(questionsViewBuilder));
