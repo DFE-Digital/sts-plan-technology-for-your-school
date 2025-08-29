@@ -1,5 +1,4 @@
-﻿using System.Net.Http;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Text;
 using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Web.Authorisation.Policies;
