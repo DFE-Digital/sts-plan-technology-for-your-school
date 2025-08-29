@@ -1,6 +1,6 @@
 using System.ComponentModel;
-using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Enums;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.Helpers;
 
@@ -11,7 +11,7 @@ public static class HeaderExtensions
     public const string LARGE = "govuk-heading-l";
     public const string EXTRALARGE = "govuk-heading-xl";
 
-    public static string GetClassForSize(this Header header) => header.Size switch
+    public static string GetClassForSize(this ComponentHeaderEntry header) => header.Size switch
     {
         HeaderSize.Small => SMALL,
         HeaderSize.Medium => MEDIUM,

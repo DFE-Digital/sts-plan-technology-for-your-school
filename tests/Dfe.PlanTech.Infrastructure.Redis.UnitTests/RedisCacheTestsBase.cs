@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Domain.Background;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Application.Background;
+using Dfe.PlanTech.Core.Contentful.Models;
 using NSubstitute;
 using StackExchange.Redis;
 
@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
 public class RedisCacheTestsBase
 {
     protected const string Key = "testKey";
-    protected string Value = JsonSerialiser.Serialise(new InsetText { Text = "This is text" });
+    protected string Value = JsonSerialiser.Serialise(new ComponentInsetTextEntry { Text = "This is text" });
 
     protected readonly IDatabase Database = Substitute.For<IDatabase>();
     protected readonly IBackgroundTaskQueue BackgroundTaskQueue = Substitute.For<IBackgroundTaskQueue>();

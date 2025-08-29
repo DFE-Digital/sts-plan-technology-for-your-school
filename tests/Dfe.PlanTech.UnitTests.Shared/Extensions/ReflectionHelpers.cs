@@ -1,10 +1,10 @@
 using System.Reflection;
 
-namespace Dfe.PlanTech;
+namespace Dfe.PlanTech.UnitTests.Shared.Extensions;
 
 public static class ReflectionHelpers
 {
-    public static async Task InvokeNonPublicAsyncMethod(this object toInvoke, string methodName, object?[]? parameters)
+    public static async Task InvokeNonPublicAsyncMethod(this object toInvoke, string methodName, object[] parameters)
     {
         try
         {
@@ -17,14 +17,14 @@ public static class ReflectionHelpers
         }
     }
 
-    public static object InvokeNonPublicMethod(this object toInvoke, string methodName, object?[]? parameters)
+    public static object InvokeNonPublicMethod(this object toInvoke, string methodName, object[] parameters)
         => toInvoke.InvokeNonPublicMethod(toInvoke.GetType(), methodName, parameters);
 
-    public static object InvokeNonPublicMethod<T>(this object toInvoke, string methodName, object?[]? parameters)
+    public static object InvokeNonPublicMethod<T>(this object toInvoke, string methodName, object[] parameters)
         => toInvoke.InvokeNonPublicMethod(typeof(T), methodName, parameters);
 
 
-    public static object InvokeNonPublicMethod(this object toInvoke, Type type, string methodName, object?[]? parameters)
+    public static object InvokeNonPublicMethod(this object toInvoke, Type type, string methodName, object[] parameters)
     {
         try
         {

@@ -1,4 +1,4 @@
-@model (string Name, string? SectionSlug, string? RecommendationSlug, string? ErrorMessage)
+@model (string Name, string? SectionSlug, string? ChunkSlug, string? ErrorMessage)
 
 @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage))
 {
@@ -7,7 +7,7 @@
 
 <a asp-route="GetRecommendation"
    asp-route-sectionSlug="@Model.SectionSlug"
-   asp-route-recommendationSlug="@Model.RecommendationSlug"
+   asp-route-chunkSlug="@Model.ChunkSlug"
    class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
     @Model.Name
 </a>

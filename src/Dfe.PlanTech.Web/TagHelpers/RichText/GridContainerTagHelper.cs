@@ -1,21 +1,23 @@
-﻿using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers.RichText;
 
-public class GridContainerTagHelper(ILogger<GridContainerTagHelper> logger, ICardContainerContentPartRenderer cardContentPartRenderer) : TagHelper
+public class GridContainerTagHelper(
+    ILogger<GridContainerTagHelper> logger,
+    ICardContainerContentPartRenderer cardContentPartRenderer
+) : TagHelper
 {
-    private readonly ILogger<GridContainerTagHelper> _logger = logger;
-    private readonly ICardContainerContentPartRenderer _cardContentPartRenderer = cardContentPartRenderer;
+    private readonly ICardContainerContentPartRenderer _cardContentPartRenderer = cardContentPartRenderer ?? throw new ArgumentNullException(nameof(cardContentPartRenderer));
 
-    public IReadOnlyList<CsCard>? Content { get; set; }
+    public IReadOnlyList<ComponentCardEntry>? Content { get; set; }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {
-        if (Content == null)
+        if (Content is null)
         {
-            _logger.LogWarning("Missing content");
+            logger.LogWarning("Missing content");
             return;
         }
 

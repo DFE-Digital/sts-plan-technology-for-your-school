@@ -1,6 +1,4 @@
-@using Dfe.PlanTech.Application.Constants
-@using Dfe.PlanTech.Web.Controllers
-@model Dfe.PlanTech.Web.Models.ChangeAnswersViewModel
+@model ReviewAnswersViewModel
 
 @section BeforeContent {
     @{
@@ -15,9 +13,9 @@
         <p>Make sure to complete and submit your self-assessment. Answers to incomplete self-assessments will not be saved.</p>
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
         <dl class="govuk-summary-list govuk-!-margin-bottom-0">
-            @foreach (var questionWithAnswer in Model.SubmissionResponses.Responses)
+            @foreach (var questionWithAnswer in Model.SubmissionResponses?.Responses ?? [])
             {
-                var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
+                var anchorLabel = $" your answer for {questionWithAnswer.QuestionText}";
 
                 <div class="govuk-!-margin-bottom-5">
                     <div class="govuk-!-margin-bottom-1">
@@ -29,14 +27,14 @@
                     </div>
 
                     <div class="noprint govuk-!-margin-bottom-5">
-                        <a asp-controller="Questions" asp-action="GetQuestionBySlug"
-                           asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
-                           asp-route-sectionSlug="@Model.SectionSlug"
+                        <a asp-controller="@nameof(QuestionsController).GetControllerNameSlug()" asp-action="@nameof(QuestionsController.GetQuestionBySlug)"
                            asp-route-categorySlug="@Model.CategorySlug"
-                           asp-route-returnTo="ChangeAnswers"
+                           asp-route-sectionSlug="@Model.SectionSlug"
+                           asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
+                           asp-route-returnTo="@nameof(ReviewAnswersController).GetControllerNameSlug()"
                            title="@questionWithAnswer.QuestionText"
                            class="govuk-link">
-                            Change <span class="govuk-visually-hidden">@anchorLabel</span>
+                            Change<span class="govuk-visually-hidden">@anchorLabel</span>
                         </a>
                     </div>
 
@@ -44,11 +42,10 @@
                 </div>
             }
         </dl>
-        <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post" class="noprint">
+        <form asp-controller="ReviewAnswers" asp-action="ConfirmCheckAnswers" method="post" class="noprint">
             <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>
             <input type="hidden" name="sectionName" value="@Model.SectionName">
             <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
-
 
             @if (Model.ErrorMessage != null)
             {

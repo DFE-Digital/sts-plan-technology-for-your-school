@@ -5,6 +5,11 @@ public static class RouteDataExtensions
     public const string DefaultPageTitle = "Plan Technology For Your School";
     public const string SectionSlugKey = "sectionSlug";
 
+    public static string GetControllerNameSlug(this string controllerName)
+    {
+        return controllerName.Replace("Controller", "");
+    }
+
     // Returns the title for the page based on the given RouteData. It retrieves the sectionSlug
     // from the routeData.Values, processes it to ensure it is not empty, and then formats it
     // as a title by replacing hyphens with spaces, converting to Title Case, and adding
@@ -12,21 +17,23 @@ public static class RouteDataExtensions
     // DefaultPageTitle.
     public static string GetTitleForPage(this RouteData routeData)
     {
-        var sectionSlug = routeData.Values.Where(routePart =>
-                                        {
-                                            if (routePart.Key == SectionSlugKey)
-                                            {
-                                                return true;
-                                            }
+        var sectionSlug = routeData.Values
+            .Where(routePart =>
+                {
+                    if (routePart.Key == SectionSlugKey)
+                    {
+                        return true;
+                    }
 
-                                            var routePartValue = routePart.Value as string;
+                    var routePartValue = routePart.Value as string;
 
 
-                                            return !string.IsNullOrEmpty(routePartValue) && routePartValue != "/" && !routePartValue.Any(char.IsNumber);
-                                        })
-                                        .OrderByDescending(routePart => routePart.Key)
-                                        .Select(routePart => routePart.Value!.ToString())
-                                        .FirstOrDefault();
+                    return !string.IsNullOrEmpty(routePartValue) && routePartValue != "/" && !routePartValue.Any(char.IsNumber);
+                }
+            )
+            .OrderByDescending(routePart => routePart.Key)
+            .Select(routePart => routePart.Value!.ToString())
+            .FirstOrDefault();
 
         if (string.IsNullOrEmpty(sectionSlug))
             return DefaultPageTitle;

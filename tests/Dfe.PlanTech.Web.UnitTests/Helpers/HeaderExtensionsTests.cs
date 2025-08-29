@@ -1,70 +1,35 @@
-using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Models;
+﻿using System.ComponentModel;
+using Dfe.PlanTech.Core.Contentful.Enums;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.Helpers;
-using Xunit;
 
-namespace Dfe.PlanTech.Web.UnitTests.Helpers
+namespace Dfe.PlanTech.Web.UnitTests.Helpers;
+
+public class HeaderExtensionsTests
 {
-    public class HeaderExtensionsTests
+    private static ComponentHeaderEntry Header(HeaderSize size) => new ComponentHeaderEntry { Size = size };
+
+    [Theory]
+    [InlineData(HeaderSize.Small, HeaderExtensions.SMALL)]
+    [InlineData(HeaderSize.Medium, HeaderExtensions.MEDIUM)]
+    [InlineData(HeaderSize.Large, HeaderExtensions.LARGE)]
+    [InlineData(HeaderSize.ExtraLarge, HeaderExtensions.EXTRALARGE)]
+    public void GetClassForSize_Returns_Expected_Class(HeaderSize size, string expected)
     {
-        [Fact]
-        public void Should_ReturnSmall_When_SmallTag()
-        {
-            var header = new Header()
-            {
-                Text = "Test",
-                Size = HeaderSize.Small,
-                Tag = HeaderTag.H1
-            };
+        var header = Header(size);
 
-            var classForHeader = header.GetClassForSize();
+        var result = header.GetClassForSize();
 
-            Assert.Equal(HeaderExtensions.SMALL, classForHeader);
-        }
+        Assert.Equal(expected, result);
+    }
 
-        [Fact]
-        public void Should_ReturnMedium_When_MediumTag()
-        {
-            var header = new Header()
-            {
-                Text = "Test",
-                Size = HeaderSize.Medium,
-                Tag = HeaderTag.H1
-            };
+    [Fact]
+    public void GetClassForSize_Throws_For_Unknown_Enum_Value()
+    {
+        var invalid = (HeaderSize)999;
+        var header = Header(invalid);
 
-            var classForHeader = header.GetClassForSize();
-
-            Assert.Equal(HeaderExtensions.MEDIUM, classForHeader);
-        }
-
-        [Fact]
-        public void Should_ReturnLarge_When_LargeTag()
-        {
-            var header = new Header()
-            {
-                Text = "Test",
-                Size = HeaderSize.Large,
-                Tag = HeaderTag.H1
-            };
-
-            var classForHeader = header.GetClassForSize();
-
-            Assert.Equal(HeaderExtensions.LARGE, classForHeader);
-        }
-
-        [Fact]
-        public void Should_ReturnExtraLarge_When_ExtraLargeTag()
-        {
-            var header = new Header()
-            {
-                Text = "Test",
-                Size = HeaderSize.ExtraLarge,
-                Tag = HeaderTag.H1
-            };
-
-            var classForHeader = header.GetClassForSize();
-
-            Assert.Equal(HeaderExtensions.EXTRALARGE, classForHeader);
-        }
+        var ex = Assert.Throws<InvalidEnumArgumentException>(() => header.GetClassForSize());
+        Assert.Contains("Could not find header size", ex.Message);
     }
 }

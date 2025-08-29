@@ -1,5 +1,6 @@
-import { Then, When } from "@cucumber/cucumber";
+import { Then } from "@cucumber/cucumber";
 import { expect } from "@playwright/test";
+import { textToHyphenatedUrl } from "../../helpers/url";
 
 function toKebabCase(input: string): string {
   return input
@@ -27,18 +28,18 @@ Then('I click the view or update self-assessment link for {string}', async funct
   expect(currentUrl.endsWith(expectedPath)).toBe(true);
 });
 
-Then('I should see the back to recommendations button for {string}', async function (sectionName: string) {
-  const kebabCaseSection = toKebabCase(sectionName);
-  const expectedHref = `/recommendations/from-section/${kebabCaseSection}`;
+Then('I should see the back to recommendations button for the category {string}', async function (categoryName: string) {
+  const expectedCategory = textToHyphenatedUrl(categoryName.toLowerCase());
+  const expectedHref = `/${expectedCategory}`;
 
-  const backButton = this.page.getByRole('button', { name: 'Back to recommendations' });
+  const backLink = this.page.getByRole('link', { name: 'Back to recommendations' });
 
-  // Check button exists and has correct text
-  await expect(backButton).toHaveCount(1);
-  await expect(backButton).toHaveText('Back to recommendations');
+  // Check link exists and has correct text
+  await expect(backLink).toHaveCount(1);
+  await expect(backLink).toHaveText('Back to recommendations');
 
   // Check href
-  const actualHref = await backButton.getAttribute('href');
+  const actualHref = await backLink.getAttribute('href');
   expect(actualHref).toBe(expectedHref);
 });
 
@@ -57,7 +58,7 @@ Then('I click the change link on change answers for {string} and I should see th
 });
 
 
-Then('I should see the following change answer rows:', async function (dataTable) {
+Then('I should see the following ordered change answer rows:', async function (dataTable) {
   const rows = this.page.locator('dl.govuk-summary-list > div');
   const expectedRows = dataTable.hashes(); 
 
@@ -71,17 +72,17 @@ Then('I should see the following change answer rows:', async function (dataTable
     const expectedAnswer = expectedRows[i]['Answer'];
     const expectedHref = expectedRows[i]['Href'];
 
-    const questionLocator = row.locator('p.govuk-\\!-font-weight-bold');
-    const answerLocator = row.locator('p.govuk-body');
+    const question = row.locator('p.govuk-\\!-font-weight-bold');
+    const answer = row.locator('p.govuk-body');
     const changeLink = row.locator('a.govuk-link');
 
-    const actualQuestion = await questionLocator.textContent();
-    const actualAnswer = await answerLocator.textContent();
+    const actualQuestion = (await question.innerText()).trim();
+    const actualAnswer = (await answer.innerText()).trim();
     const actualHref = await changeLink.getAttribute('href');
 
     expect(actualQuestion?.trim()).toBe(expectedQuestion);
     expect(actualAnswer?.trim()).toBe(expectedAnswer);
-    expect(actualHref).toBe(`${expectedHref}?returnTo=ChangeAnswers`);
+    expect(actualHref).toBe(`${expectedHref}?returnTo=ReviewAnswers`);
   }
 });
 

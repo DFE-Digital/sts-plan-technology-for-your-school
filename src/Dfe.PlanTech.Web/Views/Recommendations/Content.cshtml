@@ -1,8 +1,4 @@
-@using Dfe.PlanTech.Application.Constants
-@using Dfe.PlanTech.Domain.Questionnaire.Models
-@using GovUk.Frontend.AspNetCore.TagHelpers
-@using Microsoft.AspNetCore.Mvc.TagHelpers
-@model Dfe.PlanTech.Web.Models.HeaderContentViewModel
+@model HeaderContentViewModel
 
 @{
     var header = Model.Header;
@@ -18,13 +14,13 @@
         @header?.HeaderText
     </h1>
 
-    @foreach (var content in header.Content)
+    @foreach (var content in header?.Content ?? [])
     {
         <partial name="Components/PageComponentFactory" model="@content" />
     }
 </div>
 
-@if (header is RecommendationChunk chunk && chunk.CSLink != null)
+@if (header is RecommendationChunkEntry chunk && chunk.CSLink != null)
 {
     <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
         <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@chunk.CSLink.Url>@chunk.CSLink.LinkText</a>
