@@ -1,13 +1,13 @@
 ﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class FooterLinksViewComponentViewBuilder(
     ILogger<FooterLinksViewComponentViewBuilder> logger,
     IContentfulService contentfulService,
-    CurrentUser currentUser
+    ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
     public Task<List<NavigationLinkEntry>> GetNavigationLinksAsync()

@@ -3,10 +3,11 @@ using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
+using Dfe.PlanTech.Web.Context.Interfaces;
 
 namespace Dfe.PlanTech.Web.Context
 {
-    public class CurrentUser(IHttpContextAccessor contextAccessor)
+    public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
     {
         private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
 
@@ -39,6 +40,7 @@ namespace Dfe.PlanTech.Web.Context
             {
                 throw new InvalidDataException("No Urn for selection");
             }
+            ;
 
             _contextAccessor.HttpContext?.Response.Cookies.Delete("SelectedSchoolUrn");
 

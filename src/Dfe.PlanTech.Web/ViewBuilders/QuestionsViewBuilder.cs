@@ -4,9 +4,10 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
@@ -23,8 +24,8 @@ public class QuestionsViewBuilder(
     IQuestionService questionService,
     ISubmissionService submissionService,
     ContentfulOptionsConfiguration contentfulOptions,
-    CurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser)
+    ICurrentUser currentUser
+) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
     private readonly IQuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));

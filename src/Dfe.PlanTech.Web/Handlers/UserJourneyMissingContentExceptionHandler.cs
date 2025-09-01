@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,12 +11,12 @@ public class UserJourneyMissingContentExceptionHandler(
     ILogger<UserJourneyMissingContentExceptionHandler> logger,
     IConfiguration configuration,
     ISubmissionService submissionService,
-    CurrentUser currentUser
+    ICurrentUser currentUser
 ) : IUserJourneyMissingContentExceptionHandler
 {
     private readonly IConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly CurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+    private readonly ICurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     public const string ErrorMessageConfigKey = "ErrorMessages:ConcurrentUsersOrContentChange";
     public const string ErrorMessageTempDataKey = "SubtopicError";
