@@ -1,19 +1,20 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
+namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser;
+
+[ExcludeFromCodeCoverage]
+public class SystemDetailsViewModel
 {
-    public class SystemDetailsViewModel
+    public string Id { get; init; } = null!;
+
+    public SystemDetailsViewModel(SystemDetails systemDetailsDto)
     {
-        public string Id { get; init; } = null!;
-
-        public SystemDetailsViewModel(SystemDetails systemDetailsDto)
+        if (systemDetailsDto?.Id is null)
         {
-            if (systemDetailsDto?.Id is null)
-            {
-                throw new InvalidDataException($"{nameof(systemDetailsDto)} has no ID");
-            }
-
-            Id = systemDetailsDto.Id;
+            throw new InvalidDataException($"{nameof(systemDetailsDto)} has no ID");
         }
+
+        Id = systemDetailsDto.Id;
     }
 }

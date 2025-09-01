@@ -1,7 +1,9 @@
-﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
+[ExcludeFromCodeCoverage]
 public class HeaderContentViewModel
 {
     public int CurrentRecommendationPageCount { get; set; }

@@ -9,6 +9,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="ViewModels\Interfaces\**" />
+      <Content Remove="ViewModels\Interfaces\**" />
+      <EmbeddedResource Remove="ViewModels\Interfaces\**" />
+      <None Remove="ViewModels\Interfaces\**" />
+    </ItemGroup>
+
+    <ItemGroup>
         <Content Update="Properties\launchSettings.json">
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </Content>
@@ -45,10 +52,6 @@
 
     <ItemGroup>
         <None Remove="Views\Recommendations\" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="ViewModels\Interfaces\" />
     </ItemGroup>
 
     <Target Name="BuildWebAssets" BeforeTargets="Build" Condition="'$(buildWebAssets)' == 'true'">

@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels.Inputs;
 
+[ExcludeFromCodeCoverage]
 public class SubmitAnswerInputViewModel
 {
     [Required]

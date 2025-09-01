@@ -1,21 +1,22 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
+namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser;
+
+[ExcludeFromCodeCoverage]
+public class AnswerViewModel
 {
-    public class AnswerViewModel
+    public SystemDetailsViewModel Sys { get; init; } = null!;
+    public QuestionReferenceViewModel? NextQuestion { get; init; }
+    public string Text { get; init; } = null!;
+
+    public AnswerViewModel(QuestionnaireAnswerEntry answerDto)
     {
-        public SystemDetailsViewModel Sys { get; init; } = null!;
-        public QuestionReferenceViewModel? NextQuestion { get; init; }
-        public string Text { get; init; } = null!;
+        Sys = new SystemDetailsViewModel(answerDto.Sys!);
 
-        public AnswerViewModel(QuestionnaireAnswerEntry answerDto)
+        if (answerDto.NextQuestion is not null)
         {
-            Sys = new SystemDetailsViewModel(answerDto.Sys!);
-
-            if (answerDto.NextQuestion is not null)
-            {
-                NextQuestion = new QuestionReferenceViewModel(answerDto.NextQuestion);
-            }
+            NextQuestion = new QuestionReferenceViewModel(answerDto.NextQuestion);
         }
     }
 }

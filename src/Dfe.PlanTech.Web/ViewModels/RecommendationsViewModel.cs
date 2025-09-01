@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
+[ExcludeFromCodeCoverage]
 public class RecommendationsViewModel
 {
     public string CategoryName { get; init; } = null!;
