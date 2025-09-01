@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
+namespace Dfe.PlanTech.Web.UnitTests.TagHelpers.RichText;
 
 public class RichTextTagHelperTests
 {

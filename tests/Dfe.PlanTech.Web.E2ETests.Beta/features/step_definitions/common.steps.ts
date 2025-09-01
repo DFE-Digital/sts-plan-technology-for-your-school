@@ -240,3 +240,7 @@ Then('in the inset text I should see the following links:', async function (data
     await expect(link).toHaveAttribute('href', Href);
   }
 });
+
+Given('I visit the page {string}', async function (path:string) {
+  await this.page.goto(`${process.env.URL}${path}`);
+});

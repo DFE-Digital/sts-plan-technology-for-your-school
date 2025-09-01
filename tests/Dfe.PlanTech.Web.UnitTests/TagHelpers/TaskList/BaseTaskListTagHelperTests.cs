@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Web.TagHelpers.TaskList;
 
-namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
+namespace Dfe.PlanTech.Web.UnitTests.TagHelpers.TaskList;
 
 public static class Constants
 {

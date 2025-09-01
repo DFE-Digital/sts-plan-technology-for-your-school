@@ -69,14 +69,17 @@ public class PageModelAuthorisationPolicy(
             return new UserAuthorisationResult(true, userAuthorisationStatus);
         }
 
-        PageEntry? page = await GetPageForSlug(httpContext, slug);
-
-        if (page == null)
+        PageEntry? page;
+        try
+        {
+            page = await GetPageForSlug(httpContext, slug);
+        }
+        catch (Exception e)
         {
             return new UserAuthorisationResult(false, userAuthorisationStatus);
         }
 
-        return new UserAuthorisationResult(page.RequiresAuthorisation, userAuthorisationStatus);
+        return new UserAuthorisationResult(page!.RequiresAuthorisation, userAuthorisationStatus);
     }
 
     /// <summary>
