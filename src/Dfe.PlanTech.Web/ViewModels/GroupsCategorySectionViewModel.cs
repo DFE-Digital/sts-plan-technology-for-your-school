@@ -26,7 +26,7 @@ public class GroupsCategorySectionViewModel
         RecommendationSlug = string.IsNullOrEmpty(recommendation.SectionSlug)
             ? string.Empty
             : $"{UrlConstants.GroupsSlug}/recommendations/{recommendation.SectionSlug}";
-        Slug = section.InterstitialPage?.Slug;
+        Slug = section.InterstitialPage.Slug;
 
         if (string.IsNullOrWhiteSpace(Name))
         {

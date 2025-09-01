@@ -1,18 +1,19 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser
+namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser;
+
+[ExcludeFromCodeCoverage]
+public class SectionViewModel
 {
-    public class SectionViewModel
-    {
-        public SystemDetailsViewModel Sys { get; init; } = null!;
-        public string Name { get; init; } = null!;
-        public List<QuestionViewModel> Questions { get; init; } = [];
+    public SystemDetailsViewModel Sys { get; init; } = null!;
+    public string Name { get; init; } = null!;
+    public List<QuestionViewModel> Questions { get; init; } = [];
 
-        public SectionViewModel(QuestionnaireSectionEntry sectionDto)
-        {
-            Sys = new SystemDetailsViewModel(sectionDto.Sys!);
-            Name = sectionDto.Name;
-            Questions = sectionDto.Questions.Select(q => new QuestionViewModel(q)).ToList();
-        }
+    public SectionViewModel(QuestionnaireSectionEntry sectionDto)
+    {
+        Sys = new SystemDetailsViewModel(sectionDto.Sys!);
+        Name = sectionDto.Name;
+        Questions = sectionDto.Questions.Select(q => new QuestionViewModel(q)).ToList();
     }
 }

@@ -1,10 +1,12 @@
-﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
+[ExcludeFromCodeCoverage]
 public class GroupsCustomRecommendationIntroViewModel : IHeaderWithContent
 {
     public List<ContentfulEntry> Content { get; init; } = [];

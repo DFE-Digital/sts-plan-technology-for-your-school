@@ -1,5 +1,8 @@
-﻿namespace Dfe.PlanTech.Web.ViewModels;
+﻿using System.Diagnostics.CodeAnalysis;
 
+namespace Dfe.PlanTech.Web.ViewModels;
+
+[ExcludeFromCodeCoverage]
 public class CategorySectionRecommendationViewModel
 {
     public string? NoRecommendationFoundErrorMessage { get; init; }
