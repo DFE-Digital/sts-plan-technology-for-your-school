@@ -12,7 +12,6 @@ namespace Dfe.PlanTech.Web.Context
         bool IsMat { get; }
         OrganisationModel? Organisation { get; }
         int? UserId { get; }
-
         EstablishmentModel GetEstablishmentModel();
         string? GetGroupSelectedSchool();
         bool IsInRole(string role);
