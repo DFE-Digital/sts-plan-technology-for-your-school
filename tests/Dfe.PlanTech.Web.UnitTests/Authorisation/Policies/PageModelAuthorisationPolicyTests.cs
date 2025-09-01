@@ -1,6 +1,7 @@
 ﻿using System.Security.Claims;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Policies;
 
@@ -151,7 +153,8 @@ public class PageModelAuthorisationPolicyTests
     [Fact]
     public async Task Should_Succeed_When_Page_Does_Not_Exist()
     {
-        _contentfulService.GetPageBySlugAsync(Arg.Any<string>()).Returns(callInfo => (PageEntry?)null!);
+        _contentfulService.GetPageBySlugAsync(Arg.Any<string>())
+            .ThrowsAsync(new ContentfulDataUnavailableException("Arbitrary exception text"));
         await _policy.HandleAsync(_authContext);
         Assert.True(_authContext.HasSucceeded);
     }

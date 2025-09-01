@@ -4,6 +4,6 @@ public record UserAuthorisationResult(bool PageRequiresAuthorisation, UserAuthor
 {
     public const string HttpContextKey = "UserAuthorisationResult";
 
-    public bool CanViewPage => !PageRequiresAuthorisation || UserAuthorisationStatus.IsAuthorised;
+    public bool CanViewPage           => !PageRequiresAuthorisation || UserAuthorisationStatus.IsAuthorised;
     public bool AuthenticationMatches => !PageRequiresAuthorisation || UserAuthorisationStatus.IsAuthenticated;
 }
