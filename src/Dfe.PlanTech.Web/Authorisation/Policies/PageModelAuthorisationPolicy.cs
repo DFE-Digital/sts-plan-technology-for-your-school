@@ -78,7 +78,7 @@ public class PageModelAuthorisationPolicy(
             var page = await GetPageForSlug(httpContext, slug);
             return new UserAuthorisationResult(PageRequiresAuthorisation: page.RequiresAuthorisation, userAuthorisationStatus);
         }
-        catch(ContentfulDataUnavailableException e)
+        catch (ContentfulDataUnavailableException e)
         {
             // Pages which do not have corresponding Contentful entries do not require authorisation(?)
             logger.LogWarning(e, "Could not retrieve page from Contentful for slug {Slug} (not found) therefore unable to determine authorisation requirements, defaulting to allowing access", slug);
