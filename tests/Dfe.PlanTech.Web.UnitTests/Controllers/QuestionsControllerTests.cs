@@ -96,7 +96,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             await _viewBuilder.Received(1).SubmitAnswerAndRedirect(_controller, answerViewModel, categorySlug, sectionSlug, questionSlug, returnTo);
             Assert.IsType<OkResult>(result);
         }
-    
+
         [Fact]
         public void Constructor_WithNullQuestionsViewBuilder_ThrowsArgumentNullException()
         {
