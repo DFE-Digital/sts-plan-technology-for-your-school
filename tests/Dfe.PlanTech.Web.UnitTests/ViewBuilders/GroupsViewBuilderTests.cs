@@ -40,7 +40,7 @@ public class GroupsViewBuilderTests
         sub ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         logger ??= NullLogger<BaseViewBuilder>.Instance;
-        var establishmentId = Guid.Empty;   
+        var establishmentId = Guid.Empty;
 
         // sensible defaults used by multiple tests
         currentUser.EstablishmentId.Returns(999);
