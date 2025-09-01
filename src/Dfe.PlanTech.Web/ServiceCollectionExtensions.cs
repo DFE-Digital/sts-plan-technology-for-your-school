@@ -21,6 +21,7 @@ using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Dfe.PlanTech.Web.Background;
 using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
@@ -158,7 +159,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCurrentUser(this IServiceCollection services)
     {
         return services
-            .AddSingleton<CurrentUser>();
+            .AddSingleton<ICurrentUser, CurrentUser>();
     }
 
     public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)
@@ -213,7 +214,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ICmsViewBuilder, CmsViewBuilder>();
         services.AddTransient<FooterLinksViewComponentViewBuilder>();
         services.AddTransient<GroupsDashboardViewComponentViewBuilder>();
-        services.AddTransient<GroupsViewBuilder>();
+        services.AddTransient<IGroupsViewBuilder, GroupsViewBuilder>();
         services.AddTransient<IPagesViewBuilder, PagesViewBuilder>();
         services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();
         services.AddTransient<IRecommendationsViewBuilder, RecommendationsViewBuilder>();
