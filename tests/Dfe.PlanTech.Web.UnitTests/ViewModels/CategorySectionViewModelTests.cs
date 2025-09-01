@@ -12,8 +12,8 @@ public class CategorySectionViewModelTests
         {
             Sys = new SystemDetails("sec-1"),
             Name = name,
-               InterstitialPage = slug is null
-                ? new PageEntry {  Sys = new SystemDetails(), Slug = string.Empty }
+            InterstitialPage = slug is null
+                ? new PageEntry { Sys = new SystemDetails(), Slug = string.Empty }
                 : new PageEntry { Sys = new SystemDetails("p-1"), Slug = slug }
         };
 

@@ -14,7 +14,7 @@ public class CategoryLandingSectionViewModelTests
             Name = name,
             ShortDescription = shortDesc,
             InterstitialPage = slug is null
-                ? new PageEntry {  Sys = new SystemDetails(), Slug = string.Empty }
+                ? new PageEntry { Sys = new SystemDetails(), Slug = string.Empty }
                 : new PageEntry { Sys = new SystemDetails("p-1"), Slug = slug }
         };
 
