@@ -32,7 +32,7 @@ public class ServiceExceptionHandlerMiddleware(
         var exception = exceptionHandlerPathFeature?.Error;
 
         string redirectUrl = GetRedirectUrlForException(internalErrorSlug, exception);
-        context.Response.Redirect(redirectUrl);
+        context.Response.Redirect($"/{redirectUrl}");
     }
 
     private static string GetRedirectUrlForException(string internalErrorSlug, Exception? exception) =>
