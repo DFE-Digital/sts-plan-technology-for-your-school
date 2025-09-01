@@ -29,8 +29,8 @@ public class CookiesController(
 
         CookiesViewModel cookiesViewModel = new()
         {
-            Title = cookiesPageContent?.Title ?? new ComponentTitleEntry("Cookies"),
-            Content = cookiesPageContent?.Content ?? [],
+            Title = cookiesPageContent.Title ?? new ComponentTitleEntry("Cookies"),
+            Content = cookiesPageContent.Content ?? [],
             Cookie = _cookieService.Cookie,
             ReferrerUrl = referrerUrl ?? "",
         };
