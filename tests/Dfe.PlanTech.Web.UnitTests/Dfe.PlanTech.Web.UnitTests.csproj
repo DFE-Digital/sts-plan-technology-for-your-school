@@ -38,9 +38,10 @@
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Web\Dfe.PlanTech.Web.csproj" />
     <ProjectReference Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj" />
   </ItemGroup>
-    
-  <ItemGroup>
-    <Folder Include="Authorisation\Requirements\" />
-  </ItemGroup>
+
+<ItemGroup>
+  <Folder Include="Middleware\" />
+  <Folder Include="Authorisation\Requirements\" />
+</ItemGroup>
 
 </Project>
