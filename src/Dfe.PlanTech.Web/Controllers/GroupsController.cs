@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Web.Attributes;
-using Dfe.PlanTech.Web.Context;
-using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -10,15 +10,15 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class GroupsController : BaseController<GroupsController>
 {
     public const string GetGroupsRecommendationAction = "GetGroupsRecommendation";
-    public const string GetSchoolDashboardAction = "GetSchoolDashboard";
+    public const string GetSchoolDashboardAction = "GetSchoolDashboardView";
 
-    private readonly CurrentUser _currentUser;
-    private readonly GroupsViewBuilder _groupsViewBuilder;
+    private readonly ICurrentUser _currentUser;
+    private readonly IGroupsViewBuilder _groupsViewBuilder;
 
     public GroupsController(
         ILogger<GroupsController> logger,
-        CurrentUser currentUser,
-        GroupsViewBuilder groupsViewBuilder
+        ICurrentUser currentUser,
+        IGroupsViewBuilder groupsViewBuilder
     ) : base(logger)
     {
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
@@ -37,7 +37,7 @@ public class GroupsController : BaseController<GroupsController>
         await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
         _currentUser.SetGroupSelectedSchool(schoolUrn);
 
-        return RedirectToAction(nameof(GetSchoolDashboardView));
+        return RedirectToAction(GetSchoolDashboardAction);
     }
 
     [HttpGet($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsDashboardSlug}", Name = GetSchoolDashboardAction)]

@@ -2,7 +2,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewModels;
@@ -12,11 +12,11 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class BaseViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    CurrentUser currentUser)
+    ICurrentUser currentUser)
 {
     protected readonly ILogger<BaseViewBuilder> Logger = logger;
     protected IContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    protected CurrentUser CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+    protected ICurrentUser CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     protected int GetUserIdOrThrowException()
     {

@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -21,7 +21,7 @@ public class RecommendationsViewBuilder(
     IContentfulService contentfulService,
     IRecommendationService recommendationService,
     ISubmissionService submissionService,
-    CurrentUser currentUser
+    ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
     private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));

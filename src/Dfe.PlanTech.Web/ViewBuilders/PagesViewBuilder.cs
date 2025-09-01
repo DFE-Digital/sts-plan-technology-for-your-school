@@ -4,7 +4,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -17,17 +17,18 @@ public class PagesViewBuilder(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
-    CurrentUser currentUser
+    ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView = "~/Views/Recommendations/CategoryLandingPage.cshtml";
 
-    private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly ICurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, PageEntry page)
     {
-        if (string.Equals(page.Slug, UrlConstants.HomePage.Replace("/", "")) && CurrentUser.IsMat)
+        if (string.Equals(page.Slug, UrlConstants.HomePage.Replace("/", "")) && _currentUser.IsMat)
         {
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
@@ -44,13 +45,13 @@ public class PagesViewBuilder(
 
         if (page.DisplayOrganisationName)
         {
-            if (!CurrentUser.IsAuthenticated)
+            if (!_currentUser.IsAuthenticated)
             {
                 Logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Id);
             }
             else
             {
-                viewModel.OrganisationName = CurrentUser?.Organisation?.Name;
+                viewModel.OrganisationName = _currentUser.Organisation?.Name;
             }
         }
 

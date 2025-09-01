@@ -1,7 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
@@ -10,7 +10,7 @@ public class CategorySectionViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
     ISubmissionService submissionService,
-    CurrentUser currentUser
+    ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));

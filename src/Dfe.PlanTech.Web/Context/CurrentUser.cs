@@ -39,8 +39,7 @@ namespace Dfe.PlanTech.Web.Context
             if (string.IsNullOrEmpty(selectedSchoolUrn))
             {
                 throw new InvalidDataException("No Urn for selection");
-            }
-            ;
+            };
 
             _contextAccessor.HttpContext?.Response.Cookies.Delete("SelectedSchoolUrn");
 

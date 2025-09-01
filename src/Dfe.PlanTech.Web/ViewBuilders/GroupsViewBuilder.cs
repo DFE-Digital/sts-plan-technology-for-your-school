@@ -4,7 +4,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
@@ -19,12 +19,13 @@ public class GroupsViewBuilder(
     IContentfulService contentfulService,
     IEstablishmentService establishmentService,
     ISubmissionService submissionService,
-    CurrentUser currentUser
+    ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ICurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     private const string SelectASchoolViewName = "GroupsSelectSchool";
     private const string SchoolDashboardViewName = "GroupsSchoolDashboard";
@@ -46,7 +47,7 @@ public class GroupsViewBuilder(
 
         var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, establishmentId);
 
-        var groupName = CurrentUser.GetEstablishmentModel().Name;
+        var groupName = _currentUser.GetEstablishmentModel().Name;
         var title = groupName;
         List<ContentfulEntry> content = selectASchoolPageContent?.Content ?? [];
 
@@ -77,8 +78,8 @@ public class GroupsViewBuilder(
 
         await _establishmentService.RecordGroupSelection(
             userDsiReference,
-            CurrentUser.EstablishmentId,
-            CurrentUser.GetEstablishmentModel(),
+            _currentUser.EstablishmentId,
+            _currentUser.GetEstablishmentModel(),
             selectedEstablishmentUrn,
             selectedEstablishmentName
         );
@@ -86,7 +87,7 @@ public class GroupsViewBuilder(
 
     public async Task<IActionResult> RouteToSchoolDashboardViewAsync(Controller controller)
     {
-        var groupName = CurrentUser.GetEstablishmentModel().Name;
+        var groupName = _currentUser.GetEstablishmentModel().Name;
         var pageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
         List<ContentfulEntry> content = pageContent?.Content ?? [];
 
@@ -141,7 +142,7 @@ public class GroupsViewBuilder(
 
     private async Task<SqlEstablishmentDto> GetCurrentGroupSchoolSelection()
     {
-        var latestSelectionUrn = CurrentUser.GroupSelectedSchoolUrn ?? throw new InvalidDataException("GroupSelectedSchoolUrn is null");
+        var latestSelectionUrn = _currentUser.GroupSelectedSchoolUrn ?? throw new InvalidDataException("GroupSelectedSchoolUrn is null");
 
         return await _establishmentService.GetLatestSelectedGroupSchoolAsync(latestSelectionUrn);
     }
