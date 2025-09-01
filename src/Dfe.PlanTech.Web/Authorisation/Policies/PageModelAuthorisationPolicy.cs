@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Dfe.PlanTech.Infrastructure.SignIn.Models;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
@@ -62,24 +63,33 @@ public class PageModelAuthorisationPolicy(
     {
         var userAuthorisationStatus = httpContext.User.AuthorisationStatus();
 
-        string? slug = GetRequestRoute(httpContext);
-
-        if (slug == null)
+        if (!ControllerIsPagesController(httpContext))
         {
-            return new UserAuthorisationResult(true, userAuthorisationStatus);
+            logger.LogTrace("Request is not from/to the Pages controller. Request is to controller {ControllerName} and action {ActioName}",
+                httpContext.Request.RouteValues[RouteValuesControllerNameKey],
+                httpContext.Request.RouteValues[RouteValuesActionNameKey]);
+
+            return new UserAuthorisationResult(PageRequiresAuthorisation: true, userAuthorisationStatus);
         }
 
-        PageEntry? page;
+        string slug = GetSlugFromRoute(httpContext);
         try
         {
-            page = await GetPageForSlug(httpContext, slug);
+            var page = await GetPageForSlug(httpContext, slug);
+            return new UserAuthorisationResult(PageRequiresAuthorisation: page.RequiresAuthorisation, userAuthorisationStatus);
+        }
+        catch(ContentfulDataUnavailableException e)
+        {
+            // Pages which do not have corresponding Contentful entries do not require authorisation(?)
+            logger.LogWarning(e, "Could not retrieve page from Contentful for slug {Slug} (not found) therefore unable to determine authorisation requirements, defaulting to allowing access", slug);
+            return new UserAuthorisationResult(PageRequiresAuthorisation: false, userAuthorisationStatus);
         }
         catch (Exception e)
         {
-            return new UserAuthorisationResult(false, userAuthorisationStatus);
+            // Every other error should allow access(?)
+            logger.LogError(e, "Could not retrieve page from Contentful for slug {Slug}, unable to determine authorisation requirements, defaulting to allowing access", slug);
+            return new UserAuthorisationResult(PageRequiresAuthorisation: false, userAuthorisationStatus);
         }
-
-        return new UserAuthorisationResult(page!.RequiresAuthorisation, userAuthorisationStatus);
     }
 
     /// <summary>
@@ -89,7 +99,7 @@ public class PageModelAuthorisationPolicy(
     /// The page ias added to the HttpContext for use in the <see cref="PageModelBinder"/>,
     /// to prevent the page being loaded multiple times for a single request
     /// </remarks>
-    private async Task<PageEntry?> GetPageForSlug(HttpContext httpContext, string slug)
+    private async Task<PageEntry> GetPageForSlug(HttpContext httpContext, string slug)
     {
         using var scope = httpContext.RequestServices.CreateAsyncScope();
         var contentfulService = scope.ServiceProvider.GetRequiredService<IContentfulService>();
@@ -97,25 +107,6 @@ public class PageModelAuthorisationPolicy(
         httpContext.Items.Add(nameof(PageEntry), page);
 
         return page;
-    }
-
-    /// <summary>
-    /// Gets the slug from the route if on the pages controller, or null if not.
-    /// </summary>
-    /// <param name="httpContext"></param>
-    /// <returns></returns>
-    private string? GetRequestRoute(HttpContext httpContext)
-    {
-        if (!ControllerIsPagesController(httpContext))
-        {
-            logger.LogTrace("Request is not from/to the Pages controller. Request is to controller {ControllerName} and action {ActioName}",
-                            httpContext.Request.RouteValues[RouteValuesControllerNameKey],
-                            httpContext.Request.RouteValues[RouteValuesActionNameKey]);
-
-            return null;
-        }
-
-        return GetSlugFromRoute(httpContext);
     }
 
     /// <summary>
