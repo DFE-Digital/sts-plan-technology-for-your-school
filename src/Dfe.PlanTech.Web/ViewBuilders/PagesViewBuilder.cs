@@ -24,11 +24,10 @@ public class PagesViewBuilder(
 
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
-    private readonly ICurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, PageEntry page)
     {
-        if (string.Equals(page.Slug, UrlConstants.HomePage.Replace("/", "")) && _currentUser.IsMat)
+        if (string.Equals(page.Slug, UrlConstants.HomePage.Replace("/", "")) && CurrentUser.IsMat)
         {
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
@@ -45,13 +44,13 @@ public class PagesViewBuilder(
 
         if (page.DisplayOrganisationName)
         {
-            if (!_currentUser.IsAuthenticated)
+            if (!CurrentUser.IsAuthenticated)
             {
                 Logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Id);
             }
             else
             {
-                viewModel.OrganisationName = _currentUser.Organisation?.Name;
+                viewModel.OrganisationName = CurrentUser.Organisation?.Name;
             }
         }
 
