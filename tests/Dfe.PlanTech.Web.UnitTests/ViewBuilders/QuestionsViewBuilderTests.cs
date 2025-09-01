@@ -101,7 +101,7 @@ public class QuestionsViewBuilderTests
         return new SubmissionRoutingDataModel(
             "medium",
             nextQuestion,
-            section ,
+            section,
             submissionResponses,
             submissionStatus
         );
