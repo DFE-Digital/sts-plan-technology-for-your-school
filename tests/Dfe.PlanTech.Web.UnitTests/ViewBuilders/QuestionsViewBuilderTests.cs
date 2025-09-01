@@ -348,7 +348,7 @@ public class QuestionsViewBuilderTests
         };
 
         // Submit works
-        _submissionSvc.SubmitAnswerAsync(11, 22, Arg.Any<SubmitAnswerModel>()).Returns(Task.CompletedTask);
+        _submissionSvc.SubmitAnswerAsync(11, 22, Arg.Any<SubmitAnswerModel>()).Returns(1);
 
         // And the next unanswered question exists
         var nextQ = MakeQuestion("Q2", "q-2", "Q2");

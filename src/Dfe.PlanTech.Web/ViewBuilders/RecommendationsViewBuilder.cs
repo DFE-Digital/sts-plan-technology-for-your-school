@@ -128,7 +128,6 @@ public class RecommendationsViewBuilder(
             default:
                 throw new InvalidOperationException($"Invalid journey status - {submissionRoutingData.Status}");
         }
-        ;
     }
 
     public async Task<IActionResult> RouteBySectionSlugAndMaturity(Controller controller, string sectionSlug, string? maturity)
