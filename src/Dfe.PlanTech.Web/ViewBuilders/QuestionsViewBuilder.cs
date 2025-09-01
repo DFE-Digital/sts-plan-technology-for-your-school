@@ -22,8 +22,8 @@ public class QuestionsViewBuilder(
     IContentfulService contentfulService,
     IQuestionService questionService,
     ISubmissionService submissionService,
-    ContentfulOptionsConfiguration contentfulOptions,
-    CurrentUser currentUser
+    ICurrentUser currentUser,
+    ContentfulOptionsConfiguration contentfulOptions
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
     private readonly IQuestionService _questionService = questionService ?? throw new ArgumentNullException(nameof(questionService));

@@ -20,7 +20,7 @@ public class RecommendationsViewBuilder(
     IContentfulService contentfulService,
     IRecommendationService recommendationService,
     ISubmissionService submissionService,
-    CurrentUser currentUser
+    ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
     private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));

@@ -16,7 +16,7 @@ public class PagesViewBuilder(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
-    CurrentUser currentUser
+    ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
     public const string CategoryLandingPageView = "~/Views/Recommendations/CategoryLandingPage.cshtml";

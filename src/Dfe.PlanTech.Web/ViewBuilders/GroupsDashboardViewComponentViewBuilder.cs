@@ -11,7 +11,7 @@ public class GroupsDashboardViewComponentViewBuilder(
     IContentfulService contentfulService,
     IEstablishmentService establishmentService,
     ISubmissionService submissionService,
-    CurrentUser currentUser
+    ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
     private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
