@@ -271,7 +271,7 @@ public class GroupsViewBuilderTests
         // Latest responses (won't be used in null Section path but keep type happy)
         var sub = Substitute.For<ISubmissionService>();
         sub.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
-           .Returns(new SubmissionResponsesModel{ Responses = new List<QuestionWithAnswerModel>(), Submission = new SubmissionEntity });
+           .Returns(new SubmissionResponsesModel { Responses = new List<QuestionWithAnswerModel>(), Submission = new SubmissionEntity });
 
         var sut = CreateServiceUnderTest(contentful: contentful, sub: sub);
         var controller = new TestController();
