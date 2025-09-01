@@ -38,7 +38,7 @@ public class GroupsViewBuilder(
         var dashboardContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
         var categories = dashboardContent.Content?.OfType<QuestionnaireCategoryEntry>();
 
-        if (categories is null)
+        if (categories is null || !categories.Any())
         {
             throw new InvalidDataException("There are no categories to display for the selected page.");
         }
