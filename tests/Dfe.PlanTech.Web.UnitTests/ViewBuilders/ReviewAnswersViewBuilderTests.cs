@@ -326,6 +326,7 @@ public class ReviewAnswersViewBuilderTests
         Assert.True(ctl.TempData.ContainsKey("ErrorMessage"));
         Assert.Equal(ReviewAnswersViewBuilder.InlineRecommendationUnavailableErrorMessage, ctl.TempData["ErrorMessage"]);
         // Route values should carry category & section back to Check Answers page
+        Assert.NotNull(redirect.RouteValues);
         Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
         Assert.Equal("sec", redirect.RouteValues["sectionSlug"]);
     }
