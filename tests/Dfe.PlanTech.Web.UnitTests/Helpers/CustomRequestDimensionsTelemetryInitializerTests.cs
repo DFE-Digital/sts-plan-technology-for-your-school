@@ -74,9 +74,8 @@ public class CustomRequestDimensionsTelemetryInitializerTests
         var sut = new CustomRequestDimensionsTelemetryInitializer(accessor);
         ITelemetry telemetry = new DummyTelemetry();
 
-        // Act (no throw)
-        sut.Initialize(telemetry);
-
-        // Assert: nothing to assert; just verifying it’s a no-op for non-request telemetry
+        // Act & Assert - expect no exceptions (note no Assert.NoThrow in xUnit)
+        var exception = Record.Exception(() => sut.Initialize(telemetry));
+        Assert.Null(exception);
     }
 }
