@@ -15,6 +15,12 @@ namespace Dfe.PlanTech.Core.Models
 
         public bool HasResponses => Responses is not null && Responses.Count != 0;
 
+        public SubmissionResponsesModel(int submissionId, List<QuestionWithAnswerModel> responses)
+        {
+            SubmissionId = submissionId;
+            Responses = responses;
+        }
+
         public SubmissionResponsesModel(SqlSubmissionDto submission, QuestionnaireSectionEntry section)
         {
             SubmissionId = submission.Id;

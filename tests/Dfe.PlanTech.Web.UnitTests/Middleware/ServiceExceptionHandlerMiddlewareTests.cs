@@ -28,7 +28,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             var internalErrorPage = new PageEntry { Slug = InternalErrorSlug };
             contentfulService.GetPageByIdAsync(internalErrorPageId)
-                .Returns(Task.FromResult<PageEntry?>(internalErrorPage));
+                .Returns(Task.FromResult<PageEntry>(internalErrorPage));
 
             _middleware = new ServiceExceptionHandlerMiddleware(errorPagesOptions, contentfulService);
         }

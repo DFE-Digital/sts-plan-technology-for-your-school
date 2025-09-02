@@ -23,6 +23,8 @@ public record QuestionWithAnswerModel
     [Required]
     public DateTime? DateCreated { get; init; } = null!;
 
+    public QuestionWithAnswerModel() { }
+
     public QuestionWithAnswerModel(SqlResponseDto response, QuestionnaireSectionEntry section)
     {
         QuestionSysId = response.Question.ContentfulSysId;
