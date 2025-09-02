@@ -4,14 +4,17 @@ namespace Dfe.PlanTech.Web.Context.Interfaces
 {
     public interface ICurrentUser
     {
-        int? UserId { get; }
         string? DsiReference { get; }
+        string? Email { get; }
         int? EstablishmentId { get; }
-        void SetGroupSelectedSchool(string selectedSchoolUrn);
-        EstablishmentModel GetEstablishmentModel();
         string? GroupSelectedSchoolUrn { get; }
-        bool IsMat { get; }
         bool IsAuthenticated { get; }
+        bool IsMat { get; }
         OrganisationModel? Organisation { get; }
+        int? UserId { get; }
+        EstablishmentModel GetEstablishmentModel();
+        string? GetGroupSelectedSchool();
+        bool IsInRole(string role);
+        void SetGroupSelectedSchool(string selectedSchoolUrn);
     }
 }

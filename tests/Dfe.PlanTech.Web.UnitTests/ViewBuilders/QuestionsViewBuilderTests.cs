@@ -6,7 +6,7 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
@@ -56,8 +56,8 @@ public class QuestionsViewBuilderTests
             _contentful,
             _questionSvc,
             _submissionSvc,
-            _currentUser,
-            _contentfulOptions);
+            _contentfulOptions,
+            _currentUser);
 
     private static Controller MakeControllerWithTempData()
     {

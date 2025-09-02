@@ -3,18 +3,20 @@ using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
+using Dfe.PlanTech.Web.Context.Interfaces;
 
 namespace Dfe.PlanTech.Web.Context;
 
 public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 {
-    private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
+    private readonly IHttpContextAccessor _contextAccessor =
+        contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
 
     public string? DsiReference => GetStringFromClaim(ClaimConstants.NameIdentifier)
-        ?? throw new AuthenticationException("User is not authenticated");
+                                   ?? throw new AuthenticationException("User is not authenticated");
 
     public string? Email => GetNameIdentifierFromClaim(ClaimConstants.VerifiedEmail)
-        ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
+                            ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
 
     public int? EstablishmentId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
 
@@ -54,7 +56,8 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
     {
         var httpContext = _contextAccessor.HttpContext;
 
-        if (httpContext != null && httpContext.Request.Cookies.TryGetValue("SelectedSchoolUrn", out var selectedSchoolUrn))
+        if (httpContext != null &&
+            httpContext.Request.Cookies.TryGetValue("SelectedSchoolUrn", out var selectedSchoolUrn))
         {
             return selectedSchoolUrn;
         }
@@ -65,7 +68,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
     public EstablishmentModel GetEstablishmentModel()
     {
         return _contextAccessor.HttpContext?.User.GetUserOrganisation()
-            ?? throw new InvalidDataException("Establishment was not in expected format");
+               ?? throw new InvalidDataException("Establishment was not in expected format");
     }
 
     private int? GetIntFromClaim(string claimType)
@@ -97,5 +100,6 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
         }
 
         return JsonSerializer.Deserialize<OrganisationModel>(organisationClaim)
-            ?? throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
+               ?? throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
     }
+}
