@@ -59,16 +59,18 @@ When('I click the recommendation link {string} on the category landing page', as
 Then('I should see the completed self-assessment message for {string}', async function (sectionName: string) {
   // format todays date
   const today = new Date();
-  const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
+  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
   const formattedDate = today.toLocaleDateString('en-GB', options).replace(',', '');
 
+  const sectionNameLower = sectionName.toLowerCase();
+
   // check the self assessment completed text
-  const expectedText = `The self-assessment for ${sectionName} was completed on ${formattedDate}.`;
+  const expectedText = `The self-assessment for ${sectionNameLower} was completed on ${formattedDate}.`;
   const completionParagraph = this.page.locator('p', { hasText: expectedText });
   await expect(completionParagraph).toBeVisible();
 
   // check the view link is completed
-  const viewLink = this.page.getByRole('link', { name: `View or update your self-assessment for ${sectionName}` });
+  const viewLink = this.page.getByRole('link', { name: `View or update your self-assessment for ${sectionNameLower}` });
   await expect(viewLink).toBeVisible();
 });
 

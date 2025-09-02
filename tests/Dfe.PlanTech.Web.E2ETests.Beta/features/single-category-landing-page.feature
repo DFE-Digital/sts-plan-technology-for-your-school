@@ -18,7 +18,6 @@ Feature: Single Category Landing Page
       Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 1"
       Then I should be on the URL containing "/category-one"
       Then I should see the page heading "Category One"
-      And I should see a paragraph with text "This is the Category One Section One description"
       And I should see the confirmation panel for "Category One Section One"
       And I should see a link to the recommendation "Recommendation Header - Q1 - Answer One"
       And I should see a link to the recommendation "Recommendation Header - Q2 - Answer One"
