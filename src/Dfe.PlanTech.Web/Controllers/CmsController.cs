@@ -2,7 +2,7 @@ using System.Text.Json;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
-using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels.QaVisualiser;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,10 +13,10 @@ namespace Dfe.PlanTech.Web.Controllers;
 [LogInvalidModelState]
 public class CmsController(
     ILogger<CmsController> logger,
-    CmsViewBuilder viewBuilder
+    ICmsViewBuilder viewBuilder
 ) : BaseController<CmsController>(logger)
 {
-    private readonly CmsViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
+    private readonly ICmsViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
     [HttpPost("webhook")]
     [ValidateApiKey]

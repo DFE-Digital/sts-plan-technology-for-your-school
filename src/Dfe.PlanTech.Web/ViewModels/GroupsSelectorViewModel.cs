@@ -1,8 +1,10 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
+[ExcludeFromCodeCoverage]
 public class GroupsSelectorViewModel
 {
     public string GroupName { get; set; } = null!;

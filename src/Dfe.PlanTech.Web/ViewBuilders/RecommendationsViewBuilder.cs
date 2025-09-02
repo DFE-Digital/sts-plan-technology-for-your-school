@@ -21,7 +21,7 @@ public class RecommendationsViewBuilder(
     IRecommendationService recommendationService,
     ISubmissionService submissionService,
     ICurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
     private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));

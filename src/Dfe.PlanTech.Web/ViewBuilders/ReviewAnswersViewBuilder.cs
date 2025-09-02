@@ -18,7 +18,7 @@ public class ReviewAnswersViewBuilder(
     IContentfulService contentfulService,
     ISubmissionService submissionService,
     ICurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 

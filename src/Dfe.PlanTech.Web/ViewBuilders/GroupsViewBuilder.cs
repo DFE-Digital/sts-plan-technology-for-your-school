@@ -19,7 +19,7 @@ public class GroupsViewBuilder(
     IEstablishmentService establishmentService,
     ISubmissionService submissionService,
     ICurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));

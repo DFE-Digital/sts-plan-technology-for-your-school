@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Web.Attributes;
-using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,11 +10,11 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class RecommendationsController(
     ILogger<RecommendationsController> logger,
-    RecommendationsViewBuilder recommendationsViewBuilder
+    IRecommendationsViewBuilder recommendationsViewBuilder
 )
     : BaseController<RecommendationsController>(logger)
 {
-    private readonly RecommendationsViewBuilder _recommendationsViewBuilder = recommendationsViewBuilder ?? throw new ArgumentNullException(nameof(recommendationsViewBuilder));
+    private readonly IRecommendationsViewBuilder _recommendationsViewBuilder = recommendationsViewBuilder ?? throw new ArgumentNullException(nameof(recommendationsViewBuilder));
 
     public const string ControllerName = "Recommendations";
     public const string GetSingleRecommendationAction = nameof(GetSingleRecommendation);

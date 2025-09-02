@@ -21,11 +21,13 @@ using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Dfe.PlanTech.Web.Background;
 using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Factories;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -158,7 +160,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCurrentUser(this IServiceCollection services)
     {
         return services
-            .AddSingleton<CurrentUser>();
+            .AddSingleton<ICurrentUser, CurrentUser>();
     }
 
     public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)
@@ -210,14 +212,14 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddRoutingServices(this IServiceCollection services)
     {
         services.AddTransient<CategorySectionViewComponentViewBuilder>();
-        services.AddTransient<CmsViewBuilder>();
+        services.AddTransient<ICmsViewBuilder, CmsViewBuilder>();
         services.AddTransient<FooterLinksViewComponentViewBuilder>();
         services.AddTransient<GroupsDashboardViewComponentViewBuilder>();
-        services.AddTransient<GroupsViewBuilder>();
-        services.AddTransient<PagesViewBuilder>();
-        services.AddTransient<QuestionsViewBuilder>();
-        services.AddTransient<RecommendationsViewBuilder>();
-        services.AddTransient<ReviewAnswersViewBuilder>();
+        services.AddTransient<IGroupsViewBuilder, GroupsViewBuilder>();
+        services.AddTransient<IPagesViewBuilder, PagesViewBuilder>();
+        services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();
+        services.AddTransient<IRecommendationsViewBuilder, RecommendationsViewBuilder>();
+        services.AddTransient<IReviewAnswersViewBuilder, ReviewAnswersViewBuilder>();
 
         return services;
     }

@@ -99,4 +99,3 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
         return JsonSerializer.Deserialize<OrganisationModel>(organisationClaim)
             ?? throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
     }
-}

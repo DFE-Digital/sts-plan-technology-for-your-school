@@ -17,12 +17,12 @@ public class PagesViewBuilder(
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
     ICurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView = "~/Views/Recommendations/CategoryLandingPage.cshtml";
 
-    private ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, PageEntry page)
     {
@@ -49,7 +49,7 @@ public class PagesViewBuilder(
             }
             else
             {
-                viewModel.OrganisationName = CurrentUser?.Organisation?.Name;
+                viewModel.OrganisationName = CurrentUser.Organisation?.Name;
             }
         }
 
