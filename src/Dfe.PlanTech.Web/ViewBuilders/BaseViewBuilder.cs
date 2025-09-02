@@ -12,7 +12,8 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class BaseViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser)
+    ICurrentUser currentUser
+)
 {
     protected readonly ILogger<BaseViewBuilder> Logger = logger;
     protected IContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
