@@ -92,7 +92,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         Assert.Equal("cat-slug", vm.CategorySlug);
         Assert.NotNull(vm.ProgressRetrievalErrorMessage);
         Assert.NotEmpty(vm.CategoryLandingSections);
-        Assert.All(vm.CategoryLandingSections, s => Assert.True(s.ProgressStatus == SectionProgressStatus.RetrievalError));
+        Assert.All(vm.CategoryLandingSections, s => Assert.Equal(SectionProgressStatus.RetrievalError, s.ProgressStatus));
     }
 
     [Theory]
