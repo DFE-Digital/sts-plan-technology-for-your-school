@@ -228,6 +228,7 @@ public class RecommendationsViewBuilderTests
         // Assert
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(QuestionsController.GetQuestionBySlug), redirect.ActionName);
+        Assert.NotNull(redirect.RouteValues);
         Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
         Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
         Assert.Equal("q-2", redirect.RouteValues["Slug"] ?? redirect.RouteValues["questionSlug"]); // handle either anon type naming
@@ -297,6 +298,7 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("Subtopic", vm.SectionName);
         Assert.Equal("sec-1", vm.SectionSlug);
         Assert.Equal(2, vm.Chunks.Count);
+        Assert.NotNull(routing.Submission);
         Assert.Equal(routing.Submission.Responses, vm.SubmissionResponses);
         // Formatted date check (accept either exact DateHelper format or non-null)
         Assert.NotNull(vm.LatestCompletionDate);

@@ -191,6 +191,7 @@ public class QuestionsViewBuilderTests
         // Assert
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(QuestionsController.GetQuestionBySlug), redirect.ActionName);
+        Assert.NotNull(redirect.RouteValues);
         Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
         Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
         Assert.Equal("q-2", redirect.RouteValues["questionSlug"]);
@@ -215,6 +216,7 @@ public class QuestionsViewBuilderTests
         // Assert
         // Helper returns a RedirectToActionResult – only assert that we got a redirect with expected route values
         var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.NotNull(redirect.RouteValues);
         Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
         Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
     }
@@ -250,6 +252,7 @@ public class QuestionsViewBuilderTests
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
         Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
+        Assert.NotNull(redirect.RouteValues);
         Assert.Equal(UrlConstants.Home, redirect.RouteValues["route"]);
     }
 
@@ -322,6 +325,7 @@ public class QuestionsViewBuilderTests
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", view.ViewName);
         var model = Assert.IsType<QuestionViewModel>(view.Model);
+        Assert.NotNull(model.ErrorMessages);
         Assert.Contains("Save failed. Please try again later.", model.ErrorMessages);
     }
 
@@ -362,6 +366,7 @@ public class QuestionsViewBuilderTests
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(QuestionsController.GetQuestionBySlug), redirect.ActionName);
+        Assert.NotNull(redirect.RouteValues);
         Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
         Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
         Assert.Equal("q-2", redirect.RouteValues["questionSlug"]);

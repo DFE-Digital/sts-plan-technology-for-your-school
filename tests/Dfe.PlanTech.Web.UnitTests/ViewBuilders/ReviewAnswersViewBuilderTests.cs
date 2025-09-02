@@ -214,6 +214,7 @@ public class ReviewAnswersViewBuilderTests
         Assert.Equal(ReviewAnswersViewBuilder.CheckAnswersViewName, view.ViewName);
         var vm = Assert.IsType<ReviewAnswersViewModel>(view.Model);
         Assert.Equal("err", vm.ErrorMessage);
+        Assert.NotNull(vm.Content);
         Assert.Single(vm.Content);
         Assert.Equal(UrlConstants.CheckAnswersSlug, vm.Slug);
     }
@@ -266,6 +267,7 @@ public class ReviewAnswersViewBuilderTests
         Assert.Equal("Section 7", vm.SectionName);
         Assert.Equal(999, vm.SubmissionId);
         Assert.NotNull(vm.SubmissionResponses);
+        Assert.NotNull(vm.SubmissionResponses.Responses);
         Assert.Contains(vm.SubmissionResponses.Responses, r => r.AnswerRef == "A1");
 
         // Ensure the clone was requested
