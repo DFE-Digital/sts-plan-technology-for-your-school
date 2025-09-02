@@ -14,6 +14,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
@@ -287,7 +288,7 @@ public class GroupsViewBuilderTests
     public async Task RouteToGroupsRecommendationAsync_Throws_When_Section_Not_Found()
     {
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetSectionBySlugAsync("missing").Returns((QuestionnaireSectionEntry?)null);
+        contentful.GetSectionBySlugAsync("missing").Throws(new ContentfulDataUnavailableException("Arbitrary exception text"));
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
