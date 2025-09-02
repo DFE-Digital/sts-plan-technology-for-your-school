@@ -7,22 +7,23 @@ Then(
     const container = this.page.locator('#main-content');
 
     const today = new Date();
-    const options: Intl.DateTimeFormatOptions = { day: '2-digit', month: 'short', year: 'numeric' };
+    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
     const formattedDate = today.toLocaleDateString('en-GB', options).replace(',', '');
 
     // heading
     const headingEl = container.getByRole('heading', { level: 2, name: heading });
-    await expect(headingEl).toBeVisible();
-
-    // check description
     const descEl = headingEl.locator('xpath=following-sibling::p[1]');
-    await expect(descEl).toHaveText(description);
+    await expect(headingEl).toBeVisible();
 
     const sectionLower = heading.toLowerCase();
 
     if (state === 'not started') {
-      
+
       const linkEl = headingEl.locator('xpath=following-sibling::p[a][1]/a');
+      // check description
+      const descEl = headingEl.locator('xpath=following-sibling::p[1]');
+      await expect(descEl).toHaveText(description);
+
       await expect(linkEl).toBeVisible();
       await expect(linkEl).toHaveText(`Go to self-assessment for ${sectionLower}`);
       await expect(linkEl).toHaveAttribute('href', href);
@@ -30,6 +31,8 @@ Then(
     }
 
     if (state === 'in progress') {
+          // check description
+    await expect(descEl).toHaveText(description);
 
       // <p> with start date + continue link
       const inProgressPara = headingEl.locator(
