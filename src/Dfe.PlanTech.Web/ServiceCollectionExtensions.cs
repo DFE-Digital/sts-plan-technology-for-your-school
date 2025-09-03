@@ -226,7 +226,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddViewComponents(this IServiceCollection services)
     {
-        services.AddTransient<CategoryLandingViewComponentViewBuilder>();
+        services.AddTransient<ICategoryLandingViewComponentViewBuilder, CategoryLandingViewComponentViewBuilder>();
 
         return services;
     }
