@@ -1,14 +1,14 @@
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
 
 public class CategoryLandingViewComponent(
-    CategoryLandingViewComponentViewBuilder viewBuilder
+    ICategoryLandingViewComponentViewBuilder viewBuilder
 ) : ViewComponent
 {
-    private readonly CategoryLandingViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
+    private readonly ICategoryLandingViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
     public async Task<IViewComponentResult> InvokeAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName)
     {

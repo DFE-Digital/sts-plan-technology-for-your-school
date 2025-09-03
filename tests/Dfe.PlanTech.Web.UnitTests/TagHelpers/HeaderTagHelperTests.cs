@@ -1,7 +1,6 @@
 using System.ComponentModel;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;

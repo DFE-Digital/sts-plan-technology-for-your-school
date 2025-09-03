@@ -1,14 +1,14 @@
 ﻿using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
 
 public class GroupsDashboardViewComponent(
-    GroupsDashboardViewComponentViewBuilder viewBuilder
+    IGroupsDashboardViewComponentViewBuilder viewBuilder
 ) : ViewComponent
 {
-    private readonly GroupsDashboardViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
+    private readonly IGroupsDashboardViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
     public async Task<IViewComponentResult> InvokeAsync(QuestionnaireCategoryEntry category)
     {
