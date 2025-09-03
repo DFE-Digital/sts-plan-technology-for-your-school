@@ -211,7 +211,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddRoutingServices(this IServiceCollection services)
     {
-        services.AddTransient<CategorySectionViewComponentViewBuilder>();
+        services.AddTransient<ICategorySectionViewComponentViewBuilder, CategorySectionViewComponentViewBuilder>();
         services.AddTransient<ICmsViewBuilder, CmsViewBuilder>();
         services.AddTransient<FooterLinksViewComponentViewBuilder>();
         services.AddTransient<GroupsDashboardViewComponentViewBuilder>();
