@@ -213,7 +213,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<ICategorySectionViewComponentViewBuilder, CategorySectionViewComponentViewBuilder>();
         services.AddTransient<ICmsViewBuilder, CmsViewBuilder>();
-        services.AddTransient<FooterLinksViewComponentViewBuilder>();
+        services.AddTransient<IFooterLinksViewComponentViewBuilder, FooterLinksViewComponentViewBuilder>();
         services.AddTransient<GroupsDashboardViewComponentViewBuilder>();
         services.AddTransient<IGroupsViewBuilder, GroupsViewBuilder>();
         services.AddTransient<IPagesViewBuilder, PagesViewBuilder>();

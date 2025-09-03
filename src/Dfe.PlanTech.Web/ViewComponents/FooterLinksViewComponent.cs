@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewComponents;
@@ -7,10 +7,10 @@ namespace Dfe.PlanTech.Web.ViewComponents;
 /// View component that retrieves and displays links in the layout's footer
 /// </summary>
 public class FooterLinksViewComponent(
-    FooterLinksViewComponentViewBuilder viewBuilder
+    IFooterLinksViewComponentViewBuilder viewBuilder
 ) : ViewComponent
 {
-    private readonly FooterLinksViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
+    private readonly IFooterLinksViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
     /// <summary>
     /// Retrieve the navigation links using <see cref="IGetNavigationQuery"/> then return the view
