@@ -11,7 +11,7 @@ public class CategoryLandingViewComponentTests
 {
     [Fact]
     public async Task InvokeAsync_ShouldCallBuildViewModelAsync_WithCorrectParameters()
-    { 
+    {
         var viewBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         var component = new CategoryLandingViewComponent(viewBuilder);
 
