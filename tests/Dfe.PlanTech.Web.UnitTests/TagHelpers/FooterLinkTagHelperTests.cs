@@ -1,6 +1,5 @@
 ﻿using System.Reflection;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
