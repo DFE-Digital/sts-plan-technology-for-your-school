@@ -108,22 +108,30 @@ public class GroupsViewBuilder(
 
     public async Task<IActionResult> RouteToGroupsRecommendationAsync(Controller controller, string sectionSlug)
     {
-        var latestSelection = await GetCurrentGroupSchoolSelection();
-        var schoolId = latestSelection.Id;
-        var schoolName = latestSelection.OrgName;
-
-        var viewModel = await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
-
-        if (viewModel is null)
+        try
         {
-            return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
+            var latestSelection = await GetCurrentGroupSchoolSelection();
+            var schoolId = latestSelection.Id;
+            var schoolName = latestSelection.OrgName;
+
+            var viewModel = await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
+
+            if (viewModel is null)
+            {
+                return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
+            }
+
+            // Passes the school name to the Header
+            controller.ViewData["SelectedEstablishmentName"] = viewModel.SelectedEstablishmentName;
+            controller.ViewData["Title"] = viewModel.SectionName;
+
+            return controller.View(SchoolRecommendationsViewName, viewModel);
         }
-
-        // Passes the school name to the Header
-        controller.ViewData["SelectedEstablishmentName"] = viewModel.SelectedEstablishmentName;
-        controller.ViewData["Title"] = viewModel.SectionName;
-
-        return controller.View(SchoolRecommendationsViewName, viewModel);
+        catch (Exception ex)
+        {
+            Logger.LogError(ex.Message, ex);
+            return controller.RedirectToAction(GroupsController.GetSelectASchoolAction);
+        }
     }
 
     public async Task<IActionResult> RouteToRecommendationsPrintViewAsync(Controller controller, string sectionSlug, int schoolId, string schoolName)
