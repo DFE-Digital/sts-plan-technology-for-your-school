@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
@@ -12,7 +13,7 @@ public class GroupsDashboardViewComponentViewBuilder(
     IEstablishmentService establishmentService,
     ISubmissionService submissionService,
     ICurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser)
+) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsDashboardViewComponentViewBuilder
 {
     private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
