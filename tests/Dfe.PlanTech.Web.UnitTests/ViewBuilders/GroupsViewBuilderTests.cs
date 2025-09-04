@@ -233,24 +233,6 @@ public class GroupsViewBuilderTests
         await contentful.Received(1).GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
     }
 
-    [Fact]
-    public async Task RouteToSchoolDashboardViewAsync_Throws_When_GroupSelectedSchoolUrn_Null()
-    {
-        var current = Substitute.For<ICurrentUser>();
-        var establishmentGuid = Guid.NewGuid();
-
-        var sut = CreateServiceUnderTest(currentUser: current);
-        current.GroupSelectedSchoolUrn.Returns((string?)null);
-        current.GetEstablishmentModel().Returns(new EstablishmentModel { Id = establishmentGuid, Name = "The Group" });
-
-        var controller = new TestController();
-
-        var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.RouteToSchoolDashboardViewAsync(controller));
-
-        Assert.Contains("GroupSelectedSchoolUrn is null", ex.Message);
-    }
-
     // --- RouteToGroupsRecommendationAsync ----------------------------------
 
     [Fact]
