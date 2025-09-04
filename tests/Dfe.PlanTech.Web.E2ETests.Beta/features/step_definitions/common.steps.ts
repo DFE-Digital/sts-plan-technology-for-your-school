@@ -100,7 +100,7 @@ Then('I should see a back link to {string}', async function (href: string) {
   expect(actualHref).toContain(href);
 });
 
-Then('I should see a section heading with text {string}', async function (heading: string) {
+Then('I should see a h2 section heading with text {string}', async function (heading: string) {
   const headingLocator = this.page.locator(`h2.govuk-heading-l:has-text("${heading}")`);
   await expect(headingLocator).toBeVisible();
 });
@@ -188,6 +188,12 @@ When('I click the back to {string} link', async function (categoryName: string) 
   const link = this.page.getByRole('link', { name: `Back to ${categoryName}` });
   await link.click();
 });
+
+When('I click the back link', async function () {
+  const backLink = this.page.locator('#back-button-link');
+  await backLink.click();
+});
+
 
 Then('the header should contain all the correct content', async function () {
 
