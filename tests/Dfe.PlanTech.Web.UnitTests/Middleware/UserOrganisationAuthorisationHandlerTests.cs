@@ -1,119 +1,149 @@
 using System.Security.Claims;
-using Dfe.PlanTech.Infrastructure.SignIns.Models;
-using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Infrastructure.SignIn.Models;
+using Dfe.PlanTech.Web.Authorisation.Handlers;
+using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Xunit;
 
-namespace Dfe.PlanTech.Web.UnitTests.Middleware;
-
-public class UserOrganisationAuthorisationHandlerTests
+namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
-    private readonly UserOrganisationAuthorisationHandlerMock _handler;
-    private readonly ILogger<UserOrganisationAuthorisationHandler> _logger;
-
-    public UserOrganisationAuthorisationHandlerTests()
+    public class UserOrganisationAuthorisationHandlerTests
     {
-        _logger = Substitute.For<ILogger<UserOrganisationAuthorisationHandlerMock>>();
-        _handler = new UserOrganisationAuthorisationHandlerMock(_logger);
+        private readonly UserOrganisationAuthorisationHandlerMock _handler;
+        private readonly ILogger<UserOrganisationAuthorisationHandler> _logger;
+
+        public UserOrganisationAuthorisationHandlerTests()
+        {
+            _logger = Substitute.For<ILogger<UserOrganisationAuthorisationHandler>>();
+            _handler = new UserOrganisationAuthorisationHandlerMock(_logger);
+        }
+
+        [Fact]
+        public async Task HandleRequirementAsync_ShouldSucceed_WhenUserCanViewPage()
+        {
+            // Arrange
+            var context = new DefaultHttpContext();
+            var requirement = new UserOrganisationAuthorisationRequirement();
+
+            context.Items[UserAuthorisationResult.HttpContextKey] =
+                    new UserAuthorisationResult(true, new UserAuthorisationStatus(true, true));
+
+            var authContext = new AuthorizationHandlerContext(
+                new[] { requirement },
+                new ClaimsPrincipal(),
+                context
+            );
+
+            await _handler.PublicHandleRequirementAsync(authContext, requirement);
+
+            Assert.True(authContext.HasSucceeded);
+        }
+
+        [Fact]
+        public async Task HandleRequirementAsync_ShouldSucceed_WhenPageRequiresNoAuthorisation()
+        {
+            var context = new DefaultHttpContext();
+            var requirement = new UserOrganisationAuthorisationRequirement();
+
+            context.Items[UserAuthorisationResult.HttpContextKey] =
+                    new UserAuthorisationResult(true, new UserAuthorisationStatus(true, true));
+
+            var authContext = new AuthorizationHandlerContext(
+                new[] { requirement },
+                new ClaimsPrincipal(),
+                context
+            );
+
+            await _handler.PublicHandleRequirementAsync(authContext, requirement);
+
+            Assert.True(authContext.HasSucceeded);
+        }
+
+        [Fact]
+        public async Task HandleRequirementAsync_ShouldFail_WhenUserIsMissingOrganisation()
+        {
+            var logger = Substitute.For<ILogger<UserOrganisationAuthorisationHandler>>();
+            var handler = new UserOrganisationAuthorisationHandlerMock(logger);
+
+            var context = new DefaultHttpContext();
+            context.Request.Path = "/not-signout";
+
+            var requirement = new UserOrganisationAuthorisationRequirement();
+
+            context.Items[UserAuthorisationResult.HttpContextKey] =
+                new UserAuthorisationResult(
+                    true,
+                    new UserAuthorisationStatus(true, false)
+                );
+
+            var authContext = new AuthorizationHandlerContext(
+                new[] { requirement },
+                new ClaimsPrincipal(),
+                context
+            );
+
+            await handler.PublicHandleRequirementAsync(authContext, requirement);
+
+            Assert.False(authContext.HasSucceeded);
+            Assert.True(authContext.HasFailed);
+            Assert.NotEmpty(authContext.FailureReasons);
+        }
+
+
+
+        [Fact]
+        public async Task HandleRequirementAsync_ShouldSucceed_WhenRequestIsSignoutUrl()
+        {
+            var context = new DefaultHttpContext();
+            context.Request.Path = "/auth/sign-out";
+            var requirement = new UserOrganisationAuthorisationRequirement();
+
+            var authContext = new AuthorizationHandlerContext(
+                new[] { requirement },
+                new ClaimsPrincipal(),
+                context
+            );
+
+            await _handler.PublicHandleRequirementAsync(authContext, requirement);
+
+            Assert.True(authContext.HasSucceeded);
+        }
+
+        [Fact]
+        public async Task HandleRequirementAsync_ShouldLogError_WhenResourceIsNotHttpContext()
+        {
+            var requirement = new UserOrganisationAuthorisationRequirement();
+            var notHttpContextResource = new object();
+
+            var authContext = new AuthorizationHandlerContext(
+                new[] { requirement },
+                new ClaimsPrincipal(),
+                notHttpContextResource
+            );
+
+            await _handler.PublicHandleRequirementAsync(authContext, requirement);
+
+            Assert.False(authContext.HasSucceeded);
+            Assert.False(authContext.HasFailed);
+
+            _logger.Received(1).Log(
+                    LogLevel.Error,
+                    Arg.Any<EventId>(),
+                    Arg.Is<object>(o => o != null && o.ToString() == $"Expected resource to be HttpContext but received {typeof(object)}"),
+                    Arg.Any<Exception?>(),
+                    Arg.Any<Func<object, Exception?, string>>()
+                );
+        }
     }
 
-    [Fact]
-    public async Task HandleRequirementAsync_ShouldSucceed_WhenUserCanViewPage()
+    public class UserOrganisationAuthorisationHandlerMock : UserOrganisationAuthorisationHandler
     {
-        var context = new DefaultHttpContext();
-        var requirement = new UserOrganisationAuthorisationRequirement();
-        context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(true, new UserAuthorisationStatus(true, true));
+        public UserOrganisationAuthorisationHandlerMock(ILogger<UserOrganisationAuthorisationHandler> logger)
+            : base(logger) { }
 
-        var authContext = new AuthorizationHandlerContext(
-            [requirement],
-            new ClaimsPrincipal(),
-            context
-        );
-
-        await _handler.PublicHandleRequirementAsync(authContext, requirement);
-
-        Assert.True(authContext.HasSucceeded);
-    }
-
-    [Fact]
-    public async Task HandleRequirementAsync_ShouldSucceed_WhenPageRequiresNoAuthorisation()
-    {
-        var context = new DefaultHttpContext();
-        var requirement = new UserOrganisationAuthorisationRequirement();
-        context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(false, new UserAuthorisationStatus(true, false));
-
-        var authContext = new AuthorizationHandlerContext(
-            [requirement],
-            new ClaimsPrincipal(),
-            context
-        );
-
-        await _handler.PublicHandleRequirementAsync(authContext, requirement);
-
-        Assert.True(authContext.HasSucceeded);
-    }
-
-    [Fact]
-    public async Task HandleRequirementAsync_ShouldFail_WhenUserIsMissingOrganisation()
-    {
-        var context = new DefaultHttpContext();
-        var requirement = new UserOrganisationAuthorisationRequirement();
-        context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(true, new UserAuthorisationStatus(true, false));
-
-        var authContext = new AuthorizationHandlerContext(
-            [requirement],
-            new ClaimsPrincipal(),
-            context
-        );
-
-        await _handler.PublicHandleRequirementAsync(authContext, requirement);
-
-        Assert.False(authContext.HasSucceeded);
-        Assert.Single(authContext.FailureReasons);
-    }
-
-    [Fact]
-    public async Task HandleRequirementAsync_ShouldSucceed_WhenRequestIsSignoutUrl()
-    {
-        var context = new DefaultHttpContext();
-        context.Request.Path = "/auth/sign-out";
-        var requirement = new UserOrganisationAuthorisationRequirement();
-
-        var authContext = new AuthorizationHandlerContext(
-            [requirement],
-            new ClaimsPrincipal(),
-            context
-        );
-
-        await _handler.PublicHandleRequirementAsync(authContext, requirement);
-
-        Assert.True(authContext.HasSucceeded);
-    }
-
-    [Fact]
-    public async Task HandleRequirementAsync_ShouldLogError_WhenResourceIsNotHttpContext()
-    {
-        var requirement = new UserOrganisationAuthorisationRequirement();
-        var authContext = new AuthorizationHandlerContext(
-            [requirement],
-            new ClaimsPrincipal(),
-            new object()
-        );
-
-        await _handler.PublicHandleRequirementAsync(authContext, requirement);
-
-        var matchingCalls = _logger.GetMatchingReceivedMessages($"Expected resource to be HttpContext but received {typeof(object)}", LogLevel.Error);
-        Assert.Single(matchingCalls);
-    }
-}
-
-public class UserOrganisationAuthorisationHandlerMock(ILogger<UserOrganisationAuthorisationHandler> logger) : UserOrganisationAuthorisationHandler(logger)
-{
-    public Task PublicHandleRequirementAsync(AuthorizationHandlerContext context, UserOrganisationAuthorisationRequirement requirement)
-    {
-        return HandleRequirementAsync(context, requirement);
+        public Task PublicHandleRequirementAsync(AuthorizationHandlerContext context, UserOrganisationAuthorisationRequirement requirement)
+            => HandleRequirementAsync(context, requirement);
     }
 }

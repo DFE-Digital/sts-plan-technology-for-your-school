@@ -1,9 +1,9 @@
 using System.Text.RegularExpressions;
-using Dfe.PlanTech.Domain.SignIns.Models;
+using Dfe.PlanTech.Application.Configuration;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns;
+namespace Dfe.PlanTech.Infrastructure.SignIn;
 
 public static partial class DfeOpenIdConnectEvents
 {
@@ -22,7 +22,7 @@ public static partial class DfeOpenIdConnectEvents
     /// <returns></returns>
     public static Task OnRedirectToIdentityProvider(RedirectContext context)
     {
-        var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
+        var config = context.HttpContext.RequestServices.GetRequiredService<DfeSignInConfiguration>();
 
         context.ProtocolMessage.RedirectUri = CreateCallbackUrl(context, config, config.CallbackUrl);
 
@@ -38,7 +38,7 @@ public static partial class DfeOpenIdConnectEvents
     {
         if (context.ProtocolMessage != null)
         {
-            var config = context.HttpContext.RequestServices.GetRequiredService<IDfeSignInConfiguration>();
+            var config = context.HttpContext.RequestServices.GetRequiredService<DfeSignInConfiguration>();
 
             context.ProtocolMessage.PostLogoutRedirectUri = CreateCallbackUrl(context, config, config.SignoutRedirectUrl);
         }
@@ -50,10 +50,11 @@ public static partial class DfeOpenIdConnectEvents
     /// Gets the origin URL to be used for OpenID Connect redirects.
     /// </summary>
     /// <remarks>
-    /// Uses the X-Forwarded-Host header if available, otherwise the FrontDoorUrl field from the <see cref="IDfeSignInConfiguration">config</see>
+    /// Uses the X-Forwarded-Host header if available, otherwise the FrontDoorUrl field from the <see cref="DfeSignInConfiguration">config</see>
     /// <param name="context">The context of the redirect request</param>
     /// <param name="config">The configuration for OpenID Connect sign-ins</param>
-    public static string GetOriginUrl(RedirectContext context, IDfeSignInConfiguration config)
+    /// </remarks>
+    public static string GetOriginUrl(RedirectContext context, DfeSignInConfiguration config)
     {
         var forwardHostHeader = context.HttpContext.Request.Headers
                                                             .Where(header => string.Equals(ForwardHostHeader, header.Key, StringComparison.InvariantCultureIgnoreCase))
@@ -69,7 +70,7 @@ public static partial class DfeOpenIdConnectEvents
     /// <param name="context">The context of the redirect request.</param>
     /// <param name="config">The configuration for OpenID Connect sign-ins.</param>
     /// <param name="callbackPath">The path of the callback URL.</param>
-    public static string CreateCallbackUrl(RedirectContext context, IDfeSignInConfiguration config, string callbackPath)
+    public static string CreateCallbackUrl(RedirectContext context, DfeSignInConfiguration config, string callbackPath)
     {
         var originUrl = GetOriginUrl(context, config).EnsureScheme();
 

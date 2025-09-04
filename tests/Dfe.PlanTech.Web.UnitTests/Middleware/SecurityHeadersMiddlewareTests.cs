@@ -1,71 +1,105 @@
-using Dfe.PlanTech.Web.Helpers;
+using System.Text.RegularExpressions;
+using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
-using NSubstitute;
-using Xunit;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Dfe.PlanTech.Web.UnitTests.Middleware;
-
-public class SecurityHeadersMiddlewareTests
+namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
-
-    public readonly IConfiguration Configuration;
-
-    private const string ImgSrcKey = "CSP:ImgSrc";
-    private const string ImgSrc = "imgsrc";
-
-    private const string ConnectSrcKey = "CSP:ConnectSrc";
-    private const string ConnectSrc = "connectsrc";
-
-    private const string FrameSrcKey = "CSP:FrameSrc";
-    private const string FrameSrc = "framesrc";
-
-    private const string ScriptSrcKey = "CSP:ScriptSrc";
-    private const string ScriptSrc = "scriptsrc";
-
-    private const string DefaultSrcKey = "CSP:DefaultSrc";
-    private const string DefaultSrc = "defaultsrc";
-
-    public SecurityHeadersMiddlewareTests()
+    public class SecurityHeadersMiddlewareTests
     {
-        var inMemorySettings = new Dictionary<string, string?>
+        private const string ImgSrcKey = "CSP:ImgSrc";
+        private const string ImgSrc = "imgsrc";
+
+        private const string ConnectSrcKey = "CSP:ConnectSrc";
+        private const string ConnectSrc = "connectsrc";
+
+        private const string FrameSrcKey = "CSP:FrameSrc";
+        private const string FrameSrc = "framesrc";
+
+        private const string ScriptSrcKey = "CSP:ScriptSrc";
+        private const string ScriptSrc = "scriptsrc";
+
+        private const string DefaultSrcKey = "CSP:DefaultSrc";
+        private const string DefaultSrc = "defaultsrc";
+
+        private static DefaultHttpContext BuildContext()
         {
-            { ImgSrcKey, ImgSrc },
-            { ConnectSrcKey, ConnectSrc },
-            { FrameSrcKey, FrameSrc },
-            { ScriptSrcKey, ScriptSrc },
-            { DefaultSrcKey, DefaultSrc }
-        };
+            var inMemorySettings = new Dictionary<string, string?>
+            {
+                { ImgSrcKey, ImgSrc },
+                { ConnectSrcKey, ConnectSrc },
+                { FrameSrcKey, FrameSrc },
+                { ScriptSrcKey, ScriptSrc },
+                { DefaultSrcKey, DefaultSrc }
+            };
 
-        Configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(inMemorySettings)
-            .Build();
-    }
+            IConfiguration configuration = new ConfigurationBuilder()
+                .AddInMemoryCollection(inMemorySettings)
+                .Build();
 
+            var cfg = new ContentSecurityPolicyConfiguration(configuration);
 
-    [Fact]
-    public async Task Should_Set_Headers()
-    {
-        var context = Substitute.For<HttpContext>();
-        var config = new CspConfiguration(Configuration);
+            var services = new ServiceCollection()
+                .AddSingleton(cfg)
+                .BuildServiceProvider();
 
-        context.RequestServices.GetService(typeof(CspConfiguration)).Returns(config);
+            var ctx = new DefaultHttpContext
+            {
+                RequestServices = services,
+                Response =
+                {
+                    Body = new MemoryStream()
+                }
+            };
 
-        var next = (HttpContext hc) => Task.CompletedTask;
+            return ctx;
+        }
 
-        var middleware = new SecurityHeadersMiddleware(new RequestDelegate(next));
+        [Fact]
+        public async Task Should_Set_Headers()
+        {
+            var context = BuildContext();
+            var next = new RequestDelegate(_ => Task.CompletedTask);
+            var middleware = new SecurityHeadersMiddleware(next);
 
-        await middleware.InvokeAsync(context);
+            await middleware.InvokeAsync(context);
 
-        Assert.True(context.Response.Headers.XFrameOptions.Count > 0);
-        Assert.Equal("Deny", context.Response.Headers.XFrameOptions);
+            Assert.True(context.Response.Headers.XFrameOptions.Count > 0);
+            Assert.Equal("Deny", context.Response.Headers.XFrameOptions.ToString());
 
-        Assert.True(context.Response.Headers.ContentSecurityPolicy.Count > 0);
+            Assert.True(context.Response.Headers.ContentSecurityPolicy.Count > 0);
 
-        var csp = context.Response.Headers.ContentSecurityPolicy.ToString();
-        Assert.Contains("frame-ancestors 'none';", csp);
-        Assert.Contains("default-src 'self'", csp);
-        Assert.Contains("script-src 'nonce-", csp);
+            var csp = context.Response.Headers.ContentSecurityPolicy.ToString();
+
+            Assert.Contains("frame-ancestors 'none'", csp);
+            Assert.Contains("default-src 'self'", csp);
+            Assert.Contains($"default-src 'self' {DefaultSrc}", csp);
+
+            Assert.Contains("script-src 'nonce-", csp);
+            Assert.Contains(ScriptSrc, csp);
+
+            Assert.Contains($"img-src 'self' {ImgSrc}", csp);
+            Assert.Contains($"connect-src {ConnectSrc}", csp);
+            Assert.Contains($"frame-src {FrameSrc}", csp);
+        }
+
+        [Fact]
+        public async Task Should_Store_Nonce_In_Context_Items()
+        {
+            var context = BuildContext();
+            var next = new RequestDelegate(_ => Task.CompletedTask);
+            var middleware = new SecurityHeadersMiddleware(next);
+
+            await middleware.InvokeAsync(context);
+
+            var csp = context.Response.Headers.ContentSecurityPolicy.ToString();
+            var match = Regex.Match(csp, @"script-src 'nonce-([a-f0-9]{32})'");
+            Assert.True(match.Success, $"Expected nonce in CSP header, got: {csp}");
+
+            Assert.True(context.Items.ContainsKey("nonce"));
+            Assert.Equal(match.Groups[1].Value, context.Items["nonce"]?.ToString());
+        }
     }
 }

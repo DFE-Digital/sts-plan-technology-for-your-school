@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Http;
-using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware;
 

@@ -1,12 +1,13 @@
-using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Web.Authorisation;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Web.Authorisation.Handlers;
+using Dfe.PlanTech.Web.Authorisation.Policies;
+using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware;
 

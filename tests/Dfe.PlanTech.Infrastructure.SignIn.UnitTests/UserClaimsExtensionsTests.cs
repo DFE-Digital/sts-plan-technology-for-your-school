@@ -1,40 +1,41 @@
 using System.Security.Claims;
 using System.Text.Json;
-using Dfe.PlanTech.Domain.SignIns.Enums;
-using Dfe.PlanTech.Domain.SignIns.Models;
-using Dfe.PlanTech.Infrastructure.SignIns.Extensions;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
-namespace Dfe.PlanTech.Infrastructure.SignIns.UnitTests;
+namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
 
 public class UserClaimsExtensionsTests
 {
     [Fact]
-    public void GetUserId_Should_Return_UserId_When_ClaimsPrincipal_Exists()
+    public void GetDsiReference_Should_Return_UserId_When_ClaimsPrincipal_Exists()
     {
         string expectedUserId = "TestingName";
 
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.NameIdentifier, expectedUserId) });
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var userId = UserClaimsExtensions.GetUserId(claimsPrincipal.Claims);
+        var userId = UserClaimsExtensions.GetDsiReference(claimsPrincipal.Claims);
 
         Assert.Equal(expectedUserId, userId);
     }
 
     [Fact]
-    public void GetUserId_Should_Throw_When_Claim_Is_Missing()
+    public void GetDsiReference_Should_Throw_When_Claim_Is_Missing()
     {
         var identity = new ClaimsIdentity(Array.Empty<Claim>());
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetUserId(claimsPrincipal.Claims));
+        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetDsiReference(claimsPrincipal.Claims));
     }
 
 
     [Fact]
-    public void GetUserId_Should_Throw_When_ClaimsPrincipal_Is_Null()
+    public void GetDsiReference_Should_Throw_When_ClaimsPrincipal_Is_Null()
     {
-        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsExtensions.GetUserId(null!));
+        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsExtensions.GetDsiReference(null!));
     }
 
     [Fact]
@@ -64,11 +65,25 @@ public class UserClaimsExtensionsTests
     }
 
     [Fact]
+    public void OrganisationModel_References_Should_Throw_InvalidEstablishmentException_When_Organisation_Has_No_Urn_And_No_Ukprn()
+    {
+        var organisation = new OrganisationModel()
+        {
+            Id = Guid.NewGuid(),
+        };
+
+        Assert.Throws<InvalidEstablishmentException>(() => organisation.Reference);
+    }
+
+
+    [Fact]
     public void GetOrganisation_Should_ReturnNull_When_Organisation_Has_No_Id()
     {
-        var organisation = new Organisation()
+        var organisation = new OrganisationModel()
         {
             Id = Guid.Empty,
+            Urn = "testUrn",
+            Ukprn = "testUkPrn"
         };
 
         var organisationJson = JsonSerializer.Serialize(organisation);
@@ -84,9 +99,11 @@ public class UserClaimsExtensionsTests
     [Fact]
     public void GetOrganisation_Should_Return_Organisation_When_Exists()
     {
-        var organisation = new Organisation()
+        var organisation = new OrganisationModel()
         {
-            Id = Guid.NewGuid()
+            Id = Guid.NewGuid(),
+            Urn = "testUrn",
+            Ukprn = "testUkPrn"
         };
 
         var organisationJson = JsonSerializer.Serialize(organisation);

@@ -1,0 +1,7 @@
+@model ComponentWarningEntry
+
+<warning-component>
+  @{
+    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
+  }
+</warning-component>

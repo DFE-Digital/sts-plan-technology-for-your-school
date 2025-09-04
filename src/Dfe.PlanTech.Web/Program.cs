@@ -1,14 +1,10 @@
-using Dfe.PlanTech.Application.Helpers;
-using Dfe.PlanTech.Application.Options;
-using Dfe.PlanTech.Domain.Helpers;
-using Dfe.PlanTech.Domain.Interfaces;
+using Dfe.PlanTech.Application;
+using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
-using Dfe.PlanTech.Infrastructure.SignIns;
+using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
-using Dfe.PlanTech.Web.Configuration;
-using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Middleware;
-using Dfe.PlanTech.Web.Models;
 using GovUk.Frontend.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,29 +31,32 @@ if (builder.Environment.EnvironmentName != "E2E")
     builder.Services.AddDbWriterServices(builder.Configuration);
 }
 
-builder.Services.AddCustomTelemetry();
-builder.Services.Configure<ErrorMessages>(builder.Configuration.GetSection("ErrorMessages"));
-builder.Services.Configure<ErrorPages>(builder.Configuration.GetSection("ErrorPages"));
-builder.Services.Configure<ContactOptions>(builder.Configuration.GetSection("ContactUs"));
-builder.Services.Configure<AutomatedTestingOptions>(builder.Configuration.GetSection("AutomatedTesting"));
+builder.AddSystemConfiguration();
+builder.AddContentAndSupportConfiguration();
 
-builder.AddContentAndSupportServices()
-        .AddAuthorisationServices()
-        .AddCaching()
-        .AddContentfulServices(builder.Configuration)
-        .AddCQRSServices()
-        .AddCspConfiguration()
-        .AddDatabase(builder.Configuration)
-        .AddDfeSignIn(builder.Configuration)
-        .AddExceptionHandlingServices()
-        .AddGoogleTagManager()
-        .AddGovUkFrontend()
-        .AddHttpContextAccessor()
-        .AddRoutingServices()
-        .AddRedisServices(builder.Configuration);
+builder.Services
+    .AddGovUkFrontend()
+    .AddHttpContextAccessor();
 
-builder.Services.AddSingleton<ISystemTime, SystemTime>();
-builder.Services.Configure<RobotsConfiguration>(builder.Configuration.GetSection("Robots"));
+builder.Services
+    .AddAuthorisationServices()
+    .AddCaching()
+    .AddContentfulServices(builder.Configuration)
+    .AddCookies(builder.Configuration)
+    .AddCurrentUser()
+    .AddCustomTelemetry()
+    .AddDatabase(builder.Configuration)
+    .AddDfeSignIn(builder.Configuration)
+    .AddExceptionHandlingServices()
+    .AddGoogleTagManager()
+    .AddRoutingServices()
+    .AddRedisServices(builder.Configuration)
+    .AddRepositories()
+    .AddViewComponents();
+
+builder.Services
+    .AddApplicationServices()
+    .AddApplicationWorkflows();
 
 var app = builder.Build();
 
@@ -70,7 +69,8 @@ app.UseCookiePolicy(
     new CookiePolicyOptions
     {
         Secure = CookieSecurePolicy.Always
-    });
+    }
+);
 
 app.UseForwardedHeaders();
 

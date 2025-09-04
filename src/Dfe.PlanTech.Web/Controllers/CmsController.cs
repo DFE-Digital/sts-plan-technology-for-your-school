@@ -1,11 +1,9 @@
 using System.Text.Json;
-using Dfe.PlanTech.Application.Content.Commands;
-using Dfe.PlanTech.Application.Questionnaire.Queries;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Authorisation;
-using Dfe.PlanTech.Web.Helpers;
-using Dfe.PlanTech.Web.Models;
-using Dfe.PlanTech.Web.Models.QaVisualiser;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
+using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Authorisation.Policies;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
+using Dfe.PlanTech.Web.ViewModels.QaVisualiser;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,8 +11,13 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 [Route("api/cms")]
 [LogInvalidModelState]
-public class CmsController(ILogger<CmsController> logger) : BaseController<CmsController>(logger)
+public class CmsController(
+    ILogger<CmsController> logger,
+    ICmsViewBuilder viewBuilder
+) : BaseController<CmsController>(logger)
 {
+    private readonly ICmsViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
+
     [HttpPost("webhook")]
     [ValidateApiKey]
     [Authorize(SignedRequestAuthorisationPolicy.PolicyName)]
@@ -41,9 +44,9 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
     /// </summary>
     [HttpGet("sections")]
     [ValidateApiKey]
-    public async Task<IEnumerable<Section?>> GetSections([FromServices] GetSectionQuery getSectionQuery)
+    public async Task<IEnumerable<SectionViewModel?>> GetSections()
     {
-        return await getSectionQuery.GetAllSections();
+        return await _viewBuilder.GetAllSectionsAsync();
     }
 
     /// <summary>
@@ -51,24 +54,8 @@ public class CmsController(ILogger<CmsController> logger) : BaseController<CmsCo
     /// </summary>
     [HttpGet("chunks/{page}")]
     [ValidateApiKey]
-    public async Task<IActionResult> GetChunks(int? page, [FromServices] GetRecommendationQuery getRecommendationQuery)
+    public async Task<IActionResult> GetChunks(int? page)
     {
-        var pageNumber = page ?? 1;
-        var queryResult = await getRecommendationQuery.GetChunksByPage(pageNumber);
-
-        var resultModel = new PagedResultModel<ChunkAnswerResultModel>
-        {
-            Page = pageNumber,
-            Total = queryResult.Pagination.Total,
-            Items = queryResult.Chunks
-                .SelectMany(c => c.Answers.Select(a => new
-                {
-                    a.Sys,
-                    c.Header
-                }))
-                .Select(c => new ChunkAnswerResultModel(c.Sys.Id, c.Header)).ToList()
-        };
-
-        return Ok(resultModel);
+        return await _viewBuilder.GetChunks(this, page);
     }
 }
