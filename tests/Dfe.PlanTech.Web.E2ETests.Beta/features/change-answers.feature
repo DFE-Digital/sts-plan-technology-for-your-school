@@ -26,6 +26,9 @@ Feature: Change answers page
         | Question                                                   | Answer     | Href                                            |
         | Are you able to choose an answer to this first question?   | Answer 2   | /category-one/category-one-section-one/self-assessment/testing-question-one  |
         | Are you able to answer this second question?               | Answer One | /category-one/category-one-section-one/self-assessment/testing-question-two  |
+
+        When I click the print this page button
+        Then the print dialog should be triggered
         
         Then I click the submit and view recommendations button
         Then I should see a link to the recommendation "Recommendation Header - Q2 - Answer One"
