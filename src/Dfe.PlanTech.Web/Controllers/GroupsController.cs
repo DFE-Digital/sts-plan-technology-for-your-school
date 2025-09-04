@@ -11,6 +11,7 @@ public class GroupsController : BaseController<GroupsController>
 {
     public const string GetGroupsRecommendationAction = "GetGroupsRecommendation";
     public const string GetSchoolDashboardAction = "GetSchoolDashboardView";
+    public const string GetSelectASchoolAction = "GetSelectASchoolView";
 
     private readonly ICurrentUser _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;
@@ -25,7 +26,7 @@ public class GroupsController : BaseController<GroupsController>
         _groupsViewBuilder = groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
     }
 
-    [HttpGet($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
+    [HttpGet($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}", Name = GetSelectASchoolAction)]
     public async Task<IActionResult> GetSelectASchoolView()
     {
         return await _groupsViewBuilder.RouteToSelectASchoolViewModelAsync(this);
