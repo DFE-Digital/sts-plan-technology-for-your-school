@@ -91,6 +91,11 @@ public class GroupsViewBuilder(
         List<ContentfulEntry> content = pageContent?.Content ?? [];
 
         var selectedSchool = await GetCurrentGroupSchoolSelection();
+        if (selectedSchool is null)
+        {
+            Logger.LogInformation("GroupSelectedSchoolUrn is null, redirecting to GetSelectASchool");
+            return controller.RedirectToAction(GroupsController.GetSelectASchoolAction);
+        }
 
         var viewModel = new GroupsSchoolDashboardViewModel
         {
@@ -108,30 +113,28 @@ public class GroupsViewBuilder(
 
     public async Task<IActionResult> RouteToGroupsRecommendationAsync(Controller controller, string sectionSlug)
     {
-        try
+        var selectedSchool = await GetCurrentGroupSchoolSelection();
+        if (selectedSchool is null)
         {
-            var latestSelection = await GetCurrentGroupSchoolSelection();
-            var schoolId = latestSelection.Id;
-            var schoolName = latestSelection.OrgName;
-
-            var viewModel = await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
-
-            if (viewModel is null)
-            {
-                return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
-            }
-
-            // Passes the school name to the Header
-            controller.ViewData["SelectedEstablishmentName"] = viewModel.SelectedEstablishmentName;
-            controller.ViewData["Title"] = viewModel.SectionName;
-
-            return controller.View(SchoolRecommendationsViewName, viewModel);
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex.Message, ex);
+            Logger.LogInformation("GroupSelectedSchoolUrn is null, redirecting to GetSelectASchool");
             return controller.RedirectToAction(GroupsController.GetSelectASchoolAction);
         }
+
+        var schoolId = selectedSchool.Id;
+        var schoolName = selectedSchool.OrgName;
+
+        var viewModel = await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
+
+        if (viewModel is null)
+        {
+            return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
+        }
+
+        // Passes the school name to the Header
+        controller.ViewData["SelectedEstablishmentName"] = viewModel.SelectedEstablishmentName;
+        controller.ViewData["Title"] = viewModel.SectionName;
+
+        return controller.View(SchoolRecommendationsViewName, viewModel);
     }
 
     public async Task<IActionResult> RouteToRecommendationsPrintViewAsync(Controller controller, string sectionSlug, int schoolId, string schoolName)
@@ -147,11 +150,15 @@ public class GroupsViewBuilder(
         return controller.View(RecommendationsChecklistViewName, viewModel);
     }
 
-    private async Task<SqlEstablishmentDto> GetCurrentGroupSchoolSelection()
+    private async Task<SqlEstablishmentDto?> GetCurrentGroupSchoolSelection()
     {
-        var latestSelectionUrn = CurrentUser.GroupSelectedSchoolUrn ?? throw new InvalidDataException("GroupSelectedSchoolUrn is null");
+        var selectedSchoolUrn = CurrentUser.GroupSelectedSchoolUrn;
+        if (selectedSchoolUrn == null)
+        {
+            return null;
+        }
 
-        return await _establishmentService.GetLatestSelectedGroupSchoolAsync(latestSelectionUrn);
+        return await _establishmentService.GetLatestSelectedGroupSchoolAsync(selectedSchoolUrn);
     }
 
     private async Task<GroupsRecommendationsViewModel?> GetGroupsRecommendationsViewModel(string sectionSlug, int schoolId, string schoolName)
