@@ -1,10 +1,11 @@
 CREATE TABLE dbo.recommendation(
-    id                 INT IDENTITY(1, 1) PRIMARY KEY,
+    id                 INT IDENTITY(1, 1) NOT NULL,
     contentfulRef      NVARCHAR(50)  NOT NULL,
     dateCreated        DATETIME      NOT NULL,
     recommendationText NVARCHAR(MAX) NOT NULL,
     questionId         INT           NOT NULL,
-    archived           BIT           NOT NULL
+    archived           BIT           NOT NULL,
+    CONSTRAINT PK_recommendation PRIMARY KEY (id)
 );
 GO
 
@@ -15,15 +16,16 @@ ALTER TABLE dbo.recommendation
 GO
 
 CREATE TABLE dbo.establishmentRecommendationHistory(
-    establishmentRecommendationId INT IDENTITY(1, 1) PRIMARY KEY,
-    dateCreated                   DATETIME      NOT NULL,
-    establishmentId               INT           NOT NULL,
-    matEstablishmentId            INT           NULL,
-    recommendationId              INT           NOT NULL,
-    userId                        INT           NOT NULL,
-    previousStatus                NVARCHAR(50)  NULL,
-    currentStatus                 NVARCHAR(50)  NOT NULL,
-    noteText                      NVARCHAR(MAX) NULL
+    dateCreated         DATETIME      NOT NULL,
+    establishmentId     INT           NOT NULL,
+    matEstablishmentId  INT           NULL,
+    recommendationId    INT           NOT NULL,
+    userId              INT           NOT NULL,
+    previousStatus      NVARCHAR(50)  NULL,
+    newStatus           NVARCHAR(50)  NOT NULL,
+    noteText            NVARCHAR(MAX) NULL,
+    CONSTRAINT PK_establishmentRecommendationHistory
+        PRIMARY KEY (establishmentId, recommendationId)
 );
 GO
 
@@ -31,14 +33,17 @@ GO
 ALTER TABLE dbo.establishmentRecommendationHistory
     ADD CONSTRAINT FK_erh_establishment
         FOREIGN KEY (establishmentId) REFERENCES dbo.establishment(id);
+GO
 
 ALTER TABLE dbo.establishmentRecommendationHistory
     ADD CONSTRAINT FK_erh_matEstablishment
         FOREIGN KEY (matEstablishmentId) REFERENCES dbo.establishment(id);
+GO
 
 ALTER TABLE dbo.establishmentRecommendationHistory
     ADD CONSTRAINT FK_erh_recommendation
         FOREIGN KEY (recommendationId) REFERENCES dbo.recommendation(id);
+GO
 
 ALTER TABLE dbo.establishmentRecommendationHistory
     ADD CONSTRAINT FK_erh_user
