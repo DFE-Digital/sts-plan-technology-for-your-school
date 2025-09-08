@@ -7,7 +7,8 @@ password_raw="${2-}"
 if [ -z "${password_raw:-}" ] && [ -n "${SA_PASSWORD-}" ]; then password_raw="$SA_PASSWORD"; fi
 password="$(printf '%s' "${password_raw:-}" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
 if [ -z "$password" ] || [ "${#password}" -lt 12 ]; then
-  echo "❌ SA password missing/too short"; exit 1
+  echo "SA password missing/too short"
+  exit 1
 fi
 
 # idempotent cleanup + start
@@ -23,19 +24,63 @@ max_retries=180; i=0
 until docker logs "$name" 2>&1 | grep -q "SQL Server is now ready for client connections"; do
   sleep 1; i=$((i+1))
   if [ "$i" -ge "$max_retries" ]; then
-    echo "❌ Not ready in ${max_retries}s. Recent logs:"; docker logs --tail 200 "$name" || true; exit 1
+    echo "Not ready in ${max_retries}s. Recent logs:"
+    docker logs --tail 200 "$name" || true
+    exit 1
   fi
 done
 
-echo "SQL Edge ready. Creating database..."
-docker exec "$name" /bin/bash -lc '
-  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P "$MSSQL_SA_PASSWORD" \
-    -Q "IF DB_ID(N''plantech-mock-db'') IS NULL CREATE DATABASE [plantech-mock-db];"
-' || docker exec "$name" /bin/bash -lc '
-  # fallback if tools are under tools18 in some images
-  /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$MSSQL_SA_PASSWORD" -C \
-    -Q "IF DB_ID(N''plantech-mock-db'') IS NULL CREATE DATABASE [plantech-mock-db];"
+# pick sqlcmd path in container (+ TLS switch for tools18)
+choose_sqlcmd='
+  if [ -x /opt/mssql-tools/bin/sqlcmd ]; then
+    echo "/opt/mssql-tools/bin/sqlcmd";
+  elif [ -x /opt/mssql-tools18/bin/sqlcmd ]; then
+    echo "/opt/mssql-tools18/bin/sqlcmd";
+  else
+    echo "";
+  fi
 '
+
+# sanity: show pw length inside container (no secret leak)
+len_in_container=$(docker exec "$name" /bin/bash -lc 'echo -n "${MSSQL_SA_PASSWORD}" | wc -c' || echo 0)
+echo "Container sees MSSQL_SA_PASSWORD length: $len_in_container"
+
+sqlcmd_path=$(docker exec "$name" /bin/bash -lc "$choose_sqlcmd")
+if [ -z "$sqlcmd_path" ]; then
+  echo "sqlcmd not found in container at /opt/mssql-tools{,18}/bin/sqlcmd"
+  docker logs --tail 200 "$name" || true
+  exit 1
+fi
+echo "Using sqlcmd: $sqlcmd_path"
+
+# if using tools18, add -C to trust server cert
+sqlcmd_tls_flag=""
+if [[ "$sqlcmd_path" == *"mssql-tools18"* ]]; then
+  sqlcmd_tls_flag="-C"
+fi
+
+echo "SQL Edge ready. Creating database..."
+# Create DB if missing
+docker exec "$name" /bin/bash -lc \
+  "\"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag \
+   -Q \"IF DB_ID(N''plantech-mock-db'') IS NULL CREATE DATABASE [plantech-mock-db];\""
+
+# Verify DB exists before proceeding (retry a few seconds)
+echo "Verifying database creation..."
+verify_retries=20
+until docker exec "$name" /bin/bash -lc \
+  "\"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag \
+   -Q \"SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = N''plantech-mock-db'';\" \
+   | grep -q '^plantech-mock-db$'"; do
+  sleep 1
+  verify_retries=$((verify_retries-1))
+  if [ $verify_retries -le 0 ]; then
+    echo "Database 'plantech-mock-db' not found after create. Recent logs:"
+    docker logs --tail 200 "$name" || true
+    exit 1
+  fi
+done
+echo "Database present."
 
 echo "Writing user-secrets for DatabaseUpgrader..."
 dotnet user-secrets --project ../../../src/Dfe.PlanTech.DatabaseUpgrader init || true
