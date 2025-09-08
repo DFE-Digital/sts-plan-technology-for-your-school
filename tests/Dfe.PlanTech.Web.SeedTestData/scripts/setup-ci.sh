@@ -2,13 +2,22 @@
 set -euo pipefail
 
 name="${1:-azuresqledge}"
-password="${2:?SA password required}"
 
-# Strip any accidental Windows CR and surrounding whitespace
-password="$(printf '%s' "$password_raw" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+# Accept password from 2nd arg OR SA_PASSWORD env var
+password_raw="${2-}"
+if [ -z "${password_raw:-}" ] && [ -n "${SA_PASSWORD-}" ]; then
+  password_raw="$SA_PASSWORD"
+fi
 
-if [ -z "$password" ] || [ "${#password}" -lt 12 ]; then
-  echo "❌ SA password is empty or too short (len=${#password})."
+# Trim CRLF/whitespace (handles pasted secrets with \r)
+password="$(printf '%s' "${password_raw:-}" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+if [ -z "$password" ]; then
+  echo "❌ SA password missing (pass as 2nd arg or set SA_PASSWORD env var)."
+  exit 1
+fi
+if [ "${#password}" -lt 12 ]; then
+  echo "❌ SA password too short (len=${#password}); must be >= 12 chars."
   exit 1
 fi
 
