@@ -60,9 +60,9 @@ if [[ "$sqlcmd_path" == *"mssql-tools18"* ]]; then
 fi
 
 echo "SQL Edge ready. Creating database..."
-# Run T-SQL via stdin to avoid shell escaping issues with hyphens/brackets
+# Feed T-SQL via here-doc directly to sqlcmd (no pipe, no -i)
 docker exec "$name" /bin/bash -lc "
-  cat <<'SQL' | \"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -b -h -1 -W -w 1024 -i -
+  \"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -b -h -1 -W <<'SQL'
 DECLARE @db sysname = N'plantech-mock-db';
 IF DB_ID(@db) IS NULL
 BEGIN
@@ -75,7 +75,7 @@ SQL
 echo "Verifying database creation..."
 verify_retries=20
 until docker exec "$name" /bin/bash -lc \
-  "\"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -b -h -1 -W -w 1024 \
+  "\"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -b -h -1 -W \
    -Q \"SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = N''plantech-mock-db'';\" \
    | tr -d '\r' | grep -x 'plantech-mock-db'"; do
   sleep 1
