@@ -25,6 +25,10 @@ const browser = await chromium.launch({ headless: false, slowMo: 100 });
   await page.locator('input#password').fill(password);
   await page.locator('div.govuk-button-group button.govuk-button').first().click();
 
+  //Click the cookies banners so we get the cookie preferences set in the storage state.json
+  await page.locator('button[name="accept-cookies"]').first().click();
+  await page.locator('button[name="hide-cookies"]').first().click();
+
   await page.waitForLoadState('networkidle');
 
   const outputPath = path.resolve(storageDir, outputFilename);
@@ -35,7 +39,7 @@ const browser = await chromium.launch({ headless: false, slowMo: 100 });
 }
 
 (async () => {
-  const loginUrl = `${process.env.URL}home`; 
+  const loginUrl = `${process.env.URL}home`;
 
   const users = [
     {

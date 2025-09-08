@@ -18,74 +18,12 @@ env:
     DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
-    clear-db:
-        permissions:
-          id-token: write
-          contents: read
-        name: Clear database
-        runs-on: ubuntu-latest
-        env:
-            az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
-            az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
-            az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-            az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-            SQL_IP_NAME: e2e-tests-clear-db
-
-        steps:
-            - uses: actions/checkout@v4
-
-            - name: Azure Login
-              uses: ./.github/actions/azure-login
-              with:
-                  az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-                  az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-                  az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-
-            - name: Get workflow IP address
-              id: whats-my-ip
-              uses: ./.github/actions/whats-my-ip-address
-
-            - name: Add Azure firewall rules
-              uses: ./.github/actions/azure-ip-whitelist
-              with:
-                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-                  verb: "add"
-                  az_keyvault_name: ${{ env.az_keyvault_name }}
-                  az_ip_name: ${{ env.SQL_IP_NAME }}
-                  az_resource_group: ${{ env.az_resource_group_name }}
-                  az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
-
-            - name: Get connection string
-              id: get-connection-string
-              uses: ./.github/actions/azure-get-keyvault-secret
-              with:
-                  az_keyvault_name: ${{ env.az_keyvault_name }}
-                  az_keyvault_secret_name: ${{ env.az_keyvault_database_connectionstring_name }}
-
-            - name: Execute stored procedure
-              uses: azure/sql-action@v2.2
-              with:
-                  connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
-                  path: "./.github/scripts/drop-establishment-data.sql"
-
-            - name: Remove Azure firewall rules
-              if: always()
-              uses: ./.github/actions/azure-ip-whitelist
-              with:
-                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-                  verb: "remove"
-                  az_keyvault_name: ${{ env.az_keyvault_name }}
-                  az_ip_name: ${{ env.SQL_IP_NAME }}
-                  az_resource_group: ${{ env.az_resource_group_name }}
-                  az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
-
-    run-tests:
+  run-tests:
         permissions:
           id-token: write
           contents: read
         name: Run Playwright + Cucumber Tests
         runs-on: ubuntu-22.04
-        needs: [clear-db]
         env:
             PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
             KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
@@ -102,6 +40,16 @@ jobs:
                   az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
                   az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
                   az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+                  
+            - name: Start Azure SQL Edge and seed DB
+              shell: bash
+              working-directory: ./tests/Dfe.PlanTech.Web.SeedTestData/scripts
+              env:
+                SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
+              run: |
+                chmod +x ./setup.sh
+                # name arg = container name "azuresqledge", password from secret
+                ./setup.sh azuresqledge "$SA_PASSWORD"                  
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
@@ -140,19 +88,22 @@ jobs:
                   az_resource_group: ${{ env.RESOURCE_GROUP }}
                   az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
-            - name: Run Web App
+            - name: Run Web App (E2E, local SQL Edge)
               shell: bash
               working-directory: ./build
+              env:
+                SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
               run: |
-                  export ASPNETCORE_ENVIRONMENT=E2E
-                  export KeyVaultName=${{ env.KEYVAULT_NAME }}
-                  export Kestrel__Endpoints__Https__Url=https://*:8081
-                  export DfeSignIn__FrontDoorUrl=https://localhost:8081
-                  export GTM__Id=gtm_id
-                  export GTM__SiteVerificationId=testing_site_verification_id
-                  export AutomatedTesting__Contentful__Tag=e2e
-                  export AutomatedTesting__Contentful__IncludeTaggedContent=true
-                  dotnet ./Dfe.PlanTech.Web.dll &
+                export ASPNETCORE_ENVIRONMENT=E2E
+                export KeyVaultName=${{ env.KEYVAULT_NAME }}
+                export Kestrel__Endpoints__Https__Url=https://*:8081
+                export DfeSignIn__FrontDoorUrl=https://localhost:8081
+                export GTM__Id=gtm_id
+                export GTM__SiteVerificationId=testing_site_verification_id
+                export AutomatedTesting__Contentful__Tag=e2e
+                export AutomatedTesting__Contentful__IncludeTaggedContent=true
+                export ConnectionStrings__Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db"
+                dotnet ./Dfe.PlanTech.Web.dll &
 
             - name: Install Node.js
               uses: actions/setup-node@v4
@@ -177,11 +128,20 @@ jobs:
                   URL: https://localhost:8081
                   DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
                   DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
+                  DSI_SCHOOL_ESTABLISHMENT_REF: 00000018
                   DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
                   DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
+                  DSI_MAT_SCHOOL_ESTABLISHMENT_REF: 00000005
                   DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
                   DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
-              run: npm run test:record
+                  DB_USER: sa
+                  DB_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
+                  DB_PORT: 1433
+                  DB_DATABASE: plantech-mock-db
+                  DB_ENCRYPT: true
+                  DB_TRUST_SERVER_CERTIFICATE: true
+                  HEADLESS: false
+              run: npm run test:login && npm run test:record
 
             - name: Generate HTML report
               if: always()
@@ -220,13 +180,14 @@ jobs:
                   path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/traces/
                   if-no-files-found: ignore
 
-            - name: Remove Azure firewall rules
+            - name: Stop & remove SQL Edge container
               if: always()
-              uses: ./.github/actions/azure-ip-whitelist
-              with:
-                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-                  verb: "remove"
-                  az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-                  az_ip_name: ${{ env.SQL_IP_NAME }}
-                  az_resource_group: ${{ env.RESOURCE_GROUP }}
-                  az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+              shell: bash
+              run: |
+                docker ps -a
+                docker logs azuresqledge || true
+                docker stop azuresqledge || true
+                docker rm azuresqledge || true
+
+
+

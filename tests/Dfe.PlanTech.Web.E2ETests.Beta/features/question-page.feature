@@ -1,10 +1,10 @@
 @user-school
+@clear-data-school
 Feature: Questions Page
 
   Background:
     Given I start an assessment on category "Category One" section "Category One Section One"
 
-  @clear-data-school
   Scenario: Page has the correct content on first load
     Then I should see the beta header
     And the header should contain all the correct content
