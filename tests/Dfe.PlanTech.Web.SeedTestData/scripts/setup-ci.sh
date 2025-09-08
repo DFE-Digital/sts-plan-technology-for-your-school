@@ -85,17 +85,25 @@ until docker exec "$name" \
 done
 echo "Database present."
 
+
+conn_str="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$password;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db"
+
 echo "Writing user-secrets for DatabaseUpgrader..."
 dotnet user-secrets --project ../../../src/Dfe.PlanTech.DatabaseUpgrader init || true
 dotnet user-secrets --project ../../../src/Dfe.PlanTech.DatabaseUpgrader set \
-  "ConnectionStrings:Database" \
-  "Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$password;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db"
+  "ConnectionStrings:Database" "$conn_str"
 
 echo "Running DatabaseUpgrader..."
 dotnet run --project ../../../src/Dfe.PlanTech.DatabaseUpgrader \
-  --connectionstring "Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$password;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db"
+  --connectionstring "$conn_str"
+
+
+dotnet user-secrets --project ../../../tests/Dfe.PlanTech.Web.SeedTestData init || true
+dotnet user-secrets --project ../../../tests/Dfe.PlanTech.Web.SeedTestData set \
+  "ConnectionStrings:Database" "$conn_str"
+
 
 echo "Seeding test data..."
-dotnet run --project ../../../tests/Dfe.PlanTech.Web.SeedTestData
+dotnet run --project ../../../tests/Dfe.PlanTech.Web.SeedTestData --connectionstring "$conn_str"
 
 echo "DB ready."
