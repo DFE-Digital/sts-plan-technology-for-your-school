@@ -34,13 +34,6 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
 
-            - name: Azure CLI Login
-              uses: ./.github/actions/azure-login
-              with:
-                  az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-                  az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-                  az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-                  
             - name: Start Azure SQL Edge and seed DB
               shell: bash
               working-directory: ./tests/Dfe.PlanTech.Web.SeedTestData/scripts
