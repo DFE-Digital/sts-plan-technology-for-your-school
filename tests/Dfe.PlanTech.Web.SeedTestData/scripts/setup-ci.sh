@@ -60,16 +60,20 @@ if [[ "$sqlcmd_path" == *"mssql-tools18"* ]]; then
 fi
 
 echo "SQL Edge ready. Creating database..."
-# Feed T-SQL via here-doc directly to sqlcmd (no pipe, no -i)
-docker exec "$name" /bin/bash -lc "
+# Send T-SQL via here-doc directly to sqlcmd and also echo the resulting row
+create_out=$(docker exec "$name" /bin/bash -lc "
   \"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -b -h -1 -W <<'SQL'
+SET NOCOUNT ON;
 DECLARE @db sysname = N'plantech-mock-db';
 IF DB_ID(@db) IS NULL
 BEGIN
   EXEC(N'CREATE DATABASE ' + QUOTENAME(@db));
 END
+SELECT name FROM sys.databases WHERE name = @db;
 SQL
-"
+" | tr -d '\r' || true)
+
+echo "Create/check query output: [$create_out]"
 
 # Verify DB exists before proceeding (retry a few seconds)
 echo "Verifying database creation..."
@@ -77,12 +81,12 @@ verify_retries=20
 until docker exec "$name" /bin/bash -lc \
   "\"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -b -h -1 -W \
    -Q \"SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = N''plantech-mock-db'';\" \
-   | tr -d '\r' | grep -x 'plantech-mock-db'"; do
+   | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | grep -x 'plantech-mock-db'"; do
   sleep 1
   verify_retries=$((verify_retries-1))
   if [ $verify_retries -le 0 ]; then
     echo "Database 'plantech-mock-db' not found after create. Recent logs:"
-    docker logs --tail 200 \"$name\" || true
+    docker logs --tail 200 "$name" || true
     exit 1
   fi
 done
