@@ -23,6 +23,7 @@ jobs:
           id-token: write
           contents: read
         name: Run Playwright + Cucumber Tests
+        environment: ${{ github.event.inputs.environment }} 
         runs-on: ubuntu-22.04
         env:
             PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
@@ -31,6 +32,22 @@ jobs:
             SQL_IP_NAME: e2e-tests-pr
 
         steps:
+            - name: Check SA_PASSWORD secret present
+              shell: bash
+              run: |
+                if [ -z "${{ secrets.E2E_SQL_SA_PASSWORD }}" ]; then
+                  echo "❌ Secret E2E_SQL_SA_PASSWORD is not set or not accessible for this environment."
+                  exit 1
+                fi        
+            - name: Locate seed scripts
+              shell: bash
+              run: |
+                pwd
+                ls -la
+                ls -la ./tests || true
+                ls -la ./tests/Dfe.PlanTech.Web.SeedTestData || true
+                ls -la ./tests/Dfe.PlanTech.Web.SeedTestData/scripts || true
+
             - name: Start Azure SQL Edge and seed DB
               shell: bash
               working-directory: ./tests/Dfe.PlanTech.Web.SeedTestData/scripts
