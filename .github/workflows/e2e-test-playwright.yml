@@ -32,6 +32,11 @@ jobs:
             SQL_IP_NAME: e2e-tests-pr
 
         steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 0
+
             - name: Check SA_PASSWORD secret present
               shell: bash
               run: |
