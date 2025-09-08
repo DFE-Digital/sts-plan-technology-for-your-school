@@ -60,23 +60,29 @@ if [[ "$sqlcmd_path" == *"mssql-tools18"* ]]; then
 fi
 
 echo "SQL Edge ready. Creating database..."
-# Use dynamic SQL + QUOTENAME to avoid any parsing issues with hyphens
-docker exec "$name" /bin/bash -lc \
-  "\"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -b -h -1 -W -w 1024 \
-   -Q \"DECLARE @db sysname = N''plantech-mock-db''; IF DB_ID(@db) IS NULL EXEC(N''CREATE DATABASE '' + QUOTENAME(@db));\""
+# Run T-SQL via stdin to avoid shell escaping issues with hyphens/brackets
+docker exec "$name" /bin/bash -lc "
+  cat <<'SQL' | \"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -b -h -1 -W -w 1024 -i -
+DECLARE @db sysname = N'plantech-mock-db';
+IF DB_ID(@db) IS NULL
+BEGIN
+  EXEC(N'CREATE DATABASE ' + QUOTENAME(@db));
+END
+SQL
+"
 
 # Verify DB exists before proceeding (retry a few seconds)
 echo "Verifying database creation..."
 verify_retries=20
 until docker exec "$name" /bin/bash -lc \
-  "\"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -h -1 -W -w 1024 \
+  "\"$sqlcmd_path\" -S localhost -U SA -P \"\$MSSQL_SA_PASSWORD\" $sqlcmd_tls_flag -b -h -1 -W -w 1024 \
    -Q \"SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name = N''plantech-mock-db'';\" \
    | tr -d '\r' | grep -x 'plantech-mock-db'"; do
   sleep 1
   verify_retries=$((verify_retries-1))
   if [ $verify_retries -le 0 ]; then
     echo "Database 'plantech-mock-db' not found after create. Recent logs:"
-    docker logs --tail 200 "$name" || true
+    docker logs --tail 200 \"$name\" || true
     exit 1
   fi
 done
