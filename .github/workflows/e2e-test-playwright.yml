@@ -39,10 +39,10 @@ jobs:
               working-directory: ./tests/Dfe.PlanTech.Web.SeedTestData/scripts
               env:
                 SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
+              timeout-minutes: 5
               run: |
-                chmod +x ./setup.sh
-                # name arg = container name "azuresqledge", password from secret
-                ./setup.sh azuresqledge "$SA_PASSWORD"                  
+                chmod +x ./setup-ci.sh
+                ./setup.sh azuresqledge "$SA_PASSWORD"               
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
