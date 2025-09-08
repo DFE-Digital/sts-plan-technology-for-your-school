@@ -51,7 +51,7 @@ jobs:
                   echo "❌ Secret E2E_SQL_SA_PASSWORD is too short; must be >= 12 chars."
                   exit 1
                 fi
-                
+
             - name: Locate seed scripts
               shell: bash
               run: |
@@ -105,20 +105,6 @@ jobs:
               working-directory: ./build
               run: |
                 echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
-
-            - name: Get workflow IP address
-              id: whats-my-ip
-              uses: ./.github/actions/whats-my-ip-address
-
-            - name: Add Azure firewall rules
-              uses: ./.github/actions/azure-ip-whitelist
-              with:
-                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-                  verb: "add"
-                  az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-                  az_ip_name: ${{ env.SQL_IP_NAME }}
-                  az_resource_group: ${{ env.RESOURCE_GROUP }}
-                  az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
             - name: Run Web App (E2E, local SQL Edge)
               shell: bash
