@@ -4,6 +4,14 @@ set -euo pipefail
 name="${1:-azuresqledge}"
 password="${2:?SA password required}"
 
+# Strip any accidental Windows CR and surrounding whitespace
+password="$(printf '%s' "$password_raw" | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+if [ -z "$password" ] || [ "${#password}" -lt 12 ]; then
+  echo "❌ SA password is empty or too short (len=${#password})."
+  exit 1
+fi
+
 # Clean any previous container with same name (idempotent for retries)
 docker rm -f "$name" >/dev/null 2>&1 || true
 

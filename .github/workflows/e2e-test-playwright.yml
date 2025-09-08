@@ -37,13 +37,21 @@ jobs:
               with:
                 fetch-depth: 0
 
-            - name: Check SA_PASSWORD secret present
+            - name: Validate SA password secret
               shell: bash
               run: |
-                if [ -z "${{ secrets.E2E_SQL_SA_PASSWORD }}" ]; then
-                  echo "❌ Secret E2E_SQL_SA_PASSWORD is not set or not accessible for this environment."
+                PASS="${{ secrets.E2E_SQL_SA_PASSWORD }}"
+                if [ -z "$PASS" ]; then
+                  echo "❌ Secret E2E_SQL_SA_PASSWORD is missing or not accessible for environment '${{ github.event.inputs.environment }}'."
                   exit 1
-                fi        
+                fi
+                # GitHub masks values in logs, but this prints only the length:
+                echo "SA password length: ${#PASS}"
+                if [ "${#PASS}" -lt 12 ]; then
+                  echo "❌ Secret E2E_SQL_SA_PASSWORD is too short; must be >= 12 chars."
+                  exit 1
+                fi
+                
             - name: Locate seed scripts
               shell: bash
               run: |
