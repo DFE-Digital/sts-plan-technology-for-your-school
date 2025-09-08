@@ -15,6 +15,19 @@ docker run --cap-add SYS_PTRACE \
   --name "$name" -d \
   mcr.microsoft.com/azure-sql-edge:latest
 
+echo "Waiting for readiness logs..."
+max_retries=180
+i=0
+until docker logs "$name" 2>&1 | grep -q "SQL Server is now ready for client connections"; do
+  sleep 1
+  i=$((i+1))
+  if [ "$i" -ge "$max_retries" ]; then
+    echo "❌ Not ready in ${max_retries}s. Recent logs:"
+    docker logs --tail 200 "$name" || true
+    exit 1
+  fi
+done
+
 echo "Waiting for SQL Edge to accept connections..."
 
 # Retry up to 120s trying a trivial query (more reliable than log-grep)
