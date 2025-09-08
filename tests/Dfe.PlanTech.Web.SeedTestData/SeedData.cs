@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Infrastructure.Data;
+using Dfe.PlanTech.Data.Sql;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Web.SeedTestData;
