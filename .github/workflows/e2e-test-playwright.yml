@@ -126,17 +126,15 @@ jobs:
             - name: Install Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                node-version: 20
 
             - name: Install NPM dependencies
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               run: npm ci
 
-            - name: Setup Playwright
-              uses: microsoft/playwright-github-action@v1
-              with:
-                # optional: pin a version; otherwise it reads from your package.json
-                version: 1.51.1
+            - name: Install Playwright browsers (tests dir)
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              run: npx playwright install --with-deps chromium
 
             - name: Run Playwright + Cucumber tests (with recording)
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
