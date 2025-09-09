@@ -158,7 +158,7 @@ jobs:
                   DB_DATABASE: plantech-mock-db
                   DB_ENCRYPT: true
                   DB_TRUST_SERVER_CERTIFICATE: true
-                  HEADLESS: false
+                  HEADLESS: true
               run: npm run test:login && npm run test:record
 
             - name: Generate HTML report
