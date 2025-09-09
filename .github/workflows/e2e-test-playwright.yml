@@ -138,10 +138,6 @@ jobs:
                 # optional: pin a version; otherwise it reads from your package.json
                 version: 1.51.1
 
-            - name: Setup session storage (login)
-              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
-              run: npx ts-node login.setup.ts
-
             - name: Run Playwright + Cucumber tests (with recording)
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               env:
