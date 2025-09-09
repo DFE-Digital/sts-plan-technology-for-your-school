@@ -160,7 +160,7 @@ jobs:
             - name: Run Playwright + Cucumber tests (with recording)
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               env:
-                  URL: https://localhost:8081
+                  URL: https://localhost:8081/
                   DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
                   DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
                   DSI_SCHOOL_ESTABLISHMENT_REF: 00000018
