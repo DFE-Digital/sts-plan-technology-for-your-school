@@ -44,6 +44,7 @@ Before(async function (scenario: ITestCaseHookParameter) {
 
   const contextOptions: Parameters<typeof browser.newContext>[0] = {
     storageState: storagePath,
+    ignoreHTTPSErrors: true,
   };
 
   if (shouldRecord) {
