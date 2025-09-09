@@ -136,7 +136,6 @@ jobs:
                 export ASPNETCORE_ENVIRONMENT=E2E
                 export KeyVaultName=${{ env.KEYVAULT_NAME }}
                 export Kestrel__Endpoints__Https__Url=https://*:8081
-                export Kestrel__Endpoints__Http__Url: http://*:8081
                 export DfeSignIn__FrontDoorUrl=https://localhost:8081
                 export GTM__Id=gtm_id
                 export GTM__SiteVerificationId=testing_site_verification_id
