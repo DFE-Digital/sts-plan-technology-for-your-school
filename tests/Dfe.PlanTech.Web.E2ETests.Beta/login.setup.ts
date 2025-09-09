@@ -26,7 +26,10 @@ async function loginAndSaveSession(
   const slowMo = process.env.SLOWMO ? Number(process.env.SLOWMO) : (isCI ? 0 : 100);
 
   const browser = await chromium.launch({ headless, slowMo });
-  const context = await browser.newContext();
+
+  const ignoreHTTPSErrors = process.env.CI === 'true';
+  const context = await browser.newContext({ ignoreHTTPSErrors });
+
   const page = await context.newPage();
 
   try {
