@@ -127,6 +127,11 @@ jobs:
                 az_resource_group: ${{ env.RESOURCE_GROUP}}
                 az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
+            - name: Start Redis cache
+              shell: bash
+              run: |
+                docker run -p 6379:6379 --name plantech-redis -d redis
+
             - name: Run Web App (E2E, local SQL Edge)
               shell: bash
               working-directory: ./build
@@ -142,6 +147,7 @@ jobs:
                 export AutomatedTesting__Contentful__Tag=e2e
                 export AutomatedTesting__Contentful__IncludeTaggedContent=true
                 export ConnectionStrings__Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db"
+                export ConnectionStrings__Redis="localhost:6379,abortConnect=false"
                 dotnet ./Dfe.PlanTech.Web.dll &
 
             - name: Install Node.js
@@ -235,5 +241,3 @@ jobs:
                 az_ip_name: ${{ env.SQL_IP_NAME }}
                 az_resource_group: ${{ env.RESOURCE_GROUP}}
                 az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
-
-
