@@ -111,7 +111,15 @@ jobs:
               shell: bash
               working-directory: ./build
               run: |
-                echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
+                cat > overrides.json <<'JSON'
+                {
+                  "DfeSignIn": { "FrontDoorUrl": "https://localhost:8081" },
+                  "Contentful": {
+                    "Environment": "${{ secrets.E2E_PR_CON_ENV }}",
+                    "DeliveryApiKey": "${{ secrets.E2E_PR_CON_DEL_KEY }}"
+                  }
+                }
+                JSON
 
             - name: Get workflow IP address
               id: whats-my-ip
@@ -132,8 +140,6 @@ jobs:
               working-directory: ./build
               env:
                 SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
-                CON_ENVIRONMENT: ${{ secrets.E2E_PR_CON_ENV }}
-                CON_KEY: ${{ secrets.E2E_PR_CON_DEL_KEY }}
               run: |
                 export ASPNETCORE_ENVIRONMENT=E2E
                 export KeyVaultName=${{ env.KEYVAULT_NAME }}
@@ -143,8 +149,6 @@ jobs:
                 export GTM__SiteVerificationId=testing_site_verification_id
                 export AutomatedTesting__Contentful__Tag=e2e
                 export AutomatedTesting__Contentful__IncludeTaggedContent=true
-                export Contentful__Environment=${{ env.CON_ENVIRONMENT }}
-                export Contentful__DeliveryApiKey=${{ env.CON_KEY }}
                 export ConnectionStrings__Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db"
                 dotnet ./Dfe.PlanTech.Web.dll &
 
