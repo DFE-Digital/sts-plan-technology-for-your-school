@@ -46,14 +46,8 @@ async function loginAndSaveSession(
     await passwordSubmit.click();
 
   //Click the cookies banners so we get the cookie preferences set in the storage state.json
-    const accept = page.locator('button[name="accept-cookies"]').first();
-    if (await accept.isVisible().catch(() => false)) {
-      await accept.click().catch(() => {});
-    }
-    const hide = page.locator('button[name="hide-cookies"]').first();
-    if (await hide.isVisible().catch(() => false)) {
-      await hide.click().catch(() => {});
-    }
+    await page.locator('button[name="accept-cookies"]').first().click();
+    await page.locator('button[name="hide-cookies"]').first().click();
 
     // Settle the app
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
