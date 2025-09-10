@@ -146,9 +146,12 @@ jobs:
                 export GTM__SiteVerificationId=testing_site_verification_id
                 export AutomatedTesting__Contentful__Tag=e2e
                 export AutomatedTesting__Contentful__IncludeTaggedContent=true
-                export ConnectionStrings__Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db"
-                export ConnectionStrings__Redis="localhost:6379,abortConnect=false"
-                dotnet ./Dfe.PlanTech.Web.dll &
+
+                dotnet ./Dfe.PlanTech.Web.dll \
+                  --Contentful:Environment="${{ secrets.E2E_PR_CON_ENV }}" \
+                  --Contentful:DeliveryApiKey="${{ secrets.E2E_PR_CON_DEL_KEY }}" \
+                  --ConnectionStrings:Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db" \
+                  --ConnectionStrings:Redis="localhost:6379,abortConnect=false" &
 
             - name: Install Node.js
               uses: actions/setup-node@v4
@@ -230,6 +233,15 @@ jobs:
                 docker logs azuresqledge || true
                 docker stop azuresqledge || true
                 docker rm azuresqledge || true
+
+            - name: Stop & remove Redis container
+              if: always()
+              shell: bash
+              run: |
+                docker ps -a
+                docker logs plantech-redis || true
+                docker stop plantech-redis || true
+                docker rm plantech-redis || true
 
             - name: Remove Azure firewall rules
               if: always()
