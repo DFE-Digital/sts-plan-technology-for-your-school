@@ -111,15 +111,7 @@ jobs:
               shell: bash
               working-directory: ./build
               run: |
-                cat > overrides.json <<'JSON'
-                {
-                  "DfeSignIn": { "FrontDoorUrl": "https://localhost:8081" },
-                  "Contentful": {
-                    "Environment": "${{ secrets.E2E_PR_CON_ENV }}",
-                    "DeliveryApiKey": "${{ secrets.E2E_PR_CON_DEL_KEY }}"
-                  }
-                }
-                JSON
+                echo "{ \"DfeSignIn\": { \"FrontDoorUrl\": \"https://localhost:8081\"}}" > overrides.json
 
             - name: Get workflow IP address
               id: whats-my-ip
