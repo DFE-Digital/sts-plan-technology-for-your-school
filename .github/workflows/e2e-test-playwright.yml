@@ -30,6 +30,8 @@ jobs:
             KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
             RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
             SQL_IP_NAME: e2e-tests-pr
+            DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+            DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
         steps:
             - name: Checkout
@@ -150,8 +152,6 @@ jobs:
                 export GTM__SiteVerificationId=testing_site_verification_id
                 export AutomatedTesting__Contentful__Tag=e2e
                 export AutomatedTesting__Contentful__IncludeTaggedContent=true
-                export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
-                DOTNET_CLI_TELEMETRY_OPTOUT=1
                 dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 --ConnectionStrings:Redis="localhost:6379,abortConnect=false" --ConnectionStrings:Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db" &
 
             - name: Install Node.js
@@ -174,10 +174,6 @@ jobs:
             - name: Install Playwright browsers (tests dir)
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               run: npx playwright install --with-deps chromium
-
-            - name: Install ICU data for Node (en-GB)
-              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
-              run: npm install full-icu --no-save
 
             - name: Wait for web app to be ready
               shell: bash
