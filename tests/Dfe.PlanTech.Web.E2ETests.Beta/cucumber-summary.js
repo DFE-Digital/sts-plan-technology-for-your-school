@@ -7,13 +7,25 @@ const path = require("path");
 const input = process.argv[2] || "reports/cucumber-report.json";
 const outPath = process.env.GITHUB_STEP_SUMMARY;
 
-function nsToMsMaybe(v) {
-  // Cucumber JSON may report nanoseconds or milliseconds depending on version/formatter.
-  // Heuristic: if it's big (e.g. > 10^7) treat as ns; else ms.
-  const n = Number(v || 0);
-  if (!isFinite(n) || n <= 0) return 0;
-  return n > 10_000_000 ? n / 1e6 : n; // ns -> ms
+// ---------- helpers ----------
+
+// Prefer modern "children" (messages v19+) else legacy "elements"
+function itemsOfFeature(feature) {
+  if (Array.isArray(feature.children) && feature.children.length) return feature.children;
+  return Array.isArray(feature.elements) ? feature.elements : [];
 }
+
+// Normalize duration to milliseconds across ms / µs / ns
+function toMs(value) {
+  const v = Number(value || 0);
+  if (!isFinite(v) || v <= 0) return 0;
+  // Heuristic:
+  // < 1e7 → ms, < 1e10 → µs, else ns
+  if (v < 10_000_000) return v;            // ms
+  if (v < 10_000_000_000) return v / 1e3;  // µs -> ms
+  return v / 1e6;                           // ns -> ms
+}
+
 function msFmt(ms) {
   if (!isFinite(ms)) return "0ms";
   if (ms >= 60_000) {
@@ -24,13 +36,33 @@ function msFmt(ms) {
   if (ms >= 1000) return `${(ms / 1000).toFixed(2)}s`;
   return `${Math.round(ms)}ms`;
 }
+
 const tick = "✅";
 const cross = "❌";
-const warn = "⚠️";
+const warn  = "⚠️";
 
 function readJSON(p) {
   return JSON.parse(fs.readFileSync(p, "utf8"));
 }
+
+function stepsOf(el) {
+  return Array.isArray(el.steps) ? el.steps : [];
+}
+
+function hooksOf(el, key) {
+  // key: "before" | "after" (legacy json puts hook results here)
+  return Array.isArray(el[key]) ? el[key] : [];
+}
+
+function isScenarioLike(el) {
+  // Skip backgrounds and rule containers
+  const type = (el.type || el.keyword || "").toString().toLowerCase();
+  if (type.includes("background") || type.includes("rule")) return false;
+  // Consider anything with steps or a name a scenario-ish entry
+  return !!(stepsOf(el).length || el.name);
+}
+
+// ---------- parse ----------
 
 const data = readJSON(input);
 
@@ -43,26 +75,6 @@ let totalDurationMs = 0;
 const perFeature = new Map(); // name -> { scenarios, passed, failed, skipped, durationMs }
 const scenarios = [];         // { feature, name, status, durationMs }
 const failures = [];          // { feature, scenario, steps: [{ step, error }] }
-
-function itemsOfFeature(feature) {
-  // Support both legacy and newer shapes
-  return feature.elements || feature.children || [];
-}
-function stepsOf(el) {
-  return el.steps || [];
-}
-function hooksOf(el, key) {
-  // key: "before" | "after"
-  return el[key] || [];
-}
-function isScenarioLike(el) {
-  // Skip Background and other non-scenario entries
-  const type = (el.type || el.keyword || "").toString().toLowerCase();
-  if (type.includes("background")) return false;
-  if (stepsOf(el).length) return true;
-  // Some formatters leave steps empty when a hook hard-fails—still treat as scenario
-  return !!el.name;
-}
 
 for (const feature of data) {
   const featureName = feature.name || "(unnamed feature)";
@@ -77,7 +89,7 @@ for (const feature of data) {
     const scenarioName = el.name || "(unnamed scenario)";
     const stepList = stepsOf(el);
     const beforeHooks = hooksOf(el, "before");
-    const afterHooks = hooksOf(el, "after");
+    const afterHooks  = hooksOf(el, "after");
 
     let scenDurationMs = 0;
     let scenStatus = "passed";
@@ -87,14 +99,15 @@ for (const feature of data) {
     for (const step of stepList) {
       const result = step.result || {};
       const status = (result.status || "unknown").toLowerCase();
-      const durMs = nsToMsMaybe(result.duration);
+      const durMs = toMs(result.duration);
 
       totalSteps++;
       totalDurationMs += durMs;
       scenDurationMs += durMs;
 
-      if (status === "passed") passedSteps++;
-      else if (status === "failed") {
+      if (status === "passed") {
+        passedSteps++;
+      } else if (status === "failed") {
         failedSteps++;
         scenStatus = "failed";
         scenFailedDetails.push({
@@ -103,24 +116,23 @@ for (const feature of data) {
         });
       } else if (status === "skipped") {
         skippedSteps++;
+        // keep scenario status as-is
       } else if (status === "pending") {
         pendingSteps++;
-        // Treat pending as failure for CI visibility
-        scenStatus = scenStatus === "failed" ? "failed" : "failed";
+        scenStatus = "failed";
         scenFailedDetails.push({
           step: step.name || "(pending step)",
           error: "Step is pending",
         });
       } else if (status === "undefined") {
         undefinedSteps++;
-        // Treat undefined as failure for CI visibility
-        scenStatus = scenStatus === "failed" ? "failed" : "failed";
+        scenStatus = "failed";
         scenFailedDetails.push({
           step: step.name || "(undefined step)",
           error: "Step is undefined (no matching step definition)",
         });
       } else {
-        // unknown/other -> count as skipped
+        // unknown/ambiguous -> treat as skipped for steps
         skippedSteps++;
       }
     }
@@ -130,7 +142,7 @@ for (const feature of data) {
       for (const h of hooks) {
         const r = h.result || {};
         const s = (r.status || "unknown").toLowerCase();
-        const durMs = nsToMsMaybe(r.duration);
+        const durMs = toMs(r.duration);
         scenDurationMs += durMs;
         totalDurationMs += durMs;
         if (s === "failed") {
@@ -143,7 +155,7 @@ for (const feature of data) {
       }
     }
     absorbHookFailures(beforeHooks, "Before");
-    absorbHookFailures(afterHooks, "After");
+    absorbHookFailures(afterHooks,  "After");
 
     // Scenario-level tallies
     totalScenarios++;
@@ -179,7 +191,8 @@ for (const feature of data) {
   });
 }
 
-// Markdown output
+// ---------- markdown ----------
+
 const overallStatus = failedScenarios > 0 ? `${cross} Failed` : `${tick} Passed`;
 let md = `# 🥒 E2E Test Summary — ${overallStatus}\n\n`;
 
