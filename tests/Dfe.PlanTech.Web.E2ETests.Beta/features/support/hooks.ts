@@ -12,16 +12,10 @@ import fs from 'fs';
 import { clearTestEstablishmentData } from '../../clearTestData';
 import { setDefaultTimeout } from '@cucumber/cucumber';
 
-// e.g. 2 minutes for any step
 setDefaultTimeout(60 * 1000)
-
-
 
 let browser: Browser;
 
-/**
- * Ensure a directory exists. Create it recursively if it doesn't.
- */
 function ensureDirExists(dirPath: string) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
@@ -31,8 +25,6 @@ function ensureDirExists(dirPath: string) {
 BeforeAll(async () => {
   const isHeadless = process.env.HEADLESS == 'true';
   browser = await chromium.launch({ headless: isHeadless, slowMo: 150 });
-
-
 });
 
 Before(async function (scenario: ITestCaseHookParameter) {
@@ -58,8 +50,8 @@ Before(async function (scenario: ITestCaseHookParameter) {
 
   const context = await browser.newContext(contextOptions);
 
-  context.setDefaultTimeout(30_000);             // 30s per action
-  context.setDefaultNavigationTimeout(45_000);   // 45s for navigation
+  context.setDefaultTimeout(30_000);
+  context.setDefaultNavigationTimeout(45_000);
 
   if (shouldRecord) {
     await context.tracing.start({ screenshots: true, snapshots: true });
@@ -96,7 +88,6 @@ Before(async function (scenario: ITestCaseHookParameter) {
   }
 });
 
-
 After(async function (scenario: ITestCaseHookParameter) {
   const scenarioName = scenario.pickle.name.replace(/[^a-zA-Z0-9]/g, '_');
   const featureName = path.basename(scenario.pickle.uri || 'unknown', '.feature');
@@ -115,7 +106,7 @@ After(async function (scenario: ITestCaseHookParameter) {
     ensureDirExists(screenshotDir);
     ensureDirExists(traceDir);
 
-    if (scenario.result?.status === Status.FAILED && page) {
+    if (page) {
       try {
         const screenshotPath = path.join(screenshotDir, `${scenarioName}.png`);
         await page.screenshot({ path: screenshotPath });
@@ -125,34 +116,26 @@ After(async function (scenario: ITestCaseHookParameter) {
       }
     }
 
-    // Stop tracing before closing the page
     try {
       if (context && context.tracing) {
-        if (scenario.result?.status === Status.FAILED) {
-          const tracePath = path.join(traceDir, `${scenarioName}.zip`);
-          await context.tracing.stop({ path: tracePath });
-          console.log(`🧪 Trace saved: ${tracePath}`);
-        } else {
-          await context.tracing.stop();
-        }
+        const tracePath = path.join(traceDir, `${scenarioName}.zip`);
+        await context.tracing.stop({ path: tracePath });
+        console.log(`🧪 Trace saved: ${tracePath}`);
       }
     } catch (err) {
       console.warn(`Failed to stop tracing for ${scenarioName}:`, err);
     }
   }
 
-  // close page first, then save video, then close context ---
   let savedVideo = false;
   if (page) {
-    await page.close(); // finalizes the video
+    await page.close();
     if (shouldRecord) {
       const video = page.video();
       if (video) {
         try {
           const newVideoPath = path.join(videoDir, `${scenarioName}.webm`);
-          // saveAs waits for the file to be fully written
           await video.saveAs(newVideoPath);
-          // remove the temp video file
           await video.delete();
           savedVideo = true;
           console.log(`Video saved: ${newVideoPath}`);
@@ -163,7 +146,6 @@ After(async function (scenario: ITestCaseHookParameter) {
     }
   }
 
-  // close the context
   await context?.close();
 });
 
