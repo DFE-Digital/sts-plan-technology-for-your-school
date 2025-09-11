@@ -162,6 +162,10 @@ jobs:
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               run: npx playwright install --with-deps chromium
 
+            - name: Install ICU data for Node (en-GB)
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              run: npm install full-icu --no-save
+
             - name: Wait for web app to be ready
               shell: bash
               run: |
@@ -198,6 +202,10 @@ jobs:
                   DB_ENCRYPT: false
                   DB_TRUST_SERVER_CERTIFICATE: true
                   HEADLESS: true
+                  NODE_ICU_DATA: ./node_modules/full-icu
+                  LANG: en_GB.UTF-8
+                  LC_ALL: en_GB.UTF-8
+                  TZ: Europe/London
               run: npm run test:login && npm run test:record
 
             - name: Generate HTML report
