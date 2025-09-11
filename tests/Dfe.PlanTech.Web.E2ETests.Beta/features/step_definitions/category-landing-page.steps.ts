@@ -1,5 +1,6 @@
 import { Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
+import { getCurrentShortDate, normaliseShortDateTimeText } from '../../helpers/datetime';
 
 async function getConfirmationPanel(context: any, sectionName: string) {
   const expectedHeader = `Your self-assessment for ${sectionName.toLowerCase()} is complete`;
@@ -58,16 +59,24 @@ When('I click the recommendation link {string} on the category landing page', as
 
 Then('I should see the completed self-assessment message for {string}', async function (sectionName: string) {
   // format todays date
-  const today = new Date();
-  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
-  const formattedDate = today.toLocaleDateString('en-GB', options).replace(',', '');
+   var currentDate = getCurrentShortDate();
 
   const sectionNameLower = sectionName.toLowerCase();
+  const expectedTextRaw = `The self-assessment for ${sectionNameLower} was completed on ${currentDate}.`;
 
   // check the self assessment completed text
-  const expectedText = `The self-assessment for ${sectionNameLower} was completed on ${formattedDate}.`;
-  const completionParagraph = this.page.locator('p', { hasText: expectedText });
+  const completionParagraph = this.page.locator('p', {
+  hasText: `The self-assessment for ${sectionNameLower} was completed on`
+  });
+
   await expect(completionParagraph).toBeVisible();
+
+  // now fetch and normalise both
+  const actualText = normaliseShortDateTimeText(await completionParagraph.innerText());
+  const expectedText = normaliseShortDateTimeText(expectedTextRaw);
+
+  // assert equality
+  expect(actualText).toBe(expectedText);
 
   // check the view link is completed
   const viewLink = this.page.getByRole('link', { name: `View or update your self-assessment for ${sectionNameLower}` });
@@ -79,3 +88,7 @@ Then('I should not see any recommendation links', async function () {
 
   await expect(recommendationLinks).toHaveCount(0);
 });
+function normaliseSeptemberShortDateTimeText(expectedText: string) {
+  throw new Error('Function not implemented.');
+}
+
