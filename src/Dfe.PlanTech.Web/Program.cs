@@ -26,7 +26,11 @@ if (!builder.Environment.IsDevelopment())
     builder.Services.AddReleaseServices(builder.Configuration);
 }
 
-if (builder.Environment.EnvironmentName != "E2E")
+if (builder.Environment.EnvironmentName == "E2E")
+{
+    builder.Configuration.AddCommandLine(args);
+}
+else
 {
     builder.Services.AddDbWriterServices(builder.Configuration);
 }
