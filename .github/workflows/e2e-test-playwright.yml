@@ -95,7 +95,7 @@ jobs:
               with:
                   dotnet-version: ${{ env.DOTNET_VERSION }}
                   cache: true
-                  cache-dependecncy-path: |
+                  cache-dependency-path: |
                     **/*.csproj
                     **/packages.lock.json
 
@@ -164,7 +164,7 @@ jobs:
             - name: Install NPM dependencies
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               run: npm ci
-              
+
             - name: Cache Playwright browsers
               uses: actions/cache@v4
               with:
