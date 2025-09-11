@@ -224,7 +224,7 @@ jobs:
             - name: Summarise Cucumber results
               if: always()
               run: |
-                node scripts/cucumber-summary.js ./tests/Dfe.PlanTech.Web.E2ETests.Beta/reports/cucumber-report.json
+                node ./tests/Dfe.PlanTech.Web.E2ETests.Beta/cucumber-summary.js ./tests/Dfe.PlanTech.Web.E2ETests.Beta/reports/cucumber-report.json
 
             - name: Generate HTML report
               if: always()
