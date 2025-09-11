@@ -101,10 +101,6 @@ jobs:
                     **/*.csproj
                     **/packages.lock.json
 
-            - name: Clear NuGet Cache
-              shell: bash
-              run: dotnet nuget locals all --clear
-
             - name: Install dependencies
               shell: bash
               run: dotnet restore ${{ env.PROJECT_PATH }}
