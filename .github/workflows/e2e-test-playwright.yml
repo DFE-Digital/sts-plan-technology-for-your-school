@@ -35,7 +35,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v4
               with:
-                fetch-depth: 0
+                fetch-depth: 1
                 
             - name: Login with AZ
               uses: ./.github/actions/azure-login
@@ -94,6 +94,10 @@ jobs:
               uses: actions/setup-dotnet@v4
               with:
                   dotnet-version: ${{ env.DOTNET_VERSION }}
+                  cache: true
+                  cache-dependecncy-path: |
+                    **/*.csproj
+                    **/packages.lock.json
 
             - name: Clear NuGet Cache
               shell: bash
@@ -130,7 +134,7 @@ jobs:
             - name: Start Redis cache
               shell: bash
               run: |
-                docker run -p 6379:6379 --name plantech-redis -d redis
+                docker run -p 6379:6379 --name plantech-redis -d redis:7-alpine
 
             - name: Run Web App (E2E, local SQL Edge)
               shell: bash
@@ -146,17 +150,26 @@ jobs:
                 export GTM__SiteVerificationId=testing_site_verification_id
                 export AutomatedTesting__Contentful__Tag=e2e
                 export AutomatedTesting__Contentful__IncludeTaggedContent=true
-
+                export DOTNET_SKIP_FIRST_TIME_EXPERIENCE=1
+                DOTNET_CLI_TELEMETRY_OPTOUT=1
                 dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 --ConnectionStrings:Redis="localhost:6379,abortConnect=false" --ConnectionStrings:Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db" &
 
             - name: Install Node.js
               uses: actions/setup-node@v4
               with:
                 node-version: 20
+                cache: 'npm'
+                cache-dependency-path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/package-lock.json
 
             - name: Install NPM dependencies
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               run: npm ci
+              
+            - name: Cache Playwright browsers
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/ms-playwright
+                key: playwright-${{ runner.os }}-chromium-1.51.1
 
             - name: Install Playwright browsers (tests dir)
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
@@ -170,7 +183,7 @@ jobs:
               shell: bash
               run: |
                 set -euo pipefail
-                for i in {1..60}; do
+                for i in {1..40}; do
                   # ignore self-signed cert
                   if curl -skf https://localhost:8081/home >/dev/null; then
                     echo "Web app is up"
@@ -207,7 +220,7 @@ jobs:
                   LC_ALL: en_GB.UTF-8
                   TZ: Europe/London
               run: npm run test:login && npm run test:record
-              
+
             - name: Summarise Cucumber results
               if: always()
               run: |
@@ -241,6 +254,7 @@ jobs:
                   name: playwright-videos
                   path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/videos/
                   if-no-files-found: ignore
+                  compression-level: 1
 
             - name: Upload Playwright traces
               if: always()
@@ -249,6 +263,7 @@ jobs:
                   name: playwright-traces
                   path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/traces/
                   if-no-files-found: ignore
+                  compression-level: 1
 
             - name: Stop & remove SQL Edge container
               if: always()
