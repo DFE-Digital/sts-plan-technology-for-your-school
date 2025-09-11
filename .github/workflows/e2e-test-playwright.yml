@@ -183,7 +183,7 @@ jobs:
                   DB_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
                   DB_PORT: 1433
                   DB_DATABASE: plantech-mock-db
-                  DB_ENCRYPT: true
+                  DB_ENCRYPT: false
                   DB_TRUST_SERVER_CERTIFICATE: true
                   HEADLESS: true
               run: npm run test:login && npm run test:record
