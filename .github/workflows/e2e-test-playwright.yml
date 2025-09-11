@@ -166,6 +166,22 @@ jobs:
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               run: npx playwright install --with-deps chromium
 
+            - name: Wait for web app to be ready
+              shell: bash
+              run: |
+                set -euo pipefail
+                for i in {1..60}; do
+                  # ignore self-signed cert
+                  if curl -skf https://localhost:8081/home >/dev/null; then
+                    echo "Web app is up"
+                    exit 0
+                  fi
+                  echo "Waiting for web app... ($i/60)"
+                  sleep 2
+                done
+                echo "Web app did not become ready in time"
+                exit 1
+
             - name: Run Playwright + Cucumber tests (with recording)
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               env:
