@@ -2,7 +2,7 @@
 Feature: Unauthorised
     Background:
         Given I visit the homepage
-        Then I should be on the URL containing "/dsi-error-not-associated-organisation"
+        Then I should be on the URL containing "/dsi-error-not-associated-organisatio2n"
     
     Scenario: Unauthorised page has the correct header
         Then the header should contain all the correct content
