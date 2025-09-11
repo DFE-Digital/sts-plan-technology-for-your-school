@@ -7,7 +7,13 @@ const path = require("path");
 const input = process.argv[2] || "reports/cucumber-report.json";
 const outPath = process.env.GITHUB_STEP_SUMMARY;
 
-function nsToMs(ns) { return Number(ns || 0) / 1e6; }
+function nsToMsMaybe(v) {
+  // Cucumber JSON may report nanoseconds or milliseconds depending on version/formatter.
+  // Heuristic: if it's big (e.g. > 10^7) treat as ns; else ms.
+  const n = Number(v || 0);
+  if (!isFinite(n) || n <= 0) return 0;
+  return n > 10_000_000 ? n / 1e6 : n; // ns -> ms
+}
 function msFmt(ms) {
   if (!isFinite(ms)) return "0ms";
   if (ms >= 60_000) {
@@ -22,15 +28,11 @@ const tick = "✅";
 const cross = "❌";
 const warn = "⚠️";
 
-function safeReadJSON(p) {
-  try { return JSON.parse(fs.readFileSync(p, "utf8")); }
-  catch (e) {
-    console.error(`Failed to read JSON at ${p}:`, e.message);
-    process.exit(1);
-  }
+function readJSON(p) {
+  return JSON.parse(fs.readFileSync(p, "utf8"));
 }
 
-const data = safeReadJSON(input);
+const data = readJSON(input);
 
 // Aggregates
 let totalFeatures = 0;
@@ -39,34 +41,53 @@ let totalSteps = 0, passedSteps = 0, failedSteps = 0, skippedSteps = 0, pendingS
 let totalDurationMs = 0;
 
 const perFeature = new Map(); // name -> { scenarios, passed, failed, skipped, durationMs }
-const scenarios = []; // { feature, name, status, durationMs }
-const failures = [];  // { feature, scenario, steps: [{step, error}] }
+const scenarios = [];         // { feature, name, status, durationMs }
+const failures = [];          // { feature, scenario, steps: [{ step, error }] }
+
+function itemsOfFeature(feature) {
+  // Support both legacy and newer shapes
+  return feature.elements || feature.children || [];
+}
+function stepsOf(el) {
+  return el.steps || [];
+}
+function hooksOf(el, key) {
+  // key: "before" | "after"
+  return el[key] || [];
+}
+function isScenarioLike(el) {
+  // Skip Background and other non-scenario entries
+  const type = (el.type || el.keyword || "").toString().toLowerCase();
+  if (type.includes("background")) return false;
+  if (stepsOf(el).length) return true;
+  // Some formatters leave steps empty when a hook hard-fails—still treat as scenario
+  return !!el.name;
+}
 
 for (const feature of data) {
   const featureName = feature.name || "(unnamed feature)";
   totalFeatures++;
 
-  const children = feature.elements || feature.children || [];
+  const items = itemsOfFeature(feature);
   let featDuration = 0, featScenarios = 0, featPassed = 0, featFailed = 0, featSkipped = 0;
 
-  for (const el of children) {
-    // Cucumber JSON can have backgrounds; skip those
-    const type = (el.type || el.keyword || "").toString().toLowerCase();
-    const isScenarioLike =
-      (el.steps && el.name) && (type.includes("scenario") || type === "" || type === "rule");
-
-    if (!isScenarioLike) continue;
+  for (const el of items) {
+    if (!isScenarioLike(el)) continue;
 
     const scenarioName = el.name || "(unnamed scenario)";
-    const steps = el.steps || [];
+    const stepList = stepsOf(el);
+    const beforeHooks = hooksOf(el, "before");
+    const afterHooks = hooksOf(el, "after");
+
     let scenDurationMs = 0;
     let scenStatus = "passed";
-    const scenFailedSteps = [];
+    const scenFailedDetails = [];
 
-    for (const step of steps) {
+    // Steps
+    for (const step of stepList) {
       const result = step.result || {};
       const status = (result.status || "unknown").toLowerCase();
-      const durMs = nsToMs(result.duration);
+      const durMs = nsToMsMaybe(result.duration);
 
       totalSteps++;
       totalDurationMs += durMs;
@@ -76,27 +97,55 @@ for (const feature of data) {
       else if (status === "failed") {
         failedSteps++;
         scenStatus = "failed";
-        scenFailedSteps.push({
+        scenFailedDetails.push({
           step: step.name || "(step)",
-          error: (result.error_message || result.error || "").toString()
+          error: (result.error_message || result.error || "").toString(),
         });
       } else if (status === "skipped") {
         skippedSteps++;
       } else if (status === "pending") {
         pendingSteps++;
+        // Treat pending as failure for CI visibility
+        scenStatus = scenStatus === "failed" ? "failed" : "failed";
+        scenFailedDetails.push({
+          step: step.name || "(pending step)",
+          error: "Step is pending",
+        });
       } else if (status === "undefined") {
         undefinedSteps++;
+        // Treat undefined as failure for CI visibility
+        scenStatus = scenStatus === "failed" ? "failed" : "failed";
+        scenFailedDetails.push({
+          step: step.name || "(undefined step)",
+          error: "Step is undefined (no matching step definition)",
+        });
       } else {
-        // treat other/unknown as skipped for counts
+        // unknown/other -> count as skipped
         skippedSteps++;
       }
     }
 
-    // Scenario status may be provided directly in newer JSONs
-    if (el.tags && el.steps?.length === 0 && (el.status || el.result?.status)) {
-      scenStatus = (el.status || el.result?.status).toLowerCase();
+    // Hooks (capture failures even if steps never ran)
+    function absorbHookFailures(hooks, label) {
+      for (const h of hooks) {
+        const r = h.result || {};
+        const s = (r.status || "unknown").toLowerCase();
+        const durMs = nsToMsMaybe(r.duration);
+        scenDurationMs += durMs;
+        totalDurationMs += durMs;
+        if (s === "failed") {
+          scenStatus = "failed";
+          scenFailedDetails.push({
+            step: `(${label} hook)`,
+            error: (r.error_message || r.error || "").toString() || `${label} hook failed`,
+          });
+        }
+      }
     }
+    absorbHookFailures(beforeHooks, "Before");
+    absorbHookFailures(afterHooks, "After");
 
+    // Scenario-level tallies
     totalScenarios++;
     featScenarios++;
     featDuration += scenDurationMs;
@@ -104,8 +153,8 @@ for (const feature of data) {
     if (scenStatus === "failed") {
       failedScenarios++;
       featFailed++;
-      failures.push({ feature: featureName, scenario: scenarioName, steps: scenFailedSteps });
-    } else if (scenStatus === "skipped" || scenStatus === "pending") {
+      failures.push({ feature: featureName, scenario: scenarioName, steps: scenFailedDetails });
+    } else if (scenStatus === "skipped") {
       skippedScenarios++;
       featSkipped++;
     } else {
@@ -117,7 +166,7 @@ for (const feature of data) {
       feature: featureName,
       name: scenarioName,
       status: scenStatus,
-      durationMs: scenDurationMs
+      durationMs: scenDurationMs,
     });
   }
 
@@ -126,16 +175,13 @@ for (const feature of data) {
     passed: featPassed,
     failed: featFailed,
     skipped: featSkipped,
-    durationMs: featDuration
+    durationMs: featDuration,
   });
 }
 
-// Build Markdown
-let md = "";
-
-// Header KPIs
+// Markdown output
 const overallStatus = failedScenarios > 0 ? `${cross} Failed` : `${tick} Passed`;
-md += `# 🥒 E2E Test Summary — ${overallStatus}\n\n`;
+let md = `# 🥒 E2E Test Summary — ${overallStatus}\n\n`;
 
 md += [
   `**Features:** ${totalFeatures}`,
@@ -144,7 +190,6 @@ md += [
   `**Total Time:** ${msFmt(totalDurationMs)}`
 ].join("  •  ") + "\n\n";
 
-// Per-feature table
 md += `## 📦 Feature Overview\n`;
 md += `| Feature | Scenarios | ${tick} Passed | ${cross} Failed | ${warn} Skipped | Time |\n`;
 md += `|---|---:|---:|---:|---:|---:|\n`;
@@ -153,11 +198,7 @@ for (const [name, f] of perFeature.entries()) {
 }
 md += `\n`;
 
-// Slowest scenarios
-const slowest = [...scenarios]
-  .sort((a, b) => b.durationMs - a.durationMs)
-  .slice(0, Math.min(10, scenarios.length));
-
+const slowest = [...scenarios].sort((a, b) => b.durationMs - a.durationMs).slice(0, Math.min(10, scenarios.length));
 if (slowest.length) {
   md += `## 🐢 Slowest Scenarios\n`;
   md += `| # | Scenario | Feature | Status | Time |\n`;
@@ -169,25 +210,22 @@ if (slowest.length) {
   md += `\n`;
 }
 
-// Failures with collapsible details
 if (failures.length) {
   md += `## ❌ Failed Scenarios\n`;
-  failures.forEach((f, idx) => {
+  failures.forEach((f) => {
     const header = `**${f.feature} → ${f.scenario}**`;
     md += `<details><summary>${header}</summary>\n\n`;
     f.steps.forEach(st => {
       const firstLine = (st.error || "").split("\n")[0];
-      md += `- 🔴 **Step:** \`${st.step}\`\n`;
+      md += `- 🔴 **${st.step}**\n`;
       if (firstLine) md += `  - **Error:** ${firstLine}\n`;
     });
     md += `\n</details>\n\n`;
   });
 }
 
-// Where did the report come from
 md += `---\n*Report:* \`${path.resolve(input)}\`\n`;
 
-// Output
 if (outPath) {
   fs.appendFileSync(outPath, md);
   console.log("Wrote Cucumber summary to GITHUB_STEP_SUMMARY");
