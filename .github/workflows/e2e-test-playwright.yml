@@ -207,6 +207,11 @@ jobs:
                   LC_ALL: en_GB.UTF-8
                   TZ: Europe/London
               run: npm run test:login && npm run test:record
+              
+            - name: Summarise Cucumber results
+              if: always()
+              run: |
+                node scripts/cucumber-summary.js ./tests/Dfe.PlanTech.Web.E2ETests.Beta/reports/cucumber-report.json
 
             - name: Generate HTML report
               if: always()
