@@ -222,7 +222,7 @@ jobs:
                   if-no-files-found: warn
 
             - name: Upload Playwright screenshots
-              if: failure()
+              if: always()
               uses: actions/upload-artifact@v4
               with:
                   name: playwright-screenshots
@@ -230,7 +230,7 @@ jobs:
                   if-no-files-found: ignore
 
             - name: Upload Playwright videos
-              if: failure()
+              if: always()
               uses: actions/upload-artifact@v4
               with:
                   name: playwright-videos
@@ -238,7 +238,7 @@ jobs:
                   if-no-files-found: ignore
 
             - name: Upload Playwright traces
-              if: failure()
+              if: always()
               uses: actions/upload-artifact@v4
               with:
                   name: playwright-traces
