@@ -1,11 +1,10 @@
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Dfe.PlanTech;
+namespace Dfe.PlanTech.UnitTests.Shared.Extensions;
 
 public static class LoggingHelpers
 {
-
     public static IEnumerable<ReceivedLoggerCall> ReceivedLogMessages<T>(this ILogger<T> logger)
         => logger.ReceivedCalls().Select(call =>
         {

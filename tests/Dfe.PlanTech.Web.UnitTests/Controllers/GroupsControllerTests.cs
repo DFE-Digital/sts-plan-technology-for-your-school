@@ -1,164 +1,117 @@
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Establishments.Models;
-using Dfe.PlanTech.Domain.Groups.Interfaces;
-using Dfe.PlanTech.Domain.Groups.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Submissions.Interfaces;
-using Dfe.PlanTech.Domain.Users.Interfaces;
-using Dfe.PlanTech.Web.Configuration;
+﻿using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Models;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
-using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class GroupsControllerTests
     {
-        private readonly IUser _user;
-        private readonly IGetGroupSelectionQuery _getGroupSelectionQuery;
-        private readonly IGetPageQuery _getPageQuery;
-
+        private readonly ILogger<GroupsController> _logger;
+        private readonly IGroupsViewBuilder _viewBuilder;
+        private readonly ICurrentUser _currentUser;
         private readonly GroupsController _controller;
 
         public GroupsControllerTests()
         {
-            var logger = Substitute.For<ILogger<GroupsController>>();
-            _user = Substitute.For<IUser>();
-            _getGroupSelectionQuery = Substitute.For<IGetGroupSelectionQuery>();
-            _getPageQuery = Substitute.For<IGetPageQuery>();
-
-            _controller = new GroupsController(
-                logger,
-                _user,
-                Substitute.For<IGetEstablishmentIdQuery>(),
-                Substitute.For<IGetSubmissionStatusesQuery>(),
-                _getGroupSelectionQuery,
-                Substitute.For<IGetSectionQuery>(),
-                Substitute.For<IGetLatestResponsesQuery>(),
-                Substitute.For<IGetSubTopicRecommendationQuery>()
-            );
+            _logger = Substitute.For<ILogger<GroupsController>>();
+            _viewBuilder = Substitute.For<IGroupsViewBuilder>();
+            _currentUser = Substitute.For<ICurrentUser>();
+            _controller = new GroupsController(_logger, _currentUser, _viewBuilder);
         }
 
         [Fact]
-        public async Task GetSchoolDashboardView_ReturnsViewWithViewModel()
+        public void Constructor_WithNullCurrentUser_ThrowsArgumentNullException()
         {
-            var selection = new GroupReadActivityDto
-            {
-                SelectedEstablishmentId = 101,
-                SelectedEstablishmentName = "Test School"
-            };
-            var orgName = "Group Org";
-
-            _user.GetCurrentUserId().Returns(Task.FromResult<int?>(1));
-            _user.GetEstablishmentId().Returns(Task.FromResult(100));
-            _user.GetOrganisationData().Returns(new EstablishmentDto() { OrgName = orgName });
-
-            _getGroupSelectionQuery
-                .GetLatestSelectedGroupSchool(1, 100, Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<GroupReadActivityDto?>(selection));
-
-            _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())!
-                .Returns(Task.FromResult(new Page { Content = new List<ContentComponent>() }));
-
-            var result = await _controller.GetSchoolDashboardView(_getPageQuery, CancellationToken.None);
-
-            var viewResult = Assert.IsType<ViewResult>(result);
-            var viewModel = Assert.IsType<GroupsSchoolDashboardViewModel>(viewResult.Model);
-
-            Assert.Equal("Test School", viewModel.SchoolName);
-            Assert.Equal(101, viewModel.SchoolId);
-            Assert.Equal(orgName, viewModel.GroupName);
-        }
-
-        [Fact]
-        public async Task SelectSchool_PostRedirectsToDashboard()
-        {
-            var recordGroupSelectionCommand = Substitute.For<IRecordGroupSelectionCommand>();
-
-            var result = await _controller.SelectSchool("12345", "School A", recordGroupSelectionCommand,
-                CancellationToken.None);
-
-            await recordGroupSelectionCommand.Received(1)
-                .RecordGroupSelection(Arg.Is<SubmitSelectionDto>(dto =>
-                        dto.SelectedEstablishmentUrn == "12345" &&
-                        dto.SelectedEstablishmentName == "School A"),
-                    Arg.Any<CancellationToken>());
-
-            var redirect = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal("GetSchoolDashboardView", redirect.ActionName);
-        }
-
-        [Fact]
-        public async Task GetSelectASchoolView_ReturnsViewWithCorrectModel()
-        {
-            var getNavigationQuery = Substitute.For<IGetNavigationQuery>();
-            var contactOptions = Substitute.For<IOptions<ContactOptions>>();
-            var mockSchools = new List<EstablishmentLink>
-                { new EstablishmentLink() { Urn = "123", EstablishmentName = "School A" } };
-            var orgData = new EstablishmentDto { OrgName = "GroupName" };
-
-            _user.GetGroupEstablishments().Returns(mockSchools);
-            _user.GetOrganisationData().Returns(orgData);
-
-            _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                .Returns(new Page { Content = new List<ContentComponent>() });
-
-            var contactLinkHref = "contactLinkHref";
-            var contactLink = Substitute.For<INavigationLink>();
-            contactLink.Href = contactLinkHref;
-
-            var options = new ContactOptions
-            {
-                LinkId = contactLinkHref
-            };
-
-            contactOptions.Value.Returns(options);
-            getNavigationQuery.GetLinkById(contactLinkHref).Returns(contactLink);
-
-            var result = await _controller.GetSelectASchoolView(_getPageQuery, getNavigationQuery, contactOptions, CancellationToken.None);
-
-            var view = Assert.IsType<ViewResult>(result);
-            var viewModel = Assert.IsType<GroupsSelectorViewModel>(view.Model);
-
-            Assert.Equal("GroupName", viewModel.GroupName);
-            Assert.Single(viewModel.GroupEstablishments);
-            Assert.Equal("School A", viewModel.GroupEstablishments.First().EstablishmentName);
-        }
-        [Fact]
-        public async Task GetCurrentSelection_ReturnsLatestSelection()
-        {
-            var user = Substitute.For<IUser>();
-            var getGroupSelectionQuery = Substitute.For<IGetGroupSelectionQuery>();
-            var logger = Substitute.For<ILogger<GroupsController>>();
-
-            var controller = new GroupsController(
-                logger,
-                user,
-                Substitute.For<IGetEstablishmentIdQuery>(),
-                Substitute.For<IGetSubmissionStatusesQuery>(),
-                getGroupSelectionQuery,
-                Substitute.For<IGetSectionQuery>(),
-                Substitute.For<IGetLatestResponsesQuery>(),
-                Substitute.For<IGetSubTopicRecommendationQuery>()
+            var ex = Assert.Throws<ArgumentNullException>(() =>
+                new GroupsController(_logger, null!, _viewBuilder)
             );
 
-            var cancellationToken = CancellationToken.None;
-            var expectedSelection = new GroupReadActivityDto { SelectedEstablishmentId = 123, SelectedEstablishmentName = "Test School" };
-
-            user.GetCurrentUserId().Returns(101);
-            user.GetEstablishmentId().Returns(456);
-            getGroupSelectionQuery.GetLatestSelectedGroupSchool(Arg.Any<int>(), Arg.Any<int>(), cancellationToken)
-                .Returns(expectedSelection);
-
-            var result = await controller.GetCurrentSelection(cancellationToken);
-
-            Assert.Equal(expectedSelection, result);
+            Assert.Equal("currentUser", ex.ParamName);
         }
 
+        [Fact]
+        public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
+        {
+            var ex = Assert.Throws<ArgumentNullException>(() =>
+                new GroupsController(_logger, _currentUser, null!)
+            );
+
+            Assert.Equal("groupsViewBuilder", ex.ParamName);
+        }
+
+        [Fact]
+        public async Task GetSelectASchoolView_CallsViewBuilderAndReturnsResult()
+        {
+            _viewBuilder.RouteToSelectASchoolViewModelAsync(_controller)
+                .Returns(new OkResult());
+
+            var result = await _controller.GetSelectASchoolView();
+
+            await _viewBuilder.Received(1).RouteToSelectASchoolViewModelAsync(_controller);
+            Assert.IsType<OkResult>(result);
+        }
+
+
+        [Fact]
+        public async Task SelectSchool_RecordsSelectionAndRedirects()
+        {
+            var schoolUrn = "123456";
+            var schoolName = "Test School";
+
+            var controller = new GroupsController(_logger, _currentUser, _viewBuilder);
+
+            var result = await controller.SelectSchool(schoolUrn, schoolName);
+
+            await _viewBuilder.Received(1).RecordGroupSelectionAsync(schoolUrn, schoolName);
+            _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn);
+
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal(GroupsController.GetSchoolDashboardAction, redirectResult.ActionName);
+        }
+
+        [Fact]
+        public async Task GetSchoolDashboardView_CallsViewBuilderAndReturnsResult()
+        {
+            _viewBuilder.RouteToSchoolDashboardViewAsync(_controller)
+                .Returns(new OkResult());
+
+            var result = await _controller.GetSchoolDashboardView();
+
+            await _viewBuilder.Received(1).RouteToSchoolDashboardViewAsync(_controller);
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task GetGroupsRecommendation_CallsViewBuilderAndReturnsResult()
+        {
+            var sectionSlug = "sec";
+
+            _viewBuilder.RouteToGroupsRecommendationAsync(_controller, sectionSlug)
+                .Returns(new OkResult());
+
+            var result = await _controller.GetGroupsRecommendation(sectionSlug);
+
+            await _viewBuilder.Received(1).RouteToGroupsRecommendationAsync(_controller, sectionSlug);
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task GetRecommendationsPrintView_CallsViewBuilderAndReturnsResult()
+        {
+            var schoolId = 123;
+            var schoolName = "Test School";
+            var sectionSlug = "sec";
+
+            _viewBuilder.RouteToRecommendationsPrintViewAsync(_controller, sectionSlug, schoolId, schoolName)
+                .Returns(new OkResult());
+
+            var result = await _controller.GetRecommendationsPrintView(schoolId, schoolName, sectionSlug);
+
+            await _viewBuilder.Received(1).RouteToRecommendationsPrintViewAsync(_controller, sectionSlug, schoolId, schoolName);
+            Assert.IsType<OkResult>(result);
+        }
     }
 }

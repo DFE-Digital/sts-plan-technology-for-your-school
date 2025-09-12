@@ -1,128 +1,78 @@
-using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Persistence.Models;
-using Dfe.PlanTech.Domain.Questionnaire.Interfaces;
-using Dfe.PlanTech.Domain.Questionnaire.Models;
-using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Routing;
+﻿using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Xunit;
 
-namespace Dfe.PlanTech.Web.UnitTests.Controllers;
-
-public class RecommendationsControllerTests
+namespace Dfe.PlanTech.Web.Tests.Controllers
 {
-    private readonly IGetRecommendationRouter _recommendationsRouter;
-    private readonly IGetCategoryQuery _getCategoryQuery;
-
-    private readonly RecommendationsController _recommendationsController;
-
-    public RecommendationsControllerTests()
+    public class RecommendationsControllerTests
     {
-        _recommendationsRouter = Substitute.For<IGetRecommendationRouter>();
+        private readonly ILogger<RecommendationsController> _logger;
+        private readonly IRecommendationsViewBuilder _viewBuilder;
+        private readonly RecommendationsController _controller;
 
-        var loggerSubstitute = Substitute.For<ILogger<RecommendationsController>>();
-        _recommendationsController = new RecommendationsController(loggerSubstitute);
-        _getCategoryQuery = Substitute.For<IGetCategoryQuery>();
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task GetSingleRecommendation_Should_ThrowException_When_CategorySlug_NullOrEmpty(string? category)
-    {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetSingleRecommendation(category!, "section-slug", "recommendation", _recommendationsRouter, _getCategoryQuery, default));
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task GetSingleRecommendation_Should_ThrowException_When_SectionSlug_NullOrEmpty(string? section)
-    {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetSingleRecommendation("category-slug", section!, "recommendation", _recommendationsRouter, _getCategoryQuery, default));
-    }
-
-
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task GetSingleRecommendation_Should_ThrowException_When_RecommendationSlug_NullOrEmpty(string? recommendation)
-    {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetSingleRecommendation("category-slug", "section slug", recommendation!, _recommendationsRouter, _getCategoryQuery, default));
-    }
-
-    [Fact]
-    public async Task GetSingleRecommendation_Should_Call_RecommendationsRouter_When_Args_Valid()
-    {
-        string categorySlug = "categorySlug";
-        string sectionSlug = "section-slug";
-        string chunkSlug = "test-chunk-one";
-
-        var category = new Category()
+        public RecommendationsControllerTests()
         {
-            Header = new Header() { Text = "Test category" }
-        };
+            _logger = Substitute.For<ILogger<RecommendationsController>>();
+            _viewBuilder = Substitute.For<IRecommendationsViewBuilder>();
+            _controller = new RecommendationsController(_logger, _viewBuilder);
+        }
 
-        var section = new Section() { InterstitialPage = new Page() { Slug = sectionSlug } };
-        var testChunk1 = new RecommendationChunk() { Header = "Test chunk one" };
-        var testChunk2 = new RecommendationChunk() { Header = "Test chunk two" };
-        var testChunk3 = new RecommendationChunk() { Header = "Test chunk three" };
-        var allTestChunks = new List<RecommendationChunk> { testChunk1, testChunk2, testChunk3 };
+        [Fact]
+        public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
+        {
+            var ex = Assert.Throws<ArgumentNullException>(() =>
+                new RecommendationsController(_logger, null!)
+            );
 
-        _getCategoryQuery.GetCategoryBySlug(categorySlug).Returns(category);
-        _recommendationsRouter.GetSingleRecommendation(sectionSlug, chunkSlug, _recommendationsController, Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult((section, testChunk1, allTestChunks)));
+            Assert.Equal("recommendationsViewBuilder", ex.ParamName);
+        }
 
-        var result = await _recommendationsController.GetSingleRecommendation(
-            categorySlug, sectionSlug, chunkSlug, _recommendationsRouter, _getCategoryQuery, CancellationToken.None);
+        [Fact]
+        public async Task GetSingleRecommendation_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cat";
+            var sectionSlug = "sec";
+            var chunkSlug = "chunk";
 
-        await _recommendationsRouter.Received().GetSingleRecommendation(
-            sectionSlug, chunkSlug, _recommendationsController, Arg.Any<CancellationToken>());
-    }
+            _viewBuilder.RouteToSingleRecommendation(_controller, categorySlug, sectionSlug, chunkSlug, false)
+                .Returns(new OkResult());
 
-    [Theory]
-    [InlineData("low")]
-    [InlineData("medium")]
-    [InlineData(null)]
-    public async Task RecommendationsPage_Preview_Should_Call_RecommendationsRouter_When_Args_Valid(string? maturity)
-    {
-        string sectionSlug = "section-slug";
+            var result = await _controller.GetSingleRecommendation(categorySlug, sectionSlug, chunkSlug);
 
-        await _recommendationsController.GetRecommendationPreview(sectionSlug, maturity, new ContentfulOptions(true), _recommendationsRouter, default);
+            await _viewBuilder.Received(1).RouteToSingleRecommendation(_controller, categorySlug, sectionSlug, chunkSlug, false);
+            Assert.IsType<OkResult>(result);
+        }
 
-        await _recommendationsRouter.Received().GetRecommendationPreview(sectionSlug, maturity, _recommendationsController, Arg.Any<CancellationToken>());
-    }
+        [Fact]
+        public async Task GetRecommendationPreview_CallsViewBuilderAndReturnsResult()
+        {
+            var sectionSlug = "sec";
+            var maturity = "high";
 
-    [Fact]
-    public async Task RecommendationsPage_Preview_Should_Return_Redirect_When_UsePreview_Is_False()
-    {
-        string sectionSlug = "section-slug";
+            _viewBuilder.RouteBySectionSlugAndMaturity(_controller, sectionSlug, maturity)
+                .Returns(new OkResult());
 
-        var result = await _recommendationsController.GetRecommendationPreview(sectionSlug, null, new ContentfulOptions(false), _recommendationsRouter, default);
+            var result = await _controller.GetRecommendationPreview(sectionSlug, maturity);
 
-        var redirectResult = result as RedirectResult;
-        Assert.NotNull(redirectResult);
-        Assert.Equal(UrlConstants.HomePage, redirectResult.Url);
-    }
+            await _viewBuilder.Received(1).RouteBySectionSlugAndMaturity(_controller, sectionSlug, maturity);
+            Assert.IsType<OkResult>(result);
+        }
 
-    [Theory]
-    [InlineData("")]
-    [InlineData(null)]
-    public async Task RecommendationsPage_Preview_Should_ThrowException_When_Args_Invalid(string? sectionSlug)
-    {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendationPreview(sectionSlug!, null, new ContentfulOptions(true), _recommendationsRouter, default));
-    }
+        [Fact]
+        public async Task GetRecommendationChecklist_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cat";
+            var sectionSlug = "sec";
 
-    [Fact]
-    public async Task RecommendationsPagePageChecklist_Should_Call_RecommendationsRouter_When_Args_Valid()
-    {
-        string categorySlug = "category-slug";
-        string sectionSlug = "section-slug";
+            _viewBuilder.RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true)
+                .Returns(new OkResult());
 
-        await _recommendationsController.GetRecommendationChecklist(categorySlug, sectionSlug, _recommendationsRouter, default);
+            var result = await _controller.GetRecommendationChecklist(categorySlug, sectionSlug);
 
-        await _recommendationsRouter.Received().ValidateRoute(categorySlug, sectionSlug, true, _recommendationsController, Arg.Any<CancellationToken>());
+            await _viewBuilder.Received(1).RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true);
+            Assert.IsType<OkResult>(result);
+        }
     }
 }

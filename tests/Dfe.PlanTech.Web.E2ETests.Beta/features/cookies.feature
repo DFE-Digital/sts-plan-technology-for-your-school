@@ -1,3 +1,4 @@
+@user-school
 Feature: Cookies Page
 
   Background:
@@ -9,9 +10,9 @@ Feature: Cookies Page
 
   Scenario: Cookies page has explanatory text and sections
     Then I should see multiple paragraphs of explanatory text
-    And I should see a section heading with text "Essential cookies"
-    And I should see a section heading with text "Optional analytics cookies"
-    And I should see a section heading with text "Change your cookie settings"
+    And I should see a h2 section heading with text "Essential cookies"
+    And I should see a h2 section heading with text "Optional analytics cookies"
+    And I should see a h2 section heading with text "Change your cookie settings"
 
   Scenario: Cookie preferences form is present
     Then I should see a cookie preferences form with 2 radio options
@@ -25,3 +26,11 @@ Feature: Cookies Page
     When I choose to reject cookies and save settings
     Then I should see a notification banner confirming the action
     And Google Tag Manager should be disabled
+  
+  Scenario: Cookies page has the correct footer links
+    And I should see the GOV.UK footer with expected links
+    
+  Scenario: Cookies page has the beta header
+    And I should see the beta header
+
+  

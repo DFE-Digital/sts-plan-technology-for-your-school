@@ -1,7 +1,4 @@
-﻿@using Microsoft.AspNetCore.Http.Features;
-@using Dfe.PlanTech.Domain.Cookie;
-
-@inject Dfe.PlanTech.Domain.Cookie.Interfaces.ICookieService cookieService
+﻿@inject ICookieService cookieService
 
 @{
   var cookie = cookieService.Cookie;
