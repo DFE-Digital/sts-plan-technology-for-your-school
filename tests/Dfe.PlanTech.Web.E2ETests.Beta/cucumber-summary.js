@@ -15,15 +15,43 @@ function itemsOfFeature(feature) {
   return Array.isArray(feature.elements) ? feature.elements : [];
 }
 
+let DURATION_DIVISOR = 1;
+
+function collectDurations(raw) {
+  const vals = [];
+  for (const feature of raw) {
+    for (const el of itemsOfFeature(feature)) {
+      const steps = Array.isArray(el.steps) ? el.steps : [];
+      for (const s of steps) {
+        const v = Number(s.result?.duration ?? 0);
+        if (isFinite(v) && v > 0) vals.push(v);
+      }
+      const before = Array.isArray(el.before) ? el.before : [];
+      const after  = Array.isArray(el.after)  ? el.after  : [];
+      for (const h of [...before, ...after]) {
+        const v = Number(h.result?.duration ?? 0);
+        if (isFinite(v) && v > 0) vals.push(v);
+      }
+    }
+  }
+  vals.sort((a,b)=>a-b);
+  return vals;
+}
+
+function setDurationDivisorFromData(raw) {
+  const samples = collectDurations(raw);
+  if (!samples.length) { DURATION_DIVISOR = 1; return; }
+  const mid = samples[Math.floor(samples.length/2)];
+  if (mid >= 10_000_000) { DURATION_DIVISOR = 1e6; return; } // ns -> ms
+  if (mid >= 10_000)     { DURATION_DIVISOR = 1e3; return; } // µs -> ms
+  DURATION_DIVISOR = 1;                                        // ms
+}
+
 // Normalize duration to milliseconds across ms / µs / ns
 function toMs(value) {
   const v = Number(value || 0);
   if (!isFinite(v) || v <= 0) return 0;
-  // Heuristic:
-  // < 1e7 → ms, < 1e10 → µs, else ns
-  if (v < 10_000_000) return v;            // ms
-  if (v < 10_000_000_000) return v / 1e3;  // µs -> ms
-  return v / 1e6;                           // ns -> ms
+  return v / DURATION_DIVISOR;
 }
 
 function msFmt(ms) {
@@ -65,6 +93,7 @@ function isScenarioLike(el) {
 // ---------- parse ----------
 
 const data = readJSON(input);
+setDurationDivisorFromData(data);
 
 // Aggregates
 let totalFeatures = 0;
