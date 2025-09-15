@@ -53,21 +53,6 @@ jobs:
                 az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
                 az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
-            - name: Validate SA password secret
-              shell: bash
-              run: |
-                PASS="${{ secrets.E2E_SQL_SA_PASSWORD }}"
-                if [ -z "$PASS" ]; then
-                  echo "❌ Secret E2E_SQL_SA_PASSWORD is missing or not accessible for environment '${{ github.event.inputs.environment }}'."
-                  exit 1
-                fi
-                # GitHub masks values in logs, but this prints only the length:
-                echo "SA password length: ${#PASS}"
-                if [ "${#PASS}" -lt 12 ]; then
-                  echo "❌ Secret E2E_SQL_SA_PASSWORD is too short; must be >= 12 chars."
-                  exit 1
-                fi
-
             - name: Locate seed scripts
               shell: bash
               run: |
