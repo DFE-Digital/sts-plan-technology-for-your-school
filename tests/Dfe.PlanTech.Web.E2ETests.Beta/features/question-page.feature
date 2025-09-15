@@ -10,7 +10,7 @@ Feature: Questions Page
     And the header should contain all the correct content
     And I should see the GOV.UK footer with expected links
     And I should see a back link to the previous page
-    And I should see the question heading "Are you able to choose an answer to this first question1?"
+    And I should see the question heading "Are you able to choose an answer to this first question?"
     And I should see the question help text "First question help text"
     And I should see a continue button that submits to "/category-one/category-one-section-one/self-assessment/testing-question-one"
     And the question answer radio options should appear in this order:

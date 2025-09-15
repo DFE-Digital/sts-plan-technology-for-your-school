@@ -1,11 +1,12 @@
+@serial
 @clear-data-school
-Feature: Interstitial Paage
+Feature: Interstitial Page
     Background:
         Given I am on the self-assessment testing page and click on the category "Category One"
 
-    Scenario:
+    Scenario: Interstitial page has the correct content
         Then I am on the "category-one" page
-        Then I click the go to self-assessment link for "Category One Section On2e"
+        Then I click the go to self-assessment link for "Category One Section One"
         Then I should see the page heading "Section One Interstitial Title"
         And I should see a back link to "/category-one"
         And the header should contain all the correct content

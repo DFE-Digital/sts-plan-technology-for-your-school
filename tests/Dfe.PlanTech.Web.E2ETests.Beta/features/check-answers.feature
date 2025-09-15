@@ -1,3 +1,4 @@
+@serial
 Feature: Check answers page
   @clear-data-school
   Scenario: Check answers page has all the correct elements
