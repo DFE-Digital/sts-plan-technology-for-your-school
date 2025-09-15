@@ -1,21 +1,22 @@
 name: Run Playwright E2E Tests (Local Instance)
 
 on:
-    workflow_dispatch:
-      pull_request:
-        branches: ["main", "development"]
-        paths:
-          - "src/**"
-          - "tests/Dfe.PlanTech.Web.E2ETests/**"
-          - ".github/workflows/e2e-tests-playwright.yml"
-          - ".gitmodules"    
-        inputs:
-            environment:
-                description: Which content environment to run against? (Dev = PlanTech_Development)
-                required: true
-                type: choice
-                options: [ 'Dev', 'StagingUnprotected']
-                default: 'Dev'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which content environment to run against? (Dev = PlanTech_Development)
+        required: true
+        type: choice
+        options: ['Dev', 'StagingUnprotected']
+        default: 'Dev'
+
+  pull_request:
+    branches: ['main', 'development']
+    paths:
+      - 'src/**'
+      - 'tests/Dfe.PlanTech.Web.E2ETests/**'
+      - '.github/workflows/e2e-tests-playwright.yml'
+      - '.gitmodules'
 
 concurrency:
     group: "${{ github.workflow }}"
