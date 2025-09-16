@@ -31,7 +31,7 @@ jobs:
           id-token: write
           contents: read
         name: Run Playwright + Cucumber Tests
-        environment: ${{ github.event.inputs.environment }} 
+        environment: ${{ github.event.inputs.environment || 'Dev' }} 
         runs-on: ubuntu-22.04
         env:
             PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
