@@ -206,11 +206,14 @@ jobs:
                   TZ: Europe/London
               run: npm run test:login && npm run test:record
 
-            - name: Merge cucumber report JSON
+            - name: Merge cucumber JSON reports
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               shell: bash
               run: |
-                node -e "const fs=require('fs');const a=JSON.parse(fs.readFileSync('reports/cucumber-parallel.json','utf8'));const b=JSON.parse(fs.readFileSync('reports/cucumber-serial.json','utf8'));fs.writeFileSync('reports/cucumber-report.json', JSON.stringify([].concat(a,b)));"
+                node -e "const fs=require('fs');
+                const a=JSON.parse(fs.readFileSync('reports/cucumber-parallel.json','utf8'));
+                const b=JSON.parse(fs.readFileSync('reports/cucumber-serial.json','utf8'));
+                fs.writeFileSync('reports/cucumber-report.json', JSON.stringify([...a, ...b]));"
 
             - name: Summarise Cucumber results
               if: always()
