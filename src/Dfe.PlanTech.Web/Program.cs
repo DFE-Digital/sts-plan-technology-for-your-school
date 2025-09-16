@@ -31,9 +31,11 @@ if (builder.Environment.EnvironmentName != "E2E")
     builder.Services.AddDbWriterServices(builder.Configuration);
 }
 
+builder.Configuration.AddCommandLine(args);
+
 builder.AddSystemConfiguration();
 builder.AddContentAndSupportConfiguration();
-builder.Configuration.AddCommandLine();
+
 
 builder.Services
     .AddGovUkFrontend()
