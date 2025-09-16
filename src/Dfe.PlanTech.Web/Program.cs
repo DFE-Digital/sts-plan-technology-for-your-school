@@ -33,6 +33,7 @@ if (builder.Environment.EnvironmentName != "E2E")
 
 builder.AddSystemConfiguration();
 builder.AddContentAndSupportConfiguration();
+builder.Configuration.AddCommandLine();
 
 builder.Services
     .AddGovUkFrontend()
