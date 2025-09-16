@@ -1,3 +1,4 @@
+@serial
 @user-school
 @clear-data-school
 Feature: Questions Page
