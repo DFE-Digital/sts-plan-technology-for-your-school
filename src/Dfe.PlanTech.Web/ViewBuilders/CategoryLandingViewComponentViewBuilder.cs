@@ -76,10 +76,6 @@ public class CategoryLandingViewComponentViewBuilder(
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
-            if (sectionStatus is null)
-            {
-                Logger.LogError("No section status found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
-            }
 
             var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sectionStatus);
 
