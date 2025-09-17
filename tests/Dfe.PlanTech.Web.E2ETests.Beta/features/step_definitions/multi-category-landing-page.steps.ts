@@ -1,14 +1,13 @@
 import { Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
+import { getCurrentShortDate, normaliseShortDateTimeText } from '../../helpers/datetime';
 
 Then(
   'I should see the {string} section {string} with description {string} and link href {string}',
   async function (state: 'not started' | 'in progress' | 'completed', heading: string, description: string, href: string) {
     const container = this.page.locator('#main-content');
 
-    const today = new Date();
-    const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
-    const formattedDate = today.toLocaleDateString('en-GB', options).replace(',', '');
+    var currentDate = getCurrentShortDate();
 
     // heading
     const headingEl = container.getByRole('heading', { level: 2, name: heading });
@@ -39,10 +38,13 @@ Then(
         'xpath=following-sibling::p[contains(normalize-space(.), "A self-assessment was started on")]'
       ).first();
 
+      expect(inProgressPara).toBeVisible();
+
       const text = (await inProgressPara.innerText()).trim();
+      const normalisedText =  normaliseShortDateTimeText(text);
       // e.g. A self-assessment was started on 27 Aug 2025.
-      const expectedText = `A self-assessment was started on ${formattedDate}.`;
-      expect(text).toMatch(expectedText);
+      const expectedText = `A self-assessment was started on ${currentDate}.`;
+      expect(normalisedText).toMatch(expectedText);
 
       const link = inProgressPara.getByRole('link', {
         name: `Continue your self-assessment for ${sectionLower}`,
@@ -57,11 +59,14 @@ Then(
       const completionPara = headingEl.locator(
         'xpath=following-sibling::p[contains(normalize-space(.), "was completed on")]'
       ).first();
+      expect(completionPara).toBeVisible();
 
       const text = (await completionPara.innerText()).trim();
+      const normalisedText =  normaliseShortDateTimeText(text);
+      
       // e.g. The self-assessment for {sectionLower} was completed on 27 Aug 2025.
-      const expectedText = `The self-assessment for ${sectionLower} was completed on ${formattedDate}.`;
-      expect(text).toMatch(expectedText);
+      const expectedText = `The self-assessment for ${sectionLower} was completed on ${currentDate}.`;
+      expect(normalisedText).toMatch(expectedText);
 
       const viewLink = headingEl.locator(
         'xpath=following-sibling::p[a[contains(normalize-space(.), "View or update your self-assessment")]][1]/a'

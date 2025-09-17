@@ -1,3 +1,4 @@
+@serial
 @user-school
 Feature: Multi Category Landing Page
 
