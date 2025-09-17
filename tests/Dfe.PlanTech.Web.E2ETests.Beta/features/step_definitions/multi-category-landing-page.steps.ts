@@ -80,7 +80,3 @@ Then(
     throw new Error(`Unknown state "${state}". Use "not started", "in progress", or "completed".`);
   }
 );
-function normaliseSeptemberShortDateTimeText(text: any) {
-  throw new Error('Function not implemented.');
-}
-

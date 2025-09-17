@@ -88,7 +88,4 @@ Then('I should not see any recommendation links', async function () {
 
   await expect(recommendationLinks).toHaveCount(0);
 });
-function normaliseSeptemberShortDateTimeText(expectedText: string) {
-  throw new Error('Function not implemented.');
-}
 
