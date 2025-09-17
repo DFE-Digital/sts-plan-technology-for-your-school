@@ -1,9 +1,10 @@
+@serial
 @user-school
+@clear-data-school
 Feature: Conditional questions
 
   Background:
     Given I start an assessment on category "Category Two" section "Category Two Section Three"
-
   @clear-data-school
   Scenario: Answering question does not show the conditional question
     When I choose the radio option "Yes"

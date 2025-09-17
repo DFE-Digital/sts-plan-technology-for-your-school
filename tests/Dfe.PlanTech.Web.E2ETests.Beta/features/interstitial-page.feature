@@ -1,9 +1,10 @@
+@serial
 @clear-data-school
-Feature: Interstitial Paage
+Feature: Interstitial Page
     Background:
         Given I am on the self-assessment testing page and click on the category "Category One"
-
-    Scenario:
+  @clear-data-school
+    Scenario: Interstitial page has the correct content
         Then I am on the "category-one" page
         Then I click the go to self-assessment link for "Category One Section One"
         Then I should see the page heading "Section One Interstitial Title"
