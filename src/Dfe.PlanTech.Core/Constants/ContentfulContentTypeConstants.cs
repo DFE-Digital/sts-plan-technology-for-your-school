@@ -50,14 +50,11 @@ public static class ContentfulContentTypeConstants
             { typeof(QuestionnaireQuestionEntry), QuestionnaireQuestionContentfulContentTypeId },
             { typeof(QuestionnaireSectionEntry), QuestionnaireSectionContentfulContentTypeId },
             { typeof(RecommendationChunkEntry), RecommendationChunkContentfulContentTypeId },
-            { typeof(RecommendationIntroEntry), RecommendationIntroContentfulContentTypeId },
             { typeof(RecommendationPageEntry), RecommendationPageContentfulContentTypeId },
-            { typeof(RecommendationSectionEntry), RecommendationSectionContentfulContentTypeId },
             { typeof(RichTextContentDataEntry), RichTextContentDataContentfulContentTypeId },
             { typeof(RichTextContentField), RichTextContentContentfulContentTypeId },
             { typeof(RichTextContentSupportDataField), RichTextContentSupportDataContentfulContentTypeId },
             { typeof(RichTextMarkField), RichTextMarkContentfulContentTypeId },
-            { typeof(SubtopicRecommendationEntry), SubtopicRecommendationContentfulContentTypeId },
         };
 
     // Contentful content type IDs are managed in Contentful.
@@ -94,12 +91,9 @@ public static class ContentfulContentTypeConstants
     public const string QuestionnaireQuestionContentfulContentTypeId = "Question";
     public const string QuestionnaireSectionContentfulContentTypeId = "section";
     public const string RecommendationChunkContentfulContentTypeId = "recommendationChunk";
-    public const string RecommendationIntroContentfulContentTypeId = "recommendationIntro";
     public const string RecommendationPageContentfulContentTypeId = "recommendationPage";
-    public const string RecommendationSectionContentfulContentTypeId = "recommendationSection";
     public const string RichTextContentContentfulContentTypeId = "richTextContent";
     public const string RichTextContentDataContentfulContentTypeId = "richTextContentData";
     public const string RichTextContentSupportDataContentfulContentTypeId = "richTextContentSupportData";
     public const string RichTextMarkContentfulContentTypeId = "richTextMark";
-    public const string SubtopicRecommendationContentfulContentTypeId = "subtopicRecommendation";
 }

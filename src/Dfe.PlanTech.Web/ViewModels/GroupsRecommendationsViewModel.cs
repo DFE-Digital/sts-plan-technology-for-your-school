@@ -12,8 +12,6 @@ public class GroupsRecommendationsViewModel
 
     public string SectionName { get; init; } = null!;
 
-    public RecommendationIntroEntry? Intro { get; init; } = null!;
-
     public List<RecommendationChunkEntry> Chunks { get; init; } = null!;
 
     public string Slug { get; init; } = null!;
@@ -24,11 +22,6 @@ public class GroupsRecommendationsViewModel
 
     private IEnumerable<IHeaderWithContent> GetAllContent()
     {
-        if (Intro != null)
-        {
-            yield return Intro;
-        }
-
         if (GroupsCustomRecommendationIntro != null)
         {
             yield return GroupsCustomRecommendationIntro;

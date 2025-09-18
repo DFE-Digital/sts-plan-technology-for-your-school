@@ -148,7 +148,6 @@ public class SubmissionServiceTests
         Assert.Same(q1, rd.NextQuestion); // first question
         Assert.Same(section, rd.QuestionnaireSection);
         Assert.Null(rd.Submission);
-        Assert.Null(rd.Maturity);
     }
 
     [Fact]
@@ -167,7 +166,6 @@ public class SubmissionServiceTests
 
         Assert.Equal(SubmissionStatus.InProgress, rd.Status);
         Assert.Same(q2, rd.NextQuestion);
-        Assert.Equal("medium", rd.Maturity);
         Assert.NotNull(rd.Submission);
         // also verify pass-through arg:
         await _submissionWorkflow.Received(1).GetLatestSubmissionWithOrderedResponsesAsync(22, section, null);

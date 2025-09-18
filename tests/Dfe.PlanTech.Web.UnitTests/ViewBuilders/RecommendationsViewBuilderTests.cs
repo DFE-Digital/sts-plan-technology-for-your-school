@@ -60,7 +60,6 @@ public class RecommendationsViewBuilderTests
         SubmissionStatus status,
         QuestionnaireSectionEntry section,
         string? nextQuestionSlug = null,
-        string maturity = "medium",
         DateTime? completed = null,
         params string[] answerSysIds)
     {
@@ -70,40 +69,7 @@ public class RecommendationsViewBuilderTests
             DateCompleted = completed
         };
 
-        return new SubmissionRoutingDataModel(maturity, nextQuestion, section, submission, status);
-    }
-
-    private static SubtopicRecommendationEntry MakeSubtopicRecommendation(
-        string subtopicName,
-        IEnumerable<(string slug, string linkText, string id)> chunks)
-    {
-        var chunkEntries = chunks.Select(c => new RecommendationChunkEntry
-        {
-            Sys = new SystemDetails(c.id),
-            Answers = new List<QuestionnaireAnswerEntry>
-            {
-                new() { Sys = new SystemDetails("C1") },
-                new() { Sys = new SystemDetails("C2") }
-            },
-            Header = c.slug,
-        }).ToList();
-
-        // Section.GetRecommendationChunksByAnswerIds(...) should return some/all chunks.
-        // To keep tests simple and stable, we’ll include all chunk ids in the routing’s answerSysIds.
-        return new SubtopicRecommendationEntry
-        {
-            Subtopic = new QuestionnaireSectionEntry { Name = subtopicName },
-            Section = new RecommendationSectionEntry
-            {
-                Chunks = chunkEntries
-            },
-            Intros = new List<RecommendationIntroEntry> // used by preview path
-            {
-                new RecommendationIntroEntry { Maturity = "low" },
-                new RecommendationIntroEntry { Maturity = "medium" },
-                new RecommendationIntroEntry { Maturity = "high" }
-            }
-        };
+        return new SubmissionRoutingDataModel(nextQuestion, section, submission, status);
     }
 
     // ---------- RouteToSingleRecommendation ----------
@@ -125,14 +91,6 @@ public class RecommendationsViewBuilderTests
         // Submission has answers that match chunk ids "C1","C2","C3"
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: new[] { "C1", "C2", "C3" });
         _submissions.GetSubmissionRoutingDataAsync(123, section, true).Returns(routing);
-
-        var subtopic = MakeSubtopicRecommendation("Wi-Fi", new[]
-        {
-            ("first-chunk","First","C1"),
-            ("second-chunk","Second","C2"),
-            ("third-chunk","Third","C3")
-        });
-        _contentful.GetSubtopicRecommendationByIdAsync("S1", 3).Returns(subtopic);
 
         // Act (choose middle chunk to test prev/next both populated)
         var result = await sut.RouteToSingleRecommendation(ctl, categorySlug, "sec-1", "second-chunk", useChecklist: false);
@@ -170,9 +128,6 @@ public class RecommendationsViewBuilderTests
 
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: new[] { "C1" });
         _submissions.GetSubmissionRoutingDataAsync(123, section, true).Returns(routing);
-
-        var subtopic = MakeSubtopicRecommendation("Topic", new[] { ("only", "Only", "C1") });
-        _contentful.GetSubtopicRecommendationByIdAsync("S1", 3).Returns(subtopic);
 
         // Act + Assert
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
@@ -277,15 +232,10 @@ public class RecommendationsViewBuilderTests
             SubmissionStatus.CompleteReviewed,
             section,
             "nextQuestionSlug",
-            "medium",
             completed: new DateTime(2024, 1, 2),
             "C1", "C2");
 
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
-
-        // Recommendation includes chunks; BuildRecommendationsViewModel filters by answers -> still returns a list
-        var subtopic = MakeSubtopicRecommendation("Subtopic", [("a", "A", "C1"), ("b", "B", "C2")]);
-        _contentful.GetSubtopicRecommendationByIdAsync("S1").Returns(subtopic);
 
         // Act (useChecklist=false -> "Recommendations"; true -> "RecommendationsChecklist")
         var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: false);
@@ -320,9 +270,6 @@ public class RecommendationsViewBuilderTests
 
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: "C1");
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
-
-        var subtopic = MakeSubtopicRecommendation("Subtopic", new[] { ("a", "A", "C1") });
-        _contentful.GetSubtopicRecommendationByIdAsync("S1").Returns(subtopic);
 
         // Act
         var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: true);
@@ -363,9 +310,6 @@ public class RecommendationsViewBuilderTests
 
         var routing = MakeRouting(SubmissionStatus.InProgress, section, answerSysIds: "C1");
         _submissions.GetSubmissionRoutingDataAsync(88, section, false).Returns(routing);
-
-        var subtopic = MakeSubtopicRecommendation("Topic", new[] { ("x", "X", "C1"), ("y", "Y", "C2") });
-        _contentful.GetSubtopicRecommendationByIdAsync("S1").Returns(subtopic);
 
         // Act
         var result = await sut.RouteBySectionSlugAndMaturity(ctl, "sec-1", "Developing");

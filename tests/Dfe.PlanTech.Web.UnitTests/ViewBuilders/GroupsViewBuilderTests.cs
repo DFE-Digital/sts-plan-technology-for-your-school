@@ -244,14 +244,6 @@ public class GroupsViewBuilderTests
         var section = new QuestionnaireSectionEntry { Sys = new SystemDetails("SEC1"), Name = "Networking" };
         contentful.GetSectionBySlugAsync("net").Returns(section);
 
-        // Recommendation exists but has no Section content -> causes null return path
-        contentful.GetSubtopicRecommendationByIdAsync("SEC1")
-                  .Returns(new SubtopicRecommendationEntry
-                  {
-                      Subtopic = new QuestionnaireSectionEntry { InternalName = "Networking" },
-                      Section = null
-                  });
-
         // Latest responses (won't be used in null Section path but keep type happy)
         var sub = Substitute.For<ISubmissionService>();
         sub.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
@@ -291,14 +283,8 @@ public class GroupsViewBuilderTests
         // Recommendation with Section + minimal chunk that matches answer id
         var chunk = new RecommendationChunkEntry
         {
-            Answers = new List<QuestionnaireAnswerEntry> { new QuestionnaireAnswerEntry { Sys = new SystemDetails("ans1") } }
+            CompletingAnswers = new List<QuestionnaireAnswerEntry> { new QuestionnaireAnswerEntry { Sys = new SystemDetails("ans1") } }
         };
-        contentful.GetSubtopicRecommendationByIdAsync("SEC2")
-                  .Returns(new SubtopicRecommendationEntry
-                  {
-                      Subtopic = new QuestionnaireSectionEntry { Name = "Security" },
-                      Section = new RecommendationSectionEntry { Chunks = new List<RecommendationChunkEntry> { chunk } }
-                  });
 
         var latest = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel>
             {

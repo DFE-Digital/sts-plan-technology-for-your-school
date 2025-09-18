@@ -76,6 +76,10 @@ public class CategoryLandingViewComponentViewBuilder(
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
+            if (sectionStatus is null)
+            {
+                Logger.LogError("No section status found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
+            }
 
             var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sectionStatus);
 
@@ -101,21 +105,10 @@ public class CategoryLandingViewComponentViewBuilder(
 
         try
         {
-            var recommendationIntro = await ContentfulService.GetSubtopicRecommendationIntroAsync(section.Id, sectionStatus.LastMaturity);
-            if (recommendationIntro == null)
-            {
-                return new CategoryLandingSectionRecommendationsViewModel
-                {
-                    NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
-                };
-            }
-
             var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, true)
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
-            var subtopicRecommendation = await ContentfulService.GetSubtopicRecommendationByIdAsync(section.Id)
-               ?? throw new ContentfulDataUnavailableException($"Could not find subtopic recommendation for section {section.Name}");
 
-            var subTopicChunks = subtopicRecommendation.Section.GetRecommendationChunksByAnswerIds(latestResponses.Responses.Select(answer => answer.AnswerSysId));
+            var subTopicChunks = section.GetRecommendationChunksByAnswerIds(latestResponses.Responses.Select(answer => answer.AnswerSysId));
 
             if (section.InterstitialPage is null)
             {

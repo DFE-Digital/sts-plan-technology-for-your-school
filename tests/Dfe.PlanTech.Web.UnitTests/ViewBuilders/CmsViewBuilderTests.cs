@@ -33,7 +33,7 @@ public class CmsViewBuilderTests
         return new RecommendationChunkEntry
         {
             Header = header,
-            Answers = answerIds
+            CompletingAnswers = answerIds
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Select(id => new QuestionnaireAnswerEntry { Sys = new SystemDetails(id!) })
                 .ToList()

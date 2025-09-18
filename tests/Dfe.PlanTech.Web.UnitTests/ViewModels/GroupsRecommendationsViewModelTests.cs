@@ -11,7 +11,6 @@ public class GroupsRecommendationsViewModelTests
     public void AllContent_Includes_Intro_Chunks_And_CustomIntro()
     {
         // Arrange
-        var intro = new RecommendationIntroEntry { Sys = new SystemDetails("i1"), Maturity = "Developing" };
         var custom = new FakeHeaderWithContent("custom");
         var chunk1 = new RecommendationChunkEntry { Sys = new SystemDetails("c1") };
         var chunk2 = new RecommendationChunkEntry { Sys = new SystemDetails("c2") };
@@ -21,7 +20,6 @@ public class GroupsRecommendationsViewModelTests
             SelectedEstablishmentName = "School A",
             SelectedEstablishmentId = 123,
             SectionName = "Networking",
-            Intro = intro,
             GroupsCustomRecommendationIntro = custom,
             Chunks = new List<RecommendationChunkEntry> { chunk1, chunk2 },
             Slug = "networking",
@@ -33,7 +31,6 @@ public class GroupsRecommendationsViewModelTests
 
         // Assert: Intro, custom intro, then chunks
         Assert.Equal(4, all.Count);
-        Assert.Same(intro, all[0]);
         Assert.Same(custom, all[1]);
         Assert.Same(chunk1, all[2]);
         Assert.Same(chunk2, all[3]);

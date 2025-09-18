@@ -183,9 +183,6 @@ public class CategoryLandingViewComponentViewBuilderTests
                   .Returns(statuses);
 
         var contentful = Substitute.For<IContentfulService>();
-        // Intro not found -> should surface error
-        contentful.GetSubtopicRecommendationIntroAsync("S1", "developing")
-                  .Returns((RecommendationIntroEntry?)null);
 
         var sut = CreateSut(contentful: contentful, submission: submission);
 
@@ -219,18 +216,6 @@ public class CategoryLandingViewComponentViewBuilderTests
                   .Returns((SubmissionResponsesModel?)null);
 
         var contentful = Substitute.For<IContentfulService>();
-        // Intro exists so we get to the answers stage
-        contentful.GetSubtopicRecommendationIntroAsync("S1", "established")
-                  .Returns(new RecommendationIntroEntry { Sys = new SystemDetails("intro-1") });
-
-        // Subtopic recommendation exists (we won't reach its chunks because the answers are null)
-        contentful.GetSubtopicRecommendationByIdAsync("S1")
-                  .Returns(new SubtopicRecommendationEntry
-                  {
-                      Sys = new SystemDetails("rec-1"),
-                      Section = new RecommendationSectionEntry() // simple placeholder object
-                  });
-
         var sut = CreateSut(contentful: contentful, submission: submission);
 
         // Act
@@ -259,9 +244,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                   .Returns(statuses);
 
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetSubtopicRecommendationIntroAsync("S1", "exemplary")
-                  .Returns(new RecommendationIntroEntry { Sys = new SystemDetails("intro-xyz") });
-
+    
         // Throw anything inside the try block to trigger the catch path in SUT
         submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
                   .Throws(new DatabaseException("boom"));
