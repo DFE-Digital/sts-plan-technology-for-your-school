@@ -128,8 +128,13 @@ public class SubmissionWorkflow(
         return _submissionRepository.SetSubmissionInaccessibleAsync(submissionId);
     }
 
+    /// <summary>
+    /// NOTE: Despite the method name "HardDelete", this method actually performs a SOFT DELETE.
+    /// The underlying stored procedure sets the 'deleted' flag to 1 rather than removing the record entirely.
+    /// </summary>
     public Task DeleteSubmissionHardAsync(int establishmentId, string sectionId)
     {
+        // NOTE: Despite the method name "HardDelete", this method actually performs a SOFT DELETE.
         return _storedProcedureRepository.HardDeleteCurrentSubmissionAsync(establishmentId, sectionId);
     }
 

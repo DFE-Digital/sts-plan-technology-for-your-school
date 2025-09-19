@@ -8,7 +8,7 @@ public class RecommendationEntity
 {
     public int Id { get; init; }
 
-    public string? RecommendationText { get; init; } = null!;
+    public string? RecommendationText { get; set; } = null!;
 
     public string ContentfulRef { get; init; } = null!;
 
@@ -16,9 +16,9 @@ public class RecommendationEntity
 
     public int QuestionId { get; init; }
 
-    public QuestionEntity Question { get; init; } = null!;
+    public QuestionEntity Question { get; set; } = null!;
 
-    public bool Archived { get; init; } = false;
+    public bool Archived { get; set; } = false;
 
     public SqlRecommendationDto AsDto()
     {
@@ -29,7 +29,7 @@ public class RecommendationEntity
             ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated,
             QuestionId = QuestionId,
-            Question = Question.AsDto(),
+            // Question = Question.AsDto(), // FIXME
             Archived = Archived
         };
     }

@@ -1,8 +1,10 @@
 ﻿using System.Linq.Expressions;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -148,13 +150,33 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         return submission;
     }
 
+    /// <summary>
+    /// NOTE: Despite the method name, this method actually performs a SOFT DELETE.
+    /// The underlying stored procedure sets the 'deleted' flag to 1 rather than removing the record entirely.
+    /// </summary>
     public Task DeleteCurrentSubmission(int establishmentId, int sectionId)
     {
-        return _db.Database.ExecuteSqlAsync(
-            $@"EXEC DeleteCurrentSubmission
-            @establishmentId={establishmentId},
-            @sectionId={sectionId}"
-        );
+        // Stored procedure defined in:
+        // - 2024/20240524_1635_CreateDeleteCurrentSubmissionProcedure.sql (CREATE)
+        // - 2024/20240827_1102_UpdateDeleteCurrentSubmissionProcedure.sql (ALTER)
+        // - 2024/20241009_1100_DboSchemaImprovements.sql (ALTER - LATEST)
+        // Parameters (in order): @sectionId NVARCHAR(50), @establishmentId INT
+        // FIXED: Now using SqlParameter[] with correct parameter order to match stored procedure definition
+        var parameters = new SqlParameter[]
+        {
+            new(DatabaseConstants.SectionIdParam, sectionId.ToString()),
+            new(DatabaseConstants.EstablishmentIdParam, establishmentId)
+        };
+
+        // IMPORTANT: This stored procedure (`"[dbo].[DeleteCurrentSubmission]"`) performs a SOFT DELETE (sets deleted = 1), not a hard delete
+        var command = BuildCommand(DatabaseConstants.SpDeleteCurrentSubmission, parameters);
+        return _db.Database.ExecuteSqlRawAsync(command, parameters);
+    }
+
+    private static string BuildCommand(string storedProcedureName, SqlParameter[] parameters)
+    {
+        var parameterNames = parameters.Select(p => p.ParameterName);
+        return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
     }
 
     private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(

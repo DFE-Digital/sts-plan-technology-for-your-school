@@ -45,6 +45,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.DatabaseUpgrad
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Web.SeedTestData", "tests\Dfe.PlanTech.Web.SeedTestData\Dfe.PlanTech.Web.SeedTestData.csproj", "{2A77ADB3-7CAF-44E4-A7E8-27753C151049}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dfe.PlanTech.Data.Sql.IntegrationTests", "tests\Dfe.PlanTech.Data.Sql.IntegrationTests\Dfe.PlanTech.Data.Sql.IntegrationTests.csproj", "{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -283,6 +285,18 @@ Global
 		{2A77ADB3-7CAF-44E4-A7E8-27753C151049}.Release|x64.Build.0 = Release|Any CPU
 		{2A77ADB3-7CAF-44E4-A7E8-27753C151049}.Release|x86.ActiveCfg = Release|Any CPU
 		{2A77ADB3-7CAF-44E4-A7E8-27753C151049}.Release|x86.Build.0 = Release|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Debug|x64.Build.0 = Debug|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Debug|x86.Build.0 = Debug|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Release|x64.ActiveCfg = Release|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Release|x64.Build.0 = Release|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Release|x86.ActiveCfg = Release|Any CPU
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -307,6 +321,7 @@ Global
 		{9DB0897D-D792-4BAE-8916-904D664D4265} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{0ACE52D0-6309-4D7C-9653-DF0E7FE71950} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 		{2A77ADB3-7CAF-44E4-A7E8-27753C151049} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
+		{ED167E3E-46EB-4FF0-84D9-1762FE0EBCF3} = {33DA2E55-0921-4BEA-A7F4-96CC77F09928}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2661FAF0-D2EA-4265-846E-E6AB213C854C}
