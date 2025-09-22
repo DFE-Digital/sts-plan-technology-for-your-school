@@ -21,10 +21,10 @@ builder.Services.AddControllersWithViews(options =>
     options.Filters.AddService<MaintainUrlOnKeyNotFoundAttribute>();
 });
 
-// if (!builder.Environment.IsDevelopment())
-// {
-//     builder.Services.AddReleaseServices(builder.Configuration);
-// }
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddReleaseServices(builder.Configuration);
+}
 
 if (builder.Environment.EnvironmentName != "E2E")
 {
