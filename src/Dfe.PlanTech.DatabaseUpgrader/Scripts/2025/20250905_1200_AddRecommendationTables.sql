@@ -16,6 +16,7 @@ ALTER TABLE dbo.recommendation
 GO
 
 CREATE TABLE dbo.establishmentRecommendationHistory(
+    id                  INT IDENTITY(1,1) NOT NULL,
     dateCreated         DATETIME      NOT NULL,
     establishmentId     INT           NOT NULL,
     matEstablishmentId  INT           NULL,
@@ -24,8 +25,7 @@ CREATE TABLE dbo.establishmentRecommendationHistory(
     previousStatus      NVARCHAR(50)  NULL,
     newStatus           NVARCHAR(50)  NOT NULL,
     noteText            NVARCHAR(MAX) NULL,
-    CONSTRAINT PK_establishmentRecommendationHistory
-        PRIMARY KEY (establishmentId, recommendationId)
+    CONSTRAINT PK_establishmentRecommendationHistory PRIMARY KEY (id)
 );
 GO
 
@@ -48,4 +48,13 @@ GO
 ALTER TABLE dbo.establishmentRecommendationHistory
     ADD CONSTRAINT FK_erh_user
         FOREIGN KEY (userId) REFERENCES dbo.[user](id);
+GO
+
+-- Create indexes for performance on the append-only history table
+CREATE INDEX IX_establishmentRecommendationHistory_EstablishmentRecommendation
+    ON dbo.establishmentRecommendationHistory (establishmentId, recommendationId);
+GO
+
+CREATE INDEX IX_establishmentRecommendationHistory_DateCreated
+    ON dbo.establishmentRecommendationHistory (dateCreated DESC);
 GO
