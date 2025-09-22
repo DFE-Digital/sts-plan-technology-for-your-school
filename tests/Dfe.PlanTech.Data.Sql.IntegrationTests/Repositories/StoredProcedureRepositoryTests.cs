@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using Dfe.PlanTech.Core.Models;
+﻿using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;

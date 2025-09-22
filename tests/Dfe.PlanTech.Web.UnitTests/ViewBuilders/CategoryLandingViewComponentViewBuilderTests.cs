@@ -244,7 +244,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                   .Returns(statuses);
 
         var contentful = Substitute.For<IContentfulService>();
-    
+
         // Throw anything inside the try block to trigger the catch path in SUT
         submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
                   .Throws(new DatabaseException("boom"));

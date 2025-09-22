@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-using Xunit;
-using Dfe.PlanTech.Data.Sql.Entities;
+﻿using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests;

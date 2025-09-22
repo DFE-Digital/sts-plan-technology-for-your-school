@@ -1,14 +1,5 @@
-﻿using System;
-using System.Data.Common;
-using System.IO;
-using System.Reflection;
-using System.Threading.Tasks;
-using DbUp;
-using DbUp.Engine;
-using Dfe.PlanTech.Data.Sql;
-using Microsoft.Data.SqlClient;
+﻿using DbUp;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using Testcontainers.MsSql;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests;

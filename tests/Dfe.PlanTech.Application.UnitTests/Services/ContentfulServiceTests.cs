@@ -153,5 +153,5 @@ public class ContentfulServiceTests
 
         Assert.Same(expected, result);
         await contentfulWorkflow.Received(1).GetSectionBySlugAsync(slug, include);
-    } 
+    }
 }

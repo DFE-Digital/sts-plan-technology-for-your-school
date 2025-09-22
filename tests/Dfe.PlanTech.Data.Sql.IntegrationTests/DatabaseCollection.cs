@@ -1,6 +1,4 @@
-﻿using Xunit;
-
-namespace Dfe.PlanTech.Data.Sql.IntegrationTests;
+﻿namespace Dfe.PlanTech.Data.Sql.IntegrationTests;
 
 [CollectionDefinition("Database collection")]
 public class DatabaseCollection : ICollectionFixture<DatabaseFixture>

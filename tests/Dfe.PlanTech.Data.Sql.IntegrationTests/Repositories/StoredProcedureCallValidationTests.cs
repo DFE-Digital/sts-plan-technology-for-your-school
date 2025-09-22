@@ -1,11 +1,6 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Dfe.PlanTech.Core.Models;
+﻿using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
-using Dfe.PlanTech.Data.Sql.IntegrationTests;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;

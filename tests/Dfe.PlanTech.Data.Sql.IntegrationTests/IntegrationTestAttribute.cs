@@ -1,6 +1,4 @@
-﻿using System;
-using Xunit;
-using Xunit.Sdk;
+﻿using Xunit.Sdk;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests;
 
