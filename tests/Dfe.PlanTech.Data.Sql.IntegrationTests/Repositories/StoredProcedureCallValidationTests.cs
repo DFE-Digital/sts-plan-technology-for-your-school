@@ -14,7 +14,7 @@ namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 /// Integration tests specifically focused on validating stored procedure calls from repository classes.
 /// These tests ensure that stored procedures are called with correct parameters, types, and order.
 /// </summary>
-public class StoredProcedureCallValidationTests : IntegrationTestBase
+public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
 {
     private StoredProcedureRepository _storedProcRepository = null!;
     private SubmissionRepository _submissionRepository = null!;

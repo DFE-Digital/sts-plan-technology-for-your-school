@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
-public class StoredProcedureRepositoryTests : IntegrationTestBase
+public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
 {
     private StoredProcedureRepository _repository = null!;
 

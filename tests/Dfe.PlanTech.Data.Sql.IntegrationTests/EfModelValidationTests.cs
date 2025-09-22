@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests;
 
-public class EfModelValidationTests : IntegrationTestBase
+public class EfModelValidationTests : DatabaseIntegrationTestBase
 {
     public EfModelValidationTests(DatabaseFixture fixture) : base(fixture)
     {

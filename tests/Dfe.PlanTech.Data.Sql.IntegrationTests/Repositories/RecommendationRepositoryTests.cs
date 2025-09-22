@@ -3,7 +3,7 @@ using Dfe.PlanTech.Data.Sql.Repositories;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
-public class RecommendationRepositoryTests : IntegrationTestBase
+public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
 {
     private RecommendationRepository _repository = null!;
 

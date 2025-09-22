@@ -4,7 +4,7 @@ using Dfe.PlanTech.Data.Sql.Repositories;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
-public class SubmissionRepositoryTests : IntegrationTestBase
+public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 {
     private SubmissionRepository _repository = null!;
 

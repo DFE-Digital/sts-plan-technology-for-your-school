@@ -3,7 +3,7 @@ using Dfe.PlanTech.Data.Sql.Repositories;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
-public class EstablishmentLinkRepositoryTests : IntegrationTestBase
+public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
 {
     private EstablishmentLinkRepository _repository = null!;
 

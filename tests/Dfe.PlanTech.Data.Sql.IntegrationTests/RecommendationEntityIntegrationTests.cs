@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests;
 
-public class RecommendationEntityIntegrationTests : IntegrationTestBase
+public class RecommendationEntityIntegrationTests : DatabaseIntegrationTestBase
 {
     public RecommendationEntityIntegrationTests(DatabaseFixture fixture) : base(fixture)
     {

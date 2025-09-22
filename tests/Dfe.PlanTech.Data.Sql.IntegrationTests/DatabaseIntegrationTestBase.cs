@@ -14,13 +14,13 @@ namespace Dfe.PlanTech.Data.Sql.IntegrationTests;
 /// </summary>
 [Collection("Database collection")]
 [Trait("Category", "Integration")]
-public abstract class IntegrationTestBase : IAsyncLifetime
+public abstract class DatabaseIntegrationTestBase : IAsyncLifetime
 {
     protected readonly DatabaseFixture Fixture;
     protected PlanTechDbContext DbContext { get; private set; } = null!;
     private IDbContextTransaction _transaction = null!;
 
-    protected IntegrationTestBase(DatabaseFixture fixture)
+    protected DatabaseIntegrationTestBase(DatabaseFixture fixture)
     {
         Fixture = fixture;
     }
