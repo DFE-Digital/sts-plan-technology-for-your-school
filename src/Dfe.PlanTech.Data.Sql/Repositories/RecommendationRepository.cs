@@ -126,9 +126,10 @@ public class RecommendationRepository : IRecommendationRepository
         // Always create a new history record (append-only design)
         var newStatusRecord = new EstablishmentRecommendationHistoryEntity
         {
-            EstablishmentId = establishmentId,
-            RecommendationId = recommendationId,
             UserId = userId,
+            EstablishmentId = establishmentId,
+            MatEstablishmentId = null, // TODO: Placeholder for MAT establishment ID when applicable
+            RecommendationId = recommendationId,
             PreviousStatus = previousStatus,
             NewStatus = newStatus,
             NoteText = noteText,
