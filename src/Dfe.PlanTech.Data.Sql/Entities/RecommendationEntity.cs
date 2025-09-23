@@ -29,7 +29,7 @@ public class RecommendationEntity
             ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated,
             QuestionId = QuestionId,
-            // Question = Question.AsDto(), // FIXME
+            Question = Question.AsDto(),
             Archived = Archived
         };
     }
