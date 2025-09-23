@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-[ExcludeFromCodeCoverage]
 public class SignInRepository : ISignInRepository
 {
     protected readonly PlanTechDbContext _db;

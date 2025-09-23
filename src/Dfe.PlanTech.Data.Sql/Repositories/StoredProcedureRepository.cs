@@ -30,7 +30,6 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
  * As you'll note in SubmitResponse below, the parameters are sent in that order.
  */
 
-[ExcludeFromCodeCoverage]
 public class StoredProcedureRepository : IStoredProcedureRepository
 {
     protected readonly PlanTechDbContext _db;

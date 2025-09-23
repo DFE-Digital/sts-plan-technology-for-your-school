@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-[ExcludeFromCodeCoverage]
 public class RecommendationRepository : IRecommendationRepository
 {
     protected readonly PlanTechDbContext _db;

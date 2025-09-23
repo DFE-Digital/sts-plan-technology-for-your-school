@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-[ExcludeFromCodeCoverage]
 public class EstablishmentRepository : IEstablishmentRepository
 {
     protected readonly PlanTechDbContext _db;
