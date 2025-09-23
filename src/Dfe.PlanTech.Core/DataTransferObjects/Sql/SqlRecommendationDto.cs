@@ -1,6 +1,4 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
-
-namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 public class SqlRecommendationDto : ISqlDto
 {

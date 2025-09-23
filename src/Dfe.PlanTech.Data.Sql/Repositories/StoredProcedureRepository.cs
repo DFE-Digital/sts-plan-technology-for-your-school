@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
