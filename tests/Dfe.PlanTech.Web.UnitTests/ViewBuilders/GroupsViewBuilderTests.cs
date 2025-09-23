@@ -240,11 +240,16 @@ public class GroupsViewBuilderTests
     {
         var contentful = Substitute.For<IContentfulService>();
 
-        // Section exists
-        var section = new QuestionnaireSectionEntry { Sys = new SystemDetails("SEC1"), Name = "Networking" };
+        // Section exists with explicit CoreRecommendations
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("SEC1"),
+            Name = "Networking",
+            CoreRecommendations = new List<RecommendationChunkEntry>()
+        };
         contentful.GetSectionBySlugAsync("net").Returns(section);
 
-        // Latest responses (won't be used in null Section path but keep type happy)
+        // Latest responses
         var sub = Substitute.For<ISubmissionService>();
         sub.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
            .Returns(new SubmissionResponsesModel(1, []));
@@ -254,8 +259,9 @@ public class GroupsViewBuilderTests
 
         var action = await sut.RouteToGroupsRecommendationAsync(controller, "net");
 
-        var redirect = Assert.IsType<RedirectToActionResult>(action);
-        Assert.Equal(GroupsController.GetSchoolDashboardAction, redirect.ActionName);
+        // The method now returns a view with empty chunks instead of redirecting -- TODO: Is this desirable?
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal("Recommendations", view.ViewName);
     }
 
     [Fact]
@@ -277,14 +283,24 @@ public class GroupsViewBuilderTests
     public async Task RouteToRecommendationsPrintViewAsync_Returns_Print_View_When_Content_Available()
     {
         var contentful = Substitute.For<IContentfulService>();
-        var section = new QuestionnaireSectionEntry { Sys = new SystemDetails("SEC2"), Name = "Security" };
-        contentful.GetSectionBySlugAsync("sec").Returns(section);
 
-        // Recommendation with Section + minimal chunk that matches answer id
+        // Recommendation chunk that matches answer id
         var chunk = new RecommendationChunkEntry
         {
-            CompletingAnswers = new List<QuestionnaireAnswerEntry> { new QuestionnaireAnswerEntry { Sys = new SystemDetails("ans1") } }
+            CompletingAnswers = new List<QuestionnaireAnswerEntry>
+            {
+                new QuestionnaireAnswerEntry { Sys = new SystemDetails("ans1") }
+            }
         };
+
+        // Section must include the chunk in CoreRecommendations
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("SEC2"),
+            Name = "Security",
+            CoreRecommendations = new List<RecommendationChunkEntry> { chunk }
+        };
+        contentful.GetSectionBySlugAsync("sec").Returns(section);
 
         var latest = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel>
             {

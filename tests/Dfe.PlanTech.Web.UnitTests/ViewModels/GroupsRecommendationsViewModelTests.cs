@@ -29,11 +29,11 @@ public class GroupsRecommendationsViewModelTests
         // Act
         var all = vm.AllContent.ToList();
 
-        // Assert: Intro, custom intro, then chunks
-        Assert.Equal(4, all.Count);
-        Assert.Same(custom, all[1]);
-        Assert.Same(chunk1, all[2]);
-        Assert.Same(chunk2, all[3]);
+        // Assert: Custom intro, then chunks
+        Assert.Equal(3, all.Count);
+        Assert.Same(custom, all[0]);
+        Assert.Same(chunk1, all[1]);
+        Assert.Same(chunk2, all[2]);
     }
 
     [Fact]

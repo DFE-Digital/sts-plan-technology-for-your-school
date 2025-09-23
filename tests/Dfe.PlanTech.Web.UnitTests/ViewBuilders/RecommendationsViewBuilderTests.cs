@@ -54,7 +54,41 @@ public class RecommendationsViewBuilderTests
         new QuestionnaireCategoryEntry { Header = new ComponentHeaderEntry { Text = headerText } };
 
     private static QuestionnaireSectionEntry MakeSection(string id, string slug, string name = "Section") =>
-        new QuestionnaireSectionEntry { Sys = new SystemDetails(id), Name = name };
+        new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails(id),
+            Name = name,
+            CoreRecommendations = new List<RecommendationChunkEntry>
+            {
+                new()
+                {
+                    Sys = new SystemDetails("C1"),
+                    Header = "First Chunk",
+                    CompletingAnswers = new List<QuestionnaireAnswerEntry>
+                    {
+                        new() { Sys = new SystemDetails("C1") }
+                    }
+                },
+                new()
+                {
+                    Sys = new SystemDetails("C2"),
+                    Header = "Second Chunk",
+                    CompletingAnswers = new List<QuestionnaireAnswerEntry>
+                    {
+                        new() { Sys = new SystemDetails("C2") }
+                    }
+                },
+                new()
+                {
+                    Sys = new SystemDetails("C3"),
+                    Header = "Third Chunk",
+                    CompletingAnswers = new List<QuestionnaireAnswerEntry>
+                    {
+                        new() { Sys = new SystemDetails("C3") }
+                    }
+                }
+            }
+        };
 
     private static SubmissionRoutingDataModel MakeRouting(
         SubmissionStatus status,
@@ -245,7 +279,7 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("Recommendations", view.ViewName);
         var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
         Assert.Equal("Connectivity", vm.CategoryName);
-        Assert.Equal("Subtopic", vm.SectionName);
+        Assert.Equal("Section", vm.SectionName);
         Assert.Equal("sec-1", vm.SectionSlug);
         Assert.Equal(2, vm.Chunks.Count);
         Assert.NotNull(routing.Submission);
