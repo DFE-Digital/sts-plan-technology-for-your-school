@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <!-- Exclude integration tests by default unless explicitly enabled -->
+    <IsTestProject Condition="'$(RunIntegrationTests)' != 'true'">false</IsTestProject>
   </PropertyGroup>
 
   <ItemGroup>
