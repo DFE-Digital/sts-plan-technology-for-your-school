@@ -3,13 +3,14 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
-using Dfe.PlanTech.Application.Content.Commands;
-using Dfe.PlanTech.Application.Persistence.Commands;
-using Dfe.PlanTech.Application.Queues.Interfaces;
-using Dfe.PlanTech.Domain.Persistence.Interfaces;
-using Dfe.PlanTech.Domain.ServiceBus.Models;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
+using Dfe.PlanTech.Infrastructure.ServiceBus.MessageProcessor;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Options;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Results;
-using Dfe.PlanTech.Infrastructure.ServiceBus.Retry;
+using Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
 using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,7 +31,7 @@ public static class DependencyInjection
         services.AddServiceBusServices(configuration)
             .AddMessageRetryHandler();
 
-        services.AddTransient<IWebhookToDbCommand, WebhookMessageProcessor>();
+        services.AddTransient<IWebHookMessageProcessor, CmsWebHookMessageProcessor>();
         services.AddSingleton(new JsonSerializerOptions()
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -58,7 +59,7 @@ public static class DependencyInjection
         services.AddTransient<IQueueWriter, QueueWriter>();
         services.AddTransient<IWriteCmsWebhookToQueueCommand, WriteCmsWebhookToQueueCommand>();
 
-        services.Configure<ServiceBusOptions>(configuration.GetSection(nameof(ServiceBusOptions)));
+        services.Configure<ServiceBusOptions>(configuration.GetRequiredSection(ConfigurationConstants.ServiceBusOptions));
         return services;
     }
 
@@ -67,7 +68,7 @@ public static class DependencyInjection
         services.AddOptions<MessageRetryHandlingOptions>()
                 .Configure<IConfiguration>((settings, configuration) =>
                 {
-                    configuration.GetSection("MessageRetryHandlingOptions").Bind(settings);
+                    configuration.GetSection(ConfigurationConstants.MessageRetryHandlingOptions).Bind(settings);
                 });
 
         services.AddTransient<IMessageRetryHandler, MessageRetryHandler>();

@@ -1,7 +1,7 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
-Given('I visit the content support page', async function () {
+Given('I visit the information asset register content support page', async function () {
   await this.page.goto(`${process.env.URL}information-asset-register`);
 });
 

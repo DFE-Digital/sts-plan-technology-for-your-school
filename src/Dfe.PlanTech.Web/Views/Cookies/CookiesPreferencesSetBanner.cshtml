@@ -1,7 +1,4 @@
-@using Dfe.PlanTech.Application.Constants
-@using Dfe.PlanTech.Domain.Cookie;
-
-@model Dfe.PlanTech.Web.Models.CookiesViewModel
+@model CookiesViewModel
 
 @{
     bool userPreferenceSet = TempData[CookieConstants.UserPreferenceRecordedKey] as bool? ?? false;

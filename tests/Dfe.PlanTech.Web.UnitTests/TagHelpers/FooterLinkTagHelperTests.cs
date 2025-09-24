@@ -1,11 +1,10 @@
 ﻿using System.Reflection;
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
 
@@ -14,11 +13,11 @@ public class FooterLinkTagHelperTests
     private readonly FooterLinkTagHelper _tagHelper;
     private readonly TagHelperContext _context;
     private readonly TagHelperOutput _output;
-    private readonly ILogger<FooterLinkTagHelper> logger = Substitute.For<ILogger<FooterLinkTagHelper>>();
+    private readonly ILogger<FooterLinkTagHelper> _loggerSubstitute = Substitute.For<ILogger<FooterLinkTagHelper>>();
 
     public FooterLinkTagHelperTests()
     {
-        _tagHelper = new FooterLinkTagHelper(logger);
+        _tagHelper = new FooterLinkTagHelper(_loggerSubstitute);
 
         _context = new TagHelperContext(tagName: "footer-link",
                                                     allAttributes: new TagHelperAttributeList(),
@@ -40,7 +39,7 @@ public class FooterLinkTagHelperTests
     [InlineData(true)]
     public async Task Should_Render_Anchor_Link_When_Valid(bool openInNewTab)
     {
-        var link = new NavigationLink()
+        var link = new NavigationLinkEntry()
         {
             DisplayText = "Click me",
             Href = "www.click-me.com",
@@ -77,9 +76,9 @@ public class FooterLinkTagHelperTests
     [InlineData("/prefixed-slash", "/prefixed-slash")]
     public async Task Should_Render_Correct_Url_For_ContentToLinkTo(string expectedUrl, string slug)
     {
-        IContentComponent content = new Page { Slug = slug };
+        var content = new PageEntry() { Slug = slug };
 
-        var link = new NavigationLink()
+        var link = new NavigationLinkEntry()
         {
             DisplayText = "Content link",
             ContentToLinkTo = content
@@ -89,14 +88,15 @@ public class FooterLinkTagHelperTests
 
         await _tagHelper.ProcessAsync(_context, _output);
 
+        Assert.NotNull(_output.Attributes["href"]);
         Assert.Equal(expectedUrl, _output.Attributes["href"].Value);
     }
 
     [Fact]
     public async Task Should_Log_Error_And_Return_Empty_When_Invalid_Content_Type()
     {
-        var invalidContent = Substitute.For<IContentComponent>();
-        var link = new NavigationLink()
+        var invalidContent = Substitute.For<ContentfulEntry>();
+        var link = new NavigationLinkEntry()
         {
             DisplayText = "Invalid content",
             ContentToLinkTo = invalidContent
@@ -112,7 +112,7 @@ public class FooterLinkTagHelperTests
     [Fact]
     public async Task Should_Return_Empty_When_No_Href_Or_Content()
     {
-        var link = new NavigationLink()
+        var link = new NavigationLinkEntry()
         {
             DisplayText = "Empty link"
         };
@@ -128,7 +128,7 @@ public class FooterLinkTagHelperTests
     [Fact]
     public void Should_Log_Error_When_No_Href_Or_Content()
     {
-        var link = new NavigationLink()
+        var link = new NavigationLinkEntry()
         {
             DisplayText = "Empty"
         };
@@ -138,7 +138,7 @@ public class FooterLinkTagHelperTests
 
         methodInfo?.Invoke(_tagHelper, []);
 
-        var logMessage = logger.ReceivedLogMessages().FirstOrDefault(msg => msg.LogLevel == LogLevel.Error && msg.Message.Contains("No href or content to link to for"));
+        var logMessage = _loggerSubstitute.ReceivedLogMessages().FirstOrDefault(msg => msg.LogLevel == LogLevel.Error && msg.Message.Contains("No href or content to link to for"));
         Assert.NotNull(logMessage);
     }
 }

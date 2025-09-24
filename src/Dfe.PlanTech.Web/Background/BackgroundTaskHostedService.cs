@@ -1,14 +1,19 @@
-using Dfe.PlanTech.Domain.Background;
+using Dfe.PlanTech.Application.Background;
 
 namespace Dfe.PlanTech.Web.Background;
 
 /// <summary>
-/// Reads tasks from a <see cref="IBackgroundTaskQueue"/>, and runs them. 
+/// Reads tasks from a <see cref="IBackgroundTaskQueue"/>, and runs them.
 /// </summary>
 /// <param name="logger"></param>
 /// <param name="taskQueue"></param>
-public class BackgroundTaskHostedService(ILogger<BackgroundTaskHostedService> logger, IBackgroundTaskQueue taskQueue) : BackgroundService
+public class BackgroundTaskHostedService(
+    ILogger<BackgroundTaskHostedService> logger,
+    IBackgroundTaskQueue taskQueue
+) : BackgroundService
 {
+    private readonly IBackgroundTaskQueue _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
+
     /// <summary>
     /// Starts processing the queue
     /// </summary>
@@ -29,7 +34,7 @@ public class BackgroundTaskHostedService(ILogger<BackgroundTaskHostedService> lo
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var workItem = await taskQueue.DequeueAsync(stoppingToken);
+            var workItem = await _taskQueue.DequeueAsync(stoppingToken);
 
             logger.LogInformation("Read item from the queue");
 

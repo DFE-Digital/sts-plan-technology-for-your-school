@@ -1,124 +1,123 @@
-﻿using Dfe.PlanTech.Application.Constants;
-using Dfe.PlanTech.Application.Exceptions;
-using Dfe.PlanTech.Domain.Content.Interfaces;
-using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Domain.Establishments.Exceptions;
-using Dfe.PlanTech.Web.Configuration;
+﻿using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
-
     public class ServiceExceptionHandlerMiddlewareTests
     {
         private const string InternalErrorSlug = "/server-error";
-        private ServiceExceptionHandlerMiddleware _middleware;
+        private readonly ServiceExceptionHandlerMiddleware _middleware;
 
         public ServiceExceptionHandlerMiddlewareTests()
         {
             var internalErrorPageId = "Internal Error Page ID";
-            var internalErrorPage = new Page { Slug = InternalErrorSlug };
 
-            var errorPages = new ErrorPages { InternalErrorPageId = internalErrorPageId };
-            var errorPagesOptions = Substitute.For<IOptions<ErrorPages>>();
+            var errorPages = new ErrorPagesConfiguration { InternalErrorPageId = internalErrorPageId };
+            var errorPagesOptions = Substitute.For<IOptions<ErrorPagesConfiguration>>();
             errorPagesOptions.Value.Returns(errorPages);
 
-            var getPageQuery = Substitute.For<IGetPageQuery>();
-            getPageQuery.GetPageById(internalErrorPageId).Returns(internalErrorPage);
+            var contentfulService = Substitute.For<IContentfulService>();
 
-            _middleware = new ServiceExceptionHandlerMiddleware(errorPagesOptions, getPageQuery);
+            var internalErrorPage = new PageEntry { Slug = InternalErrorSlug };
+            contentfulService.GetPageByIdAsync(internalErrorPageId)
+                .Returns(Task.FromResult<PageEntry>(internalErrorPage));
+
+            _middleware = new ServiceExceptionHandlerMiddleware(errorPagesOptions, contentfulService);
         }
 
         [Fact]
-        public async Task Should_Get_Error_Redirect_On_Null_Exception()
+        public async Task Should_Get_ServerError_Redirect_On_Null_Exception()
         {
-            // Arrange
             var context = new DefaultHttpContext();
 
-            // Act
             await _middleware.HandleExceptionAsync(context);
 
-            //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal("/server-error", context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(InternalErrorSlug, context.Response.Headers.Values.FirstOrDefault());
         }
 
         [Fact]
-        public async Task Should_Get_Service_Unavailable_Redirect_ContentfulDataUnavailableException_Exception()
+        public async Task Should_Get_ServerError_Redirect_On_ContentfulDataUnavailableException()
         {
-            // Arrange
-            var exception = new ContentfulDataUnavailableException("service-unavailable exception");
+            var exception = new ContentfulDataUnavailableException("contentful unavailable");
             var feature = new ExceptionHandlerFeature { Error = exception };
 
             var context = new DefaultHttpContext();
             context.Features.Set<IExceptionHandlerPathFeature>(feature);
 
-            // Act
             await _middleware.HandleExceptionAsync(context);
 
-            //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal("/server-error", context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(InternalErrorSlug, context.Response.Headers.Values.FirstOrDefault());
         }
 
-
         [Fact]
-        public async Task Should_Get_Service_Unavailable_Redirect_DatabaseException_Exception()
+        public async Task Should_Get_ServerError_Redirect_On_DatabaseException()
         {
-            // Arrange
-            var exception = new DatabaseException("server-error exception");
+            var exception = new DatabaseException("db exception");
             var feature = new ExceptionHandlerFeature { Error = exception };
 
             var context = new DefaultHttpContext();
             context.Features.Set<IExceptionHandlerPathFeature>(feature);
 
-            // Act
             await _middleware.HandleExceptionAsync(context);
 
-            //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal("/server-error", context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(InternalErrorSlug, context.Response.Headers.Values.FirstOrDefault());
         }
 
         [Fact]
-        public async Task Should_Get_Service_Unavailable_Redirect_InvalidEstablishmentException_Exception()
+        public async Task Should_Get_ServerError_Redirect_On_InvalidEstablishmentException()
         {
-            // Arrange
-            var exception = new InvalidEstablishmentException("service-unavailable exception");
+            var exception = new InvalidEstablishmentException("invalid estab");
             var feature = new ExceptionHandlerFeature { Error = exception };
 
             var context = new DefaultHttpContext();
             context.Features.Set<IExceptionHandlerPathFeature>(feature);
 
-            // Act
             await _middleware.HandleExceptionAsync(context);
 
-            //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal("/server-error", context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(InternalErrorSlug, context.Response.Headers.Values.FirstOrDefault());
         }
 
         [Fact]
-        public async Task Should_Get_OrgError_Redirect_KeyNotFoundException_Exception()
+        public async Task Should_Get_OrgError_Redirect_On_KeyNotFoundException_With_Organisation()
         {
-            // Arrange
-            var exception = new KeyNotFoundException("organisation exception");
+            var exception = new KeyNotFoundException("organisation missing");
             var feature = new ExceptionHandlerFeature { Error = exception };
 
             var context = new DefaultHttpContext();
             context.Features.Set<IExceptionHandlerPathFeature>(feature);
 
-            // Act
             await _middleware.HandleExceptionAsync(context);
 
-            //Assert
             Assert.NotNull(context.Response);
             Assert.Equal(UrlConstants.OrgErrorPage, context.Response.Headers.Values.FirstOrDefault());
+        }
+
+        [Fact]
+        public async Task Should_Get_ServerError_Redirect_On_InnerException()
+        {
+            var inner = new ContentfulDataUnavailableException("inner contentful error");
+            var outer = new Exception("outer", inner);
+            var feature = new ExceptionHandlerFeature { Error = outer };
+
+            var context = new DefaultHttpContext();
+            context.Features.Set<IExceptionHandlerPathFeature>(feature);
+
+            await _middleware.HandleExceptionAsync(context);
+
+            Assert.NotNull(context.Response);
+            Assert.Equal(InternalErrorSlug, context.Response.Headers.Values.FirstOrDefault());
         }
     }
 }

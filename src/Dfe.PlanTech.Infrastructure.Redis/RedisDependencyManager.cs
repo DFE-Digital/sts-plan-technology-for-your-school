@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Domain.Background;
-using Dfe.PlanTech.Domain.Content.Interfaces;
+using Dfe.PlanTech.Application.Background;
+using Dfe.PlanTech.Core.Contentful.Models;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis;
@@ -52,31 +52,34 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue) : 
     => value switch
     {
         null => [],
-        IEnumerable<IContentComponent> collection => collection.SelectMany(GetDependencies),
-        IContentComponent item => GetContentDependenciesAsync(item),
-        _ => throw new InvalidOperationException($"{value!.GetType()} is not a {typeof(IContentComponent)} or a {typeof(IEnumerable<IContentComponent>)}"),
+        IEnumerable<ContentfulEntry> collection => collection.SelectMany(GetDependencies),
+        ContentfulEntry item => GetContentDependenciesAsync(item),
+        _ => throw new InvalidOperationException($"{value!.GetType()} is not a {typeof(ContentfulEntry)} or a {typeof(IEnumerable<ContentfulEntry>)}"),
     };
 
     /// <summary>
     /// Uses reflection to check for any ContentIds within the <see cref="IContentComponent">, and returns the Id value of any found
     /// </summary>
     /// <param name="value"></param>
-    private IEnumerable<string> GetContentDependenciesAsync(IContentComponent value)
+    private IEnumerable<string> GetContentDependenciesAsync(ContentfulEntry value)
     {
         // RichText is a sub-component that doesn't have SystemDetails, exit for such types
         if (value.Sys is null)
+        {
             yield break;
+        }
 
-        yield return value.Sys.Id;
-        var properties = value.GetType().GetProperties();
+        yield return value.Id;
+
+        var properties = value.GetType()
+            .GetProperties()
+            .Where(property => typeof(ContentfulEntry).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<ContentfulEntry>).IsAssignableFrom(property.PropertyType));
+
         foreach (var property in properties)
         {
-            if (typeof(IContentComponent).IsAssignableFrom(property.PropertyType) || typeof(IEnumerable<IContentComponent>).IsAssignableFrom(property.PropertyType))
+            foreach (var dependency in GetDependencies(property.GetValue(value)))
             {
-                foreach (var dependency in GetDependencies(property.GetValue(value)))
-                {
-                    yield return dependency;
-                }
+                yield return dependency;
             }
         }
     }

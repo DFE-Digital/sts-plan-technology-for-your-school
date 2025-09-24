@@ -1,21 +1,21 @@
 using System.ComponentModel;
-using Dfe.PlanTech.Domain.Content.Enums;
-using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Core.Contentful.Enums;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.TagHelpers;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.TagHelpers;
 
 public class HeaderComponentTagHelperTests
 {
-    private ILogger<HeaderComponentTagHelper> _loggerSubstitute;
+    private readonly ILogger<HeaderComponentTagHelper> _loggerSubstitute;
     private HeaderComponentTagHelper? _tagHelper;
-    private TagHelperContext _context;
-    private TagHelperOutput _output;
+    private readonly TagHelperContext _context;
+    private readonly TagHelperOutput _output;
 
     public HeaderComponentTagHelperTests()
     {
@@ -23,7 +23,6 @@ public class HeaderComponentTagHelperTests
         _context = CreateTagHelperContext();
         _output = CreateTagHelperOutput();
     }
-
 
     private TagHelperContext CreateTagHelperContext()
     {
@@ -56,7 +55,7 @@ public class HeaderComponentTagHelperTests
     [InlineData(HeaderTag.H1, "h1", HeaderSize.ExtraLarge)]
     public void Should_Render_Valid_Tag_And_Class(HeaderTag headerTag, string expectedTag, HeaderSize headerSize)
     {
-        var header = new Header()
+        var header = new ComponentHeaderEntry()
         {
             Text = "Header text",
             Tag = headerTag,
@@ -80,24 +79,23 @@ public class HeaderComponentTagHelperTests
     [Fact]
     public async Task Should_LogWarning_When_Model_Is_Null()
     {
-        var loggerSubstitute = Substitute.For<ILogger<HeaderComponentTagHelper>>();
-        var tagHelper = new HeaderComponentTagHelper(loggerSubstitute);
+        var tagHelper = new HeaderComponentTagHelper(_loggerSubstitute);
 
         var context = CreateTagHelperContext();
         var output = CreateTagHelperOutput();
 
         await tagHelper.ProcessAsync(context, output);
 
-        var logMessage = loggerSubstitute.ReceivedLogMessages().FirstOrDefault();
+        var logMessage = _loggerSubstitute.ReceivedLogMessages().FirstOrDefault();
         Assert.NotNull(logMessage?.Message);
-        Assert.Contains($"Missing or invalid Header {tagHelper.Model}", logMessage.Message);
+        Assert.Contains($"Missing or invalid HeaderTag {tagHelper.Model}", logMessage.Message);
         Assert.Equal(LogLevel.Warning, logMessage.LogLevel);
     }
 
     [Fact]
     public async Task Should_LogWarning_When_HeaderTag_Is_Unknown()
     {
-        var header = new Header()
+        var header = new ComponentHeaderEntry()
         {
             Text = "Header text",
             Tag = HeaderTag.Unknown
@@ -113,14 +111,14 @@ public class HeaderComponentTagHelperTests
         var logMessage = _loggerSubstitute.ReceivedLogMessages().FirstOrDefault();
 
         Assert.NotNull(logMessage?.Message);
-        Assert.Contains($"Missing or invalid Header {_tagHelper.Model}", logMessage.Message);
+        Assert.Contains($"Missing or invalid HeaderTag {_tagHelper.Model}", logMessage.Message);
         Assert.Equal(LogLevel.Warning, logMessage.LogLevel);
     }
 
     [Fact]
     public async Task Should_Throw_Exception_When_HeaderSize_Is_Unknown()
     {
-        var header = new Header()
+        var header = new ComponentHeaderEntry()
         {
             Text = "Header text",
             Tag = HeaderTag.H1,

@@ -1,0 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
+
+namespace Dfe.PlanTech.Core.Contentful.Models;
+
+[ExcludeFromCodeCoverage]
+public class ComponentTextBodyWithMaturityEntry : ContentfulEntry
+{
+    public string InternalName { get; set; } = null!;
+    public RichTextContentField TextBody { get; init; } = null!;
+    public string Maturity { get; set; } = null!;
+}

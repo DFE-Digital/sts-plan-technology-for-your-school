@@ -1,6 +1,4 @@
-@using Dfe.PlanTech.Application.Constants
-@using Dfe.PlanTech.Web.Controllers
-@model Dfe.PlanTech.Web.Models.CheckAnswersViewModel
+@model ReviewAnswersViewModel
 
 @section BeforeContent {
     @{
@@ -15,7 +13,7 @@
             await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
         }
         <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-            @foreach (var questionWithAnswer in Model.SubmissionResponses.Responses)
+            @foreach (var questionWithAnswer in Model.SubmissionResponses?.Responses ?? [])
             {
                 var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
 
@@ -29,8 +27,8 @@
                     <dd class="noprint govuk-summary-list__actions spacer">
                         <a asp-controller="Questions" asp-action="GetQuestionBySlug"
                            asp-route-categorySlug="@Model.CategorySlug"
-                           asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
                            asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
+                           asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
                            title="@questionWithAnswer.QuestionText">
                             Change
                             <span class="govuk-visually-hidden">@anchorLabel</span>
@@ -39,14 +37,14 @@
                 </div>
             }
         </dl>
-        <form asp-controller="CheckAnswers" asp-action="ConfirmCheckAnswers" method="post" class="noprint">
+        <form asp-controller="@nameof(ReviewAnswersController).GetControllerNameSlug()" asp-action="@nameof(ReviewAnswersController.ConfirmCheckAnswers)" method="post" class="noprint">
             <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>
-            <input type="hidden" name="sectionName" value="@Model.SectionName">
-            <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
             <input type="hidden" name="categorySlug" value="@Model.CategorySlug" />
+            <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
+            <input type="hidden" name="sectionName" value="@Model.SectionName">
 
             @{
-                foreach (var content in Model.Content)
+                foreach (var content in Model.Content ?? [])
                 {
                     await Html.RenderPartialAsync("Components/PageComponentFactory", content);
                 }

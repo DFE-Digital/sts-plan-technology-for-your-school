@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Application.Configuration;
 
 namespace Dfe.PlanTech.Web.Middleware;
 
@@ -15,7 +15,6 @@ public class SecurityHeadersMiddleware
     }
 
     public async Task InvokeAsync(HttpContext context)
-
     {
         AddFramejackingPreventHeaders(context);
         AddContentSecurityPolicy(context);
@@ -62,7 +61,7 @@ public class SecurityHeadersMiddleware
     {
         var nonce = GenerateNonce(context);
         var whitelist = GetAllowedScriptHashes();
-        var config = context.RequestServices.GetRequiredService<CspConfiguration>();
+        var config = context.RequestServices.GetRequiredService<ContentSecurityPolicyConfiguration>();
         var cspDirectives = new List<string>
         {
             "frame-ancestors 'none'",

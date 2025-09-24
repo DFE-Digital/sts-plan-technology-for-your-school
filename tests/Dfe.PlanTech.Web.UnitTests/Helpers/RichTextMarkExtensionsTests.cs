@@ -1,49 +1,43 @@
-using Dfe.PlanTech.Domain.Content.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Enums;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
-using Xunit;
 
-namespace Dfe.PlanTech.Web.UnitTests.Helpers
+namespace Dfe.PlanTech.Web.UnitTests.Helpers;
+
+public class RichTextMarkExtensionsTests
 {
-    public class RichTextMarkExtensionsTests
+    private class TestMark : IRichTextMark
     {
-        [Fact]
-        public void Should_ReturnBold_When_Bold()
-        {
-            var mark = new RichTextMark()
-            {
-                Type = RichTextMarkExtensions.BOLD_MARK
-            };
+        public string Type { get; set; } = string.Empty;
 
-            var classForMark = mark.GetClass();
+        public MarkType MarkType => (MarkType)Enum.Parse(MarkType.GetType(), Type);
+    }
 
-            Assert.Equal(RichTextMarkExtensions.BOLD_CLASS, classForMark);
-        }
+    [Theory]
+    [InlineData(RichTextMarkExtensions.UNDERLINE_MARK, RichTextMarkExtensions.UNDERLINE_CLASS)]
+    [InlineData(RichTextMarkExtensions.BOLD_MARK, RichTextMarkExtensions.BOLD_CLASS)]
+    public void GetClass_KnownMarks_ReturnsExpectedClass(string markType, string expectedClass)
+    {
+        // Arrange
+        var mark = new TestMark { Type = markType };
 
-        [Fact]
-        public void Should_ReturnUnderline_When_Underline()
-        {
-            var mark = new RichTextMark()
-            {
-                Type = RichTextMarkExtensions.UNDERLINE_MARK
-            };
+        // Act
+        var result = mark.GetClass();
 
-            var classForMark = mark.GetClass();
+        // Assert
+        Assert.Equal(expectedClass, result);
+    }
 
-            Assert.Equal(RichTextMarkExtensions.UNDERLINE_CLASS, classForMark);
-        }
+    [Fact]
+    public void GetClass_UnknownMarks_ReturnsEmptyString()
+    {
+        // Arrange
+        var mark = new TestMark { Type = "weird-one" };
 
-        [Fact]
-        public void Should_ReturnBlank_When_UnknownType()
-        {
-            var mark = new RichTextMark()
-            {
-                Type = "Not a real type!"
-            };
+        // Act
+        var result = mark.GetClass();
 
-            var classForMark = mark.GetClass();
-
-            Assert.Equal("", classForMark);
-        }
-
+        // Assert
+        Assert.Equal(string.Empty, result);
     }
 }

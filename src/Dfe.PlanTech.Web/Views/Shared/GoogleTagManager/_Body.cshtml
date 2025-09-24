@@ -1,7 +1,6 @@
-@using Dfe.PlanTech.Web.Helpers
-@inject GtmService GtmService
+@inject GoogleTagManagerServiceServiceConfiguration GtmService
 
-@if(!GtmService.Cookies.Cookie.UseCookies){
+@if(!GtmService.CookieService.Cookie.UseCookies){
   return;
 }
 

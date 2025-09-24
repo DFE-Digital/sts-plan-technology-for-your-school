@@ -1,7 +1,7 @@
 using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Html;
 
-namespace Dfe.PlanTech.Web.UnitTests;
+namespace Dfe.PlanTech.Web.UnitTests.TestHelpers;
 
 public static class GetTagHelperString
 {
