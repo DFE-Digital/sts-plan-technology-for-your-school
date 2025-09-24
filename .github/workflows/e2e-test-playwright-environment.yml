@@ -158,7 +158,7 @@ jobs:
                   path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/traces/
                   if-no-files-found: ignore
                   compression-level: 1
-
+                 
             - name: Remove Azure firewall rules
               if: always()
               uses: ./.github/actions/azure-ip-whitelist
@@ -179,3 +179,11 @@ jobs:
                     --name ${{ secrets.AZ_ACA_NAME }} \
                     --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
                     --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=false
+
+            - name: Flush Redis Cache
+              uses: azure/CLI@v1
+              id: azure
+              with:
+                azcliversion: 2.73.0
+                inlineScript: |
+                  az redis flush --name ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --yes                    
