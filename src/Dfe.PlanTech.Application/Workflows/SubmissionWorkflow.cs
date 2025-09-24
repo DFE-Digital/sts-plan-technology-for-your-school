@@ -26,6 +26,14 @@ public class SubmissionWorkflow(
         return newSubmission.AsDto();
     }
 
+    public async Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
+    {
+        var submission = await _submissionRepository.GetSubmissionByIdAsync(submissionId);
+        return submission is null
+            ? throw new InvalidOperationException($"Submission with ID '{submissionId}' not found")
+            : submission.AsDto();
+    }
+
     public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
         int establishmentId,
         QuestionnaireSectionEntry section,

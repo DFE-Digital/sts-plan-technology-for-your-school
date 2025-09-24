@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using System.Threading.Tasks;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 
@@ -7,9 +8,11 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces
     public interface ISubmissionWorkflow
     {
         Task<SqlSubmissionDto> CloneLatestCompletedSubmission(int establishmentId, QuestionnaireSectionEntry section);
-        Task SetSubmissionDeletedAsync(int establishmentId, string sectionId);
-        Task SetSubmissionInaccessible(int submissionId);
-        Task SetSubmissionInaccessible(int establishmentId, string sectionId);
+        Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId);
+        Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId);
+        Task DeleteSubmissionHardAsync(int establishmentId, string sectionId);
+        Task DeleteSubmissionSoftAsync(int submissionId);
+        Task DeleteSubmissionSoftAsync(int establishmentId, string sectionId);
         Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission);
         Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(int establishmentId, IEnumerable<string> sectionIds);
         Task<SqlSectionStatusDto> GetSectionSubmissionStatusAsync(int establishmentId, string sectionId, bool isCompleted);

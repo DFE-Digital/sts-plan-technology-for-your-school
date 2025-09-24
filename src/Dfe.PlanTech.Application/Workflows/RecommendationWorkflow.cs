@@ -1,24 +1,18 @@
 ﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.Contentful.Options;
-using Dfe.PlanTech.Data.Contentful.Interfaces;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class RecommendationWorkflow(
-    IContentfulRepository contentfulRepository
+    IRecommendationRepository recommendationRepository
 ) : IRecommendationWorkflow
 {
-    private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
+    private readonly IRecommendationRepository _recommendationRepository = recommendationRepository ?? throw new ArgumentNullException(nameof(recommendationRepository));
 
-    public async Task<int> GetRecommendationChunkCount(int page)
+    public async Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(IEnumerable<string> contentfulRefs)
     {
-        return await _contentfulRepository.GetEntriesCountAsync<RecommendationChunkEntry>();
-    }
-
-    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntries(int page)
-    {
-        var options = new GetEntriesOptions(include: 3) { Page = page };
-        return _contentfulRepository.GetPaginatedEntriesAsync<RecommendationChunkEntry>(options);
+        var recommendations = await _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(contentfulRefs);
+        return recommendations.Select(r => r.AsDto());
     }
 }

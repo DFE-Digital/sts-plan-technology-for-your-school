@@ -11,6 +11,7 @@ namespace Dfe.PlanTech.Application.Services.Interfaces
         Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId);
         Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, bool isCompletedSubmission);
         Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(int establishmentId, IEnumerable<string> sectionIds);
+        Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId);
         Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission);
         Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section);
         Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId);

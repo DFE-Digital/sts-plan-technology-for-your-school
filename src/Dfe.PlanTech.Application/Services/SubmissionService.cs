@@ -38,6 +38,11 @@ public class SubmissionService(
             : new SubmissionResponsesModel(submission, section);
     }
 
+    public Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
+    {
+        return _submissionWorkflow.GetSubmissionByIdAsync(submissionId);
+    }
+
     public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission)
     {
         var latestCompletedSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(

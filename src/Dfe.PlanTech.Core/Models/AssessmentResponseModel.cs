@@ -14,19 +14,24 @@ public class AssessmentResponseModel
 
     public IdWithTextModel Answer { get; init; }
 
-    public string Maturity { get; set; }
-
     public AssessmentResponseModel(int userId, int establishmentId, SubmitAnswerModel questionAnswer)
     {
+        var question = new IdWithTextModel
+        {
+            Id = questionAnswer.Question.ContentfulSysId,
+            Text = questionAnswer.Question.Text
+        };
+
+        var answer = new IdWithTextModel
+        {
+            Id = questionAnswer.ChosenAnswer!.ContentfulSysId,
+            Text = questionAnswer.ChosenAnswer!.Text
+        };
+
         SectionId = questionAnswer.SectionId;
         SectionName = questionAnswer.SectionName;
-        Answer = questionAnswer.ChosenAnswer!.Answer;
-        Question = new IdWithTextModel
-        {
-            Id = questionAnswer.QuestionId,
-            Text = questionAnswer.QuestionText
-        };
-        Maturity = questionAnswer.ChosenAnswer.Maturity;
+        Answer = answer;
+        Question = question;
         EstablishmentId = establishmentId;
         UserId = userId;
     }

@@ -11,7 +11,9 @@ namespace Dfe.PlanTech.Application.Services.Interfaces
         Task<List<NavigationLinkEntry>> GetNavigationLinksAsync();
         Task<PageEntry> GetPageByIdAsync(string pageId);
         Task<PageEntry> GetPageBySlugAsync(string slug);
+        Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page);
         Task<QuestionnaireQuestionEntry> GetQuestionByIdAsync(string questionId);
+        Task<int> GetRecommendationChunkCountAsync(int page);
         Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null);
     }
 }

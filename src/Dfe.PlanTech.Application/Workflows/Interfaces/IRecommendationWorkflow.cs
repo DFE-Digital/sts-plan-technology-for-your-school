@@ -1,10 +1,9 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Application.Workflows.Interfaces
 {
     public interface IRecommendationWorkflow
     {
-        Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntries(int page);
-        Task<int> GetRecommendationChunkCount(int page);
+        Task<IEnumerable<SqlRecommendationDto>> GetRecommendationsByContentfulReferencesAsync(IEnumerable<string> contentfulSysIds);
     }
 }

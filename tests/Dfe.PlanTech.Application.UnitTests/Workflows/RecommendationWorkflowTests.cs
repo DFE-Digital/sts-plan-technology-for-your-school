@@ -24,7 +24,7 @@ public class RecommendationWorkflowTests
         var serviceUnderTest = CreateServiceUnderTest();
         _repo.GetEntriesCountAsync<RecommendationChunkEntry>().Returns(123);
 
-        var count = await serviceUnderTest.GetRecommendationChunkCount(page: 7);
+        var count = await serviceUnderTest.GetRecommendationChunkCountAsync(page: 7);
 
         Assert.Equal(123, count);
         await _repo.Received(1).GetEntriesCountAsync<RecommendationChunkEntry>();
@@ -38,7 +38,7 @@ public class RecommendationWorkflowTests
         _repo.GetEntriesCountAsync<RecommendationChunkEntry>()
              .Returns<Task<int>>(_ => throw new InvalidOperationException("boom"));
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => serviceUnderTest.GetRecommendationChunkCount(1));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => serviceUnderTest.GetRecommendationChunkCountAsync(1));
     }
 
     [Fact]
@@ -56,7 +56,7 @@ public class RecommendationWorkflowTests
                 Arg.Is<GetEntriesOptions>(o => o.Include == 3 && o.Page == page))
             .Returns(expected);
 
-        var result = await serviceUnderTest.GetPaginatedRecommendationEntries(page);
+        var result = await serviceUnderTest.GetPaginatedRecommendationEntriesAsync(page);
 
         Assert.Same(expected, result);
         await _repo.Received(1).GetPaginatedEntriesAsync<RecommendationChunkEntry>(
@@ -70,6 +70,6 @@ public class RecommendationWorkflowTests
         _repo.GetPaginatedEntriesAsync<RecommendationChunkEntry>(Arg.Any<GetEntriesOptions>())
              .Returns<Task<IEnumerable<RecommendationChunkEntry>>>(_ => throw new Exception("boom"));
 
-        await Assert.ThrowsAsync<Exception>(() => serviceUnderTest.GetPaginatedRecommendationEntries(2));
+        await Assert.ThrowsAsync<Exception>(() => serviceUnderTest.GetPaginatedRecommendationEntriesAsync(2));
     }
 }

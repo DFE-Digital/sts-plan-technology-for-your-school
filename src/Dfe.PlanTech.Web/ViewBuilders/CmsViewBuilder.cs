@@ -23,8 +23,8 @@ public class CmsViewBuilder(
     public async Task<IActionResult> GetChunks(Controller controller, int? page)
     {
         var pageNumber = page ?? 1;
-        var total = await _recommendationService.GetRecommendationChunkCount(pageNumber);
-        var entries = await _recommendationService.GetPaginatedRecommendationEntries(pageNumber);
+        var total = await _contentfulService.GetRecommendationChunkCountAsync(pageNumber);
+        var entries = await _contentfulService.GetPaginatedRecommendationEntriesAsync(pageNumber);
 
         var chunkModels = entries
             .SelectMany(chunk => chunk.AllAnswers

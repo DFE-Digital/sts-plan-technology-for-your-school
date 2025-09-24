@@ -14,9 +14,7 @@ public class RecommendationEntity
 
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
-    public int QuestionId { get; init; }
-
-    public QuestionEntity Question { get; set; } = null!;
+    public string QuestionContentfulRef { get; init; } = null!;
 
     public bool Archived { get; set; } = false;
 
@@ -28,8 +26,7 @@ public class RecommendationEntity
             RecommendationText = RecommendationText,
             ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated,
-            QuestionId = QuestionId,
-            Question = Question.AsDto(),
+            QuestionContentfulRef = QuestionContentfulRef,
             Archived = Archived
         };
     }

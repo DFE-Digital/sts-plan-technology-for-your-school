@@ -1,10 +1,10 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Application.Services.Interfaces
 {
     public interface IRecommendationService
     {
-        Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntries(int page);
-        Task<int> GetRecommendationChunkCount(int page);
+        Task<IEnumerable<SqlRecommendationDto>> UpsertRecommendations(IEnumerable<RecommendationModel> recommendationModels);
     }
 }

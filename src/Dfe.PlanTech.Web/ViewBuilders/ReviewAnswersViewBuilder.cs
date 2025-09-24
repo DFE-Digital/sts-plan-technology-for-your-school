@@ -17,11 +17,13 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class ReviewAnswersViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
+    IRecommendationService recommendationService,
     ISubmissionService submissionService,
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
 
     public const string ChangeAnswersViewName = "~/Views/ChangeAnswers/ChangeAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
@@ -130,6 +132,54 @@ public class ReviewAnswersViewBuilder(
         catch (Exception e)
         {
             Logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
+            controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
+            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
+        }
+
+
+        QuestionnaireSectionEntry section;
+        try
+        {
+            section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "There was an error while trying to retrieve the section with slug {SectionSlug}", sectionSlug);
+            controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
+            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
+        }
+
+        try
+        {
+            var recommendationModels = section.CoreRecommendations
+                .Select(r => new RecommendationModel
+                {
+                    Text = r.Header,
+                    ContentfulSysId = r.Id,
+                    QuestionContentfulRef = r.Question.Id
+                });
+
+            // Upsert all recommendations
+            await _recommendationService.UpsertRecommendations(recommendationModels);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "There was an error while updating the database with core recommendations for section with slug {SectionSlug}", sectionSlug);
+            controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
+            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
+        }
+
+        try
+        {
+
+            var submission = await _submissionService.GetSubmissionByIdAsync(submissionId);
+            var answerContentfulRefs = submission.Responses.Select(r => r.Answer.ContentfulSysId);
+
+            // Insert history/statuses
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "There was an error while updating the database with recommendation history for section with slug {SectionSlug}", sectionSlug);
             controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
         }

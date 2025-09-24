@@ -42,8 +42,9 @@ public class AnswerViewModel
     {
         return new AnswerModel
         {
+            ContentfulSysId = Answer.Id,
+            Text = Answer.Text,
             Maturity = Maturity,
-            Answer = Answer,
         };
     }
 }
