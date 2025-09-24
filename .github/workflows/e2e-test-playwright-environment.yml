@@ -95,6 +95,7 @@ jobs:
                   DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
                   DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
                   DB_SERVER: localhost
+                  DB_MODE: azure
                   DB_USER: sa
                   DB_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
                   DB_PORT: 1433
@@ -179,6 +180,6 @@ jobs:
               with:
                 inlineScript: |
                   az containerapp update \
-                    --name $APP_NAME \
-                    --resource-group $RESOURCE_GROUP \
+                    --name ${{ secrets.AZ_ACA_NAME }} \
+                    --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
                     --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=false
