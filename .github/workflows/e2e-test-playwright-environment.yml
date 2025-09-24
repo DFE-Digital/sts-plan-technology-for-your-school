@@ -7,7 +7,7 @@ on:
         description: Which app environment to run against?
         required: true
         type: choice
-        options: ['Dev', 'Tst', 'StagingUnprotected']
+        options: ['Dev', 'Tst', 'Staging']
         default: 'Tst'
 
 concurrency:
