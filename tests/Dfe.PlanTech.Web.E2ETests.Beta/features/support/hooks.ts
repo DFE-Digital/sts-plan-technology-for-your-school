@@ -9,7 +9,7 @@ import {
 import { chromium, Browser, BrowserContext, Page } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
-import { clearTestEstablishmentData } from '../../clearTestData';
+import { clearTestEstablishmentData } from '../../clearTestDataSqlAzure';
 import { setDefaultTimeout } from '@cucumber/cucumber';
 
 setDefaultTimeout(60 * 1000)
