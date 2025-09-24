@@ -1,0 +1,184 @@
+name: Run Playwright E2E Tests (Environment)
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which app environment to run against?
+        required: true
+        type: choice
+        options: ['Dev', 'Tst', 'StagingUnprotected']
+        default: 'Tst'
+
+concurrency:
+    group: "${{ github.workflow }}"
+    cancel-in-progress: false
+
+env:
+    DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+
+jobs:
+  run-tests:
+        permissions:
+          id-token: write
+          contents: read
+        name: Run Playwright + Cucumber Tests
+        environment: ${{ github.event.inputs.environment || 'Tst' }} 
+        runs-on: ubuntu-22.04
+        env:
+            PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
+            KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+            RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            SQL_IP_NAME: e2e-tests-pr
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@v4
+              with:
+                fetch-depth: 1
+                
+            - name: Login with AZ
+              uses: ./.github/actions/azure-login
+              with:
+                az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+                az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+                az_client_id: ${{ secrets.AZ_CLIENT_ID }}              
+
+            - name: Get workflow IP address
+              id: whats-my-ip
+              uses: ./.github/actions/whats-my-ip-address
+
+            - name: Add Azure firewall rules
+              uses: ./.github/actions/azure-ip-whitelist
+              with:
+                ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+                verb: "add"
+                az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+                az_ip_name: ${{ env.SQL_IP_NAME }}
+                az_resource_group: ${{ env.RESOURCE_GROUP}}
+                az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+
+            - name: Turn on Automated Testing Content on environment
+              if: always()
+              uses: azure/cli@v2
+              with:
+                inlineScript: |
+                  az containerapp update \
+                    --name ${{ secrets.AZ_ACA_NAME }} \
+                    --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
+                    --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=true
+
+            - name: Install NPM dependencies
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              run: npm ci
+
+            - name: Cache Playwright browsers
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/ms-playwright
+                key: playwright-${{ runner.os }}-chromium-1.51.1
+
+            - name: Install Playwright browsers (tests dir)
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              run: npx playwright install --with-deps chromium
+
+            - name: Run Playwright + Cucumber tests (with recording)
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              env:
+                  URL: ${{ secrets.APP_URL }}
+                  DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
+                  DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
+                  DSI_SCHOOL_ESTABLISHMENT_REF: '00000018'
+                  DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
+                  DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
+                  DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '00000005'
+                  DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
+                  DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
+                  DB_SERVER: localhost
+                  DB_USER: sa
+                  DB_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
+                  DB_PORT: 1433
+                  DB_DATABASE: plantech-mock-db
+                  DB_ENCRYPT: false
+                  DB_TRUST_SERVER_CERTIFICATE: true
+                  HEADLESS: true
+                  NODE_ICU_DATA: ./node_modules/full-icu
+                  LANG: en_GB.UTF-8
+                  LC_ALL: en_GB.UTF-8
+                  TZ: Europe/London
+              run: npm run test:login && npm run test:record
+
+            - name: Merge cucumber JSON reports
+              if: always()            
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              shell: bash
+              run: |
+                node -e "const fs=require('fs');
+                const a=JSON.parse(fs.readFileSync('reports/cucumber-parallel.json','utf8'));
+                const b=JSON.parse(fs.readFileSync('reports/cucumber-serial.json','utf8'));
+                fs.writeFileSync('reports/cucumber-report.json', JSON.stringify([...a, ...b]));"
+
+            - name: Summarise Cucumber results
+              if: always()
+              run: |
+                node ./tests/Dfe.PlanTech.Web.E2ETests.Beta/cucumber-summary.js ./tests/Dfe.PlanTech.Web.E2ETests.Beta/reports/cucumber-report.json
+
+            - name: Generate HTML report
+              if: always()
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              run: npm run report
+
+            - name: Upload HTML report
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: cucumber-html-report
+                  path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/reports/
+                  if-no-files-found: warn
+
+            - name: Upload Playwright screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: playwright-screenshots
+                  path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/screenshots/
+                  if-no-files-found: ignore
+
+            - name: Upload Playwright videos
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: playwright-videos
+                  path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/videos/
+                  if-no-files-found: ignore
+                  compression-level: 1
+
+            - name: Upload Playwright traces
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: playwright-traces
+                  path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/traces/
+                  if-no-files-found: ignore
+                  compression-level: 1
+
+            - name: Remove Azure firewall rules
+              if: always()
+              uses: ./.github/actions/azure-ip-whitelist
+              with:
+                ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+                verb: "remove"
+                az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+                az_ip_name: ${{ env.SQL_IP_NAME }}
+                az_resource_group: ${{ env.RESOURCE_GROUP}}
+                az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+
+            - name: Turn off Automated Testing Content on environment
+              if: always()
+              uses: azure/cli@v2
+              with:
+                inlineScript: |
+                  az containerapp update \
+                    --name $APP_NAME \
+                    --resource-group $RESOURCE_GROUP \
+                    --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=false
