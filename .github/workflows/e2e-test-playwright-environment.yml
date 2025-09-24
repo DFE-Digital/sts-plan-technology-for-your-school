@@ -94,7 +94,7 @@ jobs:
                   DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '00000005'
                   DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
                   DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
-                  DB_SERVER: ${{ secrets.DB_SERVER }}
+                  DB_SERVER: ${{ secrets.AZ_DB_SERVER }}
                   DB_MODE: azure
                   DB_USER: sa
                   DB_DATABASE: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-sqldb
