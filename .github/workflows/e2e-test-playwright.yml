@@ -198,8 +198,6 @@ jobs:
                   DB_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
                   DB_PORT: 1433
                   DB_DATABASE: plantech-mock-db
-                  DB_ENCRYPT: false
-                  DB_TRUST_SERVER_CERTIFICATE: true
                   HEADLESS: true
                   NODE_ICU_DATA: ./node_modules/full-icu
                   LANG: en_GB.UTF-8
