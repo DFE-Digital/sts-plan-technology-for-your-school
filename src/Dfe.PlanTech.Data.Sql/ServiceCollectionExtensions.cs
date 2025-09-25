@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Sql.Interfaces;
