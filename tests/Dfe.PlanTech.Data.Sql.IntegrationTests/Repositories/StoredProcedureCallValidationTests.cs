@@ -196,7 +196,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task StoredProcedureRepository_HardDeleteCurrentSubmissionAsync_WhenCalledWithValidParameters_ThenDeletesSubmissionFromDatabase()
+    public async Task StoredProcedureRepository_DeleteCurrentSubmissionAsync_WhenCalledWithValidParameters_ThenSoftDeleteMarkSubmissionAsDeleted()
     {
         // Arrange
         var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School" };
@@ -222,9 +222,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         Assert.NotNull(submissionBeforeDelete);
         Assert.False(submissionBeforeDelete!.Deleted, "Submission should not be marked as deleted before deletion");
 
-        // Act - Execute the hard delete operation
-        // NOTE: Despite the method name "HardDelete", this method actually performs a SOFT DELETE.
-        await _storedProcRepository.HardDeleteCurrentSubmissionAsync(establishment.Id, "test-section-delete");
+        // Act - Execute the delete operation
+        await _storedProcRepository.DeleteCurrentSubmissionAsync(establishment.Id, "test-section-delete");
 
         // Assert - Verify submission is marked as deleted (soft delete)
         // Clear the change tracker to force EF to query the database fresh
@@ -328,9 +327,9 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         var maturityResult = await _storedProcRepository.SetMaturityForSubmissionAsync(submission.Id);
         Assert.True(maturityResult >= 0);
 
-        // 4. Test HardDeleteCurrentSubmission parameter order
+        // 4. Test DeleteCurrentSubmission parameter order
 
-        await _storedProcRepository.HardDeleteCurrentSubmissionAsync(establishment.Id, "param-section");
+        await _storedProcRepository.DeleteCurrentSubmissionAsync(establishment.Id, "param-section");
 
         // 5. Test DeleteCurrentSubmission from SubmissionRepository parameter order
         await _submissionRepository.DeleteCurrentSubmission(establishment.Id, 123);

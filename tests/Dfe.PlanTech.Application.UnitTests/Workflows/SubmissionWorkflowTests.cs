@@ -374,7 +374,7 @@ public class SubmissionWorkflowTests
     public async Task DeleteHard_Delegates_To_SP()
     {
         var sut = CreateServiceUnderTest();
-        await sut.DeleteSubmissionHardAsync(1, "SEC");
-        await _sp.Received(1).HardDeleteCurrentSubmissionAsync(1, "SEC");
+        await sut.DeleteSubmissionAsync(1, "SEC");
+        await _sp.Received(1).DeleteCurrentSubmissionAsync(1, "SEC");
     }
 }

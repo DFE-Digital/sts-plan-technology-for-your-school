@@ -168,7 +168,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             new(DatabaseConstants.EstablishmentIdParam, establishmentId)
         };
 
-        // IMPORTANT: This stored procedure (`"[dbo].[DeleteCurrentSubmission]"`) performs a SOFT DELETE (sets deleted = 1), not a hard delete
         var command = BuildCommand(DatabaseConstants.SpDeleteCurrentSubmission, parameters);
         return _db.Database.ExecuteSqlRawAsync(command, parameters);
     }

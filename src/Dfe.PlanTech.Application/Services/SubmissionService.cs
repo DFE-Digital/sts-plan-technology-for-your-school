@@ -107,11 +107,6 @@ public class SubmissionService(
         return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
-    public async Task DeleteCurrentSubmissionHardAsync(int establishmentId, string sectionId)
-    {
-        await _submissionWorkflow.DeleteSubmissionHardAsync(establishmentId, sectionId);
-    }
-
     public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
     {
         await _submissionWorkflow.DeleteSubmissionSoftAsync(establishmentId, sectionId);

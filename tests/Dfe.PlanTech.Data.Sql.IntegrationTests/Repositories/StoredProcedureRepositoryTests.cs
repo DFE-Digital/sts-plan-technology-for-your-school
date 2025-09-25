@@ -202,7 +202,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task StoredProcedureRepository_HardDeleteCurrentSubmissionAsync_WhenCalledWithValidParameters_ThenDeletesSubmissionFromDatabase()
+    public async Task StoredProcedureRepository_DeleteCurrentSubmissionAsync_WhenCalledWithValidParameters_ThenSoftDeleteMarkSubmissionAsDeleted()
     {
         // Arrange
         var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
@@ -227,9 +227,8 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         Assert.NotNull(submissionBeforeDelete);
         Assert.False(submissionBeforeDelete!.Deleted, "Submission should not be marked as deleted before deletion");
 
-        // Act - Execute the hard delete operation
-        // NOTE: Despite the method name "HardDelete", this method actually performs a SOFT DELETE.
-        await _repository.HardDeleteCurrentSubmissionAsync(establishment.Id, "section-to-delete");
+        // Act - Execute the delete operation
+        await _repository.DeleteCurrentSubmissionAsync(establishment.Id, "section-to-delete");
 
         // Assert - Verify submission is marked as deleted (soft delete)
         // Clear EF cache to force fresh database query after stored procedure execution

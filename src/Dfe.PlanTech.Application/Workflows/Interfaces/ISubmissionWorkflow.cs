@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces
     public interface ISubmissionWorkflow
     {
         Task<SqlSubmissionDto> CloneLatestCompletedSubmission(int establishmentId, QuestionnaireSectionEntry section);
-        Task DeleteSubmissionHardAsync(int establishmentId, string sectionId);
+        Task DeleteSubmissionAsync(int establishmentId, string sectionId);
         Task DeleteSubmissionSoftAsync(int submissionId);
         Task DeleteSubmissionSoftAsync(int establishmentId, string sectionId);
         Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission);

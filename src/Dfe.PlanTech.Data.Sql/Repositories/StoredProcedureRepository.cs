@@ -152,11 +152,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}");
     }
 
-    /// <summary>
-    /// NOTE: Despite the method name "HardDelete", this method actually performs a SOFT DELETE.
-    /// The underlying stored procedure sets the 'deleted' flag to 1 rather than removing the record entirely.
-    /// </summary>
-    public Task HardDeleteCurrentSubmissionAsync(int establishmentId, string sectionId)
+    public Task DeleteCurrentSubmissionAsync(int establishmentId, string sectionId)
     {
         // Stored procedure defined in:
         // - 2024/20240524_1635_CreateDeleteCurrentSubmissionProcedure.sql (CREATE)
@@ -169,7 +165,6 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             new(DatabaseConstants.EstablishmentIdParam, establishmentId)
         };
 
-        // IMPORTANT: This stored procedure (`"[dbo].[DeleteCurrentSubmission]"`) performs a SOFT DELETE (sets deleted = 1), not a hard delete
         var command = BuildCommand(DatabaseConstants.SpDeleteCurrentSubmission, parameters);
         return _db.Database.ExecuteSqlRawAsync(command, parameters);
     }
