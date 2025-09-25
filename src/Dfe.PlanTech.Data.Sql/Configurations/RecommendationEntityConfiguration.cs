@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
-[ExcludeFromCodeCoverage]
 internal class RecommendationEntityConfiguration : IEntityTypeConfiguration<RecommendationEntity>
 {
     public void Configure(EntityTypeBuilder<RecommendationEntity> builder)

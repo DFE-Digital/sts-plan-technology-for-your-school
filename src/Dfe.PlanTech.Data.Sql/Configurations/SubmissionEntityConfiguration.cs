@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
-[ExcludeFromCodeCoverage]
 internal class SubmissionEntityConfiguration : IEntityTypeConfiguration<SubmissionEntity>
 {
     public void Configure(EntityTypeBuilder<SubmissionEntity> builder)

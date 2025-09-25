@@ -7,7 +7,6 @@ namespace Dfe.PlanTech.Data.Sql.Configurations;
 
 /// Created via: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250905_1200_AddRecommendationTables.sql
 /// Updated via: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250920_1200_FixRecommendationHistoryForAppendOnly.sql
-[ExcludeFromCodeCoverage]
 internal class EstablishmentRecommendationHistoryEntityConfiguration : IEntityTypeConfiguration<EstablishmentRecommendationHistoryEntity>
 {
     public void Configure(EntityTypeBuilder<EstablishmentRecommendationHistoryEntity> builder)

@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
-[ExcludeFromCodeCoverage]
 internal class ResponseEntityConfiguration : IEntityTypeConfiguration<ResponseEntity>
 {
     public void Configure(EntityTypeBuilder<ResponseEntity> builder)

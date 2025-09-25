@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
-[ExcludeFromCodeCoverage]
 internal class SignInEntityConfiguration : IEntityTypeConfiguration<SignInEntity>
 {
     public void Configure(EntityTypeBuilder<SignInEntity> builder)

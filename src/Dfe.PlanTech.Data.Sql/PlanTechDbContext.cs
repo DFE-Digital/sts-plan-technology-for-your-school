@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql;
 
-[ExcludeFromCodeCoverage]
 public class PlanTechDbContext : DbContext
 {
     public virtual DbSet<EstablishmentEntity> Establishments { get; set; } = null!;

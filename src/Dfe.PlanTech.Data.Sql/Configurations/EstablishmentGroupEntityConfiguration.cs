@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
-[ExcludeFromCodeCoverage]
 internal class EstablishmentGroupEntityConfiguration : IEntityTypeConfiguration<EstablishmentGroupEntity>
 {
     public void Configure(EntityTypeBuilder<EstablishmentGroupEntity> builder)
