@@ -235,44 +235,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task SubmissionRepository_DeleteCurrentSubmission_WhenCalledWithValidParameters_ThenDeletesSubmissionFromDatabase()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School" };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
-
-        var submission = new SubmissionEntity
-        {
-            SectionId = "123", // This method expects int sectionId converted to string
-            SectionName = "Test Section",
-            EstablishmentId = establishment.Id,
-            Status = "InProgress",
-            Completed = false,
-            Deleted = false
-        };
-        DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
-
-        var submissionId = submission.Id;
-
-        // Assert - Verify submission exists before deletion and is not marked as deleted
-        var submissionBeforeDelete = await DbContext.Submissions.FirstOrDefaultAsync(s => s.Id == submissionId);
-        Assert.NotNull(submissionBeforeDelete);
-        Assert.False(submissionBeforeDelete!.Deleted, "Submission should not be marked as deleted before deletion");
-
-        // Act - Execute the delete operation
-        await _submissionRepository.DeleteCurrentSubmission(establishment.Id, 123);
-
-        // Assert - Verify submission is marked as deleted (soft delete)
-        // Clear EF cache to force fresh database query after stored procedure execution
-        DbContext.ChangeTracker.Clear();
-        var submissionAfterDelete = await DbContext.Submissions.AsNoTracking().FirstOrDefaultAsync(s => s.Id == submissionId);
-        Assert.NotNull(submissionAfterDelete);
-        Assert.True(submissionAfterDelete!.Deleted, "Submission should be marked as deleted in database");
-    }
-
-    [Fact]
     public async Task StoredProcedureRepository_MultipleCalls_WhenParameterOrderValidated_ThenAllCallsExecuteWithoutParameterErrors()
     {
         // This test validates that stored procedure calls don't fail due to parameter order issues
@@ -328,11 +290,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         Assert.True(maturityResult >= 0);
 
         // 4. Test DeleteCurrentSubmission parameter order
-
         await _storedProcRepository.DeleteCurrentSubmissionAsync(establishment.Id, "param-section");
-
-        // 5. Test DeleteCurrentSubmission from SubmissionRepository parameter order
-        await _submissionRepository.DeleteCurrentSubmission(establishment.Id, 123);
 
         // If we reach here, all stored procedure calls succeeded without parameter order/type errors
         Assert.True(true, "All stored procedure calls completed without parameter errors");

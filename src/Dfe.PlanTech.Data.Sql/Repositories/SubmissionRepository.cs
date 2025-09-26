@@ -150,34 +150,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         return submission;
     }
 
-    /// <summary>
-    /// NOTE: Despite the method name, this method actually performs a SOFT DELETE.
-    /// The underlying stored procedure sets the 'deleted' flag to 1 rather than removing the record entirely.
-    /// </summary>
-    public Task DeleteCurrentSubmission(int establishmentId, int sectionId)
-    {
-        // Stored procedure defined in:
-        // - 2024/20240524_1635_CreateDeleteCurrentSubmissionProcedure.sql (CREATE)
-        // - 2024/20240827_1102_UpdateDeleteCurrentSubmissionProcedure.sql (ALTER)
-        // - 2024/20241009_1100_DboSchemaImprovements.sql (ALTER - LATEST)
-        // Parameters (in order): @sectionId NVARCHAR(50), @establishmentId INT
-        // FIXED: Now using SqlParameter[] with correct parameter order to match stored procedure definition
-        var parameters = new SqlParameter[]
-        {
-            new(DatabaseConstants.SectionIdParam, sectionId.ToString()),
-            new(DatabaseConstants.EstablishmentIdParam, establishmentId)
-        };
-
-        var command = BuildCommand(DatabaseConstants.SpDeleteCurrentSubmission, parameters);
-        return _db.Database.ExecuteSqlRawAsync(command, parameters);
-    }
-
-    private static string BuildCommand(string storedProcedureName, SqlParameter[] parameters)
-    {
-        var parameterNames = parameters.Select(p => p.ParameterName);
-        return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
-    }
-
     private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
         int establishmentId,
         string sectionId,
