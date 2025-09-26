@@ -26,6 +26,11 @@ public class SubmissionWorkflow(
         return newSubmission.AsDto();
     }
 
+    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int userId, QuestionnaireSectionEntry section)
+    {
+        return _submissionRepository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, userId, section);
+    }
+
     public async Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
     {
         var submission = await _submissionRepository.GetSubmissionByIdAsync(submissionId);

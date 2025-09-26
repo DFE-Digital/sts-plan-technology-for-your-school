@@ -112,6 +112,16 @@ public class SubmissionService(
         return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
+    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int userId, QuestionnaireSectionEntry section)
+    {
+        return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, userId, section);
+    }
+
+    public async Task DeleteCurrentSubmissionHardAsync(int establishmentId, string sectionId)
+    {
+        await _submissionWorkflow.DeleteSubmissionHardAsync(establishmentId, sectionId);
+    }
+
     public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
     {
         await _submissionWorkflow.SetSubmissionInaccessible(establishmentId, sectionId);
