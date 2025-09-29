@@ -53,22 +53,6 @@ public class SubmissionWorkflow(
 
         latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses, section).ToList();
 
-        var lastResponseInUserJourney = latestSubmission.Responses.LastOrDefault();
-        if (lastResponseInUserJourney is not null)
-        {
-            var lastSelectedQuestion = section.Questions
-                .FirstOrDefault(q => q.Id.Equals(lastResponseInUserJourney.Question.ContentfulRef))
-                    ?? throw new UserJourneyMissingContentException($"Could not find question with database ID {lastResponseInUserJourney.QuestionId} (Contentful ref {lastResponseInUserJourney.Question.ContentfulRef}) in section with ID {section.Id}", section);
-
-            if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
-            {
-                // Assessment was done before core recs were introduced. User must start again.
-                return null;
-
-                throw new UserJourneyMissingContentException($"Could not find answer with Contentful reference {lastResponseInUserJourney.Answer.ContentfulRef} in question with Contentful reference {lastResponseInUserJourney.Question.ContentfulRef}", section);
-            }
-        }
-
         return latestSubmission.AsDto();
     }
 
