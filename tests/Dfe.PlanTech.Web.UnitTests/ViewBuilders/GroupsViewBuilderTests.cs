@@ -235,7 +235,7 @@ public class GroupsViewBuilderTests
     // --- RouteToGroupsRecommendationAsync ----------------------------------
 
     [Fact]
-    public async Task RouteToGroupsRecommendationAsync_Redirects_When_Subtopic_Section_Null()
+    public async Task RouteToGroupsRecommendationAsync_Returns_View_When_Empty_CoreRecommendations()
     {
         var contentful = Substitute.For<IContentfulService>();
 
@@ -258,7 +258,6 @@ public class GroupsViewBuilderTests
 
         var action = await sut.RouteToGroupsRecommendationAsync(controller, "net");
 
-        // The method now returns a view with empty chunks instead of redirecting -- TODO: Is this desirable?
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal("Recommendations", view.ViewName);
     }
