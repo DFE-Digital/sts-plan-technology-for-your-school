@@ -118,19 +118,19 @@ public class SubmissionWorkflow(
         await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
     }
 
-    public Task DeleteSubmissionSoftAsync(int establishmentId, string sectionId)
+    public Task SetSubmissionInaccessible(int establishmentId, string sectionId)
     {
         return _submissionRepository.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
     }
 
-    public Task DeleteSubmissionSoftAsync(int submissionId)
+    public Task SetSubmissionInaccessible(int submissionId)
     {
         return _submissionRepository.SetSubmissionInaccessibleAsync(submissionId);
     }
 
-    public Task DeleteSubmissionAsync(int establishmentId, string sectionId)
+    public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
     {
-        return _storedProcedureRepository.DeleteCurrentSubmissionAsync(establishmentId, sectionId);
+        return _storedProcedureRepository.SetSubmissionDeletedAsync(establishmentId, sectionId);
     }
 
     private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, QuestionnaireSectionEntry section)

@@ -152,7 +152,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}");
     }
 
-    public Task DeleteCurrentSubmissionAsync(int establishmentId, string sectionId)
+    public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
     {
         // Stored procedure defined in:
         // - 2024/20240524_1635_CreateDeleteCurrentSubmissionProcedure.sql (CREATE)

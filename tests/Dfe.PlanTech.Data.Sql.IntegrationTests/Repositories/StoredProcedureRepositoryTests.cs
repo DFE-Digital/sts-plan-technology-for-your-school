@@ -228,7 +228,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         Assert.False(submissionBeforeDelete!.Deleted, "Submission should not be marked as deleted before deletion");
 
         // Act - Execute the delete operation
-        await _repository.DeleteCurrentSubmissionAsync(establishment.Id, "section-to-delete");
+        await _repository.SetSubmissionDeletedAsync(establishment.Id, "section-to-delete");
 
         // Assert - Verify submission is marked as deleted (soft delete)
         // Clear EF cache to force fresh database query after stored procedure execution

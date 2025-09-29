@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Data.Sql.Interfaces
     {
         Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId);
 
-        Task DeleteCurrentSubmissionAsync(int establishmentId, string sectionId);
+        Task SetSubmissionDeletedAsync(int establishmentId, string sectionId);
 
         Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel);
         Task<int> SetMaturityForSubmissionAsync(int submissionId);

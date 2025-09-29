@@ -61,7 +61,7 @@ public class SubmissionServiceTests
     // --- RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync -----------
 
     [Fact]
-    public async Task RemoveAndClone_When_InProgressExists_Deletes_Then_Clones()
+    public async Task RemoveAndClone_When_InProgressExists_Clones_And_MarksPreviousInaccessible()
     {
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, _) = BuildSectionGraph();
@@ -78,12 +78,12 @@ public class SubmissionServiceTests
 
         Assert.Same(cloned, result);
 
-        await _submissionWorkflow.Received(1).DeleteSubmissionSoftAsync(inProgress.Id);
         await _submissionWorkflow.Received(1).CloneLatestCompletedSubmission(123, section);
+        await _submissionWorkflow.Received(1).SetSubmissionInaccessible(inProgress.Id);
     }
 
     [Fact]
-    public async Task RemoveAndClone_When_No_InProgress_Just_Clones()
+    public async Task MakeInaccessibleAndClone_When_No_InProgress_Just_Clones()
     {
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, _) = BuildSectionGraph();
@@ -97,8 +97,8 @@ public class SubmissionServiceTests
         var result = await sut.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(123, section);
 
         Assert.Same(cloned, result);
-        await _submissionWorkflow.DidNotReceive().DeleteSubmissionSoftAsync(Arg.Any<int>());
         await _submissionWorkflow.Received(1).CloneLatestCompletedSubmission(123, section);
+        await _submissionWorkflow.DidNotReceive().SetSubmissionInaccessible(Arg.Any<int>());
     }
 
     [Fact]

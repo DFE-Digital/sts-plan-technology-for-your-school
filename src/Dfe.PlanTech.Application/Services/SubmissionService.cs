@@ -24,7 +24,7 @@ public class SubmissionService(
             isCompletedSubmission: false);
         if (inProgressSubmission is not null)
         {
-            await _submissionWorkflow.DeleteSubmissionSoftAsync(inProgressSubmission.Id);
+            await _submissionWorkflow.SetSubmissionInaccessible(inProgressSubmission.Id);
         }
 
         return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
@@ -109,6 +109,6 @@ public class SubmissionService(
 
     public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
     {
-        await _submissionWorkflow.DeleteSubmissionSoftAsync(establishmentId, sectionId);
+        await _submissionWorkflow.SetSubmissionInaccessible(establishmentId, sectionId);
     }
 }

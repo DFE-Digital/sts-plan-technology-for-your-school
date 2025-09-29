@@ -223,7 +223,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         Assert.False(submissionBeforeDelete!.Deleted, "Submission should not be marked as deleted before deletion");
 
         // Act - Execute the delete operation
-        await _storedProcRepository.DeleteCurrentSubmissionAsync(establishment.Id, "test-section-delete");
+        await _storedProcRepository.SetSubmissionDeletedAsync(establishment.Id, "test-section-delete");
 
         // Assert - Verify submission is marked as deleted (soft delete)
         // Clear the change tracker to force EF to query the database fresh
@@ -290,7 +290,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         Assert.True(maturityResult >= 0);
 
         // 4. Test DeleteCurrentSubmission parameter order
-        await _storedProcRepository.DeleteCurrentSubmissionAsync(establishment.Id, "param-section");
+        await _storedProcRepository.SetSubmissionDeletedAsync(establishment.Id, "param-section");
 
         // If we reach here, all stored procedure calls succeeded without parameter order/type errors
         Assert.True(true, "All stored procedure calls completed without parameter errors");

@@ -355,26 +355,26 @@ public class SubmissionWorkflowTests
     }
 
     [Fact]
-    public async Task DeleteSoft_By_Establishment_Section_Delegates()
+    public async Task SetSubmissionInaccessible_By_Establishment_Section_Delegates()
     {
         var sut = CreateServiceUnderTest();
-        await sut.DeleteSubmissionSoftAsync(1, "SEC");
+        await sut.SetSubmissionInaccessible(1, "SEC");
         await _repo.Received(1).SetSubmissionInaccessibleAsync(1, "SEC");
     }
 
     [Fact]
-    public async Task DeleteSoft_By_SubmissionId_Delegates()
+    public async Task SetSubmissionInaccessible_By_SubmissionId_Delegates()
     {
         var sut = CreateServiceUnderTest();
-        await sut.DeleteSubmissionSoftAsync(123);
+        await sut.SetSubmissionInaccessible(123);
         await _repo.Received(1).SetSubmissionInaccessibleAsync(123);
     }
 
     [Fact]
-    public async Task DeleteHard_Delegates_To_SP()
+    public async Task SetSubmissionDeleted_Delegates_To_SP()
     {
         var sut = CreateServiceUnderTest();
-        await sut.DeleteSubmissionAsync(1, "SEC");
-        await _sp.Received(1).DeleteCurrentSubmissionAsync(1, "SEC");
+        await sut.SetSubmissionDeletedAsync(1, "SEC");
+        await _sp.Received(1).SetSubmissionDeletedAsync(1, "SEC");
     }
 }
