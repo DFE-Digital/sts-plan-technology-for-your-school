@@ -26,9 +26,9 @@ public class SubmissionWorkflow(
         return newSubmission.AsDto();
     }
 
-    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int userId, QuestionnaireSectionEntry section)
+    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
     {
-        return _submissionRepository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, userId, section);
+        return _submissionRepository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
     }
 
     public async Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
@@ -62,6 +62,9 @@ public class SubmissionWorkflow(
 
             if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
             {
+                // Assessment was done before core recs were introduced. User must start again.
+                return null;
+
                 throw new UserJourneyMissingContentException($"Could not find answer with Contentful reference {lastResponseInUserJourney.Answer.ContentfulRef} in question with Contentful reference {lastResponseInUserJourney.Question.ContentfulRef}", section);
             }
         }

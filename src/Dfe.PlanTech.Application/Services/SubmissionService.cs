@@ -112,9 +112,9 @@ public class SubmissionService(
         return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
-    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int userId, QuestionnaireSectionEntry section)
+    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
     {
-        return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, userId, section);
+        return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
     }
 
     public async Task DeleteCurrentSubmissionHardAsync(int establishmentId, string sectionId)

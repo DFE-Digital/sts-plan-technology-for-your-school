@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 public interface ISubmissionWorkflow
 {
     Task<SqlSubmissionDto> CloneLatestCompletedSubmission(int establishmentId, QuestionnaireSectionEntry section);
-    Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int userId, QuestionnaireSectionEntry section);
+    Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section);
     Task DeleteSubmissionHardAsync(int establishmentId, string sectionId);
     Task DeleteSubmissionSoftAsync(int submissionId);
     Task DeleteSubmissionSoftAsync(int establishmentId, string sectionId);

@@ -27,14 +27,4 @@ public class PlanTechDbContext : DbContext
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(PlanTechDbContext).Assembly);
     }
-
-    protected async Task Rollback()
-    {
-        await Rollback();
-    }
-
-    protected async Task Commit()
-    {
-        await SaveChangesAsync();
-    }
 }

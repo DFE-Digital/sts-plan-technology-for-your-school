@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using System.Reflection.PortableExecutable;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -7,7 +6,6 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -48,7 +46,11 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
     public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
     {
-        var submission = _db.Submissions.FirstOrDefault(s => s.Id == submissionId);
+        var submission = await _db.Submissions
+            .Include(s => s.Responses)
+                .ThenInclude(r => r.Answer)
+            .FirstOrDefaultAsync(s => s.Id == submissionId);
+
         if (submission is null)
         {
             throw new InvalidOperationException($"Could not find submssion with ID {submissionId} in database");
@@ -98,14 +100,14 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             RecommendationId = r.Id,
             UserId = userId,
             PreviousStatus = previousStatuses.TryGetValue(r.Id, out var previousStatus) ? previousStatus : null,
-            NewStatus = answerStatusDictionary[r.ContentfulSysId]
+            NewStatus = answerStatusDictionary[r.ContentfulRef]
         });
 
         await _db.EstablishmentRecommendationHistories.AddRangeAsync(recommendationStatuses);
 
         await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
 
-        await _db.SaveChangesAsync();
+        // No need to save changes as this is done in the call above
     }
 
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(int establishmentId, string sectionId, bool? isCompletedSubmission)
@@ -243,7 +245,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         return query;
     }
 
-    private async Task<IEnumerable<SqlRecommendationDto>> UpsertRecommendations(IEnumerable<SqlRecommendationDto> recommendationDtos)
+    private async Task<List<RecommendationEntity>> UpsertRecommendations(IEnumerable<SqlRecommendationDto> recommendationDtos)
     {
         var contentfulRefs = recommendationDtos.Select(cr => cr.ContentfulSysId);
         var existingRecommendations = await _db.Recommendations
@@ -253,15 +255,16 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
         var existingRecommendationContentfulRefs = existingRecommendations.Select(r => r.ContentfulRef).ToList();
 
-        var recommendationsToInsert = recommendationDtos
+        var recommendationEntitiesToInsert = recommendationDtos
             .Where(rm => !existingRecommendationContentfulRefs.Contains(rm.ContentfulSysId))
             .Select(BuildRecommendationEntity)
             .ToList();
 
-        _db.AddRange(recommendationsToInsert);
+        _db.AddRange(recommendationEntitiesToInsert);
 
         var recommendationDtoDictionary = recommendationDtos.ToDictionary(r => r.ContentfulSysId, r => r);
         var recommendationsToUpdate = new List<SqlRecommendationDto>();
+        var recommendationsWithNoChanges = new List<SqlRecommendationDto>();
 
         foreach (var existingRecommendation in existingRecommendations)
         {
@@ -275,15 +278,22 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             {
                 recommendationsToUpdate.Add(recommendationDto);
             }
+            else
+            {
+                recommendationsWithNoChanges.Add(recommendationDto);
+            }
         }
 
+        var recommendationEntitiesToUpdate = recommendationsToUpdate.Select(BuildRecommendationEntity);
+        var recommendationEntitiesWithNoChanges = recommendationsWithNoChanges.Select(BuildRecommendationEntity);
         if (recommendationsToUpdate.Any())
         {
-            var recommendationEntitiesToUpdate = recommendationsToUpdate.Select(BuildRecommendationEntity);
             _db.Recommendations.UpdateRange(recommendationEntitiesToUpdate);
         }
 
-        return await _db.Recommendations.Where(r => contentfulRefs.Contains(r.ContentfulRef)).ToListAsync();
+        await _db.SaveChangesAsync();
+
+        return recommendationEntitiesToInsert.Union(recommendationEntitiesToUpdate).Union(recommendationEntitiesWithNoChanges).ToList();
     }
 
     private RecommendationEntity BuildRecommendationEntity(SqlRecommendationDto recommendationDto)

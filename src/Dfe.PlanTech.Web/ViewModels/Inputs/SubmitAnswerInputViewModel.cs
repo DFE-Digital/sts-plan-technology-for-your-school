@@ -30,13 +30,13 @@ public class SubmitAnswerInputViewModel
 
     public SubmitAnswerModel ToModel()
     {
-        var questionModel = new QuestionModel
+        var questionModel = new IdWithTextModel
         {
-            ContentfulSysId = QuestionId,
+            Id = QuestionId,
             Text = QuestionText,
         };
 
-        var answerModel = ChosenAnswer?.ToModel();
+        var answerModel = ChosenAnswer?.Answer;
 
         return new SubmitAnswerModel
         {

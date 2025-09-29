@@ -1,7 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
@@ -18,13 +17,11 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class ReviewAnswersViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    IRecommendationService recommendationService,
     ISubmissionService submissionService,
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
 
     public const string ChangeAnswersViewName = "~/Views/ChangeAnswers/ChangeAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
@@ -134,9 +131,10 @@ public class ReviewAnswersViewBuilder(
 
             var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
 
-            _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
                 establishmentId,
                 matEstablishmentId,
+                submissionId,
                 userId,
                 section
             );

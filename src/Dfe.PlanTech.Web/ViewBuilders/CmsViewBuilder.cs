@@ -7,12 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class CmsViewBuilder(
-    IContentfulService contentfulService,
-    IRecommendationService recommendationService
+    IContentfulService contentfulService
 ) : ICmsViewBuilder
 {
     private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
 
     public async Task<IEnumerable<SectionViewModel>> GetAllSectionsAsync()
     {
