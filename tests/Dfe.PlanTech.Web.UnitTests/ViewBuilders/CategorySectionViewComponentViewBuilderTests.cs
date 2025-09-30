@@ -73,7 +73,7 @@ public class CategorySectionViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", Completed = true },
+            new SqlSectionStatusDto { SectionId = "S1", Completed = true, LastCompletionDate = new DateTime() },
             new SqlSectionStatusDto { SectionId = "S2", Completed = false }
         };
 
