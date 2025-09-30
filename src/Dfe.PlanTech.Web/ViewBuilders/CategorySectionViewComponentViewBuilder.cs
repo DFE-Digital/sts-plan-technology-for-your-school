@@ -53,7 +53,7 @@ public class CategorySectionViewComponentViewBuilder(
             CategoryHeaderText = category.Header.Text,
             CategorySections = categorySections,
             CategorySlug = categoryLandingSlug,
-            CompletedSectionCount = sectionStatuses.Count(ss => ss.Completed),
+            CompletedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate.HasValue),
             Description = description,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
             TotalSectionCount = category.Sections.Count
