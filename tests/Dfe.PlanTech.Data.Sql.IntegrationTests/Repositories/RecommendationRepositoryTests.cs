@@ -1,6 +1,4 @@
-﻿using Dfe.PlanTech.Data.Sql.Repositories;
-
-namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
+﻿namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
 public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
 {
