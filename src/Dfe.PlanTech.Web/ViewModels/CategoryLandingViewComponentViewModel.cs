@@ -9,7 +9,7 @@ public class CategoryLandingViewComponentViewModel
     public bool AllSectionsCompleted { get; init; }
     public bool AnySectionsCompleted { get; init; }
     public string CategoryName { get; set; } = null!;
-    public ICollection<CategoryLandingSectionViewModel> CategoryLandingSections { get; init; } = null!;
+    public ICollection<CategoryLandingSectionViewModel> CategoryLandingSections { get; init; } = [];
     public string CategorySlug { get; set; } = null!;
     public string? NoSectionsErrorRedirectUrl { get; set; }
     public string? ProgressRetrievalErrorMessage { get; set; }

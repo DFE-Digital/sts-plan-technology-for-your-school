@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Web.ViewModels;
 public class CategorySectionViewComponentViewModel
 {
     public string CategoryHeaderText { get; set; } = null!;
-    public List<CategorySectionViewModel> CategorySections { get; init; } = null!;
+    public List<CategorySectionViewModel> CategorySections { get; init; } = [];
     public string? CategorySlug { get; set; }
     public int CompletedSectionCount { get; init; }
     public ContentfulEntry Description { get; set; } = null!;

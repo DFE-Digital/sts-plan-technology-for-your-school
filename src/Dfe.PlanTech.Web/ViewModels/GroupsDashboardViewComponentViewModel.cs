@@ -8,7 +8,7 @@ public class GroupsDashboardViewComponentViewModel
 {
     public ContentfulEntry Description { get; set; } = null!;
 
-    public List<GroupsCategorySectionViewModel> GroupsCategorySections { get; init; } = null!;
+    public List<GroupsCategorySectionViewModel> GroupsCategorySections { get; init; } = [];
 
     public string? NoSectionsErrorRedirectUrl { get; set; }
 

@@ -17,7 +17,7 @@ public class CheckAnswersViewModel
     public SubmissionResponsesViewModel SubmissionResponses { get; init; } = null!;
 
     [Required]
-    public List<ContentfulEntry> Content { get; init; } = null!;
+    public List<ContentfulEntry> Content { get; init; } = [];
 
     public string? CategorySlug { get; init; }
     public int? SubmissionId { get; init; }
