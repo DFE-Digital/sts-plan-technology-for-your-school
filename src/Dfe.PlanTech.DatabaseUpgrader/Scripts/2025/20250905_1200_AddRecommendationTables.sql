@@ -14,7 +14,7 @@ CREATE TABLE dbo.establishmentRecommendationHistory(
     dateCreated         DATETIME      NOT NULL,
     establishmentId     INT           NOT NULL,
     matEstablishmentId  INT           NULL,
-    recommendationId    INT           NOT NULL,
+    recommendationId    INT           NULL,
     userId              INT           NOT NULL,
     previousStatus      NVARCHAR(50)  NULL,
     newStatus           NVARCHAR(50)  NOT NULL,

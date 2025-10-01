@@ -91,7 +91,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var previousStatuses = _db.EstablishmentRecommendationHistories
             .Where(erh => erh.EstablishmentId == establishmentId &&
                           erh.MatEstablishmentId == matEstablishmentId)
-            .ToDictionary(r => r.RecommendationId, r => r.NewStatus);
+            .ToDictionary(r => r.RecommendationId!.Value, r => r.NewStatus);
 
         var recommendationStatuses = recommendations.Select(r => new EstablishmentRecommendationHistoryEntity
         {
@@ -293,7 +293,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
         await _db.SaveChangesAsync();
 
-        return recommendationEntitiesToInsert.Union(recommendationEntitiesToUpdate).Union(recommendationEntitiesWithNoChanges).ToList();
+        return await _db.Recommendations.Where(r => contentfulRefs.Contains(r.ContentfulRef)).ToListAsync();
     }
 
     private RecommendationEntity BuildRecommendationEntity(SqlRecommendationDto recommendationDto)

@@ -24,7 +24,7 @@ public class SubmissionService(
             isCompletedSubmission: false);
         if (inProgressSubmission is not null)
         {
-            await _submissionWorkflow.SetSubmissionInaccessible(inProgressSubmission.Id);
+            await _submissionWorkflow.SetSubmissionInaccessibleAsync(inProgressSubmission.Id);
         }
 
         return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
@@ -117,13 +117,13 @@ public class SubmissionService(
         return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
     }
 
-    public async Task DeleteCurrentSubmissionHardAsync(int establishmentId, string sectionId)
+    public async Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
     {
-        await _submissionWorkflow.DeleteSubmissionHardAsync(establishmentId, sectionId);
+        await _submissionWorkflow.SetSubmissionDeletedAsync(establishmentId, sectionId);
     }
 
-    public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
+    public async Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)
     {
-        await _submissionWorkflow.SetSubmissionInaccessible(establishmentId, sectionId);
+        await _submissionWorkflow.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
     }
 }

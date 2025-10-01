@@ -11,8 +11,8 @@ public class EstablishmentRecommendationHistoryEntity
     public int EstablishmentId { get; init; }
     public EstablishmentEntity Establishment { get; set; } = null!;
 
-    public int RecommendationId { get; init; }
-    public RecommendationEntity Recommendation { get; set; } = null!;
+    public int? RecommendationId { get; init; }
+    public RecommendationEntity? Recommendation { get; set; } = null!;
 
     public int UserId { get; set; }
     public UserEntity User { get; set; } = null!;

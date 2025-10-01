@@ -2,7 +2,6 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -118,12 +117,12 @@ public class SubmissionWorkflow(
         await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
     }
 
-    public Task SetSubmissionInaccessible(int establishmentId, string sectionId)
+    public Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)
     {
         return _submissionRepository.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
     }
 
-    public Task SetSubmissionInaccessible(int submissionId)
+    public Task SetSubmissionInaccessibleAsync(int submissionId)
     {
         return _submissionRepository.SetSubmissionInaccessibleAsync(submissionId);
     }
