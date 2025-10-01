@@ -29,14 +29,6 @@ public class RecommendationsController(
         return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
     }
 
-    [HttpGet("{sectionSlug}/recommendation/preview/{maturity?}", Name = "GetRecommendationPreview")]
-    public async Task<IActionResult> GetRecommendationPreview(string sectionSlug, string? maturity)
-    {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
-
-        return await _recommendationsViewBuilder.RouteBySectionSlugAndMaturity(this, sectionSlug, maturity);
-    }
-
     [HttpGet("{categorySlug}/{sectionSlug}/recommendations/print", Name = "GetRecommendationChecklist")]
     public async Task<IActionResult> GetRecommendationChecklist(string categorySlug, string sectionSlug)
     {

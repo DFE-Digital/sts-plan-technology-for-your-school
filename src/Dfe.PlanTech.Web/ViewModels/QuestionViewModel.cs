@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Web.ViewModels;
 public class QuestionViewModel
 {
     [Required]
-    public QuestionnaireQuestionEntry Question { get; init; } = null!;
+    public required QuestionnaireQuestionEntry Question { get; init; }
 
     public string? AnswerSysId { get; init; }
     public string? CategorySlug { get; init; }

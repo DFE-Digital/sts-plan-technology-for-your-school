@@ -27,7 +27,7 @@ public sealed class DfeSignInConfiguration
 
     public bool SaveTokens { get; set; }
 
-    public IList<string> Scopes { get; set; } = null!;
+    public IList<string> Scopes { get; set; } = [];
 
     public string SignoutCallbackUrl { get; set; } = null!;
 

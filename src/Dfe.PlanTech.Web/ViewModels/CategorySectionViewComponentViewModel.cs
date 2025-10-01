@@ -6,11 +6,11 @@ namespace Dfe.PlanTech.Web.ViewModels;
 [ExcludeFromCodeCoverage]
 public class CategorySectionViewComponentViewModel
 {
-    public string CategoryHeaderText { get; set; } = null!;
-    public List<CategorySectionViewModel> CategorySections { get; init; } = null!;
+    public required string CategoryHeaderText { get; set; }
+    public List<CategorySectionViewModel> CategorySections { get; init; } = [];
     public string? CategorySlug { get; set; }
     public int CompletedSectionCount { get; init; }
-    public ContentfulEntry Description { get; set; } = null!;
+    public required ContentfulEntry Description { get; set; }
     public string? NoSectionsErrorRedirectUrl { get; set; }
     public string? ProgressRetrievalErrorMessage { get; init; }
     public int TotalSectionCount { get; init; }

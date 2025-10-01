@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Web.ViewModels;
 [ExcludeFromCodeCoverage]
 public class GroupsSchoolDashboardViewModel
 {
-    public List<ContentfulEntry> Content { get; init; } = null!;
+    public List<ContentfulEntry> Content { get; init; } = [];
     public string? ErrorMessage { get; set; }
     public string GroupName { get; set; } = null!;
     public int SchoolId { get; set; }

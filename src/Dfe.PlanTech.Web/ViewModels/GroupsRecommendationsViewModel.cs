@@ -12,7 +12,7 @@ public class GroupsRecommendationsViewModel
 
     public string SectionName { get; init; } = null!;
 
-    public List<RecommendationChunkEntry> Chunks { get; init; } = null!;
+    public List<RecommendationChunkEntry> Chunks { get; init; } = [];
 
     public string Slug { get; init; } = null!;
 
@@ -33,5 +33,5 @@ public class GroupsRecommendationsViewModel
         }
     }
 
-    public IEnumerable<QuestionWithAnswerModel> SubmissionResponses { get; init; } = null!;
+    public IEnumerable<QuestionWithAnswerModel> SubmissionResponses { get; init; } = [];
 }

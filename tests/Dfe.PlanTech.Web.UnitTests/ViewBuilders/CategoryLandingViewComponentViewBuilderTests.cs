@@ -162,8 +162,8 @@ public class CategoryLandingViewComponentViewBuilderTests
         Assert.Null(secVm.Recommendations.SectionName);
         Assert.Null(secVm.Recommendations.SectionSlug);
         Assert.Null(secVm.Recommendations.NoRecommendationFoundErrorMessage);
-        Assert.Null(secVm.Recommendations.Answers);
-        Assert.Null(secVm.Recommendations.Chunks);
+        Assert.Empty(secVm.Recommendations.Answers);
+        Assert.Empty(secVm.Recommendations.Chunks);
     }
 
     [Fact]
