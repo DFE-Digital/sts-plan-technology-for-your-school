@@ -7,6 +7,8 @@ using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 
+// no-op commit
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddResponseCompression(options =>
