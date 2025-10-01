@@ -107,7 +107,7 @@ public class RecommendationsViewBuilder(
                 return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, null);
 
             case SubmissionStatus.CompleteReviewed:
-                var viewModel = await BuildRecommendationsViewModel(
+                var viewModel = BuildRecommendationsViewModel(
                     category,
                     submissionRoutingData,
                     section,
@@ -125,7 +125,7 @@ public class RecommendationsViewBuilder(
         }
     }
 
-    private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(
+    private RecommendationsViewModel BuildRecommendationsViewModel(
         QuestionnaireCategoryEntry category,
         SubmissionRoutingDataModel submissionRoutingData,
         QuestionnaireSectionEntry section,
