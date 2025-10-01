@@ -154,6 +154,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
+        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
+        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -165,17 +167,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         {
             SectionId = "test-section",
             SectionName = "Test Section",
-            QuestionId = question.ContentfulRef,
-            QuestionText = question.QuestionText,
-            ChosenAnswer = new AnswerModel
-            {
-                Answer = new IdWithTextModel
-                {
-                    Id = answer.ContentfulRef,
-                    Text = answer.AnswerText
-                },
-                Maturity = "High"
-            }
+            Question = questionModel,
+            ChosenAnswer = answerModel
         };
 
         var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, submitAnswerModel);
@@ -245,6 +238,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         var establishment = new EstablishmentEntity { EstablishmentRef = "PARAM001", OrgName = "Parameter Test School" };
         var question = new QuestionEntity { QuestionText = "Parameter Test Question", ContentfulRef = "PQ1" };
         var answer = new AnswerEntity { AnswerText = "Parameter Test Answer", ContentfulRef = "PA1" };
+        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
+        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -263,13 +258,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         {
             SectionId = "param-section",
             SectionName = "Parameter Section",
-            QuestionId = question.ContentfulRef,
-            QuestionText = question.QuestionText,
-            ChosenAnswer = new AnswerModel
-            {
-                Answer = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText },
-                Maturity = "Medium"
-            }
+            Question = questionModel,
+            ChosenAnswer = answerModel
         };
         var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, submitAnswerModel);
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);

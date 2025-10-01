@@ -23,7 +23,6 @@ public class RecommendationsViewBuilderTests
     // ---- Substitutes (collaborators)
     private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
-    private readonly IRecommendationService _recommendations = Substitute.For<IRecommendationService>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
 
@@ -35,7 +34,6 @@ public class RecommendationsViewBuilderTests
             _logger,
             Options.Create(_contentfulOptions),
             _contentful,
-            _recommendations,
             _submissions,
             _currentUser);
 

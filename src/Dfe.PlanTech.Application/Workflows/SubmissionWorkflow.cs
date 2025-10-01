@@ -2,17 +2,21 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubmissionWorkflow(
+    ILogger<SubmissionWorkflow> logger,
     IStoredProcedureRepository storedProcedureRepository,
     ISubmissionRepository submissionRepository
 ) : ISubmissionWorkflow
 {
+    private readonly ILogger<SubmissionWorkflow> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IStoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
     private readonly ISubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
@@ -51,6 +55,19 @@ public class SubmissionWorkflow(
         }
 
         latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses, section).ToList();
+
+        var lastResponseInUserJourney = latestSubmission.Responses.LastOrDefault();
+        if (lastResponseInUserJourney is not null)
+        {
+            var lastSelectedQuestion = section.Questions
+                .FirstOrDefault(q => q.Id.Equals(lastResponseInUserJourney.Question.ContentfulRef))
+                    ?? throw new UserJourneyMissingContentException($"Could not find question with database ID {lastResponseInUserJourney.QuestionId} (Contentful ref {lastResponseInUserJourney.Question.ContentfulRef}) in section with ID {section.Id}", section);
+
+            if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
+            {
+                _logger.LogWarning("Could not find answer with Contentful reference {AnswerContentfulRef} in question with Contentful reference {QuestionContentfulRef}", lastResponseInUserJourney.Answer.ContentfulRef, lastResponseInUserJourney.Question.ContentfulRef);
+            }
+        }
 
         return latestSubmission.AsDto();
     }

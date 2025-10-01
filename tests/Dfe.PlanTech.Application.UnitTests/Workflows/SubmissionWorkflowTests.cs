@@ -5,15 +5,17 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Workflows;
 
 public class SubmissionWorkflowTests
 {
+    private readonly ILogger<SubmissionWorkflow> _logger = Substitute.For<ILogger<SubmissionWorkflow>>();
     private readonly IStoredProcedureRepository _sp = Substitute.For<IStoredProcedureRepository>();
     private readonly ISubmissionRepository _repo = Substitute.For<ISubmissionRepository>();
-    private SubmissionWorkflow CreateServiceUnderTest() => new(_sp, _repo);
+    private SubmissionWorkflow CreateServiceUnderTest() => new(_logger, _sp, _repo);
 
     // ---------- Helpers: minimal Contentful section graph ----------
     private static EstablishmentEntity BuildEstablishment(int? id = 1)
@@ -233,7 +235,9 @@ public class SubmissionWorkflowTests
     public async Task SubmitAnswer_Calls_SP_With_AssessmentResponseModel_And_Returns_Id()
     {
         var sut = CreateServiceUnderTest();
-        var model = new SubmitAnswerModel { QuestionId = "Q1", ChosenAnswer = new AnswerModel { Answer = new IdWithTextModel { Id = "A1" } } };
+        var questionModel = new IdWithTextModel { Id = "Q1", Text = "Question 1 text" };
+        var answerModel = new IdWithTextModel { Id = "A1", Text = "Answer 1 text" };
+        var model = new SubmitAnswerModel { Question = questionModel, ChosenAnswer = answerModel };
 
         _sp.SubmitResponse(Arg.Is<AssessmentResponseModel>(m =>
             m.UserId == 9 &&
@@ -358,7 +362,7 @@ public class SubmissionWorkflowTests
     public async Task SetSubmissionInaccessible_By_Establishment_Section_Delegates()
     {
         var sut = CreateServiceUnderTest();
-        await sut.SetSubmissionInaccessible(1, "SEC");
+        await sut.SetSubmissionInaccessibleAsync(1, "SEC");
         await _repo.Received(1).SetSubmissionInaccessibleAsync(1, "SEC");
     }
 
@@ -366,7 +370,7 @@ public class SubmissionWorkflowTests
     public async Task SetSubmissionInaccessible_By_SubmissionId_Delegates()
     {
         var sut = CreateServiceUnderTest();
-        await sut.SetSubmissionInaccessible(123);
+        await sut.SetSubmissionInaccessibleAsync(123);
         await _repo.Received(1).SetSubmissionInaccessibleAsync(123);
     }
 
