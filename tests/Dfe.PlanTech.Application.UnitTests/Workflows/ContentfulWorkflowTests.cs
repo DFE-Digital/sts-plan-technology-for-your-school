@@ -186,54 +186,6 @@ public class ContentfulWorkflowTests
         _logger.ReceivedWithAnyArgs(1).LogError(default, default!, "Error");
     }
 
-    // ---------- GetIntroForMaturityAsync (case-insensitive) ----------
-    [Fact]
-    public async Task GetIntroForMaturity_Picks_By_Maturity_CaseInsensitive()
-    {
-        var sut = CreateServiceUnderTest();
-        var intro = new RecommendationIntroEntry { Maturity = "Developing", Sys = new SystemDetails("I1") };
-        var subRec = new SubtopicRecommendationEntry { Intros = new List<RecommendationIntroEntry> { intro } };
-        _repo.GetEntriesAsync<SubtopicRecommendationEntry>(Arg.Any<GetEntriesOptions>())
-             .Returns(new[] { subRec });
-
-        var res = await sut.GetIntroForMaturityAsync("sub1", "developing");
-
-        Assert.Same(intro, res);
-    }
-
-    [Fact]
-    public async Task GetIntroForMaturity_Logs_And_Null_When_Subtopic_Missing()
-    {
-        var sut = CreateServiceUnderTest();
-        _repo.GetEntriesAsync<SubtopicRecommendationEntry>(Arg.Any<GetEntriesOptions>())
-             .Returns(Array.Empty<SubtopicRecommendationEntry>());
-
-        var res = await sut.GetIntroForMaturityAsync("sub1", "developing");
-
-        Assert.Null(res);
-        _logger.ReceivedWithAnyArgs(1).LogError(default, default!, "Error");
-    }
-
-    [Fact]
-    public async Task GetIntroForMaturity_Logs_And_Null_When_Maturity_NotFound()
-    {
-        var sut = CreateServiceUnderTest();
-        var subRec = new SubtopicRecommendationEntry
-        {
-            Intros = new List<RecommendationIntroEntry>
-        {
-            new() { Maturity = "Secure" }
-        }
-        };
-        _repo.GetEntriesAsync<SubtopicRecommendationEntry>(Arg.Any<GetEntriesOptions>())
-             .Returns(new[] { subRec });
-
-        var res = await sut.GetIntroForMaturityAsync("sub1", "developing");
-
-        Assert.Null(res);
-        _logger.ReceivedWithAnyArgs(1).LogError(default, default!, "Error");
-    }
-
     // ---------- GetPageBySlugAsync ----------
     [Fact]
     public async Task GetPageBySlug_Returns_First_And_Uses_Options_Include()
@@ -315,66 +267,5 @@ public class ContentfulWorkflowTests
 
         var res = await sut.GetSectionBySlugAsync("intro", includeLevel: 6);
         Assert.Same(sec, res);
-    }
-
-    // ---------- GetSubtopicRecommendationByIdAsync ----------
-    [Fact]
-    public async Task GetSubtopicRecommendationById_Returns_First_And_Respects_Include()
-    {
-        var sut = CreateServiceUnderTest();
-        var sub = new SubtopicRecommendationEntry { Sys = new SystemDetails("S1") };
-
-        _repo.GetEntriesAsync<SubtopicRecommendationEntry>(Arg.Is<GetEntriesOptions>(o => o.Include == 4))
-             .Returns(new[] { sub });
-
-        var res = await sut.GetSubtopicRecommendationByIdAsync("sub1");
-
-        Assert.Same(sub, res);
-    }
-
-    [Fact]
-    public async Task GetSubtopicRecommendationById_Logs_And_Returns_Null_When_None()
-    {
-        var sut = CreateServiceUnderTest();
-        _repo.GetEntriesAsync<SubtopicRecommendationEntry>(Arg.Any<GetEntriesOptions>())
-             .Returns(Array.Empty<SubtopicRecommendationEntry>());
-
-        var res = await sut.GetSubtopicRecommendationByIdAsync("sub1");
-
-        Assert.Null(res);
-        _logger.ReceivedWithAnyArgs(1).LogError(default, default!, "Error");
-    }
-
-    // ---------- GetSubtopicRecommendationIntroByIdAndMaturityAsync ----------
-    [Fact]
-    public async Task GetSubtopicRecommendationIntroByIdAndMaturity_Returns_When_Found_CaseSensitive()
-    {
-        // NOTE: your method uses case-sensitive Equals()
-        var sut = CreateServiceUnderTest();
-        var intro = new RecommendationIntroEntry { Sys = new SystemDetails("I1"), Maturity = "Developing" };
-        var sub = new SubtopicRecommendationEntry { Intros = new List<RecommendationIntroEntry> { intro } };
-
-        _repo.GetEntriesAsync<SubtopicRecommendationEntry>(Arg.Any<GetEntriesOptions>())
-             .Returns(new[] { sub });
-
-        var res = await sut.GetSubtopicRecommendationIntroByIdAndMaturityAsync("sub1", "Developing");
-        Assert.Same(intro, res);
-    }
-
-    [Fact]
-    public async Task GetSubtopicRecommendationIntroByIdAndMaturity_Logs_And_Null_When_Case_Differs()
-    {
-        // Because Equals() is case-sensitive here, "developing" will NOT match "Developing"
-        var sut = CreateServiceUnderTest();
-        var intro = new RecommendationIntroEntry { Sys = new SystemDetails("I1"), Maturity = "Developing" };
-        var sub = new SubtopicRecommendationEntry { Intros = new List<RecommendationIntroEntry> { intro } };
-
-        _repo.GetEntriesAsync<SubtopicRecommendationEntry>(Arg.Any<GetEntriesOptions>())
-             .Returns(new[] { sub });
-
-        var res = await sut.GetSubtopicRecommendationIntroByIdAndMaturityAsync("sub1", "developing");
-
-        Assert.Null(res);
-        _logger.ReceivedWithAnyArgs(1).LogError(default, default!, "Error");
     }
 }

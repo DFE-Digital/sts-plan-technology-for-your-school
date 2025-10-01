@@ -13,7 +13,5 @@ namespace Dfe.PlanTech.Application.Services.Interfaces
         Task<PageEntry> GetPageBySlugAsync(string slug);
         Task<QuestionnaireQuestionEntry> GetQuestionByIdAsync(string questionId);
         Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null);
-        Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId, int? includeLevel = null);
-        Task<RecommendationIntroEntry?> GetSubtopicRecommendationIntroAsync(string subtopicId, string maturity);
     }
 }

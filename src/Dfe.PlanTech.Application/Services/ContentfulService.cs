@@ -54,14 +54,4 @@ public class ContentfulService(
     {
         return _contentfulWorkflow.GetSectionBySlugAsync(slug, includeLevel);
     }
-
-    public Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId, int? includeLevel = null)
-    {
-        return _contentfulWorkflow.GetSubtopicRecommendationByIdAsync(subtopicId, includeLevel);
-    }
-
-    public Task<RecommendationIntroEntry?> GetSubtopicRecommendationIntroAsync(string subtopicId, string maturity)
-    {
-        return _contentfulWorkflow.GetSubtopicRecommendationIntroByIdAndMaturityAsync(subtopicId, maturity);
-    }
 }

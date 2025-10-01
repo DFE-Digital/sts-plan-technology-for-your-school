@@ -154,37 +154,4 @@ public class ContentfulServiceTests
         Assert.Same(expected, result);
         await contentfulWorkflow.Received(1).GetSectionBySlugAsync(slug, include);
     }
-
-    [Theory]
-    [InlineData(null)]
-    [InlineData(1)]
-    public async Task GetSubtopicRecommendationById_Forwards_IncludeLevel(int? include)
-    {
-        var (contentfulService, contentfulWorkflow) = Build();
-        const string id = "S1";
-        var expected = new SubtopicRecommendationEntry { Sys = new SystemDetails(id) };
-
-        contentfulWorkflow.GetSubtopicRecommendationByIdAsync(id, include).Returns(expected);
-
-        var result = await contentfulService.GetSubtopicRecommendationByIdAsync(id, include);
-
-        Assert.Same(expected, result);
-        await contentfulWorkflow.Received(1).GetSubtopicRecommendationByIdAsync(id, include);
-    }
-
-    [Fact]
-    public async Task GetSubtopicRecommendationIntro_Delegates_And_Returns()
-    {
-        var (contentfulService, contentfulWorkflow) = Build();
-        const string id = "S1";
-        const string maturity = "medium";
-        var expected = new RecommendationIntroEntry { Sys = new SystemDetails(id) };
-
-        contentfulWorkflow.GetSubtopicRecommendationIntroByIdAndMaturityAsync(id, maturity).Returns(expected);
-
-        var result = await contentfulService.GetSubtopicRecommendationIntroAsync(id, maturity);
-
-        Assert.Same(expected, result);
-        await contentfulWorkflow.Received(1).GetSubtopicRecommendationIntroByIdAndMaturityAsync(id, maturity);
-    }
 }

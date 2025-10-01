@@ -34,7 +34,7 @@ public class BaseViewBuilder(
         return CurrentUser.DsiReference ?? throw new AuthenticationException("User is not authenticated");
     }
 
-    protected async Task<CategorySectionRecommendationViewModel> BuildCategorySectionRecommendationViewModel(
+    protected CategorySectionRecommendationViewModel BuildCategorySectionRecommendationViewModel(
         QuestionnaireSectionEntry section,
         SqlSectionStatusDto? sectionStatus
     )
@@ -46,19 +46,8 @@ public class BaseViewBuilder(
 
         try
         {
-            var recommendationIntro = await ContentfulService.GetSubtopicRecommendationIntroAsync(section.Id, sectionStatus.LastMaturity);
-            if (recommendationIntro == null)
-            {
-                return new CategorySectionRecommendationViewModel
-                {
-                    NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
-                };
-            }
-
             return new CategorySectionRecommendationViewModel
             {
-                RecommendationSlug = recommendationIntro.Slug,
-                RecommendationDisplayName = recommendationIntro.Header.Text,
                 SectionSlug = section.InterstitialPage?.Slug,
                 SectionName = section.Name,
                 Viewed = sectionStatus.HasBeenViewed

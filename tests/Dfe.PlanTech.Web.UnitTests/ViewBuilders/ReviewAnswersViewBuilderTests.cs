@@ -48,7 +48,6 @@ public class ReviewAnswersViewBuilderTests
         DateTime? completed = null,
         params string[] answerIds)
         => new SubmissionRoutingDataModel(
-            maturity: "medium",
             nextQuestion: next,
             questionnaireSection: section,
             submission: new SubmissionResponsesModel(123, answerIds.Select(a => new QuestionWithAnswerModel { AnswerSysId = a }).ToList())

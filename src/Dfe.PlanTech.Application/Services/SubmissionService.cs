@@ -24,7 +24,7 @@ public class SubmissionService(
             isCompletedSubmission: false);
         if (inProgressSubmission is not null)
         {
-            await _submissionWorkflow.DeleteSubmissionSoftAsync(inProgressSubmission.Id);
+            await _submissionWorkflow.SetSubmissionInaccessible(inProgressSubmission.Id);
         }
 
         return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
@@ -59,7 +59,6 @@ public class SubmissionService(
         {
             return new SubmissionRoutingDataModel
             (
-                maturity: latestCompletedSubmission?.Maturity,
                 nextQuestion: section.Questions.First(),
                 questionnaireSection: section,
                 submission: submissionResponsesModel,
@@ -81,7 +80,6 @@ public class SubmissionService(
 
         return new SubmissionRoutingDataModel
         (
-            maturity: submissionResponsesModel.Maturity,
             nextQuestion: cmsLastAnswer?.NextQuestion,
             questionnaireSection: section,
             submission: submissionResponsesModel,
@@ -109,13 +107,8 @@ public class SubmissionService(
         return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
-    public async Task DeleteCurrentSubmissionHardAsync(int establishmentId, string sectionId)
-    {
-        await _submissionWorkflow.DeleteSubmissionHardAsync(establishmentId, sectionId);
-    }
-
     public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
     {
-        await _submissionWorkflow.DeleteSubmissionSoftAsync(establishmentId, sectionId);
+        await _submissionWorkflow.SetSubmissionInaccessible(establishmentId, sectionId);
     }
 }

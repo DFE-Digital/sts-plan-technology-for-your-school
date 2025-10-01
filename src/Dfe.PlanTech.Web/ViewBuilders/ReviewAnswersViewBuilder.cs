@@ -102,7 +102,6 @@ public class ReviewAnswersViewBuilder(
                 var responsesModel = new SubmissionResponsesModel(newSubmission, section);
                 submissionRoutingData = new SubmissionRoutingDataModel
                 (
-                    maturity: responsesModel.Maturity,
                     nextQuestion: section.Questions.First(),
                     questionnaireSection: section,
                     submission: responsesModel,

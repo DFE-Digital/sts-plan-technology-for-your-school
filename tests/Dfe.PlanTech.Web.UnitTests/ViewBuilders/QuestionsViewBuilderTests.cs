@@ -99,7 +99,6 @@ public class QuestionsViewBuilderTests
         var submissionResponses = new SubmissionResponsesModel(1, []);
 
         return new SubmissionRoutingDataModel(
-            "medium",
             nextQuestion,
             section,
             submissionResponses,

@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
@@ -12,7 +11,7 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
 /*
  * IMPORTANT:
  * Any stored procedure parameters must send the params in the order they're notated in the DB.
- * 
+ *
  * For example the SubmitAnswer SP looks like this:
  * ALTER PROCEDURE [dbo].[SubmitAnswer]
     @sectionId NVARCHAR(50),
@@ -30,7 +29,6 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
  * As you'll note in SubmitResponse below, the parameters are sent in that order.
  */
 
-[ExcludeFromCodeCoverage]
 public class StoredProcedureRepository : IStoredProcedureRepository
 {
     protected readonly PlanTechDbContext _db;
@@ -42,6 +40,22 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
     public Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId)
     {
+        // Stored procedure defined in:
+        // - 2023/20230718_168650_GetSectionStatusesSproc.sql (CREATE)
+        // - 2023/20230725_166107_ModifyGetSectionStatusesSproc.sql (ALTER)
+        // - 2023/20230725_166107_ModifyGetSectionStatusesSprocFix.sql (ALTER)
+        // - 2023/20230922_1420_UpdateGetSectionStatusToAcceptEstablishmentId.sql (ALTER)
+        // - 2024/20240524_1730_UpdateGetSectionStatusesSproc.sql (ALTER)
+        // - 2024/20240605_1030_UpdateGetSectionStatusesSproc.sql (ALTER)
+        // - 2024/20240612_1220_CreateGetSectionStatusesForCategory.sql (CREATE related proc)
+        // - 2024/20240702_1700_RenameUpdatedSectionStatusesProc.sql (ALTER)
+        // - 2024/20240717_1510_AlterSectionStatusesProc.sql (ALTER)
+        // - 2024/20241002_0900_CreateDateUpdatedTriggers.sql (ALTER)
+        // - 2024/20241104_1200_RemoveContentfulDependencies.sql (ALTER)
+        // - 2024/20241127_1700_AddSubmissionViewedColumn.sql (ALTER)
+        // - 2024/20241212_1500_DatafixForDateLastUpdated.sql (ALTER)
+        // - 2025/20250404_1500_UpdateGetSectionStatusesSproc.sql (ALTER - LATEST)
+        // Parameters (in order): @sectionIds NVARCHAR(MAX), @establishmentId INT
         return _db.SectionStatuses
             .FromSqlInterpolated($"EXEC {DatabaseConstants.SpGetSectionStatuses} {sectionIds}, {establishmentId}")
             .ToListAsync();
@@ -49,6 +63,9 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
     public async Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
     {
+        // Stored procedure defined in:
+        // - 2025/20250409_1900_CreateSubmitGroupSelectionProcedure.sql (CREATE)
+        // Parameters (in order): @userId INT, @userEstablishmentId INT, @selectedEstablishmentId INT, @selectedEstablishmentName NVARCHAR(MAX), @selectionId INT OUTPUT
         var selectionId = new SqlParameter(DatabaseConstants.SelectionIdParam, SqlDbType.Int)
         {
             Direction = ParameterDirection.Output
@@ -76,6 +93,11 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
     public Task<int> SetMaturityForSubmissionAsync(int submissionId)
     {
+        // Stored procedure defined in:
+        // - 2023/20230712_167773_CalculateMaturitySproc.sql (CREATE)
+        // - 2023/20230713_167773_ModifyCalculateMaturitySproc.sql (ALTER)
+        // - 2023/20230908_140500_ModifyCalculateMaturitySproc.sql (ALTER - LATEST)
+        // Parameters (in order): @submissionId INT
         var parameters = new SqlParameter[]
         {
             new(DatabaseConstants.SubmissionIdParam, submissionId)
@@ -87,6 +109,13 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
     public async Task<int> SubmitResponse(AssessmentResponseModel response)
     {
+        // Stored procedure defined in:
+        // - 2023/20230915_1737_CreateSubmitAnswerProcedure.sql (CREATE)
+        // - 2024/20241009_1100_DboSchemaImprovements.sql (ALTER - LATEST)
+        // Parameters (in order): @sectionId NVARCHAR(50), @sectionName NVARCHAR(50), @questionContentfulId NVARCHAR(50),
+        //                         @questionText NVARCHAR(MAX), @answerContentfulId NVARCHAR(50), @answerText NVARCHAR(MAX),
+        //                         @userId INT, @establishmentId INT, @maturity NVARCHAR(20),
+        //                         @responseId INT OUTPUT, @submissionId INT OUTPUT
         var responseId = new SqlParameter(DatabaseConstants.ResponseIdParam, SqlDbType.Int)
         {
             Direction = ParameterDirection.Output
@@ -123,12 +152,17 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}");
     }
 
-    public Task HardDeleteCurrentSubmissionAsync(int establishmentId, string sectionId)
+    public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
     {
+        // Stored procedure defined in:
+        // - 2024/20240524_1635_CreateDeleteCurrentSubmissionProcedure.sql (CREATE)
+        // - 2024/20240827_1102_UpdateDeleteCurrentSubmissionProcedure.sql (ALTER)
+        // - 2024/20241009_1100_DboSchemaImprovements.sql (ALTER - LATEST)
+        // Parameters (in order): @sectionId NVARCHAR(50), @establishmentId INT
         var parameters = new SqlParameter[]
         {
-            new(DatabaseConstants.EstablishmentIdParam, establishmentId),
-            new(DatabaseConstants.SectionIdParam, sectionId)
+            new(DatabaseConstants.SectionIdParam, sectionId),
+            new(DatabaseConstants.EstablishmentIdParam, establishmentId)
         };
 
         var command = BuildCommand(DatabaseConstants.SpDeleteCurrentSubmission, parameters);

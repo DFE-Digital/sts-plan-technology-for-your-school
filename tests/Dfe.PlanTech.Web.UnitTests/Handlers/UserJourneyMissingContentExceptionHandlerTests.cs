@@ -78,7 +78,7 @@ public class UserJourneyMissingContentExceptionHandlerTests
         var result = await sut.Handle(controller, ex);
 
         // Assert: deletion called with current user's establishment and section id
-        await submissionSvc.Received(1).DeleteCurrentSubmissionHardAsync(456, "sec-1");
+        await submissionSvc.Received(1).DeleteCurrentSubmissionSoftAsync(456, "sec-1");
 
         // TempData set
         Assert.True(controller.TempData.ContainsKey(UserJourneyMissingContentExceptionHandler.ErrorMessageTempDataKey));
@@ -108,6 +108,6 @@ public class UserJourneyMissingContentExceptionHandlerTests
         var thrown = await Assert.ThrowsAsync<InvalidDataException>(() => sut.Handle(controller, ex));
         Assert.Contains(nameof(CurrentUser.EstablishmentId), thrown.Message);
 
-        await submissionSvc.DidNotReceiveWithAnyArgs().DeleteCurrentSubmissionHardAsync(default!, default!);
+        await submissionSvc.DidNotReceiveWithAnyArgs().DeleteCurrentSubmissionSoftAsync(default!, default!);
     }
 }

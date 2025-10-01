@@ -148,15 +148,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         return submission;
     }
 
-    public Task DeleteCurrentSubmission(int establishmentId, int sectionId)
-    {
-        return _db.Database.ExecuteSqlAsync(
-            $@"EXEC DeleteCurrentSubmission
-            @establishmentId={establishmentId},
-            @sectionId={sectionId}"
-        );
-    }
-
     private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
         int establishmentId,
         string sectionId,

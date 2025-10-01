@@ -78,7 +78,7 @@ public class GroupsDashboardViewComponentViewBuilder(
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
-            var recommendationIntro = await BuildCategorySectionRecommendationViewModel(section, sectionStatus);
+            var recommendationIntro = BuildCategorySectionRecommendationViewModel(section, sectionStatus);
 
             yield return new GroupsCategorySectionViewModel(section, recommendationIntro, sectionStatus, hadRetrievalError);
         }

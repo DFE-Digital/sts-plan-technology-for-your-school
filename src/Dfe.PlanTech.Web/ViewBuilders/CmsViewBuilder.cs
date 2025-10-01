@@ -27,7 +27,7 @@ public class CmsViewBuilder(
         var entries = await _recommendationService.GetPaginatedRecommendationEntries(pageNumber);
 
         var chunkModels = entries
-            .SelectMany(chunk => chunk.Answers
+            .SelectMany(chunk => chunk.AllAnswers
                 .Where(a => a.Id is not null)
                 .Select(a => new ChunkModel(a.Id!, chunk.HeaderText)))
             .ToList();

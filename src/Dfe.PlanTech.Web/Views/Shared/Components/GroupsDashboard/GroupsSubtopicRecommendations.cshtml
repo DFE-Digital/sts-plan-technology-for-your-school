@@ -5,9 +5,8 @@
 {
     <govuk-error-message>@Model.NoRecommendationFoundErrorMessage</govuk-error-message>
 }
-else if (Model.RecommendationSlug != null)
+else if (Model.SectionSlug != null)
 {
-
     <a asp-controller="Groups" asp-action="GetGroupsRecommendation" asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link">
         @Model.SectionName
     </a>
