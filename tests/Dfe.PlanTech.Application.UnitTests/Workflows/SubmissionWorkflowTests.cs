@@ -192,7 +192,7 @@ public class SubmissionWorkflowTests
     }
 
     [Fact]
-    public async Task GetLatestSubmissionWithOrderedResponses_Throws_When_LastAnswer_NotIn_Question()
+    public async Task GetLatestSubmissionWithOrderedResponses_Logs_When_LastAnswer_NotIn_Question()
     {
         var sut = CreateServiceUnderTest();
         var section = BuildSection(out var q1, out _, out _, out var a1, out _, out _);
@@ -216,11 +216,14 @@ public class SubmissionWorkflowTests
 
         _repo.GetLatestSubmissionAndResponsesAsync(3, section.Id, null).Returns(submission);
 
-        var ex = await Assert.ThrowsAsync<UserJourneyMissingContentException>(
-            () => sut.GetLatestSubmissionWithOrderedResponsesAsync(3, section, null));
+        await sut.GetLatestSubmissionWithOrderedResponsesAsync(3, section, null);
 
-        Assert.Contains("Could not find answer", ex.Message);
-        Assert.Contains("Q1", ex.Message);
+        _logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("Could not find answer with Contentful reference")),
+            null,
+            Arg.Any<Func<object, Exception?, string>>());
     }
 
     // ---------- SubmitAnswer ----------
