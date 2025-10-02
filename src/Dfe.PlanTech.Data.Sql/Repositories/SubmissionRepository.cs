@@ -56,12 +56,29 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             throw new InvalidOperationException($"Could not find submssion with ID {submissionId} in database");
         }
 
+        var answeredQuestionIds = submission.Responses.Select(response => response.QuestionId);
+
+        var questions = await _db.Questions
+            .Where(q => answeredQuestionIds.Contains(q.Id))
+            .ToListAsync();
+
         var recommendationDtos = section.CoreRecommendations
-            .Select(r => new SqlRecommendationDto
-            {
-                RecommendationText = r.Header,
-                ContentfulSysId = r.Id,
-                QuestionContentfulRef = r.Question.Id
+            .Select(r => {
+                var question = questions
+                    .Where(q => string.Equals(q.ContentfulRef, r.Question.Id))
+                    .FirstOrDefault();
+
+                if (question is null)
+                {
+                    throw new InvalidOperationException("Could not find the question identified in the submission.");
+                }
+
+                return new SqlRecommendationDto
+                {
+                    RecommendationText = r.Header,
+                    ContentfulSysId = r.Id,
+                    QuestionId = question.Id
+                };
             });
 
         var recommendations = await UpsertRecommendations(recommendationDtos);
@@ -91,7 +108,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var previousStatuses = _db.EstablishmentRecommendationHistories
             .Where(erh => erh.EstablishmentId == establishmentId &&
                           erh.MatEstablishmentId == matEstablishmentId)
-            .ToDictionary(r => r.RecommendationId!.Value, r => r.NewStatus);
+            .ToDictionary(r => r.RecommendationId, r => r.NewStatus);
 
         var recommendationStatuses = recommendations.Select(r => new EstablishmentRecommendationHistoryEntity
         {
@@ -247,7 +264,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
     private async Task<List<RecommendationEntity>> UpsertRecommendations(IEnumerable<SqlRecommendationDto> recommendationDtos)
     {
-        var contentfulRefs = recommendationDtos.Select(cr => cr.ContentfulSysId);
+        var contentfulRefs = recommendationDtos.Select(r => r.ContentfulSysId);
         var existingRecommendations = await _db.Recommendations
             .Where(recommendation => contentfulRefs.Contains(recommendation.ContentfulRef))
             .Where(recommendation => recommendation != null)
@@ -260,11 +277,9 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             .Select(BuildRecommendationEntity)
             .ToList();
 
-        _db.AddRange(recommendationEntitiesToInsert);
 
         var recommendationDtoDictionary = recommendationDtos.ToDictionary(r => r.ContentfulSysId, r => r);
-        var recommendationsToUpdate = new List<SqlRecommendationDto>();
-        var recommendationsWithNoChanges = new List<SqlRecommendationDto>();
+        var recommendationsWithNoChanges = new List<RecommendationEntity>();
 
         foreach (var existingRecommendation in existingRecommendations)
         {
@@ -276,20 +291,15 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
             if (!string.Equals(recommendationDto.RecommendationText, existingRecommendation.RecommendationText))
             {
-                recommendationsToUpdate.Add(recommendationDto);
+                recommendationEntitiesToInsert.Add(BuildRecommendationEntity(recommendationDto));
             }
             else
             {
-                recommendationsWithNoChanges.Add(recommendationDto);
+                recommendationsWithNoChanges.Add(BuildRecommendationEntity(recommendationDto));
             }
         }
 
-        var recommendationEntitiesToUpdate = recommendationsToUpdate.Select(BuildRecommendationEntity);
-        var recommendationEntitiesWithNoChanges = recommendationsWithNoChanges.Select(BuildRecommendationEntity);
-        if (recommendationsToUpdate.Any())
-        {
-            _db.Recommendations.UpdateRange(recommendationEntitiesToUpdate);
-        }
+        _db.AddRange(recommendationEntitiesToInsert);
 
         await _db.SaveChangesAsync();
 
@@ -302,7 +312,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         {
             ContentfulRef = recommendationDto.ContentfulSysId,
             RecommendationText = recommendationDto.RecommendationText,
-            QuestionContentfulRef = recommendationDto.QuestionContentfulRef
+            QuestionId = recommendationDto.QuestionId
         };
     }
 }

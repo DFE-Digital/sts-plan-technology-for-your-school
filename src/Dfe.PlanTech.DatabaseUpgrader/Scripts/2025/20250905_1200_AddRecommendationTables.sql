@@ -1,12 +1,18 @@
 CREATE TABLE dbo.recommendation(
-    id                      INT IDENTITY(1, 1) NOT NULL,
-    recommendationText      NVARCHAR(MAX) NOT NULL,
-    contentfulRef           NVARCHAR(50)  NOT NULL,
-    dateCreated             DATETIME      NOT NULL,
-    questionContentfulRef   INT           NOT NULL,
-    archived                BIT           NOT NULL,
+    id                 INT IDENTITY(1, 1) NOT NULL,
+    contentfulRef      NVARCHAR(50)  NOT NULL,
+    dateCreated        DATETIME      NOT NULL,
+    recommendationText NVARCHAR(MAX) NOT NULL,
+    questionId         INT           NOT NULL,
+    archived           BIT           NOT NULL,
     CONSTRAINT PK_recommendation PRIMARY KEY (id)
 );
+GO
+
+-- FK
+ALTER TABLE dbo.recommendation
+    ADD CONSTRAINT FK_recommendation_question
+        FOREIGN KEY (questionId) REFERENCES dbo.[question](id);
 GO
 
 CREATE TABLE dbo.establishmentRecommendationHistory(
@@ -14,7 +20,7 @@ CREATE TABLE dbo.establishmentRecommendationHistory(
     dateCreated         DATETIME      NOT NULL,
     establishmentId     INT           NOT NULL,
     matEstablishmentId  INT           NULL,
-    recommendationId    INT           NULL,
+    recommendationId    INT           NOT NULL,
     userId              INT           NOT NULL,
     previousStatus      NVARCHAR(50)  NULL,
     newStatus           NVARCHAR(50)  NOT NULL,

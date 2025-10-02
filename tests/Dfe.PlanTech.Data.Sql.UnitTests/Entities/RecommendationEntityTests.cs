@@ -13,7 +13,7 @@ public class RecommendationEntityTests
         var expectedRecommendationText = "Arbitrary string - recommendation text";
         var expectedContentfulRef = "Arbitrary string - contentful ref";
         var expectedDateCreated = new DateTime(2024, 05, 01, 12, 00, 00, DateTimeKind.Utc);
-        var expectedQuestionContentfulRef = "1234";
+        var expectedQuestionId = 123;
         var expectedArchived = true;
 
         var entity = new RecommendationEntity
@@ -22,7 +22,7 @@ public class RecommendationEntityTests
             RecommendationText = expectedRecommendationText,
             ContentfulRef = expectedContentfulRef,
             DateCreated = expectedDateCreated,
-            QuestionContentfulRef = expectedQuestionContentfulRef,
+            QuestionId = expectedQuestionId,
             Archived = expectedArchived
         };
 
@@ -34,7 +34,7 @@ public class RecommendationEntityTests
         Assert.Equal(expectedRecommendationText, dto.RecommendationText);
         Assert.Equal(expectedContentfulRef, dto.ContentfulSysId);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
-        Assert.Equal(expectedQuestionContentfulRef, dto.QuestionContentfulRef);
+        Assert.Equal(expectedQuestionId, dto.QuestionId);
         Assert.Equal(expectedArchived, dto.Archived);
 
         // Assert - ensure all DTO properties are accounted for
@@ -45,7 +45,7 @@ public class RecommendationEntityTests
                 nameof(SqlRecommendationDto.RecommendationText),
                 nameof(SqlRecommendationDto.ContentfulSysId),
                 nameof(SqlRecommendationDto.DateCreated),
-                nameof(SqlRecommendationDto.QuestionContentfulRef),
+                nameof(SqlRecommendationDto.QuestionId),
                 nameof(SqlRecommendationDto.Archived)
             }
         );
@@ -69,7 +69,7 @@ public class RecommendationEntityTests
             RecommendationText = null, // Optional
             ContentfulRef = "Arbitrary string - contentful ref",
             DateCreated = DateTime.UtcNow,
-            QuestionContentfulRef = "1234",
+            QuestionId = 123,
             Archived = false
         };
 
@@ -80,7 +80,7 @@ public class RecommendationEntityTests
         Assert.Null(dto.RecommendationText);
         Assert.Equal("Arbitrary string - contentful ref", dto.ContentfulSysId);
         Assert.False(dto.Archived);
-        Assert.NotNull(dto.QuestionContentfulRef);
+        Assert.Equal(123, dto.QuestionId);
     }
 
     [Fact]
@@ -102,7 +102,7 @@ public class RecommendationEntityTests
             Id = 1,
             RecommendationText = "Arbitrary string - recommendation text",
             ContentfulRef = "Arbitrary string - contentful ref",
-            QuestionContentfulRef = "1234"
+            QuestionId = 1234
             // DateCreated is not set explicitly
         };
 
@@ -134,7 +134,7 @@ public class RecommendationEntityTests
             RecommendationText = "Arbitrary string - recommendation text",
             ContentfulRef = "Arbitrary string - contentful ref",
             DateCreated = DateTime.UtcNow,
-            QuestionContentfulRef = "1234"
+            QuestionId = 123
             // Archived is not set explicitly
         };
 
