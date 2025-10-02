@@ -39,18 +39,13 @@ public class BaseViewBuilder(
         SqlSectionStatusDto? sectionStatus
     )
     {
-        if (string.IsNullOrEmpty(sectionStatus?.LastMaturity))
-        {
-            return new CategorySectionRecommendationViewModel();
-        }
-
         try
         {
             return new CategorySectionRecommendationViewModel
             {
                 SectionSlug = section.InterstitialPage?.Slug,
                 SectionName = section.Name,
-                Viewed = sectionStatus.HasBeenViewed
+                Viewed = sectionStatus?.HasBeenViewed
             };
         }
         catch (Exception e)
