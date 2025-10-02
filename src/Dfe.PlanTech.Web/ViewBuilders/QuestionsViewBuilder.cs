@@ -167,6 +167,40 @@ public class QuestionsViewBuilder(
         }
     }
 
+    public async Task<IActionResult> RouteToContinueSelfAssessmentPage(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug)
+    {
+        var establishmentId = GetEstablishmentIdOrThrowException();
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        var trustName = CurrentUser.Organisation?.Name ?? throw new InvalidDataException(nameof(currentUser.EstablishmentId));
+
+        var submissionModel = await _submissionService.GetLatestSubmissionResponsesModel(
+            establishmentId, section, isCompletedSubmission: false);
+
+        if (submissionModel is null || !submissionModel.HasResponses)
+        {
+            return controller.RedirectToInterstitialPage(sectionSlug);
+        }
+
+        var viewModel = new ContinueSelfAssessmentViewModel
+        {
+            TrustName = trustName,
+            AssessmentStartDate = submissionModel.DateCreated ?? DateTime.UtcNow,
+            AnsweredCount = submissionModel.Responses.Count,
+            QuestionsCount = section.Questions.Count(),
+            TopicName = section.Name,
+            Responses = submissionModel.Responses,
+            CategorySlug = categorySlug,
+            SectionSlug = sectionSlug
+        };
+
+        return controller.View("ContinueSelfAssessment", viewModel);
+    }
+
+
     public async Task<IActionResult> SubmitAnswerAndRedirect(
         Controller controller,
         SubmitAnswerInputViewModel answerViewModel,

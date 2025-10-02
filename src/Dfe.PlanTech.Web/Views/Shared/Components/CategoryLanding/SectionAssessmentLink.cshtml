@@ -17,7 +17,7 @@
 			statusText = $"A self-assessment was started on {topic.DateUpdated}. ";
 			linkText = $"Continue your self-assessment for {topicName}";
 			controller = nameof(QuestionsController);
-			action = nameof(QuestionsController.GetNextUnansweredQuestion);
+			action = nameof(QuestionsController.GetContinueSelfAssessmentPage);
 			break;
 		case SectionProgressStatus.Completed:
 			statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";

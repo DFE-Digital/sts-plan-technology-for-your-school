@@ -371,6 +371,75 @@ public class QuestionsViewBuilderTests
         Assert.Equal("q-2", redirect.RouteValues["questionSlug"]);
     }
 
+    // ---------- RouteToContinueSelfAssessmentPage ----------
+
+    [Fact]
+    public async Task RouteToContinueSelfAssessmentPage_When_No_Responses_Redirects_To_Interstitial()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUser.EstablishmentId.Returns(123);
+        _currentUser.Organisation.Returns(new OrganisationModel { Name = "Everwood Learning Trust" });
+
+        var sectionSlug = "sec-1";
+        var section = MakeSection("S1", sectionSlug, "Section 1");
+        _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        var empty = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel>());
+        _submissionSvc.GetLatestSubmissionResponsesModel(123, section, false).Returns(empty);
+
+        // Act
+        var result = await sut.RouteToContinueSelfAssessmentPage(controller, "cat", sectionSlug);
+
+        // Assert
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
+        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal(sectionSlug, redirect.RouteValues["route"]);
+    }
+
+    [Fact]
+    public async Task RouteToContinueSelfAssessmentPage_When_Responses_Exist_Returns_View_With_ViewModel()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUser.EstablishmentId.Returns(123);
+        _currentUser.Organisation.Returns(new OrganisationModel { Name = "Everwood Learning Trust" });
+
+        var q1 = MakeQuestion("Q1", "q-1", "Question 1");
+        var q2 = MakeQuestion("Q2", "q-2", "Question 2");
+
+        var section = MakeSection("S1", "sec-1", "Cyber security processes", q1, q2);
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var submissionWithResponses = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel> { default! });
+
+        _submissionSvc.GetLatestSubmissionResponsesModel(123, section, false)
+                      .Returns(submissionWithResponses);
+
+        // Act
+        var result = await sut.RouteToContinueSelfAssessmentPage(controller, "category-slug", "sec-1");
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("ContinueSelfAssessment", view.ViewName);
+
+        var vm = Assert.IsType<ContinueSelfAssessmentViewModel>(view.Model);
+        Assert.Equal("Everwood Learning Trust", vm.TrustName);
+        Assert.Equal(1, vm.AnsweredCount);
+        Assert.Equal(2, vm.QuestionsCount);
+        Assert.Equal("category-slug", vm.CategorySlug);
+        Assert.Equal("sec-1", vm.SectionSlug);
+        Assert.Equal("Cyber security processes", vm.TopicName);
+        Assert.Same(submissionWithResponses.Responses, vm.Responses);
+    }
+
+
     // ------------- Stubs / helpers -------------
 
     private sealed class DummyController : Controller { }

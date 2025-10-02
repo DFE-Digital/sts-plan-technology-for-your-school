@@ -61,6 +61,16 @@ public class QuestionsController : BaseController<QuestionsController>
         return await _questionsViewBuilder.RouteToNextUnansweredQuestion(this, categorySlug, sectionSlug);
     }
 
+
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/continue", Name = "GetContinueSelfAssessmentPage")]
+    public async Task<IActionResult> GetContinueSelfAssessmentPage(string categorySlug, string sectionSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
+
+        return await _questionsViewBuilder.RouteToContinueSelfAssessmentPage(this, categorySlug, sectionSlug);
+    }
+
     [LogInvalidModelState]
     [HttpPost("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}")]
     public async Task<IActionResult> SubmitAnswer(

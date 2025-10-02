@@ -1,0 +1,56 @@
+﻿@model ContinueSelfAssessmentViewModel
+
+@section BeforeContent {
+    @{
+        await Html.RenderPartialAsync("BackButton");
+    }
+}
+
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <span class="govuk-caption-xl">@Model.TopicName</span>
+        <h1 class="govuk-heading-xl">Continue self-assessment</h1>
+
+        <p>
+            Someone in @Model.TrustName
+            started this self-assessment on
+            @Model.AssessmentStartDate.ToString("dd MMMM yyyy")
+            and answered @Model.AnsweredCount out of @Model.QuestionsCount questions.
+        </p>
+
+        <h2 class="govuk-heading-l">Your self-assessment answers</h2>
+        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+        @foreach (var response in Model.Responses)
+        {
+            <div>
+              
+                <p class="govuk-!-font-weight-bold">@response.QuestionText</p>
+                <p>@response.AnswerText</p>
+                <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-4 govuk-!-margin-bottom-4" />
+            </div>
+        }
+
+        <p>You can continue this self-assessment and answer the remaining questions.</p>
+        <p>If you choose to restart the self-assessment, any previous answers will be replaced.</p>
+
+        <div class="govuk-button-group">
+            <a href="@Url.Action(
+                               nameof(QuestionsController.GetNextUnansweredQuestion),
+                               "Questions",
+                               new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
+               class="govuk-button"
+               data-module="govuk-button">
+                Continue self-assessment
+            </a>
+
+            <a href="@Url.Action(
+                               nameof(QuestionsController.GetInterstitialPage),
+                               "Questions",
+                               new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
+               class="govuk-button govuk-button--secondary"
+               data-module="govuk-button">
+                Restart self-assessment
+            </a>
+        </div>
+    </div>
+</div>
