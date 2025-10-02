@@ -93,11 +93,6 @@ public class CategoryLandingViewComponentViewBuilder(
         SqlSectionStatusDto? sectionStatus
     )
     {
-        if (string.IsNullOrEmpty(sectionStatus?.LastMaturity))
-        {
-            return new CategoryLandingSectionRecommendationsViewModel();
-        }
-
         try
         {
             var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, true)
