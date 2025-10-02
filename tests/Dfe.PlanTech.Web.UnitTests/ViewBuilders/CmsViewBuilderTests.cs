@@ -24,8 +24,8 @@ public class CmsViewBuilderTests
         new QuestionnaireSectionEntry { Sys = new SystemDetails(id), Name = $"Section {id}" };
 
     private static RecommendationChunkEntry MakeRecEntry(
-        string header,
-        params string?[] answerIds)
+       string header,
+       params string?[] answerIds)
     {
         return new RecommendationChunkEntry
         {
@@ -42,7 +42,7 @@ public class CmsViewBuilderTests
     [Fact]
     public void Ctor_Null_Contentful_Throws()
     {
-        Assert.Throws<System.ArgumentNullException>(() => new CmsViewBuilder(null!));
+        Assert.Throws<ArgumentNullException>(() => new CmsViewBuilder(null!));
     }
 
     // --- GetAllSectionsAsync ------------------------------------------------
@@ -70,7 +70,15 @@ public class CmsViewBuilderTests
     [Fact]
     public async Task GetChunks_Defaults_Page_To_1_When_Null()
     {
-        var sut = CreateSut();
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetRecommendationChunkCountAsync(1).Returns(5);
+        contentful.GetPaginatedRecommendationEntriesAsync(1).Returns(new[]
+        {
+            MakeRecEntry("H1", "a1", null),  // null id should be filtered out
+            MakeRecEntry("H2", "b1", "b2")
+        });
+
+        var sut = CreateSut(contentful);
         var controller = new TestController();
 
         var action = await sut.GetChunks(controller, page: null);
@@ -91,7 +99,16 @@ public class CmsViewBuilderTests
     [Fact]
     public async Task GetChunks_Uses_Supplied_Page_And_Flattens_Answers()
     {
-        var sut = CreateSut();
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetRecommendationChunkCountAsync(3).Returns(10);
+        contentful.GetPaginatedRecommendationEntriesAsync(3).Returns(new[]
+        {
+            MakeRecEntry("Header A", "x1"),
+            MakeRecEntry("Header B", "y1", "y2", null), // null filtered
+            MakeRecEntry("Header C") // no answers
+        });
+
+        var sut = CreateSut(contentful);
         var controller = new TestController();
 
         var action = await sut.GetChunks(controller, page: 3);
