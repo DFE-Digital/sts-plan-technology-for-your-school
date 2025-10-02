@@ -10,7 +10,7 @@ runs:
   using: composite
 
   steps:
-    - name: name: Test
+    - name: Test
       shell: bash
       env:
         DOTNET_NOLOGO: true
