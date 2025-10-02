@@ -23,7 +23,7 @@ runs:
           --logger "trx;LogFileName=test-results.trx" \
           --logger "console;verbosity=minimal" \
           -v minimal \
-          -clp:Summary;ErrorsOnly;NoItemAndPropertyList
+          -clp:"Summary;ErrorsOnly;NoItemAndPropertyList"
         echo "::endgroup::"
 
     - name: Update apt-get packages
