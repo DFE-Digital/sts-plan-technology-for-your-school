@@ -63,7 +63,8 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             .ToListAsync();
 
         var recommendationDtos = section.CoreRecommendations
-            .Select(r => {
+            .Select(r =>
+            {
                 var question = questions
                     .Where(q => string.Equals(q.ContentfulRef, r.Question.Id))
                     .FirstOrDefault();
