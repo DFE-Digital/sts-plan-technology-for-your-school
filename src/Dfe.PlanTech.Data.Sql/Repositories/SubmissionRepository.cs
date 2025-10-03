@@ -1,4 +1,7 @@
 ﻿using System.Linq.Expressions;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -39,6 +42,90 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         await _db.SaveChangesAsync();
 
         return newSubmission;
+    }
+
+    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
+    {
+        var submission = await _db.Submissions
+            .Include(s => s.Responses)
+                .ThenInclude(r => r.Answer)
+            .FirstOrDefaultAsync(s => s.Id == submissionId);
+
+        if (submission is null)
+        {
+            throw new InvalidOperationException($"Could not find submssion with ID {submissionId} in database");
+        }
+
+        var answeredQuestionIds = submission.Responses.Select(response => response.QuestionId);
+
+        var questions = await _db.Questions
+            .Where(q => answeredQuestionIds.Contains(q.Id))
+            .ToListAsync();
+
+        var recommendationDtos = section.CoreRecommendations
+            .Select(r =>
+            {
+                var question = questions
+                    .Where(q => string.Equals(q.ContentfulRef, r.Question.Id))
+                    .FirstOrDefault();
+
+                if (question is null)
+                {
+                    throw new InvalidOperationException("Could not find the question identified in the submission.");
+                }
+
+                return new SqlRecommendationDto
+                {
+                    RecommendationText = r.Header,
+                    ContentfulSysId = r.Id,
+                    QuestionId = question.Id
+                };
+            });
+
+        var recommendations = await UpsertRecommendations(recommendationDtos);
+
+        var responses = submission.Responses
+            .Select(r => r.Answer.ContentfulRef)
+            .ToHashSet();
+
+        var answerStatusDictionary = section.CoreRecommendations
+            .Select(r =>
+            {
+                if (r.CompletingAnswers.Any(ca => responses.Contains(ca.Id)))
+                {
+                    return new { r.Id, Status = RecommendationConstants.Completed };
+                }
+
+                if (r.InProgressAnswers.Any(ca => responses.Contains(ca.Id)))
+                {
+                    return new { r.Id, Status = RecommendationConstants.InProgress };
+                }
+
+                return new { r.Id, Status = RecommendationConstants.NotStarted };
+            })
+            .Where(x => x is not null)
+            .ToDictionary(x => x!.Id, x => x.Status);
+
+        var previousStatuses = _db.EstablishmentRecommendationHistories
+            .Where(erh => erh.EstablishmentId == establishmentId &&
+                          erh.MatEstablishmentId == matEstablishmentId)
+            .ToDictionary(r => r.RecommendationId, r => r.NewStatus);
+
+        var recommendationStatuses = recommendations.Select(r => new EstablishmentRecommendationHistoryEntity
+        {
+            EstablishmentId = establishmentId,
+            MatEstablishmentId = matEstablishmentId,
+            RecommendationId = r.Id,
+            UserId = userId,
+            PreviousStatus = previousStatuses.TryGetValue(r.Id, out var previousStatus) ? previousStatus : null,
+            NewStatus = answerStatusDictionary[r.ContentfulRef]
+        });
+
+        await _db.EstablishmentRecommendationHistories.AddRangeAsync(recommendationStatuses);
+
+        await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
+
+        // No need to save changes as this is done in the call above
     }
 
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(int establishmentId, string sectionId, bool? isCompletedSubmission)
@@ -174,5 +261,59 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 .ThenInclude(r => r.Answer);
 
         return query;
+    }
+
+    private async Task<List<RecommendationEntity>> UpsertRecommendations(IEnumerable<SqlRecommendationDto> recommendationDtos)
+    {
+        var contentfulRefs = recommendationDtos.Select(r => r.ContentfulSysId);
+        var existingRecommendations = await _db.Recommendations
+            .Where(recommendation => contentfulRefs.Contains(recommendation.ContentfulRef))
+            .Where(recommendation => recommendation != null)
+            .ToListAsync();
+
+        var existingRecommendationContentfulRefs = existingRecommendations.Select(r => r.ContentfulRef).ToList();
+
+        var recommendationEntitiesToInsert = recommendationDtos
+            .Where(rm => !existingRecommendationContentfulRefs.Contains(rm.ContentfulSysId))
+            .Select(BuildRecommendationEntity)
+            .ToList();
+
+
+        var recommendationDtoDictionary = recommendationDtos.ToDictionary(r => r.ContentfulSysId, r => r);
+        var recommendationsWithNoChanges = new List<RecommendationEntity>();
+
+        foreach (var existingRecommendation in existingRecommendations)
+        {
+            recommendationDtoDictionary.TryGetValue(existingRecommendation.ContentfulRef, out var recommendationDto);
+            if (recommendationDto is null)
+            {
+                continue;
+            }
+
+            if (!string.Equals(recommendationDto.RecommendationText, existingRecommendation.RecommendationText))
+            {
+                recommendationEntitiesToInsert.Add(BuildRecommendationEntity(recommendationDto));
+            }
+            else
+            {
+                recommendationsWithNoChanges.Add(BuildRecommendationEntity(recommendationDto));
+            }
+        }
+
+        _db.AddRange(recommendationEntitiesToInsert);
+
+        await _db.SaveChangesAsync();
+
+        return await _db.Recommendations.Where(r => contentfulRefs.Contains(r.ContentfulRef)).ToListAsync();
+    }
+
+    private RecommendationEntity BuildRecommendationEntity(SqlRecommendationDto recommendationDto)
+    {
+        return new RecommendationEntity
+        {
+            ContentfulRef = recommendationDto.ContentfulSysId,
+            RecommendationText = recommendationDto.RecommendationText,
+            QuestionId = recommendationDto.QuestionId
+        };
     }
 }

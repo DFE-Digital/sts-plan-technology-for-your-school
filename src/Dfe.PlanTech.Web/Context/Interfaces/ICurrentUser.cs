@@ -10,6 +10,7 @@ namespace Dfe.PlanTech.Web.Context.Interfaces
         string? GroupSelectedSchoolUrn { get; }
         bool IsAuthenticated { get; }
         bool IsMat { get; }
+        int? MatEstablishmentId { get; }
         OrganisationModel? Organisation { get; }
         int? UserId { get; }
         EstablishmentModel GetEstablishmentModel();

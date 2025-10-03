@@ -7,13 +7,11 @@ public static class RedisCacheTestHelpers
     private static readonly QuestionnaireAnswerEntry _firstAnswer = new()
     {
         Sys = new SystemDetails { Id = "answer-one-id" },
-        Maturity = "high",
         Text = "answer-one-text",
     };
     private static readonly QuestionnaireAnswerEntry _secondAnswer = new()
     {
         Sys = new SystemDetails { Id = "answer-two-id" },
-        Maturity = "medium",
         Text = "answer-two-text",
     };
     private static readonly QuestionnaireQuestionEntry _question = new()

@@ -127,6 +127,17 @@ public class ContentfulWorkflow(
         }
     }
 
+    public async Task<int> GetRecommendationChunkCountAsync(int page)
+    {
+        return await _contentfulRepository.GetEntriesCountAsync<RecommendationChunkEntry>();
+    }
+
+    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page)
+    {
+        var options = new GetEntriesOptions(include: 3) { Page = page };
+        return _contentfulRepository.GetPaginatedEntriesAsync<RecommendationChunkEntry>(options);
+    }
+
     public async Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string sectionSlug, int? includeLevel = null)
     {
         var sectionSlugQuery = new ContentfulQuerySingleValue { Field = SlugFieldPath, Value = sectionSlug };

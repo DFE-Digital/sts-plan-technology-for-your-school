@@ -7,12 +7,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class CmsViewBuilder(
-    IContentfulService contentfulService,
-    IRecommendationService recommendationService
+    IContentfulService contentfulService
 ) : ICmsViewBuilder
 {
     private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
 
     public async Task<IEnumerable<SectionViewModel>> GetAllSectionsAsync()
     {
@@ -23,8 +21,8 @@ public class CmsViewBuilder(
     public async Task<IActionResult> GetChunks(Controller controller, int? page)
     {
         var pageNumber = page ?? 1;
-        var total = await _recommendationService.GetRecommendationChunkCount(pageNumber);
-        var entries = await _recommendationService.GetPaginatedRecommendationEntries(pageNumber);
+        var total = await _contentfulService.GetRecommendationChunkCountAsync(pageNumber);
+        var entries = await _contentfulService.GetPaginatedRecommendationEntriesAsync(pageNumber);
 
         var chunkModels = entries
             .SelectMany(chunk => chunk.AllAnswers

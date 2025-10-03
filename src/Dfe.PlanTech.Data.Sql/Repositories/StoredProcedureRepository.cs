@@ -136,7 +136,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             new(DatabaseConstants.AnswerTextParam, response.Answer.Text),
             new(DatabaseConstants.UserIdParam, response.UserId),
             new(DatabaseConstants.EstablishmentIdParam, response.EstablishmentId),
-            new(DatabaseConstants.MaturityParam, response.Maturity),
+            new(DatabaseConstants.MaturityParam, ""),
             responseId,
             submissionId
         };

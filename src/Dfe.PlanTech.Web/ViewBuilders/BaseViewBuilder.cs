@@ -19,9 +19,9 @@ public class BaseViewBuilder(
     protected IContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     protected ICurrentUser CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
-    protected int GetUserIdOrThrowException()
+    protected string GetDsiReferenceOrThrowException()
     {
-        return CurrentUser.UserId ?? throw new AuthenticationException("User is not authenticated");
+        return CurrentUser.DsiReference ?? throw new AuthenticationException("User is not authenticated");
     }
 
     protected int GetEstablishmentIdOrThrowException()
@@ -29,9 +29,9 @@ public class BaseViewBuilder(
         return CurrentUser.EstablishmentId ?? throw new InvalidDataException(nameof(currentUser.EstablishmentId));
     }
 
-    protected string GetDsiReferenceOrThrowException()
+    protected int GetUserIdOrThrowException()
     {
-        return CurrentUser.DsiReference ?? throw new AuthenticationException("User is not authenticated");
+        return CurrentUser.UserId ?? throw new AuthenticationException("User is not authenticated");
     }
 
     protected CategorySectionRecommendationViewModel BuildCategorySectionRecommendationViewModel(

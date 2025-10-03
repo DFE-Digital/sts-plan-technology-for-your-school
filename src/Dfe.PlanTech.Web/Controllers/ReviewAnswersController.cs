@@ -17,10 +17,6 @@ public class ReviewAnswersController(
     IReviewAnswersViewBuilder reviewAnswersViewBuilder
 ) : BaseController<ReviewAnswersController>(logger)
 {
-    public const string ControllerName = "CheckAnswers";
-    public const string CheckAnswersAction = nameof(CheckAnswers);
-
-
     private readonly IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
     private readonly IReviewAnswersViewBuilder _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
 

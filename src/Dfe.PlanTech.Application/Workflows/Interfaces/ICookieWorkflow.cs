@@ -1,9 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Dfe.PlanTech.Application.Workflows.Interfaces
+namespace Dfe.PlanTech.Application.Workflows.Interfaces;
+
+public interface ICookieWorkflow
 {
-    public interface ICookieWorkflow
-    {
-        void RemoveNonEssentialCookies(HttpContext context);
-    }
+    void RemoveNonEssentialCookies(HttpContext context);
 }

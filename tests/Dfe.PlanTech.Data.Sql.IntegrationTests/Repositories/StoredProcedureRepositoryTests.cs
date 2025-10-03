@@ -136,6 +136,8 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
+        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
+        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -147,17 +149,8 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         {
             SectionId = "section-1",
             SectionName = "Test Section",
-            QuestionId = question.ContentfulRef,
-            QuestionText = question.QuestionText,
-            ChosenAnswer = new AnswerModel
-            {
-                Answer = new IdWithTextModel
-                {
-                    Id = answer.ContentfulRef,
-                    Text = answer.AnswerText
-                },
-                Maturity = "High"
-            }
+            Question = questionModel,
+            ChosenAnswer = answerModel
         };
 
         var response = new AssessmentResponseModel(user.Id, establishment.Id, submitAnswerModel);

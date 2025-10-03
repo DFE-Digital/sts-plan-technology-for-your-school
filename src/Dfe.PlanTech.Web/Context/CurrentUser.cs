@@ -26,6 +26,8 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
     public bool IsMat => Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;
 
+    public int? MatEstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
+
     public OrganisationModel? Organisation
     {
         get => ParseOrganisationModel();

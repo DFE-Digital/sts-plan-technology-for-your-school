@@ -10,6 +10,7 @@ public class RecommendationChunkEntry : ContentfulEntry, IHeaderWithContent
     public string InternalName { get; set; } = null!;
     public string Header { get; init; } = null!;
     public List<ContentfulEntry> Content { get; init; } = [];
+    public QuestionnaireQuestionEntry Question { get; set; } = null!;
     public List<QuestionnaireAnswerEntry> CompletingAnswers { get; init; } = [];
     public List<QuestionnaireAnswerEntry> InProgressAnswers { get; init; } = [];
     public CAndSLinkEntry? CSLink { get; init; }
