@@ -12,7 +12,19 @@ runs:
   steps:
     - name: Test
       shell: bash
-      run: dotnet test ${{ inputs.solution_filename }} --no-restore --verbosity normal --collect:"XPlat Code Coverage" --logger:"trx;LogFileName=test-results.trx" || true
+      env:
+        DOTNET_NOLOGO: true
+        DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      run: |
+        echo "::group::dotnet test"
+        dotnet test "${{ inputs.solution_filename }}" \
+          --no-restore \
+          --collect:"XPlat Code Coverage" \
+          --logger "trx;LogFileName=test-results.trx" \
+          --logger "console;verbosity=minimal" \
+          -v minimal \
+          -clp:"Summary;ErrorsOnly;NoItemAndPropertyList"
+        echo "::endgroup::"
 
     - name: Update apt-get packages
       shell: bash
