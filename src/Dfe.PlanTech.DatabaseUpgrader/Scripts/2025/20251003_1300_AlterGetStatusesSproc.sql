@@ -1,4 +1,4 @@
-USE [plantech]
+USE [plantech-mock-db]
 GO
 
 /****** Object:  StoredProcedure [dbo].[GetSectionStatuses]    Script Date: 03-Oct-25 13:00:00 ******/
@@ -28,7 +28,7 @@ BEGIN
         LastCompleteSubmission.viewed,
         LastCompleteSubmission.dateCompleted  AS lastCompletionDate,
         (
-            SELECT e.trustName
+            SELECT e.orgName
             FROM dbo.establishment e
             WHERE e.id = @establishmentId
         ) AS trustName
