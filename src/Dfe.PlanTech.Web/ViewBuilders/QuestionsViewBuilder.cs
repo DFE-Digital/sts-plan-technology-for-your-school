@@ -213,8 +213,7 @@ public class QuestionsViewBuilder(
         var establishmentId = GetEstablishmentIdOrThrowException();
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");      
 
         var question = section.GetQuestionBySlug(questionSlug);
 
@@ -239,11 +238,6 @@ public class QuestionsViewBuilder(
             var viewModel = GenerateViewModel(controller, question, section, categorySlug, sectionSlug, questionSlug, null);
             viewModel.ErrorMessages = ["Save failed. Please try again later."];
             return controller.View(QuestionView, viewModel);
-        }
-
-        if (submissionRoutingData.Submission?.Responses is null)
-        {
-            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
 
         var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
