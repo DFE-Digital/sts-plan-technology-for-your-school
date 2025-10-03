@@ -199,6 +199,24 @@ public class QuestionsViewBuilder(
         return controller.View("ContinueSelfAssessment", viewModel);
     }
 
+    public async Task<IActionResult> RestartSelfAssessment(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug)
+    {
+        var establishmentId = GetEstablishmentIdOrThrowException();
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
+
+        await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Id);
+
+        return controller.RedirectToAction(
+            nameof(QuestionsController.GetInterstitialPage),
+            QuestionsController.Controller,
+            new { categorySlug, sectionSlug }
+        );
+    }
+
 
     public async Task<IActionResult> SubmitAnswerAndRedirect(
         Controller controller,

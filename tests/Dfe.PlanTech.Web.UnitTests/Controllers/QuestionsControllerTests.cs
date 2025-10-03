@@ -123,5 +123,20 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
 
             Assert.Equal("questionsViewBuilder", exception.ParamName);
         }
+
+        [Fact]
+        public async Task RestartSelfAssessment_CallsViewBuilder()
+        {
+            var categorySlug = "cat";
+            var sectionSlug = "sec";
+
+            _viewBuilder.RestartSelfAssessment(_controller, categorySlug, sectionSlug)
+                .Returns(new OkResult());
+
+            var result = await _controller.RestartSelfAssessment(categorySlug, sectionSlug);
+
+            await _viewBuilder.Received(1).RestartSelfAssessment(_controller, categorySlug, sectionSlug);
+            Assert.IsType<OkResult>(result);
+        }
     }
 }

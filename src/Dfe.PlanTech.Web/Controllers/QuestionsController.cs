@@ -61,6 +61,15 @@ public class QuestionsController : BaseController<QuestionsController>
         return await _questionsViewBuilder.RouteToNextUnansweredQuestion(this, categorySlug, sectionSlug);
     }
 
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/restart", Name = "RestartSelfAssessment")]
+    public async Task<IActionResult> RestartSelfAssessment(string categorySlug, string sectionSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
+
+        return await _questionsViewBuilder.RestartSelfAssessment(this, categorySlug, sectionSlug);
+    }
+
 
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/continue", Name = "GetContinueSelfAssessmentPage")]
     public async Task<IActionResult> GetContinueSelfAssessment(string categorySlug, string sectionSlug)

@@ -440,6 +440,36 @@ public class QuestionsViewBuilderTests
         Assert.Same(submissionWithResponses.Responses, vm.Responses);
     }
 
+    // ---------- RestartSelfAssessment ----------
+
+    [Fact]
+    public async Task RestartSelfAssessment_Deletes_Submission_And_Redirects_To_Interstitial()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUser.EstablishmentId.Returns(555);
+
+        var sectionSlug = "sec-restart";
+        var section = MakeSection("S123", sectionSlug, "Restart Section");
+        _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        // Act
+        var result = await sut.RestartSelfAssessment(controller, "cat-slug", sectionSlug);
+
+        // Assert
+        await _submissionSvc.Received(1).DeleteCurrentSubmissionSoftAsync(555, "S123");
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(nameof(QuestionsController.GetInterstitialPage), redirect.ActionName);
+        Assert.Equal(QuestionsController.Controller, redirect.ControllerName);
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal("cat-slug", redirect.RouteValues["categorySlug"]);
+        Assert.Equal(sectionSlug, redirect.RouteValues["sectionSlug"]);
+    }
+
+
 
 
     // ------------- Stubs / helpers -------------

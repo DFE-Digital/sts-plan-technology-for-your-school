@@ -44,11 +44,10 @@
                data-module="govuk-button">
                 Continue self-assessment
             </a>
-
             <a href="@Url.Action(
-                               nameof(QuestionsController.GetInterstitialPage),
-                               "Questions",
-                               new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
+                              nameof(QuestionsController.RestartSelfAssessment),
+                              "Questions",
+                              new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
                class="govuk-button govuk-button--secondary"
                data-module="govuk-button">
                 Restart self-assessment
