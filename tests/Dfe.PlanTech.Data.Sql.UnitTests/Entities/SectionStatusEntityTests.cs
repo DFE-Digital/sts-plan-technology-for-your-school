@@ -17,7 +17,8 @@ public class SectionStatusEntityTests
         var expectedDateUpdated = new DateTime(2024, 02, 01, 10, 00, 00, DateTimeKind.Utc);
         bool? expectedViewed = true;
         var expectedLastCompletionDate = new DateTime(2024, 03, 01, 10, 00, 00, DateTimeKind.Utc);
-        var expectedStatus = SubmissionStatus.None; // Non-nullable property, default value
+        var expectedStatus = SubmissionStatus.None; // default value
+        var expectedOrgName = "Test Trust";
 
         var entity = new SectionStatusEntity
         {
@@ -28,13 +29,13 @@ public class SectionStatusEntityTests
             DateUpdated = expectedDateUpdated,
             Viewed = expectedViewed,
             LastCompletionDate = expectedLastCompletionDate,
-            // Note: `Status` is a derived value and not a property of `SectionStatusEntity` (not set in the database), so is not set here
+            TrustName = expectedOrgName
         };
 
         // Act
         SqlSectionStatusDto dto = entity.AsDto();
 
-        // Assert - properties explicitly set by `AsDto()`
+        // Assert - properties explicitly set by AsDto()
         Assert.Equal(expectedSectionId, dto.SectionId);
         Assert.Equal(expectedCompleted, dto.Completed);
         Assert.Equal(expectedLastMaturity, dto.LastMaturity);
@@ -42,29 +43,30 @@ public class SectionStatusEntityTests
         Assert.Equal(expectedDateUpdated, dto.DateUpdated);
         Assert.Equal(expectedViewed, dto.HasBeenViewed);
         Assert.Equal(expectedLastCompletionDate, dto.LastCompletionDate);
+        Assert.Equal(expectedOrgName, dto.TrustName);
 
-        // Assert - properties not explicitly set by `AsDto()`:
+        // Assert - properties not explicitly set by AsDto():
         Assert.Equal(expectedStatus, dto.Status);
 
         // Assert - ensure all DTO properties are accounted for
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlSectionStatusDto>(
             new[]
             {
-                nameof(SqlSectionStatusDto.SectionId),
-                nameof(SqlSectionStatusDto.Completed),
-                nameof(SqlSectionStatusDto.LastMaturity),
-                nameof(SqlSectionStatusDto.DateCreated),
-                nameof(SqlSectionStatusDto.DateUpdated),
-                nameof(SqlSectionStatusDto.HasBeenViewed),
-                nameof(SqlSectionStatusDto.LastCompletionDate),
+            nameof(SqlSectionStatusDto.SectionId),
+            nameof(SqlSectionStatusDto.Completed),
+            nameof(SqlSectionStatusDto.LastMaturity),
+            nameof(SqlSectionStatusDto.DateCreated),
+            nameof(SqlSectionStatusDto.DateUpdated),
+            nameof(SqlSectionStatusDto.HasBeenViewed),
+            nameof(SqlSectionStatusDto.LastCompletionDate),
+            nameof(SqlSectionStatusDto.TrustName),
             },
             new[]
             {
-                // Synthetic property, not directly mapped from database entity
-                // Not enough information in `SectionStatusEntity` to set this property
-                // This is assigned dynamically in a handful of locations (#277270 tracks centralising this logic, though it may be removed in future)
-                nameof(SqlSectionStatusDto.Status),
+            // Synthetic property, not directly mapped from database entity
+            nameof(SqlSectionStatusDto.Status),
             }
         );
     }
+
 }

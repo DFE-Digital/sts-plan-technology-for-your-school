@@ -18,6 +18,8 @@ public class SectionStatusEntity
 
     public DateTime? LastCompletionDate { get; set; }
 
+    public string? TrustName { get; set; } = string.Empty;
+
     public SqlSectionStatusDto AsDto()
     {
         return new SqlSectionStatusDto
@@ -28,7 +30,8 @@ public class SectionStatusEntity
             DateCreated = DateCreated,
             DateUpdated = DateUpdated,
             HasBeenViewed = Viewed,
-            LastCompletionDate = LastCompletionDate
+            LastCompletionDate = LastCompletionDate,
+            TrustName = TrustName
         };
     }
 }

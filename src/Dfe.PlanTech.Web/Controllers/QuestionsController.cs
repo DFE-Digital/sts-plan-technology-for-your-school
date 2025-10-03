@@ -63,7 +63,7 @@ public class QuestionsController : BaseController<QuestionsController>
 
 
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/continue", Name = "GetContinueSelfAssessmentPage")]
-    public async Task<IActionResult> GetContinueSelfAssessmentPage(string categorySlug, string sectionSlug)
+    public async Task<IActionResult> GetContinueSelfAssessment(string categorySlug, string sectionSlug)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));

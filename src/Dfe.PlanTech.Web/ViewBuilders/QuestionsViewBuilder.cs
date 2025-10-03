@@ -116,7 +116,7 @@ public class QuestionsViewBuilder(
             return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestionSlug, returnTo);
         }
 
-        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
+        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
     }
 
     public async Task<IActionResult> RouteToInterstitialPage(Controller controller, string categorySlug, string sectionSlug)
@@ -149,7 +149,7 @@ public class QuestionsViewBuilder(
             var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
             if (nextQuestion is null)
             {
-                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, null);
+                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
             }
 
             return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), new { categorySlug, sectionSlug, questionSlug = nextQuestion.Slug });
@@ -175,7 +175,6 @@ public class QuestionsViewBuilder(
         var establishmentId = GetEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var trustName = CurrentUser.Organisation?.Name ?? throw new InvalidDataException(nameof(currentUser.EstablishmentId));
 
         var submissionModel = await _submissionService.GetLatestSubmissionResponsesModel(
             establishmentId, section, isCompletedSubmission: false);
@@ -187,7 +186,7 @@ public class QuestionsViewBuilder(
 
         var viewModel = new ContinueSelfAssessmentViewModel
         {
-            TrustName = trustName,
+            TrustName = submissionModel.Establishment.OrgName,
             AssessmentStartDate = submissionModel.DateCreated ?? DateTime.UtcNow,
             AnsweredCount = submissionModel.Responses.Count,
             QuestionsCount = section.Questions.Count(),
@@ -242,15 +241,9 @@ public class QuestionsViewBuilder(
             return controller.View(QuestionView, viewModel);
         }
 
-        var isChangeAnswersFlow = IsChangeAnswersFlow(returnTo);
-        if (!isChangeAnswersFlow)
-        {
-            return await RouteToNextUnansweredQuestion(controller, categorySlug, sectionSlug);
-        }
-
         if (submissionRoutingData.Submission?.Responses is null)
         {
-            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
+            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
 
         var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
@@ -260,7 +253,7 @@ public class QuestionsViewBuilder(
         }
 
         // No next questions so check answers
-        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
+        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
     }
 
     private async Task<string> BuildErrorMessage()

@@ -106,7 +106,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             _viewBuilder.RouteToContinueSelfAssessmentPage(_controller, categorySlug, sectionSlug)
                 .Returns(new OkResult());
 
-            var result = await _controller.GetContinueSelfAssessmentPage(categorySlug, sectionSlug);
+            var result = await _controller.GetContinueSelfAssessment(categorySlug, sectionSlug);
 
             await _viewBuilder.Received(1).RouteToContinueSelfAssessmentPage(_controller, categorySlug, sectionSlug);
             Assert.IsType<OkResult>(result);

@@ -11,6 +11,8 @@ namespace Dfe.PlanTech.Core.Models
 
         public DateTime? DateCreated { get; init; }
 
+        public SqlEstablishmentDto Establishment { get; init; }
+
         public string? Maturity { get; set; }
 
         public List<QuestionWithAnswerModel> Responses { get; set; }
@@ -29,6 +31,7 @@ namespace Dfe.PlanTech.Core.Models
             DateCompleted = submission.DateCompleted;
             DateCreated = submission.DateCreated;
             Maturity = submission.Maturity;
+            Establishment = submission.Establishment;
             Responses = submission.Responses
                 .Select(response => new QuestionWithAnswerModel(response, section))
                 .GroupBy(questionWithAnswer => questionWithAnswer.QuestionSysId)

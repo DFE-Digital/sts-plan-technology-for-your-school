@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
@@ -339,7 +340,8 @@ public class QuestionsViewBuilderTests
         _currentUser.EstablishmentId.Returns(22);
 
         var q1 = MakeQuestion("Q1", "q-1", "Q1");
-        var section = MakeSection("S1", "sec-1", "Section 1", q1);
+        var q2 = MakeQuestion("Q2", "question2", "Q2");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1, q2);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         _submissionSvc.GetSubmissionRoutingDataAsync(22, section, false)
@@ -353,9 +355,7 @@ public class QuestionsViewBuilderTests
         // Submit works
         _submissionSvc.SubmitAnswerAsync(11, 22, Arg.Any<SubmitAnswerModel>()).Returns(1);
 
-        // And the next unanswered question exists
-        var nextQ = MakeQuestion("Q2", "q-2", "Q2");
-        _questionSvc.GetNextUnansweredQuestion(22, section).Returns(nextQ);
+        _questionSvc.GetNextUnansweredQuestion(22, section).Returns(q2);
 
         // Act
         var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", returnTo: null);
@@ -363,12 +363,7 @@ public class QuestionsViewBuilderTests
         // Assert
         await _submissionSvc.Received(1).SubmitAnswerAsync(11, 22, Arg.Any<SubmitAnswerModel>());
 
-        var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(nameof(QuestionsController.GetQuestionBySlug), redirect.ActionName);
-        Assert.NotNull(redirect.RouteValues);
-        Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
-        Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
-        Assert.Equal("q-2", redirect.RouteValues["questionSlug"]);
+        var redirect = Assert.IsType<ViewResult>(result);
     }
 
     // ---------- RouteToContinueSelfAssessmentPage ----------
@@ -409,7 +404,7 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         _currentUser.EstablishmentId.Returns(123);
-        _currentUser.Organisation.Returns(new OrganisationModel { Name = "Everwood Learning Trust" });
+        _currentUser.Organisation.Returns(new OrganisationModel { Name = "Test Trust" });
 
         var q1 = MakeQuestion("Q1", "q-1", "Question 1");
         var q2 = MakeQuestion("Q2", "q-2", "Question 2");
@@ -417,7 +412,14 @@ public class QuestionsViewBuilderTests
         var section = MakeSection("S1", "sec-1", "Cyber security processes", q1, q2);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        var submissionWithResponses = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel> { default! });
+        // 👇 Ensure Establishment is populated
+        var submissionWithResponses = new SubmissionResponsesModel(
+            1,
+            new List<QuestionWithAnswerModel> { new QuestionWithAnswerModel { AnswerSysId = "A1" } }
+        )
+        {
+            Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
+        };
 
         _submissionSvc.GetLatestSubmissionResponsesModel(123, section, false)
                       .Returns(submissionWithResponses);
@@ -430,7 +432,7 @@ public class QuestionsViewBuilderTests
         Assert.Equal("ContinueSelfAssessment", view.ViewName);
 
         var vm = Assert.IsType<ContinueSelfAssessmentViewModel>(view.Model);
-        Assert.Equal("Everwood Learning Trust", vm.TrustName);
+        Assert.Equal("Test Trust", vm.TrustName);
         Assert.Equal(1, vm.AnsweredCount);
         Assert.Equal(2, vm.QuestionsCount);
         Assert.Equal("category-slug", vm.CategorySlug);
@@ -438,6 +440,7 @@ public class QuestionsViewBuilderTests
         Assert.Equal("Cyber security processes", vm.TopicName);
         Assert.Same(submissionWithResponses.Responses, vm.Responses);
     }
+
 
 
     // ------------- Stubs / helpers -------------

@@ -104,7 +104,7 @@ public class RecommendationsViewBuilder(
                     new { categorySlug, sectionSlug, submissionRoutingData.NextQuestion!.Slug });
 
             case SubmissionStatus.CompleteNotReviewed:
-                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, null);
+                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
 
             case SubmissionStatus.CompleteReviewed:
                 var viewModel = await BuildRecommendationsViewModel(

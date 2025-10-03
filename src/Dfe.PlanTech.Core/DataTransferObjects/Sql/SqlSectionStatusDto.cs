@@ -11,6 +11,7 @@ public class SqlSectionStatusDto : ISqlDto
     public bool Completed { get; set; }
     public bool? HasBeenViewed { get; set; }
     public DateTime? LastCompletionDate { get; set; }
+    public string? TrustName { get; set; } = string.Empty;
     public string? LastMaturity { get; set; }
     public DateTime DateCreated { get; set; }
     public DateTime DateUpdated { get; set; }

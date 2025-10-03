@@ -53,15 +53,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var categorySlug = "cat";
             var sectionSlug = "sec";
-            bool? isChangeAnswersFlow = true;
 
             _controller.TempData["ErrorMessage"] = "error";
-            _viewBuilder.RouteToCheckAnswers(_controller, categorySlug, sectionSlug, isChangeAnswersFlow, "error")
+            _viewBuilder.RouteToCheckAnswers(_controller, categorySlug, sectionSlug, "error")
                 .Returns(new OkResult());
 
-            var result = await _controller.CheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
+            var result = await _controller.CheckAnswers(categorySlug, sectionSlug);
 
-            await _viewBuilder.Received(1).RouteToCheckAnswers(_controller, categorySlug, sectionSlug, isChangeAnswersFlow, "error");
+            await _viewBuilder.Received(1).RouteToCheckAnswers(_controller, categorySlug, sectionSlug, "error");
             Assert.IsType<OkResult>(result);
         }
 
@@ -70,49 +69,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var categorySlug = "cat";
             var sectionSlug = "sec";
-            bool? isChangeAnswersFlow = false;
 
             var exception = new UserJourneyMissingContentException("Missing content", new QuestionnaireSectionEntry());
-            _viewBuilder.RouteToCheckAnswers(_controller, categorySlug, sectionSlug, isChangeAnswersFlow, null)
+            _viewBuilder.RouteToCheckAnswers(_controller, categorySlug, sectionSlug, null)
                 .Throws(exception);
 
             _exceptionHandler.Handle(_controller, exception).Returns(new BadRequestResult());
 
-            var result = await _controller.CheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
-
-            await _exceptionHandler.Received(1).Handle(_controller, exception);
-            Assert.IsType<BadRequestResult>(result);
-        }
-
-        [Fact]
-        public async Task ChangeAnswers_ReturnsExpectedResult()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
-
-            _controller.TempData["ErrorMessage"] = "error";
-            _viewBuilder.RouteToChangeAnswers(_controller, categorySlug, sectionSlug, "error")
-                .Returns(new OkResult());
-
-            var result = await _controller.ChangeAnswers(categorySlug, sectionSlug);
-
-            await _viewBuilder.Received(1).RouteToChangeAnswers(_controller, categorySlug, sectionSlug, "error");
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
-        public async Task ChangeAnswers_WhenExceptionThrown_UsesExceptionHandler()
-        {
-            var categorySlug = "cat";
-            var sectionSlug = "sec";
-
-            var exception = new UserJourneyMissingContentException("Missing content", new QuestionnaireSectionEntry());
-            _viewBuilder.RouteToChangeAnswers(_controller, categorySlug, sectionSlug, null)
-                .Throws(exception);
-
-            _exceptionHandler.Handle(_controller, exception).Returns(new BadRequestResult());
-
-            var result = await _controller.ChangeAnswers(categorySlug, sectionSlug);
+            var result = await _controller.CheckAnswers(categorySlug, sectionSlug);
 
             await _exceptionHandler.Received(1).Handle(_controller, exception);
             Assert.IsType<BadRequestResult>(result);
@@ -159,5 +123,40 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 );
 
         }
+
+        [Fact]
+        public async Task ViewAnswers_ReturnsExpectedResult()
+        {
+            var categorySlug = "cat";
+            var sectionSlug = "sec";
+
+            _controller.TempData["ErrorMessage"] = "error";
+            _viewBuilder.RouteToViewAnswers(_controller, categorySlug, sectionSlug, "error")
+                .Returns(new OkResult());
+
+            var result = await _controller.ViewAnswers(categorySlug, sectionSlug);
+
+            await _viewBuilder.Received(1).RouteToViewAnswers(_controller, categorySlug, sectionSlug, "error");
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task ViewAnswers_WhenExceptionThrown_UsesExceptionHandler()
+        {
+            var categorySlug = "cat";
+            var sectionSlug = "sec";
+
+            var exception = new UserJourneyMissingContentException("Missing content", new QuestionnaireSectionEntry());
+            _viewBuilder.RouteToViewAnswers(_controller, categorySlug, sectionSlug, null)
+                .Throws(exception);
+
+            _exceptionHandler.Handle(_controller, exception).Returns(new BadRequestResult());
+
+            var result = await _controller.ViewAnswers(categorySlug, sectionSlug);
+
+            await _exceptionHandler.Received(1).Handle(_controller, exception);
+            Assert.IsType<BadRequestResult>(result);
+        }
+
     }
 }
