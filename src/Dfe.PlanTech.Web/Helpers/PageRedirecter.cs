@@ -11,8 +11,8 @@ public static class PageRedirecter
     public static RedirectToActionResult RedirectToCategoryLandingPage(this Controller controller, string categorySlug) =>
         controller.RedirectToAction(nameof(PagesController.GetByRoute), nameof(PagesController).GetControllerNameSlug(), new { route = categorySlug });
 
-    public static RedirectToActionResult RedirectToCheckAnswers(this Controller controller, string categorySlug, string sectionSlug, bool? isChangeAnswersFlow) =>
-        controller.RedirectToAction(nameof(ReviewAnswersController.CheckAnswers), nameof(ReviewAnswersController).GetControllerNameSlug(), new { categorySlug, sectionSlug, isChangeAnswersFlow });
+    public static RedirectToActionResult RedirectToCheckAnswers(this Controller controller, string categorySlug, string sectionSlug) =>
+        controller.RedirectToAction(nameof(ReviewAnswersController.CheckAnswers), nameof(ReviewAnswersController).GetControllerNameSlug(), new { categorySlug, sectionSlug });
 
     public static RedirectToActionResult RedirectToHomePage(this Controller controller) =>
         RedirectToPage(controller, UrlConstants.HomePage);
@@ -25,6 +25,9 @@ public static class PageRedirecter
 
     public static RedirectToActionResult RedirectToGetNextUnansweredQuestion(this Controller controller, string categorySlug, string sectionSlug) =>
         controller.RedirectToAction(nameof(QuestionsController.GetNextUnansweredQuestion), nameof(QuestionsController).GetControllerNameSlug(), new { categorySlug, sectionSlug });
+
+    public static RedirectToActionResult RedirectToGetContinueSelfAssessment(this Controller controller, string categorySlug, string sectionSlug) =>
+    controller.RedirectToAction(nameof(QuestionsController.GetContinueSelfAssessment), nameof(QuestionsController).GetControllerNameSlug(), new { categorySlug, sectionSlug });
 
     private static RedirectToActionResult RedirectToPage(this Controller controller, string route) =>
         controller.RedirectToAction(PagesController.GetPageByRouteAction, nameof(PagesController).GetControllerNameSlug(), new { route });
