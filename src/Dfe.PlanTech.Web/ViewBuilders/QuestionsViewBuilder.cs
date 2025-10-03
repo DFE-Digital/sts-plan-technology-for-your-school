@@ -213,7 +213,7 @@ public class QuestionsViewBuilder(
         var establishmentId = GetEstablishmentIdOrThrowException();
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");      
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
         var question = section.GetQuestionBySlug(questionSlug);
 
