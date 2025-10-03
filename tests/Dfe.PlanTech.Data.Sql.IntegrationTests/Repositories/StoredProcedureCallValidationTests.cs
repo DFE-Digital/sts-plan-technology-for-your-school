@@ -151,7 +151,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     {
         // Arrange
         var user = new UserEntity { DfeSignInRef = "test-user" };
-        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School", GroupUid = null };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
         var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
