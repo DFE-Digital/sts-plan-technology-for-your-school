@@ -28,7 +28,7 @@ BEGIN
         LastCompleteSubmission.viewed,
         LastCompleteSubmission.dateCompleted  AS lastCompletionDate,
         (
-            SELECT e.orgName
+            SELECT e.trustName
             FROM dbo.establishment e
             WHERE e.id = @establishmentId
         ) AS trustName
