@@ -1,6 +1,3 @@
-USE [plantech-mock-db]
-GO
-
 /****** Object:  StoredProcedure [dbo].[GetSectionStatuses]    Script Date: 03-Oct-25 13:00:00 ******/
 SET ANSI_NULLS ON
 GO
