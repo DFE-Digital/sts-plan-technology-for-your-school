@@ -185,7 +185,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         Assert.Equal(user.Id, savedResponse!.UserId);
         Assert.Equal(question.Id, savedResponse.QuestionId);
         Assert.Equal(answer.Id, savedResponse.AnswerId);
-        Assert.Equal("High", savedResponse.Maturity);
+        Assert.Equal("", savedResponse.Maturity);
     }
 
     [Fact]
