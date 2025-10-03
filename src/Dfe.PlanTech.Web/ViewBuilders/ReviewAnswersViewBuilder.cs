@@ -83,7 +83,7 @@ public class ReviewAnswersViewBuilder(
             case SubmissionStatus.NotStarted:
                 return controller.RedirectToHomePage();
 
-            case SubmissionStatus.InProgress:          
+            case SubmissionStatus.InProgress:
             case SubmissionStatus.CompleteNotReviewed:
                 return controller.RedirectToGetContinueSelfAssessment(categorySlug, sectionSlug);
 
