@@ -1,7 +1,7 @@
 USE [plantech]
 GO
 
-/****** Object:  StoredProcedure [dbo].[GetSectionStatuses]    Script Date: 03-Oct-25 13:00:00 PM ******/
+/****** Object:  StoredProcedure [dbo].[GetSectionStatuses]    Script Date: 03-Oct-25 13:00:00 ******/
 SET ANSI_NULLS ON
 GO
 SET QUOTED_IDENTIFIER ON
@@ -27,7 +27,11 @@ BEGIN
         CurrentSubmission.dateLastUpdated     AS dateUpdated,
         LastCompleteSubmission.viewed,
         LastCompleteSubmission.dateCompleted  AS lastCompletionDate,
-        E.orgName                             AS orgName   -- added column
+        (
+            SELECT e.orgName
+            FROM dbo.establishment e
+            WHERE e.id = @establishmentId
+        ) AS trustName
     FROM #SectionIds SI
 
     -- Current submission (most recent)
@@ -37,7 +41,8 @@ BEGIN
             completed,
             S.id,
             dateCreated,
-            dateLastUpdated
+            dateLastUpdated,
+            S.establishmentId
         FROM [dbo].submission S
         WHERE
               SI.sectionId = S.sectionId
@@ -59,11 +64,7 @@ BEGIN
           AND S.deleted = 0
           AND S.completed = 1
         ORDER BY S.dateCreated DESC
-    ) LastCompleteSubmission
-
-    -- Join establishment to pull orgName
-    INNER JOIN dbo.establishment E
-        ON E.id = @establishmentId;
+    ) LastCompleteSubmission;
 
     DROP TABLE #SectionIds;
 END
