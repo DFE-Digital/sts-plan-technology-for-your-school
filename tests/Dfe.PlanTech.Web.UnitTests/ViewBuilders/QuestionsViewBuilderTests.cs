@@ -412,7 +412,6 @@ public class QuestionsViewBuilderTests
         var section = MakeSection("S1", "sec-1", "Cyber security processes", q1, q2);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        // 👇 Ensure Establishment is populated
         var submissionWithResponses = new SubmissionResponsesModel(
             1,
             new List<QuestionWithAnswerModel> { new QuestionWithAnswerModel { AnswerSysId = "A1" } }
