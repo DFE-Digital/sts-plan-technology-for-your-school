@@ -45,9 +45,19 @@ public class ContentfulService(
         return _contentfulWorkflow.GetPageBySlugAsync(slug);
     }
 
+    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page)
+    {
+        return _contentfulWorkflow.GetPaginatedRecommendationEntriesAsync(page);
+    }
+
     public Task<QuestionnaireQuestionEntry> GetQuestionByIdAsync(string questionId)
     {
         return _contentfulWorkflow.GetEntryById<QuestionnaireQuestionEntry>(questionId);
+    }
+
+    public Task<int> GetRecommendationChunkCountAsync(int page)
+    {
+        return _contentfulWorkflow.GetRecommendationChunkCountAsync(page);
     }
 
     public Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null)
