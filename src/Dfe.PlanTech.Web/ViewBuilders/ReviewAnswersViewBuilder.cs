@@ -125,7 +125,19 @@ public class ReviewAnswersViewBuilder(
     {
         try
         {
-            await _submissionService.ConfirmCheckAnswersAsync(submissionId);
+            var establishmentId = GetEstablishmentIdOrThrowException();
+            var matEstablishmentId = CurrentUser.MatEstablishmentId;
+            var userId = GetUserIdOrThrowException();
+
+            var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
+
+            await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                establishmentId,
+                matEstablishmentId,
+                submissionId,
+                userId,
+                section
+            );
         }
         catch (Exception e)
         {

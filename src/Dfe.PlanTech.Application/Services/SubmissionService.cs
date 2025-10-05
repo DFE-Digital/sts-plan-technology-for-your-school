@@ -24,7 +24,7 @@ public class SubmissionService(
             isCompletedSubmission: false);
         if (inProgressSubmission is not null)
         {
-            await _submissionWorkflow.SetSubmissionInaccessible(inProgressSubmission.Id);
+            await _submissionWorkflow.SetSubmissionInaccessibleAsync(inProgressSubmission.Id);
         }
 
         return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
@@ -36,6 +36,11 @@ public class SubmissionService(
         return submission is null
             ? null
             : new SubmissionResponsesModel(submission, section);
+    }
+
+    public Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
+    {
+        return _submissionWorkflow.GetSubmissionByIdAsync(submissionId);
     }
 
     public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission)
@@ -107,8 +112,13 @@ public class SubmissionService(
         return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
-    public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
+    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
     {
-        await _submissionWorkflow.SetSubmissionInaccessible(establishmentId, sectionId);
+        return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
+    }
+
+    public async Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)
+    {
+        await _submissionWorkflow.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
     }
 }

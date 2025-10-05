@@ -79,7 +79,7 @@ public class SubmissionServiceTests
         Assert.Same(cloned, result);
 
         await _submissionWorkflow.Received(1).CloneLatestCompletedSubmission(123, section);
-        await _submissionWorkflow.Received(1).SetSubmissionInaccessible(inProgress.Id);
+        await _submissionWorkflow.Received(1).SetSubmissionInaccessibleAsync(inProgress.Id);
     }
 
     [Fact]
@@ -98,7 +98,7 @@ public class SubmissionServiceTests
 
         Assert.Same(cloned, result);
         await _submissionWorkflow.Received(1).CloneLatestCompletedSubmission(123, section);
-        await _submissionWorkflow.DidNotReceive().SetSubmissionInaccessible(Arg.Any<int>());
+        await _submissionWorkflow.DidNotReceive().SetSubmissionInaccessibleAsync(Arg.Any<int>());
     }
 
     [Fact]

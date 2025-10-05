@@ -10,11 +10,11 @@ internal class RecommendationEntityConfiguration : IEntityTypeConfiguration<Reco
     {
         builder.HasKey(recommendation => recommendation.Id);
         builder.Property(recommendation => recommendation.Id).ValueGeneratedOnAdd();
+        builder.Property(recommendation => recommendation.RecommendationText).HasMaxLength(4000); // NVARCHAR max length
         builder.Property(recommendation => recommendation.ContentfulRef).HasMaxLength(50);
         builder.Property(recommendation => recommendation.DateCreated).HasColumnType("datetime").HasDefaultValue();
-        builder.Property(recommendation => recommendation.RecommendationText).HasMaxLength(4000); // NVARCHAR max length
 
-        builder.HasOne(r => r.Question)
+        builder.HasOne(recommendation => recommendation.Question)
             .WithMany()
             .HasForeignKey(r => r.QuestionId)
             .OnDelete(DeleteBehavior.Restrict);

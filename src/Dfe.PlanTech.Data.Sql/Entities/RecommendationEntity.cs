@@ -16,7 +16,7 @@ public class RecommendationEntity
 
     public int QuestionId { get; init; }
 
-    public QuestionEntity Question { get; set; } = null!;
+    public QuestionEntity Question { get; init; } = null!;
 
     public bool Archived { get; set; } = false;
 
