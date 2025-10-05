@@ -1,9 +1,8 @@
 ﻿using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.Application.Services.Interfaces
+namespace Dfe.PlanTech.Application.Services.Interfaces;
+
+public interface IQuestionService
 {
-    public interface IQuestionService
-    {
-        Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(int establishmentId, QuestionnaireSectionEntry section);
-    }
+    Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(int establishmentId, QuestionnaireSectionEntry section);
 }

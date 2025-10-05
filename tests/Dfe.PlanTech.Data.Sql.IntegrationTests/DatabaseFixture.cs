@@ -27,7 +27,7 @@ public class DatabaseFixture : IAsyncLifetime
         var upgrader = DeployChanges.To
             .SqlDatabase(ConnectionString)
             .WithScriptsEmbeddedInAssembly(
-                typeof(Dfe.PlanTech.DatabaseUpgrader.Options).Assembly,
+                typeof(DatabaseUpgrader.Options).Assembly,
                 s => s.StartsWith("Dfe.PlanTech.DatabaseUpgrader.Scripts", StringComparison.Ordinal))
             .LogToConsole()
             .Build();
