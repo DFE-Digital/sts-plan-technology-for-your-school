@@ -70,7 +70,9 @@ public class RecommendationsViewBuilder(
             PreviousChunk = previousChunk,
             NextChunk = nextChunk,
             CurrentChunkPosition = currentChunkIndex + 1,
-            TotalChunks = subtopicChunks.Count
+            TotalChunks = subtopicChunks.Count,
+            Status = "In progress", // TODO: enum, and real value
+            LastUpdated = DateTime.Today, // TODO: real value
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
