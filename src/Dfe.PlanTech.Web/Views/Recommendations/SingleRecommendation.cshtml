@@ -33,38 +33,57 @@
 						<a class="govuk-link" href="print">Print all recommendations for @Model.Section.Name.ToLower()</a>
 					</p>
 				</div>
-				<div class="govuk-grid-column-two-thirds">
-					<div class="recommendation-piece-content">
-						<span class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
-						<h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
+                <div class="govuk-grid-column-two-thirds">
+                    <div class="recommendation-piece-content">
+                        <span class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
+                        <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
 
-						@foreach (var content in recommendation.Content)
-						{
-							<partial name="Components/PageComponentFactory" model="@content" />
-						}
-					</div>
+                        <table>
+                            <thead class="govuk-table__head">
+                            <tr class="govuk-table__row">
+                                <th scope="col" class="govuk-table__header">Status</th>
+                                <th scope="col" class="govuk-table__header">Last updated</th>
+                            </tr>
+                            </thead>
+                            <tbody class="govuk-table__body">
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag @Model.StatusTagClass">
+                                        @Model.Status
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
+                            </tr>
+                            </tbody>
+                        </table>
 
-					@if (recommendation.CSLink != null)
-					{
-						<div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
-							<a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
-						</div>
-					}
+                        @foreach (var content in recommendation.Content)
+                        {
+                            <partial name="Components/PageComponentFactory" model="@content"/>
+                        }
+                    </div>
 
-					<div>
-						<govuk-pagination>
-							@if (Model.PreviousChunk != null)
-							{
-								<govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.SlugifiedLinkText" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state" />
-							}
+                    @if (recommendation.CSLink != null)
+                    {
+                        <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
+                            <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
+                        </div>
+                    }
 
-							@if (Model.NextChunk != null)
-							{
-								<govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.SlugifiedLinkText" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state" />
-							}
-						</govuk-pagination>
-					</div>
-				</div>
+                    <div>
+                        <govuk-pagination>
+                            @if (Model.PreviousChunk != null)
+                            {
+                                <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.SlugifiedLinkText" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state"/>
+                            }
+
+                            @if (Model.NextChunk != null)
+                            {
+                                <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.SlugifiedLinkText" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state"/>
+                            }
+                        </govuk-pagination>
+                    </div>
+                </div>
 			</div>
 		</div>
 	</div>

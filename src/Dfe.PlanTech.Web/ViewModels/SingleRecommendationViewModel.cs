@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -16,4 +17,18 @@ public class SingleRecommendationViewModel
     public RecommendationChunkEntry? NextChunk { get; set; } = null!;
     public int CurrentChunkPosition { get; set; }
     public int TotalChunks { get; set; }
+    // public string Status { get; set; } = "In progress"; // TODO: enum
+    public string Status { get; set; } = "Complete"; // TODO: enum
+    public string StatusText => Status;
+    public string StatusTagClass => Status switch // TODO: centralise, as this logic will be shared site-wide (maybe just pull out the colour?)
+    {
+        "Complete" => "govuk-tag--green",
+        "In progress" => "govuk-tag--blue",
+        "On hold" => "govuk-tag--red",
+        "Not started" => "govuk-tag--grey",
+        _ => "govuk-tag--grey"
+    };
+    // public DateTime? LastUpdated { get; set; } = DateTime.Today;
+    public DateTime? LastUpdated { get; set; } = DateTime.Today.AddDays(-40);
+    public string LastUpdatedFormatted => LastUpdated?.ToString("d MMMM yyyy") ?? string.Empty; // TODO: Consider a default along the lines of "not known" / "never updated"?
 }
