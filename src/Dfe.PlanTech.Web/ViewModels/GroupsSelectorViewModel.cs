@@ -9,11 +9,11 @@ public class GroupsSelectorViewModel
 {
     public string GroupName { get; set; } = null!;
 
-    public List<SqlEstablishmentLinkDto> GroupEstablishments { get; set; } = null!;
+    public List<SqlEstablishmentLinkDto> GroupEstablishments { get; set; } = [];
 
     public ComponentTitleEntry Title { get; init; } = null!;
 
-    public List<ContentfulEntry> Content { get; init; } = null!;
+    public List<ContentfulEntry> Content { get; init; } = [];
 
     public string? ErrorMessage { get; set; }
 

@@ -105,7 +105,7 @@ public class RecommendationsViewBuilder(
                 return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, null);
 
             case SubmissionStatus.CompleteReviewed:
-                var viewModel = await BuildRecommendationsViewModel(
+                var viewModel = BuildRecommendationsViewModel(
                     category,
                     submissionRoutingData,
                     section,
@@ -123,36 +123,14 @@ public class RecommendationsViewBuilder(
         }
     }
 
-    public async Task<IActionResult> RouteBySectionSlugAndMaturity(Controller controller, string sectionSlug, string? maturity)
-    {
-        if (!_contentfulOptions.UsePreviewApi)
-        {
-            return controller.RedirectToHomePage();
-        }
-
-        var establishmentId = GetEstablishmentIdOrThrowException();
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
-
-        var viewModel = new RecommendationsViewModel()
-        {
-            SectionName = submissionRoutingData.QuestionnaireSection.Name,
-            Chunks = section.CoreRecommendations.ToList(),
-            Slug = "preview",
-        };
-
-        return controller.View(RecommendationsViewName, viewModel);
-    }
-
-    private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(
+    private RecommendationsViewModel BuildRecommendationsViewModel(
         QuestionnaireCategoryEntry category,
         SubmissionRoutingDataModel submissionRoutingData,
         QuestionnaireSectionEntry section,
         string sectionSlug
     )
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        _ = GetEstablishmentIdOrThrowException();
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
         var subtopicChunks = section.GetRecommendationChunksByAnswerIds(answerIds);
