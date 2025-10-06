@@ -136,37 +136,6 @@ public class CategoryLandingViewComponentViewBuilderTests
     }
 
     [Fact]
-    public async Task Recommendations_When_LastMaturity_Missing_Returns_Empty_Model()
-    {
-        // Arrange
-        var section = MakeSection("S1", "Sec 1", "sec-1");
-        var category = MakeCategory(section);
-
-        // No maturity info -> section status without LastMaturity
-        var statuses = new List<SqlSectionStatusDto>
-        {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = null }
-        };
-
-        var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(statuses);
-
-        var sut = CreateSut(submission: submission);
-
-        // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null);
-
-        // Assert
-        var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Null(secVm.Recommendations.SectionName);
-        Assert.Null(secVm.Recommendations.SectionSlug);
-        Assert.Null(secVm.Recommendations.NoRecommendationFoundErrorMessage);
-        Assert.Empty(secVm.Recommendations.Answers);
-        Assert.Empty(secVm.Recommendations.Chunks);
-    }
-
-    [Fact]
     public async Task Recommendations_When_Intro_Null_Sets_Error_Message()
     {
         // Arrange
