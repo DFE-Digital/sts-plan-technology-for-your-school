@@ -17,8 +17,7 @@ public class SingleRecommendationViewModel
     public RecommendationChunkEntry? NextChunk { get; set; } = null!;
     public int CurrentChunkPosition { get; set; }
     public int TotalChunks { get; set; }
-    // public string Status { get; set; } = "In progress"; // TODO: enum
-    public string Status { get; set; } = "Complete"; // TODO: enum
+    public required string Status { get; init; } // TODO: Enum +- static constants `Dfe.PlanTech.Core.Constants.RecommendationConstants`
     public string StatusText => Status;
     public string StatusTagClass => Status switch // TODO: centralise, as this logic will be shared site-wide (maybe just pull out the colour?)
     {
@@ -28,7 +27,6 @@ public class SingleRecommendationViewModel
         "Not started" => "govuk-tag--grey",
         _ => "govuk-tag--grey"
     };
-    // public DateTime? LastUpdated { get; set; } = DateTime.Today;
-    public DateTime? LastUpdated { get; set; } = DateTime.Today.AddDays(-40);
+    public required DateTime? LastUpdated { get; init; }
     public string LastUpdatedFormatted => LastUpdated?.ToString("d MMMM yyyy") ?? string.Empty; // TODO: Consider a default along the lines of "not known" / "never updated"?
 }
