@@ -2,9 +2,11 @@
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Services;
 
@@ -58,6 +60,38 @@ public class EstablishmentServiceTests
         await _establishmentWorkflow
             .Received(1)
             .GetOrCreateEstablishmentAsync(establishmentModel);
+    }
+
+    [Fact]
+    public async Task GetLatestSelectedGroupSchoolAsync_Delegates_To_Workflow()
+    {
+        var expectedEstablishment = new SqlEstablishmentDto
+        {
+            Id = 1,
+            EstablishmentRef = "123",
+            OrgName = "Test Establishment",
+            DateCreated = DateTime.UtcNow
+        };
+
+        _establishmentWorkflow
+           .GetEstablishmentByReferenceAsync(Arg.Any<string>())
+           .Returns(expectedEstablishment);
+
+        var establishment = await _establishmentWorkflow.GetEstablishmentByReferenceAsync("123");
+
+        Assert.Same(expectedEstablishment, establishment);
+    }
+
+    [Fact]
+    public async Task GetLatestSelectedGroupSchoolAsync_Throws_Exception_If_Null_Establishment_Returned()
+    {
+        _establishmentWorkflow
+          .GetEstablishmentByReferenceAsync(Arg.Any<string>())
+          .Returns(default(SqlEstablishmentDto?));
+
+        var action = async () => await _establishmentWorkflow.GetEstablishmentByReferenceAsync("123");
+
+        await Assert.ThrowsAsync<DatabaseException>(action);
     }
 
     [Fact]
