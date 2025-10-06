@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -61,6 +62,42 @@ public class EstablishmentServiceTests
     }
 
     [Fact]
+    public async Task GetLatestSelectedGroupSchoolAsync_Delegates_To_Workflow()
+    {
+        var expectedEstablishment = new SqlEstablishmentDto
+        {
+            Id = 1,
+            EstablishmentRef = "123",
+            OrgName = "Test Establishment",
+            DateCreated = DateTime.UtcNow
+        };
+
+        _establishmentWorkflow
+           .GetEstablishmentByReferenceAsync(Arg.Any<string>())
+           .Returns(expectedEstablishment);
+
+        var sut = CreateServiceUnderTest();
+
+        var establishment = await sut.GetLatestSelectedGroupSchoolAsync("123");
+
+        Assert.Same(expectedEstablishment, establishment);
+    }
+
+    [Fact]
+    public async Task GetLatestSelectedGroupSchoolAsync_Throws_Exception_If_Null_Establishment_Returned()
+    {
+        _establishmentWorkflow
+          .GetEstablishmentByReferenceAsync(Arg.Any<string>())
+          .Returns(default(SqlEstablishmentDto?));
+
+        var sut = CreateServiceUnderTest();
+
+        var action = async () => await sut.GetLatestSelectedGroupSchoolAsync("123");
+
+        await Assert.ThrowsAsync<DatabaseException>(action);
+    }
+
+    [Fact]
     public async Task GetEstablishmentLinksWithSubmissionStatusesAndCounts_Computes_Completed_Counts()
     {
         // Arrange
@@ -90,7 +127,8 @@ public class EstablishmentServiceTests
         var groupEstablishments = new List<SqlEstablishmentLinkDto>
         {
             new SqlEstablishmentLinkDto { Id = groupEstablishmentId, Urn = "URN-A", EstablishmentName = "A" },
-            new SqlEstablishmentLinkDto { Id = 102, Urn = "URN-B", EstablishmentName = "B" }
+            new SqlEstablishmentLinkDto { Id = 102, Urn = "URN-B", EstablishmentName = "B" },
+            new SqlEstablishmentLinkDto { Id = 103, Urn = "URN-C", EstablishmentName = "C" }
         };
         _establishmentWorkflow.GetGroupEstablishments(groupEstablishmentId).Returns(groupEstablishments);
 
@@ -99,7 +137,8 @@ public class EstablishmentServiceTests
             new SqlEstablishmentDto { Id = 1001, EstablishmentRef = "URN-A", OrgName = "A" },
             new SqlEstablishmentDto { Id = 1002, EstablishmentRef = "URN-B", OrgName = "B" }
         };
-        _establishmentWorkflow.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B" })))
+
+        _establishmentWorkflow.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B", "URN-C" })))
                               .Returns(establishments);
 
         _submissionWorkflow.GetSectionStatusesAsync(1001, Arg.Is<IEnumerable<string>>(ids => ids.SequenceEqual(new[] { "S1", "S2" })))
@@ -110,7 +149,7 @@ public class EstablishmentServiceTests
 
         _submissionWorkflow.GetSectionStatusesAsync(1002, Arg.Any<IEnumerable<string>>())
                            .Returns([
-                               new SqlSectionStatusDto { Completed = false },
+                               new SqlSectionStatusDto { Completed = true, LastCompletionDate = DateTime.UtcNow },
                                new SqlSectionStatusDto { Completed = false }
                            ]);
 
@@ -122,8 +161,10 @@ public class EstablishmentServiceTests
         // Assert
         var a = result.Single(x => x.Urn == "URN-A");
         var b = result.Single(x => x.Urn == "URN-B");
+        var c = result.Single(x => x.Urn == "URN-C");
         Assert.Equal(2, a.CompletedSectionsCount);
-        Assert.Equal(0, b.CompletedSectionsCount);
+        Assert.Equal(1, b.CompletedSectionsCount);
+        Assert.Equal(0, c.CompletedSectionsCount);
     }
 
     [Fact]
