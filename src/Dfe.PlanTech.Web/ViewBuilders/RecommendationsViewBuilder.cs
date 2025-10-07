@@ -11,6 +11,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Amqp;
 using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
@@ -74,6 +75,31 @@ public class RecommendationsViewBuilder(
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
+    }
+
+    public async Task GetRecommendationHistory(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug
+    )
+    {
+        var establishmentId = GetEstablishmentIdOrThrowException();
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find category for slug {categorySlug}");
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+
+        var coreRecommendationReferences = section.CoreRecommendations.Select(cr => cr.Id).ToList();
+
+        var recommendationStatuses = await _submissionService.GetRecommendationStatusesAsync(coreRecommendationReferences, establishmentId);
+
+        var output = section.CoreRecommendations.Select(cr => new
+        {
+            ContentfulRef = cr.Id,
+            Title = cr.HeaderText,
+            DateLastUpdated = recommendationStatuses[cr.Id].DateCreated,
+            Status = recommendationStatuses[cr.Id].NewStatus
+        });
     }
 
     public async Task<IActionResult> RouteBySectionAndRecommendation(

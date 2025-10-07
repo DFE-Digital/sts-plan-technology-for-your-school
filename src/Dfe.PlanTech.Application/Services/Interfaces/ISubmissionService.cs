@@ -11,6 +11,10 @@ public interface ISubmissionService
     Task ConfirmCheckAnswersAsync(int submissionId);
     Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId);
     Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, bool isCompletedSubmission);
+    Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetRecommendationStatusesAsync(
+        IEnumerable<string> recommendationContentfulReferences,
+        int establishmentId
+    );
     Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(int establishmentId, IEnumerable<string> sectionIds);
     Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId);
     Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission);
