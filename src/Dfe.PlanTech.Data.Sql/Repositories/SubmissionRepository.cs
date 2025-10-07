@@ -109,7 +109,8 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var previousStatuses = _db.EstablishmentRecommendationHistories
             .Where(erh => erh.EstablishmentId == establishmentId &&
                           erh.MatEstablishmentId == matEstablishmentId)
-            .ToDictionary(r => r.RecommendationId, r => r.NewStatus);
+            .GroupBy(erh => erh.RecommendationId, erh => erh)
+            .ToDictionary(group => group.Key, group => group.OrderByDescending(erh => erh.DateCreated).First().NewStatus);
 
         var recommendationStatuses = recommendations.Select(r => new EstablishmentRecommendationHistoryEntity
         {
@@ -179,8 +180,9 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
-        submission.Status = SubmissionStatus.CompleteReviewed.ToString();
+        submission.Completed = true;
         submission.DateCompleted = DateTime.UtcNow;
+        submission.Status = SubmissionStatus.CompleteReviewed.ToString();
 
         var otherSubmissions = await _db.Submissions
             .Where(s =>
