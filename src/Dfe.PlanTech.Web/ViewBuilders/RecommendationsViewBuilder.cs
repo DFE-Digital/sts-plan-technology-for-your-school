@@ -1,4 +1,4 @@
-﻿using Contentful.Core.Configuration;
+using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
