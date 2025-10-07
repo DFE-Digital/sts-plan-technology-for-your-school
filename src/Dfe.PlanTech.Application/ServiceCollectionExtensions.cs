@@ -48,6 +48,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<IContentfulWorkflow, ContentfulWorkflow>()
             .AddScoped<IEstablishmentWorkflow, EstablishmentWorkflow>()
             .AddScoped<ISignInWorkflow, SignInWorkflow>()
+            .AddScoped<IRecommendationWorkflow, RecommendationWorkflow>()
             .AddScoped<ISubmissionWorkflow, SubmissionWorkflow>()
             .AddScoped<IUserWorkflow, UserWorkflow>();
     }

@@ -1,10 +1,11 @@
 ﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Application.Services;
 
 public class RecommendationService(
-    // IRecommendationWorkflow recommendationWorkflow
+    IRecommendationWorkflow recommendationWorkflow
 ) : IRecommendationService
 {
     public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByRecommendationIdAsync(
@@ -12,12 +13,9 @@ public class RecommendationService(
         int establishmentId
     )
     {
-        // Temporary stub
-        var dict = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>();
-        return Task.FromResult(dict);
-        // return recommendationWorkflow.GetMostRecentRecommendationStatusesAsync(
-        //     recommendationContentfulReferences,
-        //     establishmentId
-        // );
+        return recommendationWorkflow.GetLatestRecommendationStatusesByRecommendationIdAsync(
+            recommendationContentfulReferences,
+            establishmentId
+        );
     }
 }
