@@ -20,6 +20,7 @@ public class RecommendationsViewBuilder(
     IOptions<ContentfulOptions> contentfulOptions,
     IContentfulService contentfulService,
     ISubmissionService submissionService,
+    IRecommendationService recommendationService,
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
@@ -46,17 +47,28 @@ public class RecommendationsViewBuilder(
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: true);
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var subtopicChunks = section.GetRecommendationChunksByAnswerIds(answerIds);
+        var recommendationChunks = section.GetRecommendationChunksByAnswerIds(answerIds);
 
-        var currentChunk = subtopicChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
+        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
 
-        var currentChunkIndex = subtopicChunks.IndexOf(currentChunk);
-        var previousChunk = currentChunkIndex > 0
-                            ? subtopicChunks[currentChunkIndex - 1]
+
+        var coreRecommendationIdsForSection = section.CoreRecommendations
+            .Select(entry => entry.Id)
+            .ToHashSet();
+
+        var recommendationStatusesByRecommendationId = await recommendationService.GetLatestRecommendationStatusesByRecommendationIdAsync(
+            coreRecommendationIdsForSection,
+            establishmentId
+        );
+        var currentRecommendationHistoryStatus = recommendationStatusesByRecommendationId.GetValueOrDefault(currentRecommendationChunk.Id);
+
+        var currentRecommendationIndex = recommendationChunks.IndexOf(currentRecommendationChunk);
+        var previousRecommendationChunk = currentRecommendationIndex > 0
+                            ? recommendationChunks[currentRecommendationIndex - 1]
                             : null;
-        var nextChunk = currentChunkIndex != subtopicChunks.Count - 1
-                            ? subtopicChunks[currentChunkIndex + 1]
+        var nextRecommendationChunk = currentRecommendationIndex != recommendationChunks.Count - 1
+                            ? recommendationChunks[currentRecommendationIndex + 1]
                             : null;
 
         var viewModel = new SingleRecommendationViewModel
@@ -65,14 +77,14 @@ public class RecommendationsViewBuilder(
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
             Section = section,
-            Chunks = subtopicChunks,
-            CurrentChunk = currentChunk,
-            PreviousChunk = previousChunk,
-            NextChunk = nextChunk,
-            CurrentChunkPosition = currentChunkIndex + 1,
-            TotalChunks = subtopicChunks.Count,
-            Status = "In progress", // TODO: enum, and real value
-            LastUpdated = DateTime.Today, // TODO: real value
+            Chunks = recommendationChunks,
+            CurrentChunk = currentRecommendationChunk,
+            PreviousChunk = previousRecommendationChunk,
+            NextChunk = nextRecommendationChunk,
+            CurrentChunkPosition = currentRecommendationIndex + 1,
+            TotalChunks = recommendationChunks.Count,
+            Status = currentRecommendationHistoryStatus?.NewStatus ?? "Unknown", // TODO: Default?
+            LastUpdated = currentRecommendationHistoryStatus?.DateCreated,
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);

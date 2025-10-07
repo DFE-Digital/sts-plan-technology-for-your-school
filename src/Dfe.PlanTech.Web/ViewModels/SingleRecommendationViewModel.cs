@@ -28,5 +28,5 @@ public class SingleRecommendationViewModel
         _ => "govuk-tag--grey"
     };
     public required DateTime? LastUpdated { get; init; }
-    public string LastUpdatedFormatted => LastUpdated?.ToString("d MMMM yyyy") ?? string.Empty; // TODO: Consider a default along the lines of "not known" / "never updated"?
+    public string LastUpdatedFormatted => LastUpdated?.ToString("d MMMM yyyy") ?? "Not known / never"; // TODO: Consider empty string vs a default along the lines of "not known" / "never updated"?
 }
