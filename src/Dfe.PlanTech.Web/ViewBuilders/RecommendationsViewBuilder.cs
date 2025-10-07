@@ -11,7 +11,6 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Amqp;
 using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
