@@ -112,7 +112,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 erh.EstablishmentId == establishmentId &&
                 erh.MatEstablishmentId == matEstablishmentId
             )
-            .Select(erh => new {erh.RecommendationId, erh.NewStatus, erh.DateCreated})
+            .Select(erh => new { erh.RecommendationId, erh.NewStatus, erh.DateCreated })
             .ToListAsync();
 
         var mostRecentStatusForEachRecommendation = allHistoricalRecommendationsForEstablishment
