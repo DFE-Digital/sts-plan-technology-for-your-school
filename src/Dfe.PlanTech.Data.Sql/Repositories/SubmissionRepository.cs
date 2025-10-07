@@ -53,7 +53,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
         if (submission is null)
         {
-            throw new InvalidOperationException($"Could not find submssion with ID {submissionId} in database");
+            throw new InvalidOperationException($"Could not find submission with ID {submissionId} in database");
         }
 
         var answeredQuestionIds = submission.Responses.Select(response => response.QuestionId);
@@ -106,10 +106,21 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             .Where(x => x is not null)
             .ToDictionary(x => x!.Id, x => x.Status);
 
-        var previousStatuses = _db.EstablishmentRecommendationHistories
-            .Where(erh => erh.EstablishmentId == establishmentId &&
-                          erh.MatEstablishmentId == matEstablishmentId)
-            .ToDictionary(r => r.RecommendationId, r => r.NewStatus);
+        var allHistoricalRecommendationsForEstablishment = await _db.EstablishmentRecommendationHistories
+            .AsNoTracking()
+            .Where(erh =>
+                erh.EstablishmentId == establishmentId &&
+                erh.MatEstablishmentId == matEstablishmentId
+            )
+            .Select(erh => new {erh.RecommendationId, erh.NewStatus, erh.DateCreated})
+            .ToListAsync();
+
+        var mostRecentStatusForEachRecommendation = allHistoricalRecommendationsForEstablishment
+            .GroupBy(x => x.RecommendationId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(x => x.DateCreated).First().NewStatus
+            );
 
         var recommendationStatuses = recommendations.Select(r => new EstablishmentRecommendationHistoryEntity
         {
@@ -117,8 +128,9 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             MatEstablishmentId = matEstablishmentId,
             RecommendationId = r.Id,
             UserId = userId,
-            PreviousStatus = previousStatuses.TryGetValue(r.Id, out var previousStatus) ? previousStatus : null,
-            NewStatus = answerStatusDictionary[r.ContentfulRef]
+            PreviousStatus = mostRecentStatusForEachRecommendation.TryGetValue(r.Id, out var previousStatus) ? previousStatus : null,
+            NewStatus = answerStatusDictionary[r.ContentfulRef],
+            NoteText = "Updated by the system due to a newly-submitted self-assessment.",
         });
 
         await _db.EstablishmentRecommendationHistories.AddRangeAsync(recommendationStatuses);

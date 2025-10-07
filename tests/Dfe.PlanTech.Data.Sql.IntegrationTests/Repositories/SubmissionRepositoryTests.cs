@@ -1,4 +1,6 @@
 ﻿using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -310,5 +312,298 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.NotNull(otherSubmission);
         Assert.Equal(SubmissionStatus.Inaccessible.ToString(), otherSubmission!.Status);
         Assert.True(otherSubmission.Deleted);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_WhenNoPreviousHistory_ThenCreatesHistoryWithNullPreviousStatus()
+    {
+        // Arrange
+        var establishment = new EstablishmentEntity { EstablishmentRef = "EST100", OrgName = "Test School 100" };
+        var user = new UserEntity { DfeSignInRef = "user-100" };
+        var question = new QuestionEntity { QuestionText = "Question", ContentfulRef = "Q-100" };
+        var answerCompleted = new AnswerEntity { AnswerText = "Completed", ContentfulRef = "A-COMP-100" };
+
+        DbContext.Establishments.Add(establishment);
+        DbContext.Users.Add(user);
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answerCompleted);
+        await DbContext.SaveChangesAsync();
+
+        var submission = new SubmissionEntity
+        {
+            SectionId = "section-100",
+            SectionName = "Section 100",
+            EstablishmentId = establishment.Id,
+            Status = "CompleteNotReviewed",
+            Completed = true,
+            Responses = new List<ResponseEntity>
+            {
+                new ResponseEntity
+                {
+                    QuestionId = question.Id,
+                    AnswerId = answerCompleted.Id,
+                    Answer = answerCompleted,
+                    UserId = user.Id,
+                    Maturity = "",
+                    DateCreated = DateTime.UtcNow
+                }
+            }
+        };
+
+        DbContext.Submissions.Add(submission);
+        await DbContext.SaveChangesAsync();
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("section-100"),
+            Name = "Section 100",
+            CoreRecommendations = new List<RecommendationChunkEntry>
+            {
+                new RecommendationChunkEntry
+                {
+                    Sys = new SystemDetails("REC-100"),
+                    Header = "Recommendation 100",
+                    Question = new QuestionnaireQuestionEntry { Sys = new SystemDetails(question.ContentfulRef) },
+                    CompletingAnswers = new List<QuestionnaireAnswerEntry>
+                    {
+                        new QuestionnaireAnswerEntry { Sys = new SystemDetails(answerCompleted.ContentfulRef) }
+                    },
+                    InProgressAnswers = new List<QuestionnaireAnswerEntry>()
+                }
+            }
+        };
+
+        // Act
+        await _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishment.Id, null, submission.Id, user.Id, section);
+
+        // Assert
+        var histories = DbContext.EstablishmentRecommendationHistories.Where(h => h.EstablishmentId == establishment.Id).ToList();
+        Assert.Single(histories);
+        var history = histories[0];
+
+        Assert.Equal(establishment.Id, history.EstablishmentId);
+        Assert.Null(history.MatEstablishmentId);
+        Assert.Equal(user.Id, history.UserId);
+        Assert.Null(history.PreviousStatus);
+        Assert.Equal(RecommendationConstants.Completed, history.NewStatus);
+        Assert.Equal("Updated by the system due to a newly-submitted self-assessment.", history.NoteText);
+
+        // Recommendation upserted and linked
+        Assert.True(history.RecommendationId > 0);
+        var recommendation = await DbContext.Recommendations.FindAsync(history.RecommendationId);
+        Assert.NotNull(recommendation);
+        Assert.Equal("REC-100", recommendation!.ContentfulRef);
+        Assert.Equal(question.Id, recommendation.QuestionId);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_WhenPreviousHistoryExists_ThenSetsPreviousStatusToLatest()
+    {
+        // Arrange
+        var establishment = new EstablishmentEntity { EstablishmentRef = "EST200", OrgName = "Test School 200" };
+        var user = new UserEntity { DfeSignInRef = "user-200" };
+        var question = new QuestionEntity { QuestionText = "Question 200", ContentfulRef = "Q-200" };
+        var answerInProgress = new AnswerEntity { AnswerText = "In Progress", ContentfulRef = "A-INPROG-200" };
+
+        DbContext.Establishments.Add(establishment);
+        DbContext.Users.Add(user);
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answerInProgress);
+        await DbContext.SaveChangesAsync();
+
+        var recommendation = new RecommendationEntity
+        {
+            ContentfulRef = "REC-200",
+            RecommendationText = "Recommendation 200",
+            QuestionId = question.Id,
+            DateCreated = DateTime.UtcNow.AddDays(-10)
+        };
+        DbContext.Recommendations.Add(recommendation);
+        await DbContext.SaveChangesAsync();
+
+        var oldHistory = new EstablishmentRecommendationHistoryEntity
+        {
+            EstablishmentId = establishment.Id,
+            RecommendationId = recommendation.Id,
+            UserId = user.Id,
+            NewStatus = RecommendationConstants.NotStarted,
+            DateCreated = DateTime.UtcNow.AddDays(-5)
+        };
+        var latestHistory = new EstablishmentRecommendationHistoryEntity
+        {
+            EstablishmentId = establishment.Id,
+            RecommendationId = recommendation.Id,
+            UserId = user.Id,
+            NewStatus = RecommendationConstants.InProgress,
+            DateCreated = DateTime.UtcNow.AddDays(-1)
+        };
+        DbContext.EstablishmentRecommendationHistories.AddRange(oldHistory, latestHistory);
+        await DbContext.SaveChangesAsync();
+
+        var submission = new SubmissionEntity
+        {
+            SectionId = "section-200",
+            SectionName = "Section 200",
+            EstablishmentId = establishment.Id,
+            Status = "CompleteNotReviewed",
+            Completed = true,
+            Responses = new List<ResponseEntity>
+            {
+                new ResponseEntity
+                {
+                    QuestionId = question.Id,
+                    AnswerId = answerInProgress.Id,
+                    Answer = answerInProgress,
+                    UserId = user.Id,
+                    Maturity = "",
+                    DateCreated = DateTime.UtcNow
+                }
+            }
+        };
+        DbContext.Submissions.Add(submission);
+        await DbContext.SaveChangesAsync();
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("section-200"),
+            Name = "Section 200",
+            CoreRecommendations = new List<RecommendationChunkEntry>
+            {
+                new RecommendationChunkEntry
+                {
+                    Sys = new SystemDetails("REC-200"),
+                    Header = "Recommendation 200",
+                    Question = new QuestionnaireQuestionEntry { Sys = new SystemDetails(question.ContentfulRef) },
+                    CompletingAnswers = new List<QuestionnaireAnswerEntry>(),
+                    InProgressAnswers = new List<QuestionnaireAnswerEntry>
+                    {
+                        new QuestionnaireAnswerEntry { Sys = new SystemDetails(answerInProgress.ContentfulRef) }
+                    }
+                }
+            }
+        };
+
+        // Act
+        await _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishment.Id, null, submission.Id, user.Id, section);
+
+        // Assert
+        var histories = DbContext.EstablishmentRecommendationHistories
+            .Where(h => h.EstablishmentId == establishment.Id && h.RecommendationId == recommendation.Id)
+            .OrderBy(h => h.DateCreated)
+            .ToList();
+
+        Assert.Equal(3, histories.Count);
+        var created = histories.Last();
+        Assert.Equal(RecommendationConstants.InProgress, created.PreviousStatus);
+        Assert.Equal(RecommendationConstants.InProgress, created.NewStatus);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_WhenMultipleRecommendations_ThenWritesOneRowPerRecommendation_UsingLatestPreviousStatus()
+    {
+        // Arrange
+        var establishment = new EstablishmentEntity { EstablishmentRef = "EST300", OrgName = "Test School 300" };
+        var user = new UserEntity { DfeSignInRef = "user-300" };
+        var question1 = new QuestionEntity { QuestionText = "Q1", ContentfulRef = "Q-301" };
+        var question2 = new QuestionEntity { QuestionText = "Q2", ContentfulRef = "Q-302" };
+        var answerCompleted = new AnswerEntity { AnswerText = "Completed", ContentfulRef = "A-COMP-301" };
+        var answerOther = new AnswerEntity { AnswerText = "Other", ContentfulRef = "A-OTHER-302" };
+
+        DbContext.Establishments.Add(establishment);
+        DbContext.Users.Add(user);
+        DbContext.Questions.AddRange(question1, question2);
+        DbContext.Answers.AddRange(answerCompleted, answerOther);
+        await DbContext.SaveChangesAsync();
+
+        var recommendation1 = new RecommendationEntity { ContentfulRef = "REC-301", RecommendationText = "R1", QuestionId = question1.Id, DateCreated = DateTime.UtcNow.AddDays(-10) };
+        var recommendation2 = new RecommendationEntity { ContentfulRef = "REC-302", RecommendationText = "R2", QuestionId = question2.Id, DateCreated = DateTime.UtcNow.AddDays(-10) };
+        DbContext.Recommendations.AddRange(recommendation1, recommendation2);
+        await DbContext.SaveChangesAsync();
+
+        DbContext.EstablishmentRecommendationHistories.AddRange(
+            new EstablishmentRecommendationHistoryEntity
+            {
+                EstablishmentId = establishment.Id,
+                RecommendationId = recommendation1.Id,
+                UserId = user.Id,
+                NewStatus = RecommendationConstants.NotStarted,
+                DateCreated = DateTime.UtcNow.AddDays(-4)
+            },
+            new EstablishmentRecommendationHistoryEntity
+            {
+                EstablishmentId = establishment.Id,
+                RecommendationId = recommendation1.Id,
+                UserId = user.Id,
+                NewStatus = RecommendationConstants.Completed,
+                DateCreated = DateTime.UtcNow.AddDays(-2)
+            }
+        );
+        await DbContext.SaveChangesAsync();
+
+        var submission = new SubmissionEntity
+        {
+            SectionId = "section-300",
+            SectionName = "Section 300",
+            EstablishmentId = establishment.Id,
+            Status = "CompleteNotReviewed",
+            Completed = true,
+            Responses = new List<ResponseEntity>
+            {
+                new ResponseEntity { QuestionId = question1.Id, AnswerId = answerCompleted.Id, Answer = answerCompleted, UserId = user.Id, Maturity = "", DateCreated = DateTime.UtcNow },
+                new ResponseEntity { QuestionId = question2.Id, AnswerId = answerOther.Id, Answer = answerOther, UserId = user.Id, Maturity = "", DateCreated = DateTime.UtcNow }
+            }
+        };
+        DbContext.Submissions.Add(submission);
+        await DbContext.SaveChangesAsync();
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("section-300"),
+            Name = "Section 300",
+            CoreRecommendations = new List<RecommendationChunkEntry>
+            {
+                new RecommendationChunkEntry
+                {
+                    Sys = new SystemDetails("REC-301"),
+                    Header = "R1",
+                    Question = new QuestionnaireQuestionEntry { Sys = new SystemDetails(question1.ContentfulRef) },
+                    CompletingAnswers = new List<QuestionnaireAnswerEntry>
+                    {
+                        new QuestionnaireAnswerEntry { Sys = new SystemDetails(answerCompleted.ContentfulRef) }
+                    },
+                    InProgressAnswers = new List<QuestionnaireAnswerEntry>()
+                },
+                new RecommendationChunkEntry
+                {
+                    Sys = new SystemDetails("REC-302"),
+                    Header = "R2",
+                    Question = new QuestionnaireQuestionEntry { Sys = new SystemDetails(question2.ContentfulRef) },
+                    CompletingAnswers = new List<QuestionnaireAnswerEntry>(),
+                    InProgressAnswers = new List<QuestionnaireAnswerEntry>() // no matches -> NotStarted
+                }
+            }
+        };
+
+        // Act
+        await _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishment.Id, null, submission.Id, user.Id, section);
+
+        // Assert
+        var created = DbContext.EstablishmentRecommendationHistories
+            .Where(h => h.EstablishmentId == establishment.Id)
+            .OrderByDescending(h => h.DateCreated)
+            .ToList();
+
+        // exactly one new row per core recommendation
+        Assert.True(created.Count(h => h.RecommendationId == recommendation1.Id) >= 1);
+        Assert.True(created.Count(h => h.RecommendationId == recommendation2.Id) >= 1);
+
+        var latestForRec1 = created.First(h => h.RecommendationId == recommendation1.Id);
+        var latestForRec2 = created.First(h => h.RecommendationId == recommendation2.Id);
+
+        Assert.Equal(RecommendationConstants.Completed, latestForRec1.PreviousStatus);
+        Assert.Equal(RecommendationConstants.Completed, latestForRec1.NewStatus);
+
+        Assert.Null(latestForRec2.PreviousStatus);
+        Assert.Equal(RecommendationConstants.NotStarted, latestForRec2.NewStatus);
     }
 }

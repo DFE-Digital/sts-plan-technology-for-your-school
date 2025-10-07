@@ -141,7 +141,7 @@ public class ReviewAnswersViewBuilder(
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
+            Logger.LogError(e, "There was an error while trying to submit submission {SubmissionId}", submissionId);
             controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
         }
