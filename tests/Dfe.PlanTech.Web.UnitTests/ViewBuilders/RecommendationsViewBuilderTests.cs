@@ -1,6 +1,7 @@
 ﻿using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
@@ -111,7 +112,7 @@ public class RecommendationsViewBuilderTests
     [Fact]
     public async Task RouteToSingleRecommendation_Renders_SingleRecommendation_With_PrevNext()
     {
-        // Arrange
+        // Arrange - Setup recommendation service to return status data for integration testing
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
@@ -125,6 +126,23 @@ public class RecommendationsViewBuilderTests
         // Submission has answers that match chunk ids "C1","C2","C3"
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: new[] { "C1", "C2", "C3" });
         _submissions.GetSubmissionRoutingDataAsync(123, section, true).Returns(routing);
+
+        // Setup recommendation service with status data
+        var recommendationStatuses = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+        {
+            ["C2"] = new SqlEstablishmentRecommendationHistoryDto
+            {
+                EstablishmentId = 123,
+                RecommendationId = 2,
+                UserId = 1,
+                NewStatus = "Completed",
+                DateCreated = DateTime.UtcNow.AddDays(-1)
+            }
+        };
+        _recommendationService.GetLatestRecommendationStatusesByRecommendationIdAsync(
+            Arg.Is<IEnumerable<string>>(refs => refs.Contains("C1") && refs.Contains("C2") && refs.Contains("C3")),
+            123)
+            .Returns(recommendationStatuses);
 
         // Act (choose middle chunk to test prev/next both populated)
         var result = await sut.RouteToSingleRecommendation(ctl, categorySlug, "sec-1", "second-chunk", useChecklist: false);
@@ -145,6 +163,13 @@ public class RecommendationsViewBuilderTests
         Assert.NotNull(vm.NextChunk);
         Assert.Equal("first-chunk", vm.PreviousChunk!.SlugifiedLinkText);
         Assert.Equal("third-chunk", vm.NextChunk!.SlugifiedLinkText);
+
+        Assert.Equal("Completed", vm.Status);
+        Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
+
+        await _recommendationService.Received(1).GetLatestRecommendationStatusesByRecommendationIdAsync(
+            Arg.Is<IEnumerable<string>>(refs => refs.Contains("C1") && refs.Contains("C2") && refs.Contains("C3")),
+            123);
     }
 
     [Fact]
