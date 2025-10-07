@@ -24,6 +24,7 @@ public class RecommendationsViewBuilderTests
     private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
+    private readonly IRecommendationService _recommendationService = Substitute.For<IRecommendationService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
 
     // ---- Options
@@ -35,6 +36,7 @@ public class RecommendationsViewBuilderTests
             Options.Create(_contentfulOptions),
             _contentful,
             _submissions,
+            _recommendationService,
             _currentUser);
 
     private static Controller MakeController()
