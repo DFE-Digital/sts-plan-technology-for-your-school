@@ -18,7 +18,6 @@ public class SectionStatusEntityTests
         bool? expectedViewed = true;
         var expectedLastCompletionDate = new DateTime(2024, 03, 01, 10, 00, 00, DateTimeKind.Utc);
         var expectedStatus = SubmissionStatus.None; // default value
-        var expectedOrgName = "Test Trust";
 
         var entity = new SectionStatusEntity
         {
@@ -29,7 +28,6 @@ public class SectionStatusEntityTests
             DateUpdated = expectedDateUpdated,
             Viewed = expectedViewed,
             LastCompletionDate = expectedLastCompletionDate,
-            TrustName = expectedOrgName
         };
 
         // Act
@@ -43,7 +41,6 @@ public class SectionStatusEntityTests
         Assert.Equal(expectedDateUpdated, dto.DateUpdated);
         Assert.Equal(expectedViewed, dto.HasBeenViewed);
         Assert.Equal(expectedLastCompletionDate, dto.LastCompletionDate);
-        Assert.Equal(expectedOrgName, dto.TrustName);
 
         // Assert - properties not explicitly set by AsDto():
         Assert.Equal(expectedStatus, dto.Status);
@@ -59,7 +56,6 @@ public class SectionStatusEntityTests
             nameof(SqlSectionStatusDto.DateUpdated),
             nameof(SqlSectionStatusDto.HasBeenViewed),
             nameof(SqlSectionStatusDto.LastCompletionDate),
-            nameof(SqlSectionStatusDto.TrustName),
             },
             new[]
             {
