@@ -15,14 +15,14 @@
 	switch (topic.ProgressStatus)
 	{
 		case SectionProgressStatus.InProgress:
-            statusText = $"A self-assessment was started by {trustName} on {topic.DateUpdated}. ";
+            statusText = $"A self-assessment was started {(String.IsNullOrEmpty(trustName) ? "" : $"by {trustName}.")} on {topic.DateUpdated}. ";
 			linkText = $"Continue your self-assessment for {topicName}";
 			controller = nameof(QuestionsController);
 			action = nameof(QuestionsController.GetContinueSelfAssessment);
 			break;
 		case SectionProgressStatus.Completed:
-			statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate} by {trustName}.";
-			linkText = $"View {trustName} answes for {topicName}";
+            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}{(String.IsNullOrEmpty(trustName) ? "." : $" by {trustName}.")}";
+            linkText = $"View answers for {topicName}";
 			controller = nameof(ReviewAnswersController);
 			action = nameof(ReviewAnswersController.ViewAnswers);
 			break;
