@@ -135,7 +135,7 @@ public class ReviewAnswersViewBuilder(
     {
         var viewModel = new ViewAnswersViewModel
         {
-            TrustName = submissionModel.Submission?.Establishment.OrgName ?? "a school", //not sure on the appropriate fallback here
+            TrustName = submissionModel.Submission?.Establishment.OrgName,
             AssessmentCompletedDate = submissionModel.Submission?.DateCompleted ?? DateTime.UtcNow,
             TopicName = section.Name,
             Responses = submissionModel.Submission?.Responses,

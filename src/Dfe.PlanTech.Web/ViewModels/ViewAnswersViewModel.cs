@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Web.ViewModels
 {
     public class ViewAnswersViewModel
     {
-        public string TrustName { get; set; } = string.Empty;
+        public string? TrustName { get; set; } = string.Empty;
         public DateTime AssessmentCompletedDate { get; set; }
         public string TopicName { get; set; } = string.Empty;
         public List<QuestionWithAnswerModel> Responses { get; set; } = new();
