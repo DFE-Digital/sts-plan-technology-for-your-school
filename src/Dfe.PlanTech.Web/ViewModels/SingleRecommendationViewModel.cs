@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Web.ViewModels;
@@ -17,16 +18,12 @@ public class SingleRecommendationViewModel
     public RecommendationChunkEntry? NextChunk { get; set; } = null!;
     public int CurrentChunkPosition { get; set; }
     public int TotalChunks { get; set; }
-    public required string Status { get; init; } // TODO: Enum +- static constants `Dfe.PlanTech.Core.Constants.RecommendationConstants`
-    public string StatusText => Status;
-    public string StatusTagClass => Status switch // TODO: centralise, as this logic will be shared site-wide (maybe just pull out the colour?)
-    {
-        "Complete" => "govuk-tag--green",
-        "In progress" => "govuk-tag--blue",
-        "On hold" => "govuk-tag--red",
-        "Not started" => "govuk-tag--grey",
-        _ => "govuk-tag--grey"
-    };
+    public required string Status { get; init; }
+    public string StatusText => RecommendationConstants.StatusDisplayNames.GetValueOrDefault(Status, Status);
+    public string StatusTagClass => RecommendationConstants.StatusTagClasses.GetValueOrDefault(Status, RecommendationConstants.DefaultTagClass);
     public required DateTime? LastUpdated { get; init; }
-    public string LastUpdatedFormatted => LastUpdated?.ToString("d MMMM yyyy") ?? "Not known / never"; // TODO: Consider empty string vs a default along the lines of "not known" / "never updated"?
+    public string LastUpdatedFormatted => LastUpdated?.ToString("d MMMM yyyy") ?? RecommendationConstants.DefaultLastUpdatedText;
+    public string? SuccessMessageTitle { get; set; }
+    public string? SuccessMessageBody { get; set; }
+    public string? StatusErrorMessage { get; set; }
 }

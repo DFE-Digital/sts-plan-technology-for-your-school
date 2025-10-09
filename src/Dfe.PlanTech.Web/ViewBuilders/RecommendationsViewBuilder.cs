@@ -1,6 +1,7 @@
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
@@ -25,7 +26,8 @@ public class RecommendationsViewBuilder(
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly ContentfulOptions _contentfulOptions = contentfulOptions?.Value ?? throw new ArgumentNullException(nameof(contentfulOptions));
+    private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly ContentfulOptions _contentfulOptions = contentfulOptions.Value ?? throw new ArgumentNullException(nameof(contentfulOptions));
 
     private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
     private const string RecommendationsViewName = "Recommendations";
@@ -52,16 +54,10 @@ public class RecommendationsViewBuilder(
         var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
 
-
-        var coreRecommendationIdsForSection = section.CoreRecommendations
-            .Select(entry => entry.Id)
-            .ToHashSet();
-
-        var recommendationStatusesByRecommendationId = await recommendationService.GetLatestRecommendationStatusesByRecommendationIdAsync(
-            coreRecommendationIdsForSection,
+        var currentRecommendationHistoryStatus = await _recommendationService.GetCurrentRecommendationStatusAsync(
+            currentRecommendationChunk.Id,
             establishmentId
         );
-        var currentRecommendationHistoryStatus = recommendationStatusesByRecommendationId.GetValueOrDefault(currentRecommendationChunk.Id);
 
         var currentRecommendationIndex = recommendationChunks.IndexOf(currentRecommendationChunk);
         var previousRecommendationChunk = currentRecommendationIndex > 0
@@ -83,8 +79,11 @@ public class RecommendationsViewBuilder(
             NextChunk = nextRecommendationChunk,
             CurrentChunkPosition = currentRecommendationIndex + 1,
             TotalChunks = recommendationChunks.Count,
-            Status = currentRecommendationHistoryStatus?.NewStatus ?? "Unknown", // TODO: Default?
+            Status = currentRecommendationHistoryStatus?.NewStatus ?? RecommendationConstants.DefaultStatus,
             LastUpdated = currentRecommendationHistoryStatus?.DateCreated,
+            SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
+            SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
+            StatusErrorMessage = controller.TempData["StatusUpdateError"] as string
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);

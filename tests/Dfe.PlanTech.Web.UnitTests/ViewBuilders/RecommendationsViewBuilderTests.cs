@@ -127,22 +127,18 @@ public class RecommendationsViewBuilderTests
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: new[] { "C1", "C2", "C3" });
         _submissions.GetSubmissionRoutingDataAsync(123, section, true).Returns(routing);
 
-        // Setup recommendation service with status data
-        var recommendationStatuses = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+        // Setup recommendation service with status data for the specific chunk being tested
+        var currentRecommendationStatus = new SqlEstablishmentRecommendationHistoryDto
         {
-            ["C2"] = new SqlEstablishmentRecommendationHistoryDto
-            {
-                EstablishmentId = 123,
-                RecommendationId = 2,
-                UserId = 1,
-                NewStatus = "Completed",
-                DateCreated = DateTime.UtcNow.AddDays(-1)
-            }
+            EstablishmentId = 123,
+            RecommendationId = 2,
+            UserId = 1,
+            NewStatus = "Completed",
+            DateCreated = DateTime.UtcNow.AddDays(-1)
         };
-        _recommendationService.GetLatestRecommendationStatusesByRecommendationIdAsync(
-            Arg.Is<IEnumerable<string>>(refs => refs.Contains("C1") && refs.Contains("C2") && refs.Contains("C3")),
-            123)
-            .Returns(recommendationStatuses);
+
+        _recommendationService.GetCurrentRecommendationStatusAsync("C2", 123)
+            .Returns(currentRecommendationStatus);
 
         // Act (choose middle chunk to test prev/next both populated)
         var result = await sut.RouteToSingleRecommendation(ctl, categorySlug, "sec-1", "second-chunk", useChecklist: false);
@@ -167,9 +163,7 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("Completed", vm.Status);
         Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
 
-        await _recommendationService.Received(1).GetLatestRecommendationStatusesByRecommendationIdAsync(
-            Arg.Is<IEnumerable<string>>(refs => refs.Contains("C1") && refs.Contains("C2") && refs.Contains("C3")),
-            123);
+        await _recommendationService.Received(1).GetCurrentRecommendationStatusAsync("C2", 123);
     }
 
     [Fact]
