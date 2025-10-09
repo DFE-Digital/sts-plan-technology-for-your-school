@@ -6,6 +6,7 @@ namespace Dfe.PlanTech.Web.ViewModels
     {
         public string TrustName { get; set; } = string.Empty;
         public DateTime AssessmentStartDate { get; set; }
+        public DateTime AssessmentUpdatedDate { get; set; }
         public int AnsweredCount { get; set; }
         public string TopicName { get; set; } = string.Empty;
         public int QuestionsCount { get; set; }

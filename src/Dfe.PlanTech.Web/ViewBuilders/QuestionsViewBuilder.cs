@@ -188,6 +188,7 @@ public class QuestionsViewBuilder(
         {
             TrustName = submissionModel.Establishment.OrgName,
             AssessmentStartDate = submissionModel.DateCreated ?? DateTime.UtcNow,
+            AssessmentUpdatedDate = submissionModel.DateLastUpdated ?? DateTime.UtcNow,
             AnsweredCount = submissionModel.Responses.Count,
             QuestionsCount = section.Questions.Count(),
             TopicName = section.Name,

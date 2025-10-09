@@ -11,6 +11,8 @@ namespace Dfe.PlanTech.Core.Models
 
         public DateTime? DateCreated { get; init; }
 
+        public DateTime? DateLastUpdated { get; init; }
+
         public SqlEstablishmentDto Establishment { get; init; }
 
         public string? Maturity { get; set; }
@@ -30,6 +32,7 @@ namespace Dfe.PlanTech.Core.Models
             SubmissionId = submission.Id;
             DateCompleted = submission.DateCompleted;
             DateCreated = submission.DateCreated;
+            DateLastUpdated = submission.DateLastUpdated;
             Maturity = submission.Maturity;
             Establishment = submission.Establishment;
             Responses = submission.Responses
