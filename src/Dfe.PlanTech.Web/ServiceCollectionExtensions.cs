@@ -206,7 +206,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
         services.AddHostedService<BackgroundTaskHostedService>();
 
-        return services; 
+        return services;
     }
 
     public static IServiceCollection AddRoutingServices(this IServiceCollection services)
