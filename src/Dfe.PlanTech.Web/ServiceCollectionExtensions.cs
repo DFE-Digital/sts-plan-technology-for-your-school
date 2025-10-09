@@ -160,7 +160,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCurrentUser(this IServiceCollection services)
     {
         return services
-            .AddSingleton<ICurrentUser, CurrentUser>();
+            .AddScoped<ICurrentUser, CurrentUser>();
     }
 
     public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)
@@ -206,7 +206,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
         services.AddHostedService<BackgroundTaskHostedService>();
 
-        return services;
+        return services; 
     }
 
     public static IServiceCollection AddRoutingServices(this IServiceCollection services)
