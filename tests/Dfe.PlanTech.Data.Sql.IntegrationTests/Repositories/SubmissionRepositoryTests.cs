@@ -1,6 +1,4 @@
-﻿using System;
-using Contentful.Core.Models.Management;
-using Dfe.PlanTech.Core.Constants;
+﻿using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
@@ -185,7 +183,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         // Arrange
         var user = CreateUser(101);
         var establishment = CreateEstablishment(201);
-        var question = CreateQuestion(301); 
+        var question = CreateQuestion(301);
         var answer = CreateAnswer(401);
 
         DbContext.Users.Add(user);

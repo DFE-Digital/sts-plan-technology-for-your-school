@@ -30,7 +30,8 @@ public class DatabaseFixture : IAsyncLifetime
             .SqlDatabase(ConnectionString)
             .WithScriptsEmbeddedInAssembly(
                 typeof(DatabaseUpgrader.Options).Assembly,
-                s => {
+                s =>
+                {
                     filterOutput.Add(s);
                     return s.StartsWith("Dfe.PlanTech.DatabaseUpgrader.Scripts", StringComparison.Ordinal);
                 })
