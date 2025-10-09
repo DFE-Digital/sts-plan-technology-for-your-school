@@ -1,4 +1,8 @@
-﻿using Dfe.PlanTech.Core.Enums;
+﻿using System;
+using Contentful.Core.Models.Management;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -18,58 +22,130 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         _repository = new SubmissionRepository(DbContext);
     }
 
+    private AnswerEntity CreateAnswer(int id)
+    {
+        return new AnswerEntity { ContentfulRef = $"A{id.ToString("000")}", AnswerText = $"Answer {id}" };
+    }
+
+    private EstablishmentEntity CreateEstablishment(int id)
+    {
+        return new EstablishmentEntity { EstablishmentRef = $"EST{id.ToString("000")}", OrgName = $"Test Establishment {id}" };
+    }
+
+    private QuestionEntity CreateQuestion(int id)
+    {
+        return new QuestionEntity { ContentfulRef = $"Q{id.ToString("000")}", QuestionText = $"Question {id}" };
+    }
+
+    private QuestionnaireQuestionEntry CreateQuestionEntry(string id)
+    {
+        return new QuestionnaireQuestionEntry
+        {
+            Sys = new SystemDetails(id)
+        };
+    }
+
+    private QuestionnaireAnswerEntry CreateAnswerEntry(string id)
+    {
+        return new QuestionnaireAnswerEntry
+        {
+            Sys = new SystemDetails(id)
+        };
+    }
+
+    private RecommendationChunkEntry CreateRecommendationChunkEntry(
+        string id,
+        string questionId,
+        IEnumerable<string>? completingAnswerIds = null,
+        IEnumerable<string>? inProgressAnswerIds = null
+    )
+    {
+        var question = CreateQuestionEntry(questionId);
+
+        var completingAnswers = completingAnswerIds?.Select(CreateAnswerEntry).ToList() ?? [];
+        var inProgressAnswers = completingAnswerIds?.Select(CreateAnswerEntry).ToList() ?? [];
+
+        return new RecommendationChunkEntry
+        {
+            Sys = new SystemDetails(id),
+            Header = $"Recommendation {id}",
+            Question = question,
+            CompletingAnswers = completingAnswers,
+            InProgressAnswers = inProgressAnswers
+        };
+    }
+
+    private ResponseEntity CreateResponse(int id, int userId, int submissionId, int questionId, int answerId)
+    {
+        return new ResponseEntity
+        {
+            UserId = userId,
+            SubmissionId = submissionId,
+            QuestionId = questionId,
+            AnswerId = answerId,
+            Maturity = ""
+        };
+    }
+
+    private SubmissionEntity CreateSubmission(int id, int establishmentId, SubmissionStatus? submissionStatus = SubmissionStatus.CompleteReviewed)
+    {
+        return new SubmissionEntity
+        {
+            EstablishmentId = establishmentId,
+            Completed = true,
+            SectionId = "S001",
+            SectionName = "Test Section 1",
+            Responses = [],
+            DateCreated = DateTime.Now.AddDays(-7),
+            DateLastUpdated = DateTime.Now.AddDays(-6),
+            DateCompleted = DateTime.Now.AddDays(-5),
+            Status = submissionStatus.ToString()
+        };
+    }
+
+    private UserEntity CreateUser(int id)
+    {
+        return new UserEntity { DfeSignInRef = $"User{id}" };
+    }
+
     [Fact]
     public async Task SubmissionRepository_CloneSubmission_WhenGivenValidSubmission_ThenCreatesCopyWithNewTimestamps()
     {
         // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
-        var user = new UserEntity { DfeSignInRef = "user123" };
-        var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
-        var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
+        var user = CreateUser(101);
+        var establishment = CreateEstablishment(201);
+        var question = CreateQuestion(301);
+        var answer = CreateAnswer(401);
 
-        DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
+        DbContext.Establishments.Add(establishment);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
+
         await DbContext.SaveChangesAsync();
 
-        var originalSubmission = new SubmissionEntity
-        {
-            SectionId = "section-1",
-            SectionName = "Test Section",
-            EstablishmentId = establishment.Id,
-            Completed = true,
-            Maturity = "High",
-            DateCreated = DateTime.UtcNow.AddDays(-1),
-            Status = SubmissionStatus.CompleteNotReviewed.ToString(),
-            Responses = new List<ResponseEntity>
-            {
-                new ResponseEntity
-                {
-                    QuestionId = question.Id,
-                    AnswerId = answer.Id,
-                    UserId = user.Id,
-                    Maturity = "Medium",
-                    DateCreated = DateTime.UtcNow.AddDays(-1)
-                }
-            }
-        };
+        var submission = CreateSubmission(501, establishment.Id, SubmissionStatus.CompleteNotReviewed);
+        DbContext.Submissions.Add(submission);
 
-        DbContext.Submissions.Add(originalSubmission);
+        await DbContext.SaveChangesAsync();
+
+        var response = CreateResponse(601, user.Id, submission.Id, question.Id, answer.Id);
+        DbContext.Responses.Add(response);
+
         await DbContext.SaveChangesAsync();
 
         var beforeClone = DateTime.UtcNow;
 
         // Act
-        var clonedSubmission = await _repository.CloneSubmission(originalSubmission);
+        var clonedSubmission = await _repository.CloneSubmission(submission);
 
         // Assert
         Assert.NotNull(clonedSubmission);
-        Assert.NotEqual(originalSubmission.Id, clonedSubmission.Id);
-        Assert.Equal(originalSubmission.SectionId, clonedSubmission.SectionId);
-        Assert.Equal(originalSubmission.SectionName, clonedSubmission.SectionName);
-        Assert.Equal(originalSubmission.EstablishmentId, clonedSubmission.EstablishmentId);
-        Assert.Equal(originalSubmission.Maturity, clonedSubmission.Maturity);
+        Assert.NotEqual(submission.Id, clonedSubmission.Id);
+        Assert.Equal(submission.SectionId, clonedSubmission.SectionId);
+        Assert.Equal(submission.SectionName, clonedSubmission.SectionName);
+        Assert.Equal(submission.EstablishmentId, clonedSubmission.EstablishmentId);
+        Assert.Equal(submission.Maturity, clonedSubmission.Maturity);
 
         // Should have different timestamps and status
         Assert.False(clonedSubmission.Completed);
@@ -79,18 +155,200 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         // Should clone responses
         Assert.Single(clonedSubmission.Responses);
         var clonedResponse = clonedSubmission.Responses.First();
-        Assert.NotEqual(originalSubmission.Responses.First().Id, clonedResponse.Id);
-        Assert.Equal(originalSubmission.Responses.First().QuestionId, clonedResponse.QuestionId);
-        Assert.Equal(originalSubmission.Responses.First().AnswerId, clonedResponse.AnswerId);
+        Assert.NotEqual(submission.Responses.First().Id, clonedResponse.Id);
+        Assert.Equal(submission.Responses.First().QuestionId, clonedResponse.QuestionId);
+        Assert.Equal(submission.Responses.First().AnswerId, clonedResponse.AnswerId);
         Assert.True(clonedResponse.DateCreated >= beforeClone);
     }
 
     [Fact]
     public async Task SubmissionRepository_CloneSubmission_WhenSubmissionIsNull_ThenThrowsArgumentNullException()
     {
-        // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
             _repository.CloneSubmission(null));
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_Throws_When_Submission_Not_Found()
+    {
+        var section = new QuestionnaireSectionEntry { CoreRecommendations = [] };
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, null, 100, 1, section));
+
+        Assert.Equal("Could not find submssion with ID 100 in database", exception.Message);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_Throws_When_Question_Not_Found()
+    {
+        // Arrange
+        var user = CreateUser(101);
+        var establishment = CreateEstablishment(201);
+        var question = CreateQuestion(301); 
+        var answer = CreateAnswer(401);
+
+        DbContext.Users.Add(user);
+        DbContext.Establishments.Add(establishment);
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+
+        await DbContext.SaveChangesAsync();
+
+        var submission = CreateSubmission(501, establishment.Id, SubmissionStatus.CompleteNotReviewed);
+        DbContext.Submissions.Add(submission);
+
+        await DbContext.SaveChangesAsync();
+
+        var response = CreateResponse(601, user.Id, submission.Id, question.Id, answer.Id);
+        DbContext.Responses.Add(response);
+
+        await DbContext.SaveChangesAsync();
+
+        var coreRecommendation = CreateRecommendationChunkEntry("R1", "Q99999");
+        var section = new QuestionnaireSectionEntry
+        {
+            CoreRecommendations = [coreRecommendation]
+        };
+
+        // Act
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishment.Id, null, submission.Id, user.Id, section));
+
+        // Assert
+        Assert.Equal("Could not find the question identified in the submission", exception.Message);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_Generates_SqlRecommendationDto_And_Passes_To_UpsertRecommendations()
+    {
+        // Arrange
+        var user = CreateUser(101);
+        var establishment = CreateEstablishment(201);
+        var question = CreateQuestion(301);
+        var answer = CreateAnswer(401);
+
+        DbContext.Users.Add(user);
+        DbContext.Establishments.Add(establishment);
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+
+        await DbContext.SaveChangesAsync();
+
+        var submission = CreateSubmission(501, establishment.Id, SubmissionStatus.CompleteNotReviewed);
+        DbContext.Submissions.Add(submission);
+
+        await DbContext.SaveChangesAsync();
+
+        var response = CreateResponse(601, user.Id, submission.Id, question.Id, answer.Id);
+        DbContext.Responses.Add(response);
+
+        await DbContext.SaveChangesAsync();
+
+        var coreRecommendation = CreateRecommendationChunkEntry("R1", question.ContentfulRef);
+        var section = new QuestionnaireSectionEntry
+        {
+            CoreRecommendations = [coreRecommendation]
+        };
+
+        // Act
+        await _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishment.Id, null, submission.Id, user.Id, section);
+
+        // Assert
+        var recommendation = DbContext.Recommendations.FirstOrDefault(r => string.Equals(r.ContentfulRef, coreRecommendation.Id));
+        Assert.NotNull(recommendation);
+        Assert.Equal(question.Id, recommendation.QuestionId);
+        Assert.Equal(coreRecommendation.Header, recommendation.RecommendationText);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_Creates_EstablishmentRecommendationHistories_With_Correct_Recommendation_Statuses()
+    {
+        // Arrange
+        var user = CreateUser(101);
+        var establishment = CreateEstablishment(201);
+        var question = CreateQuestion(301);
+        var answer = CreateAnswer(401);
+
+        DbContext.Users.Add(user);
+        DbContext.Establishments.Add(establishment);
+        DbContext.Answers.Add(answer);
+        DbContext.Questions.Add(question);
+
+        await DbContext.SaveChangesAsync();
+
+        var submission = CreateSubmission(501, establishment.Id, SubmissionStatus.CompleteNotReviewed);
+        DbContext.Submissions.Add(submission);
+
+        await DbContext.SaveChangesAsync();
+
+        var response = CreateResponse(601, user.Id, submission.Id, question.Id, answer.Id);
+        DbContext.Responses.Add(response);
+
+        await DbContext.SaveChangesAsync();
+
+        var coreRecommendation = CreateRecommendationChunkEntry("R1", question.ContentfulRef, [answer.ContentfulRef]);
+        var section = new QuestionnaireSectionEntry
+        {
+            CoreRecommendations = [coreRecommendation]
+        };
+
+        // Act
+        await _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishment.Id, null, submission.Id, user.Id, section);
+
+        // Assert
+        var recommendation = DbContext.Recommendations.FirstOrDefault(r => string.Equals(r.ContentfulRef, coreRecommendation.Id));
+        Assert.NotNull(recommendation);
+
+        var recommendationHistory = DbContext.EstablishmentRecommendationHistories.FirstOrDefault(erh => erh.Id == recommendation.Id);
+        Assert.NotNull(recommendationHistory);
+        Assert.Equal(RecommendationConstants.Completed, recommendationHistory.NewStatus);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_ConfirmCheckAnswersAndUpdateRecommendationsAsync_Calls_SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync()
+    {
+        // Arrange
+        var user = CreateUser(101);
+        var establishment = CreateEstablishment(201);
+        var question = CreateQuestion(301);
+        var answer = CreateAnswer(401);
+
+        DbContext.Users.Add(user);
+        DbContext.Establishments.Add(establishment);
+        DbContext.Answers.Add(answer);
+        DbContext.Questions.Add(question);
+
+        await DbContext.SaveChangesAsync();
+
+        var oldSubmission = CreateSubmission(501, establishment.Id, SubmissionStatus.CompleteReviewed);
+        var newSubmission = CreateSubmission(502, establishment.Id, SubmissionStatus.CompleteNotReviewed);
+        DbContext.Submissions.AddRange([oldSubmission, newSubmission]);
+
+        await DbContext.SaveChangesAsync();
+
+        var response = CreateResponse(601, user.Id, newSubmission.Id, question.Id, answer.Id);
+        DbContext.Responses.Add(response);
+
+        await DbContext.SaveChangesAsync();
+
+        var coreRecommendation = CreateRecommendationChunkEntry("R1", question.ContentfulRef, [answer.ContentfulRef]);
+        var section = new QuestionnaireSectionEntry
+        {
+            CoreRecommendations = [coreRecommendation]
+        };
+
+        // Act
+        await _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishment.Id, null, newSubmission.Id, user.Id, section);
+
+        // Assert
+        var oldSubmissionEntity = DbContext.Submissions.FirstOrDefault(s => s.Id == oldSubmission.Id);
+        var newSubmissionEntity = DbContext.Submissions.FirstOrDefault(s => s.Id == newSubmission.Id);
+        Assert.NotNull(oldSubmissionEntity);
+        Assert.NotNull(newSubmissionEntity);
+
+        Assert.Equal(SubmissionStatus.Inaccessible.ToString(), oldSubmission.Status);
+        Assert.Equal(SubmissionStatus.CompleteReviewed.ToString(), newSubmission.Status);
     }
 
     [Fact]

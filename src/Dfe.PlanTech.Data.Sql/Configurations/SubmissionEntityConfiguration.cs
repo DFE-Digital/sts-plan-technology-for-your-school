@@ -12,5 +12,6 @@ internal class SubmissionEntityConfiguration : IEntityTypeConfiguration<Submissi
         builder.ToTable(tb => tb.HasTrigger("tr_submission"));
         builder.Property(submission => submission.DateCreated).HasColumnType("datetime").HasDefaultValue();
         builder.Property(submission => submission.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
+        builder.Property(submission => submission.Status).HasMaxLength(50);
     }
 }
