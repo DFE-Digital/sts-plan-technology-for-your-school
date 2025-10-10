@@ -113,10 +113,10 @@
                                     </govuk-radios-error-message>
                                 }
 
-                                @foreach (var status in RecommendationConstants.ValidStatuses)
+                                @foreach (var option in Model.StatusOptions)
                                 {
-                                    <govuk-radios-item value="@status" checked="@(Model.Status == status)">
-                                        @RecommendationConstants.StatusDisplayNames[status]
+                                    <govuk-radios-item value="@option.Key" checked="@(Model.SelectedStatusKey == option.Key)">
+                                        @option.Value
                                     </govuk-radios-item>
                                 }
                             </govuk-radios-fieldset>

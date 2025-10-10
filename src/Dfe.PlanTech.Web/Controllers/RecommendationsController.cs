@@ -68,10 +68,12 @@ public class RecommendationsController(
             return RedirectToAction(GetSingleRecommendationAction, new { categorySlug, sectionSlug, chunkSlug });
         }
 
+        var selectedStatusDisplayName = RecommendationConstants.StatusDisplayNamesNonBreakingSpaces.GetValueOrDefault(selectedStatus, selectedStatus);
+
         // Allow only specific statuses
-        if (!RecommendationConstants.ValidStatuses.Contains(selectedStatus))
+        if (!RecommendationConstants.ValidStatusKeys.Contains(selectedStatus))
         {
-            Logger.LogWarning("Invalid / unrecognised status value received: {SelectedStatus}", selectedStatus);
+            Logger.LogWarning("Invalid / unrecognised status value received: {SelectedStatus}: {SelectedStatusDisplayName}", selectedStatus, selectedStatusDisplayName);
             TempData["StatusUpdateError"] = "Select a valid status";
             return RedirectToAction(GetSingleRecommendationAction, new { categorySlug, sectionSlug, chunkSlug });
         }
@@ -99,8 +101,7 @@ public class RecommendationsController(
         );
 
         // Set success message for the banner
-        var displayName = RecommendationConstants.StatusDisplayNames.GetValueOrDefault(selectedStatus, selectedStatus);
-        TempData["StatusUpdateSuccessTitle"] = $"Status updated to '{displayName}'";
+        TempData["StatusUpdateSuccessTitle"] = $"Status updated to '{selectedStatusDisplayName}'";
 
         // Redirect back to the single recommendation page
         return RedirectToAction(GetSingleRecommendationAction, new { categorySlug, sectionSlug, chunkSlug });

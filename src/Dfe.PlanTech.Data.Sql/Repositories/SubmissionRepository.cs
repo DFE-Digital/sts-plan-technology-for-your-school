@@ -93,15 +93,15 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             {
                 if (r.CompletingAnswers.Any(ca => responses.Contains(ca.Id)))
                 {
-                    return new { r.Id, Status = RecommendationConstants.Completed };
+                    return new { r.Id, Status = RecommendationConstants.CompletedKey };
                 }
 
                 if (r.InProgressAnswers.Any(ca => responses.Contains(ca.Id)))
                 {
-                    return new { r.Id, Status = RecommendationConstants.InProgress };
+                    return new { r.Id, Status = RecommendationConstants.InProgressKey };
                 }
 
-                return new { r.Id, Status = RecommendationConstants.NotStarted };
+                return new { r.Id, Status = RecommendationConstants.NotStartedKey };
             })
             .Where(x => x is not null)
             .ToDictionary(x => x!.Id, x => x.Status);

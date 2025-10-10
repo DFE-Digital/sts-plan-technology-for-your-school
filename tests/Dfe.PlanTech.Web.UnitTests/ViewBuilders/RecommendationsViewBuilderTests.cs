@@ -160,7 +160,7 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("first-chunk", vm.PreviousChunk!.SlugifiedLinkText);
         Assert.Equal("third-chunk", vm.NextChunk!.SlugifiedLinkText);
 
-        Assert.Equal("Completed", vm.Status);
+        Assert.Equal("Completed", vm.SelectedStatusKey);
         Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
 
         await _recommendationService.Received(1).GetCurrentRecommendationStatusAsync("C2", 123);
