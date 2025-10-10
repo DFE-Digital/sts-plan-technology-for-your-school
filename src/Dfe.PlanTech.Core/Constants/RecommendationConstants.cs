@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Core.Constants;
@@ -24,25 +25,30 @@ public static class RecommendationConstants
     };
 
     // Status display mapping for consistent UI display
-    public static readonly Dictionary<string, string> StatusDisplayNames = new()
-    {
-        [NotStartedKey] = "Not started",
-        [InProgressKey] = "In progress",
-        [CompletedKey] = "Completed"
-    };
+    public static readonly ImmutableDictionary<string, string> StatusDisplayNames =
+        ImmutableDictionary.CreateRange(new[]
+        {
+            new KeyValuePair<string, string>(NotStartedKey, "Not started"),
+            new KeyValuePair<string, string>(InProgressKey, "In progress"),
+            new KeyValuePair<string, string>(CompletedKey, "Completed")
+        });
 
     // Replace spaces with non-breaking spaces, to avoid word-wrap
     // Note: Using the character code and not HTML entity (&nbsp;) to avoid Html.Raw in Razor views
-    public static Dictionary<string, string> StatusDisplayNamesNonBreakingSpaces => StatusDisplayNames
-        .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Replace(" ", "\u00A0"));
+    public static ImmutableDictionary<string, string> StatusDisplayNamesNonBreakingSpaces =>
+        StatusDisplayNames.ToImmutableDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value.Replace(" ", "\u00A0")
+        );
 
     // GOV.UK Design System (GDS) status tag CSS classes
-    public static readonly Dictionary<string, string> StatusTagClasses = new()
-    {
-        [NotStartedKey] = "govuk-tag--grey",
-        [InProgressKey] = "govuk-tag--blue",
-        [CompletedKey] = "govuk-tag--green"
-    };
+    public static readonly ImmutableDictionary<string, string> StatusTagClasses =
+        ImmutableDictionary.CreateRange(new[]
+        {
+            new KeyValuePair<string, string>(NotStartedKey, "govuk-tag--grey"),
+            new KeyValuePair<string, string>(InProgressKey, "govuk-tag--blue"),
+            new KeyValuePair<string, string>(CompletedKey, "govuk-tag--green")
+        });
 
     // Default tag class for unknown statuses
     public const string DefaultTagClass = "govuk-tag--grey";
