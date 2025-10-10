@@ -13,9 +13,7 @@
 
 	if (isAuthenticated)
 	{
-		var org = isAuthenticated ? CurrentUser.Organisation : null;
-
-		var establishmentReference = org?.Reference ?? "Unknown";
+		var establishmentReference = CurrentUser.Organisation?.Reference ?? "Unknown";
 		var establishmentType = CurrentUser.IsMat ? "MAT" : "School";
 		var userDsiReference = CurrentUser.DsiReference;
 
@@ -25,7 +23,6 @@
 			establishment_type = establishmentType,
 			user_dsi_reference = userDsiReference
 		};
-
 	}
 
 	var jsonOptions = new JsonSerializerOptions
