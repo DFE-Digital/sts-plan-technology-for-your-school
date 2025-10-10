@@ -17,12 +17,11 @@ public static class RecommendationConstants
     public const string DefaultLastUpdatedText = "Not known / never";
 
     // List of all valid status options for UI components
-    public static readonly List<string> ValidStatusKeys = new()
-    {
+    public static readonly ImmutableList<string> ValidStatusKeys = ImmutableList.Create(
         NotStartedKey,
         InProgressKey,
         CompletedKey
-    };
+    );
 
     // Status display mapping for consistent UI display
     public static readonly ImmutableDictionary<string, string> StatusDisplayNames =
