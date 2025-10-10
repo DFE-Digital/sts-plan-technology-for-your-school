@@ -1,10 +1,9 @@
 ﻿using Dfe.PlanTech.Data.Sql.Entities;
 
-namespace Dfe.PlanTech.Data.Sql.Interfaces
+namespace Dfe.PlanTech.Data.Sql.Interfaces;
+
+public interface ISignInRepository
 {
-    public interface ISignInRepository
-    {
-        Task<SignInEntity> CreateSignInAsync(int userId, int? establishmentId = null);
-        Task<SignInEntity> RecordSignInWithoutEstablishmentIdAsync(string dfeSignInRef);
-    }
+    Task<SignInEntity> CreateSignInAsync(int userId, int? establishmentId = null);
+    Task<SignInEntity> RecordSignInWithoutEstablishmentIdAsync(string dfeSignInRef);
 }

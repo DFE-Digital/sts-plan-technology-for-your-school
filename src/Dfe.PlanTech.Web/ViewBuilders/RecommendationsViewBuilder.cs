@@ -1,5 +1,6 @@
-﻿using Contentful.Core.Configuration;
+using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
@@ -20,11 +21,13 @@ public class RecommendationsViewBuilder(
     IOptions<ContentfulOptions> contentfulOptions,
     IContentfulService contentfulService,
     ISubmissionService submissionService,
+    IRecommendationService recommendationService,
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly ContentfulOptions _contentfulOptions = contentfulOptions?.Value ?? throw new ArgumentNullException(nameof(contentfulOptions));
+    private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly ContentfulOptions _contentfulOptions = contentfulOptions.Value ?? throw new ArgumentNullException(nameof(contentfulOptions));
 
     private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
     private const string RecommendationsViewName = "Recommendations";
@@ -46,17 +49,22 @@ public class RecommendationsViewBuilder(
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: true);
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var subtopicChunks = section.GetRecommendationChunksByAnswerIds(answerIds);
+        var recommendationChunks = section.GetRecommendationChunksByAnswerIds(answerIds);
 
-        var currentChunk = subtopicChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
+        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
 
-        var currentChunkIndex = subtopicChunks.IndexOf(currentChunk);
-        var previousChunk = currentChunkIndex > 0
-                            ? subtopicChunks[currentChunkIndex - 1]
+        var currentRecommendationHistoryStatus = await _recommendationService.GetCurrentRecommendationStatusAsync(
+            currentRecommendationChunk.Id,
+            establishmentId
+        );
+
+        var currentRecommendationIndex = recommendationChunks.IndexOf(currentRecommendationChunk);
+        var previousRecommendationChunk = currentRecommendationIndex > 0
+                            ? recommendationChunks[currentRecommendationIndex - 1]
                             : null;
-        var nextChunk = currentChunkIndex != subtopicChunks.Count - 1
-                            ? subtopicChunks[currentChunkIndex + 1]
+        var nextRecommendationChunk = currentRecommendationIndex != recommendationChunks.Count - 1
+                            ? recommendationChunks[currentRecommendationIndex + 1]
                             : null;
 
         var viewModel = new SingleRecommendationViewModel
@@ -65,12 +73,21 @@ public class RecommendationsViewBuilder(
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
             Section = section,
-            Chunks = subtopicChunks,
-            CurrentChunk = currentChunk,
-            PreviousChunk = previousChunk,
-            NextChunk = nextChunk,
-            CurrentChunkPosition = currentChunkIndex + 1,
-            TotalChunks = subtopicChunks.Count
+            Chunks = recommendationChunks,
+            CurrentChunk = currentRecommendationChunk,
+            PreviousChunk = previousRecommendationChunk,
+            NextChunk = nextRecommendationChunk,
+            CurrentChunkPosition = currentRecommendationIndex + 1,
+            TotalChunks = recommendationChunks.Count,
+            SelectedStatusKey = currentRecommendationHistoryStatus?.NewStatus ?? RecommendationConstants.DefaultStatus,
+            LastUpdated = currentRecommendationHistoryStatus?.DateCreated,
+            SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
+            SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
+            StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
+            StatusOptions = RecommendationConstants.ValidStatusKeys.ToDictionary(
+                key => key,
+                key => RecommendationConstants.StatusDisplayNames[key]
+            )
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
