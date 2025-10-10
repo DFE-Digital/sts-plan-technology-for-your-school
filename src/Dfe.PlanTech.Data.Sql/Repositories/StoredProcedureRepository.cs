@@ -116,6 +116,12 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         //                         @questionText NVARCHAR(MAX), @answerContentfulId NVARCHAR(50), @answerText NVARCHAR(MAX),
         //                         @userId INT, @establishmentId INT, @maturity NVARCHAR(20),
         //                         @responseId INT OUTPUT, @submissionId INT OUTPUT
+
+        if (response.Answer is null)
+        {
+            throw new InvalidDataException($"{nameof(response.Answer)} cannot be null");
+        }
+
         var responseId = new SqlParameter(DatabaseConstants.ResponseIdParam, SqlDbType.Int)
         {
             Direction = ParameterDirection.Output

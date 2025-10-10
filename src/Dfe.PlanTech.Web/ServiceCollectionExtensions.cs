@@ -160,7 +160,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCurrentUser(this IServiceCollection services)
     {
         return services
-            .AddScoped<ICurrentUser, CurrentUser>();
+            .AddSingleton<ICurrentUser, CurrentUser>();
     }
 
     public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)

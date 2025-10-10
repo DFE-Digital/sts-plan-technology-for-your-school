@@ -1,5 +1,4 @@
 ﻿using System.Security.Authentication;
-using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
@@ -28,10 +27,8 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
     public int? MatEstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
 
-    public OrganisationModel? Organisation
-    {
-        get => ParseOrganisationModel();
-    }
+    public OrganisationModel Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation()
+            ?? throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
 
     public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 
@@ -67,12 +64,6 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
         return null;
     }
 
-    public EstablishmentModel GetEstablishmentModel()
-    {
-        return _contextAccessor.HttpContext?.User.GetUserOrganisation()
-               ?? throw new InvalidDataException("Establishment was not in expected format");
-    }
-
     private int? GetIntFromClaim(string claimType)
     {
         return int.TryParse(GetNameIdentifierFromClaim(claimType), out var id) ? id : null;
@@ -80,7 +71,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
     private bool GetIsAuthenticated()
     {
-        return _contextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false;
+        return _contextAccessor.HttpContext?.User.GetAuthorisationStatus().IsAuthenticated == true;
     }
 
     private string? GetNameIdentifierFromClaim(string claimType)
@@ -91,17 +82,5 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
     private string? GetStringFromClaim(string claimType)
     {
         return _contextAccessor.HttpContext?.User.Claims.FirstOrDefault(x => x.Type.Contains(claimType))?.Value;
-    }
-
-    private OrganisationModel? ParseOrganisationModel()
-    {
-        var organisationClaim = GetNameIdentifierFromClaim(ClaimConstants.Organisation);
-        if (string.IsNullOrWhiteSpace(organisationClaim))
-        {
-            throw new AuthenticationException($"User's {nameof(Organisation)} is null or empty");
-        }
-
-        return JsonSerializer.Deserialize<OrganisationModel>(organisationClaim)
-               ?? throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
     }
 }

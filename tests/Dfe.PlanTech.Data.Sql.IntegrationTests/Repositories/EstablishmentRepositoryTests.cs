@@ -22,11 +22,11 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
     public async Task EstablishmentRepository_CreateEstablishmentFromModelAsync_WhenGivenValidModel_ThenCreatesAndReturnsEntity()
     {
         // Arrange
-        var model = new EstablishmentModel
+        var model = new OrganisationModel
         {
             Urn = "TEST123",
             Name = "Test School",
-            Type = new EstablishmentTypeModel { Name = "Academy" },
+            Type = new IdWithNameModel { Name = "Academy" },
             GroupUid = "group-123"
         };
 
@@ -51,7 +51,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
     public async Task EstablishmentRepository_CreateEstablishmentFromModelAsync_WhenTypeIsNull_ThenHandlesNullType()
     {
         // Arrange
-        var model = new EstablishmentModel
+        var model = new OrganisationModel
         {
             Urn = "TEST456",
             Name = "Test School 2",

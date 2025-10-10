@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
@@ -63,18 +62,6 @@ public class UserClaimsExtensionsTests
 
         Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims));
     }
-
-    [Fact]
-    public void OrganisationModel_References_Should_Throw_InvalidEstablishmentException_When_Organisation_Has_No_Urn_And_No_Ukprn()
-    {
-        var organisation = new OrganisationModel()
-        {
-            Id = Guid.NewGuid(),
-        };
-
-        Assert.Throws<InvalidEstablishmentException>(() => organisation.Reference);
-    }
-
 
     [Fact]
     public void GetOrganisation_Should_ReturnNull_When_Organisation_Has_No_Id()

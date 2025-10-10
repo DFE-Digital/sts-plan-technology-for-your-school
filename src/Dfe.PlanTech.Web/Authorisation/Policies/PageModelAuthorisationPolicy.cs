@@ -61,7 +61,7 @@ public class PageModelAuthorisationPolicy(
     /// <exception cref="KeyNotFoundException"></exception>
     private async Task<UserAuthorisationResult> GetUserAuthorisationResult(HttpContext httpContext)
     {
-        var userAuthorisationStatus = httpContext.User.AuthorisationStatus();
+        var userAuthorisationStatus = httpContext.User.GetAuthorisationStatus();
 
         if (!ControllerIsPagesController(httpContext))
         {

@@ -5,36 +5,45 @@ namespace Dfe.PlanTech.Core.Models;
 
 public sealed class OrganisationModel
 {
-    public const string InvalidEstablishmentErrorMessage = $"Both {nameof(Urn)} and {nameof(Ukprn)} are invalid";
+    public const string InvalidEstablishmentErrorMessage = $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
 
     [JsonPropertyName("id")]
     public Guid Id { get; set; }
 
-    [JsonPropertyName("name")]
-    public string Name { get; set; } = null!;
-
     [JsonPropertyName("category")]
     public IdWithNameModel? Category { get; set; }
-
-    public IdWithNameModel? Type { get; set; }
-
-    public string? Urn { get; set; }
-
-    public string? Uid { get; set; }
-
-    public string? Ukprn { get; set; }
-
-    public string LegacyId { get; set; } = null!;
-
-    public string Sid { get; set; } = null!;
 
     [JsonPropertyName("DistrictAdministrative_code")]
     public string DistrictAdministrativeCode { get; set; } = null!;
 
-    public bool IsValid => References.Any(reference => !string.IsNullOrWhiteSpace(reference));
+    [JsonPropertyName("groupUid")]
+    public string? GroupUid { get; set; }
 
-    public string Reference => References.FirstOrDefault(reference => !string.IsNullOrWhiteSpace(reference))
-        ?? throw new InvalidEstablishmentException(InvalidEstablishmentErrorMessage);
+    public string LegacyId { get; set; } = null!;
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = null!;
+
+    [JsonPropertyName("sid")]
+    public string Sid { get; set; } = null!;
+
+    [JsonPropertyName("type")]
+    public IdWithNameModel? Type { get; set; }
+
+    [JsonPropertyName("uid")]
+    public string? Uid { get; set; }
+
+    [JsonPropertyName("ukprn")]
+    public string? Ukprn { get; set; }
+
+    [JsonPropertyName("urn")]
+    public string? Urn { get; set; }
+
+    public bool IsValid => References.Any(reference => !string.IsNullOrEmpty(reference));
+
+    public string Reference => References
+        .FirstOrDefault(reference => !string.IsNullOrEmpty(reference))
+            ?? throw new InvalidEstablishmentException(InvalidEstablishmentErrorMessage);
 
     private IEnumerable<string?> References
     {
@@ -42,6 +51,8 @@ public sealed class OrganisationModel
         {
             yield return Urn;
             yield return Ukprn;
+            yield return Uid;
+            yield return Id.ToString();
         }
     }
 }
