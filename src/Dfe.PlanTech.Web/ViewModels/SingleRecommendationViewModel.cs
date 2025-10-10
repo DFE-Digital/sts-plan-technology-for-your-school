@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
