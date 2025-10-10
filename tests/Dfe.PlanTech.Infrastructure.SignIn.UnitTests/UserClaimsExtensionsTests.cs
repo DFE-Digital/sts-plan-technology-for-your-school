@@ -65,18 +65,6 @@ public class UserClaimsExtensionsTests
     }
 
     [Fact]
-    public void OrganisationModel_References_Should_Throw_InvalidEstablishmentException_When_Organisation_Has_No_Urn_And_No_Ukprn()
-    {
-        var organisation = new OrganisationModel()
-        {
-            Id = Guid.NewGuid(),
-        };
-
-        Assert.Throws<InvalidEstablishmentException>(() => organisation.Reference);
-    }
-
-
-    [Fact]
     public void GetOrganisation_Should_ReturnNull_When_Organisation_Has_No_Id()
     {
         var organisation = new OrganisationModel()

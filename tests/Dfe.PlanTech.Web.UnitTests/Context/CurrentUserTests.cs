@@ -131,6 +131,7 @@ public class CurrentUserTests
         // Arrange a minimal OrganisationModel with Category.Id = MatOrganisationCategoryId
         var org = new OrganisationModel
         {
+            Id = Guid.NewGuid(),
             Category = new IdWithNameModel { Id = DsiConstants.MatOrganisationCategoryId },
             Urn = "testUrn"
         };
@@ -149,12 +150,12 @@ public class CurrentUserTests
     {
         var (sut, _) = Build();
 
-        var ex1 = Assert.Throws<AuthenticationException>(() => _ = sut.Organisation);
-        Assert.Equal("User's Organisation is null or empty", ex1.Message);
+        var ex1 = Assert.Throws<InvalidDataException>(() => _ = sut.Organisation);
+        Assert.Equal("Could not parse user's Organisation claim", ex1.Message);
 
         // Because the getter throws, IsMat will propagate that exception too
-        var ex2 = Assert.Throws<AuthenticationException>(() => _ = sut.IsMat);
-        Assert.Equal("User's Organisation is null or empty", ex2.Message);
+        var ex2 = Assert.Throws<InvalidDataException>(() => _ = sut.IsMat);
+        Assert.Equal("Could not parse user's Organisation claim", ex2.Message);
     }
 
     [Fact]
@@ -225,10 +226,8 @@ public class CurrentUserTests
     [Fact]
     public void GetEstablishmentModel_Throws_When_Not_Present()
     {
-        // We don't know your GetUserOrganisation extension’s internals,
-        // but we can assert the documented failure case:
         var (sut, _) = Build();
-        var ex = Assert.Throws<InvalidDataException>(() => sut.GetEstablishmentModel());
-        Assert.Equal("Establishment was not in expected format", ex.Message);
+        var ex = Assert.Throws<InvalidDataException>(() => sut.Organisation);
+        Assert.Equal("Could not parse user's Organisation claim", ex.Message);
     }
 }

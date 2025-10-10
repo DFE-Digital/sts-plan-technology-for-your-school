@@ -15,7 +15,7 @@ public class EstablishmentRepository : IEstablishmentRepository
         _db = dbContext;
     }
 
-    public async Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(EstablishmentModel model)
+    public async Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(OrganisationModel model)
     {
         ArgumentNullException.ThrowIfNull(model, nameof(model));
 
