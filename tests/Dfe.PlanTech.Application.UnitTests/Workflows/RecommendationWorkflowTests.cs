@@ -250,31 +250,261 @@ public class RecommendationWorkflowTests
         // Act
         var result = await workflow.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId);
 
-        // Assert
+        // Assert - Verify it returns the latest status with correct properties
         Assert.Single(result);
         Assert.True(result.ContainsKey("rec-001"));
-        Assert.Equal("Reviewed", result["rec-001"].NewStatus); // Should be the most recent entry
+        Assert.Equal("Reviewed", result["rec-001"].NewStatus);
+        Assert.Equal(establishmentId, result["rec-001"].EstablishmentId);
+        Assert.Equal(1, result["rec-001"].RecommendationId);
     }
 
     [Fact]
-    public async Task GetLatestRecommendationStatusesByRecommendationIdAsync_VerifyRepositoryInteractions()
+    public async Task GetCurrentRecommendationStatusAsync_WhenRecommendationExists_ThenReturnsCorrectlyMappedDto()
     {
-        // Arrange - Setup to verify that both repositories are called with correct parameters
-        var establishmentId = 456;
-        var recommendationContentfulReferences = new[] { "rec-test" };
+        // Arrange - Setup recommendation and history to test correct DTO mapping
+        var recommendationContentfulReference = "rec-001";
+        var establishmentId = 123;
 
-        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences)
-            .Returns(new RecommendationEntity[0]);
-        _establishmentRecommendationHistoryRepository.GetRecommendationHistoryByEstablishmentIdAsync(establishmentId)
-            .Returns(new EstablishmentRecommendationHistoryEntity[0]);
+        var recommendations = new[]
+        {
+            new RecommendationEntity { Id = 1, ContentfulRef = "rec-001", RecommendationText = "Test Recommendation", QuestionId = 1 }
+        };
+
+        var historyEntity = new EstablishmentRecommendationHistoryEntity
+        {
+            Id = 5,
+            EstablishmentId = establishmentId,
+            RecommendationId = 1,
+            UserId = 42,
+            NewStatus = "Completed",
+            PreviousStatus = "InProgress",
+            NoteText = "Work completed",
+            DateCreated = DateTime.UtcNow
+        };
+
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+            .Returns(recommendations);
+        _establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .Returns(historyEntity);
 
         var workflow = CreateServiceUnderTest();
 
         // Act
-        await workflow.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId);
+        var result = await workflow.GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
+
+        // Assert - Verify all DTO properties are correctly mapped
+        Assert.NotNull(result);
+        Assert.Equal(establishmentId, result.EstablishmentId);
+        Assert.Equal(1, result.RecommendationId);
+        Assert.Equal(42, result.UserId);
+        Assert.Equal("Completed", result.NewStatus);
+        Assert.Equal("InProgress", result.PreviousStatus);
+        Assert.Equal("Work completed", result.NoteText);
+        Assert.Equal(historyEntity.DateCreated, result.DateCreated);
+    }
+
+    [Fact]
+    public async Task GetCurrentRecommendationStatusAsync_WhenRecommendationNotFound_ThenReturnsNull()
+    {
+        // Arrange - Setup scenario where recommendation doesn't exist
+        var recommendationContentfulReference = "non-existent";
+        var establishmentId = 123;
+
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+            .Returns(new RecommendationEntity[0]);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        var result = await workflow.GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
 
         // Assert
-        await _recommendationRepository.Received(1).GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences);
-        await _establishmentRecommendationHistoryRepository.Received(1).GetRecommendationHistoryByEstablishmentIdAsync(establishmentId);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetCurrentRecommendationStatusAsync_WhenNoHistoryExists_ThenReturnsNull()
+    {
+        // Arrange - Setup recommendation but no history entries
+        var recommendationContentfulReference = "rec-001";
+        var establishmentId = 123;
+
+        var recommendations = new[]
+        {
+            new RecommendationEntity { Id = 1, ContentfulRef = "rec-001", RecommendationText = "Test Recommendation", QuestionId = 1 }
+        };
+
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+            .Returns(recommendations);
+        _establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .Returns((EstablishmentRecommendationHistoryEntity?)null);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        var result = await workflow.GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task UpdateRecommendationStatusAsync_WhenRecommendationExists_ThenCreatesHistoryWithCorrectData()
+    {
+        // Arrange - Setup recommendation and current status to test status transition logic
+        var recommendationContentfulReference = "rec-001";
+        var establishmentId = 123;
+        var userId = 456;
+        var newStatus = "Completed";
+        var noteText = "Work finished successfully";
+        var matEstablishmentId = 789;
+
+        var recommendations = new[]
+        {
+            new RecommendationEntity { Id = 1, ContentfulRef = "rec-001", RecommendationText = "Test Recommendation", QuestionId = 1 }
+        };
+
+        var currentHistoryEntity = new EstablishmentRecommendationHistoryEntity
+        {
+            Id = 1,
+            EstablishmentId = establishmentId,
+            RecommendationId = 1,
+            UserId = 1,
+            NewStatus = "InProgress",
+            DateCreated = DateTime.UtcNow.AddDays(-1)
+        };
+
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+            .Returns(recommendations);
+        _establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .Returns(currentHistoryEntity);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        await workflow.UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            noteText,
+            matEstablishmentId
+        );
+
+        // Assert - Verify correct status transition: current status becomes previous status
+        await _establishmentRecommendationHistoryRepository.Received(1).CreateRecommendationHistoryAsync(
+            establishmentId,
+            1,
+            userId,
+            matEstablishmentId,
+            "InProgress", // Should use current status as previous
+            newStatus,
+            noteText
+        );
+    }
+
+    [Fact]
+    public async Task UpdateRecommendationStatusAsync_WhenNoCurrentHistory_ThenCreatesInitialHistoryEntry()
+    {
+        // Arrange - Setup recommendation with no existing history to test initial entry creation
+        var recommendationContentfulReference = "rec-001";
+        var establishmentId = 123;
+        var userId = 456;
+        var newStatus = "InProgress";
+
+        var recommendations = new[]
+        {
+            new RecommendationEntity { Id = 1, ContentfulRef = "rec-001", RecommendationText = "Test Recommendation", QuestionId = 1 }
+        };
+
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+            .Returns(recommendations);
+        _establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .Returns((EstablishmentRecommendationHistoryEntity?)null);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        await workflow.UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus
+        );
+
+        // Assert - Verify initial history entry has null previous status and converts null noteText
+        await _establishmentRecommendationHistoryRepository.Received(1).CreateRecommendationHistoryAsync(
+            establishmentId,
+            1,
+            userId,
+            null,
+            null, // Should be null for initial entry
+            newStatus,
+            string.Empty // Should convert null noteText to empty string
+        );
+    }
+
+    [Fact]
+    public async Task UpdateRecommendationStatusAsync_WhenRecommendationNotFound_ThenThrowsInvalidOperationException()
+    {
+        // Arrange - Setup scenario where recommendation doesn't exist to test error handling
+        var recommendationContentfulReference = "non-existent";
+        var establishmentId = 123;
+        var userId = 456;
+        var newStatus = "Completed";
+
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+            .Returns(new RecommendationEntity[0]);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act & Assert
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => workflow.UpdateRecommendationStatusAsync(recommendationContentfulReference, establishmentId, userId, newStatus)
+        );
+
+        Assert.Equal($"Recommendation with ContentfulRef '{recommendationContentfulReference}' not found", exception.Message);
+    }
+
+    [Fact]
+    public async Task UpdateRecommendationStatusAsync_WhenNoteTextIsNull_ThenPassesEmptyStringToRepository()
+    {
+        // Arrange - Setup to test null noteText handling business rule
+        var recommendationContentfulReference = "rec-001";
+        var establishmentId = 123;
+        var userId = 456;
+        var newStatus = "Reviewed";
+
+        var recommendations = new[]
+        {
+            new RecommendationEntity { Id = 1, ContentfulRef = "rec-001", RecommendationText = "Test Recommendation", QuestionId = 1 }
+        };
+
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+            .Returns(recommendations);
+        _establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, 1)
+            .Returns((EstablishmentRecommendationHistoryEntity?)null);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        await workflow.UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            null // Explicitly null noteText
+        );
+
+        // Assert - Verify that a null noteText is converted to empty string (database has non-nulllable column)
+        await _establishmentRecommendationHistoryRepository.Received(1).CreateRecommendationHistoryAsync(
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<int?>(),
+            Arg.Any<string?>(),
+            Arg.Any<string>(),
+            string.Empty // Confirms null noteText becomes empty string
+        );
     }
 }

@@ -15,7 +15,7 @@ public class RecommendationServiceTests
     [Fact]
     public async Task GetLatestRecommendationStatusesByRecommendationIdAsync_WhenCalled_ThenDelegatesToWorkflow()
     {
-        // Arrange - Setup service to test delegation to workflow
+        // Arrange - Multiple recommendations with different statuses for an establishment
         var establishmentId = 123;
         var recommendationContentfulReferences = new[] { "rec-001", "rec-002" };
         var expectedResult = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
@@ -54,7 +54,7 @@ public class RecommendationServiceTests
     [Fact]
     public async Task GetLatestRecommendationStatusesByRecommendationIdAsync_WhenWorkflowReturnsEmpty_ThenReturnsEmpty()
     {
-        // Arrange - Setup workflow to return empty dictionary
+        // Arrange - Establishment has no recommendation history
         var establishmentId = 456;
         var recommendationContentfulReferences = new[] { "non-existent" };
         var emptyResult = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>();
@@ -75,7 +75,7 @@ public class RecommendationServiceTests
     [Fact]
     public async Task GetLatestRecommendationStatusesByRecommendationIdAsync_WhenEmptyReferences_ThenPassesToWorkflow()
     {
-        // Arrange - Setup service with empty recommendation references
+        // Arrange - Request with no recommendation references to check (e.g. Contentful changes)
         var establishmentId = 789;
         var emptyReferences = new string[0];
         var emptyResult = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>();
@@ -88,7 +88,7 @@ public class RecommendationServiceTests
         // Act
         var result = await service.GetLatestRecommendationStatusesByRecommendationIdAsync(emptyReferences, establishmentId);
 
-        // Assert
+        // Assert - Confirms service passes empty array to workflow
         Assert.Empty(result);
         await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByRecommendationIdAsync(emptyReferences, establishmentId);
     }
@@ -96,7 +96,7 @@ public class RecommendationServiceTests
     [Fact]
     public async Task GetLatestRecommendationStatusesByRecommendationIdAsync_WhenWorkflowThrows_ThenPropagatesException()
     {
-        // Arrange - Setup workflow to throw exception to test error propagation
+        // Arrange - Workflow encounters error during recommendation lookup
         var establishmentId = 999;
         var recommendationContentfulReferences = new[] { "rec-error" };
         var expectedException = new InvalidOperationException("Test exception from workflow");
@@ -118,7 +118,7 @@ public class RecommendationServiceTests
     [Fact]
     public async Task GetLatestRecommendationStatusesByRecommendationIdAsync_WhenSingleRecommendation_ThenReturnsSingleResult()
     {
-        // Arrange - Setup service with single recommendation to test simple delegation
+        // Arrange - Single recommendation status lookup scenario
         var establishmentId = 111;
         var singleReference = new[] { "rec-single" };
         var singleResult = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
@@ -146,5 +146,208 @@ public class RecommendationServiceTests
         Assert.Equal("rec-single", result.Keys.First());
         Assert.Equal("Reviewed", result["rec-single"].NewStatus);
         await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByRecommendationIdAsync(singleReference, establishmentId);
+    }
+
+    [Fact]
+    public async Task GetCurrentRecommendationStatusAsync_WhenCalled_ThenDelegatesToWorkflow()
+    {
+        // Arrange - Current status lookup for a specific recommendation
+        var recommendationContentfulReference = "rec-001";
+        var establishmentId = 123;
+        var expectedResult = new SqlEstablishmentRecommendationHistoryDto
+        {
+            EstablishmentId = establishmentId,
+            RecommendationId = 1,
+            UserId = 1,
+            NewStatus = "Completed",
+            DateCreated = DateTime.UtcNow
+        };
+
+        _recommendationWorkflow.GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
+            .Returns(expectedResult);
+
+        var service = CreateServiceUnderTest();
+
+        // Act
+        var result = await service.GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
+
+        // Assert
+        Assert.Equal(expectedResult, result);
+        await _recommendationWorkflow.Received(1).GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
+    }
+
+    [Fact]
+    public async Task GetCurrentRecommendationStatusAsync_WhenWorkflowReturnsNull_ThenReturnsNull()
+    {
+        // Arrange - Recommendation has no status history
+        var recommendationContentfulReference = "non-existent";
+        var establishmentId = 456;
+
+        _recommendationWorkflow.GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
+            .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
+
+        var service = CreateServiceUnderTest();
+
+        // Act
+        var result = await service.GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
+
+        // Assert
+        Assert.Null(result);
+        await _recommendationWorkflow.Received(1).GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
+    }
+
+    [Fact]
+    public async Task GetCurrentRecommendationStatusAsync_WhenWorkflowThrows_ThenPropagatesException()
+    {
+        // Arrange - Workflow encounters error during status lookup
+        var recommendationContentfulReference = "rec-error";
+        var establishmentId = 789;
+        var expectedException = new InvalidOperationException("Test exception from workflow");
+
+        _recommendationWorkflow.GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
+            .ThrowsAsync(expectedException);
+
+        var service = CreateServiceUnderTest();
+
+        // Act & Assert
+        var actualException = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
+        );
+
+        Assert.Equal(expectedException.Message, actualException.Message);
+        await _recommendationWorkflow.Received(1).GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
+    }
+
+    [Fact]
+    public async Task UpdateRecommendationStatusAsync_WhenCalledWithAllParameters_ThenDelegatesToWorkflow()
+    {
+        // Arrange - Status update with all optional parameters (note and MAT establishment ID)
+        var recommendationContentfulReference = "rec-001";
+        var establishmentId = 123;
+        var userId = 456;
+        var newStatus = "Completed";
+        var noteText = "Work completed successfully";
+        var matEstablishmentId = 789;
+
+        var service = CreateServiceUnderTest();
+
+        // Act
+        await service.UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            noteText,
+            matEstablishmentId
+        );
+
+        // Assert
+        await _recommendationWorkflow.Received(1).UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            noteText,
+            matEstablishmentId
+        );
+    }
+
+    [Fact]
+    public async Task UpdateRecommendationStatusAsync_WhenCalledWithOptionalParametersNull_ThenDelegatesToWorkflow()
+    {
+        // Arrange - Status update without optional parameters
+        var recommendationContentfulReference = "rec-002";
+        var establishmentId = 987;
+        var userId = 654;
+        var newStatus = "InProgress";
+
+        var service = CreateServiceUnderTest();
+
+        // Act
+        await service.UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus
+        );
+
+        // Assert - Confirms optional parameters are passed as null to workflow
+        await _recommendationWorkflow.Received(1).UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            null,
+            null
+        );
+    }
+
+    [Fact]
+    public async Task UpdateRecommendationStatusAsync_WhenWorkflowThrows_ThenPropagatesException()
+    {
+        // Arrange - Workflow fails to update non-existent recommendation
+        var recommendationContentfulReference = "rec-error";
+        var establishmentId = 111;
+        var userId = 222;
+        var newStatus = "Failed";
+        var expectedException = new InvalidOperationException("Recommendation not found");
+
+        _recommendationWorkflow.UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            null,
+            null
+        ).ThrowsAsync(expectedException);
+
+        var service = CreateServiceUnderTest();
+
+        // Act & Assert
+        var actualException = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => service.UpdateRecommendationStatusAsync(recommendationContentfulReference, establishmentId, userId, newStatus)
+        );
+
+        Assert.Equal(expectedException.Message, actualException.Message);
+        await _recommendationWorkflow.Received(1).UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            null,
+            null
+        );
+    }
+
+    [Fact]
+    public async Task UpdateRecommendationStatusAsync_WhenCalledWithEmptyNoteText_ThenPassesEmptyStringToWorkflow()
+    {
+        // Arrange - Status update with empty note text
+        var recommendationContentfulReference = "rec-003";
+        var establishmentId = 333;
+        var userId = 444;
+        var newStatus = "Reviewed";
+        var emptyNoteText = "";
+
+        var service = CreateServiceUnderTest();
+
+        // Act
+        await service.UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            emptyNoteText
+        );
+
+        // Assert - Confirms empty string is passed to workflow (not null)
+        await _recommendationWorkflow.Received(1).UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            emptyNoteText,
+            null
+        );
     }
 }
