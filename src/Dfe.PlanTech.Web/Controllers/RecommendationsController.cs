@@ -35,9 +35,9 @@ public class RecommendationsController(
     [HttpGet("{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}", Name = GetSingleRecommendationAction)]
     public async Task<IActionResult> GetSingleRecommendation(string categorySlug, string sectionSlug, string chunkSlug)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug, nameof(chunkSlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
 
         return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
     }
@@ -45,8 +45,8 @@ public class RecommendationsController(
     [HttpGet("{categorySlug}/{sectionSlug}/recommendations/print", Name = "GetRecommendationChecklist")]
     public async Task<IActionResult> GetRecommendationChecklist(string categorySlug, string sectionSlug)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
         return await _recommendationsViewBuilder.RouteBySectionAndRecommendation(this, categorySlug, sectionSlug, true);
     }
@@ -58,9 +58,9 @@ public class RecommendationsController(
         string chunkSlug,
         [FromForm] string selectedStatus)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug, nameof(chunkSlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
 
         if (string.IsNullOrWhiteSpace(selectedStatus))
         {
