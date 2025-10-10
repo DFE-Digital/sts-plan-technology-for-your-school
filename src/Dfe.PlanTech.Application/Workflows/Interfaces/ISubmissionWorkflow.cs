@@ -18,5 +18,5 @@ public interface ISubmissionWorkflow
     Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId);
     Task SetMaturityAndMarkAsReviewedAsync(int submissionId);
     Task SetSubmissionReviewedAsync(int submissionId);
-    Task<int> SubmitAnswer(int userId, int establishmentId, SubmitAnswerModel answerModel);
+    Task<int> SubmitAnswer(int userId, int establishmentId, int? matEstablishmentId, SubmitAnswerModel answerModel);
 }

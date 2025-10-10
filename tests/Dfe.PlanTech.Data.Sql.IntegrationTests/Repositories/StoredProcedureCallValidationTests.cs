@@ -171,7 +171,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             ChosenAnswer = answerModel
         };
 
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, submitAnswerModel);
+        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, null, submitAnswerModel);
 
         // Act & Assert - Should execute without parameter type or order errors
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);
@@ -261,7 +261,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             Question = questionModel,
             ChosenAnswer = answerModel
         };
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, submitAnswerModel);
+        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, null, submitAnswerModel);
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);
         Assert.True(responseId > 0);
 

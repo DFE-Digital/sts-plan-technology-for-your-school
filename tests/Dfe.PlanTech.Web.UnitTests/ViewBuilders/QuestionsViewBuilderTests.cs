@@ -314,7 +314,7 @@ public class QuestionsViewBuilderTests
             ChosenAnswerJson = @"{ ""answer"": { ""id"": ""A1"" } }"
         };
 
-        _submissionSvc.SubmitAnswerAsync(11, 22, Arg.Any<SubmitAnswerModel>())
+        _submissionSvc.SubmitAnswerAsync(11, 22, null, Arg.Any<SubmitAnswerModel>())
                       .Returns<Task>(_ => throw new Exception("db down"));
 
         // Act
@@ -351,7 +351,7 @@ public class QuestionsViewBuilderTests
         };
 
         // Submit works
-        _submissionSvc.SubmitAnswerAsync(11, 22, Arg.Any<SubmitAnswerModel>()).Returns(1);
+        _submissionSvc.SubmitAnswerAsync(11, 22, null, Arg.Any<SubmitAnswerModel>()).Returns(1);
 
         // And the next unanswered question exists
         var nextQ = MakeQuestion("Q2", "q-2", "Q2");
@@ -361,7 +361,7 @@ public class QuestionsViewBuilderTests
         var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", returnTo: null);
 
         // Assert
-        await _submissionSvc.Received(1).SubmitAnswerAsync(11, 22, Arg.Any<SubmitAnswerModel>());
+        await _submissionSvc.Received(1).SubmitAnswerAsync(11, 22, null, Arg.Any<SubmitAnswerModel>());
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(QuestionsController.GetQuestionBySlug), redirect.ActionName);
