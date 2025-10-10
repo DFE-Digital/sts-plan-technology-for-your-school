@@ -1,7 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Data.Sql.Interfaces;
-using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
@@ -22,12 +21,7 @@ public class RecommendationWorkflow(
             return null;
         }
 
-        var recommendationHistoryEntities = await establishmentRecommendationHistoryRepository.GetRecommendationHistoryByEstablishmentIdAsync(establishmentId);
-
-        var latestHistoryForRecommendation = recommendationHistoryEntities
-            .Where(rhe => rhe.RecommendationId == recommendation.Id)
-            .OrderByDescending(r => r.DateCreated)
-            .FirstOrDefault();
+        var latestHistoryForRecommendation = await establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, recommendation.Id);
 
         return latestHistoryForRecommendation?.AsDto();
     }

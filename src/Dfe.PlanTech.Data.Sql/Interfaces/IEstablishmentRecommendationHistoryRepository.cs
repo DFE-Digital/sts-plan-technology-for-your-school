@@ -6,6 +6,8 @@ public interface IEstablishmentRecommendationHistoryRepository
 {
     Task<IEnumerable<EstablishmentRecommendationHistoryEntity>> GetRecommendationHistoryByEstablishmentIdAsync(int establishmentId);
 
+    Task<EstablishmentRecommendationHistoryEntity?> GetLatestRecommendationHistoryAsync(int establishmentId, int recommendationId);
+
     Task CreateRecommendationHistoryAsync(
         int establishmentId,
         int recommendationId,

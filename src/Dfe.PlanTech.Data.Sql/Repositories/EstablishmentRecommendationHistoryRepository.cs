@@ -20,6 +20,14 @@ public class EstablishmentRecommendationHistoryRepository : IEstablishmentRecomm
             .ToListAsync();
     }
 
+    public async Task<EstablishmentRecommendationHistoryEntity?> GetLatestRecommendationHistoryAsync(int establishmentId, int recommendationId)
+    {
+        return await _db.EstablishmentRecommendationHistories
+            .Where(erh => erh.EstablishmentId == establishmentId && erh.RecommendationId == recommendationId)
+            .OrderByDescending(erh => erh.DateCreated)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task CreateRecommendationHistoryAsync(
         int establishmentId,
         int recommendationId,
