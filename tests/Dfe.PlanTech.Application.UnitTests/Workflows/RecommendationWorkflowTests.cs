@@ -282,7 +282,8 @@ public class RecommendationWorkflowTests
             DateCreated = DateTime.UtcNow
         };
 
-        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(
+            Arg.Is<IEnumerable<string>>(refs => refs.Contains(recommendationContentfulReference)))
             .Returns(recommendations);
         _establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, 1)
             .Returns(historyEntity);
@@ -374,7 +375,8 @@ public class RecommendationWorkflowTests
             DateCreated = DateTime.UtcNow.AddDays(-1)
         };
 
-        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(
+            Arg.Is<IEnumerable<string>>(refs => refs.Contains(recommendationContentfulReference)))
             .Returns(recommendations);
         _establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, 1)
             .Returns(currentHistoryEntity);
@@ -417,7 +419,8 @@ public class RecommendationWorkflowTests
             new RecommendationEntity { Id = 1, ContentfulRef = "rec-001", RecommendationText = "Test Recommendation", QuestionId = 1 }
         };
 
-        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(
+            Arg.Is<IEnumerable<string>>(refs => refs.Contains(recommendationContentfulReference)))
             .Returns(recommendations);
         _establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, 1)
             .Returns((EstablishmentRecommendationHistoryEntity?)null);
@@ -480,7 +483,8 @@ public class RecommendationWorkflowTests
             new RecommendationEntity { Id = 1, ContentfulRef = "rec-001", RecommendationText = "Test Recommendation", QuestionId = 1 }
         };
 
-        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference })
+        _recommendationRepository.GetRecommendationsByContentfulReferencesAsync(
+            Arg.Is<IEnumerable<string>>(refs => refs.Contains(recommendationContentfulReference)))
             .Returns(recommendations);
         _establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, 1)
             .Returns((EstablishmentRecommendationHistoryEntity?)null);
