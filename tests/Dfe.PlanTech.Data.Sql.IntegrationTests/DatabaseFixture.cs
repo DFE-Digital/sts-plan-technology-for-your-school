@@ -22,13 +22,19 @@ public class DatabaseFixture : IAsyncLifetime
             .Build();
         await DbContainer.StartAsync();
 
+        var filterOutput = new List<string>();
+
         // Run DbUp migrations
         EnsureDatabase.For.SqlDatabase(ConnectionString);
         var upgrader = DeployChanges.To
             .SqlDatabase(ConnectionString)
             .WithScriptsEmbeddedInAssembly(
                 typeof(DatabaseUpgrader.Options).Assembly,
-                s => s.StartsWith("Dfe.PlanTech.DatabaseUpgrader.Scripts", StringComparison.Ordinal))
+                s =>
+                {
+                    filterOutput.Add(s);
+                    return s.StartsWith("Dfe.PlanTech.DatabaseUpgrader.Scripts", StringComparison.Ordinal);
+                })
             .LogToConsole()
             .Build();
         var result = upgrader.PerformUpgrade();
