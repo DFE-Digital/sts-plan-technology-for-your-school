@@ -102,9 +102,9 @@ public class SubmissionService(
         return _submissionWorkflow.SetLatestSubmissionViewedAsync(establishmentId, sectionId);
     }
 
-    public Task<int> SubmitAnswerAsync(int userId, int establishmentId, SubmitAnswerModel answerModel)
+    public Task<int> SubmitAnswerAsync(int userId, int establishmentId, int? matEstablishmentId, SubmitAnswerModel answerModel)
     {
-        return _submissionWorkflow.SubmitAnswer(userId, establishmentId, answerModel);
+        return _submissionWorkflow.SubmitAnswer(userId, establishmentId, matEstablishmentId, answerModel);
     }
 
     public Task ConfirmCheckAnswersAsync(int submissionId)

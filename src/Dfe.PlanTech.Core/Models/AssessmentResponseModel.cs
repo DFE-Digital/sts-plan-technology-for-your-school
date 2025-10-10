@@ -4,6 +4,8 @@ public class AssessmentResponseModel
 {
     public int UserId { get; set; }
 
+    public int UserEstablishmentId { get; set; }
+
     public int EstablishmentId { get; set; }
 
     public string SectionId { get; set; }
@@ -14,7 +16,7 @@ public class AssessmentResponseModel
 
     public IdWithTextModel? Answer { get; init; }
 
-    public AssessmentResponseModel(int userId, int establishmentId, SubmitAnswerModel questionAnswer)
+    public AssessmentResponseModel(int userId, int establishmentId, int? matEstablishmentId, SubmitAnswerModel questionAnswer)
     {
         SectionId = questionAnswer.SectionId;
         SectionName = questionAnswer.SectionName;
@@ -22,5 +24,6 @@ public class AssessmentResponseModel
         Question = questionAnswer.Question;
         EstablishmentId = establishmentId;
         UserId = userId;
+        UserEstablishmentId = matEstablishmentId ?? establishmentId;
     }
 }

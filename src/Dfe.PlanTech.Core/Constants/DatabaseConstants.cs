@@ -27,6 +27,7 @@ public static class DatabaseConstants
     public const string SelectedEstablishmentNameParam = "@SelectedEstablishmentName";
     public const string SelectionIdParam = "@SelectionId";
     public const string SubmissionIdParam = "@SubmissionId";
+    public const string UserEstablishmentIdParam = "@UserEstablishmentId";
     public const string UserIdParam = "@UserId";
 
     #endregion Stored Procedures

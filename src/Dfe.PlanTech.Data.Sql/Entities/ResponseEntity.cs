@@ -12,6 +12,10 @@ public class ResponseEntity
 
     public UserEntity? User { get; set; }
 
+    public int UserEstablishmentId { get; set; }
+
+    public EstablishmentEntity? UserEstablishment { get; set; } = null!;
+
     public int SubmissionId { get; set; }
 
     public SubmissionEntity Submission { get; set; } = null!;
@@ -37,6 +41,8 @@ public class ResponseEntity
             Id = Id,
             UserId = UserId,
             User = User?.AsDto(),
+            UserEstablishmentId = UserEstablishmentId,
+            UserEstablishment = UserEstablishment?.AsDto(),
             SubmissionId = SubmissionId,
             QuestionId = QuestionId,
             Question = Question.AsDto(),
