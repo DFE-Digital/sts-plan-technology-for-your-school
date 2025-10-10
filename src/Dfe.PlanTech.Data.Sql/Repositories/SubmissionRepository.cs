@@ -106,11 +106,11 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             .Where(x => x is not null)
             .ToDictionary(x => x!.Id, x => x.Status);
 
-        var previousStatuses = _db.EstablishmentRecommendationHistories
+        var previousStatuses = await _db.EstablishmentRecommendationHistories
             .Where(erh => erh.EstablishmentId == establishmentId &&
                           erh.MatEstablishmentId == matEstablishmentId)
             .GroupBy(erh => erh.RecommendationId, erh => erh)
-            .ToDictionary(group => group.Key, group => group.OrderByDescending(erh => erh.DateCreated).First().NewStatus);
+            .ToDictionaryAsync(group => group.Key, group => group.OrderByDescending(erh => erh.DateCreated).First().NewStatus);
 
         var recommendationStatuses = recommendations.Select(r => new EstablishmentRecommendationHistoryEntity
         {
