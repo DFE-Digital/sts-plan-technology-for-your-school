@@ -1,5 +1,6 @@
 ﻿using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
@@ -654,6 +655,67 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
 
         // Assert
         Assert.Null(result);
+    }
+
+    #endregion
+
+    #region CreateRecommendationHistoryAsync Tests
+
+    [Fact]
+    public async Task CreateRecommendationHistoryAsync_WhenGivenValidParameters_ThenCreatesHistoryEntry()
+    {
+        // Arrange - Create establishment, user, and recommendation to use in history creation
+        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var user = new UserEntity { DfeSignInRef = "user123" };
+        var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
+
+        DbContext.Establishments.Add(establishment);
+        DbContext.Users.Add(user);
+        DbContext.Questions.Add(question);
+        await DbContext.SaveChangesAsync();
+
+        var recommendation = new RecommendationEntity
+        {
+            RecommendationText = "Test Recommendation",
+            ContentfulRef = "rec-001",
+            QuestionId = question.Id
+        };
+        DbContext.Recommendations.Add(recommendation);
+        await DbContext.SaveChangesAsync();
+
+        var initialCount = await CountEntitiesAsync<EstablishmentRecommendationHistoryEntity>();
+        var beforeCreate = DateTime.UtcNow;
+
+        // Act
+        await _repository.CreateRecommendationHistoryAsync(
+            establishment.Id,
+            recommendation.Id,
+            user.Id,
+            null,
+            "InProgress",
+            "Completed",
+            "Recommendation completed successfully"
+        );
+
+        var afterCreate = DateTime.UtcNow;
+
+        // Assert
+        var finalCount = await CountEntitiesAsync<EstablishmentRecommendationHistoryEntity>();
+        Assert.Equal(initialCount + 1, finalCount);
+
+        var createdHistory = await DbContext.EstablishmentRecommendationHistories
+            .FirstOrDefaultAsync(h => h.EstablishmentId == establishment.Id && h.RecommendationId == recommendation.Id);
+
+        Assert.NotNull(createdHistory);
+        Assert.Equal(establishment.Id, createdHistory.EstablishmentId);
+        Assert.Equal(recommendation.Id, createdHistory.RecommendationId);
+        Assert.Equal(user.Id, createdHistory.UserId);
+        Assert.Null(createdHistory.MatEstablishmentId);
+        Assert.Equal("InProgress", createdHistory.PreviousStatus);
+        Assert.Equal("Completed", createdHistory.NewStatus);
+        Assert.Equal("Recommendation completed successfully", createdHistory.NoteText);
+        Assert.True(createdHistory.DateCreated >= beforeCreate);
+        Assert.True(createdHistory.DateCreated <= afterCreate);
     }
 
     #endregion
