@@ -71,7 +71,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
                 if (question is null)
                 {
-                    throw new InvalidOperationException("Could not find the question identified in the submission.");
+                    throw new InvalidOperationException("Could not find the question identified in the submission");
                 }
 
                 return new SqlRecommendationDto
