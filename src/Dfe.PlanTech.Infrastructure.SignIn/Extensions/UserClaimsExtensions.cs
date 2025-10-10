@@ -18,7 +18,7 @@ public static class UserClaimsExtensions
     public static UserAuthorisationStatus GetAuthorisationStatus(this ClaimsPrincipal claimsPrincipal) =>
         new(claimsPrincipal.Identity?.IsAuthenticated == true, claimsPrincipal.Claims.GetOrganisation() != null);
 
-    public static string GetDsiReference(this IEnumerable<Claim> claims)
+    public static string GetDsiReference(this IEnumerable<Claim> claims)    
     {
         ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
