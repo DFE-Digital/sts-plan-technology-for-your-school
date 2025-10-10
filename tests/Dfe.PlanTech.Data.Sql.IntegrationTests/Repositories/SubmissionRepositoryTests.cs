@@ -300,7 +300,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var recommendationHistory = DbContext.EstablishmentRecommendationHistories.FirstOrDefault(erh => erh.Id == recommendation.Id);
         Assert.NotNull(recommendationHistory);
-        Assert.Equal(RecommendationConstants.Completed, recommendationHistory.NewStatus);
+        Assert.Equal(RecommendationConstants.CompletedKey, recommendationHistory.NewStatus);
     }
 
     [Fact]
