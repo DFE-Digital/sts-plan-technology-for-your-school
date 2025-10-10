@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
