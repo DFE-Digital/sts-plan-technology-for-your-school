@@ -3,12 +3,14 @@ using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Core.Models;
 
-public class EstablishmentModel
+public sealed class EstablishmentModel
 {
     public const string InvalidEstablishmentErrorMessage = $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
 
+    [JsonPropertyName("id")]
     public Guid Id { get; set; }
 
+    [JsonPropertyName("category")]
     public IdWithNameModel? Category { get; set; }
 
     [JsonPropertyName("DistrictAdministrative_code")]
@@ -26,7 +28,7 @@ public class EstablishmentModel
     public string Sid { get; set; } = null!;
 
     [JsonPropertyName("type")]
-    public EstablishmentTypeModel? Type { get; set; }
+    public IdWithNameModel? Type { get; set; }
 
     [JsonPropertyName("uid")]
     public string? Uid { get; set; }
@@ -37,18 +39,20 @@ public class EstablishmentModel
     [JsonPropertyName("urn")]
     public string? Urn { get; set; }
 
-    public bool IsValid => References()
-        .Any(reference => !string.IsNullOrEmpty(reference));
+    public bool IsValid => References.Any(reference => !string.IsNullOrEmpty(reference));
 
-    public string Reference => References()
+    public string Reference => References
         .FirstOrDefault(reference => !string.IsNullOrEmpty(reference))
             ?? throw new InvalidEstablishmentException(InvalidEstablishmentErrorMessage);
 
-    private IEnumerable<string?> References()
+    private IEnumerable<string?> References
     {
-        yield return Urn;
-        yield return Ukprn;
-        yield return Uid;
-        yield return Id.ToString();
+        get
+        {
+            yield return Urn;
+            yield return Ukprn;
+            yield return Uid;
+            yield return Id.ToString();
+        }
     }
 }
