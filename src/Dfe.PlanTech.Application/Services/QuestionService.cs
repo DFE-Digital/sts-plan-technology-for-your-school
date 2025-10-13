@@ -15,6 +15,10 @@ public class QuestionService(
     public async Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(int establishmentId, QuestionnaireSectionEntry section)
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+
+        if (submission?.Status == "Inaccessible")
+            submission = null;
+
         if (submission is null)
             return section.Questions.FirstOrDefault();
 

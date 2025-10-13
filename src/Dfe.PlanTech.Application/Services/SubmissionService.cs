@@ -22,6 +22,7 @@ public class SubmissionService(
             establishmentId,
             section,
             isCompletedSubmission: false);
+
         if (inProgressSubmission is not null)
         {
             await _submissionWorkflow.SetSubmissionInaccessible(inProgressSubmission.Id);
@@ -40,20 +41,29 @@ public class SubmissionService(
 
     public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission)
     {
-        var latestCompletedSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+        var latestSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
             section,
             isCompletedSubmission);
 
-        var status = latestCompletedSubmission is null
-            ? SubmissionStatus.NotStarted
-            : latestCompletedSubmission.Completed
-                ? SubmissionStatus.CompleteReviewed
-                : SubmissionStatus.InProgress;
+        SubmissionStatus status;
 
-        var submissionResponsesModel = latestCompletedSubmission is null
+        if (latestSubmission == null || latestSubmission.Status == "Inaccessible")
+        {
+            status = SubmissionStatus.NotStarted;
+        }
+        else if (latestSubmission.Completed)
+        {
+            status = SubmissionStatus.CompleteReviewed;
+        }
+        else
+        {
+            status = SubmissionStatus.InProgress;
+        }
+
+        var submissionResponsesModel = latestSubmission is null || latestSubmission.Status == "Inaccessible"
             ? null
-            : new SubmissionResponsesModel(latestCompletedSubmission, section);
+            : new SubmissionResponsesModel(latestSubmission, section);
 
         if (status.Equals(SubmissionStatus.NotStarted))
         {
@@ -72,11 +82,11 @@ public class SubmissionService(
             .Answers
             .FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
 
-        var sectionStatus = latestCompletedSubmission?.Status is null
+        var sectionStatus = latestSubmission?.Status is null
             ? cmsLastAnswer?.NextQuestion is null
                ? SubmissionStatus.CompleteNotReviewed
                : SubmissionStatus.InProgress
-            : latestCompletedSubmission.Status.ToSubmissionStatus();
+            : latestSubmission.Status.ToSubmissionStatus();
 
         return new SubmissionRoutingDataModel
         (

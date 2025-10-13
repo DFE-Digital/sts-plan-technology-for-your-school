@@ -120,10 +120,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         string sectionId
     )
     {
-        var query = GetSubmissionsBy(submission =>
-                submission.EstablishmentId == establishmentId &&
-                submission.SectionId == sectionId
-            );
+        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission: false);
 
         var submission = await query.FirstOrDefaultAsync();
         if (submission is null)

@@ -1,0 +1,4 @@
+SET ANSI_NULLS ONGOSET QUOTED_IDENTIFIER ONGO
+ALTER FUNCTION [dbo].[GetCurrentSubmissionId](    @sectionId NVARCHAR(50),    @establishmentId INT)RETURNS INTASBEGIN    DECLARE @submissionId INT;
+SELECT TOP 1 @submissionId = Id    FROM [dbo].[submission]    WHERE sectionId = @sectionId      AND establishmentId = @establishmentId      AND completed = 0      AND status != 'Inaccessible' -- Exclude inaccessible submissions    ORDER BY Id DESC;
+RETURN @submissionId;ENDGO
