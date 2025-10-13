@@ -65,7 +65,7 @@ public class RecommendationsController(
         if (string.IsNullOrWhiteSpace(selectedStatus))
         {
             TempData["StatusUpdateError"] = "Select a status";
-            return RedirectToAction(GetSingleRecommendationAction, new { categorySlug, sectionSlug, chunkSlug });
+            return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
         }
 
         var selectedStatusDisplayName = RecommendationConstants.StatusDisplayNamesNonBreakingSpaces.GetValueOrDefault(selectedStatus, selectedStatus);
@@ -75,7 +75,7 @@ public class RecommendationsController(
         {
             Logger.LogWarning("Invalid / unrecognised status value received: {SelectedStatus}: {SelectedStatusDisplayName}", selectedStatus, selectedStatusDisplayName);
             TempData["StatusUpdateError"] = "Select a valid status";
-            return RedirectToAction(GetSingleRecommendationAction, new { categorySlug, sectionSlug, chunkSlug });
+            return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
         }
 
 
@@ -104,7 +104,7 @@ public class RecommendationsController(
         TempData["StatusUpdateSuccessTitle"] = $"Status updated to '{selectedStatusDisplayName}'";
 
         // Redirect back to the single recommendation page
-        return RedirectToAction(GetSingleRecommendationAction, new { categorySlug, sectionSlug, chunkSlug });
+        return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
     }
 
     private int GetEstablishmentIdOrThrowException()
