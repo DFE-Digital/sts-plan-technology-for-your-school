@@ -127,7 +127,7 @@ public class SubmissionService(
         return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
     }
 
-    public async Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)
+    public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
     {
         await _submissionWorkflow.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
     }

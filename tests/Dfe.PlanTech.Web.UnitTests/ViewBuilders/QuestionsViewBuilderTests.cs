@@ -243,7 +243,7 @@ public class QuestionsViewBuilderTests
         var result = await sut.RouteToNextUnansweredQuestion(controller, "cat", "sec-err");
 
         // Assert
-        await _submissionSvc.Received(1).SetSubmissionInaccessibleAsync(987, "S99");
+        await _submissionSvc.Received(1).DeleteCurrentSubmissionSoftAsync(987, "S99");
 
         Assert.True(controller.TempData.ContainsKey("SubtopicError"));
         var msg = controller.TempData["SubtopicError"] as string;

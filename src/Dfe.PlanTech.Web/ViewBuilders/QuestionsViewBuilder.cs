@@ -157,7 +157,7 @@ public class QuestionsViewBuilder(
         catch (DatabaseException)
         {
             // Remove the current invalid submission and redirect to self-assessment page
-            await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
+            await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Id);
 
             controller.TempData["SubtopicError"] = await BuildErrorMessage();
             return controller.RedirectToAction(
