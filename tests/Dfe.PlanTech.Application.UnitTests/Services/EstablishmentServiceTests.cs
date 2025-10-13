@@ -26,7 +26,7 @@ public class EstablishmentServiceTests
     public async Task GetOrCreateEstablishmentAsync_Delegates_To_Workflow()
     {
         // Arrange
-        var establishmentModel = new OrganisationModel
+        var establishmentModel = new EstablishmentModel
         {
             Id = Guid.NewGuid(),
             DistrictAdministrativeCode = "testCode",
@@ -142,7 +142,7 @@ public class EstablishmentServiceTests
             DfeSignInRef = dsiRef
         };
 
-        var establishmentModel = new OrganisationModel
+        var establishmentModel = new EstablishmentModel
         {
             Id = Guid.NewGuid(),
             DistrictAdministrativeCode = "testCode",
@@ -216,7 +216,7 @@ public class EstablishmentServiceTests
             sut.RecordGroupSelection(
                 dsiRef,
                 userEstablishmentId: null,
-                userEstablishmentModel: new OrganisationModel { Urn = "U", Name = "N" },
+                userEstablishmentModel: new EstablishmentModel { Urn = "U", Name = "N" },
                 selectedEstablishmentUrn: "SURN",
                 selectedEstablishmentName: "SNAME"));
     }

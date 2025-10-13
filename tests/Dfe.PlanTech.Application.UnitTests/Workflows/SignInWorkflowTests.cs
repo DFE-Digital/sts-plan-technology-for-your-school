@@ -32,7 +32,7 @@ public class SignInWorkflowTests
         var dsi = "user-123";
         var name = "testName";
         var urn = "testUrn";
-        var model = new OrganisationModel { Urn = urn, Name = name };
+        var model = new EstablishmentModel { Urn = urn, Name = name };
 
         var user = new UserEntity
         {
@@ -69,7 +69,7 @@ public class SignInWorkflowTests
         await _estRepo.Received(1).GetEstablishmentByReferenceAsync(urn);
         await _signInRepo.Received(1).CreateSignInAsync(7, 10);
         await _userRepo.DidNotReceive().CreateUserBySignInRefAsync(Arg.Any<string>());
-        await _estRepo.DidNotReceive().CreateEstablishmentFromModelAsync(Arg.Any<OrganisationModel>());
+        await _estRepo.DidNotReceive().CreateEstablishmentFromModelAsync(Arg.Any<EstablishmentModel>());
     }
 
     // ── RecordSignIn: create missing user & establishment; copy fields ────────
@@ -81,7 +81,7 @@ public class SignInWorkflowTests
         var dsi = "user-456";
         var name = "testName";
         var urn = "testUrn";
-        var model = new OrganisationModel
+        var model = new EstablishmentModel
         {
             Ukprn = "UKPRN-XYZ",
             Urn = urn,
@@ -112,8 +112,8 @@ public class SignInWorkflowTests
 
         _estRepo.GetEstablishmentByReferenceAsync("URN-2").Returns((EstablishmentEntity?)null);
 
-        OrganisationModel? captured = null;
-        _estRepo.CreateEstablishmentFromModelAsync(Arg.Do<OrganisationModel>(m => captured = m))
+        EstablishmentModel? captured = null;
+        _estRepo.CreateEstablishmentFromModelAsync(Arg.Do<EstablishmentModel>(m => captured = m))
                 .Returns(new EstablishmentEntity { Id = 20, EstablishmentRef = urn, OrgName = name });
 
         _signInRepo.CreateSignInAsync(9, 20).Returns(signIn);
@@ -132,7 +132,7 @@ public class SignInWorkflowTests
         Assert.Equal(name, captured.Type!.Name);
 
         await _userRepo.Received(1).CreateUserBySignInRefAsync(dsi);
-        await _estRepo.Received(1).CreateEstablishmentFromModelAsync(Arg.Any<OrganisationModel>());
+        await _estRepo.Received(1).CreateEstablishmentFromModelAsync(Arg.Any<EstablishmentModel>());
         await _signInRepo.Received(1).CreateSignInAsync(9, 20);
     }
 
@@ -145,7 +145,7 @@ public class SignInWorkflowTests
         var dsi = "user-789";
         var name = "testName";
         var urn = "testUrn";
-        var model = new OrganisationModel
+        var model = new EstablishmentModel
         {
             Urn = urn,
             Name = name,
@@ -174,8 +174,8 @@ public class SignInWorkflowTests
 
         _estRepo.GetEstablishmentByReferenceAsync(urn).Returns((EstablishmentEntity?)null);
 
-        OrganisationModel? captured = null;
-        _estRepo.CreateEstablishmentFromModelAsync(Arg.Do<OrganisationModel>(m => captured = m))
+        EstablishmentModel? captured = null;
+        _estRepo.CreateEstablishmentFromModelAsync(Arg.Do<EstablishmentModel>(m => captured = m))
                 .Returns(new EstablishmentEntity { Id = 30, EstablishmentRef = urn, OrgName = name });
 
         _signInRepo.CreateSignInAsync(11, 30).Returns(signIn);

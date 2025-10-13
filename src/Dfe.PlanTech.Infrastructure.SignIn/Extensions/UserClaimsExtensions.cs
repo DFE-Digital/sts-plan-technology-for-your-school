@@ -38,7 +38,7 @@ public static class UserClaimsExtensions
     /// <exception cref="ArgumentNullException">
     /// If <paramref name="principal"/> is <c>null</c>
     /// </exception>
-    public static OrganisationModel? GetOrganisation(this IEnumerable<Claim> claims)
+    public static EstablishmentModel? GetOrganisation(this IEnumerable<Claim> claims)
     {
         ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
@@ -51,7 +51,7 @@ public static class UserClaimsExtensions
             return null;
         }
 
-        var organisation = JsonSerializer.Deserialize<OrganisationModel>(organisationJson, _jsonSerialiserOptions);
+        var organisation = JsonSerializer.Deserialize<EstablishmentModel>(organisationJson, _jsonSerialiserOptions);
         if (organisation?.Id == Guid.Empty)
         {
             return null;

@@ -66,7 +66,7 @@ public class UserClaimsExtensionsTests
     [Fact]
     public void GetOrganisation_Should_ReturnNull_When_Organisation_Has_No_Id()
     {
-        var organisation = new OrganisationModel()
+        var organisation = new EstablishmentModel()
         {
             Id = Guid.Empty,
             Urn = "testUrn",
@@ -86,7 +86,7 @@ public class UserClaimsExtensionsTests
     [Fact]
     public void GetOrganisation_Should_Return_Organisation_When_Exists()
     {
-        var organisation = new OrganisationModel()
+        var organisation = new EstablishmentModel()
         {
             Id = Guid.NewGuid(),
             Urn = "testUrn",

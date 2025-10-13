@@ -20,7 +20,7 @@ public class EstablishmentService(
     private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
     private readonly IUserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 
-    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(OrganisationModel establishmentModel)
+    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
     {
         return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel);
     }
@@ -52,7 +52,7 @@ public class EstablishmentService(
     public async Task RecordGroupSelection(
         string userDsiReference,
         int? userEstablishmentId,
-        OrganisationModel userEstablishmentModel,
+        EstablishmentModel userEstablishmentModel,
         string selectedEstablishmentUrn,
         string selectedEstablishmentName)
     {

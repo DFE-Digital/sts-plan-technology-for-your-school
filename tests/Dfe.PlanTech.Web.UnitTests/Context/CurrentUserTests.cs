@@ -129,7 +129,7 @@ public class CurrentUserTests
     public void Organisation_Parses_From_Json_Claim_And_IsMat_True_When_Category_Matches()
     {
         // Arrange a minimal OrganisationModel with Category.Id = MatOrganisationCategoryId
-        var org = new OrganisationModel
+        var org = new EstablishmentModel
         {
             Id = Guid.NewGuid(),
             Category = new IdWithNameModel { Id = DsiConstants.MatOrganisationCategoryId },

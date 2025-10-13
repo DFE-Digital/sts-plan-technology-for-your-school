@@ -15,7 +15,7 @@ public class EstablishmentWorkflow(
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository = establishmentLinkRepository ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
     private readonly IStoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
 
-    public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(OrganisationModel establishmentModel)
+    public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
     {
         var establishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(establishmentModel.Reference);
         establishment ??= await _establishmentRepository.CreateEstablishmentFromModelAsync(establishmentModel);
@@ -25,7 +25,7 @@ public class EstablishmentWorkflow(
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(string establishmentUrn, string establishmentName)
     {
-        var establishmentModel = new OrganisationModel()
+        var establishmentModel = new EstablishmentModel()
         {
             Name = establishmentName,
             Urn = establishmentUrn

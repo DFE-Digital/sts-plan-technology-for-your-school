@@ -15,7 +15,7 @@ public class SignInWorkflow(
     private readonly ISignInRepository _signInRepository = signInRepository ?? throw new ArgumentNullException(nameof(signInRepository));
     private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 
-    public virtual async Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, OrganisationModel establishmentModel)
+    public virtual async Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, EstablishmentModel establishmentModel)
     {
         var user = await GetOrCreateUserAsync(dfeSignInRef);
         var establishment = await GetOrCreateEstablishmentAsync(establishmentModel);
@@ -44,7 +44,7 @@ public class SignInWorkflow(
         return newUser.AsDto();
     }
 
-    private async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(OrganisationModel establishmentModel)
+    private async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
     {
         var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(establishmentModel.Reference);
         if (existingEstablishment is not null)
@@ -52,7 +52,7 @@ public class SignInWorkflow(
             return existingEstablishment.AsDto();
         }
 
-        var newEstablishmentData = new OrganisationModel
+        var newEstablishmentData = new EstablishmentModel
         {
             Ukprn = establishmentModel.Ukprn,
             Urn = establishmentModel.Urn,

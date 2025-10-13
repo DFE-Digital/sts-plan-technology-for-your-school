@@ -37,7 +37,7 @@ public class EstablishmentWorkflowTests
         var serviceUnderTest = CreateServiceUnderTest();
         var urn = "12345";
         var name = "testName";
-        var model = new OrganisationModel { Id = Guid.NewGuid(), Urn = urn, Name = name };
+        var model = new EstablishmentModel { Id = Guid.NewGuid(), Urn = urn, Name = name };
         var establishment = MakeEstablishment(10, urn, name);
 
         _estRepo.GetEstablishmentByReferenceAsync(urn).Returns(establishment);
@@ -50,14 +50,14 @@ public class EstablishmentWorkflowTests
         Assert.Equal(name, dto.OrgName);
 
         await _estRepo.Received(1).GetEstablishmentByReferenceAsync(urn);
-        await _estRepo.DidNotReceive().CreateEstablishmentFromModelAsync(Arg.Any<OrganisationModel>());
+        await _estRepo.DidNotReceive().CreateEstablishmentFromModelAsync(Arg.Any<EstablishmentModel>());
     }
 
     [Fact]
     public async Task GetOrCreateEstablishment_Creates_When_Not_Found()
     {
         var serviceUnderTest = CreateServiceUnderTest();
-        var model = new OrganisationModel { Urn = "999", Name = "New School" };
+        var model = new EstablishmentModel { Urn = "999", Name = "New School" };
 
         _estRepo.GetEstablishmentByReferenceAsync("999")
                 .Returns((EstablishmentEntity?)null);
@@ -87,7 +87,7 @@ public class EstablishmentWorkflowTests
                 .Returns((EstablishmentEntity?)null);
 
         _estRepo.CreateEstablishmentFromModelAsync(
-                Arg.Is<OrganisationModel>(m => m.Urn == establishmentReference && m.Name == name))
+                Arg.Is<EstablishmentModel>(m => m.Urn == establishmentReference && m.Name == name))
             .Returns(MakeEstablishment(5, establishmentReference, name));
 
         var dto = await serviceUnderTest.GetOrCreateEstablishmentAsync(establishmentReference, name);

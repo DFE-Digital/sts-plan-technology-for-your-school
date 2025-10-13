@@ -3,7 +3,7 @@ using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Core.Models;
 
-public sealed class OrganisationModel
+public sealed class EstablishmentModel
 {
     public const string InvalidEstablishmentErrorMessage = $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
 
