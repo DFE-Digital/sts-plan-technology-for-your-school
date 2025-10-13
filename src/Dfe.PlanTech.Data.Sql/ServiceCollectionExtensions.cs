@@ -28,8 +28,10 @@ public static class ServiceCollectionExtensions
     {
         return services
             .AddScoped<IEstablishmentLinkRepository, EstablishmentLinkRepository>()
+            .AddScoped<IEstablishmentRecommendationHistoryRepository, EstablishmentRecommendationHistoryRepository>()
             .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
             .AddScoped<ISignInRepository, SignInRepository>()
+            .AddScoped<IRecommendationRepository, RecommendationRepository>()
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
             .AddScoped<ISubmissionRepository, SubmissionRepository>()
             .AddScoped<IUserRepository, UserRepository>();

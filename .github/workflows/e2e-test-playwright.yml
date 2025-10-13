@@ -10,13 +10,13 @@ on:
         options: ['Dev', 'StagingUnprotected']
         default: 'Dev'
 
-  pull_request:
-    branches: ['main', 'development']
-    paths:
-      - 'src/**'
-      - 'tests/Dfe.PlanTech.Web.E2ETests.Beta/**'
-      - '.github/workflows/e2e-tests-playwright.yml'
-      - '.gitmodules'
+  # pull_request:
+  #   branches: ['main', 'development']
+  #   paths:
+  #     - 'src/**'
+  #     - 'tests/Dfe.PlanTech.Web.E2ETests.Beta/**'
+  #     - '.github/workflows/e2e-tests-playwright.yml'
+  #     - '.gitmodules'
 
 concurrency:
     group: "${{ github.workflow }}"

@@ -298,9 +298,9 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         var recommendation = DbContext.Recommendations.FirstOrDefault(r => string.Equals(r.ContentfulRef, coreRecommendation.Id));
         Assert.NotNull(recommendation);
 
-        var recommendationHistory = DbContext.EstablishmentRecommendationHistories.FirstOrDefault(erh => erh.Id == recommendation.Id);
+        var recommendationHistory = DbContext.EstablishmentRecommendationHistories.FirstOrDefault(erh => erh.RecommendationId == recommendation.Id);
         Assert.NotNull(recommendationHistory);
-        Assert.Equal(RecommendationConstants.Completed, recommendationHistory.NewStatus);
+        Assert.Equal(RecommendationConstants.CompletedKey, recommendationHistory.NewStatus);
     }
 
     [Fact]
