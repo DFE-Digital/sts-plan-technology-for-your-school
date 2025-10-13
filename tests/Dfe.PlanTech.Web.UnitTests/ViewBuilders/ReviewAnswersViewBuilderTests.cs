@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
@@ -23,8 +24,14 @@ public class ReviewAnswersViewBuilderTests
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
 
-    private ReviewAnswersViewBuilder CreateSut() =>
-        new ReviewAnswersViewBuilder(_logger, _contentful, _submissions, _currentUser);
+    private ReviewAnswersViewBuilder CreateSut()
+    {
+        _currentUser.EstablishmentId.Returns(2);
+        _currentUser.MatEstablishmentId.Returns(16);
+        _currentUser.UserId.Returns(1);
+
+        return new ReviewAnswersViewBuilder(_logger, _contentful, _submissions, _currentUser);
+    }
 
     private static Controller MakeController()
     {
@@ -254,7 +261,12 @@ public class ReviewAnswersViewBuilderTests
 
         var result = await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "My Section", 42);
 
-        await _submissions.Received(1).ConfirmCheckAnswersAsync(42);
+        await _submissions.Received(1).ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            42,
+            Arg.Any<int>(),
+            Arg.Any<QuestionnaireSectionEntry>());
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.True(ctl.TempData.ContainsKey("SectionName"));
@@ -267,7 +279,13 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _submissions.ConfirmCheckAnswersAsync(9).Returns<Task>(_ => throw new Exception("boom"));
+        _submissions.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            9,
+            Arg.Any<int>(),
+            Arg.Any<QuestionnaireSectionEntry>())
+            .ThrowsAsync(new Exception("boom"));
 
         var result = await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "S", 9);
 

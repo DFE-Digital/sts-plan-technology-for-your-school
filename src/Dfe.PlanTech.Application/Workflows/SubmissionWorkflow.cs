@@ -6,14 +6,17 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubmissionWorkflow(
+    ILogger<SubmissionWorkflow> logger,
     IStoredProcedureRepository storedProcedureRepository,
     ISubmissionRepository submissionRepository
 ) : ISubmissionWorkflow
 {
+    private readonly ILogger<SubmissionWorkflow> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IStoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
     private readonly ISubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
@@ -24,6 +27,19 @@ public class SubmissionWorkflow(
         newSubmission.Responses = GetOrderedResponses(newSubmission.Responses, section).ToList();
 
         return newSubmission.AsDto();
+    }
+
+    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
+    {
+        return _submissionRepository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
+    }
+
+    public async Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
+    {
+        var submission = await _submissionRepository.GetSubmissionByIdAsync(submissionId);
+        return submission is null
+            ? throw new InvalidOperationException($"Submission with ID '{submissionId}' not found")
+            : submission.AsDto();
     }
 
     public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
@@ -49,7 +65,7 @@ public class SubmissionWorkflow(
 
             if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
             {
-                throw new UserJourneyMissingContentException($"Could not find answer with Contentful reference {lastResponseInUserJourney.Answer.ContentfulRef} in question with Contentful reference {lastResponseInUserJourney.Question.ContentfulRef}", section);
+                _logger.LogWarning("Could not find answer with Contentful reference {AnswerContentfulRef} in question with Contentful reference {QuestionContentfulRef}", lastResponseInUserJourney.Answer.ContentfulRef, lastResponseInUserJourney.Question.ContentfulRef);
             }
         }
 
@@ -118,12 +134,12 @@ public class SubmissionWorkflow(
         await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
     }
 
-    public Task SetSubmissionInaccessible(int establishmentId, string sectionId)
+    public Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)
     {
         return _submissionRepository.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
     }
 
-    public Task SetSubmissionInaccessible(int submissionId)
+    public Task SetSubmissionInaccessibleAsync(int submissionId)
     {
         return _submissionRepository.SetSubmissionInaccessibleAsync(submissionId);
     }

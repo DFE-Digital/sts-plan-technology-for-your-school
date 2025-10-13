@@ -23,7 +23,6 @@ public class RecommendationsViewBuilderTests
     // ---- Substitutes (collaborators)
     private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
-    private readonly IRecommendationService _recommendations = Substitute.For<IRecommendationService>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
 
@@ -35,7 +34,6 @@ public class RecommendationsViewBuilderTests
             _logger,
             Options.Create(_contentfulOptions),
             _contentful,
-            _recommendations,
             _submissions,
             _currentUser);
 
@@ -311,50 +309,6 @@ public class RecommendationsViewBuilderTests
         // Assert
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("RecommendationsChecklist", view.ViewName);
-    }
-
-    // ---------- RouteBySectionSlugAndMaturity (Preview) ----------
-
-    [Fact]
-    public async Task RouteBySectionSlugAndMaturity_When_Preview_Disabled_Redirects_Home()
-    {
-        // Arrange
-        _contentfulOptions = new ContentfulOptions { UsePreviewApi = false };
-        var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
-
-        // Act
-        var result = await sut.RouteBySectionSlugAndMaturity(ctl, "sec-1", "Developing");
-
-        // Assert
-        Assert.IsType<RedirectToActionResult>(result);
-    }
-
-    [Fact]
-    public async Task RouteBySectionSlugAndMaturity_When_Preview_Enabled_Renders_Recommendations_Preview()
-    {
-        // Arrange
-        _contentfulOptions = new ContentfulOptions { UsePreviewApi = true };
-        var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
-
-        _currentUser.EstablishmentId.Returns(88);
-        var section = MakeSection("S1", "sec-1", "Section Name");
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
-
-        var routing = MakeRouting(SubmissionStatus.InProgress, section, answerSysIds: "C1");
-        _submissions.GetSubmissionRoutingDataAsync(88, section, false).Returns(routing);
-
-        // Act
-        var result = await sut.RouteBySectionSlugAndMaturity(ctl, "sec-1", "Developing");
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal("Recommendations", view.ViewName);
-        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
-        Assert.Equal("preview", vm.Slug);
-        Assert.Equal(section.Name, vm.SectionName);
-        Assert.True(vm.Chunks.Count >= 1);
     }
 
     // ---------- Support ----------

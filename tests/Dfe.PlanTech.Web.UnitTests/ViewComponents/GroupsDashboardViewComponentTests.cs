@@ -14,7 +14,10 @@ namespace Dfe.PlanTech.Web.Tests.ViewComponents
         {
             var mockViewBuilder = Substitute.For<IGroupsDashboardViewComponentViewBuilder>();
             var categoryEntry = new QuestionnaireCategoryEntry();
-            var expectedViewModel = new GroupsDashboardViewComponentViewModel();
+            var expectedViewModel = new GroupsDashboardViewComponentViewModel()
+            {
+                Description = new MissingComponentEntry()
+            };
 
             mockViewBuilder.BuildViewModelAsync(categoryEntry).Returns(Task.FromResult(expectedViewModel));
 

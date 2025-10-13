@@ -46,21 +46,6 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetRecommendationPreview_CallsViewBuilderAndReturnsResult()
-        {
-            var sectionSlug = "sec";
-            var maturity = "high";
-
-            _viewBuilder.RouteBySectionSlugAndMaturity(_controller, sectionSlug, maturity)
-                .Returns(new OkResult());
-
-            var result = await _controller.GetRecommendationPreview(sectionSlug, maturity);
-
-            await _viewBuilder.Received(1).RouteBySectionSlugAndMaturity(_controller, sectionSlug, maturity);
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
         public async Task GetRecommendationChecklist_CallsViewBuilderAndReturnsResult()
         {
             var categorySlug = "cat";
