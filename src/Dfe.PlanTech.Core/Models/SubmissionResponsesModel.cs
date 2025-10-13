@@ -40,6 +40,6 @@ public class SubmissionResponsesModel
             .GroupBy(questionWithAnswer => questionWithAnswer.QuestionSysId)
             .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First())
             .ToList();
-        }
     }
+}
 }
