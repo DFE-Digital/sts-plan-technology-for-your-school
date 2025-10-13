@@ -28,7 +28,6 @@ public class CategoryLandingSectionViewModel
         Name = section.Name;
         ShortDescription = section.ShortDescription;
         Recommendations = recommendations;
-        TrustName = sectionStatus?.TrustName;
 
         if (sectionStatus is not null)
         {
