@@ -111,10 +111,11 @@ public class StoredProcedureRepository : IStoredProcedureRepository
     {
         // Stored procedure defined in:
         // - 2023/20230915_1737_CreateSubmitAnswerProcedure.sql (CREATE)
-        // - 2024/20241009_1100_DboSchemaImprovements.sql (ALTER - LATEST)
+        // - 2024/20241009_1100_DboSchemaImprovements.sql (ALTER)
+        // - 2025/20251010_0130_AddEstablishmentColumnsToResponses.sql (ALTER - LATEST)
         // Parameters (in order): @sectionId NVARCHAR(50), @sectionName NVARCHAR(50), @questionContentfulId NVARCHAR(50),
         //                         @questionText NVARCHAR(MAX), @answerContentfulId NVARCHAR(50), @answerText NVARCHAR(MAX),
-        //                         @userId INT, @establishmentId INT, @maturity NVARCHAR(20),
+        //                         @userId INT, @userEstablishmentId INT, @establishmentId INT, @maturity NVARCHAR(20),
         //                         @responseId INT OUTPUT, @submissionId INT OUTPUT
 
         if (response.Answer is null)
@@ -141,6 +142,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             new(DatabaseConstants.AnswerContentfulIdParam, response.Answer.Id),
             new(DatabaseConstants.AnswerTextParam, response.Answer.Text),
             new(DatabaseConstants.UserIdParam, response.UserId),
+            new(DatabaseConstants.UserEstablishmentIdParam, response.UserEstablishmentId),
             new(DatabaseConstants.EstablishmentIdParam, response.EstablishmentId),
             new(DatabaseConstants.MaturityParam, ""),
             responseId,

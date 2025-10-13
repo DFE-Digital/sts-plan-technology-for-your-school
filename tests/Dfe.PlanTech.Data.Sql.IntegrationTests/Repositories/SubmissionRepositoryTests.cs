@@ -73,11 +73,12 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
     }
 
-    private ResponseEntity CreateResponse(int id, int userId, int submissionId, int questionId, int answerId)
+    private ResponseEntity CreateResponse(int id, int userId, int userEstablishmentId, int submissionId, int questionId, int answerId)
     {
         return new ResponseEntity
         {
             UserId = userId,
+            UserEstablishmentId = userEstablishmentId,
             SubmissionId = submissionId,
             QuestionId = questionId,
             AnswerId = answerId,
@@ -127,7 +128,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         await DbContext.SaveChangesAsync();
 
-        var response = CreateResponse(601, user.Id, submission.Id, question.Id, answer.Id);
+        var response = CreateResponse(601, user.Id, establishment.Id, submission.Id, question.Id, answer.Id);
         DbContext.Responses.Add(response);
 
         await DbContext.SaveChangesAsync();
@@ -198,7 +199,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         await DbContext.SaveChangesAsync();
 
-        var response = CreateResponse(601, user.Id, submission.Id, question.Id, answer.Id);
+        var response = CreateResponse(601, user.Id, establishment.Id, submission.Id, question.Id, answer.Id);
         DbContext.Responses.Add(response);
 
         await DbContext.SaveChangesAsync();
@@ -238,7 +239,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         await DbContext.SaveChangesAsync();
 
-        var response = CreateResponse(601, user.Id, submission.Id, question.Id, answer.Id);
+        var response = CreateResponse(601, user.Id, establishment.Id, submission.Id, question.Id, answer.Id);
         DbContext.Responses.Add(response);
 
         await DbContext.SaveChangesAsync();
@@ -280,7 +281,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         await DbContext.SaveChangesAsync();
 
-        var response = CreateResponse(601, user.Id, submission.Id, question.Id, answer.Id);
+        var response = CreateResponse(601, user.Id, establishment.Id, submission.Id, question.Id, answer.Id);
         DbContext.Responses.Add(response);
 
         await DbContext.SaveChangesAsync();
@@ -325,7 +326,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         await DbContext.SaveChangesAsync();
 
-        var response = CreateResponse(601, user.Id, newSubmission.Id, question.Id, answer.Id);
+        var response = CreateResponse(601, user.Id, establishment.Id, newSubmission.Id, question.Id, answer.Id);
         DbContext.Responses.Add(response);
 
         await DbContext.SaveChangesAsync();
@@ -353,11 +354,11 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     public async Task SubmissionRepository_GetLatestSubmissionAndResponsesAsync_WhenMultipleSubmissionsExist_ThenReturnsMostRecent()
     {
         // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
-        var user = new UserEntity { DfeSignInRef = "user123" };
-        var question1 = new QuestionEntity { QuestionText = "Question 1", ContentfulRef = "Q1" };
-        var question2 = new QuestionEntity { QuestionText = "Question 2", ContentfulRef = "Q2" };
-        var answer = new AnswerEntity { AnswerText = "Answer", ContentfulRef = "A1" };
+        var establishment = CreateEstablishment(101);
+        var user = CreateUser(201);
+        var question1 = CreateQuestion(301);
+        var question2 = CreateQuestion(302);
+        var answer = CreateAnswer(401);
 
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
@@ -393,6 +394,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
                     QuestionId = question1.Id,
                     AnswerId = answer.Id,
                     UserId = user.Id,
+                    UserEstablishmentId = establishment.Id,
                     Maturity = "Low",
                     DateCreated = DateTime.UtcNow.AddHours(-2)
                 },
@@ -402,6 +404,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
                     QuestionId = question1.Id,
                     AnswerId = answer.Id,
                     UserId = user.Id,
+                    UserEstablishmentId = establishment.Id,
                     Maturity = "Medium",
                     DateCreated = DateTime.UtcNow.AddHours(-1)
                 },
@@ -411,6 +414,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
                     QuestionId = question2.Id,
                     AnswerId = answer.Id,
                     UserId = user.Id,
+                    UserEstablishmentId = establishment.Id,
                     Maturity = "High",
                     DateCreated = DateTime.UtcNow.AddHours(-1)
                 }
@@ -441,10 +445,10 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     public async Task SubmissionRepository_GetSubmissionByIdAsync_WhenSubmissionExists_ThenReturnsSubmissionWithIncludes()
     {
         // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
-        var user = new UserEntity { DfeSignInRef = "user123" };
-        var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
-        var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
+        var establishment = CreateEstablishment(101);
+        var user = CreateUser(201);
+        var question = CreateQuestion(301);
+        var answer = CreateAnswer(401);
 
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
@@ -465,6 +469,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
                     QuestionId = question.Id,
                     AnswerId = answer.Id,
                     UserId = user.Id,
+                    UserEstablishmentId = establishment.Id,
                     Maturity = "Medium"
                 }
             }
@@ -482,13 +487,13 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         // Verify includes work
         Assert.NotNull(result.Establishment);
-        Assert.Equal("Test School", result.Establishment.OrgName);
+        Assert.Equal("Test Establishment 101", result.Establishment.OrgName);
 
         Assert.Single(result.Responses);
         Assert.NotNull(result.Responses.First().Question);
         Assert.NotNull(result.Responses.First().Answer);
-        Assert.Equal("Test Question", result.Responses.First().Question.QuestionText);
-        Assert.Equal("Test Answer", result.Responses.First().Answer.AnswerText);
+        Assert.Equal("Question 301", result.Responses.First().Question.QuestionText);
+        Assert.Equal("Answer 401", result.Responses.First().Answer.AnswerText);
     }
 
     [Fact]

@@ -31,6 +31,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 QuestionId = r.QuestionId,
                 AnswerId = r.AnswerId,
                 UserId = r.UserId,
+                UserEstablishmentId = r.UserEstablishmentId,
                 Maturity = r.Maturity,
                 Question = r.Question,
                 Answer = r.Answer,

@@ -230,7 +230,7 @@ public class SubmissionWorkflowTests
     public async Task SubmitAnswer_Throws_When_Model_Null()
     {
         var sut = CreateServiceUnderTest();
-        await Assert.ThrowsAsync<InvalidDataException>(() => sut.SubmitAnswer(1, 2, null!));
+        await Assert.ThrowsAsync<InvalidDataException>(() => sut.SubmitAnswer(1, 2, null, null!));
     }
 
     [Fact]
@@ -245,10 +245,10 @@ public class SubmissionWorkflowTests
             m.UserId == 9 &&
             m.EstablishmentId == 8 &&
             m.Question.Id == "Q1" &&
-            m.Answer.Id == "A1"))
+            m.Answer!.Id == "A1"))
           .Returns(777);
 
-        var id = await sut.SubmitAnswer(9, 8, model);
+        var id = await sut.SubmitAnswer(9, 8, null, model);
         Assert.Equal(777, id);
     }
 
