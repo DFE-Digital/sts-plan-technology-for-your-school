@@ -1,7 +1,11 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Utilities;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
@@ -17,7 +21,11 @@ public class CategoryLandingViewComponentViewBuilder(
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName)
+    public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(
+        QuestionnaireCategoryEntry category,
+        string slug,
+        string? sectionName,
+        string sortOrder = RecommendationConstants.DefaultSortOrder)
     {
         if (!category.Sections.Any())
         {
@@ -43,7 +51,12 @@ public class CategoryLandingViewComponentViewBuilder(
             progressRetrievalErrorMessage = "Unable to retrieve progress, please refresh your browser.";
         }
 
-        var categoryLandingSections = await BuildCategoryLandingSectionViewModels(establishmentId, category, sectionStatuses, progressRetrievalErrorMessage is not null).ToListAsync();
+        var sortType = Enum.GetValues(typeof(RecommendationSort))
+            .Cast<RecommendationSort?>()
+            .FirstOrDefault(s => string.Equals(sortOrder, s!.GetDescription()))
+            ?? RecommendationSort.Default;
+
+        var categoryLandingSections = await BuildCategoryLandingSectionViewModels(establishmentId, category, sectionStatuses, progressRetrievalErrorMessage is not null, sortType).ToListAsync();
         var completedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate != null);
 
         var viewModel = new CategoryLandingViewComponentViewModel()
@@ -65,7 +78,8 @@ public class CategoryLandingViewComponentViewBuilder(
         int establishmentId,
         QuestionnaireCategoryEntry category,
         List<SqlSectionStatusDto> sectionStatuses,
-        bool hadRetrievalError
+        bool hadRetrievalError,
+        RecommendationSort sortType
     )
     {
         foreach (var section in category.Sections)
@@ -76,7 +90,7 @@ public class CategoryLandingViewComponentViewBuilder(
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
-            var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sectionStatus);
+            var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sectionStatus, sortType);
 
             yield return new CategoryLandingSectionViewModel(
                 section,
@@ -90,7 +104,8 @@ public class CategoryLandingViewComponentViewBuilder(
     private async Task<CategoryLandingSectionRecommendationsViewModel> GetCategoryLandingSectionRecommendations(
         int establishmentId,
         QuestionnaireSectionEntry section,
-        SqlSectionStatusDto? sectionStatus
+        SqlSectionStatusDto? sectionStatus,
+        RecommendationSort sortType
     )
     {
         try
@@ -98,7 +113,9 @@ public class CategoryLandingViewComponentViewBuilder(
             var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, true)
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
 
-            var subTopicChunks = section.CoreRecommendations.ToList();
+            var recommendationChunks = section.CoreRecommendations;
+            var recommendationReferences = recommendationChunks.Select(r => r.Id);
+            var recommendations = await _submissionService.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationReferences, establishmentId);
 
             if (section.InterstitialPage is null)
             {
@@ -110,7 +127,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 SectionName = section.Name,
                 SectionSlug = section.InterstitialPage.Slug,
                 Answers = latestResponses.Responses,
-                Chunks = subTopicChunks,
+                Chunks = recommendationChunks.SortByStatus(recommendations, sortType)
             };
         }
         catch

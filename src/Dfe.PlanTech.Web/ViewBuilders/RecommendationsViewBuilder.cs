@@ -1,9 +1,9 @@
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -79,15 +79,17 @@ public class RecommendationsViewBuilder(
             NextChunk = nextRecommendationChunk,
             CurrentChunkPosition = currentRecommendationIndex + 1,
             TotalChunks = recommendationChunks.Count,
-            SelectedStatusKey = currentRecommendationHistoryStatus?.NewStatus ?? RecommendationConstants.DefaultStatus,
+            SelectedStatusKey = currentRecommendationHistoryStatus?.NewStatus ?? RecommendationStatus.NotStarted.GetDisplayName(),
             LastUpdated = currentRecommendationHistoryStatus?.DateCreated,
             SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
             SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
             StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
-            StatusOptions = RecommendationConstants.ValidStatusKeys.ToDictionary(
-                key => key,
-                key => RecommendationConstants.StatusDisplayNames[key]
-            )
+            StatusOptions = Enum.GetValues(typeof(RecommendationStatus))
+                .Cast<RecommendationStatus>()
+                .ToDictionary(
+                    key => key.GetDisplayName(),
+                    key => key.GetDisplayName()
+                )
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
