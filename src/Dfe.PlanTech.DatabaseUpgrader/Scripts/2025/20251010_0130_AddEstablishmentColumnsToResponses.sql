@@ -1,5 +1,5 @@
 ALTER TABLE dbo.response
-ADD userEstablishmentId INT NOT NULL
+ADD userEstablishmentId INT NULL
 GO
 
 -- FK
