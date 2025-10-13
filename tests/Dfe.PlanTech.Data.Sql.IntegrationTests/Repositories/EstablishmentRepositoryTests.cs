@@ -26,7 +26,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
         {
             Urn = "TEST123",
             Name = "Test School",
-            Type = new EstablishmentTypeModel { Name = "Academy" },
+            Type = new IdWithNameModel { Name = "Academy" },
             GroupUid = "group-123"
         };
 

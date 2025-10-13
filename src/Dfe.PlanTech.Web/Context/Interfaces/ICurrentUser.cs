@@ -1,21 +1,19 @@
 ﻿using Dfe.PlanTech.Core.Models;
 
-namespace Dfe.PlanTech.Web.Context.Interfaces
+namespace Dfe.PlanTech.Web.Context.Interfaces;
+
+public interface ICurrentUser
 {
-    public interface ICurrentUser
-    {
-        string? DsiReference { get; }
-        string? Email { get; }
-        int? EstablishmentId { get; }
-        string? GroupSelectedSchoolUrn { get; }
-        bool IsAuthenticated { get; }
-        bool IsMat { get; }
-        int? MatEstablishmentId { get; }
-        OrganisationModel? Organisation { get; }
-        int? UserId { get; }
-        EstablishmentModel GetEstablishmentModel();
-        string? GetGroupSelectedSchool();
-        bool IsInRole(string role);
-        void SetGroupSelectedSchool(string selectedSchoolUrn);
-    }
+    string? DsiReference { get; }
+    string? Email { get; }
+    int? EstablishmentId { get; }
+    string? GroupSelectedSchoolUrn { get; }
+    bool IsAuthenticated { get; }
+    bool IsMat { get; }
+    int? MatEstablishmentId { get; }
+    EstablishmentModel Organisation { get; }
+    int? UserId { get; }
+    string? GetGroupSelectedSchool();
+    bool IsInRole(string role);
+    void SetGroupSelectedSchool(string selectedSchoolUrn);
 }
