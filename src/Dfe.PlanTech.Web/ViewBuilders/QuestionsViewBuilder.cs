@@ -230,6 +230,7 @@ public class QuestionsViewBuilder(
     {
         var userId = GetUserIdOrThrowException();
         var establishmentId = GetEstablishmentIdOrThrowException();
+        var matEstablishmentId = CurrentUser.MatEstablishmentId;
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
@@ -249,7 +250,7 @@ public class QuestionsViewBuilder(
 
         try
         {
-            await _submissionService.SubmitAnswerAsync(userId, establishmentId, answerViewModel.ToModel());
+            await _submissionService.SubmitAnswerAsync(userId, establishmentId, matEstablishmentId, answerViewModel.ToModel());
         }
         catch (Exception e)
         {

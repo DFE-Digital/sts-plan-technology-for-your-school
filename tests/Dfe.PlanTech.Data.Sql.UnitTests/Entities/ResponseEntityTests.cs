@@ -103,6 +103,8 @@ public class ResponseEntityTests
                 nameof(SqlResponseDto.Id),
                 nameof(SqlResponseDto.UserId),
                 nameof(SqlResponseDto.User),
+                nameof(SqlResponseDto.UserEstablishmentId),
+                nameof(SqlResponseDto.UserEstablishment),
                 nameof(SqlResponseDto.SubmissionId),
                 nameof(SqlResponseDto.Submission),
                 nameof(SqlResponseDto.QuestionId),

@@ -153,7 +153,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             ChosenAnswer = answerModel
         };
 
-        var response = new AssessmentResponseModel(user.Id, establishment.Id, submitAnswerModel);
+        var response = new AssessmentResponseModel(user.Id, establishment.Id, null, submitAnswerModel);
 
         var result = await _repository.SubmitResponse(response);
         Assert.True(result > 0);
