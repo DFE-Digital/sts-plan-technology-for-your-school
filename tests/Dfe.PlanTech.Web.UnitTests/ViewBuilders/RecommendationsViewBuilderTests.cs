@@ -1,6 +1,7 @@
 ﻿using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
@@ -24,6 +25,7 @@ public class RecommendationsViewBuilderTests
     private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
+    private readonly IRecommendationService _recommendationService = Substitute.For<IRecommendationService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
 
     // ---- Options
@@ -35,6 +37,7 @@ public class RecommendationsViewBuilderTests
             Options.Create(_contentfulOptions),
             _contentful,
             _submissions,
+            _recommendationService,
             _currentUser);
 
     private static Controller MakeController()
@@ -109,7 +112,7 @@ public class RecommendationsViewBuilderTests
     [Fact]
     public async Task RouteToSingleRecommendation_Renders_SingleRecommendation_With_PrevNext()
     {
-        // Arrange
+        // Arrange - Setup recommendation service to return status data for integration testing
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
@@ -123,6 +126,19 @@ public class RecommendationsViewBuilderTests
         // Submission has answers that match chunk ids "C1","C2","C3"
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: new[] { "C1", "C2", "C3" });
         _submissions.GetSubmissionRoutingDataAsync(123, section, true).Returns(routing);
+
+        // Setup recommendation service with status data for the specific chunk being tested
+        var currentRecommendationStatus = new SqlEstablishmentRecommendationHistoryDto
+        {
+            EstablishmentId = 123,
+            RecommendationId = 2,
+            UserId = 1,
+            NewStatus = "Completed",
+            DateCreated = DateTime.UtcNow.AddDays(-1)
+        };
+
+        _recommendationService.GetCurrentRecommendationStatusAsync("C2", 123)
+            .Returns(currentRecommendationStatus);
 
         // Act (choose middle chunk to test prev/next both populated)
         var result = await sut.RouteToSingleRecommendation(ctl, categorySlug, "sec-1", "second-chunk", useChecklist: false);
@@ -143,6 +159,11 @@ public class RecommendationsViewBuilderTests
         Assert.NotNull(vm.NextChunk);
         Assert.Equal("first-chunk", vm.PreviousChunk!.SlugifiedLinkText);
         Assert.Equal("third-chunk", vm.NextChunk!.SlugifiedLinkText);
+
+        Assert.Equal("Completed", vm.SelectedStatusKey);
+        Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
+
+        await _recommendationService.Received(1).GetCurrentRecommendationStatusAsync("C2", 123);
     }
 
     [Fact]
