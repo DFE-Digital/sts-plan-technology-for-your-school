@@ -85,7 +85,7 @@ public class SignInWorkflowTests
         {
             Ukprn = "UKPRN-XYZ",
             Urn = urn,
-            Type = new EstablishmentTypeModel { Name = name },
+            Type = new IdWithNameModel { Name = name },
             Name = name,
             Uid = "GROUP-UID-9"
         };
@@ -149,7 +149,7 @@ public class SignInWorkflowTests
         {
             Urn = urn,
             Name = name,
-            Type = new EstablishmentTypeModel { Name = null! }
+            Type = new IdWithNameModel { Name = null! }
         };
 
         var user = new UserEntity

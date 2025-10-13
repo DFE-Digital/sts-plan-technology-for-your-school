@@ -55,7 +55,7 @@ public class PagesViewBuilderTests
         // sensible defaults
         currentUser.IsMat.Returns(false);
         currentUser.IsAuthenticated.Returns(true);
-        currentUser.Organisation.Returns(new OrganisationModel { Name = "Acme Academy" });
+        currentUser.Organisation.Returns(new EstablishmentModel { Name = "Acme Academy" });
 
         return new PagesViewBuilder(logger, contact, errors, contentful, currentUser);
     }

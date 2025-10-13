@@ -44,7 +44,7 @@ public class GroupsViewBuilderTests
 
         // sensible defaults used by multiple tests
         currentUser.EstablishmentId.Returns(999);
-        currentUser.GetEstablishmentModel().Returns(new EstablishmentModel { Id = establishmentId, Name = "The Group" });
+        currentUser.Organisation.Returns(new EstablishmentModel { Id = establishmentId, Name = "The Group" });
         currentUser.GroupSelectedSchoolUrn.Returns("URN-ABC");
         est.GetLatestSelectedGroupSchoolAsync("URN-ABC")
            .Returns(new SqlEstablishmentDto { Id = 42, OrgName = "Selected School", EstablishmentRef = "URN-ABC" });
@@ -187,7 +187,7 @@ public class GroupsViewBuilderTests
 
         var sut = CreateServiceUnderTest(est: est, currentUser: currentUser);
         currentUser.EstablishmentId.Returns(1000);
-        currentUser.GetEstablishmentModel().Returns(new EstablishmentModel { Id = establishmentGuid, Name = "Group X" });
+        currentUser.Organisation.Returns(new EstablishmentModel { Id = establishmentGuid, Name = "Group X" });
         currentUser.DsiReference.Returns("dsi-123"); // if your BaseViewBuilder wraps this, still fine to use
 
         await sut.RecordGroupSelectionAsync("URN-007", "Bond Primary");
