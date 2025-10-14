@@ -300,7 +300,7 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("Connectivity", vm.CategoryName);
         Assert.Equal("Section", vm.SectionName);
         Assert.Equal("sec-1", vm.SectionSlug);
-        Assert.Equal(2, vm.Chunks.Count);
+        Assert.Equal(3, vm.Chunks.Count);
         Assert.NotNull(routing.Submission);
         Assert.Equal(routing.Submission.Responses, vm.SubmissionResponses);
         // Formatted date check (accept either exact DateHelper format or non-null)

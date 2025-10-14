@@ -150,7 +150,7 @@ public class RecommendationsViewBuilder(
         _ = GetEstablishmentIdOrThrowException();
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var subtopicChunks = section.GetRecommendationChunksByAnswerIds(answerIds);
+        var subtopicChunks = section.CoreRecommendations.ToList();
 
         return new RecommendationsViewModel()
         {
