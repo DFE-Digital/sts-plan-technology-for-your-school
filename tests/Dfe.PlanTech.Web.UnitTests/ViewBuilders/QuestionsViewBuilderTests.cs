@@ -469,8 +469,33 @@ public class QuestionsViewBuilderTests
         Assert.Equal(sectionSlug, redirect.RouteValues["sectionSlug"]);
     }
 
+    // ---------- ContinuePreviousAssessment ----------
+    [Fact]
+    public async Task ContinuePreviousAssessment_Restores_Submission_And_Redirects_To_Next_Unanswered()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
 
+        _currentUser.EstablishmentId.Returns(555);
 
+        var sectionSlug = "sec-continue-prev";
+        var section = MakeSection("S123", sectionSlug, "Continue previous assessment");
+        _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        // Act
+        var result = await sut.ContinuePreviousAssessment(controller, "cat-slug", sectionSlug);
+
+        // Assert
+        await _submissionSvc.Received(1).RestoreInaccessibleSubmissionAsync(555, "S123");
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(nameof(QuestionsController.GetNextUnansweredQuestion), redirect.ActionName);
+        Assert.Equal(QuestionsController.Controller, redirect.ControllerName);
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal("cat-slug", redirect.RouteValues["categorySlug"]);
+        Assert.Equal(sectionSlug, redirect.RouteValues["sectionSlug"]);
+    }
 
     // ------------- Stubs / helpers -------------
 
