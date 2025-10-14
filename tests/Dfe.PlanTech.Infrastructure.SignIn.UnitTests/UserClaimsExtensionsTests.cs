@@ -16,7 +16,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.NameIdentifier, expectedUserId) });
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var userId = UserClaimsExtensions.GetDsiReference(claimsPrincipal.Claims);
+        var userId = UserClaimsExtensions.GetDsiUserReference(claimsPrincipal.Claims);
 
         Assert.Equal(expectedUserId, userId);
     }
@@ -27,20 +27,20 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(Array.Empty<Claim>());
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetDsiReference(claimsPrincipal.Claims));
+        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetDsiUserReference(claimsPrincipal.Claims));
     }
 
 
     [Fact]
     public void GetDsiReference_Should_Throw_When_ClaimsPrincipal_Is_Null()
     {
-        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsExtensions.GetDsiReference(null!));
+        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsExtensions.GetDsiUserReference(null!));
     }
 
     [Fact]
     public void GetOrganisation_Should_Throw_When_ClaimsPrincipal_Is_Null()
     {
-        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsExtensions.GetOrganisation(null!));
+        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsExtensions.GetDsiOrganisation(null!));
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(Array.Empty<Claim>());
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var organisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
+        var organisation = UserClaimsExtensions.GetDsiOrganisation(claimsPrincipal.Claims);
 
         Assert.Null(organisation);
     }
@@ -60,13 +60,13 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.Organisation, "not a real claim") });
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims));
+        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetDsiOrganisation(claimsPrincipal.Claims));
     }
 
     [Fact]
     public void GetOrganisation_Should_ReturnNull_When_Organisation_Has_No_Id()
     {
-        var organisation = new EstablishmentModel()
+        var organisation = new DsiOrganisationModel()
         {
             Id = Guid.Empty,
             Urn = "testUrn",
@@ -78,7 +78,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.Organisation, organisationJson) });
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
+        var foundOrganisation = UserClaimsExtensions.GetDsiOrganisation(claimsPrincipal.Claims);
 
         Assert.Null(foundOrganisation);
     }
@@ -86,7 +86,7 @@ public class UserClaimsExtensionsTests
     [Fact]
     public void GetOrganisation_Should_Return_Organisation_When_Exists()
     {
-        var organisation = new EstablishmentModel()
+        var organisation = new DsiOrganisationModel()
         {
             Id = Guid.NewGuid(),
             Urn = "testUrn",
@@ -98,7 +98,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.Organisation, organisationJson) });
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
+        var foundOrganisation = UserClaimsExtensions.GetDsiOrganisation(claimsPrincipal.Claims);
 
         Assert.NotNull(foundOrganisation);
         Assert.Equal(organisation.Id, foundOrganisation.Id);

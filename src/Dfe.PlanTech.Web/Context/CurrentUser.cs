@@ -25,9 +25,9 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
     public bool IsMat => Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;
 
-    public int? MatEstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
+    public int? MatEstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID); // FIXME: MATs cannot have an establishment ID - they are not an establishment
 
-    public EstablishmentModel Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation()
+    public DsiOrganisationModel Organisation => _contextAccessor.HttpContext?.User.Claims.GetDsiOrganisation()
             ?? throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
 
     public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);

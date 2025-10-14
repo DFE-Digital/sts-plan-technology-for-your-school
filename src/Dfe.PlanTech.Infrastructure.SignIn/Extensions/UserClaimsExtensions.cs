@@ -16,9 +16,9 @@ public static class UserClaimsExtensions
     };
 
     public static UserAuthorisationStatus GetAuthorisationStatus(this ClaimsPrincipal claimsPrincipal) =>
-        new(claimsPrincipal.Identity?.IsAuthenticated == true, claimsPrincipal.Claims.GetOrganisation() != null);
+        new(claimsPrincipal.Identity?.IsAuthenticated == true, claimsPrincipal.Claims.GetDsiOrganisation() != null);
 
-    public static string GetDsiReference(this IEnumerable<Claim> claims)
+    public static string GetDsiUserReference(this IEnumerable<Claim> claims)
     {
         ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
@@ -32,18 +32,22 @@ public static class UserClaimsExtensions
     /// Gets the organisation of a user by deserializing the organisation claim.
     /// </summary>
     /// <returns>
-    /// The deserialized <see cref="Organisation"/>, or a value of <c>null</c> if no
+    /// The deserialized <see cref="DsiOrganisationModel"/>, or a value of <c>null</c> if no
     /// organisation has been provided for the user.
     /// </returns>
     /// <exception cref="ArgumentNullException">
     /// If <paramref name="principal"/> is <c>null</c>
     /// </exception>
-    public static EstablishmentModel? GetOrganisation(this IEnumerable<Claim> claims)
+    public static DsiOrganisationModel? GetDsiOrganisation(this IEnumerable<Claim> claims)
     {
+
         ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
+        // We assume that there is a single organisation claim, if any.
+        // Note that if a user belongs to multiple organisations,
+        // DSI will prompt the user to select one at sign-in time.
         string? organisationJson = claims
-            .FirstOrDefault(c => c.Type == ClaimConstants.Organisation)?
+            .SingleOrDefault(c => c.Type == ClaimConstants.Organisation)?
             .Value;
 
         if (organisationJson == null)
@@ -51,7 +55,7 @@ public static class UserClaimsExtensions
             return null;
         }
 
-        var organisation = JsonSerializer.Deserialize<EstablishmentModel>(organisationJson, _jsonSerialiserOptions);
+        var organisation = JsonSerializer.Deserialize<DsiOrganisationModel>(organisationJson, _jsonSerialiserOptions);
         if (organisation?.Id == Guid.Empty)
         {
             return null;

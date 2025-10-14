@@ -3,7 +3,7 @@ using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Core.Models;
 
-public sealed class EstablishmentModel
+public sealed class DsiOrganisationModel
 {
     public const string InvalidEstablishmentErrorMessage = $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
 
@@ -51,7 +51,7 @@ public sealed class EstablishmentModel
         {
             yield return Urn;
             yield return Ukprn;
-            yield return Uid;
+            yield return Uid; // TODO: Consider moving UID above UKPRN, given that UID is the GIAS identifier for establishment groups (potential backwards compatability issue?)
             yield return Id.ToString();
         }
     }

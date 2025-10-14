@@ -68,7 +68,7 @@ public class OnUserInformationReceivedEventTests
         // Act
         await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
 
-        // Assert: since GetOrganisation() returns null with no org claims, we should call the user-only workflow
+        // Assert: since GetDsiOrganisation() returns null with no org claims, we should call the user-only workflow
         await wf.Received(1).RecordSignInUserOnly(Arg.Any<string>());
         await wf.DidNotReceiveWithAnyArgs().RecordSignIn(default!, default!);
 
@@ -84,18 +84,15 @@ public class OnUserInformationReceivedEventTests
         // Arrange
         var principal = AuthenticatedPrincipal();
         var (ctx, _, _) = BuildContext(principal);
-        var signIn = new SqlSignInDto
-        {
-            UserId = 42,
-            EstablishmentId = 999
-        };
+        var userId = 42;
+        var establishmentId = 999;
 
-        // Invoke private static AddClaimsToPrincipal(UserInformationReceivedContext, SqlSignInDto)
+        // Invoke private static AddClaimsToPrincipal(UserInformationReceivedContext, int?, int)
         var mi = typeof(OnUserInformationReceivedEvent)
             .GetMethod("AddClaimsToPrincipal", BindingFlags.NonPublic | BindingFlags.Static);
         Assert.NotNull(mi);
 
-        mi!.Invoke(null, new object[] { ctx, signIn });
+        mi!.Invoke(null, new object[] { ctx, establishmentId, userId });
 
         // Assert
         var userIdClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimConstants.DB_USER_ID);
@@ -112,14 +109,15 @@ public class OnUserInformationReceivedEventTests
     public void AddClaimsToPrincipal_When_PrincipalNull_DoesNothing()
     {
         var (ctx, _, _) = BuildContext(principal: null);
-        var signIn = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
+        var userId = 1;
+        var establishmentId = 2;
 
         var mi = typeof(OnUserInformationReceivedEvent)
             .GetMethod("AddClaimsToPrincipal", BindingFlags.NonPublic | BindingFlags.Static);
         Assert.NotNull(mi);
 
         // Should not throw
-        mi!.Invoke(null, new object[] { ctx, signIn });
+        mi!.Invoke(null, new object[] { ctx, establishmentId, userId });
     }
 
     [Fact]
@@ -127,16 +125,17 @@ public class OnUserInformationReceivedEventTests
     {
         var principal = AuthenticatedPrincipal();
         var (ctx, _, _) = BuildContext(principal);
-        var signIn = new SqlSignInDto { UserId = 7, EstablishmentId = null };
+        var userId = 7;
+        int? establishmentId = null;
 
         var mi = typeof(OnUserInformationReceivedEvent)
             .GetMethod("AddClaimsToPrincipal", BindingFlags.NonPublic | BindingFlags.Static)!;
 
         var ex = Assert.Throws<TargetInvocationException>(() =>
-            mi.Invoke(null, new object[] { ctx, signIn }));
+            mi.Invoke(null, new object[] { ctx, establishmentId, userId }));
 
         // Inner exception should be the InvalidDataException thrown by the method
         Assert.IsType<InvalidDataException>(ex.InnerException);
-        Assert.Equal("EstablishmentId", ex.InnerException!.Message);
+        Assert.Equal("signinEstablishmentId", ex.InnerException!.Message);
     }
 }

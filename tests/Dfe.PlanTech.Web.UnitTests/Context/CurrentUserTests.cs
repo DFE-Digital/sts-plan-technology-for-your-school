@@ -129,7 +129,7 @@ public class CurrentUserTests
     public void Organisation_Parses_From_Json_Claim_And_IsMat_True_When_Category_Matches()
     {
         // Arrange a minimal OrganisationModel with Category.Id = MatOrganisationCategoryId
-        var org = new EstablishmentModel
+        var org = new DsiOrganisationModel
         {
             Id = Guid.NewGuid(),
             Category = new IdWithNameModel { Id = DsiConstants.MatOrganisationCategoryId },
@@ -221,7 +221,7 @@ public class CurrentUserTests
         Assert.Contains("samesite=strict", setCookie.ToLowerInvariant());
     }
 
-    // ---------- EstablishmentModel via extension ----------
+    // ---------- DsiOrganisationModel via extension ----------
 
     [Fact]
     public void GetEstablishmentModel_Throws_When_Not_Present()
