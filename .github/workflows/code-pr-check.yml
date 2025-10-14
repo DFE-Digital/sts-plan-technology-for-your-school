@@ -2,13 +2,7 @@ name: Code PR Check
 
 on:
   pull_request:
-    paths:
-      - 'contentful/**'
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/code-pr-check.yml'
-      - '.github/actions/build-dotnet-app/action.yml'
-      - '.github/actions/run-unit-tests/action.yml'
+    types: [opened, reopened, synchronize, ready_for_review]
 
 concurrency:
   group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
@@ -18,10 +12,41 @@ env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
+  sentinel:
+    name: PR Sentinel (always runs)
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "PR detected – checks will conditionally run."
+
+  # Use per-job path filters with dorny/paths-filter instead of top-level paths
+  detect-changes:
+    name: Detect changed areas
+    runs-on: ubuntu-22.04
+    outputs:
+      src: ${{ steps.filter.outputs.src }}
+      tests: ${{ steps.filter.outputs.tests }}
+      contentful: ${{ steps.filter.outputs.contentful }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            src:      'src/**'
+            tests:    'tests/**'
+            contentful:
+              - 'contentful/**'
+              - 'contentful/tests/**'
+            github:
+              - '.github/workflows/**'
+              - '.github/actions/**'
+
   build-test-web-app:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
-    if: always()
+    needs: [detect-changes]
+    if: ${{ always() && (needs.detect-changes.outputs.src == 'true' || needs.detect-changes.outputs.tests == 'true') }}
 
     steps:
       - name: Check out repository
@@ -89,6 +114,8 @@ jobs:
   build-database-upgrader:
     name: Build database upgrader
     runs-on: ubuntu-22.04
+    needs: [detect-changes]
+    if: ${{ needs.detect-changes.outputs.src == 'true' }}
 
     steps:
       - name: Check out repository
@@ -103,6 +130,8 @@ jobs:
   run-javascript-tests:
     runs-on: ubuntu-22.04
     name: Run javascript tests
+    needs: [detect-changes]
+    if: ${{ needs.detect-changes.outputs.tests == 'true' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -131,6 +160,9 @@ jobs:
   run-contentful-jest-tests:
     name: Run Jest Tests for Contentful
     runs-on: ubuntu-22.04
+    needs: [detect-changes]
+    if: ${{ needs.detect-changes.outputs.contentful == 'true' }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -159,7 +191,7 @@ jobs:
         working-directory: ./contentful
         run: npm install
 
-      - name: Run Jest Tests
+      - name: Run JEST Tests
         if: steps.contentful-check.outputs.changed == 'true'
         working-directory: ./contentful/tests
         run: npm test -- --ci --reporters=default --reporters=jest-junit
