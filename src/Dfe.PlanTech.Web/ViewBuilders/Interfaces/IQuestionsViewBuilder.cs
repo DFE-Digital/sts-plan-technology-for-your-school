@@ -11,6 +11,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
         Task<IActionResult> RouteToNextUnansweredQuestion(Controller controller, string categorySlug, string sectionSlug);
         Task<IActionResult> RouteToContinueSelfAssessmentPage(Controller controller, string categorySlug, string sectionSlug);
         Task<IActionResult> RestartSelfAssessment(Controller controller, string categorySlug, string sectionSlug);
+        Task<IActionResult> ContinuePreviousAssessment(Controller controller, string categorySlug, string sectionSlug);
         Task<IActionResult> SubmitAnswerAndRedirect(Controller controller, SubmitAnswerInputViewModel answerViewModel, string categorySlug, string sectionSlug, string questionSlug, string? returnTo);
     }
 }

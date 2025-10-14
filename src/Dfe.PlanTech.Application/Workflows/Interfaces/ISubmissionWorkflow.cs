@@ -10,7 +10,9 @@ public interface ISubmissionWorkflow
     Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section);
     Task SetSubmissionDeletedAsync(int establishmentId, string sectionId);
     Task SetSubmissionInaccessibleAsync(int submissionId);
+    Task SetSubmissionInProgressAsync(int submissionId);
     Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId);
+    Task SetSubmissionInProgressAsync(int establishmentId, string sectionId);
     Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission);
     Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(int establishmentId, IEnumerable<string> sectionIds);
     Task<SqlSectionStatusDto> GetSectionSubmissionStatusAsync(int establishmentId, string sectionId, bool isCompleted);

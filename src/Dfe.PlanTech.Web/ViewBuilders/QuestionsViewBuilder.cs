@@ -218,6 +218,23 @@ public class QuestionsViewBuilder(
         );
     }
 
+    public async Task<IActionResult> ContinuePreviousAssessment(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug)
+    {
+        var establishmentId = GetEstablishmentIdOrThrowException();
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
+
+        await _submissionService.RestoreInaccessibleSubmissionAsync(establishmentId, section.Id);
+
+        return controller.RedirectToAction(
+            nameof(QuestionsController.GetNextUnansweredQuestion),
+            QuestionsController.Controller,
+            new { categorySlug, sectionSlug }
+        );
+    }
 
     public async Task<IActionResult> SubmitAnswerAndRedirect(
         Controller controller,

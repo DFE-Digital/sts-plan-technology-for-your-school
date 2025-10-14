@@ -131,4 +131,9 @@ public class SubmissionService(
     {
         await _submissionWorkflow.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
     }
+
+    public async Task RestoreInaccessibleSubmissionAsync(int establishmentId, string sectionId)
+    {
+        await _submissionWorkflow.SetSubmissionInProgressAsync(establishmentId, sectionId);
+    }
 }

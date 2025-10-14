@@ -236,6 +236,39 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         return submission;
     }
 
+    public async Task SetSubmissionInProgressAsync(
+    int establishmentId,
+    string sectionId
+)
+    {
+        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission: false);
+
+        var submission = await query.FirstOrDefaultAsync();
+        if (submission is null)
+        {
+            throw new InvalidOperationException($"Submission not found for establishment ID '{establishmentId}' and section ID '{sectionId}'");
+        }
+
+        await SetSubmissionInProgressAsync(submission.Id);
+    }
+
+    public async Task<SubmissionEntity> SetSubmissionInProgressAsync(int submissionId)
+    {
+        var submission = await GetSubmissionByIdAsync(submissionId);
+        if (submission is null)
+        {
+            throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
+        }
+
+        if (submission.Status == "Inaccessible")
+        {
+            submission.Status = SubmissionStatus.InProgress.ToString();
+            await _db.SaveChangesAsync();
+        }
+
+        return submission;
+    }
+
     private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
         int establishmentId,
         string sectionId,

@@ -143,6 +143,15 @@ public class SubmissionWorkflow(
     {
         return _submissionRepository.SetSubmissionInaccessibleAsync(submissionId);
     }
+    public Task SetSubmissionInProgressAsync(int establishmentId, string sectionId)
+    {
+        return _submissionRepository.SetSubmissionInProgressAsync(establishmentId, sectionId);
+    }
+
+    public Task SetSubmissionInProgressAsync(int submissionId)
+    {
+        return _submissionRepository.SetSubmissionInProgressAsync(submissionId);
+    }
 
     public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
     {
