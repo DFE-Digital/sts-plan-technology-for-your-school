@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
@@ -98,7 +98,7 @@ public class CategoryLandingViewComponentViewBuilder(
             var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, true)
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
 
-            var subTopicChunks = section.GetRecommendationChunksByAnswerIds(latestResponses.Responses.Select(answer => answer.AnswerSysId));
+            var subTopicChunks = section.CoreRecommendations.ToList();
 
             if (section.InterstitialPage is null)
             {

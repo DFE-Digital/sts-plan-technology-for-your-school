@@ -3,8 +3,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
@@ -23,7 +21,7 @@ public class ReviewAnswersViewBuilder(
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public const string ChangeAnswersViewName = "~/Views/ChangeAnswers/ChangeAnswers.cshtml";
+    public const string ViewAnswersViewName = "~/Views/ViewAnswers/ViewAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
     public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
 
@@ -31,7 +29,6 @@ public class ReviewAnswersViewBuilder(
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        bool? isChangeAnswersFlow,
         string? errorMessage = null
     )
     {
@@ -54,20 +51,16 @@ public class ReviewAnswersViewBuilder(
 
             case SubmissionStatus.InProgress:
             case SubmissionStatus.CompleteNotReviewed:
-            case SubmissionStatus.CompleteReviewed when isChangeAnswersFlow != false:
+            case SubmissionStatus.CompleteReviewed:
                 viewModel = await BuildCheckAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
                 return controller.View(CheckAnswersViewName, viewModel);
-
-            case SubmissionStatus.CompleteReviewed when isChangeAnswersFlow == false:
-                viewModel = await BuildChangeAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
-                return controller.View(ChangeAnswersViewName, viewModel);
 
             default:
                 return controller.RedirectToGetQuestionBySlug(categorySlug, sectionSlug, submissionRoutingData.NextQuestion!.Slug);
         }
     }
 
-    public async Task<IActionResult> RouteToChangeAnswers(
+    public async Task<IActionResult> RouteToViewAnswers(
         Controller controller,
         string categorySlug,
         string sectionSlug,
@@ -84,31 +77,24 @@ public class ReviewAnswersViewBuilder(
             isCompletedSubmission: true
         );
 
-        ReviewAnswersViewModel viewModel;
+        ViewAnswersViewModel viewModel;
         switch (submissionRoutingData.Status)
         {
             case SubmissionStatus.NotStarted:
                 return controller.RedirectToHomePage();
 
             case SubmissionStatus.InProgress:
-                return controller.RedirectToGetNextUnansweredQuestion(categorySlug, sectionSlug);
-
             case SubmissionStatus.CompleteNotReviewed:
-                viewModel = await BuildCheckAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
-                return controller.View(CheckAnswersViewName, viewModel);
+                return controller.RedirectToGetContinueSelfAssessment(categorySlug, sectionSlug);
 
             case SubmissionStatus.CompleteReviewed:
-                var newSubmission = await _submissionService.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(establishmentId, submissionRoutingData.QuestionnaireSection);
-                var responsesModel = new SubmissionResponsesModel(newSubmission, section);
-                submissionRoutingData = new SubmissionRoutingDataModel
-                (
-                    nextQuestion: section.Questions.First(),
-                    questionnaireSection: section,
-                    submission: responsesModel,
-                    status: newSubmission!.Status!.ToSubmissionStatus()
-                );
-                viewModel = await BuildChangeAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
-                return controller.View(ChangeAnswersViewName, viewModel);
+                if (submissionRoutingData.Submission is null)
+                    throw new InvalidOperationException(
+                        $"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}"
+                    );
+
+                viewModel = BuildViewAnswersViewModel(controller, section, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
+                return controller.View(ViewAnswersViewName, viewModel);
 
             default:
                 return controller.RedirectToGetQuestionBySlug(categorySlug, sectionSlug, submissionRoutingData.NextQuestion!.Slug);
@@ -143,22 +129,32 @@ public class ReviewAnswersViewBuilder(
         {
             Logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
             controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
-            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
+            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
 
         controller.TempData["SectionName"] = sectionName;
         return controller.RedirectToCategoryLandingPage(categorySlug);
     }
 
-    private Task<ReviewAnswersViewModel> BuildChangeAnswersViewModel(
+    private ViewAnswersViewModel BuildViewAnswersViewModel(
         Controller controller,
-        SubmissionRoutingDataModel routingData,
+        QuestionnaireSectionEntry section,
+        SubmissionRoutingDataModel submissionModel,
         string categorySlug,
         string sectionSlug,
         string? errorMessage
     )
     {
-        return BuildViewModel(controller, routingData, categorySlug, sectionSlug, PageTitleConstants.ChangeAnswers, UrlConstants.ChangeAnswersSlug, errorMessage);
+        var viewModel = new ViewAnswersViewModel
+        {
+            AssessmentCompletedDate = submissionModel.Submission?.DateCompleted ?? DateTime.UtcNow,
+            TopicName = section.Name,
+            Responses = submissionModel.Submission?.Responses,
+            CategorySlug = categorySlug,
+            SectionSlug = sectionSlug
+        };
+
+        return viewModel;
     }
 
     private Task<ReviewAnswersViewModel> BuildCheckAnswersViewModel(

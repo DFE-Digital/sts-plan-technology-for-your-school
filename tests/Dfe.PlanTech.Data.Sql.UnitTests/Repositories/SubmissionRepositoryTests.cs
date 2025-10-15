@@ -157,4 +157,23 @@ public class SubmissionRepositoryTests
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             repo.SetSubmissionInaccessibleAsync(establishmentId: 99, sectionId: "NA"));
     }
+
+    [Fact]
+    public async Task SetSubmissionInProgress_ById_Throws_When_NotFound()
+    {
+        using var db = BuildPlanTechDbContext(nameof(SetSubmissionInProgress_ById_Throws_When_NotFound));
+        var repo = new SubmissionRepository(db);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() => repo.SetSubmissionInProgressAsync(12345));
+    }
+
+    [Fact]
+    public async Task SetSubmissionInProgress_ByScope_Throws_When_NotFound()
+    {
+        using var db = BuildPlanTechDbContext(nameof(SetSubmissionInProgress_ByScope_Throws_When_NotFound));
+        var repo = new SubmissionRepository(db);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            repo.SetSubmissionInProgressAsync(establishmentId: 99, sectionId: "NA"));
+    }
 }

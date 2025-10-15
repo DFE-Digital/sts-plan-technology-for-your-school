@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -207,13 +207,9 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
     public async Task SetSubmissionInaccessibleAsync(
         int establishmentId,
-        string sectionId
-    )
+        string sectionId)
     {
-        var query = GetSubmissionsBy(submission =>
-                submission.EstablishmentId == establishmentId &&
-                submission.SectionId == sectionId
-            );
+        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission: false);
 
         var submission = await query.FirstOrDefaultAsync();
         if (submission is null)
@@ -235,6 +231,38 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         submission.Status = SubmissionStatus.Inaccessible.ToString();
         await _db.SaveChangesAsync();
 
+
+        return submission;
+    }
+
+    public async Task SetSubmissionInProgressAsync(
+        int establishmentId,
+        string sectionId)
+    {
+        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission: false);
+
+        var submission = await query.FirstOrDefaultAsync();
+        if (submission is null)
+        {
+            throw new InvalidOperationException($"Submission not found for establishment ID '{establishmentId}' and section ID '{sectionId}'");
+        }
+
+        await SetSubmissionInProgressAsync(submission.Id);
+    }
+
+    public async Task<SubmissionEntity> SetSubmissionInProgressAsync(int submissionId)
+    {
+        var submission = await GetSubmissionByIdAsync(submissionId);
+        if (submission is null)
+        {
+            throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
+        }
+
+        if (submission.Status != null && submission.Status.Equals(SubmissionStatus.Inaccessible))
+        {
+            submission.Status = SubmissionStatus.InProgress.ToString();
+            await _db.SaveChangesAsync();
+        }
 
         return submission;
     }

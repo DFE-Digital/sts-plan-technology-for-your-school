@@ -21,6 +21,7 @@ public class PagesController(
 {
     private readonly IPagesViewBuilder _pagesViewBuilder = pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
 
+
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
 

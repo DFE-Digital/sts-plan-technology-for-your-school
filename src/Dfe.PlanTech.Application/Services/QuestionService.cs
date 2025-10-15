@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 
@@ -15,6 +16,10 @@ public class QuestionService(
     public async Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(int establishmentId, QuestionnaireSectionEntry section)
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+
+        if (submission?.Status == SubmissionStatus.Inaccessible.ToString())
+            submission = null;
+
         if (submission is null)
             return section.Questions.FirstOrDefault();
 

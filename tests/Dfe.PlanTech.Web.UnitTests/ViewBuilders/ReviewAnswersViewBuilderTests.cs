@@ -54,14 +54,19 @@ public class ReviewAnswersViewBuilderTests
         QuestionnaireQuestionEntry? next = null,
         DateTime? completed = null,
         params string[] answerIds)
-        => new SubmissionRoutingDataModel(
-            nextQuestion: next,
-            questionnaireSection: section,
-            submission: new SubmissionResponsesModel(123, answerIds.Select(a => new QuestionWithAnswerModel { AnswerSysId = a }).ToList())
+    {
+        var submission = new SubmissionResponsesModel(123,
+            answerIds.Select(a => new QuestionWithAnswerModel { AnswerSysId = a }).ToList())
+        {
+            DateCompleted = completed,
+            Establishment = new SqlEstablishmentDto
             {
-                DateCompleted = completed,
-            },
-            status);
+                OrgName = "Test Trust"
+            }
+        };
+
+        return new SubmissionRoutingDataModel(next, section, submission, status);
+    }
 
     // ---------------- RouteToCheckAnswers ----------------
 
@@ -78,14 +83,14 @@ public class ReviewAnswersViewBuilderTests
         _submissions.GetSubmissionRoutingDataAsync(1, section, false)
                     .Returns(MakeRouting(SubmissionStatus.NotStarted, section));
 
-        var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1", isChangeAnswersFlow: null);
+        var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1");
         Assert.IsType<RedirectToActionResult>(result);
     }
 
     [Theory]
     [InlineData(SubmissionStatus.InProgress)]
     [InlineData(SubmissionStatus.CompleteNotReviewed)]
-    [InlineData(SubmissionStatus.CompleteReviewed)] // with isChangeAnswersFlow != false → CheckAnswers
+    [InlineData(SubmissionStatus.CompleteReviewed)]
     public async Task RouteToCheckAnswers_Shows_CheckAnswers_For_Allowed_Statuses(SubmissionStatus status)
     {
         var sut = CreateSut();
@@ -95,49 +100,22 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S1", "sec-1", "Section 1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        // ensure page content is loaded only for CheckAnswers page
         _contentful.GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
                    .Returns(new PageEntry { Content = new List<ContentfulEntry> { new PageEntry { Sys = new SystemDetails("X") } } });
 
         _submissions.GetSubmissionRoutingDataAsync(1, section, false)
                     .Returns(MakeRouting(status, section, next: MakeQuestion("Q2", "q-2")));
 
-        var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1", isChangeAnswersFlow: null, errorMessage: "err");
+        var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1", errorMessage: "err");
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal(ReviewAnswersViewBuilder.CheckAnswersViewName, view.ViewName);
 
         var vm = Assert.IsType<ReviewAnswersViewModel>(view.Model);
-        Assert.Equal(UrlConstants.CheckAnswersSlug, vm.Slug);
         Assert.Equal("Section 1", vm.SectionName);
         Assert.Equal("cat", vm.CategorySlug);
         Assert.Equal("sec-1", vm.SectionSlug);
         Assert.Equal("err", vm.ErrorMessage);
-        Assert.NotNull(vm.Content);
-        Assert.Single(vm.Content); // came from GetPageBySlugAsync
-    }
-
-    [Fact]
-    public async Task RouteToCheckAnswers_CompleteReviewed_With_IsChangeAnswersFlow_False_Shows_ChangeAnswers()
-    {
-        var sut = CreateSut();
-        var ctl = MakeController();
-
-        _currentUser.EstablishmentId.Returns(1);
-        var section = MakeSection("S1", "sec-1", "Section 1");
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
-
-        _submissions.GetSubmissionRoutingDataAsync(1, section, false)
-                    .Returns(MakeRouting(SubmissionStatus.CompleteReviewed, section, next: MakeQuestion("Q2", "q-2")));
-
-        var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1", isChangeAnswersFlow: false, errorMessage: null);
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal(ReviewAnswersViewBuilder.ChangeAnswersViewName, view.ViewName);
-
-        var vm = Assert.IsType<ReviewAnswersViewModel>(view.Model);
-        Assert.Equal(UrlConstants.ChangeAnswersSlug, vm.Slug);
-        Assert.Equal("Section 1", vm.SectionName);
-        // For ChangeAnswers page, BuildViewModel should NOT fetch page content (content stays empty)
-        Assert.Empty(vm.Content ?? []);
+        Assert.NotEmpty(vm.Content);
     }
 
     [Fact]
@@ -150,7 +128,6 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S1", "sec-1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        // Force a default path by spoofing a status not matched above (cast from int)
         var weirdStatus = (SubmissionStatus)999;
         var routing = MakeRouting(SubmissionStatus.InProgress, section, next: MakeQuestion("Q1", "q-1"));
         typeof(SubmissionRoutingDataModel).GetProperty(nameof(SubmissionRoutingDataModel.Status))!
@@ -158,14 +135,14 @@ public class ReviewAnswersViewBuilderTests
 
         _submissions.GetSubmissionRoutingDataAsync(1, section, false).Returns(routing);
 
-        var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1", isChangeAnswersFlow: null);
+        var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1");
         Assert.IsType<RedirectToActionResult>(result);
     }
 
-    // ---------------- RouteToChangeAnswers ----------------
+    // ---------------- RouteToViewAnswers ----------------
 
     [Fact]
-    public async Task RouteToChangeAnswers_NotStarted_Redirects_Home()
+    public async Task RouteToViewAnswers_NotStarted_Redirects_Home()
     {
         var sut = CreateSut();
         var ctl = MakeController();
@@ -177,12 +154,12 @@ public class ReviewAnswersViewBuilderTests
         _submissions.GetSubmissionRoutingDataAsync(2, section, true)
                     .Returns(MakeRouting(SubmissionStatus.NotStarted, section));
 
-        var result = await sut.RouteToChangeAnswers(ctl, "cat", "sec-2");
+        var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
         Assert.IsType<RedirectToActionResult>(result);
     }
 
     [Fact]
-    public async Task RouteToChangeAnswers_InProgress_Redirects_To_Next_Unanswered()
+    public async Task RouteToViewAnswers_InProgress_Redirects_To_ContinueSelfAssessment()
     {
         var sut = CreateSut();
         var ctl = MakeController();
@@ -194,94 +171,67 @@ public class ReviewAnswersViewBuilderTests
         _submissions.GetSubmissionRoutingDataAsync(2, section, true)
                     .Returns(MakeRouting(SubmissionStatus.InProgress, section));
 
-        var result = await sut.RouteToChangeAnswers(ctl, "cat", "sec-2");
+        var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
         Assert.IsType<RedirectToActionResult>(result);
     }
 
     [Fact]
-    public async Task RouteToChangeAnswers_CompleteNotReviewed_Shows_CheckAnswers()
+    public async Task RouteToViewAnswers_CompleteNotReviewed_Redirects_To_ContinueSelfAssessment()
     {
         var sut = CreateSut();
         var ctl = MakeController();
 
         _currentUser.EstablishmentId.Returns(2);
-        var section = MakeSection("S2", "sec-2", "Section 2");
+        var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
-
-        // Fetch page content for CheckAnswers
-        _contentful.GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
-                   .Returns(new PageEntry { Content = new List<ContentfulEntry> { new PageEntry { Sys = new SystemDetails("C") } } });
 
         _submissions.GetSubmissionRoutingDataAsync(2, section, true)
                     .Returns(MakeRouting(SubmissionStatus.CompleteNotReviewed, section));
 
-        var result = await sut.RouteToChangeAnswers(ctl, "cat", "sec-2", "err");
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal(ReviewAnswersViewBuilder.CheckAnswersViewName, view.ViewName);
-        var vm = Assert.IsType<ReviewAnswersViewModel>(view.Model);
-        Assert.Equal("err", vm.ErrorMessage);
-        Assert.NotNull(vm.Content);
-        Assert.Single(vm.Content);
-        Assert.Equal(UrlConstants.CheckAnswersSlug, vm.Slug);
+        var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
+        Assert.IsType<RedirectToActionResult>(result);
     }
 
     [Fact]
-    public async Task RouteToChangeAnswers_CompleteReviewed_Clones_Submission_And_Shows_ChangeAnswers()
+    public async Task RouteToViewAnswers_CompleteReviewed_Shows_ViewAnswers()
     {
         var sut = CreateSut();
         var ctl = MakeController();
 
         _currentUser.EstablishmentId.Returns(77);
-        var q1 = MakeQuestion("Q1", "q-1");
-        var section = MakeSection("S7", "sec-7", "Section 7", q1);
+        var section = MakeSection("S7", "sec-7", "Section 7");
         _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
 
-        // Initial routing: CompleteReviewed to trigger clone path
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true)
-                    .Returns(MakeRouting(SubmissionStatus.CompleteReviewed, section));
-
-        // When cloning most recent completed submission:
-        var cloned = new SqlSubmissionDto
-        {
-            Id = 999,
-            Status = SubmissionStatus.CompleteNotReviewed.ToString(),
-            Responses = new List<SqlResponseDto>
+        // Build routing with Establishment initialised
+        var routing = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: new SubmissionResponsesModel(123, [])
             {
-                new SqlResponseDto
-                {
-                    Question = new SqlQuestionDto
-                    {
-                        ContentfulSysId = "Q1"
-                    },
-                    Answer = new SqlAnswerDto
-                    {
-                        ContentfulSysId = "A1"
-                    }
-                }
-            }
-        };
-        _submissions.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(77, section)
-                    .Returns(cloned);
+                DateCompleted = DateTime.UtcNow,
+                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
+            },
+            status: SubmissionStatus.CompleteReviewed
+        );
 
-        var result = await sut.RouteToChangeAnswers(ctl, "cat", "sec-7");
+        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
 
+        // Act
+        var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
+
+        // Assert
         var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal(ReviewAnswersViewBuilder.ChangeAnswersViewName, view.ViewName);
+        Assert.Equal(ReviewAnswersViewBuilder.ViewAnswersViewName, view.ViewName);
 
-        var vm = Assert.IsType<ReviewAnswersViewModel>(view.Model);
-        Assert.Equal(UrlConstants.ChangeAnswersSlug, vm.Slug);
-        Assert.Equal("Section 7", vm.SectionName);
-        Assert.Equal(999, vm.SubmissionId);
-        Assert.NotNull(vm.SubmissionResponses);
-        Assert.NotNull(vm.SubmissionResponses.Responses);
-        Assert.Contains(vm.SubmissionResponses.Responses, r => r.AnswerRef == "A1");
-
-        // Ensure the clone was requested
-        await _submissions.Received(1).RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(77, section);
+        var vm = Assert.IsType<ViewAnswersViewModel>(view.Model);
+        Assert.Equal("Section 7", vm.TopicName);
+        Assert.Equal("cat", vm.CategorySlug);
+        Assert.Equal("sec-7", vm.SectionSlug);
     }
 
+
     [Fact]
-    public async Task RouteToChangeAnswers_Default_Redirects_To_GetQuestionBySlug()
+    public async Task RouteToViewAnswers_Default_Redirects_To_GetQuestionBySlug()
     {
         var sut = CreateSut();
         var ctl = MakeController();
@@ -294,7 +244,7 @@ public class ReviewAnswersViewBuilderTests
         var routing = MakeRouting((SubmissionStatus)999, section, next: q1);
         _submissions.GetSubmissionRoutingDataAsync(2, section, true).Returns(routing);
 
-        var result = await sut.RouteToChangeAnswers(ctl, "cat", "sec-2");
+        var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
         Assert.IsType<RedirectToActionResult>(result);
     }
 
@@ -320,7 +270,6 @@ public class ReviewAnswersViewBuilderTests
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.True(ctl.TempData.ContainsKey("SectionName"));
         Assert.Equal("My Section", ctl.TempData["SectionName"]);
-        Assert.NotNull(redirect); // usually goes to category landing page helper → RedirectToActionResult
     }
 
     [Fact]
@@ -342,10 +291,6 @@ public class ReviewAnswersViewBuilderTests
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.True(ctl.TempData.ContainsKey("ErrorMessage"));
         Assert.Equal(ReviewAnswersViewBuilder.InlineRecommendationUnavailableErrorMessage, ctl.TempData["ErrorMessage"]);
-        // Route values should carry category & section back to Check Answers page
-        Assert.NotNull(redirect.RouteValues);
-        Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
-        Assert.Equal("sec", redirect.RouteValues["sectionSlug"]);
     }
 
     private sealed class DummyController : Controller { }

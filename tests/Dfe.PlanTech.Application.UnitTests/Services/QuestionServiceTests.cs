@@ -73,6 +73,30 @@ public class QuestionServiceTests
     }
 
     [Fact]
+    public async Task Returns_FirstQuestion_When_Submission_Inaccessible()
+    {
+        // Arrange
+        var section = BuildSectionGraph();
+        const int establishmentId = 1;
+        var submission = new SqlSubmissionDto { Status = "Inaccessible" };
+
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+           .Returns(submission);
+
+        var questionService = CreateServiceUnderTest();
+
+        // Act
+        var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
+
+        // Assert
+        Assert.NotNull(next);
+        Assert.Equal("Q1", next!.Id);
+
+        await _mockSubmissionWorkflow.Received(1)
+                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+    }
+
+    [Fact]
     public async Task Throws_When_Submission_Has_No_Responses()
     {
         // Arrange

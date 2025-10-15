@@ -16,12 +16,4 @@ public class QuestionnaireSectionEntry : ContentfulEntry
         return Questions.FirstOrDefault(question => question.Slug.Equals(questionSlug))
              ?? throw new ContentfulDataUnavailableException($"Could not find question slug '{questionSlug}' under section '{Name}'");
     }
-
-    public List<RecommendationChunkEntry> GetRecommendationChunksByAnswerIds(IEnumerable<string> answerIds)
-    {
-        return CoreRecommendations
-            .Where(chunk => chunk.AllAnswers.Exists(chunkAnswer => answerIds.Contains(chunkAnswer.Id)))
-            .DistinctBy(chunk => chunk.Id)
-            .ToList();
-    }
 }

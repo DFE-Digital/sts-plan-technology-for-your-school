@@ -228,4 +228,87 @@ public class CategoryLandingViewComponentViewBuilderTests
         Assert.Equal("Unable to retrieve Devices recommendation",
                      secVm.Recommendations.NoRecommendationFoundErrorMessage);
     }
+
+    [Fact]
+    public async Task Recommendations_Success_Populates_Expected_Fields()
+    {
+        // Arrange
+        var section = MakeSection("S4", "Broadband", "broadband", "broadband-connection");
+        section.CoreRecommendations = new List<RecommendationChunkEntry>
+        {
+            new RecommendationChunkEntry { Sys = new SystemDetails("chunk-1") }
+        };
+
+        var category = MakeCategory(section);
+
+        var statuses = new List<SqlSectionStatusDto>
+        {
+            new() { SectionId = "S4", LastMaturity = "developing" }
+        };
+
+        var responses = new SubmissionResponsesModel(
+            submissionId: 42,
+            responses: new List<QuestionWithAnswerModel>
+            {
+                new()
+                {
+                    QuestionSysId = "Q1",
+                    QuestionText = "Do you have a safeguarding lead?",
+                    AnswerSysId = "A1",
+                    AnswerText = "Yes",
+                    DateCreated = DateTime.UtcNow
+                }
+            });
+
+        var submission = Substitute.For<ISubmissionService>();
+        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+                  .Returns(statuses);
+        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
+                  .Returns(responses);
+
+        var sut = CreateSut(submission: submission);
+
+        // Act
+        var vm = await sut.BuildViewModelAsync(category, "cat", null);
+
+        // Assert
+        var secVm = Assert.Single(vm.CategoryLandingSections);
+        var recs = secVm.Recommendations;
+        Assert.Null(recs.NoRecommendationFoundErrorMessage);
+        Assert.Equal("Broadband", recs.SectionName);
+        Assert.Equal("broadband-connection", recs.SectionSlug);
+        Assert.Single(recs.Answers);
+        Assert.Single(recs.Chunks);
+        Assert.Equal("Yes", recs.Answers.First().AnswerText);
+    }
+
+    [Fact]
+    public async Task Recommendations_When_CoreRecommendations_Is_Null_Returns_Error_Message()
+    {
+        // Arrange
+        var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
+        section.CoreRecommendations = null;
+        var category = MakeCategory(section);
+
+        var statuses = new List<SqlSectionStatusDto>
+        {
+            new() { SectionId = "S6", LastMaturity = "exemplary" }
+        };
+
+        var submission = Substitute.For<ISubmissionService>();
+        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+                  .Returns(statuses);
+        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
+                  .Returns(new SubmissionResponsesModel(1, new()));
+
+        var sut = CreateSut(submission: submission);
+
+        // Act
+        var vm = await sut.BuildViewModelAsync(category, "cat", null);
+
+        // Assert
+        var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.Equal("Unable to retrieve Devices recommendation",
+                     secVm.Recommendations.NoRecommendationFoundErrorMessage);
+    }
 }

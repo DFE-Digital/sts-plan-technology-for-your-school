@@ -377,6 +377,22 @@ public class SubmissionWorkflowTests
     }
 
     [Fact]
+    public async Task SetSubmissionInProgress_By_Establishment_Section_Delegates()
+    {
+        var sut = CreateServiceUnderTest();
+        await sut.SetSubmissionInProgressAsync(1, "SEC");
+        await _repo.Received(1).SetSubmissionInProgressAsync(1, "SEC");
+    }
+
+    [Fact]
+    public async Task SetSubmissionInProgress_By_SubmissionId_Delegates()
+    {
+        var sut = CreateServiceUnderTest();
+        await sut.SetSubmissionInProgressAsync(123);
+        await _repo.Received(1).SetSubmissionInProgressAsync(123);
+    }
+
+    [Fact]
     public async Task SetSubmissionDeleted_Delegates_To_SP()
     {
         var sut = CreateServiceUnderTest();

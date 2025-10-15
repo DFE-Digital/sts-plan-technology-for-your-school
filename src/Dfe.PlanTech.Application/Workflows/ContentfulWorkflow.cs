@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Dfe.PlanTech.Core.Contentful.Options;
@@ -108,7 +109,10 @@ public class ContentfulWorkflow(
     public async Task<PageEntry> GetPageBySlugAsync(string slug)
     {
         var query = new ContentfulQuerySingleValue { Field = "fields.slug", Value = slug };
-        var options = new GetEntriesOptions(_getPageOptions.Include, [query]);
+
+        GetEntriesOptions options = PageIncludeLevelConstants.IncludeLevelOverrides.TryGetValue(slug, out int includeLevelOverride)
+            ? new GetEntriesOptions(includeLevelOverride, [query])
+            : new GetEntriesOptions(_getPageOptions.Include, [query]);
 
         try
         {
