@@ -49,7 +49,7 @@ public class RecommendationsViewBuilder(
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: true);
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var recommendationChunks = section.GetRecommendationChunksByAnswerIds(answerIds);
+        var recommendationChunks = section.CoreRecommendations.ToList();
 
         var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
@@ -150,7 +150,7 @@ public class RecommendationsViewBuilder(
         _ = GetEstablishmentIdOrThrowException();
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var subtopicChunks = section.GetRecommendationChunksByAnswerIds(answerIds);
+        var subtopicChunks = section.CoreRecommendations.ToList();
 
         return new RecommendationsViewModel()
         {

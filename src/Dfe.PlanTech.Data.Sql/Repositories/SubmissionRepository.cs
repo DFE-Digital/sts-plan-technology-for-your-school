@@ -207,8 +207,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
     public async Task SetSubmissionInaccessibleAsync(
         int establishmentId,
-        string sectionId
-    )
+        string sectionId)
     {
         var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission: false);
 
@@ -237,9 +236,8 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
     }
 
     public async Task SetSubmissionInProgressAsync(
-    int establishmentId,
-    string sectionId
-)
+        int establishmentId,
+        string sectionId)
     {
         var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission: false);
 
