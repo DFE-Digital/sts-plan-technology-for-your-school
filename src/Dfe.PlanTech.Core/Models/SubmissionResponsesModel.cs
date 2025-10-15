@@ -9,6 +9,12 @@ public class SubmissionResponsesModel
 
     public DateTime? DateCompleted { get; init; }
 
+    public DateTime? DateCreated { get; init; }
+
+    public DateTime? DateLastUpdated { get; init; }
+
+    public SqlEstablishmentDto Establishment { get; init; }
+
     public string? Maturity { get; set; }
 
     public List<QuestionWithAnswerModel> Responses { get; set; }
@@ -25,7 +31,10 @@ public class SubmissionResponsesModel
     {
         SubmissionId = submission.Id;
         DateCompleted = submission.DateCompleted;
+        DateCreated = submission.DateCreated;
+        DateLastUpdated = submission.DateLastUpdated;
         Maturity = submission.Maturity;
+        Establishment = submission.Establishment;
         Responses = submission.Responses
             .Select(response => new QuestionWithAnswerModel(response, section))
             .GroupBy(questionWithAnswer => questionWithAnswer.QuestionSysId)
@@ -33,3 +42,4 @@ public class SubmissionResponsesModel
             .ToList();
     }
 }
+

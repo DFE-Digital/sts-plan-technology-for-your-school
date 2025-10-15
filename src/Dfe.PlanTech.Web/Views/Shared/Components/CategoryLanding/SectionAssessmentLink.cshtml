@@ -14,16 +14,16 @@
 	switch (topic.ProgressStatus)
 	{
 		case SectionProgressStatus.InProgress:
-			statusText = $"A self-assessment was started on {topic.DateUpdated}. ";
+            statusText = $"A self-assessment was started on {topic.DateUpdated}.";
 			linkText = $"Continue your self-assessment for {topicName}";
 			controller = nameof(QuestionsController);
-			action = nameof(QuestionsController.GetNextUnansweredQuestion);
+			action = nameof(QuestionsController.GetContinueSelfAssessment);
 			break;
 		case SectionProgressStatus.Completed:
-			statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
-			linkText = $"View or update your self-assessment for {topicName}";
+            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
+            linkText = $"View answers for {topicName}";
 			controller = nameof(ReviewAnswersController);
-			action = nameof(ReviewAnswersController.ChangeAnswers);
+			action = nameof(ReviewAnswersController.ViewAnswers);
 			break;
 		default:
 			statusText = "";
@@ -45,14 +45,13 @@
             </p>
             <p>
                 <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-                    class="govuk-link">@linkText</a> at any time.
+                    class="govuk-link">@linkText</a>
             </p>
         }
         else if (topic.ProgressStatus == SectionProgressStatus.InProgress)
         {
-            <p>@topic.ShortDescription</p>
-            <p>
-                @statusText
+            <p>@statusText</p>
+            <p>               
                 <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
                    class="govuk-link">@linkText</a>
             </p>

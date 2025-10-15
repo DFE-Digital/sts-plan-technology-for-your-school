@@ -3,8 +3,6 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context.Interfaces;
-using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewModels;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
@@ -61,10 +59,5 @@ public class BaseViewBuilder(
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
             };
         }
-    }
-
-    protected bool IsChangeAnswersFlow(string? returnTo)
-    {
-        return returnTo?.Equals(nameof(ReviewAnswersController).GetControllerNameSlug()) ?? false;
     }
 }

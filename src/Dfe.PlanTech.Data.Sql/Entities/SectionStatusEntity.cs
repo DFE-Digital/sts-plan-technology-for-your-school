@@ -28,7 +28,7 @@ public class SectionStatusEntity
             DateCreated = DateCreated,
             DateUpdated = DateUpdated,
             HasBeenViewed = Viewed,
-            LastCompletionDate = LastCompletionDate
+            LastCompletionDate = LastCompletionDate,
         };
     }
 }
