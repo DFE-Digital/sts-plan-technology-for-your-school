@@ -243,7 +243,7 @@ public class QuestionsViewBuilderTests
         var result = await sut.RouteToNextUnansweredQuestion(controller, "cat", "sec-err");
 
         // Assert
-        await _submissionSvc.Received(1).DeleteCurrentSubmissionSoftAsync(987, "S99");
+        await _submissionSvc.Received(1).SetSubmissionInaccessibleAsync(987, "S99");
 
         Assert.True(controller.TempData.ContainsKey("SubtopicError"));
         var msg = controller.TempData["SubtopicError"] as string;
@@ -459,7 +459,7 @@ public class QuestionsViewBuilderTests
         var result = await sut.RestartSelfAssessment(controller, "cat-slug", sectionSlug);
 
         // Assert
-        await _submissionSvc.Received(1).DeleteCurrentSubmissionSoftAsync(555, "S123");
+        await _submissionSvc.Received(1).SetSubmissionInaccessibleAsync(555, "S123");
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(nameof(QuestionsController.GetInterstitialPage), redirect.ActionName);

@@ -53,7 +53,7 @@ public class SubmissionService(
 
         SubmissionStatus status;
 
-        if (latestSubmission == null || latestSubmission.Status == "Inaccessible")
+        if (latestSubmission == null || (latestSubmission.Status != null && latestSubmission.Status.Equals(SubmissionStatus.Inaccessible)))
         {
             status = SubmissionStatus.NotStarted;
         }
@@ -66,7 +66,7 @@ public class SubmissionService(
             status = SubmissionStatus.InProgress;
         }
 
-        var submissionResponsesModel = latestSubmission is null || latestSubmission.Status == "Inaccessible"
+        var submissionResponsesModel = latestSubmission is null || (latestSubmission.Status != null && latestSubmission.Status.Equals(SubmissionStatus.Inaccessible))
             ? null
             : new SubmissionResponsesModel(latestSubmission, section);
 
@@ -127,7 +127,7 @@ public class SubmissionService(
         return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
     }
 
-    public async Task DeleteCurrentSubmissionSoftAsync(int establishmentId, string sectionId)
+    public async Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)
     {
         await _submissionWorkflow.SetSubmissionInaccessibleAsync(establishmentId, sectionId);
     }

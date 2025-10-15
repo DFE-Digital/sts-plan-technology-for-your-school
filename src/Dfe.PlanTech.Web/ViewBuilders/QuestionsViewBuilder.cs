@@ -157,7 +157,7 @@ public class QuestionsViewBuilder(
         catch (DatabaseException)
         {
             // Remove the current invalid submission and redirect to self-assessment page
-            await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Id);
+            await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
 
             controller.TempData["SubtopicError"] = await BuildErrorMessage();
             return controller.RedirectToAction(
@@ -209,7 +209,7 @@ public class QuestionsViewBuilder(
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
 
-        await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Id);
+        await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
 
         return controller.RedirectToAction(
             nameof(QuestionsController.GetInterstitialPage),

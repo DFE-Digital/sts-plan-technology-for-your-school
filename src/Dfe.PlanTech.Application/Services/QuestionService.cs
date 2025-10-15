@@ -1,6 +1,7 @@
 ﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 
@@ -16,7 +17,7 @@ public class QuestionService(
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
 
-        if (submission?.Status == "Inaccessible")
+        if (submission?.Status != null && submission.Status.Equals(SubmissionStatus.Inaccessible))
             submission = null;
 
         if (submission is null)

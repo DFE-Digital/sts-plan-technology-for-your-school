@@ -258,7 +258,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
-        if (submission.Status == "Inaccessible")
+        if (submission.Status != null && submission.Status.Equals(SubmissionStatus.Inaccessible))
         {
             submission.Status = SubmissionStatus.InProgress.ToString();
             await _db.SaveChangesAsync();
