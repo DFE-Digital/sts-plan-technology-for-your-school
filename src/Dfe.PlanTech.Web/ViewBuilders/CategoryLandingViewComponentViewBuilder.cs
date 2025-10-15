@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Utilities;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -110,24 +111,33 @@ public class CategoryLandingViewComponentViewBuilder(
     {
         try
         {
+            if (section.InterstitialPage is null)
+            {
+                throw new ContentfulDataUnavailableException($"Could not find {section.Name} interstitial page");
+            }
+
             var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, true)
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
 
             var recommendationChunks = section.CoreRecommendations;
             var recommendationReferences = recommendationChunks.Select(r => r.Id);
             var recommendations = await _submissionService.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationReferences, establishmentId);
-
-            if (section.InterstitialPage is null)
-            {
-                throw new ContentfulDataUnavailableException($"Could not find {section.Name} interstitial page");
-            }
+            var sortedRecommendations = recommendationChunks.SortByStatus(recommendations, sortType);
+            var chunks = sortedRecommendations.Select(sr => new RecommendationChunkViewModel
+                {
+                    HeaderText = sr.HeaderText,
+                    LastUpdated = recommendations[sr.Id].DateCreated,
+                    Status = RecommendationHelper.GetStatus(sr, recommendations),
+                    SlugifiedLinkText = sr.SlugifiedLinkText
+                })
+                .ToList();
 
             return new CategoryLandingSectionRecommendationsViewModel
             {
                 SectionName = section.Name,
                 SectionSlug = section.InterstitialPage.Slug,
                 Answers = latestResponses.Responses,
-                Chunks = recommendationChunks.SortByStatus(recommendations, sortType)
+                Chunks = chunks
             };
         }
         catch

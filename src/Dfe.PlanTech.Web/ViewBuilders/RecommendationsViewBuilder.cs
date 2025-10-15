@@ -151,14 +151,11 @@ public class RecommendationsViewBuilder(
     {
         _ = GetEstablishmentIdOrThrowException();
 
-        var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var subtopicChunks = section.CoreRecommendations.ToList();
-
         return new RecommendationsViewModel()
         {
             CategoryName = category.Header.Text,
             SectionName = section.Name,
-            Chunks = subtopicChunks,
+            Chunks = section.CoreRecommendations.ToList(),
             LatestCompletionDate = submissionRoutingData.Submission!.DateCompleted.HasValue
                                 ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission!.DateCompleted.Value)
                                 : null,
