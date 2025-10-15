@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Core.Models;
@@ -38,6 +39,36 @@ public sealed class DsiOrganisationModel
 
     [JsonPropertyName("urn")]
     public string? Urn { get; set; }
+
+    public bool IsGroup()
+    {
+        if (!string.IsNullOrEmpty(Urn))
+        {
+            // If there's a URN, this organisation is an establishment
+            return false;
+        }
+        else if (!string.IsNullOrEmpty(Uid))
+        {
+            // If there's a UID, this organisation is a group
+            return true;
+        }
+        else if (Category?.Id == DsiConstants.MatOrganisationCategoryId)
+        {
+            // If there's not a UID (checks above) but we do have a known-group category, this organisation is a group
+            return true;
+        }
+        else if (Type is not null)
+        {
+            // This is an "establishment type" therefore, if it's present, the organisation is an establishment (and, therefore, _not_ a group)
+            return false;
+        }
+        else
+        {
+            // TODO: What to default to if unable to determine? Yes/No/Unknown
+            return true;
+        }
+    }
+
 
     public bool IsValid => References.Any(reference => !string.IsNullOrEmpty(reference));
 
