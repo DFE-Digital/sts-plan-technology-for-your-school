@@ -17,7 +17,7 @@ public class QuestionService(
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
 
-        if (submission?.Status != null && submission.Status.Equals(SubmissionStatus.Inaccessible))
+        if (submission?.Status == SubmissionStatus.Inaccessible.ToString())
             submission = null;
 
         if (submission is null)
