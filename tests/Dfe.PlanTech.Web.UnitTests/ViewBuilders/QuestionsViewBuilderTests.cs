@@ -376,7 +376,7 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         _currentUser.EstablishmentId.Returns(123);
-        _currentUser.Organisation.Returns(new EstablishmentModel { Name = "Everwood Learning Trust" });
+        _currentUser.Organisation.Returns(new DsiOrganisationModel() { Name = "Everwood Learning Trust" });
 
         var sectionSlug = "sec-1";
         var section = MakeSection("S1", sectionSlug, "Section 1");
@@ -404,7 +404,7 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         _currentUser.EstablishmentId.Returns(123);
-        _currentUser.Organisation.Returns(new EstablishmentModel { Name = "Test Trust" });
+        _currentUser.Organisation.Returns(new DsiOrganisationModel() { Name = "Test Trust" });
 
         var q1 = MakeQuestion("Q1", "q-1", "Question 1");
         var q2 = MakeQuestion("Q2", "q-2", "Question 2");

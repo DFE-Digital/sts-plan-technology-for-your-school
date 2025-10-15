@@ -19,11 +19,17 @@ public class SignInWorkflow(
     {
         var user = await GetOrCreateUserAsync(dfeSignInRef);
 
-
-        var establishment = await GetOrCreateEstablishmentAsync(dsiOrganisationModel); // FIXME: Not necessarily an establishment
-        var signIn = await _signInRepository.CreateSignInAsync(user.Id, establishment.Id);
-
-        return signIn.AsDto();
+        if (dsiOrganisationModel is null)
+        {
+            var signIn = await _signInRepository.CreateSignInAsync(user.Id, null);
+            return signIn.AsDto();
+        }
+        else
+        {
+            var establishment = await GetOrCreateEstablishmentAsync(dsiOrganisationModel); // TODO/FIXME: Not necessarily an establishment
+            var signIn = await _signInRepository.CreateSignInAsync(user.Id, establishment.Id);
+            return signIn.AsDto();
+        }
     }
 
     public async Task<SqlSignInDto> RecordSignInUserOnly(string dfeSignInRef)

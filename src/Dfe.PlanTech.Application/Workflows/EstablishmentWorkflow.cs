@@ -17,6 +17,7 @@ public class EstablishmentWorkflow(
 
     public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(DsiOrganisationModel dsiOrganisationModel)
     {
+        // TODO/FIXME: The given organisation model doesn't _necessarily_ represent an establishment.
         var establishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(dsiOrganisationModel.Reference);
         establishment ??= await _establishmentRepository.CreateEstablishmentFromModelAsync(dsiOrganisationModel);
 
@@ -25,13 +26,13 @@ public class EstablishmentWorkflow(
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(string establishmentUrn, string establishmentName)
     {
-        var establishmentModel = new DsiOrganisationModel()
+        var dsiOrganisationModel = new DsiOrganisationModel()
         {
             Name = establishmentName,
             Urn = establishmentUrn
         };
 
-        return GetOrCreateEstablishmentAsync(establishmentModel);
+        return GetOrCreateEstablishmentAsync(dsiOrganisationModel);
     }
 
     public async Task<SqlEstablishmentDto?> GetEstablishmentByDsiReferenceAsync(string establishmentDsiReference)

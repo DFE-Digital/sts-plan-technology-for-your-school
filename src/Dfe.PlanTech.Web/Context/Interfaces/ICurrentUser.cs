@@ -10,7 +10,7 @@ public interface ICurrentUser
     string? GroupSelectedSchoolUrn { get; }
     bool IsAuthenticated { get; }
     bool IsMat { get; }
-    int? MatEstablishmentId { get; }
+    int? MatEstablishmentId { get; } // TODO/FIXME: MATs cannot have an establishment ID - they are not an establishment
     DsiOrganisationModel Organisation { get; }
     int? UserId { get; }
     string? GetGroupSelectedSchool();
