@@ -147,7 +147,6 @@ public class ReviewAnswersViewBuilder(
     {
         var viewModel = new ViewAnswersViewModel
         {
-            TrustName = submissionModel.Submission?.Establishment.OrgName,
             AssessmentCompletedDate = submissionModel.Submission?.DateCompleted ?? DateTime.UtcNow,
             TopicName = section.Name,
             Responses = submissionModel.Submission?.Responses,

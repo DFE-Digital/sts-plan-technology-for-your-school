@@ -10,18 +10,17 @@
 	var topicName = topic.Name.ToLower().Trim();
 	var topicSlug = topic.Slug ?? string.Empty;
 	var categorySlug = Model.CategorySlug;
-    var trustName = Model.Section.TrustName;
 
 	switch (topic.ProgressStatus)
 	{
 		case SectionProgressStatus.InProgress:
-            statusText = $"A self-assessment was started {(String.IsNullOrEmpty(trustName) ? "" : $"by {trustName}.")} on {topic.DateUpdated}. ";
+            statusText = $"A self-assessment was started on {topic.DateUpdated}.";
 			linkText = $"Continue your self-assessment for {topicName}";
 			controller = nameof(QuestionsController);
 			action = nameof(QuestionsController.GetContinueSelfAssessment);
 			break;
 		case SectionProgressStatus.Completed:
-            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}{(String.IsNullOrEmpty(trustName) ? "." : $" by {trustName}.")}";
+            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
             linkText = $"View answers for {topicName}";
 			controller = nameof(ReviewAnswersController);
 			action = nameof(ReviewAnswersController.ViewAnswers);

@@ -4,7 +4,6 @@ namespace Dfe.PlanTech.Web.ViewModels
 {
     public class ContinueSelfAssessmentViewModel
     {
-        public string TrustName { get; set; } = string.Empty;
         public DateTime AssessmentStartDate { get; set; }
         public DateTime AssessmentUpdatedDate { get; set; }
         public int AnsweredCount { get; set; }

@@ -431,7 +431,6 @@ public class QuestionsViewBuilderTests
         Assert.Equal("ContinueSelfAssessment", view.ViewName);
 
         var vm = Assert.IsType<ContinueSelfAssessmentViewModel>(view.Model);
-        Assert.Equal("Test Trust", vm.TrustName);
         Assert.Equal(1, vm.AnsweredCount);
         Assert.Equal(2, vm.QuestionsCount);
         Assert.Equal("category-slug", vm.CategorySlug);

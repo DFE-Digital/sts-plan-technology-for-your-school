@@ -11,7 +11,6 @@ public class CategoryLandingSectionViewModel
     public string? ErrorMessage { get; init; }
     public string? LastCompletionDate { get; init; } = null;
     public string Name { get; init; }
-    public string? TrustName { get; init; } = string.Empty;
     public SectionProgressStatus ProgressStatus { get; init; }
     public CategoryLandingSectionRecommendationsViewModel Recommendations { get; init; } = null!;
     public string ShortDescription { get; init; }

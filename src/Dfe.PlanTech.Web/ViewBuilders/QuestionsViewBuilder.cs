@@ -186,7 +186,6 @@ public class QuestionsViewBuilder(
 
         var viewModel = new ContinueSelfAssessmentViewModel
         {
-            TrustName = submissionModel.Establishment.OrgName,
             AssessmentStartDate = submissionModel.DateCreated ?? DateTime.UtcNow,
             AssessmentUpdatedDate = submissionModel.DateLastUpdated ?? DateTime.UtcNow,
             AnsweredCount = submissionModel.Responses.Count,

@@ -227,7 +227,6 @@ public class ReviewAnswersViewBuilderTests
         Assert.Equal("Section 7", vm.TopicName);
         Assert.Equal("cat", vm.CategorySlug);
         Assert.Equal("sec-7", vm.SectionSlug);
-        Assert.Equal("Test Trust", vm.TrustName); // ensure Establishment.Name flowed through
     }
 
 
