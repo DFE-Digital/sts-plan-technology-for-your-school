@@ -63,7 +63,7 @@ public class GroupsCategorySectionViewModelTests
         Assert.Equal(" unavailable", vm.ErrorMessage);
 
         // With no sectionStatus and no retrieval error, Tag should be "Not started" (Grey)
-        Assert.StartsWith("Not started", vm.Tag.Text, StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith("Not started", vm.Tag.Text, StringComparison.InvariantCultureIgnoreCase);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public class GroupsCategorySectionViewModelTests
 
         var vm = new GroupsCategorySectionViewModel(section, rec, status, hadRetrievalError: false);
 
-        Assert.StartsWith("Completed on ", vm.Tag.Text, StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith("Completed on ", vm.Tag.Text, StringComparison.InvariantCultureIgnoreCase);
     }
 
     [Fact]
@@ -119,7 +119,7 @@ public class GroupsCategorySectionViewModelTests
 
         var vm = new GroupsCategorySectionViewModel(section, rec, status, hadRetrievalError: false);
 
-        Assert.StartsWith("Completed at ", vm.Tag.Text, StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith("Completed at ", vm.Tag.Text, StringComparison.InvariantCultureIgnoreCase);
     }
 
     [Fact]
@@ -130,6 +130,6 @@ public class GroupsCategorySectionViewModelTests
 
         var vm = new GroupsCategorySectionViewModel(section, rec, sectionStatus: null, hadRetrievalError: false);
 
-        Assert.StartsWith("Not started", vm.Tag.Text, StringComparison.OrdinalIgnoreCase);
+        Assert.StartsWith("Not started", vm.Tag.Text, StringComparison.InvariantCultureIgnoreCase);
     }
 }

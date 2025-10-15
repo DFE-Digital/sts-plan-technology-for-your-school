@@ -20,13 +20,13 @@ public static class RecommendationSorter
                 indexed.Select(x => x.chunk).ToList(),
 
             RecommendationSort.Status =>
-                indexed.OrderBy(x => RecommendationHelper.GetStatus(x.chunk, history))
+                indexed.OrderBy(x => RecommendationStatusHelper.GetStatus(x.chunk, history))
                        .ThenBy(x => x.index)
                        .Select(x => x.chunk)
                        .ToList(),
 
             RecommendationSort.LastUpdated =>
-                indexed.OrderByDescending(x => RecommendationHelper.GetLastUpdatedUtc(x.chunk, history))
+                indexed.OrderByDescending(x => RecommendationStatusHelper.GetLastUpdatedUtc(x.chunk, history))
                        .ThenBy(x => x.index)
                        .Select(x => x.chunk)
                        .ToList(),

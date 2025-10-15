@@ -1,10 +1,8 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Utilities;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -26,7 +24,7 @@ public class CategoryLandingViewComponentViewBuilder(
         QuestionnaireCategoryEntry category,
         string slug,
         string? sectionName,
-        string sortOrder = RecommendationConstants.DefaultSortOrder)
+        string sortOrder)
     {
         if (!category.Sections.Any())
         {
@@ -52,15 +50,11 @@ public class CategoryLandingViewComponentViewBuilder(
             progressRetrievalErrorMessage = "Unable to retrieve progress, please refresh your browser.";
         }
 
-        var sortType = Enum.GetValues(typeof(RecommendationSort))
-            .Cast<RecommendationSort?>()
-            .FirstOrDefault(s => string.Equals(sortOrder, s!.GetDescription()))
-            ?? RecommendationSort.Default;
-
+        var sortType = sortOrder.GetRecommendationSortEnumValue();
         var categoryLandingSections = await BuildCategoryLandingSectionViewModels(establishmentId, category, sectionStatuses, progressRetrievalErrorMessage is not null, sortType).ToListAsync();
         var completedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate != null);
 
-        var viewModel = new CategoryLandingViewComponentViewModel()
+        var viewModel = new CategoryLandingViewComponentViewModel
         {
             AllSectionsCompleted = completedSectionCount.Equals(category.Sections.Count),
             AnySectionsCompleted = completedSectionCount > 0,
@@ -69,7 +63,8 @@ public class CategoryLandingViewComponentViewBuilder(
             CategorySlug = slug,
             Sections = category.Sections,
             SectionName = sectionName,
-            ProgressRetrievalErrorMessage = progressRetrievalErrorMessage
+            ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
+            SortType = sortType
         };
 
         return viewModel;
@@ -127,7 +122,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 {
                     HeaderText = sr.HeaderText,
                     LastUpdated = recommendations[sr.Id].DateCreated,
-                    Status = RecommendationHelper.GetStatus(sr, recommendations),
+                    Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
                     SlugifiedLinkText = sr.SlugifiedLinkText
                 })
                 .ToList();

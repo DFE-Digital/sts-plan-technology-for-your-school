@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Extensions;
 
 namespace Dfe.PlanTech.Core.Helpers
 {
-    public static class RecommendationHelper
+    public static class RecommendationStatusHelper
     {
         public static RecommendationStatus? GetRecommendationStatusEnumValue(this string recommendationStatus)
         {

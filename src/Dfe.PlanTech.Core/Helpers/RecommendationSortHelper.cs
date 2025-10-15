@@ -1,0 +1,16 @@
+﻿using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Extensions;
+
+namespace Dfe.PlanTech.Core.Helpers
+{
+    public static class RecommendationSortHelper
+    {
+        public static RecommendationSort GetRecommendationSortEnumValue(this string sortOrder)
+        {
+            return Enum.GetValues(typeof(RecommendationSort))
+                .Cast<RecommendationSort?>()
+                .FirstOrDefault(s => string.Equals(sortOrder, s!.GetDescription(), StringComparison.InvariantCultureIgnoreCase))
+                ?? RecommendationSort.Default;
+        }
+    }
+}

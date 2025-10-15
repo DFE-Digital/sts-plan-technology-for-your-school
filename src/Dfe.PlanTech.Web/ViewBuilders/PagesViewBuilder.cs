@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Configuration;
+﻿using Azure.Core;
+using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -75,7 +76,8 @@ public class PagesViewBuilder(
             Slug = page.Slug,
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
-            SectionName = controller.TempData["SectionName"] as string
+            SectionName = controller.TempData["SectionName"] as string,
+            SortOrder = controller.Request.Query["sort"]
         };
 
         return controller.View(CategoryLandingPageView, landingPageViewModel);
