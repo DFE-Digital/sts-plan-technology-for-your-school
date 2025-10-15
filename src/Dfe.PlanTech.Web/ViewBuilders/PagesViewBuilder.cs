@@ -1,5 +1,4 @@
-﻿using Azure.Core;
-using Dfe.PlanTech.Application.Configuration;
+﻿using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;

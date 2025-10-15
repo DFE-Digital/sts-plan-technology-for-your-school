@@ -4,7 +4,7 @@ namespace Dfe.PlanTech.Core.Enums;
 
 public enum RecommendationSort
 {
-    [Display(Name="Default")]
+    [Display(Name = "Default")]
     Default = 0,
 
     [Display(Name = "Status")]
