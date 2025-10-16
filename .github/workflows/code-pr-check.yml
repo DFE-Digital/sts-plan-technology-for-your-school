@@ -196,7 +196,6 @@ jobs:
             echo "contentful_changes=false" >> $GITHUB_ENV
             echo "::set-output name=changed::false"
           fi
-          
 
       - name: Setup Node.js
         if: steps.contentful-check.outputs.changed == 'true'
