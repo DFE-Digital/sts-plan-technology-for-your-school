@@ -7,5 +7,6 @@ public enum SubmissionStatus
     InProgress,
     CompleteNotReviewed,
     CompleteReviewed,
-    Inaccessible
+    Inaccessible,
+    Obsolete
 }
