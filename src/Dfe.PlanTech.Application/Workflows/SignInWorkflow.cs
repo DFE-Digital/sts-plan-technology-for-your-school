@@ -24,6 +24,13 @@ public class SignInWorkflow(
             var signIn = await _signInRepository.CreateSignInAsync(user.Id, null);
             return signIn.AsDto();
         }
+        else if (dsiOrganisationModel.IsGroup())
+        {
+            // TODO: Additional column / argument / flag / something to record the group details
+            // (n.b.: deliberately redundant/repetitive for now - can fold in later)
+            var signIn = await _signInRepository.CreateSignInAsync(user.Id, null);
+            return signIn.AsDto();
+        }
         else
         {
             var establishment = await GetOrCreateEstablishmentAsync(dsiOrganisationModel); // TODO/FIXME: Not necessarily an establishment
