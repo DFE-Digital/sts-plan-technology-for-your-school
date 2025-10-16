@@ -1,7 +1,6 @@
 using System.Security.Claims;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -15,6 +14,7 @@ public static class OnUserInformationReceivedEvent
     /// <summary>
     /// Records user sign in event
     /// </summary>
+    /// <param name="logger"></param>
     /// <param name="context"></param>
     /// <returns></returns>
     public static async Task RecordUserSignIn(
@@ -28,35 +28,34 @@ public static class OnUserInformationReceivedEvent
             return;
         }
 
-        var dsiReference = context.Principal.Claims.GetDsiReference();
-        var establishment = context.Principal.Claims.GetOrganisation();
+        var dsiUserReference = context.Principal.Claims.GetDsiUserReference();
+        var dsiOrganisation = context.Principal.Claims.GetDsiOrganisation();
         var signInWorkflow = context.HttpContext.RequestServices.GetRequiredService<ISignInWorkflow>();
 
-        if (establishment is null)
+        if (dsiOrganisation is null)
         {
-            logger.LogWarning("User {UserId} is authenticated but has no establishment", dsiReference);
-            await signInWorkflow.RecordSignInUserOnly(dsiReference);
+            logger.LogWarning("User {UserId} is authenticated, but not linked to a DSI organisation", dsiUserReference);
+            await signInWorkflow.RecordSignInUserOnly(dsiUserReference);
             return;
         }
 
-        var signin = await signInWorkflow.RecordSignIn(dsiReference, establishment);
+        var signin = await signInWorkflow.RecordSignIn(dsiUserReference, dsiOrganisation);
 
-        AddClaimsToPrincipal(context, signin);
+        AddClaimsToPrincipal(context, signin.EstablishmentId, signin.UserId);
     }
 
-    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, SqlSignInDto signin)
+    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, int? signinEstablishmentId, int signinUserId)
     {
         var principal = context.Principal;
-
         if (principal is null)
         {
             return;
         }
 
-        string establishmentId = (signin.EstablishmentId?.ToString()) ?? throw new InvalidDataException(nameof(signin.EstablishmentId));
+        string establishmentId = (signinEstablishmentId?.ToString()) ?? throw new InvalidDataException(nameof(signinEstablishmentId));
 
         ClaimsIdentity claimsIdentity = new([
-            new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),
+            new Claim(ClaimConstants.DB_USER_ID, signinUserId.ToString()),
             new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, establishmentId)
         ]);
 

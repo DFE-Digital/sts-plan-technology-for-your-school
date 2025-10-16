@@ -140,7 +140,7 @@ public partial class DfeOpenIdConnectEventsTests
         var logger = Substitute.For<ILogger<DfeSignIn>>();
         await OnUserInformationReceivedEvent.RecordUserSignIn(logger, context);
 
-        Assert.Single(logger.GetMatchingReceivedMessages($"User {userId} is authenticated but has no establishment", LogLevel.Warning));
+        Assert.Single(logger.GetMatchingReceivedMessages($"User {userId} is authenticated, but not linked to a DSI organisation", LogLevel.Warning));
         await signInWorkflowSubstitute.Received(1).RecordSignInUserOnly(Arg.Any<string>());
     }
 

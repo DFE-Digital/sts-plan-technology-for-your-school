@@ -26,7 +26,7 @@ public class EstablishmentServiceTests
     public async Task GetOrCreateEstablishmentAsync_Delegates_To_Workflow()
     {
         // Arrange
-        var establishmentModel = new EstablishmentModel
+        var dsiOrganisationModel = new DsiOrganisationModel
         {
             Id = Guid.NewGuid(),
             DistrictAdministrativeCode = "testCode",
@@ -45,19 +45,19 @@ public class EstablishmentServiceTests
         };
 
         _establishmentWorkflow
-            .GetOrCreateEstablishmentAsync(establishmentModel)
+            .GetOrCreateEstablishmentAsync(dsiOrganisationModel)
             .Returns(expected);
 
         var sut = CreateServiceUnderTest();
 
         // Act
-        var actual = await sut.GetOrCreateEstablishmentAsync(establishmentModel);
+        var actual = await sut.GetOrCreateEstablishmentAsync(dsiOrganisationModel);
 
         // Assert
         Assert.Same(expected, actual);
         await _establishmentWorkflow
             .Received(1)
-            .GetOrCreateEstablishmentAsync(establishmentModel);
+            .GetOrCreateEstablishmentAsync(dsiOrganisationModel);
     }
 
     [Fact]
@@ -99,7 +99,7 @@ public class EstablishmentServiceTests
             new SqlEstablishmentDto { Id = 1001, EstablishmentRef = "URN-A", OrgName = "A" },
             new SqlEstablishmentDto { Id = 1002, EstablishmentRef = "URN-B", OrgName = "B" }
         };
-        _establishmentWorkflow.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B" })))
+        _establishmentWorkflow.GetEstablishmentsByDsiReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B" })))
                               .Returns(establishments);
 
         _submissionWorkflow.GetSectionStatusesAsync(1001, Arg.Is<IEnumerable<string>>(ids => ids.SequenceEqual(new[] { "S1", "S2" })))
@@ -142,7 +142,7 @@ public class EstablishmentServiceTests
             DfeSignInRef = dsiRef
         };
 
-        var establishmentModel = new EstablishmentModel
+        var dsiOrganisationModel = new DsiOrganisationModel
         {
             Id = Guid.NewGuid(),
             DistrictAdministrativeCode = "testCode",
@@ -155,8 +155,8 @@ public class EstablishmentServiceTests
         var createdUserEstablishment = new SqlEstablishmentDto
         {
             Id = establishmentId,
-            EstablishmentRef = establishmentModel.Urn,
-            OrgName = establishmentModel.Name
+            EstablishmentRef = dsiOrganisationModel.Urn,
+            OrgName = dsiOrganisationModel.Name
         };
 
         var createdSelectedEstablishment = new SqlEstablishmentDto
@@ -167,8 +167,8 @@ public class EstablishmentServiceTests
         };
 
         _userWorkflow.GetUserBySignInRefAsync(dsiRef).Returns(user);
-        _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel).Returns(createdUserEstablishment);
-        _establishmentWorkflow.GetEstablishmentByReferenceAsync(urn).Returns((SqlEstablishmentDto?)null);
+        _establishmentWorkflow.GetOrCreateEstablishmentAsync(dsiOrganisationModel).Returns(createdUserEstablishment);
+        _establishmentWorkflow.GetEstablishmentByDsiReferenceAsync(urn).Returns((SqlEstablishmentDto?)null);
         _establishmentWorkflow.GetOrCreateEstablishmentAsync(urn, orgName).Returns(createdSelectedEstablishment);
 
         // Record and return id
@@ -182,15 +182,15 @@ public class EstablishmentServiceTests
         await sut.RecordGroupSelection(
             dsiRef,
             userEstablishmentId: null,
-            userEstablishmentModel: establishmentModel,
+            userDsiOrganisationModel: dsiOrganisationModel,
             selectedEstablishmentUrn: urn,
             selectedEstablishmentName: orgName);
 
         await _userWorkflow.Received(1).GetUserBySignInRefAsync(dsiRef);
 
-        await _establishmentWorkflow.Received(1).GetOrCreateEstablishmentAsync(establishmentModel);
+        await _establishmentWorkflow.Received(1).GetOrCreateEstablishmentAsync(dsiOrganisationModel);
 
-        await _establishmentWorkflow.Received(1).GetEstablishmentByReferenceAsync(urn);
+        await _establishmentWorkflow.Received(1).GetEstablishmentByDsiReferenceAsync(urn);
         await _establishmentWorkflow.Received(1).GetOrCreateEstablishmentAsync(urn, orgName);
 
         await _establishmentWorkflow.Received(1).RecordGroupSelection(
@@ -216,7 +216,7 @@ public class EstablishmentServiceTests
             sut.RecordGroupSelection(
                 dsiRef,
                 userEstablishmentId: null,
-                userEstablishmentModel: new EstablishmentModel { Urn = "U", Name = "N" },
+                userDsiOrganisationModel: new DsiOrganisationModel { Urn = "U", Name = "N" },
                 selectedEstablishmentUrn: "SURN",
                 selectedEstablishmentName: "SNAME"));
     }

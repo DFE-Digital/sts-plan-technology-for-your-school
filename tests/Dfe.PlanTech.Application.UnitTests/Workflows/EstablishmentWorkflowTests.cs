@@ -28,7 +28,7 @@ public class EstablishmentWorkflowTests
         => new GroupReadActivityEntity { Id = id, UserId = userId, SelectedEstablishmentId = selectedEstablishmentId };
 
     // ────────────────────────────────────────────────────────────────────────────
-    // GetOrCreateEstablishmentAsync(EstablishmentModel)
+    // GetOrCreateEstablishmentAsync(DsiOrganisationModel)
     // ────────────────────────────────────────────────────────────────────────────
 
     [Fact]
@@ -37,7 +37,7 @@ public class EstablishmentWorkflowTests
         var serviceUnderTest = CreateServiceUnderTest();
         var urn = "12345";
         var name = "testName";
-        var model = new EstablishmentModel { Id = Guid.NewGuid(), Urn = urn, Name = name };
+        var model = new DsiOrganisationModel { Id = Guid.NewGuid(), Urn = urn, Name = name };
         var establishment = MakeEstablishment(10, urn, name);
 
         _estRepo.GetEstablishmentByReferenceAsync(urn).Returns(establishment);
@@ -50,14 +50,14 @@ public class EstablishmentWorkflowTests
         Assert.Equal(name, dto.OrgName);
 
         await _estRepo.Received(1).GetEstablishmentByReferenceAsync(urn);
-        await _estRepo.DidNotReceive().CreateEstablishmentFromModelAsync(Arg.Any<EstablishmentModel>());
+        await _estRepo.DidNotReceive().CreateEstablishmentFromModelAsync(Arg.Any<DsiOrganisationModel>());
     }
 
     [Fact]
     public async Task GetOrCreateEstablishment_Creates_When_Not_Found()
     {
         var serviceUnderTest = CreateServiceUnderTest();
-        var model = new EstablishmentModel { Urn = "999", Name = "New School" };
+        var model = new DsiOrganisationModel { Urn = "999", Name = "New School" };
 
         _estRepo.GetEstablishmentByReferenceAsync("999")
                 .Returns((EstablishmentEntity?)null);
@@ -87,7 +87,7 @@ public class EstablishmentWorkflowTests
                 .Returns((EstablishmentEntity?)null);
 
         _estRepo.CreateEstablishmentFromModelAsync(
-                Arg.Is<EstablishmentModel>(m => m.Urn == establishmentReference && m.Name == name))
+                Arg.Is<DsiOrganisationModel>(m => m.Urn == establishmentReference && m.Name == name))
             .Returns(MakeEstablishment(5, establishmentReference, name));
 
         var dto = await serviceUnderTest.GetOrCreateEstablishmentAsync(establishmentReference, name);
@@ -99,7 +99,7 @@ public class EstablishmentWorkflowTests
     }
 
     // ────────────────────────────────────────────────────────────────────────────
-    // GetEstablishmentByReferenceAsync
+    // GetEstablishmentByDsiReferenceAsync
     // ────────────────────────────────────────────────────────────────────────────
 
     [Fact]
@@ -111,19 +111,19 @@ public class EstablishmentWorkflowTests
         _estRepo.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(r => r.Single() == "U1"))
                 .Returns(establishments);
 
-        var found = await serviceUnderTest.GetEstablishmentByReferenceAsync("U1");
+        var found = await serviceUnderTest.GetEstablishmentByDsiReferenceAsync("U1");
         Assert.NotNull(found);
         Assert.Equal(1, found!.Id);
 
         _estRepo.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(r => r.Single() == "MISSING"))
                 .Returns([]);
 
-        var missing = await serviceUnderTest.GetEstablishmentByReferenceAsync("MISSING");
+        var missing = await serviceUnderTest.GetEstablishmentByDsiReferenceAsync("MISSING");
         Assert.Null(missing);
     }
 
     // ────────────────────────────────────────────────────────────────────────────
-    // GetEstablishmentsByReferencesAsync
+    // GetEstablishmentsByDsiReferencesAsync
     // ────────────────────────────────────────────────────────────────────────────
 
     [Fact]
@@ -139,7 +139,7 @@ public class EstablishmentWorkflowTests
         _estRepo.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(r => r.SequenceEqual(new[] { "A", "B" })))
                 .Returns(establishments);
 
-        var list = (await serviceUnderTest.GetEstablishmentsByReferencesAsync(new[] { "A", "B" })).ToList();
+        var list = (await serviceUnderTest.GetEstablishmentsByDsiReferencesAsync(new[] { "A", "B" })).ToList();
 
         Assert.Collection(list,
             e => { Assert.Equal(11, e.Id); Assert.Equal("A School", e.OrgName); },

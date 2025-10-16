@@ -15,21 +15,33 @@ public class SignInWorkflow(
     private readonly ISignInRepository _signInRepository = signInRepository ?? throw new ArgumentNullException(nameof(signInRepository));
     private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 
-    public virtual async Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, EstablishmentModel establishmentModel)
+    public virtual async Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, DsiOrganisationModel? dsiOrganisationModel)
     {
         var user = await GetOrCreateUserAsync(dfeSignInRef);
-        var establishment = await GetOrCreateEstablishmentAsync(establishmentModel);
-        var signIn = await _signInRepository.CreateSignInAsync(user.Id, establishment.Id);
 
-        return signIn.AsDto();
+        if (dsiOrganisationModel is null)
+        {
+            var signIn = await _signInRepository.CreateSignInAsync(user.Id, null);
+            return signIn.AsDto();
+        }
+        else if (dsiOrganisationModel.IsGroup())
+        {
+            // TODO: Additional column / argument / flag / something to record the group details
+            // (n.b.: deliberately redundant/repetitive for now - can fold in later)
+            var signIn = await _signInRepository.CreateSignInAsync(user.Id, null);
+            return signIn.AsDto();
+        }
+        else
+        {
+            var establishment = await GetOrCreateEstablishmentAsync(dsiOrganisationModel); // TODO/FIXME: Not necessarily an establishment
+            var signIn = await _signInRepository.CreateSignInAsync(user.Id, establishment.Id);
+            return signIn.AsDto();
+        }
     }
 
     public async Task<SqlSignInDto> RecordSignInUserOnly(string dfeSignInRef)
     {
-        var user = await GetOrCreateUserAsync(dfeSignInRef);
-        var signIn = await _signInRepository.CreateSignInAsync(user.Id);
-
-        return signIn.AsDto();
+        return await RecordSignIn(dfeSignInRef, null);
     }
 
     private async Task<SqlUserDto> GetOrCreateUserAsync(string dfeSignInRef)
@@ -44,23 +56,23 @@ public class SignInWorkflow(
         return newUser.AsDto();
     }
 
-    private async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
+    private async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(DsiOrganisationModel dsiOrganisationModel)
     {
-        var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(establishmentModel.Reference);
+        var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(dsiOrganisationModel.Reference);
         if (existingEstablishment is not null)
         {
             return existingEstablishment.AsDto();
         }
 
-        var newEstablishmentData = new EstablishmentModel
+        var newEstablishmentData = new DsiOrganisationModel
         {
-            Ukprn = establishmentModel.Ukprn,
-            Urn = establishmentModel.Urn,
-            Type = establishmentModel.Type?.Name is null
+            Ukprn = dsiOrganisationModel.Ukprn,
+            Urn = dsiOrganisationModel.Urn,
+            Type = dsiOrganisationModel.Type?.Name is null
                 ? null
-                : new IdWithNameModel { Name = establishmentModel.Type.Name },
-            Name = establishmentModel.Name,
-            GroupUid = establishmentModel.Uid
+                : new IdWithNameModel { Name = dsiOrganisationModel.Type.Name },
+            Name = dsiOrganisationModel.Name,
+            GroupUid = dsiOrganisationModel.Uid
         };
 
         var newEstablishment = await _establishmentRepository

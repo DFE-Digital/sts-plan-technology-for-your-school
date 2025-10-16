@@ -1,0 +1,131 @@
+using System.Text.Json.Serialization;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Exceptions;
+
+namespace Dfe.PlanTech.Core.Models;
+
+/// <summary>
+/// Represents the JSON structure return by DSI as part of the OIDC claim `organisation`.
+/// TODO: Consider splitting out to dedicated DTO to model the JSON string and a domain model for use within the application.
+/// Note: Previously named `EstablishmentModel` and appears to have been used in many places which assume it represents an establishment.
+/// Work remains to fully decouple the concept of "organisation" (which may be an establishment or a group) from "establishment".
+/// </summary>
+public sealed class DsiOrganisationModel
+{
+    public const string InvalidEstablishmentErrorMessage = $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
+
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("category")]
+    public IdWithNameModel? Category { get; set; }
+
+    [JsonPropertyName("DistrictAdministrative_code")]
+    public string DistrictAdministrativeCode { get; set; } = null!;
+
+    [JsonPropertyName("groupUid")]
+    public string? GroupUid { get; set; }
+
+    public string LegacyId { get; set; } = null!;
+
+    [JsonPropertyName("name")]
+    public string Name { get; set; } = null!;
+
+    [JsonPropertyName("sid")]
+    public string Sid { get; set; } = null!;
+
+    [JsonPropertyName("type")]
+    public IdWithNameModel? Type { get; set; }
+
+    [JsonPropertyName("uid")]
+    public string? Uid { get; set; }
+
+    [JsonPropertyName("ukprn")]
+    public string? Ukprn { get; set; }
+
+    [JsonPropertyName("urn")]
+    public string? Urn { get; set; }
+
+    public bool IsGroup()
+    {
+        if (!string.IsNullOrEmpty(Urn))
+        {
+            // If there's a URN, this organisation is an establishment
+            return false;
+        }
+        else if (!string.IsNullOrEmpty(Uid))
+        {
+            // If there's a UID, this organisation is a group
+            return true;
+        }
+        else if (Category?.Id == DsiConstants.MatOrganisationCategoryId)
+        {
+            // If there's not a UID (checks above) but we do have a known-group category, this organisation is a group
+            return true;
+        }
+        else if (Type is not null)
+        {
+            // This is an "establishment type" therefore, if it's present, the organisation is an establishment (and, therefore, _not_ a group)
+            return false;
+        }
+        else
+        {
+            // TODO: What to default to if unable to determine? Yes/No/Unknown
+            return true;
+        }
+    }
+
+
+    public bool IsValid => References.Any(reference => !string.IsNullOrEmpty(reference));
+
+    public string Reference => References
+        .FirstOrDefault(reference => !string.IsNullOrEmpty(reference))
+            ?? throw new InvalidEstablishmentException(InvalidEstablishmentErrorMessage);
+
+    private IEnumerable<string?> References
+    {
+        get
+        {
+            yield return Urn;
+            yield return Ukprn;
+            yield return Uid; // TODO: Consider moving UID above UKPRN, given that UID is the GIAS identifier for establishment groups (potential backwards compatability issue?)
+            yield return Id.ToString();
+        }
+    }
+
+
+    // Extracted from DSI Manage
+    public static readonly IDictionary<string, string> DsiOrganisationCategoryMappings = new Dictionary<string, string>()
+    {
+        { "052", "Billing Authority" },
+        { "001", "Establishment" },
+        { "011", "Government" },
+        { "002", "Local Authority" },
+        { "010", "Multi-Academy Trust" },
+        { "012", "Other GIAS Stakeholder" },
+        { "003", "Other Legacy Organisations" },
+        { "008", "Other Stakeholders" },
+        { "051", "PIMS Training Providers" },
+        { "014", "Secure Single-Academy Trust" },
+        { "013", "Single-Academy Trust" },
+        { "050", "Software Suppliers" },
+        { "009", "Training Providers" },
+        { "053", "Youth Custody Service" }
+    };
+
+    // Extracted from DSI Manage
+    public static readonly IDictionary<string, string> DsiOrganisationStatusCodeMappings = new Dictionary<string, string>()
+    {
+        { "0", "Hidden" },
+        { "1", "Open" },
+        { "2", "Closed" },
+        { "3", "Proposed to close" },
+        { "4", "Proposed to open" },
+        { "5", "Dissolved" },
+        { "6", "In Liquidation" },
+        { "8", "Locked Duplicate" },
+        { "9", "Created in error" },
+        { "10", "Locked Restructure" }
+    };
+
+}

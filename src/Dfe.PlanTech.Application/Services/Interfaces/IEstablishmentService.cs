@@ -8,6 +8,6 @@ public interface IEstablishmentService
 {
     Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId);
     Task<SqlEstablishmentDto> GetLatestSelectedGroupSchoolAsync(string selectedEstablishmentUrn);
-    Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel);
-    Task RecordGroupSelection(string userDsiReference, int? userEstablishmentId, EstablishmentModel userEstablishmentModel, string selectedEstablishmentUrn, string selectedEstablishmentName);
+    Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(DsiOrganisationModel dsiOrganisationModel);
+    Task RecordGroupSelection(string userDsiReference, int? userEstablishmentId, DsiOrganisationModel userDsiOrganisationModel, string selectedEstablishmentUrn, string selectedEstablishmentName);
 }
