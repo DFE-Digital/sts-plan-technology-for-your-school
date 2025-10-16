@@ -119,12 +119,12 @@ public class CategoryLandingViewComponentViewBuilder(
             var recommendations = await _submissionService.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationReferences, establishmentId);
             var sortedRecommendations = recommendationChunks.SortByStatus(recommendations, sortType);
             var chunks = sortedRecommendations.Select(sr => new RecommendationChunkViewModel
-                {
-                    HeaderText = sr.HeaderText,
-                    LastUpdated = recommendations[sr.Id].DateCreated,
-                    Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
-                    SlugifiedLinkText = sr.SlugifiedLinkText
-                })
+            {
+                HeaderText = sr.HeaderText,
+                LastUpdated = recommendations[sr.Id].DateCreated,
+                Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
+                SlugifiedLinkText = sr.SlugifiedLinkText
+            })
                 .ToList();
 
             return new CategoryLandingSectionRecommendationsViewModel
