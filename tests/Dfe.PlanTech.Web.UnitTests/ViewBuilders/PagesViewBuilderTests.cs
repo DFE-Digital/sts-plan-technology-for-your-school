@@ -94,24 +94,60 @@ public class PagesViewBuilderTests
 
     // ---------- RouteBasedOnOrganisationTypeAsync ----------
     [Fact]
-    public async Task RouteBasedOnOrganisationType_Redirects_To_SelectSchool_For_Home_And_MAT()
+    public async Task RouteBasedOnOrganisationType_When_NoSchoolSelected_Then_RedirectsToSelectSchoolPage()
     {
+        // Arrange - A MAT user without a selected school, attempting to access the home page.
         // Home slug logic uses UrlConstants.HomePage.Replace("/", "")
         var homeSlug = UrlConstants.HomePage.Replace("/", ""); // usually ""
         var page = MakePage(homeSlug, isLanding: false);
 
         var contentful = Substitute.For<IContentfulService>();
-        var current = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUser>();
 
-        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: current);
-        current.IsMat.Returns(true);
+        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser);
+
+        // `CreateServiceUnderTest` sets defaults, so must override here:
+        currentUser.IsAuthenticated.Returns(true);
+        currentUser.IsMat.Returns(true);
+        currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
 
         var controller = new TestController();
 
+        // Act
         var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
 
+        // Assert
         var redirect = Assert.IsType<RedirectResult>(action);
         Assert.Equal(UrlConstants.SelectASchoolPage, redirect.Url);
+    }
+
+    [Fact]
+    public async Task RouteBasedOnOrganisationType_When_SchoolSelected_Then_ReturnsPageView()
+    {
+        // Arrange - A MAT user with a selected school, attempting to access the home page.
+        // Home slug logic uses UrlConstants.HomePage.Replace("/", "")
+        var homeSlug = UrlConstants.HomePage.Replace("/", ""); // usually ""
+        var page = MakePage(homeSlug, isLanding: false);
+
+        var contentful = Substitute.For<IContentfulService>();
+        var currentUser = Substitute.For<ICurrentUser>();
+
+        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser);
+
+        // `CreateServiceUnderTest` sets defaults, so must override here:
+        currentUser.IsAuthenticated.Returns(true);
+        currentUser.IsMat.Returns(true);
+        currentUser.GroupSelectedSchoolUrn.Returns("123456");
+
+        var controller = new TestController();
+
+        // Act
+        var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal("Page", view.ViewName);
+        var vm = Assert.IsType<PageViewModel>(view.Model);
     }
 
     [Fact]
