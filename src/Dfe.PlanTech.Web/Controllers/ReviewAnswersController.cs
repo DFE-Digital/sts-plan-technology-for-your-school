@@ -20,7 +20,7 @@ public class ReviewAnswersController(
     private readonly IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
     private readonly IReviewAnswersViewBuilder _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
 
-    [HttpGet($"{{categorySlug}}/{{sectionSlug}}/{UrlConstants.CheckAnswersSlug}")]
+    [HttpGet($"{{categorySlug}}/{{sectionSlug}}/{UrlConstants.CheckAnswersSlug}", Name = UrlConstants.CheckAnswersSlug)]
     public async Task<IActionResult> CheckAnswers(string categorySlug, string sectionSlug, [FromQuery] bool? isChangeAnswersFlow)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));

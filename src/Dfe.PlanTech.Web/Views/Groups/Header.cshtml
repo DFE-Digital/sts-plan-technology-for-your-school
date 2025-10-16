@@ -4,18 +4,7 @@
 	<div class="govuk-width-container">
 		<div class="govuk-grid-row">
 			<partial name="BetaHeader" />
-			@{
-				var schoolName = ViewData["SelectedEstablishmentName"] as string;
-			}
 			<div class="dfe-page-header-inner">
-				<div class="govuk-grid-column">
-					<div class="school-ident">
-						<div class="school-ident-content">
-							<h2 class="govuk-heading-s school-ident-name">@schoolName</h2>
-							<a class="govuk-link" href="/groups/select-a-school">Change school</a>
-						</div>
-					</div>
-				</div>
 				<div class="govuk-grid-column-two-thirds">
 					<h1 class="govuk-heading-xl">@Model.HeaderText</h1>
 				</div>

@@ -8,12 +8,13 @@ public interface ICurrentUser
     string? Email { get; }
     int? EstablishmentId { get; }
     string? GroupSelectedSchoolUrn { get; }
+    string? GroupSelectedSchoolName  { get; }
     bool IsAuthenticated { get; }
     bool IsMat { get; }
     int? MatEstablishmentId { get; }
     EstablishmentModel Organisation { get; }
     int? UserId { get; }
-    string? GetGroupSelectedSchool();
+    (string Urn, string? Name)? GetGroupSelectedSchool();
     bool IsInRole(string role);
-    void SetGroupSelectedSchool(string selectedSchoolUrn);
+    void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName);
 }

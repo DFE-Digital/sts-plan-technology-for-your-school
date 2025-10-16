@@ -22,7 +22,7 @@ public class QuestionsController : BaseController<QuestionsController>
         _questionsViewBuilder = questionsViewBuilder ?? throw new ArgumentNullException(nameof(questionsViewBuilder));
     }
 
-    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}")]
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}", Name = "GetQuestionBySlug")]
     public async Task<IActionResult> GetQuestionBySlug(string categorySlug, string sectionSlug, string questionSlug, string? returnTo)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
