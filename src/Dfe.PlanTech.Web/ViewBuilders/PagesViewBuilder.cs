@@ -27,7 +27,8 @@ public class PagesViewBuilder(
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, PageEntry page)
     {
-        if (string.Equals(page.Slug, UrlConstants.HomePage.Replace("/", "")) && CurrentUser.IsMat)
+        var isMatUserWhoNeedsToSelectSchool = CurrentUser.IsMat && CurrentUser.GroupSelectedSchoolUrn is null;
+        if (isMatUserWhoNeedsToSelectSchool)
         {
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
