@@ -86,4 +86,40 @@ public sealed class DsiOrganisationModel
             yield return Id.ToString();
         }
     }
+
+
+    // Extracted from DSI Manage
+    public static readonly IDictionary<string, string> DsiOrganisationCategoryMappings = new Dictionary<string, string>()
+    {
+        { "052", "Billing Authority" },
+        { "001", "Establishment" },
+        { "011", "Government" },
+        { "002", "Local Authority" },
+        { "010", "Multi-Academy Trust" },
+        { "012", "Other GIAS Stakeholder" },
+        { "003", "Other Legacy Organisations" },
+        { "008", "Other Stakeholders" },
+        { "051", "PIMS Training Providers" },
+        { "014", "Secure Single-Academy Trust" },
+        { "013", "Single-Academy Trust" },
+        { "050", "Software Suppliers" },
+        { "009", "Training Providers" },
+        { "053", "Youth Custody Service" }
+    };
+
+    // Extracted from DSI Manage
+    public static readonly IDictionary<string, string> DsiOrganisationStatusCodeMappings = new Dictionary<string, string>()
+    {
+        { "0", "Hidden" },
+        { "1", "Open" },
+        { "2", "Closed" },
+        { "3", "Proposed to close" },
+        { "4", "Proposed to open" },
+        { "5", "Dissolved" },
+        { "6", "In Liquidation" },
+        { "8", "Locked Duplicate" },
+        { "9", "Created in error" },
+        { "10", "Locked Restructure" }
+    };
+
 }
