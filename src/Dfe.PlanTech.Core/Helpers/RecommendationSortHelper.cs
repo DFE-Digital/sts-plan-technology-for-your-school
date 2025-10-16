@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Core.Helpers
         {
             return Enum.GetValues(typeof(RecommendationSort))
                 .Cast<RecommendationSort?>()
-                .FirstOrDefault(s => string.Equals(sortOrder, s!.GetDescription(), StringComparison.InvariantCultureIgnoreCase))
+                .FirstOrDefault(s => string.Equals(sortOrder, s!.GetDisplayName(), StringComparison.InvariantCultureIgnoreCase))
                 ?? RecommendationSort.Default;
         }
     }
