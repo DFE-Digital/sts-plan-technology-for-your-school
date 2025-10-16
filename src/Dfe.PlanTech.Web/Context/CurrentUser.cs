@@ -25,7 +25,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
     public bool IsAuthenticated => GetIsAuthenticated();
 
-    public bool IsMat => true;
+    public bool IsMat => Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;
 
     public int? MatEstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
 
