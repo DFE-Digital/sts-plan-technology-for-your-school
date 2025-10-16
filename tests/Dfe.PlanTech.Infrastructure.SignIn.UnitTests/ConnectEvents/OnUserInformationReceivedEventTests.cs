@@ -2,7 +2,6 @@
 using System.Security.Claims;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
 using Microsoft.AspNetCore.Authentication;
