@@ -4,6 +4,12 @@ using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Core.Models;
 
+/// <summary>
+/// Represents the JSON structure return by DSI as part of the OIDC claim `organisation`.
+/// TODO: Consider splitting out to dedicated DTO to model the JSON string and a domain model for use within the application.
+/// Note: Previously named `EstablishmentModel` and appears to have been used in many places which assume it represents an establishment.
+/// Work remains to fully decouple the concept of "organisation" (which may be an establishment or a group) from "establishment".
+/// </summary>
 public sealed class DsiOrganisationModel
 {
     public const string InvalidEstablishmentErrorMessage = $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
