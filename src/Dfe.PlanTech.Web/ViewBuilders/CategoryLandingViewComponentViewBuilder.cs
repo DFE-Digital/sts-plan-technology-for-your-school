@@ -99,7 +99,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
     private async Task<CategoryLandingSectionRecommendationsViewModel> GetCategoryLandingSectionRecommendations(
         int establishmentId,
-        QuestionnaireSectionEntry section, 
+        QuestionnaireSectionEntry section,
         RecommendationSort sortType
     )
     {
