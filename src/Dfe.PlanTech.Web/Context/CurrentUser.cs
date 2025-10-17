@@ -29,8 +29,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
     public int? MatEstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
 
-    public EstablishmentModel Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation()
-            ?? throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
+    public EstablishmentModel? Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
 
     public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 

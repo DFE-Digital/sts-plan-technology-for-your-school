@@ -12,7 +12,7 @@ public interface ICurrentUser
     bool IsAuthenticated { get; }
     bool IsMat { get; }
     int? MatEstablishmentId { get; }
-    EstablishmentModel Organisation { get; }
+    EstablishmentModel? Organisation { get; }
     int? UserId { get; }
     (string Urn, string? Name)? GetGroupSelectedSchool();
     bool IsInRole(string role);
