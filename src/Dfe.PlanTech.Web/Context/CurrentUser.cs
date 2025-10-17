@@ -79,7 +79,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
                 return (school.Urn, school.Name);
             }
         }
-        catch (System.Text.Json.JsonException ex)
+        catch (System.Text.Json.JsonException)
         {
             return null;
         }
