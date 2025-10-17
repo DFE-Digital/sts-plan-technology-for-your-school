@@ -59,6 +59,8 @@ public class PagesViewBuilderTests
         currentUser.IsMat.Returns(false);
         currentUser.IsAuthenticated.Returns(true);
         currentUser.Organisation.Returns(new EstablishmentModel { Name = "Acme Academy" });
+        currentUser.ActiveEstablishmentName.Returns("Acme Academy");
+        currentUser.ActiveEstablishmentUrn.Returns("123456");
 
         return new PagesViewBuilder(logger, contact, errors, contentful, establishmentService, currentUser);
     }
@@ -226,7 +228,8 @@ public class PagesViewBuilderTests
         Assert.Equal("Page", view.ViewName);
 
         var vm = Assert.IsType<PageViewModel>(view.Model);
-        Assert.Equal("Acme Academy", vm.OrganisationName);
+        Assert.Equal("Acme Academy", vm.ActiveEstablishmentName);
+        Assert.Equal("123456", vm.ActiveEstablishmentUrn);
         Assert.Equal("About Us", controller.ViewData["Title"]); // processed title
         Assert.True(vm.DisplayBlueBanner); // default
     }
@@ -277,7 +280,8 @@ public class PagesViewBuilderTests
 
         var view = Assert.IsType<ViewResult>(action);
         var vm = Assert.IsType<PageViewModel>(view.Model);
-        Assert.Null(vm.OrganisationName);
+        Assert.Null(vm.ActiveEstablishmentName);
+        Assert.Null(vm.ActiveEstablishmentUrn);
     }
 
     // ---------- BuildNotFoundViewModel ----------

@@ -17,17 +17,19 @@ namespace Dfe.PlanTech.Web.UnitTests.Handlers;
 
 public class UserJourneyMissingContentExceptionHandlerTests
 {
-    private static (CurrentUser user, DefaultHttpContext http) MakeCurrentUser(int? establishmentId)
+    private static (CurrentUser currentUser, HttpContext http) MakeCurrentUser(int? establishmentId = null)
     {
         var http = new DefaultHttpContext();
-        var identity = new ClaimsIdentity("test");
+        var identity = new ClaimsIdentity(authenticationType: "test");
+
         if (establishmentId.HasValue)
         {
             identity.AddClaim(new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, establishmentId.Value.ToString()));
         }
         http.User = new ClaimsPrincipal(identity);
         var accessor = new HttpContextAccessor { HttpContext = http };
-        return (new CurrentUser(accessor), http);
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        return (new CurrentUser(accessor, establishmentService), http);
     }
 
     private static Controller MakeController(HttpContext http)

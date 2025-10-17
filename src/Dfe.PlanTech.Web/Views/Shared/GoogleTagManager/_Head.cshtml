@@ -13,7 +13,7 @@
 
 	if (isAuthenticated)
 	{
-		var establishmentReference = CurrentUser.Organisation?.Reference ?? "Unknown";
+		var establishmentReference = CurrentUser.ActiveEstablishmentReference ?? "Unknown";
 		var establishmentType = CurrentUser.IsMat ? "MAT" : "School";
 		var userDsiReference = CurrentUser.DsiReference;
 

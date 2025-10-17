@@ -49,7 +49,7 @@ public class GroupsViewBuilder(
         var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, establishmentId);
 
         var groupName = CurrentUser.Organisation?.Name;
-        var title = groupName;
+        var title = groupName ?? "Your organisation";
         List<ContentfulEntry> content = selectASchoolPageContent?.Content ?? [];
 
         string totalSections = categories.Sum(category => category.Sections.Count).ToString();

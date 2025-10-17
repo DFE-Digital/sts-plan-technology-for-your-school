@@ -19,10 +19,13 @@
             await Html.RenderPartialAsync("Components/PageComponentFactory", content);
         }
 
-        @if (Model.Page.DisplayOrganisationName)
-        {
-            <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.OrganisationName</span>
-        }
+        <span class="govuk-caption-xl govuk-!-margin-top-5">
+            @Model.ActiveEstablishmentName
+            @if (!string.IsNullOrEmpty(Model.ActiveEstablishmentUrn))
+            {
+                <small>(@Model.ActiveEstablishmentUrn)</small>
+            }
+        </span>
 
         @if (Model.Page.Title != null)
         {
@@ -50,7 +53,13 @@ else
 
     if (Model.Page.DisplayOrganisationName)
     {
-        <span class="govuk-caption-xl govuk-!-margin-top-5">@Model.OrganisationName</span>
+        <span class="govuk-caption-xl govuk-!-margin-top-5">
+            @Model.ActiveEstablishmentName
+            @if (!string.IsNullOrEmpty(Model.ActiveEstablishmentUrn))
+            {
+                <small>(@Model.ActiveEstablishmentUrn)</small>
+            }
+        </span>
     }
 
     if (Model.Page.Title != null)

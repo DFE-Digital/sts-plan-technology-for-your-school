@@ -1,10 +1,12 @@
 ﻿using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text.Json;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context;
 using Microsoft.AspNetCore.Http;
+using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
 
@@ -26,7 +28,8 @@ public class CurrentUserTests
         ctx.User = principal;
 
         var accessor = new HttpContextAccessor { HttpContext = ctx };
-        var sut = new CurrentUser(accessor);
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var sut = new CurrentUser(accessor, establishmentService);
         return (sut, ctx);
     }
 
@@ -37,7 +40,15 @@ public class CurrentUserTests
     [Fact]
     public void Ctor_Throws_When_ContextAccessor_Null()
     {
-        Assert.Throws<ArgumentNullException>(() => new CurrentUser(null!));
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        Assert.Throws<ArgumentNullException>(() => new CurrentUser(null!, establishmentService));
+    }
+
+    [Fact]
+    public void Ctor_Throws_When_EstablishmentService_Null()
+    {
+        var accessor = new HttpContextAccessor();
+        Assert.Throws<ArgumentNullException>(() => new CurrentUser(accessor, null!));
     }
 
     // ---------- DsiReference ----------
@@ -191,7 +202,7 @@ public class CurrentUserTests
 
         var ctx = new DefaultHttpContext { User = principal };
         var accessor = new HttpContextAccessor { HttpContext = ctx };
-        var sut = new CurrentUser(accessor);
+        var sut = new CurrentUser(accessor, Substitute.For<IEstablishmentService>());
 
         Assert.True(sut.IsInRole("Admin"));
         Assert.False(sut.IsInRole("Other"));

@@ -70,7 +70,8 @@ public class PagesViewBuilder(
             }
             else
             {
-                viewModel.OrganisationName = CurrentUser.Organisation?.Name;
+                viewModel.ActiveEstablishmentName = CurrentUser.ActiveEstablishmentName;
+                viewModel.ActiveEstablishmentUrn = CurrentUser.ActiveEstablishmentUrn;
             }
         }
 
