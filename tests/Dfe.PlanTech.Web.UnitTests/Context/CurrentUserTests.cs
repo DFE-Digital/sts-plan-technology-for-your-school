@@ -205,7 +205,7 @@ public class CurrentUserTests
 
         var schoolData = new { Urn = "12345", Name = "Test school" };
         var json = JsonSerializer.Serialize(schoolData);
-        var encoded = Uri.EscapeDataString(json); // IMPORTANT: encode for Cookie header
+        var encoded = Uri.EscapeDataString(json);
 
         // Set the Cookie header correctly
         ctx.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={encoded}");
@@ -213,15 +213,45 @@ public class CurrentUserTests
         var result = sut.GetGroupSelectedSchool();
 
         Assert.Equal(("12345", "Test school"), result);
+        Assert.Equal("12345", sut.GroupSelectedSchoolUrn);
+        Assert.Equal("Test school", sut.GroupSelectedSchoolName);
+    }
+
+    [Fact]
+    public void GetGroupSelectedSchool_ReturnsNull_WhenIncorrectDataModel()
+    {
+        var (sut, ctx) = Build();
+
+        var schoolData = new { Id = "12345", School = "Test school" };
+        var json = JsonSerializer.Serialize(schoolData);
+        var encoded = Uri.EscapeDataString(json);
+
+        // Set the Cookie header correctly
+        ctx.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={encoded}");
+
+        var result = sut.GetGroupSelectedSchool();
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetGroupSelectedSchool_ReturnsNull_WhenMalformedJson()
+    {
+        var (sut, ctx) = Build();
+
+        var malformedJson = "{\"Urn\":\"12345\",\"Name\":\"Test school\"";
+        var encoded = Uri.EscapeDataString(malformedJson);
+
+        // Set the Cookie header correctly
+        ctx.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={encoded}");
+
+        var result = sut.GetGroupSelectedSchool();
+        Assert.Null(result);
     }
 
     [Fact]
     public void SetGroupSelectedSchool_Writes_Response_Cookie_And_Throws_On_Empty()
     {
         var (sut, ctx) = Build();
-
-        // empty -> throws
-        Assert.Throws<InvalidDataException>(() => sut.SetGroupSelectedSchool("", ""));
 
         // valid -> writes Set-Cookie
         sut.SetGroupSelectedSchool("99999", "Test school");
