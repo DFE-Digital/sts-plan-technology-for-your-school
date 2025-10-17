@@ -85,7 +85,6 @@ public class RecommendationsViewBuilder(
             SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
             StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
             StatusOptions = Enum.GetValues<RecommendationStatus>()
-                .Cast<RecommendationStatus>()
                 .ToDictionary(
                     key => key.GetDisplayName(),
                     key => key.GetDisplayName()
