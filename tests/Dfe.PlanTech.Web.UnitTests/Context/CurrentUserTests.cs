@@ -7,6 +7,7 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
@@ -30,7 +31,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = ctx };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var sut = new CurrentUser(accessor, establishmentService);
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
         return (sut, ctx);
     }
 
@@ -42,14 +44,16 @@ public class CurrentUserTests
     public void Ctor_Throws_When_ContextAccessor_Null()
     {
         var establishmentService = Substitute.For<IEstablishmentService>();
-        Assert.Throws<ArgumentNullException>(() => new CurrentUser(null!, establishmentService));
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        Assert.Throws<ArgumentNullException>(() => new CurrentUser(null!, establishmentService, logger));
     }
 
     [Fact]
     public void Ctor_Throws_When_EstablishmentService_Null()
     {
         var accessor = new HttpContextAccessor();
-        Assert.Throws<ArgumentNullException>(() => new CurrentUser(accessor, null!));
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        Assert.Throws<ArgumentNullException>(() => new CurrentUser(accessor, null!, logger));
     }
 
     // ---------- DsiReference ----------
@@ -295,7 +299,7 @@ public class CurrentUserTests
 
         var ctx = new DefaultHttpContext { User = principal };
         var accessor = new HttpContextAccessor { HttpContext = ctx };
-        var sut = new CurrentUser(accessor, Substitute.For<IEstablishmentService>());
+        var sut = new CurrentUser(accessor, Substitute.For<IEstablishmentService>(), Substitute.For<ILogger<CurrentUser>>());
 
         Assert.True(sut.IsInRole("Admin"));
         Assert.False(sut.IsInRole("Other"));

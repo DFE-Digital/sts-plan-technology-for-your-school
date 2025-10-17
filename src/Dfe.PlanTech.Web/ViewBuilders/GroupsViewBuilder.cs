@@ -29,7 +29,9 @@ public class GroupsViewBuilder(
 
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
-        var establishmentId = GetActiveEstablishmentIdOrThrowException();
+        // Get the user's organisation ID (the MAT/group), not the active establishment
+        // At this point, the user hasn't selected a school yet
+        var establishmentId = GetUserEstablishmentIdOrThrowException();
 
         var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
 

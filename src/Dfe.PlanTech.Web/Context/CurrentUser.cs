@@ -5,14 +5,16 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Web.Context;
 
-public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentService establishmentService) : ICurrentUser
+public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentService establishmentService, ILogger<CurrentUser> logger) : ICurrentUser
 {
     private readonly IHttpContextAccessor _contextAccessor =
         contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
     private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly ILogger<CurrentUser> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private SqlEstablishmentDto? _cachedSelectedSchool;
     private bool _selectedSchoolLoaded;
 
@@ -79,9 +81,9 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
             throw new InvalidDataException("No Urn for selection");
         }
 
-        _contextAccessor.HttpContext?.Response.Cookies.Delete("SelectedSchoolUrn");
+        _contextAccessor.HttpContext?.Response.Cookies.Delete(CookieConstants.SelectedSchoolUrn);
 
-        _contextAccessor.HttpContext?.Response.Cookies.Append("SelectedSchoolUrn", selectedSchoolUrn, new CookieOptions
+        _contextAccessor.HttpContext?.Response.Cookies.Append(CookieConstants.SelectedSchoolUrn, selectedSchoolUrn, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -98,7 +100,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
         var httpContext = _contextAccessor.HttpContext;
 
         if (httpContext != null &&
-            httpContext.Request.Cookies.TryGetValue("SelectedSchoolUrn", out var selectedSchoolUrn))
+            httpContext.Request.Cookies.TryGetValue(CookieConstants.SelectedSchoolUrn, out var selectedSchoolUrn))
         {
             return selectedSchoolUrn;
         }
@@ -129,9 +131,10 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
                 .GetAwaiter()
                 .GetResult();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             // Log warning and fall back to user's organisation details
+            _logger.LogWarning(ex, "Failed to get establishment details for URN {GroupSelectedSchoolUrn}. Exception: {Message}", GroupSelectedSchoolUrn, ex.Message);
             _cachedSelectedSchool = null;
         }
 
