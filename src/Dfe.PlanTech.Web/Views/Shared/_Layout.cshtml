@@ -20,7 +20,7 @@
     var hasInner = IsSectionDefined("DfePageHeaderInner");
     var hasPageHeader = hasOuter || hasInner;
 
-    bool showChangeSchool = false;
+    var showChangeSchool = false;
 
     @* Conditionally show the change school partial on all pages except for specific pages in the exclusion list for MAT's*@
     if (CurrentUser.IsAuthenticated && CurrentUser.IsMat)
@@ -28,11 +28,24 @@
         var controller = (string?)ViewContext.RouteData.Values["controller"] ?? "";
         var action = (string?)ViewContext.RouteData.Values["action"] ?? "";
 
+        @* Controller actions where change-school option won't be shown *@
         var excluded = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
         {
-            { "ReviewAnswers", new HashSet<string>(new[] { nameof(ReviewAnswersController.CheckAnswers) }, StringComparer.OrdinalIgnoreCase) },
-            { "Questions",     new HashSet<string>(new[] { nameof(QuestionsController.GetQuestionBySlug) }, StringComparer.OrdinalIgnoreCase) },
-            { "Groups",        new HashSet<string>(new[] { GroupsController.GetSelectASchoolAction }, StringComparer.OrdinalIgnoreCase) },
+            {
+                "ReviewAnswers", new HashSet<string>(
+                    [nameof(ReviewAnswersController.CheckAnswers)],
+                    StringComparer.OrdinalIgnoreCase)
+            },
+            {
+                "Questions", new HashSet<string>(
+                    [QuestionsController.GetQuestionBySlugAction, nameof(QuestionsController.SubmitAnswer)],
+                    StringComparer.OrdinalIgnoreCase)
+            },
+            {
+                "Groups", new HashSet<string>(
+                    [GroupsController.GetSelectASchoolAction],
+                    StringComparer.OrdinalIgnoreCase)
+            },
         };
 
         showChangeSchool = !(excluded.TryGetValue(controller, out var actions) && actions.Contains(action));
@@ -50,7 +63,7 @@
         <section class="dfe-page-header">
             <div class="govuk-width-container">
                 <div class="govuk-grid-row">
-                    <partial name="BetaHeader" />
+                    <partial name="BetaHeader"/>
                     <div class="govuk-grid-column-two-thirds">
                         @if (hasOuter)
                         {
@@ -58,7 +71,7 @@
                         }
                         @if (showChangeSchool)
                         {
-                            <partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
+                            <partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName"/>
                         }
                         @if (hasInner)
                         {
@@ -71,13 +84,12 @@
             </div>
         </section>
     }
-
 }
 
 @section BeforeContent {
     @if (!hasPageHeader)
     {
-        <partial name="BetaHeader" />
+        <partial name="BetaHeader"/>
     }
 
     <partial name="_BeforeContent"/>
@@ -85,7 +97,7 @@
 
     @if (!hasPageHeader && showChangeSchool)
     {
-        <partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
+        <partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName"/>
     }
 }
 
