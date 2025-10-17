@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -10,9 +11,9 @@ public class CategoryLandingViewComponent(
 {
     private readonly ICategoryLandingViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
-    public async Task<IViewComponentResult> InvokeAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName)
+    public async Task<IViewComponentResult> InvokeAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName, string sortOrder = RecommendationConstants.DefaultSortOrder)
     {
-        var viewModel = await _viewBuilder.BuildViewModelAsync(category, slug, sectionName);
+        var viewModel = await _viewBuilder.BuildViewModelAsync(category, slug, sectionName, sortOrder);
         return View(viewModel);
     }
 }

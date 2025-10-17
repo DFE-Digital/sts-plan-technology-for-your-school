@@ -1,6 +1,6 @@
-﻿using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -301,7 +301,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var recommendationHistory = DbContext.EstablishmentRecommendationHistories.FirstOrDefault(erh => erh.RecommendationId == recommendation.Id);
         Assert.NotNull(recommendationHistory);
-        Assert.Equal(RecommendationConstants.CompletedKey, recommendationHistory.NewStatus);
+        Assert.Equal(RecommendationStatus.Complete.GetDisplayName(), recommendationHistory.NewStatus);
     }
 
     [Fact]

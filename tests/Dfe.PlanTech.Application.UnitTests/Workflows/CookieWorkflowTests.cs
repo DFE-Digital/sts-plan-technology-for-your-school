@@ -24,7 +24,7 @@ public class CookieWorkflowTests
     {
         var part = setCookieHeader.Split(';')
             .FirstOrDefault(p => p.TrimStart()
-                .StartsWith("expires=", StringComparison.OrdinalIgnoreCase));
+                .StartsWith("expires=", StringComparison.InvariantCultureIgnoreCase));
         if (part is null)
             return null;
 
@@ -86,8 +86,8 @@ public class CookieWorkflowTests
         Assert.True(expires!.Value < DateTimeOffset.UtcNow, "Expiry should be in the past");
 
         // flags
-        Assert.Contains("httponly", header, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("secure", header, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("httponly", header, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Contains("secure", header, StringComparison.InvariantCultureIgnoreCase);
     }
 
     [Fact]

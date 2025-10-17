@@ -39,6 +39,7 @@ public class RecommendationWorkflow(
         var recommendationHistoryEntities = await establishmentRecommendationHistoryRepository.GetRecommendationHistoryByEstablishmentIdAsync(establishmentId);
 
         return recommendationHistoryEntities
+            .Where(rhe => recommendationIdToContentfulReferenceDictionary.ContainsKey(rhe.RecommendationId))
             .GroupBy(rhe => rhe.RecommendationId)
             .ToDictionary(
                 group => recommendationIdToContentfulReferenceDictionary[group.Key],

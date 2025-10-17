@@ -49,7 +49,7 @@ public class CookieServiceTests
     private static DateTimeOffset? GetExpires(DefaultHttpContext httpContext)
     {
         var header = GetSetCookie(httpContext).Last(s => s.Contains($"{CookieService.CookieKey}="));
-        var expiresPart = header.Split(';').FirstOrDefault(p => p.TrimStart().StartsWith("expires=", StringComparison.OrdinalIgnoreCase));
+        var expiresPart = header.Split(';').FirstOrDefault(p => p.TrimStart().StartsWith("expires=", StringComparison.InvariantCultureIgnoreCase));
         if (expiresPart is null)
         {
             return null;
@@ -96,8 +96,8 @@ public class CookieServiceTests
         Assert.All(headers, header => Assert.Contains(CookieService.CookieKey, header, StringComparison.Ordinal));
 
         var last = headers.Last();
-        Assert.Contains("httponly", last, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("secure", last, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("httponly", last, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Contains("secure", last, StringComparison.InvariantCultureIgnoreCase);
 
         var exp = GetExpires(httpContext);
         Assert.NotNull(exp);
