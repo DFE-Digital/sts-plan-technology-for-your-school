@@ -37,9 +37,9 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
     public void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName)
     {
-        if (string.IsNullOrEmpty(selectedSchoolUrn))
+        if (string.IsNullOrEmpty(selectedSchoolUrn) || string.IsNullOrEmpty(selectedSchoolName))
         {
-            throw new InvalidDataException("No Urn for selection");
+            throw new InvalidDataException("No Urn/School name set for selection.");
         }
 
         var schoolData = new SelectedSchoolCookieData
@@ -60,7 +60,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
         });
     }
 
-    public (string Urn, string? Name)? GetGroupSelectedSchool()
+    public (string Urn, string Name)? GetGroupSelectedSchool()
     {
         var httpContext = _contextAccessor.HttpContext;
 
@@ -74,14 +74,14 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
         try
         {
             var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieData>(cookieValue);
-            if (school != null && !string.IsNullOrEmpty(school.Urn))
+            if (school != null && (!string.IsNullOrEmpty(school.Urn) && !string.IsNullOrEmpty(school.Name)))
             {
                 return (school.Urn, school.Name);
             }
         }
-        catch
+        catch (System.Text.Json.JsonException ex)
         {
-            return (cookieValue, null);
+            return null;
         }
 
         return null;

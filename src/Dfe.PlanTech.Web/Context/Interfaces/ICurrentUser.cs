@@ -14,7 +14,7 @@ public interface ICurrentUser
     int? MatEstablishmentId { get; }
     EstablishmentModel? Organisation { get; }
     int? UserId { get; }
-    (string Urn, string? Name)? GetGroupSelectedSchool();
+    (string Urn, string Name)? GetGroupSelectedSchool();
     bool IsInRole(string role);
     void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName);
 }

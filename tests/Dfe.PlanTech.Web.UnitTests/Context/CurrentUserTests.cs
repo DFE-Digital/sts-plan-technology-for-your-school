@@ -278,7 +278,7 @@ public class CurrentUserTests
         // Act & Assert
         var ex = Assert.Throws<InvalidDataException>(() => sut.SetGroupSelectedSchool(urn!, "Test School"));
 
-        Assert.Equal("No Urn for selection", ex.Message);
+        Assert.Equal("No Urn/School name set for selection.", ex.Message);
     }
 
 
