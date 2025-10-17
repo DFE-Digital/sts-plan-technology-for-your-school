@@ -25,10 +25,10 @@ public class UserJourneyMissingContentExceptionHandler(
     {
         logger.LogError(exception, "Handling errored user journey for section {Section}", exception.Section.Name);
 
-        var establishmentId = _currentUser.EstablishmentId
-            ?? throw new InvalidDataException($"Current user has no {nameof(_currentUser.EstablishmentId)}");
+        var activeEstablishmentId = _currentUser.ActiveEstablishmentId
+            ?? throw new InvalidDataException($"Current user has no {nameof(_currentUser.ActiveEstablishmentId)}");
 
-        await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, exception.Section.Id);
+        await _submissionService.SetSubmissionInaccessibleAsync(activeEstablishmentId, exception.Section.Id);
 
         controller.TempData[ErrorMessageTempDataKey] = _configuration[ErrorMessageConfigKey];
 

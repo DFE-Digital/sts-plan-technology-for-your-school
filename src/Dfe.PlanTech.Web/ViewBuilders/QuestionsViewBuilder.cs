@@ -46,7 +46,7 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = GetActiveEstablishmentIdOrThrowException();
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
@@ -141,7 +141,7 @@ public class QuestionsViewBuilder(
 
     public async Task<IActionResult> RouteToNextUnansweredQuestion(Controller controller, string categorySlug, string sectionSlug)
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = GetActiveEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
 
         try
@@ -172,7 +172,7 @@ public class QuestionsViewBuilder(
         string categorySlug,
         string sectionSlug)
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = GetActiveEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
@@ -204,7 +204,7 @@ public class QuestionsViewBuilder(
         string categorySlug,
         string sectionSlug)
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = GetActiveEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
 
@@ -222,7 +222,7 @@ public class QuestionsViewBuilder(
         string categorySlug,
         string sectionSlug)
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = GetActiveEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
 
@@ -245,8 +245,8 @@ public class QuestionsViewBuilder(
     )
     {
         var userId = GetUserIdOrThrowException();
-        var establishmentId = GetEstablishmentIdOrThrowException();
-        var matEstablishmentId = CurrentUser.MatEstablishmentId;
+        var activeEstablishmentId = GetActiveEstablishmentIdOrThrowException();
+        var userOrganisationId = CurrentUser.UserOrganisationId;
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
@@ -266,7 +266,7 @@ public class QuestionsViewBuilder(
 
         try
         {
-            await _submissionService.SubmitAnswerAsync(userId, establishmentId, matEstablishmentId, answerViewModel.ToModel());
+            await _submissionService.SubmitAnswerAsync(userId, activeEstablishmentId, userOrganisationId, answerViewModel.ToModel());
         }
         catch (Exception e)
         {
@@ -276,7 +276,7 @@ public class QuestionsViewBuilder(
             return controller.View(QuestionView, viewModel);
         }
 
-        var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
+        var nextQuestion = await _questionService.GetNextUnansweredQuestion(activeEstablishmentId, section);
         if (nextQuestion is not null)
         {
             return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestion.Slug, returnTo);

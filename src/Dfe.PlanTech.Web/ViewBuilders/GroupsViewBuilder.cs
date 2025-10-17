@@ -31,7 +31,7 @@ public class GroupsViewBuilder(
 
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = GetActiveEstablishmentIdOrThrowException();
 
         var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
 
@@ -48,7 +48,7 @@ public class GroupsViewBuilder(
 
         var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, establishmentId);
 
-        var groupName = CurrentUser.Organisation?.Name;
+        var groupName = CurrentUser.UserOrganisationName;
         var title = groupName ?? "Your organisation";
         List<ContentfulEntry> content = selectASchoolPageContent?.Content ?? [];
 
@@ -79,7 +79,7 @@ public class GroupsViewBuilder(
 
         await _establishmentService.RecordGroupSelection(
             userDsiReference,
-            CurrentUser.EstablishmentId,
+            CurrentUser.UserOrganisationId,
             CurrentUser.Organisation,
             selectedEstablishmentUrn,
             selectedEstablishmentName

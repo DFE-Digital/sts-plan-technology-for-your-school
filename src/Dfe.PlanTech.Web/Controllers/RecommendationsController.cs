@@ -79,7 +79,7 @@ public class RecommendationsController(
         }
 
 
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = GetActiveEstablishmentIdOrThrowException();
         var userId = GetUserIdOrThrowException();
 
         var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
@@ -107,23 +107,30 @@ public class RecommendationsController(
         return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
     }
 
-    private int GetEstablishmentIdOrThrowException()
+
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns>The PlanTech database ID for the user's organisation (e.g. establishment, or establishment group)</returns>
+    /// <exception cref="InvalidDataException"></exception>
+    protected int GetUserEstablishmentIdOrThrowException()
     {
-        var establishmentId = _currentUser.EstablishmentId;
-        if (establishmentId == null)
-        {
-            throw new InvalidOperationException("Establishment ID is required but not available");
-        }
-        return establishmentId.Value;
+        return _currentUser.UserOrganisationId ?? throw new InvalidDataException(nameof(_currentUser.UserOrganisationId));
     }
 
-    private int GetUserIdOrThrowException()
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns>The PlanTech database ID for the selected establishment (e.g. an establishment that a MAT user has selected)</returns>
+    /// <exception cref="InvalidDataException"></exception>
+    protected int GetActiveEstablishmentIdOrThrowException()
     {
-        var userId = _currentUser.UserId;
-        if (userId == null)
-        {
-            throw new InvalidOperationException("User ID is required but not available");
-        }
-        return userId.Value;
+        return _currentUser.ActiveEstablishmentId ?? throw new InvalidDataException(nameof(_currentUser.ActiveEstablishmentId));
+    }
+
+    protected int GetUserIdOrThrowException()
+    {
+        return _currentUser.UserId ?? throw new InvalidOperationException("User ID is required but not available");
     }
 }

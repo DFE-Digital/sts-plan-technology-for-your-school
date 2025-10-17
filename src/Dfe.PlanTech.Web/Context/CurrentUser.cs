@@ -58,6 +58,17 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
 
     public string? UserOrganisationReference => Organisation?.Reference;
 
+    public string? UserOrganisationTypeName => Organisation?.Type?.Name;
+
+    private static HashSet<string> OrganisationGroupCategories { get; } = new()
+    {
+        DsiConstants.MatOrganisationCategoryId,
+        // DsiConstants.SatOrganisationCategoryId,
+        // DsiConstants.SSatOrganisationCategoryId,
+    };
+    public bool UserOrganisationIsGroup => Organisation != null &&
+        OrganisationGroupCategories.Contains(Organisation.Category?.Id ?? string.Empty);
+
     public bool IsAuthenticated => GetIsAuthenticated();
 
     public bool IsMat => Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;

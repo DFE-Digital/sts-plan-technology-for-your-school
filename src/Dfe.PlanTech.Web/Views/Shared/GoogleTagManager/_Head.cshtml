@@ -14,7 +14,7 @@
 	if (isAuthenticated)
 	{
 		var establishmentReference = CurrentUser.ActiveEstablishmentReference ?? "Unknown";
-		var establishmentType = CurrentUser.IsMat ? "MAT" : "School";
+		var establishmentType = CurrentUser.UserOrganisationTypeName ?? "Unknown";
 		var userDsiReference = CurrentUser.DsiReference;
 
 		dataLayerObj = new

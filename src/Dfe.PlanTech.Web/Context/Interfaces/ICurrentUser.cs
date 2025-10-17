@@ -28,12 +28,14 @@ public interface ICurrentUser
     string? UserOrganisationUid { get; }
     Guid? UserOrganisationDsiId { get; }
     string? UserOrganisationReference { get; }
+    string? UserOrganisationTypeName { get; }
 
     bool IsAuthenticated { get; }
     bool IsMat { get; }
     int? MatEstablishmentId { get; }
     EstablishmentModel? Organisation { get; }
     int? UserId { get; }
+    bool UserOrganisationIsGroup { get; }
     string? GetGroupSelectedSchool();
     bool IsInRole(string role);
     void SetGroupSelectedSchool(string selectedSchoolUrn);

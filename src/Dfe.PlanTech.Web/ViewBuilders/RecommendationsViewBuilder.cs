@@ -41,7 +41,7 @@ public class RecommendationsViewBuilder(
         bool useChecklist
     )
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = GetActiveEstablishmentIdOrThrowException();
         var categoryHeaderText = await ContentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find category header text for slug {categorySlug}");
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
@@ -100,7 +100,7 @@ public class RecommendationsViewBuilder(
         bool useChecklist
     )
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = GetActiveEstablishmentIdOrThrowException();
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find category for slug {categorySlug}");
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -147,7 +147,7 @@ public class RecommendationsViewBuilder(
         string sectionSlug
     )
     {
-        _ = GetEstablishmentIdOrThrowException();
+        _ = GetActiveEstablishmentIdOrThrowException();
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
         var subtopicChunks = section.CoreRecommendations.ToList();
