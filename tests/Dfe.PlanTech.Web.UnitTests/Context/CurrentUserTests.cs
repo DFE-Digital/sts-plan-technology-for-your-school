@@ -146,16 +146,23 @@ public class CurrentUserTests
     }
 
     [Fact]
-    public void Organisation_Throws_When_Claim_Missing_And_IsMat_Also_Throws()
+    public void Organisation_When_ClaimsNotPresent_OrganisationIsNull()
     {
+        // Arrange - no Organisation claim
         var (sut, _) = Build();
 
-        var ex1 = Assert.Throws<InvalidDataException>(() => _ = sut.Organisation);
-        Assert.Equal("Could not parse user's Organisation claim", ex1.Message);
+        // Act / Assert
+        Assert.Null(sut.Organisation);
+    }
 
-        // Because the getter throws, IsMat will propagate that exception too
-        var ex2 = Assert.Throws<InvalidDataException>(() => _ = sut.IsMat);
-        Assert.Equal("Could not parse user's Organisation claim", ex2.Message);
+    [Fact]
+    public void Organisation_When_ClaimsNotPresent_Then_IsMatIsFalse()
+    {
+        // Arrange - no Organisation claim
+        var (sut, _) = Build();
+
+        // Act / Assert
+        Assert.False(sut.IsMat);
     }
 
     [Fact]
@@ -221,13 +228,4 @@ public class CurrentUserTests
         Assert.Contains("samesite=strict", setCookie.ToLowerInvariant());
     }
 
-    // ---------- EstablishmentModel via extension ----------
-
-    [Fact]
-    public void GetEstablishmentModel_Throws_When_Not_Present()
-    {
-        var (sut, _) = Build();
-        var ex = Assert.Throws<InvalidDataException>(() => sut.Organisation);
-        Assert.Equal("Could not parse user's Organisation claim", ex.Message);
-    }
 }
