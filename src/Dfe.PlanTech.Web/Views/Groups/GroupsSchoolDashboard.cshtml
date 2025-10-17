@@ -1,15 +1,6 @@
 ﻿@model GroupsSchoolDashboardViewModel
 
 @section DfePageHeaderInnerFullWidth {
-	<div class="govuk-grid-column">
-		<div class="school-ident">
-			<div class="school-ident-content">
-				<h2 class="govuk-heading-s school-ident-name">@Model.SchoolName</h2>
-				<a class="govuk-link" href="select-a-school">Change school</a>
-			</div>
-		</div>
-	</div>
-
 	<div class="govuk-grid-column-two-thirds">
 		<partial name="Components/PageComponentFactory" model="@Model.Title" />
 	</div>
