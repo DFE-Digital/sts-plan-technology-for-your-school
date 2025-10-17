@@ -86,7 +86,7 @@ public class CategoryLandingViewComponentViewBuilder(
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
-            var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sectionStatus, sortType);
+            var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sortType);
 
             yield return new CategoryLandingSectionViewModel(
                 section,
@@ -100,7 +100,6 @@ public class CategoryLandingViewComponentViewBuilder(
     private async Task<CategoryLandingSectionRecommendationsViewModel> GetCategoryLandingSectionRecommendations(
         int establishmentId,
         QuestionnaireSectionEntry section, 
-        SqlSectionStatusDto? sectionStatus, 
         RecommendationSort sortType
     )
     {

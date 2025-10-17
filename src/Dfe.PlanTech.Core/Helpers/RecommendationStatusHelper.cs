@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Core.Helpers
     {
         public static RecommendationStatus? GetRecommendationStatusEnumValue(this string recommendationStatus)
         {
-            return Enum.GetValues(typeof(RecommendationStatus))
+            return Enum.GetValues<RecommendationStatus>()
                 .Cast<RecommendationStatus?>()
                 .FirstOrDefault(rs => string.Equals(rs!.GetDisplayName(), recommendationStatus, StringComparison.InvariantCultureIgnoreCase));
         }

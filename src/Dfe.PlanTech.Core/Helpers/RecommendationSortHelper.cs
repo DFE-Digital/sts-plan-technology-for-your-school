@@ -7,7 +7,7 @@ namespace Dfe.PlanTech.Core.Helpers
     {
         public static RecommendationSort GetRecommendationSortEnumValue(this string sortOrder)
         {
-            return Enum.GetValues(typeof(RecommendationSort))
+            return Enum.GetValues<RecommendationSort>()
                 .Cast<RecommendationSort?>()
                 .FirstOrDefault(s => string.Equals(sortOrder, s!.GetDisplayName(), StringComparison.InvariantCultureIgnoreCase))
                 ?? RecommendationSort.Default;
