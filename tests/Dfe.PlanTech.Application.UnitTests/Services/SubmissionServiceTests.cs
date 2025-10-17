@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Models;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Services;
@@ -187,5 +188,126 @@ public class SubmissionServiceTests
 
         Assert.Equal(SubmissionStatus.CompleteNotReviewed, rd.Status);
         Assert.Null(rd.NextQuestion);
+    }
+
+    [Fact]
+    public async Task Routing_Next_Question_When_Status_InProgress()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var (section, _, _, _, _) = BuildSectionGraph();
+
+        var sub = SubmissionWithResponses(completed: false, maturity: "medium", ("1", "1"));
+        sub.Status = "InProgress";
+
+        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(44, section, false)
+           .Returns(sub);
+
+        // Act
+        var rd = await sut.GetSubmissionRoutingDataAsync(44, section, isCompletedSubmission: false);
+
+        // Assert
+        Assert.Equal(SubmissionStatus.InProgress, rd.Status);
+        Assert.NotNull(rd.NextQuestion);
+        Assert.Equal("2", rd.NextQuestion.Id);
+    }
+
+
+    [Fact]
+    public async Task GetSectionStatusesForSchoolAsync_Calls_Workflow_And_Returns_Result()
+    {
+        var sut = CreateServiceUnderTest();
+        var expected = new List<SqlSectionStatusDto> { new SqlSectionStatusDto() };
+
+        _submissionWorkflow.GetSectionStatusesAsync(123, Arg.Any<IEnumerable<string>>())
+            .Returns(expected);
+
+        var result = await sut.GetSectionStatusesForSchoolAsync(123, new[] { "sec1", "sec2" });
+
+        Assert.Same(expected, result);
+        await _submissionWorkflow.Received(1)
+            .GetSectionStatusesAsync(123, Arg.Is<IEnumerable<string>>(ids => ids.Contains("sec1") && ids.Contains("sec2")));
+    }
+
+    [Fact]
+    public async Task SetLatestSubmissionViewedAsync_Calls_Workflow()
+    {
+        var sut = CreateServiceUnderTest();
+
+        await sut.SetLatestSubmissionViewedAsync(123, "sec1");
+
+        await _submissionWorkflow.Received(1).SetLatestSubmissionViewedAsync(123, "sec1");
+    }
+
+    [Fact]
+    public async Task SubmitAnswerAsync_Calls_Workflow_And_Returns_Result()
+    {
+        var sut = CreateServiceUnderTest();
+        var expected = 42;
+        var model = new SubmitAnswerModel();
+
+        _submissionWorkflow.SubmitAnswer(1, 2, 3, model).Returns(expected);
+
+        var result = await sut.SubmitAnswerAsync(1, 2, 3, model);
+
+        Assert.Equal(expected, result);
+        await _submissionWorkflow.Received(1).SubmitAnswer(1, 2, 3, model);
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAsync_Calls_Workflow()
+    {
+        var sut = CreateServiceUnderTest();
+
+        await sut.ConfirmCheckAnswersAsync(999);
+
+        await _submissionWorkflow.Received(1).SetMaturityAndMarkAsReviewedAsync(999);
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync_Calls_Workflow()
+    {
+        var sut = CreateServiceUnderTest();
+        var section = new QuestionnaireSectionEntry();
+
+        await sut.ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 2, 3, 4, section);
+
+        await _submissionWorkflow.Received(1)
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 2, 3, 4, section);
+    }
+
+    [Fact]
+    public async Task SetSubmissionInaccessibleAsync_Calls_Workflow()
+    {
+        var sut = CreateServiceUnderTest();
+
+        await sut.SetSubmissionInaccessibleAsync(123, "sec1");
+
+        await _submissionWorkflow.Received(1).SetSubmissionInaccessibleAsync(123, "sec1");
+    }
+
+    [Fact]
+    public async Task RestoreInaccessibleSubmissionAsync_Calls_Workflow()
+    {
+        var sut = CreateServiceUnderTest();
+
+        await sut.RestoreInaccessibleSubmissionAsync(123, "sec1");
+
+        await _submissionWorkflow.Received(1).SetSubmissionInProgressAsync(123, "sec1");
+    }
+
+    [Fact]
+    public async Task GetSubmissionByIdAsync_Calls_Workflow_And_Returns_Dto()
+    {
+        var sut = CreateServiceUnderTest();
+        var expected = new SqlSubmissionDto { Id = 1, EstablishmentId = 99 };
+        var model = new SubmitAnswerModel();
+
+        _submissionWorkflow.GetSubmissionByIdAsync(101).Returns(expected);
+
+        var result = await sut.GetSubmissionByIdAsync(101);
+
+        Assert.Equal(expected, result);
+        await _submissionWorkflow.Received(1).GetSubmissionByIdAsync(101);
     }
 }
