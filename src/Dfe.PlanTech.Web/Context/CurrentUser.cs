@@ -47,7 +47,8 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
     // For MAT users, these represent the MAT/group they belong to
     public string? UserOrganisationName => Organisation?.Name;
 
-    public int? UserOrganisationId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
+    // Note: `DB_ESTABLISHMENT_ID` is the ID of the logged in user's organisation, not the selected establishment
+    public int? UserOrganisationId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
 
     public string? UserOrganisationUrn => Organisation?.Urn;
 
