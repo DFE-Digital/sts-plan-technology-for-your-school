@@ -110,11 +110,12 @@ public class GroupsViewBuilderTests
         contentful.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
                   .Returns(new PageEntry { Content = new List<ContentfulEntry> { new MissingComponentEntry() } });
 
-        // dashboard page content: supplies categories with sections
+        // home page content: supplies categories with sections
         var cat1 = MakeCategory(MakeSection("S1"), MakeSection("S2"));
         var cat2 = MakeCategory(MakeSection("S3"));
-        contentful.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug)
-                  .Returns(new PageEntry { Content = new List<ContentfulEntry> { cat1, cat2 } });
+        var homePage = new PageEntry { Content = new List<ContentfulEntry> { cat1, cat2 } };
+        contentful.GetPageBySlugAsync(Arg.Any<string>())
+                  .Returns(homePage);
 
         // contact link
         contentful.GetLinkByIdAsync("contact-123")
@@ -150,7 +151,6 @@ public class GroupsViewBuilderTests
         // establishments list comes from service
         Assert.Equal(2, vm.GroupEstablishments.Count);
         await contentful.Received(1).GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
-        await contentful.Received(1).GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
         await contentful.Received(1).GetLinkByIdAsync("contact-123");
         await est.Received(1).GetEstablishmentLinksWithSubmissionStatusesAndCounts(
             Arg.Is<IEnumerable<QuestionnaireCategoryEntry>>(e => e.Count() == 2), 999);
@@ -164,9 +164,10 @@ public class GroupsViewBuilderTests
         var sut = CreateServiceUnderTest(contentful: contentful);
         contentful.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
                   .Returns(new PageEntry { Content = null });
-        // dashboard page with content that contains NO QuestionnaireCategoryEntry
-        contentful.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug)
-                  .Returns(new PageEntry { Content = [new MissingComponentEntry()] });
+        // home page with content that contains NO QuestionnaireCategoryEntry
+        var homePage = new PageEntry { Content = [new MissingComponentEntry()] };
+        contentful.GetPageBySlugAsync(Arg.Any<string>())
+                  .Returns(homePage);
 
         var controller = new TestController();
 
@@ -198,133 +199,5 @@ public class GroupsViewBuilderTests
             Arg.Is<EstablishmentModel>(m => m.Id == establishmentGuid && m.Name == "Group X"),
             "URN-007",
             "Bond Primary");
-    }
-
-    // --- RouteToSchoolDashboardViewAsync -----------------------------------
-
-    [Fact]
-    public async Task RouteToSchoolDashboardViewAsync_Builds_View_For_Selected_School()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        contentful.GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug)
-                  .Returns(new PageEntry { Content = new List<ContentfulEntry> { new MissingComponentEntry() } });
-
-        var est = Substitute.For<IEstablishmentService>();
-        est.GetLatestSelectedGroupSchoolAsync("URN-ABC")
-           .Returns(new SqlEstablishmentDto { Id = 42, OrgName = "Selected School" });
-
-        var sut = CreateServiceUnderTest(contentful: contentful, est: est);
-        var controller = new TestController();
-
-        var action = await sut.RouteToSchoolDashboardViewAsync(controller);
-
-        var view = Assert.IsType<ViewResult>(action);
-        Assert.Equal("GroupsSchoolDashboard", view.ViewName);
-        Assert.Equal("Dashboard", controller.ViewData["Title"]);
-
-        var vm = Assert.IsType<GroupsSchoolDashboardViewModel>(view.Model);
-        Assert.Equal("Selected School", vm.SchoolName);
-        Assert.Equal(42, vm.SchoolId);
-        Assert.Equal("The Group", vm.GroupName);
-        Assert.Equal(UrlConstants.GroupsDashboardSlug, vm.Slug);
-
-        await est.Received(1).GetLatestSelectedGroupSchoolAsync("URN-ABC");
-        await contentful.Received(1).GetPageBySlugAsync(UrlConstants.GroupsDashboardSlug);
-    }
-
-    // --- RouteToGroupsRecommendationAsync ----------------------------------
-
-    [Fact]
-    public async Task RouteToGroupsRecommendationAsync_Returns_View_When_Empty_CoreRecommendations()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-
-        // Section exists with explicit CoreRecommendations
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("SEC1"),
-            Name = "Networking",
-            CoreRecommendations = new List<RecommendationChunkEntry>()
-        };
-        contentful.GetSectionBySlugAsync("net").Returns(section);
-
-        // Latest responses
-        var sub = Substitute.For<ISubmissionService>();
-        sub.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
-           .Returns(new SubmissionResponsesModel(1, []));
-
-        var sut = CreateServiceUnderTest(contentful: contentful, sub: sub);
-        var controller = new TestController();
-
-        var action = await sut.RouteToGroupsRecommendationAsync(controller, "net");
-
-        var view = Assert.IsType<ViewResult>(action);
-        Assert.Equal("Recommendations", view.ViewName);
-    }
-
-    [Fact]
-    public async Task RouteToGroupsRecommendationAsync_Throws_When_Section_Not_Found()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        contentful.GetSectionBySlugAsync("missing").Throws(new ContentfulDataUnavailableException("Arbitrary exception text"));
-
-        var sut = CreateServiceUnderTest(contentful: contentful);
-        var controller = new TestController();
-
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.RouteToGroupsRecommendationAsync(controller, "missing"));
-    }
-
-    // --- RouteToRecommendationsPrintViewAsync -------------------------------
-
-    [Fact]
-    public async Task RouteToRecommendationsPrintViewAsync_Returns_Print_View_When_Content_Available()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-
-        // Recommendation chunk that matches answer id
-        var chunk = new RecommendationChunkEntry
-        {
-            CompletingAnswers = new List<QuestionnaireAnswerEntry>
-            {
-                new QuestionnaireAnswerEntry { Sys = new SystemDetails("ans1") }
-            }
-        };
-
-        // Section must include the chunk in CoreRecommendations
-        var section = new QuestionnaireSectionEntry
-        {
-            Sys = new SystemDetails("SEC2"),
-            Name = "Security",
-            CoreRecommendations = new List<RecommendationChunkEntry> { chunk }
-        };
-        contentful.GetSectionBySlugAsync("sec").Returns(section);
-
-        var latest = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel>
-            {
-                new QuestionWithAnswerModel
-                {
-                    AnswerSysId = "ans1"
-                }
-            });
-        var sub = Substitute.For<ISubmissionService>();
-        sub.GetLatestSubmissionResponsesModel(77, section, true).Returns(latest);
-
-        var sut = CreateServiceUnderTest(contentful: contentful, sub: sub);
-        var controller = new TestController();
-
-        var action = await sut.RouteToRecommendationsPrintViewAsync(controller, "sec", 77, "School Z");
-
-        var view = Assert.IsType<ViewResult>(action);
-        Assert.Equal("RecommendationsChecklist", view.ViewName);
-
-        var vm = Assert.IsType<GroupsRecommendationsViewModel>(view.Model);
-        Assert.Equal("Security", vm.SectionName);
-        Assert.Equal(77, vm.SelectedEstablishmentId);
-        Assert.Equal("School Z", vm.SelectedEstablishmentName);
-        Assert.Equal("sec", vm.Slug);
-        Assert.Single(vm.Chunks); // one chunk matched ans1
-        Assert.NotNull(vm.GroupsCustomRecommendationIntro);
-        Assert.Equal("School Z", ((GroupsCustomRecommendationIntroViewModel)vm.GroupsCustomRecommendationIntro).SelectedEstablishmentName);
     }
 }
