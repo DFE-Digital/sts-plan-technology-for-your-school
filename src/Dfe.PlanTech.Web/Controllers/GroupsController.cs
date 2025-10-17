@@ -38,7 +38,7 @@ public class GroupsController : BaseController<GroupsController>
         await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
         _currentUser.SetGroupSelectedSchool(schoolUrn);
 
-        return RedirectToAction(GetSchoolDashboardAction);
+        return Redirect(UrlConstants.HomePage);
     }
 
     [HttpGet($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsDashboardSlug}", Name = GetSchoolDashboardAction)]
