@@ -8,7 +8,7 @@ public interface ICurrentUser
     string? Email { get; }
     int? EstablishmentId { get; }
     string? GroupSelectedSchoolUrn { get; }
-    string? GroupSelectedSchoolName  { get; }
+    string? GroupSelectedSchoolName { get; }
     bool IsAuthenticated { get; }
     bool IsMat { get; }
     int? MatEstablishmentId { get; }
