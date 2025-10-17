@@ -42,7 +42,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
             throw new InvalidDataException("No Urn for selection");
         }
 
-        var schoolData = new
+        var schoolData = new SelectedSchoolCookieData
         {
             Urn = selectedSchoolUrn,
             Name = selectedSchoolName
