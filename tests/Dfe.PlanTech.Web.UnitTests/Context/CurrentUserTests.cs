@@ -198,28 +198,6 @@ public class CurrentUserTests
         Assert.False(sut.IsInRole("Other"));
     }
 
-    // ---------- GroupSelectedSchool cookie ----------
-
-    // [Fact]
-    // public void GetGroupSelectedSchool_Reads_From_Request_Cookies()
-    // {
-    //     var (sut, ctx) = Build();
-    //
-    //     var schoolData = new
-    //     {
-    //         Urn = "12345",
-    //         Name = "Test school"
-    //     };
-    //
-    //     var schoolDataJson = System.Text.Json.JsonSerializer.Serialize(schoolData);
-    //
-    //
-    //     // Simulate an incoming request cookie
-    //     ctx.Request.Headers["Cookie"] = $"SelectedSchool={schoolDataJson}";
-    //
-    //     Assert.Equal(("12345", "Test school"), sut.GetGroupSelectedSchool());
-    // }
-
     [Fact]
     public void GetGroupSelectedSchool_Reads_From_Request_Cookies()
     {
