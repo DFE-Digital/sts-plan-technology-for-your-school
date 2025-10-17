@@ -6,7 +6,6 @@ public interface ICurrentUser
 {
     string? DsiReference { get; }
     string? Email { get; }
-    int? EstablishmentId { get; }
     string? GroupSelectedSchoolUrn { get; }
 
     // Active Establishment - the selected establishment (if MAT user has selected one), otherwise the user's organisation
@@ -32,8 +31,6 @@ public interface ICurrentUser
 
     bool IsAuthenticated { get; }
     bool IsMat { get; }
-    int? MatEstablishmentId { get; }
-    EstablishmentModel? Organisation { get; }
     int? UserId { get; }
     bool UserOrganisationIsGroup { get; }
     string? GetGroupSelectedSchool();

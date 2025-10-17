@@ -22,7 +22,6 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
     public string? Email => GetNameIdentifierFromClaim(ClaimConstants.VerifiedEmail)
                             ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
 
-    public int? EstablishmentId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
 
     public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool();
 
@@ -46,7 +45,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
     // For MAT users, these represent the MAT/group they belong to
     public string? UserOrganisationName => Organisation?.Name;
 
-    public int? UserOrganisationId => EstablishmentId;
+    public int? UserOrganisationId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
 
     public string? UserOrganisationUrn => Organisation?.Urn;
 
@@ -60,22 +59,14 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
 
     public string? UserOrganisationTypeName => Organisation?.Type?.Name;
 
-    private static HashSet<string> OrganisationGroupCategories { get; } = new()
-    {
-        DsiConstants.MatOrganisationCategoryId,
-        // DsiConstants.SatOrganisationCategoryId,
-        // DsiConstants.SSatOrganisationCategoryId,
-    };
     public bool UserOrganisationIsGroup => Organisation != null &&
-        OrganisationGroupCategories.Contains(Organisation.Category?.Id ?? string.Empty);
+                                           DsiConstants.OrganisationGroupCategories.Contains(Organisation.Category?.Id ?? string.Empty);
 
     public bool IsAuthenticated => GetIsAuthenticated();
 
     public bool IsMat => Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;
 
-    public int? MatEstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
-
-    public EstablishmentModel? Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
+    private EstablishmentModel? Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
 
     public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 
@@ -134,7 +125,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
         {
             // Synchronously get the selected establishment details
             // This is acceptable as it's only called once per request and cached
-            _cachedSelectedSchool = _establishmentService.GetLatestSelectedGroupSchoolAsync(GroupSelectedSchoolUrn)
+            _cachedSelectedSchool = _establishmentService.GetEstablishmentByReferenceAsync(GroupSelectedSchoolUrn)
                 .GetAwaiter()
                 .GetResult();
         }
@@ -156,7 +147,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
     private int? GetActiveEstablishmentId()
     {
         var selectedSchool = GetSelectedSchoolDetails();
-        return selectedSchool?.Id ?? EstablishmentId;
+        return selectedSchool?.Id ?? GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
     }
 
     private string? GetActiveEstablishmentUrn()

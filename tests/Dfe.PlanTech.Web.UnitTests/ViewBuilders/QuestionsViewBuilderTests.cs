@@ -177,7 +177,7 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         // Current user info needed by BaseViewBuilder
-        _currentUser.EstablishmentId.Returns(123);
+        _currentUser.ActiveEstablishmentId.Returns(123);
 
         var section = MakeSection("S1", "sec-1", "Section", MakeQuestion("Q1", "q-1", "Text"));
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
@@ -204,7 +204,7 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.EstablishmentId.Returns(123);
+        _currentUser.ActiveEstablishmentId.Returns(123);
         var section = MakeSection("S1", "sec-1", "Section");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
@@ -228,7 +228,7 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.EstablishmentId.Returns(987);
+        _currentUser.ActiveEstablishmentId.Returns(987);
         var section = MakeSection("S99", "sec-err", "Section Err");
         _contentful.GetSectionBySlugAsync("sec-err").Returns(section);
 
@@ -267,7 +267,7 @@ public class QuestionsViewBuilderTests
         controller.ModelState.AddModelError("Answer", "Answer is required");
 
         _currentUser.UserId.Returns(11);
-        _currentUser.EstablishmentId.Returns(22);
+        _currentUser.ActiveEstablishmentId.Returns(22);
 
         var q = MakeQuestion("Q1", "q-1", "Question 1");
         var section = MakeSection("S1", "sec-1", "Section 1", q);
@@ -301,7 +301,7 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         _currentUser.UserId.Returns(11);
-        _currentUser.EstablishmentId.Returns(22);
+        _currentUser.ActiveEstablishmentId.Returns(22);
 
         var q = MakeQuestion("Q1", "q-1", "Question 1");
         var section = MakeSection("S1", "sec-1", "Section 1", q);
@@ -337,7 +337,7 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         _currentUser.UserId.Returns(11);
-        _currentUser.EstablishmentId.Returns(22);
+        _currentUser.ActiveEstablishmentId.Returns(22);
 
         var q1 = MakeQuestion("Q1", "q-1", "Q1");
         var q2 = MakeQuestion("Q2", "question2", "Q2");
@@ -375,8 +375,8 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.EstablishmentId.Returns(123);
-        _currentUser.Organisation.Returns(new EstablishmentModel { Name = "Everwood Learning Trust" });
+        _currentUser.ActiveEstablishmentId.Returns(123);
+        _currentUser.ActiveEstablishmentName.Returns("Everwood Learning Trust");
 
         var sectionSlug = "sec-1";
         var section = MakeSection("S1", sectionSlug, "Section 1");
@@ -403,8 +403,8 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.EstablishmentId.Returns(123);
-        _currentUser.Organisation.Returns(new EstablishmentModel { Name = "Test Trust" });
+        _currentUser.ActiveEstablishmentId.Returns(123);
+        _currentUser.ActiveEstablishmentName.Returns("Test Trust");
 
         var q1 = MakeQuestion("Q1", "q-1", "Question 1");
         var q2 = MakeQuestion("Q2", "q-2", "Question 2");
@@ -448,7 +448,7 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.EstablishmentId.Returns(555);
+        _currentUser.ActiveEstablishmentId.Returns(555);
 
         var sectionSlug = "sec-restart";
         var section = MakeSection("S123", sectionSlug, "Restart Section");
@@ -476,7 +476,7 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.EstablishmentId.Returns(555);
+        _currentUser.ActiveEstablishmentId.Returns(555);
 
         var sectionSlug = "sec-continue-prev";
         var section = MakeSection("S123", sectionSlug, "Continue previous assessment");

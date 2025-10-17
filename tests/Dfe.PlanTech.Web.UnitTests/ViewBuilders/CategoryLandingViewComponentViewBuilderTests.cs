@@ -25,7 +25,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         submission ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUser>();
 
-        currentUser.EstablishmentId.Returns(1001);
+        currentUser.ActiveEstablishmentId.Returns(1001);
 
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 

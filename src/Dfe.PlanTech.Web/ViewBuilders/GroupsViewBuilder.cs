@@ -2,10 +2,8 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
-using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -77,10 +75,20 @@ public class GroupsViewBuilder(
     {
         var userDsiReference = GetDsiReferenceOrThrowException();
 
+        // Construct the user's organisation model from individual properties
+        var userOrganisationModel = new EstablishmentModel
+        {
+            Id = CurrentUser.UserOrganisationDsiId ?? Guid.Empty,
+            Name = CurrentUser.UserOrganisationName ?? string.Empty,
+            Urn = CurrentUser.UserOrganisationUrn,
+            Ukprn = CurrentUser.UserOrganisationUkprn,
+            Uid = CurrentUser.UserOrganisationUid
+        };
+
         await _establishmentService.RecordGroupSelection(
             userDsiReference,
             CurrentUser.UserOrganisationId,
-            CurrentUser.Organisation,
+            userOrganisationModel,
             selectedEstablishmentUrn,
             selectedEstablishmentName
         );

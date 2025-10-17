@@ -22,7 +22,7 @@ public class CategorySectionViewComponentViewBuilderTests
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUser>();
-        currentUser.EstablishmentId.Returns(1234);
+        currentUser.ActiveEstablishmentId.Returns(1234);
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
         return new CategorySectionViewComponentViewBuilder(

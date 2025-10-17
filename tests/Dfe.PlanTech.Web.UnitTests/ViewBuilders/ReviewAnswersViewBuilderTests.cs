@@ -26,8 +26,8 @@ public class ReviewAnswersViewBuilderTests
 
     private ReviewAnswersViewBuilder CreateSut()
     {
-        _currentUser.EstablishmentId.Returns(2);
-        _currentUser.MatEstablishmentId.Returns(16);
+        _currentUser.ActiveEstablishmentId.Returns(2);
+        _currentUser.UserOrganisationId.Returns((int?)null); // non-MAT user by default
         _currentUser.UserId.Returns(1);
 
         return new ReviewAnswersViewBuilder(_logger, _contentful, _submissions, _currentUser);
@@ -76,7 +76,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(1);
+        _currentUser.ActiveEstablishmentId.Returns(1);
         var section = MakeSection("S1", "sec-1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
@@ -96,7 +96,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(1);
+        _currentUser.ActiveEstablishmentId.Returns(1);
         var section = MakeSection("S1", "sec-1", "Section 1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
@@ -124,7 +124,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(1);
+        _currentUser.ActiveEstablishmentId.Returns(1);
         var section = MakeSection("S1", "sec-1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
@@ -147,7 +147,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(2);
+        _currentUser.ActiveEstablishmentId.Returns(2);
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
@@ -164,7 +164,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(2);
+        _currentUser.ActiveEstablishmentId.Returns(2);
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
@@ -181,7 +181,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(2);
+        _currentUser.ActiveEstablishmentId.Returns(2);
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
@@ -198,7 +198,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(77);
+        _currentUser.ActiveEstablishmentId.Returns(77);
         var section = MakeSection("S7", "sec-7", "Section 7");
         _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
 
@@ -236,7 +236,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(2);
+        _currentUser.ActiveEstablishmentId.Returns(2);
         var q1 = MakeQuestion("QX", "q-x");
         var section = MakeSection("S2", "sec-2", "S", q1);
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
@@ -256,16 +256,23 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _submissions.ConfirmCheckAnswersAsync(42).Returns(Task.CompletedTask);
+        var section = MakeSection("S1", "sec", "My Section");
+        _contentful.GetSectionBySlugAsync("sec").Returns(section);
+        _submissions.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            Arg.Any<int>(),
+            Arg.Any<int?>(),
+            42,
+            Arg.Any<int>(),
+            Arg.Any<QuestionnaireSectionEntry>()).Returns(Task.CompletedTask);
 
         var result = await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "My Section", 42);
 
         await _submissions.Received(1).ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-            Arg.Any<int>(),
-            Arg.Any<int>(),
+            2, // ActiveEstablishmentId
+            null, // UserOrganisationId (non-MAT user)
             42,
-            Arg.Any<int>(),
-            Arg.Any<QuestionnaireSectionEntry>());
+            1, // UserId
+            Arg.Is<QuestionnaireSectionEntry>(s => s.Sys.Id == "S1"));
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.True(ctl.TempData.ContainsKey("SectionName"));
@@ -278,9 +285,11 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
+        var section = MakeSection("S1", "sec", "S");
+        _contentful.GetSectionBySlugAsync("sec").Returns(section);
         _submissions.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
             Arg.Any<int>(),
-            Arg.Any<int>(),
+            Arg.Any<int?>(),
             9,
             Arg.Any<int>(),
             Arg.Any<QuestionnaireSectionEntry>())
