@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
@@ -339,7 +340,8 @@ public class QuestionsViewBuilderTests
         _currentUser.EstablishmentId.Returns(22);
 
         var q1 = MakeQuestion("Q1", "q-1", "Q1");
-        var section = MakeSection("S1", "sec-1", "Section 1", q1);
+        var q2 = MakeQuestion("Q2", "question2", "Q2");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1, q2);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         _submissionSvc.GetSubmissionRoutingDataAsync(22, section, false)
@@ -353,9 +355,7 @@ public class QuestionsViewBuilderTests
         // Submit works
         _submissionSvc.SubmitAnswerAsync(11, 22, null, Arg.Any<SubmitAnswerModel>()).Returns(1);
 
-        // And the next unanswered question exists
-        var nextQ = MakeQuestion("Q2", "q-2", "Q2");
-        _questionSvc.GetNextUnansweredQuestion(22, section).Returns(nextQ);
+        _questionSvc.GetNextUnansweredQuestion(22, section).Returns(q2);
 
         // Act
         var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", returnTo: null);
@@ -363,12 +363,137 @@ public class QuestionsViewBuilderTests
         // Assert
         await _submissionSvc.Received(1).SubmitAnswerAsync(11, 22, null, Arg.Any<SubmitAnswerModel>());
 
+        var redirect = Assert.IsType<ViewResult>(result);
+    }
+
+    // ---------- RouteToContinueSelfAssessmentPage ----------
+
+    [Fact]
+    public async Task RouteToContinueSelfAssessmentPage_When_No_Responses_Redirects_To_Interstitial()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUser.EstablishmentId.Returns(123);
+        _currentUser.Organisation.Returns(new EstablishmentModel { Name = "Everwood Learning Trust" });
+
+        var sectionSlug = "sec-1";
+        var section = MakeSection("S1", sectionSlug, "Section 1");
+        _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        var empty = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel>());
+        _submissionSvc.GetLatestSubmissionResponsesModel(123, section, false).Returns(empty);
+
+        // Act
+        var result = await sut.RouteToContinueSelfAssessmentPage(controller, "cat", sectionSlug);
+
+        // Assert
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(nameof(QuestionsController.GetQuestionBySlug), redirect.ActionName);
+        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
+        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
         Assert.NotNull(redirect.RouteValues);
-        Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
-        Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
-        Assert.Equal("q-2", redirect.RouteValues["questionSlug"]);
+        Assert.Equal(sectionSlug, redirect.RouteValues["route"]);
+    }
+
+    [Fact]
+    public async Task RouteToContinueSelfAssessmentPage_When_Responses_Exist_Returns_View_With_ViewModel()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUser.EstablishmentId.Returns(123);
+        _currentUser.Organisation.Returns(new EstablishmentModel { Name = "Test Trust" });
+
+        var q1 = MakeQuestion("Q1", "q-1", "Question 1");
+        var q2 = MakeQuestion("Q2", "q-2", "Question 2");
+
+        var section = MakeSection("S1", "sec-1", "Cyber security processes", q1, q2);
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var submissionWithResponses = new SubmissionResponsesModel(
+            1,
+            new List<QuestionWithAnswerModel> { new QuestionWithAnswerModel { AnswerSysId = "A1" } }
+        )
+        {
+            Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
+        };
+
+        _submissionSvc.GetLatestSubmissionResponsesModel(123, section, false)
+                      .Returns(submissionWithResponses);
+
+        // Act
+        var result = await sut.RouteToContinueSelfAssessmentPage(controller, "category-slug", "sec-1");
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("ContinueSelfAssessment", view.ViewName);
+
+        var vm = Assert.IsType<ContinueSelfAssessmentViewModel>(view.Model);
+        Assert.Equal(1, vm.AnsweredCount);
+        Assert.Equal(2, vm.QuestionsCount);
+        Assert.Equal("category-slug", vm.CategorySlug);
+        Assert.Equal("sec-1", vm.SectionSlug);
+        Assert.Equal("Cyber security processes", vm.TopicName);
+        Assert.Same(submissionWithResponses.Responses, vm.Responses);
+    }
+
+    // ---------- RestartSelfAssessment ----------
+
+    [Fact]
+    public async Task RestartSelfAssessment_Deletes_Submission_And_Redirects_To_Interstitial()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUser.EstablishmentId.Returns(555);
+
+        var sectionSlug = "sec-restart";
+        var section = MakeSection("S123", sectionSlug, "Restart Section");
+        _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        // Act
+        var result = await sut.RestartSelfAssessment(controller, "cat-slug", sectionSlug);
+
+        // Assert
+        await _submissionSvc.Received(1).SetSubmissionInaccessibleAsync(555, "S123");
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(nameof(QuestionsController.GetInterstitialPage), redirect.ActionName);
+        Assert.Equal(QuestionsController.Controller, redirect.ControllerName);
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal("cat-slug", redirect.RouteValues["categorySlug"]);
+        Assert.Equal(sectionSlug, redirect.RouteValues["sectionSlug"]);
+    }
+
+    // ---------- ContinuePreviousAssessment ----------
+    [Fact]
+    public async Task ContinuePreviousAssessment_Restores_Submission_And_Redirects_To_Next_Unanswered()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUser.EstablishmentId.Returns(555);
+
+        var sectionSlug = "sec-continue-prev";
+        var section = MakeSection("S123", sectionSlug, "Continue previous assessment");
+        _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        // Act
+        var result = await sut.ContinuePreviousAssessment(controller, "cat-slug", sectionSlug);
+
+        // Assert
+        await _submissionSvc.Received(1).RestoreInaccessibleSubmissionAsync(555, "S123");
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(nameof(QuestionsController.GetNextUnansweredQuestion), redirect.ActionName);
+        Assert.Equal(QuestionsController.Controller, redirect.ControllerName);
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal("cat-slug", redirect.RouteValues["categorySlug"]);
+        Assert.Equal(sectionSlug, redirect.RouteValues["sectionSlug"]);
     }
 
     // ------------- Stubs / helpers -------------

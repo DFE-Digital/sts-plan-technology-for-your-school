@@ -21,7 +21,7 @@ public class ReviewAnswersController(
     private readonly IReviewAnswersViewBuilder _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
 
     [HttpGet($"{{categorySlug}}/{{sectionSlug}}/{UrlConstants.CheckAnswersSlug}", Name = UrlConstants.CheckAnswersSlug)]
-    public async Task<IActionResult> CheckAnswers(string categorySlug, string sectionSlug, [FromQuery] bool? isChangeAnswersFlow)
+    public async Task<IActionResult> CheckAnswers(string categorySlug, string sectionSlug)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
         ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
@@ -29,7 +29,7 @@ public class ReviewAnswersController(
         try
         {
             var errorMessage = TempData["ErrorMessage"]?.ToString();
-            return await _reviewAnswersViewBuilder.RouteToCheckAnswers(this, categorySlug, sectionSlug, isChangeAnswersFlow, errorMessage);
+            return await _reviewAnswersViewBuilder.RouteToCheckAnswers(this, categorySlug, sectionSlug, errorMessage);
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {
@@ -37,8 +37,8 @@ public class ReviewAnswersController(
         }
     }
 
-    [HttpGet($"{{categorySlug}}/{{sectionSlug}}/{UrlConstants.ChangeAnswersSlug}")]
-    public async Task<IActionResult> ChangeAnswers(string categorySlug, string sectionSlug)
+    [HttpGet($"{{categorySlug}}/{{sectionSlug}}/{UrlConstants.ViewAnswersSlug}")]
+    public async Task<IActionResult> ViewAnswers(string categorySlug, string sectionSlug)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
         ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
@@ -46,7 +46,7 @@ public class ReviewAnswersController(
         try
         {
             var errorMessage = TempData["ErrorMessage"]?.ToString();
-            return await _reviewAnswersViewBuilder.RouteToChangeAnswers(this, categorySlug, sectionSlug, errorMessage);
+            return await _reviewAnswersViewBuilder.RouteToViewAnswers(this, categorySlug, sectionSlug, errorMessage);
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {
