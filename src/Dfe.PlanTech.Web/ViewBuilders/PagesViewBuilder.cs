@@ -17,6 +17,7 @@ public class PagesViewBuilder(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
+    IEstablishmentService establishmentService,
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
@@ -31,6 +32,24 @@ public class PagesViewBuilder(
         if (isMatUserWhoNeedsToSelectSchool)
         {
             return controller.Redirect(UrlConstants.SelectASchoolPage);
+        }
+
+        // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
+        var isMatUserAndHasSelectedSchool = CurrentUser.IsMat && CurrentUser.GroupSelectedSchoolUrn is not null;
+        if (isMatUserAndHasSelectedSchool)
+        {
+            // Named `establishmentId`, but for a group (e.g. MAT) this is the internal PlanTech synthetic database ID for the group not the selected establishment.
+            var groupId = CurrentUser.EstablishmentId ?? throw new InvalidDataException("User is a MAT user but does not have an establishment ID (for the group)");
+            var groupSchools = await establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+                [],
+                groupId
+            );
+
+            var selectedSchoolIsValid = groupSchools.Any(s => s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn));
+            if (!selectedSchoolIsValid)
+            {
+                return controller.Redirect(UrlConstants.SelectASchoolPage);
+            }
         }
 
         if (page.IsLandingPage == true)
