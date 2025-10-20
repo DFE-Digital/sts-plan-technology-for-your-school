@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -100,7 +101,7 @@ public class RecommendationsController(
         );
 
         // Set success message for the banner
-        TempData["StatusUpdateSuccessTitle"] = $"Status updated to '{selectedStatusDisplayName}'";
+        TempData["StatusUpdateSuccessTitle"] = $"Status updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'";
 
         // Redirect back to the single recommendation page
         return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);

@@ -79,14 +79,14 @@ public class RecommendationsViewBuilder(
             NextChunk = nextRecommendationChunk,
             CurrentChunkPosition = currentRecommendationIndex + 1,
             TotalChunks = recommendationChunks.Count,
-            SelectedStatusKey = currentRecommendationHistoryStatus?.NewStatus ?? RecommendationStatus.NotStarted.GetDisplayName(),
+            SelectedStatusKey = currentRecommendationHistoryStatus?.NewStatus ?? RecommendationStatus.NotStarted.ToString(),
             LastUpdated = currentRecommendationHistoryStatus?.DateCreated,
             SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
             SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
             StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
             StatusOptions = Enum.GetValues<RecommendationStatus>()
                 .ToDictionary(
-                    key => key.GetDisplayName(),
+                    key => key.ToString(),
                     key => key.GetDisplayName()
                 )
         };
