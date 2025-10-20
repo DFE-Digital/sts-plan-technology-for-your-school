@@ -1,6 +1,4 @@
-﻿using Dfe.PlanTech.Core.Models;
-
-namespace Dfe.PlanTech.Web.Context.Interfaces;
+﻿namespace Dfe.PlanTech.Web.Context.Interfaces;
 
 public interface ICurrentUser
 {

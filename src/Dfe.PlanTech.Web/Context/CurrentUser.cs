@@ -5,7 +5,6 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Dfe.PlanTech.Web.Context.Interfaces;
-using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Web.Context;
 
