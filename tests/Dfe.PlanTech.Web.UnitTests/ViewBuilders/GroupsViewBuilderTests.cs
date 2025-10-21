@@ -314,7 +314,7 @@ public class GroupsViewBuilderTests
     // --- RouteToRecommendationsPrintViewAsync -------------------------------
 
     [Fact]
-     public async Task RouteToRecommendationsPrintViewAsync_Returns_Print_View_When_Content_Available()
+    public async Task RouteToRecommendationsPrintViewAsync_Returns_Print_View_When_Content_Available()
     {
         // Arrange
         var contentful = Substitute.For<IContentfulService>();
