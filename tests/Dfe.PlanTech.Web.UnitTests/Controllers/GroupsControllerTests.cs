@@ -105,12 +105,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var schoolName = "Test School";
             var sectionSlug = "sec";
 
-            _viewBuilder.RouteToRecommendationsPrintViewAsync(_controller, sectionSlug, schoolId, schoolName)
+            _viewBuilder.RouteToRecommendationsPrintViewAsync(_controller, sectionSlug, schoolName)
                 .Returns(new OkResult());
 
-            var result = await _controller.GetRecommendationsPrintView(schoolId, schoolName, sectionSlug);
+            var result = await _controller.GetRecommendationsPrintView(schoolName, sectionSlug);
 
-            await _viewBuilder.Received(1).RouteToRecommendationsPrintViewAsync(_controller, sectionSlug, schoolId, schoolName);
+            await _viewBuilder.Received(1).RouteToRecommendationsPrintViewAsync(_controller, sectionSlug, schoolName);
             Assert.IsType<OkResult>(result);
         }
     }

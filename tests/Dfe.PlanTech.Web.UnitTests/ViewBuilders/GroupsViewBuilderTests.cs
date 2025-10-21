@@ -316,47 +316,69 @@ public class GroupsViewBuilderTests
     [Fact]
     public async Task RouteToRecommendationsPrintViewAsync_Returns_Print_View_When_Content_Available()
     {
+        // Arrange
         var contentful = Substitute.For<IContentfulService>();
         var section = new QuestionnaireSectionEntry { Sys = new SystemDetails("SEC2"), Name = "Security" };
         contentful.GetSectionBySlugAsync("sec").Returns(section);
 
-        // Recommendation with Section + minimal chunk that matches answer id
+        var est = Substitute.For<IEstablishmentService>();
+        var groupId = 123;
+
+        est.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+                Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+                Arg.Any<int>())
+            .Returns(new List<SqlEstablishmentLinkDto>
+            {
+                new SqlEstablishmentLinkDto { Urn = "URN-ABC" }
+            });
+
         var chunk = new RecommendationChunkEntry
         {
-            Answers = new List<QuestionnaireAnswerEntry> { new QuestionnaireAnswerEntry { Sys = new SystemDetails("ans1") } }
+            Answers = new List<QuestionnaireAnswerEntry>
+            {
+                new QuestionnaireAnswerEntry { Sys = new SystemDetails("ans1") }
+            }
         };
+
         contentful.GetSubtopicRecommendationByIdAsync("SEC2")
-                  .Returns(new SubtopicRecommendationEntry
-                  {
-                      Subtopic = new QuestionnaireSectionEntry { Name = "Security" },
-                      Section = new RecommendationSectionEntry { Chunks = new List<RecommendationChunkEntry> { chunk } }
-                  });
+            .Returns(new SubtopicRecommendationEntry
+            {
+                Subtopic = new QuestionnaireSectionEntry { Name = "Security" },
+                Section = new RecommendationSectionEntry { Chunks = new List<RecommendationChunkEntry> { chunk } }
+            });
 
         var latest = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel>
-            {
-                new QuestionWithAnswerModel
-                {
-                    AnswerSysId = "ans1"
-                }
-            });
-        var sub = Substitute.For<ISubmissionService>();
-        sub.GetLatestSubmissionResponsesModel(77, section, true).Returns(latest);
+        {
+            new QuestionWithAnswerModel { AnswerSysId = "ans1" }
+        });
 
-        var sut = CreateServiceUnderTest(contentful: contentful, sub: sub);
+        var sub = Substitute.For<ISubmissionService>();
+        sub.GetLatestSubmissionResponsesModel(42, section, true).Returns(latest);
+
+        var currentUser = Substitute.For<ICurrentUser>();
+
+        currentUser.EstablishmentId.Returns(groupId);
+        currentUser.GroupSelectedSchoolUrn.Returns("URN-ABC");
+
+        var sut = CreateServiceUnderTest(contentful: contentful, sub: sub, est: est, currentUser: currentUser);
+
         var controller = new TestController();
 
-        var action = await sut.RouteToRecommendationsPrintViewAsync(controller, "sec", 77, "School Z");
+        // Act
+        var action = await sut.RouteToRecommendationsPrintViewAsync(controller, "sec", "School Z");
 
+        // Assert
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal("RecommendationsChecklist", view.ViewName);
 
         var vm = Assert.IsType<GroupsRecommendationsViewModel>(view.Model);
         Assert.Equal("Security", vm.SectionName);
-        Assert.Equal(77, vm.SelectedEstablishmentId);
+        Assert.Equal(42, vm.SelectedEstablishmentId);
         Assert.Equal("School Z", vm.SelectedEstablishmentName);
         Assert.Equal("sec", vm.Slug);
         Assert.Single(vm.Chunks); // one chunk matched ans1
         Assert.NotNull(vm.GroupsCustomRecommendationIntro);
-        Assert.Equal("School Z", ((GroupsCustomRecommendationIntroViewModel)vm.GroupsCustomRecommendationIntro).SelectedEstablishmentName);
+        Assert.Equal("School Z",
+            ((GroupsCustomRecommendationIntroViewModel)vm.GroupsCustomRecommendationIntro).SelectedEstablishmentName);
     }
 }

@@ -8,6 +8,6 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
         Task RecordGroupSelectionAsync(string selectedEstablishmentUrn, string selectedEstablishmentName);
         Task<IActionResult> RouteToSchoolDashboardViewAsync(Controller controller);
         Task<IActionResult> RouteToGroupsRecommendationAsync(Controller controller, string sectionSlug);
-        Task<IActionResult> RouteToRecommendationsPrintViewAsync(Controller controller, string sectionSlug, int schoolId, string schoolName);
+        Task<IActionResult> RouteToRecommendationsPrintViewAsync(Controller controller, string sectionSlug, string schoolName);
     }
 }
