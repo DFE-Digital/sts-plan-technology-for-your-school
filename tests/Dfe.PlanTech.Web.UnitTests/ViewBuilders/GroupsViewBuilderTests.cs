@@ -211,8 +211,16 @@ public class GroupsViewBuilderTests
                   .Returns(new PageEntry { Content = new List<ContentfulEntry> { new MissingComponentEntry() } });
 
         var est = Substitute.For<IEstablishmentService>();
-        est.GetLatestSelectedGroupSchoolAsync("URN-ABC")
-           .Returns(new SqlEstablishmentDto { Id = 42, OrgName = "Selected School" });
+        var urn = "URN-ABC";
+        est.GetLatestSelectedGroupSchoolAsync(urn)
+            .Returns(new SqlEstablishmentDto { Id = 42, OrgName = "Selected School" });
+
+        est.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+                Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(), Arg.Any<int>())
+            .Returns(new List<SqlEstablishmentLinkDto>() { new SqlEstablishmentLinkDto()
+            {
+                Urn = urn
+            }});
 
         var sut = CreateServiceUnderTest(contentful: contentful, est: est);
         var controller = new TestController();
@@ -257,7 +265,19 @@ public class GroupsViewBuilderTests
         sub.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
            .Returns(new SubmissionResponsesModel(1, []));
 
-        var sut = CreateServiceUnderTest(contentful: contentful, sub: sub);
+        var est = Substitute.For<IEstablishmentService>();
+        var urn = "URN-ABC";
+        est.GetLatestSelectedGroupSchoolAsync(urn)
+            .Returns(new SqlEstablishmentDto { Id = 42, OrgName = "Selected School" });
+
+        est.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+                Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(), Arg.Any<int>())
+            .Returns(new List<SqlEstablishmentLinkDto>() { new SqlEstablishmentLinkDto()
+            {
+                Urn = urn
+            }});
+
+        var sut = CreateServiceUnderTest(contentful: contentful, sub: sub, est: est);
         var controller = new TestController();
 
         var action = await sut.RouteToGroupsRecommendationAsync(controller, "net");
@@ -272,7 +292,19 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         contentful.GetSectionBySlugAsync("missing").Throws(new ContentfulDataUnavailableException("Arbitrary exception text"));
 
-        var sut = CreateServiceUnderTest(contentful: contentful);
+        var est = Substitute.For<IEstablishmentService>();
+        var urn = "URN-ABC";
+        est.GetLatestSelectedGroupSchoolAsync(urn)
+            .Returns(new SqlEstablishmentDto { Id = 42, OrgName = "Selected School" });
+
+        est.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+                Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(), Arg.Any<int>())
+            .Returns(new List<SqlEstablishmentLinkDto>() { new SqlEstablishmentLinkDto()
+            {
+                Urn = urn
+            }});
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est);
         var controller = new TestController();
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
