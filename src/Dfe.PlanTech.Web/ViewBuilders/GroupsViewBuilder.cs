@@ -97,8 +97,6 @@ public class GroupsViewBuilder(
             return controller.RedirectToAction(GroupsController.GetSelectASchoolAction);
         }
 
-        // TODO: Check if the selected school exists and belongs to the group
-
         var viewModel = new GroupsSchoolDashboardViewModel
         {
             SchoolName = selectedSchool.OrgName,
@@ -121,8 +119,6 @@ public class GroupsViewBuilder(
             Logger.LogInformation("GroupSelectedSchoolUrn is null, redirecting to GetSelectASchool");
             return controller.RedirectToAction(GroupsController.GetSelectASchoolAction);
         }
-
-        // TODO: Check if the selected school exists and belongs to the group
 
         var schoolId = selectedSchool.Id;
         var schoolName = selectedSchool.OrgName;
@@ -149,8 +145,6 @@ public class GroupsViewBuilder(
         {
             return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
         }
-
-        // TODO: Check if the selected school exists and belongs to the group
 
         controller.ViewData["Title"] = viewModel.SectionName;
         return controller.View(RecommendationsChecklistViewName, viewModel);
