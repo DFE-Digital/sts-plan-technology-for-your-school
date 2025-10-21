@@ -67,7 +67,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var result = await controller.SelectSchool(schoolUrn, schoolName);
 
             await _viewBuilder.Received(1).RecordGroupSelectionAsync(schoolUrn, schoolName);
-            _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn);
+            _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn, schoolName);
 
             var redirect = Assert.IsType<RedirectResult>(result);
             Assert.Equal(UrlConstants.HomePage, redirect.Url);
