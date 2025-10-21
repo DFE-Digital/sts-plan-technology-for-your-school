@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Web.Context.Interfaces;
+﻿using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -68,8 +69,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             await _viewBuilder.Received(1).RecordGroupSelectionAsync(schoolUrn, schoolName);
             _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn);
 
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal(GroupsController.GetSchoolDashboardAction, redirectResult.ActionName);
+            var redirect = Assert.IsType<RedirectResult>(result);
+            Assert.Equal(UrlConstants.HomePage, redirect.Url);
         }
 
         [Fact]
