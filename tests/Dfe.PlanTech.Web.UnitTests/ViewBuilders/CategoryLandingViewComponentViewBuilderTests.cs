@@ -379,8 +379,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
-                    PreviousStatus = RecommendationStatus.InProgress.GetDisplayName(),
-                    NewStatus = RecommendationStatus.Complete.GetDisplayName(),
+                    PreviousStatus = RecommendationStatus.InProgress.ToString(),
+                    NewStatus = RecommendationStatus.Complete.ToString(),
                     NoteText = "Test note 1"
                 }
             },
@@ -393,8 +393,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
-                    PreviousStatus = RecommendationStatus.NotStarted.GetDisplayName(),
-                    NewStatus = RecommendationStatus.InProgress.GetDisplayName(),
+                    PreviousStatus = RecommendationStatus.NotStarted.ToString(),
+                    NewStatus = RecommendationStatus.InProgress.ToString(),
                     NoteText = "Test note 2"
                 }
             },
@@ -408,7 +408,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
                     PreviousStatus = null,
-                    NewStatus = RecommendationStatus.NotStarted.GetDisplayName(),
+                    NewStatus = RecommendationStatus.NotStarted.ToString(),
                     NoteText = "Test note 3"
                 }
             }
@@ -480,8 +480,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now.AddDays(-2),
-                    PreviousStatus = RecommendationStatus.InProgress.GetDisplayName(),
-                    NewStatus = RecommendationStatus.Complete.GetDisplayName(),
+                    PreviousStatus = RecommendationStatus.InProgress.ToString(),
+                    NewStatus = RecommendationStatus.Complete.ToString(),
                     NoteText = "Test note 1"
                 }
             },
@@ -494,8 +494,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now.AddDays(-1),
-                    PreviousStatus = RecommendationStatus.NotStarted.GetDisplayName(),
-                    NewStatus = RecommendationStatus.InProgress.GetDisplayName(),
+                    PreviousStatus = RecommendationStatus.NotStarted.ToString(),
+                    NewStatus = RecommendationStatus.InProgress.ToString(),
                     NoteText = "Test note 2"
                 }
             },
@@ -509,7 +509,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
                     PreviousStatus = null,
-                    NewStatus = RecommendationStatus.NotStarted.GetDisplayName(),
+                    NewStatus = RecommendationStatus.NotStarted.ToString(),
                     NoteText = "Test note 3"
                 }
             }
