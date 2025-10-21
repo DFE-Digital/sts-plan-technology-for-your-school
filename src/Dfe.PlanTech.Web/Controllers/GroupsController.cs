@@ -1,5 +1,4 @@
 ﻿using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +8,6 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class GroupsController : BaseController<GroupsController>
 {
-    public const string GetGroupsRecommendationAction = "GetGroupsRecommendation";
-    public const string GetSchoolDashboardAction = "GetSchoolDashboardView";
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
 
     private readonly ICurrentUser _currentUser;
@@ -39,24 +36,5 @@ public class GroupsController : BaseController<GroupsController>
         _currentUser.SetGroupSelectedSchool(schoolUrn);
 
         return Redirect(UrlConstants.HomePage);
-    }
-
-    [HttpGet($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsDashboardSlug}", Name = GetSchoolDashboardAction)]
-    public async Task<IActionResult> GetSchoolDashboardView()
-    {
-        return await _groupsViewBuilder.RouteToSchoolDashboardViewAsync(this);
-    }
-
-    [HttpGet($"{UrlConstants.GroupsSlug}/recommendations/{{sectionSlug}}")]
-    public async Task<IActionResult> GetGroupsRecommendation(string sectionSlug)
-    {
-        return await _groupsViewBuilder.RouteToGroupsRecommendationAsync(this, sectionSlug);
-    }
-
-    [LogInvalidModelState]
-    [HttpGet("groups/recommendations/{sectionSlug}/print", Name = "GetRecommendationsPrintView")]
-    public async Task<IActionResult> GetRecommendationsPrintView(int schoolId, string schoolName, string sectionSlug)
-    {
-        return await _groupsViewBuilder.RouteToRecommendationsPrintViewAsync(this, sectionSlug, schoolId, schoolName);
     }
 }
