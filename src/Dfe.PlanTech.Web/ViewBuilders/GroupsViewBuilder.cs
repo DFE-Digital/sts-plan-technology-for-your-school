@@ -158,6 +158,19 @@ public class GroupsViewBuilder(
             return null;
         }
 
+        // Named `establishmentId`, but for a group (e.g. MAT) this is the internal PlanTech synthetic database ID for the group not the selected establishment.
+        var groupId = CurrentUser.EstablishmentId ?? throw new InvalidDataException("User is a MAT user but does not have an establishment ID (for the group)");
+        var groupSchools = await establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            [],
+            groupId
+        );
+
+        var selectedSchoolIsValid = groupSchools.Any(s => s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn));
+        if (!selectedSchoolIsValid)
+        {
+            return null;
+        }
+
         return await _establishmentService.GetLatestSelectedGroupSchoolAsync(selectedSchoolUrn);
     }
 

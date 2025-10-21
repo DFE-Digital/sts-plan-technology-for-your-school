@@ -2,7 +2,6 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -44,14 +43,12 @@ public class PagesViewBuilderTests
         IOptions<ContactOptionsConfiguration>? contact = null,
         IOptions<ErrorPagesConfiguration>? errors = null,
         IContentfulService? contentful = null,
-        IEstablishmentService? establishmentService = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null)
     {
         contact ??= ContactOpts();
         errors ??= ErrorOpts();
         contentful ??= Substitute.For<IContentfulService>();
-        establishmentService ??= Substitute.For<IEstablishmentService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
@@ -60,7 +57,7 @@ public class PagesViewBuilderTests
         currentUser.IsAuthenticated.Returns(true);
         currentUser.Organisation.Returns(new OrganisationModel { Name = "Acme Academy" });
 
-        return new PagesViewBuilder(logger, contact, errors, contentful, establishmentService, currentUser);
+        return new PagesViewBuilder(logger, contact, errors, contentful, currentUser);
     }
 
     private static PageEntry MakePage(string slug, bool isLanding = false, string? title = "My Page", bool displayOrg = false, string? id = "pg-1")
@@ -82,9 +79,8 @@ public class PagesViewBuilderTests
     {
         var errors = ErrorOpts();
         var contentful = Substitute.For<IContentfulService>();
-        var establishmentService = Substitute.For<IEstablishmentService>();
         var current = Substitute.For<ICurrentUser>();
-        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, errors, contentful, establishmentService, current));
+        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, errors, contentful, current));
     }
 
     [Fact]
@@ -92,84 +88,30 @@ public class PagesViewBuilderTests
     {
         var contact = ContactOpts();
         var contentful = Substitute.For<IContentfulService>();
-        var establishmentService = Substitute.For<IEstablishmentService>();
         var current = Substitute.For<ICurrentUser>();
-        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, contact, null!, contentful, establishmentService, current));
+        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, contact, null!, contentful, current));
     }
 
     // ---------- RouteBasedOnOrganisationTypeAsync ----------
     [Fact]
-    public async Task RouteBasedOnOrganisationType_When_NoSchoolSelected_Then_RedirectsToSelectSchoolPage()
+    public async Task RouteBasedOnOrganisationType_Redirects_To_SelectSchool_For_Home_And_MAT()
     {
-        // Arrange - A MAT user without a selected school, attempting to access the home page.
         // Home slug logic uses UrlConstants.HomePage.Replace("/", "")
         var homeSlug = UrlConstants.HomePage.Replace("/", ""); // usually ""
         var page = MakePage(homeSlug, isLanding: false);
 
         var contentful = Substitute.For<IContentfulService>();
-        var currentUser = Substitute.For<ICurrentUser>();
+        var current = Substitute.For<ICurrentUser>();
 
-        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser);
-
-        // `CreateServiceUnderTest` sets defaults, so must override here:
-        currentUser.IsAuthenticated.Returns(true);
-        currentUser.IsMat.Returns(true);
-        currentUser.EstablishmentId.Returns(654321); // the ID for the group (MAT)
-        currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
+        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: current);
+        current.IsMat.Returns(true);
 
         var controller = new TestController();
 
-        // Act
         var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
 
-        // Assert
         var redirect = Assert.IsType<RedirectResult>(action);
         Assert.Equal(UrlConstants.SelectASchoolPage, redirect.Url);
-    }
-
-    [Fact]
-    public async Task RouteBasedOnOrganisationType_When_SchoolSelected_Then_ReturnsPageView()
-    {
-        // Arrange - A MAT user with a selected school, attempting to access the home page.
-        // Home slug logic uses UrlConstants.HomePage.Replace("/", "")
-        var homeSlug = UrlConstants.HomePage.Replace("/", ""); // usually ""
-        var page = MakePage(homeSlug, isLanding: false);
-
-        var contentful = Substitute.For<IContentfulService>();
-        var currentUser = Substitute.For<ICurrentUser>();
-        var establishmentService = Substitute.For<IEstablishmentService>();
-
-        // Setup establishmentService to return a list containing the selected school
-        // (needed to verify that the user has access to the selected school)
-        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            Arg.Any<int>()
-        ).Returns(new List<SqlEstablishmentLinkDto>
-        {
-            new SqlEstablishmentLinkDto { Urn = "123456" }
-        });
-
-        var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            currentUser: currentUser,
-            establishmentService: establishmentService
-        );
-
-        // `CreateServiceUnderTest` sets defaults, so must override here:
-        currentUser.IsAuthenticated.Returns(true);
-        currentUser.IsMat.Returns(true);
-        currentUser.EstablishmentId.Returns(654321); // the ID for the group (MAT)
-        currentUser.GroupSelectedSchoolUrn.Returns("123456");
-
-        var controller = new TestController();
-
-        // Act
-        var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(action);
-        Assert.Equal("Page", view.ViewName);
-        var vm = Assert.IsType<PageViewModel>(view.Model);
     }
 
     [Fact]
