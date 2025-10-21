@@ -55,8 +55,8 @@ public class GroupsController : BaseController<GroupsController>
 
     [LogInvalidModelState]
     [HttpGet("groups/recommendations/{sectionSlug}/print", Name = "GetRecommendationsPrintView")]
-    public async Task<IActionResult> GetRecommendationsPrintView(int schoolId, string schoolName, string sectionSlug)
+    public async Task<IActionResult> GetRecommendationsPrintView(string schoolName, string sectionSlug)
     {
-        return await _groupsViewBuilder.RouteToRecommendationsPrintViewAsync(this, sectionSlug, schoolId, schoolName);
+        return await _groupsViewBuilder.RouteToRecommendationsPrintViewAsync(this, sectionSlug, schoolName);
     }
 }

@@ -137,9 +137,29 @@ public class GroupsViewBuilder(
         return controller.View(SchoolRecommendationsViewName, viewModel);
     }
 
-    public async Task<IActionResult> RouteToRecommendationsPrintViewAsync(Controller controller, string sectionSlug, int schoolId, string schoolName)
+    public async Task<IActionResult> RouteToRecommendationsPrintViewAsync(Controller controller, string sectionSlug, string schoolName)
     {
-        var viewModel = await GetGroupsRecommendationsViewModel(sectionSlug, schoolId, schoolName);
+        var selectedSchool = await GetCurrentGroupSchoolSelection();
+
+        if (selectedSchool is null)
+        {
+            Logger.LogInformation("GroupSelectedSchoolUrn is null, redirecting to GetSelectASchool");
+            return controller.RedirectToAction(GroupsController.GetSelectASchoolAction);
+        }
+
+        var groupId = CurrentUser.EstablishmentId ?? throw new InvalidDataException("User is a MAT user but does not have an establishment ID (for the group)");
+        var groupSchools = await establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            [],
+            groupId
+        );
+
+        var selectedSchoolIsValid = groupSchools.Any(s => s.Urn.Equals(selectedSchool.EstablishmentRef));
+        if (!selectedSchoolIsValid)
+        {
+            return controller.RedirectToAction(GroupsController.GetSchoolDashboardAction);
+        }
+
+        var viewModel = await GetGroupsRecommendationsViewModel(sectionSlug, selectedSchool.Id, schoolName);
 
         if (viewModel is null)
         {
