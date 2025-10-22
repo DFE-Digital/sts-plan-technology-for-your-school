@@ -1,5 +1,4 @@
 using System.Linq.Expressions;
-using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
@@ -94,15 +93,15 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             {
                 if (r.CompletingAnswers.Any(ca => responses.Contains(ca.Id)))
                 {
-                    return new { r.Id, Status = RecommendationConstants.CompletedKey };
+                    return new { r.Id, Status = RecommendationStatus.Complete.ToString() };
                 }
 
                 if (r.InProgressAnswers.Any(ca => responses.Contains(ca.Id)))
                 {
-                    return new { r.Id, Status = RecommendationConstants.InProgressKey };
+                    return new { r.Id, Status = RecommendationStatus.InProgress.ToString() };
                 }
 
-                return new { r.Id, Status = RecommendationConstants.NotStartedKey };
+                return new { r.Id, Status = RecommendationStatus.NotStarted.ToString() };
             })
             .Where(x => x is not null)
             .ToDictionary(x => x!.Id, x => x.Status);
