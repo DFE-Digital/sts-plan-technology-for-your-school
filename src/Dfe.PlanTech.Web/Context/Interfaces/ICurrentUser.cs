@@ -27,11 +27,11 @@ public interface ICurrentUser
     Guid? UserOrganisationDsiId { get; }
     string? UserOrganisationReference { get; }
     string? UserOrganisationTypeName { get; }
+    bool UserOrganisationIsGroup { get; }
 
     bool IsAuthenticated { get; }
     bool IsMat { get; }
     int? UserId { get; }
-    bool UserOrganisationIsGroup { get; }
     (string Urn, string Name)? GetGroupSelectedSchool();
     bool IsInRole(string role);
     void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName);
