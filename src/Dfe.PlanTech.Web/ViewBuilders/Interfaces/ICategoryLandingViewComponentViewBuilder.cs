@@ -5,6 +5,6 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
 {
     public interface ICategoryLandingViewComponentViewBuilder
     {
-        Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName, string sortOrder);
+        Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName, string? sortOrder);
     }
 }

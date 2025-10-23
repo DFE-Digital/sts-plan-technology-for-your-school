@@ -24,7 +24,7 @@ public class CategoryLandingViewComponentViewBuilder(
         QuestionnaireCategoryEntry category,
         string slug,
         string? sectionName,
-        string sortOrder)
+        string? sortOrder)
     {
         if (!category.Sections.Any())
         {

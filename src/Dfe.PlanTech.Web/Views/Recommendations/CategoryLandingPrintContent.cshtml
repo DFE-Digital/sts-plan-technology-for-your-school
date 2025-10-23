@@ -1,0 +1,24 @@
+@model CategoryLandingPageViewModel
+
+@section DfePageHeaderInner {
+	<span class="govuk-caption-xl">How to meet the standard</span>
+	<partial name="Components/PageComponentFactory" model="@Model.Title" />
+}
+
+<div class="govuk-!-margin-bottom-2">
+	@{
+		await Html.RenderPartialAsync("PrintButton", Model);
+	}
+</div>
+
+<div class="govuk-grid-row">
+	<div class="govuk-grid-column-two-thirds">
+		@await Component.InvokeAsync("CategoryLanding", new {
+			category = Model.Category,
+			slug = Model.Slug,
+			sectionName = Model.SectionName,
+			sortOrder = Model.SortOrder,
+			print = true
+		})
+	</div>
+</div>

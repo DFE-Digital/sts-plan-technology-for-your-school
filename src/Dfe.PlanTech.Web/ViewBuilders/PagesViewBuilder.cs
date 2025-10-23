@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -16,15 +17,18 @@ public class PagesViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
+    ICategoryLandingViewComponentViewBuilder categoryLandingViewComponentViewBuilder,
     IContentfulService contentfulService,
     IEstablishmentService establishmentService,
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView = "~/Views/Recommendations/CategoryLandingPage.cshtml";
+    public const string CategoryLandingPagePrintView = "~/Views/Recommendations/CategoryLandingPrintContent.cshtml";
 
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly ICategoryLandingViewComponentViewBuilder _categoryLandingViewComponentViewBuilder = categoryLandingViewComponentViewBuilder ?? throw new ArgumentNullException(nameof(categoryLandingViewComponentViewBuilder));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, PageEntry page)
     {
@@ -54,7 +58,8 @@ public class PagesViewBuilder(
 
         if (page.IsLandingPage == true)
         {
-            return await BuildLandingPageAsync(controller, page);
+            var landingPageViewModel = await BuildLandingPageAsync(controller, page.Slug);
+            return controller.View(CategoryLandingPageView, landingPageViewModel);
         }
 
         controller.ViewData["Title"] = StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text)
@@ -82,24 +87,35 @@ public class PagesViewBuilder(
         return controller.View("Page", viewModel);
     }
 
-    private async Task<IActionResult> BuildLandingPageAsync(Controller controller, PageEntry page)
+    public async Task<IActionResult> RouteToCategoryLandingPrintPageAsync(Controller controller, string categorySlug)
     {
-        var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4);
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug);
+        if (category is null)
+        {
+            return controller.RedirectToHomePage();
+        }
+
+        var viewModel = await BuildLandingPageAsync(controller, categorySlug);
+
+        return controller.View(CategoryLandingPagePrintView, viewModel);
+    }
+
+    private async Task<CategoryLandingPageViewModel> BuildLandingPageAsync(Controller controller, string categorySlug)
+    {
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
         if (category is null)
         {
             throw new ContentfulDataUnavailableException($"Could not find category at {controller.Request.Path.Value}");
         }
 
-        var landingPageViewModel = new CategoryLandingPageViewModel()
+        return new CategoryLandingPageViewModel
         {
-            Slug = page.Slug,
+            Slug = categorySlug,
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"]
         };
-
-        return controller.View(CategoryLandingPageView, landingPageViewModel);
     }
 
     public async Task<NotFoundViewModel> BuildNotFoundViewModel()

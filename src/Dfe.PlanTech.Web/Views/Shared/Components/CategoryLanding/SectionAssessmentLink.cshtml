@@ -14,62 +14,20 @@
 	switch (topic.ProgressStatus)
 	{
 		case SectionProgressStatus.InProgress:
-            statusText = $"A self-assessment was started on {topic.DateUpdated}.";
-			linkText = $"Continue your self-assessment for {topicName}";
-			controller = nameof(QuestionsController);
-			action = nameof(QuestionsController.GetContinueSelfAssessment);
+			statusText = $"A self-assessment was started on {topic.DateUpdated}. This must be completed before recommendations are available.";
 			break;
 		case SectionProgressStatus.Completed:
-            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
-            linkText = $"View answers for {topicName}";
-			controller = nameof(ReviewAnswersController);
-			action = nameof(ReviewAnswersController.ViewAnswers);
+			statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
 			break;
 		default:
-			statusText = "";
-			linkText = $"Go to self-assessment for {topicName}";
-			controller = nameof(QuestionsController);
-			action = nameof(QuestionsController.GetInterstitialPage);
+			statusText = "Self-assessment not started.";
 			break;
 	}
 
-	controller = controller.GetControllerNameSlug();
-
-    if (Model.Context == "Sections")
-    {
-
-        if (topic.ProgressStatus == SectionProgressStatus.Completed)
-        {
-            <p>
-                @statusText
-            </p>
-            <p>
-                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-                    class="govuk-link">@linkText</a>
-            </p>
-        }
-        else if (topic.ProgressStatus == SectionProgressStatus.InProgress)
-        {
-            <p>@statusText</p>
-            <p>               
-                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-                   class="govuk-link">@linkText</a>
-            </p>
-        }
-        else
-        {
-            <p>@topic.ShortDescription</p>
-            <p>
-                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-                   class="govuk-link">@linkText</a>
-            </p>
-        }
-    }
-    else if (Model.Context == "Default" && topic.ProgressStatus != SectionProgressStatus.Completed)
-    {
-        <p>
-            <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-                class="govuk-link">@linkText</a>
-        </p>
-    }
+	if (Model.Context == "Sections")
+	{
+		<p>
+			@statusText
+		</p>
+	}
 }
