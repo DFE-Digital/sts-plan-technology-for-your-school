@@ -10,7 +10,12 @@
 		</div>
 	</div>
 
-	<div class="govuk-grid-column-two-thirds">
+    @foreach (var content in Model.BeforeTitleContent)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
+
+    <div class="govuk-grid-column-two-thirds">
 		<partial name="Components/PageComponentFactory" model="@Model.Title" />
 	</div>
 }
@@ -18,7 +23,7 @@
 <div class="govuk-grid-row">
 	<div class="govuk-grid-column-two-thirds">
 		<p>
-			You are viewing @Model.SchoolName's status.</>
+			You are viewing @Model.SchoolName's status.
 			@if (Model.Content != null)
 			{
 				ViewData["PageSlug"] = Model.Slug;

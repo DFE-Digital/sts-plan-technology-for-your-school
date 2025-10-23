@@ -9,5 +9,6 @@ public class CategoryLandingPageViewModel
     public QuestionnaireCategoryEntry Category { get; set; } = null!;
     public string? SectionName { get; set; }
     public string Slug { get; set; } = null!;
+    public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
     public ComponentTitleEntry Title { get; set; } = null!;
 }

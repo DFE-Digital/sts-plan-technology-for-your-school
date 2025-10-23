@@ -11,6 +11,8 @@ public class GroupsSelectorViewModel
 
     public List<SqlEstablishmentLinkDto> GroupEstablishments { get; set; } = null!;
 
+    public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
+
     public ComponentTitleEntry Title { get; init; } = null!;
 
     public List<ContentfulEntry> Content { get; init; } = null!;
