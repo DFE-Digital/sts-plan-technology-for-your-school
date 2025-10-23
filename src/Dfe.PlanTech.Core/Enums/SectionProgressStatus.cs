@@ -4,8 +4,6 @@
     {
         NotStarted,
         InProgress,
-        StartedNeverCompleted,
-        CompletedStartedNew,
         Completed,
         RetrievalError
     }

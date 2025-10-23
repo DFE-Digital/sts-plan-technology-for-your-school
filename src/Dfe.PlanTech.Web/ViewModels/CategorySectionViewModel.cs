@@ -38,8 +38,6 @@ public class CategorySectionViewModel
     {
         var started = sectionStatus is not null;
         var completed = started && sectionStatus!.Completed;
-        var startedNeverCompleted = started && !completed && sectionStatus!.LastCompletionDate is null;
-        var completedStartedNew = started && !completed && sectionStatus!.LastCompletionDate is not null;
 
         if (hadRetrievalError)
         {
@@ -48,14 +46,6 @@ public class CategorySectionViewModel
         else if (completed)
         {
             return SectionProgressStatus.Completed;
-        }
-        else if (startedNeverCompleted)
-        {
-            return SectionProgressStatus.StartedNeverCompleted;
-        }
-        else if (completedStartedNew)
-        {
-            return SectionProgressStatus.CompletedStartedNew;
         }
         else if (started)
         {

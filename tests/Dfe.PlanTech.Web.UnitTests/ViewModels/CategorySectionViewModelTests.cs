@@ -67,39 +67,6 @@ public class CategorySectionViewModelTests
     }
 
     [Fact]
-    public void Started_Never_Completed_Status_Is_StartedNeverCompleted()
-    {
-        var section = Section(slug: "devices");
-        var status = new SqlSectionStatusDto
-        {
-            Completed = false,
-            LastCompletionDate = null
-        };
-
-        var vm = new CategorySectionViewModel(section, Rec(), status, hadRetrievalError: false);
-
-        Assert.Equal(SectionProgressStatus.StartedNeverCompleted, vm.ProgressStatus);
-        Assert.Null(vm.ErrorMessage);
-    }
-
-    [Fact]
-    public void Completed_Then_Started_New_Status_Is_CompletedStartedNew()
-    {
-        var section = Section(slug: "hosting");
-        var status = new SqlSectionStatusDto
-        {
-            Completed = false,
-            // Presence of a last completion date with Completed == false means: previously completed, now started again
-            LastCompletionDate = DateTime.UtcNow.AddDays(-10)
-        };
-
-        var vm = new CategorySectionViewModel(section, Rec(), status, hadRetrievalError: false);
-
-        Assert.Equal(SectionProgressStatus.CompletedStartedNew, vm.ProgressStatus);
-        Assert.Null(vm.ErrorMessage);
-    }
-
-    [Fact]
     public void When_No_Status_NotStarted()
     {
         var section = Section(slug: "connectivity");
