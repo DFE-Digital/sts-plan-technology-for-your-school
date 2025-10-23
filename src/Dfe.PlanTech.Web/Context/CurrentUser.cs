@@ -26,7 +26,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
 
     public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool()?.Urn;
 
-    public string? GroupSelectedSchoolName => GetGroupSelectedSchool()?.Name;
+    public string? GroupSelectedSchoolName => GetGroupSelectedSchool()?.Name; // TODO: understand how/if relates to `ActiveEstablishmentName` and if we might be able/willing to remove `GroupSelectedSchoolName` (this is from the cookie, versus `ActiveEstablishmentName` is from the database?)
 
     // Active Establishment properties - resolve to selected school for MAT users, otherwise Organisation
     public string? ActiveEstablishmentName => GetActiveEstablishmentName();
