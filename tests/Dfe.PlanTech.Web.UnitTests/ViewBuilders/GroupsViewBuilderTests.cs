@@ -38,14 +38,24 @@ public class GroupsViewBuilderTests
         sub ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         logger ??= NullLogger<BaseViewBuilder>.Instance;
-        var establishmentId = Guid.Empty;
 
-        // sensible defaults used by multiple tests
-        currentUser.EstablishmentId.Returns(999);
-        currentUser.Organisation.Returns(new EstablishmentModel { Id = establishmentId, Name = "The Group" });
-        currentUser.GroupSelectedSchoolUrn.Returns("URN-ABC");
-        est.GetLatestSelectedGroupSchoolAsync("URN-ABC")
-           .Returns(new SqlEstablishmentDto { Id = 42, OrgName = "Selected School", EstablishmentRef = "URN-ABC" });
+        // Set up test scenario: A MAT/Group user who needs to select a school
+        // User Organisation (the MAT/Group they belong to)
+        var groupDsiId = Guid.Parse("10000000-0000-0000-0000-000000000001");
+        currentUser.UserOrganisationId.Returns(100);
+        currentUser.UserOrganisationDsiId.Returns(groupDsiId);
+        currentUser.UserOrganisationName.Returns("Test Academy Trust");
+        currentUser.UserOrganisationUrn.Returns("GRP-100");
+        currentUser.UserOrganisationTypeName.Returns("Multi-Academy Trust");
+        currentUser.UserOrganisationReference.Returns("GRP-100");
+
+        // For the "select a school" flow, ActiveEstablishmentId should match UserOrganisationId
+        // since they haven't selected a specific school yet
+        currentUser.GetActiveEstablishmentIdAsync().Returns(100);
+
+        // No selected establishment by default - tests that need this should set it up explicitly
+        // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
+        // GroupSelectedSchoolUrn not set
 
         return new GroupsViewBuilder(logger, contactOpts, contentful, est, sub, currentUser);
     }
@@ -121,7 +131,7 @@ public class GroupsViewBuilderTests
 
         var est = Substitute.For<IEstablishmentService>();
         est.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-               Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(), 999)
+               Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(), 100)
            .Returns(new List<SqlEstablishmentLinkDto>
            {
                new SqlEstablishmentLinkDto { Id = 1, EstablishmentName = "School A", CompletedSectionsCount = 2 },
@@ -140,8 +150,8 @@ public class GroupsViewBuilderTests
         Assert.Equal("Select a school", controller.ViewData["Title"]);
 
         var vm = Assert.IsType<GroupsSelectorViewModel>(view.Model);
-        Assert.Equal("The Group", vm.GroupName);
-        Assert.Equal("The Group", vm.Title.Text);
+        Assert.Equal("Test Academy Trust", vm.GroupName);
+        Assert.Equal("Test Academy Trust", vm.Title.Text);
         Assert.Equal("3", vm.TotalSections);       // 2 + 1
         Assert.Null(vm.ProgressRetrievalErrorMessage);
         Assert.Equal("/contact-us", vm.ContactLinkHref);
@@ -151,7 +161,7 @@ public class GroupsViewBuilderTests
         await contentful.Received(1).GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
         await contentful.Received(1).GetLinkByIdAsync("contact-123");
         await est.Received(1).GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Is<IEnumerable<QuestionnaireCategoryEntry>>(e => e.Count() == 2), 999);
+            Arg.Is<IEnumerable<QuestionnaireCategoryEntry>>(e => e.Count() == 2), 100);
     }
 
     [Fact]
@@ -182,19 +192,25 @@ public class GroupsViewBuilderTests
     {
         var est = Substitute.For<IEstablishmentService>();
         var currentUser = Substitute.For<ICurrentUser>();
-        var establishmentGuid = Guid.NewGuid();
+
+        // Set up a different MAT/group than the default to test parameter forwarding
+        var customGroupDsiId = Guid.Parse("20000000-0000-0000-0000-000000000002");
 
         var sut = CreateServiceUnderTest(est: est, currentUser: currentUser);
-        currentUser.EstablishmentId.Returns(1000);
-        currentUser.Organisation.Returns(new EstablishmentModel { Id = establishmentGuid, Name = "Group X" });
-        currentUser.DsiReference.Returns("dsi-123"); // if your BaseViewBuilder wraps this, still fine to use
+
+        // Override defaults with custom test values
+        currentUser.DsiReference.Returns("dsi-123");
+        currentUser.UserOrganisationId.Returns(200);
+        currentUser.UserOrganisationDsiId.Returns(customGroupDsiId);
+        currentUser.UserOrganisationName.Returns("Custom Academy Trust");
+        currentUser.UserOrganisationUrn.Returns("GRP-200");
 
         await sut.RecordGroupSelectionAsync("URN-007", "Bond Primary");
 
         await est.Received(1).RecordGroupSelection(
             "dsi-123",
-            1000,
-            Arg.Is<EstablishmentModel>(m => m.Id == establishmentGuid && m.Name == "Group X"),
+            200,
+            Arg.Is<EstablishmentModel>(m => m.Id == customGroupDsiId && m.Name == "Custom Academy Trust" && m.Urn == "GRP-200"),
             "URN-007",
             "Bond Primary");
     }

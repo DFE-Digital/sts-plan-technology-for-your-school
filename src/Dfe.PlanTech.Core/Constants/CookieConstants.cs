@@ -6,4 +6,5 @@ namespace Dfe.PlanTech.Core.Constants;
 public static class CookieConstants
 {
     public const string UserPreferenceRecordedKey = "UserPreferenceRecorded";
+    public const string SelectedSchool = "SelectedSchool";
 }

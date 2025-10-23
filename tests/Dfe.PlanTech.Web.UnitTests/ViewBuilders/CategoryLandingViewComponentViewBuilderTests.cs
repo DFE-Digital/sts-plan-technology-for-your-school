@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -27,7 +27,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         submission ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUser>();
 
-        currentUser.EstablishmentId.Returns(1001);
+        currentUser.GetActiveEstablishmentIdAsync().Returns(1001);
 
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 

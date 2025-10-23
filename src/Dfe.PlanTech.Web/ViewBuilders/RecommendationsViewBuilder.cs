@@ -41,7 +41,7 @@ public class RecommendationsViewBuilder(
         bool useChecklist
     )
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var categoryHeaderText = await ContentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find category header text for slug {categorySlug}");
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
@@ -101,7 +101,7 @@ public class RecommendationsViewBuilder(
         bool useChecklist
     )
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find category for slug {categorySlug}");
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -123,7 +123,7 @@ public class RecommendationsViewBuilder(
                 return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
 
             case SubmissionStatus.CompleteReviewed:
-                var viewModel = BuildRecommendationsViewModel(
+                var viewModel = await BuildRecommendationsViewModel(
                     category,
                     submissionRoutingData,
                     section,
@@ -141,14 +141,14 @@ public class RecommendationsViewBuilder(
         }
     }
 
-    private RecommendationsViewModel BuildRecommendationsViewModel(
+    private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(
         QuestionnaireCategoryEntry category,
         SubmissionRoutingDataModel submissionRoutingData,
         QuestionnaireSectionEntry section,
         string sectionSlug
     )
     {
-        _ = GetEstablishmentIdOrThrowException();
+        _ = await GetActiveEstablishmentIdOrThrowException();
 
         return new RecommendationsViewModel()
         {
