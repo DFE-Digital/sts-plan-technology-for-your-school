@@ -58,7 +58,7 @@ public class GroupsViewBuilder(
         {
             GroupName = groupName,
             GroupEstablishments = groupSchools,
-            BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent,
+            BeforeTitleContent = selectASchoolPageContent?.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(title),
             Content = content,
             TotalSections = totalSections,
@@ -103,7 +103,7 @@ public class GroupsViewBuilder(
             SchoolName = selectedSchool.OrgName,
             SchoolId = selectedSchool.Id,
             GroupName = groupName,
-            BeforeTitleContent = pageContent.BeforeTitleContent,
+            BeforeTitleContent = pageContent?.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry("Plan technology for your school"),
             Content = content,
             Slug = UrlConstants.GroupsDashboardSlug
