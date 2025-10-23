@@ -96,7 +96,8 @@ public class PagesViewBuilder(
             Slug = page.Slug,
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
-            SectionName = controller.TempData["SectionName"] as string
+            SectionName = controller.TempData["SectionName"] as string,
+            SortOrder = controller.Request.Query["sort"]
         };
 
         return controller.View(CategoryLandingPageView, landingPageViewModel);

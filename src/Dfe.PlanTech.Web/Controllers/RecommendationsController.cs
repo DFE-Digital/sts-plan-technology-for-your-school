@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -68,16 +69,15 @@ public class RecommendationsController(
             return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
         }
 
-        var selectedStatusDisplayName = RecommendationConstants.StatusDisplayNamesNonBreakingSpaces.GetValueOrDefault(selectedStatus, selectedStatus);
+        var selectedStatusDisplayName = selectedStatus.GetRecommendationStatusEnumValue();
 
         // Allow only specific statuses
-        if (!RecommendationConstants.ValidStatusKeys.Contains(selectedStatus))
+        if (selectedStatusDisplayName is null)
         {
             Logger.LogWarning("Invalid / unrecognised status value received: {SelectedStatus}: {SelectedStatusDisplayName}", selectedStatus, selectedStatusDisplayName);
             TempData["StatusUpdateError"] = "Select a valid status";
             return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
         }
-
 
         var establishmentId = GetActiveEstablishmentIdOrThrowException();
         var userId = GetUserIdOrThrowException();
@@ -101,7 +101,7 @@ public class RecommendationsController(
         );
 
         // Set success message for the banner
-        TempData["StatusUpdateSuccessTitle"] = $"Status updated to '{selectedStatusDisplayName}'";
+        TempData["StatusUpdateSuccessTitle"] = $"Status updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'";
 
         // Redirect back to the single recommendation page
         return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);

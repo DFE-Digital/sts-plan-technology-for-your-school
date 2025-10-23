@@ -8,7 +8,7 @@
 
 <div class="govuk-grid-row" id="checkYourAnswers-page">
     <div class="govuk-grid-column-two-thirds-from-desktop">
-        <h3 class="govuk-body-l">@Model.SectionName</h3>
+        <h3 class="govuk-caption-xl">@Model.SectionName</h3>
         @{
             await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
         }

@@ -13,15 +13,14 @@
 
 	if (isAuthenticated)
 	{
-		var establishmentReference = CurrentUser.ActiveEstablishmentReference ?? "Unknown";
+		var establishmentId = CurrentUser.ActiveEstablishmentId.ToString() ?? "Unknown";
 		var establishmentType = CurrentUser.UserOrganisationTypeName ?? "Unknown";
-		var userDsiReference = CurrentUser.DsiReference;
 
 		dataLayerObj = new
 		{
-			establishment_reference = establishmentReference,
+            establishment_id = establishmentId,
 			establishment_type = establishmentType,
-			user_dsi_reference = userDsiReference
+            event_name = "establishmentTypeEvent"
 		};
 	}
 

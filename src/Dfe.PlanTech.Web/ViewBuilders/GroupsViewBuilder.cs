@@ -76,6 +76,7 @@ public class GroupsViewBuilder(
     public async Task RecordGroupSelectionAsync(string selectedEstablishmentUrn, string selectedEstablishmentName)
     {
         var userDsiReference = GetDsiReferenceOrThrowException();
+        var userOrganisationId = CurrentUser.UserOrganisationId;
 
         // Construct the user's organisation model from individual properties
         var userOrganisationModel = new EstablishmentModel
@@ -89,7 +90,7 @@ public class GroupsViewBuilder(
 
         await _establishmentService.RecordGroupSelection(
             userDsiReference,
-            CurrentUser.UserOrganisationId,
+            userOrganisationId,
             userOrganisationModel,
             selectedEstablishmentUrn,
             selectedEstablishmentName

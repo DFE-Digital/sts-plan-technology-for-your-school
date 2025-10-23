@@ -1,4 +1,6 @@
 ﻿using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewComponents;
 using Dfe.PlanTech.Web.ViewModels;
@@ -33,11 +35,11 @@ public class CategoryLandingViewComponentTests
             Sections = category.Sections
         };
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName).Returns(Task.FromResult(expectedViewModel));
+        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));
 
         var result = await component.InvokeAsync(category, slug, sectionName);
 
-        await viewBuilder.Received(1).BuildViewModelAsync(category, slug, sectionName);
+        await viewBuilder.Received(1).BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.ToString());
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
         Assert.NotNull(viewResult.ViewData);
         Assert.Equal(expectedViewModel, viewResult.ViewData.Model);
@@ -67,7 +69,7 @@ public class CategoryLandingViewComponentTests
             Sections = category.Sections
         };
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName).Returns(Task.FromResult(expectedViewModel));
+        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));
 
         var result = await component.InvokeAsync(category, slug, sectionName);
 

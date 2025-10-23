@@ -7,6 +7,7 @@ using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Microsoft.Net.Http.Headers;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
@@ -304,17 +305,54 @@ public class CurrentUserTests
         Assert.False(sut.IsInRole("Other"));
     }
 
-    // ---------- GroupSelectedSchool cookie ----------
-
     [Fact]
     public void GetGroupSelectedSchool_Reads_From_Request_Cookies()
     {
         var (sut, ctx) = Build();
 
-        // Simulate an incoming request cookie
-        ctx.Request.Headers["Cookie"] = "SelectedSchoolUrn=12345";
+        var schoolData = new { Urn = "12345", Name = "Test school" };
+        var json = JsonSerializer.Serialize(schoolData);
+        var encoded = Uri.EscapeDataString(json);
 
-        Assert.Equal("12345", sut.GetGroupSelectedSchool());
+        // Set the Cookie header correctly
+        ctx.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={encoded}");
+
+        var result = sut.GetGroupSelectedSchool();
+
+        Assert.Equal(("12345", "Test school"), result);
+        Assert.Equal("12345", sut.GroupSelectedSchoolUrn);
+        Assert.Equal("Test school", sut.GroupSelectedSchoolName);
+    }
+
+    [Fact]
+    public void GetGroupSelectedSchool_ReturnsNull_WhenIncorrectDataModel()
+    {
+        var (sut, ctx) = Build();
+
+        var schoolData = new { Id = "12345", School = "Test school" };
+        var json = JsonSerializer.Serialize(schoolData);
+        var encoded = Uri.EscapeDataString(json);
+
+        // Set the Cookie header correctly
+        ctx.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={encoded}");
+
+        var result = sut.GetGroupSelectedSchool();
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void GetGroupSelectedSchool_ReturnsNull_WhenMalformedJson()
+    {
+        var (sut, ctx) = Build();
+
+        var malformedJson = "{\"Urn\":\"12345\",\"Name\":\"Test school\"";
+        var encoded = Uri.EscapeDataString(malformedJson);
+
+        // Set the Cookie header correctly
+        ctx.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={encoded}");
+
+        var result = sut.GetGroupSelectedSchool();
+        Assert.Null(result);
     }
 
     [Fact]
@@ -322,17 +360,42 @@ public class CurrentUserTests
     {
         var (sut, ctx) = Build();
 
-        // empty -> throws
-        Assert.Throws<InvalidDataException>(() => sut.SetGroupSelectedSchool(""));
-
         // valid -> writes Set-Cookie
-        sut.SetGroupSelectedSchool("99999");
-        var setCookie = ctx.Response.Headers["Set-Cookie"].ToString();
+        sut.SetGroupSelectedSchool("99999", "Test school");
 
-        Assert.Contains("SelectedSchoolUrn=99999", setCookie);
-        Assert.Contains("httponly", setCookie);
-        Assert.Contains("secure", setCookie);
-        Assert.Contains("samesite=strict", setCookie.ToLowerInvariant());
+        var setCookies = ctx.Response.Headers[HeaderNames.SetCookie];
+
+        Assert.NotEmpty(setCookies);
+
+        var cookie = setCookies.LastOrDefault(v =>
+            v.StartsWith("SelectedSchool=", StringComparison.OrdinalIgnoreCase) &&
+            !v.Contains("01 Jan 1970", StringComparison.OrdinalIgnoreCase));
+
+        Assert.False(string.IsNullOrEmpty(cookie), $"Expected an appended SelectedSchool cookie.");
+
+        var lower = cookie!.ToLowerInvariant();
+        Assert.Contains("httponly", lower);
+        Assert.Contains("secure", lower);
+        Assert.Contains("samesite=strict", lower);
     }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    public void SetGroupSelectedSchool_ThrowsInvalidDataException_WhenUrnIsNullOrEmpty(string? urn)
+    {
+        // Arrange
+        var context = new DefaultHttpContext();
+        var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(httpContextAccessor, establishmentService, logger);
+
+        // Act & Assert
+        var ex = Assert.Throws<InvalidDataException>(() => sut.SetGroupSelectedSchool(urn!, "Test School"));
+
+        Assert.Equal("No Urn/School name set for selection.", ex.Message);
+    }
+
 
 }

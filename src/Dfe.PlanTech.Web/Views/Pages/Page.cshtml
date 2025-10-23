@@ -36,6 +36,7 @@
 else
 {
     @section BeforeContent {
+
     @if (Model.Page.DisplayBackButton)
         {
             await Html.RenderPartialAsync("BackButton", Model);

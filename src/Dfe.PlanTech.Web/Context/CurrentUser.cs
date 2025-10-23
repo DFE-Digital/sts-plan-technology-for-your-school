@@ -24,7 +24,9 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
                             ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
 
 
-    public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool();
+    public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool()?.Urn;
+
+    public string? GroupSelectedSchoolName => GetGroupSelectedSchool()?.Name;
 
     // Active Establishment properties - resolve to selected school for MAT users, otherwise Organisation
     public string? ActiveEstablishmentName => GetActiveEstablishmentName();
@@ -74,16 +76,24 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
 
     public bool IsInRole(string role) => _contextAccessor.HttpContext?.User.IsInRole(role) ?? false;
 
-    public void SetGroupSelectedSchool(string selectedSchoolUrn)
+    public void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName)
     {
-        if (string.IsNullOrEmpty(selectedSchoolUrn))
+        if (string.IsNullOrEmpty(selectedSchoolUrn) || string.IsNullOrEmpty(selectedSchoolName))
         {
-            throw new InvalidDataException("No Urn for selection");
+            throw new InvalidDataException("No Urn/School name set for selection.");
         }
 
-        _contextAccessor.HttpContext?.Response.Cookies.Delete(CookieConstants.SelectedSchoolUrn);
+        var schoolData = new SelectedSchoolCookieData
+        {
+            Urn = selectedSchoolUrn,
+            Name = selectedSchoolName
+        };
 
-        _contextAccessor.HttpContext?.Response.Cookies.Append(CookieConstants.SelectedSchoolUrn, selectedSchoolUrn, new CookieOptions
+        var schoolDataJson = System.Text.Json.JsonSerializer.Serialize(schoolData);
+
+        _contextAccessor.HttpContext?.Response.Cookies.Delete(CookieConstants.SelectedSchool);
+
+        _contextAccessor.HttpContext?.Response.Cookies.Append(CookieConstants.SelectedSchool, schoolDataJson, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -95,14 +105,28 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
         _cachedSelectedSchool = null;
     }
 
-    public string? GetGroupSelectedSchool()
+    public (string Urn, string Name)? GetGroupSelectedSchool()
     {
         var httpContext = _contextAccessor.HttpContext;
 
-        if (httpContext != null &&
-            httpContext.Request.Cookies.TryGetValue(CookieConstants.SelectedSchoolUrn, out var selectedSchoolUrn))
+        if (httpContext == null ||
+            !httpContext.Request.Cookies.TryGetValue(CookieConstants.SelectedSchool, out var cookieValue) ||
+            string.IsNullOrWhiteSpace(cookieValue))
         {
-            return selectedSchoolUrn;
+            return null;
+        }
+
+        try
+        {
+            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieData>(cookieValue);
+            if (school != null && (!string.IsNullOrEmpty(school.Urn) && !string.IsNullOrEmpty(school.Name)))
+            {
+                return (school.Urn, school.Name);
+            }
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return null;
         }
 
         return null;

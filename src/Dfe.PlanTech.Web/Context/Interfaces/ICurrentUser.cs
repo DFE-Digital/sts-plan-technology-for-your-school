@@ -5,6 +5,7 @@ public interface ICurrentUser
     string? DsiReference { get; }
     string? Email { get; }
     string? GroupSelectedSchoolUrn { get; }
+    string? GroupSelectedSchoolName { get; }
 
     // Active Establishment - the selected establishment (if MAT user has selected one), otherwise the user's organisation
     string? ActiveEstablishmentName { get; }
@@ -31,7 +32,7 @@ public interface ICurrentUser
     bool IsMat { get; }
     int? UserId { get; }
     bool UserOrganisationIsGroup { get; }
-    string? GetGroupSelectedSchool();
+    (string Urn, string Name)? GetGroupSelectedSchool();
     bool IsInRole(string role);
-    void SetGroupSelectedSchool(string selectedSchoolUrn);
+    void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName);
 }
