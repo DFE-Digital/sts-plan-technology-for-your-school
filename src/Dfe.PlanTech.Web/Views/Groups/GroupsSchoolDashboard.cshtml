@@ -10,14 +10,13 @@
 		</div>
 	</div>
 
-    @foreach (var content in Model.BeforeTitleContent)
-    {
-        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-    }
-
     <div class="govuk-grid-column-two-thirds">
-		<partial name="Components/PageComponentFactory" model="@Model.Title" />
-	</div>
+        @foreach (var content in Model.BeforeTitleContent)
+        {
+            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+        }
+        <partial name="Components/PageComponentFactory" model="@Model.Title"/>
+    </div>
 }
 
 <div class="govuk-grid-row">
