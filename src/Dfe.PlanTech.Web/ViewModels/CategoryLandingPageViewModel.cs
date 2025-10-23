@@ -10,5 +10,6 @@ public class CategoryLandingPageViewModel
     public string? SectionName { get; set; }
     public required string Slug { get; set; }
     public string? SortOrder { get; set; }
+    public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
     public required ComponentTitleEntry Title { get; set; }
 }

@@ -60,6 +60,7 @@ public class GroupsViewBuilder(
         {
             GroupName = groupName,
             GroupEstablishments = groupSchools,
+            BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent,
             Title = new ComponentTitleEntry(title),
             Content = content,
             TotalSections = totalSections,

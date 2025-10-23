@@ -7,6 +7,10 @@
 }
 
 @section DfePageHeaderInner {
+    @foreach (var content in Model.BeforeTitleContent)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
     <span class="govuk-caption-xl">How to meet the standard</span>
     <partial name="Components/PageComponentFactory" model="@Model.Title" />
 }

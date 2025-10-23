@@ -94,6 +94,7 @@ public class PagesViewBuilder(
         var landingPageViewModel = new CategoryLandingPageViewModel()
         {
             Slug = page.Slug,
+            BeforeTitleContent = page.BeforeTitleContent,
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
