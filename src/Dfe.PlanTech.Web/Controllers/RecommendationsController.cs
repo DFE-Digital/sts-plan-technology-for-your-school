@@ -114,7 +114,7 @@ public class RecommendationsController(
     /// </summary>
     /// <returns>The PlanTech database ID for the user's organisation (e.g. establishment, or establishment group)</returns>
     /// <exception cref="InvalidDataException"></exception>
-    protected int GetUserEstablishmentIdOrThrowException()
+    protected int GetUserOrganisationIdOrThrowException()
     {
         return _currentUser.UserOrganisationId ?? throw new InvalidDataException(nameof(_currentUser.UserOrganisationId));
     }

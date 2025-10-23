@@ -32,7 +32,7 @@ public class BaseViewBuilder(
     /// </summary>
     /// <returns>The PlanTech database ID for the user's organisation (e.g. establishment, or establishment group)</returns>
     /// <exception cref="InvalidDataException"></exception>
-    protected int GetUserEstablishmentIdOrThrowException()
+    protected int GetUserOrganisationIdOrThrowException()
     {
         return CurrentUser.UserOrganisationId ?? throw new InvalidDataException(nameof(CurrentUser.UserOrganisationId));
     }

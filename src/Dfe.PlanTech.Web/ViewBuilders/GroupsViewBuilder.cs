@@ -31,7 +31,7 @@ public class GroupsViewBuilder(
     {
         // Get the user's organisation ID (the MAT/group), not the active establishment
         // At this point, the user hasn't selected a school yet
-        var establishmentId = GetUserEstablishmentIdOrThrowException();
+        var establishmentId = GetUserOrganisationIdOrThrowException();
 
         var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
 
