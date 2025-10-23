@@ -202,13 +202,17 @@ public class QuestionsViewBuilder(
     public async Task<IActionResult> RestartSelfAssessment(
         Controller controller,
         string categorySlug,
-        string sectionSlug)
+        string sectionSlug,
+        bool isObsoleteSubmissionFlow)
     {
         var establishmentId = GetEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
 
-        await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
+        if (!isObsoleteSubmissionFlow)
+        {
+            await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
+        };
 
         return controller.RedirectToAction(
             nameof(QuestionsController.GetInterstitialPage),

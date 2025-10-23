@@ -455,7 +455,7 @@ public class QuestionsViewBuilderTests
         _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
         // Act
-        var result = await sut.RestartSelfAssessment(controller, "cat-slug", sectionSlug);
+        var result = await sut.RestartSelfAssessment(controller, "cat-slug", sectionSlug, false);
 
         // Assert
         await _submissionSvc.Received(1).SetSubmissionInaccessibleAsync(555, "S123");
