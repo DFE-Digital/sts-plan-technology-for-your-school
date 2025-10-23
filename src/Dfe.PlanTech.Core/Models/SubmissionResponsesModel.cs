@@ -13,13 +13,15 @@ public class SubmissionResponsesModel
 
     public DateTime? DateLastUpdated { get; init; }
 
-    public SqlEstablishmentDto Establishment { get; init; }
+    public SqlEstablishmentDto? Establishment { get; init; }
 
     public string? Maturity { get; set; }
 
     public List<QuestionWithAnswerModel> Responses { get; set; }
 
     public bool HasResponses => Responses is not null && Responses.Count != 0;
+
+    public string? Status {  get; init; }
 
     public SubmissionResponsesModel(int submissionId, List<QuestionWithAnswerModel> responses)
     {
@@ -40,6 +42,7 @@ public class SubmissionResponsesModel
             .GroupBy(questionWithAnswer => questionWithAnswer.QuestionSysId)
             .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First())
             .ToList();
+        Status = submission.Status;
     }
 }
 

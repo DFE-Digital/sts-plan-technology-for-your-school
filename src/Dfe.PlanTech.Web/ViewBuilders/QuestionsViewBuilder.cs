@@ -36,6 +36,8 @@ public class QuestionsViewBuilder(
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
+    private const string ContinueSelfAssessmentView = "ContinueSelfAssessment";
+    private const string RestartObsoleteAssessmentView = "RestartObsoleteAssessment";
 
 
     public async Task<IActionResult> RouteBySlugAndQuestionAsync(
@@ -184,6 +186,18 @@ public class QuestionsViewBuilder(
             return controller.RedirectToInterstitialPage(sectionSlug);
         }
 
+        if (!String.IsNullOrEmpty(submissionModel.Status) && submissionModel.Status.Equals(SubmissionStatus.Obsolete))
+        {
+            var restartObsoleteViewModel = new RestartObsoleteAssessmentViewModel
+            {
+                TopicName = section.Name,
+                CategorySlug = categorySlug,
+                SectionSlug = sectionSlug
+            };
+
+            return controller.View(RestartObsoleteAssessmentView, restartObsoleteViewModel);
+        };
+
         var viewModel = new ContinueSelfAssessmentViewModel
         {
             AssessmentStartDate = submissionModel.DateCreated ?? DateTime.UtcNow,
@@ -196,7 +210,7 @@ public class QuestionsViewBuilder(
             SectionSlug = sectionSlug
         };
 
-        return controller.View("ContinueSelfAssessment", viewModel);
+        return controller.View(ContinueSelfAssessmentView, viewModel);
     }
 
     public async Task<IActionResult> RestartSelfAssessment(
