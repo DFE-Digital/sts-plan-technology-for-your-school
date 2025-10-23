@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -15,4 +16,5 @@ public class CategoryLandingViewComponentViewModel
     public string? ProgressRetrievalErrorMessage { get; set; }
     public string? SectionName { get; set; }
     public ICollection<QuestionnaireSectionEntry> Sections { get; set; } = [];
+    public RecommendationSort? SortType { get; set; }
 }

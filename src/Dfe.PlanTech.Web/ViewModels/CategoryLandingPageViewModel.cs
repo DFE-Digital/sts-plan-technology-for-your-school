@@ -9,5 +9,6 @@ public class CategoryLandingPageViewModel
     public required QuestionnaireCategoryEntry Category { get; set; }
     public string? SectionName { get; set; }
     public required string Slug { get; set; }
+    public string? SortOrder { get; set; }
     public required ComponentTitleEntry Title { get; set; }
 }

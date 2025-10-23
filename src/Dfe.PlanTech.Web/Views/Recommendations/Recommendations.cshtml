@@ -1,8 +1,5 @@
 @model RecommendationsViewModel
 
-@{
-    Layout = "_RecommendationsLayout";
-}
 
 @* placeholder button name until we have the new tsubtopic page created *@
 @section BeforeContent {
@@ -21,13 +18,13 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
     <div class="recommendation-content">
             @{
                 var allContent = Model.Chunks.ToArray();
-            } 
+            }
 
             @for (var x = 0; x < allContent.Length; x++)
             {
                 var headerWithContent = allContent[x];
                 var previousContent = x - 1 >= 0 ? allContent[x - 1] : null;
-                var nextContent = x + 1 < allContent.Length ? allContent[x + 1] : null;         
+                var nextContent = x + 1 < allContent.Length ? allContent[x + 1] : null;
 
                 <div class="recommendation-piece-container" id="@headerWithContent.SlugifiedLinkText">
                         <div class="govuk-grid-row">
@@ -40,7 +37,7 @@ and the headers & chunks to have a shared parent for displaying based on anchor 
                                                         SectionName = Model.SectionName,
                                                         RecommendationCount = allContent.Length,
                                                         CurrentRecommendationPageCount = x + 1
-                                }" />                                                   
+                                }" />
                                 <partial name="Pagination" model="@(Previous: previousContent, Next:nextContent)" />
                             </div>
                         </div>

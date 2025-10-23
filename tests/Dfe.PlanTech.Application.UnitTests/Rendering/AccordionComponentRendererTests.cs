@@ -67,25 +67,28 @@ public class AccordionComponentRendererRendererTests
 
         var result = renderer.AddHtml(content, rendererCollection, stringBuilder);
 
-        Assert.Equal(result.ToString(), GetStandardStringBuilderOutput().ToString());
+        Assert.Equal(GetStandardStringBuilderOutput().ToString(), result.ToString());
     }
 
     private StringBuilder GetStandardStringBuilderOutput()
     {
+        var accId = "accordion-Internal Name 1";
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine($"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"accordion-Internal Name 1\">");
-        stringBuilder.Append("<div class=\"govuk-accordion__section govuk-body\">");
+
+        stringBuilder.AppendLine($"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"{accId}\">");
+        stringBuilder.Append("<div class=\"govuk-accordion__section\">");
         stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
         stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
-        stringBuilder.Append("<span class=\"govuk-accordion__section-button\" id=\"Internal Name 1-heading\">");
+        stringBuilder.Append($"<span class=\"govuk-accordion__section-button\" id=\"{accId}-heading-1\">");
         stringBuilder.Append("Title 1");
         stringBuilder.Append("</span></h2>");
-        stringBuilder.Append("<div class=\"govuk-accordion__section-summary govuk-body\" id=\"Internal Name 1-summary\">");
+        stringBuilder.Append($"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{accId}-summary-1\">");
         stringBuilder.Append("Summary Line 1");
         stringBuilder.Append("</div></div>");
-        stringBuilder.Append("<div id=\"Internal Name 1-content\" class=\"govuk-accordion__section-content\">");
+        stringBuilder.Append($"<div id=\"{accId}-content-1\" class=\"govuk-accordion__section-content\">");
         stringBuilder.Append("</div></div>");
         stringBuilder.Append("</div>");
+
         return stringBuilder;
     }
 }

@@ -9,9 +9,10 @@ namespace Dfe.PlanTech.Application.UnitTests.Services;
 
 public class SubmissionServiceTests
 {
+    private readonly IRecommendationWorkflow _recommendationWorkflow = Substitute.For<IRecommendationWorkflow>();
     private readonly ISubmissionWorkflow _submissionWorkflow = Substitute.For<ISubmissionWorkflow>();
 
-    private SubmissionService CreateServiceUnderTest() => new SubmissionService(_submissionWorkflow);
+    private SubmissionService CreateServiceUnderTest() => new SubmissionService(_recommendationWorkflow, _submissionWorkflow);
 
     private static (QuestionnaireSectionEntry section,
                     QuestionnaireQuestionEntry q1,
