@@ -26,7 +26,7 @@ public class CategorySectionViewModelTests
         var section = Section(slug: null, name: "Devices");
         var vm = new CategorySectionViewModel(section, Rec(), sectionStatus: null, hadRetrievalError: false);
 
-        Assert.Equal(SectionProgressStatus.RetrievalError, vm.ProgressStatus);
+        Assert.Equal(SubmissionStatus.RetrievalError, vm.ProgressStatus);
         Assert.Equal("Slug  unavailable", vm.ErrorMessage); // Slug is null -> interpolates as blank
         Assert.Equal(string.Empty, vm.Slug);
         Assert.Equal("Devices", vm.Name);
@@ -45,7 +45,7 @@ public class CategorySectionViewModelTests
 
         var vm = new CategorySectionViewModel(section, Rec(), status, hadRetrievalError: true);
 
-        Assert.Equal(SectionProgressStatus.RetrievalError, vm.ProgressStatus);
+        Assert.Equal(SubmissionStatus.RetrievalError, vm.ProgressStatus);
         Assert.Null(vm.ErrorMessage); // slug present, so no slug error message
         Assert.Equal("networking", vm.Slug);
     }
@@ -62,7 +62,7 @@ public class CategorySectionViewModelTests
 
         var vm = new CategorySectionViewModel(section, Rec(), status, hadRetrievalError: false);
 
-        Assert.Equal(SectionProgressStatus.Completed, vm.ProgressStatus);
+        Assert.Equal(SubmissionStatus.CompleteReviewed, vm.ProgressStatus);
         Assert.Null(vm.ErrorMessage);
     }
 
@@ -73,7 +73,7 @@ public class CategorySectionViewModelTests
 
         var vm = new CategorySectionViewModel(section, Rec(), sectionStatus: null, hadRetrievalError: false);
 
-        Assert.Equal(SectionProgressStatus.NotStarted, vm.ProgressStatus);
+        Assert.Equal(SubmissionStatus.NotStarted, vm.ProgressStatus);
         Assert.Null(vm.ErrorMessage);
         Assert.Equal("connectivity", vm.Slug);
         Assert.Equal("Networking", vm.Name);

@@ -8,5 +8,6 @@ public enum SubmissionStatus
     CompleteNotReviewed,
     CompleteReviewed,
     Inaccessible,
-    Obsolete
+    Obsolete,
+    RetrievalError
 }

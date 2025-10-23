@@ -13,13 +13,14 @@
 
 	switch (topic.ProgressStatus)
 	{
-		case SectionProgressStatus.InProgress:
+		case SubmissionStatus.InProgress:
+        case SubmissionStatus.Obsolete:
             statusText = $"A self-assessment was started on {topic.DateUpdated}.";
 			linkText = $"Continue your self-assessment for {topicName}";
 			controller = nameof(QuestionsController);
 			action = nameof(QuestionsController.GetContinueSelfAssessment);
 			break;
-		case SectionProgressStatus.Completed:
+		case SubmissionStatus.CompleteReviewed:
             statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
             linkText = $"View answers for {topicName}";
 			controller = nameof(ReviewAnswersController);
@@ -38,7 +39,7 @@
     if (Model.Context == "Sections")
     {
 
-        if (topic.ProgressStatus == SectionProgressStatus.Completed)
+        if (topic.ProgressStatus == SubmissionStatus.CompleteReviewed)
         {
             <p>
                 @statusText
@@ -48,7 +49,7 @@
                     class="govuk-link">@linkText</a>
             </p>
         }
-        else if (topic.ProgressStatus == SectionProgressStatus.InProgress)
+        else if (topic.ProgressStatus == SubmissionStatus.InProgress || topic.ProgressStatus == SubmissionStatus.Obsolete)
         {
             <p>@statusText</p>
             <p>               
@@ -65,7 +66,7 @@
             </p>
         }
     }
-    else if (Model.Context == "Default" && topic.ProgressStatus != SectionProgressStatus.Completed)
+    else if (Model.Context == "Default" && topic.ProgressStatus != SubmissionStatus.CompleteReviewed)
     {
         <p>
             <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"

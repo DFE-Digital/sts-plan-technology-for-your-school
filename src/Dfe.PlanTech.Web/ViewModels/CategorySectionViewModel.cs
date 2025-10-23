@@ -8,7 +8,7 @@ public class CategorySectionViewModel
 {
     public string? ErrorMessage { get; init; }
     public string Name { get; init; } = null!;
-    public SectionProgressStatus ProgressStatus { get; init; }
+    public SubmissionStatus ProgressStatus { get; init; }
     public CategorySectionRecommendationViewModel? Recommendation { get; init; }
     public string? Slug { get; init; }
 
@@ -26,34 +26,34 @@ public class CategorySectionViewModel
         if (string.IsNullOrWhiteSpace(Slug))
         {
             ErrorMessage = $"Slug {Slug} unavailable";
-            ProgressStatus = SectionProgressStatus.RetrievalError;
+            ProgressStatus = SubmissionStatus.RetrievalError;
         }
         else
         {
-            ProgressStatus = GetSectionProgressStatus(sectionStatus, hadRetrievalError);
+            ProgressStatus = GetSectionSubmissionStatus(sectionStatus, hadRetrievalError);
         }
     }
 
-    private SectionProgressStatus GetSectionProgressStatus(SqlSectionStatusDto? sectionStatus, bool hadRetrievalError)
+    private SubmissionStatus GetSectionSubmissionStatus(SqlSectionStatusDto? sectionStatus, bool hadRetrievalError)
     {
         var started = sectionStatus is not null;
         var completed = started && sectionStatus!.Completed;
 
         if (hadRetrievalError)
         {
-            return SectionProgressStatus.RetrievalError;
+            return SubmissionStatus.RetrievalError;
         }
         else if (completed)
         {
-            return SectionProgressStatus.Completed;
+            return SubmissionStatus.CompleteReviewed;
         }
         else if (started)
         {
-            return SectionProgressStatus.InProgress;
+            return SubmissionStatus.InProgress;
         }
         else
         {
-            return SectionProgressStatus.NotStarted;
+            return SubmissionStatus.NotStarted;
         }
     }
 }
