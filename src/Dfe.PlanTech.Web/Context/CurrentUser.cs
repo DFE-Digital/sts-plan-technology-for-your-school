@@ -41,7 +41,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
 
     public Guid? ActiveEstablishmentDsiId => GetActiveEstablishmentDsiId();
 
-    public string? ActiveEstablishmentReference => GroupSelectedSchoolUrn ?? Organisation?.Reference;
+    public string? ActiveEstablishmentReference => GetActiveEstablishmentReference();
 
     // User Organisation properties - the organisation the currently logged in user is linked to (from OIDC claims)
     // For direct establishment users, these match ActiveEstablishment properties
@@ -214,6 +214,17 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
             return null; // Selected establishment doesn't have DSI ID
         }
         return Organisation?.Id;
+    }
+
+    private string? GetActiveEstablishmentReference()
+    {
+        // Use the selected school URN if available (MAT user has selected a school)
+        // Otherwise fall back to the user's organisation reference
+        if (GroupSelectedSchoolUrn != null)
+        {
+            return GroupSelectedSchoolUrn;
+        }
+        return Organisation?.Reference;
     }
 
     private int? GetIntFromClaim(string claimType)
