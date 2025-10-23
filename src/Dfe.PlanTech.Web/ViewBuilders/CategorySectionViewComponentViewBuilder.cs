@@ -24,7 +24,7 @@ public class CategorySectionViewComponentViewBuilder(
             throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 
-        var establishmentId = GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;

@@ -51,7 +51,7 @@ public class GroupsViewBuilderTests
 
         // For the "select a school" flow, ActiveEstablishmentId should match UserOrganisationId
         // since they haven't selected a specific school yet
-        currentUser.ActiveEstablishmentId.Returns(100);
+        currentUser.GetActiveEstablishmentIdAsync().Returns(100);
 
         // No selected establishment by default - tests that need this should set it up explicitly
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set

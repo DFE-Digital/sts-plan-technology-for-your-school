@@ -70,8 +70,8 @@ public class PagesViewBuilder(
             }
             else
             {
-                viewModel.ActiveEstablishmentName = CurrentUser.ActiveEstablishmentName;
-                viewModel.ActiveEstablishmentUrn = CurrentUser.ActiveEstablishmentUrn;
+                viewModel.ActiveEstablishmentName = await CurrentUser.GetActiveEstablishmentNameAsync();
+                viewModel.ActiveEstablishmentUrn = await CurrentUser.GetActiveEstablishmentUrnAsync();
             }
         }
 

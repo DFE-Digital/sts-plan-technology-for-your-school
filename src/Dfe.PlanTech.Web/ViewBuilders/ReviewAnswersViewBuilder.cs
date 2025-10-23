@@ -32,7 +32,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
@@ -67,7 +67,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
@@ -111,7 +111,7 @@ public class ReviewAnswersViewBuilder(
     {
         try
         {
-            var establishmentId = GetActiveEstablishmentIdOrThrowException();
+            var establishmentId = await GetActiveEstablishmentIdOrThrowException();
             var userOrganisationId = CurrentUser.UserOrganisationId;
             var userId = GetUserIdOrThrowException();
 

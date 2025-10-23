@@ -79,7 +79,7 @@ public class RecommendationsController(
             return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
         }
 
-        var establishmentId = GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var userId = GetUserIdOrThrowException();
 
         var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
@@ -124,9 +124,9 @@ public class RecommendationsController(
     /// </summary>
     /// <returns>The PlanTech database ID for the selected establishment (e.g. an establishment that a MAT user has selected)</returns>
     /// <exception cref="InvalidDataException"></exception>
-    protected int GetActiveEstablishmentIdOrThrowException()
+    protected async Task<int> GetActiveEstablishmentIdOrThrowException()
     {
-        return _currentUser.ActiveEstablishmentId ?? throw new InvalidDataException(nameof(_currentUser.ActiveEstablishmentId));
+        return await _currentUser.GetActiveEstablishmentIdAsync() ?? throw new InvalidDataException(nameof(_currentUser.GetActiveEstablishmentIdAsync));
     }
 
     protected int GetUserIdOrThrowException()

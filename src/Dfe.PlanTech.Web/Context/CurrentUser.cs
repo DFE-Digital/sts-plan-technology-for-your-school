@@ -14,8 +14,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
         contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
     private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly ILogger<CurrentUser> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private SqlEstablishmentDto? _cachedSelectedSchool;
-    private bool _selectedSchoolLoaded;
+    private readonly Lazy<Task<SqlEstablishmentDto?>> _selectedSchoolLazy = new(() => LoadSelectedSchoolAsync(contextAccessor, establishmentService, logger));
 
     public string? DsiReference => GetStringFromClaim(ClaimConstants.NameIdentifier)
                                    ?? throw new AuthenticationException("User is not authenticated");
@@ -26,22 +25,70 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
 
     public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool()?.Urn;
 
-    public string? GroupSelectedSchoolName => GetGroupSelectedSchool()?.Name; // TODO: understand how/if relates to `ActiveEstablishmentName` and if we might be able/willing to remove `GroupSelectedSchoolName` (this is from the cookie, versus `ActiveEstablishmentName` is from the database?)
+    public string? GroupSelectedSchoolName => GetGroupSelectedSchool()?.Name; // TODO: understand how/if relates to `GetActiveEstablishmentNameAsync` and if we might be able/willing to remove `GroupSelectedSchoolName` (this is from the cookie, versus `GetActiveEstablishmentNameAsync` is from the database?)
 
-    // Active Establishment properties - resolve to selected school for MAT users, otherwise Organisation
-    public string? ActiveEstablishmentName => GetActiveEstablishmentName();
+    // Active Establishment methods - resolve to selected school for MAT users, otherwise Organisation
+    public async Task<string?> GetActiveEstablishmentNameAsync()
+    {
+        var selectedSchool = await _selectedSchoolLazy.Value;
+        return selectedSchool?.OrgName ?? Organisation?.Name;
+    }
 
-    public int? ActiveEstablishmentId => GetActiveEstablishmentId();
+    public async Task<int?> GetActiveEstablishmentIdAsync()
+    {
+        var selectedSchool = await _selectedSchoolLazy.Value;
+        return selectedSchool?.Id ?? GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
+    }
 
-    public string? ActiveEstablishmentUrn => GetActiveEstablishmentUrn();
+    public async Task<string?> GetActiveEstablishmentUrnAsync()
+    {
+        var selectedSchool = await _selectedSchoolLazy.Value;
+        return selectedSchool?.EstablishmentRef ?? Organisation?.Urn;
+    }
 
-    public string? ActiveEstablishmentUkprn => GetActiveEstablishmentUkprn();
+    public async Task<string?> GetActiveEstablishmentUkprnAsync()
+    {
+        // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
+        // If a school is selected but doesn't have UKPRN, return null
+        if (GroupSelectedSchoolUrn != null)
+        {
+            return null; // Selected establishment doesn't have UKPRN in SqlEstablishmentDto
+        }
+        return Organisation?.Ukprn;
+    }
 
-    public string? ActiveEstablishmentUid => GetActiveEstablishmentUid();
+    public async Task<string?> GetActiveEstablishmentUidAsync()
+    {
+        // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
+        // If a school is selected but doesn't have UID, return null
+        if (GroupSelectedSchoolUrn != null)
+        {
+            return null; // Selected establishment doesn't have UID in SqlEstablishmentDto
+        }
+        return Organisation?.Uid;
+    }
 
-    public Guid? ActiveEstablishmentDsiId => GetActiveEstablishmentDsiId();
+    public async Task<Guid?> GetActiveEstablishmentDsiIdAsync()
+    {
+        // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
+        // If a school is selected, we don't have the DSI ID for it
+        if (GroupSelectedSchoolUrn != null)
+        {
+            return null; // Selected establishment doesn't have DSI ID
+        }
+        return Organisation?.Id;
+    }
 
-    public string? ActiveEstablishmentReference => GetActiveEstablishmentReference();
+    public async Task<string?> GetActiveEstablishmentReferenceAsync()
+    {
+        // Use the selected school URN if available (MAT user has selected a school)
+        // Otherwise fall back to the user's organisation reference
+        if (GroupSelectedSchoolUrn != null)
+        {
+            return GroupSelectedSchoolUrn;
+        }
+        return Organisation?.Reference;
+    }
 
     // User Organisation properties - the organisation the currently logged in user is linked to (from OIDC claims)
     // For direct establishment users, these match ActiveEstablishment properties
@@ -99,10 +146,6 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
             Secure = true,
             SameSite = SameSiteMode.Strict,
         });
-
-        // Clear cache when selection changes
-        _selectedSchoolLoaded = false;
-        _cachedSelectedSchool = null;
     }
 
     public (string Urn, string Name)? GetGroupSelectedSchool()
@@ -132,99 +175,44 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
         return null;
     }
 
-    // Private methods for Active Establishment resolution
-    private SqlEstablishmentDto? GetSelectedSchoolDetails()
+    // Private static method to load selected school asynchronously
+    private static async Task<SqlEstablishmentDto?> LoadSelectedSchoolAsync(
+        IHttpContextAccessor contextAccessor,
+        IEstablishmentService establishmentService,
+        ILogger<CurrentUser> logger)
     {
-        if (_selectedSchoolLoaded)
+        var httpContext = contextAccessor.HttpContext;
+        if (httpContext == null ||
+            !httpContext.Request.Cookies.TryGetValue(CookieConstants.SelectedSchool, out var cookieValue) ||
+            string.IsNullOrWhiteSpace(cookieValue))
         {
-            return _cachedSelectedSchool;
+            return null;
         }
 
-        _selectedSchoolLoaded = true;
-
-        if (GroupSelectedSchoolUrn == null)
+        string? urn;
+        try
+        {
+            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieData>(cookieValue);
+            urn = school?.Urn;
+            if (string.IsNullOrWhiteSpace(urn))
+            {
+                return null;
+            }
+        }
+        catch (System.Text.Json.JsonException)
         {
             return null;
         }
 
         try
         {
-            // Synchronously get the selected establishment details
-            // This is acceptable as it's only called once per request and cached
-            _cachedSelectedSchool = _establishmentService.GetEstablishmentByReferenceAsync(GroupSelectedSchoolUrn)
-                .GetAwaiter()
-                .GetResult();
+            return await establishmentService.GetEstablishmentByReferenceAsync(urn);
         }
         catch (Exception ex)
         {
-            // Log warning and fall back to user's organisation details
-            _logger.LogWarning(ex, "Failed to get establishment details for URN {GroupSelectedSchoolUrn}. Exception: {Message}", GroupSelectedSchoolUrn, ex.Message);
-            _cachedSelectedSchool = null;
+            logger.LogWarning(ex, "Failed to get establishment details for URN {Urn}: {Message}", urn, ex.Message);
+            return null;
         }
-
-        return _cachedSelectedSchool;
-    }
-
-    private string? GetActiveEstablishmentName()
-    {
-        var selectedSchool = GetSelectedSchoolDetails();
-        return selectedSchool?.OrgName ?? Organisation?.Name;
-    }
-
-    private int? GetActiveEstablishmentId()
-    {
-        var selectedSchool = GetSelectedSchoolDetails();
-        return selectedSchool?.Id ?? GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
-    }
-
-    private string? GetActiveEstablishmentUrn()
-    {
-        var selectedSchool = GetSelectedSchoolDetails();
-        return selectedSchool?.EstablishmentRef ?? Organisation?.Urn;
-    }
-
-    private string? GetActiveEstablishmentUkprn()
-    {
-        // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
-        // If a school is selected but doesn't have UKPRN, return null
-        if (GroupSelectedSchoolUrn != null)
-        {
-            return null; // Selected establishment doesn't have UKPRN in SqlEstablishmentDto
-        }
-        return Organisation?.Ukprn;
-    }
-
-    private string? GetActiveEstablishmentUid()
-    {
-        // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
-        // If a school is selected but doesn't have UID, return null
-        if (GroupSelectedSchoolUrn != null)
-        {
-            return null; // Selected establishment doesn't have UID in SqlEstablishmentDto
-        }
-        return Organisation?.Uid;
-    }
-
-    private Guid? GetActiveEstablishmentDsiId()
-    {
-        // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
-        // If a school is selected, we don't have the DSI ID for it
-        if (GroupSelectedSchoolUrn != null)
-        {
-            return null; // Selected establishment doesn't have DSI ID
-        }
-        return Organisation?.Id;
-    }
-
-    private string? GetActiveEstablishmentReference()
-    {
-        // Use the selected school URN if available (MAT user has selected a school)
-        // Otherwise fall back to the user's organisation reference
-        if (GroupSelectedSchoolUrn != null)
-        {
-            return GroupSelectedSchoolUrn;
-        }
-        return Organisation?.Reference;
     }
 
     private int? GetIntFromClaim(string claimType)

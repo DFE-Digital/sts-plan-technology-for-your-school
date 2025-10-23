@@ -109,7 +109,7 @@ public class UserJourneyMissingContentExceptionHandlerTests
 
         // Act + Assert
         var thrown = await Assert.ThrowsAsync<InvalidDataException>(() => sut.Handle(controller, ex));
-        Assert.Contains(nameof(CurrentUser.ActiveEstablishmentId), thrown.Message);
+        Assert.Contains(nameof(CurrentUser.GetActiveEstablishmentIdAsync), thrown.Message);
 
         await submissionSvc.DidNotReceiveWithAnyArgs().SetSubmissionInaccessibleAsync(default!, default!);
     }

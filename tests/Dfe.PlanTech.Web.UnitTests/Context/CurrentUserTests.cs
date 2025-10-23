@@ -93,20 +93,20 @@ public class CurrentUserTests
     // ---------- EstablishmentId ----------
 
     [Fact]
-    public void EstablishmentId_Parses_Int_When_Present()
+    public async Task EstablishmentId_Parses_Int_When_Present()
     {
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "42") });
-        Assert.Equal(42, sut.ActiveEstablishmentId);
+        Assert.Equal(42, await sut.GetActiveEstablishmentIdAsync());
     }
 
     [Fact]
-    public void EstablishmentId_Is_Null_When_Missing_Or_NonNumeric()
+    public async Task EstablishmentId_Is_Null_When_Missing_Or_NonNumeric()
     {
         var (sut1, _) = Build();
-        Assert.Null(sut1.ActiveEstablishmentId);
+        Assert.Null(await sut1.GetActiveEstablishmentIdAsync());
 
         var (sut2, _) = Build(new[] { BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "not-an-int") });
-        Assert.Null(sut2.ActiveEstablishmentId);
+        Assert.Null(await sut2.GetActiveEstablishmentIdAsync());
     }
 
     // ---------- UserId ----------

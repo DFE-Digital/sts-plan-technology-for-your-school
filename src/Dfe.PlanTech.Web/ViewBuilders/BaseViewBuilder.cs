@@ -42,9 +42,9 @@ public class BaseViewBuilder(
     /// </summary>
     /// <returns>The PlanTech database ID for the selected establishment (e.g. an establishment that a MAT user has selected)</returns>
     /// <exception cref="InvalidDataException"></exception>
-    protected int GetActiveEstablishmentIdOrThrowException()
+    protected async Task<int> GetActiveEstablishmentIdOrThrowException()
     {
-        return CurrentUser.ActiveEstablishmentId ?? throw new InvalidDataException(nameof(CurrentUser.ActiveEstablishmentId));
+        return await CurrentUser.GetActiveEstablishmentIdAsync() ?? throw new InvalidDataException(nameof(CurrentUser.GetActiveEstablishmentIdAsync));
     }
 
     protected CategorySectionRecommendationViewModel BuildCategorySectionRecommendationViewModel(

@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -26,7 +26,7 @@ public class ReviewAnswersViewBuilderTests
 
     private ReviewAnswersViewBuilder CreateSut()
     {
-        _currentUser.ActiveEstablishmentId.Returns(2);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(2);
         _currentUser.UserOrganisationId.Returns((int?)null); // non-MAT user by default
         _currentUser.UserId.Returns(1);
 
@@ -76,7 +76,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.ActiveEstablishmentId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
         var section = MakeSection("S1", "sec-1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
@@ -96,7 +96,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.ActiveEstablishmentId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
         var section = MakeSection("S1", "sec-1", "Section 1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
@@ -124,7 +124,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.ActiveEstablishmentId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
         var section = MakeSection("S1", "sec-1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
@@ -147,7 +147,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.ActiveEstablishmentId.Returns(2);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(2);
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
@@ -164,7 +164,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.ActiveEstablishmentId.Returns(2);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(2);
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
@@ -181,7 +181,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.ActiveEstablishmentId.Returns(2);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(2);
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
@@ -198,7 +198,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.ActiveEstablishmentId.Returns(77);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(77);
         var section = MakeSection("S7", "sec-7", "Section 7");
         _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
 
@@ -236,7 +236,7 @@ public class ReviewAnswersViewBuilderTests
         var sut = CreateSut();
         var ctl = MakeController();
 
-        _currentUser.ActiveEstablishmentId.Returns(2);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(2);
         var q1 = MakeQuestion("QX", "q-x");
         var section = MakeSection("S2", "sec-2", "S", q1);
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);

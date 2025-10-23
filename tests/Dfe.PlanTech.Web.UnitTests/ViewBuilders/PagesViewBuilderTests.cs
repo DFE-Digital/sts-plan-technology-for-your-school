@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -57,8 +57,8 @@ public class PagesViewBuilderTests
         // sensible defaults
         currentUser.IsMat.Returns(false);
         currentUser.IsAuthenticated.Returns(true);
-        currentUser.ActiveEstablishmentName.Returns("Acme Academy");
-        currentUser.ActiveEstablishmentUrn.Returns("123456");
+        currentUser.GetActiveEstablishmentNameAsync().Returns("Acme Academy");
+        currentUser.GetActiveEstablishmentUrnAsync().Returns("123456");
 
         return new PagesViewBuilder(logger, contact, errors, contentful, establishmentService, currentUser);
     }
@@ -158,7 +158,7 @@ public class PagesViewBuilderTests
         // `CreateServiceUnderTest` sets defaults, so must override here:
         currentUser.IsAuthenticated.Returns(true);
         currentUser.IsMat.Returns(true);
-        currentUser.ActiveEstablishmentId.Returns(654321); // the ID for the group (MAT)
+        currentUser.GetActiveEstablishmentIdAsync().Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns("123456");
 
         var controller = new TestController();

@@ -13,7 +13,7 @@
 
 	if (isAuthenticated)
 	{
-		var establishmentId = CurrentUser.ActiveEstablishmentId.ToString() ?? "Unknown";
+		var establishmentId = (await CurrentUser.GetActiveEstablishmentIdAsync())?.ToString() ?? "Unknown";
 		var establishmentType = CurrentUser.UserOrganisationTypeName ?? "Unknown";
 
 		dataLayerObj = new
