@@ -14,7 +14,7 @@
     }
 
     @section DfePageHeaderInner {
-    @foreach (var content in Model.Page.BeforeTitleContent)
+        @foreach (var content in Model.Page.BeforeTitleContent)
         {
             await Html.RenderPartialAsync("Components/PageComponentFactory", content);
         }

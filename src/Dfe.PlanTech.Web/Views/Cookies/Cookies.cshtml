@@ -5,6 +5,11 @@
 }
 
 @section DfePageHeaderInner {
+    @foreach (var content in Model.BeforeTitleContent)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
+
     <partial name="Components/PageComponentFactory" model="@Model.Title" />
 }
 
