@@ -24,7 +24,7 @@ public class EstablishmentRepository : IEstablishmentRepository
             EstablishmentRef = model.Reference,
             EstablishmentType = model.Type?.Name,
             OrgName = model.Name,
-            GroupUid = model.GroupUid
+            GroupUid = model.GroupUid // TODO: Consider getting it from `uid` instead, noting that `GroupUid` is populated from `uid`
         };
 
         await _db.Establishments.AddAsync(establishmentEntity);

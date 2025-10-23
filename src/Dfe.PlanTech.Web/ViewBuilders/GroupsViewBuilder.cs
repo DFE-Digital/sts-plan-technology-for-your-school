@@ -85,7 +85,11 @@ public class GroupsViewBuilder(
             Name = CurrentUser.UserOrganisationName ?? string.Empty,
             Urn = CurrentUser.UserOrganisationUrn,
             Ukprn = CurrentUser.UserOrganisationUkprn,
-            Uid = CurrentUser.UserOrganisationUid
+            Uid = CurrentUser.UserOrganisationUid,
+            GroupUid = CurrentUser.UserOrganisationUid, // TODO: resolve some confusion here - the database table is `GroupUid` and is populated from the `uid` OIDC claim - possibly remove `groupUid` from `EstablishmentModel`?
+            Type = CurrentUser.UserOrganisationTypeName is null
+                ? null
+                : new IdWithNameModel { Name = CurrentUser.UserOrganisationTypeName }
         };
 
         await _establishmentService.RecordGroupSelection(
