@@ -13,6 +13,11 @@
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
-        @await Component.InvokeAsync("CategoryLanding", new { category = Model.Category, slug = Model.Slug, Model.SectionName })
+        @await Component.InvokeAsync("CategoryLanding", new {
+			category = Model.Category,
+			slug = Model.Slug,
+			sectionName = Model.SectionName,
+			sortOrder = Model.SortOrder
+		})
     </div>
 </div>

@@ -12,6 +12,8 @@ public class QuestionsController : BaseController<QuestionsController>
 {
     public const string Controller = "Questions";
 
+    public const string GetQuestionBySlugAction = "GetQuestionBySlug";
+
     private readonly IQuestionsViewBuilder _questionsViewBuilder;
 
     public QuestionsController(
@@ -22,7 +24,7 @@ public class QuestionsController : BaseController<QuestionsController>
         _questionsViewBuilder = questionsViewBuilder ?? throw new ArgumentNullException(nameof(questionsViewBuilder));
     }
 
-    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}")]
+    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}", Name = GetQuestionBySlugAction)]
     public async Task<IActionResult> GetQuestionBySlug(string categorySlug, string sectionSlug, string questionSlug, string? returnTo)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));

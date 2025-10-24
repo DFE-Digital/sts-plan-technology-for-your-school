@@ -30,7 +30,7 @@ public partial interface IRichTextContent
         );
 
     public bool MatchesNodeType(string? enumName)
-    => string.Equals(enumName, RemoveHyphensAndNumbersRegEx().Replace(NodeType, ""), StringComparison.OrdinalIgnoreCase);
+    => string.Equals(enumName, RemoveHyphensAndNumbersRegEx().Replace(NodeType, ""), StringComparison.InvariantCultureIgnoreCase);
 
     public string? GetNameForNodeType(RichTextNodeType value) => Enum.GetName(value);
 

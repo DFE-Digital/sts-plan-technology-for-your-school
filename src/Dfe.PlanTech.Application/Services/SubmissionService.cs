@@ -10,9 +10,11 @@ using Dfe.PlanTech.Core.RoutingDataModels;
 namespace Dfe.PlanTech.Application.Services;
 
 public class SubmissionService(
+    IRecommendationWorkflow recommendationWorkflow,
     ISubmissionWorkflow submissionWorkflow
 ) : ISubmissionService
 {
+    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
     private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
     public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section)
@@ -29,6 +31,14 @@ public class SubmissionService(
         }
 
         return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
+    }
+
+    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByRecommendationIdAsync(
+        IEnumerable<string> recommendationContentfulReferences,
+        int establishmentId
+    )
+    {
+        return _recommendationWorkflow.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId);
     }
 
     public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, bool isCompletedSubmission)

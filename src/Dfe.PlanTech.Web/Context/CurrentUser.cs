@@ -19,7 +19,9 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
     public int? EstablishmentId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
 
-    public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool();
+    public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool()?.Urn;
+
+    public string? GroupSelectedSchoolName => GetGroupSelectedSchool()?.Name;
 
     public bool IsAuthenticated => GetIsAuthenticated();
 
@@ -27,23 +29,30 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
     public int? MatEstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
 
-    public EstablishmentModel Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation()
-            ?? throw new InvalidDataException($"Could not parse user's {nameof(Organisation)} claim");
+    public EstablishmentModel? Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
 
     public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 
     public bool IsInRole(string role) => contextAccessor.HttpContext?.User.IsInRole(role) ?? false;
 
-    public void SetGroupSelectedSchool(string selectedSchoolUrn)
+    public void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName)
     {
-        if (string.IsNullOrEmpty(selectedSchoolUrn))
+        if (string.IsNullOrEmpty(selectedSchoolUrn) || string.IsNullOrEmpty(selectedSchoolName))
         {
-            throw new InvalidDataException("No Urn for selection");
+            throw new InvalidDataException("No Urn/School name set for selection.");
         }
 
-        _contextAccessor.HttpContext?.Response.Cookies.Delete("SelectedSchoolUrn");
+        var schoolData = new SelectedSchoolCookieData
+        {
+            Urn = selectedSchoolUrn,
+            Name = selectedSchoolName
+        };
 
-        _contextAccessor.HttpContext?.Response.Cookies.Append("SelectedSchoolUrn", selectedSchoolUrn, new CookieOptions
+        var schoolDataJson = System.Text.Json.JsonSerializer.Serialize(schoolData);
+
+        _contextAccessor.HttpContext?.Response.Cookies.Delete("SelectedSchool");
+
+        _contextAccessor.HttpContext?.Response.Cookies.Append("SelectedSchool", schoolDataJson, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -51,14 +60,28 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
         });
     }
 
-    public string? GetGroupSelectedSchool()
+    public (string Urn, string Name)? GetGroupSelectedSchool()
     {
         var httpContext = _contextAccessor.HttpContext;
 
-        if (httpContext != null &&
-            httpContext.Request.Cookies.TryGetValue("SelectedSchoolUrn", out var selectedSchoolUrn))
+        if (httpContext == null ||
+            !httpContext.Request.Cookies.TryGetValue("SelectedSchool", out var cookieValue) ||
+            string.IsNullOrWhiteSpace(cookieValue))
         {
-            return selectedSchoolUrn;
+            return null;
+        }
+
+        try
+        {
+            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieData>(cookieValue);
+            if (school != null && (!string.IsNullOrEmpty(school.Urn) && !string.IsNullOrEmpty(school.Name)))
+            {
+                return (school.Urn, school.Name);
+            }
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return null;
         }
 
         return null;
