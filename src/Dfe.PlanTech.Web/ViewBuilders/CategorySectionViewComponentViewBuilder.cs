@@ -43,9 +43,9 @@ public class CategorySectionViewComponentViewBuilder(
         }
 
         var categoryLandingSlug = GetLandingPageSlug(category);
-            var description = category.Content is { Count: > 0 } content
-            ? content[0]
-            : new MissingComponentEntry();
+        var description = category.Content is { Count: > 0 } content
+        ? content[0]
+        : new MissingComponentEntry();
 
         return new CategoryCardsViewComponentViewModel
         {

@@ -21,7 +21,7 @@ public class SubmissionResponsesModel
 
     public bool HasResponses => Responses is not null && Responses.Count != 0;
 
-    public string? Status {  get; init; }
+    public string? Status { get; init; }
 
     public SubmissionResponsesModel(int submissionId, List<QuestionWithAnswerModel> responses)
     {

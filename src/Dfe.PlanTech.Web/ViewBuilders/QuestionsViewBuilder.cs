@@ -196,7 +196,8 @@ public class QuestionsViewBuilder(
             };
 
             return controller.View(RestartObsoleteAssessmentView, restartObsoleteViewModel);
-        };
+        }
+        ;
 
         var viewModel = new ContinueSelfAssessmentViewModel
         {
@@ -226,7 +227,8 @@ public class QuestionsViewBuilder(
         if (!isObsoleteSubmissionFlow)
         {
             await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
-        };
+        }
+        ;
 
         return controller.RedirectToAction(
             nameof(QuestionsController.GetInterstitialPage),
