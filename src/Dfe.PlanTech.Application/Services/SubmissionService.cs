@@ -61,35 +61,23 @@ public class SubmissionService(
             section,
             isCompletedSubmission);
 
-        SubmissionStatus status;
+        bool isNullSubmissionOrInvalidStatus =
+            latestSubmission == null ||
+            (latestSubmission.Status?.Equals(nameof(SubmissionStatus.Inaccessible)) ?? false) ||
+            (latestSubmission.Status?.Equals(nameof(SubmissionStatus.Obsolete)) ?? false);
 
-        if (latestSubmission == null || (latestSubmission.Status != null && latestSubmission.Status.Equals(SubmissionStatus.Inaccessible)))
-        {
-            status = SubmissionStatus.NotStarted;
-        }
-        else if (latestSubmission.Completed)
-        {
-            status = SubmissionStatus.CompleteReviewed;
-        }
-        else
-        {
-            status = SubmissionStatus.InProgress;
-        }
-
-        var submissionResponsesModel = latestSubmission is null || (latestSubmission.Status != null && latestSubmission.Status.Equals(SubmissionStatus.Inaccessible))
-            ? null
-            : new SubmissionResponsesModel(latestSubmission, section);
-
-        if (status.Equals(SubmissionStatus.NotStarted))
+        if (isNullSubmissionOrInvalidStatus)
         {
             return new SubmissionRoutingDataModel
             (
                 nextQuestion: section.Questions.First(),
                 questionnaireSection: section,
-                submission: submissionResponsesModel,
-                status
+                submission: null,
+                status: SubmissionStatus.NotStarted
             );
         }
+
+        var submissionResponsesModel = new SubmissionResponsesModel(latestSubmission!, section);
 
         var lastResponse = submissionResponsesModel!.Responses.Last();
         var cmsLastAnswer = section.Questions
@@ -97,11 +85,18 @@ public class SubmissionService(
             .Answers
             .FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
 
-        var sectionStatus = latestSubmission?.Status is null
-            ? cmsLastAnswer?.NextQuestion is null
-               ? SubmissionStatus.CompleteNotReviewed
-               : SubmissionStatus.InProgress
-            : latestSubmission.Status.ToSubmissionStatus();
+        SubmissionStatus sectionStatus;
+
+        if (latestSubmission!.Status is null)
+        {
+            sectionStatus = cmsLastAnswer?.NextQuestion is null
+                ? SubmissionStatus.CompleteNotReviewed
+                : SubmissionStatus.InProgress;
+        }
+        else
+        {
+            sectionStatus = latestSubmission.Status.ToSubmissionStatus();
+        }
 
         return new SubmissionRoutingDataModel
         (

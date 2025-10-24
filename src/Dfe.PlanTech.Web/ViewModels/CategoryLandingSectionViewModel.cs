@@ -11,7 +11,7 @@ public class CategoryLandingSectionViewModel
     public string? ErrorMessage { get; init; }
     public string? LastCompletionDate { get; init; } = null;
     public string Name { get; init; }
-    public SectionProgressStatus ProgressStatus { get; init; }
+    public SubmissionStatus ProgressStatus { get; init; }
     public CategoryLandingSectionRecommendationsViewModel Recommendations { get; init; } = null!;
     public string ShortDescription { get; init; }
     public string? Slug { get; init; }
@@ -39,34 +39,34 @@ public class CategoryLandingSectionViewModel
         if (string.IsNullOrWhiteSpace(Slug))
         {
             ErrorMessage = $"{Name} at {Slug} unavailable";
-            ProgressStatus = SectionProgressStatus.RetrievalError;
+            ProgressStatus = SubmissionStatus.RetrievalError;
         }
         else
         {
-            ProgressStatus = GetSectionProgressStatus(sectionStatus, hadRetrievalError);
+            ProgressStatus = GetSectionSubmissionStatus(sectionStatus, hadRetrievalError);
         }
     }
 
-    private SectionProgressStatus GetSectionProgressStatus(SqlSectionStatusDto? sectionStatus, bool hadRetrievalError)
+    private SubmissionStatus GetSectionSubmissionStatus(SqlSectionStatusDto? sectionStatus, bool hadRetrievalError)
     {
         var started = sectionStatus is not null;
         var completed = started && sectionStatus?.LastCompletionDate is not null;
 
         if (hadRetrievalError)
         {
-            return SectionProgressStatus.RetrievalError;
+            return SubmissionStatus.RetrievalError;
         }
         else if (completed)
         {
-            return SectionProgressStatus.Completed;
+            return SubmissionStatus.CompleteReviewed;
         }
         else if (started)
         {
-            return SectionProgressStatus.InProgress;
+            return SubmissionStatus.InProgress;
         }
         else
         {
-            return SectionProgressStatus.NotStarted;
+            return SubmissionStatus.NotStarted;
         }
     }
 }

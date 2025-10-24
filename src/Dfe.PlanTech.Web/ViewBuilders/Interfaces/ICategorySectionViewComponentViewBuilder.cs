@@ -5,6 +5,6 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
 {
     public interface ICategorySectionViewComponentViewBuilder
     {
-        Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category);
+        Task<CategoryCardsViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category);
     }
 }

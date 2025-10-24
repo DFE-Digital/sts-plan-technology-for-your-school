@@ -14,7 +14,7 @@ namespace Dfe.PlanTech.Web.Tests.ViewComponents
         {
             var mockViewBuilder = Substitute.For<ICategorySectionViewComponentViewBuilder>();
             var categoryEntry = new QuestionnaireCategoryEntry();
-            var expectedViewModel = new CategorySectionViewComponentViewModel()
+            var expectedViewModel = new CategoryCardsViewComponentViewModel()
             {
                 CategoryHeaderText = "Arbitrary header text",
                 Description = new MissingComponentEntry()
