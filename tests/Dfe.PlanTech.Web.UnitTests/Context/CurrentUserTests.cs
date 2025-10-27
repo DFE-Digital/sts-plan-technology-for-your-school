@@ -93,18 +93,72 @@ public class CurrentUserTests
     // ---------- EstablishmentId ----------
 
     [Fact]
-    public async Task EstablishmentId_Parses_Int_When_Present()
+    public async Task GetActiveEstablishmentIdAsync_ForDirectEstablishmentUser_ReturnsIdFromClaim()
     {
+        // Arrange - Direct establishment user (no selected school)
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "42") });
-        Assert.Equal(42, await sut.GetActiveEstablishmentIdAsync());
+
+        // Act
+        var result = await sut.GetActiveEstablishmentIdAsync();
+
+        // Assert
+        Assert.Equal(42, result);
     }
 
     [Fact]
-    public async Task EstablishmentId_Is_Null_When_Missing_Or_NonNumeric()
+    public async Task GetActiveEstablishmentIdAsync_ForGroupUserWithSelectedSchool_ReturnsSelectedSchoolIdFromDatabase()
+    {
+        // Arrange - MAT user with selected school
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's ID
+        }, "test"));
+        context.User = principal;
+
+        // Set selected school cookie
+        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        establishmentService.GetEstablishmentByReferenceAsync("999888")
+            .Returns(new Core.DataTransferObjects.Sql.SqlEstablishmentDto
+            {
+                Id = 42, // Selected school's DB ID
+                OrgName = "Selected Academy",
+                EstablishmentRef = "999888"
+            });
+
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var result = await sut.GetActiveEstablishmentIdAsync();
+
+        // Assert - Should return selected school's ID (42), not MAT's ID (100)
+        Assert.Equal(42, result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentIdAsync_WhenNoClaimAndNoSelectedSchool_ReturnsNull()
     {
         var (sut1, _) = Build();
         Assert.Null(await sut1.GetActiveEstablishmentIdAsync());
+    }
 
+    [Fact]
+    public async Task GetActiveEstablishmentIdAsync_WhenClaimIsNonNumeric_ReturnsNull()
+    {
         var (sut2, _) = Build(new[] { BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "not-an-int") });
         Assert.Null(await sut2.GetActiveEstablishmentIdAsync());
     }
@@ -395,6 +449,627 @@ public class CurrentUserTests
         var ex = Assert.Throws<InvalidDataException>(() => sut.SetGroupSelectedSchool(urn!, "Test School"));
 
         Assert.Equal("No Urn/School name set for selection.", ex.Message);
+    }
+
+    // ---------- GetActiveEstablishmentNameAsync ----------
+
+    [Fact]
+    public async Task GetActiveEstablishmentNameAsync_ForDirectSchoolUser_ReturnsSchoolName()
+    {
+        // Arrange - Direct school user (logged in directly as a school)
+        var orgJson = """
+        {
+          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+          "name": "Test Primary School",
+          "category": { "id": "001", "name": "Establishment" },
+          "type": { "id": "27", "name": "Miscellaneous" },
+          "urn": "123456"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert
+        Assert.Equal("Test Primary School", result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentNameAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupName()
+    {
+        // Arrange - MAT user who has not yet selected a school (will be prompted to select)
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should return MAT name since no school selected
+        Assert.Equal("Test Multi-Academy Trust", result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentNameAsync_ForGroupUserWithSelectedSchool_ReturnsSelectedSchoolNameFromDatabase()
+    {
+        // Arrange - MAT user who has selected a school from their group
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        context.User = principal;
+
+        // Set selected school cookie
+        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        establishmentService.GetEstablishmentByReferenceAsync("999888")
+            .Returns(new Core.DataTransferObjects.Sql.SqlEstablishmentDto
+            {
+                Id = 42,
+                OrgName = "Selected Academy from DB",
+                EstablishmentRef = "999888"
+            });
+
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var result = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - should return name from database, not cookie
+        Assert.Equal("Selected Academy from DB", result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentNameAsync_ForGroupUserWithSelectedSchool_WhenDatabaseLookupFails_FallsBackToGroupName()
+    {
+        // Arrange - MAT user who has selected a school, but database lookup fails
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        context.User = principal;
+
+        // Set selected school cookie
+        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        establishmentService.GetEstablishmentByReferenceAsync("999888")
+            .Returns(Task.FromException<Core.DataTransferObjects.Sql.SqlEstablishmentDto?>(new Exception("Database error")));
+
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var result = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - should fall back to MAT/group name
+        Assert.Equal("Test Multi-Academy Trust", result);
+    }
+
+    // ---------- GetActiveEstablishmentUrnAsync ----------
+
+    [Fact]
+    public async Task GetActiveEstablishmentUrnAsync_ForDirectSchoolUser_ReturnsSchoolUrn()
+    {
+        // Arrange - Direct school user (logged in directly as a school)
+        var orgJson = """
+        {
+          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+          "name": "Test Primary School",
+          "category": { "id": "001", "name": "Establishment" },
+          "urn": "123456"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentUrnAsync();
+
+        // Assert
+        Assert.Equal("123456", result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentUrnAsync_ForGroupUserWithNoSchoolSelected_ReturnsNull()
+    {
+        // Arrange - MAT user who has not yet selected a school (will be prompted to select)
+        // Business Rule: MATs don't have URN (only UID), so return null
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" },
+          "uid": "9876"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentUrnAsync();
+
+        // Assert - MAT doesn't have URN, only schools do
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentUrnAsync_ForGroupUserWithSelectedSchool_ReturnsSelectedSchoolUrn()
+    {
+        // Arrange - MAT user who has selected a school from their group
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        context.User = principal;
+
+        // Set selected school cookie
+        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        establishmentService.GetEstablishmentByReferenceAsync("999888")
+            .Returns(new Core.DataTransferObjects.Sql.SqlEstablishmentDto
+            {
+                Id = 42,
+                OrgName = "Selected Academy",
+                EstablishmentRef = "999888"
+            });
+
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var result = await sut.GetActiveEstablishmentUrnAsync();
+
+        // Assert
+        Assert.Equal("999888", result);
+    }
+
+    // ---------- GetActiveEstablishmentUkprnAsync ----------
+
+    [Fact]
+    public async Task GetActiveEstablishmentUkprnAsync_ForDirectSchoolUser_ReturnsSchoolUkprn()
+    {
+        // Arrange - Direct school user (logged in directly as a school)
+        var orgJson = """
+        {
+          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+          "name": "Test Primary School",
+          "category": { "id": "001", "name": "Establishment" },
+          "urn": "123456",
+          "ukprn": "10012345"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentUkprnAsync();
+
+        // Assert
+        Assert.Equal("10012345", result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentUkprnAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupUkprn()
+    {
+        // Arrange - MAT user who has not yet selected a school (will be prompted to select)
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" },
+          "ukprn": "10067890"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentUkprnAsync();
+
+        // Assert - Should return MAT's UKPRN since no school selected
+        Assert.Equal("10067890", result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentUkprnAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
+    {
+        // Arrange - MAT user who has selected a school from their group
+        // Business Rule: Schools do (sometimes) have an UKPRN on DSI, but we do not store it in our database,
+        // therefore we cannot return it here for a group user (the user is not logged in directly as the school).
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" },
+          "ukprn": "10067890"
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        context.User = principal;
+
+        // Set selected school cookie
+        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var result = await sut.GetActiveEstablishmentUkprnAsync();
+
+        // Assert - Should return null because selected establishment doesn't have UKPRN in the database
+        Assert.Null(result);
+    }
+
+    // ---------- GetActiveEstablishmentUidAsync ----------
+
+    [Fact]
+    public async Task GetActiveEstablishmentUidAsync_ForDirectSchoolUser_ReturnsNull()
+    {
+        // Arrange - Direct school user (logged in directly as a school)
+        // Note: Schools don't have UID (only groups like MATs and SATs have a UID)
+        var orgJson = """
+        {
+          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+          "name": "Test Primary School",
+          "category": { "id": "001", "name": "Establishment" },
+          "urn": "123456"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentUidAsync();
+
+        // Assert - Schools don't have UID
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentUidAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupUid()
+    {
+        // Arrange - MAT user (logged in as MAT, no school selected) - MATs have UID
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" },
+          "uid": "9876"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentUidAsync();
+
+        // Assert
+        Assert.Equal("9876", result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentUidAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
+    {
+        // Arrange - MAT user who has selected a school from their group
+        // Note: Schools do not have a UID (UIDs are for establishment groups only),
+        // therefore we expect null for the "active" school when a group user has selected one
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" },
+          "uid": "9876"
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        context.User = principal;
+
+        // Set selected school cookie
+        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var result = await sut.GetActiveEstablishmentUidAsync();
+
+        // Assert - Should return null because selected schools don't have UID in the database
+        Assert.Null(result);
+    }
+
+    // ---------- GetActiveEstablishmentDsiIdAsync ----------
+
+    [Fact]
+    public async Task GetActiveEstablishmentDsiIdAsync_ForDirectSchoolUser_ReturnsSchoolDsiId()
+    {
+        // Arrange - Direct school user (logged in directly as a school)
+        var orgJson = """
+        {
+          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+          "name": "Test Primary School",
+          "category": { "id": "001", "name": "Establishment" }
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentDsiIdAsync();
+
+        // Assert
+        Assert.Equal(Guid.Parse("CC1185B8-3142-4B6C-887C-ADC413CD3891"), result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentDsiIdAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupDsiId()
+    {
+        // Arrange - MAT user who has not yet selected a school (will be prompted to select)
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentDsiIdAsync();
+
+        // Assert - Should return MAT's DSI ID since no school selected
+        Assert.Equal(Guid.Parse("D9011C85-F851-4746-B4A2-D732536717F8"), result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentDsiIdAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
+    {
+        // Arrange - MAT user who has selected a school from their group
+        // Note: Schools do have an organisation ID on DSI, but we do not store it in our database,
+        // therefore we cannot return it here for a group user (the user is not logged in directly as the school).
+        var orgJson = """
+                      {
+                        "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+                        "name": "Test Multi-Academy Trust",
+                        "category": { "id": "010", "name": "Multi-Academy Trust" }
+                      }
+                      """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        context.User = principal;
+
+        // Set selected school cookie
+        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var result = await sut.GetActiveEstablishmentDsiIdAsync();
+
+        // Assert - Should return null because we don't have DSI ID for selected schools
+        Assert.Null(result);
+    }
+
+    // ---------- GetActiveEstablishmentReferenceAsync ----------
+
+    [Fact]
+    public async Task GetActiveEstablishmentReferenceAsync_ForDirectSchoolUser_ReturnsSchoolUrn()
+    {
+        // Arrange - Direct school user (logged in directly as a school with URN)
+        var orgJson = """
+        {
+          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+          "name": "Test Primary School",
+          "category": { "id": "001", "name": "Establishment" },
+          "urn": "123456"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentReferenceAsync();
+
+        // Assert - Should use URN as reference
+        Assert.Equal("123456", result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentReferenceAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupReference()
+    {
+        // Arrange - MAT user who has not yet selected a school (will be prompted to select)
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" },
+          "uid": "9876"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act
+        var result = await sut.GetActiveEstablishmentReferenceAsync();
+
+        // Assert - Should return MAT's reference (UID) since no school selected
+        Assert.Equal("9876", result);
+    }
+
+    [Fact]
+    public async Task GetActiveEstablishmentReferenceAsync_ForGroupUserWithSelectedSchool_ReturnsSelectedSchoolUrn()
+    {
+        // Arrange - MAT user who has selected a school from their group
+        var orgJson = """
+                      {
+                        "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+                        "name": "Test Multi-Academy Trust",
+                        "category": { "id": "010", "name": "Multi-Academy Trust" },
+                        "uid": "9876"
+                      }
+                      """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        context.User = principal;
+
+        // Set selected school cookie
+        var schoolData = new { Urn = "999888", Name = "Selected Academy" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var result = await sut.GetActiveEstablishmentReferenceAsync();
+
+        // Assert - Should return selected school URN, not MAT's UID
+        Assert.Equal("999888", result);
+    }
+
+    // ---------- UserOrganisationIsGroup ----------
+
+    [Fact]
+    public void UserOrganisationIsGroup_WhenMatOrganisation_ReturnsTrue()
+    {
+        // Arrange - MAT organisation
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act / Assert
+        Assert.True(sut.UserOrganisationIsGroup);
+    }
+
+    [Fact]
+    public void UserOrganisationIsGroup_WhenSatOrganisation_ReturnsTrue()
+    {
+        // Arrange - SAT (Single Academy Trust) organisation
+        var orgJson = """
+        {
+          "id": "A1011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Single Academy Trust",
+          "category": { "id": "013", "name": "Single-Academy Trust" }
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act / Assert
+        Assert.True(sut.UserOrganisationIsGroup);
+    }
+
+    [Fact]
+    public void UserOrganisationIsGroup_WhenSsatOrganisation_ReturnsTrue()
+    {
+        // Arrange - SSAT organisation
+        var orgJson = """
+        {
+          "id": "B2011C85-F851-4746-B4A2-D732536717F8",
+          "name": "Test Secure Single Academy Trust",
+          "category": { "id": "014", "name": "Secure Single-Academy Trust" }
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act / Assert
+        Assert.True(sut.UserOrganisationIsGroup);
+    }
+
+    [Fact]
+    public void UserOrganisationIsGroup_WhenDirectEstablishment_ReturnsFalse()
+    {
+        // Arrange - Direct establishment (not a group)
+        var orgJson = """
+        {
+          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+          "name": "Test Primary School",
+          "category": { "id": "001", "name": "Establishment" },
+          "urn": "123456"
+        }
+        """;
+
+        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+
+        // Act / Assert
+        Assert.False(sut.UserOrganisationIsGroup);
+    }
+
+    [Fact]
+    public void UserOrganisationIsGroup_WhenOrganisationNull_ReturnsFalse()
+    {
+        // Arrange - No organisation claim
+        var (sut, _) = Build();
+
+        // Act / Assert
+        Assert.False(sut.UserOrganisationIsGroup);
     }
 
 
