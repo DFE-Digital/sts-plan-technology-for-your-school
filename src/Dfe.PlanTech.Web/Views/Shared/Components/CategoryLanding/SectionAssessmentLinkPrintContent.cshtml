@@ -1,0 +1,33 @@
+﻿@model StatusLinkViewModel
+
+@{
+	string statusText;
+	string linkText;
+	string? controller = null;
+	string? action = null;
+
+	var topic = Model.Section;
+	var topicName = topic.Name.ToLower().Trim();
+	var topicSlug = topic.Slug ?? string.Empty;
+	var categorySlug = Model.CategorySlug;
+
+	switch (topic.ProgressStatus)
+	{
+		case SectionProgressStatus.InProgress:
+			statusText = $"A self-assessment was started on {topic.DateUpdated}. This must be completed before recommendations are available.";
+			break;
+		case SectionProgressStatus.Completed:
+			statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
+			break;
+		default:
+			statusText = "Self-assessment not started.";
+			break;
+	}
+
+	if (Model.Context == "Sections")
+	{
+		<p>
+			@statusText
+		</p>
+	}
+}
