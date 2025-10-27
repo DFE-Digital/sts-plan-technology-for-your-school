@@ -14,12 +14,13 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
     public class PagesControllerTests
     {
         private readonly ILogger<PagesController> _logger = Substitute.For<ILogger<PagesController>>();
-        private readonly IPagesViewBuilder _viewBuilder = Substitute.For<IPagesViewBuilder>();
+        private readonly ICategoryLandingViewComponentViewBuilder _categoryLandingViewComponentBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
+        private readonly IPagesViewBuilder _pagesViewBuilder = Substitute.For<IPagesViewBuilder>();
         private readonly PagesController _controller;
 
         public PagesControllerTests()
         {
-            _controller = new PagesController(_logger, _viewBuilder);
+            _controller = new PagesController(_logger, _categoryLandingViewComponentBuilder, _pagesViewBuilder);
             _controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext()
@@ -30,7 +31,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         public void Constructor_ThrowsArgumentNullException_WhenViewBuilderIsNull()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new PagesController(_logger, null!)
+                new PagesController(_logger, _categoryLandingViewComponentBuilder, null!)
             );
             Assert.Equal("pagesViewBuilder", ex.ParamName);
         }
@@ -40,7 +41,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         {
             var page = new PageEntry();
             var expectedResult = new OkResult();
-            _viewBuilder.RouteBasedOnOrganisationTypeAsync(_controller, page)
+            _pagesViewBuilder.RouteBasedOnOrganisationTypeAsync(_controller, page)
                 .Returns(Task.FromResult<IActionResult>(expectedResult));
 
             var result = await _controller.GetByRoute(page);
@@ -78,7 +79,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         public async Task NotFoundError_ReturnsViewWithViewModel()
         {
             var viewModel = new NotFoundViewModel();
-            _viewBuilder.BuildNotFoundViewModel().Returns(Task.FromResult(viewModel));
+            _pagesViewBuilder.BuildNotFoundViewModel().Returns(Task.FromResult(viewModel));
 
             var result = await _controller.NotFoundError();
 

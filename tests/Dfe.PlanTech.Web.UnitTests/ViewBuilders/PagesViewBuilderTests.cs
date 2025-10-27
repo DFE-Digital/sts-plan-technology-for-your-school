@@ -7,6 +7,7 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
+using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -43,6 +44,7 @@ public class PagesViewBuilderTests
     private static PagesViewBuilder CreateServiceUnderTest(
         IOptions<ContactOptionsConfiguration>? contact = null,
         IOptions<ErrorPagesConfiguration>? errors = null,
+        ICategoryLandingViewComponentViewBuilder? viewBuilder = null,
         IContentfulService? contentful = null,
         IEstablishmentService? establishmentService = null,
         ICurrentUser? currentUser = null,
@@ -50,6 +52,7 @@ public class PagesViewBuilderTests
     {
         contact ??= ContactOpts();
         errors ??= ErrorOpts();
+        viewBuilder ??= Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         contentful ??= Substitute.For<IContentfulService>();
         establishmentService ??= Substitute.For<IEstablishmentService>();
         currentUser ??= Substitute.For<ICurrentUser>();
@@ -60,7 +63,7 @@ public class PagesViewBuilderTests
         currentUser.IsAuthenticated.Returns(true);
         currentUser.Organisation.Returns(new EstablishmentModel { Name = "Acme Academy" });
 
-        return new PagesViewBuilder(logger, contact, errors, contentful, establishmentService, currentUser);
+        return new PagesViewBuilder(logger, contact, errors, viewBuilder, contentful, establishmentService, currentUser);
     }
 
     private static PageEntry MakePage(string slug, bool isLanding = false, string? title = "My Page", bool displayOrg = false, string? id = "pg-1")
@@ -81,20 +84,22 @@ public class PagesViewBuilderTests
     public void Ctor_Null_ContactOptions_Throws()
     {
         var errors = ErrorOpts();
+        var viewBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         var contentful = Substitute.For<IContentfulService>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var current = Substitute.For<ICurrentUser>();
-        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, errors, contentful, establishmentService, current));
+        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, errors, viewBuilder, contentful, establishmentService, current));
     }
 
     [Fact]
     public void Ctor_Null_ErrorOptions_Throws()
     {
         var contact = ContactOpts();
+        var viewBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         var contentful = Substitute.For<IContentfulService>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var current = Substitute.For<ICurrentUser>();
-        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, contact, null!, contentful, establishmentService, current));
+        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, contact, null!, viewBuilder, contentful, establishmentService, current));
     }
 
     // ---------- RouteBasedOnOrganisationTypeAsync ----------
