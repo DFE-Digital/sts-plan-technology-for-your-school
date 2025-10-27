@@ -1,15 +1,30 @@
 @model CategoryLandingPageViewModel
+@inject ICurrentUser CurrentUser
 
-@section DfePageHeaderInner {
-	<span class="govuk-caption-xl">How to meet the standard</span>
-	<partial name="Components/PageComponentFactory" model="@Model.Title" />
+@{
+	var schoolName = CurrentUser.Organisation?.Name ?? CurrentUser.GetGroupSelectedSchool()?.Name;
+}
+
+@section BeforeContent {
+    @{
+        await Html.RenderPartialAsync("BackButton");
+    }
 }
 
 <div class="govuk-!-margin-bottom-2">
 	@{
 		await Html.RenderPartialAsync("PrintButton", Model);
 	}
+	<p>&nbsp;</p>
 </div>
+
+<span class="govuk-caption-xl">@schoolName</span>
+<h1 class="govuk-heading-xl">@Model.Category.Header.Text</h1>
+
+@if (!string.IsNullOrWhiteSpace(Model.SectionName))
+{
+	<partial name="Components/PageComponentFactory" model="@(new ComponentTitleEntry(Model.SectionName))" />
+}
 
 <div class="govuk-grid-row">
 	<div class="govuk-grid-column-two-thirds">

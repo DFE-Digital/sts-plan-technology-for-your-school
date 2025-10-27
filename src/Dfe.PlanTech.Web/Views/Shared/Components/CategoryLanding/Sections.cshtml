@@ -31,7 +31,9 @@
 									sectionSlug = topic.Slug,
 									chunkSlug = chunk.SlugifiedLinkText
 									})
-								   class="govuk-link">
+								    class="govuk-link"
+							        data-recommendation-header="@chunk.HeaderText"
+								    data-recommendation-status="@chunk.Status.GetDisplayName()">
 									@chunk.HeaderText
 								</a>
 							</td>
