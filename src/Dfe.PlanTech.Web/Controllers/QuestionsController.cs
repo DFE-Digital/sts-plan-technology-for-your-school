@@ -77,6 +77,11 @@ public class QuestionsController : BaseController<QuestionsController>
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
 
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
         return await _questionsViewBuilder.RestartSelfAssessment(this, categorySlug, sectionSlug, isObsoleteSubmissionFlow);
     }
 
