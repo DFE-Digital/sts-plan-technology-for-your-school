@@ -1,15 +1,20 @@
 ﻿using System.Security.Authentication;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Dfe.PlanTech.Web.Context.Interfaces;
 
 namespace Dfe.PlanTech.Web.Context;
 
-public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
+public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentService establishmentService, ILogger<CurrentUser> logger) : ICurrentUser
 {
     private readonly IHttpContextAccessor _contextAccessor =
         contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
+    private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly ILogger<CurrentUser> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly Lazy<Task<SqlEstablishmentDto?>> _selectedSchoolLazy = new(() => LoadSelectedSchoolAsync(contextAccessor, establishmentService, logger));
 
     public string? DsiReference => GetStringFromClaim(ClaimConstants.NameIdentifier)
                                    ?? throw new AuthenticationException("User is not authenticated");
@@ -17,23 +22,106 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
     public string? Email => GetNameIdentifierFromClaim(ClaimConstants.VerifiedEmail)
                             ?? throw new AuthenticationException($"User's {nameof(Email)} is null");
 
-    public int? EstablishmentId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
 
     public string? GroupSelectedSchoolUrn => GetGroupSelectedSchool()?.Urn;
 
-    public string? GroupSelectedSchoolName => GetGroupSelectedSchool()?.Name;
+    public string? GroupSelectedSchoolName => GetGroupSelectedSchool()?.Name; // TODO: understand how/if relates to `GetActiveEstablishmentNameAsync` and if we might be able/willing to remove `GroupSelectedSchoolName` (this is from the cookie, versus `GetActiveEstablishmentNameAsync` is from the database?)
+
+    // Active Establishment methods - resolve to selected school for MAT users, otherwise Organisation
+    public async Task<string?> GetActiveEstablishmentNameAsync()
+    {
+        var selectedSchool = await _selectedSchoolLazy.Value;
+        return selectedSchool?.OrgName ?? Organisation?.Name;
+    }
+
+    public async Task<int?> GetActiveEstablishmentIdAsync()
+    {
+        var selectedSchool = await _selectedSchoolLazy.Value;
+        return selectedSchool?.Id ?? GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
+    }
+
+    public async Task<string?> GetActiveEstablishmentUrnAsync()
+    {
+        var selectedSchool = await _selectedSchoolLazy.Value;
+        return selectedSchool?.EstablishmentRef ?? Organisation?.Urn;
+    }
+
+    public async Task<string?> GetActiveEstablishmentUkprnAsync()
+    {
+        // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
+        // If a school is selected but doesn't have UKPRN, return null
+        if (GroupSelectedSchoolUrn != null)
+        {
+            return null; // Selected establishment doesn't have UKPRN in SqlEstablishmentDto
+        }
+        return Organisation?.Ukprn;
+    }
+
+    public async Task<string?> GetActiveEstablishmentUidAsync()
+    {
+        // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
+        // If a school is selected but doesn't have UID, return null
+        if (GroupSelectedSchoolUrn != null)
+        {
+            return null; // Selected establishment doesn't have UID in SqlEstablishmentDto
+        }
+        return Organisation?.Uid;
+    }
+
+    public async Task<Guid?> GetActiveEstablishmentDsiIdAsync()
+    {
+        // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
+        // If a school is selected, we don't have the DSI ID for it
+        if (GroupSelectedSchoolUrn != null)
+        {
+            return null; // Selected establishment doesn't have DSI ID
+        }
+        return Organisation?.Id;
+    }
+
+    public async Task<string?> GetActiveEstablishmentReferenceAsync()
+    {
+        // Use the selected school URN if available (MAT user has selected a school)
+        // Otherwise fall back to the user's organisation reference
+        if (GroupSelectedSchoolUrn != null)
+        {
+            return GroupSelectedSchoolUrn;
+        }
+        return Organisation?.Reference;
+    }
+
+    // User Organisation properties - the organisation the currently logged in user is linked to (from OIDC claims)
+    // For direct establishment users, these match ActiveEstablishment properties
+    // For MAT users, these represent the MAT/group they belong to
+    public string? UserOrganisationName => Organisation?.Name;
+
+    // Note: `DB_ESTABLISHMENT_ID` is the ID of the logged in user's organisation, not the selected establishment
+    public int? UserOrganisationId => GetIntFromClaim(ClaimConstants.DB_ESTABLISHMENT_ID);
+
+    public string? UserOrganisationUrn => Organisation?.Urn;
+
+    public string? UserOrganisationUkprn => Organisation?.Ukprn;
+
+    public string? UserOrganisationUid => Organisation?.Uid;
+
+    public Guid? UserOrganisationDsiId => Organisation?.Id;
+
+    public string? UserOrganisationReference => Organisation?.Reference;
+
+    public string? UserOrganisationTypeName => Organisation?.Type?.Name;
+
+    public bool UserOrganisationIsGroup => Organisation != null &&
+                                           DsiConstants.OrganisationGroupCategories.Contains(Organisation.Category?.Id ?? string.Empty);
 
     public bool IsAuthenticated => GetIsAuthenticated();
 
     public bool IsMat => Organisation?.Category?.Id.Equals(DsiConstants.MatOrganisationCategoryId) ?? false;
 
-    public int? MatEstablishmentId => GetIntFromClaim(ClaimConstants.DB_MAT_ESTABLISHMENT_ID);
-
-    public EstablishmentModel? Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
+    private EstablishmentModel? Organisation => _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
 
     public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 
-    public bool IsInRole(string role) => contextAccessor.HttpContext?.User.IsInRole(role) ?? false;
+    public bool IsInRole(string role) => _contextAccessor.HttpContext?.User.IsInRole(role) ?? false;
 
     public void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName)
     {
@@ -50,9 +138,9 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
 
         var schoolDataJson = System.Text.Json.JsonSerializer.Serialize(schoolData);
 
-        _contextAccessor.HttpContext?.Response.Cookies.Delete("SelectedSchool");
+        _contextAccessor.HttpContext?.Response.Cookies.Delete(CookieConstants.SelectedSchool);
 
-        _contextAccessor.HttpContext?.Response.Cookies.Append("SelectedSchool", schoolDataJson, new CookieOptions
+        _contextAccessor.HttpContext?.Response.Cookies.Append(CookieConstants.SelectedSchool, schoolDataJson, new CookieOptions
         {
             HttpOnly = true,
             Secure = true,
@@ -65,7 +153,7 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
         var httpContext = _contextAccessor.HttpContext;
 
         if (httpContext == null ||
-            !httpContext.Request.Cookies.TryGetValue("SelectedSchool", out var cookieValue) ||
+            !httpContext.Request.Cookies.TryGetValue(CookieConstants.SelectedSchool, out var cookieValue) ||
             string.IsNullOrWhiteSpace(cookieValue))
         {
             return null;
@@ -85,6 +173,46 @@ public class CurrentUser(IHttpContextAccessor contextAccessor) : ICurrentUser
         }
 
         return null;
+    }
+
+    // Private static method to load selected school asynchronously
+    private static async Task<SqlEstablishmentDto?> LoadSelectedSchoolAsync(
+        IHttpContextAccessor contextAccessor,
+        IEstablishmentService establishmentService,
+        ILogger<CurrentUser> logger)
+    {
+        var httpContext = contextAccessor.HttpContext;
+        if (httpContext == null ||
+            !httpContext.Request.Cookies.TryGetValue(CookieConstants.SelectedSchool, out var cookieValue) ||
+            string.IsNullOrWhiteSpace(cookieValue))
+        {
+            return null;
+        }
+
+        string? urn;
+        try
+        {
+            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieData>(cookieValue);
+            urn = school?.Urn;
+            if (string.IsNullOrWhiteSpace(urn))
+            {
+                return null;
+            }
+        }
+        catch (System.Text.Json.JsonException)
+        {
+            return null;
+        }
+
+        try
+        {
+            return await establishmentService.GetEstablishmentByReferenceAsync(urn);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(ex, "Failed to get establishment details for URN {Urn}: {Message}", urn, ex.Message);
+            return null;
+        }
     }
 
     private int? GetIntFromClaim(string claimType)

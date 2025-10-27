@@ -1,4 +1,4 @@
-﻿using Contentful.Core.Configuration;
+using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -116,7 +116,7 @@ public class RecommendationsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(123);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
 
         var categorySlug = "cat-a";
         var section = MakeSection("S1", "sec-1", "Section One");
@@ -173,7 +173,7 @@ public class RecommendationsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(123);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
         var section = MakeSection("S1", "sec-1");
 
         _contentful.GetCategoryHeaderTextBySlugAsync("cat").Returns("Header");
@@ -196,7 +196,7 @@ public class RecommendationsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
         var category = MakeCategory("Cat");
         var section = MakeSection("S1", "sec-1");
 
@@ -220,7 +220,7 @@ public class RecommendationsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
         var category = MakeCategory("Cat");
         var section = MakeSection("S1", "sec-1");
 
@@ -249,7 +249,7 @@ public class RecommendationsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
         var category = MakeCategory("Cat");
         var section = MakeSection("S1", "sec-1");
 
@@ -273,7 +273,7 @@ public class RecommendationsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
         var category = MakeCategory("Connectivity");
         var section = MakeSection("S1", "sec-1");
 
@@ -314,7 +314,7 @@ public class RecommendationsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
-        _currentUser.EstablishmentId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
         var category = MakeCategory("Connectivity");
         var section = MakeSection("S1", "sec-1");
 

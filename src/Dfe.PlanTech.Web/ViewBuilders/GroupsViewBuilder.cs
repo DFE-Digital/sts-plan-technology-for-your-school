@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
@@ -28,7 +29,9 @@ public class GroupsViewBuilder(
 
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        // Get the user's organisation ID (the MAT/group), not the active establishment
+        // At this point, the user hasn't selected a school yet
+        var establishmentId = GetUserOrganisationIdOrThrowException();
 
         var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
 
@@ -45,8 +48,8 @@ public class GroupsViewBuilder(
 
         var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, establishmentId);
 
-        var groupName = CurrentUser.Organisation?.Name;
-        var title = groupName;
+        var groupName = CurrentUser.UserOrganisationName;
+        var title = groupName ?? "Your organisation";
         List<ContentfulEntry> content = selectASchoolPageContent?.Content ?? [];
 
         string totalSections = categories.Sum(category => category.Sections.Count).ToString();
@@ -73,11 +76,26 @@ public class GroupsViewBuilder(
     public async Task RecordGroupSelectionAsync(string selectedEstablishmentUrn, string selectedEstablishmentName)
     {
         var userDsiReference = GetDsiReferenceOrThrowException();
+        var userOrganisationId = CurrentUser.UserOrganisationId;
+
+        // Construct the user's organisation model from individual properties
+        var userOrganisationModel = new EstablishmentModel
+        {
+            Id = CurrentUser.UserOrganisationDsiId ?? Guid.Empty,
+            Name = CurrentUser.UserOrganisationName ?? string.Empty,
+            Urn = CurrentUser.UserOrganisationUrn,
+            Ukprn = CurrentUser.UserOrganisationUkprn,
+            Uid = CurrentUser.UserOrganisationUid,
+            GroupUid = CurrentUser.UserOrganisationUid, // TODO: resolve some confusion here - the database table is `GroupUid` and is populated from the `uid` OIDC claim - possibly remove `groupUid` from `EstablishmentModel`?
+            Type = CurrentUser.UserOrganisationTypeName is null
+                ? null
+                : new IdWithNameModel { Name = CurrentUser.UserOrganisationTypeName }
+        };
 
         await _establishmentService.RecordGroupSelection(
             userDsiReference,
-            CurrentUser.EstablishmentId,
-            CurrentUser.Organisation,
+            userOrganisationId,
+            userOrganisationModel,
             selectedEstablishmentUrn,
             selectedEstablishmentName
         );
