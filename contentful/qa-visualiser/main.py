@@ -25,7 +25,9 @@ def main():
     all_recommendations: set[str] = set()
 
     if display_recommendations:
-        completing_map, inprogress_map, all_recommendations = fetch_recommendation_chunks()
+        completing_map, inprogress_map, all_recommendations = (
+            fetch_recommendation_chunks()
+        )
 
     sections = fetch_sections()
     process_sections(
