@@ -81,6 +81,7 @@ public class RecommendationsController(
 
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var userId = GetUserIdOrThrowException();
+        var userOrganisationId = _currentUser.UserOrganisationId;
 
         var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
@@ -97,7 +98,8 @@ public class RecommendationsController(
             establishmentId,
             userId,
             selectedStatus,
-            $"Change reason: Status manually updated to {selectedStatus}"
+            $"Change reason: Status manually updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'",
+            userOrganisationId
         );
 
         // Set success message for the banner
