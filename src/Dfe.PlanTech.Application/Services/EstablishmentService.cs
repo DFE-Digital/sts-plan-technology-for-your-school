@@ -2,7 +2,6 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Microsoft.Extensions.Logging;
 
@@ -25,10 +24,9 @@ public class EstablishmentService(
         return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
-    public async Task<SqlEstablishmentDto> GetLatestSelectedGroupSchoolAsync(string selectedEstablishmentUrn)
+    public async Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(string establishmentReference)
     {
-        return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(selectedEstablishmentUrn)
-            ?? throw new DatabaseException($"Could not get latest selected group school for {selectedEstablishmentUrn}");
+        return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(establishmentReference);
     }
 
     public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId)
