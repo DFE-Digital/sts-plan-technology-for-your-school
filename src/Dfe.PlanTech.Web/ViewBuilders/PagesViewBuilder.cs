@@ -17,7 +17,6 @@ public class PagesViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
-    ICategoryLandingViewComponentViewBuilder categoryLandingViewComponentViewBuilder,
     IContentfulService contentfulService,
     IEstablishmentService establishmentService,
     ICurrentUser currentUser
@@ -28,7 +27,6 @@ public class PagesViewBuilder(
 
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
-    private readonly ICategoryLandingViewComponentViewBuilder _categoryLandingViewComponentViewBuilder = categoryLandingViewComponentViewBuilder ?? throw new ArgumentNullException(nameof(categoryLandingViewComponentViewBuilder));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, PageEntry page)
     {

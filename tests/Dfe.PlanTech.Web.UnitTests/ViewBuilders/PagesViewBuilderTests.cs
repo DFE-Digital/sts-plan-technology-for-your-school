@@ -5,7 +5,9 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
@@ -63,7 +65,7 @@ public class PagesViewBuilderTests
         currentUser.IsAuthenticated.Returns(true);
         currentUser.Organisation.Returns(new EstablishmentModel { Name = "Acme Academy" });
 
-        return new PagesViewBuilder(logger, contact, errors, viewBuilder, contentful, establishmentService, currentUser);
+        return new PagesViewBuilder(logger, contact, errors, contentful, establishmentService, currentUser);
     }
 
     private static PageEntry MakePage(string slug, bool isLanding = false, string? title = "My Page", bool displayOrg = false, string? id = "pg-1")
@@ -88,7 +90,7 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var current = Substitute.For<ICurrentUser>();
-        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, errors, viewBuilder, contentful, establishmentService, current));
+        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, errors, contentful, establishmentService, current));
     }
 
     [Fact]
@@ -99,7 +101,7 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var current = Substitute.For<ICurrentUser>();
-        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, contact, null!, viewBuilder, contentful, establishmentService, current));
+        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, contact, null!, contentful, establishmentService, current));
     }
 
     // ---------- RouteBasedOnOrganisationTypeAsync ----------
@@ -121,6 +123,39 @@ public class PagesViewBuilderTests
         currentUser.IsMat.Returns(true);
         currentUser.EstablishmentId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
+
+        var controller = new TestController();
+
+        // Act
+        var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
+
+        // Assert
+        var redirect = Assert.IsType<RedirectResult>(action);
+        Assert.Equal(UrlConstants.SelectASchoolPage, redirect.Url);
+    }
+
+    [Fact]
+    public async Task RouteBasedOnOrganisationType_When_NoSchoolNotInGroup_Then_RedirectsToSelectSchoolPage()
+    {
+        // Arrange - A MAT user with a selected school outside their group, attempting to access the home page.
+        // Home slug logic uses UrlConstants.HomePage.Replace("/", "")
+        var homeSlug = UrlConstants.HomePage.Replace("/", ""); // usually ""
+        var page = MakePage(homeSlug, isLanding: false);
+
+        var contentful = Substitute.For<IContentfulService>();
+        var currentUser = Substitute.For<ICurrentUser>();
+        var establishmentService = Substitute.For<IEstablishmentService>();
+
+        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser, establishmentService: establishmentService);
+
+        // `CreateServiceUnderTest` sets defaults, so must override here:
+        currentUser.IsAuthenticated.Returns(true);
+        currentUser.IsMat.Returns(true);
+        currentUser.EstablishmentId.Returns(654321); // the ID for the group (MAT)
+        currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
+
+        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts([], 654321)
+            .Returns([]);
 
         var controller = new TestController();
 
@@ -283,6 +318,60 @@ public class PagesViewBuilderTests
         var view = Assert.IsType<ViewResult>(action);
         var vm = Assert.IsType<PageViewModel>(view.Model);
         Assert.Null(vm.OrganisationName);
+    }
+
+    [Fact]
+    public async Task RouteToCategoryLandingPrintPageAsync_RedirectsToHomePage_When_CategoryNotFound()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetCategoryBySlugAsync("invalidCategory", 4).Returns(default(QuestionnaireCategoryEntry?));
+
+        var current = Substitute.For<ICurrentUser>();
+        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: current);
+        current.IsAuthenticated.Returns(false);
+        current.IsMat.Returns(false);
+
+        var controller = new TestController();
+
+        var slug = "categorySlug";
+        var action = await sut.RouteToCategoryLandingPrintPageAsync(controller, slug);
+
+        var redirect = Assert.IsType<RedirectToActionResult>(action);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+    }
+
+    [Fact]
+    public async Task RouteToCategoryLandingPrintPageAsync_When_CategoryFound_Then_ReturnsView()
+    {
+        var category = new QuestionnaireCategoryEntry
+        {
+            Header = new ComponentHeaderEntry
+            {
+                Text = "Category"
+            }
+        };
+
+        var currentUser = Substitute.For<ICurrentUser>();
+        var contentful = Substitute.For<IContentfulService>();
+        var slug = "category";
+        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser);
+
+        currentUser.IsAuthenticated.Returns(true);
+        currentUser.IsMat.Returns(true);
+        currentUser.EstablishmentId.Returns(654321); // the ID for the group (MAT)
+        currentUser.GroupSelectedSchoolUrn.Returns("123456");
+
+        contentful.GetCategoryBySlugAsync(slug).Returns(category);
+        contentful.GetCategoryBySlugAsync(slug, 4).Returns(category);
+
+        var controller = new TestController();
+
+        var action = await sut.RouteToCategoryLandingPrintPageAsync(controller, slug);
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal(PagesViewBuilder.CategoryLandingPagePrintView, view.ViewName);
+        var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
     }
 
     // ---------- BuildNotFoundViewModel ----------

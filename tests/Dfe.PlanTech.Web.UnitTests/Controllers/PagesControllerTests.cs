@@ -37,7 +37,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetByRoute_ReturnsResultFromViewBuilder_WhenPageIsNotNull()
+        public async Task RouteBasedOnOrganisationTypeAsync_ReturnsResultFromViewBuilder_WhenPageIsNotNull()
         {
             var page = new PageEntry();
             var expectedResult = new OkResult();
@@ -49,8 +49,9 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             Assert.Equal(expectedResult, result);
         }
 
+
         [Fact]
-        public async Task GetByRoute_ThrowsContentfulDataUnavailableException_WhenPageIsNull()
+        public async Task RouteBasedOnOrganisationTypeAsync_ThrowsContentfulDataUnavailableException_WhenPageIsNull()
         {
             _controller.HttpContext.Request.Path = "/some-path";
 
@@ -59,6 +60,45 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             );
 
             Assert.Equal("Could not find page at /some-path", ex.Message);
+        }
+
+        [Fact]
+        public async Task GetStandardChecklist_ReturnsResultFromViewBuilder_WhenCategorySlugIsNotNull()
+        {
+            var expectedResult = new OkResult();
+            var slug = "categorySlug";
+            _pagesViewBuilder.RouteToCategoryLandingPrintPageAsync(_controller, slug)
+                .Returns(Task.FromResult<IActionResult>(expectedResult));
+
+            var result = await _controller.GetStandardChecklist(slug);
+
+            Assert.Equal(expectedResult, result);
+        }
+
+        [Fact]
+        public async Task GetStandardChecklist_ThrowsContentfulDataUnavailableException_WhenCategorySlugIsEmpty()
+        {
+            _controller.HttpContext.Request.Path = "/some-path";
+
+            var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+                _controller.GetStandardChecklist("")
+            );
+
+            Assert.Equal("The value cannot be an empty string or composed entirely of whitespace. (Parameter 'categorySlug')", ex.Message);
+        }
+
+        [Fact]
+        public async Task HandleUnknownRoutes_ReturnsNotFoundPage_WhenCalled()
+        {
+            var model = new NotFoundViewModel { ContactLinkHref = "contactLinkHref" };
+            var expectedResult = new ViewResult();
+            var slug = "categorySlug/sectionSlug/not/a/valid/path";
+
+            _pagesViewBuilder.BuildNotFoundViewModel().Returns(model);
+
+            var result = await _controller.HandleUnknownRoutes(slug);
+
+            Assert.Equal(expectedResult.GetType(), result.GetType());
         }
 
         [Fact]
