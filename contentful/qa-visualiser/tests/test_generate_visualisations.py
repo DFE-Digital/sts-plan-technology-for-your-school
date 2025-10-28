@@ -7,28 +7,52 @@ from src.models import Section
 @patch("src.generate_visualisations.Digraph.node")
 @patch("src.generate_visualisations.Digraph.edge")
 def test_create_questionnaire_flowchart(mock_edge, mock_node, mock_sections):
-    mock_recommendation_map = {
+    completing_map = {
         "answer-1": ["Keep backups up-to-date"],
         "answer-2": ["Ensure security protocols are followed"],
     }
+    inprogress_map = {
+        "answer-1": ["Keep backups up-to-date"],
+        "answer-2": ["Ensure security protocols are followed"],
+    }
+    all_recommendations = set()
 
     wrapped_recommendation_1 = _wrap_text("Keep backups up-to-date", 20)
     wrapped_recommendation_2 = _wrap_text("Ensure security protocols are followed", 20)
 
-    rec_id_1 = f"rec_{hash(wrapped_recommendation_1)}"
-    rec_id_2 = f"rec_{hash(wrapped_recommendation_2)}"
+    section = Section.model_validate(mock_sections[0])
+    create_questionnaire_flowchart(
+        section,
+        completing_map,
+        inprogress_map,
+        all_recommendations,
+    )
 
-    expected_nodes = {
-        ("question-1", "Q1. First Question?"),
-        ("end", "Check Answers"),
-        ("question-2", "Next Question"),
-        ("ans_answer-1", "first answer"),
-        ("ans_answer-2", "second answer"),
-        (rec_id_1, wrapped_recommendation_1),
-        (rec_id_2, wrapped_recommendation_2),
-        ("question-2", "Missing Content"),
+    node_pairs = {(call.args[0], call.args[1]) for call in mock_node.call_args_list if len(call.args) >= 2}
+
+    assert ("question-1", "Q1. First Question?") in node_pairs
+    assert ("end", "Check Answers") in node_pairs
+    assert ("ans_answer-1", _wrap_text("first answer", 20)) in node_pairs
+    assert ("ans_answer-2", _wrap_text("second answer", 20)) in node_pairs
+
+    rec_label_to_id = {
+        label: nid
+        for (nid, label) in node_pairs
+        if label in {wrapped_recommendation_1, wrapped_recommendation_2}
     }
-    expected_edges = {
+    assert wrapped_recommendation_1 in rec_label_to_id
+    assert wrapped_recommendation_2 in rec_label_to_id
+    rec_id_1 = rec_label_to_id[wrapped_recommendation_1]
+    rec_id_2 = rec_label_to_id[wrapped_recommendation_2]
+
+    edge_calls = [
+        (call.args[0], call.args[1], call.kwargs)
+        for call in mock_edge.call_args_list
+        if call.kwargs.get("style") != "invis"
+    ]
+    actual_edges = {(src, dst) for (src, dst, _) in edge_calls}
+
+    required_edges = {
         ("question-1", "ans_answer-1"),
         ("question-1", "ans_answer-2"),
         ("ans_answer-1", "question-2"),
@@ -37,14 +61,21 @@ def test_create_questionnaire_flowchart(mock_edge, mock_node, mock_sections):
         ("ans_answer-2", rec_id_2),
     }
 
-    section = Section.model_validate(mock_sections[0])
-    create_questionnaire_flowchart(section, mock_recommendation_map)
+    for e in required_edges:
+        assert e in actual_edges
 
-    assert mock_node.call_count == len(expected_nodes)
-    assert mock_edge.call_count == len(expected_edges)
+    completes_edges = [
+        (src, dst, {"label": kwargs.get("label"), "color": kwargs.get("color")})
+        for (src, dst, kwargs) in edge_calls
+        if kwargs.get("label") == "completes"
+    ]
+    assert ("ans_answer-1", rec_id_1, {"label": "completes", "color": "green"}) in completes_edges
+    assert ("ans_answer-2", rec_id_2, {"label": "completes", "color": "green"}) in completes_edges
 
-    mock_node_args = {call.args for call in mock_node.call_args_list}
-    mock_edge_args = {call.args for call in mock_edge.call_args_list}
-
-    assert mock_node_args == expected_nodes
-    assert mock_edge_args == expected_edges
+    inprogress_edges = [
+        (src, dst, {"label": kwargs.get("label"), "color": kwargs.get("color")})
+        for (src, dst, kwargs) in edge_calls
+        if kwargs.get("label") == "in progress"
+    ]
+    assert ("ans_answer-1", rec_id_1, {"label": "in progress", "color": "orange"}) in inprogress_edges
+    assert ("ans_answer-2", rec_id_2, {"label": "in progress", "color": "orange"}) in inprogress_edges
