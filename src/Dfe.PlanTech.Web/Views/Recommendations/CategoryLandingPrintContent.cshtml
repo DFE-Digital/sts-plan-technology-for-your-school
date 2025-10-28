@@ -2,7 +2,7 @@
 @inject ICurrentUser CurrentUser
 
 @{
-	var schoolName = CurrentUser.Organisation?.Name ?? CurrentUser.GetGroupSelectedSchool()?.Name;
+	var schoolName = CurrentUser.GetActiveEstablishmentNameAsync();
 }
 
 @section BeforeContent {

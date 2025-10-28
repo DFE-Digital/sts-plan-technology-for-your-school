@@ -4,6 +4,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders;
@@ -134,7 +135,7 @@ public class PagesViewBuilderTests
     }
 
     [Fact]
-    public async Task RouteBasedOnOrganisationType_When_NoSchoolNotInGroup_Then_RedirectsToSelectSchoolPage()
+    public async Task RouteBasedOnOrganisationType_When_SchoolNotInGroup_Then_RedirectsToSelectSchoolPage()
     {
         // Arrange - A MAT user with a selected school outside their group, attempting to access the home page.
         // Home slug logic uses UrlConstants.HomePage.Replace("/", "")
@@ -150,8 +151,9 @@ public class PagesViewBuilderTests
         // `CreateServiceUnderTest` sets defaults, so must override here:
         currentUser.IsAuthenticated.Returns(true);
         currentUser.IsMat.Returns(true);
-        currentUser.EstablishmentId.Returns(654321); // the ID for the group (MAT)
-        currentUser.GroupSelectedSchoolUrn.Returns((string?)null);
+        currentUser.UserOrganisationIsGroup.Returns(true);
+        currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
+        currentUser.GroupSelectedSchoolUrn.Returns("123456");
 
         establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts([], 654321)
             .Returns([]);
@@ -359,7 +361,7 @@ public class PagesViewBuilderTests
 
         currentUser.IsAuthenticated.Returns(true);
         currentUser.IsMat.Returns(true);
-        currentUser.EstablishmentId.Returns(654321); // the ID for the group (MAT)
+        currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns("123456");
 
         contentful.GetCategoryBySlugAsync(slug).Returns(category);
