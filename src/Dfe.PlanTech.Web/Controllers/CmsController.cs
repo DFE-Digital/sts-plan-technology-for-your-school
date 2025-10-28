@@ -46,7 +46,9 @@ public class CmsController(
     [ValidateApiKey]
     public async Task<IEnumerable<SectionViewModel?>> GetSections()
     {
-        return await _viewBuilder.GetAllSectionsAsync();
+        var result = await _viewBuilder.GetAllSectionsAsync();
+
+        return result;
     }
 
     /// <summary>

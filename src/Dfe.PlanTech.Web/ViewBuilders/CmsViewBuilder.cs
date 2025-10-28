@@ -10,7 +10,8 @@ public class CmsViewBuilder(
     IContentfulService contentfulService
 ) : ICmsViewBuilder
 {
-    private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly IContentfulService _contentfulService =
+        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     public async Task<IEnumerable<SectionViewModel>> GetAllSectionsAsync()
     {
@@ -20,15 +21,35 @@ public class CmsViewBuilder(
 
     public async Task<IActionResult> GetChunks(Controller controller, int? page)
     {
+        var sections = await _contentfulService.GetAllSectionsAsync();
+
+        var sectionAllAnswers = sections
+            .SelectMany(s => s.Questions)
+            .SelectMany(q => q.Answers)
+            .Select(a => a.Id)
+            .ToList();
+
         var pageNumber = page ?? 1;
         var total = await _contentfulService.GetRecommendationChunkCountAsync(pageNumber);
         var entries = await _contentfulService.GetPaginatedRecommendationEntriesAsync(pageNumber);
+        List<ChunkModel> chunkModels = new();
 
-        var chunkModels = entries
-            .SelectMany(chunk => chunk.AllAnswers
-                .Where(a => a.Id is not null)
-                .Select(a => new ChunkModel(a.Id!, chunk.HeaderText)))
-            .ToList();
+        chunkModels = entries.Select(a =>
+        {
+            // Validate and retrieve the answer that is within the sectionAllAnswers so we don't retrieve "RETIRED" answers
+            var completingAnswer = a.CompletingAnswers
+                .FirstOrDefault(ans => sectionAllAnswers.Contains(ans.Id));
+
+            var inProgressAnswer = a.InProgressAnswers
+                .FirstOrDefault(ans => sectionAllAnswers.Contains(ans.Id));
+
+            return new ChunkModel(
+                completingAnswer?.Id ?? "",
+                inProgressAnswer?.Id ?? "",
+                a.HeaderText
+            );
+        }).ToList();
+
 
         var resultModel = new PagedResultViewModel<ChunkModel>
         {
