@@ -28,7 +28,11 @@ def test_create_questionnaire_flowchart(mock_edge, mock_node, mock_sections):
         all_recommendations,
     )
 
-    node_pairs = {(call.args[0], call.args[1]) for call in mock_node.call_args_list if len(call.args) >= 2}
+    node_pairs = {
+        (call.args[0], call.args[1])
+        for call in mock_node.call_args_list
+        if len(call.args) >= 2
+    }
 
     assert ("question-1", "Q1. First Question?") in node_pairs
     assert ("end", "Check Answers") in node_pairs
@@ -69,13 +73,29 @@ def test_create_questionnaire_flowchart(mock_edge, mock_node, mock_sections):
         for (src, dst, kwargs) in edge_calls
         if kwargs.get("label") == "completes"
     ]
-    assert ("ans_answer-1", rec_id_1, {"label": "completes", "color": "green"}) in completes_edges
-    assert ("ans_answer-2", rec_id_2, {"label": "completes", "color": "green"}) in completes_edges
+    assert (
+        "ans_answer-1",
+        rec_id_1,
+        {"label": "completes", "color": "green"},
+    ) in completes_edges
+    assert (
+        "ans_answer-2",
+        rec_id_2,
+        {"label": "completes", "color": "green"},
+    ) in completes_edges
 
     inprogress_edges = [
         (src, dst, {"label": kwargs.get("label"), "color": kwargs.get("color")})
         for (src, dst, kwargs) in edge_calls
         if kwargs.get("label") == "in progress"
     ]
-    assert ("ans_answer-1", rec_id_1, {"label": "in progress", "color": "orange"}) in inprogress_edges
-    assert ("ans_answer-2", rec_id_2, {"label": "in progress", "color": "orange"}) in inprogress_edges
+    assert (
+        "ans_answer-1",
+        rec_id_1,
+        {"label": "in progress", "color": "orange"},
+    ) in inprogress_edges
+    assert (
+        "ans_answer-2",
+        rec_id_2,
+        {"label": "in progress", "color": "orange"},
+    ) in inprogress_edges
