@@ -3,8 +3,9 @@
 namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser;
 
 [ExcludeFromCodeCoverage]
-public class ChunkModel(string answerId, string recommendationHeader)
+public class ChunkModel(string completingAnswerId, string inProgressAnswerId, string recommendationHeader)
 {
-    public string AnswerId { get; set; } = answerId;
+    public string? CompletingAnswerId { get; set; } = completingAnswerId;
+    public string? InProgressAnswerId { get; set; } = inProgressAnswerId;
     public string RecommendationHeader { get; set; } = recommendationHeader;
 }
