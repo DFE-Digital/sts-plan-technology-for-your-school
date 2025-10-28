@@ -1,4 +1,4 @@
-ALTER FUNCTION [dbo].[GetCurrentSubmissionId]
+﻿ALTER FUNCTION [dbo].[GetCurrentSubmissionId]
 (
     @sectionId NVARCHAR(50),
     @establishmentId INT
