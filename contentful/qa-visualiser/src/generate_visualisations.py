@@ -90,7 +90,7 @@ def create_questionnaire_flowchart(
                 width="1.5",
             )
 
-            tree.edge(current_question_id, answer_node_id) # Connect question to answer
+            tree.edge(current_question_id, answer_node_id)  # Connect question to answer
 
             if answer.next_question:
                 next_question_id = answer.next_question.sys.id
@@ -98,7 +98,6 @@ def create_questionnaire_flowchart(
                 tree.edge(answer_node_id, next_question_id)
             else:
                 tree.edge(answer_node_id, "end")
-
 
             # helper method to get/create a recommendation node local to this question
             def get_question_rec_node(rec_text: str) -> str:
@@ -120,14 +119,16 @@ def create_questionnaire_flowchart(
                 return question_rec_nodes[wrapped]
 
             # completed recommendations status - green
-            for rec_text in (completing_map.get(answer_id) or []):
+            for rec_text in completing_map.get(answer_id) or []:
                 rec_node_id = get_question_rec_node(rec_text)
                 tree.edge(answer_node_id, rec_node_id, label="completes", color="green")
 
             # in progress recommendation status - orange
-            for rec_text in (inprogress_map.get(answer_id) or []):
+            for rec_text in inprogress_map.get(answer_id) or []:
                 rec_node_id = get_question_rec_node(rec_text)
-                tree.edge(answer_node_id, rec_node_id, label="in progress", color="orange")
+                tree.edge(
+                    answer_node_id, rec_node_id, label="in progress", color="orange"
+                )
 
     return tree
 

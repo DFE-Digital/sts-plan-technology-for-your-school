@@ -51,7 +51,9 @@ def fetch_sections() -> list[Section]:
         raise
 
 
-def fetch_recommendation_chunks() -> tuple[dict[str, list[str]], dict[str, list[str]], set[str]]:
+def fetch_recommendation_chunks() -> (
+    tuple[dict[str, list[str]], dict[str, list[str]], set[str]]
+):
     """
     Fetches paginated RecommendationChunks from {PLANTECH_API_URL}/chunks/{page}
     Returns:
@@ -62,8 +64,8 @@ def fetch_recommendation_chunks() -> tuple[dict[str, list[str]], dict[str, list[
     token = os.getenv("PLANTECH_API_KEY")
     base_url = os.getenv("PLANTECH_API_URL")
 
-    total_items = [] # Store all results
-    page_number = 1 # Start from the first page
+    total_items = []  # Store all results
+    page_number = 1  # Start from the first page
 
     try:
         logger.info(f"Fetching recommendation chunks from {base_url}/chunks/1")
@@ -82,7 +84,9 @@ def fetch_recommendation_chunks() -> tuple[dict[str, list[str]], dict[str, list[
             items = data.get("items", [])
 
             if not items:
-                logger.info(f"No more items on page {page_number}. Stopping pagination.")
+                logger.info(
+                    f"No more items on page {page_number}. Stopping pagination."
+                )
                 break
 
             total_items.extend(items)
@@ -96,9 +100,15 @@ def fetch_recommendation_chunks() -> tuple[dict[str, list[str]], dict[str, list[
         all_recommendations: set[str] = set()
 
         for item in total_items:
-            completing_id = item.get("CompletingAnswerId") or item.get("completingAnswerId")
-            inprogress_id = item.get("InProgressAnswerId") or item.get("inProgressAnswerId")
-            header = item.get("RecommendationHeader") or item.get("recommendationHeader")
+            completing_id = item.get("CompletingAnswerId") or item.get(
+                "completingAnswerId"
+            )
+            inprogress_id = item.get("InProgressAnswerId") or item.get(
+                "inProgressAnswerId"
+            )
+            header = item.get("RecommendationHeader") or item.get(
+                "recommendationHeader"
+            )
 
             if not header:
                 logger.warning(f"Skipping chunk without RecommendationHeader: {item}")
