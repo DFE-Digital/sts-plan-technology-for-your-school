@@ -20,11 +20,12 @@ public class CmsViewBuilderTests
         return new CmsViewBuilder(contentful);
     }
 
-    private static QuestionnaireSectionEntry MakeSection(string id, List<QuestionnaireQuestionEntry>? questions = null)  =>
+    private static QuestionnaireSectionEntry MakeSection(string id, List<QuestionnaireQuestionEntry>? questions = null) =>
         new QuestionnaireSectionEntry
         {
             Questions = questions ?? [],
-            Sys = new SystemDetails(id), Name = $"Section {id}"
+            Sys = new SystemDetails(id),
+            Name = $"Section {id}"
         };
 
     private static RecommendationChunkEntry MakeRecEntry(
