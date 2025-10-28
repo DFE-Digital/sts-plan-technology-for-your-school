@@ -32,7 +32,10 @@ public class CategoryLandingViewComponentTests
             CategorySlug = slug,
             SectionName = sectionName,
             CategoryLandingSections = new List<CategoryLandingSectionViewModel>(),
-            Sections = category.Sections
+            Sections = category.Sections,
+            Print = false,
+            SectionsPartialName = "partial",
+            StatusLinkPartialName = "status"
         };
 
         viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));
@@ -66,7 +69,10 @@ public class CategoryLandingViewComponentTests
             CategorySlug = slug,
             SectionName = sectionName,
             CategoryLandingSections = new List<CategoryLandingSectionViewModel>(),
-            Sections = category.Sections
+            Sections = category.Sections,
+            Print = false,
+            SectionsPartialName = "partial",
+            StatusLinkPartialName = "status"
         };
 
         viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));

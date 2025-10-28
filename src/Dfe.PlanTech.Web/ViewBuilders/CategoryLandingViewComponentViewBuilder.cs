@@ -20,11 +20,18 @@ public class CategoryLandingViewComponentViewBuilder(
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
+    private const string CategoryLandingSections = "Components/CategoryLanding/Sections";
+    private const string CategoryLandingSectionsPrintContent = "Components/CategoryLanding/SectionsPrintContent";
+
+    private const string CategoryLandingSectionAssessmentLink = "Components/CategoryLanding/SectionAssessmentLink";
+    private const string CategoryLandingSectionAssessmentLinkPrintContent = "Components/CategoryLanding/SectionAssessmentLinkPrintContent";
+
     public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(
         QuestionnaireCategoryEntry category,
         string slug,
         string? sectionName,
-        string? sortOrder)
+        string? sortOrder,
+        bool print = false)
     {
         if (!category.Sections.Any())
         {
@@ -64,7 +71,10 @@ public class CategoryLandingViewComponentViewBuilder(
             Sections = category.Sections,
             SectionName = sectionName,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
-            SortType = sortType
+            SortType = sortType,
+            Print = print,
+            SectionsPartialName = print ? CategoryLandingSectionsPrintContent : CategoryLandingSections,
+            StatusLinkPartialName = print ? CategoryLandingSectionAssessmentLinkPrintContent : CategoryLandingSectionAssessmentLink
         };
 
         return viewModel;

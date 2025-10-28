@@ -13,9 +13,7 @@ public class CategoryLandingViewComponent(
 
     public async Task<IViewComponentResult> InvokeAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName, string sortOrder = RecommendationConstants.DefaultSortOrder, bool print = false)
     {
-        var viewModel = await _viewBuilder.BuildViewModelAsync(category, slug, sectionName, sortOrder);
-        return print
-            ? View("SectionPrintContent", viewModel)
-            : View(viewModel);
+        var viewModel = await _viewBuilder.BuildViewModelAsync(category, slug, sectionName, sortOrder, print);
+        return View(viewModel);
     }
 }
