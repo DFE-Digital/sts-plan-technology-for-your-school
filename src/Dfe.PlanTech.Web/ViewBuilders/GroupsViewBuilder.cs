@@ -2,6 +2,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -33,7 +34,8 @@ public class GroupsViewBuilder(
         // At this point, the user hasn't selected a school yet
         var establishmentId = GetUserOrganisationIdOrThrowException();
 
-        var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
+        var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
+                                       ?? throw new ContentfulDataUnavailableException($"Could not find contentful page for slug '{UrlConstants.GroupsSelectionPageSlug}'");
 
         // Categories which would display on the home page - use these to figure out which categories we should get counts for
         // This means updating Contentful will impact what is considered in the totals
@@ -50,7 +52,7 @@ public class GroupsViewBuilder(
 
         var groupName = CurrentUser.UserOrganisationName;
         var title = groupName ?? "Your organisation";
-        List<ContentfulEntry> content = selectASchoolPageContent?.Content ?? [];
+        List<ContentfulEntry> content = selectASchoolPageContent.Content ?? [];
 
         string totalSections = categories.Sum(category => category.Sections.Count).ToString();
 
