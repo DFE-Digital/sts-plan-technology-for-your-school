@@ -58,7 +58,7 @@ def fetch_recommendation_chunks() -> (
     Fetches paginated RecommendationChunks from {PLANTECH_API_URL}/chunks/{page}
     Returns:
       - completing_map: answer_id -> list of recommendation headers the answer sets status completed
-      - inprogress_map: answer_id -> list of recommendation headers the answer sets ststus in-progress
+      - inprogress_map: answer_id -> list of recommendation headers the answer sets status in-progress
       - all_recommendations: set of all recommendation headers (to render all rec nodes)
     """
     token = os.getenv("PLANTECH_API_KEY")
