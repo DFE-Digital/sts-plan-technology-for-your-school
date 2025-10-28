@@ -6,14 +6,18 @@
         <h1 class="govuk-heading-xl">
             @Model.CategoryName
         </h1>
+
         <h2 class="govuk-heading-l">@Model.SectionName</h2>
+
         <p>
             The self-assessment for @Model.SectionName.ToLower() was completed on
-            <strong>@Model.LatestCompletionDate</strong>.
+            <strong>@Model.LatestCompletionDate.</strong>
         </p>
         <p>View or change your self-assessment answers at any time.</p>
     </div>
-    <h5 class="govuk-!-margin-bottom-4">Recommendations</h5>
+
+    <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Recommendations</h2>
+
     <ul class="govuk-task-list">
         @foreach (var chunk in Model.Chunks)
         {
@@ -28,20 +32,24 @@
     </ul>
 
     <h2 class="govuk-heading-l">Recommendations</h2>
-    foreach (var chunk in Model.Chunks)
+
+    @foreach (var chunk in Model.Chunks)
     {
         <div class="recommendation-action-header">
             <div class="recommendation-piece-header">
-                <h1 class="govuk-heading-m">@chunk.HeaderText</h1>
+                <h3 class="govuk-heading-m">@chunk.HeaderText</h3>
             </div>
         </div>
+
         <div class="recommendation-action-content govuk-!-margin-bottom-4">
             @foreach (var content in chunk.Content)
             {
                 await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-                <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+                <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible" />
             }
-            @{ ViewData["RecommendationsActionsHeader"] = chunk.SlugifiedLinkText; }
+            @{
+                ViewData["RecommendationsActionsHeader"] = chunk.SlugifiedLinkText;
+            }
         </div>
     }
-}   
+}
