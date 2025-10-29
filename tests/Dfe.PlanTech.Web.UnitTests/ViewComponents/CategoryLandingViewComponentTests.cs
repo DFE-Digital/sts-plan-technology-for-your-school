@@ -34,7 +34,6 @@ public class CategoryLandingViewComponentTests
             CategoryLandingSections = new List<CategoryLandingSectionViewModel>(),
             Sections = category.Sections,
             Print = false,
-            SectionsPartialName = "partial",
             StatusLinkPartialName = "status"
         };
 
@@ -71,7 +70,6 @@ public class CategoryLandingViewComponentTests
             CategoryLandingSections = new List<CategoryLandingSectionViewModel>(),
             Sections = category.Sections,
             Print = false,
-            SectionsPartialName = "partial",
             StatusLinkPartialName = "status"
         };
 
