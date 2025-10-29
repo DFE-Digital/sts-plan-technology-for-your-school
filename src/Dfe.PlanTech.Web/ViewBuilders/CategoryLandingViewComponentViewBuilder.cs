@@ -20,9 +20,6 @@ public class CategoryLandingViewComponentViewBuilder(
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    private const string CategoryLandingSections = "Components/CategoryLanding/Sections";
-    private const string CategoryLandingSectionsPrintContent = "Components/CategoryLanding/SectionsPrintContent";
-
     private const string CategoryLandingSectionAssessmentLink = "Components/CategoryLanding/SectionAssessmentLink";
     private const string CategoryLandingSectionAssessmentLinkPrintContent = "Components/CategoryLanding/SectionAssessmentLinkPrintContent";
 
@@ -73,7 +70,6 @@ public class CategoryLandingViewComponentViewBuilder(
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
             SortType = sortType,
             Print = print,
-            SectionsPartialName = print ? CategoryLandingSectionsPrintContent : CategoryLandingSections,
             StatusLinkPartialName = print ? CategoryLandingSectionAssessmentLinkPrintContent : CategoryLandingSectionAssessmentLink
         };
 
