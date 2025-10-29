@@ -2,7 +2,7 @@
 @inject ICurrentUser CurrentUser
 
 @{
-	var schoolName = CurrentUser.GetActiveEstablishmentNameAsync();
+	var schoolName = await CurrentUser.GetActiveEstablishmentNameAsync();
 }
 
 @section BeforeContent {
