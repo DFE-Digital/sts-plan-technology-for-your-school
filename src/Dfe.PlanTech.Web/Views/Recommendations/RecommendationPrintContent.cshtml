@@ -13,7 +13,6 @@
             The self-assessment for @Model.SectionName.ToLower() was completed on
             <strong>@Model.LatestCompletionDate.</strong>
         </p>
-        <p>View or change your self-assessment answers at any time.</p>
     </div>
 
     <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Recommendations</h2>
@@ -35,21 +34,33 @@
 
     @foreach (var chunk in Model.Chunks)
     {
-        <div class="recommendation-action-header">
-            <div class="recommendation-piece-header">
-                <h3 class="govuk-heading-m">@chunk.HeaderText</h3>
-            </div>
-        </div>
+		<div class="recommendation-piece-content">
+			<h1 class="govuk-heading-xl">@chunk.HeaderText</h1>
 
-        <div class="recommendation-action-content govuk-!-margin-bottom-4">
-            @foreach (var content in chunk.Content)
-            {
-                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-                <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible" />
-            }
-            @{
-                ViewData["RecommendationsActionsHeader"] = chunk.SlugifiedLinkText;
-            }
-        </div>
+			<table class="govuk-table">
+				<thead class="govuk-table__head">
+					<tr class="govuk-table__row">
+						<th scope="col" class="govuk-table__header">Status</th>
+						<th scope="col" class="govuk-table__header">Last updated</th>
+					</tr>
+				</thead>
+				<tbody class="govuk-table__body">
+					<tr class="govuk-table__row">
+						<td class="govuk-table__cell">
+							<strong class="govuk-tag @chunk.StatusTagClass">
+								@chunk.Status
+							</strong>
+						</td>
+						<td class="govuk-table__cell">@chunk.LastUpdatedFormatted</td>
+					</tr>
+				</tbody>
+			</table>
+
+			@foreach (var content in chunk.Content)
+			{
+				<partial name="Components/PageComponentFactory" model="@content" />
+				<hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible" />
+			}
+		</div>
     }
 }

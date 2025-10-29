@@ -20,9 +20,6 @@ public class CategoryLandingViewComponentViewBuilder(
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    private const string CategoryLandingSections = "Components/CategoryLanding/Sections";
-    private const string CategoryLandingSectionsPrintContent = "Components/CategoryLanding/SectionsPrintContent";
-
     private const string CategoryLandingSectionAssessmentLink = "Components/CategoryLanding/SectionAssessmentLink";
     private const string CategoryLandingSectionAssessmentLinkPrintContent = "Components/CategoryLanding/SectionAssessmentLinkPrintContent";
 
@@ -73,7 +70,6 @@ public class CategoryLandingViewComponentViewBuilder(
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
             SortType = sortType,
             Print = print,
-            SectionsPartialName = print ? CategoryLandingSectionsPrintContent : CategoryLandingSections,
             StatusLinkPartialName = print ? CategoryLandingSectionAssessmentLinkPrintContent : CategoryLandingSectionAssessmentLink
         };
 
@@ -129,10 +125,9 @@ public class CategoryLandingViewComponentViewBuilder(
             var sortedRecommendations = recommendationChunks.SortByStatus(recommendations, sortType);
             var chunks = sortedRecommendations.Select(sr => new RecommendationChunkViewModel
             {
-                HeaderText = sr.HeaderText,
+                Header = sr.HeaderText,
                 LastUpdated = recommendations[sr.Id].DateCreated,
                 Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
-                SlugifiedLinkText = sr.SlugifiedLinkText
             })
                 .ToList();
 

@@ -18,6 +18,5 @@ public class CategoryLandingViewComponentViewModel
     public ICollection<QuestionnaireSectionEntry> Sections { get; set; } = [];
     public RecommendationSort? SortType { get; set; }
     public bool Print { get; set; }
-    public required string SectionsPartialName { get; set; }
     public required string StatusLinkPartialName { get; set; }
 }

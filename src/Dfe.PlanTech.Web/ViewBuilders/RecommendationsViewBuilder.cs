@@ -148,13 +148,22 @@ public class RecommendationsViewBuilder(
         string sectionSlug
     )
     {
-        _ = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
+        var details = await _recommendationService.GetLatestRecommendationStatusesByRecommendationIdAsync(contentfulReferences, establishmentId);
+        var chunkViewModels = section.CoreRecommendations.Select(cr => new RecommendationChunkViewModel
+        {
+            Content = cr.Content,
+            Header = cr.HeaderText,
+            LastUpdated = details[cr.Id].DateCreated,
+            Status = details[cr.Id].NewStatus.GetRecommendationStatusEnumValue() ?? RecommendationStatus.NotStarted,
+        });
 
         return new RecommendationsViewModel()
         {
             CategoryName = category.Header.Text,
             SectionName = section.Name,
-            Chunks = section.CoreRecommendations.ToList(),
+            Chunks = chunkViewModels.ToList(),
             LatestCompletionDate = submissionRoutingData.Submission!.DateCompleted.HasValue
                                 ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission!.DateCompleted.Value)
                                 : null,

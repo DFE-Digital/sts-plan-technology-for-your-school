@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
@@ -8,7 +7,7 @@ namespace Dfe.PlanTech.Web.ViewModels;
 public class RecommendationsViewModel
 {
     public required string CategoryName { get; init; }
-    public List<RecommendationChunkEntry> Chunks { get; init; } = [];
+    public List<RecommendationChunkViewModel> Chunks { get; init; } = [];
     public string? LatestCompletionDate { get; init; }
     public required string SectionName { get; init; }
     public required string SectionSlug { get; init; }
