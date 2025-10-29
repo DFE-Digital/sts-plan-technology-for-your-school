@@ -257,7 +257,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
-        if (submission.Status != null && submission.Status.Equals(SubmissionStatus.Inaccessible))
+        if (submission.Status != null && submission.Status.Equals(nameof(SubmissionStatus.Inaccessible)))
         {
             submission.Status = SubmissionStatus.InProgress.ToString();
             await _db.SaveChangesAsync();
@@ -276,7 +276,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 !submission.Deleted &&
                 submission.EstablishmentId == establishmentId &&
                 submission.SectionId == sectionId &&
-                submission.Status != SubmissionStatus.Inaccessible.ToString() &&
+          //      submission.Status != SubmissionStatus.Inaccessible.ToString() &&
                 (isCompletedSubmission == null || submission.Completed == isCompletedSubmission)
             )
             .OrderByDescending(submission => submission.DateCreated);

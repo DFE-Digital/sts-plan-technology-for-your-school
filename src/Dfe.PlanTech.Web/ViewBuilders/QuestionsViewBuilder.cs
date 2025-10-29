@@ -184,7 +184,7 @@ public class QuestionsViewBuilder(
             return controller.RedirectToInterstitialPage(sectionSlug);
         }
 
-        if (!String.IsNullOrEmpty(submissionModel.Status) && submissionModel.Status.Equals(SubmissionStatus.Obsolete))
+        if (!String.IsNullOrEmpty(submissionModel.Status) && submissionModel.Status.Equals(nameof(SubmissionStatus.Obsolete)))
         {
             var restartObsoleteViewModel = new RestartObsoleteAssessmentViewModel
             {
@@ -225,8 +225,7 @@ public class QuestionsViewBuilder(
         if (!isObsoleteSubmissionFlow)
         {
             await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
-        }
-        ;
+        };
 
         return controller.RedirectToAction(
             nameof(QuestionsController.GetInterstitialPage),
