@@ -276,7 +276,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 !submission.Deleted &&
                 submission.EstablishmentId == establishmentId &&
                 submission.SectionId == sectionId &&
-          //      submission.Status != SubmissionStatus.Inaccessible.ToString() &&
+                //      submission.Status != SubmissionStatus.Inaccessible.ToString() &&
                 (isCompletedSubmission == null || submission.Completed == isCompletedSubmission)
             )
             .OrderByDescending(submission => submission.DateCreated);

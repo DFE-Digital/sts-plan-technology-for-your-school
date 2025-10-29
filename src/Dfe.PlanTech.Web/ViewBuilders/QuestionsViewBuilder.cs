@@ -225,7 +225,8 @@ public class QuestionsViewBuilder(
         if (!isObsoleteSubmissionFlow)
         {
             await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
-        };
+        }
+        ;
 
         return controller.RedirectToAction(
             nameof(QuestionsController.GetInterstitialPage),
