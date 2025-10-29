@@ -2,14 +2,9 @@
 
 @{
 	string statusText;
-	string linkText;
-	string? controller = null;
-	string? action = null;
 
 	var topic = Model.Section;
 	var topicName = topic.Name.ToLower().Trim();
-	var topicSlug = topic.Slug ?? string.Empty;
-	var categorySlug = Model.CategorySlug;
 
 	switch (topic.ProgressStatus)
 	{

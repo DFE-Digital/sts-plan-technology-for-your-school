@@ -32,7 +32,7 @@
 									chunkSlug = chunk.SlugifiedLinkText
 									})
 								    class="govuk-link"
-							        data-recommendation-header="@(chunk.HeaderText)-@(Model.StatusLinkPartialName.Split("/").Last())"
+							        data-recommendation-header="@(chunk.HeaderText)-@(Model.StatusLinkPartialName.Split("/")[^1])"
 								    data-recommendation-status="@chunk.Status.GetDisplayName()">
 									@chunk.HeaderText
 								</a>

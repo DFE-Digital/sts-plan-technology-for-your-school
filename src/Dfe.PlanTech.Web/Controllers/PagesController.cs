@@ -16,11 +16,9 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class PagesController(
     ILogger<PagesController> logger,
-    ICategoryLandingViewComponentViewBuilder categoryLandingViewComponentViewBuilder,
     IPagesViewBuilder pagesViewBuilder
 ) : BaseController<PagesController>(logger)
 {
-    private readonly ICategoryLandingViewComponentViewBuilder _categoryLandingViewComponentViewBuilder = categoryLandingViewComponentViewBuilder ?? throw new ArgumentNullException(nameof(categoryLandingViewComponentViewBuilder));
     private readonly IPagesViewBuilder _pagesViewBuilder = pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
 
 
