@@ -22,14 +22,29 @@ public class BaseViewBuilder(
         return CurrentUser.DsiReference ?? throw new AuthenticationException("User is not authenticated");
     }
 
-    protected int GetEstablishmentIdOrThrowException()
-    {
-        return CurrentUser.EstablishmentId ?? throw new InvalidDataException(nameof(currentUser.EstablishmentId));
-    }
-
     protected int GetUserIdOrThrowException()
     {
         return CurrentUser.UserId ?? throw new AuthenticationException("User is not authenticated");
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns>The PlanTech database ID for the user's organisation (e.g. establishment, or establishment group)</returns>
+    /// <exception cref="InvalidDataException"></exception>
+    protected int GetUserOrganisationIdOrThrowException()
+    {
+        return CurrentUser.UserOrganisationId ?? throw new InvalidDataException(nameof(CurrentUser.UserOrganisationId));
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns>The PlanTech database ID for the selected establishment (e.g. an establishment that a MAT user has selected)</returns>
+    /// <exception cref="InvalidDataException"></exception>
+    protected async Task<int> GetActiveEstablishmentIdOrThrowException()
+    {
+        return await CurrentUser.GetActiveEstablishmentIdAsync() ?? throw new InvalidDataException(nameof(CurrentUser.GetActiveEstablishmentIdAsync));
     }
 
     protected CategorySectionRecommendationViewModel BuildCategorySectionRecommendationViewModel(

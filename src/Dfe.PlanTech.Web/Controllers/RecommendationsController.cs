@@ -15,18 +15,18 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class RecommendationsController(
     ILogger<RecommendationsController> logger,
-    IRecommendationsViewBuilder recommendationsViewBuilder,
-    IRecommendationService recommendationService,
     IContentfulService contentfulService,
+    IRecommendationService recommendationService,
+    IRecommendationsViewBuilder recommendationsViewBuilder,
     ISubmissionService submissionService,
     ICurrentUser currentUser
 )
     : BaseController<RecommendationsController>(logger)
 {
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IRecommendationsViewBuilder _recommendationsViewBuilder = recommendationsViewBuilder ?? throw new ArgumentNullException(nameof(recommendationsViewBuilder));
     private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly ICurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     public const string ControllerName = "Recommendations";
@@ -79,8 +79,9 @@ public class RecommendationsController(
             return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
         }
 
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var userId = GetUserIdOrThrowException();
+        var userOrganisationId = _currentUser.UserOrganisationId;
 
         var section = await _contentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
@@ -97,7 +98,8 @@ public class RecommendationsController(
             establishmentId,
             userId,
             selectedStatus,
-            $"Change reason: Status manually updated to {selectedStatus}"
+            $"Change reason: Status manually updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'",
+            userOrganisationId
         );
 
         // Set success message for the banner
@@ -107,23 +109,30 @@ public class RecommendationsController(
         return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
     }
 
-    private int GetEstablishmentIdOrThrowException()
+
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns>The PlanTech database ID for the user's organisation (e.g. establishment, or establishment group)</returns>
+    /// <exception cref="InvalidDataException"></exception>
+    protected int GetUserOrganisationIdOrThrowException()
     {
-        var establishmentId = _currentUser.EstablishmentId;
-        if (establishmentId == null)
-        {
-            throw new InvalidOperationException("Establishment ID is required but not available");
-        }
-        return establishmentId.Value;
+        return _currentUser.UserOrganisationId ?? throw new InvalidDataException(nameof(_currentUser.UserOrganisationId));
     }
 
-    private int GetUserIdOrThrowException()
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns>The PlanTech database ID for the selected establishment (e.g. an establishment that a MAT user has selected)</returns>
+    /// <exception cref="InvalidDataException"></exception>
+    protected async Task<int> GetActiveEstablishmentIdOrThrowException()
     {
-        var userId = _currentUser.UserId;
-        if (userId == null)
-        {
-            throw new InvalidOperationException("User ID is required but not available");
-        }
-        return userId.Value;
+        return await _currentUser.GetActiveEstablishmentIdAsync() ?? throw new InvalidDataException(nameof(_currentUser.GetActiveEstablishmentIdAsync));
+    }
+
+    protected int GetUserIdOrThrowException()
+    {
+        return _currentUser.UserId ?? throw new InvalidOperationException("User ID is required but not available");
     }
 }

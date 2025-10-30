@@ -28,10 +28,15 @@ def fetch_sections() -> list[Section]:
                 "Authorization": f"Bearer {token}",
             },
         )
+        data.raise_for_status()
 
         result = []
+        payload = data.json()
+        if not isinstance(payload, list):
+            raise TypeError(f"Unexpected /sections payload type: {type(payload)}")
+
         logger.info("Validating retrieved sections")
-        for i, item in enumerate(data.json()):
+        for i, item in enumerate(payload):
             name = item.get("name", "<unnamed>")
             logger.info(f"Validating section '{name}' (index [{i}])")
             result.append(Section.model_validate(item))
@@ -40,16 +45,21 @@ def fetch_sections() -> list[Section]:
 
     except RequestException as ex:
         logger.error(f"Error fetching sections: {ex}")
-        raise ex
+        raise
     except (ValidationError, TypeError) as ex:
         logger.error(f"Error converting response to Sections: {ex}")
-        raise ex
+        raise
 
 
-def fetch_recommendation_chunks() -> dict[str, list[str]]:
+def fetch_recommendation_chunks() -> (
+    tuple[dict[str, list[str]], dict[str, list[str]], set[str]]
+):
     """
-    Fetches all RecommendationChunks from the chunks API in /api/cms
-    Returns a dictionary mapping answerId to RecommendationHeader.
+    Fetches paginated RecommendationChunks from {PLANTECH_API_URL}/chunks/{page}
+    Returns:
+      - completing_map: answer_id -> list of recommendation headers the answer sets status completed
+      - inprogress_map: answer_id -> list of recommendation headers the answer sets status in-progress
+      - all_recommendations: set of all recommendation headers (to render all rec nodes)
     """
     token = os.getenv("PLANTECH_API_KEY")
     base_url = os.getenv("PLANTECH_API_URL")
@@ -69,7 +79,6 @@ def fetch_recommendation_chunks() -> dict[str, list[str]]:
                 },
             )
             response.raise_for_status()
-
             data = response.json()
 
             items = data.get("items", [])
@@ -84,30 +93,43 @@ def fetch_recommendation_chunks() -> dict[str, list[str]]:
             logger.info(
                 f"Retrieved {len(items)} items from page {page_number}, total so far: {len(total_items)}"
             )
-
             page_number += 1
 
-        recommendation_map = {}
+        completing_map: dict[str, list[str]] = {}
+        inprogress_map: dict[str, list[str]] = {}
+        all_recommendations: set[str] = set()
 
         for item in total_items:
-            answer_id = item.get("answerId")
-            recommendation_header = item.get(
+            completing_id = item.get("CompletingAnswerId") or item.get(
+                "completingAnswerId"
+            )
+            inprogress_id = item.get("InProgressAnswerId") or item.get(
+                "inProgressAnswerId"
+            )
+            header = item.get("RecommendationHeader") or item.get(
                 "recommendationHeader"
-            )  # Ensure correct field name
+            )
 
-            if answer_id and recommendation_header:
-                if answer_id not in recommendation_map:
-                    recommendation_map[answer_id] = []  # Initialize as list
+            if not header:
+                logger.warning(f"Skipping chunk without RecommendationHeader: {item}")
+                continue
 
-                recommendation_map[answer_id].append(
-                    recommendation_header
-                )  # Store multiple recommendations
+            all_recommendations.add(header)
+
+            if completing_id:
+                completing_map.setdefault(completing_id, []).append(header)
+
+            if inprogress_id:
+                inprogress_map.setdefault(inprogress_id, []).append(header)
 
         logger.info(
-            f"Successfully retrieved {len(recommendation_map)} unique answer mappings."
+            "Built maps: %d completing keys, %d in-progress keys, %d total recommendations",
+            len(completing_map),
+            len(inprogress_map),
+            len(all_recommendations),
         )
-        return recommendation_map
+        return completing_map, inprogress_map, all_recommendations
 
     except (RequestException, TypeError) as ex:
         logger.error(f"Error fetching recommendation chunks: {ex}")
-        return {}
+        return {}, {}, set()
