@@ -53,7 +53,6 @@ public class QuestionsViewBuilderTests
             _logger,
             _contactOptions,
             _errorMessages,
-            _errorPages,
             _contentful,
             _questionSvc,
             _submissionSvc,
