@@ -159,7 +159,26 @@
   border-top: 1px solid #b1b4b6;
 }
 
-#checkYourAnswers-page .govuk-heading-xl {
+#checkYourAnswers-page .spacer {
+  content: " " !important;
+  display: block;
+}
+
+@media (min-width: 40.0625em) {
+  #changeYourAnswers-page .govuk-summary-list__key {
+    width: 100%;
+  }
+
+  #changeYourAnswers-page .govuk-summary-list__actions {
+    width: 0;
+  }
+}
+
+#changeYourAnswers-page dl.govuk-summary-list.govuk-\!-margin-bottom-9 {
+  border-top: 1px solid #b1b4b6;
+}
+
+#changeYourAnswers-page .govuk-heading-xl {
   font-size: 2.5rem;
   margin-bottom: 25px;
 }
