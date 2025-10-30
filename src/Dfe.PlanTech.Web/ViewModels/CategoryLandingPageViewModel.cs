@@ -12,4 +12,5 @@ public class CategoryLandingPageViewModel
     public string? SortOrder { get; set; }
     public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
     public required ComponentTitleEntry Title { get; set; }
+    public bool Print { get; set; }
 }

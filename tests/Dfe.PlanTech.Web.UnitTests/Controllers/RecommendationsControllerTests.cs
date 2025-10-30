@@ -26,14 +26,14 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             _contentfulService = Substitute.For<IContentfulService>();
             _submissionService = Substitute.For<ISubmissionService>();
             _currentUser = Substitute.For<ICurrentUser>();
-            _controller = new RecommendationsController(_logger, _viewBuilder, _recommendationService, _contentfulService, _submissionService, _currentUser);
+            _controller = new RecommendationsController(_logger, _contentfulService, _recommendationService, _viewBuilder, _submissionService, _currentUser);
         }
 
         [Fact]
         public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new RecommendationsController(_logger, null!, _recommendationService, _contentfulService, _submissionService, _currentUser)
+                new RecommendationsController(_logger, _contentfulService, _recommendationService, null!, _submissionService, _currentUser)
             );
 
             Assert.Equal("recommendationsViewBuilder", ex.ParamName);

@@ -11,9 +11,9 @@ public class CategoryLandingViewComponent(
 {
     private readonly ICategoryLandingViewComponentViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
-    public async Task<IViewComponentResult> InvokeAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName, string sortOrder = RecommendationConstants.DefaultSortOrder)
+    public async Task<IViewComponentResult> InvokeAsync(QuestionnaireCategoryEntry category, string slug, string? sectionName, string sortOrder = RecommendationConstants.DefaultSortOrder, bool print = false)
     {
-        var viewModel = await _viewBuilder.BuildViewModelAsync(category, slug, sectionName, sortOrder);
+        var viewModel = await _viewBuilder.BuildViewModelAsync(category, slug, sectionName, sortOrder, print);
         return View(viewModel);
     }
 }
