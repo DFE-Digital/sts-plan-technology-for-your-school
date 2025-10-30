@@ -11,4 +11,5 @@ public class CategoryLandingPageViewModel
     public required string Slug { get; set; }
     public string? SortOrder { get; set; }
     public required ComponentTitleEntry Title { get; set; }
+    public bool Print { get; set; }
 }

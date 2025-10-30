@@ -7,7 +7,7 @@
         <h2 class="govuk-heading-l">@topic.Name</h2>
     }
 
-    <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = Model.CategorySlug, Section = topic, Context = "Sections" }' />
+    <partial name="@Model.StatusLinkPartialName" model='new StatusLinkViewModel { CategorySlug = Model.CategorySlug, Section = topic, Context = "Sections" }' />
 
     @if (!string.IsNullOrEmpty(topic.LastCompletionDate))
     {
@@ -31,7 +31,9 @@
 									sectionSlug = topic.Slug,
 									chunkSlug = chunk.SlugifiedLinkText
 									})
-								   class="govuk-link">
+								    class="govuk-link"
+							        data-recommendation-header="@(chunk.HeaderText)-@(Model.StatusLinkPartialName.Split("/")[^1])"
+								    data-recommendation-status="@chunk.Status.GetDisplayName()">
 									@chunk.HeaderText
 								</a>
 							</td>
