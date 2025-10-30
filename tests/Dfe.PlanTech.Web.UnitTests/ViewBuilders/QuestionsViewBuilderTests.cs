@@ -40,9 +40,6 @@ public class QuestionsViewBuilderTests
             ConcurrentUsersOrContentChange = "There was a problem, please contact us."
         });
 
-    private readonly IOptions<ErrorPagesConfiguration> _errorPages =
-        Options.Create(new ErrorPagesConfiguration());
-
     private ContentfulOptionsConfiguration _contentfulOptions = new ContentfulOptionsConfiguration
     {
         UsePreviewApi = false
@@ -78,7 +75,8 @@ public class QuestionsViewBuilderTests
         {
             Sys = new SystemDetails(id),
             Name = name,
-            Questions = questions
+            Questions = questions,
+            InterstitialPage = new PageEntry { Slug = slug }
         };
 
     private static QuestionnaireQuestionEntry MakeQuestion(string id, string slug, string text)
