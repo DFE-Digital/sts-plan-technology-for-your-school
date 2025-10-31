@@ -1,6 +1,10 @@
 ﻿@model GroupsSelectorViewModel
 
 @section DfePageHeaderInner {
+    @foreach (var content in Model.BeforeTitleContent)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
     <partial name="Components/PageComponentFactory" model="@Model.Title" />
 }
 
@@ -32,4 +36,4 @@
         <p class="govuk-body"><a href="@Model.ContactLinkHref" target="_blank" class="govuk-link">Contact us (opens in new tab)</a> if any school information is missing or incorrect.</p>
     </div>
 </div>
-    
+
