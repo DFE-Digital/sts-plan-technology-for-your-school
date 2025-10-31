@@ -29,6 +29,7 @@ public class CookiesController(
 
         CookiesViewModel cookiesViewModel = new()
         {
+            BeforeTitleContent = cookiesPageContent.BeforeTitleContent,
             Title = cookiesPageContent.Title ?? new ComponentTitleEntry("Cookies"),
             Content = cookiesPageContent.Content ?? [],
             Cookie = _cookieService.Cookie,
