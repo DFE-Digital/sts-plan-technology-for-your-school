@@ -40,9 +40,6 @@ public class QuestionsViewBuilderTests
             ConcurrentUsersOrContentChange = "There was a problem, please contact us."
         });
 
-    private readonly IOptions<ErrorPagesConfiguration> _errorPages =
-        Options.Create(new ErrorPagesConfiguration());
-
     private ContentfulOptionsConfiguration _contentfulOptions = new ContentfulOptionsConfiguration
     {
         UsePreviewApi = false
@@ -53,7 +50,6 @@ public class QuestionsViewBuilderTests
             _logger,
             _contactOptions,
             _errorMessages,
-            _errorPages,
             _contentful,
             _questionSvc,
             _submissionSvc,
@@ -79,7 +75,8 @@ public class QuestionsViewBuilderTests
         {
             Sys = new SystemDetails(id),
             Name = name,
-            Questions = questions
+            Questions = questions,
+            InterstitialPage = new PageEntry { Slug = slug }
         };
 
     private static QuestionnaireQuestionEntry MakeQuestion(string id, string slug, string text)
@@ -455,7 +452,7 @@ public class QuestionsViewBuilderTests
         _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
         // Act
-        var result = await sut.RestartSelfAssessment(controller, "cat-slug", sectionSlug);
+        var result = await sut.RestartSelfAssessment(controller, "cat-slug", sectionSlug, false);
 
         // Assert
         await _submissionSvc.Received(1).SetSubmissionInaccessibleAsync(555, "S123");

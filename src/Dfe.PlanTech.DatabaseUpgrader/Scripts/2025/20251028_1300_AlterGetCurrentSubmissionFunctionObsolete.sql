@@ -13,7 +13,7 @@ BEGIN
     WHERE sectionId = @sectionId
       AND establishmentId = @establishmentId
       AND completed = 0
-      AND (status IS NULL OR status <> 'Inaccessible') -- Exclude inaccessible submissions
+      AND (status IS NULL OR status NOT IN ('Inaccessible', 'Obsolete')) -- Exclude null-status, inaccessible and obsolete submissions
     ORDER BY Id DESC;
 
     RETURN @submissionId;

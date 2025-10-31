@@ -8,10 +8,10 @@
 
 	switch (topic.ProgressStatus)
 	{
-		case SectionProgressStatus.InProgress:
+		case SubmissionStatus.InProgress:
 			statusText = $"A self-assessment was started on {topic.DateUpdated}. This must be completed before recommendations are available.";
 			break;
-		case SectionProgressStatus.Completed:
+		case SubmissionStatus.CompleteReviewed:
 			statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
 			break;
 		default:

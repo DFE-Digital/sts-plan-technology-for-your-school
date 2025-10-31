@@ -130,12 +130,27 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             var categorySlug = "cat";
             var sectionSlug = "sec";
 
-            _viewBuilder.RestartSelfAssessment(_controller, categorySlug, sectionSlug)
+            _viewBuilder.RestartSelfAssessment(_controller, categorySlug, sectionSlug, false)
                 .Returns(new OkResult());
 
-            var result = await _controller.RestartSelfAssessment(categorySlug, sectionSlug);
+            var result = await _controller.RestartSelfAssessment(categorySlug, sectionSlug, false);
 
-            await _viewBuilder.Received(1).RestartSelfAssessment(_controller, categorySlug, sectionSlug);
+            await _viewBuilder.Received(1).RestartSelfAssessment(_controller, categorySlug, sectionSlug, false);
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task ContinuePreviousAssessment_CallsViewBuilder()
+        {
+            var categorySlug = "cat";
+            var sectionSlug = "sec";
+
+            _viewBuilder.ContinuePreviousAssessment(_controller, categorySlug, sectionSlug)
+                .Returns(new OkResult());
+
+            var result = await _controller.ContinuePreviousAssessment(categorySlug, sectionSlug);
+
+            await _viewBuilder.Received(1).ContinuePreviousAssessment(_controller, categorySlug, sectionSlug);
             Assert.IsType<OkResult>(result);
         }
     }
