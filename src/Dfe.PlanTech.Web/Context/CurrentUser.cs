@@ -8,13 +8,20 @@ using Dfe.PlanTech.Web.Context.Interfaces;
 
 namespace Dfe.PlanTech.Web.Context;
 
-public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentService establishmentService, ILogger<CurrentUser> logger) : ICurrentUser
+public class CurrentUser : ICurrentUser
 {
-    private readonly IHttpContextAccessor _contextAccessor =
-        contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-    private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly ILogger<CurrentUser> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly Lazy<Task<SqlEstablishmentDto?>> _selectedSchoolLazy = new(() => LoadSelectedSchoolAsync(contextAccessor, establishmentService, logger));
+    private readonly IHttpContextAccessor _contextAccessor;
+    private readonly IEstablishmentService _establishmentService;
+    private readonly ILogger<CurrentUser> _logger;
+    private readonly Lazy<Task<SqlEstablishmentDto?>> _selectedSchoolLazy;
+
+    public CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentService establishmentService, ILogger<CurrentUser> logger)
+    {
+        _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
+        _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        _selectedSchoolLazy = new Lazy<Task<SqlEstablishmentDto?>>(() => LoadSelectedSchoolAsync());
+    }
 
     public string? DsiReference => GetStringFromClaim(ClaimConstants.NameIdentifier)
                                    ?? throw new AuthenticationException("User is not authenticated");
@@ -175,13 +182,32 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
         return null;
     }
 
-    // Private static method to load selected school asynchronously
-    private static async Task<SqlEstablishmentDto?> LoadSelectedSchoolAsync(
-        IHttpContextAccessor contextAccessor,
-        IEstablishmentService establishmentService,
-        ILogger<CurrentUser> logger)
+    // Private instance method to load selected school asynchronously
+    private async Task<SqlEstablishmentDto?> LoadSelectedSchoolAsync()
     {
-        var httpContext = contextAccessor.HttpContext;
+        var httpContext = _contextAccessor.HttpContext;
+
+        // Early return if user is not authenticated
+        if (!IsAuthenticated)
+        {
+            return null;
+        }
+
+        // Early return if user is not a group user - they shouldn't have a selected school cookie
+        if (!UserOrganisationIsGroup)
+        {
+            // Non-group users should not have a selected school cookie - clear it if present
+            if (httpContext?.Request.Cookies.ContainsKey(CookieConstants.SelectedSchool) == true)
+            {
+                _logger.LogWarning(
+                    "Non-group user has school selection cookie but should not. Clearing school selection cookie ({CookieName}).",
+                    CookieConstants.SelectedSchool);
+                ClearSelectedSchoolCookie(httpContext);
+            }
+            return null;
+        }
+
+        // From here on, we know the user is a group user
         if (httpContext == null ||
             !httpContext.Request.Cookies.TryGetValue(CookieConstants.SelectedSchool, out var cookieValue) ||
             string.IsNullOrWhiteSpace(cookieValue))
@@ -196,23 +222,82 @@ public class CurrentUser(IHttpContextAccessor contextAccessor, IEstablishmentSer
             urn = school?.Urn;
             if (string.IsNullOrWhiteSpace(urn))
             {
+                _logger.LogWarning(
+                    "School selection cookie is missing URN value. Cookie length: {CookieLength}. Clearing school selection cookie ({CookieName}).",
+                    cookieValue?.Length ?? 0,
+                    CookieConstants.SelectedSchool);
+                ClearSelectedSchoolCookie(httpContext);
                 return null;
             }
         }
-        catch (System.Text.Json.JsonException)
+        catch (System.Text.Json.JsonException ex)
         {
+            _logger.LogWarning(ex,
+                "School selection cookie contains invalid JSON. Cookie length: {CookieLength}. Clearing school selection cookie ({CookieName}).",
+                cookieValue?.Length ?? 0,
+                CookieConstants.SelectedSchool);
+            ClearSelectedSchoolCookie(httpContext);
+            return null;
+        }
+
+        // Validate that the selected school is within the user's group
+        if (UserOrganisationId == null)
+        {
+            _logger.LogWarning(
+                "Group user attempted to access establishment {SelectedUrn} but has no organisation ID. Clearing school selection cookie ({CookieName}).",
+                urn,
+                CookieConstants.SelectedSchool);
+            ClearSelectedSchoolCookie(httpContext);
             return null;
         }
 
         try
         {
-            return await establishmentService.GetEstablishmentByReferenceAsync(urn);
+            // Get all schools in the user's group
+            var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+                [],
+                UserOrganisationId.Value);
+
+            var selectedSchoolIsValid = groupSchools.Any(s => s.Urn.Equals(urn, StringComparison.OrdinalIgnoreCase));
+
+            if (!selectedSchoolIsValid)
+            {
+                _logger.LogWarning(
+                    "Group user attempted to access establishment {SelectedUrn} that is not within their group (GID: {GroupId}). Clearing school selection cookie ({CookieName}).",
+                    urn,
+                    UserOrganisationId.Value,
+                    CookieConstants.SelectedSchool);
+                ClearSelectedSchoolCookie(httpContext);
+                return null;
+            }
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Failed to get establishment details for URN {Urn}: {Message}", urn, ex.Message);
+            _logger.LogError(ex,
+                "Failed to validate group membership for URN {Urn} in group {GroupId}. Clearing school selection cookie ({CookieName}).",
+                urn,
+                UserOrganisationId.Value,
+                CookieConstants.SelectedSchool);
+            ClearSelectedSchoolCookie(httpContext);
             return null;
         }
+
+        try
+        {
+            return await _establishmentService.GetEstablishmentByReferenceAsync(urn);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to get establishment details for URN {Urn} from the database: {Message}. Clearing school selection cookie ({CookieName}).",
+                urn, ex.Message,
+                CookieConstants.SelectedSchool);
+            return null;
+        }
+    }
+
+    private static void ClearSelectedSchoolCookie(HttpContext httpContext)
+    {
+        httpContext.Response.Cookies.Delete(CookieConstants.SelectedSchool);
     }
 
     private int? GetIntFromClaim(string claimType)

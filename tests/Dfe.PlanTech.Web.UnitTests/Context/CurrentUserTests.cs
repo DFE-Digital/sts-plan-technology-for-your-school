@@ -3,6 +3,8 @@ using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context;
 using Microsoft.AspNetCore.Http;
@@ -131,6 +133,16 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
+
+        // Mock the validation - confirm the school is in the MAT's group
+        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<Core.Contentful.Models.QuestionnaireCategoryEntry>>(),
+            100)
+            .Returns(new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
+            {
+                new() { Urn = "999888", EstablishmentName = "Selected Academy", Id = 42 }
+            });
+
         establishmentService.GetEstablishmentByReferenceAsync("999888")
             .Returns(new Core.DataTransferObjects.Sql.SqlEstablishmentDto
             {
@@ -510,7 +522,10 @@ public class CurrentUserTests
         """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's ID
+        }, "test"));
         context.User = principal;
 
         // Set selected school cookie
@@ -520,6 +535,16 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
+
+        // Mock the validation - confirm the school is in the MAT's group
+        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<Core.Contentful.Models.QuestionnaireCategoryEntry>>(),
+            100)
+            .Returns(new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
+            {
+                new() { Urn = "999888", EstablishmentName = "Selected Academy", Id = 42 }
+            });
+
         establishmentService.GetEstablishmentByReferenceAsync("999888")
             .Returns(new Core.DataTransferObjects.Sql.SqlEstablishmentDto
             {
@@ -634,7 +659,10 @@ public class CurrentUserTests
         """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's ID
+        }, "test"));
         context.User = principal;
 
         // Set selected school cookie
@@ -644,6 +672,16 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
+
+        // Mock the validation - confirm the school is in the MAT's group
+        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<Core.Contentful.Models.QuestionnaireCategoryEntry>>(),
+            100)
+            .Returns(new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
+            {
+                new() { Urn = "999888", EstablishmentName = "Selected Academy", Id = 42 }
+            });
+
         establishmentService.GetEstablishmentByReferenceAsync("999888")
             .Returns(new Core.DataTransferObjects.Sql.SqlEstablishmentDto
             {
@@ -1070,6 +1108,643 @@ public class CurrentUserTests
 
         // Act / Assert
         Assert.False(sut.UserOrganisationIsGroup);
+    }
+
+    // ---------- LoadSelectedSchool validation (security tests) ----------
+
+    [Fact]
+    public async Task NonGroupUser_CannotAccessSchool_WhenCookieIsManipulated()
+    {
+        // Arrange - Direct school user with URN 123456
+        var orgJson = """
+        {
+          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+          "name": "My Primary School",
+          "category": { "id": "001", "name": "Establishment" },
+          "urn": "123456"
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
+        }, "test"));
+        context.User = principal;
+
+        // Bad actor: User manually adds a selected school cookie for a different school
+        var maliciousSchoolData = new { Urn = "999888", Name = "Someone Elses School" };
+        var json = JsonSerializer.Serialize(maliciousSchoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should ignore the manipulated cookie and return the user's actual school
+        Assert.Equal(100, activeEstablishmentId); // Their actual school ID from claims
+        Assert.Equal("123456", activeEstablishmentUrn); // Their actual school URN
+        Assert.Equal("My Primary School", activeEstablishmentName);
+
+        // Verify the cookie was cleared (warning logged)
+        logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("Non-group user has school selection cookie but should not")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>());
+
+        // Verify we never called the establishment service (short-circuited early)
+        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task GroupUser_CannotAccessSchoolOutsideTheirGroup_WhenCookieIsManipulated()
+    {
+        // Arrange - MAT user (group ID 100) who tries to access a school not in their group
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's DB ID
+        }, "test"));
+        context.User = principal;
+
+        // Bad actor: User manually edits cookie to try accessing a school outside their MAT
+        var maliciousSchoolData = new { Urn = "888777", Name = "School From Different MAT" };
+        var json = JsonSerializer.Serialize(maliciousSchoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+
+        // Setup: The MAT only has schools with URNs 111222 and 333444
+        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+            100)
+            .Returns(new List<SqlEstablishmentLinkDto>
+            {
+                new() { Urn = "111222", EstablishmentName = "My School 1", Id = 1 },
+                new() { Urn = "333444", EstablishmentName = "My School 2", Id = 2 }
+            });
+
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should reject the manipulated cookie and fall back to MAT details
+        Assert.Equal(100, activeEstablishmentId); // MAT's ID
+        Assert.Null(activeEstablishmentUrn); // MAT doesn't have URN
+        Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
+
+        // Verify validation was attempted
+        await establishmentService.Received(1).GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+            100);
+
+        // Verify the cookie was cleared (warning logged)
+        logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("not within their group")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>());
+
+        // Verify we never tried to load the malicious school
+        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync("888777");
+    }
+
+    [Fact]
+    public async Task UnauthenticatedUser_CannotAccessSchool_EvenWithValidCookie()
+    {
+        // Arrange - Unauthenticated user with a valid-looking cookie
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity()); // Not authenticated
+        context.User = principal;
+
+        var schoolData = new { Urn = "123456", Name = "Some School" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should return nulls (no access)
+        Assert.Null(activeEstablishmentId);
+        Assert.Null(activeEstablishmentUrn);
+        Assert.Null(activeEstablishmentName);
+
+        // Verify we never called the establishment service
+        await establishmentService.DidNotReceive().GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+            Arg.Any<int>());
+        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task GroupUser_CanAccessSchoolWithinTheirGroup_WhenValidCookieIsSet()
+    {
+        // Arrange - MAT user (group ID 100) with a valid school selection within their group
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's DB ID
+        }, "test"));
+        context.User = principal;
+
+        // Valid selection: User selects a school within their MAT
+        var validSchoolData = new { Urn = "111222", Name = "My School 1" };
+        var json = JsonSerializer.Serialize(validSchoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+
+        // Setup: The MAT has this school
+        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+            100)
+            .Returns(new List<SqlEstablishmentLinkDto>
+            {
+                new() { Urn = "111222", EstablishmentName = "My School 1", Id = 42 },
+                new() { Urn = "333444", EstablishmentName = "My School 2", Id = 43 }
+            });
+
+        // Setup: Return the school details from the database
+        establishmentService.GetEstablishmentByReferenceAsync("111222")
+            .Returns(new SqlEstablishmentDto
+            {
+                Id = 42,
+                OrgName = "My School 1 (Full Name)",
+                EstablishmentRef = "111222"
+            });
+
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should successfully return the selected school
+        Assert.Equal(42, activeEstablishmentId); // Selected school's ID
+        Assert.Equal("111222", activeEstablishmentUrn); // Selected school's URN
+        Assert.Equal("My School 1 (Full Name)", activeEstablishmentName); // Name from database
+
+        // Verify validation was performed
+        await establishmentService.Received(1).GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+            100);
+
+        // Verify the school was loaded from database
+        await establishmentService.Received(1).GetEstablishmentByReferenceAsync("111222");
+
+        // Verify no warnings were logged
+        logger.DidNotReceive().Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Any<object>(),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>());
+    }
+
+    [Fact]
+    public async Task GroupUser_CannotAccessSchool_WhenValidationServiceThrowsException()
+    {
+        // Arrange - MAT user with a school selection, but validation fails due to service error
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
+        }, "test"));
+        context.User = principal;
+
+        var schoolData = new { Urn = "111222", Name = "My School 1" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+
+        // Setup: Service throws an exception during validation
+        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+            100)
+            .Returns(Task.FromException<List<SqlEstablishmentLinkDto>>(new Exception("Database connection failed")));
+
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should fail securely and fall back to MAT details
+        Assert.Equal(100, activeEstablishmentId); // MAT's ID
+        Assert.Null(activeEstablishmentUrn); // MAT doesn't have URN
+        Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
+
+        // Verify error was logged
+        logger.Received(1).Log(
+            LogLevel.Error,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("Failed to validate group membership")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>());
+
+        // Verify we never tried to load the school after validation failed
+        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task GroupUser_WithNoOrganisationId_CannotAccessSchool()
+    {
+        // Arrange - Group user without an organisation ID in claims (edge case / data corruption scenario)
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson)
+            // Note: No DB_ESTABLISHMENT_ID claim
+        }, "test"));
+        context.User = principal;
+
+        var schoolData = new { Urn = "111222", Name = "My School 1" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should reject and fall back to MAT details
+        Assert.Null(activeEstablishmentId); // No ID available
+        Assert.Null(activeEstablishmentUrn); // MAT doesn't have URN
+        Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
+
+        // Verify warning was logged
+        logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("but has no organisation ID")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>());
+
+        // Verify we never called the establishment service
+        await establishmentService.DidNotReceive().GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+            Arg.Any<int>());
+    }
+
+    // ---------- Cookie corruption and validation tests ----------
+
+    [Fact]
+    public async Task GroupUser_WithMalformedJsonInCookie_CannotAccessSchool()
+    {
+        // Arrange - Group user with malformed JSON in cookie (e.g., browser corruption, manual editing)
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
+        }, "test"));
+        context.User = principal;
+
+        // Set malformed JSON cookie
+        var malformedJson = "{\"Urn\":\"123456\",\"Name\":\"Test School\""; // Missing closing brace
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(malformedJson)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should fall back to MAT details
+        Assert.Equal(100, activeEstablishmentId); // MAT's ID
+        Assert.Null(activeEstablishmentUrn); // MAT doesn't have URN
+        Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
+
+        // Verify warning was logged with exception details
+        logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie contains invalid JSON")),
+            Arg.Is<Exception>(ex => ex is JsonException),
+            Arg.Any<Func<object, Exception?, string>>());
+
+        // Verify we never tried to validate or load the school
+        await establishmentService.DidNotReceive().GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+            Arg.Any<int>());
+        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task GroupUser_WithEmptyUrnInCookie_CannotAccessSchool()
+    {
+        // Arrange - Group user with empty URN in cookie (corrupted data or manual editing)
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
+        }, "test"));
+        context.User = principal;
+
+        // Set cookie with empty URN
+        var schoolData = new { Urn = "", Name = "Test School" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should fall back to MAT details
+        Assert.Equal(100, activeEstablishmentId); // MAT's ID
+        Assert.Null(activeEstablishmentUrn); // MAT doesn't have URN
+        Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
+
+        // Verify warning was logged
+        logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie is missing URN value")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>());
+
+        // Verify we never tried to validate or load the school
+        await establishmentService.DidNotReceive().GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
+            Arg.Any<int>());
+        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task GroupUser_WithWhitespaceUrnInCookie_CannotAccessSchool()
+    {
+        // Arrange - Group user with whitespace-only URN in cookie
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
+        }, "test"));
+        context.User = principal;
+
+        // Set cookie with whitespace URN
+        var schoolData = new { Urn = "   ", Name = "Test School" };
+        var json = JsonSerializer.Serialize(schoolData);
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should fall back to MAT details
+        Assert.Equal(100, activeEstablishmentId);
+        Assert.Null(activeEstablishmentUrn);
+        Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
+
+        // Verify warning was logged
+        logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie is missing URN value")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>());
+    }
+
+    [Fact]
+    public async Task GroupUser_WithNullUrnInCookie_CannotAccessSchool()
+    {
+        // Arrange - Group user with null URN in cookie (JSON contains "Urn":null)
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
+        }, "test"));
+        context.User = principal;
+
+        // Manually construct JSON with null URN
+        var jsonWithNull = "{\"Urn\":null,\"Name\":\"Test School\"}";
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(jsonWithNull)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should fall back to MAT details
+        Assert.Equal(100, activeEstablishmentId);
+        Assert.Null(activeEstablishmentUrn);
+        Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
+
+        // Verify warning was logged
+        logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie is missing URN value")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>());
+    }
+
+    [Fact]
+    public async Task GroupUser_WithCompletelyInvalidCookieValue_CannotAccessSchool()
+    {
+        // Arrange - Group user with completely invalid cookie value (not even JSON)
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
+        }, "test"));
+        context.User = principal;
+
+        // Set completely invalid cookie value
+        var invalidValue = "this-is-not-json-at-all-just-random-text";
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(invalidValue)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentUrn = await sut.GetActiveEstablishmentUrnAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should fall back to MAT details
+        Assert.Equal(100, activeEstablishmentId);
+        Assert.Null(activeEstablishmentUrn);
+        Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
+
+        // Verify warning was logged with exception
+        logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie contains invalid JSON")),
+            Arg.Is<Exception>(ex => ex is JsonException),
+            Arg.Any<Func<object, Exception?, string>>());
+    }
+
+    [Fact]
+    public async Task GroupUser_AfterCodeChangeInvalidatesOldCookieFormat_GracefullyHandles()
+    {
+        // Arrange - Simulates scenario after a code deployment where old cookie format is no longer valid
+        // This is a common real-world scenario that should be handled gracefully
+        var orgJson = """
+        {
+          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+          "name": "My Multi-Academy Trust",
+          "category": { "id": "010", "name": "Multi-Academy Trust" }
+        }
+        """;
+
+        var context = new DefaultHttpContext();
+        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
+            BuildClaim(ClaimConstants.Organisation, orgJson),
+            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
+        }, "test"));
+        context.User = principal;
+
+        // Old format cookie (different property names)
+        var oldFormatJson = "{\"SchoolUrn\":\"123456\",\"SchoolName\":\"Old Format School\"}";
+        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(oldFormatJson)}");
+
+        var accessor = new HttpContextAccessor { HttpContext = context };
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var sut = new CurrentUser(accessor, establishmentService, logger);
+
+        // Act
+        var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
+        var activeEstablishmentName = await sut.GetActiveEstablishmentNameAsync();
+
+        // Assert - Should gracefully fall back to MAT without throwing exceptions
+        Assert.Equal(100, activeEstablishmentId);
+        Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
+
+        // Verify appropriate warning was logged
+        logger.Received(1).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie is missing URN value")),
+            Arg.Any<Exception>(),
+            Arg.Any<Func<object, Exception?, string>>());
     }
 
 
