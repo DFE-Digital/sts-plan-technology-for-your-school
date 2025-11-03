@@ -10,7 +10,6 @@ namespace Dfe.PlanTech.Web.ViewModels
         public string TopicName { get; set; } = string.Empty;
         public int QuestionsCount { get; set; }
         public List<QuestionWithAnswerModel> Responses { get; set; } = new();
-
         public string CategorySlug { get; set; } = string.Empty;
         public string SectionSlug { get; set; } = string.Empty;
     }

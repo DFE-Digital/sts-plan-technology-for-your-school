@@ -19,7 +19,6 @@ public class QuestionsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
-    IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
     IQuestionService questionService,
     ISubmissionService submissionService,
@@ -31,11 +30,12 @@ public class QuestionsViewBuilder(
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorMessagesConfiguration _errorMessages = errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
-    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
     private readonly ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
+    private const string ContinueSelfAssessmentView = "ContinueSelfAssessment";
+    private const string RestartObsoleteAssessmentView = "RestartObsoleteAssessment";
 
 
     public async Task<IActionResult> RouteBySlugAndQuestionAsync(
@@ -184,6 +184,19 @@ public class QuestionsViewBuilder(
             return controller.RedirectToInterstitialPage(sectionSlug);
         }
 
+        if (!String.IsNullOrEmpty(submissionModel.Status) && submissionModel.Status.Equals(nameof(SubmissionStatus.Obsolete)))
+        {
+            var restartObsoleteViewModel = new RestartObsoleteAssessmentViewModel
+            {
+                TopicName = section.Name,
+                CategorySlug = categorySlug,
+                SectionSlug = sectionSlug
+            };
+
+            return controller.View(RestartObsoleteAssessmentView, restartObsoleteViewModel);
+        }
+        ;
+
         var viewModel = new ContinueSelfAssessmentViewModel
         {
             AssessmentStartDate = submissionModel.DateCreated ?? DateTime.UtcNow,
@@ -196,19 +209,24 @@ public class QuestionsViewBuilder(
             SectionSlug = sectionSlug
         };
 
-        return controller.View("ContinueSelfAssessment", viewModel);
+        return controller.View(ContinueSelfAssessmentView, viewModel);
     }
 
     public async Task<IActionResult> RestartSelfAssessment(
         Controller controller,
         string categorySlug,
-        string sectionSlug)
+        string sectionSlug,
+        bool isObsoleteSubmissionFlow)
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
 
-        await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
+        if (!isObsoleteSubmissionFlow)
+        {
+            await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
+        }
+        ;
 
         return controller.RedirectToAction(
             nameof(QuestionsController.GetInterstitialPage),
