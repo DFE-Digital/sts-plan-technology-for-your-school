@@ -1,0 +1,49 @@
+﻿name: Build Site Offline Microsite Image
+
+on:
+  workflow_call:
+    inputs:
+      branch:
+        type: string
+        required: true
+      checked-out-sha:
+        type: string
+        required: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
+  cancel-in-progress: true
+
+env:
+  DOCKER_IMAGE: plan-technology-site-offline
+  GITHUB_CONTAINER_REGISTRY: ghcr.io
+  ORG_NAME: dfe-digital
+
+jobs:
+  build-site-offline-image:
+    runs-on: ubuntu-22.04
+    name: Build & Publish Site Offline Microsite Image
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: GitHub Container Registry Login
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.GITHUB_CONTAINER_REGISTRY }}
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build Image & Publish To GCR
+        uses: docker/build-push-action@v5
+        with:
+          context: ./
+          file: ./src/Dfe.PlanTech.Web.SiteOfflineMicrosite/Dockerfile
+          build-args: COMMIT_SHA=${{ inputs.checked-out-sha }}
+          tags: |
+            ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}
+          push: true
+
