@@ -7,6 +7,8 @@ namespace Dfe.PlanTech.Web.ViewModels;
 [ExcludeFromCodeCoverage]
 public class CookiesViewModel
 {
+    public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
+
     public ComponentTitleEntry Title { get; init; } = null!;
 
     public List<ContentfulEntry> Content { get; init; } = [];

@@ -15,18 +15,18 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("/")]
 public class RecommendationsController(
     ILogger<RecommendationsController> logger,
-    IRecommendationsViewBuilder recommendationsViewBuilder,
-    IRecommendationService recommendationService,
     IContentfulService contentfulService,
+    IRecommendationService recommendationService,
+    IRecommendationsViewBuilder recommendationsViewBuilder,
     ISubmissionService submissionService,
     ICurrentUser currentUser
 )
     : BaseController<RecommendationsController>(logger)
 {
+    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IRecommendationsViewBuilder _recommendationsViewBuilder = recommendationsViewBuilder ?? throw new ArgumentNullException(nameof(recommendationsViewBuilder));
     private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly ICurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     public const string ControllerName = "Recommendations";
