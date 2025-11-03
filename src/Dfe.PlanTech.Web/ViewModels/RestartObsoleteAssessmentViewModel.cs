@@ -1,5 +1,8 @@
-﻿namespace Dfe.PlanTech.Web.ViewModels
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Dfe.PlanTech.Web.ViewModels
 {
+    [ExcludeFromCodeCoverage]
     public class RestartObsoleteAssessmentViewModel
     {
         public string TopicName { get; set; } = string.Empty;

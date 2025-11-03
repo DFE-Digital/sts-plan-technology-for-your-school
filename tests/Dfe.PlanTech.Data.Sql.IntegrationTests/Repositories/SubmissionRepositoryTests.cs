@@ -684,4 +684,46 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal("ref-301", result.First().ContentfulRef);
     }
 
+    [Fact]
+    public async Task SetSubmissionInProgressAsync_SetsInaccessibleToInProgress()
+    {
+        // Arrange
+        var establishment = CreateEstablishment(101);
+        var user = CreateUser(201);
+        var question = CreateQuestion(301);
+        var answer = CreateAnswer(401);
+
+        DbContext.Establishments.Add(establishment);
+        DbContext.Users.Add(user);
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+        await DbContext.SaveChangesAsync();
+
+        var submission = new SubmissionEntity
+        {
+            SectionId = "section-1",
+            SectionName = "Test Section",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.Inaccessible.ToString(),
+            Responses = new List<ResponseEntity>
+            {
+                new ResponseEntity
+                {
+                    QuestionId = question.Id,
+                    AnswerId = answer.Id,
+                    UserId = user.Id,
+                    UserEstablishmentId = establishment.Id,
+                    Maturity = "Medium"
+                }
+            }
+        };
+
+        DbContext.Submissions.Add(submission);
+        await DbContext.SaveChangesAsync();
+
+        var result = await _repository.SetSubmissionInProgressAsync(submission.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal(nameof(SubmissionStatus.InProgress), result.Status);
+    }
 }
