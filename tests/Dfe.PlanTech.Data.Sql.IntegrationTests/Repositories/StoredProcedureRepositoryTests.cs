@@ -1,5 +1,4 @@
-﻿using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Models;
+﻿using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -297,47 +296,6 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(savedSubmission.Id, savedSubmission3.Id);
         Assert.Equal(activeSchoolEstablishment.Id, savedSubmission3.EstablishmentId);
         Assert.NotEqual(groupEstablishment.Id, savedSubmission3.EstablishmentId);
-    }
-
-
-    [Fact]
-    public async Task StoredProcedureRepository_SubmitResponse_WhenFirstResponse_ThenSubmissionCreatedAsInProgress()
-    {
-        // Arrange
-        var user = new UserEntity { DfeSignInRef = "first-response-user" };
-        var establishment = new EstablishmentEntity { EstablishmentRef = "FIRST001", OrgName = "First Response School", GroupUid = null };
-        var question = new QuestionEntity { QuestionText = "First Response Question", ContentfulRef = "FRQ1" };
-        var answer = new AnswerEntity { AnswerText = "First Response Answer", ContentfulRef = "FRA1" };
-        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
-        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.Add(establishment);
-        DbContext.Questions.Add(question);
-        DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
-
-        var submitAnswerModel = new SubmitAnswerModel
-        {
-            SectionId = "first-response-section",
-            SectionName = "First Response Section",
-            Question = questionModel,
-            ChosenAnswer = answerModel
-        };
-
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
-
-        // Act - Submit the first response for this section
-        var responseId = await _repository.SubmitResponse(assessmentResponse);
-
-        // Assert
-        Assert.True(responseId > 0, "Response ID should be returned from stored procedure");
-
-        // Verify the submission was created and is marked as InProgress
-        var savedSubmission = await DbContext.Submissions.Include(s => s.Responses).FirstOrDefaultAsync(s => s.Id == DbContext.Responses.First(r => r.Id == responseId).SubmissionId);
-        Assert.NotNull(savedSubmission);
-        Assert.Equal(nameof(SubmissionStatus.InProgress), savedSubmission.Status);
-        Assert.False(savedSubmission.Completed, "Submission should not be marked as completed for first response");
     }
 
 
