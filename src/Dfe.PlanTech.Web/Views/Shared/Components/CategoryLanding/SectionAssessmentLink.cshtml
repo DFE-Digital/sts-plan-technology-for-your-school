@@ -1,75 +1,86 @@
 ﻿@model StatusLinkViewModel
 
 @{
-	string statusText;
-	string linkText;
-	string? controller = null;
-	string? action = null;
+    string statusText;
+    string linkText;
+    string? controller = null;
+    string? action = null;
 
-	var topic = Model.Section;
-	var topicName = topic.Name.ToLower().Trim();
-	var topicSlug = topic.Slug ?? string.Empty;
-	var categorySlug = Model.CategorySlug;
+    var topic = Model.Section;
+    var topicName = topic.Name.ToLower().Trim();
+    var topicSlug = topic.Slug ?? string.Empty;
+    var topicStatus = topic.ProgressStatus;
+    var categorySlug = Model.CategorySlug;
 
-	switch (topic.ProgressStatus)
-	{
-		case SectionProgressStatus.InProgress:
-			statusText = $"A self-assessment was started on {topic.DateUpdated}.";
-			linkText = $"Continue your self-assessment for {topicName}";
-			controller = nameof(QuestionsController);
-			action = nameof(QuestionsController.GetContinueSelfAssessment);
-			break;
-		case SectionProgressStatus.Completed:
-			statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
-			linkText = $"View answers for {topicName}";
-			controller = nameof(ReviewAnswersController);
-			action = nameof(ReviewAnswersController.ViewAnswers);
-			break;
-		default:
-			statusText = "";
-			linkText = $"Go to self-assessment for {topicName}";
-			controller = nameof(QuestionsController);
-			action = nameof(QuestionsController.GetInterstitialPage);
-			break;
-	}
+    switch (topicStatus)
+    {
+        case SubmissionStatus.InProgress:
+        case SubmissionStatus.Obsolete:
+            statusText = $"A self-assessment was started on {topic.DateUpdated}.";
+            linkText = $"Continue your self-assessment for {topicName}";
+            controller = nameof(QuestionsController);
+            action = nameof(QuestionsController.GetContinueSelfAssessment);
+            break;
+        case SubmissionStatus.CompleteReviewed:
+            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
+            linkText = $"View answers for {topicName}";
+            controller = nameof(ReviewAnswersController);
+            action = nameof(ReviewAnswersController.ViewAnswers);
+            break;
+        default:
+            statusText = "";
+            linkText = $"Go to self-assessment for {topicName}";
+            controller = nameof(QuestionsController);
+            action = nameof(QuestionsController.GetInterstitialPage);
+            break;
+    }
 
-	controller = controller.GetControllerNameSlug();
+    controller = controller.GetControllerNameSlug();
 
-	if (Model.Context == "Sections")
-	{
+    /* Displaying the description, status information and link based on context and submission status
+    *
+    * The "Sections" context refers to the text/link underneath each Section (above Recommendations where applicable):
+    * - If the section has been started or completed show the status message followed by the link
+    * - If the section has never been started, show the short description followed by the link.
+    * 
+    * The "Default" context refers to the inset text shown at the top of the CategoryLanding page:
+    * - Only show a link for that section if it is not completed
+    * - Do not show the status message or the description
+    *
+    * NB inset text does not appear for single-section categories, this is handled elsewhere
+    */
+    
+    bool noDescriptionFormat =
+        topicStatus == SubmissionStatus.CompleteReviewed ||
+        topicStatus == SubmissionStatus.Obsolete ||
+        topicStatus == SubmissionStatus.InProgress;
 
-		if (topic.ProgressStatus == SectionProgressStatus.Completed)
-		{
-			<p>
-				@statusText
-			</p>
-			<p>
-				<a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-				   class="govuk-link">@linkText</a>
-			</p>
-		}
-		else if (topic.ProgressStatus == SectionProgressStatus.InProgress)
-		{
-			<p>@statusText</p>
-			<p>
-				<a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-				   class="govuk-link">@linkText</a>
-			</p>
-		}
-		else
-		{
-			<p>@topic.ShortDescription</p>
-			<p>
-				<a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-				   class="govuk-link">@linkText</a>
-			</p>
-		}
-	}
-	else if (Model.Context == "Default" && topic.ProgressStatus != SectionProgressStatus.Completed)
-	{
-		<p>
-			<a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
-			   class="govuk-link">@linkText</a>
-		</p>
-	}
+    if (Model.Context == "Sections")
+    {
+        if (noDescriptionFormat)
+        {
+            <p>
+                @statusText
+            </p>
+            <p>
+                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
+                    class="govuk-link">@linkText</a>
+            </p>
+        }
+        else
+        {
+            <p>@topic.ShortDescription</p>
+            <p>
+                <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
+                   class="govuk-link">@linkText</a>
+            </p>
+        }
+    }
+    else if (Model.Context == "Default" && topic.ProgressStatus != SubmissionStatus.CompleteReviewed)
+    {
+        <p>
+            <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"
+                class="govuk-link">@linkText</a>
+        </p>
+    }
 }

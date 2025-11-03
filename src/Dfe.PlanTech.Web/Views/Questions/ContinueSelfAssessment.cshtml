@@ -44,7 +44,7 @@
             <a href="@Url.Action(
                               nameof(QuestionsController.RestartSelfAssessment),
                               "Questions",
-                              new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
+                              new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug, isObsoleteSubmissionFlow = false })"
                class="govuk-button govuk-button--secondary"
                data-module="govuk-button">
                 Restart self-assessment

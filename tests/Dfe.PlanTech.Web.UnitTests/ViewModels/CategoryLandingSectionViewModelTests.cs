@@ -31,7 +31,7 @@ public class CategoryLandingSectionViewModelTests
 
         var vm = new CategoryLandingSectionViewModel(section, Recs(), sectionStatus: null, hadRetrievalError: false);
 
-        Assert.Equal(SectionProgressStatus.RetrievalError, vm.ProgressStatus);
+        Assert.Equal(SubmissionStatus.RetrievalError, vm.ProgressStatus);
         Assert.Equal("Devices at  unavailable", vm.ErrorMessage); // Slug is null => string interpolation shows empty after 'at '
         Assert.Null(vm.DateUpdated);
         Assert.Null(vm.LastCompletionDate);
@@ -53,7 +53,7 @@ public class CategoryLandingSectionViewModelTests
 
         var vm = new CategoryLandingSectionViewModel(section, Recs(), status, hadRetrievalError: true);
 
-        Assert.Equal(SectionProgressStatus.RetrievalError, vm.ProgressStatus);
+        Assert.Equal(SubmissionStatus.RetrievalError, vm.ProgressStatus);
         Assert.NotNull(vm.DateUpdated);
         Assert.False(string.IsNullOrWhiteSpace(vm.DateUpdated));
         Assert.NotNull(vm.LastCompletionDate);
@@ -75,7 +75,7 @@ public class CategoryLandingSectionViewModelTests
 
         var vm = new CategoryLandingSectionViewModel(section, Recs(), status, hadRetrievalError: false);
 
-        Assert.Equal(SectionProgressStatus.Completed, vm.ProgressStatus);
+        Assert.Equal(SubmissionStatus.CompleteReviewed, vm.ProgressStatus);
         Assert.NotNull(vm.DateUpdated);
         Assert.False(string.IsNullOrWhiteSpace(vm.DateUpdated));
         Assert.NotNull(vm.LastCompletionDate);
@@ -96,7 +96,7 @@ public class CategoryLandingSectionViewModelTests
 
         var vm = new CategoryLandingSectionViewModel(section, Recs(), status, hadRetrievalError: false);
 
-        Assert.Equal(SectionProgressStatus.InProgress, vm.ProgressStatus);
+        Assert.Equal(SubmissionStatus.InProgress, vm.ProgressStatus);
         Assert.NotNull(vm.DateUpdated);
         Assert.False(string.IsNullOrWhiteSpace(vm.DateUpdated));
         Assert.Equal(string.Empty, vm.LastCompletionDate); // explicitly empty string per code path
@@ -110,7 +110,7 @@ public class CategoryLandingSectionViewModelTests
 
         var vm = new CategoryLandingSectionViewModel(section, Recs(), sectionStatus: null, hadRetrievalError: false);
 
-        Assert.Equal(SectionProgressStatus.NotStarted, vm.ProgressStatus);
+        Assert.Equal(SubmissionStatus.NotStarted, vm.ProgressStatus);
         Assert.Null(vm.DateUpdated);
         Assert.Null(vm.LastCompletionDate);
         Assert.Equal("hosting", vm.Slug);
