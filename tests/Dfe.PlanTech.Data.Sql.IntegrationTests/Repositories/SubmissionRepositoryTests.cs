@@ -184,7 +184,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         // Arrange
         var user = CreateUser(101);
         var establishment = CreateEstablishment(201);
-        var question = CreateQuestion(301);
+        var question = new QuestionEntity { ContentfulRef = "Q301ref", QuestionText = "Question 301" };
         var answer = CreateAnswer(401);
 
         DbContext.Users.Add(user);
@@ -205,9 +205,16 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         var coreRecommendation = CreateRecommendationChunkEntry("R1", "Q99999");
+        var sectionQuestions = new List<QuestionnaireQuestionEntry>
+        {
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q301ref" } },
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q302ref" } }
+        };
+
         var section = new QuestionnaireSectionEntry
         {
-            CoreRecommendations = [coreRecommendation]
+            CoreRecommendations = [coreRecommendation],
+            Questions = sectionQuestions
         };
 
         // Act
@@ -224,7 +231,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         // Arrange
         var user = CreateUser(101);
         var establishment = CreateEstablishment(201);
-        var question = CreateQuestion(301);
+        var question = new QuestionEntity { ContentfulRef = "Q301ref", QuestionText = "Question 301" };
         var answer = CreateAnswer(401);
 
         DbContext.Users.Add(user);
@@ -245,9 +252,16 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         var coreRecommendation = CreateRecommendationChunkEntry("R1", question.ContentfulRef);
+        var sectionQuestions = new List<QuestionnaireQuestionEntry>
+        {
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q301ref" } },
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q302ref" } }
+        };
+
         var section = new QuestionnaireSectionEntry
         {
-            CoreRecommendations = [coreRecommendation]
+            CoreRecommendations = [coreRecommendation],
+            Questions = sectionQuestions
         };
 
         // Act
@@ -266,7 +280,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         // Arrange
         var user = CreateUser(101);
         var establishment = CreateEstablishment(201);
-        var question = CreateQuestion(301);
+        var question = new QuestionEntity { ContentfulRef = "Q301ref", QuestionText = "Question 301" };
         var answer = CreateAnswer(401);
 
         DbContext.Users.Add(user);
@@ -287,9 +301,16 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         var coreRecommendation = CreateRecommendationChunkEntry("R1", question.ContentfulRef, [answer.ContentfulRef]);
+        var sectionQuestions = new List<QuestionnaireQuestionEntry>
+        {
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q301ref" } },
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q302ref" } }
+        };
+
         var section = new QuestionnaireSectionEntry
         {
-            CoreRecommendations = [coreRecommendation]
+            CoreRecommendations = [coreRecommendation],
+            Questions = sectionQuestions
         };
 
         // Act
@@ -310,7 +331,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         // Arrange
         var user = CreateUser(101);
         var establishment = CreateEstablishment(201);
-        var question = CreateQuestion(301);
+        var question = new QuestionEntity { ContentfulRef = "Q301ref", QuestionText = "Question 301" };
         var answer = CreateAnswer(401);
 
         DbContext.Users.Add(user);
@@ -332,9 +353,16 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         var coreRecommendation = CreateRecommendationChunkEntry("R1", question.ContentfulRef, [answer.ContentfulRef]);
+        var sectionQuestions = new List<QuestionnaireQuestionEntry>
+        {
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q301ref" } },
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "Q302ref" } }
+        };
+
         var section = new QuestionnaireSectionEntry
         {
-            CoreRecommendations = [coreRecommendation]
+            CoreRecommendations = [coreRecommendation],
+            Questions = sectionQuestions
         };
 
         // Act
@@ -571,5 +599,131 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.NotNull(otherSubmission);
         Assert.Equal(SubmissionStatus.Inaccessible.ToString(), otherSubmission!.Status);
         Assert.True(otherSubmission.Deleted);
+    }
+
+
+    [Fact]
+    public async Task GetQuestionsForSection_ReturnsMatchingQuestions_WhenContentfulRefsMatch()
+    {
+        // Arrange
+        var question1 = new QuestionEntity { ContentfulRef = "ref-101" };
+        var question2 = new QuestionEntity { ContentfulRef = "ref-102" };
+
+        DbContext.Questions.AddRange(question1, question2);
+        await DbContext.SaveChangesAsync();
+
+        var sectionQuestions = new List<QuestionnaireQuestionEntry>
+        {
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "ref-101" } },
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "ref-102" } }
+        };
+        var section = new QuestionnaireSectionEntry
+        {
+            Questions = sectionQuestions
+        };
+
+        // Act
+        var result = await _repository.GetQuestionsForSection(section);
+
+        // Assert
+        Assert.Equal(2, result.Count);
+        Assert.Contains(result, q => q.ContentfulRef == "ref-101");
+        Assert.Contains(result, q => q.ContentfulRef == "ref-102");
+    }
+
+
+    [Fact]
+    public async Task GetQuestionsForSection_ReturnsEmptyList_WhenNoMatchingQuestions()
+    {
+        // Arrange
+        var question = new QuestionEntity { ContentfulRef = "ref-201" };
+
+        DbContext.Questions.Add(question);
+        await DbContext.SaveChangesAsync();
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Questions = new List<QuestionnaireQuestionEntry>
+            {
+                new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "non-existent-ref" } }
+            }
+        };
+
+        // Act
+        var result = await _repository.GetQuestionsForSection(section);
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+
+    [Fact]
+    public async Task GetQuestionsForSection_IgnoresNullSysIds()
+    {
+        // Arrange
+        var question = new QuestionEntity { ContentfulRef = "ref-301" };
+
+        DbContext.Questions.Add(question);
+        await DbContext.SaveChangesAsync();
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Questions = new List<QuestionnaireQuestionEntry>
+        {
+            new QuestionnaireQuestionEntry { Sys = null },
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = null! } },
+            new QuestionnaireQuestionEntry { Sys = new SystemDetails { Id = "ref-301" } }
+        }
+        };
+
+        // Act
+        var result = await _repository.GetQuestionsForSection(section);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("ref-301", result.First().ContentfulRef);
+    }
+
+    [Fact]
+    public async Task SetSubmissionInProgressAsync_SetsInaccessibleToInProgress()
+    {
+        // Arrange
+        var establishment = CreateEstablishment(101);
+        var user = CreateUser(201);
+        var question = CreateQuestion(301);
+        var answer = CreateAnswer(401);
+
+        DbContext.Establishments.Add(establishment);
+        DbContext.Users.Add(user);
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+        await DbContext.SaveChangesAsync();
+
+        var submission = new SubmissionEntity
+        {
+            SectionId = "section-1",
+            SectionName = "Test Section",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.Inaccessible.ToString(),
+            Responses = new List<ResponseEntity>
+            {
+                new ResponseEntity
+                {
+                    QuestionId = question.Id,
+                    AnswerId = answer.Id,
+                    UserId = user.Id,
+                    UserEstablishmentId = establishment.Id,
+                    Maturity = "Medium"
+                }
+            }
+        };
+
+        DbContext.Submissions.Add(submission);
+        await DbContext.SaveChangesAsync();
+
+        var result = await _repository.SetSubmissionInProgressAsync(submission.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal(nameof(SubmissionStatus.InProgress), result.Status);
     }
 }

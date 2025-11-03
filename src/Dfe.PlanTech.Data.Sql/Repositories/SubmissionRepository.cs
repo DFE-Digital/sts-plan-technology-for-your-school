@@ -46,28 +46,21 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
     public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
     {
-        var submission = await _db.Submissions
-            .Include(s => s.Responses)
-                .ThenInclude(r => r.Answer)
-            .FirstOrDefaultAsync(s => s.Id == submissionId);
+        var submission = await GetSubmissionByIdWithResponsesAsync(submissionId);
 
         if (submission is null)
         {
             throw new InvalidOperationException($"Could not find submssion with ID {submissionId} in database");
         }
 
-        var answeredQuestionIds = submission.Responses.Select(response => response.QuestionId);
+        var sectionQuestions = await GetQuestionsForSection(section);
 
-        var questions = await _db.Questions
-            .Where(q => answeredQuestionIds.Contains(q.Id))
-            .ToListAsync();
-
+        // Create recommendation dtos each of the core recs
         var recommendationDtos = section.CoreRecommendations
             .Select(r =>
             {
-                var question = questions
-                    .Where(q => string.Equals(q.ContentfulRef, r.Question.Id))
-                    .FirstOrDefault();
+                var question = sectionQuestions
+                    .FirstOrDefault(q => string.Equals(q.ContentfulRef, r.Question.Id));
 
                 if (question is null)
                 {
@@ -154,6 +147,27 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
     public Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId)
     {
         return GetSubmissionsBy(s => s.Id == submissionId).FirstOrDefaultAsync();
+    }
+
+    public async Task<SubmissionEntity?> GetSubmissionByIdWithResponsesAsync(int submissionId)
+    {
+        var submission = await GetSubmissionByIdAsync(submissionId);
+
+        if (submission is null)
+        {
+            return null;
+        }
+
+        submission.Responses = submission.Responses
+            .OrderByDescending(response => response.DateCreated)
+            .GroupBy(response => response.QuestionId)
+            .Select(group => group
+                .OrderByDescending(response => response.DateCreated)
+                .First()
+            )
+            .ToList();
+
+        return submission;
     }
 
     public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
@@ -257,7 +271,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
-        if (submission.Status != null && submission.Status.Equals(SubmissionStatus.Inaccessible))
+        if (submission.Status != null && submission.Status.Equals(nameof(SubmissionStatus.Inaccessible)))
         {
             submission.Status = SubmissionStatus.InProgress.ToString();
             await _db.SaveChangesAsync();
@@ -276,7 +290,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 !submission.Deleted &&
                 submission.EstablishmentId == establishmentId &&
                 submission.SectionId == sectionId &&
-                submission.Status != SubmissionStatus.Inaccessible.ToString() &&
                 (isCompletedSubmission == null || submission.Completed == isCompletedSubmission)
             )
             .OrderByDescending(submission => submission.DateCreated);
@@ -293,6 +306,17 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 .ThenInclude(r => r.Answer);
 
         return query;
+    }
+
+    public async Task<List<QuestionEntity>> GetQuestionsForSection(QuestionnaireSectionEntry section)
+    {
+        var sectionQuestionRefs = section.Questions.Select(q => q.Sys?.Id).ToList();
+
+        var sectionQuestions = await _db.Questions
+            .Where(question => sectionQuestionRefs.Contains(question.ContentfulRef))
+            .ToListAsync();
+
+        return sectionQuestions;
     }
 
     private async Task<List<RecommendationEntity>> UpsertRecommendations(IEnumerable<SqlRecommendationDto> recommendationDtos)

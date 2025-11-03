@@ -7,17 +7,28 @@
 }
 
 @section DfePageHeaderInner {
+    @foreach (var content in Model.BeforeTitleContent)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
     <span class="govuk-caption-xl">How to meet the standard</span>
     <partial name="Components/PageComponentFactory" model="@Model.Title" />
 }
 
 <div class="govuk-grid-row">
+    <div class="govuk-grid-column-one-third govuk-float-right">
+        <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
+        <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+        <p class="govuk-body-s">
+            <a class="govuk-link" href="@Model.Slug/print">Print all recommendations for @Model.Category.Header.Text.ToLower()</a>
+        </p>
+    </div>
     <div class="govuk-grid-column-two-thirds">
         @await Component.InvokeAsync("CategoryLanding", new {
-			category = Model.Category,
-			slug = Model.Slug,
-			sectionName = Model.SectionName,
-			sortOrder = Model.SortOrder
-		})
+            category = Model.Category,
+            slug = Model.Slug,
+            sectionName = Model.SectionName,
+            sortOrder = Model.SortOrder,
+        })
     </div>
 </div>

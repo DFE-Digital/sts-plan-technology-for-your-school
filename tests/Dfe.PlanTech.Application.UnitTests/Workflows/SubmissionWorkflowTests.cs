@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Application.Workflows;
+﻿using Contentful.Core.Models;
+using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
@@ -402,5 +403,74 @@ public class SubmissionWorkflowTests
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionDeletedAsync(1, "SEC");
         await _sp.Received(1).SetSubmissionDeletedAsync(1, "SEC");
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync_CallsRepository()
+    {
+        var sut = CreateServiceUnderTest();
+        var section = new QuestionnaireSectionEntry();
+
+        await sut.ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 1, 123, 99, section);
+        await _repo.Received(1).ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 1, 123, 99, section);
+    }
+
+    [Fact]
+    public async Task GetSubmissionByIdAsync_CallsRepo()
+    {
+        var sut = CreateServiceUnderTest();
+        var submission = new SubmissionEntity
+        {
+            Id = 444,
+            SectionId = "secId",
+            SectionName = "testSection",
+            Completed = true,
+            EstablishmentId = 1,
+            Establishment = BuildEstablishment(),
+            Responses = new List<ResponseEntity>()
+        };
+
+        _repo.GetSubmissionByIdAsync(submission.Id).Returns(submission);
+
+        await sut.GetSubmissionByIdAsync(submission.Id);
+
+        await _repo.Received(1).GetSubmissionByIdAsync(submission.Id);
+    }
+
+    [Fact]
+    public async Task GetSubmissionByIdAsync_ReturnsSubmissionDto()
+    {
+        var submission = new SubmissionEntity
+        {
+            Id = 555,
+            SectionId = "secId",
+            SectionName = "testSection",
+            Completed = true,
+            EstablishmentId = 1,
+            Establishment = BuildEstablishment(),
+            Responses = new List<ResponseEntity>()
+        };
+
+        var sut = CreateServiceUnderTest();
+
+        _repo.GetSubmissionByIdAsync(555).Returns(submission);
+
+        var dto = await sut.GetSubmissionByIdAsync(555);
+
+        Assert.NotNull(dto);
+        Asset.Equals(submission, dto);
+    }
+
+    [Fact]
+    public async Task GetSubmissionByIdAsync_ThrowsWhenNullSubmission()
+    {
+        var sut = CreateServiceUnderTest();
+        SubmissionEntity nullSubmission = null!;
+        var submissionId = 666;
+
+        _repo.GetSubmissionByIdAsync(666).Returns(nullSubmission);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => sut.GetSubmissionByIdAsync(submissionId));
+        Assert.Equal($"Submission with ID '{submissionId}' not found", ex.Message);
     }
 }

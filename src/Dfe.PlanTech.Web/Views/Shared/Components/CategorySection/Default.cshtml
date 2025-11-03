@@ -1,4 +1,4 @@
-@model CategorySectionViewComponentViewModel
+@model CategoryCardsViewComponentViewModel
 
 @if (Model.NoSectionsErrorRedirectUrl != null)
 {
@@ -11,4 +11,4 @@
         class="govuk-visually-hidden">Error:</span>@Model.ProgressRetrievalErrorMessage</p>
 }
 
-<partial name="Components/CategorySection/Subtopics" model="@Model"/>
+<partial name="Components/CategorySection/CategoryCards" model="@Model"/>
