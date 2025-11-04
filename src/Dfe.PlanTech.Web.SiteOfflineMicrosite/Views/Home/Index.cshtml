@@ -1,4 +1,5 @@
-﻿@{
+﻿@model Dfe.PlanTech.Web.SiteOfflineMicrosite.Configuration.MaintenanceConfiguration
+@{
     ViewData["Title"] = "Sorry, the service is unavailable";
 }
 
@@ -7,13 +8,20 @@
         <h1 class="govuk-heading-xl">Sorry, the service is unavailable</h1>
 
         <div>
-            <p class="govuk-body">
-                The service will be unavailable on ((pauseDate)).
-                You will be able to use the service from ((resumeTime)) on ((resumeDate)).
-            </p>
-            <p class="govuk-body">
-                We saved your recommendations. They will be available when the service is back online.
-            </p>
+            @if (Model.MessageParagraphs.Any())
+            {
+                foreach (var paragraph in Model.MessageParagraphs)
+                {
+                    <p class="govuk-body">@paragraph</p>
+                }
+            }
+            else
+            {
+                <p class="govuk-body">
+                    The service is temporarily unavailable for scheduled maintenance. Please check back later.
+                </p>
+            }
+
             <p class="govuk-body">
                 Contact the <a href="https://schooltech.support.education.gov.uk/hc/en-gb/requests/new?ticket_form_id=22398112507922">Plan technology for your school team</a> if you need to speak to someone about your request.
             </p>

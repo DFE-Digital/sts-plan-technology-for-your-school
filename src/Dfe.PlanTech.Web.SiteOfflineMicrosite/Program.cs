@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Web.SiteOfflineMicrosite.Configuration;
 using Dfe.PlanTech.Web.SiteOfflineMicrosite.Middleware;
 using GovUk.Frontend.AspNetCore;
 
@@ -5,6 +6,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddGovUkFrontend();
+builder.Services.Configure<MaintenanceConfiguration>(
+    builder.Configuration.GetSection("Maintenance"));
 
 var app = builder.Build();
 

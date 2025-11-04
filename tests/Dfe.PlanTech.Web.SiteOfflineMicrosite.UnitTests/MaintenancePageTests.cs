@@ -26,7 +26,8 @@ public class MaintenancePageTests : IClassFixture<SiteOfflineMicrositeWebApplica
         var content = await response.Content.ReadAsStringAsync();
 
         Assert.Contains("Sorry, the service is unavailable", content);
-        Assert.Contains("The service will be unavailable on", content);
+        Assert.Contains("temporarily unavailable", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("maintenance", content, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
