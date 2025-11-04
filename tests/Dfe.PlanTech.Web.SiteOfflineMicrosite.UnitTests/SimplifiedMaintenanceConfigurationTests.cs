@@ -128,7 +128,7 @@ public class SimplifiedMaintenanceConfigurationTests
     }
 
     [Fact]
-    public async Task MaintenancePage_AlwaysDisplaysSavedRecommendationsMessage()
+    public async Task MaintenancePage_AlwaysDisplaysContactLink()
     {
         var factory = new SimplifiedConfigWebApplicationFactory(new Dictionary<string, string?>
         {
@@ -139,8 +139,8 @@ public class SimplifiedMaintenanceConfigurationTests
         var response = await client.GetAsync("/");
         var content = await response.Content.ReadAsStringAsync();
 
-        Assert.Contains("We saved your recommendations", content);
-        Assert.Contains("available when the service is back online", content);
+        Assert.Contains("Contact the Plan technology for your school team", content);
+        Assert.Contains("if you have a question, feedback, or need help", content);
     }
 
     [Fact]
