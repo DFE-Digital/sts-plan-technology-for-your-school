@@ -280,15 +280,30 @@ public class RecommendationsViewBuilderTests
         _contentful.GetCategoryBySlugAsync("connectivity").Returns(category);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        // Submission completed; include completion date and responses
         var routing = MakeRouting(
             SubmissionStatus.CompleteReviewed,
             section,
             "nextQuestionSlug",
             completed: new DateTime(2024, 1, 2),
             "C1", "C2");
-
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+
+        _recommendationService
+            .GetLatestRecommendationStatusesByRecommendationIdAsync(
+                Arg.Any<IEnumerable<string>>(),
+                Arg.Any<int>())
+            .Returns(call =>
+            {
+                var crIds = call.Arg<IEnumerable<string>>();
+                return crIds.ToDictionary(
+                    id => id,
+                    id => new SqlEstablishmentRecommendationHistoryDto
+                    {
+                        RecommendationId = int.TryParse(id.TrimStart('C'), out var i) ? i : 0,
+                        DateCreated = DateTime.UtcNow,
+                        NewStatus = "InProgress"
+                    });
+            });
 
         // Act (useChecklist=false -> "Recommendations"; true -> "RecommendationsChecklist")
         var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: false);
@@ -303,9 +318,9 @@ public class RecommendationsViewBuilderTests
         Assert.Equal(3, vm.Chunks.Count);
         Assert.NotNull(routing.Submission);
         Assert.Equal(routing.Submission.Responses, vm.SubmissionResponses);
-        // Formatted date check (accept either exact DateHelper format or non-null)
         Assert.NotNull(vm.LatestCompletionDate);
     }
+
 
     [Fact]
     public async Task RouteBySectionAndRecommendation_CompleteReviewed_Renders_Checklist_When_Requested()
@@ -324,13 +339,103 @@ public class RecommendationsViewBuilderTests
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: "C1");
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
 
+        _recommendationService
+            .GetLatestRecommendationStatusesByRecommendationIdAsync(
+                Arg.Any<IEnumerable<string>>(),
+                Arg.Any<int>())
+            .Returns(call =>
+            {
+                var crIds = call.Arg<IEnumerable<string>>();
+                return crIds.ToDictionary(
+                    id => id,
+                    id => new SqlEstablishmentRecommendationHistoryDto
+                    {
+                        RecommendationId = int.TryParse(id.TrimStart('C'), out var i) ? i : 0,
+                        DateCreated = DateTime.UtcNow,
+                        NewStatus = "InProgress"
+                    });
+            });
+
         // Act
         var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: true);
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("RecommendationsChecklist", view.ViewName);
+        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
+        Assert.Equal(3, vm.Chunks.Count);
     }
+
+
+    [Fact]
+    public async Task RouteBySectionAndRecommendation_WithCurrentCount_Renders_Single_Recommendation()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var ctl = MakeController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
+
+        var categorySlug = "connectivity";
+        var sectionSlug = "sec-1";
+        var category = MakeCategory("Connectivity");
+        var section = MakeSection("S1", sectionSlug);
+
+        _contentful.GetCategoryBySlugAsync(categorySlug).Returns(category);
+        _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        var routing = MakeRouting(
+            SubmissionStatus.CompleteReviewed,
+            section,
+            answerSysIds: new[] { "C1", "C2", "C3" });
+        _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+
+        _recommendationService
+            .GetLatestRecommendationStatusesByRecommendationIdAsync(
+                Arg.Any<IEnumerable<string>>(),
+                Arg.Any<int>())
+            .Returns(call =>
+            {
+                var crIds = call.Arg<IEnumerable<string>>();
+                return crIds.ToDictionary(
+                    id => id,
+                    id => new SqlEstablishmentRecommendationHistoryDto
+                    {
+                        RecommendationId = int.TryParse(id.TrimStart('C'), out var i) ? i : 0,
+                        DateCreated = DateTime.UtcNow.AddDays(-i),
+                        NewStatus = "Completed"
+                    });
+            });
+
+        // Act - request single recommendation (position 2 out of 3)
+        var result = await sut.RouteBySectionAndRecommendation(
+            ctl,
+            categorySlug,
+            sectionSlug,
+            useChecklist: false,
+            currentRecommendationCount: 2);
+
+        // Assert - view should still be the regular Recommendations view
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("Recommendations", view.ViewName);
+
+        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
+
+        // Ensure only one chunk is returned
+        Assert.Single(vm.Chunks);
+        Assert.Equal("Second Chunk", vm.Chunks[0].Header);
+
+        // Check helper metadata
+        Assert.Equal(2, vm.CurrentChunkCount);
+        Assert.Equal(3, vm.TotalChunks);
+
+        // Ensure overall model metadata hasn't been lost
+        Assert.Equal("Connectivity", vm.CategoryName);
+        Assert.Equal(sectionSlug, vm.SectionSlug);
+        Assert.Equal(routing.Submission.Responses, vm.SubmissionResponses);
+    }
+
+
 
     // ---------- Support ----------
 

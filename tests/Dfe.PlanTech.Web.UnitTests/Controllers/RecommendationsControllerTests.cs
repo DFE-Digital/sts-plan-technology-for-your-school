@@ -64,7 +64,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             _viewBuilder.RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true)
                 .Returns(new OkResult());
 
-            var result = await _controller.GetRecommendationChecklist(categorySlug, sectionSlug);
+            var result = await _controller.GetRecommendationChecklist(categorySlug, sectionSlug, null);
 
             await _viewBuilder.Received(1).RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true);
             Assert.IsType<OkResult>(result);
