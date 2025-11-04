@@ -6,10 +6,6 @@
     }
 }
 
-@{
-    int remainingQuestions = Model.QuestionsCount - Model.AnsweredCount;
-}
-
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds">
         <span class="govuk-caption-xl">@Model.TopicName</span>
@@ -33,7 +29,7 @@
 
         <hr class="govuk-section-break govuk-section-break--m">
 
-        <p>You can continue this self-assessment and answer the remaining @remainingQuestions questions.</p>
+        <p>You can continue this self-assessment and answer the remaining questions.</p>
         <p>If you choose to restart the self-assessment, any previous answers will be replaced.</p>
 
         <div class="govuk-button-group">
@@ -48,7 +44,7 @@
             <a href="@Url.Action(
                               nameof(QuestionsController.RestartSelfAssessment),
                               "Questions",
-                              new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
+                              new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug, isObsoleteSubmissionFlow = false })"
                class="govuk-button govuk-button--secondary"
                data-module="govuk-button">
                 Restart self-assessment

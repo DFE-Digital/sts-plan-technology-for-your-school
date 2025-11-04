@@ -71,13 +71,14 @@ public class QuestionsController : BaseController<QuestionsController>
         return await _questionsViewBuilder.ContinuePreviousAssessment(this, categorySlug, sectionSlug);
     }
 
+    [LogInvalidModelState]
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/restart", Name = "RestartSelfAssessment")]
-    public async Task<IActionResult> RestartSelfAssessment(string categorySlug, string sectionSlug)
+    public async Task<IActionResult> RestartSelfAssessment(string categorySlug, string sectionSlug, bool isObsoleteSubmissionFlow)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
 
-        return await _questionsViewBuilder.RestartSelfAssessment(this, categorySlug, sectionSlug);
+        return await _questionsViewBuilder.RestartSelfAssessment(this, categorySlug, sectionSlug, isObsoleteSubmissionFlow);
     }
 
 

@@ -78,7 +78,18 @@ public class PagesViewBuilderTests
         };
 
     private static QuestionnaireCategoryEntry MakeCategory(string header = "Cat")
-        => new QuestionnaireCategoryEntry { Header = new ComponentHeaderEntry { Text = header }, Sections = new List<QuestionnaireSectionEntry>() };
+        => new QuestionnaireCategoryEntry
+        {
+            Header = new ComponentHeaderEntry
+            {
+                Text = header
+            },
+            LandingPage = new PageEntry
+            {
+                Slug = header.ToLower()
+            },
+            Sections = new List<QuestionnaireSectionEntry>()
+        };
 
     // ---------- ctor guards ----------
     [Fact]
@@ -230,7 +241,7 @@ public class PagesViewBuilderTests
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
         var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
-        Assert.Equal("networks", vm.Slug);
+        Assert.Equal("networking", vm.Slug);
         Assert.Equal("Networking", vm.Title.Text);
         Assert.Equal("Some Section", vm.SectionName);
 
@@ -345,17 +356,10 @@ public class PagesViewBuilderTests
     [Fact]
     public async Task RouteToCategoryLandingPrintPageAsync_When_CategoryFound_Then_ReturnsView()
     {
-        var category = new QuestionnaireCategoryEntry
-        {
-            Header = new ComponentHeaderEntry
-            {
-                Text = "Category"
-            }
-        };
-
+        var category = MakeCategory("Networking");
         var currentUser = Substitute.For<ICurrentUser>();
         var contentful = Substitute.For<IContentfulService>();
-        var slug = "category";
+        var slug = "networking";
         var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser);
 
         currentUser.IsAuthenticated.Returns(true);

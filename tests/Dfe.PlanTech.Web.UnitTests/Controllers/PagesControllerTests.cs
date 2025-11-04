@@ -14,13 +14,12 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
     public class PagesControllerTests
     {
         private readonly ILogger<PagesController> _logger = Substitute.For<ILogger<PagesController>>();
-        private readonly ICategoryLandingViewComponentViewBuilder _categoryLandingViewComponentBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         private readonly IPagesViewBuilder _pagesViewBuilder = Substitute.For<IPagesViewBuilder>();
         private readonly PagesController _controller;
 
         public PagesControllerTests()
         {
-            _controller = new PagesController(_logger, _categoryLandingViewComponentBuilder, _pagesViewBuilder);
+            _controller = new PagesController(_logger, _pagesViewBuilder);
             _controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext()
@@ -31,7 +30,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         public void Constructor_ThrowsArgumentNullException_WhenViewBuilderIsNull()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new PagesController(_logger, _categoryLandingViewComponentBuilder, null!)
+                new PagesController(_logger, null!)
             );
             Assert.Equal("pagesViewBuilder", ex.ParamName);
         }
