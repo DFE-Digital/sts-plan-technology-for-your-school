@@ -30,7 +30,6 @@ public class RecommendationWorkflow(
         int establishmentId)
     {
         var recommendationHistoryEntities = await establishmentRecommendationHistoryRepository.GetRecommendationHistoryByEstablishmentIdAsync(establishmentId);
-        Dictionary<string,SqlEstablishmentRecommendationHistoryDto> x;
 
         return recommendationHistoryEntities
             .GroupBy(rhe => rhe.Recommendation.ContentfulRef)
