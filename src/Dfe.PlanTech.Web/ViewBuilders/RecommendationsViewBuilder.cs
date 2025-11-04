@@ -98,8 +98,8 @@ public class RecommendationsViewBuilder(
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        bool useChecklist
-    )
+        bool useChecklist,
+        int? currentRecommendationCount = null)
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -127,12 +127,34 @@ public class RecommendationsViewBuilder(
                     category,
                     submissionRoutingData,
                     section,
-                    sectionSlug
-                );
+                    sectionSlug);
 
+                // Pick the correct view name based on the route
                 var viewName = useChecklist
                     ? RecommendationsChecklistViewName
                     : RecommendationsViewName;
+
+                if (currentRecommendationCount.HasValue)
+                {
+                    var index = currentRecommendationCount.Value - 1;
+                    if (index < 0 || index >= viewModel.Chunks.Count)
+                    {
+                        throw new ArgumentOutOfRangeException(nameof(currentRecommendationCount),
+                            $"Count '{currentRecommendationCount}' is outside the available recommendations range.");
+                    }
+
+                    viewModel = new RecommendationsViewModel
+                    {
+                        CategoryName = viewModel.CategoryName,
+                        SectionName = viewModel.SectionName,
+                        Chunks = new List<RecommendationChunkViewModel> { viewModel.Chunks[index] },
+                        CurrentChunkCount = currentRecommendationCount.Value,
+                        TotalChunks = viewModel.Chunks.Count,
+                        LatestCompletionDate = viewModel.LatestCompletionDate,
+                        SectionSlug = viewModel.SectionSlug,
+                        SubmissionResponses = viewModel.SubmissionResponses
+                    };
+                }
 
                 return controller.View(viewName, viewModel);
 
@@ -145,28 +167,29 @@ public class RecommendationsViewBuilder(
         QuestionnaireCategoryEntry category,
         SubmissionRoutingDataModel submissionRoutingData,
         QuestionnaireSectionEntry section,
-        string sectionSlug
-    )
+        string sectionSlug)
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
-        var details = await _recommendationService.GetLatestRecommendationStatusesByRecommendationIdAsync(contentfulReferences, establishmentId);
+        var details = await _recommendationService
+            .GetLatestRecommendationStatusesByRecommendationIdAsync(contentfulReferences, establishmentId);
+
         var chunkViewModels = section.CoreRecommendations.Select(cr => new RecommendationChunkViewModel
         {
             Content = cr.Content,
             Header = cr.HeaderText,
             LastUpdated = details[cr.Id].DateCreated,
             Status = details[cr.Id].NewStatus.GetRecommendationStatusEnumValue() ?? RecommendationStatus.NotStarted,
-        });
+        }).ToList();
 
-        return new RecommendationsViewModel()
+        return new RecommendationsViewModel
         {
             CategoryName = category.Header.Text,
             SectionName = section.Name,
-            Chunks = chunkViewModels.ToList(),
-            LatestCompletionDate = submissionRoutingData.Submission!.DateCompleted.HasValue
-                                ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission!.DateCompleted.Value)
-                                : null,
+            Chunks = chunkViewModels,
+            LatestCompletionDate = submissionRoutingData.Submission?.DateCompleted.HasValue == true
+                ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission.DateCompleted.Value)
+                : null,
             SectionSlug = sectionSlug,
             SubmissionResponses = submissionRoutingData.Submission.Responses
         };

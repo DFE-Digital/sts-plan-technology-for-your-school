@@ -12,5 +12,7 @@ public class RecommendationsViewModel
     public required string SectionName { get; init; }
     public required string SectionSlug { get; init; }
     public string? Slug { get; init; }
+    public int? CurrentChunkCount { get; set; }
+    public int? TotalChunks { get; set; }
     public IEnumerable<QuestionWithAnswerModel> SubmissionResponses { get; init; } = [];
 }

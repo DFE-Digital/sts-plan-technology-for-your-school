@@ -1,0 +1,37 @@
+﻿@model RecommendationsViewModel
+
+<h1 class="govuk-heading-xl">
+    @Model.CategoryName
+</h1>
+
+@foreach (var chunk in Model.Chunks)
+{
+    <div class="recommendation-piece-content">
+        <span class="govuk-caption-l">Recommendation @Model.CurrentChunkCount of @Model.TotalChunks</span>
+            <h1 class="govuk-heading-l">@chunk.HeaderText</h1>
+
+        <table class="govuk-table">
+            <thead class="govuk-table__head">
+                <tr class="govuk-table__row">
+                    <th scope="col" class="govuk-table__header">Status</th>
+                    <th scope="col" class="govuk-table__header">Last updated</th>
+                </tr>
+            </thead>
+            <tbody class="govuk-table__body">
+                <tr class="govuk-table__row">
+                    <td class="govuk-table__cell">
+                            <strong class="govuk-tag @chunk.StatusTagClass">
+                            @chunk.Status
+                        </strong>
+                    </td>
+                        <td class="govuk-table__cell">@chunk.LastUpdatedFormatted</td>
+                </tr>
+            </tbody>
+        </table>
+
+    @foreach (var content in chunk.Content)
+    {
+        <partial name="Components/PageComponentFactory" model="@content" />
+    }
+    </div>
+}
