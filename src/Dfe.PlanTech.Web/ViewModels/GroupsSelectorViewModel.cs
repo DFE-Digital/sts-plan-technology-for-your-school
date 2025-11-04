@@ -21,6 +21,8 @@ public class GroupsSelectorViewModel
 
     public string? TotalSections { get; set; }
 
+    public string? TotalRecommendations { get; set; }
+
     public string? ProgressRetrievalErrorMessage { get; init; }
 
     public string? ContactLinkHref { get; set; }

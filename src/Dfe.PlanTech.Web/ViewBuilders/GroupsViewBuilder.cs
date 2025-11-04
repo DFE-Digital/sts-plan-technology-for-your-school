@@ -17,12 +17,10 @@ public class GroupsViewBuilder(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IContentfulService contentfulService,
     IEstablishmentService establishmentService,
-    ISubmissionService submissionService,
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
 
     private const string SelectASchoolViewName = "GroupsSelectSchool";
@@ -56,6 +54,9 @@ public class GroupsViewBuilder(
 
         string totalSections = categories.Sum(category => category.Sections.Count).ToString();
 
+        var sections = await contentfulService.GetAllSectionsAsync();
+        string totalRecommendations = sections.Sum(section => section.CoreRecommendations.Count()).ToString();
+
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 
         var viewModel = new GroupsSelectorViewModel
@@ -66,7 +67,8 @@ public class GroupsViewBuilder(
             Title = new ComponentTitleEntry(title),
             Content = content,
             TotalSections = totalSections,
-            ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalSections)
+            TotalRecommendations = totalRecommendations,
+            ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalRecommendations)
                 ? "Unable to retrieve progress"
                 : null,
             ContactLinkHref = contactLink?.Href
