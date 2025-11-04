@@ -29,21 +29,14 @@ public class RecommendationWorkflow(
     public async Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByRecommendationIdAsync(IEnumerable<string> recommendationContentfulReferences,
         int establishmentId)
     {
-        var recommendations = await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences);
-        var recommendationIdToContentfulReferenceDictionary = recommendations
-            .ToDictionary(
-                r => r.Id,
-                r => r.ContentfulRef
-            );
-
         var recommendationHistoryEntities = await establishmentRecommendationHistoryRepository.GetRecommendationHistoryByEstablishmentIdAsync(establishmentId);
+        Dictionary<string,SqlEstablishmentRecommendationHistoryDto> x;
 
         return recommendationHistoryEntities
-            .Where(rhe => recommendationIdToContentfulReferenceDictionary.ContainsKey(rhe.RecommendationId))
-            .GroupBy(rhe => rhe.RecommendationId)
+            .GroupBy(rhe => rhe.Recommendation.ContentfulRef)
             .ToDictionary(
-                group => recommendationIdToContentfulReferenceDictionary[group.Key],
-                group => group.OrderByDescending(r => r.DateCreated).First().AsDto()
+                group => group.Key,
+                group => group.OrderByDescending(rhe => rhe.DateCreated).First().AsDto()
             );
     }
 
