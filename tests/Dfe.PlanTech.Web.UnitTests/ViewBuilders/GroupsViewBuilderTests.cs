@@ -73,7 +73,8 @@ public class GroupsViewBuilderTests
         {
             Sys = new SystemDetails(id),
             Name = $"Sec {id}",
-            Questions = Enumerable.Repeat(new QuestionnaireQuestionEntry(), countAnswers).ToList()
+            Questions = Enumerable.Repeat(new QuestionnaireQuestionEntry(), countAnswers).ToList(),
+            CoreRecommendations = Enumerable.Repeat(new RecommendationChunkEntry(), countAnswers).ToList()
         };
 
     // --- ctor guards --------------------------------------------------------
@@ -117,10 +118,16 @@ public class GroupsViewBuilderTests
         // selection page content (only Content list is used)
         contentful.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
                   .Returns(new PageEntry { Content = new List<ContentfulEntry> { new MissingComponentEntry() } });
+        var sec1 = MakeSection("Sec1", 3);
+        var sec2 = MakeSection("Sec2", 2);
+        var sec3 = MakeSection("Sec3", 5);
+        var cat1 = MakeCategory(sec1, sec2);
+        var cat2 = MakeCategory(sec3);
+        var allSections = new List<QuestionnaireSectionEntry> { sec1, sec2, sec3 };
+
+        contentful.GetAllSectionsAsync().Returns(allSections);
 
         // home page content: supplies categories with sections
-        var cat1 = MakeCategory(MakeSection("S1"), MakeSection("S2"));
-        var cat2 = MakeCategory(MakeSection("S3"));
         var homePage = new PageEntry { Content = new List<ContentfulEntry> { cat1, cat2 } };
         contentful.GetPageBySlugAsync(Arg.Any<string>())
                   .Returns(homePage);
@@ -153,6 +160,7 @@ public class GroupsViewBuilderTests
         Assert.Equal("Test Academy Trust", vm.GroupName);
         Assert.Equal("Test Academy Trust", vm.Title.Text);
         Assert.Equal("3", vm.TotalSections);       // 2 + 1
+        Assert.Equal("10", vm.TotalRecommendations); // total of all values passed to MakeSection above
         Assert.Null(vm.ProgressRetrievalErrorMessage);
         Assert.Equal("/contact-us", vm.ContactLinkHref);
 
