@@ -35,7 +35,7 @@ public class RecommendationWorkflow(
             .GroupBy(rhe => rhe.Recommendation.ContentfulRef)
             .ToDictionary(
                 group => group.Key,
-                group => group.OrderByDescending(rhe => rhe.DateCreated).First().AsDto()
+                group => group.OrderByDescending(g => g.DateCreated).First().AsDto()
             );
     }
 
