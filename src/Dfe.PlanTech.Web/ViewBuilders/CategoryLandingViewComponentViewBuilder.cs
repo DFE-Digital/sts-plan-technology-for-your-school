@@ -120,7 +120,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
 
             var recommendationChunks = section.CoreRecommendations;
-            var recommendations = await _submissionService.GetLatestRecommendationStatusesByRecommendationIdAsync(establishmentId);
+            var recommendations = await _submissionService.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
             var sortedRecommendations = recommendationChunks.SortByStatus(recommendations, sortType);
             var chunks = sortedRecommendations.Select(sr => new RecommendationChunkViewModel
             {

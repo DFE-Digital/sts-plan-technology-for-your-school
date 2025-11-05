@@ -9,7 +9,7 @@ public interface IRecommendationWorkflow
         int establishmentId
     );
 
-    Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesAsync(
+    Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByEstablishmentIdAsync(
             int establishmentId
         );
 

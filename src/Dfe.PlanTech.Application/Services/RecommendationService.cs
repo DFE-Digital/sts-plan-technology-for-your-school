@@ -22,7 +22,7 @@ public class RecommendationService(
         int establishmentId
     )
     {
-        return recommendationWorkflow.GetLatestRecommendationStatusesAsync(
+        return recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
             establishmentId
         );
     }

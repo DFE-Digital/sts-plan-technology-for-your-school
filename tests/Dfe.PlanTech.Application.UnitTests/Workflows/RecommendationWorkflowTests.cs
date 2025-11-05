@@ -69,7 +69,7 @@ public class RecommendationWorkflowTests
         var workflow = CreateServiceUnderTest();
 
         // Act
-        var result = await workflow.GetLatestRecommendationStatusesAsync(establishmentId);
+        var result = await workflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
 
         // Assert
         Assert.Equal(3, result.Count);
@@ -99,7 +99,7 @@ public class RecommendationWorkflowTests
         var workflow = CreateServiceUnderTest();
 
         // Act
-        var result = await workflow.GetLatestRecommendationStatusesAsync(establishmentId);
+        var result = await workflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
 
         // Assert
         Assert.Empty(result);
@@ -140,7 +140,7 @@ public class RecommendationWorkflowTests
         var workflow = CreateServiceUnderTest();
 
         // Act
-        var result = await workflow.GetLatestRecommendationStatusesAsync(establishmentId);
+        var result = await workflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
 
         // Assert - Verify it returns the latest status with correct properties
         Assert.Single(result);
