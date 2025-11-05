@@ -13,7 +13,7 @@ describe("Content & Support Page Richtext components", () => {
     it("renders accordion components", () => {
         cy.get(".govuk-accordion").should("exist");
         cy.get(".govuk-accordion__controls").should("exist").contains("span", "Show all sections");
-        cy.get(".govuk-accordion__section .govuk-body").should("have.length", 2);
+        cy.get(".govuk-accordion__section").should("have.length", 2);
         cy.get(".govuk-accordion__section-toggle-text").should("have.length", 2);
     });
 
