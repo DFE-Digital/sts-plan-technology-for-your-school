@@ -29,22 +29,30 @@ public class EstablishmentService(
         return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(establishmentReference);
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId)
+    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int groupEstablishmentId)
     {
-        var schools = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
+        var establishmentLinks = await _establishmentWorkflow.GetGroupEstablishments(groupEstablishmentId);
         var sectionIds = categories.SelectMany(c => c.Sections.Select(s => s.Id));
 
-        var schoolUrns = schools.Select(s => s.Urn);
-        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(schoolUrns);
-        var establishmentLinkMap = establishments.ToDictionary(e => e.Id, e => schools.Single(s => s.Urn.Equals(e.EstablishmentRef)));
+        var linkUrns = establishmentLinks.Select(s => s.Urn);
+        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(linkUrns);
 
-        foreach (var establishment in establishments)
+        var establishmentLinkMap = establishments.ToDictionary(e => e.EstablishmentRef, e => e.Id);
+
+        foreach (var establishmentLink in establishmentLinks)
         {
-            var sectionStatuses = await _submissionWorkflow.GetSectionStatusesAsync(establishment.Id, sectionIds);
-            establishmentLinkMap[establishment.Id].CompletedSectionsCount = sectionStatuses.Count(ss => ss.Completed || ss.LastCompletionDate is not null);
+            if (!establishmentLinkMap.ContainsKey(establishmentLink.Urn))
+            {
+                establishmentLink.CompletedSectionsCount = 0;
+                continue;
+            }
+
+            var establishmentId = establishmentLinkMap[establishmentLink.Urn];
+            var sectionStatuses = await _submissionWorkflow.GetSectionStatusesAsync(establishmentId, sectionIds);
+            establishmentLink.CompletedSectionsCount = sectionStatuses.Count(ss => ss.Completed || ss.LastCompletionDate is not null);
         }
 
-        return establishmentLinkMap.Values.ToList();
+        return establishmentLinks.ToList();
     }
 
     public async Task RecordGroupSelection(
