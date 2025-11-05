@@ -16,6 +16,7 @@ public class EstablishmentRecommendationHistoryRepository : IEstablishmentRecomm
     public async Task<IEnumerable<EstablishmentRecommendationHistoryEntity>> GetRecommendationHistoryByEstablishmentIdAsync(int establishmentId)
     {
         return await _db.EstablishmentRecommendationHistories
+            .Include(erh => erh.Recommendation)
             .Where(erh => erh.EstablishmentId == establishmentId)
             .ToListAsync();
     }
