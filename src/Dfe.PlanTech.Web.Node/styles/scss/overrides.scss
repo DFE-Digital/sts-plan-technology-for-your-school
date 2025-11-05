@@ -200,3 +200,12 @@ ul.landing-page-list > li {
 .recommendation-content > div > div.noprint button#print-page-button {
     margin-top: 0px;
 }
+
+.govuk-table__cell.custom-height {
+    height: 40px;
+}
+
+.recommendation-action-header .govuk-table__cell,
+.recommendation-action-header .govuk-table__header {
+    vertical-align: middle;
+}

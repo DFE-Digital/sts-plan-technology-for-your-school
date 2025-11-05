@@ -1,6 +1,6 @@
 ﻿@model RecommendationsViewModel
 
-<h1 class="govuk-heading-xl">
+<h1 class="govuk-heading-xl govuk-!-margin-bottom-8">
     @Model.CategoryName
 </h1>
 
@@ -21,13 +21,15 @@
                 <tr class="govuk-table__row">
                     <td class="govuk-table__cell">
                             <strong class="govuk-tag @chunk.StatusTagClass">
-                            @chunk.Status
+                            @chunk.Status.GetDisplayName()
                         </strong>
                     </td>
                         <td class="govuk-table__cell">@chunk.LastUpdatedFormatted</td>
                 </tr>
             </tbody>
         </table>
+
+        <hr class="govuk-section-break govuk-section-break--m">
 
     @foreach (var content in chunk.Content)
     {

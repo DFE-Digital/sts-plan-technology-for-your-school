@@ -3,7 +3,7 @@
 @{
     <div>
         <span class="govuk-caption-xl">How to meet the standard</span>
-        <h1 class="govuk-heading-xl">
+        <h1 class="govuk-heading-xl govuk-!-margin-bottom-8">
             @Model.CategoryName
         </h1>
 
@@ -15,27 +15,45 @@
         </p>
     </div>
 
-    <h2 class="govuk-heading-l govuk-!-margin-bottom-4">Recommendations</h2>
+        <div class="recommendation-action-header">
+            <table class="govuk-table">
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header">Recommendations</th>
+                        <th scope="col" class="govuk-table__header">Last updated</th>
+                        <th scope="col" class="govuk-table__header govuk-!-text-align-right">Status</th>
+                    </tr>
+                </thead>
+            <tbody class="govuk-table__body">
+                @foreach (var chunk in Model.Chunks)
+                {
+          
+			        <tr class="govuk-table__row">
+			            <td class="govuk-table__cell table__cell custom-height">
+                            <div>@chunk.HeaderText</div>
+                        </td>
+			            <td class="govuk-table__cell govuk-hint govuk-!-font-size-16 govuk-!-padding-top-3">
+				            @chunk.LastUpdated.ToString("d MMM yyy")
+			            </td>
+			            <td class="govuk-table__cell govuk-!-text-align-right">
+				            <strong class="govuk-tag @((chunk.Status as RecommendationStatus?).GetCssClassOrDefault(RecommendationConstants.DefaultTagClass))">
+					            @chunk.Status.GetDisplayName()
+				            </strong>
+			            </td>
+			        </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 
-    <ul class="govuk-task-list">
-        @foreach (var chunk in Model.Chunks)
-        {
-            <li class="govuk-task-list__item govuk-task-list__item--with-link">
-                <div class="govuk-task-list__name-and-hint custom-height">
-                    <p class="govuk-!-margin-bottom-0">
-                        @chunk.HeaderText
-                    </p>
-                </div>
-            </li>
-        }
-    </ul>
+    <hr class="govuk-section-break govuk-section-break--l">
 
     <h2 class="govuk-heading-l">Recommendations</h2>
 
     @foreach (var chunk in Model.Chunks)
     {
 		<div class="recommendation-piece-content">
-			<h1 class="govuk-heading-xl">@chunk.HeaderText</h1>
+			<h1 class="govuk-heading-l">@chunk.HeaderText</h1>
 
 			<table class="govuk-table">
 				<thead class="govuk-table__head">
@@ -48,7 +66,7 @@
 					<tr class="govuk-table__row">
 						<td class="govuk-table__cell">
 							<strong class="govuk-tag @chunk.StatusTagClass">
-								@chunk.Status
+                                @chunk.Status.GetDisplayName()
 							</strong>
 						</td>
 						<td class="govuk-table__cell">@chunk.LastUpdatedFormatted</td>
@@ -59,7 +77,7 @@
 			@foreach (var content in chunk.Content)
 			{
 				<partial name="Components/PageComponentFactory" model="@content" />
-				<hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible" />
+                <hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible" />
 			}
 		</div>
     }
