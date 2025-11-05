@@ -289,20 +289,27 @@ public class RecommendationsViewBuilderTests
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
 
         _recommendationService
-            .GetLatestRecommendationStatusesByRecommendationIdAsync(
-                Arg.Any<IEnumerable<string>>(),
-                Arg.Any<int>())
-            .Returns(call =>
+            .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
+            .Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
             {
-                var crIds = call.Arg<IEnumerable<string>>();
-                return crIds.ToDictionary(
-                    id => id,
-                    id => new SqlEstablishmentRecommendationHistoryDto
-                    {
-                        RecommendationId = int.TryParse(id.TrimStart('C'), out var i) ? i : 0,
-                        DateCreated = DateTime.UtcNow,
-                        NewStatus = "InProgress"
-                    });
+                ["C1"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 1,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "InProgress"
+                },
+                ["C2"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 2,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "Complete"
+                },
+                ["C3"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 3,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "NotStarted"
+                }
             });
 
         // Act (useChecklist=false -> "Recommendations"; true -> "RecommendationsChecklist")
@@ -340,20 +347,27 @@ public class RecommendationsViewBuilderTests
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
 
         _recommendationService
-            .GetLatestRecommendationStatusesByRecommendationIdAsync(
-                Arg.Any<IEnumerable<string>>(),
-                Arg.Any<int>())
-            .Returns(call =>
+            .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
+            .Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
             {
-                var crIds = call.Arg<IEnumerable<string>>();
-                return crIds.ToDictionary(
-                    id => id,
-                    id => new SqlEstablishmentRecommendationHistoryDto
-                    {
-                        RecommendationId = int.TryParse(id.TrimStart('C'), out var i) ? i : 0,
-                        DateCreated = DateTime.UtcNow,
-                        NewStatus = "InProgress"
-                    });
+                ["C1"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 1,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "InProgress"
+                },
+                ["C2"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 2,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "InProgress"
+                },
+                ["C3"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 3,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "InProgress"
+                }
             });
 
         // Act
@@ -391,23 +405,30 @@ public class RecommendationsViewBuilderTests
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
 
         _recommendationService
-            .GetLatestRecommendationStatusesByRecommendationIdAsync(
-                Arg.Any<IEnumerable<string>>(),
-                Arg.Any<int>())
-            .Returns(call =>
+            .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
+            .Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
             {
-                var crIds = call.Arg<IEnumerable<string>>();
-                return crIds.ToDictionary(
-                    id => id,
-                    id => new SqlEstablishmentRecommendationHistoryDto
-                    {
-                        RecommendationId = int.TryParse(id.TrimStart('C'), out var i) ? i : 0,
-                        DateCreated = DateTime.UtcNow.AddDays(-i),
-                        NewStatus = "Completed"
-                    });
+                ["C1"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 1,
+                    DateCreated = DateTime.UtcNow.AddDays(-1),
+                    NewStatus = "Completed"
+                },
+                ["C2"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 2,
+                    DateCreated = DateTime.UtcNow.AddDays(-2),
+                    NewStatus = "Completed"
+                },
+                ["C3"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 3,
+                    DateCreated = DateTime.UtcNow.AddDays(-3),
+                    NewStatus = "Completed"
+                }
             });
 
-        // Act - request single recommendation (position 2 out of 3)
+        // Act
         var result = await sut.RouteBySectionAndRecommendation(
             ctl,
             categorySlug,
@@ -415,21 +436,18 @@ public class RecommendationsViewBuilderTests
             useChecklist: false,
             currentRecommendationCount: 2);
 
-        // Assert - view should still be the regular Recommendations view
+        // Assert
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("Recommendations", view.ViewName);
 
         var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
 
-        // Ensure only one chunk is returned
         Assert.Single(vm.Chunks);
         Assert.Equal("Second Chunk", vm.Chunks[0].Header);
 
-        // Check helper metadata
         Assert.Equal(2, vm.CurrentChunkCount);
         Assert.Equal(3, vm.TotalChunks);
 
-        // Ensure overall model metadata hasn't been lost
         Assert.Equal("Connectivity", vm.CategoryName);
         Assert.Equal(sectionSlug, vm.SectionSlug);
         Assert.Equal(routing.Submission.Responses, vm.SubmissionResponses);

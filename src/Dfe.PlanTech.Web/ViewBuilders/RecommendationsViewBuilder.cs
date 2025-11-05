@@ -172,7 +172,7 @@ public class RecommendationsViewBuilder(
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
         var details = await _recommendationService
-            .GetLatestRecommendationStatusesByRecommendationIdAsync(contentfulReferences, establishmentId);
+            .GetLatestRecommendationStatusesAsync(establishmentId);
 
         var chunkViewModels = section.CoreRecommendations.Select(cr => new RecommendationChunkViewModel
         {
