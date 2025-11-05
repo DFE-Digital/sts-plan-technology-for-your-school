@@ -50,7 +50,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
         if (submission is null)
         {
-            throw new InvalidOperationException($"Could not find submssion with ID {submissionId} in database");
+            throw new InvalidOperationException($"Could not find submission with ID {submissionId} in database");
         }
 
         var sectionQuestions = await GetQuestionsForSection(section);
@@ -325,6 +325,8 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var existingRecommendations = await _db.Recommendations
             .Where(recommendation => contentfulRefs.Contains(recommendation.ContentfulRef))
             .Where(recommendation => recommendation != null)
+            .GroupBy(recommendation => recommendation.ContentfulRef)
+            .Select(group => group.OrderByDescending(g => g.DateCreated).First())
             .ToListAsync();
 
         var existingRecommendationContentfulRefs = existingRecommendations.Select(r => r.ContentfulRef).ToList();
