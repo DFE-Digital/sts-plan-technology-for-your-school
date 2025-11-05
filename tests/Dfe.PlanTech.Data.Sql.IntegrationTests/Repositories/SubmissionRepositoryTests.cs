@@ -175,7 +175,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             _repository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, null, 100, 1, section));
 
-        Assert.Equal("Could not find submssion with ID 100 in database", exception.Message);
+        Assert.Equal("Could not find submission with ID 100 in database", exception.Message);
     }
 
     [Fact]
