@@ -285,7 +285,7 @@ public class CategoryLandingViewComponentViewBuilderTests
             .Returns(statuses);
         submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
             .Returns(responses);
-        submission.GetLatestRecommendationStatusesByRecommendationIdAsync(Arg.Any<IEnumerable<string>>(), Arg.Any<int>())
+        submission.GetLatestRecommendationStatusesByRecommendationIdAsync(Arg.Any<int>())
             .Returns(recommendationHistory);
 
         var sut = CreateSut(submission: submission);
@@ -419,7 +419,7 @@ public class CategoryLandingViewComponentViewBuilderTests
             .Returns(statuses);
         submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
             .Returns(responses);
-        submission.GetLatestRecommendationStatusesByRecommendationIdAsync(Arg.Any<IEnumerable<string>>(), Arg.Any<int>())
+        submission.GetLatestRecommendationStatusesByRecommendationIdAsync(Arg.Any<int>())
             .Returns(recommendationHistory);
 
         var sut = CreateSut(submission: submission);
@@ -520,7 +520,7 @@ public class CategoryLandingViewComponentViewBuilderTests
             .Returns(statuses);
         submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
             .Returns(responses);
-        submission.GetLatestRecommendationStatusesByRecommendationIdAsync(Arg.Any<IEnumerable<string>>(), Arg.Any<int>())
+        submission.GetLatestRecommendationStatusesByRecommendationIdAsync(Arg.Any<int>())
             .Returns(recommendationHistory);
 
         var sut = CreateSut(submission: submission);

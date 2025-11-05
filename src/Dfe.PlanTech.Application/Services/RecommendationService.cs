@@ -18,13 +18,11 @@ public class RecommendationService(
         );
     }
 
-    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByRecommendationIdAsync(
-        IEnumerable<string> recommendationContentfulReferences,
+    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesAsync(
         int establishmentId
     )
     {
-        return recommendationWorkflow.GetLatestRecommendationStatusesByRecommendationIdAsync(
-            recommendationContentfulReferences,
+        return recommendationWorkflow.GetLatestRecommendationStatusesAsync(
             establishmentId
         );
     }
