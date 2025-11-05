@@ -26,24 +26,16 @@ public class RecommendationWorkflow(
         return latestHistoryForRecommendation?.AsDto();
     }
 
-    public async Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByRecommendationIdAsync(IEnumerable<string> recommendationContentfulReferences,
+    public async Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByEstablishmentIdAsync(
         int establishmentId)
     {
-        var recommendations = await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(recommendationContentfulReferences);
-        var recommendationIdToContentfulReferenceDictionary = recommendations
-            .ToDictionary(
-                r => r.Id,
-                r => r.ContentfulRef
-            );
-
         var recommendationHistoryEntities = await establishmentRecommendationHistoryRepository.GetRecommendationHistoryByEstablishmentIdAsync(establishmentId);
 
         return recommendationHistoryEntities
-            .Where(rhe => recommendationIdToContentfulReferenceDictionary.ContainsKey(rhe.RecommendationId))
-            .GroupBy(rhe => rhe.RecommendationId)
+            .GroupBy(rhe => rhe.Recommendation.ContentfulRef)
             .ToDictionary(
-                group => recommendationIdToContentfulReferenceDictionary[group.Key],
-                group => group.OrderByDescending(r => r.DateCreated).First().AsDto()
+                group => group.Key,
+                group => group.OrderByDescending(g => g.DateCreated).First().AsDto()
             );
     }
 
