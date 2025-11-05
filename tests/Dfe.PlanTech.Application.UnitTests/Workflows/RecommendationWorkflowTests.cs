@@ -112,7 +112,7 @@ public class RecommendationWorkflowTests
         var establishmentId = 123;
 
         var recommendation = new RecommendationEntity
-            { Id = 1, ContentfulRef = "rec-001", RecommendationText = "Test Recommendation", QuestionId = 1 };
+        { Id = 1, ContentfulRef = "rec-001", RecommendationText = "Test Recommendation", QuestionId = 1 };
 
         var historyEntities = new[]
         {
