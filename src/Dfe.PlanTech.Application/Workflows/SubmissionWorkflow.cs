@@ -57,18 +57,6 @@ public class SubmissionWorkflow(
         latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses, section).ToList();
 
         var lastResponseInUserJourney = latestSubmission.Responses.LastOrDefault();
-        if (lastResponseInUserJourney is not null)
-        {
-            var lastSelectedQuestion = section.Questions
-                .FirstOrDefault(q => q.Id.Equals(lastResponseInUserJourney.Question.ContentfulRef))
-                    ?? throw new UserJourneyMissingContentException($"Could not find question with database ID {lastResponseInUserJourney.QuestionId} (Contentful ref {lastResponseInUserJourney.Question.ContentfulRef}) in section with ID {section.Id}", section);
-
-            if (lastSelectedQuestion.Answers.FirstOrDefault(a => a.Id.Equals(lastResponseInUserJourney.Answer.ContentfulRef)) is null)
-            {
-                _logger.LogWarning("Could not find answer with Contentful reference {AnswerContentfulRef} in question with Contentful reference {QuestionContentfulRef}", lastResponseInUserJourney.Answer.ContentfulRef, lastResponseInUserJourney.Question.ContentfulRef);
-            }
-        }
-
         return latestSubmission.AsDto();
     }
 
@@ -160,24 +148,13 @@ public class SubmissionWorkflow(
 
     private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, QuestionnaireSectionEntry section)
     {
-        var questionWithAnswerMap = responses
-            .OrderByDescending(r => r.DateCreated)
+        return responses
+            .OrderBy(r => r.DateCreated)
             .GroupBy(r => r.Question.ContentfulRef)
-            .ToDictionary(group => group.Key, group => group.First());
-
-        var currentQuestion = section?.Questions.FirstOrDefault();
-        while (currentQuestion is not null)
-        {
-            if (!questionWithAnswerMap.TryGetValue(currentQuestion.Id ?? string.Empty, out var response))
-            {
-                break;
-            }
-
-            yield return response;
-
-            currentQuestion = currentQuestion.Answers.ToList()
-                .Find(a => a.Id!.Equals(response.Answer.ContentfulRef))?
-                .NextQuestion;
-        }
+            .ToDictionary(
+                group => group.Key,
+                group => group.ToList().OrderByDescending(r => r.DateLastUpdated).First()
+            )
+            .Values;
     }
 }

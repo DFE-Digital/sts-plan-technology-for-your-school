@@ -512,3 +512,4 @@ contentful/migration-scripts/contentful-export-*.json
 azure-secrets-expiring.yml
 
 StrykerOutput/
+/src/Dfe.PlanTech.DatabaseUpgrader/Properties/launchSettings.json
