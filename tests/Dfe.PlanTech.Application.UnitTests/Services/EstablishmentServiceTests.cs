@@ -263,4 +263,59 @@ public class EstablishmentServiceTests
                 selectedEstablishmentUrn: "SURN",
                 selectedEstablishmentName: "SNAME"));
     }
+
+    [Fact]
+    public async Task GetEstablishmentLinksWithRecommendationCounts_WhenSchoolNotInEstablishmentTable_IncludesSchoolWithZeroCount()
+    {
+        // Arrange
+        const int groupEstablishmentId = 101;
+        var groupEstablishments = new List<SqlEstablishmentLinkDto>
+        {
+            new SqlEstablishmentLinkDto { Id = groupEstablishmentId, Urn = "URN-A", EstablishmentName = "School A" },
+            new SqlEstablishmentLinkDto { Id = 102, Urn = "URN-B", EstablishmentName = "School B" },
+            new SqlEstablishmentLinkDto { Id = 103, Urn = "URN-C", EstablishmentName = "School C (Never Logged In)" }
+        };
+        _establishmentWorkflow.GetGroupEstablishments(groupEstablishmentId).Returns(groupEstablishments);
+
+        // Only URN-A and URN-B exist in establishment table (URN-C has never logged in)
+        var establishments = new List<SqlEstablishmentDto>
+        {
+            new SqlEstablishmentDto { Id = 1001, EstablishmentRef = "URN-A", OrgName = "School A" },
+            new SqlEstablishmentDto { Id = 1002, EstablishmentRef = "URN-B", OrgName = "School B" }
+        };
+
+        _establishmentWorkflow.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B", "URN-C" })))
+                              .Returns(establishments);
+
+        var recommendationsEst1 = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+        {
+            ["rec-001"] = new SqlEstablishmentRecommendationHistoryDto
+            {
+                EstablishmentId = 1001,
+                RecommendationId = 1,
+                UserId = 1,
+                NewStatus = "Complete",
+                DateCreated = DateTime.UtcNow
+            }
+        };
+
+        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1001).Returns(recommendationsEst1);
+        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1002).Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>());
+
+        var sut = CreateServiceUnderTest();
+
+        // Act
+        var result = await sut.GetEstablishmentLinksWithRecommendationCounts(groupEstablishmentId);
+
+        // Assert
+        Assert.Equal(3, result.Count); // All 3 schools should be returned
+
+        var schoolA = result.Single(x => x.Urn == "URN-A");
+        var schoolB = result.Single(x => x.Urn == "URN-B");
+        var schoolC = result.Single(x => x.Urn == "URN-C");
+
+        Assert.Equal(1, schoolA.InProgressOrCompletedRecommendationsCount);
+        Assert.Equal(0, schoolB.InProgressOrCompletedRecommendationsCount);
+        Assert.Equal(0, schoolC.InProgressOrCompletedRecommendationsCount); // School C should have 0 count, not be excluded
+    }
 }
