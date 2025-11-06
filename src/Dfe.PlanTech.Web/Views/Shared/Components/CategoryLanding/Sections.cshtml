@@ -30,7 +30,7 @@
 								<a href=@Url.RouteUrl("GetSingleRecommendation", new {
 									categorySlug = Model.CategorySlug,
 									sectionSlug = topic.Slug,
-									chunkSlug = chunk.SlugifiedLinkText
+									chunkSlug = chunk.Slug
 									})
 								    class="govuk-link"
 							        data-recommendation-header="@(chunk.HeaderText)-@(Model.StatusLinkPartialName.Split("/")[^1])"
