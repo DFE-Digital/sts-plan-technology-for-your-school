@@ -94,8 +94,8 @@ public class SecurityHeadersMiddleware
             {
                 headers.Append("Content-Security-Policy",
                     "default-src 'self'; " +
-                    "style-src 'self' 'unsafe-inline'; " +
-                    "script-src 'self' 'unsafe-inline'; " +
+                    "style-src 'self'; " +
+                    "script-src 'self'; " +
                     "img-src 'self' data:; " +
                     "font-src 'self' data:; " +
                     "form-action 'self'; " +
