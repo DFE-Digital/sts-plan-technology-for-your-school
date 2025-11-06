@@ -152,13 +152,13 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("cat-a", vm.CategorySlug);
         Assert.Equal("sec-1", vm.SectionSlug);
         Assert.Equal(3, vm.Chunks.Count);
-        Assert.Equal("second-chunk", vm.CurrentChunk.SlugifiedLinkText);
+        Assert.Equal("second-chunk", vm.CurrentChunk.Slug);
         Assert.Equal(2, vm.CurrentChunkPosition);
         Assert.Equal(3, vm.TotalChunks);
         Assert.NotNull(vm.PreviousChunk);
         Assert.NotNull(vm.NextChunk);
-        Assert.Equal("first-chunk", vm.PreviousChunk!.SlugifiedLinkText);
-        Assert.Equal("third-chunk", vm.NextChunk!.SlugifiedLinkText);
+        Assert.Equal("first-chunk", vm.PreviousChunk!.Slug);
+        Assert.Equal("third-chunk", vm.NextChunk!.Slug);
 
         Assert.Equal("Completed", vm.SelectedStatusKey);
         Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
