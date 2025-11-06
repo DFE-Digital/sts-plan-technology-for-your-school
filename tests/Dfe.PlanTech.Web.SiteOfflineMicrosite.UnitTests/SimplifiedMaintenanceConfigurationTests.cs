@@ -1,8 +1,6 @@
 using System.Net;
 using Dfe.PlanTech.Web.SiteOfflineMicrosite.Configuration;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.Configuration;
 
 namespace Dfe.PlanTech.Web.SiteOfflineMicrosite.UnitTests;
 
