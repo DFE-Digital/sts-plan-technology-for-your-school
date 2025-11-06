@@ -25,7 +25,6 @@ public class GroupsViewBuilder(
 
     private const string SelectASchoolViewName = "GroupsSelectSchool";
 
-
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
         // Get the user's organisation ID (the MAT/group), not the active establishment
