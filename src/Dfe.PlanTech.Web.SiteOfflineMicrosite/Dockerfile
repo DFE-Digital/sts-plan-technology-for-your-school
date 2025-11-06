@@ -6,15 +6,20 @@ FROM node:24-alpine AS node-build
 WORKDIR /build
 COPY src/Dfe.PlanTech.Web.SiteOfflineMicrosite/package*.json ./
 RUN npm ci --quiet --ignore-scripts
-COPY src/Dfe.PlanTech.Web.SiteOfflineMicrosite/ ./
+COPY src/Dfe.PlanTech.Web.SiteOfflineMicrosite/scripts/ ./scripts/
+COPY src/Dfe.PlanTech.Web.SiteOfflineMicrosite/src/ ./src/
 RUN npm run build
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-WORKDIR /
-COPY src/Dfe.PlanTech.Web.SiteOfflineMicrosite/ src/Dfe.PlanTech.Web.SiteOfflineMicrosite/
-COPY --from=node-build /build/wwwroot/ src/Dfe.PlanTech.Web.SiteOfflineMicrosite/wwwroot/
-RUN dotnet publish "src/Dfe.PlanTech.Web.SiteOfflineMicrosite/Dfe.PlanTech.Web.SiteOfflineMicrosite.csproj" -c Release -o /out/publish && \
-    rm -rf /src
+WORKDIR /src
+COPY src/Dfe.PlanTech.Web.SiteOfflineMicrosite/*.csproj ./
+RUN dotnet restore
+COPY src/Dfe.PlanTech.Web.SiteOfflineMicrosite/ ./
+COPY --from=node-build /build/wwwroot/ ./wwwroot/
+RUN dotnet publish "Dfe.PlanTech.Web.SiteOfflineMicrosite.csproj" \
+    -c Release \
+    -o /out/publish \
+    --no-restore
 
 FROM base AS final
 WORKDIR /src
