@@ -224,7 +224,7 @@ public class CurrentUser : ICurrentUser
             {
                 _logger.LogWarning(
                     "School selection cookie is missing URN value. Cookie length: {CookieLength}. Clearing school selection cookie ({CookieName}).",
-                    cookieValue?.Length ?? 0,
+                    cookieValue.Length,
                     CookieConstants.SelectedSchool);
                 ClearSelectedSchoolCookie(httpContext);
                 return null;
@@ -234,7 +234,7 @@ public class CurrentUser : ICurrentUser
         {
             _logger.LogWarning(ex,
                 "School selection cookie contains invalid JSON. Cookie length: {CookieLength}. Clearing school selection cookie ({CookieName}).",
-                cookieValue?.Length ?? 0,
+                cookieValue.Length,
                 CookieConstants.SelectedSchool);
             ClearSelectedSchoolCookie(httpContext);
             return null;
