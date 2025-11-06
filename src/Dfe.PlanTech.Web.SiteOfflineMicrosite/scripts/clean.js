@@ -1,6 +1,6 @@
-﻿import { rmSync, existsSync, readdirSync, statSync, mkdirSync, writeFileSync } from 'fs';
-import { dirname, join } from 'path';
-import { fileURLToPath } from 'url';
+﻿import { rmSync, existsSync, readdirSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -14,20 +14,20 @@ const pathsToClean = [
 
 console.log('Cleaning generated assets...');
 
-pathsToClean.forEach(path => {
+for (const path of pathsToClean) {
   if (existsSync(path)) {
     const items = readdirSync(path);
-    items.forEach(item => {
+    for (const item of items) {
       if (item !== '.gitkeep') {
         const itemPath = join(path, item);
         rmSync(itemPath, { recursive: true, force: true });
       }
-    });
+    }
     console.log(`✓ Cleaned ${path} (preserved .gitkeep)`);
   } else {
     console.log(`⊘ ${path} does not exist`);
   }
-});
+}
 
 console.log('✓ Clean complete');
 

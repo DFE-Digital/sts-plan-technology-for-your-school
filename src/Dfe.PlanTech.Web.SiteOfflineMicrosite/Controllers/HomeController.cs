@@ -17,7 +17,7 @@ public class HomeController : Controller
     public IActionResult Index()
     {
         Response.StatusCode = 503;
-        Response.Headers["Retry-After"] = "3600"; // Suggest retry after 1 hour (in seconds)
+        Response.Headers.RetryAfter = "3600"; // Suggest retry after 1 hour (in seconds)
         return View(_config);
     }
 }

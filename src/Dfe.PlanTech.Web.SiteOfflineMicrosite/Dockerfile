@@ -5,7 +5,7 @@ EXPOSE 8080
 FROM node:24-alpine AS node-build
 WORKDIR /build
 COPY src/Dfe.PlanTech.Web.SiteOfflineMicrosite/package*.json ./
-RUN npm ci --quiet
+RUN npm ci --quiet --ignore-scripts
 COPY src/Dfe.PlanTech.Web.SiteOfflineMicrosite/ ./
 RUN npm run build
 
