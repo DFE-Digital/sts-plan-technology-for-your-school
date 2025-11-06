@@ -57,7 +57,7 @@ public class GroupsViewBuilderTests
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
         // GroupSelectedSchoolUrn not set
 
-        return new GroupsViewBuilder(logger, contactOpts, contentful, est, sub, currentUser);
+        return new GroupsViewBuilder(logger, contactOpts, contentful, est, currentUser);
     }
 
     private static QuestionnaireCategoryEntry MakeCategory(params QuestionnaireSectionEntry[] sections)
@@ -88,7 +88,7 @@ public class GroupsViewBuilderTests
         var current = Substitute.For<ICurrentUser>();
 
         Assert.Throws<ArgumentNullException>(() =>
-            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, contentful, est, sub, current));
+            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, contentful, est, current));
     }
 
     [Fact]
@@ -101,10 +101,7 @@ public class GroupsViewBuilderTests
         var est = Substitute.For<IEstablishmentService>();
 
         Assert.Throws<ArgumentNullException>(() =>
-            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, opts, contentful, null!, sub, current));
-
-        Assert.Throws<ArgumentNullException>(() =>
-            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, opts, contentful, est, null!, current));
+            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, opts, contentful, null!, current));
     }
 
     // --- RouteToSelectASchoolViewModelAsync --------------------------------
@@ -137,14 +134,14 @@ public class GroupsViewBuilderTests
                   .Returns(new NavigationLinkEntry { Href = "/contact-us" });
 
         var est = Substitute.For<IEstablishmentService>();
-        est.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-               Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(), 100)
+        est.GetEstablishmentLinksWithRecommendationCounts(
+               Arg.Any<IEnumerable<QuestionnaireSectionEntry>>(), 100)
            .Returns(new List<SqlEstablishmentLinkDto>
            {
-               new SqlEstablishmentLinkDto { Id = 1, EstablishmentName = "School A", CompletedSectionsCount = 2 },
-               new SqlEstablishmentLinkDto { Id = 2, EstablishmentName = "School B", CompletedSectionsCount = 1 },
+               new SqlEstablishmentLinkDto { Id = 1, EstablishmentName = "School A", InProgressOrCompletedRecommendationsCount = 2 },
+               new SqlEstablishmentLinkDto { Id = 2, EstablishmentName = "School B", InProgressOrCompletedRecommendationsCount = 1 },
            });
-
+        
         var sut = CreateServiceUnderTest(contentful: contentful, est: est);
         var controller = new TestController();
 
@@ -159,7 +156,6 @@ public class GroupsViewBuilderTests
         var vm = Assert.IsType<GroupsSelectorViewModel>(view.Model);
         Assert.Equal("Test Academy Trust", vm.GroupName);
         Assert.Equal("Test Academy Trust", vm.Title.Text);
-        Assert.Equal("3", vm.TotalSections);       // 2 + 1
         Assert.Equal("10", vm.TotalRecommendations); // total of all values passed to MakeSection above
         Assert.Null(vm.ProgressRetrievalErrorMessage);
         Assert.Equal("/contact-us", vm.ContactLinkHref);
@@ -168,29 +164,8 @@ public class GroupsViewBuilderTests
         Assert.Equal(2, vm.GroupEstablishments.Count);
         await contentful.Received(1).GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
         await contentful.Received(1).GetLinkByIdAsync("contact-123");
-        await est.Received(1).GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Is<IEnumerable<QuestionnaireCategoryEntry>>(e => e.Count() == 2), 100);
-    }
-
-    [Fact]
-    public async Task RouteToSelectASchoolViewModelAsync_Throws_When_No_Categories()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-
-        var sut = CreateServiceUnderTest(contentful: contentful);
-        contentful.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
-                  .Returns(new PageEntry { Content = null });
-        // home page with content that contains NO QuestionnaireCategoryEntry
-        var homePage = new PageEntry { Content = [new MissingComponentEntry()] };
-        contentful.GetPageBySlugAsync(Arg.Any<string>())
-                  .Returns(homePage);
-
-        var controller = new TestController();
-
-        var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.RouteToSelectASchoolViewModelAsync(controller));
-
-        Assert.Contains("There are no categories to display", ex.Message);
+        await est.Received(1).GetEstablishmentLinksWithRecommendationCounts(
+            Arg.Is<IEnumerable<QuestionnaireSectionEntry>>(e => e.Count() == 2), 100);
     }
 
     // --- RecordGroupSelectionAsync -----------------------------------------
