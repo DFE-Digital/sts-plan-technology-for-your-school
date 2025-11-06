@@ -16,9 +16,9 @@ BEGIN TRY
         IF @submissionId IS NULL
             BEGIN
                 INSERT INTO [dbo].[submission]
-                    (establishmentId, completed, sectionId, sectionName)
+                    (establishmentId, completed, sectionId, sectionName, status)
                 VALUES
-                    (@establishmentId, 0, @sectionId, @sectionName)
+                    (@establishmentId, 0, @sectionId, @sectionName, 'InProgress')
 
                 SELECT @submissionId = SCOPE_IDENTITY()
             END
