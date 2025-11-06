@@ -165,7 +165,7 @@ public class PagesViewBuilderTests
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns("123456");
 
-        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts([], 654321)
+        establishmentService.GetEstablishmentLinksWithRecommendationCounts(654321)
             .Returns([]);
 
         var controller = new TestController();
@@ -192,9 +192,7 @@ public class PagesViewBuilderTests
 
         // Setup establishmentService to return a list containing the selected school
         // (needed to verify that the user has access to the selected school)
-        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            Arg.Any<int>()
+        establishmentService.GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>()
         ).Returns(new List<SqlEstablishmentLinkDto>
         {
             new SqlEstablishmentLinkDto { Urn = "123456" }
