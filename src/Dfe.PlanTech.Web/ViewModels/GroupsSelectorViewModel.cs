@@ -17,9 +17,7 @@ public class GroupsSelectorViewModel
 
     public List<ContentfulEntry> Content { get; init; } = [];
 
-    public string? ErrorMessage { get; set; }
-
-    public string? TotalSections { get; set; }
+    public string? TotalRecommendations { get; set; }
 
     public string? ProgressRetrievalErrorMessage { get; init; }
 

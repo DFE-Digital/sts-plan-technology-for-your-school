@@ -124,10 +124,9 @@ public class CategoryLandingViewComponentViewBuilder(
             var sortedRecommendations = recommendationChunks.SortByStatus(recommendations, sortType);
             var chunks = sortedRecommendations.Select(sr => new RecommendationChunkViewModel
             {
-                HeaderText = sr.HeaderText,
+                Header = sr.HeaderText,
                 LastUpdated = recommendations[sr.Id].DateCreated,
                 Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
-                SlugifiedLinkText = sr.SlugifiedLinkText
             })
                 .ToList();
 

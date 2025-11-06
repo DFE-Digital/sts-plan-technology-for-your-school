@@ -224,7 +224,7 @@ public class CurrentUser : ICurrentUser
             {
                 _logger.LogWarning(
                     "School selection cookie is missing URN value. Cookie length: {CookieLength}. Clearing school selection cookie ({CookieName}).",
-                    cookieValue?.Length ?? 0,
+                    cookieValue.Length,
                     CookieConstants.SelectedSchool);
                 ClearSelectedSchoolCookie(httpContext);
                 return null;
@@ -234,7 +234,7 @@ public class CurrentUser : ICurrentUser
         {
             _logger.LogWarning(ex,
                 "School selection cookie contains invalid JSON. Cookie length: {CookieLength}. Clearing school selection cookie ({CookieName}).",
-                cookieValue?.Length ?? 0,
+                cookieValue.Length,
                 CookieConstants.SelectedSchool);
             ClearSelectedSchoolCookie(httpContext);
             return null;
@@ -254,9 +254,7 @@ public class CurrentUser : ICurrentUser
         try
         {
             // Get all schools in the user's group
-            var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-                [],
-                UserOrganisationId.Value);
+            var groupSchools = await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(UserOrganisationId.Value);
 
             var selectedSchoolIsValid = groupSchools.Any(s => s.Urn.Equals(urn, StringComparison.OrdinalIgnoreCase));
 

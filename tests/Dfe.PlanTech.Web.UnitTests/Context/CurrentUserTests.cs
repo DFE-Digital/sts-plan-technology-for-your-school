@@ -3,7 +3,6 @@ using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context;
@@ -135,9 +134,7 @@ public class CurrentUserTests
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<Core.Contentful.Models.QuestionnaireCategoryEntry>>(),
-            100)
+        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
             .Returns(new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
             {
                 new() { Urn = "999888", EstablishmentName = "Selected Academy", Id = 42 }
@@ -537,9 +534,7 @@ public class CurrentUserTests
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<Core.Contentful.Models.QuestionnaireCategoryEntry>>(),
-            100)
+        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
             .Returns(new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
             {
                 new() { Urn = "999888", EstablishmentName = "Selected Academy", Id = 42 }
@@ -674,9 +669,7 @@ public class CurrentUserTests
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<Core.Contentful.Models.QuestionnaireCategoryEntry>>(),
-            100)
+        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
             .Returns(new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
             {
                 new() { Urn = "999888", EstablishmentName = "Selected Academy", Id = 42 }
@@ -1192,9 +1185,7 @@ public class CurrentUserTests
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Setup: The MAT only has schools with URNs 111222 and 333444
-        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            100)
+        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
             .Returns(new List<SqlEstablishmentLinkDto>
             {
                 new() { Urn = "111222", EstablishmentName = "My School 1", Id = 1 },
@@ -1215,9 +1206,7 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify validation was attempted
-        await establishmentService.Received(1).GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            100);
+        await establishmentService.Received(1).GetEstablishmentLinksWithRecommendationCounts(100);
 
         // Verify the cookie was cleared (warning logged)
         logger.Received(1).Log(
@@ -1259,9 +1248,7 @@ public class CurrentUserTests
         Assert.Null(activeEstablishmentName);
 
         // Verify we never called the establishment service
-        await establishmentService.DidNotReceive().GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            Arg.Any<int>());
+        await establishmentService.DidNotReceive().GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
         await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
     }
 
@@ -1293,9 +1280,7 @@ public class CurrentUserTests
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Setup: The MAT has this school
-        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            100)
+        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
             .Returns(new List<SqlEstablishmentLinkDto>
             {
                 new() { Urn = "111222", EstablishmentName = "My School 1", Id = 42 },
@@ -1325,9 +1310,7 @@ public class CurrentUserTests
         Assert.Equal("My School 1 (Full Name)", activeEstablishmentName); // Name from database
 
         // Verify validation was performed
-        await establishmentService.Received(1).GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            100);
+        await establishmentService.Received(1).GetEstablishmentLinksWithRecommendationCounts(100);
 
         // Verify the school was loaded from database
         await establishmentService.Received(1).GetEstablishmentByReferenceAsync("111222");
@@ -1368,9 +1351,7 @@ public class CurrentUserTests
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Setup: Service throws an exception during validation
-        establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            100)
+        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
             .Returns(Task.FromException<List<SqlEstablishmentLinkDto>>(new Exception("Database connection failed")));
 
         var logger = Substitute.For<ILogger<CurrentUser>>();
@@ -1445,9 +1426,7 @@ public class CurrentUserTests
             Arg.Any<Func<object, Exception?, string>>());
 
         // Verify we never called the establishment service
-        await establishmentService.DidNotReceive().GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            Arg.Any<int>());
+        await establishmentService.DidNotReceive().GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
     }
 
     // ---------- Cookie corruption and validation tests ----------
@@ -1499,9 +1478,7 @@ public class CurrentUserTests
             Arg.Any<Func<object, Exception?, string>>());
 
         // Verify we never tried to validate or load the school
-        await establishmentService.DidNotReceive().GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            Arg.Any<int>());
+        await establishmentService.DidNotReceive().GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
         await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
     }
 
@@ -1553,9 +1530,7 @@ public class CurrentUserTests
             Arg.Any<Func<object, Exception?, string>>());
 
         // Verify we never tried to validate or load the school
-        await establishmentService.DidNotReceive().GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(),
-            Arg.Any<int>());
+        await establishmentService.DidNotReceive().GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
         await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
     }
 
