@@ -28,14 +28,12 @@ public class GroupsViewBuilderTests
         IOptions<ContactOptionsConfiguration>? contactOpts = null,
         IContentfulService? contentful = null,
         IEstablishmentService? est = null,
-        ISubmissionService? sub = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null)
     {
         contactOpts ??= Opt();
         contentful ??= Substitute.For<IContentfulService>();
         est ??= Substitute.For<IEstablishmentService>();
-        sub ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
@@ -57,7 +55,7 @@ public class GroupsViewBuilderTests
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
         // GroupSelectedSchoolUrn not set
 
-        return new GroupsViewBuilder(logger, contactOpts, contentful, est, sub, currentUser);
+        return new GroupsViewBuilder(logger, contactOpts, contentful, est, currentUser);
     }
 
     private static QuestionnaireCategoryEntry MakeCategory(params QuestionnaireSectionEntry[] sections)
@@ -73,7 +71,8 @@ public class GroupsViewBuilderTests
         {
             Sys = new SystemDetails(id),
             Name = $"Sec {id}",
-            Questions = Enumerable.Repeat(new QuestionnaireQuestionEntry(), countAnswers).ToList()
+            Questions = Enumerable.Repeat(new QuestionnaireQuestionEntry(), countAnswers).ToList(),
+            CoreRecommendations = Enumerable.Repeat(new RecommendationChunkEntry(), countAnswers).ToList()
         };
 
     // --- ctor guards --------------------------------------------------------
@@ -83,11 +82,10 @@ public class GroupsViewBuilderTests
     {
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
-        var sub = Substitute.For<ISubmissionService>();
         var current = Substitute.For<ICurrentUser>();
 
         Assert.Throws<ArgumentNullException>(() =>
-            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, contentful, est, sub, current));
+            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, contentful, est, current));
     }
 
     [Fact]
@@ -96,14 +94,10 @@ public class GroupsViewBuilderTests
         var opts = Opt();
         var contentful = Substitute.For<IContentfulService>();
         var current = Substitute.For<ICurrentUser>();
-        var sub = Substitute.For<ISubmissionService>();
         var est = Substitute.For<IEstablishmentService>();
 
         Assert.Throws<ArgumentNullException>(() =>
-            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, opts, contentful, null!, sub, current));
-
-        Assert.Throws<ArgumentNullException>(() =>
-            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, opts, contentful, est, null!, current));
+            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, opts, contentful, null!, current));
     }
 
     // --- RouteToSelectASchoolViewModelAsync --------------------------------
@@ -117,10 +111,16 @@ public class GroupsViewBuilderTests
         // selection page content (only Content list is used)
         contentful.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
                   .Returns(new PageEntry { Content = new List<ContentfulEntry> { new MissingComponentEntry() } });
+        var sec1 = MakeSection("Sec1", 3);
+        var sec2 = MakeSection("Sec2", 2);
+        var sec3 = MakeSection("Sec3", 5);
+        var cat1 = MakeCategory(sec1, sec2);
+        var cat2 = MakeCategory(sec3);
+        var allSections = new List<QuestionnaireSectionEntry> { sec1, sec2, sec3 };
+
+        contentful.GetAllSectionsAsync().Returns(allSections);
 
         // home page content: supplies categories with sections
-        var cat1 = MakeCategory(MakeSection("S1"), MakeSection("S2"));
-        var cat2 = MakeCategory(MakeSection("S3"));
         var homePage = new PageEntry { Content = new List<ContentfulEntry> { cat1, cat2 } };
         contentful.GetPageBySlugAsync(Arg.Any<string>())
                   .Returns(homePage);
@@ -130,12 +130,11 @@ public class GroupsViewBuilderTests
                   .Returns(new NavigationLinkEntry { Href = "/contact-us" });
 
         var est = Substitute.For<IEstablishmentService>();
-        est.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-               Arg.Any<IEnumerable<QuestionnaireCategoryEntry>>(), 100)
+        est.GetEstablishmentLinksWithRecommendationCounts(100)
            .Returns(new List<SqlEstablishmentLinkDto>
            {
-               new SqlEstablishmentLinkDto { Id = 1, EstablishmentName = "School A", CompletedSectionsCount = 2 },
-               new SqlEstablishmentLinkDto { Id = 2, EstablishmentName = "School B", CompletedSectionsCount = 1 },
+               new SqlEstablishmentLinkDto { Id = 1, EstablishmentName = "School A", InProgressOrCompletedRecommendationsCount = 2 },
+               new SqlEstablishmentLinkDto { Id = 2, EstablishmentName = "School B", InProgressOrCompletedRecommendationsCount = 1 },
            });
 
         var sut = CreateServiceUnderTest(contentful: contentful, est: est);
@@ -152,7 +151,7 @@ public class GroupsViewBuilderTests
         var vm = Assert.IsType<GroupsSelectorViewModel>(view.Model);
         Assert.Equal("Test Academy Trust", vm.GroupName);
         Assert.Equal("Test Academy Trust", vm.Title.Text);
-        Assert.Equal("3", vm.TotalSections);       // 2 + 1
+        Assert.Equal("10", vm.TotalRecommendations); // total of all values passed to MakeSection above
         Assert.Null(vm.ProgressRetrievalErrorMessage);
         Assert.Equal("/contact-us", vm.ContactLinkHref);
 
@@ -160,29 +159,7 @@ public class GroupsViewBuilderTests
         Assert.Equal(2, vm.GroupEstablishments.Count);
         await contentful.Received(1).GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
         await contentful.Received(1).GetLinkByIdAsync("contact-123");
-        await est.Received(1).GetEstablishmentLinksWithSubmissionStatusesAndCounts(
-            Arg.Is<IEnumerable<QuestionnaireCategoryEntry>>(e => e.Count() == 2), 100);
-    }
-
-    [Fact]
-    public async Task RouteToSelectASchoolViewModelAsync_Throws_When_No_Categories()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-
-        var sut = CreateServiceUnderTest(contentful: contentful);
-        contentful.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
-                  .Returns(new PageEntry { Content = null });
-        // home page with content that contains NO QuestionnaireCategoryEntry
-        var homePage = new PageEntry { Content = [new MissingComponentEntry()] };
-        contentful.GetPageBySlugAsync(Arg.Any<string>())
-                  .Returns(homePage);
-
-        var controller = new TestController();
-
-        var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.RouteToSelectASchoolViewModelAsync(controller));
-
-        Assert.Contains("There are no categories to display", ex.Message);
+        await est.Received(1).GetEstablishmentLinksWithRecommendationCounts(100);
     }
 
     // --- RecordGroupSelectionAsync -----------------------------------------

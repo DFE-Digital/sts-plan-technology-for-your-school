@@ -360,7 +360,7 @@ public class QuestionsViewBuilderTests
         // Assert
         await _submissionSvc.Received(1).SubmitAnswerAsync(11, 22, null, Arg.Any<SubmitAnswerModel>());
 
-        var redirect = Assert.IsType<ViewResult>(result);
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
     }
 
     // ---------- RouteToContinueSelfAssessmentPage ----------
