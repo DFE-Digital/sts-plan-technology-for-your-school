@@ -254,7 +254,7 @@ public class CurrentUser : ICurrentUser
         try
         {
             // Get all schools in the user's group
-            var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(
+            var groupSchools = await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(
                 [],
                 UserOrganisationId.Value);
 

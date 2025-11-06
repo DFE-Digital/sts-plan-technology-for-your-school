@@ -35,27 +35,15 @@ public class GroupsViewBuilder(
         var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
                                        ?? throw new ContentfulDataUnavailableException($"Could not find contentful page for slug '{UrlConstants.GroupsSelectionPageSlug}'");
 
-        // Categories which would display on the home page - use these to figure out which categories we should get counts for
-        // This means updating Contentful will impact what is considered in the totals
-        var homeSlug = UrlConstants.HomePage.Replace("/", "");
-        var homePage = await ContentfulService.GetPageBySlugAsync(homeSlug);
-        var categories = homePage.Content?.OfType<QuestionnaireCategoryEntry>().ToList();
-
-        if (categories is null || !categories.Any())
-        {
-            throw new InvalidDataException("There are no categories to display for the selected page.");
-        }
-
-        var groupSchools = await _establishmentService.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, establishmentId);
-
         var groupName = CurrentUser.UserOrganisationName;
         var title = groupName ?? "Your organisation";
         List<ContentfulEntry> content = selectASchoolPageContent.Content ?? [];
 
-        string totalSections = categories.Sum(category => category.Sections.Count).ToString();
-
         var sections = await contentfulService.GetAllSectionsAsync();
-        string totalRecommendations = sections.Sum(section => section.CoreRecommendations.Count()).ToString();
+        var allRecommendations = sections.SelectMany(section => section.CoreRecommendations);
+        string totalRecommendations = allRecommendations.Count().ToString();
+
+        var groupSchools = await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(sections, establishmentId);
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 
@@ -66,7 +54,6 @@ public class GroupsViewBuilder(
             BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent,
             Title = new ComponentTitleEntry(title),
             Content = content,
-            TotalSections = totalSections,
             TotalRecommendations = totalRecommendations,
             ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalRecommendations)
                 ? "Unable to retrieve progress"
