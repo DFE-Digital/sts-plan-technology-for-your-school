@@ -1,6 +1,13 @@
 @model RecommendationsViewModel
 
 @{
+    if (Model.CategoryName != null)
+    {
+        ViewData["Title"] = $"{Model.CategoryName} - print view";
+    }
+}
+
+@{
     <div>
         <span class="govuk-caption-xl">How to meet the standard</span>
         <h1 class="govuk-heading-xl govuk-!-margin-bottom-8">
@@ -16,7 +23,7 @@
     </div>
 
         <div class="recommendation-action-header">
-            <table class="govuk-table">
+        <table class="govuk-table">
                 <thead class="govuk-table__head">
                     <tr class="govuk-table__row">
                         <th scope="col" class="govuk-table__header">Recommendations</th>

@@ -1,5 +1,12 @@
 ﻿@model RecommendationsViewModel
 
+@{
+    if (Model.CategoryName != null)
+    {
+        ViewData["Title"] = $"{Model.CategoryName} - print view";
+    }
+}
+
 <h1 class="govuk-heading-xl govuk-!-margin-bottom-8">
     @Model.CategoryName
 </h1>

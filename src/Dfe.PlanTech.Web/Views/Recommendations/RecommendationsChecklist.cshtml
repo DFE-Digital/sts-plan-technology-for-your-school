@@ -1,8 +1,15 @@
 @model RecommendationsViewModel
 
 @{
-    Layout = "_Layout";
-	var currentTime = TimeZoneHelper.ToUkTime(DateTime.UtcNow);
+    if (Model.SectionName != null)
+    {
+        ViewData["Title"] = $"{Model.SectionName} - print view";
+    }
+    else
+    {
+        var routeData = Context.GetRouteData();
+        ViewData["Title"] = routeData.GetTitleForPage();
+    }
 }
 
 @section BeforeContent {
