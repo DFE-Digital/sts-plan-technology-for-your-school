@@ -136,7 +136,7 @@ public class GroupsViewBuilderTests
                new SqlEstablishmentLinkDto { Id = 1, EstablishmentName = "School A", InProgressOrCompletedRecommendationsCount = 2 },
                new SqlEstablishmentLinkDto { Id = 2, EstablishmentName = "School B", InProgressOrCompletedRecommendationsCount = 1 },
            });
-        
+
         var sut = CreateServiceUnderTest(contentful: contentful, est: est);
         var controller = new TestController();
 
