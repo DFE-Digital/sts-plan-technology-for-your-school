@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Core.Extensions;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
