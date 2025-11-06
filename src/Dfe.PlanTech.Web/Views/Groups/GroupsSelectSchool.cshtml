@@ -24,11 +24,12 @@
             {
                 var schoolUrn = school.Urn;
                 var schoolName = school.EstablishmentName;
+                
                 <form asp-action="SelectSchool" method="post">
                     <button type="submit" class="govuk-button school-button govuk-!-text-align-left" value="@schoolUrn">@schoolName</button>
                     <input type="hidden" name="schoolUrn" value="@schoolUrn" />
                     <input type="hidden" name="schoolName" value="@schoolName" />
-                    <p>@school.CompletedSectionsCount out of @Model.TotalSections assessments completed</p>
+                    <p>@school.InProgressOrCompletedRecommendationsCount out of @Model.TotalRecommendations recommendations completed or in progress</p>
                 </form>
             }
         }
