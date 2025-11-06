@@ -254,9 +254,7 @@ public class CurrentUser : ICurrentUser
         try
         {
             // Get all schools in the user's group
-            var groupSchools = await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(
-                [],
-                UserOrganisationId.Value);
+            var groupSchools = await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(UserOrganisationId.Value);
 
             var selectedSchoolIsValid = groupSchools.Any(s => s.Urn.Equals(urn, StringComparison.OrdinalIgnoreCase));
 

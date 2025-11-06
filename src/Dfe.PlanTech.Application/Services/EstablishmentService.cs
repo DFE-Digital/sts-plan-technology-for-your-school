@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
@@ -27,7 +26,7 @@ public class EstablishmentService(
         return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(establishmentReference);
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(IEnumerable<QuestionnaireSectionEntry> sections, int establishmentId)
+    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(int establishmentId)
     {
         var schools = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
         var schoolUrns = schools.Select(s => s.Urn);

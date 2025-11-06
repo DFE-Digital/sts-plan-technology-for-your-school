@@ -42,7 +42,7 @@ public class GroupsViewBuilder(
         var allRecommendations = sections.SelectMany(section => section.CoreRecommendations);
         string totalRecommendations = allRecommendations.Count().ToString();
 
-        var groupSchools = await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(sections, establishmentId);
+        var groupSchools = await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(establishmentId);
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 

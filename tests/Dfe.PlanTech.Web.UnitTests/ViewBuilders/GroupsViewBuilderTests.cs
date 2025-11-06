@@ -28,14 +28,12 @@ public class GroupsViewBuilderTests
         IOptions<ContactOptionsConfiguration>? contactOpts = null,
         IContentfulService? contentful = null,
         IEstablishmentService? est = null,
-        ISubmissionService? sub = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null)
     {
         contactOpts ??= Opt();
         contentful ??= Substitute.For<IContentfulService>();
         est ??= Substitute.For<IEstablishmentService>();
-        sub ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
@@ -84,7 +82,6 @@ public class GroupsViewBuilderTests
     {
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
-        var sub = Substitute.For<ISubmissionService>();
         var current = Substitute.For<ICurrentUser>();
 
         Assert.Throws<ArgumentNullException>(() =>
@@ -97,7 +94,6 @@ public class GroupsViewBuilderTests
         var opts = Opt();
         var contentful = Substitute.For<IContentfulService>();
         var current = Substitute.For<ICurrentUser>();
-        var sub = Substitute.For<ISubmissionService>();
         var est = Substitute.For<IEstablishmentService>();
 
         Assert.Throws<ArgumentNullException>(() =>
@@ -134,8 +130,7 @@ public class GroupsViewBuilderTests
                   .Returns(new NavigationLinkEntry { Href = "/contact-us" });
 
         var est = Substitute.For<IEstablishmentService>();
-        est.GetEstablishmentLinksWithRecommendationCounts(
-               Arg.Any<IEnumerable<QuestionnaireSectionEntry>>(), 100)
+        est.GetEstablishmentLinksWithRecommendationCounts(100)
            .Returns(new List<SqlEstablishmentLinkDto>
            {
                new SqlEstablishmentLinkDto { Id = 1, EstablishmentName = "School A", InProgressOrCompletedRecommendationsCount = 2 },
@@ -164,8 +159,7 @@ public class GroupsViewBuilderTests
         Assert.Equal(2, vm.GroupEstablishments.Count);
         await contentful.Received(1).GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug);
         await contentful.Received(1).GetLinkByIdAsync("contact-123");
-        await est.Received(1).GetEstablishmentLinksWithRecommendationCounts(
-            Arg.Is<IEnumerable<QuestionnaireSectionEntry>>(e => e.Count() == 2), 100);
+        await est.Received(1).GetEstablishmentLinksWithRecommendationCounts(100);
     }
 
     // --- RecordGroupSelectionAsync -----------------------------------------
