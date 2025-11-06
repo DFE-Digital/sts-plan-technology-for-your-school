@@ -165,6 +165,50 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
+    public async Task StoredProcedureRepository_SubmitResponse_WhenFirstResponseForSection_ThenSubmissionCreatedWithInProgressStatus()
+    {
+        // Arrange
+        var user = new UserEntity { DfeSignInRef = "first-response-user" };
+        var establishment = new EstablishmentEntity { EstablishmentRef = "FIRST001", OrgName = "First Response School", GroupUid = null };
+        var question = new QuestionEntity { QuestionText = "First Response Question", ContentfulRef = "FRQ1" };
+        var answer = new AnswerEntity { AnswerText = "First Response Answer", ContentfulRef = "FRA1" };
+        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
+        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+
+        DbContext.Users.Add(user);
+        DbContext.Establishments.Add(establishment);
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+        await DbContext.SaveChangesAsync();
+
+        var submitAnswerModel = new SubmitAnswerModel
+        {
+            SectionId = "first-response-section",
+            SectionName = "First Response Section",
+            Question = questionModel,
+            ChosenAnswer = answerModel
+        };
+
+        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
+
+        // Act - Submit the first response for this section
+        var responseId = await _repository.SubmitResponse(assessmentResponse);
+
+        // Assert
+        Assert.True(responseId > 0, "Response ID should be returned from stored procedure");
+
+        // Clear EF cache to force fresh database query after stored procedure execution
+        DbContext.ChangeTracker.Clear();
+
+        // Verify the submission was created and is marked as InProgress
+        var savedResponse = await DbContext.Responses.AsNoTracking().Include(r => r.Submission).FirstOrDefaultAsync(r => r.Id == responseId);
+        Assert.NotNull(savedResponse);
+        Assert.NotNull(savedResponse!.Submission);
+        Assert.Equal("InProgress", savedResponse.Submission!.Status);
+        Assert.False(savedResponse.Submission.Completed, "Submission should not be marked as completed for first response");
+    }
+
+    [Fact]
     public async Task StoredProcedureRepository_SetMaturityForSubmissionAsync_WhenCalledWithValidSubmissionId_ThenExecutesWithoutError()
     {
         // Arrange
