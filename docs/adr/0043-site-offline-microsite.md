@@ -210,25 +210,57 @@ Tests follow naming convention: `Subject_ContextAndOrScenario_Outcome`
 - Adds complexity to deployment pipeline but improves safety
 - Requires team understanding of when microsite is active vs inactive
 
+### Message Customisation
+
+The microsite supports configurable maintenance messages via environment variables, enabling flexibility in the message displayed without requiring redeployment:
+
+**Configuration Options:**
+1. **Default Generic Message** (no configuration required)
+   - Displays generic "service temporarily unavailable" messaging
+   - Suitable when specific timing is unknown or maintenance is brief
+   - Example:
+     ```
+     You'll be able to use the service later.
+
+     The service is temporarily unavailable for scheduled maintenance.
+     This normally lasts only a few minutes. Please check back later.
+     ```
+
+2. **Custom Messages** (via environment variables)
+   - Configure `Maintenance__MessageParagraphs__*` array in Azure Container Apps
+   - Each array element becomes a separate paragraph
+   - Enables specific timing and context without code changes
+   - Example configuration:
+     ```
+     Maintenance__MessageParagraphs__0 = "The service will be unavailable from 5pm on Monday 4th November."
+     Maintenance__MessageParagraphs__1 = "You will be able to use the service from 9am on Tuesday 5th November."
+     ```
+
+**Rationale for Configuration-Based Approach:**
+
+This design addresses the scenario of updating the message mid-deployment (e.g. what if it is taking longer than expected/planned?).
+
+- If database migrations take longer than planned, messages can be updated mid-maintenance
+- If issues arise requiring extended downtime, revised timing can be communicated immediately
+- No need to rebuild/redeploy container just to change user-facing text
+- Different environments (dev/test/production) can have environment-specific messaging
+- Maintenance windows can be communicated accurately based on actual progress
+- Default fallback ensures users always see appropriate messaging
+
+**Implementation Details:**
+- Configuration bound via `IOptions<MaintenanceConfiguration>` pattern
+- View renders paragraphs from `MessageParagraphs` list or falls back to defaults
+- No code changes required to modify messaging
+- See `src/Dfe.PlanTech.Web.SiteOfflineMicrosite/Configuration/MaintenanceConfiguration.cs` for structure
+
+
 ## Future Considerations
 
-1. **Dynamic Maintenance Messaging**
-   - Consider configuration-driven messages (maintenance window times)
-   - Could read from environment variables or configuration file
-
-2. **Monitoring Integration**
+1. **Monitoring Integration**
    - Integrate health endpoint with application monitoring
    - Alert on unexpected maintenance mode activation
 
 3. **Azure Front Door Configuration**
    - If/when AFD configuration changes are re-enabled, evaluate whether traffic routing could be simplified
    - Current microsite approach remains valid regardless
-
-## References
-
-- GitHub Actions Environments: https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment
-- HTTP 503 Status Code: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/503
-- Retry-After Header: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Retry-After
-- OWASP Secure Headers Project: https://owasp.org/www-project-secure-headers/
-- GovUK Frontend AspNetCore: https://github.com/gunndabad/govuk-frontend-aspnetcore
 

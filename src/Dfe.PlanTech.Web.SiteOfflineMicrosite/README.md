@@ -1,4 +1,4 @@
-﻿# Site Offline Microsite
+﻿**# Site Offline Microsite
 
 A lightweight maintenance page microsite for Plan Technology for Your School.
 
@@ -49,14 +49,26 @@ The microsite is automatically built and deployed as part of the standard deploy
 - Deployed first to show maintenance message
 - Overwritten by the actual application once deployment completes
 
-## Customization
+## Customisation
 
-To customize the maintenance message, edit the HTML in `Program.cs` within the `GetMaintenanceHtml()` method.
+The maintenance message can be customised via environment variables without requiring a full redeployment. This is particularly useful during deployments when you need to update timing information or provide specific details about the maintenance window.
 
-## Technical Details
+### Configuration
 
-- **Framework**: ASP.NET Core 9.0 (minimal API)
-- **Port**: 8080
-- **Health Check**: `/health` endpoint for container health monitoring
-- **User**: Runs as non-root user `dotnet` in container
+Set the `Maintenance__MessageParagraphs__*` environment variables with an array of strings. Each string will be displayed as a separate paragraph on the maintenance page.
+
+**Example configuration:**
+
+```bash
+Maintenance__MessageParagraphs__0="The service will be unavailable from 5pm on Monday 4th November."
+Maintenance__MessageParagraphs__1="You will be able to use the service from 9am on Tuesday 5th November."
+```
+
+**Default behaviour:**
+
+If no custom messages are configured, a generic maintenance message is displayed:
+
+> You'll be able to use the service later.
+>
+> The service is temporarily unavailable for scheduled maintenance. This normally lasts only a few minutes. Please check back later.
 
