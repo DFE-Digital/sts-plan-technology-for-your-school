@@ -5,6 +5,18 @@
 	var schoolName = await CurrentUser.GetActiveEstablishmentNameAsync();
 }
 
+@{
+    if (Model.Category.Header.Text != null)
+    {
+        ViewData["Title"] = $"{Model.Category.Header.Text} standard - print view";
+    }
+    else
+    {
+        var routeData = Context.GetRouteData();
+        ViewData["Title"] = routeData.GetTitleForPage();
+    }
+}
+
 @section BeforeContent {
     @{
         await Html.RenderPartialAsync("BackButton");

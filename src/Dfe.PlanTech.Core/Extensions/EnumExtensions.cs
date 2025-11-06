@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Dfe.PlanTech.Core.Attributes;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Core.Extensions;
@@ -34,5 +35,10 @@ public static class EnumExtensions
         var attribute = member.GetCustomAttribute<CssClassAttribute>();
 
         return attribute?.ClassName ?? defaultValue;
+    }
+
+    public static string GetCssClass(this RecommendationStatus value)
+    {
+        return GetCssClassOrDefault(value, RecommendationConstants.DefaultTagClass);
     }
 }
