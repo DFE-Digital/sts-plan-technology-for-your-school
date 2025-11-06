@@ -68,7 +68,8 @@ public class RecommendationsViewBuilderTests
                     CompletingAnswers = new List<QuestionnaireAnswerEntry>
                     {
                         new() { Sys = new SystemDetails("C1") }
-                    }
+                    },
+                    Slug = "first-chunk-1"
                 },
                 new()
                 {
@@ -77,7 +78,8 @@ public class RecommendationsViewBuilderTests
                     CompletingAnswers = new List<QuestionnaireAnswerEntry>
                     {
                         new() { Sys = new SystemDetails("C2") }
-                    }
+                    },
+                    Slug = "second-chunk-2"
                 },
                 new()
                 {
@@ -86,7 +88,8 @@ public class RecommendationsViewBuilderTests
                     CompletingAnswers = new List<QuestionnaireAnswerEntry>
                     {
                         new() { Sys = new SystemDetails("C3") }
-                    }
+                    },
+                    Slug = "third-chunk-3"
                 }
             }
         };
@@ -141,7 +144,7 @@ public class RecommendationsViewBuilderTests
             .Returns(currentRecommendationStatus);
 
         // Act (choose middle chunk to test prev/next both populated)
-        var result = await sut.RouteToSingleRecommendation(ctl, categorySlug, "sec-1", "second-chunk", useChecklist: false);
+        var result = await sut.RouteToSingleRecommendation(ctl, categorySlug, "sec-1", "second-chunk-2", useChecklist: false);
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
@@ -152,13 +155,13 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("cat-a", vm.CategorySlug);
         Assert.Equal("sec-1", vm.SectionSlug);
         Assert.Equal(3, vm.Chunks.Count);
-        Assert.Equal("second-chunk", vm.CurrentChunk.Slug);
+        Assert.Equal("second-chunk-2", vm.CurrentChunk.Slug);
         Assert.Equal(2, vm.CurrentChunkPosition);
         Assert.Equal(3, vm.TotalChunks);
         Assert.NotNull(vm.PreviousChunk);
         Assert.NotNull(vm.NextChunk);
-        Assert.Equal("first-chunk", vm.PreviousChunk!.Slug);
-        Assert.Equal("third-chunk", vm.NextChunk!.Slug);
+        Assert.Equal("first-chunk-1", vm.PreviousChunk!.Slug);
+        Assert.Equal("third-chunk-3", vm.NextChunk!.Slug);
 
         Assert.Equal("Completed", vm.SelectedStatusKey);
         Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
