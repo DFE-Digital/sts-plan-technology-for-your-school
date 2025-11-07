@@ -253,7 +253,6 @@ public class SubmissionWorkflowTests
         // activeEstablishmentId = 8, userEstablishmentId = 7 (simulating MAT user selecting a school)
         var id = await sut.SubmitAnswer(9, 8, 7, model);
 
-        // TODO/FIXME: We're asserting that the mock returns the value the mock was configured to return...?
         Assert.Equal(777, id);
     }
 
