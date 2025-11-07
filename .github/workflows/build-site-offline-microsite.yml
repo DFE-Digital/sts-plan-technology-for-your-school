@@ -1,4 +1,4 @@
-name: Build Image and Publish to GCR
+﻿name: Build Site Offline Microsite Image
 
 on:
   workflow_call:
@@ -15,14 +15,14 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DOCKER_IMAGE: plan-technology-for-your-school
+  DOCKER_IMAGE: plan-technology-site-offline
   GITHUB_CONTAINER_REGISTRY: ghcr.io
   ORG_NAME: dfe-digital
 
 jobs:
-  build-image:
+  build-site-offline-image:
     runs-on: ubuntu-22.04
-    name: Build & Publish Image
+    name: Build & Publish Site Offline Microsite Image
 
     steps:
       - name: Checkout Repository
@@ -41,8 +41,9 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./
-          file: ./src/Dfe.PlanTech.Web/Dockerfile
+          file: ./src/Dfe.PlanTech.Web.SiteOfflineMicrosite/Dockerfile
           build-args: COMMIT_SHA=${{ inputs.checked-out-sha }}
           tags: |
             ${{ env.GITHUB_CONTAINER_REGISTRY }}/${{ env.ORG_NAME }}/${{ env.DOCKER_IMAGE }}:${{ inputs.branch }}-${{ inputs.checked-out-sha }}
           push: true
+

@@ -18,5 +18,5 @@ public interface ISubmissionService
     Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission);
     Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section);
     Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId);
-    Task<int> SubmitAnswerAsync(int userId, int establishmentId, int? matEstablishmentId, SubmitAnswerModel answerModel);
+    Task<int> SubmitAnswerAsync(int userId, int activeEstablishmentId, int userEstablishmentId, SubmitAnswerModel answerModel);
 }

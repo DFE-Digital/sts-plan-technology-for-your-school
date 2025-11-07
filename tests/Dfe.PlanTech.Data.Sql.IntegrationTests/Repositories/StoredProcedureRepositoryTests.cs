@@ -153,7 +153,8 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             ChosenAnswer = answerModel
         };
 
-        var response = new AssessmentResponseModel(user.Id, establishment.Id, null, submitAnswerModel);
+        // When user is logged in directly as a school (not MAT), both IDs are the same
+        var response = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
 
         var result = await _repository.SubmitResponse(response);
         Assert.True(result > 0);
@@ -162,6 +163,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         var savedResponse = await DbContext.Responses.FirstOrDefaultAsync(r => r.Id == result);
         Assert.NotNull(savedResponse);
         Assert.Equal(user.Id, savedResponse!.UserId);
+        Assert.Equal(establishment.Id, savedResponse.UserEstablishmentId);
     }
 
     [Fact]
@@ -207,6 +209,139 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal("InProgress", savedResponse.Submission!.Status);
         Assert.False(savedResponse.Submission.Completed, "Submission should not be marked as completed for first response");
     }
+
+    [Fact]
+    public async Task StoredProcedureRepository_SubmitResponse_WhenUserAndActiveEstablishmentDiffer_ThenUsesCorrectEstablishmentId()
+    {
+        // Arrange - A group user submitting a response for an establishment different from their own
+        var schoolUser = new UserEntity { DfeSignInRef = "school-user" };
+        var activeSchoolEstablishment = new EstablishmentEntity { EstablishmentRef = "USER003", OrgName = "Group Establishment" };
+
+        var groupUser = new UserEntity { DfeSignInRef = "group-user" };
+        var groupEstablishment = new EstablishmentEntity { EstablishmentRef = "USER002", OrgName = "User Establishment" };
+
+        var question = new QuestionEntity { QuestionText = "Estab Diff Question", ContentfulRef = "EDQ1" };
+        var answer = new AnswerEntity { AnswerText = "Estab Diff Answer", ContentfulRef = "EDA1" };
+        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
+        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+
+        DbContext.Users.AddRange(groupUser, schoolUser);
+        DbContext.Establishments.AddRange(groupEstablishment, activeSchoolEstablishment);
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+        await DbContext.SaveChangesAsync();
+
+        var submitAnswerModel = new SubmitAnswerModel
+        {
+            SectionId = "estab-diff-section",
+            SectionName = "Estab Diff Section",
+            Question = questionModel,
+            ChosenAnswer = answerModel
+        };
+        var assessmentResponse = new AssessmentResponseModel(groupUser.Id, activeSchoolEstablishment.Id, groupEstablishment.Id, submitAnswerModel);
+
+        // Act - Create a new "submission" by submitting a first response
+        var responseId = await _repository.SubmitResponse(assessmentResponse);
+
+        // Assert
+        // The submission created by submitting a response should be linked to the active establishment, not the user's establishment
+        Assert.Equal(1, await DbContext.Submissions.CountAsync());
+        var savedSubmission = await DbContext.Submissions.FirstOrDefaultAsync();
+        Assert.NotNull(savedSubmission);
+        Assert.Equal(activeSchoolEstablishment.Id, savedSubmission.EstablishmentId);
+        Assert.NotEqual(groupEstablishment.Id, savedSubmission.EstablishmentId);
+    }
+
+    [Fact]
+    public async Task StoredProcedureRepository_SubmitResponse_WhenMultipleUsersSubmitResponses_ThenSubmissionEstablishmentIdStaysStatic()
+    {
+        // Arrange - A group user submitting a response for an establishment different from their own
+        var schoolUser = new UserEntity { DfeSignInRef = "school-user" };
+        var activeSchoolEstablishment = new EstablishmentEntity { EstablishmentRef = "USER003", OrgName = "Group Establishment" };
+
+        var groupUser = new UserEntity { DfeSignInRef = "group-user" };
+        var groupEstablishment = new EstablishmentEntity { EstablishmentRef = "USER002", OrgName = "User Establishment" };
+
+        var question = new QuestionEntity { QuestionText = "Estab Diff Question", ContentfulRef = "EDQ1" };
+        var answer = new AnswerEntity { AnswerText = "Estab Diff Answer", ContentfulRef = "EDA1" };
+        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
+        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+
+        DbContext.Users.AddRange(groupUser, schoolUser);
+        DbContext.Establishments.AddRange(groupEstablishment, activeSchoolEstablishment);
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+        await DbContext.SaveChangesAsync();
+
+
+        // Act & Assert (1) - Group user submits first response (creating the "submission"),
+        // the "response" establishment ID is the active establishment ID
+        var submitAnswerModel1 = new SubmitAnswerModel
+        {
+            SectionId = "estab-diff-section",
+            SectionName = "Estab Diff Section",
+            Question = questionModel,
+            ChosenAnswer = answerModel
+        };
+        var assessmentResponse1 = new AssessmentResponseModel(groupUser.Id, activeSchoolEstablishment.Id, groupEstablishment.Id, submitAnswerModel1);
+        _ = await _repository.SubmitResponse(assessmentResponse1);
+
+        Assert.Equal(1, await DbContext.Responses.CountAsync());
+
+        // The submission created by submitting a response should be linked to the active establishment, not the user's establishment
+        Assert.Equal(1, await DbContext.Submissions.CountAsync());
+        var savedSubmission = await DbContext.Submissions.FirstOrDefaultAsync();
+        Assert.NotNull(savedSubmission);
+        Assert.Equal(activeSchoolEstablishment.Id, savedSubmission.EstablishmentId);
+        Assert.NotEqual(groupEstablishment.Id, savedSubmission.EstablishmentId);
+
+        // Act & Assert (2) - Now school user submits a response to the same section,
+        // response establishment remains as the active school establishment's ID
+        var submitAnswerModel2 = new SubmitAnswerModel
+        {
+            SectionId = "estab-diff-section",
+            SectionName = "Estab Diff Section",
+            Question = questionModel,
+            ChosenAnswer = answerModel
+        };
+        var assessmentResponse2 = new AssessmentResponseModel(schoolUser.Id, activeSchoolEstablishment.Id, activeSchoolEstablishment.Id, submitAnswerModel2);
+        _ = await _repository.SubmitResponse(assessmentResponse2);
+
+        Assert.Equal(2, await DbContext.Responses.CountAsync());
+
+        // The previous submission should be re-used/continued
+        // The establishment ID should remain linked to the school and not the group user's establishment
+        Assert.Equal(1, await DbContext.Submissions.CountAsync());
+        var savedSubmission2 = await DbContext.Submissions.FirstOrDefaultAsync();
+        Assert.NotNull(savedSubmission2);
+        Assert.Equal(savedSubmission.Id, savedSubmission2.Id);
+        Assert.Equal(activeSchoolEstablishment.Id, savedSubmission2.EstablishmentId);
+        Assert.NotEqual(groupEstablishment.Id, savedSubmission2.EstablishmentId);
+
+        // Act & Assert (3) - Group user submits another response to the same section,
+        // response establishment remains as the active school establishment's ID
+        var submitAnswerModel3 = new SubmitAnswerModel
+        {
+            SectionId = "estab-diff-section",
+            SectionName = "Estab Diff Section",
+            Question = questionModel,
+            ChosenAnswer = answerModel
+        };
+        var assessmentResponse3 = new AssessmentResponseModel(groupUser.Id, activeSchoolEstablishment.Id, groupEstablishment.Id, submitAnswerModel3);
+        _ = await _repository.SubmitResponse(assessmentResponse3);
+
+        Assert.Equal(3, await DbContext.Responses.CountAsync());
+
+        // The previous submission should be re-used/continued
+        // The establishment ID should remain linked to the school and not the group user's establishment
+        Assert.Equal(1, await DbContext.Submissions.CountAsync());
+        var savedSubmission3 = await DbContext.Submissions.FirstOrDefaultAsync();
+        Assert.NotNull(savedSubmission3);
+        Assert.Equal(savedSubmission.Id, savedSubmission3.Id);
+        Assert.Equal(activeSchoolEstablishment.Id, savedSubmission3.EstablishmentId);
+        Assert.NotEqual(groupEstablishment.Id, savedSubmission3.EstablishmentId);
+    }
+
 
     [Fact]
     public async Task StoredProcedureRepository_SetMaturityForSubmissionAsync_WhenCalledWithValidSubmissionId_ThenExecutesWithoutError()
