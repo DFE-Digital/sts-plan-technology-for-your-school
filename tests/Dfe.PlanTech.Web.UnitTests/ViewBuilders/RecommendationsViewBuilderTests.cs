@@ -68,7 +68,8 @@ public class RecommendationsViewBuilderTests
                     CompletingAnswers = new List<QuestionnaireAnswerEntry>
                     {
                         new() { Sys = new SystemDetails("C1") }
-                    }
+                    },
+                    Slug = "first-chunk-1"
                 },
                 new()
                 {
@@ -77,7 +78,8 @@ public class RecommendationsViewBuilderTests
                     CompletingAnswers = new List<QuestionnaireAnswerEntry>
                     {
                         new() { Sys = new SystemDetails("C2") }
-                    }
+                    },
+                    Slug = "second-chunk-2"
                 },
                 new()
                 {
@@ -86,7 +88,8 @@ public class RecommendationsViewBuilderTests
                     CompletingAnswers = new List<QuestionnaireAnswerEntry>
                     {
                         new() { Sys = new SystemDetails("C3") }
-                    }
+                    },
+                    Slug = "third-chunk-3"
                 }
             }
         };
@@ -141,7 +144,7 @@ public class RecommendationsViewBuilderTests
             .Returns(currentRecommendationStatus);
 
         // Act (choose middle chunk to test prev/next both populated)
-        var result = await sut.RouteToSingleRecommendation(ctl, categorySlug, "sec-1", "second-chunk", useChecklist: false);
+        var result = await sut.RouteToSingleRecommendation(ctl, categorySlug, "sec-1", "second-chunk-2", useChecklist: false);
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
@@ -152,13 +155,13 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("cat-a", vm.CategorySlug);
         Assert.Equal("sec-1", vm.SectionSlug);
         Assert.Equal(3, vm.Chunks.Count);
-        Assert.Equal("second-chunk", vm.CurrentChunk.SlugifiedLinkText);
+        Assert.Equal("second-chunk-2", vm.CurrentChunk.Slug);
         Assert.Equal(2, vm.CurrentChunkPosition);
         Assert.Equal(3, vm.TotalChunks);
         Assert.NotNull(vm.PreviousChunk);
         Assert.NotNull(vm.NextChunk);
-        Assert.Equal("first-chunk", vm.PreviousChunk!.SlugifiedLinkText);
-        Assert.Equal("third-chunk", vm.NextChunk!.SlugifiedLinkText);
+        Assert.Equal("first-chunk-1", vm.PreviousChunk!.Slug);
+        Assert.Equal("third-chunk-3", vm.NextChunk!.Slug);
 
         Assert.Equal("Completed", vm.SelectedStatusKey);
         Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
@@ -280,15 +283,37 @@ public class RecommendationsViewBuilderTests
         _contentful.GetCategoryBySlugAsync("connectivity").Returns(category);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        // Submission completed; include completion date and responses
         var routing = MakeRouting(
             SubmissionStatus.CompleteReviewed,
             section,
             "nextQuestionSlug",
             completed: new DateTime(2024, 1, 2),
             "C1", "C2");
-
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+
+        _recommendationService
+            .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
+            .Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+            {
+                ["C1"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 1,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "InProgress"
+                },
+                ["C2"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 2,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "Complete"
+                },
+                ["C3"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 3,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "NotStarted"
+                }
+            });
 
         // Act (useChecklist=false -> "Recommendations"; true -> "RecommendationsChecklist")
         var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: false);
@@ -303,9 +328,9 @@ public class RecommendationsViewBuilderTests
         Assert.Equal(3, vm.Chunks.Count);
         Assert.NotNull(routing.Submission);
         Assert.Equal(routing.Submission.Responses, vm.SubmissionResponses);
-        // Formatted date check (accept either exact DateHelper format or non-null)
         Assert.NotNull(vm.LatestCompletionDate);
     }
+
 
     [Fact]
     public async Task RouteBySectionAndRecommendation_CompleteReviewed_Renders_Checklist_When_Requested()
@@ -324,13 +349,114 @@ public class RecommendationsViewBuilderTests
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: "C1");
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
 
+        _recommendationService
+            .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
+            .Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+            {
+                ["C1"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 1,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "InProgress"
+                },
+                ["C2"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 2,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "InProgress"
+                },
+                ["C3"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 3,
+                    DateCreated = DateTime.UtcNow,
+                    NewStatus = "InProgress"
+                }
+            });
+
         // Act
         var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: true);
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("RecommendationsChecklist", view.ViewName);
+        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
+        Assert.Equal(3, vm.Chunks.Count);
     }
+
+
+    [Fact]
+    public async Task RouteBySectionAndRecommendation_WithCurrentCount_Renders_Single_Recommendation()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var ctl = MakeController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
+
+        var categorySlug = "connectivity";
+        var sectionSlug = "sec-1";
+        var category = MakeCategory("Connectivity");
+        var section = MakeSection("S1", sectionSlug);
+
+        _contentful.GetCategoryBySlugAsync(categorySlug).Returns(category);
+        _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        var routing = MakeRouting(
+            SubmissionStatus.CompleteReviewed,
+            section,
+            answerSysIds: new[] { "C1", "C2", "C3" });
+        _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+
+        _recommendationService
+            .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
+            .Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+            {
+                ["C1"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 1,
+                    DateCreated = DateTime.UtcNow.AddDays(-1),
+                    NewStatus = "Completed"
+                },
+                ["C2"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 2,
+                    DateCreated = DateTime.UtcNow.AddDays(-2),
+                    NewStatus = "Completed"
+                },
+                ["C3"] = new SqlEstablishmentRecommendationHistoryDto
+                {
+                    RecommendationId = 3,
+                    DateCreated = DateTime.UtcNow.AddDays(-3),
+                    NewStatus = "Completed"
+                }
+            });
+
+        // Act
+        var result = await sut.RouteBySectionAndRecommendation(
+            ctl,
+            categorySlug,
+            sectionSlug,
+            useChecklist: false,
+            currentRecommendationCount: 2);
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("Recommendations", view.ViewName);
+
+        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
+
+        Assert.Single(vm.Chunks);
+        Assert.Equal("Second Chunk", vm.Chunks[0].Header);
+
+        Assert.Equal(2, vm.CurrentChunkCount);
+        Assert.Equal(3, vm.TotalChunks);
+
+        Assert.Equal("Connectivity", vm.CategoryName);
+        Assert.Equal(sectionSlug, vm.SectionSlug);
+        Assert.Equal(routing.Submission.Responses, vm.SubmissionResponses);
+    }
+
+
 
     // ---------- Support ----------
 

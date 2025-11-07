@@ -3,6 +3,7 @@
 @{
 	string statusText;
 
+    var description = Model.Section.ShortDescription;
 	var topic = Model.Section;
 	var topicName = topic.Name.ToLower().Trim();
 
@@ -21,6 +22,9 @@
 
 	if (Model.Context == "Sections")
 	{
+        <p>
+            @description
+        </p>
 		<p>
 			@statusText
 		</p>
