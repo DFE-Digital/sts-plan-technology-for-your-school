@@ -1,6 +1,9 @@
 @model RecommendationsViewModel
+@inject ICurrentUser CurrentUser
 
 @{
+    var schoolName = await CurrentUser.GetActiveEstablishmentNameAsync();
+
     if (Model.CategoryName != null)
     {
         ViewData["Title"] = $"{Model.CategoryName} - print view";
@@ -9,7 +12,7 @@
 
 @{
     <div>
-        <span class="govuk-caption-xl">How to meet the standard</span>
+        <span class="govuk-caption-xl">@schoolName</span>
         <h1 class="govuk-heading-xl govuk-!-margin-bottom-8">
             @Model.CategoryName
         </h1>
