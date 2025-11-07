@@ -54,8 +54,6 @@ public class SubmissionWorkflow(
         }
 
         latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses, section).ToList();
-
-        var lastResponseInUserJourney = latestSubmission.Responses.LastOrDefault();
         return latestSubmission.AsDto();
     }
 
