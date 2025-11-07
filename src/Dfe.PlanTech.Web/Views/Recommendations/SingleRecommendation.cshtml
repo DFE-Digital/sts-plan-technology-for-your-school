@@ -30,10 +30,13 @@
                     <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
                     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
                     <p class="govuk-body-s">
-                        <a class="govuk-link" href="/@categorySlug/@sectionSlug/change-answers">View or update your self-assessment for @Model.Section.Name.ToLower()</a>
+                        <a class="govuk-link" href="print/@Model.CurrentChunkPosition">
+                            Print this recommendation
+                        </a>
                     </p>
+
                     <p class="govuk-body-s">
-                        <a class="govuk-link" href="print">Print all recommendations for @Model.Section.Name.ToLower()</a>
+                        <a class="govuk-link" href="print">Print your school's @Model.Section.Name.ToLower() recommendations</a>
                     </p>
                 </div>
                 <div class="govuk-grid-column-two-thirds">

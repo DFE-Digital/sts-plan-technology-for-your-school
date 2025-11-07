@@ -43,13 +43,14 @@ public class RecommendationsController(
         return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
     }
 
-    [HttpGet("{categorySlug}/{sectionSlug}/recommendations/print", Name = "GetRecommendationChecklist")]
-    public async Task<IActionResult> GetRecommendationChecklist(string categorySlug, string sectionSlug)
+    [HttpGet("{categorySlug}/{sectionSlug}/recommendations/print/{currentRecommendationCount?}", Name = "GetRecommendationChecklist")]
+    public async Task<IActionResult> GetRecommendationChecklist(string categorySlug, string sectionSlug, int? currentRecommendationCount)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        return await _recommendationsViewBuilder.RouteBySectionAndRecommendation(this, categorySlug, sectionSlug, true);
+        return await _recommendationsViewBuilder.RouteBySectionAndRecommendation(
+            this, categorySlug, sectionSlug, true, currentRecommendationCount);
     }
 
     [HttpPost("{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/update-status")]

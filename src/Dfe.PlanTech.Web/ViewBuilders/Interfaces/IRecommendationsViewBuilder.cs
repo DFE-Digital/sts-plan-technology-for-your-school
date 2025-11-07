@@ -16,6 +16,7 @@ public interface IRecommendationsViewBuilder
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        bool useChecklist
+        bool useChecklist,
+        int? currentRecommendationCount = null
     );
 }
