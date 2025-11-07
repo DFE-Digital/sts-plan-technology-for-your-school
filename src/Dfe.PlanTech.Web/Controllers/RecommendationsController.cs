@@ -91,7 +91,7 @@ public class RecommendationsController(
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
         var recommendationChunks = section.CoreRecommendations.ToList();
 
-        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
+        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
 
         await _recommendationService.UpdateRecommendationStatusAsync(

@@ -24,7 +24,7 @@
     var sectionSlug = Model.SectionSlug;
 
     <div class="recommendation-content">
-        <div class="recommendation-piece-container" id="@recommendation.SlugifiedLinkText">
+        <div class="recommendation-piece-container" id="@recommendation.Slug">
             <div class="govuk-grid-row">
                 <div class="govuk-grid-column-one-third govuk-float-right">
                     <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
@@ -58,7 +58,7 @@
                     }
 
                     @* The error summary is dynamically inserted at the top of the form. We want that at the top of the page. *@
-                    <form method="post" action="/@categorySlug/@sectionSlug/recommendations/@recommendation.SlugifiedLinkText/update-status">
+                    <form method="post" action="/@categorySlug/@sectionSlug/recommendations/@recommendation.Slug/update-status">
 
                         <div class="recommendation-piece-content">
                             <span class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
@@ -135,12 +135,12 @@
                         <govuk-pagination>
                             @if (Model.PreviousChunk != null)
                             {
-                                <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.SlugifiedLinkText" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state"/>
+                                <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state"/>
                             }
 
                             @if (Model.NextChunk != null)
                             {
-                                <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.SlugifiedLinkText" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state"/>
+                                <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state"/>
                             }
                         </govuk-pagination>
                     </div>

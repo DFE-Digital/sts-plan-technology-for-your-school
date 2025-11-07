@@ -127,6 +127,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 Header = sr.HeaderText,
                 LastUpdated = recommendations[sr.Id].DateCreated,
                 Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
+                Slug = sr.Slug
             })
                 .ToList();
 
