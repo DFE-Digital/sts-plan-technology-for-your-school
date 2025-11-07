@@ -28,18 +28,28 @@ public class EstablishmentService(
 
     public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(int establishmentId)
     {
-        var schools = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
-        var schoolUrns = schools.Select(s => s.Urn);
-        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(schoolUrns);
-        var establishmentLinkMap = establishments.ToDictionary(e => e.Id, e => schools.Single(s => s.Urn.Equals(e.EstablishmentRef)));
+        var establishmentLinks = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
 
-        foreach (var school in establishments)
+        var linkUrns = establishmentLinks.Select(s => s.Urn);
+        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(linkUrns);
+
+        var establishmentLinkMap = establishments.ToDictionary(e => e.EstablishmentRef, e => e.Id);
+
+        foreach (var establishmentLink in establishmentLinks)
         {
-            var recommendations = await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(school.Id);
+            if (!establishmentLinkMap.ContainsKey(establishmentLink.Urn))
+            {
+                establishmentLink.InProgressOrCompletedRecommendationsCount = 0;
+                continue;
+            }
 
-            establishmentLinkMap[school.Id].InProgressOrCompletedRecommendationsCount = recommendations.Values.Count(r => r.NewStatus == nameof(RecommendationStatus.Complete).ToString() || r.NewStatus == nameof(RecommendationStatus.InProgress).ToString());
+            var schoolEstablishmentId = establishmentLinkMap[establishmentLink.Urn];
+            var recommendations = await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(schoolEstablishmentId);
+
+            establishmentLink.InProgressOrCompletedRecommendationsCount = recommendations.Values.Count(r => r.NewStatus == nameof(RecommendationStatus.Complete).ToString() || r.NewStatus == nameof(RecommendationStatus.InProgress).ToString());
         }
-        return establishmentLinkMap.Values.ToList();
+
+        return establishmentLinks.ToList();
     }
 
     public async Task RecordGroupSelection(
