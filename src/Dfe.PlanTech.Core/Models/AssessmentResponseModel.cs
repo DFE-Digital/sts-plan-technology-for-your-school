@@ -16,14 +16,14 @@ public class AssessmentResponseModel
 
     public IdWithTextModel? Answer { get; init; }
 
-    public AssessmentResponseModel(int userId, int establishmentId, int? matEstablishmentId, SubmitAnswerModel questionAnswer)
+    public AssessmentResponseModel(int userId, int activeEstablishmentId, int userEstablishmentId, SubmitAnswerModel questionAnswer)
     {
         SectionId = questionAnswer.SectionId;
         SectionName = questionAnswer.SectionName;
         Answer = questionAnswer.ChosenAnswer;
         Question = questionAnswer.Question;
-        EstablishmentId = establishmentId;
+        EstablishmentId = activeEstablishmentId;
         UserId = userId;
-        UserEstablishmentId = matEstablishmentId ?? establishmentId;
+        UserEstablishmentId = userEstablishmentId;
     }
 }

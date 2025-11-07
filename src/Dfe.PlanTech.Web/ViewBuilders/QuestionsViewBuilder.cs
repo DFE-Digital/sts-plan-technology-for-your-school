@@ -264,7 +264,8 @@ public class QuestionsViewBuilder(
     {
         var userId = GetUserIdOrThrowException();
         var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var userOrganisationId = CurrentUser.UserOrganisationId;
+        var userOrganisationId = CurrentUser.UserOrganisationId
+            ?? throw new InvalidOperationException("User organisation ID is null - user needs to be logged in to submit an answer");
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
