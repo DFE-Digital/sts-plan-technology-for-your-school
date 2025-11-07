@@ -6,7 +6,8 @@ on:
     branches: ["main", "development"]
     paths:
       - "src/**"
-      - ".github/workflows/matrix-deploy.yml"
+      - ".github/actions/**"
+      - ".github/workflows/**"
       - ".gitmodules"
 
 jobs:
@@ -16,6 +17,10 @@ jobs:
     outputs:
       branch: ${{ steps.var.outputs.branch }}
       checked-out-sha: ${{ steps.var.outputs.checked-out-sha }}
+      allow-deploy-to-dev: ${{ steps.deployment-flags.outputs.allow-deploy-to-dev }}
+      allow-deploy-to-test: ${{ steps.deployment-flags.outputs.allow-deploy-to-test }}
+      allow-deploy-to-staging: ${{ steps.deployment-flags.outputs.allow-deploy-to-staging }}
+      allow-deploy-to-production: ${{ steps.deployment-flags.outputs.allow-deploy-to-production }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,7 +31,23 @@ jobs:
           GIT_BRANCH=${GITHUB_BASE_REF:-${GITHUB_REF#refs/heads/}}
           CHECKED_OUT_SHA="$(git log -1 '--format=format:%H')"
           echo "branch=$GIT_BRANCH" >> $GITHUB_OUTPUT
-          echo "checked-out-sha=${CHECKED_OUT_SHA}" >> $GITHUB_OUTPUT
+          echo "checked-out-sha=$CHECKED_OUT_SHA" >> $GITHUB_OUTPUT
+
+      - id: deployment-flags
+        shell: pwsh
+        run: |
+          $branch = '${{ steps.var.outputs.branch }}'
+
+          # Deployment matrix: which branches deploy to which environments
+          $deployDev     = $branch -in 'main', 'development'
+          $deployTest    = $branch -in 'main', 'development'
+          $deployStaging = $branch -eq 'main'
+          $deployProd    = $branch -eq 'main'
+
+          "allow-deploy-to-dev=$($deployDev.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          "allow-deploy-to-test=$($deployTest.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          "allow-deploy-to-staging=$($deployStaging.ToString().ToLower())" >> $env:GITHUB_OUTPUT
+          "allow-deploy-to-production=$($deployProd.ToString().ToLower())" >> $env:GITHUB_OUTPUT
 
   create-and-publish-image:
     needs: set-env
@@ -52,30 +73,49 @@ jobs:
     uses: ./.github/workflows/create-tag-release.yml
     secrets: inherit
 
-  deploy-to-dev-and-test:
-    name: Deployment to Dev & Test
+  deploy-to-dev:
+    name: Deployment to Dev
     needs: [
               set-env,
               create-and-publish-image,
-              create-and-publish-site-offline-microsite
+              create-and-publish-site-offline-microsite,
+              create-and-tag-release
             ]
-    if: always()
+    if: needs.set-env.outputs.allow-deploy-to-dev == 'true'
     strategy:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [Dev, Tst]
+        target: [Dev]
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
+      run-e2e-tests: false
+    secrets: inherit
+
+  deploy-to-test:
+    name: Deployment to Test
+    needs: [set-env, deploy-to-dev]
+    if: needs.set-env.outputs.allow-deploy-to-test == 'true'
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        target: [Test]
+    uses: ./.github/workflows/deploy-image.yml
+    with:
+      environment: ${{ matrix.target }}
+      branch: ${{ needs.set-env.outputs.branch }}
+      checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
+      run-e2e-tests: true
     secrets: inherit
 
   generate-subtopic-visualisations:
-    needs: [set-env, deploy-to-dev-and-test]
+    needs: [set-env, deploy-to-test]
     name: Run the visualisation workflow against staging content.
-    if: ${{ needs.set-env.outputs.branch == 'main' }}
+    if: needs.set-env.outputs.allow-deploy-to-staging == 'true'
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -87,15 +127,9 @@ jobs:
     secrets: inherit
 
   deploy-to-staging:
-    needs: [
-              set-env,
-              create-and-publish-image,
-              deploy-to-dev-and-test
-            ]
+    needs: [set-env, deploy-to-test]
     name: Deployment to Staging
-    if: |
-      always() &&
-      needs.set-env.outputs.branch == 'main'
+    if: needs.set-env.outputs.allow-deploy-to-staging == 'true'
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -106,20 +140,13 @@ jobs:
       environment: ${{ matrix.target }}
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
+      run-e2e-tests: true
     secrets: inherit
 
   deploy-to-production:
-    needs:
-      [
-        set-env,
-        create-and-publish-image,
-        deploy-to-dev-and-test,
-        deploy-to-staging
-      ]
+    needs: [set-env, deploy-to-staging]
     name: Deployment to Production
-    if: |
-      always() &&
-      needs.set-env.outputs.branch == 'main'
+    if: needs.set-env.outputs.allow-deploy-to-production == 'true'
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -130,4 +157,5 @@ jobs:
       environment: ${{ matrix.target }}
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
+      run-e2e-tests: false
     secrets: inherit

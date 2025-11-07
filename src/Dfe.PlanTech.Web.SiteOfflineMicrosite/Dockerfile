@@ -19,7 +19,8 @@ COPY --from=node-build /build/wwwroot/ ./wwwroot/
 RUN dotnet publish "Dfe.PlanTech.Web.SiteOfflineMicrosite.csproj" \
     -c Release \
     -o /out/publish \
-    --no-restore
+    --no-restore \
+    -p:SkipNpmBuild=true
 
 FROM base AS final
 WORKDIR /src

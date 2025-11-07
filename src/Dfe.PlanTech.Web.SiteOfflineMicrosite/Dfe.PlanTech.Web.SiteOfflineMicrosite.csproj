@@ -26,12 +26,12 @@
     <NpmSourceFiles Include="src\assets\**\*.scss" />
   </ItemGroup>
 
-  <Target Name="NpmInstall" BeforeTargets="NpmBuild" Condition="!Exists('node_modules')">
+  <Target Name="NpmInstall" BeforeTargets="NpmBuild" Condition="!Exists('node_modules') AND '$(SkipNpmBuild)' != 'true'">
     <Message Importance="high" Text="Running npm install..." />
     <Exec Command="npm install" />
   </Target>
 
-  <Target Name="NpmBuild" BeforeTargets="BeforeBuild" DependsOnTargets="NpmInstall" Inputs="@(NpmSourceFiles)" Outputs="$(NpmBuildStampFile)">
+  <Target Name="NpmBuild" BeforeTargets="BeforeBuild" DependsOnTargets="NpmInstall" Inputs="@(NpmSourceFiles)" Outputs="$(NpmBuildStampFile)" Condition="'$(SkipNpmBuild)' != 'true'">
     <Message Importance="high" Text="Running npm build (source files changed)..." />
     <Exec Command="npm run build" />
     <Touch Files="$(NpmBuildStampFile)" AlwaysCreate="true" />
