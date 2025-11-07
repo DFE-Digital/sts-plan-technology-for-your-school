@@ -1,13 +1,6 @@
 name: Code PR Check
 
 on:
-  push:
-    paths:
-      - "src/**"
-      - "tests/**"
-      - ".github/workflows/code-pr-check.yml"
-      - ".github/actions/build-dotnet-app/action.yml"
-      - ".github/actions/run-unit-tests/action.yml"
   pull_request:
     paths:
       - "src/**"
@@ -69,7 +62,7 @@ jobs:
   build-test-web-app:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
-    if: ${{ always() && ( github.event_name == 'pull_request' && needs.lint-code.result == 'success' ) || ( github.event_name == 'push' && needs.lint-code.result == 'skipped' ) }}
+    if: ${{ always() && needs.lint-code.result == 'success' }}
     needs: [lint-code]
 
     steps:

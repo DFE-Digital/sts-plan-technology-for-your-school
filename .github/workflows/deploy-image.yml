@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  AZ_FRONTDOOR_URL: ${{ inputs.environment == 'staging' && secrets.AZ_FRONTDOOR_URL_STAGING || secrets.AZ_FRONTDOOR_URL }}
+  AZ_FRONTDOOR_URL: ${{ inputs.environment == 'Staging' && secrets.AZ_FRONTDOOR_URL_STAGING || secrets.AZ_FRONTDOOR_URL }}
   ACR_DOCKER_IMAGE: plan-tech-app
   ACR_SITE_OFFLINE_IMAGE: plan-tech-site-offline
   GCR_DOCKER_IMAGE: plan-technology-for-your-school
@@ -213,6 +213,7 @@ jobs:
           azcliversion: 2.73.0
           inlineScript: |
             az redis flush --name ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --yes
+            az redis flush --ids $(az redis list --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --query "[?name=='${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}'].id" -o tsv) --yes
 
   run-e2e-testing:
     permissions:
@@ -220,7 +221,7 @@ jobs:
       contents: read
     runs-on: ubuntu-22.04
     name: Clear Database & Run E2E Tests on ${{ inputs.environment }}
-    if: ${{ inputs.environment == 'tst' || inputs.environment == 'staging' }}
+    if: ${{ inputs.environment == 'Tst' || inputs.environment == 'Staging' }}
     environment: ${{ inputs.environment }}
     needs:
       [upgrade-database, pull-image-from-gcr-and-publish-to-acr, deploy-image, flush-redis-cache]
