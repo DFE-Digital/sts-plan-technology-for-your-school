@@ -72,8 +72,8 @@ public class CategorySectionViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", Completed = true },
-            new SqlSectionStatusDto { SectionId = "S2", Completed = false }
+            new SqlSectionStatusDto { SectionId = "S1", LastCompletionDate = new DateTime() },
+            new SqlSectionStatusDto { SectionId = "S2" }
         };
 
         var submission = Substitute.For<ISubmissionService>();

@@ -171,7 +171,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             ChosenAnswer = answerModel
         };
 
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, null, submitAnswerModel);
+        // When user is logged in directly as a school (not MAT), both IDs are the same
+        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
 
         // Act & Assert - Should execute without parameter type or order errors
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);
@@ -183,6 +184,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         var savedResponse = await DbContext.Responses.FindAsync(responseId);
         Assert.NotNull(savedResponse);
         Assert.Equal(user.Id, savedResponse!.UserId);
+        Assert.Equal(establishment.Id, savedResponse.UserEstablishmentId);
         Assert.Equal(question.Id, savedResponse.QuestionId);
         Assert.Equal(answer.Id, savedResponse.AnswerId);
         Assert.Equal("", savedResponse.Maturity);
@@ -261,7 +263,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             Question = questionModel,
             ChosenAnswer = answerModel
         };
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, null, submitAnswerModel);
+        // When user is logged in directly as a school (not MAT), both IDs are the same
+        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);
         Assert.True(responseId > 0);
 

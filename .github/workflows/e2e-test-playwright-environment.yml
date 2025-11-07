@@ -7,7 +7,7 @@ on:
         description: Which app environment to run against?
         required: true
         type: choice
-        options: ['Dev', 'Tst', 'Staging']
+        options: ['Dev', 'Tst', 'StagingUnprotected']
         default: 'Tst'
   workflow_call:
     inputs:
@@ -163,7 +163,7 @@ jobs:
                   path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/traces/
                   if-no-files-found: ignore
                   compression-level: 1
-                 
+
             - name: Remove Azure firewall rules
               if: always()
               uses: ./.github/actions/azure-ip-whitelist

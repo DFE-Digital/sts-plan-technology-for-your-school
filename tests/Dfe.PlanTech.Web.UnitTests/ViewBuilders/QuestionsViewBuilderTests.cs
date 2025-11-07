@@ -264,6 +264,7 @@ public class QuestionsViewBuilderTests
         controller.ModelState.AddModelError("Answer", "Answer is required");
 
         _currentUser.UserId.Returns(11);
+        _currentUser.UserOrganisationId.Returns(22);
         _currentUser.GetActiveEstablishmentIdAsync().Returns(22);
 
         var q = MakeQuestion("Q1", "q-1", "Question 1");
@@ -298,6 +299,7 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         _currentUser.UserId.Returns(11);
+        _currentUser.UserOrganisationId.Returns(22);
         _currentUser.GetActiveEstablishmentIdAsync().Returns(22);
 
         var q = MakeQuestion("Q1", "q-1", "Question 1");
@@ -312,7 +314,8 @@ public class QuestionsViewBuilderTests
             ChosenAnswerJson = @"{ ""answer"": { ""id"": ""A1"" } }"
         };
 
-        _submissionSvc.SubmitAnswerAsync(11, 22, null, Arg.Any<SubmitAnswerModel>())
+        // User logged in directly as a school, therefore activeEstablishmentId == userEstablishmentId
+        _submissionSvc.SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>())
                       .Returns<Task>(_ => throw new Exception("db down"));
 
         // Act
@@ -334,6 +337,7 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         _currentUser.UserId.Returns(11);
+        _currentUser.UserOrganisationId.Returns(22);
         _currentUser.GetActiveEstablishmentIdAsync().Returns(22);
 
         var q1 = MakeQuestion("Q1", "q-1", "Q1");
@@ -350,7 +354,8 @@ public class QuestionsViewBuilderTests
         };
 
         // Submit works
-        _submissionSvc.SubmitAnswerAsync(11, 22, null, Arg.Any<SubmitAnswerModel>()).Returns(1);
+        // User logged in directly as a school, therefore activeEstablishmentId == userEstablishmentId
+        _submissionSvc.SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>()).Returns(1);
 
         _questionSvc.GetNextUnansweredQuestion(22, section).Returns(q2);
 
@@ -358,7 +363,7 @@ public class QuestionsViewBuilderTests
         var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", returnTo: null);
 
         // Assert
-        await _submissionSvc.Received(1).SubmitAnswerAsync(11, 22, null, Arg.Any<SubmitAnswerModel>());
+        await _submissionSvc.Received(1).SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>());
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
     }

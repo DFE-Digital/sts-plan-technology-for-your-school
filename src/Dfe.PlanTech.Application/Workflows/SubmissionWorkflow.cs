@@ -61,14 +61,14 @@ public class SubmissionWorkflow(
 
     // On the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
     // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
-    public async Task<int> SubmitAnswer(int userId, int establishmentId, int? matEstablishmentId, SubmitAnswerModel answerModel)
+    public async Task<int> SubmitAnswer(int userId, int activeEstablishmentId, int userEstablishmentId, SubmitAnswerModel answerModel)
     {
         if (answerModel is null)
         {
             throw new InvalidDataException($"{nameof(answerModel)} is null");
         }
 
-        var model = new AssessmentResponseModel(userId, establishmentId, matEstablishmentId, answerModel);
+        var model = new AssessmentResponseModel(userId, activeEstablishmentId, userEstablishmentId, answerModel);
         var responseId = await _storedProcedureRepository.SubmitResponse(model);
 
         return responseId;
