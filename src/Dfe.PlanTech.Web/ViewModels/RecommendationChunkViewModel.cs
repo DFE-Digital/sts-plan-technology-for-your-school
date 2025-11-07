@@ -1,12 +1,11 @@
 ﻿using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
-public class RecommendationChunkViewModel : IHeaderWithContent
+public class RecommendationChunkViewModel
 {
     public List<ContentfulEntry> Content { get; set; } = [];
     public string Header { get; init; } = null!;
@@ -17,7 +16,5 @@ public class RecommendationChunkViewModel : IHeaderWithContent
     public string StatusText => Status.GetDisplayName();
     public string StatusTagClass => Status.GetCssClass();
     public string LinkText => HeaderText;
-
-    private string? _slugifiedLinkText;
-    public string SlugifiedLinkText => _slugifiedLinkText ??= LinkText.Slugify();
+    public string Slug { get; set; } = null!;
 }

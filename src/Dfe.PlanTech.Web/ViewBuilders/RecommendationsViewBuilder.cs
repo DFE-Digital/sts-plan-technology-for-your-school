@@ -51,7 +51,7 @@ public class RecommendationsViewBuilder(
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
         var recommendationChunks = section.CoreRecommendations.ToList();
 
-        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.SlugifiedLinkText == chunkSlug)
+        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
 
         var currentRecommendationHistoryStatus = await _recommendationService.GetCurrentRecommendationStatusAsync(
