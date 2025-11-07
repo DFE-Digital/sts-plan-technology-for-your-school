@@ -33,12 +33,11 @@ public class SubmissionService(
         return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
     }
 
-    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByRecommendationIdAsync(
-        IEnumerable<string> recommendationContentfulReferences,
+    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByEstablishmentIdAsync(
         int establishmentId
     )
     {
-        return _recommendationWorkflow.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId);
+        return _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
     }
 
     public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, bool isCompletedSubmission)

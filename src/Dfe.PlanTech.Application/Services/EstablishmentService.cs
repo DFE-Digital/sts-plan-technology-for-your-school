@@ -1,22 +1,19 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
-using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Services;
 
 public class EstablishmentService(
-    ILogger<EstablishmentService> logger,
     IEstablishmentWorkflow establishmentWorkflow,
-    ISubmissionWorkflow submissionWorkflow,
+    IRecommendationWorkflow recommendationWorkflow,
     IUserWorkflow userWorkflow
 ) : IEstablishmentService
 {
-    private readonly ILogger<EstablishmentService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IEstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
-    private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
+    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
     private readonly IUserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
@@ -29,22 +26,30 @@ public class EstablishmentService(
         return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(establishmentReference);
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithSubmissionStatusesAndCounts(IEnumerable<QuestionnaireCategoryEntry> categories, int establishmentId)
+    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(int establishmentId)
     {
-        var schools = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
-        var sectionIds = categories.SelectMany(c => c.Sections.Select(s => s.Id));
+        var establishmentLinks = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
 
-        var schoolUrns = schools.Select(s => s.Urn);
-        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(schoolUrns);
-        var establishmentLinkMap = establishments.ToDictionary(e => e.Id, e => schools.Single(s => s.Urn.Equals(e.EstablishmentRef)));
+        var linkUrns = establishmentLinks.Select(s => s.Urn);
+        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(linkUrns);
 
-        foreach (var establishment in establishments)
+        var establishmentLinkMap = establishments.ToDictionary(e => e.EstablishmentRef, e => e.Id);
+
+        foreach (var establishmentLink in establishmentLinks)
         {
-            var sectionStatuses = await _submissionWorkflow.GetSectionStatusesAsync(establishment.Id, sectionIds);
-            establishmentLinkMap[establishment.Id].CompletedSectionsCount = sectionStatuses.Count(ss => ss.Completed || ss.LastCompletionDate is not null);
+            if (!establishmentLinkMap.ContainsKey(establishmentLink.Urn))
+            {
+                establishmentLink.InProgressOrCompletedRecommendationsCount = 0;
+                continue;
+            }
+
+            var schoolEstablishmentId = establishmentLinkMap[establishmentLink.Urn];
+            var recommendations = await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(schoolEstablishmentId);
+
+            establishmentLink.InProgressOrCompletedRecommendationsCount = recommendations.Values.Count(r => r.NewStatus == nameof(RecommendationStatus.Complete).ToString() || r.NewStatus == nameof(RecommendationStatus.InProgress).ToString());
         }
 
-        return establishmentLinkMap.Values.ToList();
+        return establishmentLinks.ToList();
     }
 
     public async Task RecordGroupSelection(

@@ -38,17 +38,17 @@ public class RecommendationServiceTests
             }
         };
 
-        _recommendationWorkflow.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId)
+        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId)
             .Returns(expectedResult);
 
         var service = CreateServiceUnderTest();
 
         // Act
-        var result = await service.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId);
+        var result = await service.GetLatestRecommendationStatusesAsync(establishmentId);
 
         // Assert
         Assert.Equal(expectedResult, result);
-        await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId);
+        await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
     }
 
     [Fact]
@@ -56,41 +56,19 @@ public class RecommendationServiceTests
     {
         // Arrange - Establishment has no recommendation history
         var establishmentId = 456;
-        var recommendationContentfulReferences = new[] { "non-existent" };
         var emptyResult = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>();
 
-        _recommendationWorkflow.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId)
+        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId)
             .Returns(emptyResult);
 
         var service = CreateServiceUnderTest();
 
         // Act
-        var result = await service.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId);
+        var result = await service.GetLatestRecommendationStatusesAsync(establishmentId);
 
         // Assert
         Assert.Empty(result);
-        await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId);
-    }
-
-    [Fact]
-    public async Task GetLatestRecommendationStatusesByRecommendationIdAsync_WhenEmptyReferences_ThenPassesToWorkflow()
-    {
-        // Arrange - Request with no recommendation references to check (e.g. Contentful changes)
-        var establishmentId = 789;
-        var emptyReferences = new string[0];
-        var emptyResult = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>();
-
-        _recommendationWorkflow.GetLatestRecommendationStatusesByRecommendationIdAsync(emptyReferences, establishmentId)
-            .Returns(emptyResult);
-
-        var service = CreateServiceUnderTest();
-
-        // Act
-        var result = await service.GetLatestRecommendationStatusesByRecommendationIdAsync(emptyReferences, establishmentId);
-
-        // Assert - Confirms service passes empty array to workflow
-        Assert.Empty(result);
-        await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByRecommendationIdAsync(emptyReferences, establishmentId);
+        await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
     }
 
     [Fact]
@@ -98,54 +76,20 @@ public class RecommendationServiceTests
     {
         // Arrange - Workflow encounters error during recommendation lookup
         var establishmentId = 999;
-        var recommendationContentfulReferences = new[] { "rec-error" };
         var expectedException = new InvalidOperationException("Test exception from workflow");
 
-        _recommendationWorkflow.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId)
+        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId)
             .ThrowsAsync(expectedException);
 
         var service = CreateServiceUnderTest();
 
         // Act & Assert
         var actualException = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => service.GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId)
+            () => service.GetLatestRecommendationStatusesAsync(establishmentId)
         );
 
         Assert.Equal(expectedException.Message, actualException.Message);
-        await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByRecommendationIdAsync(recommendationContentfulReferences, establishmentId);
-    }
-
-    [Fact]
-    public async Task GetLatestRecommendationStatusesByRecommendationIdAsync_WhenSingleRecommendation_ThenReturnsSingleResult()
-    {
-        // Arrange - Single recommendation status lookup scenario
-        var establishmentId = 111;
-        var singleReference = new[] { "rec-single" };
-        var singleResult = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
-        {
-            ["rec-single"] = new SqlEstablishmentRecommendationHistoryDto
-            {
-                EstablishmentId = establishmentId,
-                RecommendationId = 99,
-                UserId = 1,
-                NewStatus = "Reviewed",
-                DateCreated = DateTime.UtcNow
-            }
-        };
-
-        _recommendationWorkflow.GetLatestRecommendationStatusesByRecommendationIdAsync(singleReference, establishmentId)
-            .Returns(singleResult);
-
-        var service = CreateServiceUnderTest();
-
-        // Act
-        var result = await service.GetLatestRecommendationStatusesByRecommendationIdAsync(singleReference, establishmentId);
-
-        // Assert
-        Assert.Single(result);
-        Assert.Equal("rec-single", result.Keys.First());
-        Assert.Equal("Reviewed", result["rec-single"].NewStatus);
-        await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByRecommendationIdAsync(singleReference, establishmentId);
+        await _recommendationWorkflow.Received(1).GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
     }
 
     [Fact]

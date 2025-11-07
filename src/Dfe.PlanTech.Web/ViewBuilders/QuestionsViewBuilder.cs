@@ -292,13 +292,18 @@ public class QuestionsViewBuilder(
             Logger.LogError(e, "An error occurred while submitting an answer with the following message: {Message} ", e.Message);
             var viewModel = GenerateViewModel(controller, question, section, categorySlug, sectionSlug, questionSlug, null);
             viewModel.ErrorMessages = ["Save failed. Please try again later."];
+
             return controller.View(QuestionView, viewModel);
         }
 
         var nextQuestion = await _questionService.GetNextUnansweredQuestion(activeEstablishmentId, section);
         if (nextQuestion is not null)
         {
-            return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestion.Slug, returnTo);
+            return controller.RedirectToAction(
+                nameof(QuestionsController.GetQuestionBySlug),
+                QuestionsController.Controller,
+                new { categorySlug, sectionSlug, questionSlug = nextQuestion.Slug, returnTo }
+            );
         }
 
         // No next questions so check answers

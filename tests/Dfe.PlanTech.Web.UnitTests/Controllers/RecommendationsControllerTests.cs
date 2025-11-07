@@ -64,10 +64,34 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             _viewBuilder.RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true)
                 .Returns(new OkResult());
 
-            var result = await _controller.GetRecommendationChecklist(categorySlug, sectionSlug);
+            var result = await _controller.GetRecommendationChecklist(categorySlug, sectionSlug, null);
 
             await _viewBuilder.Received(1).RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true);
             Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateRecommendationStatus_ThrowsIfCategorySlugNull()
+        {
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.UpdateRecommendationStatus(null!, "section-slug", "chunk-slug", "Complete")
+            );
+        }
+
+        [Fact]
+        public async Task UpdateRecommendationStatus_ThrowsIfSectionSlugNull()
+        {
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.UpdateRecommendationStatus("category-slug", null!, "chunk-slug", "Complete")
+            );
+        }
+
+        [Fact]
+        public async Task UpdateRecommendationStatus_ThrowsIfChunkSlugNull()
+        {
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.UpdateRecommendationStatus("category-slug", "section-slug", null!, "Complete")
+            );
         }
     }
 }
