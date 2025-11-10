@@ -295,11 +295,3 @@ jobs:
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
           az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
-
-  run-playwright-e2e:
-    needs: run-e2e-testing
-    if: ${{ inputs.run-e2e-tests }}
-    uses: ./.github/workflows/e2e-test-playwright-environment.yml
-    with:
-      environment: ${{ inputs.environment }}
-    secrets: inherit
