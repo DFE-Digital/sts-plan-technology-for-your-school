@@ -70,8 +70,8 @@ public class SimplifiedMaintenanceConfigurationTests
         var content = await response.Content.ReadAsStringAsync();
 
         Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
-        Assert.Contains("temporarily unavailable", content, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("please check back later", content, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("You'll be able to use the service later", content);
+        Assert.Contains("Your recommendations have been saved", content);
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class SimplifiedMaintenanceConfigurationTests
         var content = await response.Content.ReadAsStringAsync();
 
         Assert.Contains("We are performing essential maintenance.", content);
-        Assert.DoesNotContain("please check back later", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Your recommendations have been saved", content);
     }
 
     [Fact]
@@ -121,8 +121,8 @@ public class SimplifiedMaintenanceConfigurationTests
         var response = await client.GetAsync("/");
         var content = await response.Content.ReadAsStringAsync();
 
-        Assert.DoesNotContain("temporarily unavailable", content, StringComparison.OrdinalIgnoreCase);
-        Assert.DoesNotContain("please check back later", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("You'll be able to use the service later", content);
+        Assert.DoesNotContain("Your recommendations have been saved", content);
     }
 
     [Fact]
@@ -159,7 +159,7 @@ public class SimplifiedMaintenanceConfigurationTests
         Assert.Contains("This is at index 5.", content);
 
         // Should not display the default message since we have custom paragraphs
-        Assert.DoesNotContain("please check back later", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Your recommendations have been saved", content);
     }
 
     [Fact]
@@ -176,7 +176,7 @@ public class SimplifiedMaintenanceConfigurationTests
 
         // Should display the message (config binding ignores sparse indices)
         Assert.Contains("Only this message.", content);
-        Assert.DoesNotContain("please check back later", content, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Your recommendations have been saved", content);
     }
 
     [Fact]

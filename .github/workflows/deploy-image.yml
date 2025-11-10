@@ -12,6 +12,10 @@ on:
       checked-out-sha:
         type: string
         required: true
+      run-e2e-tests:
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.inputs.environment }}
@@ -221,7 +225,7 @@ jobs:
       contents: read
     runs-on: ubuntu-22.04
     name: Clear Database & Run E2E Tests on ${{ inputs.environment }}
-    if: ${{ inputs.environment == 'Tst' || inputs.environment == 'Staging' }}
+    if: ${{ inputs.run-e2e-tests }}
     environment: ${{ inputs.environment }}
     needs:
       [upgrade-database, pull-image-from-gcr-and-publish-to-acr, deploy-image, flush-redis-cache]
@@ -294,6 +298,7 @@ jobs:
 
   run-playwright-e2e:
     needs: run-e2e-testing
+    if: ${{ inputs.run-e2e-tests }}
     uses: ./.github/workflows/e2e-test-playwright-environment.yml
     with:
       environment: ${{ inputs.environment }}
