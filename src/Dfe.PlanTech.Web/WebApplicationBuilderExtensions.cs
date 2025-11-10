@@ -23,7 +23,7 @@ namespace Dfe.PlanTech.Web
                 .AddSingleton(sp => sp.GetRequiredService<IOptions<TrackingOptionsConfiguration>>().Value);
 
             app.Services
-                .Configure<SupportedAssetTypesConfiguration>(app.Configuration.GetRequiredSection(ConfigurationConstants.ContentAndSupportSupportedAssetTypes))
+                .Configure<SupportedAssetTypesConfiguration>(app.Configuration.GetRequiredSection(ConfigurationConstants.CAndSSupportedAssetTypes))
                 .AddSingleton(sp => sp.GetRequiredService<IOptions<SupportedAssetTypesConfiguration>>().Value);
 
             app.Services.Configure<CookiePolicyOptions>(options =>
