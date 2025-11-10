@@ -1,7 +1,3 @@
-IF OBJECT_ID(N'dbo.deleteDataForEstablishment', N'P') IS NOT NULL
-    DROP PROCEDURE dbo.deleteDataForEstablishment
-GO
-
 CREATE PROCEDURE [dbo].[deleteDataForEstablishment] @establishmentRef nvarchar(50)
 AS
     BEGIN TRY
