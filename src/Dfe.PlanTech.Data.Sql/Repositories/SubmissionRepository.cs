@@ -133,10 +133,10 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         }
 
         submission.Responses = submission.Responses
-            .OrderByDescending(response => response.DateCreated)
             .GroupBy(response => response.QuestionId)
             .Select(group => group
-                .OrderByDescending(response => response.DateCreated)
+                .OrderByDescending(response => response.DateLastUpdated)
+                .ThenByDescending(response => response.Id)
                 .First()
             )
             .ToList();

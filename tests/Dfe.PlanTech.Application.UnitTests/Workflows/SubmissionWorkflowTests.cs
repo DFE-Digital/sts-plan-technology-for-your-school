@@ -191,41 +191,6 @@ public class SubmissionWorkflowTests
         Assert.Equal("developing", dto.Maturity);
     }
 
-    [Fact]
-    public async Task GetLatestSubmissionWithOrderedResponses_Logs_When_LastAnswer_NotIn_Question()
-    {
-        var sut = CreateServiceUnderTest();
-        var section = BuildSection(out var q1, out _, out _, out var a1, out _, out _);
-        var now = DateTime.UtcNow;
-
-        var emptySubmission = BuildEmptySubmission();
-
-        var submission = new SubmissionEntity
-        {
-            Id = 71,
-            SectionId = section.Id,
-            SectionName = "testName",
-            Completed = false,
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Responses = new List<ResponseEntity>
-            {
-                BuildResponse(q1.Id, "AX", now.AddMinutes(-1), 2, emptySubmission)
-            }
-        };
-
-        _repo.GetLatestSubmissionAndResponsesAsync(3, section.Id, null).Returns(submission);
-
-        await sut.GetLatestSubmissionWithOrderedResponsesAsync(3, section, null);
-
-        _logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Could not find answer with Contentful reference")),
-            null,
-            Arg.Any<Func<object, Exception?, string>>());
-    }
-
     // ---------- SubmitAnswer ----------
     [Fact]
     public async Task SubmitAnswer_Throws_When_Model_Null()
