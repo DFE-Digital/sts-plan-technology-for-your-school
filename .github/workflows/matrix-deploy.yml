@@ -103,7 +103,7 @@ jobs:
       max-parallel: 1
       fail-fast: true
       matrix:
-        target: [Test]
+        target: [Tst]
     uses: ./.github/workflows/deploy-image.yml
     with:
       environment: ${{ matrix.target }}
