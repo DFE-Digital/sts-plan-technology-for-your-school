@@ -1,4 +1,6 @@
-﻿using Dfe.PlanTech.Web.Controllers;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -10,20 +12,28 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
     {
         private readonly ILogger<RecommendationsController> _logger;
         private readonly IRecommendationsViewBuilder _viewBuilder;
+        private readonly IRecommendationService _recommendationService;
+        private readonly IContentfulService _contentfulService;
+        private readonly ISubmissionService _submissionService;
+        private readonly ICurrentUser _currentUser;
         private readonly RecommendationsController _controller;
 
         public RecommendationsControllerTests()
         {
             _logger = Substitute.For<ILogger<RecommendationsController>>();
             _viewBuilder = Substitute.For<IRecommendationsViewBuilder>();
-            _controller = new RecommendationsController(_logger, _viewBuilder);
+            _recommendationService = Substitute.For<IRecommendationService>();
+            _contentfulService = Substitute.For<IContentfulService>();
+            _submissionService = Substitute.For<ISubmissionService>();
+            _currentUser = Substitute.For<ICurrentUser>();
+            _controller = new RecommendationsController(_logger, _contentfulService, _recommendationService, _viewBuilder, _submissionService, _currentUser);
         }
 
         [Fact]
         public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new RecommendationsController(_logger, null!)
+                new RecommendationsController(_logger, _contentfulService, _recommendationService, null!, _submissionService, _currentUser)
             );
 
             Assert.Equal("recommendationsViewBuilder", ex.ParamName);
@@ -46,21 +56,6 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetRecommendationPreview_CallsViewBuilderAndReturnsResult()
-        {
-            var sectionSlug = "sec";
-            var maturity = "high";
-
-            _viewBuilder.RouteBySectionSlugAndMaturity(_controller, sectionSlug, maturity)
-                .Returns(new OkResult());
-
-            var result = await _controller.GetRecommendationPreview(sectionSlug, maturity);
-
-            await _viewBuilder.Received(1).RouteBySectionSlugAndMaturity(_controller, sectionSlug, maturity);
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
         public async Task GetRecommendationChecklist_CallsViewBuilderAndReturnsResult()
         {
             var categorySlug = "cat";
@@ -69,10 +64,34 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             _viewBuilder.RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true)
                 .Returns(new OkResult());
 
-            var result = await _controller.GetRecommendationChecklist(categorySlug, sectionSlug);
+            var result = await _controller.GetRecommendationChecklist(categorySlug, sectionSlug, null);
 
             await _viewBuilder.Received(1).RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true);
             Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task UpdateRecommendationStatus_ThrowsIfCategorySlugNull()
+        {
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.UpdateRecommendationStatus(null!, "section-slug", "chunk-slug", "Complete")
+            );
+        }
+
+        [Fact]
+        public async Task UpdateRecommendationStatus_ThrowsIfSectionSlugNull()
+        {
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.UpdateRecommendationStatus("category-slug", null!, "chunk-slug", "Complete")
+            );
+        }
+
+        [Fact]
+        public async Task UpdateRecommendationStatus_ThrowsIfChunkSlugNull()
+        {
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.UpdateRecommendationStatus("category-slug", "section-slug", null!, "Complete")
+            );
         }
     }
 }

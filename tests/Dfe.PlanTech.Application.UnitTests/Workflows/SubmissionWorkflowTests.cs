@@ -1,19 +1,21 @@
-﻿using Dfe.PlanTech.Application.Workflows;
+﻿using Contentful.Core.Models;
+using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Workflows;
 
 public class SubmissionWorkflowTests
 {
+    private readonly ILogger<SubmissionWorkflow> _logger = Substitute.For<ILogger<SubmissionWorkflow>>();
     private readonly IStoredProcedureRepository _sp = Substitute.For<IStoredProcedureRepository>();
     private readonly ISubmissionRepository _repo = Substitute.For<ISubmissionRepository>();
-    private SubmissionWorkflow CreateServiceUnderTest() => new(_sp, _repo);
+    private SubmissionWorkflow CreateServiceUnderTest() => new(_logger, _sp, _repo);
 
     // ---------- Helpers: minimal Contentful section graph ----------
     private static EstablishmentEntity BuildEstablishment(int? id = 1)
@@ -189,60 +191,33 @@ public class SubmissionWorkflowTests
         Assert.Equal("developing", dto.Maturity);
     }
 
-    [Fact]
-    public async Task GetLatestSubmissionWithOrderedResponses_Throws_When_LastAnswer_NotIn_Question()
-    {
-        var sut = CreateServiceUnderTest();
-        var section = BuildSection(out var q1, out _, out _, out var a1, out _, out _);
-        var now = DateTime.UtcNow;
-
-        var emptySubmission = BuildEmptySubmission();
-
-        var submission = new SubmissionEntity
-        {
-            Id = 71,
-            SectionId = section.Id,
-            SectionName = "testName",
-            Completed = false,
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(),
-            Responses = new List<ResponseEntity>
-            {
-                BuildResponse(q1.Id, "AX", now.AddMinutes(-1), 2, emptySubmission)
-            }
-        };
-
-        _repo.GetLatestSubmissionAndResponsesAsync(3, section.Id, null).Returns(submission);
-
-        var ex = await Assert.ThrowsAsync<UserJourneyMissingContentException>(
-            () => sut.GetLatestSubmissionWithOrderedResponsesAsync(3, section, null));
-
-        Assert.Contains("Could not find answer", ex.Message);
-        Assert.Contains("Q1", ex.Message);
-    }
-
     // ---------- SubmitAnswer ----------
     [Fact]
     public async Task SubmitAnswer_Throws_When_Model_Null()
     {
         var sut = CreateServiceUnderTest();
-        await Assert.ThrowsAsync<InvalidDataException>(() => sut.SubmitAnswer(1, 2, null!));
+        await Assert.ThrowsAsync<InvalidDataException>(() => sut.SubmitAnswer(1, 2, 2, null!));
     }
 
     [Fact]
     public async Task SubmitAnswer_Calls_SP_With_AssessmentResponseModel_And_Returns_Id()
     {
         var sut = CreateServiceUnderTest();
-        var model = new SubmitAnswerModel { QuestionId = "Q1", ChosenAnswer = new AnswerModel { Answer = new IdWithTextModel { Id = "A1" } } };
+        var questionModel = new IdWithTextModel { Id = "Q1", Text = "Question 1 text" };
+        var answerModel = new IdWithTextModel { Id = "A1", Text = "Answer 1 text" };
+        var model = new SubmitAnswerModel { Question = questionModel, ChosenAnswer = answerModel };
 
         _sp.SubmitResponse(Arg.Is<AssessmentResponseModel>(m =>
             m.UserId == 9 &&
             m.EstablishmentId == 8 &&
+            m.UserEstablishmentId == 7 &&
             m.Question.Id == "Q1" &&
-            m.Answer.Id == "A1"))
+            m.Answer!.Id == "A1"))
           .Returns(777);
 
-        var id = await sut.SubmitAnswer(9, 8, model);
+        // activeEstablishmentId = 8, userEstablishmentId = 7 (simulating MAT user selecting a school)
+        var id = await sut.SubmitAnswer(9, 8, 7, model);
+
         Assert.Equal(777, id);
     }
 
@@ -355,26 +330,111 @@ public class SubmissionWorkflowTests
     }
 
     [Fact]
-    public async Task DeleteSoft_By_Establishment_Section_Delegates()
+    public async Task SetSubmissionInaccessible_By_Establishment_Section_Delegates()
     {
         var sut = CreateServiceUnderTest();
-        await sut.DeleteSubmissionSoftAsync(1, "SEC");
+        await sut.SetSubmissionInaccessibleAsync(1, "SEC");
         await _repo.Received(1).SetSubmissionInaccessibleAsync(1, "SEC");
     }
 
     [Fact]
-    public async Task DeleteSoft_By_SubmissionId_Delegates()
+    public async Task SetSubmissionInaccessible_By_SubmissionId_Delegates()
     {
         var sut = CreateServiceUnderTest();
-        await sut.DeleteSubmissionSoftAsync(123);
+        await sut.SetSubmissionInaccessibleAsync(123);
         await _repo.Received(1).SetSubmissionInaccessibleAsync(123);
     }
 
     [Fact]
-    public async Task DeleteHard_Delegates_To_SP()
+    public async Task SetSubmissionInProgress_By_Establishment_Section_Delegates()
     {
         var sut = CreateServiceUnderTest();
-        await sut.DeleteSubmissionHardAsync(1, "SEC");
-        await _sp.Received(1).HardDeleteCurrentSubmissionAsync(1, "SEC");
+        await sut.SetSubmissionInProgressAsync(1, "SEC");
+        await _repo.Received(1).SetSubmissionInProgressAsync(1, "SEC");
+    }
+
+    [Fact]
+    public async Task SetSubmissionInProgress_By_SubmissionId_Delegates()
+    {
+        var sut = CreateServiceUnderTest();
+        await sut.SetSubmissionInProgressAsync(123);
+        await _repo.Received(1).SetSubmissionInProgressAsync(123);
+    }
+
+    [Fact]
+    public async Task SetSubmissionDeleted_Delegates_To_SP()
+    {
+        var sut = CreateServiceUnderTest();
+        await sut.SetSubmissionDeletedAsync(1, "SEC");
+        await _sp.Received(1).SetSubmissionDeletedAsync(1, "SEC");
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync_CallsRepository()
+    {
+        var sut = CreateServiceUnderTest();
+        var section = new QuestionnaireSectionEntry();
+
+        await sut.ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 1, 123, 99, section);
+        await _repo.Received(1).ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 1, 123, 99, section);
+    }
+
+    [Fact]
+    public async Task GetSubmissionByIdAsync_CallsRepo()
+    {
+        var sut = CreateServiceUnderTest();
+        var submission = new SubmissionEntity
+        {
+            Id = 444,
+            SectionId = "secId",
+            SectionName = "testSection",
+            Completed = true,
+            EstablishmentId = 1,
+            Establishment = BuildEstablishment(),
+            Responses = new List<ResponseEntity>()
+        };
+
+        _repo.GetSubmissionByIdAsync(submission.Id).Returns(submission);
+
+        await sut.GetSubmissionByIdAsync(submission.Id);
+
+        await _repo.Received(1).GetSubmissionByIdAsync(submission.Id);
+    }
+
+    [Fact]
+    public async Task GetSubmissionByIdAsync_ReturnsSubmissionDto()
+    {
+        var submission = new SubmissionEntity
+        {
+            Id = 555,
+            SectionId = "secId",
+            SectionName = "testSection",
+            Completed = true,
+            EstablishmentId = 1,
+            Establishment = BuildEstablishment(),
+            Responses = new List<ResponseEntity>()
+        };
+
+        var sut = CreateServiceUnderTest();
+
+        _repo.GetSubmissionByIdAsync(555).Returns(submission);
+
+        var dto = await sut.GetSubmissionByIdAsync(555);
+
+        Assert.NotNull(dto);
+        Asset.Equals(submission, dto);
+    }
+
+    [Fact]
+    public async Task GetSubmissionByIdAsync_ThrowsWhenNullSubmission()
+    {
+        var sut = CreateServiceUnderTest();
+        SubmissionEntity nullSubmission = null!;
+        var submissionId = 666;
+
+        _repo.GetSubmissionByIdAsync(666).Returns(nullSubmission);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => sut.GetSubmissionByIdAsync(submissionId));
+        Assert.Equal($"Submission with ID '{submissionId}' not found", ex.Message);
     }
 }

@@ -1,8 +1,15 @@
 @model RecommendationsViewModel
 
 @{
-    Layout = "_PrintLayout";
-	var currentTime = TimeZoneHelper.ToUkTime(DateTime.UtcNow);
+    if (Model.SectionName != null)
+    {
+        ViewData["Title"] = $"{Model.SectionName} - print view";
+    }
+    else
+    {
+        var routeData = Context.GetRouteData();
+        ViewData["Title"] = routeData.GetTitleForPage();
+    }
 }
 
 @section BeforeContent {
@@ -12,7 +19,7 @@
     </govuk-back-link>
 }
 
-<div class="recommendation-content"> 
+<div class="recommendation-content">
     <div class="govuk-!-margin-bottom-2">
         @{
             await Html.RenderPartialAsync("PrintButton", Model);
@@ -21,22 +28,14 @@
 
     <div class="govuk-grid-row" id="checkYourAnswers-page">
         <div class="govuk-grid-column-two-thirds-from-desktop">
-            <partial name="RecommendationPrintContent" model="@Model" />
-            <h2>Your self-assessment</h2>
-            <p>The self-assessment for @Model.SectionName.ToLower() was completed on <strong>@Model.LatestCompletionDate</strong>. You can change your answers at any time.</p>
-             <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-                @foreach (var questionWithAnswer in Model.SubmissionResponses)
-                {
-                    <div class="govuk-summary-list__row">
-                        <dt class="govuk-summary-list__key spacer">
-                            @questionWithAnswer.QuestionText
-                        </dt>
-                        <dd class="govuk-summary-list__value spacer govuk-!-margin-bottom-2">
-                            @questionWithAnswer.AnswerText
-                        </dd>
-                    </div>
-                }
-            </dl>
-       </div>
+            @if (Model.Chunks != null && Model.Chunks.Count == 1)
+            {
+                <partial name="SingleRecommendationPrint" model="@Model" />
+            }
+            else
+            {
+                <partial name="RecommendationPrintContent" model="@Model" />
+            }
+        </div>
     </div>
 </div>

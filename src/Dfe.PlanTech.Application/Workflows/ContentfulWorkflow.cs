@@ -1,4 +1,5 @@
 ﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Dfe.PlanTech.Core.Contentful.Options;
@@ -105,36 +106,13 @@ public class ContentfulWorkflow(
         return category;
     }
 
-    public async Task<RecommendationIntroEntry?> GetIntroForMaturityAsync(string subtopicId, string maturity)
-    {
-        var query = new ContentfulQuerySingleValue() { Field = "fields.subtopic.sys.id", Value = subtopicId };
-        var options = new GetEntriesOptions(include: 2, [query]);
-        options.Select = ["fields.intros", "sys"];
-
-        var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
-
-        var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
-        if (subtopicRecommendation is null)
-        {
-            logger.LogError("Could not find subtopic recommendation in Contentful for subtopic with ID '{SubtopicId}'", subtopicId);
-            return null;
-        }
-
-        var introForMaturity = subtopicRecommendation.Intros
-            .FirstOrDefault(intro => string.Equals(intro.Maturity, maturity, StringComparison.OrdinalIgnoreCase));
-        if (introForMaturity is null)
-        {
-            logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
-            return null;
-        }
-
-        return introForMaturity;
-    }
-
     public async Task<PageEntry> GetPageBySlugAsync(string slug)
     {
         var query = new ContentfulQuerySingleValue { Field = "fields.slug", Value = slug };
-        var options = new GetEntriesOptions(_getPageOptions.Include, [query]);
+
+        GetEntriesOptions options = PageIncludeLevelConstants.IncludeLevelOverrides.TryGetValue(slug, out int includeLevelOverride)
+            ? new GetEntriesOptions(includeLevelOverride, [query])
+            : new GetEntriesOptions(_getPageOptions.Include, [query]);
 
         try
         {
@@ -151,6 +129,17 @@ public class ContentfulWorkflow(
         {
             throw new ContentfulDataUnavailableException($"Error getting page with slug {slug} from Contentful", ex);
         }
+    }
+
+    public async Task<int> GetRecommendationChunkCountAsync(int page)
+    {
+        return await _contentfulRepository.GetEntriesCountAsync<RecommendationChunkEntry>();
+    }
+
+    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page)
+    {
+        var options = new GetEntriesOptions(include: 3) { Page = page };
+        return _contentfulRepository.GetPaginatedEntriesAsync<RecommendationChunkEntry>(options);
     }
 
     public async Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string sectionSlug, int? includeLevel = null)
@@ -176,34 +165,5 @@ public class ContentfulWorkflow(
         {
             throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug} from Contentful", ex);
         }
-    }
-
-    public async Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId, int? includeLevel = null)
-    {
-        var sectionIdQuery = new ContentfulQuerySingleValue { Field = "fields.subtopic.sys.id", Value = subtopicId };
-        var options = new GetEntriesOptions(includeLevel ?? 4, [sectionIdQuery]);
-
-        var subtopicRecommendations = await _contentfulRepository.GetEntriesAsync<SubtopicRecommendationEntry>(options);
-        var subtopicRecommendation = subtopicRecommendations.FirstOrDefault();
-
-        if (subtopicRecommendation is null)
-        {
-            logger.LogError("Could not find subtopic recommendation in Contentful for {SubtopicId}", subtopicId);
-        }
-
-        return subtopicRecommendation;
-    }
-
-    public async Task<RecommendationIntroEntry?> GetSubtopicRecommendationIntroByIdAndMaturityAsync(string subtopicId, string maturity)
-    {
-        var subtopicRecommendation = await GetSubtopicRecommendationByIdAsync(subtopicId);
-
-        var introForMaturity = subtopicRecommendation?.Intros.FirstOrDefault(i => i.Maturity.Equals(maturity));
-        if (introForMaturity is null)
-        {
-            logger.LogError("Could not find intro with maturity {Maturity} for subtopic {SubtopicId}", maturity, subtopicId);
-        }
-
-        return introForMaturity;
     }
 }

@@ -1,3 +1,4 @@
+@serial
 Feature: Change answers page
 @clear-data-school
     Scenario: Change answers has all the correct elements on the page 

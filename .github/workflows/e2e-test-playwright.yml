@@ -1,14 +1,22 @@
-name: Run Playwright E2E Tests
+name: Run Playwright E2E Tests (Local Instance)
 
 on:
-    workflow_dispatch:
-        inputs:
-            environment:
-                description: Which db environment to run the tests on
-                required: true
-                type: choice
-                options: [ 'Dev', 'Tst' ]
-                default: 'Dev'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which content environment to run against? (Dev = PlanTech_Development)
+        required: true
+        type: choice
+        options: ['Dev', 'StagingUnprotected']
+        default: 'Dev'
+
+  # pull_request:
+  #   branches: ['main', 'development']
+  #   paths:
+  #     - 'src/**'
+  #     - 'tests/Dfe.PlanTech.Web.E2ETests.Beta/**'
+  #     - '.github/workflows/e2e-tests-playwright.yml'
+  #     - '.gitmodules'
 
 concurrency:
     group: "${{ github.workflow }}"
@@ -18,99 +26,73 @@ env:
     DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
-    clear-db:
-        permissions:
-          id-token: write
-          contents: read
-        name: Clear database
-        runs-on: ubuntu-latest
-        env:
-            az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
-            az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
-            az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-            az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-            SQL_IP_NAME: e2e-tests-clear-db
-
-        steps:
-            - uses: actions/checkout@v4
-
-            - name: Azure Login
-              uses: ./.github/actions/azure-login
-              with:
-                  az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-                  az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-                  az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-
-            - name: Get workflow IP address
-              id: whats-my-ip
-              uses: ./.github/actions/whats-my-ip-address
-
-            - name: Add Azure firewall rules
-              uses: ./.github/actions/azure-ip-whitelist
-              with:
-                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-                  verb: "add"
-                  az_keyvault_name: ${{ env.az_keyvault_name }}
-                  az_ip_name: ${{ env.SQL_IP_NAME }}
-                  az_resource_group: ${{ env.az_resource_group_name }}
-                  az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
-
-            - name: Get connection string
-              id: get-connection-string
-              uses: ./.github/actions/azure-get-keyvault-secret
-              with:
-                  az_keyvault_name: ${{ env.az_keyvault_name }}
-                  az_keyvault_secret_name: ${{ env.az_keyvault_database_connectionstring_name }}
-
-            - name: Execute stored procedure
-              uses: azure/sql-action@v2.2
-              with:
-                  connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
-                  path: "./.github/scripts/drop-establishment-data.sql"
-
-            - name: Remove Azure firewall rules
-              if: always()
-              uses: ./.github/actions/azure-ip-whitelist
-              with:
-                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-                  verb: "remove"
-                  az_keyvault_name: ${{ env.az_keyvault_name }}
-                  az_ip_name: ${{ env.SQL_IP_NAME }}
-                  az_resource_group: ${{ env.az_resource_group_name }}
-                  az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
-
-    run-tests:
+  run-tests:
         permissions:
           id-token: write
           contents: read
         name: Run Playwright + Cucumber Tests
+        environment: ${{ github.event.inputs.environment || 'Dev' }} 
         runs-on: ubuntu-22.04
-        needs: [clear-db]
         env:
             PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
             KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
             RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
             SQL_IP_NAME: e2e-tests-pr
+            DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+            DOTNET_CLI_TELEMETRY_OPTOUT: 1
 
         steps:
             - name: Checkout
               uses: actions/checkout@v4
-
-            - name: Azure CLI Login
+              with:
+                fetch-depth: 1
+                
+            - name: Login with AZ
               uses: ./.github/actions/azure-login
               with:
-                  az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-                  az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-                  az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+                az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+                az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+                az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+            - name: Locate seed scripts
+              shell: bash
+              run: |
+                pwd
+                ls -la
+                ls -la ./tests || true
+                ls -la ./tests/Dfe.PlanTech.Web.SeedTestData || true
+                ls -la ./tests/Dfe.PlanTech.Web.SeedTestData/scripts || true
+
+            - name: Start Azure SQL Edge and seed DB
+              shell: bash
+              working-directory: ./tests/Dfe.PlanTech.Web.SeedTestData/scripts
+              env:
+                SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
+              timeout-minutes: 5
+              run: |
+                set -euo pipefail
+                ls -la
+                echo "---- first lines of script ----"
+                head -n 30 ./setup-ci.sh
+                chmod +x ./setup-ci.sh
+                ./setup-ci.sh azuresqledge "$SA_PASSWORD"
+
+            - name: Debug SQL Edge
+              if: failure()
+              run: |
+                docker ps -a
+                docker logs azuresqledge || true
+                docker exec azuresqledge ls -la /opt || true
+                docker exec azuresqledge which /opt/mssql-tools/bin/sqlcmd || true                
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
               with:
                   dotnet-version: ${{ env.DOTNET_VERSION }}
-
-            - name: Clear NuGet Cache
-              shell: bash
-              run: dotnet nuget locals all --clear
+                  cache: true
+                  cache-dependency-path: |
+                    **/*.csproj
+                    **/packages.lock.json
 
             - name: Install dependencies
               shell: bash
@@ -133,55 +115,110 @@ jobs:
             - name: Add Azure firewall rules
               uses: ./.github/actions/azure-ip-whitelist
               with:
-                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-                  verb: "add"
-                  az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-                  az_ip_name: ${{ env.SQL_IP_NAME }}
-                  az_resource_group: ${{ env.RESOURCE_GROUP }}
-                  az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+                ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+                verb: "add"
+                az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+                az_ip_name: ${{ env.SQL_IP_NAME }}
+                az_resource_group: ${{ env.RESOURCE_GROUP}}
+                az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
-            - name: Run Web App
+            - name: Start Redis cache
+              shell: bash
+              run: |
+                docker run -p 6379:6379 --name plantech-redis -d redis:7-alpine
+
+            - name: Run Web App (E2E, local SQL Edge)
               shell: bash
               working-directory: ./build
+              env:
+                SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
               run: |
-                  export ASPNETCORE_ENVIRONMENT=E2E
-                  export KeyVaultName=${{ env.KEYVAULT_NAME }}
-                  export Kestrel__Endpoints__Https__Url=https://*:8081
-                  export DfeSignIn__FrontDoorUrl=https://localhost:8081
-                  export GTM__Id=gtm_id
-                  export GTM__SiteVerificationId=testing_site_verification_id
-                  export AutomatedTesting__Contentful__Tag=e2e
-                  export AutomatedTesting__Contentful__IncludeTaggedContent=true
-                  dotnet ./Dfe.PlanTech.Web.dll &
+                export ASPNETCORE_ENVIRONMENT=E2E
+                export KeyVaultName=${{ env.KEYVAULT_NAME }}
+                export Kestrel__Endpoints__Https__Url=https://*:8081
+                export DfeSignIn__FrontDoorUrl=https://localhost:8081
+                export GTM__Id=gtm_id
+                export GTM__SiteVerificationId=testing_site_verification_id
+                export AutomatedTesting__Contentful__Tag=e2e
+                export AutomatedTesting__Contentful__IncludeTaggedContent=true
+                dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 --ConnectionStrings:Redis="localhost:6379,abortConnect=false" --ConnectionStrings:Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db" &
 
             - name: Install Node.js
               uses: actions/setup-node@v4
               with:
-                  node-version: 20
+                node-version: 20
+                cache: 'npm'
+                cache-dependency-path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/package-lock.json
 
             - name: Install NPM dependencies
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               run: npm ci
 
-            - name: Install Playwright browsers
-              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
-              run: npx playwright install --with-deps
+            - name: Cache Playwright browsers
+              uses: actions/cache@v4
+              with:
+                path: ~/.cache/ms-playwright
+                key: playwright-${{ runner.os }}-chromium-1.51.1
 
-            - name: Setup session storage (login)
+            - name: Install Playwright browsers (tests dir)
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
-              run: npx ts-node login.setup.ts
+              run: npx playwright install --with-deps chromium
+
+            - name: Wait for web app to be ready
+              shell: bash
+              run: |
+                set -euo pipefail
+                for i in {1..40}; do
+                  # ignore self-signed cert
+                  if curl -skf https://localhost:8081/home >/dev/null; then
+                    echo "Web app is up"
+                    exit 0
+                  fi
+                  echo "Waiting for web app... ($i/60)"
+                  sleep 2
+                done
+                echo "Web app did not become ready in time"
+                exit 1
 
             - name: Run Playwright + Cucumber tests (with recording)
               working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
               env:
-                  URL: https://localhost:8081
+                  URL: https://localhost:8081/
                   DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
                   DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
+                  DSI_SCHOOL_ESTABLISHMENT_REF: '00000018'
                   DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
                   DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
+                  DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '00000005'
                   DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
                   DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
-              run: npm run test:record
+                  DB_SERVER: localhost
+                  DB_MODE: sql
+                  DB_USER: sa
+                  DB_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
+                  DB_PORT: 1433
+                  DB_DATABASE: plantech-mock-db
+                  HEADLESS: true
+                  NODE_ICU_DATA: ./node_modules/full-icu
+                  LANG: en_GB.UTF-8
+                  LC_ALL: en_GB.UTF-8
+                  TZ: Europe/London
+              run: npm run test:login && npm run test:record
+
+            - name: Merge cucumber JSON reports
+              if: always()            
+              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+              shell: bash
+              run: |
+                node -e "const fs=require('fs');
+                const a=JSON.parse(fs.readFileSync('reports/cucumber-parallel.json','utf8'));
+                const b=JSON.parse(fs.readFileSync('reports/cucumber-serial.json','utf8'));
+                fs.writeFileSync('reports/cucumber-report.json', JSON.stringify([...a, ...b]));"
+
+            - name: Summarise Cucumber results
+              if: always()
+              run: |
+                node ./tests/Dfe.PlanTech.Web.E2ETests.Beta/cucumber-summary.js ./tests/Dfe.PlanTech.Web.E2ETests.Beta/reports/cucumber-report.json
 
             - name: Generate HTML report
               if: always()
@@ -197,7 +234,7 @@ jobs:
                   if-no-files-found: warn
 
             - name: Upload Playwright screenshots
-              if: failure()
+              if: always()
               uses: actions/upload-artifact@v4
               with:
                   name: playwright-screenshots
@@ -205,28 +242,48 @@ jobs:
                   if-no-files-found: ignore
 
             - name: Upload Playwright videos
-              if: failure()
+              if: always()
               uses: actions/upload-artifact@v4
               with:
                   name: playwright-videos
                   path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/videos/
                   if-no-files-found: ignore
+                  compression-level: 1
 
             - name: Upload Playwright traces
-              if: failure()
+              if: always()
               uses: actions/upload-artifact@v4
               with:
                   name: playwright-traces
                   path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/traces/
                   if-no-files-found: ignore
+                  compression-level: 1
+
+            - name: Stop & remove SQL Edge container
+              if: always()
+              shell: bash
+              run: |
+                docker ps -a
+                docker logs azuresqledge || true
+                docker stop azuresqledge || true
+                docker rm azuresqledge || true
+
+            - name: Stop & remove Redis container
+              if: always()
+              shell: bash
+              run: |
+                docker ps -a
+                docker logs plantech-redis || true
+                docker stop plantech-redis || true
+                docker rm plantech-redis || true
 
             - name: Remove Azure firewall rules
               if: always()
               uses: ./.github/actions/azure-ip-whitelist
               with:
-                  ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-                  verb: "remove"
-                  az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-                  az_ip_name: ${{ env.SQL_IP_NAME }}
-                  az_resource_group: ${{ env.RESOURCE_GROUP }}
-                  az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+                ip_address: ${{ steps.whats-my-ip.outputs.ip }}
+                verb: "remove"
+                az_keyvault_name: ${{ env.KEYVAULT_NAME }}
+                az_ip_name: ${{ env.SQL_IP_NAME }}
+                az_resource_group: ${{ env.RESOURCE_GROUP}}
+                az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}

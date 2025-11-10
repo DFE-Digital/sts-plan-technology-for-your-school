@@ -130,7 +130,6 @@ button.govuk-button--white {
 }
 
 .school-ident {
-    background-color: #ebf2f6;
     padding: 20px 0;
     margin-bottom: 0px;
 }
@@ -200,4 +199,13 @@ ul.landing-page-list > li {
 
 .recommendation-content > div > div.noprint button#print-page-button {
     margin-top: 0px;
+}
+
+.govuk-table__cell.custom-height {
+    height: 40px;
+}
+
+.recommendation-action-header .govuk-table__cell,
+.recommendation-action-header .govuk-table__header {
+    vertical-align: middle;
 }

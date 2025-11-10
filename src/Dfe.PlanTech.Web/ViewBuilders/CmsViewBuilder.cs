@@ -7,12 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class CmsViewBuilder(
-    IContentfulService contentfulService,
-    IRecommendationService recommendationService
+    IContentfulService contentfulService
 ) : ICmsViewBuilder
 {
-    private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    private readonly IRecommendationService _recommendationService = recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly IContentfulService _contentfulService =
+        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     public async Task<IEnumerable<SectionViewModel>> GetAllSectionsAsync()
     {
@@ -22,15 +21,35 @@ public class CmsViewBuilder(
 
     public async Task<IActionResult> GetChunks(Controller controller, int? page)
     {
-        var pageNumber = page ?? 1;
-        var total = await _recommendationService.GetRecommendationChunkCount(pageNumber);
-        var entries = await _recommendationService.GetPaginatedRecommendationEntries(pageNumber);
+        var sections = await _contentfulService.GetAllSectionsAsync();
 
-        var chunkModels = entries
-            .SelectMany(chunk => chunk.Answers
-                .Where(a => a.Id is not null)
-                .Select(a => new ChunkModel(a.Id!, chunk.HeaderText)))
+        var sectionAllAnswers = sections
+            .SelectMany(s => s.Questions)
+            .SelectMany(q => q.Answers)
+            .Select(a => a.Id)
             .ToList();
+
+        var pageNumber = page ?? 1;
+        var total = await _contentfulService.GetRecommendationChunkCountAsync(pageNumber);
+        var entries = await _contentfulService.GetPaginatedRecommendationEntriesAsync(pageNumber);
+        List<ChunkModel> chunkModels = new();
+
+        chunkModels = entries.Select(a =>
+        {
+            // Validate and retrieve the answer that is within the sectionAllAnswers so we don't retrieve "RETIRED" answers
+            var completingAnswer = a.CompletingAnswers
+                .FirstOrDefault(ans => sectionAllAnswers.Contains(ans.Id));
+
+            var inProgressAnswer = a.InProgressAnswers
+                .FirstOrDefault(ans => sectionAllAnswers.Contains(ans.Id));
+
+            return new ChunkModel(
+                completingAnswer?.Id ?? "",
+                inProgressAnswer?.Id ?? "",
+                a.HeaderText
+            );
+        }).ToList();
+
 
         var resultModel = new PagedResultViewModel<ChunkModel>
         {

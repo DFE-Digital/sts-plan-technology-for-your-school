@@ -9,13 +9,13 @@ import {
 import { chromium, Browser, BrowserContext, Page } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
-import { clearTestEstablishmentData } from '../../clearTestData';
+import { clearTestEstablishmentData } from '../../clearTestDataSqlAzure';
+import { setDefaultTimeout } from '@cucumber/cucumber';
+
+setDefaultTimeout(60 * 1000)
 
 let browser: Browser;
 
-/**
- * Ensure a directory exists. Create it recursively if it doesn't.
- */
 function ensureDirExists(dirPath: string) {
   if (!fs.existsSync(dirPath)) {
     fs.mkdirSync(dirPath, { recursive: true });
@@ -24,8 +24,7 @@ function ensureDirExists(dirPath: string) {
 
 BeforeAll(async () => {
   const isHeadless = process.env.HEADLESS == 'true';
-  //browser = await chromium.launch({ headless: isHeadless });
-  browser = await chromium.launch({ headless: isHeadless });
+  browser = await chromium.launch({ headless: isHeadless, slowMo: 150 });
 });
 
 Before(async function (scenario: ITestCaseHookParameter) {
@@ -37,15 +36,22 @@ Before(async function (scenario: ITestCaseHookParameter) {
 
   const contextOptions: Parameters<typeof browser.newContext>[0] = {
     storageState: storagePath,
+    ignoreHTTPSErrors: true,
   };
 
   if (shouldRecord) {
+    const tempVideoDir = path.resolve(__dirname, '../../videos/temp');
+    ensureDirExists(tempVideoDir);
     contextOptions.recordVideo = {
-      dir: path.resolve(__dirname, '../../videos/temp'), // Temporary folder — will rename later
+      dir: tempVideoDir,
+      size: { width: 1280, height: 720 },
     };
   }
 
   const context = await browser.newContext(contextOptions);
+
+  context.setDefaultTimeout(30_000);
+  context.setDefaultNavigationTimeout(45_000);
 
   if (shouldRecord) {
     await context.tracing.start({ screenshots: true, snapshots: true });
@@ -57,29 +63,29 @@ Before(async function (scenario: ITestCaseHookParameter) {
   this.page = page;
   this.shouldRecord = shouldRecord;
 
-const resetTag = scenario.pickle.tags.find(t =>
-  t.name === '@clear-data-school' || t.name === '@clear-data-mat'
-);
+  const resetTag = scenario.pickle.tags.find(t =>
+    t.name === '@clear-data-school' || t.name === '@clear-data-mat'
+  );
 
-if (resetTag) {
-  const tagName = resetTag.name;
+  if (resetTag) {
+    const tagName = resetTag.name;
 
-  let establishmentRef: string | undefined;
+    let establishmentRef: string | undefined;
 
-  if (tagName === '@clear-data-school') {
-    establishmentRef = process.env.DSI_SCHOOL_ESTABLISHMENT_REF;
-  } else if (tagName === '@clear-data-mat') {
-    establishmentRef = process.env.DSI_MAT_ESTABLISHMENT_REF;
+    if (tagName === '@clear-data-school') {
+      establishmentRef = process.env.DSI_SCHOOL_ESTABLISHMENT_REF;
+    } else if (tagName === '@clear-data-mat') {
+      establishmentRef = process.env.DSI_MAT_ESTABLISHMENT_REF;
+    }
+
+    if (!establishmentRef) {
+      throw new Error(`No establishmentRef found for tag ${tagName}. Check the environment variables.`);
+    }
+
+    console.log(`Clearing establishment data for establishmentRef: ${establishmentRef}`);
+
+    await clearTestEstablishmentData(establishmentRef);
   }
-
-  if (!establishmentRef) {
-    throw new Error(`No establishmentRef found for tag ${tagName}. Check the environment variables.`);
-  }
-
-  console.log(`Clearing establishment data for establishmentRef: ${establishmentRef}`);
-
-  await clearTestEstablishmentData(establishmentRef); 
-}
 });
 
 After(async function (scenario: ITestCaseHookParameter) {
@@ -87,8 +93,8 @@ After(async function (scenario: ITestCaseHookParameter) {
   const featureName = path.basename(scenario.pickle.uri || 'unknown', '.feature');
 
   const shouldRecord = this.shouldRecord;
-  const page = this.page;
-  const context = this.context;
+  const page = this.page as Page | undefined;
+  const context = this.context as BrowserContext | undefined;
 
   const baseDir = path.resolve(__dirname, `../../`);
   const videoDir = path.join(baseDir, 'videos', featureName);
@@ -100,51 +106,56 @@ After(async function (scenario: ITestCaseHookParameter) {
     ensureDirExists(screenshotDir);
     ensureDirExists(traceDir);
 
-    if (scenario.result?.status === Status.FAILED) {
-      if (page) {
-        try {
-          const screenshotPath = path.join(screenshotDir, `${scenarioName}.png`);
-          await page.screenshot({ path: screenshotPath });
-          console.log(`Screenshot saved: ${screenshotPath}`);
-        } catch (err) {
-          console.warn(`Failed to take screenshot for ${scenarioName}:`, err);
-        }
-      } else {
-        console.warn(`Page not available for screenshot in: ${scenarioName}`);
-      }
-
-      if (context) {
-        try {
-          const tracePath = path.join(traceDir, `${scenarioName}.zip`);
-          await context.tracing.stop({ path: tracePath });
-          console.log(`🧪 Trace saved: ${tracePath}`);
-        } catch (err) {
-          console.warn(`Failed to stop tracing for ${scenarioName}:`, err);
-        }
-      }
-    } else {
-      await context?.tracing.stop();
-    }
-  }
-
-  await page?.close();
-  await context?.close();
-
-  if (shouldRecord && page) {
-    const video = page.video();
-    if (video) {
+    if (page) {
       try {
-        const videoPath = await video.path();
-        const newVideoPath = path.join(videoDir, `${scenarioName}.webm`);
-        await fs.promises.rename(videoPath, newVideoPath);
-        console.log(`Video saved: ${newVideoPath}`);
+        const screenshotPath = path.join(screenshotDir, `${scenarioName}.png`);
+        await page.screenshot({ path: screenshotPath });
+        console.log(`Screenshot saved: ${screenshotPath}`);
       } catch (err) {
-        console.warn(`Failed to save video for ${scenarioName}:`, err);
+        console.warn(`Failed to take screenshot for ${scenarioName}:`, err);
+      }
+    }
+
+    try {
+      if (context && context.tracing) {
+        const tracePath = path.join(traceDir, `${scenarioName}.zip`);
+        await context.tracing.stop({ path: tracePath });
+        console.log(`🧪 Trace saved: ${tracePath}`);
+      }
+    } catch (err) {
+      console.warn(`Failed to stop tracing for ${scenarioName}:`, err);
+    }
+  }
+
+  let savedVideo = false;
+  if (page) {
+    await page.close();
+    if (shouldRecord) {
+      const video = page.video();
+      if (video) {
+        try {
+          const newVideoPath = path.join(videoDir, `${scenarioName}.webm`);
+          await video.saveAs(newVideoPath);
+          await video.delete();
+          savedVideo = true;
+          console.log(`Video saved: ${newVideoPath}`);
+        } catch (err) {
+          console.warn(`Failed to save video for ${scenarioName}:`, err);
+        }
       }
     }
   }
+
+  await context?.close();
 });
 
 AfterAll(async () => {
-  await browser?.close();
+  try {
+    if (browser) {
+      await Promise.all(browser.contexts().map(c => c.close().catch(() => {})));
+      await browser.close();
+    }
+  } catch (e) {
+    console.warn('Browser close error:', e);
+  }
 });

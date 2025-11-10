@@ -20,9 +20,8 @@ public static class UrlConstants
     #region Slugs
 
     public const string CheckAnswersSlug = "check-answers";
-    public const string ChangeAnswersSlug = "change-answers";
+    public const string ViewAnswersSlug = "view-answers";
 
-    public const string GroupsDashboardSlug = "dashboard";
     public const string GroupsSelectionPageSlug = "select-a-school";
     public const string GroupsSlug = "groups";
 

@@ -1,6 +1,6 @@
 ﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Application.Services;
 
@@ -8,15 +8,40 @@ public class RecommendationService(
     IRecommendationWorkflow recommendationWorkflow
 ) : IRecommendationService
 {
-    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
-
-    public Task<int> GetRecommendationChunkCount(int page)
+    public Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        int establishmentId)
     {
-        return _recommendationWorkflow.GetRecommendationChunkCount(page);
+        return recommendationWorkflow.GetCurrentRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId
+        );
     }
 
-    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntries(int page)
+    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesAsync(
+        int establishmentId
+    )
     {
-        return _recommendationWorkflow.GetPaginatedRecommendationEntries(page);
+        return recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
+            establishmentId
+        );
+    }
+
+    public Task UpdateRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        int establishmentId,
+        int userId,
+        string newStatus,
+        string? noteText = null,
+        int? matEstablishmentId = null)
+    {
+        return recommendationWorkflow.UpdateRecommendationStatusAsync(
+            recommendationContentfulReference,
+            establishmentId,
+            userId,
+            newStatus,
+            noteText,
+            matEstablishmentId
+        );
     }
 }

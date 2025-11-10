@@ -4,8 +4,10 @@
   "main": "index.js",
   "scripts": {
     "test": "cucumber-js --format json:reports/cucumber-report.json",
-    "test:record": "cucumber-js --format json:reports/cucumber-report.json --world-parameters=\"{\\\"record\\\": true}\"",
     "test:login": "npx ts-node login.setup.ts",
+    "test:record:parallel": "cucumber-js --parallel 4 --format json:reports/cucumber-parallel.json --world-parameters=\"{\\\"record\\\": true}\" --tags not\\ @serial",
+    "test:record:serial": "cucumber-js --format json:reports/cucumber-serial.json --world-parameters=\"{\\\"record\\\": true}\" --tags @serial",
+    "test:record": "npm run test:record:parallel && npm run test:record:serial",
     "report": "node generate-report.ts"
   },
   "keywords": [],
@@ -19,11 +21,13 @@
     "@types/dotenv": "^6.1.1",
     "@types/mssql": "^9.1.7",
     "@types/node": "^22.14.1",
+    "full-icu": "^1.5.0",
     "multiple-cucumber-html-reporter": "^3.9.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@azure/identity": "^4.12.0",
     "dotenv": "^16.5.0",
     "mssql": "^11.0.1"
   }

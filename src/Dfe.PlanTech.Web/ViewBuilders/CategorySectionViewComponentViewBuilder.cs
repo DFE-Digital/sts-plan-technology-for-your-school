@@ -16,7 +16,7 @@ public class CategorySectionViewComponentViewBuilder(
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    public async Task<CategorySectionViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category)
+    public async Task<CategoryCardsViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category)
     {
         if (!category.Sections.Any())
         {
@@ -24,7 +24,7 @@ public class CategorySectionViewComponentViewBuilder(
             throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
         List<SqlSectionStatusDto> sectionStatuses = [];
         string? progressRetrievalErrorMessage = null;
@@ -43,41 +43,19 @@ public class CategorySectionViewComponentViewBuilder(
         }
 
         var categoryLandingSlug = GetLandingPageSlug(category);
-        var categorySections = await BuildCategorySectionViewModel(category.Sections, sectionStatuses, progressRetrievalErrorMessage is null).ToListAsync();
         var description = category.Content is { Count: > 0 } content
-            ? content[0]
-            : new MissingComponentEntry();
+        ? content[0]
+        : new MissingComponentEntry();
 
-        return new CategorySectionViewComponentViewModel
+        return new CategoryCardsViewComponentViewModel
         {
             CategoryHeaderText = category.Header.Text,
-            CategorySections = categorySections,
             CategorySlug = categoryLandingSlug,
             CompletedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate.HasValue),
             Description = description,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
             TotalSectionCount = category.Sections.Count
         };
-    }
-
-    private async IAsyncEnumerable<CategorySectionViewModel> BuildCategorySectionViewModel(
-        ICollection<QuestionnaireSectionEntry> sections,
-        List<SqlSectionStatusDto> sectionStatuses,
-        bool hadRetrievalError
-    )
-    {
-        foreach (var section in sections)
-        {
-            if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
-            {
-                Logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
-            }
-
-            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
-            var recommendationIntro = await BuildCategorySectionRecommendationViewModel(section, sectionStatus);
-
-            yield return new CategorySectionViewModel(section, recommendationIntro, sectionStatus, hadRetrievalError);
-        }
     }
 
     private string? GetLandingPageSlug(QuestionnaireCategoryEntry category)

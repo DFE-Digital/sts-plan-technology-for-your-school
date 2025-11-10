@@ -11,7 +11,7 @@ public class CookiesViewModel
 
     public ComponentTitleEntry Title { get; init; } = null!;
 
-    public List<ContentfulEntry> Content { get; init; } = null!;
+    public List<ContentfulEntry> Content { get; init; } = [];
 
     public DfeCookieModel Cookie { get; init; } = new DfeCookieModel();
 

@@ -14,29 +14,31 @@ public class CmsViewBuilderTests
 
     private sealed class TestController : Controller { }
 
-    private static CmsViewBuilder CreateSut(
-        IContentfulService? contentful = null,
-        IRecommendationService? recs = null)
+    private static CmsViewBuilder CreateSut(IContentfulService? contentful = null)
     {
         contentful ??= Substitute.For<IContentfulService>();
-        recs ??= Substitute.For<IRecommendationService>();
-        return new CmsViewBuilder(contentful, recs);
+        return new CmsViewBuilder(contentful);
     }
 
-    private static QuestionnaireSectionEntry MakeSection(string id) =>
-        new QuestionnaireSectionEntry { Sys = new SystemDetails(id), Name = $"Section {id}" };
+    private static QuestionnaireSectionEntry MakeSection(string id, List<QuestionnaireQuestionEntry>? questions = null) =>
+        new QuestionnaireSectionEntry
+        {
+            Questions = questions ?? [],
+            Sys = new SystemDetails(id),
+            Name = $"Section {id}"
+        };
 
     private static RecommendationChunkEntry MakeRecEntry(
-        string header,
-        params string?[] answerIds)
+       string header,
+       params string?[] answerIds)
     {
         return new RecommendationChunkEntry
         {
             Header = header,
-            Answers = answerIds
+            CompletingAnswers = answerIds
                 .Where(id => !string.IsNullOrWhiteSpace(id))
                 .Select(id => new QuestionnaireAnswerEntry { Sys = new SystemDetails(id!) })
-                .ToList()
+                .ToList(),
         };
     }
 
@@ -45,15 +47,7 @@ public class CmsViewBuilderTests
     [Fact]
     public void Ctor_Null_Contentful_Throws()
     {
-        var recs = Substitute.For<IRecommendationService>();
-        Assert.Throws<System.ArgumentNullException>(() => new CmsViewBuilder(null!, recs));
-    }
-
-    [Fact]
-    public void Ctor_Null_RecommendationService_Throws()
-    {
-        var contentful = Substitute.For<IContentfulService>();
-        Assert.Throws<System.ArgumentNullException>(() => new CmsViewBuilder(contentful, null!));
+        Assert.Throws<ArgumentNullException>(() => new CmsViewBuilder(null!));
     }
 
     // --- GetAllSectionsAsync ------------------------------------------------
@@ -81,15 +75,35 @@ public class CmsViewBuilderTests
     [Fact]
     public async Task GetChunks_Defaults_Page_To_1_When_Null()
     {
-        var recs = Substitute.For<IRecommendationService>();
-        recs.GetRecommendationChunkCount(1).Returns(5);
-        recs.GetPaginatedRecommendationEntries(1).Returns(new[]
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetRecommendationChunkCountAsync(1).Returns(5);
+        contentful.GetPaginatedRecommendationEntriesAsync(1).Returns(new[]
         {
             MakeRecEntry("H1", "a1", null),  // null id should be filtered out
-            MakeRecEntry("H2", "b1", "b2")
+            MakeRecEntry("H2", "b1"),
+            MakeRecEntry("H3", "b2"),
         });
 
-        var sut = CreateSut(recs: recs);
+        var questions = new List<QuestionnaireQuestionEntry>
+        {
+            new QuestionnaireQuestionEntry()
+            {
+                Answers = new List<QuestionnaireAnswerEntry>
+                {
+                    new() { Sys = new SystemDetails("a1"), Text = "A1" },
+                    new() { Sys = new SystemDetails("b1"), Text = "B1" },
+                    new() { Sys = new SystemDetails("b2"), Text = "B2" },
+                }
+            }
+        };
+
+        contentful.GetAllSectionsAsync().Returns(new[]
+        {
+            MakeSection("A", questions),
+        });
+
+
+        var sut = CreateSut(contentful);
         var controller = new TestController();
 
         var action = await sut.GetChunks(controller, page: null);
@@ -100,29 +114,45 @@ public class CmsViewBuilderTests
         Assert.Equal(1, model.Page);
         Assert.Equal(5, model.Total);
 
-        // Expected chunks: "a1" from H1, and "b1","b2" from H2 => 3 total, no null IDs
+        // Expected chunks: "a1" from H1, and "b1" from H2 and "b3" from "h3" => 3 total, no null IDs
         Assert.Equal(3, model.Items.Count);
-        Assert.Contains(model.Items, i => i.AnswerId == "a1" && i.RecommendationHeader == "H1");
-        Assert.Contains(model.Items, i => i.AnswerId == "b1" && i.RecommendationHeader == "H2");
-        Assert.Contains(model.Items, i => i.AnswerId == "b2" && i.RecommendationHeader == "H2");
-
-        await recs.Received(1).GetRecommendationChunkCount(1);
-        await recs.Received(1).GetPaginatedRecommendationEntries(1);
+        Assert.Contains(model.Items, i => i.CompletingAnswerId == "a1" && i.RecommendationHeader == "H1");
+        Assert.Contains(model.Items, i => i.CompletingAnswerId == "b1" && i.RecommendationHeader == "H2");
+        Assert.Contains(model.Items, i => i.CompletingAnswerId == "b2" && i.RecommendationHeader == "H3");
     }
 
     [Fact]
     public async Task GetChunks_Uses_Supplied_Page_And_Flattens_Answers()
     {
-        var recs = Substitute.For<IRecommendationService>();
-        recs.GetRecommendationChunkCount(3).Returns(10);
-        recs.GetPaginatedRecommendationEntries(3).Returns(new[]
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetRecommendationChunkCountAsync(3).Returns(10);
+        contentful.GetPaginatedRecommendationEntriesAsync(3).Returns(new[]
         {
             MakeRecEntry("Header A", "x1"),
-            MakeRecEntry("Header B", "y1", "y2", null), // null filtered
-            MakeRecEntry("Header C") // no answers
+            MakeRecEntry("Header B", "y1", null), // null filtered
+            MakeRecEntry("Header C", "y2", null),
+            MakeRecEntry("Header D") // no answers
         });
 
-        var sut = CreateSut(recs: recs);
+        var questions = new List<QuestionnaireQuestionEntry>
+        {
+            new QuestionnaireQuestionEntry()
+            {
+                Answers = new List<QuestionnaireAnswerEntry>
+                {
+                    new() { Sys = new SystemDetails("x1"), Text = "X1" },
+                    new() { Sys = new SystemDetails("y1"), Text = "Y1" },
+                    new() { Sys = new SystemDetails("y2"), Text = "Y2" },
+                }
+            }
+        };
+
+        contentful.GetAllSectionsAsync().Returns(new[]
+        {
+            MakeSection("A", questions),
+        });
+
+        var sut = CreateSut(contentful);
         var controller = new TestController();
 
         var action = await sut.GetChunks(controller, page: 3);
@@ -133,10 +163,10 @@ public class CmsViewBuilderTests
         Assert.Equal(3, model.Page);
         Assert.Equal(10, model.Total);
 
-        // Expected chunk models: x1 (A), y1 (B), y2 (B) => 3 total
-        Assert.Equal(3, model.Items.Count);
+        // Expected chunk models: x1 (A), y1 (B), y2 (C) => 3 total
+        Assert.Equal(4, model.Items.Count);
 
-        var (ids, headers) = (model.Items.Select(i => i.AnswerId).ToList(),
+        var (ids, headers) = (model.Items.Select(i => i.CompletingAnswerId).ToList(),
                               model.Items.Select(i => i.RecommendationHeader).ToList());
 
         Assert.Contains("x1", ids);
@@ -145,20 +175,16 @@ public class CmsViewBuilderTests
 
         Assert.Contains("Header A", headers);
         Assert.Contains("Header B", headers);
-        Assert.DoesNotContain("Header C", headers); // no answers => contributes nothing
+        Assert.Contains("Header C", headers);
 
-        await recs.Received(1).GetRecommendationChunkCount(3);
-        await recs.Received(1).GetPaginatedRecommendationEntries(3);
+        var headerD = model.Items.Single(i => i.RecommendationHeader == "Header D");
+        Assert.Contains("", headerD.CompletingAnswerId); // completingAnswerId is empty string when no answers.
     }
 
     [Fact]
     public async Task GetChunks_When_No_Entries_Returns_Empty_Items_With_Correct_Metadata()
     {
-        var recs = Substitute.For<IRecommendationService>();
-        recs.GetRecommendationChunkCount(2).Returns(0);
-        recs.GetPaginatedRecommendationEntries(2).Returns(Enumerable.Empty<RecommendationChunkEntry>());
-
-        var sut = CreateSut(recs: recs);
+        var sut = CreateSut();
         var controller = new TestController();
 
         var action = await sut.GetChunks(controller, page: 2);

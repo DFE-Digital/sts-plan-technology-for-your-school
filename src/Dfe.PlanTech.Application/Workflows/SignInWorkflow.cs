@@ -58,7 +58,7 @@ public class SignInWorkflow(
             Urn = establishmentModel.Urn,
             Type = establishmentModel.Type?.Name is null
                 ? null
-                : new EstablishmentTypeModel { Name = establishmentModel.Type.Name },
+                : new IdWithNameModel { Name = establishmentModel.Type.Name },
             Name = establishmentModel.Name,
             GroupUid = establishmentModel.Uid
         };

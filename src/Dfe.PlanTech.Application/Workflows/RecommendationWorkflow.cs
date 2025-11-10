@@ -1,24 +1,69 @@
 ﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
-using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.Contentful.Options;
-using Dfe.PlanTech.Data.Contentful.Interfaces;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class RecommendationWorkflow(
-    IContentfulRepository contentfulRepository
+    IEstablishmentRecommendationHistoryRepository establishmentRecommendationHistoryRepository,
+    IRecommendationRepository recommendationRepository
 ) : IRecommendationWorkflow
 {
-    private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
-
-    public async Task<int> GetRecommendationChunkCount(int page)
+    public async Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        int establishmentId)
     {
-        return await _contentfulRepository.GetEntriesCountAsync<RecommendationChunkEntry>();
+        var recommendations = await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference });
+        var recommendation = recommendations.FirstOrDefault();
+
+        if (recommendation == null)
+        {
+            return null;
+        }
+
+        var latestHistoryForRecommendation = await establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, recommendation.Id);
+
+        return latestHistoryForRecommendation?.AsDto();
     }
 
-    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntries(int page)
+    public async Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByEstablishmentIdAsync(
+        int establishmentId)
     {
-        var options = new GetEntriesOptions(include: 3) { Page = page };
-        return _contentfulRepository.GetPaginatedEntriesAsync<RecommendationChunkEntry>(options);
+        var recommendationHistoryEntities = await establishmentRecommendationHistoryRepository.GetRecommendationHistoryByEstablishmentIdAsync(establishmentId);
+
+        return recommendationHistoryEntities
+            .GroupBy(rhe => rhe.Recommendation.ContentfulRef)
+            .ToDictionary(
+                group => group.Key,
+                group => group.OrderByDescending(g => g.DateCreated).First().AsDto()
+            );
+    }
+
+    public async Task UpdateRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        int establishmentId,
+        int userId,
+        string newStatus,
+        string? noteText = null,
+        int? matEstablishmentId = null)
+    {
+        // Get the recommendation by ContentfulRef to get its ID
+        var recommendations = await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference });
+        var recommendation = recommendations.FirstOrDefault()
+            ?? throw new InvalidOperationException($"Recommendation with ContentfulRef '{recommendationContentfulReference}' not found");
+
+        // Get current status, to use it as the new previous status
+        var currentStatus = await GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
+        var previousStatus = currentStatus?.NewStatus;
+
+        await establishmentRecommendationHistoryRepository.CreateRecommendationHistoryAsync(
+            establishmentId,
+            recommendation.Id,
+            userId,
+            matEstablishmentId,
+            previousStatus,
+            newStatus,
+            noteText ?? string.Empty
+        );
     }
 }

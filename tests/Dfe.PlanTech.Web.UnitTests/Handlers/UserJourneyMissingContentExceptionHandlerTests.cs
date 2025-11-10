@@ -17,17 +17,20 @@ namespace Dfe.PlanTech.Web.UnitTests.Handlers;
 
 public class UserJourneyMissingContentExceptionHandlerTests
 {
-    private static (CurrentUser user, DefaultHttpContext http) MakeCurrentUser(int? establishmentId)
+    private static (CurrentUser currentUser, HttpContext http) MakeCurrentUser(int? establishmentId = null)
     {
         var http = new DefaultHttpContext();
-        var identity = new ClaimsIdentity("test");
+        var identity = new ClaimsIdentity(authenticationType: "test");
+
         if (establishmentId.HasValue)
         {
             identity.AddClaim(new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, establishmentId.Value.ToString()));
         }
         http.User = new ClaimsPrincipal(identity);
         var accessor = new HttpContextAccessor { HttpContext = http };
-        return (new CurrentUser(accessor), http);
+        var establishmentService = Substitute.For<IEstablishmentService>();
+        var logger = Substitute.For<ILogger<CurrentUser>>();
+        return (new CurrentUser(accessor, establishmentService, logger), http);
     }
 
     private static Controller MakeController(HttpContext http)
@@ -78,7 +81,7 @@ public class UserJourneyMissingContentExceptionHandlerTests
         var result = await sut.Handle(controller, ex);
 
         // Assert: deletion called with current user's establishment and section id
-        await submissionSvc.Received(1).DeleteCurrentSubmissionHardAsync(456, "sec-1");
+        await submissionSvc.Received(1).SetSubmissionInaccessibleAsync(456, "sec-1");
 
         // TempData set
         Assert.True(controller.TempData.ContainsKey(UserJourneyMissingContentExceptionHandler.ErrorMessageTempDataKey));
@@ -106,8 +109,8 @@ public class UserJourneyMissingContentExceptionHandlerTests
 
         // Act + Assert
         var thrown = await Assert.ThrowsAsync<InvalidDataException>(() => sut.Handle(controller, ex));
-        Assert.Contains(nameof(CurrentUser.EstablishmentId), thrown.Message);
+        Assert.Contains(nameof(CurrentUser.GetActiveEstablishmentIdAsync), thrown.Message);
 
-        await submissionSvc.DidNotReceiveWithAnyArgs().DeleteCurrentSubmissionHardAsync(default!, default!);
+        await submissionSvc.DidNotReceiveWithAnyArgs().SetSubmissionInaccessibleAsync(default!, default!);
     }
 }

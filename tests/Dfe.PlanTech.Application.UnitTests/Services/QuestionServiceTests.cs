@@ -73,6 +73,30 @@ public class QuestionServiceTests
     }
 
     [Fact]
+    public async Task Returns_FirstQuestion_When_Submission_Inaccessible()
+    {
+        // Arrange
+        var section = BuildSectionGraph();
+        const int establishmentId = 1;
+        var submission = new SqlSubmissionDto { Status = "Inaccessible" };
+
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+           .Returns(submission);
+
+        var questionService = CreateServiceUnderTest();
+
+        // Act
+        var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
+
+        // Assert
+        Assert.NotNull(next);
+        Assert.Equal("Q1", next!.Id);
+
+        await _mockSubmissionWorkflow.Received(1)
+                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+    }
+
+    [Fact]
     public async Task Throws_When_Submission_Has_No_Responses()
     {
         // Arrange
@@ -90,7 +114,7 @@ public class QuestionServiceTests
         var ex = await Assert.ThrowsAsync<DatabaseException>(
             () => questionService.GetNextUnansweredQuestion(establishmentId, section));
 
-        Assert.Contains("no responses", ex.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("no responses", ex.Message, StringComparison.InvariantCultureIgnoreCase);
         Assert.Contains(submission.Id.ToString(), ex.Message);
         Assert.Contains(establishmentId.ToString(), ex.Message);
     }

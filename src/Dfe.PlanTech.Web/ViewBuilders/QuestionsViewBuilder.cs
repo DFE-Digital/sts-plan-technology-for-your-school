@@ -19,7 +19,6 @@ public class QuestionsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
-    IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
     IQuestionService questionService,
     ISubmissionService submissionService,
@@ -31,11 +30,12 @@ public class QuestionsViewBuilder(
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorMessagesConfiguration _errorMessages = errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
-    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
     private readonly ContentfulOptionsConfiguration _contentfulOptions = contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
+    private const string ContinueSelfAssessmentView = "ContinueSelfAssessment";
+    private const string RestartObsoleteAssessmentView = "RestartObsoleteAssessment";
 
 
     public async Task<IActionResult> RouteBySlugAndQuestionAsync(
@@ -46,7 +46,7 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
@@ -116,7 +116,7 @@ public class QuestionsViewBuilder(
             return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestionSlug, returnTo);
         }
 
-        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, false);
+        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
     }
 
     public async Task<IActionResult> RouteToInterstitialPage(Controller controller, string categorySlug, string sectionSlug)
@@ -141,7 +141,7 @@ public class QuestionsViewBuilder(
 
     public async Task<IActionResult> RouteToNextUnansweredQuestion(Controller controller, string categorySlug, string sectionSlug)
     {
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
 
         try
@@ -149,7 +149,7 @@ public class QuestionsViewBuilder(
             var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
             if (nextQuestion is null)
             {
-                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, null);
+                return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
             }
 
             return controller.RedirectToAction(nameof(QuestionsController.GetQuestionBySlug), new { categorySlug, sectionSlug, questionSlug = nextQuestion.Slug });
@@ -157,7 +157,7 @@ public class QuestionsViewBuilder(
         catch (DatabaseException)
         {
             // Remove the current invalid submission and redirect to self-assessment page
-            await _submissionService.DeleteCurrentSubmissionSoftAsync(establishmentId, section.Id);
+            await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
 
             controller.TempData["SubtopicError"] = await BuildErrorMessage();
             return controller.RedirectToAction(
@@ -165,6 +165,92 @@ public class QuestionsViewBuilder(
                 PagesController.ControllerName,
                 new { route = UrlConstants.Home });
         }
+    }
+
+    public async Task<IActionResult> RouteToContinueSelfAssessmentPage(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug)
+    {
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+
+        var submissionModel = await _submissionService.GetLatestSubmissionResponsesModel(
+            establishmentId, section, isCompletedSubmission: false);
+
+        if (submissionModel is null || !submissionModel.HasResponses)
+        {
+            return controller.RedirectToInterstitialPage(sectionSlug);
+        }
+
+        if (!String.IsNullOrEmpty(submissionModel.Status) && submissionModel.Status.Equals(nameof(SubmissionStatus.Obsolete)))
+        {
+            var restartObsoleteViewModel = new RestartObsoleteAssessmentViewModel
+            {
+                TopicName = section.Name,
+                CategorySlug = categorySlug,
+                SectionSlug = sectionSlug
+            };
+
+            return controller.View(RestartObsoleteAssessmentView, restartObsoleteViewModel);
+        }
+        ;
+
+        var viewModel = new ContinueSelfAssessmentViewModel
+        {
+            AssessmentStartDate = submissionModel.DateCreated ?? DateTime.UtcNow,
+            AssessmentUpdatedDate = submissionModel.DateLastUpdated ?? DateTime.UtcNow,
+            AnsweredCount = submissionModel.Responses.Count,
+            QuestionsCount = section.Questions.Count(),
+            TopicName = section.Name,
+            Responses = submissionModel.Responses,
+            CategorySlug = categorySlug,
+            SectionSlug = sectionSlug
+        };
+
+        return controller.View(ContinueSelfAssessmentView, viewModel);
+    }
+
+    public async Task<IActionResult> RestartSelfAssessment(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        bool isObsoleteSubmissionFlow)
+    {
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
+
+        if (!isObsoleteSubmissionFlow)
+        {
+            await _submissionService.SetSubmissionInaccessibleAsync(establishmentId, section.Id);
+        }
+        ;
+
+        return controller.RedirectToAction(
+            nameof(QuestionsController.GetInterstitialPage),
+            QuestionsController.Controller,
+            new { categorySlug, sectionSlug }
+        );
+    }
+
+    public async Task<IActionResult> ContinuePreviousAssessment(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug)
+    {
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException($"Could not find interstitial page for section {sectionSlug}");
+
+        await _submissionService.RestoreInaccessibleSubmissionAsync(establishmentId, section.Id);
+
+        return controller.RedirectToAction(
+            nameof(QuestionsController.GetNextUnansweredQuestion),
+            QuestionsController.Controller,
+            new { categorySlug, sectionSlug }
+        );
     }
 
     public async Task<IActionResult> SubmitAnswerAndRedirect(
@@ -177,11 +263,12 @@ public class QuestionsViewBuilder(
     )
     {
         var userId = GetUserIdOrThrowException();
-        var establishmentId = GetEstablishmentIdOrThrowException();
+        var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var userOrganisationId = CurrentUser.UserOrganisationId
+            ?? throw new InvalidOperationException("User organisation ID is null - user needs to be logged in to submit an answer");
 
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
 
         var question = section.GetQuestionBySlug(questionSlug);
 
@@ -198,35 +285,29 @@ public class QuestionsViewBuilder(
 
         try
         {
-            await _submissionService.SubmitAnswerAsync(userId, establishmentId, answerViewModel.ToModel());
+            await _submissionService.SubmitAnswerAsync(userId, activeEstablishmentId, userOrganisationId, answerViewModel.ToModel());
         }
         catch (Exception e)
         {
             Logger.LogError(e, "An error occurred while submitting an answer with the following message: {Message} ", e.Message);
             var viewModel = GenerateViewModel(controller, question, section, categorySlug, sectionSlug, questionSlug, null);
             viewModel.ErrorMessages = ["Save failed. Please try again later."];
+
             return controller.View(QuestionView, viewModel);
         }
 
-        var isChangeAnswersFlow = IsChangeAnswersFlow(returnTo);
-        if (!isChangeAnswersFlow)
-        {
-            return await RouteToNextUnansweredQuestion(controller, categorySlug, sectionSlug);
-        }
-
-        if (submissionRoutingData.Submission?.Responses is null)
-        {
-            return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
-        }
-
-        var nextQuestion = await _questionService.GetNextUnansweredQuestion(establishmentId, section);
+        var nextQuestion = await _questionService.GetNextUnansweredQuestion(activeEstablishmentId, section);
         if (nextQuestion is not null)
         {
-            return await RouteBySlugAndQuestionAsync(controller, categorySlug, sectionSlug, nextQuestion.Slug, returnTo);
+            return controller.RedirectToAction(
+                nameof(QuestionsController.GetQuestionBySlug),
+                QuestionsController.Controller,
+                new { categorySlug, sectionSlug, questionSlug = nextQuestion.Slug, returnTo }
+            );
         }
 
         // No next questions so check answers
-        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug, isChangeAnswersFlow);
+        return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
     }
 
     private async Task<string> BuildErrorMessage()

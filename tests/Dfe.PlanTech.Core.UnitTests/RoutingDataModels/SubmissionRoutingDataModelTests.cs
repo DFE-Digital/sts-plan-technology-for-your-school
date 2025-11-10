@@ -10,7 +10,6 @@ namespace Dfe.PlanTech.Core.UnitTests.RoutingDataModels;
 public class SubmissionRoutingDataModelTests
 {
     #region Constants
-    private const string ArbitraryMaturity = "arbitrary";
     private const SubmissionStatus ArbitraryStatus = SubmissionStatus.InProgress;
     #endregion
 
@@ -59,7 +58,6 @@ public class SubmissionRoutingDataModelTests
         };
 
         var routingData = new SubmissionRoutingDataModel(
-            maturity: ArbitraryMaturity,
             nextQuestion: null,
             questionnaireSection: questionnaireSection,
             submission: submission,
@@ -102,7 +100,6 @@ public class SubmissionRoutingDataModelTests
         var expectedResponse = submission.Responses[0];
 
         var routingData = new SubmissionRoutingDataModel(
-            maturity: ArbitraryMaturity,
             nextQuestion: null,
             questionnaireSection: questionnaireSection,
             submission: submission,
@@ -131,7 +128,6 @@ public class SubmissionRoutingDataModelTests
         );
 
         var routingData = new SubmissionRoutingDataModel(
-            maturity: ArbitraryMaturity,
             nextQuestion: null,
             questionnaireSection: questionnaireSection,
             submission: submission,
@@ -158,7 +154,6 @@ public class SubmissionRoutingDataModelTests
         };
 
         var routingData = new SubmissionRoutingDataModel(
-            maturity: ArbitraryMaturity,
             nextQuestion: null,
             questionnaireSection: questionnaireSection,
             submission: null,
@@ -183,7 +178,6 @@ public class SubmissionRoutingDataModelTests
         };
 
         var routingData = new SubmissionRoutingDataModel(
-            maturity: ArbitraryMaturity,
             nextQuestion: null,
             questionnaireSection: questionnaireSection,
             submission: null,
@@ -211,7 +205,6 @@ public class SubmissionRoutingDataModelTests
 
         // Act
         var routingData = new SubmissionRoutingDataModel(
-            maturity: ArbitraryMaturity,
             nextQuestion: nextQuestion,
             questionnaireSection: questionnaireSection,
             submission: submission,
@@ -219,7 +212,6 @@ public class SubmissionRoutingDataModelTests
         );
 
         // Assert
-        Assert.Equal(ArbitraryMaturity, routingData.Maturity);
         Assert.Equal(ArbitraryStatus, routingData.Status);
         Assert.Same(nextQuestion, routingData.NextQuestion);
         Assert.Same(questionnaireSection, routingData.QuestionnaireSection);

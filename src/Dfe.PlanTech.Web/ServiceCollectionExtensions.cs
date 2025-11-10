@@ -160,7 +160,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddCurrentUser(this IServiceCollection services)
     {
         return services
-            .AddSingleton<ICurrentUser, CurrentUser>();
+            .AddScoped<ICurrentUser, CurrentUser>();
     }
 
     public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)
@@ -214,7 +214,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ICategorySectionViewComponentViewBuilder, CategorySectionViewComponentViewBuilder>();
         services.AddTransient<ICmsViewBuilder, CmsViewBuilder>();
         services.AddTransient<IFooterLinksViewComponentViewBuilder, FooterLinksViewComponentViewBuilder>();
-        services.AddTransient<IGroupsDashboardViewComponentViewBuilder, GroupsDashboardViewComponentViewBuilder>();
         services.AddTransient<IGroupsViewBuilder, GroupsViewBuilder>();
         services.AddTransient<IPagesViewBuilder, PagesViewBuilder>();
         services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();

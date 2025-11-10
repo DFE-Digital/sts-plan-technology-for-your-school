@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
@@ -7,11 +6,13 @@ namespace Dfe.PlanTech.Web.ViewModels;
 [ExcludeFromCodeCoverage]
 public class RecommendationsViewModel
 {
-    public string CategoryName { get; init; } = null!;
-    public List<RecommendationChunkEntry> Chunks { get; init; } = null!;
-    public string? LatestCompletionDate { get; init; } = null!;
-    public string SectionName { get; init; } = null!;
-    public string SectionSlug { get; init; } = null!;
-    public string? Slug { get; init; } = null;
-    public IEnumerable<QuestionWithAnswerModel> SubmissionResponses { get; init; } = null!;
+    public required string CategoryName { get; init; }
+    public List<RecommendationChunkViewModel> Chunks { get; init; } = [];
+    public string? LatestCompletionDate { get; init; }
+    public required string SectionName { get; init; }
+    public required string SectionSlug { get; init; }
+    public string? Slug { get; init; }
+    public int? CurrentChunkCount { get; set; }
+    public int? TotalChunks { get; set; }
+    public IEnumerable<QuestionWithAnswerModel> SubmissionResponses { get; init; } = [];
 }

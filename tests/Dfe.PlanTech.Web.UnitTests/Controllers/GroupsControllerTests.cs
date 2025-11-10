@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Web.Context.Interfaces;
+﻿using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -66,52 +67,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var result = await controller.SelectSchool(schoolUrn, schoolName);
 
             await _viewBuilder.Received(1).RecordGroupSelectionAsync(schoolUrn, schoolName);
-            _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn);
+            _currentUser.Received(1).SetGroupSelectedSchool(schoolUrn, schoolName);
 
-            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
-            Assert.Equal(GroupsController.GetSchoolDashboardAction, redirectResult.ActionName);
-        }
-
-        [Fact]
-        public async Task GetSchoolDashboardView_CallsViewBuilderAndReturnsResult()
-        {
-            _viewBuilder.RouteToSchoolDashboardViewAsync(_controller)
-                .Returns(new OkResult());
-
-            var result = await _controller.GetSchoolDashboardView();
-
-            await _viewBuilder.Received(1).RouteToSchoolDashboardViewAsync(_controller);
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
-        public async Task GetGroupsRecommendation_CallsViewBuilderAndReturnsResult()
-        {
-            var sectionSlug = "sec";
-
-            _viewBuilder.RouteToGroupsRecommendationAsync(_controller, sectionSlug)
-                .Returns(new OkResult());
-
-            var result = await _controller.GetGroupsRecommendation(sectionSlug);
-
-            await _viewBuilder.Received(1).RouteToGroupsRecommendationAsync(_controller, sectionSlug);
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
-        public async Task GetRecommendationsPrintView_CallsViewBuilderAndReturnsResult()
-        {
-            var schoolId = 123;
-            var schoolName = "Test School";
-            var sectionSlug = "sec";
-
-            _viewBuilder.RouteToRecommendationsPrintViewAsync(_controller, sectionSlug, schoolName)
-                .Returns(new OkResult());
-
-            var result = await _controller.GetRecommendationsPrintView(schoolName, sectionSlug);
-
-            await _viewBuilder.Received(1).RouteToRecommendationsPrintViewAsync(_controller, sectionSlug, schoolName);
-            Assert.IsType<OkResult>(result);
+            var redirect = Assert.IsType<RedirectResult>(result);
+            Assert.Equal(UrlConstants.HomePage, redirect.Url);
         }
     }
 }

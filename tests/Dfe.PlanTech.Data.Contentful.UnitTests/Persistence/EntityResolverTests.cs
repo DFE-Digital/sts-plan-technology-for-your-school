@@ -79,14 +79,11 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
         [InlineData(ContentfulContentTypeConstants.QuestionnaireQuestionContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.QuestionnaireSectionContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.RecommendationChunkContentfulContentTypeId)]
-        [InlineData(ContentfulContentTypeConstants.RecommendationIntroContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.RecommendationPageContentfulContentTypeId)]
-        [InlineData(ContentfulContentTypeConstants.RecommendationSectionContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.RichTextContentContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.RichTextContentDataContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.RichTextContentSupportDataContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.RichTextMarkContentfulContentTypeId)]
-        [InlineData(ContentfulContentTypeConstants.SubtopicRecommendationContentfulContentTypeId)]
         public void ContentfulContentId_KnownContentfulId_ReturnsMatchingCsharpType_ForAllMappings(string contentfulTypeId)
         {
             // Arrange

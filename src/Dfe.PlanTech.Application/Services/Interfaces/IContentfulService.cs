@@ -1,19 +1,18 @@
 ﻿using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.Application.Services.Interfaces
+namespace Dfe.PlanTech.Application.Services.Interfaces;
+
+public interface IContentfulService
 {
-    public interface IContentfulService
-    {
-        Task<IEnumerable<QuestionnaireSectionEntry>> GetAllSectionsAsync();
-        Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug, int? includeLevel = null);
-        Task<string?> GetCategoryHeaderTextBySlugAsync(string slug);
-        Task<NavigationLinkEntry> GetLinkByIdAsync(string contentId);
-        Task<List<NavigationLinkEntry>> GetNavigationLinksAsync();
-        Task<PageEntry> GetPageByIdAsync(string pageId);
-        Task<PageEntry> GetPageBySlugAsync(string slug);
-        Task<QuestionnaireQuestionEntry> GetQuestionByIdAsync(string questionId);
-        Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null);
-        Task<SubtopicRecommendationEntry?> GetSubtopicRecommendationByIdAsync(string subtopicId, int? includeLevel = null);
-        Task<RecommendationIntroEntry?> GetSubtopicRecommendationIntroAsync(string subtopicId, string maturity);
-    }
+    Task<IEnumerable<QuestionnaireSectionEntry>> GetAllSectionsAsync();
+    Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug, int? includeLevel = null);
+    Task<string?> GetCategoryHeaderTextBySlugAsync(string slug);
+    Task<NavigationLinkEntry> GetLinkByIdAsync(string contentId);
+    Task<List<NavigationLinkEntry>> GetNavigationLinksAsync();
+    Task<PageEntry> GetPageByIdAsync(string pageId);
+    Task<PageEntry> GetPageBySlugAsync(string slug);
+    Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page);
+    Task<QuestionnaireQuestionEntry> GetQuestionByIdAsync(string questionId);
+    Task<int> GetRecommendationChunkCountAsync(int page);
+    Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null);
 }

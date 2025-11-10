@@ -2,25 +2,21 @@
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Services;
 
 public class EstablishmentServiceTests
 {
-    private readonly ILogger<EstablishmentService> _logger = Substitute.For<ILogger<EstablishmentService>>();
     private readonly IEstablishmentWorkflow _establishmentWorkflow = Substitute.For<IEstablishmentWorkflow>();
-    private readonly ISubmissionWorkflow _submissionWorkflow = Substitute.For<ISubmissionWorkflow>();
+    private readonly IRecommendationWorkflow _recommendationWorkflow = Substitute.For<IRecommendationWorkflow>();
     private readonly IUserWorkflow _userWorkflow = Substitute.For<IUserWorkflow>();
 
     private EstablishmentService CreateServiceUnderTest()
         => new EstablishmentService(
-            _logger,
             _establishmentWorkflow,
-            _submissionWorkflow,
+            _recommendationWorkflow,
             _userWorkflow);
 
     [Fact]
@@ -62,63 +58,33 @@ public class EstablishmentServiceTests
     }
 
     [Fact]
-    public async Task GetLatestSelectedGroupSchoolAsync_Delegates_To_Workflow()
-    {
-        var expectedEstablishment = new SqlEstablishmentDto
-        {
-            Id = 1,
-            EstablishmentRef = "123",
-            OrgName = "Test Establishment",
-            DateCreated = DateTime.UtcNow
-        };
-
-        _establishmentWorkflow
-           .GetEstablishmentByReferenceAsync(Arg.Any<string>())
-           .Returns(expectedEstablishment);
-
-        var sut = CreateServiceUnderTest();
-
-        var establishment = await sut.GetLatestSelectedGroupSchoolAsync("123");
-
-        Assert.Same(expectedEstablishment, establishment);
-    }
-
-    [Fact]
-    public async Task GetLatestSelectedGroupSchoolAsync_Throws_Exception_If_Null_Establishment_Returned()
-    {
-        _establishmentWorkflow
-          .GetEstablishmentByReferenceAsync(Arg.Any<string>())
-          .Returns(default(SqlEstablishmentDto?));
-
-        var sut = CreateServiceUnderTest();
-
-        var action = async () => await sut.GetLatestSelectedGroupSchoolAsync("123");
-
-        await Assert.ThrowsAsync<DatabaseException>(action);
-    }
-
-    [Fact]
-    public async Task GetEstablishmentLinksWithSubmissionStatusesAndCounts_Computes_Completed_Counts()
+    public async Task GetEstablishmentLinksWithRecommendationCounts_Computes_Completed_Counts()
     {
         // Arrange
-        var categories = new List<QuestionnaireCategoryEntry>
+        var sections = new List<QuestionnaireSectionEntry>
         {
-            new QuestionnaireCategoryEntry
+            new QuestionnaireSectionEntry
             {
-                InternalName = "Test Internal Category Name",
-                Sections = new List<QuestionnaireSectionEntry>
+                Sys = new SystemDetails("S1"),
+                InternalName = "Test Internal Section Name 1",
+                Name = "Section 1",
+                CoreRecommendations = new List<RecommendationChunkEntry>
                 {
-                    new QuestionnaireSectionEntry
-                    {
-                        Sys = new SystemDetails("S1"),
-                        InternalName = "Test Internal Section Name 1",
-                        Name = "Section 1"
-                    },
-                    new QuestionnaireSectionEntry {
-                        Sys = new SystemDetails("S2"),
-                        InternalName = "Test Internal Section Name 2",
-                        Name = "Section 2"
-                    }
+                    new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-001" } },
+                    new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-002" } },
+                    new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-003" } },
+                    new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-004" } },
+                }
+            },
+            new QuestionnaireSectionEntry
+            {
+                Sys = new SystemDetails("S2"),
+                InternalName = "Test Internal Section Name 2",
+                Name = "Section 2",
+                CoreRecommendations = new List<RecommendationChunkEntry>
+                {
+                    new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-005" } },
+                    new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-006" } },
                 }
             }
         };
@@ -127,8 +93,7 @@ public class EstablishmentServiceTests
         var groupEstablishments = new List<SqlEstablishmentLinkDto>
         {
             new SqlEstablishmentLinkDto { Id = groupEstablishmentId, Urn = "URN-A", EstablishmentName = "A" },
-            new SqlEstablishmentLinkDto { Id = 102, Urn = "URN-B", EstablishmentName = "B" },
-            new SqlEstablishmentLinkDto { Id = 103, Urn = "URN-C", EstablishmentName = "C" }
+            new SqlEstablishmentLinkDto { Id = 102, Urn = "URN-B", EstablishmentName = "B" }
         };
         _establishmentWorkflow.GetGroupEstablishments(groupEstablishmentId).Returns(groupEstablishments);
 
@@ -138,33 +103,70 @@ public class EstablishmentServiceTests
             new SqlEstablishmentDto { Id = 1002, EstablishmentRef = "URN-B", OrgName = "B" }
         };
 
-        _establishmentWorkflow.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B", "URN-C" })))
+        _establishmentWorkflow.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B" })))
                               .Returns(establishments);
 
-        _submissionWorkflow.GetSectionStatusesAsync(1001, Arg.Is<IEnumerable<string>>(ids => ids.SequenceEqual(new[] { "S1", "S2" })))
-                           .Returns([
-                               new SqlSectionStatusDto { Completed = true },
-                               new SqlSectionStatusDto { Completed = false, LastCompletionDate = DateTime.UtcNow }
-                           ]);
+        var recommendationsEst1 = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+        {
+            ["rec-001"] = new SqlEstablishmentRecommendationHistoryDto
+            {
+                EstablishmentId = 1001,
+                RecommendationId = 1,
+                UserId = 1,
+                NewStatus = "Complete",
+                DateCreated = DateTime.UtcNow.AddDays(-1)
+            },
+            ["rec-002"] = new SqlEstablishmentRecommendationHistoryDto
+            {
+                EstablishmentId = 1001,
+                RecommendationId = 2,
+                UserId = 1,
+                NewStatus = "InProgress",
+                DateCreated = DateTime.UtcNow.AddDays(-2)
+            },
+            ["rec-003"] = new SqlEstablishmentRecommendationHistoryDto
+            {
+                EstablishmentId = 1001,
+                RecommendationId = 3,
+                UserId = 1,
+                NewStatus = "NotStarted",
+                DateCreated = DateTime.UtcNow.AddDays(-2)
+            }
+        };
 
-        _submissionWorkflow.GetSectionStatusesAsync(1002, Arg.Any<IEnumerable<string>>())
-                           .Returns([
-                               new SqlSectionStatusDto { Completed = true, LastCompletionDate = DateTime.UtcNow },
-                               new SqlSectionStatusDto { Completed = false }
-                           ]);
+        var recommendationsEst2 = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+        {
+            ["rec-004"] = new SqlEstablishmentRecommendationHistoryDto
+            {
+                EstablishmentId = 1002,
+                RecommendationId = 4,
+                UserId = 1,
+                NewStatus = "NotStarted",
+                DateCreated = DateTime.UtcNow.AddDays(-1)
+            },
+            ["rec-005"] = new SqlEstablishmentRecommendationHistoryDto
+            {
+                EstablishmentId = 1002,
+                RecommendationId = 5,
+                UserId = 1,
+                NewStatus = "InProgress",
+                DateCreated = DateTime.UtcNow.AddDays(-2)
+            }
+        };
+
+        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1001).Returns(recommendationsEst1);
+        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1002).Returns(recommendationsEst2);
 
         var sut = CreateServiceUnderTest();
 
         // Act
-        var result = await sut.GetEstablishmentLinksWithSubmissionStatusesAndCounts(categories, groupEstablishmentId);
+        var result = await sut.GetEstablishmentLinksWithRecommendationCounts(groupEstablishmentId);
 
         // Assert
         var a = result.Single(x => x.Urn == "URN-A");
         var b = result.Single(x => x.Urn == "URN-B");
-        var c = result.Single(x => x.Urn == "URN-C");
-        Assert.Equal(2, a.CompletedSectionsCount);
-        Assert.Equal(1, b.CompletedSectionsCount);
-        Assert.Equal(0, c.CompletedSectionsCount);
+        Assert.Equal(2, a.InProgressOrCompletedRecommendationsCount);
+        Assert.Equal(1, b.InProgressOrCompletedRecommendationsCount);
     }
 
     [Fact]
@@ -260,5 +262,60 @@ public class EstablishmentServiceTests
                 userEstablishmentModel: new EstablishmentModel { Urn = "U", Name = "N" },
                 selectedEstablishmentUrn: "SURN",
                 selectedEstablishmentName: "SNAME"));
+    }
+
+    [Fact]
+    public async Task GetEstablishmentLinksWithRecommendationCounts_WhenSchoolNotInEstablishmentTable_IncludesSchoolWithZeroCount()
+    {
+        // Arrange
+        const int groupEstablishmentId = 101;
+        var groupEstablishments = new List<SqlEstablishmentLinkDto>
+        {
+            new SqlEstablishmentLinkDto { Id = groupEstablishmentId, Urn = "URN-A", EstablishmentName = "School A" },
+            new SqlEstablishmentLinkDto { Id = 102, Urn = "URN-B", EstablishmentName = "School B" },
+            new SqlEstablishmentLinkDto { Id = 103, Urn = "URN-C", EstablishmentName = "School C (Never Logged In)" }
+        };
+        _establishmentWorkflow.GetGroupEstablishments(groupEstablishmentId).Returns(groupEstablishments);
+
+        // Only URN-A and URN-B exist in establishment table (URN-C has never logged in)
+        var establishments = new List<SqlEstablishmentDto>
+        {
+            new SqlEstablishmentDto { Id = 1001, EstablishmentRef = "URN-A", OrgName = "School A" },
+            new SqlEstablishmentDto { Id = 1002, EstablishmentRef = "URN-B", OrgName = "School B" }
+        };
+
+        _establishmentWorkflow.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B", "URN-C" })))
+                              .Returns(establishments);
+
+        var recommendationsEst1 = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+        {
+            ["rec-001"] = new SqlEstablishmentRecommendationHistoryDto
+            {
+                EstablishmentId = 1001,
+                RecommendationId = 1,
+                UserId = 1,
+                NewStatus = "Complete",
+                DateCreated = DateTime.UtcNow
+            }
+        };
+
+        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1001).Returns(recommendationsEst1);
+        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1002).Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>());
+
+        var sut = CreateServiceUnderTest();
+
+        // Act
+        var result = await sut.GetEstablishmentLinksWithRecommendationCounts(groupEstablishmentId);
+
+        // Assert
+        Assert.Equal(3, result.Count); // All 3 schools should be returned
+
+        var schoolA = result.Single(x => x.Urn == "URN-A");
+        var schoolB = result.Single(x => x.Urn == "URN-B");
+        var schoolC = result.Single(x => x.Urn == "URN-C");
+
+        Assert.Equal(1, schoolA.InProgressOrCompletedRecommendationsCount);
+        Assert.Equal(0, schoolB.InProgressOrCompletedRecommendationsCount);
+        Assert.Equal(0, schoolC.InProgressOrCompletedRecommendationsCount); // School C should have 0 count, not be excluded
     }
 }

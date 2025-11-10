@@ -5,6 +5,8 @@ public class SqlResponseDto : ISqlDto
     public int Id { get; set; }
     public int UserId { get; set; }
     public SqlUserDto? User { get; set; }
+    public int UserEstablishmentId { get; set; }
+    public SqlEstablishmentDto? UserEstablishment { get; set; } = null!;
     public int SubmissionId { get; set; }
     public SqlSubmissionDto Submission { get; set; } = null!;
     public int QuestionId { get; set; }

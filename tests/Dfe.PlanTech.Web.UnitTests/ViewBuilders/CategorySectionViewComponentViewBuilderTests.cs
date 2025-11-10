@@ -1,7 +1,6 @@
-﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.Extensions.Logging;
@@ -22,7 +21,7 @@ public class CategorySectionViewComponentViewBuilderTests
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUser>();
-        currentUser.EstablishmentId.Returns(1234);
+        currentUser.GetActiveEstablishmentIdAsync().Returns(1234);
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
         return new CategorySectionViewComponentViewBuilder(
@@ -89,10 +88,6 @@ public class CategorySectionViewComponentViewBuilderTests
         Assert.Equal("networks-landing", vm.CategorySlug);
         Assert.Equal(2, vm.TotalSectionCount);
         Assert.Equal(1, vm.CompletedSectionCount);
-        Assert.Equal(2, vm.CategorySections.Count);
-        // Current code passes "progressRetrievalErrorMessage is null" to child VMs,
-        // which means true when SUCCESS (arg name suggests the inverse).
-        Assert.All(vm.CategorySections, s => Assert.Equal(SectionProgressStatus.RetrievalError, s.ProgressStatus));
         Assert.Null(vm.ProgressRetrievalErrorMessage);
     }
 
@@ -111,11 +106,7 @@ public class CategorySectionViewComponentViewBuilderTests
 
         var vm = await sut.BuildViewModelAsync(category);
 
-        Assert.Equal(2, vm.CategorySections.Count);
         Assert.Equal("Unable to retrieve progress, please refresh your browser.", vm.ProgressRetrievalErrorMessage);
-
-        // With an error, the code passes (progressRetrievalErrorMessage is null) => false
-        Assert.All(vm.CategorySections, s => Assert.NotEqual(SectionProgressStatus.RetrievalError, s.ProgressStatus));
     }
 
     [Fact]

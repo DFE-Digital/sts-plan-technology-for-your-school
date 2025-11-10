@@ -36,6 +36,11 @@ runs:
         NOW=$(date +'%Y%m%d-%H%M')
         echo "ARTIFACT_PREFIX=-${{ inputs.environment }}-$NOW" >> $GITHUB_ENV
 
+    - name: Install contentful export-processor dependencies
+      shell: bash
+      working-directory: ./contentful/export-processor
+      run: npm install
+
     - name: Build and test project
       uses: cypress-io/github-action@v6
       env:

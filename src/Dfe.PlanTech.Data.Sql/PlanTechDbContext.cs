@@ -1,10 +1,8 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Data.Sql.Entities;
+﻿using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql;
 
-[ExcludeFromCodeCoverage]
 public class PlanTechDbContext : DbContext
 {
     public virtual DbSet<EstablishmentEntity> Establishments { get; set; } = null!;
@@ -17,7 +15,9 @@ public class PlanTechDbContext : DbContext
     public virtual DbSet<SignInEntity> SignIns { get; set; } = null!;
     public virtual DbSet<SubmissionEntity> Submissions { get; set; } = null!;
     public virtual DbSet<UserEntity> Users { get; set; } = null!;
-    public virtual DbSet<GroupReadActivityEntity> GroupReadActivities { get; set; }
+    public virtual DbSet<GroupReadActivityEntity> GroupReadActivities { get; set; } = null!;
+    public virtual DbSet<RecommendationEntity> Recommendations { get; set; } = null!;
+    public virtual DbSet<EstablishmentRecommendationHistoryEntity> EstablishmentRecommendationHistories { get; set; } = null!;
 
     public PlanTechDbContext() { }
 

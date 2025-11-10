@@ -6,9 +6,11 @@ namespace Dfe.PlanTech.Web.ViewModels;
 [ExcludeFromCodeCoverage]
 public class CategoryLandingPageViewModel
 {
-    public QuestionnaireCategoryEntry Category { get; set; } = null!;
+    public required QuestionnaireCategoryEntry Category { get; set; }
     public string? SectionName { get; set; }
-    public string Slug { get; set; } = null!;
+    public required string Slug { get; set; }
+    public string? SortOrder { get; set; }
     public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
-    public ComponentTitleEntry Title { get; set; } = null!;
+    public required ComponentTitleEntry Title { get; set; }
+    public bool Print { get; set; }
 }

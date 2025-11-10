@@ -15,6 +15,9 @@ public static class UserClaimsExtensions
         PropertyNameCaseInsensitive = true
     };
 
+    public static UserAuthorisationStatus GetAuthorisationStatus(this ClaimsPrincipal claimsPrincipal) =>
+        new(claimsPrincipal.Identity?.IsAuthenticated == true, claimsPrincipal.Claims.GetOrganisation() != null);
+
     public static string GetDsiReference(this IEnumerable<Claim> claims)
     {
         ArgumentNullException.ThrowIfNull(claims, nameof(claims));
@@ -39,7 +42,10 @@ public static class UserClaimsExtensions
     {
         ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
-        string? organisationJson = GetUserOrganisationClaim(claims);
+        string? organisationJson = claims
+            .FirstOrDefault(c => c.Type == ClaimConstants.Organisation)?
+            .Value;
+
         if (organisationJson == null)
         {
             return null;
@@ -53,15 +59,4 @@ public static class UserClaimsExtensions
 
         return organisation;
     }
-
-    public static EstablishmentModel? GetUserOrganisation(this ClaimsPrincipal claimsPrincipal) =>
-        claimsPrincipal.Claims.GetOrganisation();
-
-    public static UserAuthorisationStatus AuthorisationStatus(this ClaimsPrincipal claimsPrincipal) =>
-        new(claimsPrincipal.Identity?.IsAuthenticated == true, claimsPrincipal.GetUserOrganisation() != null);
-
-    private static string? GetUserOrganisationClaim(IEnumerable<Claim> claims) =>
-        claims
-            .Where(c => c.Type == ClaimConstants.Organisation).Select(c => c.Value)
-            .FirstOrDefault();
 }

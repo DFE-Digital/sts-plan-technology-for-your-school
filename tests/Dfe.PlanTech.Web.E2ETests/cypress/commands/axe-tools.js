@@ -20,6 +20,29 @@ export function terminalLog(violations) {
   )
 
   cy.task('table', violationData)
+
+  // Log full page HTML for debugging
+  cy.document().then((doc) => {
+    cy.task('log', '\n\n==================== FULL PAGE HTML ====================')
+    cy.task('log', doc.documentElement.outerHTML)
+    cy.task('log', '==================== END FULL PAGE HTML ====================\n')
+  })
+
+  // Log detailed node information for debugging
+  violations.forEach((violation) => {
+    cy.task('log', `\n=== Violation: ${violation.id} ===`)
+    cy.task('log', `Description: ${violation.description}`)
+    cy.task('log', `Impact: ${violation.impact}`)
+    cy.task('log', `Help: ${violation.help}`)
+    cy.task('log', `Help URL: ${violation.helpUrl}`)
+
+    violation.nodes.forEach((node, index) => {
+      cy.task('log', `\n--- Node ${index + 1} of ${violation.nodes.length} ---`)
+      cy.task('log', `Target: ${node.target.join(' > ')}`)
+      cy.task('log', `HTML: ${node.html}`)
+      cy.task('log', `Failure summary: ${node.failureSummary}`)
+    })
+  })
 }
 
 /**

@@ -37,6 +37,14 @@ public class PagesController(
         return _pagesViewBuilder.RouteBasedOnOrganisationTypeAsync(this, page);
     }
 
+    [HttpGet("{categorySlug}/print", Name = "GetStandardChecklist")]
+    public async Task<IActionResult> GetStandardChecklist(string categorySlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToCategoryLandingPrintPageAsync(this, categorySlug);
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [HttpGet(UrlConstants.Error, Name = UrlConstants.Error)]
     public IActionResult Error() =>

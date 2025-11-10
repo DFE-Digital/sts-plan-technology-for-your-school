@@ -1,10 +1,24 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
-namespace Dfe.PlanTech.Application.Services.Interfaces
+namespace Dfe.PlanTech.Application.Services.Interfaces;
+
+public interface IRecommendationService
 {
-    public interface IRecommendationService
-    {
-        Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntries(int page);
-        Task<int> GetRecommendationChunkCount(int page);
-    }
+    Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        int establishmentId
+    );
+
+    Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesAsync(
+        int establishmentId
+    );
+
+    Task UpdateRecommendationStatusAsync(
+        string recommendationContentfulReference,
+        int establishmentId,
+        int userId,
+        string newStatus,
+        string? noteText = null,
+        int? matEstablishmentId = null
+    );
 }

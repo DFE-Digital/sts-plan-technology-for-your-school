@@ -8,11 +8,10 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
                     Controller controller,
                     string categorySlug,
                     string sectionSlug,
-                    bool? isChangeAnswersFlow,
                     string? errorMessage = null
                 );
 
-        Task<IActionResult> RouteToChangeAnswers(
+        Task<IActionResult> RouteToViewAnswers(
             Controller controller,
             string categorySlug,
             string sectionSlug,

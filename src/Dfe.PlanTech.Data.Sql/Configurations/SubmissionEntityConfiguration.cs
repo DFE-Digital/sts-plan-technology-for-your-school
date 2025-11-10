@@ -1,11 +1,9 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Data.Sql.Entities;
+﻿using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
-[ExcludeFromCodeCoverage]
 internal class SubmissionEntityConfiguration : IEntityTypeConfiguration<SubmissionEntity>
 {
     public void Configure(EntityTypeBuilder<SubmissionEntity> builder)
@@ -14,5 +12,6 @@ internal class SubmissionEntityConfiguration : IEntityTypeConfiguration<Submissi
         builder.ToTable(tb => tb.HasTrigger("tr_submission"));
         builder.Property(submission => submission.DateCreated).HasColumnType("datetime").HasDefaultValue();
         builder.Property(submission => submission.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
+        builder.Property(submission => submission.Status).HasMaxLength(50);
     }
 }

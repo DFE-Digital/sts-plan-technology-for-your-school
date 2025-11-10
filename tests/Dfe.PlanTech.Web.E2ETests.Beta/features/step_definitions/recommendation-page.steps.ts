@@ -1,6 +1,7 @@
 import { DataTable, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import { textToHyphenatedUrl } from '../../helpers/url';
+import { getCurrentShortDate, normaliseShortDateTimeText } from '../../helpers/datetime';
 
 Then('I should see the paragraph text {string} inside the recommendation content', async function (expectedText: string) {
   const paragraph = this.page.locator('.recommendation-piece-content p', { hasText: expectedText });
@@ -97,9 +98,8 @@ Then('I should see the print this page button', async function () {
 })
 
 Then('I should see the completed self assessment text on the print recommendations page', async function (sectionName: string) {
-  const today = new Date();
-  const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' };
-  const formattedDate = today.toLocaleDateString('en-GB', options).replace(',', '');
+   var currentDate = getCurrentShortDate();
+
   const sectionLower = sectionName.toLowerCase();
 
   const container = this.page.locator('#main-content');
@@ -107,10 +107,14 @@ Then('I should see the completed self assessment text on the print recommendatio
     'xpath=following-sibling::p[contains(normalize-space(.), "was completed on")]'
   ).first();
 
+  expect(completionPara).toBeVisible();
+
   const text = (await completionPara.innerText()).trim();
+  const normalisedText =  normaliseShortDateTimeText(text);
+  
   // e.g. The self-assessment for {sectionLower} was completed on 27 Aug 2025.
-  const expectedText = `The self-assessment for ${sectionLower} was completed on ${formattedDate}.`;
-  expect(text).toMatch(expectedText);
+  const expectedText = `The self-assessment for ${sectionLower} was completed on ${currentDate}.`;
+  expect(normalisedText).toMatch(expectedText);
 
   const viewText = container.locator(
     'xpath=following-sibling::p[contains(normalize-space(.), "View or update your self-assessment")][1]/a'

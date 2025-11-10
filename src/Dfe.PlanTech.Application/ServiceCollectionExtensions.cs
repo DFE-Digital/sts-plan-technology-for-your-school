@@ -37,8 +37,9 @@ public static class ServiceCollectionExtensions
             .AddScoped<IContentfulService, ContentfulService>()
             .AddScoped<IEstablishmentService, EstablishmentService>()
             .AddScoped<IQuestionService, QuestionService>()
+            .AddScoped<ISubmissionService, SubmissionService>()
             .AddScoped<IRecommendationService, RecommendationService>()
-            .AddScoped<ISubmissionService, SubmissionService>();
+            ;
     }
 
     public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)
@@ -46,8 +47,8 @@ public static class ServiceCollectionExtensions
         return services
             .AddScoped<IContentfulWorkflow, ContentfulWorkflow>()
             .AddScoped<IEstablishmentWorkflow, EstablishmentWorkflow>()
-            .AddScoped<IRecommendationWorkflow, RecommendationWorkflow>()
             .AddScoped<ISignInWorkflow, SignInWorkflow>()
+            .AddScoped<IRecommendationWorkflow, RecommendationWorkflow>()
             .AddScoped<ISubmissionWorkflow, SubmissionWorkflow>()
             .AddScoped<IUserWorkflow, UserWorkflow>();
     }

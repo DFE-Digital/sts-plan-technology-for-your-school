@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -7,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-[ExcludeFromCodeCoverage]
 public class EstablishmentRepository : IEstablishmentRepository
 {
     protected readonly PlanTechDbContext _db;
@@ -26,7 +24,7 @@ public class EstablishmentRepository : IEstablishmentRepository
             EstablishmentRef = model.Reference,
             EstablishmentType = model.Type?.Name,
             OrgName = model.Name,
-            GroupUid = model.GroupUid
+            GroupUid = model.GroupUid // TODO: Consider getting it from `uid` instead, noting that `GroupUid` is populated from `uid`
         };
 
         await _db.Establishments.AddAsync(establishmentEntity);

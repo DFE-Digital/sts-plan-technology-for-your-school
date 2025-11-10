@@ -7,21 +7,18 @@ namespace Dfe.PlanTech.Core.RoutingDataModels
 {
     public class SubmissionRoutingDataModel
     {
-        public string? Maturity { get; set; }
         public QuestionnaireQuestionEntry? NextQuestion { get; set; }
         public QuestionnaireSectionEntry QuestionnaireSection { get; set; }
         public SubmissionResponsesModel? Submission { get; set; }
         public SubmissionStatus Status { get; init; }
 
         public SubmissionRoutingDataModel(
-            string? maturity,
             QuestionnaireQuestionEntry? nextQuestion,
             QuestionnaireSectionEntry questionnaireSection,
             SubmissionResponsesModel? submission,
             SubmissionStatus status
         )
         {
-            Maturity = maturity;
             NextQuestion = nextQuestion;
             QuestionnaireSection = questionnaireSection;
             Submission = submission;

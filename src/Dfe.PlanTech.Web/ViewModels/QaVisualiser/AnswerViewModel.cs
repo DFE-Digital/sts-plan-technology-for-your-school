@@ -13,6 +13,7 @@ public class AnswerViewModel
     public AnswerViewModel(QuestionnaireAnswerEntry answerDto)
     {
         Sys = new SystemDetailsViewModel(answerDto.Sys!);
+        Text = answerDto.Text;
 
         if (answerDto.NextQuestion is not null)
         {

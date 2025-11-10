@@ -9,6 +9,7 @@ public class QuestionnaireSectionEntry : ContentfulEntry
     public string ShortDescription { get; init; } = null!;
     public PageEntry InterstitialPage { get; set; } = null!;
     public IEnumerable<QuestionnaireQuestionEntry> Questions { get; set; } = [];
+    public IEnumerable<RecommendationChunkEntry> CoreRecommendations { get; set; } = [];
 
     public QuestionnaireQuestionEntry GetQuestionBySlug(string questionSlug)
     {

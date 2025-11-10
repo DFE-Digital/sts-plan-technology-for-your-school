@@ -3,8 +3,6 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context.Interfaces;
-using Dfe.PlanTech.Web.Controllers;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewModels;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
@@ -19,49 +17,48 @@ public class BaseViewBuilder(
     protected IContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     protected ICurrentUser CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
-    protected int GetUserIdOrThrowException()
-    {
-        return CurrentUser.UserId ?? throw new AuthenticationException("User is not authenticated");
-    }
-
-    protected int GetEstablishmentIdOrThrowException()
-    {
-        return CurrentUser.EstablishmentId ?? throw new InvalidDataException(nameof(currentUser.EstablishmentId));
-    }
-
     protected string GetDsiReferenceOrThrowException()
     {
         return CurrentUser.DsiReference ?? throw new AuthenticationException("User is not authenticated");
     }
 
-    protected async Task<CategorySectionRecommendationViewModel> BuildCategorySectionRecommendationViewModel(
+    protected int GetUserIdOrThrowException()
+    {
+        return CurrentUser.UserId ?? throw new AuthenticationException("User is not authenticated");
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns>The PlanTech database ID for the user's organisation (e.g. establishment, or establishment group)</returns>
+    /// <exception cref="InvalidDataException"></exception>
+    protected int GetUserOrganisationIdOrThrowException()
+    {
+        return CurrentUser.UserOrganisationId ?? throw new InvalidDataException(nameof(CurrentUser.UserOrganisationId));
+    }
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// <returns>The PlanTech database ID for the selected establishment (e.g. an establishment that a MAT user has selected)</returns>
+    /// <exception cref="InvalidDataException"></exception>
+    protected async Task<int> GetActiveEstablishmentIdOrThrowException()
+    {
+        return await CurrentUser.GetActiveEstablishmentIdAsync() ?? throw new InvalidDataException(nameof(CurrentUser.GetActiveEstablishmentIdAsync));
+    }
+
+    protected CategorySectionRecommendationViewModel BuildCategorySectionRecommendationViewModel(
         QuestionnaireSectionEntry section,
         SqlSectionStatusDto? sectionStatus
     )
     {
-        if (string.IsNullOrEmpty(sectionStatus?.LastMaturity))
-        {
-            return new CategorySectionRecommendationViewModel();
-        }
-
         try
         {
-            var recommendationIntro = await ContentfulService.GetSubtopicRecommendationIntroAsync(section.Id, sectionStatus.LastMaturity);
-            if (recommendationIntro == null)
-            {
-                return new CategorySectionRecommendationViewModel
-                {
-                    NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
-                };
-            }
-
             return new CategorySectionRecommendationViewModel
             {
-                RecommendationSlug = recommendationIntro.Slug,
-                RecommendationDisplayName = recommendationIntro.Header.Text,
                 SectionSlug = section.InterstitialPage?.Slug,
                 SectionName = section.Name,
-                Viewed = sectionStatus.HasBeenViewed
+                Viewed = sectionStatus?.HasBeenViewed
             };
         }
         catch (Exception e)
@@ -77,10 +74,5 @@ public class BaseViewBuilder(
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
             };
         }
-    }
-
-    protected bool IsChangeAnswersFlow(string? returnTo)
-    {
-        return returnTo?.Equals(nameof(ReviewAnswersController).GetControllerNameSlug()) ?? false;
     }
 }

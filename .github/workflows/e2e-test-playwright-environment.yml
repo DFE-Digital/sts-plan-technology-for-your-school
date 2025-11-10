@@ -9,6 +9,11 @@ on:
         type: choice
         options: ['Dev', 'Tst', 'StagingUnprotected']
         default: 'Tst'
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
 
 concurrency:
     group: "${{ github.workflow }}"
@@ -23,7 +28,7 @@ jobs:
           id-token: write
           contents: read
         name: Run Playwright + Cucumber Tests
-        environment: ${{ github.event.inputs.environment || 'Tst' }} 
+        environment: ${{ inputs.environment || github.event.inputs.environment || 'Tst' }}
         runs-on: ubuntu-22.04
         env:
             PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
@@ -94,13 +99,10 @@ jobs:
                   DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '00000005'
                   DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
                   DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
-                  DB_SERVER: localhost
+                  DB_SERVER: ${{ secrets.AZ_DB_SERVER }}
+                  DB_MODE: azure
                   DB_USER: sa
-                  DB_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
-                  DB_PORT: 1433
-                  DB_DATABASE: plantech-mock-db
-                  DB_ENCRYPT: false
-                  DB_TRUST_SERVER_CERTIFICATE: true
+                  DB_DATABASE: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-sqldb
                   HEADLESS: true
                   NODE_ICU_DATA: ./node_modules/full-icu
                   LANG: en_GB.UTF-8
@@ -179,6 +181,14 @@ jobs:
               with:
                 inlineScript: |
                   az containerapp update \
-                    --name $APP_NAME \
-                    --resource-group $RESOURCE_GROUP \
+                    --name ${{ secrets.AZ_ACA_NAME }} \
+                    --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
                     --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=false
+
+            - name: Flush Redis Cache
+              uses: azure/CLI@v1
+              id: azure
+              with:
+                azcliversion: 2.73.0
+                inlineScript: |
+                  az redis flush --name ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --yes
