@@ -30,13 +30,22 @@
                     <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
                     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
                     <p class="govuk-body-s">
-                        <a class="govuk-link" href="print/@Model.CurrentChunkPosition">
+                        <a class="govuk-link"
+                           asp-route="GetRecommendationChecklist"
+                           asp-route-categorySlug="@Model.CategorySlug"
+                           asp-route-sectionSlug="@Model.SectionSlug"
+                           asp-route-currentRecommendationCount="@Model.CurrentChunkPosition">
                             Print this recommendation
                         </a>
                     </p>
 
                     <p class="govuk-body-s">
-                        <a class="govuk-link" href="print">Print your school's @Model.Section.Name.ToLower() recommendations</a>
+                        <a class="govuk-link"
+                           asp-route="GetRecommendationChecklist"
+                           asp-route-categorySlug="@Model.CategorySlug"
+                           asp-route-sectionSlug="@Model.SectionSlug">
+                            Print your school's @Model.Section.Name.ToLower() recommendations
+                        </a>
                     </p>
                 </div>
                 <div class="govuk-grid-column-two-thirds">
