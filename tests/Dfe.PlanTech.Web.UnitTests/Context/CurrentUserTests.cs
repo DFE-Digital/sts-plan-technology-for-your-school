@@ -1038,41 +1038,41 @@ public class CurrentUserTests
         Assert.True(sut.UserOrganisationIsGroup);
     }
 
-    [Fact]
-    public void UserOrganisationIsGroup_WhenSatOrganisation_ReturnsTrue()
-    {
-        // Arrange - SAT (Single Academy Trust) organisation
-        var orgJson = """
-        {
-          "id": "A1011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Single Academy Trust",
-          "category": { "id": "013", "name": "Single-Academy Trust" }
-        }
-        """;
+    // [Fact]
+    // public void UserOrganisationIsGroup_WhenSatOrganisation_ReturnsTrue()
+    // {
+    //     // Arrange - SAT (Single Academy Trust) organisation
+    //     var orgJson = """
+    //     {
+    //       "id": "A1011C85-F851-4746-B4A2-D732536717F8",
+    //       "name": "Test Single Academy Trust",
+    //       "category": { "id": "013", "name": "Single-Academy Trust" }
+    //     }
+    //     """;
+    //
+    //     var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+    //
+    //     // Act / Assert
+    //     Assert.True(sut.UserOrganisationIsGroup);
+    // }
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
-
-        // Act / Assert
-        Assert.True(sut.UserOrganisationIsGroup);
-    }
-
-    [Fact]
-    public void UserOrganisationIsGroup_WhenSsatOrganisation_ReturnsTrue()
-    {
-        // Arrange - SSAT organisation
-        var orgJson = """
-        {
-          "id": "B2011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Secure Single Academy Trust",
-          "category": { "id": "014", "name": "Secure Single-Academy Trust" }
-        }
-        """;
-
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
-
-        // Act / Assert
-        Assert.True(sut.UserOrganisationIsGroup);
-    }
+    // [Fact]
+    // public void UserOrganisationIsGroup_WhenSsatOrganisation_ReturnsTrue()
+    // {
+    //     // Arrange - SSAT organisation
+    //     var orgJson = """
+    //     {
+    //       "id": "B2011C85-F851-4746-B4A2-D732536717F8",
+    //       "name": "Test Secure Single Academy Trust",
+    //       "category": { "id": "014", "name": "Secure Single-Academy Trust" }
+    //     }
+    //     """;
+    //
+    //     var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+    //
+    //     // Act / Assert
+    //     Assert.True(sut.UserOrganisationIsGroup);
+    // }
 
     [Fact]
     public void UserOrganisationIsGroup_WhenDirectEstablishment_ReturnsFalse()

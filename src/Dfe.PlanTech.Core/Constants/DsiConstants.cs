@@ -29,8 +29,8 @@ public static class DsiConstants
     public static HashSet<string> OrganisationGroupCategories { get; } = new()
     {
         MatOrganisationCategoryId,
-        SatOrganisationCategoryId,
-        SSatOrganisationCategoryId,
+        //SatOrganisationCategoryId,
+        //SSatOrganisationCategoryId,
     };
 
 
