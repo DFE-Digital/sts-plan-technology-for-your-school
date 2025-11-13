@@ -87,11 +87,10 @@ public class CacheHelperTests
         var key = "key5";
         int calls = 0;
 
-        var result = await _sut.GetAsync(key, async () =>
+        var result = await _sut.GetAsync(key, () =>
         {
             calls++;
-            await Task.Yield();
-            return 321;
+            return Task.FromResult(321);
         }, TimeSpan.FromMinutes(1));
 
         Assert.Equal(321, result);

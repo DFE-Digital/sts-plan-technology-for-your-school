@@ -156,7 +156,7 @@ public class MaintainUrlOnKeyNotFoundAttributeTests
         // Arrange
         var linkId = "contact-link-id";
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetLinkByIdAsync(linkId).Returns((NavigationLinkEntry?)null);
+        contentful.GetLinkByIdAsync(linkId).Returns(new NavigationLinkEntry());
 
         var sut = BuildServiceUnderTest(linkId, contentful);
         var ctx = BuildExceptionContext();

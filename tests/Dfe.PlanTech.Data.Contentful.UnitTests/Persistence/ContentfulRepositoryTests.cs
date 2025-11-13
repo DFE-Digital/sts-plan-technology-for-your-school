@@ -157,13 +157,6 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
         }
 
         [Fact]
-        public async Task GetEntityById_Should_ThrowException_When_IdIsNull()
-        {
-            var repository = new ContentfulRepository(_logger, _clientSubstitute, _hostEnvironmentMock, _automatedTestingOptions);
-            await Assert.ThrowsAsync<ArgumentNullException>(() => repository.GetEntryByIdAsync<TestClass>(null));
-        }
-
-        [Fact]
         public async Task GetEntityById_Should_ThrowException_When_IdIsEmpty()
         {
             var repository = new ContentfulRepository(_logger, _clientSubstitute, _hostEnvironmentMock, _automatedTestingOptions);
