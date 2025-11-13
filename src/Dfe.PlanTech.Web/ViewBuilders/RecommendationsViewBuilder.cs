@@ -191,7 +191,7 @@ public class RecommendationsViewBuilder(
                 ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission.DateCompleted.Value)
                 : null,
             SectionSlug = sectionSlug,
-            SubmissionResponses = submissionRoutingData.Submission.Responses
+            SubmissionResponses = submissionRoutingData.Submission?.Responses ?? []
         };
     }
 }

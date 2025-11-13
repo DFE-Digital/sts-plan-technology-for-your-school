@@ -11,10 +11,10 @@ public interface ICurrentUser
     Task<string?> GetActiveEstablishmentNameAsync();
     Task<int?> GetActiveEstablishmentIdAsync();
     Task<string?> GetActiveEstablishmentUrnAsync();
-    Task<string?> GetActiveEstablishmentUkprnAsync();
-    Task<string?> GetActiveEstablishmentUidAsync();
-    Task<Guid?> GetActiveEstablishmentDsiIdAsync();
-    Task<string?> GetActiveEstablishmentReferenceAsync();
+    string? GetActiveEstablishmentUkprnAsync();
+    string? GetActiveEstablishmentUidAsync();
+    Guid? GetActiveEstablishmentDsiIdAsync();
+    string? GetActiveEstablishmentReferenceAsync();
 
     // User Organisation - the organisation the currently logged in user is linked to (from OIDC claims)
     // For direct establishment users, these match ActiveEstablishment properties

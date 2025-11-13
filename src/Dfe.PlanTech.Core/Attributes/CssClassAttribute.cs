@@ -3,6 +3,6 @@
     [AttributeUsage(AttributeTargets.Field)]
     public sealed class CssClassAttribute : Attribute
     {
-        public string ClassName { get; set; }
+        public required string ClassName { get; set; }
     }
 }

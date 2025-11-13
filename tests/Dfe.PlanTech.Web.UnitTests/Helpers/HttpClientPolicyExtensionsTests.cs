@@ -21,14 +21,14 @@ public class HttpClientPolicyExtensionsTests
         try
         {
             // Fail with 500 for the first 6 attempts (i.e., cause 6 retries), then succeed
-            var result = await policy.ExecuteAsync(async () =>
+            var result = await policy.ExecuteAsync(() =>
             {
                 attempts++;
                 if (attempts <= 6)
                 {
-                    return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError));
                 }
-                return new HttpResponseMessage(HttpStatusCode.OK);
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
             });
 
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
@@ -51,14 +51,14 @@ public class HttpClientPolicyExtensionsTests
 
         try
         {
-            var result = await policy.ExecuteAsync(async () =>
+            var result = await policy.ExecuteAsync(() =>
             {
                 attempts++;
                 if (attempts <= 3)
                 {
                     throw new HttpRequestException("boom"); // transient network error
                 }
-                return new HttpResponseMessage(HttpStatusCode.OK);
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
             });
 
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);
@@ -81,14 +81,14 @@ public class HttpClientPolicyExtensionsTests
 
         try
         {
-            var result = await policy.ExecuteAsync(async () =>
+            var result = await policy.ExecuteAsync(() =>
             {
                 attempts++;
                 if (attempts <= 2)
                 {
-                    return new HttpResponseMessage(HttpStatusCode.NotFound); // covered by .OrResult(...)
+                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound));
                 }
-                return new HttpResponseMessage(HttpStatusCode.OK);
+                return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
             });
 
             Assert.Equal(HttpStatusCode.OK, result.StatusCode);

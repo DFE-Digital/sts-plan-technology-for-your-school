@@ -29,7 +29,7 @@ public class ApiKeyAuthorisationFilterTests
         return new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
     }
 
-    private static ApiAuthenticationConfiguration ConfigWithKey(string? key)
+    private static ApiAuthenticationConfiguration ConfigWithKey(string key)
         => new ApiAuthenticationConfiguration { KeyValue = key };
 
     [Fact]

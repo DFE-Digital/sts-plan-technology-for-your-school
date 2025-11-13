@@ -2,7 +2,7 @@
 $govuk-assets-path: "/assets/";
 
 // Import GOV.UK Frontend - this includes all styles, components, and utilities
-@import "govuk-frontend/dist/govuk/all";
+@import "govuk-frontend/dist/govuk/index";
 
 // Import DfE Frontend components (after GOV.UK Frontend)
 @import "dfe-frontend/packages/dfefrontend";
