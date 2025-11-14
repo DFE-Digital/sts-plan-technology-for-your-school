@@ -2,6 +2,7 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
+
 public class GuardTests
 {
     static Exception ExceptionFactory() => new GuardException("Custom exception");
