@@ -310,7 +310,7 @@ public class CategoryLandingViewComponentViewBuilderTests
     {
         // Arrange
         var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
-        section.CoreRecommendations = [];
+        section.CoreRecommendations = null!;
         var category = MakeCategory(section);
 
         var statuses = new List<SqlSectionStatusDto>
