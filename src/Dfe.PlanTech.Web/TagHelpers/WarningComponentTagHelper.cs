@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
+
 public class WarningComponentTagHelper : TagHelper
 {
     public const string OpeningDiv = """<div class="govuk-warning-text">""";

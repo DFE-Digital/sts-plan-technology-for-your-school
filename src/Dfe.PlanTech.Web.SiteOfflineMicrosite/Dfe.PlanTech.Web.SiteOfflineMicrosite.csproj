@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <!-- v2.2.1 is outdated, but matches the main web site -->
-    <PackageReference Include="GovUk.Frontend.AspNetCore" Version="2.2.1" />
+    <PackageReference Include="GovUk.Frontend.AspNetCore" Version="3.4.1" />
   </ItemGroup>
 
   <PropertyGroup>

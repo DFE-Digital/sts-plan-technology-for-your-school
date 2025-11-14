@@ -1,26 +1,21 @@
-<header class="dfe-header" role="banner">
-  <div class="govuk-width-container dfe-header__container">
-    <div class="dfe-header__logo">
-      <a class="dfe-header__link dfe-header__link--service " href="@UrlConstants.HomePage" aria-label="DfE homepage">
-        <img src="/assets/images/dfe-logo.png" class="dfe-logo noprint" alt="DfE Homepage">
-        <img src="/assets/images/dfe-logo-alt.png" class="dfe-logo-hover noprint" alt="DfE Homepage">
-        <img src="/assets/images/dfe-logo-alt.png" class="dfe-logo print-only" alt="DfE Homepage">
-      </a>
-    </div>
-    <div class="dfe-header__content" id="content-header">
-      <ul class="dfe-header__action-links">
-        @{
-          if (Context.User.Identity?.IsAuthenticated == true){
-            <li>
-              <a asp-controller="Auth" asp-action="SignOut" class="govuk-link govuk-link--inverse">Sign out</a>
-            </li>
-          }
-        }
-      </ul>
-    </div>
-  </div>
-  <div class="dfe-width-container dfe-header__service-name">
-    <a href="@UrlConstants.HomePage" class="dfe-header__link--service">Plan technology for your school</a>
-  </div>
+<header class="govuk-header" data-module="govuk-header">
+	<div class="govuk-header__container govuk-width-container">
+		<div class="govuk-header__logo">
+			<a href="#" class="govuk-header__link govuk-header__link--homepage">
+				<img src="/assets/images/department-for-education_white.png" alt="Department for Education" class="govuk-header__logotype">
+			</a>
+		</div>
+		<div class="dfe-header__content" id="content-header">
+			<ul class="dfe-header__action-links">
+				@{
+					if (Context.User.Identity?.IsAuthenticated == true)
+					{
+						<li>
+							<a asp-controller="Auth" asp-action="SignOut" class="govuk-link govuk-link--inverse">Sign out</a>
+						</li>
+					}
+				}
+			</ul>
+		</div>
+	</div>
 </header>
-

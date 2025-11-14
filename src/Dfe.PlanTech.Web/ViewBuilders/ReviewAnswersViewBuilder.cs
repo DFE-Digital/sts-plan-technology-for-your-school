@@ -149,7 +149,7 @@ public class ReviewAnswersViewBuilder(
         {
             AssessmentCompletedDate = submissionModel.Submission?.DateCompleted ?? DateTime.UtcNow,
             TopicName = section.Name,
-            Responses = submissionModel.Submission?.Responses,
+            Responses = submissionModel.Submission?.Responses ?? [],
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug
         };

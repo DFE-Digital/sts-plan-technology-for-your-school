@@ -38,6 +38,7 @@ builder.AddContentAndSupportConfiguration();
 
 
 builder.Services
+    .AddGovUkFrontendConfiguration()
     .AddGovUkFrontend()
     .AddHttpContextAccessor();
 

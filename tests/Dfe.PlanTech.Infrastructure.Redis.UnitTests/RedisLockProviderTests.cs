@@ -6,6 +6,7 @@ using NSubstitute;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
+
 public class RedisLockProviderUnitTests
 {
     private readonly DistributedCachingOptions _options = new("", 1, 1);
