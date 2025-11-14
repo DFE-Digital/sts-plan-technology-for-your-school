@@ -18,7 +18,6 @@ public static class ConfigurationConstants
     public const string ErrorPages = "ErrorPages";
     public const string GoogleTagManager = "GTM";
     public const string GovUkFrontend = "GovUkFrontend";
-    public const string GovUkFrontendAspNetCore = "GovUkFrontendAspNetCore";
     public const string MessageRetryHandlingOptions = "MessageRetryHandlingOptions";
     public const string Robots = "Robots";
     public const string ServiceBusOptions = "ServiceBusOptions";
