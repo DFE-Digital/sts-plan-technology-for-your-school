@@ -272,7 +272,7 @@ public class ReviewAnswersViewBuilderTests
             null, // UserOrganisationId (non-MAT user)
             42,
             1, // UserId
-            Arg.Is<QuestionnaireSectionEntry>(s => s.Sys != null && s.Sys.Id == "S1" ));
+            Arg.Is<QuestionnaireSectionEntry>(s => s.Sys != null && s.Sys.Id == "S1"));
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.True(ctl.TempData.ContainsKey("SectionName"));
