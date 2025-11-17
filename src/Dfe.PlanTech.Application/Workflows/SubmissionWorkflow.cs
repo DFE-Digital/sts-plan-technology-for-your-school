@@ -146,7 +146,7 @@ public class SubmissionWorkflow(
     private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, QuestionnaireSectionEntry section)
     {
         return responses
-            .OrderBy(r => r.DateCreated)
+            .OrderBy(r => r.DateLastUpdated)
             .GroupBy(r => r.Question.ContentfulRef)
             .ToDictionary(
                 group => group.Key,

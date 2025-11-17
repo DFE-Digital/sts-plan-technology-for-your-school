@@ -3,6 +3,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
@@ -145,11 +146,24 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage
     )
     {
+        //Get Ordered CORE responses from section questions and select out the responses from the submission
+        var orderedCoreResponses = section.Questions
+            .Select(q => submissionModel.Submission?.Responses?.FirstOrDefault(r => r.QuestionSysId == q.Sys.Id))
+            .ToList();
+
+        //Get Ordered Retired responses from section questions and select out the responses from the submission
+        var orderedRetiredResponses = submissionModel.Submission?.Responses?.OrderBy(r => r.Order).ToList() ?? new List<QuestionWithAnswerModel>();
+
+        //Join the two lists together with core first so we only rely on the order columnn for the retired responses
+        List<QuestionWithAnswerModel> responses = orderedCoreResponses.Union(orderedRetiredResponses).Where(r => r != null)
+            .Cast<QuestionWithAnswerModel>()
+            .ToList();
+
         var viewModel = new ViewAnswersViewModel
         {
             AssessmentCompletedDate = submissionModel.Submission?.DateCompleted ?? DateTime.UtcNow,
             TopicName = section.Name,
-            Responses = submissionModel.Submission?.Responses,
+            Responses = responses,
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug
         };

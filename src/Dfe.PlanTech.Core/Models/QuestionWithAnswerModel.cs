@@ -23,6 +23,8 @@ public record QuestionWithAnswerModel
     [Required]
     public DateTime? DateCreated { get; init; } = null!;
 
+    public int? Order { get; init; }
+
     public QuestionWithAnswerModel() { }
 
     public QuestionWithAnswerModel(SqlResponseDto response, QuestionnaireSectionEntry section)
@@ -33,5 +35,6 @@ public record QuestionWithAnswerModel
         AnswerSysId = response.Answer.ContentfulSysId;
         AnswerText = response.Answer.AnswerText ?? string.Empty; //Should this come from Contentful?
         DateCreated = response.DateCreated;
+        Order = response.Question.Order;
     }
 }
