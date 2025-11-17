@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
+
 public class CacheHelperTests
 {
     private readonly MemoryCache _memoryCache;
