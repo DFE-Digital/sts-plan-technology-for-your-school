@@ -60,6 +60,11 @@ env_summary = "\n".join(
     for env in failures
 )
 
+if env_summary == "":
+    print("✅ No failed environments, skipping notification.")
+    sys.exit(0)
+
+
 if not RECIPIENT_ADDRESSES:
     print("⚠️  RECIPIENT_ADDRESSES not set, skipping email.")
     print("Environment summary:\n" + env_summary)

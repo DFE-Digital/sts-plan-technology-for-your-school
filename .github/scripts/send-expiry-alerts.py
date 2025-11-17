@@ -49,6 +49,10 @@ def load_secrets(file_path: str):
 
 all_secrets = load_secrets("azure-secrets-expiring.yml")
 
+if not all_secrets:
+    print("✅ No secrets nearing expiry, skipping notification.")
+    sys.exit(0)
+
 secret_expiry_details = ""
 for secret in all_secrets:
     expiry = secret["expires"]
