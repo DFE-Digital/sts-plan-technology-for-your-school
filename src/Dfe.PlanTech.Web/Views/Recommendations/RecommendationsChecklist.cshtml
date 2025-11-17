@@ -13,10 +13,40 @@
 }
 
 @section BeforeContent {
-    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.RecommendationsPage" class="noprint non-js-only govuk-back-link">Home</govuk-back-link>
-    <govuk-back-link id="back-button-link" href="@UrlConstants.RecommendationsPage" class="noprint js-only">
-        Back
+    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
+        Home
     </govuk-back-link>
+
+    @if (!string.IsNullOrEmpty(Model.OriginatingSlug))
+    {
+        <govuk-back-link
+            id="js-back-button-link"
+            class="noprint js-only"
+            href="@Url.RouteUrl(
+                RecommendationsController.GetSingleRecommendationAction,
+                new {
+                    categorySlug = Model.CategorySlug,
+                    sectionSlug = Model.SectionSlug,
+                    chunkSlug = Model.OriginatingSlug
+                })">
+            Back
+        </govuk-back-link>
+    }
+    else
+    {
+        <govuk-back-link
+            id="js-back-button-link"
+            class="noprint js-only"
+            href="@Url.RouteUrl(
+                nameof(RecommendationsController.GetSingleRecommendationAction),
+                new {
+                    categorySlug = Model.CategorySlug,
+                    sectionSlug = Model.SectionSlug,
+                    chunkSlug = Model.Chunks.First().Slug
+                })">
+            Back
+        </govuk-back-link>
+    }
 }
 
 <div class="recommendation-content">

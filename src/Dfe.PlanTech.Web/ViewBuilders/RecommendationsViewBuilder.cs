@@ -48,11 +48,10 @@ public class RecommendationsViewBuilder(
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: true);
 
-        var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
         var recommendationChunks = section.CoreRecommendations.ToList();
 
         var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
-           ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
+            ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
 
         var currentRecommendationHistoryStatus = await _recommendationService.GetCurrentRecommendationStatusAsync(
             currentRecommendationChunk.Id,
@@ -88,18 +87,21 @@ public class RecommendationsViewBuilder(
                 .ToDictionary(
                     key => key.ToString(),
                     key => key.GetDisplayName()
-                )
+                ),
+            OriginatingSlug = chunkSlug
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
     }
+
 
     public async Task<IActionResult> RouteBySectionAndRecommendation(
         Controller controller,
         string categorySlug,
         string sectionSlug,
         bool useChecklist,
-        int? currentRecommendationCount = null)
+        string? singleChunkSlug = null,
+        string? originatingSlug = null)
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -123,37 +125,41 @@ public class RecommendationsViewBuilder(
                 return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
 
             case SubmissionStatus.CompleteReviewed:
+
                 var viewModel = await BuildRecommendationsViewModel(
                     category,
                     submissionRoutingData,
                     section,
-                    sectionSlug);
+                    sectionSlug,
+                    categorySlug
+                );
 
-                // Pick the correct view name based on the route
                 var viewName = useChecklist
                     ? RecommendationsChecklistViewName
                     : RecommendationsViewName;
 
-                if (currentRecommendationCount.HasValue)
+                if (!string.IsNullOrWhiteSpace(singleChunkSlug))
                 {
-                    var index = currentRecommendationCount.Value - 1;
-                    if (index < 0 || index >= viewModel.Chunks.Count)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(currentRecommendationCount),
-                            $"Count '{currentRecommendationCount}' is outside the available recommendations range.");
-                    }
+                    var selectedChunk = viewModel.Chunks.FirstOrDefault(c => c.Slug == singleChunkSlug)
+                        ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {singleChunkSlug}");
 
                     viewModel = new RecommendationsViewModel
                     {
                         CategoryName = viewModel.CategoryName,
+                        CategorySlug = viewModel.CategorySlug,
                         SectionName = viewModel.SectionName,
-                        Chunks = new List<RecommendationChunkViewModel> { viewModel.Chunks[index] },
-                        CurrentChunkCount = currentRecommendationCount.Value,
+                        SectionSlug = viewModel.SectionSlug,
+                        Chunks = new List<RecommendationChunkViewModel> { selectedChunk },
+                        CurrentChunkCount = viewModel.Chunks.IndexOf(selectedChunk) + 1,
                         TotalChunks = viewModel.Chunks.Count,
                         LatestCompletionDate = viewModel.LatestCompletionDate,
-                        SectionSlug = viewModel.SectionSlug,
-                        SubmissionResponses = viewModel.SubmissionResponses
+                        SubmissionResponses = viewModel.SubmissionResponses,
+                        OriginatingSlug = singleChunkSlug
                     };
+                }
+                else
+                {
+                    viewModel.OriginatingSlug = originatingSlug;
                 }
 
                 return controller.View(viewName, viewModel);
@@ -163,11 +169,45 @@ public class RecommendationsViewBuilder(
         }
     }
 
+    public Task<IActionResult> RouteToPrintSingle(
+    Controller controller,
+    string categorySlug,
+    string sectionSlug,
+    string chunkSlug)
+    {
+        return RouteBySectionAndRecommendation(
+            controller,
+            categorySlug,
+            sectionSlug,
+            useChecklist: true,
+            singleChunkSlug: chunkSlug,
+            originatingSlug: chunkSlug
+        );
+    }
+
+    public Task<IActionResult> RouteToPrintAll(
+    Controller controller,
+    string categorySlug,
+    string sectionSlug,
+    string chunkSlug)
+    {
+        return RouteBySectionAndRecommendation(
+            controller,
+            categorySlug,
+            sectionSlug,
+            useChecklist: true,
+            singleChunkSlug: null,
+            originatingSlug: chunkSlug
+        );
+    }
+
     private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(
         QuestionnaireCategoryEntry category,
         SubmissionRoutingDataModel submissionRoutingData,
         QuestionnaireSectionEntry section,
-        string sectionSlug)
+        string sectionSlug,
+        string categorySlug,
+        int? currentRecommendationCount = null)
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
@@ -180,6 +220,7 @@ public class RecommendationsViewBuilder(
             Header = cr.HeaderText,
             LastUpdated = details[cr.Id].DateCreated,
             Status = details[cr.Id].NewStatus.GetRecommendationStatusEnumValue() ?? RecommendationStatus.NotStarted,
+            Slug = cr.Slug
         }).ToList();
 
         return new RecommendationsViewModel
@@ -191,6 +232,8 @@ public class RecommendationsViewBuilder(
                 ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission.DateCompleted.Value)
                 : null,
             SectionSlug = sectionSlug,
+            CategorySlug = categorySlug,
+            CurrentChunkCount = currentRecommendationCount,
             SubmissionResponses = submissionRoutingData.Submission.Responses
         };
     }
