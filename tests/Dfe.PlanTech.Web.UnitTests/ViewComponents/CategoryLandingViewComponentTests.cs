@@ -37,11 +37,11 @@ public class CategoryLandingViewComponentTests
             StatusLinkPartialName = "status"
         };
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));
+        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSortOrder.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));
 
         var result = await component.InvokeAsync(category, slug, sectionName);
 
-        await viewBuilder.Received(1).BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.ToString());
+        await viewBuilder.Received(1).BuildViewModelAsync(category, slug, sectionName, RecommendationSortOrder.Default.ToString());
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
         Assert.NotNull(viewResult.ViewData);
         Assert.Equal(expectedViewModel, viewResult.ViewData.Model);
@@ -73,7 +73,7 @@ public class CategoryLandingViewComponentTests
             StatusLinkPartialName = "status"
         };
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));
+        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSortOrder.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));
 
         var result = await component.InvokeAsync(category, slug, sectionName);
 

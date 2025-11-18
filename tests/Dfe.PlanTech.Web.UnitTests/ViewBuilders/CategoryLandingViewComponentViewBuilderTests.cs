@@ -425,7 +425,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var sut = CreateSut(submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationSort.Status.GetDisplayName());
+        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationSortOrder.Status.GetDisplayName());
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
@@ -526,7 +526,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var sut = CreateSut(submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationSort.LastUpdated.GetDisplayName());
+        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationSortOrder.LastUpdated.GetDisplayName());
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);

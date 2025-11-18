@@ -34,6 +34,8 @@ public static class ServiceCollectionExtensions
             .AddScoped<IRecommendationRepository, RecommendationRepository>()
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
             .AddScoped<ISubmissionRepository, SubmissionRepository>()
-            .AddScoped<IUserRepository, UserRepository>();
+            .AddScoped<IUserRepository, UserRepository>()
+            .AddScoped<IUserSettingsRepository, UserSettingsRepository>()
+            ;
     }
 }

@@ -165,7 +165,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)
     {
-        return services
+        return services 
             .AddApplicationInsightsTelemetry()
             .AddSingleton<ITelemetryInitializer, CustomRequestDimensionsTelemetryInitializer>();
     }

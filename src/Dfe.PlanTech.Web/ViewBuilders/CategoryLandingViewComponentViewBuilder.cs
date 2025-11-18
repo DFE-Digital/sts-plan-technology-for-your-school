@@ -8,6 +8,7 @@ using Dfe.PlanTech.Core.Utilities;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -15,10 +16,12 @@ public class CategoryLandingViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
     ISubmissionService submissionService,
+    IUserService userService,
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), ICategoryLandingViewComponentViewBuilder
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IUserService _userService = userService ?? throw new ArgumentNullException(nameof(userService));
 
     private const string CategoryLandingSectionAssessmentLink = "Components/CategoryLanding/SectionAssessmentLink";
     private const string CategoryLandingSectionAssessmentLinkPrintContent = "Components/CategoryLanding/SectionAssessmentLinkPrintContent";
@@ -54,7 +57,8 @@ public class CategoryLandingViewComponentViewBuilder(
             progressRetrievalErrorMessage = "Unable to retrieve progress, please refresh your browser.";
         }
 
-        var sortType = sortOrder.GetRecommendationSortEnumValue();
+        var sortType = await GetUserSortType(sortOrder);
+
         var categoryLandingSections = await BuildCategoryLandingSectionViewModels(establishmentId, category, sectionStatuses, progressRetrievalErrorMessage is not null, sortType).ToListAsync();
         var completedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate != null);
 
@@ -81,7 +85,7 @@ public class CategoryLandingViewComponentViewBuilder(
         QuestionnaireCategoryEntry category,
         List<SqlSectionStatusDto> sectionStatuses,
         bool hadRetrievalError,
-        RecommendationSort sortType
+        RecommendationSortOrder sortType
     )
     {
         foreach (var section in category.Sections)
@@ -106,7 +110,7 @@ public class CategoryLandingViewComponentViewBuilder(
     private async Task<CategoryLandingSectionRecommendationsViewModel> GetCategoryLandingSectionRecommendations(
         int establishmentId,
         QuestionnaireSectionEntry section,
-        RecommendationSort sortType
+        RecommendationSortOrder sortType
     )
     {
         try
@@ -146,5 +150,24 @@ public class CategoryLandingViewComponentViewBuilder(
                 NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
             };
         }
+    }
+
+    private async Task<RecommendationSortOrder> GetUserSortType(string? sortOrder)
+    {
+        var sortType = sortOrder?.GetRecommendationSortEnumValue();
+        if (CurrentUser.UserId != null)
+        {
+            if (sortType != null)
+            {
+                await _userService.UpsertUserSettings(CurrentUser.UserId.Value, sortType.Value);
+            }
+            else
+            {
+                var userSettings = await _userService.GetUserSettingsByUserIdAsync(CurrentUser.UserId.Value);
+                sortType = userSettings?.SortOrder;
+            }
+        }
+
+        return sortType ?? RecommendationSortOrder.Default;
     }
 }
