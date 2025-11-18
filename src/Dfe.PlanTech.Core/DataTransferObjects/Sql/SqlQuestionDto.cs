@@ -6,4 +6,5 @@ public class SqlQuestionDto : ISqlDto
     public string? QuestionText { get; init; } = null!;
     public string ContentfulSysId { get; init; } = null!;
     public DateTime DateCreated { get; init; } = DateTime.UtcNow;
+    public int? Order { get; init; }
 }
