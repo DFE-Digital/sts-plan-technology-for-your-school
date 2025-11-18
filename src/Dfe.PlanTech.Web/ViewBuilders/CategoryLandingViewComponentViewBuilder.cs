@@ -8,7 +8,6 @@ using Dfe.PlanTech.Core.Utilities;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
-using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
