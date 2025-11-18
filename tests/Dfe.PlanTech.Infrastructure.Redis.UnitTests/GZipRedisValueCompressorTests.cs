@@ -2,6 +2,7 @@ using System.Text;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
+
 public class GZipRedisValueCompressorTests
 {
     [Fact]
