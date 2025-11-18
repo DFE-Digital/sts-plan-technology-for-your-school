@@ -29,25 +29,28 @@
                 <div class="govuk-grid-column-one-third govuk-float-right">
                     <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
                     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+
                     <p class="govuk-body-s">
                         <a class="govuk-link"
-                           asp-route="GetRecommendationChecklist"
+                           asp-route="PrintSingleRecommendation"
                            asp-route-categorySlug="@Model.CategorySlug"
                            asp-route-sectionSlug="@Model.SectionSlug"
-                           asp-route-currentRecommendationCount="@Model.CurrentChunkPosition">
+                           asp-route-chunkSlug="@Model.CurrentChunk.Slug">
                             Print this recommendation
                         </a>
                     </p>
 
                     <p class="govuk-body-s">
                         <a class="govuk-link"
-                           asp-route="GetRecommendationChecklist"
+                           asp-route="PrintAllRecommendations"
                            asp-route-categorySlug="@Model.CategorySlug"
-                           asp-route-sectionSlug="@Model.SectionSlug">
+                           asp-route-sectionSlug="@Model.SectionSlug"
+                           asp-route-chunkSlug="@Model.CurrentChunk.Slug">
                             Print your school's @Model.Section.Name.ToLower() recommendations
                         </a>
                     </p>
                 </div>
+
                 <div class="govuk-grid-column-two-thirds">
 
                     @if (!string.IsNullOrEmpty(Model.SuccessMessageTitle) || !string.IsNullOrEmpty(Model.SuccessMessageBody))

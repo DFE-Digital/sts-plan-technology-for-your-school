@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Serialization;
 
 namespace Dfe.PlanTech.Data.Contentful.Serializers;
+
 public class DependencyInjectionContractResolver : DefaultContractResolver
 {
     private readonly IServiceProvider _serviceProvider;
