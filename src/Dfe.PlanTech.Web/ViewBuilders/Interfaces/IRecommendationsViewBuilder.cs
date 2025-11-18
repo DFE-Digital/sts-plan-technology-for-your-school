@@ -13,10 +13,25 @@ public interface IRecommendationsViewBuilder
     );
 
     Task<IActionResult> RouteBySectionAndRecommendation(
+       Controller controller,
+       string categorySlug,
+       string sectionSlug,
+       bool useChecklist,
+       string? singleChunkSlug,
+       string? originatingSlug
+    );
+
+    Task<IActionResult> RouteToPrintSingle(
         Controller controller,
         string categorySlug,
         string sectionSlug,
-        bool useChecklist,
-        int? currentRecommendationCount = null
-    );
+        string chunkSlug
+        );
+
+    Task<IActionResult> RouteToPrintAll(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+        );
 }
