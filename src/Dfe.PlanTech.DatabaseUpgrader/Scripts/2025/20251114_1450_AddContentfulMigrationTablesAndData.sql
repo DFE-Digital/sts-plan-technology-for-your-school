@@ -1,12 +1,11 @@
-﻿IF OBJECT_ID('dbo.ContentfulImport') IS NULL
+﻿IF OBJECT_ID('dbo.ContentfulImport', 'U') IS NOT NULL DROP TABLE dbo.ContentfulImport;
+
 CREATE TABLE dbo.ContentfulImport (
                                       Id INT IDENTITY(1,1) PRIMARY KEY,
                                       ContentType NVARCHAR(50),
                                       JsonResponse NVARCHAR(MAX),
                                       ImportedAt DATETIME2 DEFAULT SYSUTCDATETIME()
 );
-
-DELETE FROM dbo.ContentfulImport;
 
 -- Required SET options for XML decoding
 SET ANSI_WARNINGS ON;
