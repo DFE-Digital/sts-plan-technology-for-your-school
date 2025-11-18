@@ -43,14 +43,26 @@ public class RecommendationsController(
         return await _recommendationsViewBuilder.RouteToSingleRecommendation(this, categorySlug, sectionSlug, chunkSlug, false);
     }
 
-    [HttpGet("{categorySlug}/{sectionSlug}/recommendations/print/{currentRecommendationCount?}", Name = "GetRecommendationChecklist")]
-    public async Task<IActionResult> GetRecommendationChecklist(string categorySlug, string sectionSlug, int? currentRecommendationCount)
+    [HttpGet("{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print", Name = "PrintSingleRecommendation")]
+    public async Task<IActionResult> PrintSingleRecommendation(string categorySlug, string sectionSlug, string chunkSlug)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
 
-        return await _recommendationsViewBuilder.RouteBySectionAndRecommendation(
-            this, categorySlug, sectionSlug, true, currentRecommendationCount);
+        return await _recommendationsViewBuilder.RouteToPrintSingle(
+            this, categorySlug, sectionSlug, chunkSlug);
+    }
+
+    [HttpGet("{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print-all", Name = "PrintAllRecommendations")]
+    public async Task<IActionResult> PrintAllRecommendations(string categorySlug, string sectionSlug, string chunkSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
+
+        return await _recommendationsViewBuilder.RouteToPrintAll(
+            this, categorySlug, sectionSlug, chunkSlug);
     }
 
     [HttpPost("{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/update-status")]
