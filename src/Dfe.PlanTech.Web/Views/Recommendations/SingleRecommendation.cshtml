@@ -22,20 +22,25 @@
 }
 
 @section RelatedActions {
-    <hr
-        class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
+    <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
 
     <p class="govuk-body-s">
-        <a class="govuk-link" asp-route="PrintSingleRecommendation" asp-route-categorySlug="@Model.CategorySlug"
-            asp-route-sectionSlug="@Model.SectionSlug" asp-route-chunkSlug="@Model.CurrentChunk.Slug">
+        <a class="govuk-link"
+           asp-route="PrintSingleRecommendation"
+           asp-route-categorySlug="@Model.CategorySlug"
+           asp-route-sectionSlug="@Model.SectionSlug"
+           asp-route-chunkSlug="@Model.CurrentChunk.Slug">
             Print this recommendation
         </a>
     </p>
 
     <p class="govuk-body-s">
-        <a class="govuk-link" asp-route="PrintAllRecommendations" asp-route-categorySlug="@Model.CategorySlug"
-            asp-route-sectionSlug="@Model.SectionSlug" asp-route-chunkSlug="@Model.CurrentChunk.Slug">
+        <a class="govuk-link"
+           asp-route="PrintAllRecommendations"
+           asp-route-categorySlug="@Model.CategorySlug"
+           asp-route-sectionSlug="@Model.SectionSlug"
+           asp-route-chunkSlug="@Model.CurrentChunk.Slug">
             Print your school's @Model.Section.Name.ToLower() recommendations
         </a>
     </p>
@@ -96,8 +101,7 @@
                 @if (recommendation.CSLink != null)
                 {
                     <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
-                        <a class="govuk-body govuk-link govuk-!-font-weight-bold"
-                            href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
+                        <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
                     </div>
                 }
 
@@ -147,20 +151,52 @@
 
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
+            <h2 class="govuk-heading--l">Recent activity</h2>
+
+            <govuk-accordion id="accordion-default">
+                @foreach (var (month, historyGroup) in Model.History)
+                {
+                    <govuk-accordion-item expanded="true" heading-level="2">
+                        <govuk-accordion-item-heading>
+                            <h3 class="govuk-!-margin-bottom-0">@month</h3>
+                        </govuk-accordion-item-heading>
+
+                        <govuk-accordion-item-content>
+                            @foreach (var history in historyGroup)
+                            {
+                                <h3 class="govuk-heading-s">@history.DateCreated.ToString("dd MMMM yyyy")</h3>
+
+                                @if (!string.Equals(history.PreviousStatus, history.NewStatus))
+                                {
+                                    <p>Status changed to <strong>@history.NewStatus</strong></p>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(history.NoteText))
+                                {
+                                    <p>@history.NoteText</p>
+                                }
+                            }
+                        </govuk-accordion-item-content>
+                    </govuk-accordion-item>
+                }
+            </govuk-accordion>
+
             <div>
                 <govuk-pagination>
                     @if (Model.PreviousChunk != null)
                     {
-                        <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug"
-                            label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state" />
+                        <govuk-pagination-previous class="govuk-link--no-visited-state"
+                                                   href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug"
+                                                   label-text="@Model.PreviousChunk.LinkText"/>
                     }
+
                     @if (Model.NextChunk != null)
                     {
-                        <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug"
-                            label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state" />
+                        <govuk-pagination-next class="govuk-link--no-visited-state"
+                                               href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug"
+                                               label-text="@Model.NextChunk.LinkText"/>
                     }
                 </govuk-pagination>
-
             </div>
         </div>
     </div>

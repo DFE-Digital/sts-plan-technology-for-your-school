@@ -78,6 +78,15 @@ public class RecommendationsViewBuilder(
                 ? recommendationChunks[currentRecommendationIndex + 1]
                 : null;
 
+        var recommendationHistory = await _recommendationService.GetRecommendationHistoryAsync(
+            currentRecommendationChunk.Id,
+            establishmentId
+        );
+        var groupedHistory = recommendationHistory
+            .OrderByDescending(rh => rh.DateCreated)
+            .GroupBy(rh => $"{rh.DateCreated.Date:MMMM} activity")
+            .ToDictionary(group => group.Key, group => group.Select(g => g));
+
         var viewModel = new SingleRecommendationViewModel
         {
             CategoryName = categoryHeaderText,
@@ -100,6 +109,7 @@ public class RecommendationsViewBuilder(
             StatusOptions = Enum.GetValues<RecommendationStatus>()
                 .ToDictionary(key => key.ToString(), key => key.GetDisplayName()),
             OriginatingSlug = chunkSlug,
+            History = groupedHistory,
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);

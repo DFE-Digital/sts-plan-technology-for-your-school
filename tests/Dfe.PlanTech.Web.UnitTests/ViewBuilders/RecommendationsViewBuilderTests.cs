@@ -212,6 +212,10 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("Completed", vm.SelectedStatusKey);
         Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
         Assert.Equal("second-chunk-2", vm.OriginatingSlug);
+        Assert.Single(vm.History.Keys);
+        Assert.Equal(new DateTime(2025, 11, 14), vm.History.Values.First().Take(1).First().DateCreated);
+        Assert.Equal(new DateTime(2025, 11, 11), vm.History.Values.First().Skip(1).Take(1).First().DateCreated);
+        Assert.Equal("second-chunk-2", vm.OriginatingSlug);
 
         await _recommendationService.Received(1).GetCurrentRecommendationStatusAsync("C2", 123);
     }

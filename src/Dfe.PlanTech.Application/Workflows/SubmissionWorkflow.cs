@@ -21,13 +21,13 @@ public class SubmissionWorkflow(
 
     public async Task<SqlSubmissionDto> CloneLatestCompletedSubmission(
         int establishmentId,
-        QuestionnaireSectionEntry section
+        string sectionId
     )
     {
         var submissionWithResponses =
             await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
                 establishmentId,
-                section.Id,
+                sectionId,
                 status: SubmissionStatus.CompleteReviewed
             );
         var newSubmission = await _submissionRepository.CloneSubmission(submissionWithResponses);
@@ -63,13 +63,13 @@ public class SubmissionWorkflow(
 
     public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
         int establishmentId,
-        QuestionnaireSectionEntry section,
+        string sectionId,
         SubmissionStatus? status
     )
     {
         var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
             establishmentId,
-            section.Id,
+            sectionId,
             status
         );
         if (latestSubmission is null)

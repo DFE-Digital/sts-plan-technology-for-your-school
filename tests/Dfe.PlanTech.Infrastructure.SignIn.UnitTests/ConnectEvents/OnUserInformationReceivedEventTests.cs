@@ -125,6 +125,20 @@ public class OnUserInformationReceivedEventTests
     }
 
     [Fact]
+    public void AddClaimsToPrincipal_When_PrincipalNull_DoesNothing()
+    {
+        var (ctx, _, _) = BuildContext(principal: null!);
+        var signIn = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
+
+        var mi = typeof(OnUserInformationReceivedEvent)
+            .GetMethod("AddClaimsToPrincipal", BindingFlags.NonPublic | BindingFlags.Static);
+        Assert.NotNull(mi);
+
+        // Should not throw
+        mi!.Invoke(null, [ctx, signIn]);
+    }
+
+    [Fact]
     public void AddClaimsToPrincipal_When_EstablishmentIdNull_Throws()
     {
         var principal = AuthenticatedPrincipal();

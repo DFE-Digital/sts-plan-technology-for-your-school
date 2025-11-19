@@ -238,7 +238,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Unable to retrieve Networking recommendation",
+            "Section 'Networking' has no recommendations",
             secVm.Recommendations.NoRecommendationFoundErrorMessage
         );
     }
@@ -283,7 +283,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Unable to retrieve Security recommendation",
+            "Section 'Security' has no recommendations",
             secVm.Recommendations.NoRecommendationFoundErrorMessage
         );
     }
@@ -329,7 +329,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Unable to retrieve Devices recommendation",
+            "Section 'Devices' has no recommendations",
             secVm.Recommendations.NoRecommendationFoundErrorMessage
         );
     }
@@ -430,7 +430,7 @@ public class CategoryLandingViewComponentViewBuilderTests
     {
         // Arrange
         var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
-        section.CoreRecommendations = null!;
+        section.CoreRecommendations = [];
         var category = MakeCategory(section);
 
         var statuses = new List<SqlSectionStatusDto>
@@ -448,7 +448,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                 section,
                 SubmissionStatus.CompleteReviewed
             )
-            .Returns(new SubmissionResponsesModel(1, new()));
+            .Returns(new SubmissionResponsesModel(1, []));
 
         var sut = CreateSut(submission: submission);
 
@@ -463,7 +463,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Unable to retrieve Devices recommendation",
+            "Section 'Devices' has no recommendations",
             secVm.Recommendations.NoRecommendationFoundErrorMessage
         );
     }
@@ -526,7 +526,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
                     PreviousStatus = RecommendationStatus.InProgress.ToString(),
-                    NewStatus = RecommendationStatus.Complete.ToString(),
+                    NewStatus = RecommendationStatus.Completed.ToString(),
                     NoteText = "Test note 1",
                 }
             },
@@ -591,7 +591,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         Assert.NotEmpty(chunks);
         Assert.Equal(RecommendationStatus.NotStarted, chunks[0].Status);
         Assert.Equal(RecommendationStatus.InProgress, chunks[1].Status);
-        Assert.Equal(RecommendationStatus.Complete, chunks[2].Status);
+        Assert.Equal(RecommendationStatus.Completed, chunks[2].Status);
     }
 
     [Fact]

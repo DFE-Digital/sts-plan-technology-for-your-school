@@ -38,7 +38,7 @@ public interface ISubmissionService
     );
     Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(
         int establishmentId,
-        QuestionnaireSectionEntry section
+        string sectionId
     );
     Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId);
     Task<int> SubmitAnswerAsync(
