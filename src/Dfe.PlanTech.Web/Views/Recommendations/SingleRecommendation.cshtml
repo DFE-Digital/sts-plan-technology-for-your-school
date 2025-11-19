@@ -1,142 +1,142 @@
 ﻿@model SingleRecommendationViewModel
 
 @{
-    Layout = "_Layout";
+	Layout = "_Layout";
 }
 
 
 @section BeforeContent {
-    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
-        Home
-    </govuk-back-link>
-    <govuk-back-link id="nonjs-back-button-link" href="@($"/{Model.CategorySlug}")" class="noprint js-only">
-        Back to @Model.CategoryName.ToLower()
-    </govuk-back-link>
+	<govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
+		Home
+	</govuk-back-link>
+	<govuk-back-link id="nonjs-back-button-link" href="@($"/{Model.CategorySlug}")" class="noprint js-only">
+		Back to @Model.CategoryName.ToLower()
+	</govuk-back-link>
 }
 
 @section Header {
-    <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
+	<link rel="stylesheet" as="style" href="~/css/step-by-step.css">
 }
 
 @{
-    var recommendation = Model.CurrentChunk;
-    var categorySlug = Model.CategorySlug;
-    var sectionSlug = Model.SectionSlug;
+	var recommendation = Model.CurrentChunk;
+	var categorySlug = Model.CategorySlug;
+	var sectionSlug = Model.SectionSlug;
 
-    <div class="recommendation-content">
-        <div class="recommendation-piece-container" id="@recommendation.Slug">
-            <div class="govuk-grid-row">
-                <div class="govuk-grid-column-one-third govuk-float-right">
-                    <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
-                    <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+	<div class="recommendation-content">
+		<div class="recommendation-piece-container" id="@recommendation.Slug">
+			<div class="govuk-grid-row">
+				<div class="govuk-grid-column-one-third govuk-float-right">
+					<hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
+					<h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
 
-                    <p class="govuk-body-s">
-                        <a class="govuk-link"
-                           asp-route="PrintSingleRecommendation"
-                           asp-route-categorySlug="@Model.CategorySlug"
-                           asp-route-sectionSlug="@Model.SectionSlug"
-                           asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-                            Print this recommendation
-                        </a>
-                    </p>
+					<p class="govuk-body-s">
+						<a class="govuk-link"
+						   asp-route="PrintSingleRecommendation"
+						   asp-route-categorySlug="@Model.CategorySlug"
+						   asp-route-sectionSlug="@Model.SectionSlug"
+						   asp-route-chunkSlug="@Model.CurrentChunk.Slug">
+							Print this recommendation
+						</a>
+					</p>
 
-                    <p class="govuk-body-s">
-                        <a class="govuk-link"
-                           asp-route="PrintAllRecommendations"
-                           asp-route-categorySlug="@Model.CategorySlug"
-                           asp-route-sectionSlug="@Model.SectionSlug"
-                           asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-                            Print your school's @Model.Section.Name.ToLower() recommendations
-                        </a>
-                    </p>
-                </div>
+					<p class="govuk-body-s">
+						<a class="govuk-link"
+						   asp-route="PrintAllRecommendations"
+						   asp-route-categorySlug="@Model.CategorySlug"
+						   asp-route-sectionSlug="@Model.SectionSlug"
+						   asp-route-chunkSlug="@Model.CurrentChunk.Slug">
+							Print your school's @Model.Section.Name.ToLower() recommendations
+						</a>
+					</p>
+				</div>
 
-                <div class="govuk-grid-column-two-thirds">
+				<div class="govuk-grid-column-two-thirds">
 
-                    @if (!string.IsNullOrEmpty(Model.SuccessMessageTitle) || !string.IsNullOrEmpty(Model.SuccessMessageBody))
-                    {
-                        <govuk-panel heading-level="2">
-                            @if (!string.IsNullOrEmpty(Model.SuccessMessageTitle))
-                            {
-                                <govuk-panel-title>@Model.SuccessMessageTitle</govuk-panel-title>
-                            }
-                            @if (!string.IsNullOrEmpty(Model.SuccessMessageBody))
-                            {
-                                <govuk-panel-body>
-                                    @Model.SuccessMessageBody
-                                </govuk-panel-body>
-                            }
-                        </govuk-panel>
-                    }
+					@if (!string.IsNullOrEmpty(Model.SuccessMessageTitle) || !string.IsNullOrEmpty(Model.SuccessMessageBody))
+					{
+						<govuk-panel heading-level="2">
+							@if (!string.IsNullOrEmpty(Model.SuccessMessageTitle))
+							{
+								<govuk-panel-title>@Model.SuccessMessageTitle</govuk-panel-title>
+							}
+							@if (!string.IsNullOrEmpty(Model.SuccessMessageBody))
+							{
+								<govuk-panel-body>
+									@Model.SuccessMessageBody
+								</govuk-panel-body>
+							}
+						</govuk-panel>
+					}
 
-                    @* The error summary is dynamically inserted at the top of the form. We want that at the top of the page. *@
-                    <form method="post" action="/@categorySlug/@sectionSlug/recommendations/@recommendation.Slug/update-status">
+					@* The error summary is dynamically inserted at the top of the form. We want that at the top of the page. *@
+					<form method="post" action="/@categorySlug/@sectionSlug/recommendations/@recommendation.Slug/update-status">
 
-                        <div class="recommendation-piece-content">
-                            <span class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
-                            <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
+						<div class="recommendation-piece-content">
+							<span class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
+							<h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
 
-                            <table class="govuk-table">
-                                <thead class="govuk-table__head">
-                                <tr class="govuk-table__row">
-                                    <th scope="col" class="govuk-table__header">Status</th>
-                                    <th scope="col" class="govuk-table__header">Last updated</th>
-                                </tr>
-                                </thead>
-                                <tbody class="govuk-table__body">
-                                <tr class="govuk-table__row">
-                                    <td class="govuk-table__cell">
-                                        <strong class="govuk-tag @Model.StatusTagClass">
-                                            @Model.StatusText
-                                        </strong>
-                                    </td>
-                                    <td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
-                                </tr>
-                                </tbody>
-                            </table>
+							<table class="govuk-table">
+								<thead class="govuk-table__head">
+									<tr class="govuk-table__row">
+										<th scope="col" class="govuk-table__header">Status</th>
+										<th scope="col" class="govuk-table__header">Last updated</th>
+									</tr>
+								</thead>
+								<tbody class="govuk-table__body">
+									<tr class="govuk-table__row">
+										<td class="govuk-table__cell">
+											<strong class="govuk-tag @Model.StatusTagClass">
+												@Model.StatusText
+											</strong>
+										</td>
+										<td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
+									</tr>
+								</tbody>
+							</table>
 
-                            @foreach (var content in recommendation.Content)
-                            {
-                                <partial name="Components/PageComponentFactory" model="@content"/>
-                            }
-                        </div>
+							@foreach (var content in recommendation.Content)
+							{
+								<partial name="Components/PageComponentFactory" model="@content" />
+							}
+						</div>
 
-                        @if (recommendation.CSLink != null)
-                        {
-                            <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
-                                <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
-                            </div>
-                        }
+						@if (recommendation.CSLink != null)
+						{
+							<div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
+								<a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
+							</div>
+						}
 
-                        <hr class="govuk-section-break govuk-section-break--l"/>
+						<hr class="govuk-section-break govuk-section-break--l" />
 
-                        <govuk-radios name="SelectedStatus">
-                            <govuk-radios-fieldset>
-                                <govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
-                                    <h2 class="govuk-fieldset__heading">
-                                        Have you completed this recommendation?
-                                    </h2>
-                                </govuk-radios-fieldset-legend>
+						<govuk-radios name="SelectedStatus">
+							<govuk-radios-fieldset>
+								<govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
+									<h2 class="govuk-fieldset__heading">
+										Have you completed this recommendation?
+									</h2>
+								</govuk-radios-fieldset-legend>
 
-                                <govuk-radios-hint>
-                                    Select the current status of this recommendation.
-                                </govuk-radios-hint>
+								<govuk-radios-hint>
+									Select the current status of this recommendation.
+								</govuk-radios-hint>
 
-                                @if (!string.IsNullOrEmpty(Model.StatusErrorMessage))
-                                {
-                                    <govuk-radios-error-message>
-                                        @Model.StatusErrorMessage
-                                    </govuk-radios-error-message>
-                                }
+								@if (!string.IsNullOrEmpty(Model.StatusErrorMessage))
+								{
+									<govuk-radios-error-message>
+										@Model.StatusErrorMessage
+									</govuk-radios-error-message>
+								}
 
-                                @foreach (var option in Model.StatusOptions)
-                                {
-                                    <govuk-radios-item value="@option.Key" checked="@(Model.SelectedStatusKey == option.Key)">
-                                        @option.Value
-                                    </govuk-radios-item>
-                                }
-                            </govuk-radios-fieldset>
-                        </govuk-radios>
+								@foreach (var option in Model.StatusOptions)
+								{
+									<govuk-radios-item value="@option.Key" checked="@(Model.SelectedStatusKey == option.Key)">
+										@option.Value
+									</govuk-radios-item>
+								}
+							</govuk-radios-fieldset>
+						</govuk-radios>
 
 						<govuk-textarea name="Notes" rows="5">
 							<govuk-textarea-label class="govuk-label--s">
@@ -154,21 +154,58 @@
 
 					<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
-                    <div>
-                        <govuk-pagination>
-                            @if (Model.PreviousChunk != null)
-                            {
-                                <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state"/>
-                            }
+					<h2 class="govuk-heading--l">Recent activity</h2>
 
-                            @if (Model.NextChunk != null)
-                            {
-                                <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state"/>
-                            }
-                        </govuk-pagination>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+					<govuk-accordion id="accordion-default">
+						@foreach (var (month, historyGroup) in Model.History)
+						{
+							<govuk-accordion-item expanded="true" heading-level="2">
+								<govuk-accordion-item-heading>
+									<h3 class="govuk-!-margin-bottom-0">@month</h3>
+								</govuk-accordion-item-heading>
+
+								<govuk-accordion-item-content>
+									@foreach (var history in historyGroup)
+									{
+										<h3 class="govuk-heading-s">@history.DateCreated.ToString("dd MMMM yyyy")</h3>
+
+										@if (!string.Equals(history.PreviousStatus, history.NewStatus))
+										{
+											<p>Status changed to <strong>@history.NewStatus</strong></p>
+										}
+
+										@if (!string.IsNullOrWhiteSpace(history.NoteText))
+										{
+											<p>@history.NoteText</p>
+										}
+										<!--
+										<p>
+											<strong>Do you have a tested cyber incident report plan at school or trust level?</strong>
+										</p>
+
+										<p>Your answer: Yes</p>
+										-->
+									}
+								</govuk-accordion-item-content>
+							</govuk-accordion-item>
+						}
+					</govuk-accordion>
+
+						<div>
+						<govuk-pagination>
+							@if (Model.PreviousChunk != null)
+							{
+								<govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state" />
+							}
+
+							@if (Model.NextChunk != null)
+							{
+								<govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state" />
+							}
+						</govuk-pagination>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 }
