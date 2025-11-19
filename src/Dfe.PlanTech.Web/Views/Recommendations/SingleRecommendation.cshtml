@@ -138,10 +138,21 @@
                             </govuk-radios-fieldset>
                         </govuk-radios>
 
-                        <govuk-button type="submit" prevent-double-click="true">Update status</govuk-button>
+						<govuk-textarea name="Notes" rows="5">
+							<govuk-textarea-label class="govuk-label--s">
+								Add a comment
+							</govuk-textarea-label>
+
+							<govuk-textarea-hint>
+								Anyone who uses the service for your school will be able to see comments.
+								Do not include personal or sensitive information, like email addresses or account details.
+							</govuk-textarea-hint>
+						</govuk-textarea>
+
+                        <govuk-button type="submit" prevent-double-click="true">Save</govuk-button>
                     </form>
 
-                    <hr class="govuk-section-break govuk-section-break--l"/>
+					<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
                     <div>
                         <govuk-pagination>
