@@ -11,9 +11,9 @@ public class UserService(
 {
     private readonly IUserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 
-    public Task<SqlUserSettingsDto> UpsertUserSettings(int userId, RecommendationSortOrder sortOrder)
+    public Task<SqlUserSettingsDto> UpsertUserSettingsAsync(int userId, RecommendationSortOrder sortOrder)
     {
-        return _userWorkflow.UpsertUserSettings(userId, sortOrder);
+        return _userWorkflow.UpsertUserSettingsAsync(userId, sortOrder);
     }
 
     public Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId)

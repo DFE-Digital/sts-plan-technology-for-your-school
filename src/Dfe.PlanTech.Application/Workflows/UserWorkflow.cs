@@ -19,14 +19,17 @@ public class UserWorkflow(
         return user?.AsDto();
     }
 
-    public Task<SqlUserSettingsDto> UpsertUserSettings(int userId, RecommendationSortOrder sortOrder)
+    public async Task<SqlUserSettingsDto> UpsertUserSettingsAsync(int userId, RecommendationSortOrder sortOrder)
     {
-        return _userSettingsRepository.UpsertUserSettings(userId, sortOrder);
+        var userSettings = await _userSettingsRepository.UpsertUserSettingsAsync(userId, sortOrder);
+        return userSettings.AsDto();
     }
 
-    public Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId)
+    public async Task<SqlUserSettingsDto?> GetUserSettingsByUserIdAsync(int userId)
     {
-        return _userSettingsRepository.GetUserSettingsByUserId(userId);
+        var userSettings = await _userSettingsRepository.GetUserSettingsByUserIdAsync(userId);
+        return userSettings?.AsDto();
+
     }
 }
 

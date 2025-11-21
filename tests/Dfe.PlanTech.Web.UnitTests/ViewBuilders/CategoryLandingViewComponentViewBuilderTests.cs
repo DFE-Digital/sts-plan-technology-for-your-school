@@ -20,13 +20,13 @@ public class CategoryLandingViewComponentViewBuilderTests
     private static CategoryLandingViewComponentViewBuilder CreateSut(
         IContentfulService? contentful = null,
         ISubmissionService? submission = null,
-        IUserService? userService = null,
+        IUserService? user = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null)
     {
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
-        userService ??= Substitute.For<IUserService>();
+        user ??= Substitute.For<IUserService>();
         currentUser ??= Substitute.For<ICurrentUser>();
 
         currentUser.GetActiveEstablishmentIdAsync().Returns(1001);
@@ -37,7 +37,7 @@ public class CategoryLandingViewComponentViewBuilderTests
             logger,
             contentful,
             submission,
-            userService,
+            user,
             currentUser
         );
     }
@@ -138,6 +138,45 @@ public class CategoryLandingViewComponentViewBuilderTests
         // Assert
         Assert.Equal(anyCompleted, vm.AnySectionsCompleted);
         Assert.Equal(allCompleted, vm.AllSectionsCompleted);
+    }
+
+    [Theory]
+    [InlineData(null, RecommendationSortOrder.Default)]
+    [InlineData("Default", RecommendationSortOrder.Default)]
+    [InlineData("Last updated", RecommendationSortOrder.LastUpdated)]
+    [InlineData("Status", RecommendationSortOrder.Status)]
+    public async Task BuildViewModelAsync_Computed_SortType_Is_Correct(string? inputSortOrder, RecommendationSortOrder expectedSortOrder)
+    {
+        // Arrange
+        var s1 = MakeSection("A", "A", "a");
+        var s2 = MakeSection("B", "B", "b");
+        var category = MakeCategory(s1, s2);
+
+        var statuses = new List<SqlSectionStatusDto>
+        {
+            new SqlSectionStatusDto
+            {
+                SectionId = "A",
+                LastCompletionDate = DateTime.UtcNow
+            },
+            new SqlSectionStatusDto
+            {
+                SectionId = "B",
+                LastCompletionDate = DateTime.UtcNow
+            }
+        };
+
+        var submission = Substitute.For<ISubmissionService>();
+        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+                  .Returns(statuses);
+
+        var sut = CreateSut(submission: submission);
+
+        // Act
+        var vm = await sut.BuildViewModelAsync(category, "cat", null, inputSortOrder);
+
+        // Assert
+        Assert.Equal(expectedSortOrder, vm.SortType);
     }
 
     [Fact]
@@ -313,7 +352,7 @@ public class CategoryLandingViewComponentViewBuilderTests
     {
         // Arrange
         var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
-        section.CoreRecommendations = null;
+        section.CoreRecommendations = null!;
         var category = MakeCategory(section);
 
         var statuses = new List<SqlSectionStatusDto>

@@ -1,5 +1,4 @@
 ﻿using System.Linq.Expressions;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -16,7 +15,7 @@ public class UserSettingsRepository : IUserSettingsRepository
         _db = dbContext;
     }
 
-    public async Task<SqlUserSettingsDto> UpsertUserSettings(int userId, RecommendationSortOrder sortOrder)
+    public async Task<UserSettingsEntity> UpsertUserSettingsAsync(int userId, RecommendationSortOrder sortOrder)
     {
         var userSettingsEntity = await GetUserSettingsByAsync(u => u.UserId.Equals(userId));
 
@@ -37,13 +36,12 @@ public class UserSettingsRepository : IUserSettingsRepository
 
         await _db.SaveChangesAsync();
 
-        return userSettingsEntity.AsDto();
+        return userSettingsEntity;
     }
 
-    public async Task<SqlUserSettingsDto?> GetUserSettingsByUserId(int userId)
+    public Task<UserSettingsEntity?> GetUserSettingsByUserIdAsync(int userId)
     {
-        var userSettings = await GetUserSettingsByAsync(u => u.UserId.Equals(userId));
-        return userSettings?.AsDto();
+        return GetUserSettingsByAsync(u => u.UserId.Equals(userId));
     }
 
     private Task<UserSettingsEntity?> GetUserSettingsByAsync(Expression<Func<UserSettingsEntity, bool>> predicate)

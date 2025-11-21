@@ -158,7 +158,7 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             if (sortType != null)
             {
-                await _userService.UpsertUserSettings(CurrentUser.UserId.Value, sortType.Value);
+                await _userService.UpsertUserSettingsAsync(CurrentUser.UserId.Value, sortType.Value);
             }
             else
             {

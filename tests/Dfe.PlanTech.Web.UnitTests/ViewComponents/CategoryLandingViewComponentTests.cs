@@ -1,4 +1,5 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -37,11 +38,9 @@ public class CategoryLandingViewComponentTests
             StatusLinkPartialName = "status"
         };
 
-        var sortOrder = RecommendationSortOrder.Default.GetDisplayName();
+        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder).Returns(Task.FromResult(expectedViewModel));
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName, sortOrder).Returns(Task.FromResult(expectedViewModel));
-
-        var result = await component.InvokeAsync(category, slug, sectionName, sortOrder);
+        var result = await component.InvokeAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder);
 
         await viewBuilder.Received(1).BuildViewModelAsync(category, slug, sectionName, RecommendationSortOrder.Default.ToString());
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
@@ -75,11 +74,9 @@ public class CategoryLandingViewComponentTests
             StatusLinkPartialName = "status"
         };
 
-        var sortOrder = RecommendationSortOrder.Default.GetDisplayName();
+        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder).Returns(Task.FromResult(expectedViewModel));
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName, sortOrder).Returns(Task.FromResult(expectedViewModel));
-
-        var result = await component.InvokeAsync(category, slug, sectionName, sortOrder);
+        var result = await component.InvokeAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder);
 
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
         Assert.NotNull(viewResult.ViewData);
