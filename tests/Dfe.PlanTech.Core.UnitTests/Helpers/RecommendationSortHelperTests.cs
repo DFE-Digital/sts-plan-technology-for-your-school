@@ -6,11 +6,11 @@ namespace Dfe.PlanTech.Core.UnitTests.Helpers;
 public class RecommendationSortHelperTests
 {
     [Theory]
-    [InlineData(null, RecommendationSort.Default)]
-    [InlineData("Default", RecommendationSort.Default)]
-    [InlineData("Status", RecommendationSort.Status)]
-    [InlineData("Last updated", RecommendationSort.LastUpdated)]
-    public void Should_Return_Correct_Enum_Value(string? sortOrder, RecommendationSort expected)
+    [InlineData(null, RecommendationSortOrder.Default)]
+    [InlineData("Default", RecommendationSortOrder.Default)]
+    [InlineData("Status", RecommendationSortOrder.Status)]
+    [InlineData("Last updated", RecommendationSortOrder.LastUpdated)]
+    public void Should_Return_Correct_Enum_Value(string? sortOrder, RecommendationSortOrder expected)
     {
         var result = sortOrder.GetRecommendationSortEnumValue();
         Assert.Equal(expected, result);

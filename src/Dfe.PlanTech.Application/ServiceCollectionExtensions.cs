@@ -37,8 +37,9 @@ public static class ServiceCollectionExtensions
             .AddScoped<IContentfulService, ContentfulService>()
             .AddScoped<IEstablishmentService, EstablishmentService>()
             .AddScoped<IQuestionService, QuestionService>()
-            .AddScoped<ISubmissionService, SubmissionService>()
             .AddScoped<IRecommendationService, RecommendationService>()
+            .AddScoped<ISubmissionService, SubmissionService>()
+            .AddScoped<IUserService, UserService>()
             ;
     }
 

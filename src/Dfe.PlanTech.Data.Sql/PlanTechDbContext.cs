@@ -15,6 +15,7 @@ public class PlanTechDbContext : DbContext
     public virtual DbSet<SignInEntity> SignIns { get; set; } = null!;
     public virtual DbSet<SubmissionEntity> Submissions { get; set; } = null!;
     public virtual DbSet<UserEntity> Users { get; set; } = null!;
+    public virtual DbSet<UserSettingsEntity> UserSettings { get; set; } = null!;
     public virtual DbSet<GroupReadActivityEntity> GroupReadActivities { get; set; } = null!;
     public virtual DbSet<RecommendationEntity> Recommendations { get; set; } = null!;
     public virtual DbSet<EstablishmentRecommendationHistoryEntity> EstablishmentRecommendationHistories { get; set; } = null!;

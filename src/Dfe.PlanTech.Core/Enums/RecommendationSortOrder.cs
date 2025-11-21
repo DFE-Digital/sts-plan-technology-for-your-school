@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dfe.PlanTech.Core.Enums;
 
-public enum RecommendationSort
+public enum RecommendationSortOrder
 {
     [Display(Name = "Default")]
     Default = 0,
