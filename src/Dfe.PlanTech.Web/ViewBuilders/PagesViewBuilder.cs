@@ -30,7 +30,7 @@ public class PagesViewBuilder(
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, PageEntry page)
     {
-        var needsToSelectSchool = CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is null;
+        var needsToSelectSchool = page.RequiresAuthorisation && CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is null;
         if (needsToSelectSchool)
         {
             return controller.Redirect(UrlConstants.SelectASchoolPage);
