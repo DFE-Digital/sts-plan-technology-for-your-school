@@ -20,11 +20,13 @@ public class CategoryLandingViewComponentViewBuilderTests
     private static CategoryLandingViewComponentViewBuilder CreateSut(
         IContentfulService? contentful = null,
         ISubmissionService? submission = null,
+        IUserService? userService = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null)
     {
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
+        userService ??= Substitute.For<IUserService>();
         currentUser ??= Substitute.For<ICurrentUser>();
 
         currentUser.GetActiveEstablishmentIdAsync().Returns(1001);
@@ -35,6 +37,7 @@ public class CategoryLandingViewComponentViewBuilderTests
             logger,
             contentful,
             submission,
+            userService,
             currentUser
         );
     }

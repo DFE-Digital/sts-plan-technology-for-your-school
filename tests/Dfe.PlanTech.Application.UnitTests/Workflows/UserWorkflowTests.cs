@@ -8,14 +8,16 @@ namespace Dfe.PlanTech.Application.UnitTests.Workflows;
 public class UserWorkflowTests
 {
     private readonly IUserRepository _repo = Substitute.For<IUserRepository>();
+    private readonly IUserSettingsRepository _repoSettings = Substitute.For<IUserSettingsRepository>();
 
-    private UserWorkflow CreateServiceUnderTest() => new UserWorkflow(_repo);
+
+    private UserWorkflow CreateServiceUnderTest() => new UserWorkflow(_repo, _repoSettings);
 
     // --- ctor guard ---
     [Fact]
     public void Ctor_NullRepository_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => new UserWorkflow(null!));
+        Assert.Throws<ArgumentNullException>(() => new UserWorkflow(null!, null!));
     }
 
     // --- GetUserBySignInRefAsync ---
