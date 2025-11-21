@@ -27,6 +27,7 @@ public interface ICurrentUser
     Guid? UserOrganisationDsiId { get; }
     string? UserOrganisationReference { get; }
     string? UserOrganisationTypeName { get; }
+    string? UserOrganisationCategoryName { get; }
     bool UserOrganisationIsGroup { get; }
 
     bool IsAuthenticated { get; }
