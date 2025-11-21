@@ -49,7 +49,6 @@ public class UserSettingsRepository : IUserSettingsRepository
     private Task<UserSettingsEntity?> GetUserSettingsByAsync(Expression<Func<UserSettingsEntity, bool>> predicate)
     {
         return _db.UserSettings
-            .AsNoTracking()
             .FirstOrDefaultAsync(predicate);
     }
 }
