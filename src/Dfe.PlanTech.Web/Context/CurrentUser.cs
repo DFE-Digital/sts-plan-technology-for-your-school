@@ -116,6 +116,7 @@ public class CurrentUser : ICurrentUser
     public string? UserOrganisationReference => Organisation?.Reference;
 
     public string? UserOrganisationTypeName => Organisation?.Type?.Name;
+    public string? UserOrganisationCategoryName => Organisation?.Category?.Name;
 
     public bool UserOrganisationIsGroup => Organisation != null &&
                                            DsiConstants.OrganisationGroupCategories.Contains(Organisation.Category?.Id ?? string.Empty);

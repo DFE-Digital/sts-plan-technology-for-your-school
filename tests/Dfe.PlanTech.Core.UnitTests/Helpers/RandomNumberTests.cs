@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Core.UnitTests.Helpers;
+
 public class RandomNumberTests
 {
     [Fact]
