@@ -70,7 +70,8 @@ public class RecommendationsController(
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        [FromForm] string selectedStatus)
+        [FromForm] string selectedStatus,
+        [FromForm] string? notes)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
@@ -111,8 +112,8 @@ public class RecommendationsController(
             establishmentId,
             userId,
             selectedStatus,
-            $"Change reason: Status manually updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'",
-            userOrganisationId
+            notes ?? $"Change reason: Status manually updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'",
+            _currentUser.IsMat ? userOrganisationId : null
         );
 
         // Set success message for the banner
