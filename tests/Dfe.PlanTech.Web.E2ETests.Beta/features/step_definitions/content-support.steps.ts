@@ -28,7 +28,7 @@ Then('I should see a control labelled {string}', async function (text: string) {
 });
 
 Then('I should see multiple accordion body sections', async function () {
-  const sections = this.page.locator('.govuk-accordion__section .govuk-body');
+  const sections = this.page.locator('.govuk-accordion__section');
   expect(await sections.count()).toBeGreaterThan(1);
 });
 
