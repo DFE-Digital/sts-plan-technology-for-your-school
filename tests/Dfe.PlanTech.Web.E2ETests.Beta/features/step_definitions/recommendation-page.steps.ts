@@ -54,7 +54,7 @@ Then('I should see the related actions sidebar', async function () {
   await expect(sidebar.locator('h2')).toHaveText('Related actions');
 });
 
-Then('I should see the related actions links for category {string} section {string}', async function (categoryName: string, sectionName: string) {
+Then('I should see the related actions links for category {string} section {string} recommendation {string}', async function (categoryName: string, sectionName: string, recommendationSlug: string) {
 
   const container = this.page.locator('.govuk-grid-column-one-third.govuk-float-right');
   await expect(container).toBeVisible();
@@ -65,30 +65,31 @@ Then('I should see the related actions links for category {string} section {stri
 
   const slugSectionName = textToHyphenatedUrl(sectionName);
   const slugCategoryName = textToHyphenatedUrl(categoryName);
-  const expectedSelfAssessmentHref = `/${slugCategoryName}/${slugSectionName}/change-answers`;
-  const expectedPrintHref = 'print';
+  const expectedPrintAllSlug = `/${slugCategoryName}/${slugSectionName}/recommendations/${recommendationSlug}/print-all`;
+  const expectedPrintRecommendationSlug = `/${slugCategoryName}/${slugSectionName}/recommendations/${recommendationSlug}/print`;
 
   const sectionNameLowercase = sectionName.toLowerCase();
 
-  // check the view or update your self assessment url
-  const viewUpdateLink = container.getByRole('link', {
-    name: `View or update your self-assessment for ${sectionNameLowercase}`,
+  // check print all recommendations url
+  const printTopicLink = container.getByRole('link', {
+    name: `Print your school's ${sectionNameLowercase} recommendations`,
   });
-  await expect(viewUpdateLink).toBeVisible();
-  await expect(viewUpdateLink).toHaveAttribute('href', expectedSelfAssessmentHref);
+  await expect(printTopicLink).toBeVisible();
+  await expect(printTopicLink).toHaveAttribute('href', expectedPrintAllSlug);
 
-  // check the print all recommendations url
-  const printLink = container.getByRole('link', {
-    name: `Print all recommendations for ${sectionNameLowercase}`,
+  // check the print this recommendation url
+  const printThisRecommendation = container.getByRole('link', {
+    name: `Print this recommendation`,
   });
-  await expect(printLink).toBeVisible();
-  await expect(printLink).toHaveAttribute('href', expectedPrintHref);
+  await expect(printThisRecommendation).toBeVisible();
+  await expect(printThisRecommendation).toHaveAttribute('href', expectedPrintRecommendationSlug);
 });
 
-Then('I click the print all recommendations link in the related actions', async function () {
+Then('I click the print all recommendations link in the related actions for {string}', async function (topic:string) {
 
   const container = this.page.locator('.govuk-grid-column-one-third.govuk-float-right');
-  const printLink = container.locator('a', { hasText: 'Print all recommendations for' });
+  const printLink = container.locator('a', { hasText: `Print your school's ${topic.toLowerCase()} recommendations` });
+  await expect(printLink).toBeVisible();
   printLink.click();
 });
 
@@ -111,7 +112,7 @@ Then('I should see the completed self assessment text on the print recommendatio
 
   const text = (await completionPara.innerText()).trim();
   const normalisedText =  normaliseShortDateTimeText(text);
-  
+
   // e.g. The self-assessment for {sectionLower} was completed on 27 Aug 2025.
   const expectedText = `The self-assessment for ${sectionLower} was completed on ${currentDate}.`;
   expect(normalisedText).toMatch(expectedText);
@@ -123,23 +124,26 @@ Then('I should see the completed self assessment text on the print recommendatio
   await expect(viewText).toHaveText(`View or update your self-assessment for ${sectionLower}`);
 })
 
-Then('I should see the print page recommendation text {string}',
+Then(
+  'I should see the print page recommendation text {string}',
   async function (recommendationText: string) {
 
-    const recommendationLink = this.page.locator('ul.govuk-task-list p', {
-      hasText: recommendationText,
-    });
+    const recommendation = this.page.locator(
+      '.recommendation-action-header td.govuk-table__cell div',
+      { hasText: recommendationText }
+    );
 
-    await expect(recommendationLink).toBeVisible();
+    await expect(recommendation).toBeVisible();
   }
 );
+
 
 Then(
   'I should see a recommendation with heading {string} and content containing {string} on the print recommendation page',
   async function (heading: string, content: string) {
-    // the header wrapper that HAS the exact h1 text, then its immediate sibling content
+    // find the header matching the h1
     const contentBlock = this.page.locator(
-      'div.recommendation-action-header:has(h1.govuk-heading-m:has-text("' + heading + '")) + div.recommendation-action-content'
+      `div.recommendation-piece-content:has(h1.govuk-heading-l:has-text("${heading}"))`
     );
 
     await expect(contentBlock).toBeVisible();
@@ -182,3 +186,42 @@ Then('the print dialog should be triggered', async function () {
   const printCalled = await this.page.evaluate(() => (window as any).__printCalled);
   expect(printCalled).toBeTruthy();
 });
+
+
+Then('recommendation status is shown as {string}', async function (expectedStatus: string) {
+  const statusTag = this.page.locator(
+    '.recommendation-piece-content table.govuk-table tbody tr .govuk-tag'
+  );
+
+  await expect(statusTag).toHaveText(expectedStatus);
+});
+
+Then(
+  'recommendation status in the header matches the selected status in the form',
+  async function () {
+    // Header status (the tag in the top table)
+    const headerTag = this.page.locator(
+      '.recommendation-piece-content table.govuk-table tbody tr .govuk-tag'
+    );
+    const headerStatus = (await headerTag.innerText()).replace(/\s+/g, ' ').trim();
+
+    // Selected radio in the form
+    const checkedRadio = this.page.locator('input[name="SelectedStatus"]:checked');
+    await expect(checkedRadio).toHaveCount(1);
+
+    const radioId = await checkedRadio.getAttribute('id');
+    const label = this.page.locator(`label[for="${radioId}"]`);
+    const formStatus = (await label.innerText()).replace(/\s+/g, ' ').trim();
+
+    expect(formStatus).toBe(headerStatus);
+  }
+);
+
+Then('status last updated date is {string}', async function (expectedDate: string) {
+  const lastUpdatedCell = this.page
+    .locator('.recommendation-piece-content table.govuk-table tbody tr .govuk-table__cell')
+    .nth(1);
+
+  await expect(lastUpdatedCell).toHaveText(expectedDate);
+});
+

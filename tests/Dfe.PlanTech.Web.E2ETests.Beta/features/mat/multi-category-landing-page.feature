@@ -1,5 +1,6 @@
 @serial
-@user-school
+@user-mat
+@selected-school-miscellaneous
 Feature: Multi Category Landing Page
 
   Background:

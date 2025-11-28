@@ -17,8 +17,7 @@ Feature: Accessibility Page
     And I should see a non govuk section heading with text "Preparation of this accessibility statement"
 
   Scenario: Accessibility page includes contact links
-    Then I should see a link with text "contact us page (opens in new tab)"
-    And I should see a link with text "contact us (opens in new tab)"
+    Then I should see 2 links with text "contact us page (opens in new tab)"
     And I should see a link with text "Equality Advisory and Support Service (EASS) (opens in new tab)"
 
   Scenario: Accessibility page passes accessibility checks
@@ -26,6 +25,6 @@ Feature: Accessibility Page
 
   Scenario: Accessibility page has the correct footer links
     And I should see the GOV.UK footer with expected links
-    
+
   Scenario: Accessibility page has the beta header
     And I should see the beta header

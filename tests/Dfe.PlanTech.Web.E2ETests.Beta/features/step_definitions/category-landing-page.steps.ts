@@ -18,7 +18,7 @@ async function getConfirmationPanel(context: any, sectionName: string) {
 Then('I should see the confirmation panel for {string}',
   async function (sectionName: string) {
     const {headerLocator, bodyLocator} = await getConfirmationPanel(this, sectionName);
-    
+
     await expect(headerLocator).toBeVisible();
     await expect(bodyLocator).toBeVisible();
   }
@@ -26,36 +26,44 @@ Then('I should see the confirmation panel for {string}',
 
 Then('I should not see the confirmation panel for {string}', async function (sectionName: string) {
     const {headerLocator, bodyLocator} = await getConfirmationPanel(this, sectionName);
-    
+
     await expect(headerLocator).not.toBeVisible();
     await expect(bodyLocator).not.toBeVisible();
 }
 );
 
-Then('I should see a link to the recommendation {string}',
-  async function (recommendationText: string) {
+Then(
+  'I should see a link to the recommendation {string}',
+  async function (recommendationTitle: string) {
 
-    const recommendationLink = this.page.locator('ul.govuk-task-list a.govuk-link', {
-      hasText: recommendationText,
+    const link = this.page.getByRole('link', {
+      name: recommendationTitle,
     });
 
-    await expect(recommendationLink).toBeVisible();
+    await expect(link).toBeVisible();
   }
 );
 
 When('I click the first recommendation link on the category landing page', async function () {
-  const firstLink = this.page.locator('a.govuk-task-list__link').first();
+  const firstLink = this.page
+    .locator('.recommendation-action-header')
+    .getByRole('link')
+    .first();
+
   await firstLink.click();
 });
 
-When('I click the recommendation link {string} on the category landing page', async function (linkText: string) {
-  const link = this.page.locator('a.govuk-task-list__link', {
-    hasText: linkText,
-  });
+When(
+  'I click the recommendation link {string} on the category landing page',
+  async function (linkText: string) {
+    const link = this.page
+      .locator('.recommendation-action-header')
+      .getByRole('link', { name: linkText });
 
-  await link.first().click();
-}
+    await link.click();
+  }
 );
+
 
 Then('I should see the completed self-assessment message for {string}', async function (sectionName: string) {
   // format todays date
@@ -79,7 +87,7 @@ Then('I should see the completed self-assessment message for {string}', async fu
   expect(actualText).toBe(expectedText);
 
   // check the view link is completed
-  const viewLink = this.page.getByRole('link', { name: `View or update your self-assessment for ${sectionNameLower}` });
+  const viewLink = this.page.getByRole('link', { name: `View answers for ${sectionNameLower}` });
   await expect(viewLink).toBeVisible();
 });
 
