@@ -2,7 +2,7 @@
 @clear-data-school
 @user-mat
 @selected-school-miscellaneous
-Feature: Questions Page
+Feature: MAT Questions Page
 
   Background:
     Given I start an assessment on category "Category One" section "Category One Section One"

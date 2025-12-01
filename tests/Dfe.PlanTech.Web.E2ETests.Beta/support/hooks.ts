@@ -9,7 +9,7 @@ import {
 import { chromium, Browser, BrowserContext, Page } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
-import { clearTestEstablishmentData } from '../../clearTestDataSqlAzure';
+import { clearTestEstablishmentData } from '../clearTestDataSqlAzure';
 import { setDefaultTimeout } from '@cucumber/cucumber';
 import { MAT_SCHOOLS } from '../constants/matConstants';
 
@@ -31,9 +31,15 @@ BeforeAll(async () => {
 });
 
 Before(async function (scenario: ITestCaseHookParameter) {
-  const tag = scenario.pickle.tags.find((t) => t.name.startsWith('@user-'));
-  const userType = tag ? tag.name.replace('@user-', '') : 'school';
-  const storagePath = path.resolve(__dirname, `../../storage/${userType}.json`);
+const tag = scenario.pickle.tags.find(t =>
+  t.name.startsWith('@user-')
+);
+
+const userType = tag
+  ? tag.name.replace('@user-', '')
+  : 'school'; 
+
+  const storagePath = path.resolve(__dirname, `../storage/${userType}.json`);
 
   const shouldRecord = this.parameters?.record === true;
 
@@ -43,7 +49,7 @@ Before(async function (scenario: ITestCaseHookParameter) {
   };
 
   if (shouldRecord) {
-    const tempVideoDir = path.resolve(__dirname, '../../videos/temp');
+    const tempVideoDir = path.resolve(__dirname, '../videos/temp');
     ensureDirExists(tempVideoDir);
     contextOptions.recordVideo = {
       dir: tempVideoDir,
@@ -130,7 +136,7 @@ After(async function (scenario: ITestCaseHookParameter) {
   const page = this.page as Page | undefined;
   const context = this.context as BrowserContext | undefined;
 
-  const baseDir = path.resolve(__dirname, `../../`);
+  const baseDir = path.resolve(__dirname, `../`);
   const videoDir = path.join(baseDir, 'videos', featureName);
   const screenshotDir = path.join(baseDir, 'screenshots', featureName);
   const traceDir = path.join(baseDir, 'traces', featureName);
