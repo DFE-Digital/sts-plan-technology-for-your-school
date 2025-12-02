@@ -1,5 +1,7 @@
+
 @serial
-@user-school
+@user-mat
+@selected-school-miscellaneous
 Feature: Check answers page
   @clear-data-school
   Scenario: Check answers page has all the correct elements
