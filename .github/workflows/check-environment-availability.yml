@@ -1,0 +1,78 @@
+name: Check Environment Availability
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        required: true
+
+jobs:
+  ping-environments:
+    name: Ping environments for ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    env:
+      ENVIRONMENT: ${{ inputs.environment }}
+      ENVIRONMENT_URL: ${{ 
+        inputs.environment == 'Dev' && 'https://dev.plan-technology-for-your-school.education.gov.uk/information-asset-register' ||
+        inputs.environment == 'Tst' && 'https://test.dev.plan-technology-for-your-school.education.gov.uk/information-asset-register' ||
+        inputs.environment == 'StagingUnprotected' && 'https://staging.plan-technology-for-your-school.education.gov.uk/information-asset-register' ||
+        inputs.environment == 'ProductionUnprotected' && 'https://plan-technology-for-your-school.education.gov.uk/information-asset-register' }}
+
+    steps:
+      - name: Show environment information
+        run: |
+          echo "Environment: $ENVIRONMENT"
+          echo "URL: $ENVIRONMENT_URL"
+
+      - name: Prepare empty failures list
+        run: |
+          mkdir -p tmp
+          echo "failures:" > tmp/env-check-failures.yml
+
+      - name: Check $ENVIRONMENT availability
+        run: |
+          echo "🌐 Pinging $ENVIRONMENT ($ENVIRONMENT_URL)..."
+          status_code=$(curl -s -o /dev/null -w "%{http_code}" "$ENVIRONMENT_URL")
+          
+          if [[ "$status_code" -ne 200 && "$status_code" -ne 302 ]]; then
+            echo "❌ $ENVIRONMENT returned status code $status_code"
+            echo "- name: $ENVIRONMENT" >> tmp/env-check-failures.yml
+            echo "  url: $ENVIRONMENT_URL" >> tmp/env-check-failures.yml
+            echo "  status: $status_code" >> tmp/env-check-failures.yml
+            exit 1
+          fi
+
+          echo "✅ $ENVIRONMENT is up (HTTP $status_code)"
+
+      - name: Upload failure artifact
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-check-failures-$ENVIRONMENT
+          path: tmp/env-check-failures.yml
+
+  notify:
+    name: Send email notifications
+    runs-on: ubuntu-latest
+    needs: ping-environments
+    if: always()
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all failure artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: env-check-failures-*
+          path: downloaded-failures
+
+      - name: Install Notify client
+        run: pip install notifications-python-client pyyaml
+
+      - name: Send environment down alert
+        env:
+          NOTIFICATIONS_API_KEY: ${{ secrets.NOTIFICATIONS_SERVICE_GOV_UK_API_KEY }}
+          RECIPIENT_ADDRESSES: ${{ secrets.SEND_EXPIRY_ALERTS_RECIPIENT_ADDRESSES }}
+        run: python .github/scripts/notify-down-envs.py
