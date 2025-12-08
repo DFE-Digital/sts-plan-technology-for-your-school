@@ -9,8 +9,11 @@ import {
 import { chromium, Browser, BrowserContext, Page } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
-import { clearTestEstablishmentData } from '../../clearTestDataSqlAzure';
+import { clearTestEstablishmentData } from '../clearTestDataSqlAzure';
 import { setDefaultTimeout } from '@cucumber/cucumber';
+import { MAT_SCHOOLS } from '../constants/matConstants';
+
+type MatSchoolKey = keyof typeof MAT_SCHOOLS;
 
 setDefaultTimeout(60 * 1000)
 
@@ -28,9 +31,15 @@ BeforeAll(async () => {
 });
 
 Before(async function (scenario: ITestCaseHookParameter) {
-  const tag = scenario.pickle.tags.find((t) => t.name.startsWith('@user-'));
-  const userType = tag ? tag.name.replace('@user-', '') : 'school';
-  const storagePath = path.resolve(__dirname, `../../storage/${userType}.json`);
+const tag = scenario.pickle.tags.find(t =>
+  t.name.startsWith('@user-')
+);
+
+const userType = tag
+  ? tag.name.replace('@user-', '')
+  : 'school'; 
+
+  const storagePath = path.resolve(__dirname, `../storage/${userType}.json`);
 
   const shouldRecord = this.parameters?.record === true;
 
@@ -40,7 +49,7 @@ Before(async function (scenario: ITestCaseHookParameter) {
   };
 
   if (shouldRecord) {
-    const tempVideoDir = path.resolve(__dirname, '../../videos/temp');
+    const tempVideoDir = path.resolve(__dirname, '../videos/temp');
     ensureDirExists(tempVideoDir);
     contextOptions.recordVideo = {
       dir: tempVideoDir,
@@ -86,6 +95,37 @@ Before(async function (scenario: ITestCaseHookParameter) {
 
     await clearTestEstablishmentData(establishmentRef);
   }
+
+  const schoolTag = scenario.pickle.tags.find(t =>
+    t.name.startsWith('@selected-school-')
+  );
+
+  if (schoolTag) {
+    const rawKey = schoolTag.name.replace('@selected-school-', '');
+    const keyFromTag = rawKey.toUpperCase() as MatSchoolKey;
+
+    if (!(keyFromTag in MAT_SCHOOLS)) {
+      throw new Error(
+        `Unknown school key "${keyFromTag}" in tag ${schoolTag.name}. ` +
+        `Expected one of: ${Object.keys(MAT_SCHOOLS).join(', ')}`
+      );
+    }
+
+    this.selectedSchool = MAT_SCHOOLS[keyFromTag];
+
+    if (this.selectedSchool) {
+      console.log(`Auto-selecting school: ${this.selectedSchool.NAME}`);
+
+      await this.page.goto(`${process.env.URL}home`);
+
+      await this.page.getByRole('button', { name: this.selectedSchool.NAME }).click();
+
+      console.log(`Navigated to dashboard for: ${this.selectedSchool.NAME}`);
+    }
+
+    console.log(`Selected school via tag: ${this.selectedSchool.NAME}`);
+  }
+
 });
 
 After(async function (scenario: ITestCaseHookParameter) {
@@ -96,7 +136,7 @@ After(async function (scenario: ITestCaseHookParameter) {
   const page = this.page as Page | undefined;
   const context = this.context as BrowserContext | undefined;
 
-  const baseDir = path.resolve(__dirname, `../../`);
+  const baseDir = path.resolve(__dirname, `../`);
   const videoDir = path.join(baseDir, 'videos', featureName);
   const screenshotDir = path.join(baseDir, 'screenshots', featureName);
   const traceDir = path.join(baseDir, 'traces', featureName);
@@ -152,7 +192,7 @@ After(async function (scenario: ITestCaseHookParameter) {
 AfterAll(async () => {
   try {
     if (browser) {
-      await Promise.all(browser.contexts().map(c => c.close().catch(() => {})));
+      await Promise.all(browser.contexts().map(c => c.close().catch(() => { })));
       await browser.close();
     }
   } catch (e) {

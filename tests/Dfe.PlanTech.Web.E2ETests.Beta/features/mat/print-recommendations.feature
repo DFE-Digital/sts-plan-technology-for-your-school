@@ -1,10 +1,11 @@
 @serial
-@user-school
-Feature: Print recommendations Page
+@user-mat
+@selected-school-miscellaneous
+Feature: MAT Print recommendations Page
 
   Background:
   @clear-data-school
-    Scenario: Print recommendations page has correct layout content
+      Scenario: Print recommendations page has correct layout content
         Given I start a test assessment on "Category Two" category "Category Two Section Three" section with answers "1, 1, 1, 2, 4"
         And I click the recommendation link "Recommendation Header - C2 - S3 - Q5" on the category landing page
         And I click the print all recommendations link in the related actions for "Category Two Section Three"
@@ -40,7 +41,3 @@ Feature: Print recommendations Page
         Then I should see a recommendation with heading "Recommendation Header - C2 - S3 - Q3" and content containing "This is the content for Category Two Section Three Question Three Answer Two" on the print recommendation page
         Then I should see a recommendation with heading "Recommendation Header - C2 - S3 - Q2" and content containing "This is the content for Category Two Section Three Question Two Answer One" on the print recommendation page
         Then I should see a recommendation with heading "Recommendation Header - C2 - S3 - Q1" and content containing "This is the content for Category Two Section Three Question One Answer One" on the print recommendation page
-
-
-
-

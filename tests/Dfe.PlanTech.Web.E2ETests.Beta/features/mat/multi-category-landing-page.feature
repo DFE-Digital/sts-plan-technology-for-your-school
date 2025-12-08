@@ -1,6 +1,7 @@
 @serial
-@user-school
-Feature: Multi Category Landing Page
+@user-mat
+@selected-school-miscellaneous
+Feature: MAT Multi Category Landing Page
 
   Background:
     @clear-data-school
