@@ -230,18 +230,20 @@ public class RecommendationsViewBuilder(
             Slug = cr.Slug
         }).ToList();
 
+        var submission = submissionRoutingData.Submission;
+
         return new RecommendationsViewModel
         {
             CategoryName = category.Header.Text,
             SectionName = section.Name,
             Chunks = chunkViewModels,
-            LatestCompletionDate = submissionRoutingData.Submission?.DateCompleted.HasValue == true
-                ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission.DateCompleted.Value)
+            LatestCompletionDate = submission?.DateCompleted.HasValue == true
+                ? DateTimeHelper.FormattedDateShort(submission.DateCompleted.Value)
                 : null,
             SectionSlug = sectionSlug,
             CategorySlug = categorySlug,
             CurrentChunkCount = currentRecommendationCount,
-            SubmissionResponses = submissionRoutingData.Submission.Responses
+            SubmissionResponses = submission?.Responses ?? []
         };
     }
 }

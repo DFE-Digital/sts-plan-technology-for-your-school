@@ -93,12 +93,11 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             Assert.IsType<OkResult>(result);
         }
 
-
         [Fact]
         public async Task UpdateRecommendationStatus_ThrowsIfCategorySlugNull()
         {
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.UpdateRecommendationStatus(null!, "section-slug", "chunk-slug", "Complete")
+                _controller.UpdateRecommendationStatus(null!, "section-slug", "chunk-slug", "Complete", null)
             );
         }
 
@@ -106,7 +105,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         public async Task UpdateRecommendationStatus_ThrowsIfSectionSlugNull()
         {
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.UpdateRecommendationStatus("category-slug", null!, "chunk-slug", "Complete")
+                _controller.UpdateRecommendationStatus("category-slug", null!, "chunk-slug", "Complete", null)
             );
         }
 
@@ -114,7 +113,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         public async Task UpdateRecommendationStatus_ThrowsIfChunkSlugNull()
         {
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.UpdateRecommendationStatus("category-slug", "section-slug", null!, "Complete")
+                _controller.UpdateRecommendationStatus("category-slug", "section-slug", null!, "Complete", null)
             );
         }
     }

@@ -115,7 +115,7 @@ public class ReviewAnswersViewBuilderTests
         Assert.Equal("cat", vm.CategorySlug);
         Assert.Equal("sec-1", vm.SectionSlug);
         Assert.Equal("err", vm.ErrorMessage);
-        Assert.NotEmpty(vm.Content);
+        Assert.True(vm.Content?.Count > 0);
     }
 
     [Fact]
@@ -268,11 +268,11 @@ public class ReviewAnswersViewBuilderTests
         var result = await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "My Section", 42);
 
         await _submissions.Received(1).ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-            2, // ActiveEstablishmentId
-            null, // UserOrganisationId (non-MAT user)
+            establishmentId: 2,
+            matEstablishmentId: null,
             42,
-            1, // UserId
-            Arg.Is<QuestionnaireSectionEntry>(s => s.Sys.Id == "S1"));
+            userId: 1,
+            Arg.Is<QuestionnaireSectionEntry>(s => s.Sys!.Id == "S1"));
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.True(ctl.TempData.ContainsKey("SectionName"));

@@ -441,7 +441,7 @@ public class RecommendationsViewBuilderTests
 
         Assert.Equal("Connectivity", vm.CategoryName);
         Assert.Equal(sectionSlug, vm.SectionSlug);
-        Assert.Equal(routing.Submission.Responses, vm.SubmissionResponses);
+        Assert.Equal(routing.Submission?.Responses, vm.SubmissionResponses);
         Assert.Equal(expectedSlug, vm.OriginatingSlug);
     }
 

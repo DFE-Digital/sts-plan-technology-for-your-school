@@ -58,7 +58,7 @@ public class PagesViewBuilder(
             {
                 throw new ContentfulDataUnavailableException($"Could not find category at {controller.Request.Path.Value}");
             }
-            var landingPageViewModel = await BuildLandingPageViewModelAsync(controller, category);
+            var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
             return controller.View(CategoryLandingPageView, landingPageViewModel);
         }
 
@@ -96,13 +96,18 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var viewModel = await BuildLandingPageViewModelAsync(controller, category);
+        var viewModel = BuildLandingPageViewModelAsync(controller, category);
 
         return controller.View(CategoryLandingPagePrintView, viewModel);
     }
 
-    private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(Controller controller, QuestionnaireCategoryEntry category)
+    private CategoryLandingPageViewModel BuildLandingPageViewModelAsync(Controller controller, QuestionnaireCategoryEntry category)
     {
+        if (category.LandingPage?.Slug is null)
+        {
+            throw new InvalidDataException("Cannot build a landing page with an empty slug");
+        }
+
         return new CategoryLandingPageViewModel
         {
             Slug = category.LandingPage.Slug,

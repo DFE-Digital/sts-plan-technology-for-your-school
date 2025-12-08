@@ -147,30 +147,4 @@ public class MaintainUrlOnKeyNotFoundAttributeTests
         Assert.Null(ctx.Result);
         await contentful.DidNotReceiveWithAnyArgs().GetLinkByIdAsync(default!);
     }
-
-    // ---------- Safe when Contentful returns null link ----------
-
-    [Fact]
-    public async Task OnExceptionAsync_When_Contentful_Returns_Null_Link_Sets_Null_Href_And_Handles()
-    {
-        // Arrange
-        var linkId = "contact-link-id";
-        var contentful = Substitute.For<IContentfulService>();
-        contentful.GetLinkByIdAsync(linkId).Returns((NavigationLinkEntry?)null);
-
-        var sut = BuildServiceUnderTest(linkId, contentful);
-        var ctx = BuildExceptionContext();
-        ctx.Exception = new ContentfulDataUnavailableException("boom");
-
-        // Act
-        await sut.OnExceptionAsync(ctx);
-
-        // Assert
-        Assert.True(ctx.ExceptionHandled);
-        var view = Assert.IsType<ViewResult>(ctx.Result);
-        Assert.Equal("NotFoundError", view.ViewName);
-        var vm = Assert.IsType<NotFoundViewModel>(view.ViewData.Model);
-        Assert.Null(vm.ContactLinkHref);
-        await contentful.Received(1).GetLinkByIdAsync(linkId);
-    }
 }

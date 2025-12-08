@@ -112,6 +112,14 @@ public class CategoryLandingViewComponentViewBuilder(
         RecommendationSortOrder sortType
     )
     {
+        if (!section.CoreRecommendations.Any())
+        {
+            return new CategoryLandingSectionRecommendationsViewModel
+            {
+                NoRecommendationFoundErrorMessage = $"Section '{section.Name}' has no recommendations"
+            };
+        }
+
         try
         {
             if (section.InterstitialPage is null)

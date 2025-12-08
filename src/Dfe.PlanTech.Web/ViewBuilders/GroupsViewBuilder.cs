@@ -34,11 +34,10 @@ public class GroupsViewBuilder(
         var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
                                        ?? throw new ContentfulDataUnavailableException($"Could not find contentful page for slug '{UrlConstants.GroupsSelectionPageSlug}'");
 
-        var groupName = CurrentUser.UserOrganisationName;
-        var title = groupName ?? "Your organisation";
+        var groupName = CurrentUser.UserOrganisationName ?? "Your organisation";
         List<ContentfulEntry> content = selectASchoolPageContent.Content ?? [];
 
-        var sections = await contentfulService.GetAllSectionsAsync();
+        var sections = await ContentfulService.GetAllSectionsAsync();
         var allRecommendations = sections.SelectMany(section => section.CoreRecommendations);
         string totalRecommendations = allRecommendations.Count().ToString();
 
@@ -51,7 +50,7 @@ public class GroupsViewBuilder(
             GroupName = groupName,
             GroupEstablishments = groupSchools,
             BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent ?? [],
-            Title = new ComponentTitleEntry(title),
+            Title = new ComponentTitleEntry(groupName),
             Content = content,
             TotalRecommendations = totalRecommendations,
             ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalRecommendations)

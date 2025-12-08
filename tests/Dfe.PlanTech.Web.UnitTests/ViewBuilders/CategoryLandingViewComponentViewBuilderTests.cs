@@ -352,7 +352,7 @@ public class CategoryLandingViewComponentViewBuilderTests
     {
         // Arrange
         var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
-        section.CoreRecommendations = null!;
+        section.CoreRecommendations = [];
         var category = MakeCategory(section);
 
         var statuses = new List<SqlSectionStatusDto>
@@ -364,7 +364,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
                   .Returns(statuses);
         submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
-                  .Returns(new SubmissionResponsesModel(1, new()));
+                  .Returns(new SubmissionResponsesModel(1, []));
 
         var sut = CreateSut(submission: submission);
 
@@ -373,7 +373,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal("Unable to retrieve Devices recommendation",
+        Assert.Equal("Section 'Devices' has no recommendations",
                      secVm.Recommendations.NoRecommendationFoundErrorMessage);
     }
 

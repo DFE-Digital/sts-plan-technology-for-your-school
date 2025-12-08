@@ -111,7 +111,7 @@ public class OnUserInformationReceivedEventTests
     [Fact]
     public void AddClaimsToPrincipal_When_PrincipalNull_DoesNothing()
     {
-        var (ctx, _, _) = BuildContext(principal: null);
+        var (ctx, _, _) = BuildContext(principal: null!);
         var signIn = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
 
         var mi = typeof(OnUserInformationReceivedEvent)
@@ -119,7 +119,7 @@ public class OnUserInformationReceivedEventTests
         Assert.NotNull(mi);
 
         // Should not throw
-        mi!.Invoke(null, new object[] { ctx, signIn });
+        mi!.Invoke(null, [ctx, signIn]);
     }
 
     [Fact]
