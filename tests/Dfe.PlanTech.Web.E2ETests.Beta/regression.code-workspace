@@ -1,0 +1,13 @@
+{
+  "folders": [
+    { "path": "." }
+  ],
+  "settings": {
+    "cucumber.features": [
+      "features/regression/**/*.feature"
+    ],
+    "cucumber.glue": [
+      "step_definitions/regression/**/*.ts"
+    ]
+  }
+}
