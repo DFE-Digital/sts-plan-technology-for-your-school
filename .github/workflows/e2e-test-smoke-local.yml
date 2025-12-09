@@ -7,7 +7,7 @@ on:
         description: Which content environment to run against? (Dev = PlanTech_Development)
         required: true
         type: choice
-        options: ['Dev', 'Staging','StagingUnprotected']
+        options: ['Dev', 'Tst', 'Staging','StagingUnprotected']
         default: 'Dev'
 
   # pull_request:
