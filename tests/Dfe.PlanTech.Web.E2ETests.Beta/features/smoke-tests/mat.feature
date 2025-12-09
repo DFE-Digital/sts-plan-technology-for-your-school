@@ -28,7 +28,7 @@ Feature: MAT Multi Category Landing Page
 
     @selected-school-miscellaneous
     @clear-data-school
-    Scenario: Completing all topics on a multi-topic category shows the correct content
+    Scenario: MAT completing all topics on a multi-topic category shows the correct content
       Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "4, 1, 1"
       And I start a test assessment on "Category Two" category "Category Two Section Two" section with answers "3, 2, 2"
       And I start a test assessment on "Category Two" category "Category Two Section Three" section with answers "1, 1, 1, 2, 4"
