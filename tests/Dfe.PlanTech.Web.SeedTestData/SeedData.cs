@@ -48,9 +48,9 @@ Select CONCAT('Test Ref ', n), 'Test School', CONCAT('Test Establishment ', n) f
                                 -- Insert test establishments linked to that MAT
                                 INSERT INTO [dbo].[establishmentLink] (groupUid, establishmentName, urn)
                                 VALUES
-                                ('99999', 'DSI TEST Establishment (001) Community School (01)', 2),
-                                ('99999', 'DSI TEST Establishment (001) Miscellaneous (27)', 18),
-                                ('99999', 'DSI TEST Establishment (001) Foundation School (05)', 5);
+                                ('99999', 'DSI TEST Establishment (001) Community School (01)', '00000002'),
+                                ('99999', 'DSI TEST Establishment (001) Miscellaneous (27)', '00000018'),
+                                ('99999', 'DSI TEST Establishment (001) Foundation School (05)', '00000005');
                            ");
 
     }
