@@ -83,65 +83,7 @@ jobs:
                 docker ps -a
                 docker logs azuresqledge || true
                 docker exec azuresqledge ls -la /opt || true
-                docker exec azuresqledge which /opt/mssql-tools/bin/sqlcmd || true             
-
-            - name: Execute seed test MAT data
-              shell: bash
-              env:
-                SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
-              run: |
-                set -euo pipefail
-
-                docker exec azuresqledge /opt/mssql-tools/bin/sqlcmd \
-                  -S localhost \
-                  -U sa \
-                  -P "$SA_PASSWORD" \
-                  -d plantech-mock-db \
-                  -i /src/.github/scripts/seed-test-mat-data.sql
-
-            - name: Verify seeded MAT + establishment link data
-              shell: bash
-              env:
-                SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
-              run: |
-                set -euo pipefail
-
-                sqlcmd_in_container() {
-                  docker exec azuresqledge /opt/mssql-tools/bin/sqlcmd \
-                    -S localhost \
-                    -U sa \
-                    -P "$SA_PASSWORD" \
-                    -d plantech-mock-db \
-                    -h -1 -W \
-                    -Q "$1"
-                }
-
-                echo "=== establishmentGroup ==="
-                sqlcmd_in_container "SELECT uid, groupName, groupType, groupStatus FROM dbo.establishmentGroup WHERE uid = '99999';"
-
-                echo ""
-                echo "=== establishmentLink ==="
-                sqlcmd_in_container "SELECT groupUid, establishmentName, urn FROM dbo.establishmentLink WHERE groupUid = '99999';"
-
-                echo ""
-                echo "=== Counting rows ==="
-                GROUP_COUNT=$(sqlcmd_in_container "SELECT COUNT(*) FROM dbo.establishmentGroup WHERE uid = '99999';" | tr -d ' \r')
-                LINK_COUNT=$(sqlcmd_in_container "SELECT COUNT(*) FROM dbo.establishmentLink WHERE groupUid = '99999';" | tr -d ' \r')
-
-                echo "establishmentGroup count: $GROUP_COUNT"
-                echo "establishmentLink count: $LINK_COUNT"
-
-                if [ "$GROUP_COUNT" != "1" ]; then
-                  echo "❌ ERROR: Expected 1 Group row but got $GROUP_COUNT"
-                  exit 1
-                fi
-
-                if [ "$LINK_COUNT" != "3" ]; then
-                  echo "❌ ERROR: Expected 3 Link rows but got $LINK_COUNT"
-                  exit 1
-                fi
-
-                echo "✅ Verification passed — seeded data is present."                 
+                docker exec azuresqledge which /opt/mssql-tools/bin/sqlcmd || true                  
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
