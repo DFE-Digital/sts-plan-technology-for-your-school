@@ -3,6 +3,29 @@ import { expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import { textToHyphenatedUrl } from '../../helpers/url'
 
+Given('I visit the landing page', async function () {
+  await this.page.goto(`${process.env.URL}`);
+});
+
+Then('I should see the beta header',
+  async function () {
+    //check the banner exists
+    const header = this.page.locator('div.govuk-phase-banner');
+    await expect(header).toBeVisible();
+
+    // check tag
+    const tag = header.locator('strong.govuk-tag');
+    await expect(tag).toBeVisible();
+    await expect(tag).toHaveText('Beta');
+
+    // ensure the feedback link exists (this is hardcoded in the backend beta-header.cshtml file)
+    const expectedHref = 'https://forms.office.com/e/Jk5PuNWvGe';
+    const link = header.locator('a');
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute('href', expectedHref);
+  }
+);
+
 Given('I visit the homepage', async function () {
   await this.page.goto(`${process.env.URL}home`);
 });
@@ -55,9 +78,17 @@ Then('the page should be accessible', async function () {
 });
 
 Then('I should see a link with text {string}', async function (text: string) {
-  const link = this.page.locator(`a:has-text("${text}")`);
+  const link = this.page.locator(`a:has-text("${text}")`).first();
   await expect(link).toBeVisible();
 });
+
+Then(
+  'I should see {int} links with text {string}',
+  async function (count: number, text: string) {
+    const links = this.page.getByRole('link', { name: text });
+    await expect(links).toHaveCount(count);
+  }
+);
 
 Then('I should see the main page heading', async function () {
   const heading = this.page.locator('h1.govuk-heading-xl');
@@ -100,6 +131,14 @@ Then('I should see a back link to {string}', async function (href: string) {
   expect(actualHref).toContain(href);
 });
 
+Then('I should see a js-back link to {string}', async function (href: string) {
+  const backLink = this.page.locator('#js-back-button-link');
+  await expect(backLink).toBeVisible();
+  const actualHref = await backLink.getAttribute('href');
+  expect(actualHref).toContain(href);
+});
+
+
 Then('I should see a h2 section heading with text {string}', async function (heading: string) {
   const headingLocator = this.page.locator(`h2.govuk-heading-l:has-text("${heading}")`);
   await expect(headingLocator).toBeVisible();
@@ -131,7 +170,7 @@ Given('I am on the self-assessment testing page and click on the category {strin
 
   await cardLink.first().click();
 
-  const expectedPath = textToHyphenatedUrl(categoryName); 
+  const expectedPath = textToHyphenatedUrl(categoryName);
 
   await expect(this.page).toHaveURL(new RegExp(`${expectedPath}(/|$)`));
 });
@@ -194,6 +233,16 @@ When('I click the back link', async function () {
   await backLink.click();
 });
 
+When('I click the js-back link', async function () {
+  const backLink = this.page.locator('#js-back-button-link');
+  await backLink.click();
+});
+
+When('I click the non-js back link', async function () {
+  const backLink = this.page.locator('#nonjs-back-button-link');
+  await backLink.click();
+});
+
 
 Then('the header should contain all the correct content', async function () {
 
@@ -239,7 +288,7 @@ Then('in the inset text I should see the following links:', async function (data
   const inset = this.page.locator('.govuk-inset-text');
   await expect(inset).toBeVisible();
 
-  const expected = dataTable.hashes(); 
+  const expected = dataTable.hashes();
   for (const { Text, Href } of expected) {
     const link = inset.getByRole('link', { name: Text });
     await expect(link).toBeVisible();
@@ -247,6 +296,16 @@ Then('in the inset text I should see the following links:', async function (data
   }
 });
 
-Given('I visit the page {string}', async function (path:string) {
+Given('I visit the page {string}', async function (path: string) {
   await this.page.goto(`${process.env.URL}${path}`);
 });
+
+Then(
+  'I should see a confirmation panel saying {string}',
+  async function (expectedText: string) {
+    const panelTitle = this.page.locator('.govuk-panel--confirmation .govuk-panel__title');
+
+    await expect(panelTitle).toBeVisible();
+    await expect(panelTitle).toHaveText(expectedText);
+  }
+);
