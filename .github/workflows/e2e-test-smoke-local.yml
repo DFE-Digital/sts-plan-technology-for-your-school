@@ -83,7 +83,32 @@ jobs:
                 docker ps -a
                 docker logs azuresqledge || true
                 docker exec azuresqledge ls -la /opt || true
-                docker exec azuresqledge which /opt/mssql-tools/bin/sqlcmd || true                
+                docker exec azuresqledge which /opt/mssql-tools/bin/sqlcmd || true             
+
+            - name: Seed the test establishments + group
+              shell: bash
+              env:
+                SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
+              run: |
+                docker exec azuresqledge /opt/mssql-tools/bin/sqlcmd \
+                  -S localhost -U sa -P "$SA_PASSWORD" -d plantech-mock-db -Q "
+                    SET NOCOUNT ON;
+                    DELETE FROM dbo.establishmentLink  WHERE groupUid = '99999';
+                    DELETE FROM dbo.establishmentGroup WHERE uid      = '99999';
+
+                    INSERT INTO dbo.establishmentGroup (uid, groupName, groupType, groupStatus)
+                    VALUES (
+                        '99999',
+                        'DSI TEST Multi-Academy Trust (010)',
+                        'Multi-academy trust',
+                        'Open'
+                    );
+
+                    INSERT INTO dbo.establishmentLink (groupUid, establishmentName, urn) VALUES
+                    ('99999', 'DSI TEST Establishment (001) Community School (01)', 2),
+                    ('99999', 'DSI TEST Establishment (001) Miscellaneous (27)', 18),
+                    ('99999', 'DSI TEST Establishment (001) Foundation School (05)', 5);
+                  "   
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
