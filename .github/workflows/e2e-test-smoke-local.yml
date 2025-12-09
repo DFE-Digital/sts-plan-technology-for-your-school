@@ -205,19 +205,10 @@ jobs:
                   TZ: Europe/London
               run: npm run test:login && npm run test:record:smoke
 
-            - name: Merge cucumber JSON reports
-              if: always()            
-              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
-              shell: bash
-              run: |
-                node -e "const fs=require('fs');
-                const a=JSON.parse(fs.readFileSync('reports/cucumber-smoke.json','utf8'));
-                fs.writeFileSync('reports/cucumber-report.json', JSON.stringify(a));"
-
             - name: Summarise Cucumber results
               if: always()
               run: |
-                node ./tests/Dfe.PlanTech.Web.E2ETests.Beta/cucumber-summary.js ./tests/Dfe.PlanTech.Web.E2ETests.Beta/reports/cucumber-report.json
+                node ./tests/Dfe.PlanTech.Web.E2ETests.Beta/cucumber-summary.js ./tests/Dfe.PlanTech.Web.E2ETests.Beta/reports/cucumber-smoke.json
 
             - name: Generate HTML report
               if: always()
