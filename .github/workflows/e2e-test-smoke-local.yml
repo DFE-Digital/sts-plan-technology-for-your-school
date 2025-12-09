@@ -205,6 +205,14 @@ jobs:
                   TZ: Europe/London
               run: npm run test:login && npm run test:record:smoke
 
+            - name: Upload login debug screenshots
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                name: login-debug
+                path: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/debug-*.png
+                if-no-files-found: ignore
+
             - name: Summarise Cucumber results
               if: always()
               run: |

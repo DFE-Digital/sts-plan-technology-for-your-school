@@ -32,10 +32,27 @@ async function loginAndSaveSession(
 
   const page = await context.newPage();
 
+  console.log('After goto, URL is:', page.url());
+
+
   try {
     await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
 
-    await page.locator('input#username').waitFor({ timeout: 10000 });
+    try {
+      await page.locator('input#username').waitFor({ timeout: 10000 });
+    }
+    catch (err) {
+      console.error('Timeout waiting for #username');
+      console.error('Final URL:', page.url());
+
+      const html = await page.content();
+      console.error('Page content (truncated):', html.slice(0, 2000));
+
+      await page.screenshot({ path: `debug-${outputFilename}.png`, fullPage: true });
+
+      throw err; 
+    }
+
     await page.fill('input#username', email);
     const usernameSubmit = page.locator('button.govuk-button').first();
     await usernameSubmit.click();
