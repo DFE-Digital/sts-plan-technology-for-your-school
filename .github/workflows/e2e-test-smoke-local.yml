@@ -85,30 +85,11 @@ jobs:
                 docker exec azuresqledge ls -la /opt || true
                 docker exec azuresqledge which /opt/mssql-tools/bin/sqlcmd || true             
 
-            - name: Seed the test establishments + group
-              shell: bash
-              env:
-                SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
-              run: |
-                docker exec azuresqledge /opt/mssql-tools/bin/sqlcmd \
-                  -S localhost -U sa -P "$SA_PASSWORD" -d plantech-mock-db -Q "
-                    SET NOCOUNT ON;
-                    DELETE FROM dbo.establishmentLink  WHERE groupUid = '99999';
-                    DELETE FROM dbo.establishmentGroup WHERE uid      = '99999';
-
-                    INSERT INTO dbo.establishmentGroup (uid, groupName, groupType, groupStatus)
-                    VALUES (
-                        '99999',
-                        'DSI TEST Multi-Academy Trust (010)',
-                        'Multi-academy trust',
-                        'Open'
-                    );
-
-                    INSERT INTO dbo.establishmentLink (groupUid, establishmentName, urn) VALUES
-                    ('99999', 'DSI TEST Establishment (001) Community School (01)', 2),
-                    ('99999', 'DSI TEST Establishment (001) Miscellaneous (27)', 18),
-                    ('99999', 'DSI TEST Establishment (001) Foundation School (05)', 5);
-                  "   
+            - name: Execute seed test MAT data
+              uses: azure/sql-action@v2.2
+              with:
+                connection-string: Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db
+                path: "./.github/scripts/seed-test-mat-data.sql"
 
             - name: Setup .NET
               uses: actions/setup-dotnet@v4
