@@ -51,6 +51,13 @@ Select CONCAT('Test Ref ', n), 'Test School', CONCAT('Test Establishment ', n) f
                                 ('99999', 'DSI TEST Establishment (001) Community School (01)', '00000002'),
                                 ('99999', 'DSI TEST Establishment (001) Miscellaneous (27)', '00000018'),
                                 ('99999', 'DSI TEST Establishment (001) Foundation School (05)', '00000005');
+
+                                -- Insert test establishments
+                                INSERT INTO [dbo].[establishment] (establishmentRef, establishmentType, orgName, groupUid)
+                                VALUES
+                                ('00000002', 'Community School', 'DSI TEST Establishment (001) Community School (01)', '99999'),
+                                ('00000018', 'Miscellaneous','DSI TEST Establishment (001) Miscellaneous (27)', '99999'),
+                                ('00000005', 'Foundation School', 'DSI TEST Establishment (001) Foundation School (05)', '99999');
                            ");
 
     }
