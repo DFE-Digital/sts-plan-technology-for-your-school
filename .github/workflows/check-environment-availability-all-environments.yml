@@ -1,0 +1,34 @@
+name: Check Environment Availability
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # every 15 minutes
+
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which environment to check
+        required: true
+        type: choice
+        options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
+        default: 'Dev'
+
+jobs:
+  scheduled:
+    if: github.event_name == 'schedule'
+    name: Scheduled Environment Availability Check
+    strategy:
+      matrix:
+        target: [Dev, Tst, StagingUnprotected, ProductionUnprotected]
+    uses: ./.github/workflows/check-environment-availability.yml
+    with:
+      environment: ${{ matrix.target }}
+    secrets: inherit
+
+  manual:
+    if: github.event_name == 'workflow_dispatch'
+    name: Manual Environment Availability Check
+    uses: ./.github/workflows/check-environment-availability.yml
+    with:
+      environment: ${{ inputs.environment }}
+    secrets: inherit
