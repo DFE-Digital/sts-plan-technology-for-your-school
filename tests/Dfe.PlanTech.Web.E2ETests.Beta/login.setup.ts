@@ -50,7 +50,7 @@ async function loginAndSaveSession(
 
       await page.screenshot({ path: `debug-${outputFilename}.png`, fullPage: true });
 
-      throw err; 
+      throw err;
     }
 
     await page.fill('input#username', email);
@@ -62,20 +62,28 @@ async function loginAndSaveSession(
     const passwordSubmit = page.locator('div.govuk-button-group button.govuk-button').first();
     await passwordSubmit.click();
 
-  //Click the cookies banners so we get the cookie preferences set in the storage state.json
-    await page.locator('button[name="accept-cookies"]').first().click();
-    await page.locator('button[name="hide-cookies"]').first().click();
+    //Click the cookies banners so we get the cookie preferences set in the storage state.json
+    const accept = page.locator('button[name="accept-cookies"]');
+    if (await accept.count() > 0) {
+      await accept.first().click();
+    }
+
+    const hide = page.locator('button[name="hide-cookies"]');
+    if (await hide.count() > 0) {
+      await hide.first().click();
+    }
+
 
     // Settle the app
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => { });
 
     // Persist storage state
     const outputPath = path.resolve(storageDir, outputFilename);
     await context.storageState({ path: outputPath });
     console.log(`Saved storage state for ${outputFilename}`);
   } finally {
-    await context.close().catch(() => {});
-    await browser.close().catch(() => {});
+    await context.close().catch(() => { });
+    await browser.close().catch(() => { });
   }
 }
 
