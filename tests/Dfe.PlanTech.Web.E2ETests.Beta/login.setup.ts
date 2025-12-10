@@ -30,6 +30,21 @@ async function loginAndSaveSession(
   const ignoreHTTPSErrors = process.env.CI === 'true';
   const context = await browser.newContext({ ignoreHTTPSErrors });
 
+  await context.addCookies([
+    {
+      name: "user_cookie_preferences",
+      value: JSON.stringify({
+        IsVisible: false,
+        UserAcceptsCookies: true,
+      }),
+      domain: "localhost",
+      path: "/",
+      httpOnly: false,
+      secure: false,
+      sameSite: "Lax",
+    }
+  ]);
+
   const page = await context.newPage();
 
   console.log('After goto, URL is:', page.url());
@@ -65,18 +80,11 @@ async function loginAndSaveSession(
     //Click the cookies banners so we get the cookie preferences set in the storage state.json
 
     try {
- const accept = page.locator('button[name="accept-cookies"]');
-      if (await accept.count() > 0) {
-        await accept.first().click();
-      }
-
-      const hide = page.locator('button[name="hide-cookies"]');
-      if (await hide.count() > 0) {
-        await hide.first().click();
-      }    
+      await page.locator('input#username').waitFor({ timeout: 10000 });
     }
     catch (err) {
-     
+      console.error('Timeout waiting for #username');
+      console.error('Final URL:', page.url());
 
       const html = await page.content();
       console.error('Page content (truncated):', html.slice(0, 2000));
@@ -85,8 +93,6 @@ async function loginAndSaveSession(
 
       throw err;
     }
-
-
 
     // Settle the app
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => { });
