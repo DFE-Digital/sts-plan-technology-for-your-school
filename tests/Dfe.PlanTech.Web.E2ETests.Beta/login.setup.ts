@@ -47,11 +47,9 @@ async function loginAndSaveSession(
 
   const page = await context.newPage();
 
-  console.log('After goto, URL is:', page.url());
-
-
   try {
     await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
+    console.log('After goto, URL is:', page.url());
 
     try {
       await page.locator('input#username').waitFor({ timeout: 10000 });
@@ -77,22 +75,6 @@ async function loginAndSaveSession(
     const passwordSubmit = page.locator('div.govuk-button-group button.govuk-button').first();
     await passwordSubmit.click();
 
-    //Click the cookies banners so we get the cookie preferences set in the storage state.json
-
-    try {
-      await page.locator('input#username').waitFor({ timeout: 10000 });
-    }
-    catch (err) {
-      console.error('Timeout waiting for #username');
-      console.error('Final URL:', page.url());
-
-      const html = await page.content();
-      console.error('Page content (truncated):', html.slice(0, 2000));
-
-      await page.screenshot({ path: `debug-${outputFilename}.png`, fullPage: true });
-
-      throw err;
-    }
 
     // Settle the app
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => { });
