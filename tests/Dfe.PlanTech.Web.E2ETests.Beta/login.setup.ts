@@ -65,10 +65,7 @@ async function loginAndSaveSession(
     //Click the cookies banners so we get the cookie preferences set in the storage state.json
 
     try {
-      await page.locator('input#username').waitFor({ timeout: 10000 });
-    }
-    catch (err) {
-      const accept = page.locator('button[name="accept-cookies"]');
+ const accept = page.locator('button[name="accept-cookies"]');
       if (await accept.count() > 0) {
         await accept.first().click();
       }
@@ -76,7 +73,10 @@ async function loginAndSaveSession(
       const hide = page.locator('button[name="hide-cookies"]');
       if (await hide.count() > 0) {
         await hide.first().click();
-      }
+      }    
+    }
+    catch (err) {
+     
 
       const html = await page.content();
       console.error('Page content (truncated):', html.slice(0, 2000));
