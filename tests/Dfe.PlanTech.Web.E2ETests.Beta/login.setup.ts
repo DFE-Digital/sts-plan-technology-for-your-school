@@ -49,7 +49,6 @@ async function loginAndSaveSession(
 
   try {
     await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
-    console.log('After goto, URL is:', page.url());
 
     try {
       await page.locator('input#username').waitFor({ timeout: 10000 });
@@ -57,11 +56,6 @@ async function loginAndSaveSession(
     catch (err) {
       console.error('Timeout waiting for #username');
       console.error('Final URL:', page.url());
-
-      const html = await page.content();
-      console.error('Page content (truncated):', html.slice(0, 2000));
-
-      await page.screenshot({ path: `debug-${outputFilename}.png`, fullPage: true });
 
       throw err;
     }
