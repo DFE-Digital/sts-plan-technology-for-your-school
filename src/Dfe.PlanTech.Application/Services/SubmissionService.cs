@@ -78,7 +78,7 @@ public class SubmissionService(
 
         var submissionResponsesModel = new SubmissionResponsesModel(latestSubmission!, section);
 
-        var lastResponse = submissionResponsesModel!.Responses.Last();
+        var lastResponse = submissionResponsesModel!.Responses[^1];
         var cmsLastAnswer = section.Questions
             .FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))?
             .Answers

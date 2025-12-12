@@ -5,17 +5,14 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
-using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubmissionWorkflow(
-    ILogger<SubmissionWorkflow> logger,
     IStoredProcedureRepository storedProcedureRepository,
     ISubmissionRepository submissionRepository
 ) : ISubmissionWorkflow
 {
-    private readonly ILogger<SubmissionWorkflow> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly IStoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
     private readonly ISubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
@@ -23,7 +20,7 @@ public class SubmissionWorkflow(
     {
         var submissionWithResponses = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, isCompletedSubmission: true);
         var newSubmission = await _submissionRepository.CloneSubmission(submissionWithResponses);
-        newSubmission.Responses = GetOrderedResponses(newSubmission.Responses, section).ToList();
+        newSubmission.Responses = GetOrderedResponses(newSubmission.Responses).ToList();
 
         return newSubmission.AsDto();
     }
@@ -53,7 +50,7 @@ public class SubmissionWorkflow(
             return null;
         }
 
-        latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses, section).ToList();
+        latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses).ToList();
         return latestSubmission.AsDto();
     }
 
@@ -143,14 +140,16 @@ public class SubmissionWorkflow(
         return _storedProcedureRepository.SetSubmissionDeletedAsync(establishmentId, sectionId);
     }
 
-    private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, QuestionnaireSectionEntry section)
+    private static Dictionary<string, ResponseEntity>.ValueCollection GetOrderedResponses(
+        IEnumerable<ResponseEntity> responses
+    )
     {
         return responses
             .OrderBy(r => r.DateLastUpdated)
             .GroupBy(r => r.Question.ContentfulRef)
             .ToDictionary(
                 group => group.Key,
-                group => group.ToList().OrderByDescending(r => r.DateLastUpdated).First()
+                group => group.OrderByDescending(r => r.DateLastUpdated).First()
             )
             .Values;
     }

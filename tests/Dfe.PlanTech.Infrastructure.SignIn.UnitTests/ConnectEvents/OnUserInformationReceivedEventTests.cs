@@ -16,7 +16,7 @@ namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests.ConnectEvents;
 
 public class OnUserInformationReceivedEventTests
 {
-    private static (UserInformationReceivedContext ctx, ISignInWorkflow wf, ILogger<DfeSignIn> logger) BuildContext(ClaimsPrincipal principal)
+    private static (UserInformationReceivedContext ctx, ISignInWorkflow wf, ILogger<IDfeSignIn> logger) BuildContext(ClaimsPrincipal principal)
     {
         var services = new ServiceCollection();
         var wf = Substitute.For<ISignInWorkflow>();
@@ -31,7 +31,7 @@ public class OnUserInformationReceivedEventTests
 
         var ctx = new UserInformationReceivedContext(httpContext, scheme, options, principal, properties);
 
-        var logger = Substitute.For<ILogger<DfeSignIn>>();
+        var logger = Substitute.For<ILogger<IDfeSignIn>>();
         return (ctx, wf, logger);
     }
 

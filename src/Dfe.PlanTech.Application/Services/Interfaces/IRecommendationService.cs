@@ -9,6 +9,11 @@ public interface IRecommendationService
         int establishmentId
     );
 
+    Task<IEnumerable<SqlEstablishmentRecommendationHistoryDto>> GetRecommendationHistoryAsync(
+        string recommendationContentfulReference,
+        int establishmentId
+   );
+
     Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesAsync(
         int establishmentId
     );

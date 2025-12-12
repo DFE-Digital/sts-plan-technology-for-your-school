@@ -29,23 +29,23 @@
 
         @* Controller actions where change-school option won't be shown *@
         var excluded = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
-        {
-            {
-                "ReviewAnswers", new HashSet<string>(
-                    [nameof(ReviewAnswersController.CheckAnswers)],
-                    StringComparer.OrdinalIgnoreCase)
-            },
-            {
-                "Questions", new HashSet<string>(
-                    [QuestionsController.GetQuestionBySlugAction, nameof(QuestionsController.SubmitAnswer)],
-                    StringComparer.OrdinalIgnoreCase)
-            },
-            {
-                "Groups", new HashSet<string>(
-                    [GroupsController.GetSelectASchoolAction],
-                    StringComparer.OrdinalIgnoreCase)
-            },
-        };
+{
+{
+"ReviewAnswers", new HashSet<string>(
+[nameof(ReviewAnswersController.CheckAnswers)],
+StringComparer.OrdinalIgnoreCase)
+},
+{
+"Questions", new HashSet<string>(
+[QuestionsController.GetQuestionBySlugAction, nameof(QuestionsController.SubmitAnswer)],
+StringComparer.OrdinalIgnoreCase)
+},
+{
+"Groups", new HashSet<string>(
+[GroupsController.GetSelectASchoolAction],
+StringComparer.OrdinalIgnoreCase)
+},
+};
 
         showChangeSchool = !(excluded.TryGetValue(controller, out var actions) && actions.Contains(action));
     }

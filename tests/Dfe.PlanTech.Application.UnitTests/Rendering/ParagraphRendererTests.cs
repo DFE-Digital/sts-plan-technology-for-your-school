@@ -1,7 +1,7 @@
 using System.Text;
 using Dfe.PlanTech.Application.Rendering;
-using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Rendering;
@@ -21,7 +21,7 @@ public class ParagraphRendererTests
             Value = value,
         };
 
-        var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
+        var renderer = new ParagraphRenderer(new RichTextPartRendererOptions());
 
         var accepted = renderer.Accepts(content);
 
@@ -37,7 +37,7 @@ public class ParagraphRendererTests
             Value = "hyperlink"
         };
 
-        var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
+        var renderer = new ParagraphRenderer(new RichTextPartRendererOptions());
 
         var accepted = renderer.Accepts(content);
 
@@ -47,7 +47,7 @@ public class ParagraphRendererTests
     [Fact]
     public void Should_Create_Paragraph_When_PassedValidData()
     {
-        var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
+        var renderer = new ParagraphRenderer(new RichTextPartRendererOptions());
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";
@@ -70,7 +70,7 @@ public class ParagraphRendererTests
     public void Should_Create_Paragraph_WithClass__When_PassedValidData()
     {
         const string classes = "testing-classes";
-        var renderer = new ParagraphRenderer(new ParagraphRendererOptions() { Classes = classes });
+        var renderer = new ParagraphRenderer(new RichTextPartRendererOptions() { Classes = classes });
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string value = "Paragraph text";

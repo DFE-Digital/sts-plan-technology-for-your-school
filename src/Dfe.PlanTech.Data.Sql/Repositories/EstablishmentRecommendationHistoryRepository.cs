@@ -21,6 +21,13 @@ public class EstablishmentRecommendationHistoryRepository : IEstablishmentRecomm
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<EstablishmentRecommendationHistoryEntity>> GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(int establishmentId, int recommendationId)
+    {
+        return await _db.EstablishmentRecommendationHistories
+            .Where(erh => erh.EstablishmentId == establishmentId && erh.RecommendationId == recommendationId)
+            .ToListAsync();
+    }
+
     public async Task<EstablishmentRecommendationHistoryEntity?> GetLatestRecommendationHistoryAsync(int establishmentId, int recommendationId)
     {
         return await _db.EstablishmentRecommendationHistories

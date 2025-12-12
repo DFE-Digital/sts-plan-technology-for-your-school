@@ -1,5 +1,3 @@
-using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -12,28 +10,20 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
     {
         private readonly ILogger<RecommendationsController> _logger;
         private readonly IRecommendationsViewBuilder _viewBuilder;
-        private readonly IRecommendationService _recommendationService;
-        private readonly IContentfulService _contentfulService;
-        private readonly ISubmissionService _submissionService;
-        private readonly ICurrentUser _currentUser;
         private readonly RecommendationsController _controller;
 
         public RecommendationsControllerTests()
         {
             _logger = Substitute.For<ILogger<RecommendationsController>>();
             _viewBuilder = Substitute.For<IRecommendationsViewBuilder>();
-            _recommendationService = Substitute.For<IRecommendationService>();
-            _contentfulService = Substitute.For<IContentfulService>();
-            _submissionService = Substitute.For<ISubmissionService>();
-            _currentUser = Substitute.For<ICurrentUser>();
-            _controller = new RecommendationsController(_logger, _contentfulService, _recommendationService, _viewBuilder, _submissionService, _currentUser);
+            _controller = new RecommendationsController(_logger, _viewBuilder);
         }
 
         [Fact]
         public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new RecommendationsController(_logger, _contentfulService, _recommendationService, null!, _submissionService, _currentUser)
+                new RecommendationsController(_logger, null!)
             );
 
             Assert.Equal("recommendationsViewBuilder", ex.ParamName);
@@ -93,12 +83,11 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             Assert.IsType<OkResult>(result);
         }
 
-
         [Fact]
         public async Task UpdateRecommendationStatus_ThrowsIfCategorySlugNull()
         {
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.UpdateRecommendationStatus(null!, "section-slug", "chunk-slug", "Complete")
+                _controller.UpdateRecommendationStatus(null!, "section-slug", "chunk-slug", "Complete", null)
             );
         }
 
@@ -106,7 +95,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         public async Task UpdateRecommendationStatus_ThrowsIfSectionSlugNull()
         {
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.UpdateRecommendationStatus("category-slug", null!, "chunk-slug", "Complete")
+                _controller.UpdateRecommendationStatus("category-slug", null!, "chunk-slug", "Complete", null)
             );
         }
 
@@ -114,8 +103,28 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         public async Task UpdateRecommendationStatus_ThrowsIfChunkSlugNull()
         {
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.UpdateRecommendationStatus("category-slug", "section-slug", null!, "Complete")
+                _controller.UpdateRecommendationStatus("category-slug", "section-slug", null!, "Complete", null)
             );
+        }
+
+
+        [Fact]
+        public async Task UpdateRecommendationStatus_ThrowsIfSelectedStatusNull()
+        {
+            await _controller.UpdateRecommendationStatus("category-slug", "section-slug", "chunk-slug", "", null);
+
+            var viewBuilderCalls = _viewBuilder.ReceivedCalls()
+                .Where(c => c.GetMethodInfo().Name == nameof(IRecommendationsViewBuilder.RouteToSingleRecommendation))
+                .Where(c => c.GetArguments().Length == 5 &&
+                            c.GetArguments()[0] is Controller controller &&
+                            c.GetArguments()[1] is string categorySlug &&
+                            c.GetArguments()[2] is string sectionSlug &&
+                            c.GetArguments()[3] is string chunkSlug &&
+                            c.GetArguments()[4] is bool useChecklist
+                )
+                .ToList();
+
+            Assert.True(viewBuilderCalls.Count == 1, $"Expected 1 call to RouteToSingleRecommendation, got {viewBuilderCalls.Count}");
         }
     }
 }

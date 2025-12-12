@@ -71,7 +71,7 @@ public class PagesViewBuilder(
         {
             if (!CurrentUser.IsAuthenticated)
             {
-                Logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Id);
+                Logger.LogWarning("Tried to display establishment on {PageTitle} but user is not authenticated", page.Title?.Text ?? page.Id);
             }
             else
             {

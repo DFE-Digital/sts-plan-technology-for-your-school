@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
@@ -120,12 +119,12 @@ public static class ServiceCollectionExtensions
             };
         });
 
-        services.AddScoped((_) => new HyperlinkRendererOptions()
+        services.AddScoped((_) => new RichTextPartRendererOptions()
         {
             Classes = "govuk-link",
         });
 
-        services.AddScoped((_) => new ParagraphRendererOptions());
+        services.AddScoped((_) => new RichTextPartRendererOptions());
 
         services.AddOptions<ApiAuthenticationConfiguration>()
             .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.ApiAuthentication).Bind(settings));

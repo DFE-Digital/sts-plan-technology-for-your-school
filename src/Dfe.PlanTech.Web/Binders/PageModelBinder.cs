@@ -12,7 +12,7 @@ public class PageModelBinder(
 {
     public Task BindModelAsync(ModelBindingContext bindingContext)
     {
-        ArgumentNullException.ThrowIfNull(bindingContext, nameof(bindingContext));
+        ArgumentNullException.ThrowIfNull(bindingContext);
 
         if (!bindingContext.HttpContext.Items.TryGetValue(nameof(PageEntry), out var pageItem))
         {
@@ -23,7 +23,7 @@ public class PageModelBinder(
 
         if (pageItem is not PageEntry page)
         {
-            logger.LogError("Page is not of type {type}", typeof(PageEntry));
+            logger.LogError("Page is not of type {Type}", typeof(PageEntry));
             bindingContext.Result = ModelBindingResult.Failed();
             return Task.CompletedTask;
         }

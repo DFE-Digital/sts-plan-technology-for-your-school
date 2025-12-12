@@ -137,7 +137,7 @@ public partial class DfeOpenIdConnectEventsTests
             claimsPrincipal,
             new AuthenticationProperties());
 
-        var logger = Substitute.For<ILogger<DfeSignIn>>();
+        var logger = Substitute.For<ILogger<IDfeSignIn>>();
         await OnUserInformationReceivedEvent.RecordUserSignIn(logger, context);
 
         Assert.Single(logger.GetMatchingReceivedMessages($"User {userId} is authenticated but has no establishment", LogLevel.Warning));

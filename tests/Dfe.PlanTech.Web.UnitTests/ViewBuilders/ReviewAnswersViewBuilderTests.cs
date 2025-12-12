@@ -413,8 +413,10 @@ public class ReviewAnswersViewBuilderTests
     [Fact]
     public async Task ConfirmCheckAnswers_Failure_Sets_Error_TempData_And_Redirects_Back_To_CheckAnswers()
     {
-        var sut = CreateSut();
         var ctl = MakeController();
+        var exception = new Exception("boom");
+
+        var sut = CreateSut();
 
         var section = MakeSection("S1", "sec", "S");
         _contentful.GetSectionBySlugAsync("sec").Returns(section);
@@ -424,13 +426,19 @@ public class ReviewAnswersViewBuilderTests
             9,
             Arg.Any<int>(),
             Arg.Any<QuestionnaireSectionEntry>())
-            .ThrowsAsync(new Exception("boom"));
+            .ThrowsAsync(exception);
 
         var result = await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "S", 9);
 
-        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        _logger.ReceivedWithAnyArgs().LogError(
+            default,
+            default!,
+            "Error"
+        );
+
         Assert.True(ctl.TempData.ContainsKey("ErrorMessage"));
         Assert.Equal(ReviewAnswersViewBuilder.InlineRecommendationUnavailableErrorMessage, ctl.TempData["ErrorMessage"]);
+        Assert.IsType<RedirectToActionResult>(result);
     }
 
     private sealed class DummyController : Controller { }
