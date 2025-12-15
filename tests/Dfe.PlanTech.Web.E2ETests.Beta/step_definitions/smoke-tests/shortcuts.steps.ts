@@ -75,7 +75,8 @@ async function startAndAnswerAssessment(context:any, category: string, section:s
   }
 
   await expect(sectionLink).toBeVisible();
-  await sectionLink.click();
+  await sectionLink.click({ noWaitAfter: true });
+  await expect(context.page.getByRole('button', { name: 'Start self-assessment' })).toBeVisible();
 
   //Get the start self assessment button on interstitial page
   const startSelfAssessmentBtn = context.page.getByRole('button', { name: 'Start self-assessment' });

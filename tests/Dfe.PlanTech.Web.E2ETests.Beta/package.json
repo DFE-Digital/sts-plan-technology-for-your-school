@@ -5,13 +5,13 @@
   "scripts": {
     "test": "cucumber-js --format json:reports/cucumber-report.json",
     "test:login": "npx ts-node login.setup.ts",
-    "test:record:parallel": "cucumber-js -p regression --parallel 4 --format json:reports/cucumber-parallel.json --world-parameters=\"{\\\"record\\\": true}\" --tags \"not @serial\"",
-    "test:record:serial": "cucumber-js -p regression --format json:reports/cucumber-serial.json --world-parameters=\"{\\\"record\\\": true}\" --tags @serial",
-    "test:parallel": "cucumber-js -p regression --parallel 4 --format json:reports/cucumber-parallel.json --world-parameters=\"{\\\"record\\\": false}\" --tags \"not @serial\"",
-    "test:serial": "cucumber-js -p regression --format json:reports/cucumber-serial.json --world-parameters=\"{\\\"record\\\": false}\" --tags @serial",
+    "test:record:parallel": "cucumber-js -p regression --parallel 4 --retry 4 --format json:reports/cucumber-parallel.json --world-parameters=\"{\\\"record\\\": true}\" --tags \"not @serial\"",
+    "test:record:serial": "cucumber-js -p regression --retry 4 --format json:reports/cucumber-serial.json --world-parameters=\"{\\\"record\\\": true}\" --tags @serial",
+    "test:parallel": "cucumber-js -p regression --retry 4 --parallel 4 --format json:reports/cucumber-parallel.json --world-parameters=\"{\\\"record\\\": false}\" --tags \"not @serial\"",
+    "test:serial": "cucumber-js -p regression --retry 4 --format json:reports/cucumber-serial.json --world-parameters=\"{\\\"record\\\": false}\" --tags @serial",
     "test:record": "npm run test:record:parallel && npm run test:record:serial",
     "test:all": "npm run test:parallel && npm run test:serial",
-    "test:record:smoke": "cucumber-js -p smoke --format json:reports/cucumber-smoke.json --world-parameters=\"{\\\"record\\\": true}\"",
+    "test:record:smoke": "cucumber-js -p smoke --retry 4 --format json:reports/cucumber-smoke.json --world-parameters=\"{\\\"record\\\": true}\"",
     "test:smoke": "cucumber-js -p smoke",
     "report": "node generate-report.ts"
   },

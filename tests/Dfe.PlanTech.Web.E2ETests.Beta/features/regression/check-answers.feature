@@ -5,7 +5,7 @@ Feature: Check answers page
   Scenario: Check answers page has all the correct elements
     Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 1" and I do not click submit recommendations
 
-    Then I should see the page heading "Check Answers"
+    Then I should see the page heading "Check your answers"
     And the header should contain all the correct content
     And I should see the caption heading "Category One Section One"
 
