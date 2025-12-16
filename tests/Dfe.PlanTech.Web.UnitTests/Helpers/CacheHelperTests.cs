@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Caching.Interfaces;
+using Dfe.PlanTech.Core.Caching.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;

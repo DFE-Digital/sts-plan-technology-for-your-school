@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.Interfaces;

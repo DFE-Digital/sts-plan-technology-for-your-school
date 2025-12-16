@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Commands;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces;
 using Dfe.PlanTech.Infrastructure.ServiceBus.Queueing;

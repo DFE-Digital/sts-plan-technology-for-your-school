@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Handlers;

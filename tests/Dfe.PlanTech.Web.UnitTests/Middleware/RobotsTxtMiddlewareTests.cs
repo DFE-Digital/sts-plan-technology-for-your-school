@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Http;

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Dfe.PlanTech.Core.Attributes;
 
 namespace Dfe.PlanTech.Core.Enums;

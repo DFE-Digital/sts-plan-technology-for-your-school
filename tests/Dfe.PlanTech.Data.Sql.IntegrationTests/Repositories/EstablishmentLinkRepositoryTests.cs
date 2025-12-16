@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;

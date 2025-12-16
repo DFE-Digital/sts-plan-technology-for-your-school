@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Web.SiteOfflineMicrosite.Middleware;
+namespace Dfe.PlanTech.Web.SiteOfflineMicrosite.Middleware;
 
 /// <summary>
 /// Middleware to add security headers and remove information disclosure headers.

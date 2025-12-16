@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using Dfe.PlanTech.Core.Attributes;
 using Dfe.PlanTech.Core.Constants;
