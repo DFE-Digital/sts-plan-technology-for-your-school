@@ -7,17 +7,24 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// </summary>
 public class SecurityHeadersMiddleware
 {
+    private readonly IHostEnvironment _environment;
     private readonly RequestDelegate _next;
 
-    public SecurityHeadersMiddleware(RequestDelegate next)
+    public SecurityHeadersMiddleware(IHostEnvironment environment, RequestDelegate next)
     {
+        _environment = environment;
         _next = next;
     }
 
     public async Task InvokeAsync(HttpContext context)
     {
         AddFramejackingPreventHeaders(context);
-        AddContentSecurityPolicy(context);
+
+        if (!_environment.IsDevelopment())
+        {
+            AddContentSecurityPolicy(context);
+        }
+
         await _next(context);
     }
 

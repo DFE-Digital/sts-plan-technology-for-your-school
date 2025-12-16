@@ -76,18 +76,23 @@ readdirSync(dfeDir).forEach((file) => {
 //GOVUK
 const govukDir = "./node_modules/govuk-frontend/dist/govuk/assets/";
 const targetFolders = ["images", "fonts"];
-const ignoreFiles = ["favicon.ico"];
+//const ignoreFiles = ["favicon.ico"];
 
 for (const folder of targetFolders) {
   const path = govukDir + folder;
 
   readdirSync(path).forEach((file) => {
-    if (ignoreFiles.some((ignoreFile) => ignoreFile == file)) {
-      return;
-    }
+    // if (ignoreFiles.some((ignoreFile) => ignoreFile == file)) {
+    //   return;
+    // }
 
     cpSync(`${path}/${file}`, `./out/assets/${folder}/${file}`, {
       overwrite: true,
+    });
+
+    cpSync(`${govukDir}rebrand`, `./out/assets/rebrand`, {
+      overwrite: true,
+      recursive: true
     });
   });
 }
@@ -96,6 +101,17 @@ copyFileSync(
   "./node_modules/govuk-frontend/dist/govuk/govuk-frontend.min.js",
   "./out/js/govuk-frontend.min.js"
 );
+
+copyFileSync(
+  "./node_modules/dfe-frontend/dist/dfefrontend.min.js",
+  "./out/js/dfefrontend.min.js"
+);
+
+//Inter (mandated font)
+cpSync(`./fonts/`, `./out/assets/fonts`, {
+  overwrite: true,
+  recursive: true
+});
 
 //Copy to Dfe.PlanTech.Web
 const targetDir = "../Dfe.PlanTech.Web/wwwroot";

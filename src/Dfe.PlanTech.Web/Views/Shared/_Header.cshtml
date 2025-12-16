@@ -1,4 +1,4 @@
-<header class="govuk-header" data-module="govuk-header">
+<header class="govuk-header" data-module="govuk-header" role="banner">
 	<div class="govuk-header__container govuk-width-container">
 		<div class="govuk-header__logo">
 			<a href="#" class="govuk-header__link govuk-header__link--homepage">
@@ -7,13 +7,11 @@
 		</div>
 		<div class="dfe-header__content" id="content-header">
 			<ul class="dfe-header__action-links">
-				@{
-					if (Context.User.Identity?.IsAuthenticated == true)
-					{
-						<li>
-							<a asp-controller="Auth" asp-action="SignOut" class="govuk-link govuk-link--inverse">Sign out</a>
-						</li>
-					}
+				@if (Context.User.Identity?.IsAuthenticated == true)
+				{
+					<li>
+						<a asp-controller="Auth" asp-action="SignOut" class="govuk-link govuk-link--inverse">Sign out</a>
+					</li>
 				}
 			</ul>
 		</div>
