@@ -1,4 +1,4 @@
-﻿using System.Security.Authentication;
+using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
@@ -713,7 +713,7 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentUkprnAsync();
+        var result = sut.GetActiveEstablishmentUkprn();
 
         // Assert
         Assert.Equal("10012345", result);
@@ -735,7 +735,7 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentUkprnAsync();
+        var result = sut.GetActiveEstablishmentUkprn();
 
         // Assert - Should return MAT's UKPRN since no school selected
         Assert.Equal("10067890", result);
@@ -771,7 +771,7 @@ public class CurrentUserTests
         var sut = new CurrentUser(accessor, establishmentService, logger);
 
         // Act
-        var result = sut.GetActiveEstablishmentUkprnAsync();
+        var result = sut.GetActiveEstablishmentUkprn();
 
         // Assert - Should return null because selected establishment doesn't have UKPRN in the database
         Assert.Null(result);
@@ -796,7 +796,7 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentUidAsync();
+        var result = sut.GetActiveEstablishmentUid();
 
         // Assert - Schools don't have UID
         Assert.Null(result);
@@ -818,7 +818,7 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentUidAsync();
+        var result = sut.GetActiveEstablishmentUid();
 
         // Assert
         Assert.Equal("9876", result);
@@ -854,7 +854,7 @@ public class CurrentUserTests
         var sut = new CurrentUser(accessor, establishmentService, logger);
 
         // Act
-        var result = sut.GetActiveEstablishmentUidAsync();
+        var result = sut.GetActiveEstablishmentUid();
 
         // Assert - Should return null because selected schools don't have UID in the database
         Assert.Null(result);
@@ -877,7 +877,7 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentDsiIdAsync();
+        var result = sut.GetActiveEstablishmentDsiId();
 
         // Assert
         Assert.Equal(Guid.Parse("CC1185B8-3142-4B6C-887C-ADC413CD3891"), result);
@@ -898,7 +898,7 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentDsiIdAsync();
+        var result = sut.GetActiveEstablishmentDsiId();
 
         // Assert - Should return MAT's DSI ID since no school selected
         Assert.Equal(Guid.Parse("D9011C85-F851-4746-B4A2-D732536717F8"), result);
@@ -933,7 +933,7 @@ public class CurrentUserTests
         var sut = new CurrentUser(accessor, establishmentService, logger);
 
         // Act
-        var result = sut.GetActiveEstablishmentDsiIdAsync();
+        var result = sut.GetActiveEstablishmentDsiId();
 
         // Assert - Should return null because we don't have DSI ID for selected schools
         Assert.Null(result);
@@ -957,7 +957,7 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentReferenceAsync();
+        var result = sut.GetActiveEstablishmentReference();
 
         // Assert - Should use URN as reference
         Assert.Equal("123456", result);
@@ -979,7 +979,7 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentReferenceAsync();
+        var result = sut.GetActiveEstablishmentReference();
 
         // Assert - Should return MAT's reference (UID) since no school selected
         Assert.Equal("9876", result);
@@ -1013,7 +1013,7 @@ public class CurrentUserTests
         var sut = new CurrentUser(accessor, establishmentService, logger);
 
         // Act
-        var result = sut.GetActiveEstablishmentReferenceAsync();
+        var result = sut.GetActiveEstablishmentReference();
 
         // Assert - Should return selected school URN, not MAT's UID
         Assert.Equal("999888", result);
