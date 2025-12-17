@@ -19,6 +19,7 @@ public class CategoryLandingViewComponentViewBuilder(
 ) : BaseViewBuilder(logger, contentfulService, currentUser), ICategoryLandingViewComponentViewBuilder
 {
     private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     private const string CategoryLandingSectionAssessmentLink = "Components/CategoryLanding/SectionAssessmentLink";
     private const string CategoryLandingSectionAssessmentLinkPrintContent = "Components/CategoryLanding/SectionAssessmentLinkPrintContent";
@@ -57,11 +58,11 @@ public class CategoryLandingViewComponentViewBuilder(
         var sortType = sortOrder.GetRecommendationSortEnumValue();
         var categoryLandingSections = await BuildCategoryLandingSectionViewModels(establishmentId, category, sectionStatuses, progressRetrievalErrorMessage is not null, sortType).ToListAsync();
         var completedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate != null);
+        var resources = await _contentfulService.GetAllResourcesAsync();
 
         var viewModel = new CategoryLandingViewComponentViewModel
         {
-            AllSectionsCompleted = completedSectionCount.Equals(category.Sections.Count),
-            AnySectionsCompleted = completedSectionCount > 0,
+            CompletedSectionCount = completedSectionCount,
             CategoryLandingSections = categoryLandingSections,
             CategoryName = category.Header.Text,
             CategorySlug = slug,
@@ -70,7 +71,8 @@ public class CategoryLandingViewComponentViewBuilder(
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
             SortType = sortType,
             Print = print,
-            StatusLinkPartialName = print ? CategoryLandingSectionAssessmentLinkPrintContent : CategoryLandingSectionAssessmentLink
+            StatusLinkPartialName = print ? CategoryLandingSectionAssessmentLinkPrintContent : CategoryLandingSectionAssessmentLink,
+            Resources = resources
         };
 
         return viewModel;

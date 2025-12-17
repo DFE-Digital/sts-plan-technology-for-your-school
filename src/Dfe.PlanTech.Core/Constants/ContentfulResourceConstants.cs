@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Dfe.PlanTech.Core.Constants;
 
@@ -77,8 +76,7 @@ public static class ContentfulResourceConstants
         }
         else
         {
-            return string.Empty;
-            //throw??
+            throw new ArgumentException();
         }
     }
 }
