@@ -42,6 +42,8 @@ public class CategorySectionViewComponentViewBuilder(
             progressRetrievalErrorMessage = "Unable to retrieve progress, please refresh your browser.";
         }
 
+        var resources = await contentfulService.GetAllResourcesAsync();
+
         var categoryLandingSlug = GetLandingPageSlug(category);
         var description = category.Content is { Count: > 0 } content
         ? content[0]
@@ -54,7 +56,8 @@ public class CategorySectionViewComponentViewBuilder(
             CompletedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate.HasValue),
             Description = description,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
-            TotalSectionCount = category.Sections.Count
+            TotalSectionCount = category.Sections.Count,
+            Resources = resources
         };
     }
 

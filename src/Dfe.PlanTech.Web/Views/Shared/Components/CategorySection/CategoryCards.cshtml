@@ -9,26 +9,8 @@
             </h3>
 
             <p class="govuk-body-s">
-                @GetStatusText(Model.CompletedSectionCount, Model.TotalSectionCount)
+                @Model.StatusText
             </p>
         </div>
     </div>
 
-@functions {
-    public static string GetStatusText(int completed, int total)
-    {
-        if (completed == 0 && total == 1)
-        {
-            return "Start self-assessment";
-        }
-
-        if (completed == 0)
-        {
-            return "Start self-assessments";
-        }
-
-        return completed < total
-            ? "Continue self-assessments"
-            : "View recommendations";
-    }
-}
