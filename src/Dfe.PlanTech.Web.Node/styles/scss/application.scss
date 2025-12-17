@@ -1,4 +1,7 @@
-@import "../../node_modules/govuk-frontend/dist/govuk/all.scss";
+@import "inter";
+$govuk-font-family: Inter, sans-serif;
+
+@import "../../node_modules/govuk-frontend/dist/govuk/index.scss";
 @import "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
 @import "variables";

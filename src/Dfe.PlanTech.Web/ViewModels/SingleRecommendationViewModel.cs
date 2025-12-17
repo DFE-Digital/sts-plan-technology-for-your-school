@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Extensions;
@@ -12,6 +12,7 @@ public class SingleRecommendationViewModel
     public string CategoryName { get; set; } = string.Empty;
     public string CategorySlug { get; set; } = string.Empty;
     public string SectionSlug { get; set; } = string.Empty;
+    public string? OriginatingSlug { get; set; }
     public QuestionnaireSectionEntry Section { get; set; } = null!;
     public List<RecommendationChunkEntry> Chunks { get; set; } = [];
     public RecommendationChunkEntry CurrentChunk { get; set; } = null!;

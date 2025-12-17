@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Dfe.PlanTech.Web.SiteOfflineMicrosite.UnitTests;
 

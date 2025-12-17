@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Core.Attributes;
+namespace Dfe.PlanTech.Core.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class ContentfulTypeAttribute : Attribute

@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Caching.Interfaces;
 
 namespace Dfe.PlanTech.Core.Caching;

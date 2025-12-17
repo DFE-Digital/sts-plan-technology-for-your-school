@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -56,19 +56,43 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetRecommendationChecklist_CallsViewBuilderAndReturnsResult()
+        public async Task PrintSingleRecommendation_CallsViewBuilderAndReturnsResult()
         {
             var categorySlug = "cat";
             var sectionSlug = "sec";
+            var chunkSlug = "rec-1";
 
-            _viewBuilder.RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true)
+            _viewBuilder
+                .RouteToPrintSingle(_controller, categorySlug, sectionSlug, chunkSlug)
                 .Returns(new OkResult());
 
-            var result = await _controller.GetRecommendationChecklist(categorySlug, sectionSlug, null);
+            var result = await _controller.PrintSingleRecommendation(categorySlug, sectionSlug, chunkSlug);
 
-            await _viewBuilder.Received(1).RouteBySectionAndRecommendation(_controller, categorySlug, sectionSlug, true);
+            await _viewBuilder.Received(1)
+                .RouteToPrintSingle(_controller, categorySlug, sectionSlug, chunkSlug);
+
             Assert.IsType<OkResult>(result);
         }
+
+        [Fact]
+        public async Task PrintAllRecommendations_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cat";
+            var sectionSlug = "sec";
+            var chunkSlug = "rec-1";
+
+            _viewBuilder
+                .RouteToPrintAll(_controller, categorySlug, sectionSlug, chunkSlug)
+                .Returns(new OkResult());
+
+            var result = await _controller.PrintAllRecommendations(categorySlug, sectionSlug, chunkSlug);
+
+            await _viewBuilder.Received(1)
+                .RouteToPrintAll(_controller, categorySlug, sectionSlug, chunkSlug);
+
+            Assert.IsType<OkResult>(result);
+        }
+
 
         [Fact]
         public async Task UpdateRecommendationStatus_ThrowsIfCategorySlugNull()

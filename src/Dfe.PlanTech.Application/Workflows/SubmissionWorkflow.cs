@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
@@ -146,7 +146,7 @@ public class SubmissionWorkflow(
     private static IEnumerable<ResponseEntity> GetOrderedResponses(IEnumerable<ResponseEntity> responses, QuestionnaireSectionEntry section)
     {
         return responses
-            .OrderBy(r => r.DateCreated)
+            .OrderBy(r => r.DateLastUpdated)
             .GroupBy(r => r.Question.ContentfulRef)
             .ToDictionary(
                 group => group.Key,

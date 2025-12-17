@@ -35,7 +35,8 @@ public class QuestionEntityTests
                 nameof(SqlQuestionDto.Id),
                 nameof(SqlQuestionDto.QuestionText),
                 nameof(SqlQuestionDto.ContentfulSysId),
-                nameof(SqlQuestionDto.DateCreated)
+                nameof(SqlQuestionDto.DateCreated),
+                nameof(SqlQuestionDto.Order)
             }
         );
     }

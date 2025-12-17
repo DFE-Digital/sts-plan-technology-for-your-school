@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Web.Context.Interfaces;
+namespace Dfe.PlanTech.Web.Context.Interfaces;
 
 public interface ICurrentUser
 {
@@ -11,10 +11,10 @@ public interface ICurrentUser
     Task<string?> GetActiveEstablishmentNameAsync();
     Task<int?> GetActiveEstablishmentIdAsync();
     Task<string?> GetActiveEstablishmentUrnAsync();
-    Task<string?> GetActiveEstablishmentUkprnAsync();
-    Task<string?> GetActiveEstablishmentUidAsync();
-    Task<Guid?> GetActiveEstablishmentDsiIdAsync();
-    Task<string?> GetActiveEstablishmentReferenceAsync();
+    string? GetActiveEstablishmentUkprn();
+    string? GetActiveEstablishmentUid();
+    Guid? GetActiveEstablishmentDsiId();
+    string? GetActiveEstablishmentReference();
 
     // User Organisation - the organisation the currently logged in user is linked to (from OIDC claims)
     // For direct establishment users, these match ActiveEstablishment properties
@@ -27,6 +27,7 @@ public interface ICurrentUser
     Guid? UserOrganisationDsiId { get; }
     string? UserOrganisationReference { get; }
     string? UserOrganisationTypeName { get; }
+    string? UserOrganisationCategoryName { get; }
     bool UserOrganisationIsGroup { get; }
 
     bool IsAuthenticated { get; }

@@ -1,7 +1,7 @@
 @use "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
 html {
-    font-family: GDS Transport, arial, sans-serif;
+    font-family: Inter, sans-serif;
 }
 
 .logo {
@@ -85,6 +85,10 @@ strong.govuk-tag {
 
 .dfe-header {
     border-bottom: 10px solid #347ca9;
+}
+
+.dfe-header__action-links {
+    margin-top: 1em;
 }
 
 .share-html-img {

@@ -1,0 +1,13 @@
+{
+  "folders": [
+    { "path": "." }
+  ],
+  "settings": {
+    "cucumber.features": [
+      "features/smoke-tests/**/*.feature"
+    ],
+    "cucumber.glue": [
+      "step_definitions/smoke-tests/**/*.ts"
+    ]
+  }
+}

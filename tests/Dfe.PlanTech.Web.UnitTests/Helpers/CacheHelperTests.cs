@@ -1,9 +1,10 @@
-﻿using Dfe.PlanTech.Core.Caching.Interfaces;
+using Dfe.PlanTech.Core.Caching.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Microsoft.Extensions.Caching.Memory;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
+
 public class CacheHelperTests
 {
     private readonly MemoryCache _memoryCache;
@@ -86,11 +87,10 @@ public class CacheHelperTests
         var key = "key5";
         int calls = 0;
 
-        var result = await _sut.GetAsync(key, async () =>
+        var result = await _sut.GetAsync(key, () =>
         {
             calls++;
-            await Task.Yield();
-            return 321;
+            return Task.FromResult(321);
         }, TimeSpan.FromMinutes(1));
 
         Assert.Equal(321, result);

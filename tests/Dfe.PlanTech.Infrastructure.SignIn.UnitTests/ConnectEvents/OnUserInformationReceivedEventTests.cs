@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Security.Claims;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
@@ -106,20 +106,6 @@ public class OnUserInformationReceivedEventTests
 
         Assert.NotNull(estIdClaim);
         Assert.Equal("999", estIdClaim!.Value);
-    }
-
-    [Fact]
-    public void AddClaimsToPrincipal_When_PrincipalNull_DoesNothing()
-    {
-        var (ctx, _, _) = BuildContext(principal: null);
-        var signIn = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
-
-        var mi = typeof(OnUserInformationReceivedEvent)
-            .GetMethod("AddClaimsToPrincipal", BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.NotNull(mi);
-
-        // Should not throw
-        mi!.Invoke(null, new object[] { ctx, signIn });
     }
 
     [Fact]

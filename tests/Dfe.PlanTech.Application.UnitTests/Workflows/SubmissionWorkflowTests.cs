@@ -1,4 +1,4 @@
-﻿using Contentful.Core.Models;
+using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
@@ -80,6 +80,7 @@ public class SubmissionWorkflowTests
        {
            Id = id,
            DateCreated = dateCreated,
+           DateLastUpdated = dateCreated,
            QuestionId = id * 10, // just to have something for error messages
            Question = new QuestionEntity { ContentfulRef = questionReference },
            Answer = new AnswerEntity { ContentfulRef = answerReference },

@@ -1,21 +1,22 @@
-﻿using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
 
 namespace Dfe.PlanTech.Core.Helpers
 {
     public static class RecommendationSortHelper
     {
-        public static RecommendationSort GetRecommendationSortEnumValue(this string? sortOrder)
+        public static RecommendationSortOrder GetRecommendationSortEnumValue(this string? sortOrder)
         {
             if (sortOrder is null)
             {
-                return RecommendationSort.Default;
+                return RecommendationSortOrder.Default;
             }
 
-            return Enum.GetValues<RecommendationSort>()
-                .Cast<RecommendationSort?>()
-                .FirstOrDefault(s => string.Equals(sortOrder, s!.GetDisplayName(), StringComparison.InvariantCultureIgnoreCase))
-                ?? RecommendationSort.Default;
+            return Enum.GetValues<RecommendationSortOrder>()
+                .Cast<RecommendationSortOrder?>()
+                .FirstOrDefault(s => string.Equals(sortOrder, s!.GetDisplayName(), StringComparison.InvariantCultureIgnoreCase)
+                                     || string.Equals(sortOrder, s!.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                ?? RecommendationSortOrder.Default;
         }
     }
 }

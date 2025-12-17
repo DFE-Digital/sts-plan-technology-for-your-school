@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
@@ -14,6 +14,8 @@ public class QuestionEntity
 
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
+    public int? Order { get; set; }
+
     public SqlQuestionDto AsDto()
     {
         return new SqlQuestionDto
@@ -21,7 +23,8 @@ public class QuestionEntity
             Id = Id,
             QuestionText = QuestionText,
             ContentfulSysId = ContentfulRef,
-            DateCreated = DateCreated
+            DateCreated = DateCreated,
+            Order = Order
         };
     }
 }

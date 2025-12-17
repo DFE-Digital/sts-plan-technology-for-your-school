@@ -1,4 +1,4 @@
-﻿using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus;
 
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.Interfaces
 {

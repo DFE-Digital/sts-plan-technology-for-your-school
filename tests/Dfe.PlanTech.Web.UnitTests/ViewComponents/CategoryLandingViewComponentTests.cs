@@ -1,6 +1,6 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewComponents;
 using Dfe.PlanTech.Web.ViewModels;
@@ -37,11 +37,11 @@ public class CategoryLandingViewComponentTests
             StatusLinkPartialName = "status"
         };
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));
+        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder).Returns(Task.FromResult(expectedViewModel));
 
-        var result = await component.InvokeAsync(category, slug, sectionName);
+        var result = await component.InvokeAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder);
 
-        await viewBuilder.Received(1).BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.ToString());
+        await viewBuilder.Received(1).BuildViewModelAsync(category, slug, sectionName, RecommendationSortOrder.Default.ToString());
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
         Assert.NotNull(viewResult.ViewData);
         Assert.Equal(expectedViewModel, viewResult.ViewData.Model);
@@ -73,9 +73,9 @@ public class CategoryLandingViewComponentTests
             StatusLinkPartialName = "status"
         };
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationSort.Default.GetDisplayName()).Returns(Task.FromResult(expectedViewModel));
+        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder).Returns(Task.FromResult(expectedViewModel));
 
-        var result = await component.InvokeAsync(category, slug, sectionName);
+        var result = await component.InvokeAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder);
 
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
         Assert.NotNull(viewResult.ViewData);
