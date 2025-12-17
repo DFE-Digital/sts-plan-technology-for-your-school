@@ -5,16 +5,10 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// <summary>
 /// Middleware that sets various response headers for security reasons.
 /// </summary>
-public class SecurityHeadersMiddleware
+public class SecurityHeadersMiddleware(IWebHostEnvironment environment, RequestDelegate next)
 {
-    private readonly IHostEnvironment _environment;
-    private readonly RequestDelegate _next;
-
-    public SecurityHeadersMiddleware(IHostEnvironment environment, RequestDelegate next)
-    {
-        _environment = environment;
-        _next = next;
-    }
+    private readonly IHostEnvironment _environment = environment ?? throw new ArgumentNullException(nameof(environment));
+    private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
 
     public async Task InvokeAsync(HttpContext context)
     {
