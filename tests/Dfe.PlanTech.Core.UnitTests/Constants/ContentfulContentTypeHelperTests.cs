@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Helpers;
 

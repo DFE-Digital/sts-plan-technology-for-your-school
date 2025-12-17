@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.Factories;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

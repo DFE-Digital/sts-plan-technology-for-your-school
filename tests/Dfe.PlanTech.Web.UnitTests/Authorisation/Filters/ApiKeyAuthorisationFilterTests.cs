@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.Authorisation.Filters;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +29,7 @@ public class ApiKeyAuthorisationFilterTests
         return new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
     }
 
-    private static ApiAuthenticationConfiguration ConfigWithKey(string? key)
+    private static ApiAuthenticationConfiguration ConfigWithKey(string key)
         => new ApiAuthenticationConfiguration { KeyValue = key };
 
     [Fact]

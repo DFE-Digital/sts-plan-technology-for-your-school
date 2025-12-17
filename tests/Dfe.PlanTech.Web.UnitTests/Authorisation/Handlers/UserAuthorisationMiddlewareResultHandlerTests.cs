@@ -1,4 +1,4 @@
-﻿using System.Text.Encodings.Web;
+using System.Text.Encodings.Web;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Web.Authorisation.Handlers;
 using Microsoft.AspNetCore.Authentication;

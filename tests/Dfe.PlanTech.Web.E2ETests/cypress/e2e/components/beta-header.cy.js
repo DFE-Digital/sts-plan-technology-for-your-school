@@ -16,7 +16,7 @@ describe("beta header", () => {
 
     tag.should("exist").and("be.visible");
 
-    tag.should("have.text", "Beta");
+    tag.invoke("text").should("match", /^\s*Beta\s*$/);
   });
 
   it("should link to feedback url", () => {

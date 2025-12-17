@@ -5,10 +5,6 @@
 
 .govuk-header__container {
   position: relative;
-  margin-bottom: -10px;
-  padding-top: 25px;
-  padding-bottom: 15px;
-  border-bottom: 10px solid #347ca9;
 }
 
 .govuk-header__product-name,
@@ -36,6 +32,15 @@
 
 .govuk-header__logotype {
   margin-right: 0;
+}
+
+.govuk-header__link .govuk-header__logotype{
+  height: 30px;
+}
+
+.govuk-header__link:focus .govuk-header__logotype{
+  content: url(/assets/images/department-for-education_black.png);
+  height: 30px;
 }
 
 .govuk-header__navigation-item--active a:link,

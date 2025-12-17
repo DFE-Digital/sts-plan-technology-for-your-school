@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Web.SiteOfflineMicrosite.Configuration;
+using Dfe.PlanTech.Web.SiteOfflineMicrosite.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 

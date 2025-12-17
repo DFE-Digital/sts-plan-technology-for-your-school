@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Extensions;
 
 namespace Dfe.PlanTech.Core.UnitTests.Extensions;
 
