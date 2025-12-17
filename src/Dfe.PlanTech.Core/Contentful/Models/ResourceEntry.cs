@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Core.Contentful.Models;
+namespace Dfe.PlanTech.Core.Contentful.Models;
 
 public class ResourceEntry : ContentfulEntry
 {
