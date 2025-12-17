@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Web.SiteOfflineMicrosite.UnitTests;
+namespace Dfe.PlanTech.Web.SiteOfflineMicrosite.UnitTests;
 
 public class SecurityHeadersTests : IClassFixture<SiteOfflineMicrositeWebApplicationFactory>
 {

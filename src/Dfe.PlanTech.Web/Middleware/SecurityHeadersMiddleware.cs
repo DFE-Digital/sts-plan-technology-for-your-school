@@ -86,4 +86,4 @@ public static class SecurityHeadersMiddlewareExtensions
     /// <returns></returns>
     public static IApplicationBuilder UseSecurityHeaders(
         this IApplicationBuilder app) => app.UseMiddleware<SecurityHeadersMiddleware>();
-} 
+}

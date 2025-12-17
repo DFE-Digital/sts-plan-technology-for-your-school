@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Core.Models;
 

@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;

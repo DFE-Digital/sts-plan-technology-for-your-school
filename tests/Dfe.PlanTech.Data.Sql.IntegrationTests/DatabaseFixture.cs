@@ -1,4 +1,4 @@
-﻿using DbUp;
+using DbUp;
 using Microsoft.EntityFrameworkCore;
 using Testcontainers.MsSql;
 
