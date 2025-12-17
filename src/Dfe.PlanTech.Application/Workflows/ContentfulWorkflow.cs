@@ -166,4 +166,18 @@ public class ContentfulWorkflow(
             throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug} from Contentful", ex);
         }
     }
+
+    public async Task<List<ResourceEntry>> GetAllResourcesAsync()
+    {
+        try
+        {
+            var options = new GetEntriesOptions(include: 2);
+            var resources = await _contentfulRepository.GetEntriesAsync<ResourceEntry>(options);
+            return resources.ToList();
+        }
+        catch (Exception ex)
+        {
+            throw new ContentfulDataUnavailableException("Error getting resources from Contentful", ex);
+        }
+    }
 }

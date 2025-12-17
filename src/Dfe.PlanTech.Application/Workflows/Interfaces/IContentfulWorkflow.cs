@@ -13,4 +13,5 @@ public interface IContentfulWorkflow
     Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page);
     Task<int> GetRecommendationChunkCountAsync(int page);
     Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string sectionSlug, int? includeLevel = null);
+    Task<List<ResourceEntry>> GetAllResourcesAsync();
 }
