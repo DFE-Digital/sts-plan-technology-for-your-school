@@ -1,107 +1,103 @@
-﻿@model PageViewModel
+@model PageViewModel
+
+@section NavButton {
+	@if (Model.Page.DisplayBackButton)
+	{
+		await Html.RenderPartialAsync("BackButton", Model);
+	}
+	@if (Model.Page.DisplayHomeButton)
+	{
+		await Html.RenderPartialAsync("HomeButton", Model);
+	}
+}
 
 @if (Model.DisplayBlueBanner)
 {
-    @section DfePageHeaderOuter {
-    @if (Model.Page.DisplayBackButton)
-        {
-            await Html.RenderPartialAsync("BackButton", Model);
-        }
-        @if (Model.Page.DisplayHomeButton)
-        {
-            await Html.RenderPartialAsync("HomeButton", Model);
-        }
-    }
+	@section DfePageHeaderInner {
+		@foreach (var content in Model.Page.BeforeTitleContent)
+		{
+			await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+		}
 
-    @section DfePageHeaderInner {
-        @foreach (var content in Model.Page.BeforeTitleContent)
-        {
-            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-        }
+		<span class="govuk-caption-xl govuk-!-margin-top-5">
+			@Model.ActiveEstablishmentName
+		</span>
 
-        <span class="govuk-caption-xl govuk-!-margin-top-5">
-            @Model.ActiveEstablishmentName
-        </span>
-
-        @if (Model.Page.Title != null)
-        {
-            await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
-        }
-    }
+		@if (Model.Page.Title != null)
+		{
+			await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+		}
+	}
 }
 else
 {
-    @section BeforeContent {
+	foreach (var content in Model.Page.BeforeTitleContent)
+	{
+		await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+	}
 
-    @if (Model.Page.DisplayBackButton)
-        {
-            await Html.RenderPartialAsync("BackButton", Model);
-        }
-        @if (Model.Page.DisplayHomeButton)
-        {
-            await Html.RenderPartialAsync("HomeButton", Model);
-        }
-    }
+	if (Model.Page.DisplayOrganisationName)
+	{
+		<span class="govuk-caption-xl govuk-!-margin-top-5">
+			@Model.ActiveEstablishmentName
+		</span>
+	}
 
-    foreach (var content in Model.Page.BeforeTitleContent)
-    {
-        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-    }
-
-    if (Model.Page.DisplayOrganisationName)
-    {
-        <span class="govuk-caption-xl govuk-!-margin-top-5">
-            @Model.ActiveEstablishmentName
-        </span>
-    }
-
-    if (Model.Page.Title != null)
-    {
-        await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
-    }
+	if (Model.Page.Title != null)
+	{
+		await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+	}
 }
 
 @{
-    if (Model.Page.Slug == "home" && TempData.ContainsKey("SubtopicError"))
-    {
-        var error = TempData["SubtopicError"] as string;
-        <div class="govuk-error-summary" data-module="govuk-error-summary">
-            <div role="alert">
-                <h2 class="govuk-error-summary__title">
-                    There is a problem
-                </h2>
-                @if (!string.IsNullOrEmpty(error))
-                {
-                    <div class="govuk-error-summary__body whitespace-preline">@Html.Raw(error)</div>
-                }
-            </div>
-        </div>
-    }
+	if (Model.Page.Slug == "home" && TempData.ContainsKey("SubtopicError"))
+	{
+		var error = TempData["SubtopicError"] as string;
+		<div class="govuk-error-summary" data-module="govuk-error-summary">
+			<div role="alert">
+				<h2 class="govuk-error-summary__title">
+					There is a problem
+				</h2>
+				@if (!string.IsNullOrEmpty(error))
+				{
+					<div class="govuk-error-summary__body whitespace-preline">@Html.Raw(error)</div>
+				}
+			</div>
+		</div>
+	}
 
-    var isHomeCategoryPage = Model.Page.Slug.Equals(UrlConstants.HomePage.Replace("/", ""));
-    var isAutomatedTestingHomePage = Model.Page.Slug == UrlConstants.AutomatedTestingHomePage.Replace("/", "");
-    var categories = Model.Page.Content?.OfType<QuestionnaireCategoryEntry>().ToList();
+	var isHomeCategoryPage = Model.Page.Slug.Equals(UrlConstants.HomePage.Replace("/", ""));
+	var isAutomatedTestingHomePage = Model.Page.Slug == UrlConstants.AutomatedTestingHomePage.Replace("/", "");
+	var categories = Model.Page.Content?.OfType<QuestionnaireCategoryEntry>().ToList();
 
-    @if ((isHomeCategoryPage || isAutomatedTestingHomePage) && categories is not null && categories.Any())
-    {
-        <div class="govuk-grid-row">
-        <div class="govuk-grid-column-two-thirds">
-            @{
-                await Html.RenderPartialAsync("Components/Page", Model.Page);
-            }
+	@if ((isHomeCategoryPage || isAutomatedTestingHomePage) && categories is not null && categories.Any())
+	{
+		@section RightHandColumn {
+			<hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
+			<h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+			<p class="govuk-body-s">
+				<a class="govuk-link" href="/service-updates">Recent updates</a>
+			</p>
+		}
 
-            <h2 class="govuk-heading-l">How to meet the digital and technology standards</h2>
-            <div class="dfe-grid-container">
-                @foreach (var category in categories)
-                {
-                    @await Component.InvokeAsync("CategorySection", new { category })
-                }
-            </div>
-        </div>
-        </div>
-    }
-    else
-    {
-        await Html.RenderPartialAsync("Components/Page", Model.Page);
-    }
+		<div class="govuk-grid-row">
+			<div class="govuk-grid-column-two-thirds">
+				@{
+					await Html.RenderPartialAsync("Components/Page", Model.Page);
+				}
+
+				<h2 class="govuk-heading-l">How to meet the digital and technology standards</h2>
+				<div class="dfe-grid-container">
+					@foreach (var category in categories)
+					{
+						@await Component.InvokeAsync("CategorySection", new { category })
+					}
+				</div>
+			</div>
+		</div>
+	}
+	else
+	{
+		await Html.RenderPartialAsync("Components/Page", Model.Page);
+	}
 }

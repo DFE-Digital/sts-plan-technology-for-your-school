@@ -6,21 +6,21 @@
 }
 
 @{
-    if (Model.Category.Header.Text != null)
-    {
-        ViewData["Title"] = $"{Model.Category.Header.Text} standard - print view";
-    }
-    else
-    {
-        var routeData = Context.GetRouteData();
-        ViewData["Title"] = routeData.GetTitleForPage();
-    }
+	if (Model.Category.Header.Text != null)
+	{
+		ViewData["Title"] = $"{Model.Category.Header.Text} standard - print view";
+	}
+	else
+	{
+		var routeData = Context.GetRouteData();
+		ViewData["Title"] = routeData.GetTitleForPage();
+	}
 }
 
 @section BeforeContent {
-    @{
-        await Html.RenderPartialAsync("BackButton");
-    }
+	@{
+		await Html.RenderPartialAsync("BackButton");
+	}
 }
 
 <div class="govuk-!-margin-bottom-2">
@@ -41,11 +41,11 @@
 <div class="govuk-grid-row">
 	<div class="govuk-grid-column-two-thirds">
 		@await Component.InvokeAsync("CategoryLanding", new {
-			category = Model.Category,
-			slug = Model.Slug,
-			sectionName = Model.SectionName,
-			sortOrder = Model.SortOrder,
-			print = true
-		})
+		category = Model.Category,
+				slug = Model.Slug,
+				sectionName = Model.SectionName,
+				sortOrder = Model.SortOrder,
+				print = true
+				})
 	</div>
 </div>

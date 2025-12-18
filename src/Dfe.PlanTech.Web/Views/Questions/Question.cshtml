@@ -1,55 +1,55 @@
 @model QuestionViewModel
 
-@section BeforeContent {
-    @{
-        await Html.RenderPartialAsync("BackButton");
-    }
+@section NavButton {
+	@{
+		await Html.RenderPartialAsync("BackButton");
+	}
 }
 
 <form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-categorySlug="@Model.CategorySlug" asp-route-sectionSlug="@Model.SectionSlug"
-      asp-route-questionSlug="@Model.Question.Slug" method="post">
-    <input id="QuestionText" type="hidden" value="@Model.Question.Text" name="QuestionText"/>
-    <input id="QuestionId" type="hidden" value=@Model.Question.Id name="QuestionId"/>
-    <input id="SectionId" type="hidden" value="@Model.SectionId" name="SectionId"/>
-    <input id="SectionName" type="hidden" value="@Model.SectionName" name="SectionName"/>
-    @if (!string.IsNullOrEmpty(ViewData["ReturnTo"]?.ToString()))
-    {
-        <input type="hidden" name="returnTo" value="@ViewData["ReturnTo"]" />
-    }
+	  asp-route-questionSlug="@Model.Question.Slug" method="post">
+	<input id="QuestionText" type="hidden" value="@Model.Question.Text" name="QuestionText" />
+	<input id="QuestionId" type="hidden" value=@Model.Question.Id name="QuestionId" />
+	<input id="SectionId" type="hidden" value="@Model.SectionId" name="SectionId" />
+	<input id="SectionName" type="hidden" value="@Model.SectionName" name="SectionName" />
+	@if (!string.IsNullOrEmpty(ViewData["ReturnTo"]?.ToString()))
+	{
+		<input type="hidden" name="returnTo" value="@ViewData["ReturnTo"]" />
+	}
 
-    <govuk-radios name="ChosenAnswerJson">
-        <govuk-radios-fieldset>
-            <govuk-radios-fieldset-legend is-page-heading="true" class="govuk-fieldset__legend--l">
-                @Model.Question.Text
-            </govuk-radios-fieldset-legend>
+	<govuk-radios name="ChosenAnswerJson">
+		<govuk-radios-fieldset>
+			<govuk-radios-fieldset-legend is-page-heading="true" class="govuk-fieldset__legend--l">
+				@Model.Question.Text
+			</govuk-radios-fieldset-legend>
 
-            @if (!string.IsNullOrEmpty(Model.Question.HelpText))
-            {
-                <govuk-radios-hint>@Model.Question.HelpText</govuk-radios-hint>
-            }
+			@if (!string.IsNullOrEmpty(Model.Question.HelpText))
+			{
+				<govuk-radios-hint>@Model.Question.HelpText</govuk-radios-hint>
+			}
 
-            @if (Model.ErrorMessages != null)
-            {
-                <govuk-radios-error-message>@string.Join(",", Model.ErrorMessages)</govuk-radios-error-message>
-            }
+			@if (Model.ErrorMessages != null)
+			{
+				<govuk-radios-error-message>@string.Join(",", Model.ErrorMessages)</govuk-radios-error-message>
+			}
 
-            @{
-                foreach (var answer in Model.Question.Answers)
-                {
-                    var isChecked = Model.AnswerSysId != null && Model.AnswerSysId.Equals(answer.Id);
-                    var radioValue = JsonSerializer.Serialize(answer);
+			@{
+				foreach (var answer in Model.Question.Answers)
+				{
+					var isChecked = Model.AnswerSysId != null && Model.AnswerSysId.Equals(answer.Id);
+					var radioValue = JsonSerializer.Serialize(answer);
 
-                    <govuk-radios-item value="@radioValue" checked="@isChecked">@answer.Text</govuk-radios-item>
-                }
-            }
+					<govuk-radios-item value="@radioValue" checked="@isChecked">@answer.Text</govuk-radios-item>
+				}
+			}
 
-        </govuk-radios-fieldset>
-    </govuk-radios>
+		</govuk-radios-fieldset>
+	</govuk-radios>
 
-    @{
-        // Question preview omits section details and submission should be disabled in this case
-        var disabled = Model.SectionSlug == null;
-        <govuk-button type="submit" disabled="disabled" prevent-double-click="true">Continue</govuk-button>
-    }
+	@{
+		// Question preview omits section details and submission should be disabled in this case
+		var disabled = Model.SectionSlug == null;
+		<govuk-button type="submit" disabled="disabled" prevent-double-click="true">Continue</govuk-button>
+	}
 
 </form>

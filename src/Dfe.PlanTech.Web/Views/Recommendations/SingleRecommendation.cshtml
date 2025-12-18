@@ -1,11 +1,11 @@
-﻿@model SingleRecommendationViewModel
+@model SingleRecommendationViewModel
 
 @{
     Layout = "_Layout";
 }
 
 
-@section BeforeContent {
+@section NavButton {
     <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
         Home
     </govuk-back-link>
@@ -15,7 +15,7 @@
 }
 
 @section Header {
-    <link rel="stylesheet" as="style" href="~/css/step-by-step.css">
+    <link rel="stylesheet" as="style" href="~/css/step-by-step.css" />
 }
 
 @{

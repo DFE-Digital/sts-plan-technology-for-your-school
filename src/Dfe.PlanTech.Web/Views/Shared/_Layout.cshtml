@@ -58,40 +58,38 @@
 	<partial name="_Header" />
 	@await RenderSectionAsync("Header", required: false)
 
-	@if (hasPageHeader)
-	{
-		<section class="dfe-page-header">
-			<div class="govuk-width-container">
-				<partial name="BetaHeader" />
-				<div class="govuk-grid-row">
-					<div class="govuk-grid-column-two-thirds">
-						@if (hasOuter)
-						{
-							@await RenderSectionAsync("DfePageHeaderOuter", required: false)
-						}
-						@if (showChangeSchool)
-						{
-							<partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
-						}
-						@if (hasInner)
-						{
-							<div class="dfe-page-header-inner">
-								@await RenderSectionAsync("DfePageHeaderInner", required: false)
-							</div>
-						}
-					</div>
+	<div class="govuk-width-container">
+		<partial name="BetaHeader" />
+		<div class="govuk-caption-xl govuk-!-margin-bottom-5">
+			@await RenderSectionAsync("NavButton", required: false)
+		</div>
+
+		@if (hasPageHeader)
+		{
+			<div class="govuk-grid-row">
+				<div class="govuk-grid-column-two-thirds">
+					@if (hasOuter)
+					{
+						@await RenderSectionAsync("DfePageHeaderOuter", required: false)
+					}
+					@if (showChangeSchool)
+					{
+						<partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
+					}
+					@if (hasInner)
+					{
+						@await RenderSectionAsync("DfePageHeaderInner", required: false)
+					}
+				</div>
+				<div class="govuk-grid-column-one-third govuk-float-right">
+					@await RenderSectionAsync("RightHandColumn", required: false)
 				</div>
 			</div>
-		</section>
-	}
+		}
+	</div>
 }
 
 @section BeforeContent {
-	@if (!hasPageHeader)
-	{
-		<partial name="BetaHeader" />
-	}
-
 	<partial name="_BeforeContent" />
 	@await RenderSectionAsync("BeforeContent", required: false)
 
@@ -100,7 +98,6 @@
 		<partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
 	}
 }
-
 
 @RenderBody()
 

@@ -12,11 +12,13 @@
     }
 }
 
-@section BeforeContent {
+@section NavButton {
     <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
         Home
     </govuk-back-link>
+}
 
+@section BeforeContent {
     @if (!string.IsNullOrEmpty(Model.OriginatingSlug))
     {
         <govuk-back-link
