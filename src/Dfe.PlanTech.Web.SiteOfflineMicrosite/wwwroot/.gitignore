@@ -6,8 +6,3 @@
 
 # Keep directory structure
 !.gitkeep
-
-# Ignore copied assets (fonts, images, etc.)
-assets/**/*
-!assets/.gitkeep
-

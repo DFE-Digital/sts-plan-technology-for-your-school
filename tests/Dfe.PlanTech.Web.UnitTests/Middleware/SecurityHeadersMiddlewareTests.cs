@@ -63,9 +63,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         public async Task Should_Set_Headers()
         {
             var context = BuildContext();
-            var hostingEnvironment = Substitute.For<IWebHostEnvironment>();
             var next = new RequestDelegate(_ => Task.CompletedTask);
-            var middleware = new SecurityHeadersMiddleware(hostingEnvironment, next);
+            var middleware = new SecurityHeadersMiddleware(next);
 
             await middleware.InvokeAsync(context);
 
@@ -92,9 +91,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         public async Task Should_Store_Nonce_In_Context_Items()
         {
             var context = BuildContext();
-            var hostingEnvironment = Substitute.For<IWebHostEnvironment>();
             var next = new RequestDelegate(_ => Task.CompletedTask);
-            var middleware = new SecurityHeadersMiddleware(hostingEnvironment, next);
+            var middleware = new SecurityHeadersMiddleware(next);
 
             await middleware.InvokeAsync(context);
 
