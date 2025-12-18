@@ -1,11 +1,9 @@
 using System.Text.RegularExpressions;
 using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Web.Middleware;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
