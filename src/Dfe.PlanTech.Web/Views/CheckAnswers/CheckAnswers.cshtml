@@ -1,70 +1,67 @@
 @model ReviewAnswersViewModel
 
-@section BeforeContent {
-    @{
-        await Html.RenderPartialAsync("BackButton");
-    }
+@section NavButton {
+	@{
+		await Html.RenderPartialAsync("BackButton");
+	}
 }
 
-<div class="govuk-grid-row" id="checkYourAnswers-page">
-    <div class="govuk-grid-column-two-thirds-from-desktop">
-        <h3 class="govuk-caption-xl">@Model.SectionName</h3>
-        @{
-            await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
-        }
-        <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-            @foreach (var questionWithAnswer in Model.SubmissionResponses?.Responses ?? [])
-            {
-                var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
+@{
+	await Html.RenderPartialAsync("PrintButton", Model);
+}
 
-                <div class="govuk-summary-list__row">
-                    <dt class="govuk-summary-list__key spacer">
-                        @questionWithAnswer.QuestionText
-                    </dt>
-                    <dd class="govuk-summary-list__value spacer">
-                        @questionWithAnswer.AnswerText
-                    </dd>
-                    <dd class="noprint govuk-summary-list__actions spacer">
-                        <a asp-controller="Questions" asp-action="GetQuestionBySlug"
-                           asp-route-categorySlug="@Model.CategorySlug"
-                           asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
-                           asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
-                           title="@questionWithAnswer.QuestionText">
-                            Change
-                            <span class="govuk-visually-hidden">@anchorLabel</span>
-                        </a>
-                    </dd>
-                </div>
-            }
-        </dl>
-        <form asp-controller="@nameof(ReviewAnswersController).GetControllerNameSlug()" asp-action="@nameof(ReviewAnswersController.ConfirmCheckAnswers)" method="post" class="noprint">
-            <input type="hidden" name="submissionId" value="@Model.SubmissionId"/>
-            <input type="hidden" name="categorySlug" value="@Model.CategorySlug" />
-            <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
-            <input type="hidden" name="sectionName" value="@Model.SectionName">
+<div id="checkYourAnswers-page">
+	<h3 class="govuk-caption-xl">@Model.SectionName</h3>
+	@{
+		await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
+	}
+	<dl class="govuk-summary-list govuk-!-margin-bottom-9">
+		@foreach (var questionWithAnswer in Model.SubmissionResponses?.Responses ?? [])
+		{
+			var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
 
-            @{
-                foreach (var content in Model.Content ?? [])
-                {
-                    await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-                }
-            }
+			<div class="govuk-summary-list__row">
+				<dt class="govuk-summary-list__key spacer">
+					@questionWithAnswer.QuestionText
+				</dt>
+				<dd class="govuk-summary-list__value spacer">
+					@questionWithAnswer.AnswerText
+				</dd>
+				<dd class="noprint govuk-summary-list__actions spacer">
+					<a asp-controller="Questions" asp-action="GetQuestionBySlug"
+					   asp-route-categorySlug="@Model.CategorySlug"
+					   asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
+					   asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
+					   title="@questionWithAnswer.QuestionText">
+						Change
+						<span class="govuk-visually-hidden">@anchorLabel</span>
+					</a>
+				</dd>
+			</div>
+		}
+	</dl>
+	<form asp-controller="@nameof(ReviewAnswersController).GetControllerNameSlug()" asp-action="@nameof(ReviewAnswersController.ConfirmCheckAnswers)" method="post" class="noprint">
+		<input type="hidden" name="submissionId" value="@Model.SubmissionId" />
+		<input type="hidden" name="categorySlug" value="@Model.CategorySlug" />
+		<input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
+		<input type="hidden" name="sectionName" value="@Model.SectionName">
 
-            <govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">Submit and view recommendations</govuk-button>
+		@{
+			foreach (var content in Model.Content ?? [])
+			{
+				await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+			}
+		}
 
-            @if (Model.ErrorMessage != null)
-            {
-                <p class="govuk-error-message">
-                    <span class="govuk-visually-hidden">Error:</span> @Model.ErrorMessage <a class="govuk-error-message"
-                        href="@UrlConstants.HomePage">Return to the homepage</a>
-                </p>
-            }
+		<govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">Submit and view recommendations</govuk-button>
 
-        </form>
-    </div>
-    <div class="govuk-grid-column-one-third-from-desktop">
-        @{
-            await Html.RenderPartialAsync("PrintButton", Model);
-        }
-    </div>
+		@if (Model.ErrorMessage != null)
+		{
+			<p class="govuk-error-message">
+				<span class="govuk-visually-hidden">Error:</span> @Model.ErrorMessage
+				<a class="govuk-error-message" href="@UrlConstants.HomePage">Return to the homepage</a>
+			</p>
+		}
+
+	</form>
 </div>

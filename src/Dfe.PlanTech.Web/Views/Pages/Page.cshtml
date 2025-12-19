@@ -11,42 +11,37 @@
 	}
 }
 
-@if (Model.DisplayBlueBanner)
-{
-	@section DfePageHeaderInner {
-		@foreach (var content in Model.Page.BeforeTitleContent)
-		{
-			await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-		}
+@section RelatedActions {
+	@{
+		var isHomeCategoryPage = Model.Page.Slug.Equals(UrlConstants.HomePage.Replace("/", ""));
 
-		<span class="govuk-caption-xl govuk-!-margin-top-5">
-			@Model.ActiveEstablishmentName
-		</span>
-
-		@if (Model.Page.Title != null)
+		if (isHomeCategoryPage)
 		{
-			await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+			<hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
+			<h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+
+			<p class="govuk-body-s">
+				<a class="govuk-link" href="/service-updates">Recent updates</a>
+			</p>
 		}
 	}
 }
-else
+
+@foreach (var content in Model.Page.BeforeTitleContent)
 {
-	foreach (var content in Model.Page.BeforeTitleContent)
-	{
-		await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-	}
+	await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+}
 
-	if (Model.Page.DisplayOrganisationName)
-	{
-		<span class="govuk-caption-xl govuk-!-margin-top-5">
-			@Model.ActiveEstablishmentName
-		</span>
-	}
+@if (Model.Page.DisplayOrganisationName)
+{
+	<span class="govuk-caption-xl govuk-!-margin-top-5">
+		@Model.ActiveEstablishmentName
+	</span>
+}
 
-	if (Model.Page.Title != null)
-	{
-		await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
-	}
+@if (Model.Page.Title != null)
+{
+	await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
 }
 
 @{
@@ -72,28 +67,14 @@ else
 
 	@if ((isHomeCategoryPage || isAutomatedTestingHomePage) && categories is not null && categories.Any())
 	{
-		@section RightHandColumn {
-			<hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
-			<h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
-			<p class="govuk-body-s">
-				<a class="govuk-link" href="/service-updates">Recent updates</a>
-			</p>
-		}
+		await Html.RenderPartialAsync("Components/Page", Model.Page);
 
-		<div class="govuk-grid-row">
-			<div class="govuk-grid-column-two-thirds">
-				@{
-					await Html.RenderPartialAsync("Components/Page", Model.Page);
-				}
-
-				<h2 class="govuk-heading-l">How to meet the digital and technology standards</h2>
-				<div class="dfe-grid-container">
-					@foreach (var category in categories)
-					{
-						@await Component.InvokeAsync("CategorySection", new { category })
-					}
-				</div>
-			</div>
+		<h2 class="govuk-heading-l">How to meet the digital and technology standards</h2>
+		<div class="dfe-grid-container">
+			@foreach (var category in categories)
+			{
+				@await Component.InvokeAsync("CategorySection", new { category })
+			}
 		</div>
 	}
 	else

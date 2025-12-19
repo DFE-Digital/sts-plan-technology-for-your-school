@@ -2,6 +2,9 @@
 
 @section Head {
 	<partial name="_Head" />
+	@await RenderSectionAsync("CSS", required: false)
+	<partial name="GoogleTagManager/_Head" />
+
 	@await RenderSectionAsync("Head", required: false)
 }
 
@@ -16,10 +19,6 @@
 }
 
 @{
-	var hasOuter = IsSectionDefined("DfePageHeaderOuter");
-	var hasInner = IsSectionDefined("DfePageHeaderInner");
-	var hasPageHeader = hasOuter || hasInner;
-
 	var showChangeSchool = false;
 
 	@* Conditionally show the change school partial on all pages except for specific pages in the exclusion list for MAT's*@
@@ -56,34 +55,15 @@
 	<partial name="GoogleTagManager/_Body" />
 	<partial name="CookiesBanner/_CookieBanner" />
 	<partial name="_Header" />
-	@await RenderSectionAsync("Header", required: false)
 
 	<div class="govuk-width-container">
 		<partial name="BetaHeader" />
-		<div class="govuk-caption-xl govuk-!-margin-bottom-5">
-			@await RenderSectionAsync("NavButton", required: false)
-		</div>
+		@await RenderSectionAsync("NavButton", required: false)
 
-		@if (hasPageHeader)
+		@if (showChangeSchool)
 		{
 			<div class="govuk-grid-row">
-				<div class="govuk-grid-column-two-thirds">
-					@if (hasOuter)
-					{
-						@await RenderSectionAsync("DfePageHeaderOuter", required: false)
-					}
-					@if (showChangeSchool)
-					{
-						<partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
-					}
-					@if (hasInner)
-					{
-						@await RenderSectionAsync("DfePageHeaderInner", required: false)
-					}
-				</div>
-				<div class="govuk-grid-column-one-third govuk-float-right">
-					@await RenderSectionAsync("RightHandColumn", required: false)
-				</div>
+				<partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
 			</div>
 		}
 	</div>
@@ -91,15 +71,24 @@
 
 @section BeforeContent {
 	<partial name="_BeforeContent" />
-	@await RenderSectionAsync("BeforeContent", required: false)
 
-	@if (!hasPageHeader && showChangeSchool)
+	@if (showChangeSchool)
 	{
 		<partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
 	}
 }
 
-@RenderBody()
+<div class="govuk-grid-row">
+	<div class="govuk-grid-column-two-thirds-from-desktop">
+		@await RenderSectionAsync("Panel", required: false)
+
+		@RenderBody()
+	</div>
+
+	<div class="govuk-grid-column-one-third-from-desktop govuk-float-right">
+		@await RenderSectionAsync("RelatedActions", required: false)
+	</div>
+</div>
 
 @section Footer {
 	<partial name="_Footer" />

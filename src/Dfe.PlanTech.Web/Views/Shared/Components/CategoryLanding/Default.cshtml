@@ -14,7 +14,7 @@
 
 @if (!string.IsNullOrEmpty(Model.SectionName))
 {
-	<div class="govuk-panel govuk-panel--confirmation">
+	<div class="govuk-panel govuk-panel--confirmation govuk-!-margin-bottom-8">
 		<h1 class="govuk-panel__title">
 			Your self-assessment for @Model.SectionName.ToLower() is complete
 		</h1>
@@ -23,6 +23,13 @@
 		</div>
 	</div>
 }
+
+@{
+	var title = new ComponentTitleEntry(Model.CategoryName);
+}
+
+<span class="govuk-caption-xl">How to meet the standard</span>
+<partial name="Components/PageComponentFactory" model="@title" />
 
 @if (!Model.Print)
 {

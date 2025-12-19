@@ -37,6 +37,7 @@
 	<meta name="google-site-verification" content="@GtmService.Config.SiteVerificationId" />
 }
 
+<!-- Google Tag Manager -->
 <script nonce="@nonce">
 	(function (w, d, s, l, i) {
 		w[l] = w[l] || [];
@@ -55,13 +56,15 @@
 		var f = d.getElementsByTagName(s)[0],
 			j = d.createElement(s),
 			dl = l != 'dataLayer' ? '&l=' + l : '';
-		j.async = true;
 
 		// Carry CSP nonce to external script
 		var n = d.querySelector('[nonce]');
 		if (n) { j.setAttribute('nonce', n.nonce || n.getAttribute('nonce')); }
 
+		j.async = true;
 		j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
 		f.parentNode.insertBefore(j, f);
-	})(window, document, 'script', 'dataLayer', '@GtmService.Config.Id');
+	})
+	(window, document, 'script', 'dataLayer', '@GtmService.Config.Id');
 </script>
+<!-- End Google Tag Manager -->

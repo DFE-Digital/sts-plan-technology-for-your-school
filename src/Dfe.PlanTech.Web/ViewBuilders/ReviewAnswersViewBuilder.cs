@@ -148,7 +148,7 @@ public class ReviewAnswersViewBuilder(
     {
         //Get Ordered CORE responses from section questions and select out the responses from the submission
         var orderedCoreResponses = section.Questions
-            .Select(q => submissionModel.Submission?.Responses?.FirstOrDefault(r => r.QuestionSysId == q.Sys.Id))
+            .Select(q => submissionModel.Submission?.Responses?.FirstOrDefault(r => r.QuestionSysId == q.Sys?.Id))
             .ToList();
 
         //Get Ordered Retired responses from section questions and select out the responses from the submission
