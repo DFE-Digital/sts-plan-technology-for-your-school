@@ -11,6 +11,5 @@ internal class EstablishmentEntityConfiguration : IEntityTypeConfiguration<Estab
         builder.HasKey(establishment => establishment.Id);
         builder.ToTable(tb => tb.HasTrigger("tr_establishment"));
         builder.Property(establishment => establishment.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
-        builder.Property(establishment => establishment.GroupUid).HasMaxLength(50);
     }
 }
