@@ -17,12 +17,6 @@
         Home
     </govuk-back-link>
 
-	 @{
-		var slug = string.IsNullOrEmpty(Model.OriginatingSlug)
-			? Model.Chunks.First().Slug
-			: Model.OriginatingSlug;
-	}
-
     <govuk-back-link
         id="js-back-button-link"
         class="noprint js-only"
@@ -31,7 +25,9 @@
             new {
                 categorySlug = Model.CategorySlug,
                 sectionSlug = Model.SectionSlug,
-                chunkSlug = @slug
+                chunkSlug = string.IsNullOrEmpty(Model.OriginatingSlug)
+							? Model.Chunks.First().Slug
+							: Model.OriginatingSlug
             })">
         Back
     </govuk-back-link>
