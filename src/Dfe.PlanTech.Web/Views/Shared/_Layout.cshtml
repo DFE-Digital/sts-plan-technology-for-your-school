@@ -59,13 +59,6 @@
 	<div class="govuk-width-container">
 		<partial name="BetaHeader" />
 		@await RenderSectionAsync("NavButton", required: false)
-
-		@if (showChangeSchool)
-		{
-			<div class="govuk-grid-row">
-				<partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
-			</div>
-		}
 	</div>
 }
 
