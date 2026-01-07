@@ -28,9 +28,5 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Dfe.PlanTech.Web.SiteOfflineMicrosite\Dfe.PlanTech.Web.SiteOfflineMicrosite.csproj" />
-  </ItemGroup>
-
 </Project>
 
