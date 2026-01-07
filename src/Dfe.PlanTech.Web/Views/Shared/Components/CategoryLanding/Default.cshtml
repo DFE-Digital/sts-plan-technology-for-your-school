@@ -26,32 +26,28 @@
 
 @if (!Model.Print)
 {
-	@if (Model.CategoryLandingSections.Count != 1 && !Model.AllSectionsCompleted)
+    bool singleSectionCategory = Model.CategoryLandingSections.Count == 1;
+    bool anySectionsCompleted = Model.CompletedSectionCount != 0;
+    bool allSectionsCompleted = Model.CompletedSectionCount == Model.Sections.Count;
+
+    if (!singleSectionCategory && !allSectionsCompleted)
 	{
 		<div class="govuk-inset-text">
 			@{
-				if (!Model.AnySectionsCompleted)
-				{
-					<p>You have not completed any self-assessments for the @Model.CategoryName.ToLower() standard. Complete self-assessments to view all recommendations.</p>
-				}
-				else if (Model.AllSectionsCompleted)
-				{
-					<p>You have completed all self-assessments for the @Model.CategoryName.ToLower() standard.</p>
-				}
-				else
-				{
-					<p>Complete the remaining self-assessments to get recommendations for your school's @Model.CategoryName.ToLower().</p>
+                <p>@ContentfulResourcesHelper.GetCategoryLandingInsetText(Model.CategoryName.ToLower(), Model.CompletedSectionCount, Model.Resources)</p>
 
-					foreach (var topic in Model.CategoryLandingSections)
+                if (anySectionsCompleted)
+                {
+                    foreach (var topic in Model.CategoryLandingSections)
 					{
 						<partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = @Model.CategorySlug, Section = topic, Context = "Default" }' />
 					}
-				}
+                }
 			}
 		</div>
 	}
 
-	@if (Model.AnySectionsCompleted)
+	if (anySectionsCompleted)
 	{
 		<form method="get" class="govuk-form-group">
 			<label class="govuk-label" for="sort">

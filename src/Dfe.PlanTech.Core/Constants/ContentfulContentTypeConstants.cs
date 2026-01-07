@@ -51,6 +51,8 @@ public static class ContentfulContentTypeConstants
             { typeof(QuestionnaireSectionEntry), QuestionnaireSectionContentfulContentTypeId },
             { typeof(RecommendationChunkEntry), RecommendationChunkContentfulContentTypeId },
             { typeof(RecommendationPageEntry), RecommendationPageContentfulContentTypeId },
+            { typeof(ResourceEntry), ResourceContentfulContentTypeId },
+            { typeof(ResourceSetEntry), ResourceSetContentfulContentTypeId },
             { typeof(RichTextContentDataEntry), RichTextContentDataContentfulContentTypeId },
             { typeof(RichTextContentField), RichTextContentContentfulContentTypeId },
             { typeof(RichTextContentSupportDataField), RichTextContentSupportDataContentfulContentTypeId },
@@ -92,6 +94,8 @@ public static class ContentfulContentTypeConstants
     public const string QuestionnaireSectionContentfulContentTypeId = "section";
     public const string RecommendationChunkContentfulContentTypeId = "recommendationChunk";
     public const string RecommendationPageContentfulContentTypeId = "recommendationPage";
+    public const string ResourceContentfulContentTypeId = "resource";
+    public const string ResourceSetContentfulContentTypeId = "resourceSet";
     public const string RichTextContentContentfulContentTypeId = "richTextContent";
     public const string RichTextContentDataContentfulContentTypeId = "richTextContentData";
     public const string RichTextContentSupportDataContentfulContentTypeId = "richTextContentSupportData";

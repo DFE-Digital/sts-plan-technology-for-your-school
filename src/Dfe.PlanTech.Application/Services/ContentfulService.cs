@@ -64,4 +64,9 @@ public class ContentfulService(
     {
         return _contentfulWorkflow.GetSectionBySlugAsync(slug, includeLevel);
     }
+
+    public Task<List<ResourceEntry>> GetAllResourcesAsync()
+    {
+        return _contentfulWorkflow.GetAllResourcesAsync();
+    }
 }
