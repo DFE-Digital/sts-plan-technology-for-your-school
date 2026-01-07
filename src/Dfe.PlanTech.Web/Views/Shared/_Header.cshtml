@@ -5,16 +5,14 @@
 				<img src="/assets/images/department-for-education_white.png" alt="Department for Education" class="govuk-header__logotype">
 			</a>
 		</div>
-		<div class="dfe-header__content" id="content-header">
-			<ul class="dfe-header__action-links">
-				@if (Context.User.Identity?.IsAuthenticated == true)
-				{
-					<li>
-						<a asp-controller="Auth" asp-action="SignOut" class="govuk-link govuk-link--inverse">Sign out</a>
-					</li>
-				}
-			</ul>
-		</div>
+		@if (Context.User.Identity?.IsAuthenticated == true)
+		{
+			<div class="app-auth-action">
+				<a class="app-auth-action__link" href="/signout">
+					Sign out
+				</a>
+			</div>
+		}
 	</div>
 </header>
 
