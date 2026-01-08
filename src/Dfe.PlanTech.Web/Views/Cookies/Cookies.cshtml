@@ -1,13 +1,13 @@
 @model CookiesViewModel
 
 @section NavButton {
-	<partial name="BackButton" />
+    <partial name="BackButton" />
 }
 
 @foreach (var content in Model.BeforeTitleContent)
 {
-	<span>Cookies</span>
-	await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    <span>Cookies</span>
+    await Html.RenderPartialAsync("Components/PageComponentFactory", content);
 }
 
 <partial name="Components/PageComponentFactory" model="@Model.Title" />
@@ -16,10 +16,10 @@
 
 @if (Model.Content != null)
 {
-	foreach (var content in Model.Content)
-	{
-		<partial name="Components/PageComponentFactory" model="content" />
-	}
+    foreach (var content in Model.Content)
+    {
+        <partial name="Components/PageComponentFactory" model="content" />
+    }
 }
 
 <partial name="CookiePreferencesForm" model="@Model.Cookie" />

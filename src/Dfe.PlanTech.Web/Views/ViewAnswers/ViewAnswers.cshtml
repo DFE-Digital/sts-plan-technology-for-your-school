@@ -1,20 +1,20 @@
 @model ViewAnswersViewModel
 
 @section NavButton {
-	@{
-		await Html.RenderPartialAsync("BackButton");
-	}
+    @{
+        await Html.RenderPartialAsync("BackButton");
+    }
 }
 
 @{
-	await Html.RenderPartialAsync("PrintButton");
+    await Html.RenderPartialAsync("PrintButton");
 }
 
 <span class="govuk-caption-xl">@Model.TopicName</span>
 <h1 class="govuk-heading-xl">View your answers</h1>
 <p>
-	The self-assessment was completed @Model.AssessmentCompletedDate.ToString("dd MMMM yyyy").
-	We used these answers to set the initial status of your recommendations.
+    The self-assessment was completed @Model.AssessmentCompletedDate.ToString("dd MMMM yyyy").
+    We used these answers to set the initial status of your recommendations.
 </p>
 
 <p>You can view more recent activity on recommendations pages.</p>
@@ -22,16 +22,16 @@
 <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 @foreach (var response in Model.Responses)
 {
-	<div>
-		<p class="govuk-!-font-weight-bold">@response.QuestionText</p>
-		<p>@response.AnswerText</p>
-		<hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-4 govuk-!-margin-bottom-4" />
-	</div>
+    <div>
+        <p class="govuk-!-font-weight-bold">@response.QuestionText</p>
+        <p>@response.AnswerText</p>
+        <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-4 govuk-!-margin-bottom-4" />
+    </div>
 }
 
 <hr class="govuk-section-break govuk-section-break--l">
 
 <a href="@($"/{Model.CategorySlug}")" draggable="false"
    class="govuk-button govuk-button--secondary" data-module="govuk-button">
-	Back to recommendations
+    Back to recommendations
 </a>

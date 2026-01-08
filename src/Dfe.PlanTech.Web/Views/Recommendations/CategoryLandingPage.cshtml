@@ -1,28 +1,28 @@
 @model CategoryLandingPageViewModel
 
 @section NavButton {
-	<govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
-		Back to choose a standard
-	</govuk-back-link>
+    <govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
+        Back to choose a standard
+    </govuk-back-link>
 }
 
 @section RelatedActions {
-	<hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
-	<h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+    <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
+    <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
 
-	<p class="govuk-body-s">
-		<a class="govuk-link" href="@Model.Slug/print">Print your school's @Model.Category.Header.Text.ToLower() recommendations</a>
-	</p>
+    <p class="govuk-body-s">
+        <a class="govuk-link" href="@Model.Slug/print">Print your school's @Model.Category.Header.Text.ToLower() recommendations</a>
+    </p>
 }
 
 @foreach (var content in Model.BeforeTitleContent)
 {
-	await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    await Html.RenderPartialAsync("Components/PageComponentFactory", content);
 }
 
 @await Component.InvokeAsync("CategoryLanding", new {
-	category = Model.Category,
-	slug = Model.Slug,
-	sectionName = Model.SectionName,
-	sortOrder = Model.SortOrder,
+    category = Model.Category,
+    slug = Model.Slug,
+    sectionName = Model.SectionName,
+    sortOrder = Model.SortOrder,
 })

@@ -1,15 +1,15 @@
 <div class="govuk-!-margin-bottom-2">
-	<div class="noprint js-only">
-		<button class="govuk-link print-button govuk-!-font-size-16" id="print-page-button">Print this page</button>
-	</div>
+    <div class="noprint js-only">
+        <button class="govuk-link print-button govuk-!-font-size-16" id="print-page-button">Print this page</button>
+    </div>
 
-	<p>&nbsp;</p>
+    <p>&nbsp;</p>
 </div>
 
 <script defer nonce="@Context.Items["nonce"]">
-	document.getElementById("print-page-button").addEventListener("click", printPage);
+    document.getElementById("print-page-button").addEventListener("click", printPage);
 
-	function printPage() {
-		window.print();
-	}
+    function printPage() {
+        window.print();
+    }
 </script>
