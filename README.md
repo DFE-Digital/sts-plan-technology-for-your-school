@@ -8,7 +8,7 @@ Web application to help schools plan a technology roadmap
 
 ## Requirements
 
-- .Net 8.0 and any supported IDE for DEV running.
+- .Net 9.0 and any supported IDE for DEV running.
 
 ## Running Locally
 
@@ -18,10 +18,11 @@ Web application to help schools plan a technology roadmap
 
 - [Authentication](./docs/Authentication.md)
 - [Architecture Decision Records](./docs/adr/README.md)
+- [Coding Style](/coding-style/README.md)
 - [Contentful](./docs/cms/README.md)
 - [Conventions](./docs/Conventions.md)
 - [Database Upgrades](./src/Dfe.PlanTech.DatabaseUpgrader/README.md)
 - [GitHub Workflows](./docs/GitHub-Workflows.md)
+- [Migration Scripts](./contentful/migration-scripts/README.md)
 - [Terraform Main](./terraform/container-app/README.md)
 - [Terraform Configuration](./terraform/container-app/terraform-configuration.md)
-- [Migration Scripts](./contentful/migration-scripts/README.md)

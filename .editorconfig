@@ -8,22 +8,21 @@ trim_trailing_whitespace = true
 
 indent_style = space
 indent_size = 2
-tab_width = 4
-
-# Markdown: allow trailing whitespace (can be meaningful)
-[*.md]
-trim_trailing_whitespace = false
 
 # C# / .NET
 [*.{cs,csproj,sln,cshtml}]
 indent_size = 4
 
-# Python
-[*.py]
-indent_size = 2
+# Markdown: allow trailing whitespace (can be meaningful)
+[*.md]
+trim_trailing_whitespace = false
 
 # PowerShell
 [*.ps1]
+indent_size = 2
+
+# Python
+[*.py]
 indent_size = 2
 
 # Shell

@@ -1,34 +1,16 @@
-# Linting & Formatting
+# Tools
 
-## Requirements
-
-### Prettier and pre-commit-config
-
-python -m pip install pre-commit
-pre-commit install
-
-### Formatters
-
-Add the following markdown extension for VSCode
-
-- DavidAnson.vscode-markdownlint
-
-## This directory
-
-This directory contains tooling to:
-
-- inventory languages and file types in the repository
-- support decisions about linters/formatters
-- eventually enforce formatting consistency pre-commit and in CI
+This directory contains tooling to inventory languages and file types
+in the repository in order to support decisions about linters/formatters.
 
 These outputs can be used to get an overview of what languages we're using
 and therefore the amount of configuration needed in the formatting configs.
 
-### Scripts
+## Scripts
 
 All scripts are designed to be run from anywhere inside the repo.
 
-#### Inventory (tracked files)
+### Inventory (tracked files)
 
 This script writes the tracked files list to:
 
@@ -42,11 +24,11 @@ and then prints reports.
 
 #### Outputs
 
-`output/tracked-files.txt`
+`output/tracked-files.txt` (ignored)
 
 - raw list of tracked files used as input
 
-## Repository root
+## Repository configuration
 
 ### [.gitattributes](../.gitattributes)
 
@@ -65,25 +47,32 @@ Tells git what line endings to use.
 As pre-commit passes filenames after `--include` we can configure how to
 treat specific files.
 
-That last hook runs only on staged .cs/.csproj files (because pre-commit passes filenames after --include).
+That hooks run only on staged files because pre-commit passes filenames after `--include`.
 
 #### Universal hygiene
 
-- Checks yaml
 - Checks JSON
+- Checks yaml
 - Fixes ends of files
 - Removes trailing whitespace
 - Ensures line endings become LF
 
-#### Web + config formats
+#### Markdown
+
+- Formats markdown files
+
+#### .NET formatting (avoids opinionated style rewrites)
+
+- Uses CSharpier
+- Formats C# code according to accepted guidelines
+
+#### Web and config formats
 
 - Uses prettier to format JavaScript, Typescript, styling, HTML, YAML, JSON
 
-#### .NET formatting
-
-- Formats whitespace
-
 ### [.prettier-ignore](../.prettier-ignore)
+
+Used to disregard key files.
 
 - Minified JavaScript
 - Map files,

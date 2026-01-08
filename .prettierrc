@@ -1,5 +1,14 @@
 {
   "printWidth": 100,
   "singleQuote": true,
-  "trailingComma": "all"
+  "trailingComma": "all",
+
+  "overrides": [
+    {
+      "files": ["tsconfig.json", "tsconfig.*.json"],
+      "options": {
+        "parser": "jsonc"
+      }
+    }
+  ]
 }

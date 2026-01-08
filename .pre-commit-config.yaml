@@ -3,28 +3,70 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
-    - id: end-of-file-fixer
-      name: Fix ends of files
-    - id: trailing-whitespace
-      name: Remove trailing whitespace
-    - id: mixed-line-ending
-      name: Normalize line endings to LF
-      args: ["--fix=lf"]
-    - id: check-yaml
-      name: Run YAML linter
+      - id: end-of-file-fixer
+        name: Fix ends of files
+      - id: trailing-whitespace
+        name: Remove trailing whitespace
+      - id: mixed-line-ending
+        name: Normalize line endings to LF
+        args: ['--fix=lf']
+      - id: check-yaml
+        name: Run GitHub YAML linter
+      - id: check-json
+        name: Run GitHub JSON linter on files except tsconfig.json
+        exclude: tsconfig.json$ # Exlude tsconfig*.json from check-json hook as it contains comments
 
-  # Prettier for web + config formats
+  # .NET formatting (Database Upgrader)
+  - repo: local
+    hooks:
+      - id: dotnet-format-whitespace-db-upgrader
+        name: Format whitespace in DB Upgrader solution
+        entry: dotnet
+        args: ['format', 'whitespace', 'Dfe.PlanTech.DatabaseUpgrader.sln']
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+            Dfe\.PlanTech\.DatabaseUpgrader\.sln|
+            src/Dfe\.PlanTech\.DatabaseUpgrader/.*\.(cs|csproj|props|targets|slnf)$|
+            Directory\.Build\.(props|targets)|
+            \.editorconfig$
+          )
+
+  # .NET formatting (Service)
+  - repo: local
+    hooks:
+      - id: dotnet-format-whitespace-service
+        name: Format whitespace in PlanTech solution
+        entry: dotnet
+        args: ['format', 'whitespace', 'plan-technology-for-your-school.sln']
+        language: system
+        pass_filenames: false
+        files: |
+          (?x)^(
+            plan-technology-for-your-school\.sln|
+            src/.*\.(cs|csproj|props|targets|slnf)$|
+            tests/.*\.(cs|csproj|props|targets|slnf)$|
+            Directory\.Build\.(props|targets)|
+            \.editorconfig$
+          )
+
+  # CSharpier formatting (avoids opinionated style rewrites)
+  - repo: local
+    hooks:
+      - id: csharpier
+        name: Run CSharpier
+        entry: dotnet csharpier
+        args: ['format']
+        language: system
+        types: ['c#']
+        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)
+
+  # Web and config formats
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
-        files: \.(js|mjs|ts|tsx|css|scss|html|md|yml|yaml|json)$
-
-  # .NET formatting (whitespace only; avoids opinionated style rewrites)
-  - repo: local
-    hooks:
-      - id: dotnet-format-whitespace
-        name: dotnet format (whitespace)
-        language: system
-        entry: dotnet format whitespace --include
-        files: \.(cs|csproj)$
+        name: Run Prettier linter on documentation, web and config files
+        files: /(js|mjs|ts|tsx|css|scss|html|md|yml|yaml|json)$
+        exclude: (^|/)(bin|obj|wwwroot)(/|$)|.*Generated.*
