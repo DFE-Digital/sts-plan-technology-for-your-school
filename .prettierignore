@@ -1,0 +1,6 @@
+**/*.min.js
+**/*.map
+**/wwwroot/lib/**
+**/node_modules/**
+**/dist/**
+**/build/**

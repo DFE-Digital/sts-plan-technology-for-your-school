@@ -1,5 +1,30 @@
 repos:
- - repo: https://github.com/pre-commit/pre-commit-hooks
-   rev: v4.1.0 # Use the latest stable version
-   hooks:
-     - id: trailing-whitespace
+  # Universal hygiene (fast, huge payoff)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+    - id: end-of-file-fixer
+      name: Fix ends of files
+    - id: trailing-whitespace
+      name: Remove trailing whitespace
+    - id: mixed-line-ending
+      name: Normalize line endings to LF
+      args: ["--fix=lf"]
+    - id: check-yaml
+      name: Run YAML linter
+
+  # Prettier for web + config formats
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v4.0.0-alpha.8
+    hooks:
+      - id: prettier
+        files: \.(js|mjs|ts|tsx|css|scss|html|md|yml|yaml|json)$
+
+  # .NET formatting (whitespace only; avoids opinionated style rewrites)
+  - repo: local
+    hooks:
+      - id: dotnet-format-whitespace
+        name: dotnet format (whitespace)
+        language: system
+        entry: dotnet format whitespace --include
+        files: \.(cs|csproj)$
