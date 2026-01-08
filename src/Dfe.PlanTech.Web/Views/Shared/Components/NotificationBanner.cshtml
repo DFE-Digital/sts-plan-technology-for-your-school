@@ -1,49 +1,49 @@
 @model ComponentNotificationBannerEntry
 @{
-	if (!TempData.ContainsKey("SubtopicError"))
-	{
-		// If we have multiple banners on the page, this creates multiple `role="region"` with duplicate accessible names
-		// This is flagged by accessibility scans (and causes E2E tests to fail).
-		// Additionally, there is an issue of duplicated `id` values.
-		//
-		// We could/would set the ID on the title, but there is an upstream bug in the govuk.frontend.aspnetcore library
-		// Proposed fix: https://github.com/x-govuk/govuk-frontend-aspnetcore/pull/355
-		// In the meanwhile, we write the HTML directly for now while we wait for the upstream fix to be merged and released.
-		//
-		// Just setting the ID is insufficient, however, as multiple banners with the same computed `aria-label` will still
-		// cause accessibility issues (i.e. multiple `role="region"` with an `aria-label` of "Important".
-		// Therefore we also (conditionally) append a visually hidden differentiator for the second and subsequent banners on the page.
+    if (!TempData.ContainsKey("SubtopicError"))
+    {
+        // If we have multiple banners on the page, this creates multiple `role="region"` with duplicate accessible names
+        // This is flagged by accessibility scans (and causes E2E tests to fail).
+        // Additionally, there is an issue of duplicated `id` values.
+        //
+        // We could/would set the ID on the title, but there is an upstream bug in the govuk.frontend.aspnetcore library
+        // Proposed fix: https://github.com/x-govuk/govuk-frontend-aspnetcore/pull/355
+        // In the meanwhile, we write the HTML directly for now while we wait for the upstream fix to be merged and released.
+        //
+        // Just setting the ID is insufficient, however, as multiple banners with the same computed `aria-label` will still
+        // cause accessibility issues (i.e. multiple `role="region"` with an `aria-label` of "Important".
+        // Therefore we also (conditionally) append a visually hidden differentiator for the second and subsequent banners on the page.
 
-		// Track banner count in request to provide unique accessible names
-		const string bannerIdsKey = "NotificationBannerIds";
+        // Track banner count in request to provide unique accessible names
+        const string bannerIdsKey = "NotificationBannerIds";
 
-		var bannerIds = (List<string>?)Context.Items[bannerIdsKey] ?? new List<string>();
-		Context.Items[bannerIdsKey] = bannerIds;
+        var bannerIds = (List<string>?)Context.Items[bannerIdsKey] ?? new List<string>();
+        Context.Items[bannerIdsKey] = bannerIds;
 
-		// Check if we've seen this banner before (in case of re-rendering)
-		if (!bannerIds.Contains(Model.Id))
-		{
-			bannerIds.Add(Model.Id);
-		}
+        // Check if we've seen this banner before (in case of re-rendering)
+        if (!bannerIds.Contains(Model.Id))
+        {
+            bannerIds.Add(Model.Id);
+        }
 
-		var currentIndex = bannerIds.IndexOf(Model.Id) + 1; // 1-based indexing
+        var currentIndex = bannerIds.IndexOf(Model.Id) + 1; // 1-based indexing
 
-		var titleId = $"govuk-notification-banner-title-{Model.Id}";
-		<div class="govuk-notification-banner" role="region" aria-labelledby="@titleId" data-module="govuk-notification-banner">
-			<div class="govuk-notification-banner__header">
-				<h2 class="govuk-notification-banner__title" id="@titleId">
-					Important
-					@if (currentIndex > 1)
-					{
-						<span class="govuk-visually-hidden"> - notification @currentIndex</span>
-					}
-				</h2>
-			</div>
-			<div class="govuk-notification-banner__content">
-				@{
-					await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
-				}
-			</div>
-		</div>
-	}
+        var titleId = $"govuk-notification-banner-title-{Model.Id}";
+        <div class="govuk-notification-banner" role="region" aria-labelledby="@titleId" data-module="govuk-notification-banner">
+            <div class="govuk-notification-banner__header">
+                <h2 class="govuk-notification-banner__title" id="@titleId">
+                    Important
+                    @if (currentIndex > 1)
+                    {
+                        <span class="govuk-visually-hidden"> - notification @currentIndex</span>
+                    }
+                </h2>
+            </div>
+            <div class="govuk-notification-banner__content">
+                @{
+                    await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
+                }
+            </div>
+        </div>
+    }
 }
