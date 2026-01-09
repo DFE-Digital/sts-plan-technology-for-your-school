@@ -46,7 +46,7 @@ resource "azurerm_storage_container" "backups_container" {
 }
 
 resource "azurerm_storage_management_policy" "lifecycle_policy" {
-  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
+  storage_account_name = azurerm_storage_account.contentful_backup_storage.id
 
   rule {
     name    = "delete_after_30_days"
