@@ -46,12 +46,12 @@ public class SectionStatusEntityTests
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlSectionStatusDto>(
             new[]
             {
-            nameof(SqlSectionStatusDto.SectionId),
-            nameof(SqlSectionStatusDto.LastMaturity),
-            nameof(SqlSectionStatusDto.DateCreated),
-            nameof(SqlSectionStatusDto.DateUpdated),
-            nameof(SqlSectionStatusDto.HasBeenViewed),
-            nameof(SqlSectionStatusDto.LastCompletionDate),
+                nameof(SqlSectionStatusDto.SectionId),
+                nameof(SqlSectionStatusDto.LastMaturity),
+                nameof(SqlSectionStatusDto.DateCreated),
+                nameof(SqlSectionStatusDto.DateUpdated),
+                nameof(SqlSectionStatusDto.HasBeenViewed),
+                nameof(SqlSectionStatusDto.LastCompletionDate),
             },
             new[]
             {

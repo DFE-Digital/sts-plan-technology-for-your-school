@@ -5,6 +5,8 @@ namespace Dfe.PlanTech.Core.UnitTests.Contentful.Options;
 
 public class GetEntriesOptionsTests
 {
+    private static readonly string[] item = ["a", "b", "c"];
+
     [Fact]
     public void Defaults_Are_Correct()
     {
@@ -79,11 +81,7 @@ public class GetEntriesOptionsTests
             Queries = new List<ContentfulQuery>
             {
                 new ContentfulQuerySingleValue { Field = "fields.slug", Value = "intro" },
-                new ContentfulQueryMultipleValues
-                {
-                    Field = "fields.tags",
-                    Value = new[] { "a", "b", "c" },
-                },
+                new ContentfulQueryMultipleValues { Field = "fields.tags", Value = item },
             },
         };
 

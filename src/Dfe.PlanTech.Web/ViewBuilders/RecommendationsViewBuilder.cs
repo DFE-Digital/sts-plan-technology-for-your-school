@@ -19,7 +19,6 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class RecommendationsViewBuilder(
     ILogger<BaseViewBuilder> logger,
-    IOptions<ContentfulOptions> contentfulOptions,
     IContentfulService contentfulService,
     ISubmissionService submissionService,
     IRecommendationService recommendationService,
@@ -30,8 +29,6 @@ public class RecommendationsViewBuilder(
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IRecommendationService _recommendationService =
         recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
-    private readonly ContentfulOptions _contentfulOptions =
-        contentfulOptions.Value ?? throw new ArgumentNullException(nameof(contentfulOptions));
 
     private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
     private const string RecommendationsViewName = "Recommendations";
@@ -118,11 +115,21 @@ public class RecommendationsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find category for slug {categorySlug}");
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, status: SubmissionStatus.CompleteReviewed);
+        var category =
+            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category for slug {categorySlug}"
+            );
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
+            establishmentId,
+            section,
+            status: SubmissionStatus.CompleteReviewed
+        );
 
         switch (submissionRoutingData.Status)
         {
@@ -227,9 +234,16 @@ public class RecommendationsViewBuilder(
         var userId = GetUserIdOrThrowException();
         var userOrganisationId = CurrentUser.UserOrganisationId;
 
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
-            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, status: SubmissionStatus.CompleteReviewed);
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
+            establishmentId,
+            section,
+            status: SubmissionStatus.CompleteReviewed
+        );
 
         var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
         var recommendationChunks = section.CoreRecommendations.ToList();

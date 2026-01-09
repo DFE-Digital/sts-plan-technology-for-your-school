@@ -93,7 +93,7 @@ public class QueryBuildersTests
         var q1 = new ContentfulQuerySingleValue { Field = "fields.title", Value = "Alpha" };
         var q2 = new ContentfulQuerySingleValue { Field = "fields.slug", Value = "intro" };
 
-        qb = qb.WithQueries(new[] { q1, q2 });
+        qb = qb.WithQueries([q1, q2]);
 
         var kv = qb.QueryStringValues();
         // We expect *some* entries referencing the fields and values we passed in

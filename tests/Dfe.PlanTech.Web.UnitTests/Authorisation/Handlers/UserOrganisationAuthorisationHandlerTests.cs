@@ -49,7 +49,7 @@ public class UserOrganisationAuthorisationHandlerTests
 
         Assert.False(context.HasSucceeded);
         Assert.False(context.HasFailed);
-        logger.ReceivedWithAnyArgs(1).Log(default, default, default!, default, default!);
+        logger.ReceivedWithAnyArgs(1).Log(default, default, default!, "{Message}", default!);
     }
 
     [Fact]

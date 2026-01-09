@@ -151,8 +151,15 @@ public class CategoryLandingViewComponentViewBuilder(
                 );
             }
 
-            var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, status: SubmissionStatus.CompleteReviewed)
-                ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
+            var latestResponses =
+                await _submissionService.GetLatestSubmissionResponsesModel(
+                    establishmentId,
+                    section,
+                    status: SubmissionStatus.CompleteReviewed
+                )
+                ?? throw new DatabaseException(
+                    $"Could not find user's answers for section {section.Name}"
+                );
 
             var recommendationChunks = section.CoreRecommendations;
             var recommendations =

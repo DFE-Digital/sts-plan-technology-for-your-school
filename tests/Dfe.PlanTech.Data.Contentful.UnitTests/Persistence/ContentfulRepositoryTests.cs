@@ -295,7 +295,7 @@ public class ContentfulRepositoryTests
             _automatedTestingOptions
         );
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            repository.GetEntryByIdAsync<TestClass>(null)
+            repository.GetEntryByIdAsync<TestClass>(null!)
         );
     }
 

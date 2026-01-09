@@ -21,11 +21,25 @@ public interface ISubmissionService
         Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
     > GetLatestRecommendationStatusesByEstablishmentIdAsync(int establishmentId);
     Task RestoreInaccessibleSubmissionAsync(int establishmentId, string sectionId);
-    Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, SubmissionStatus status);
-    Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(int establishmentId, IEnumerable<string> sectionIds);
+    Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        SubmissionStatus status
+    );
+    Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(
+        int establishmentId,
+        IEnumerable<string> sectionIds
+    );
     Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId);
-    Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, QuestionnaireSectionEntry section, SubmissionStatus? status);
-    Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section);
+    Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        SubmissionStatus? status
+    );
+    Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(
+        int establishmentId,
+        QuestionnaireSectionEntry section
+    );
     Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId);
     Task<int> SubmitAnswerAsync(
         int userId,

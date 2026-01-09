@@ -24,17 +24,19 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             Maturity = existingSubmission.Maturity,
             DateCreated = DateTime.UtcNow,
             Status = SubmissionStatus.InProgress,
-            Responses = existingSubmission.Responses.Select(r => new ResponseEntity
-            {
-                QuestionId = r.QuestionId,
-                AnswerId = r.AnswerId,
-                UserId = r.UserId,
-                UserEstablishmentId = r.UserEstablishmentId,
-                Maturity = r.Maturity,
-                Question = r.Question,
-                Answer = r.Answer,
-                DateCreated = DateTime.UtcNow
-            }).ToList()
+            Responses = existingSubmission
+                .Responses.Select(r => new ResponseEntity
+                {
+                    QuestionId = r.QuestionId,
+                    AnswerId = r.AnswerId,
+                    UserId = r.UserId,
+                    UserEstablishmentId = r.UserEstablishmentId,
+                    Maturity = r.Maturity,
+                    Question = r.Question,
+                    Answer = r.Answer,
+                    DateCreated = DateTime.UtcNow,
+                })
+                .ToList(),
         };
 
         await _db.Submissions.AddAsync(newSubmission);
@@ -133,7 +135,9 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
         await _db.EstablishmentRecommendationHistories.AddRangeAsync(recommendationStatuses);
 
-        await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
+        await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
+            submissionId
+        );
         // No need to save changes as this is done in the call above
     }
 
@@ -144,7 +148,11 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
     )
     {
         // Get latest submission
-        var submission = await GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, status)
+        var submission = await GetPreviousSubmissionsInDescendingOrder(
+                establishmentId,
+                sectionId,
+                status
+            )
             .FirstOrDefaultAsync();
 
         if (submission is null)
@@ -153,11 +161,13 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         submission.Responses = submission
             .Responses.OrderByDescending(response => response.DateLastUpdated)
             .GroupBy(response => response.QuestionId)
-            .Select(group => group
-                .OrderByDescending(response => response.DateLastUpdated)
-                .ThenByDescending(response => response.Id)
-                .First()
-            ).ToList();
+            .Select(group =>
+                group
+                    .OrderByDescending(response => response.DateLastUpdated)
+                    .ThenByDescending(response => response.Id)
+                    .First()
+            )
+            .ToList();
 
         return submission;
     }
@@ -188,10 +198,10 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
     public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
     {
         var currentSubmission = await GetLatestSubmissionAndResponsesAsync(
-                establishmentId,
-                sectionId,
-                status: SubmissionStatus.CompleteReviewed
-            );
+            establishmentId,
+            sectionId,
+            status: SubmissionStatus.CompleteReviewed
+        );
 
         if (currentSubmission is not null)
         {
@@ -213,12 +223,12 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         submission.DateCompleted = DateTime.UtcNow;
         submission.Status = SubmissionStatus.CompleteReviewed;
 
-        var otherSubmissions = await _db.Submissions
-            .Where(s =>
-                s.Id != submission.Id &&
-                s.EstablishmentId == submission.EstablishmentId &&
-                string.Equals(s.SectionId, submission.SectionId) &&
-                s.Status == SubmissionStatus.CompleteReviewed
+        var otherSubmissions = await _db
+            .Submissions.Where(s =>
+                s.Id != submission.Id
+                && s.EstablishmentId == submission.EstablishmentId
+                && string.Equals(s.SectionId, submission.SectionId)
+                && s.Status == SubmissionStatus.CompleteReviewed
             )
             .ToListAsync();
 
@@ -235,11 +245,17 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
     public async Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)
     {
-        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, status: SubmissionStatus.InProgress);
+        var query = GetPreviousSubmissionsInDescendingOrder(
+            establishmentId,
+            sectionId,
+            status: SubmissionStatus.InProgress
+        );
 
-        var submission = await query.FirstOrDefaultAsync()
+        var submission =
+            await query.FirstOrDefaultAsync()
             ?? throw new InvalidOperationException(
-                $"Submission not found for establishment ID '{establishmentId}' and section ID '{sectionId}'");
+                $"Submission not found for establishment ID '{establishmentId}' and section ID '{sectionId}'"
+            );
 
         await SetSubmissionInaccessibleAsync(submission.Id);
     }
@@ -260,7 +276,11 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
     public async Task SetSubmissionInProgressAsync(int establishmentId, string sectionId)
     {
-        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, status: SubmissionStatus.InProgress);
+        var query = GetPreviousSubmissionsInDescendingOrder(
+            establishmentId,
+            sectionId,
+            status: SubmissionStatus.InProgress
+        );
 
         var submission = await query.FirstOrDefaultAsync();
         if (submission is null)
@@ -297,11 +317,12 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
     )
     {
         return GetSubmissionsBy(submission =>
-                !submission.Deleted &&
-                submission.EstablishmentId == establishmentId &&
-                submission.SectionId == sectionId &&
-                (status == null || submission.Status == status)
-        ).OrderByDescending(submission => submission.DateCreated);
+                !submission.Deleted
+                && submission.EstablishmentId == establishmentId
+                && submission.SectionId == sectionId
+                && (status == null || submission.Status == status)
+            )
+            .OrderByDescending(submission => submission.DateCreated);
     }
 
     private IQueryable<SubmissionEntity> GetSubmissionsBy(
@@ -355,7 +376,10 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             .Select(BuildRecommendationEntity)
             .ToList();
 
-        var recommendationDtoDictionary = recommendationDtos.ToDictionary(r => r.ContentfulSysId, r => r);
+        var recommendationDtoDictionary = recommendationDtos.ToDictionary(
+            r => r.ContentfulSysId,
+            r => r
+        );
         var recommendationsWithNoChanges = new List<RecommendationEntity>();
 
         foreach (var existingRecommendation in existingRecommendations)

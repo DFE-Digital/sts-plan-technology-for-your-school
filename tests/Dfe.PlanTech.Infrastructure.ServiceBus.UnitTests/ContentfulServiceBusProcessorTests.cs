@@ -86,10 +86,7 @@ public class ContentfulServiceBusProcessorTests
     [Fact]
     public async Task StopProcessingAsync_ShouldStopAndDisposeProcessor()
     {
-        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
-            "StopProcessingAsync",
-            new object[] { }
-        );
+        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("StopProcessingAsync", []);
         await _serviceBusProcessor.Received(1).StopProcessingAsync();
         await _serviceBusProcessor.Received(1).DisposeAsync();
     }
@@ -120,7 +117,7 @@ public class ContentfulServiceBusProcessorTests
 
         await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
             "MessageHandler",
-            new object[] { eventArgs }
+            [eventArgs]
         );
 
         await _webHookMessageProcessor
@@ -160,7 +157,7 @@ public class ContentfulServiceBusProcessorTests
 
         await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
             "MessageHandler",
-            new object[] { eventArgs }
+            [eventArgs]
         );
 
         await _webHookMessageProcessor
@@ -206,7 +203,7 @@ public class ContentfulServiceBusProcessorTests
 
         await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
             "MessageHandler",
-            new object[] { eventArgs }
+            [eventArgs]
         );
 
         await _webHookMessageProcessor
@@ -261,7 +258,7 @@ public class ContentfulServiceBusProcessorTests
 
         await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
             "ErrorHandler",
-            new object[] { eventArgs }
+            [eventArgs]
         );
 
         var receivedLoggerCalls = _logger.GetMatchingReceivedMessages(

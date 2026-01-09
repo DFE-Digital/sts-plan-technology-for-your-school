@@ -130,7 +130,7 @@ public class PagesViewBuilder(
         return controller.View(CategoryLandingPagePrintView, viewModel);
     }
 
-    private CategoryLandingPageViewModel BuildLandingPageViewModelAsync(
+    private static CategoryLandingPageViewModel BuildLandingPageViewModelAsync(
         Controller controller,
         QuestionnaireCategoryEntry category
     )

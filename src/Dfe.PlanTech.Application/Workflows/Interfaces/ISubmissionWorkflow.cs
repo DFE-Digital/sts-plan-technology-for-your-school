@@ -23,9 +23,20 @@ public interface ISubmissionWorkflow
     Task SetSubmissionInProgressAsync(int submissionId);
     Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId);
     Task SetSubmissionInProgressAsync(int establishmentId, string sectionId);
-    Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(int establishmentId, QuestionnaireSectionEntry section, SubmissionStatus? status);
-    Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(int establishmentId, IEnumerable<string> sectionIds);
-    Task<SqlSectionStatusDto> GetSectionSubmissionStatusAsync(int establishmentId, string sectionId, SubmissionStatus status);
+    Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        SubmissionStatus? status
+    );
+    Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(
+        int establishmentId,
+        IEnumerable<string> sectionIds
+    );
+    Task<SqlSectionStatusDto> GetSectionSubmissionStatusAsync(
+        int establishmentId,
+        string sectionId,
+        SubmissionStatus status
+    );
     Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId);
     Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId);
     Task SetMaturityAndMarkAsReviewedAsync(int submissionId);

@@ -43,7 +43,7 @@ public class ApiKeyAuthorisationFilterTests
 
         // Assert
         Assert.IsType<UnauthorizedResult>(ctx.Result);
-        logger.ReceivedWithAnyArgs().Log(LogLevel.Error, default, default!, default, default!);
+        logger.ReceivedWithAnyArgs().Log(LogLevel.Error, default, default!, "{Message}", default!);
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public class ApiKeyAuthorisationFilterTests
         Assert.IsType<UnauthorizedResult>(ctx.Result);
         logger
             .ReceivedWithAnyArgs()
-            .Log(LogLevel.Information, default, default!, default, default!);
+            .Log(LogLevel.Information, default, default!, "{Message}", default!);
     }
 
     [Fact]
@@ -88,7 +88,7 @@ public class ApiKeyAuthorisationFilterTests
         Assert.IsType<UnauthorizedResult>(ctx.Result);
         logger
             .ReceivedWithAnyArgs()
-            .Log(LogLevel.Information, default, default!, default, default!);
+            .Log(LogLevel.Information, default, default!, "{Message}", default!);
     }
 
     [Fact]

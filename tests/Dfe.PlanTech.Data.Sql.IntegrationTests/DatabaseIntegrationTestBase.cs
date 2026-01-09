@@ -56,7 +56,8 @@ public abstract class DatabaseIntegrationTestBase : IAsyncLifetime
 
     private async Task EnsureSubmissionCompletedHasDefaultAsync()
     {
-        const string sql = @"
+        const string sql =
+            @"
                             DECLARE @tblId int = OBJECT_ID(N'dbo.submission');
 
                             IF @tblId IS NOT NULL AND COL_LENGTH('dbo.submission', 'completed') IS NOT NULL
@@ -78,5 +79,4 @@ public abstract class DatabaseIntegrationTestBase : IAsyncLifetime
                             ";
         await DbContext.Database.ExecuteSqlRawAsync(sql);
     }
-
 }

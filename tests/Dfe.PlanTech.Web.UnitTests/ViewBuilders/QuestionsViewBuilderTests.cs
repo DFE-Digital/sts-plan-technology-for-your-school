@@ -282,8 +282,9 @@ public class QuestionsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         // submission routing is fetched but not used on the invalid-path (still harmless to return a simple stub)
-        _submissionSvc.GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
-                      .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
 
         var vm = new SubmitAnswerInputViewModel
         {
@@ -323,8 +324,9 @@ public class QuestionsViewBuilderTests
         var section = MakeSection("S1", "sec-1", "Section 1", q);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        _submissionSvc.GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
-                      .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
 
         var vm = new SubmitAnswerInputViewModel
         {
@@ -370,8 +372,9 @@ public class QuestionsViewBuilderTests
         var section = MakeSection("S1", "sec-1", "Section 1", q1, q2);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        _submissionSvc.GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
-                      .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
 
         var vm = new SubmitAnswerInputViewModel
         {
@@ -419,7 +422,9 @@ public class QuestionsViewBuilderTests
         _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
         var empty = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel>());
-        _submissionSvc.GetLatestSubmissionResponsesModel(123, section, SubmissionStatus.InProgress).Returns(empty);
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(123, section, SubmissionStatus.InProgress)
+            .Returns(empty);
 
         // Act
         var result = await sut.RouteToContinueSelfAssessmentPage(controller, "cat", sectionSlug);
@@ -456,8 +461,9 @@ public class QuestionsViewBuilderTests
             Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" },
         };
 
-        _submissionSvc.GetLatestSubmissionResponsesModel(123, section, SubmissionStatus.InProgress)
-                      .Returns(submissionWithResponses);
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(123, section, SubmissionStatus.InProgress)
+            .Returns(submissionWithResponses);
 
         // Act
         var result = await sut.RouteToContinueSelfAssessmentPage(

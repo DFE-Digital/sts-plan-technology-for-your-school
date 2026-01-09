@@ -14,6 +14,8 @@ public class EstablishmentServiceTests
     private readonly IRecommendationWorkflow _recommendationWorkflow =
         Substitute.For<IRecommendationWorkflow>();
     private readonly IUserWorkflow _userWorkflow = Substitute.For<IUserWorkflow>();
+    private static readonly string[] urnAandB = ["URN-A", "URN-B"];
+    private static readonly string[] urnAandBandC = ["URN-A", "URN-B", "URN-C"];
 
     private EstablishmentService CreateServiceUnderTest() =>
         new EstablishmentService(_establishmentWorkflow, _recommendationWorkflow, _userWorkflow);
@@ -122,7 +124,7 @@ public class EstablishmentServiceTests
 
         _establishmentWorkflow
             .GetEstablishmentsByReferencesAsync(
-                Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B" }))
+                Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(urnAandB))
             )
             .Returns(establishments);
 
@@ -346,9 +348,7 @@ public class EstablishmentServiceTests
 
         _establishmentWorkflow
             .GetEstablishmentsByReferencesAsync(
-                Arg.Is<IEnumerable<string>>(us =>
-                    us.SequenceEqual(new[] { "URN-A", "URN-B", "URN-C" })
-                )
+                Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(urnAandBandC))
             )
             .Returns(establishments);
 

@@ -42,7 +42,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
-            DateCreated = DateTime.UtcNow.AddDays(-1)
+            DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
         var submission2 = new SubmissionEntity
@@ -51,7 +51,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Section 2",
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.InProgress,
-            DateCreated = DateTime.UtcNow.AddDays(-2)
+            DateCreated = DateTime.UtcNow.AddDays(-2),
         };
 
         // Add a submission for a different establishment that should NOT be returned
@@ -69,7 +69,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Section 1 Other",
             EstablishmentId = otherEstablishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
 
         DbContext.Submissions.AddRange(submission1, submission2, otherSubmission);
@@ -491,7 +491,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.InProgress
+            Status = SubmissionStatus.InProgress,
         };
 
         DbContext.Submissions.Add(submission);
@@ -522,7 +522,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-to-delete",
             SectionName = "Section To Delete",
             EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.InProgress
+            Status = SubmissionStatus.InProgress,
         };
 
         DbContext.Submissions.Add(submission);

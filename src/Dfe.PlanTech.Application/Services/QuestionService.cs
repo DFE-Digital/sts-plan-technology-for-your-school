@@ -20,9 +20,13 @@ public class QuestionService(ISubmissionWorkflow submissionWorkflow) : IQuestion
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
             section,
-            status: SubmissionStatus.InProgress);
+            status: SubmissionStatus.InProgress
+        );
 
-        if (submission?.Status == SubmissionStatus.Inaccessible || submission?.Status == SubmissionStatus.Obsolete)
+        if (
+            submission?.Status == SubmissionStatus.Inaccessible
+            || submission?.Status == SubmissionStatus.Obsolete
+        )
             submission = null;
 
         if (submission is null)

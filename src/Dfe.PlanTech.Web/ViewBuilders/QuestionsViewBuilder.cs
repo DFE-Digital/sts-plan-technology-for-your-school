@@ -58,7 +58,11 @@ public class QuestionsViewBuilder(
                 $"Could not find section for slug {sectionSlug}"
             );
 
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, status: SubmissionStatus.InProgress);
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
+            establishmentId,
+            section,
+            status: SubmissionStatus.InProgress
+        );
 
         var isSlugForNextQuestion =
             submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug) ?? false;
@@ -222,7 +226,10 @@ public class QuestionsViewBuilder(
             );
 
         var submissionModel = await _submissionService.GetLatestSubmissionResponsesModel(
-            establishmentId, section, status: SubmissionStatus.InProgress);
+            establishmentId,
+            section,
+            status: SubmissionStatus.InProgress
+        );
 
         if (submissionModel is null || !submissionModel.HasResponses)
         {

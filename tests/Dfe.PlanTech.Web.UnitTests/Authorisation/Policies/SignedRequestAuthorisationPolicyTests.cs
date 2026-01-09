@@ -106,7 +106,7 @@ public class SignedRequestAuthorisationPolicyTests
         await authorisationPolicy.HandleAsync(ctx);
 
         Assert.True(ctx.HasFailed);
-        _logger.ReceivedWithAnyArgs(1).Log(default, default, default!, default, default!);
+        _logger.ReceivedWithAnyArgs(1).Log(default, default, default!, "{Message}", default!);
     }
 
     [Fact]
@@ -213,7 +213,7 @@ public class SignedRequestAuthorisationPolicyTests
         Assert.False(ctx.HasFailed);
         _logger
             .DidNotReceiveWithAnyArgs()
-            .Log(LogLevel.Error, default, default!, default, default!);
+            .Log(LogLevel.Error, default, default!, "{Message}", default!);
     }
 
     [Fact]
@@ -227,7 +227,7 @@ public class SignedRequestAuthorisationPolicyTests
         await authorisationPolicy.HandleAsync(ctx);
 
         Assert.True(ctx.HasFailed);
-        _logger.ReceivedWithAnyArgs().Log(LogLevel.Error, default, default!, default, default!);
+        _logger.ReceivedWithAnyArgs().Log(LogLevel.Error, default, default!, "{Message}", default!);
     }
 
     [Fact]

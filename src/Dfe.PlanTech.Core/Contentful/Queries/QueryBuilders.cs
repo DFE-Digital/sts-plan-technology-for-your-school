@@ -121,6 +121,8 @@ public static class QueryBuilders
         this QueryBuilder<T> queryBuilder
     )
     {
+        // Intentional use of reflection to access internal QueryBuilder state.
+        // Field name is constant and type is trusted.
         var fieldInfo = queryBuilder
             .GetType()
             .GetField(

@@ -16,41 +16,6 @@ repos:
         name: Run GitHub JSON linter on files except tsconfig.json
         exclude: tsconfig.json$ # Exlude tsconfig*.json from check-json hook as it contains comments
 
-  # .NET formatting (Database Upgrader)
-  - repo: local
-    hooks:
-      - id: dotnet-format-whitespace-db-upgrader
-        name: Format whitespace in DB Upgrader solution
-        entry: dotnet
-        args: ['format', 'whitespace', 'Dfe.PlanTech.DatabaseUpgrader.sln']
-        language: system
-        pass_filenames: false
-        files: |
-          (?x)^(
-            Dfe\.PlanTech\.DatabaseUpgrader\.sln|
-            src/Dfe\.PlanTech\.DatabaseUpgrader/.*\.(cs|csproj|props|targets|slnf)$|
-            Directory\.Build\.(props|targets)|
-            \.editorconfig$
-          )
-
-  # .NET formatting (Service)
-  - repo: local
-    hooks:
-      - id: dotnet-format-whitespace-service
-        name: Format whitespace in PlanTech solution
-        entry: dotnet
-        args: ['format', 'whitespace', 'plan-technology-for-your-school.sln']
-        language: system
-        pass_filenames: false
-        files: |
-          (?x)^(
-            plan-technology-for-your-school\.sln|
-            src/.*\.(cs|csproj|props|targets|slnf)$|
-            tests/.*\.(cs|csproj|props|targets|slnf)$|
-            Directory\.Build\.(props|targets)|
-            \.editorconfig$
-          )
-
   # CSharpier formatting (avoids opinionated style rewrites)
   - repo: local
     hooks:

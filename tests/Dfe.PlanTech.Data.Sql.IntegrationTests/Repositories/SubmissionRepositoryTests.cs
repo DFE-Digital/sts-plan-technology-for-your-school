@@ -78,7 +78,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
     }
 
-    private ResponseEntity CreateResponse(
+    private static ResponseEntity CreateResponse(
         int id,
         int userId,
         int userEstablishmentId,
@@ -98,7 +98,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
     }
 
-    private SubmissionEntity CreateSubmission(
+    private static SubmissionEntity CreateSubmission(
         int id,
         int establishmentId,
         SubmissionStatus? submissionStatus = SubmissionStatus.CompleteReviewed
@@ -113,7 +113,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.Now.AddDays(-7),
             DateLastUpdated = DateTime.Now.AddDays(-6),
             DateCompleted = DateTime.Now.AddDays(-5),
-            Status = submissionStatus ?? SubmissionStatus.None
+            Status = submissionStatus ?? SubmissionStatus.None,
         };
     }
 
@@ -536,7 +536,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
             DateCreated = DateTime.UtcNow.AddDays(-2),
-            Status = SubmissionStatus.CompleteReviewed
+            Status = SubmissionStatus.CompleteReviewed,
         };
 
         // Create newer submission with multiple responses for same question
@@ -586,7 +586,11 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetLatestSubmissionAndResponsesAsync(establishment.Id, "section-1", status: SubmissionStatus.CompleteReviewed);
+        var result = await _repository.GetLatestSubmissionAndResponsesAsync(
+            establishment.Id,
+            "section-1",
+            status: SubmissionStatus.CompleteReviewed
+        );
 
         // Assert
         Assert.NotNull(result);
@@ -676,7 +680,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             EstablishmentId = establishment.Id,
             Viewed = false,
             DateCreated = DateTime.UtcNow,
-            Status = SubmissionStatus.CompleteReviewed
+            Status = SubmissionStatus.CompleteReviewed,
         };
 
         DbContext.Submissions.Add(submission);
@@ -709,7 +713,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
-            DateCreated = DateTime.UtcNow.AddDays(-2)
+            DateCreated = DateTime.UtcNow.AddDays(-2),
         };
 
         var submission2 = new SubmissionEntity
@@ -718,7 +722,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteNotReviewed,
-            DateCreated = DateTime.UtcNow.AddDays(-1)
+            DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
         DbContext.Submissions.AddRange(submission1, submission2);

@@ -32,7 +32,7 @@ Formatting is enforced through several complementary layers:
    - Controls whitespace, indentation, and basic conventions
    - Respected by Visual Studio, VS Code, Rider, and formatters
 
-3. **Language-specific formatters**
+3. **Language-specific formatters (CSharpier)**
    - Own structural layout and wrapping
    - Opinionated and deterministic
 

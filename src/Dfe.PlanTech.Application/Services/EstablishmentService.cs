@@ -48,7 +48,9 @@ public class EstablishmentService(
             linkUrns
         );
 
-        var establishmentLinkMap = establishments.ToDictionary(e => e.EstablishmentRef, e => e.Id);
+        var establishmentLinkMap = establishments
+            .Where(e => e.EstablishmentRef is not null)
+            .ToDictionary(e => e.EstablishmentRef!, e => e.Id);
 
         foreach (var establishmentLink in establishmentLinks)
         {

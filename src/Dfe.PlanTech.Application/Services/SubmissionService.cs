@@ -24,10 +24,12 @@ public class SubmissionService(
     )
     {
         // Check if an in-progress submission already exists
-        var inProgressSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
-            establishmentId,
-            section,
-            status: SubmissionStatus.InProgress);
+        var inProgressSubmission =
+            await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status: SubmissionStatus.InProgress
+            );
 
         if (inProgressSubmission is not null)
         {
@@ -46,12 +48,18 @@ public class SubmissionService(
         );
     }
 
-    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, SubmissionStatus status)
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        SubmissionStatus status
+    )
     {
-        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status);
-        return submission is null
-            ? null
-            : new SubmissionResponsesModel(submission, section);
+        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+            establishmentId,
+            section,
+            status
+        );
+        return submission is null ? null : new SubmissionResponsesModel(submission, section);
     }
 
     public Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
@@ -62,17 +70,20 @@ public class SubmissionService(
     public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(
         int establishmentId,
         QuestionnaireSectionEntry section,
-        SubmissionStatus? status)
+        SubmissionStatus? status
+    )
     {
-        var latestSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
-            establishmentId,
-            section,
-            status);
+        var latestSubmission =
+            await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status
+            );
 
         bool isNullSubmissionOrInvalidStatus =
-            latestSubmission == null ||
-            latestSubmission.Status == SubmissionStatus.Inaccessible ||
-            latestSubmission.Status == SubmissionStatus.Obsolete;
+            latestSubmission == null
+            || latestSubmission.Status == SubmissionStatus.Inaccessible
+            || latestSubmission.Status == SubmissionStatus.Obsolete;
 
         if (isNullSubmissionOrInvalidStatus)
         {
@@ -87,10 +98,9 @@ public class SubmissionService(
         var submissionResponsesModel = new SubmissionResponsesModel(latestSubmission!, section);
 
         var lastResponse = submissionResponsesModel.Responses.Last();
-        var cmsLastAnswer = section.Questions
-            .FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))?
-            .Answers
-            .FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
+        var cmsLastAnswer = section
+            .Questions.FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))
+            ?.Answers.FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
 
         SubmissionStatus sectionStatus;
 

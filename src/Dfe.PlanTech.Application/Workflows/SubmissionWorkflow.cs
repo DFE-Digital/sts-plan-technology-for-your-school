@@ -24,7 +24,12 @@ public class SubmissionWorkflow(
         QuestionnaireSectionEntry section
     )
     {
-        var submissionWithResponses = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, status: SubmissionStatus.CompleteReviewed);
+        var submissionWithResponses =
+            await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
+                establishmentId,
+                section.Id,
+                status: SubmissionStatus.CompleteReviewed
+            );
         var newSubmission = await _submissionRepository.CloneSubmission(submissionWithResponses);
         newSubmission.Responses = GetOrderedResponses(newSubmission.Responses).ToList();
 
@@ -62,7 +67,11 @@ public class SubmissionWorkflow(
         SubmissionStatus? status
     )
     {
-        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, status);
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
+            establishmentId,
+            section.Id,
+            status
+        );
         if (latestSubmission is null)
         {
             return null;
@@ -113,10 +122,14 @@ public class SubmissionWorkflow(
     public async Task<SqlSectionStatusDto> GetSectionSubmissionStatusAsync(
         int establishmentId,
         string sectionId,
-        SubmissionStatus status)
+        SubmissionStatus status
+    )
     {
-        var latestSubmission = await _submissionRepository
-            .GetLatestSubmissionAndResponsesAsync(establishmentId, sectionId, status);
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
+            establishmentId,
+            sectionId,
+            status
+        );
 
         if (latestSubmission is not null)
         {
@@ -124,7 +137,7 @@ public class SubmissionWorkflow(
             {
                 LastMaturity = latestSubmission.Maturity,
                 SectionId = latestSubmission.SectionId,
-                Status = latestSubmission.Status
+                Status = latestSubmission.Status,
             };
         }
 

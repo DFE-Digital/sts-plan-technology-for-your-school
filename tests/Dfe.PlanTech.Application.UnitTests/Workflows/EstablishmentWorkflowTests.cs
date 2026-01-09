@@ -13,6 +13,7 @@ public class EstablishmentWorkflowTests
         Substitute.For<IEstablishmentLinkRepository>();
     private readonly IStoredProcedureRepository _spRepo =
         Substitute.For<IStoredProcedureRepository>();
+    private static readonly string[] abString = new[] { "A", "B" };
 
     private EstablishmentWorkflow CreateServiceUnderTest() =>
         new EstablishmentWorkflow(_estRepo, _linkRepo, _spRepo);
@@ -20,7 +21,7 @@ public class EstablishmentWorkflowTests
     // ── Helpers: create minimal entities that map via AsDto() in YOUR codebase ──
     // Replace these types with your real entity classes (what the repos return),
     // and set properties so that AsDto() maps to the asserted DTOs.
-    private EstablishmentEntity MakeEstablishment(int id, string urn, string name) =>
+    private static EstablishmentEntity MakeEstablishment(int id, string urn, string name) =>
         new EstablishmentEntity
         {
             Id = id,
@@ -28,20 +29,12 @@ public class EstablishmentWorkflowTests
             OrgName = name,
         };
 
-    private EstablishmentLinkEntity MakeLink(int id, string urn, string name) =>
+    private static EstablishmentLinkEntity MakeLink(int id, string urn, string name) =>
         new EstablishmentLinkEntity
         {
             Id = id,
             Urn = urn,
             EstablishmentName = name,
-        };
-
-    private GroupReadActivityEntity MakeRead(int id, int userId, int selectedEstablishmentId) =>
-        new GroupReadActivityEntity
-        {
-            Id = id,
-            UserId = userId,
-            SelectedEstablishmentId = selectedEstablishmentId,
         };
 
     // ────────────────────────────────────────────────────────────────────────────
@@ -174,13 +167,11 @@ public class EstablishmentWorkflowTests
 
         _estRepo
             .GetEstablishmentsByReferencesAsync(
-                Arg.Is<IEnumerable<string>>(r => r.SequenceEqual(new[] { "A", "B" }))
+                Arg.Is<IEnumerable<string>>(r => r.SequenceEqual(abString))
             )
             .Returns(establishments);
 
-        var list = (
-            await serviceUnderTest.GetEstablishmentsByReferencesAsync(new[] { "A", "B" })
-        ).ToList();
+        var list = (await serviceUnderTest.GetEstablishmentsByReferencesAsync(abString)).ToList();
 
         Assert.Collection(
             list,

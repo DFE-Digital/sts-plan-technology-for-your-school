@@ -82,7 +82,7 @@ public class BackgroundTaskHostedServiceTests
         // Assert: error was logged at least once
         logger
             .ReceivedWithAnyArgs()
-            .Log(LogLevel.Error, 0, default!, Arg.Any<Exception>(), default!);
+            .Log(LogLevel.Error, 0, default, Arg.Any<Exception>(), default!);
 
         // Both dequeues happened (first threw, second cancelled the loop)
         await queue.Received(2).DequeueAsync(Arg.Any<CancellationToken>());

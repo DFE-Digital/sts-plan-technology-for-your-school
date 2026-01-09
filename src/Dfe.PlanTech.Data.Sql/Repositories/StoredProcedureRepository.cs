@@ -40,58 +40,66 @@ public class StoredProcedureRepository : IStoredProcedureRepository
     }
 
     // Moved GetSectionStatuses sproc into code (need to remove more sprocs when completed column is removed from db)
-    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId)
+    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
+        string sectionIds,
+        int establishmentId
+    )
     {
         var sectionIdList = sectionIds
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
 
-        var currentSubmissions = await _db.Submissions
-            .Where(s =>
-                !s.Deleted &&
-                s.EstablishmentId == establishmentId &&
-                sectionIdList.Contains(s.SectionId))
+        var currentSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+            )
             .GroupBy(s => s.SectionId)
-            .Select(g => g
-                .OrderByDescending(s => s.DateCreated)
-                .First())
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
 
-        var lastCompleteSubmissions = await _db.Submissions
-            .Where(s =>
-                !s.Deleted &&
-                s.EstablishmentId == establishmentId &&
-                sectionIdList.Contains(s.SectionId) &&
-                (s.Status == SubmissionStatus.CompleteReviewed))
+        var lastCompleteSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+                && (s.Status == SubmissionStatus.CompleteReviewed)
+            )
             .GroupBy(s => s.SectionId)
-            .Select(g => g
-                .OrderByDescending(s => s.DateCreated)
-                .First())
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
 
         var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
-        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(s => s.SectionId, s => s);
+        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(
+            s => s.SectionId,
+            s => s
+        );
 
-        var result = sectionIdList.Select(sectionId =>
-        {
-            currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
-            lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
-
-            return new SectionStatusEntity
+        var result = sectionIdList
+            .Select(sectionId =>
             {
-                SectionId = sectionId,
-                Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
-                DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
-                DateUpdated = currentSubmission?.DateLastUpdated ?? currentSubmission?.DateCreated ?? DateTime.UtcNow,
-                LastMaturity = lastCompleteSubmission?.Maturity,
-                LastCompletionDate = lastCompleteSubmission?.DateCompleted,
-                Viewed = lastCompleteSubmission?.Viewed
-            };
-        }).ToList();
+                currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
+                lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
+
+                return new SectionStatusEntity
+                {
+                    SectionId = sectionId,
+                    Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
+                    DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
+                    DateUpdated =
+                        currentSubmission?.DateLastUpdated
+                        ?? currentSubmission?.DateCreated
+                        ?? DateTime.UtcNow,
+                    LastMaturity = lastCompleteSubmission?.Maturity,
+                    LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                    Viewed = lastCompleteSubmission?.Viewed,
+                };
+            })
+            .ToList();
 
         return result;
     }
-
 
     public async Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
     {

@@ -38,7 +38,7 @@ public class CmsController(ILogger<CmsController> logger, ICmsViewBuilder viewBu
         {
             Logger.LogError(
                 e,
-                "An error occured while trying to write the message to the queue: {message}",
+                "An error occured while trying to write the message to the queue: {Message}",
                 e.Message
             );
             return BadRequest(e.Message);

@@ -38,7 +38,8 @@ public class PlanTechDbContext : DbContext
             v => SubmissionHelper.ToSubmissionStatus(v)
         );
 
-        modelBuilder.Entity<SubmissionEntity>()
+        modelBuilder
+            .Entity<SubmissionEntity>()
             .Property(s => s.Status)
             .HasConversion(submissionStatusConverter);
 

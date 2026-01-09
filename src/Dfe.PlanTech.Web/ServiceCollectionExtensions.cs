@@ -139,10 +139,7 @@ public static class ServiceCollectionExtensions
             }
         );
 
-        services.AddScoped((_) => new HyperlinkRendererOptions()
-        {
-            Classes = "govuk-link",
-        });
+        services.AddScoped((_) => new HyperlinkRendererOptions() { Classes = "govuk-link" });
 
         services.AddScoped((_) => new RichTextPartRendererOptions());
 
