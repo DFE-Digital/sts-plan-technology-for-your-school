@@ -186,14 +186,9 @@ resource "azurerm_key_vault_key" "data_protection_key" {
 
   rotation_policy {
     automatic {
-      # Rotate (renew) 7 days before the key expires
       time_before_expiry = "P7D"
     }
-
-    # Key expires after 1 month
     expire_after         = "P1M"
-
-    # Notify 14 days before expiry
     notify_before_expiry = "P14D"
   }
 
