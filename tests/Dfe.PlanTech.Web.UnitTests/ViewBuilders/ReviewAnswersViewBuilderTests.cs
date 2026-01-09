@@ -355,11 +355,11 @@ public class ReviewAnswersViewBuilderTests
 
         // Act
         var call = async () => await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(call);
 
         // Assert
-        call().Throws(new InvalidOperationException($"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}"));
+        Assert.Equal($"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}", exception.Message);
     }
-
 
     [Fact]
     public async Task RouteToViewAnswers_Default_Redirects_To_GetQuestionBySlug()
