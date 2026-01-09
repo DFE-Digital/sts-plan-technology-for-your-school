@@ -63,10 +63,10 @@ public class ReviewAnswersController(
         int submissionId
     )
     {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
         ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
         ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
         ArgumentNullException.ThrowIfNullOrEmpty(sectionName, nameof(sectionName));
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
 
         try
         {

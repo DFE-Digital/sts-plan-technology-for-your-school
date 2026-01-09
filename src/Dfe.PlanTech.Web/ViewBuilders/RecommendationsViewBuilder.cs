@@ -234,7 +234,7 @@ public class RecommendationsViewBuilder(
             SectionSlug = sectionSlug,
             CategorySlug = categorySlug,
             CurrentChunkCount = currentRecommendationCount,
-            SubmissionResponses = submissionRoutingData.Submission.Responses
+            SubmissionResponses = submissionRoutingData.Submission?.Responses ?? []
         };
     }
 }
