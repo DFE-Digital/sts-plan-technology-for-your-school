@@ -1,31 +1,25 @@
 @model CookiesViewModel
 
-@section DfePageHeaderOuter {
+@section NavButton {
     <partial name="BackButton" />
 }
 
-@section DfePageHeaderInner {
-    @foreach (var content in Model.BeforeTitleContent)
-    {
-        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-    }
-
-    <partial name="Components/PageComponentFactory" model="@Model.Title" />
+@foreach (var content in Model.BeforeTitleContent)
+{
+    <span>Cookies</span>
+    await Html.RenderPartialAsync("Components/PageComponentFactory", content);
 }
+
+<partial name="Components/PageComponentFactory" model="@Model.Title" />
 
 <partial name="CookiesPreferencesSetBanner" model="@Model" />
 
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
+@if (Model.Content != null)
+{
+    foreach (var content in Model.Content)
+    {
+        <partial name="Components/PageComponentFactory" model="content" />
+    }
+}
 
-        @if (Model.Content != null)
-        {
-            foreach (var content in Model.Content)
-            {
-                <partial name="Components/PageComponentFactory" model="content" />
-            }
-        }
-
-        <partial name="CookiePreferencesForm" model="@Model.Cookie" />
-    </div>
-</div>
+<partial name="CookiePreferencesForm" model="@Model.Cookie" />

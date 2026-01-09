@@ -35,7 +35,7 @@ public class GridContainerRendererTests : CardTests
         var stringBuilder = new StringBuilder();
 
         stringBuilder.Append("<div class=\"govuk-grid-row\">");
-        stringBuilder.Append("<div class=\"govuk-grid-column-two-thirds\">");
+        stringBuilder.Append("<div class=\"govuk-grid-column-two-thirds-from-desktop\">");
         stringBuilder.Append("<div class=\"dfe-grid-container\">");
         stringBuilder.Append("</div></div></div>");
 
@@ -51,7 +51,7 @@ public class GridContainerRendererTests : CardTests
         var stringBuilder = new StringBuilder();
 
         stringBuilder.Append("<div class=\"govuk-grid-row\">");
-        stringBuilder.Append("<div class=\"govuk-grid-column-two-thirds\">");
+        stringBuilder.Append("<div class=\"govuk-grid-column-two-thirds-from-desktop\">");
         stringBuilder.Append("<div class=\"dfe-grid-container\">");
         stringBuilder.Append("</div></div></div>");
 

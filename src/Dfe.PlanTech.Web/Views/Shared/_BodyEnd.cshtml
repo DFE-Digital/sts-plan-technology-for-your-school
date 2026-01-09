@@ -1,5 +1,3 @@
-<script async src="~/js/app.js" nonce="@Context.Items["nonce"]"></script>
-<script async src="~/js/dfefrontend.min.js" nonce="@Context.Items["nonce"]"></script>
 <script defer type="module" nonce="@Context.Items["nonce"]">
     import * as govuk from '/js/govuk-frontend.min.js';
     govuk.initAll();
@@ -16,3 +14,5 @@
     [...document.getElementsByClassName("js-only")].forEach(showHiddenElement);
     [...document.getElementsByClassName("non-js-only")].forEach(deleteNonJsElement);
 </script>
+<script async src="~/js/dfefrontend.min.js" nonce="@Context.Items["nonce"]"></script>
+<script async src="~/js/app.js" nonce="@Context.Items["nonce"]"></script>

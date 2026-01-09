@@ -32,3 +32,13 @@ html {
 .app-step-nav__list {
   margin-bottom: 0px;
 }
+
+.govuk-pagination--block .govuk-pagination__prev {
+  margin-bottom: 10px;
+}
+
+@media screen {
+    .govuk-pagination__link:after {
+        position: relative;
+    }
+}

@@ -158,6 +158,8 @@ public class ReviewAnswersViewBuilderTests
         Assert.IsType<RedirectToActionResult>(result);
     }
 
+
+
     [Fact]
     public async Task RouteToViewAnswers_InProgress_Redirects_To_ContinueSelfAssessment()
     {
@@ -202,7 +204,6 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S7", "sec-7", "Section 7");
         _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
 
-        // Build routing with Establishment initialised
         var routing = new SubmissionRoutingDataModel(
             nextQuestion: null,
             questionnaireSection: section,
@@ -227,6 +228,136 @@ public class ReviewAnswersViewBuilderTests
         Assert.Equal("Section 7", vm.TopicName);
         Assert.Equal("cat", vm.CategorySlug);
         Assert.Equal("sec-7", vm.SectionSlug);
+    }
+
+    [Fact]
+    public async Task RouteToViewAnswers_When_SubmissionResponsesContainSectionQuestions_Then_CompleteReviewed_UsesSectionQuestionOrder()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(77);
+
+        var questions = new List<QuestionnaireQuestionEntry>
+        {
+            MakeQuestion("Q1", "q1-slug"),
+            MakeQuestion("Q2", "q2-slug"),
+            MakeQuestion("Q3", "q3-slug"),
+        };
+
+        var responses = questions
+            .Select(q => new QuestionWithAnswerModel
+            {
+                QuestionSysId = q.Id,
+            }
+            )
+            .Reverse()
+            .ToList();
+
+        var section = MakeSection("S7", "sec-7", "Section 7", [.. questions]);
+        _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
+
+        var routing = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: new SubmissionResponsesModel(123, responses)
+            {
+                DateCompleted = DateTime.UtcNow,
+                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
+            },
+            status: SubmissionStatus.CompleteReviewed
+        );
+
+        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+
+        // Act
+        var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal(ReviewAnswersViewBuilder.ViewAnswersViewName, view.ViewName);
+
+        var vm = Assert.IsType<ViewAnswersViewModel>(view.Model);
+        Assert.Equal("Q1", vm.Responses[0].QuestionSysId);
+        Assert.Equal("Q2", vm.Responses[1].QuestionSysId);
+        Assert.Equal("Q3", vm.Responses[2].QuestionSysId);
+    }
+
+    [Fact]
+    public async Task RouteToViewAnswers_When_SubmissionResponsesAreForRetiredQuestions_Then_CompleteReviewed_UsesResponseOrder()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(77);
+
+        var questions = new List<QuestionnaireQuestionEntry>
+        {
+            MakeQuestion("Q1", "q1-slug"),
+            MakeQuestion("Q2", "q2-slug"),
+            MakeQuestion("Q3", "q3-slug"),
+        };
+
+        var section = MakeSection("S7", "sec-7", "Section 7", [.. questions]);
+        _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
+
+        var responses = new List<QuestionWithAnswerModel>
+        {
+            new QuestionWithAnswerModel { QuestionSysId = "OldQ1", Order = 1 },
+            new QuestionWithAnswerModel { QuestionSysId = "OldQ3", Order = 3 },
+            new QuestionWithAnswerModel { QuestionSysId = "OldQ2", Order = 2 },
+        };
+
+        var routing = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: new SubmissionResponsesModel(123, responses)
+            {
+                DateCompleted = DateTime.UtcNow,
+                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
+            },
+            status: SubmissionStatus.CompleteReviewed
+        );
+
+        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+
+        // Act
+        var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal(ReviewAnswersViewBuilder.ViewAnswersViewName, view.ViewName);
+
+        var vm = Assert.IsType<ViewAnswersViewModel>(view.Model);
+        Assert.Equal("OldQ1", vm.Responses[0].QuestionSysId);
+        Assert.Equal("OldQ2", vm.Responses[1].QuestionSysId);
+        Assert.Equal("OldQ3", vm.Responses[2].QuestionSysId);
+    }
+
+    [Fact]
+    public async Task RouteToViewAnswers_CompleteReviewed_Throws_If_Submission_Is_Null()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(77);
+        var section = MakeSection("S7", "sec-7", "Section 7");
+        _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
+
+        var routing = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: null,
+            status: SubmissionStatus.CompleteReviewed
+        );
+
+        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+
+        // Act
+        var call = async () => await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
+
+        // Assert
+        call().Throws(new InvalidOperationException($"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}"));
     }
 
 

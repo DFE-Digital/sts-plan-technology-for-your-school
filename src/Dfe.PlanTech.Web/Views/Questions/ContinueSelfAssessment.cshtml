@@ -1,54 +1,49 @@
-﻿@model ContinueSelfAssessmentViewModel
+@model ContinueSelfAssessmentViewModel
 
-@section BeforeContent {
+@section NavButton {
     @{
         await Html.RenderPartialAsync("BackButton");
     }
 }
 
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-        <span class="govuk-caption-xl">@Model.TopicName</span>
-        <h1 class="govuk-heading-xl">Continue self-assessment</h1>
+<span class="govuk-caption-xl">@Model.TopicName</span>
+<h1 class="govuk-heading-xl">Continue self-assessment</h1>
 
-        <p>
-            The self-assessment was last updated @Model.AssessmentUpdatedDate.ToString("dd MMMM yyyy").
-        </p>
+<p>
+    The self-assessment was last updated @Model.AssessmentUpdatedDate.ToString("dd MMMM yyyy").
+</p>
 
-        <h2 class="govuk-heading-l">Your self-assessment answers</h2>
-        <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
-        @foreach (var response in Model.Responses)
-        {
-            <div>
-              
-                <p class="govuk-!-font-weight-bold">@response.QuestionText</p>
-                <p>@response.AnswerText</p>
-                <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-4 govuk-!-margin-bottom-4" />
-            </div>
-        }
-
-        <hr class="govuk-section-break govuk-section-break--m">
-
-        <p>You can continue this self-assessment and answer the remaining questions.</p>
-        <p>If you choose to restart the self-assessment, any previous answers will be replaced.</p>
-
-        <div class="govuk-button-group">
-            <a href="@Url.Action(
-                               nameof(QuestionsController.ContinuePreviousAssessment),
-                               "Questions",
-                               new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
-               class="govuk-button"
-               data-module="govuk-button">
-                Continue self-assessment
-            </a>
-            <a href="@Url.Action(
-                              nameof(QuestionsController.RestartSelfAssessment),
-                              "Questions",
-                              new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug, isObsoleteSubmissionFlow = false })"
-               class="govuk-button govuk-button--secondary"
-               data-module="govuk-button">
-                Restart self-assessment
-            </a>
-        </div>
+<h2 class="govuk-heading-l">Your self-assessment answers</h2>
+<hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+@foreach (var response in Model.Responses)
+{
+    <div>
+        <p class="govuk-!-font-weight-bold">@response.QuestionText</p>
+        <p>@response.AnswerText</p>
+        <hr class="govuk-section-break govuk-section-break--visible govuk-!-margin-top-4 govuk-!-margin-bottom-4" />
     </div>
+}
+
+<hr class="govuk-section-break govuk-section-break--m">
+
+<p>You can continue this self-assessment and answer the remaining questions.</p>
+<p>If you choose to restart the self-assessment, any previous answers will be replaced.</p>
+
+<div class="govuk-button-group">
+    <a href="@Url.Action(
+        nameof(QuestionsController.ContinuePreviousAssessment),
+        "Questions",
+        new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
+       class="govuk-button"
+       data-module="govuk-button">
+        Continue self-assessment
+    </a>
+    <a href="@Url.Action(
+        nameof(QuestionsController.RestartSelfAssessment),
+        "Questions",
+        new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug, isObsoleteSubmissionFlow = false })"
+       class="govuk-button govuk-button--secondary"
+       data-module="govuk-button">
+        Restart self-assessment
+    </a>
 </div>
