@@ -94,6 +94,21 @@ public class ContentfulServiceTests
     }
 
     [Fact]
+    public async Task GetMicrocopyEntriesAsync_Uses_GetEntries()
+    {
+        var (contentfulService, contentfulWorkflow) = Build();
+        const string id = "M1";
+        var expected = new List<MicrocopyEntry> { new() { Sys = new SystemDetails(id) } };
+
+        contentfulWorkflow.GetEntries<MicrocopyEntry>().Returns(expected);
+
+        var result = await contentfulService.GetMicrocopyEntriesAsync();
+
+        Assert.Same(expected, result);
+        await contentfulWorkflow.Received(1).GetEntries<MicrocopyEntry>();
+    }
+
+    [Fact]
     public async Task GetPageById_Uses_Generic_GetEntryById()
     {
         var (contentfulService, contentfulWorkflow) = Build();
