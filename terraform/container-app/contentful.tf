@@ -41,12 +41,12 @@ resource "azurerm_storage_account" "contentful_backup_storage" {
 
 resource "azurerm_storage_container" "backups_container" {
   name                  = "backups-container"
-  storage_account_name  = azurerm_storage_account.contentful_backup_storage.name
+  storage_account_id    = azurerm_storage_account.contentful_backup_storage.id
   container_access_type = "private"
 }
 
 resource "azurerm_storage_management_policy" "lifecycle_policy" {
-  storage_account_name = azurerm_storage_account.contentful_backup_storage.id
+  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
 
   rule {
     name    = "delete_after_30_days"
