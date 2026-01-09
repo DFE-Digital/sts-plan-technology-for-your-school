@@ -35,6 +35,11 @@ public class ContentfulService(
         return contentfulWorkflow.GetEntries<NavigationLinkEntry>();
     }
 
+    public Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync()
+    {
+        return contentfulWorkflow.GetEntries<MicrocopyEntry>();
+    }
+
     public Task<PageEntry> GetPageByIdAsync(string pageId)
     {
         return _contentfulWorkflow.GetEntryById<PageEntry>(pageId);
