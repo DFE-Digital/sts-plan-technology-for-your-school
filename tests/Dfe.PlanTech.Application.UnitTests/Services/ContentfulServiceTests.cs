@@ -13,7 +13,10 @@ public class ContentfulServiceTests
         Assert.Throws<ArgumentNullException>(() => new ContentfulService(null!));
     }
 
-    private static (ContentfulService contentfulService, IContentfulWorkflow contentfulWorkflow) Build()
+    private static (
+        ContentfulService contentfulService,
+        IContentfulWorkflow contentfulWorkflow
+    ) Build()
     {
         var contentfulWorkflow = Substitute.For<IContentfulWorkflow>();
         var contentfulService = new ContentfulService(contentfulWorkflow);
@@ -24,7 +27,10 @@ public class ContentfulServiceTests
     public async Task GetAllSections_Delegates_And_Returns()
     {
         var (contentfulService, contentfulWorkflow) = Build();
-        var expected = new List<QuestionnaireSectionEntry> { new() { Sys = new SystemDetails("S1") } };
+        var expected = new List<QuestionnaireSectionEntry>
+        {
+            new() { Sys = new SystemDetails("S1") },
+        };
         contentfulWorkflow.GetAllSectionsAsync().Returns(expected);
 
         var result = await contentfulService.GetAllSectionsAsync();

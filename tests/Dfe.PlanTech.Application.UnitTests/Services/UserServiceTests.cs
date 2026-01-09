@@ -18,7 +18,9 @@ public class UserServiceTests
 
         var result = await sut.UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
 
-        await _userWorkflow.Received(1).UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
+        await _userWorkflow
+            .Received(1)
+            .UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
     }
 
     [Fact]

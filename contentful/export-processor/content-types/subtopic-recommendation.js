@@ -1,47 +1,45 @@
-import RecommendationIntro from "./recommendation-intro.js";
-import RecommendationSection from "./recommendation-section.js";
-import { Section } from "./section.js";
-import ErrorLogger from "../errors/error-logger.js";
+import RecommendationIntro from './recommendation-intro.js';
+import RecommendationSection from './recommendation-section.js';
+import { Section } from './section.js';
+import ErrorLogger from '../errors/error-logger.js';
 
-const contentType = "subtopicRecommendation";
+const contentType = 'subtopicRecommendation';
 
 export default class SubtopicRecommendation {
-    intros;
-    section;
-    subtopic;
-    id;
+  intros;
+  section;
+  subtopic;
+  id;
 
-    constructor({ fields, sys }) {
-        this.intros = fields.intros.map(
-            (recommendation) => new RecommendationIntro(recommendation)
-        );
-        this.section = new RecommendationSection(fields.section);
-        this.id = sys.id;
+  constructor({ fields, sys }) {
+    this.intros = fields.intros.map((recommendation) => new RecommendationIntro(recommendation));
+    this.section = new RecommendationSection(fields.section);
+    this.id = sys.id;
 
-        this.subtopic =
-            fields.subtopic && fields.subtopic.fields && fields.subtopic.sys
-                ? new Section(fields.subtopic, this)
-                : null;
+    this.subtopic =
+      fields.subtopic && fields.subtopic.fields && fields.subtopic.sys
+        ? new Section(fields.subtopic, this)
+        : null;
 
-        if (!this.subtopic) {
-            ErrorLogger.addError({
-                id: sys.id,
-                contentType: contentType,
-                message: `No Subtopic found`,
-            });
-        }
+    if (!this.subtopic) {
+      ErrorLogger.addError({
+        id: sys.id,
+        contentType: contentType,
+        message: `No Subtopic found`,
+      });
     }
+  }
 
-    getContentForMaturityAndPath({ maturity, path }) {
-        const intro = this.intros.find((intro) => intro.maturity == maturity);
+  getContentForMaturityAndPath({ maturity, path }) {
+    const intro = this.intros.find((intro) => intro.maturity == maturity);
 
-        const chunks = this.section.getChunksForPath(path);
+    const chunks = this.section.getChunksForPath(path);
 
-        return {
-            intro,
-            chunks,
-        };
-    }
+    return {
+      intro,
+      chunks,
+    };
+  }
 }
 
 export { contentType as SubtopicRecommendationContentType };

@@ -16,7 +16,15 @@ public class SubmissionEntityTests
         var expectedSectionName = "Arbitrary string - section name";
         var expectedMaturity = "Arbitrary string - maturity";
         var expectedDateCreated = new DateTime(2024, 08, 01, 10, 00, 00, DateTimeKind.Utc);
-        DateTime? expectedDateLastUpdated = new DateTime(2024, 08, 02, 11, 00, 00, DateTimeKind.Utc);
+        DateTime? expectedDateLastUpdated = new DateTime(
+            2024,
+            08,
+            02,
+            11,
+            00,
+            00,
+            DateTimeKind.Utc
+        );
         DateTime? expectedDateCompleted = null;
         var expectedDeleted = false;
         var expectedViewed = true;
@@ -28,7 +36,7 @@ public class SubmissionEntityTests
             EstablishmentRef = "Arbitrary string - establishment ref",
             EstablishmentType = "Arbitrary string - establishment type",
             OrgName = "Arbitrary string - organisation name",
-            DateCreated = new DateTime(2024, 01, 01, 00, 00, 00, DateTimeKind.Utc)
+            DateCreated = new DateTime(2024, 01, 01, 00, 00, 00, DateTimeKind.Utc),
         };
 
         var entity = new SubmissionEntity
@@ -48,7 +56,7 @@ public class SubmissionEntityTests
             Responses = new List<ResponseEntity>(),
             Deleted = expectedDeleted,
             Viewed = expectedViewed,
-            Status = expectedStatus
+            Status = expectedStatus,
         };
 
         // Act
@@ -86,7 +94,7 @@ public class SubmissionEntityTests
                 nameof(SqlSubmissionDto.Responses),
                 nameof(SqlSubmissionDto.Deleted),
                 nameof(SqlSubmissionDto.Viewed),
-                nameof(SqlSubmissionDto.Status)
+                nameof(SqlSubmissionDto.Status),
             }
         );
     }

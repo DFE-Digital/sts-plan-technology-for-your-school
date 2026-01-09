@@ -20,10 +20,7 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextContentSupportDataField()
-            {
-                Uri = url
-            }
+            Data = new RichTextContentSupportDataField() { Uri = url },
         };
 
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
@@ -39,7 +36,7 @@ public class HyperlinkRendererTests
         var content = new RichTextContentField()
         {
             NodeType = "paragraph",
-            Value = "paragraph text"
+            Value = "paragraph text",
         };
 
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
@@ -66,7 +63,7 @@ public class HyperlinkRendererTests
             {
                 Uri = url,
                 Target = new RichTextContentDataEntry(),
-            }
+            },
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
@@ -95,7 +92,7 @@ public class HyperlinkRendererTests
             {
                 Uri = url,
                 Target = new RichTextContentDataEntry(),
-            }
+            },
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
@@ -115,11 +112,7 @@ public class HyperlinkRendererTests
 
         const string linkText = "Click Here";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = linkText,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = linkText };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
@@ -147,7 +140,7 @@ public class HyperlinkRendererTests
             {
                 Uri = url,
                 Target = new RichTextContentDataEntry(),
-            }
+            },
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());

@@ -12,7 +12,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers;
 
 public class CmsControllerTests
 {
-    private readonly IWriteCmsWebhookToQueueCommand _writeCmsWebhook = Substitute.For<IWriteCmsWebhookToQueueCommand>();
+    private readonly IWriteCmsWebhookToQueueCommand _writeCmsWebhook =
+        Substitute.For<IWriteCmsWebhookToQueueCommand>();
     private readonly ILogger<CmsController> _logger = Substitute.For<ILogger<CmsController>>();
     private readonly CmsController _controller;
 
@@ -21,7 +22,7 @@ public class CmsControllerTests
         _controller = new CmsController(_logger);
         _controller.ControllerContext = new ControllerContext
         {
-            HttpContext = new DefaultHttpContext()
+            HttpContext = new DefaultHttpContext(),
         };
     }
 
@@ -31,7 +32,9 @@ public class CmsControllerTests
         var json = "{}";
         var deserialised = JsonSerializer.Deserialize<JsonDocument>(json);
         var expectedResult = new QueueWriteResult(true);
-        _writeCmsWebhook.WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>()).Returns(expectedResult);
+        _writeCmsWebhook
+            .WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>())
+            .Returns(expectedResult);
 
         var result = await _controller.WebhookPayload(deserialised!, _writeCmsWebhook);
         Assert.IsType<OkResult>(result);
@@ -44,7 +47,9 @@ public class CmsControllerTests
         var deserialised = JsonSerializer.Deserialize<JsonDocument>(json);
         var expectedResult = new QueueWriteResult("Expected error message");
 
-        _writeCmsWebhook.WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>()).Returns(expectedResult);
+        _writeCmsWebhook
+            .WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>())
+            .Returns(expectedResult);
 
         var result = await _controller.WebhookPayload(deserialised!, _writeCmsWebhook);
         Assert.IsType<BadRequestObjectResult>(result);
@@ -69,7 +74,8 @@ public class CmsControllerTests
 
         var exceptionMessage = "Exception thrown";
 
-        _writeCmsWebhook.WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>())
+        _writeCmsWebhook
+            .WriteMessageToQueue(deserialised!, Arg.Any<HttpRequest>())
             .Throws(new Exception(exceptionMessage));
 
         var result = await _controller.WebhookPayload(deserialised!, _writeCmsWebhook);
@@ -87,7 +93,10 @@ public class CmsControllerTests
 
         Assert.Single(loggedMessages);
 
-        Assert.Contains("An error occured while trying to write the message to the queue:", loggedMessages[0].Message);
+        Assert.Contains(
+            "An error occured while trying to write the message to the queue:",
+            loggedMessages[0].Message
+        );
     }
 
     [Fact]
@@ -103,32 +112,51 @@ public class CmsControllerTests
         {
             new RecommendationChunk
             {
-                Answers = new List<Answer> { new Answer { Sys = new SystemDetails { Id = "123" } } },
-                Header = "Test Header 1"
+                Answers = new List<Answer>
+                {
+                    new Answer { Sys = new SystemDetails { Id = "123" } },
+                },
+                Header = "Test Header 1",
             },
             new RecommendationChunk
             {
-                Answers = new List<Answer> { new Answer { Sys = new SystemDetails { Id = "456" } } },
-                Header = "Test Header 2"
-            }
+                Answers = new List<Answer>
+                {
+                    new Answer { Sys = new SystemDetails { Id = "456" } },
+                },
+                Header = "Test Header 2",
+            },
         };
 
-        repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
+        repository
+            .GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(expectedTotalCount));
 
-        repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntriesOptions>(), Arg.Any<CancellationToken>())
+        repository
+            .GetPaginatedEntities<RecommendationChunk>(
+                Arg.Any<GetEntriesOptions>(),
+                Arg.Any<CancellationToken>()
+            )
             .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(fakeChunks));
 
         var result = await _controller.GetChunks(pageNumber, getRecommendationQuery);
 
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var pagedResult = Assert.IsType<PagedResultViewModel<ChunkAnswerResultModel>>(okResult.Value);
+        var pagedResult = Assert.IsType<PagedResultViewModel<ChunkAnswerResultModel>>(
+            okResult.Value
+        );
 
         Assert.Equal(pageNumber, pagedResult.Page);
         Assert.Equal(expectedTotalCount, pagedResult.Total);
         Assert.Equal(fakeChunks.Count, pagedResult.Items.Count);
-        Assert.Contains(pagedResult.Items, item => item is { AnswerId: "123", RecommendationHeader: "Test Header 1" });
-        Assert.Contains(pagedResult.Items, item => item is { AnswerId: "456", RecommendationHeader: "Test Header 2" });
+        Assert.Contains(
+            pagedResult.Items,
+            item => item is { AnswerId: "123", RecommendationHeader: "Test Header 1" }
+        );
+        Assert.Contains(
+            pagedResult.Items,
+            item => item is { AnswerId: "456", RecommendationHeader: "Test Header 2" }
+        );
     }
 
     [Fact]
@@ -136,18 +164,27 @@ public class CmsControllerTests
     {
         var repository = Substitute.For<IContentRepository>();
 
-        repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
+        repository
+            .GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(0));
 
-        repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntriesOptions>(), Arg.Any<CancellationToken>())
-            .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(new List<RecommendationChunk>()));
+        repository
+            .GetPaginatedEntities<RecommendationChunk>(
+                Arg.Any<GetEntriesOptions>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(
+                Task.FromResult<IEnumerable<RecommendationChunk>>(new List<RecommendationChunk>())
+            );
 
         var getRecommendationQuery = new GetRecommendationQuery(repository);
 
         var result = await _controller.GetChunks(null, getRecommendationQuery);
 
         var okResult = Assert.IsType<OkObjectResult>(result);
-        var pagedResult = Assert.IsType<PagedResultViewModel<ChunkAnswerResultModel>>(okResult.Value);
+        var pagedResult = Assert.IsType<PagedResultViewModel<ChunkAnswerResultModel>>(
+            okResult.Value
+        );
 
         Assert.Equal(1, pagedResult.Page);
     }

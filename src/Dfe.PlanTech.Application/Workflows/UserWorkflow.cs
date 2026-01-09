@@ -10,8 +10,10 @@ public class UserWorkflow(
     IUserSettingsRepository userSettingsRepository
 ) : IUserWorkflow
 {
-    private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
-    private readonly IUserSettingsRepository _userSettingsRepository = userSettingsRepository ?? throw new ArgumentNullException(nameof(userSettingsRepository));
+    private readonly IUserRepository _userRepository =
+        userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+    private readonly IUserSettingsRepository _userSettingsRepository =
+        userSettingsRepository ?? throw new ArgumentNullException(nameof(userSettingsRepository));
 
     public async Task<SqlUserDto?> GetUserBySignInRefAsync(string dfeSignInRef)
     {
@@ -19,7 +21,10 @@ public class UserWorkflow(
         return user?.AsDto();
     }
 
-    public async Task<SqlUserSettingsDto> UpsertUserSettingsAsync(int userId, RecommendationSortOrder sortOrder)
+    public async Task<SqlUserSettingsDto> UpsertUserSettingsAsync(
+        int userId,
+        RecommendationSortOrder sortOrder
+    )
     {
         var userSettings = await _userSettingsRepository.UpsertUserSettingsAsync(userId, sortOrder);
         return userSettings.AsDto();
@@ -29,7 +34,5 @@ public class UserWorkflow(
     {
         var userSettings = await _userSettingsRepository.GetUserSettingsByUserIdAsync(userId);
         return userSettings?.AsDto();
-
     }
 }
-

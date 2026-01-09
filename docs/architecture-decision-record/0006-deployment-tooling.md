@@ -1,6 +1,6 @@
 # 0006 - Deployment Tooling
 
-* **Status**: Accepted
+- **Status**: Accepted
 
 ## Context and Problem Statement
 
@@ -8,16 +8,16 @@ How to ensure new versions of the application are consistently packaged, tested 
 
 ## Decision Drivers
 
-* Within DfE’s Technical Guidance
-* Open source as per Service Standard
-* Compatible with selected hosting platform
-* Support for automated application, security and accessibility testing
-* Enables quick and frequent releases
+- Within DfE’s Technical Guidance
+- Open source as per Service Standard
+- Compatible with selected hosting platform
+- Support for automated application, security and accessibility testing
+- Enables quick and frequent releases
 
 ## Considered Options
 
-* GitHub Actions
-* Azure DevOps
+- GitHub Actions
+- Azure DevOps
 
 ## Decision Outcome
 

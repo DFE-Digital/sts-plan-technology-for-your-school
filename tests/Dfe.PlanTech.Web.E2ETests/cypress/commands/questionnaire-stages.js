@@ -1,19 +1,22 @@
-import { submitToSelfAssessmentButtonText, submitToRecommendationsButtonText } from "../helpers/constants";
+import {
+  submitToSelfAssessmentButtonText,
+  submitToRecommendationsButtonText,
+} from '../helpers/constants';
 
 const navigateToRecommendationPage = () => {
-    cy.get('a[href*="/recommendation/"]').first().click();
+  cy.get('a[href*="/recommendation/"]').first().click();
 };
 
 const completeFirstSubtopic = () => {
   let selectedQuestionsWithAnswers = [];
-    cy.clickFirstSection();
-    cy.clickContinueButton();
+  cy.clickFirstSection();
+  cy.clickContinueButton();
 
   return cy
     .navigateToCheckAnswersPage(selectedQuestionsWithAnswers)
     .then((res) => cy.wrap(res))
     .then(() => cy.submitAnswersAndGoToSelfAssessment());
-}
+};
 
 const navigateToCheckAnswersPage = (selectedQuestionsWithAnswers) => {
   return cy
@@ -23,15 +26,15 @@ const navigateToCheckAnswersPage = (selectedQuestionsWithAnswers) => {
 
 const navigateThroughQuestions = (selectedQuestionsWithAnswers) => {
   return cy
-    .get("main")
-    .then(($main) => $main.find("form div.govuk-radios").length > 0)
+    .get('main')
+    .then(($main) => $main.find('form div.govuk-radios').length > 0)
     .then((onQuestionPage) => {
       if (!onQuestionPage) {
         return Promise.resolve();
       }
 
       cy.selectFirstRadioButton().then((questionWithAnswer) =>
-        selectedQuestionsWithAnswers.push(questionWithAnswer)
+        selectedQuestionsWithAnswers.push(questionWithAnswer),
       );
       cy.saveAndContinue();
 
@@ -40,15 +43,14 @@ const navigateThroughQuestions = (selectedQuestionsWithAnswers) => {
     .then(() => cy.wrap(selectedQuestionsWithAnswers));
 };
 
-const submitAnswersAndGoToSelfAssessment = () => cy.get("button.govuk-button").contains(submitToSelfAssessmentButtonText).click();
-const submitAnswersAndGoToRecommendation = () => cy.get("button.govuk-button").contains(submitToRecommendationsButtonText).click();
+const submitAnswersAndGoToSelfAssessment = () =>
+  cy.get('button.govuk-button').contains(submitToSelfAssessmentButtonText).click();
+const submitAnswersAndGoToRecommendation = () =>
+  cy.get('button.govuk-button').contains(submitToRecommendationsButtonText).click();
 
-Cypress.Commands.add(
-  "navigateToRecommendationPage",
-  navigateToRecommendationPage
-);
-Cypress.Commands.add("completeFirstSubtopic", completeFirstSubtopic);
-Cypress.Commands.add("navigateToCheckAnswersPage", navigateToCheckAnswersPage);
-Cypress.Commands.add("navigateThroughQuestions", navigateThroughQuestions);
-Cypress.Commands.add("submitAnswersAndGoToSelfAssessment", submitAnswersAndGoToSelfAssessment);
-Cypress.Commands.add("submitAnswersAndGoToRecommendation", submitAnswersAndGoToRecommendation);
+Cypress.Commands.add('navigateToRecommendationPage', navigateToRecommendationPage);
+Cypress.Commands.add('completeFirstSubtopic', completeFirstSubtopic);
+Cypress.Commands.add('navigateToCheckAnswersPage', navigateToCheckAnswersPage);
+Cypress.Commands.add('navigateThroughQuestions', navigateThroughQuestions);
+Cypress.Commands.add('submitAnswersAndGoToSelfAssessment', submitAnswersAndGoToSelfAssessment);
+Cypress.Commands.add('submitAnswersAndGoToRecommendation', submitAnswersAndGoToRecommendation);

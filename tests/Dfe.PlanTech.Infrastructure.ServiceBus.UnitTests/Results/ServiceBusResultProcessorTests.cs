@@ -11,8 +11,11 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests.Results;
 public class ServiceBusResultProcessorTests
 {
     private readonly IMessageRetryHandler _retryHandler = Substitute.For<IMessageRetryHandler>();
-    private readonly ILogger<ServiceBusResultProcessor> _logger = Substitute.For<ILogger<ServiceBusResultProcessor>>();
-    private readonly ServiceBusReceivedMessage _message = Substitute.For<ServiceBusReceivedMessage>();
+    private readonly ILogger<ServiceBusResultProcessor> _logger = Substitute.For<
+        ILogger<ServiceBusResultProcessor>
+    >();
+    private readonly ServiceBusReceivedMessage _message =
+        Substitute.For<ServiceBusReceivedMessage>();
     private readonly ServiceBusReceiver _receiver = Substitute.For<ServiceBusReceiver>();
 
     private readonly ServiceBusResultProcessor _processor;
@@ -20,14 +23,22 @@ public class ServiceBusResultProcessorTests
 
     public ServiceBusResultProcessorTests()
     {
-        _eventArgs = Substitute.For<ProcessMessageEventArgs>(_message, _receiver, CancellationToken.None);
+        _eventArgs = Substitute.For<ProcessMessageEventArgs>(
+            _message,
+            _receiver,
+            CancellationToken.None
+        );
         _processor = new ServiceBusResultProcessor(_logger, _retryHandler);
     }
 
     [Fact]
     public async Task Should_Complete_Successful_Message()
     {
-        await _processor.ProcessMessageResult(_eventArgs, new ServiceBusSuccessResult() { }, default);
+        await _processor.ProcessMessageResult(
+            _eventArgs,
+            new ServiceBusSuccessResult() { },
+            default
+        );
 
         await _eventArgs.Received(1).CompleteMessageAsync(_message, Arg.Any<CancellationToken>());
     }
@@ -42,7 +53,15 @@ public class ServiceBusResultProcessorTests
 
         await _processor.ProcessMessageResult(_eventArgs, result, default);
 
-        await _eventArgs.Received(1).DeadLetterMessageAsync(_message, null, result.Reason, result.Description, Arg.Any<CancellationToken>());
+        await _eventArgs
+            .Received(1)
+            .DeadLetterMessageAsync(
+                _message,
+                null,
+                result.Reason,
+                result.Description,
+                Arg.Any<CancellationToken>()
+            );
     }
 
     [Fact]
@@ -68,7 +87,15 @@ public class ServiceBusResultProcessorTests
 
         await _processor.ProcessMessageResult(_eventArgs, result, default);
 
-        await _eventArgs.Received(1).DeadLetterMessageAsync(_message, null, result.Reason, result.Description, Arg.Any<CancellationToken>());
+        await _eventArgs
+            .Received(1)
+            .DeadLetterMessageAsync(
+                _message,
+                null,
+                result.Reason,
+                result.Description,
+                Arg.Any<CancellationToken>()
+            );
     }
 
     [Fact]
@@ -78,7 +105,10 @@ public class ServiceBusResultProcessorTests
         await _processor.ProcessMessageResult(_eventArgs, result, default);
 
         var expectedLogMessage = $"Unexpected service bus result type: {result.GetType().Name}";
-        var matchingLogMessages = _logger.GetMatchingReceivedMessages(expectedLogMessage, LogLevel.Error);
+        var matchingLogMessages = _logger.GetMatchingReceivedMessages(
+            expectedLogMessage,
+            LogLevel.Error
+        );
 
         Assert.Single(matchingLogMessages);
     }
@@ -87,13 +117,24 @@ public class ServiceBusResultProcessorTests
     public async Task Should_Handle_Exceptions()
     {
         var exception = new Exception("Thrown exception");
-        _eventArgs.CompleteMessageAsync(Arg.Any<ServiceBusReceivedMessage>(), Arg.Any<CancellationToken>())
+        _eventArgs
+            .CompleteMessageAsync(
+                Arg.Any<ServiceBusReceivedMessage>(),
+                Arg.Any<CancellationToken>()
+            )
             .ThrowsAsync(exception);
 
-        await _processor.ProcessMessageResult(_eventArgs, new ServiceBusSuccessResult() { }, default);
+        await _processor.ProcessMessageResult(
+            _eventArgs,
+            new ServiceBusSuccessResult() { },
+            default
+        );
 
         var expectedLogMessage = $"Error processing message result: {exception.Message}";
-        var matchingLogMessages = _logger.GetMatchingReceivedMessages(expectedLogMessage, LogLevel.Error);
+        var matchingLogMessages = _logger.GetMatchingReceivedMessages(
+            expectedLogMessage,
+            LogLevel.Error
+        );
         Assert.Single(matchingLogMessages);
     }
 }

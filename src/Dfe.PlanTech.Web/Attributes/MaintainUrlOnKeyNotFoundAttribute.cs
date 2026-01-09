@@ -11,14 +11,20 @@ using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Attributes;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
+[AttributeUsage(
+    AttributeTargets.Class | AttributeTargets.Method,
+    AllowMultiple = true,
+    Inherited = true
+)]
 public class MaintainUrlOnKeyNotFoundAttribute(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IContentfulService contentfulService
 ) : ExceptionFilterAttribute, IAsyncExceptionFilter
 {
-    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly ContactOptionsConfiguration _contactOptions =
+        contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly IContentfulService _contentfulService =
+        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     public override async Task OnExceptionAsync(ExceptionContext context)
     {
@@ -27,27 +33,26 @@ public class MaintainUrlOnKeyNotFoundAttribute(
         var isContentfulDataUnavailableException = exception is ContentfulDataUnavailableException;
 
         var isKeyNotFoundException = exception is KeyNotFoundException;
-        var isNonOrganisationKeyNotFoundException = isKeyNotFoundException &&
-            !exception.Message.Contains(ClaimConstants.Organisation);
+        var isNonOrganisationKeyNotFoundException =
+            isKeyNotFoundException && !exception.Message.Contains(ClaimConstants.Organisation);
 
         if (isContentfulDataUnavailableException || isNonOrganisationKeyNotFoundException)
         {
             // Use the injected service to get the contact link.
             var contactLink = await _contentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
-            var viewModel = new NotFoundViewModel
-            {
-                ContactLinkHref = contactLink?.Href
-            };
+            var viewModel = new NotFoundViewModel { ContactLinkHref = contactLink?.Href };
 
             // Build the ViewResult
             var viewResult = new ViewResult
             {
                 ViewName = "NotFoundError",
                 ViewData = new ViewDataDictionary(
-                    new EmptyModelMetadataProvider(), context.ModelState)
+                    new EmptyModelMetadataProvider(),
+                    context.ModelState
+                )
                 {
-                    Model = viewModel
-                }
+                    Model = viewModel,
+                },
             };
 
             context.Result = viewResult;

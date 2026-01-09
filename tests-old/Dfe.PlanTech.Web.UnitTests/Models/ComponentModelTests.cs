@@ -56,7 +56,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
             Assert.Equal(0, actual.Completed);
         }
 
-
         [Fact]
         public void Should_Render_ButtonWithEntryReference()
         {
@@ -80,13 +79,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         [InlineData("Random test Topic", "random-test-topic")]
         [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
         [InlineData("Save a back-up...", "save-a-back-up")]
-        [InlineData("This is a string with loads of spaces at the end        ", "this-is-a-string-with-loads-of-spaces-at-the-end")]
-        [InlineData("This is a string with loads of spaces at the end        and-this", "this-is-a-string-with-loads-of-spaces-at-the-end-and-this")]
+        [InlineData(
+            "This is a string with loads of spaces at the end        ",
+            "this-is-a-string-with-loads-of-spaces-at-the-end"
+        )]
+        [InlineData(
+            "This is a string with loads of spaces at the end        and-this",
+            "this-is-a-string-with-loads-of-spaces-at-the-end-and-this"
+        )]
         [InlineData(" spaces either side     ", "spaces-either-side")]
-        [InlineData(@"Line
+        [InlineData(
+            @"Line
 separator
 character
-", "line-separator-character")]
+",
+            "line-separator-character"
+        )]
         public void Slugify_Should_Slugify_Strings(string linkText, string expectedResult)
         {
             var recommendationChunk = ComponentBuilder.BuildRecommendationChunk(linkText);
@@ -97,7 +105,10 @@ character
         [Theory]
         [InlineData("Random test Topic", "random-test-topic")]
         [InlineData("Y867as ()&ycj Cool Thing", "y867as-ycj-cool-thing")]
-        public void RecommendationChunk_Should_Return_Correct_Header_Title_And_LinkText(string header, string expectedResult)
+        public void RecommendationChunk_Should_Return_Correct_Header_Title_And_LinkText(
+            string header,
+            string expectedResult
+        )
         {
             var recommendationChunk = ComponentBuilder.BuildRecommendationChunk(header);
 
@@ -111,10 +122,38 @@ character
         {
             var submission = new List<QuestionWithAnswer>()
             {
-                new QuestionWithAnswer { QuestionSysId = "Q1", QuestionText = "First question", AnswerSysId = "A1", AnswerText = "First answer", DateCreated = new DateTime() },
-                new QuestionWithAnswer { QuestionSysId = "Q2", QuestionText = "Second question", AnswerSysId = "A2", AnswerText = "Second answer", DateCreated = new DateTime() },
-                new QuestionWithAnswer { QuestionSysId = "Q3", QuestionText = "Third question", AnswerSysId = "A3", AnswerText = "Third answer", DateCreated = new DateTime() },
-                new QuestionWithAnswer { QuestionSysId = "Q4", QuestionText = "Fourth question", AnswerSysId = "A4", AnswerText = "Fourth answer", DateCreated = new DateTime() },
+                new QuestionWithAnswer
+                {
+                    QuestionSysId = "Q1",
+                    QuestionText = "First question",
+                    AnswerSysId = "A1",
+                    AnswerText = "First answer",
+                    DateCreated = new DateTime(),
+                },
+                new QuestionWithAnswer
+                {
+                    QuestionSysId = "Q2",
+                    QuestionText = "Second question",
+                    AnswerSysId = "A2",
+                    AnswerText = "Second answer",
+                    DateCreated = new DateTime(),
+                },
+                new QuestionWithAnswer
+                {
+                    QuestionSysId = "Q3",
+                    QuestionText = "Third question",
+                    AnswerSysId = "A3",
+                    AnswerText = "Third answer",
+                    DateCreated = new DateTime(),
+                },
+                new QuestionWithAnswer
+                {
+                    QuestionSysId = "Q4",
+                    QuestionText = "Fourth question",
+                    AnswerSysId = "A4",
+                    AnswerText = "Fourth answer",
+                    DateCreated = new DateTime(),
+                },
             };
 
             var recommendationViewModel = ComponentBuilder.BuildRecommendationViewModel(submission);

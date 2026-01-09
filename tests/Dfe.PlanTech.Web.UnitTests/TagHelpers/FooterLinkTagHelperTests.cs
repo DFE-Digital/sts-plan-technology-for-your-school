@@ -13,25 +13,31 @@ public class FooterLinkTagHelperTests
     private readonly FooterLinkTagHelper _tagHelper;
     private readonly TagHelperContext _context;
     private readonly TagHelperOutput _output;
-    private readonly ILogger<FooterLinkTagHelper> _loggerSubstitute = Substitute.For<ILogger<FooterLinkTagHelper>>();
+    private readonly ILogger<FooterLinkTagHelper> _loggerSubstitute = Substitute.For<
+        ILogger<FooterLinkTagHelper>
+    >();
 
     public FooterLinkTagHelperTests()
     {
         _tagHelper = new FooterLinkTagHelper(_loggerSubstitute);
 
-        _context = new TagHelperContext(tagName: "footer-link",
-                                                    allAttributes: new TagHelperAttributeList(),
-                                                    items: new Dictionary<object, object>(),
-                                                    uniqueId: "footer-link-test");
+        _context = new TagHelperContext(
+            tagName: "footer-link",
+            allAttributes: new TagHelperAttributeList(),
+            items: new Dictionary<object, object>(),
+            uniqueId: "footer-link-test"
+        );
 
-        _output = new TagHelperOutput("footer-link-tag",
-                                        attributes: [],
-                                        getChildContentAsync: (useCachedResult, encoder) =>
-                                        {
-                                            var tagHelperContent = new DefaultTagHelperContent();
-                                            tagHelperContent.SetContent("");
-                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
-                                        });
+        _output = new TagHelperOutput(
+            "footer-link-tag",
+            attributes: [],
+            getChildContentAsync: (useCachedResult, encoder) =>
+            {
+                var tagHelperContent = new DefaultTagHelperContent();
+                tagHelperContent.SetContent("");
+                return Task.FromResult<TagHelperContent>(tagHelperContent);
+            }
+        );
     }
 
     [Theory]
@@ -81,7 +87,7 @@ public class FooterLinkTagHelperTests
         var link = new NavigationLinkEntry()
         {
             DisplayText = "Content link",
-            ContentToLinkTo = content
+            ContentToLinkTo = content,
         };
 
         _tagHelper.Link = link;
@@ -99,7 +105,7 @@ public class FooterLinkTagHelperTests
         var link = new NavigationLinkEntry()
         {
             DisplayText = "Invalid content",
-            ContentToLinkTo = invalidContent
+            ContentToLinkTo = invalidContent,
         };
 
         _tagHelper.Link = link;
@@ -112,10 +118,7 @@ public class FooterLinkTagHelperTests
     [Fact]
     public async Task Should_Return_Empty_When_No_Href_Or_Content()
     {
-        var link = new NavigationLinkEntry()
-        {
-            DisplayText = "Empty link"
-        };
+        var link = new NavigationLinkEntry() { DisplayText = "Empty link" };
 
         _tagHelper.Link = link;
 
@@ -128,17 +131,22 @@ public class FooterLinkTagHelperTests
     [Fact]
     public void Should_Log_Error_When_No_Href_Or_Content()
     {
-        var link = new NavigationLinkEntry()
-        {
-            DisplayText = "Empty"
-        };
+        var link = new NavigationLinkEntry() { DisplayText = "Empty" };
 
         _tagHelper.Link = link;
-        var methodInfo = typeof(FooterLinkTagHelper).GetMethod("GetHref", BindingFlags.NonPublic | BindingFlags.Instance);
+        var methodInfo = typeof(FooterLinkTagHelper).GetMethod(
+            "GetHref",
+            BindingFlags.NonPublic | BindingFlags.Instance
+        );
 
         methodInfo?.Invoke(_tagHelper, []);
 
-        var logMessage = _loggerSubstitute.ReceivedLogMessages().FirstOrDefault(msg => msg.LogLevel == LogLevel.Error && msg.Message.Contains("No href or content to link to for"));
+        var logMessage = _loggerSubstitute
+            .ReceivedLogMessages()
+            .FirstOrDefault(msg =>
+                msg.LogLevel == LogLevel.Error
+                && msg.Message.Contains("No href or content to link to for")
+            );
         Assert.NotNull(logMessage);
     }
 }

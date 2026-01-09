@@ -7,13 +7,15 @@ using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Application.Services;
 
-public class QuestionService(
-    ISubmissionWorkflow submissionWorkflow
-) : IQuestionService
+public class QuestionService(ISubmissionWorkflow submissionWorkflow) : IQuestionService
 {
-    private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
+    private readonly ISubmissionWorkflow _submissionWorkflow =
+        submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
-    public async Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(int establishmentId, QuestionnaireSectionEntry section)
+    public async Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(
+        int establishmentId,
+        QuestionnaireSectionEntry section
+    )
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
@@ -27,7 +29,9 @@ public class QuestionService(
             return section.Questions.FirstOrDefault();
 
         if (!submission.Responses.Any())
-            throw new DatabaseException($"There are no responses in the database for ongoing submission '{submission.Id}' linked to establishment '{establishmentId}'");
+            throw new DatabaseException(
+                $"There are no responses in the database for ongoing submission '{submission.Id}' linked to establishment '{establishmentId}'"
+            );
 
         var submissionResponsesModel = new SubmissionResponsesModel(submission, section);
 
@@ -42,14 +46,19 @@ public class QuestionService(
     /// <param name="answeredQuestions"></param>
     /// <returns></returns>
     /// <exception cref="DatabaseException"></exception>
-    private static QuestionnaireQuestionEntry? GetValidatedNextUnansweredQuestion(QuestionnaireSectionEntry section, SubmissionResponsesModel answeredQuestions)
+    private static QuestionnaireQuestionEntry? GetValidatedNextUnansweredQuestion(
+        QuestionnaireSectionEntry section,
+        SubmissionResponsesModel answeredQuestions
+    )
     {
         var lastAttachedResponse = answeredQuestions.Responses.LastOrDefault();
         if (lastAttachedResponse is null)
-            throw new DatabaseException($"The responses to the ongoing submission {answeredQuestions.SubmissionId} are out of sync with the topic");
+            throw new DatabaseException(
+                $"The responses to the ongoing submission {answeredQuestions.SubmissionId} are out of sync with the topic"
+            );
 
-        return section.Questions
-            .Where(question => question.Id.Equals(lastAttachedResponse.QuestionSysId))
+        return section
+            .Questions.Where(question => question.Id.Equals(lastAttachedResponse.QuestionSysId))
             .SelectMany(question => question.Answers)
             .Where(answer => answer.Id.Equals(lastAttachedResponse.AnswerSysId))
             .Select(answer => answer.NextQuestion)

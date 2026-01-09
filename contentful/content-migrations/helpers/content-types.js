@@ -13,39 +13,39 @@
  * @type {AllContentTypesMap}
  */
 const AllContentTypes = {
-  "button": {},
-  "buttonWithEntryReference": {},
-  "buttonWithLink": {},
-  "category": { manyChildReferences: ["content", "sections"] },
-  "componentDropDown": {},
-  "csLink": {},
-  "header": {},
-  "insetText": {},
-  "navigationLink": {},
-  "page": {
-    manyChildReferences: ["content", "beforeTitleContent"]
+  button: {},
+  buttonWithEntryReference: {},
+  buttonWithLink: {},
+  category: { manyChildReferences: ['content', 'sections'] },
+  componentDropDown: {},
+  csLink: {},
+  header: {},
+  insetText: {},
+  navigationLink: {},
+  page: {
+    manyChildReferences: ['content', 'beforeTitleContent'],
   },
-  "question": {
-    manyChildReferences: ["answers"]
+  question: {
+    manyChildReferences: ['answers'],
   },
-  "recommendationChunk": {
-    manyChildReferences: ["answers", "content"]
+  recommendationChunk: {
+    manyChildReferences: ['answers', 'content'],
   },
-  "recommendationIntro": {
-    manyChildReferences: ["content"]
+  recommendationIntro: {
+    manyChildReferences: ['content'],
   },
-  "recommendationSection": {
-    manyChildReferences: ["answers", "chunks"]
+  recommendationSection: {
+    manyChildReferences: ['answers', 'chunks'],
   },
-  "section": {
-    manyChildReferences: ["questions"]
+  section: {
+    manyChildReferences: ['questions'],
   },
-  "subtopicRecommendation": {
-    manyChildReferences: ["intros"]
+  subtopicRecommendation: {
+    manyChildReferences: ['intros'],
   },
-  "textBody": {},
-  "title": {},
-  "warningComponent": {},
+  textBody: {},
+  title: {},
+  warningComponent: {},
 };
 
 /**
@@ -53,9 +53,12 @@ const AllContentTypes = {
  *
  * @param {function(string, ContentTypeDefinition): void} callback - The callback function to execute for each content type. It receives the content type key and its definition as arguments.
  */
-const runForEachContentType = (callback) => Object.entries(AllContentTypes).forEach(([contetTypeId, contentType]) => callback(contetTypeId, contentType));
+const runForEachContentType = (callback) =>
+  Object.entries(AllContentTypes).forEach(([contetTypeId, contentType]) =>
+    callback(contetTypeId, contentType),
+  );
 
 module.exports = {
   runForEachContentType,
-  AllContentTypes
+  AllContentTypes,
 };

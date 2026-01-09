@@ -3,16 +3,16 @@ name: Run E2E Tests
 on:
   workflow_dispatch:
   pull_request:
-    branches: ["main", "development"]
+    branches: ['main', 'development']
     paths:
-      - "src/**"
-      - "tests/Dfe.PlanTech.Web.E2ETests/**"
-      - ".github/workflows/e2e-tests.yml"
-      - ".github/actions/run-e2e-tests/action.yml"
-      - ".gitmodules"
+      - 'src/**'
+      - 'tests/Dfe.PlanTech.Web.E2ETests/**'
+      - '.github/workflows/e2e-tests.yml'
+      - '.github/actions/run-e2e-tests/action.yml'
+      - '.gitmodules'
 
 concurrency:
-  group: "${{ github.workflow }}"
+  group: '${{ github.workflow }}'
   cancel-in-progress: false
 
 env:
@@ -34,7 +34,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
+
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
@@ -50,7 +50,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "add"
+          verb: 'add'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
@@ -67,14 +67,14 @@ jobs:
         uses: azure/sql-action@v2.2
         with:
           connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
-          path: "./.github/scripts/drop-establishment-data.sql"
+          path: './.github/scripts/drop-establishment-data.sql'
 
       - name: Remove Azure firewall rules
         if: always()
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "remove"
+          verb: 'remove'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
@@ -135,7 +135,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "add"
+          verb: 'add'
           az_keyvault_name: ${{ env.KEYVAULT_NAME }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}
@@ -164,7 +164,7 @@ jobs:
           dsi_url: ${{ secrets.DSI_URL }}
           dsi_username: ${{ secrets.DSI_USERNAME }}
           dsi_password: ${{ secrets.DSI_PASSWORD }}
-          environment: "E2E"
+          environment: 'E2E'
           dsi_noorg_username: ${{ secrets.DSI_NOORG_USERNAME }}
           dsi_noorg_password: ${{ secrets.DSI_NOORG_PASSWORD }}
           browser: chrome
@@ -175,7 +175,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "remove"
+          verb: 'remove'
           az_keyvault_name: ${{ env.KEYVAULT_NAME }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}

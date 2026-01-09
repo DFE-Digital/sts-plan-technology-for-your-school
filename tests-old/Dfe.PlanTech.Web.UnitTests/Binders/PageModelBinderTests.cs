@@ -14,22 +14,18 @@ public class PageModelBinderTests
     [Fact]
     public async Task Should_Get_Page_From_Items()
     {
-        var page = new PageEntry()
-        {
-            Slug = "Testing Slug"
-        };
+        var page = new PageEntry() { Slug = "Testing Slug" };
 
-        var pageModelBinder = new PageModelBinder(new NullLoggerFactory().CreateLogger<PageModelBinder>());
+        var pageModelBinder = new PageModelBinder(
+            new NullLoggerFactory().CreateLogger<PageModelBinder>()
+        );
 
         var modelBinderContext = Substitute.For<ModelBindingContext>();
         modelBinderContext.Result = new ModelBindingResult();
 
         var httpContext = Substitute.For<HttpContext>();
 
-        httpContext.Items = new Dictionary<object, object?>
-        {
-            [nameof(PageEntry)] = page
-        };
+        httpContext.Items = new Dictionary<object, object?> { [nameof(PageEntry)] = page };
 
         modelBinderContext.HttpContext.Returns(httpContext);
 
@@ -52,14 +48,16 @@ public class PageModelBinderTests
 
         httpContext.Items = new Dictionary<object, object?>
         {
-            [nameof(PageEntry)] = "Not a page type"
+            [nameof(PageEntry)] = "Not a page type",
         };
 
         modelBinderContext.HttpContext.Returns(httpContext);
 
         await pageModelBinder.BindModelAsync(modelBinderContext);
 
-        Assert.Single(logger.GetMatchingReceivedMessages($"Page is not {typeof(PageEntry)}", LogLevel.Error));
+        Assert.Single(
+            logger.GetMatchingReceivedMessages($"Page is not {typeof(PageEntry)}", LogLevel.Error)
+        );
         Assert.False(modelBinderContext.Result.IsModelSet);
     }
 
@@ -84,5 +82,4 @@ public class PageModelBinderTests
 
         Assert.False(modelBinderContext.Result.IsModelSet);
     }
-
 }

@@ -56,7 +56,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var selection = new GroupReadActivityDto
             {
                 SelectedEstablishmentId = 101,
-                SelectedEstablishmentName = "Test School"
+                SelectedEstablishmentName = "Test School",
             };
             var orgName = "Group Org";
 
@@ -68,10 +68,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .GetLatestSelectedGroupSchool(1, 100, Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult<GroupReadActivityDto?>(selection));
 
-            _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())!
+            _getPageQuery
+                .GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())!
                 .Returns(Task.FromResult(new Page { Content = new List<ContentComponent>() }));
 
-            var result = await _controller.GetSchoolDashboardView(_getPageQuery, CancellationToken.None);
+            var result = await _controller.GetSchoolDashboardView(
+                _getPageQuery,
+                CancellationToken.None
+            );
 
             var viewResult = Assert.IsType<ViewResult>(result);
             var viewModel = Assert.IsType<GroupsSchoolDashboardViewModel>(viewResult.Model);
@@ -86,14 +90,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var recordGroupSelectionCommand = Substitute.For<IRecordGroupSelectionCommand>();
 
-            var result = await _controller.SelectSchool("12345", "School A", recordGroupSelectionCommand,
-                CancellationToken.None);
+            var result = await _controller.SelectSchool(
+                "12345",
+                "School A",
+                recordGroupSelectionCommand,
+                CancellationToken.None
+            );
 
-            await recordGroupSelectionCommand.Received(1)
-                .RecordGroupSelection(Arg.Is<SubmitSelectionDto>(dto =>
-                        dto.SelectedEstablishmentUrn == "12345" &&
-                        dto.SelectedEstablishmentName == "School A"),
-                    Arg.Any<CancellationToken>());
+            await recordGroupSelectionCommand
+                .Received(1)
+                .RecordGroupSelection(
+                    Arg.Is<SubmitSelectionDto>(dto =>
+                        dto.SelectedEstablishmentUrn == "12345"
+                        && dto.SelectedEstablishmentName == "School A"
+                    ),
+                    Arg.Any<CancellationToken>()
+                );
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("GetSchoolDashboardView", redirect.ActionName);
@@ -105,28 +117,33 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var getNavigationQuery = Substitute.For<IGetNavigationQuery>();
             var contactOptions = Substitute.For<IOptions<ContactOptionsConfiguration>>();
             var mockSchools = new List<EstablishmentLink>
-                { new EstablishmentLink() { Urn = "123", EstablishmentName = "School A" } };
+            {
+                new EstablishmentLink() { Urn = "123", EstablishmentName = "School A" },
+            };
             var orgData = new EstablishmentDto { OrgName = "GroupName" };
 
             _user.GetGroupEstablishments().Returns(mockSchools);
             _user.GetOrganisationData().Returns(orgData);
 
-            _getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            _getPageQuery
+                .GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
                 .Returns(new Page { Content = new List<ContentComponent>() });
 
             var contactLinkHref = "contactLinkHref";
             var contactLink = Substitute.For<INavigationLink>();
             contactLink.Href = contactLinkHref;
 
-            var options = new ContactOptionsConfiguration
-            {
-                LinkId = contactLinkHref
-            };
+            var options = new ContactOptionsConfiguration { LinkId = contactLinkHref };
 
             contactOptions.Value.Returns(options);
             getNavigationQuery.GetLinkById(contactLinkHref).Returns(contactLink);
 
-            var result = await _controller.GetSelectASchoolView(_getPageQuery, getNavigationQuery, contactOptions, CancellationToken.None);
+            var result = await _controller.GetSelectASchoolView(
+                _getPageQuery,
+                getNavigationQuery,
+                contactOptions,
+                CancellationToken.None
+            );
 
             var view = Assert.IsType<ViewResult>(result);
             var viewModel = Assert.IsType<GroupsSelectorViewModel>(view.Model);
@@ -135,6 +152,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Assert.Single(viewModel.GroupEstablishments);
             Assert.Equal("School A", viewModel.GroupEstablishments.First().EstablishmentName);
         }
+
         [Fact]
         public async Task GetCurrentSelection_ReturnsLatestSelection()
         {
@@ -154,17 +172,21 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             );
 
             var cancellationToken = CancellationToken.None;
-            var expectedSelection = new GroupReadActivityDto { SelectedEstablishmentId = 123, SelectedEstablishmentName = "Test School" };
+            var expectedSelection = new GroupReadActivityDto
+            {
+                SelectedEstablishmentId = 123,
+                SelectedEstablishmentName = "Test School",
+            };
 
             user.GetCurrentUserId().Returns(101);
             user.GetEstablishmentId().Returns(456);
-            getGroupSelectionQuery.GetLatestSelectedGroupSchool(Arg.Any<int>(), Arg.Any<int>(), cancellationToken)
+            getGroupSelectionQuery
+                .GetLatestSelectedGroupSchool(Arg.Any<int>(), Arg.Any<int>(), cancellationToken)
                 .Returns(expectedSelection);
 
             var result = await controller.GetCurrentSelection(cancellationToken);
 
             Assert.Equal(expectedSelection, result);
         }
-
     }
 }

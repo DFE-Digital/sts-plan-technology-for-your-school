@@ -35,11 +35,11 @@ public class PagesViewBuilderTests
         }
     }
 
-    private static IOptions<ContactOptionsConfiguration> ContactOpts(string linkId = "contact-1")
-        => Options.Create(new ContactOptionsConfiguration { LinkId = linkId });
+    private static IOptions<ContactOptionsConfiguration> ContactOpts(string linkId = "contact-1") =>
+        Options.Create(new ContactOptionsConfiguration { LinkId = linkId });
 
-    private static IOptions<ErrorPagesConfiguration> ErrorOpts(string internalId = "err-500")
-        => Options.Create(new ErrorPagesConfiguration { InternalErrorPageId = internalId });
+    private static IOptions<ErrorPagesConfiguration> ErrorOpts(string internalId = "err-500") =>
+        Options.Create(new ErrorPagesConfiguration { InternalErrorPageId = internalId });
 
     private static PagesViewBuilder CreateServiceUnderTest(
         IOptions<ContactOptionsConfiguration>? contact = null,
@@ -48,7 +48,8 @@ public class PagesViewBuilderTests
         IContentfulService? contentful = null,
         IEstablishmentService? establishmentService = null,
         ICurrentUser? currentUser = null,
-        ILogger<BaseViewBuilder>? logger = null)
+        ILogger<BaseViewBuilder>? logger = null
+    )
     {
         contact ??= ContactOpts();
         errors ??= ErrorOpts();
@@ -64,31 +65,38 @@ public class PagesViewBuilderTests
         currentUser.GetActiveEstablishmentNameAsync().Returns("Acme Academy");
         currentUser.GetActiveEstablishmentUrnAsync().Returns("123456");
 
-        return new PagesViewBuilder(logger, contact, errors, contentful, establishmentService, currentUser);
+        return new PagesViewBuilder(
+            logger,
+            contact,
+            errors,
+            contentful,
+            establishmentService,
+            currentUser
+        );
     }
 
-    private static PageEntry MakePage(string slug, bool isLanding = false, string? title = "My Page", bool displayOrg = false, string? id = "pg-1")
-        => new PageEntry
+    private static PageEntry MakePage(
+        string slug,
+        bool isLanding = false,
+        string? title = "My Page",
+        bool displayOrg = false,
+        string? id = "pg-1"
+    ) =>
+        new PageEntry
         {
             Sys = new SystemDetails(id!),
             Slug = slug,
             IsLandingPage = isLanding,
             Title = title is null ? null : new ComponentTitleEntry(title),
-            DisplayOrganisationName = displayOrg
+            DisplayOrganisationName = displayOrg,
         };
 
-    private static QuestionnaireCategoryEntry MakeCategory(string header = "Cat")
-        => new QuestionnaireCategoryEntry
+    private static QuestionnaireCategoryEntry MakeCategory(string header = "Cat") =>
+        new QuestionnaireCategoryEntry
         {
-            Header = new ComponentHeaderEntry
-            {
-                Text = header
-            },
-            LandingPage = new PageEntry
-            {
-                Slug = header.ToLower()
-            },
-            Sections = new List<QuestionnaireSectionEntry>()
+            Header = new ComponentHeaderEntry { Text = header },
+            LandingPage = new PageEntry { Slug = header.ToLower() },
+            Sections = new List<QuestionnaireSectionEntry>(),
         };
 
     // ---------- ctor guards ----------
@@ -100,7 +108,16 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var current = Substitute.For<ICurrentUser>();
-        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, errors, contentful, establishmentService, current));
+        Assert.Throws<ArgumentNullException>(() =>
+            new PagesViewBuilder(
+                NullLogger<BaseViewBuilder>.Instance,
+                null!,
+                errors,
+                contentful,
+                establishmentService,
+                current
+            )
+        );
     }
 
     [Fact]
@@ -111,7 +128,16 @@ public class PagesViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var current = Substitute.For<ICurrentUser>();
-        Assert.Throws<ArgumentNullException>(() => new PagesViewBuilder(NullLogger<BaseViewBuilder>.Instance, contact, null!, contentful, establishmentService, current));
+        Assert.Throws<ArgumentNullException>(() =>
+            new PagesViewBuilder(
+                NullLogger<BaseViewBuilder>.Instance,
+                contact,
+                null!,
+                contentful,
+                establishmentService,
+                current
+            )
+        );
     }
 
     // ---------- RouteBasedOnOrganisationTypeAsync ----------
@@ -156,7 +182,11 @@ public class PagesViewBuilderTests
         var currentUser = Substitute.For<ICurrentUser>();
         var establishmentService = Substitute.For<IEstablishmentService>();
 
-        var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser, establishmentService: establishmentService);
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            currentUser: currentUser,
+            establishmentService: establishmentService
+        );
 
         // `CreateServiceUnderTest` sets defaults, so must override here:
         currentUser.IsAuthenticated.Returns(true);
@@ -165,8 +195,7 @@ public class PagesViewBuilderTests
         currentUser.UserOrganisationId.Returns(654321); // the ID for the group (MAT)
         currentUser.GroupSelectedSchoolUrn.Returns("123456");
 
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(654321)
-            .Returns([]);
+        establishmentService.GetEstablishmentLinksWithRecommendationCounts(654321).Returns([]);
 
         var controller = new TestController();
 
@@ -192,11 +221,11 @@ public class PagesViewBuilderTests
 
         // Setup establishmentService to return a list containing the selected school
         // (needed to verify that the user has access to the selected school)
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>()
-        ).Returns(new List<SqlEstablishmentLinkDto>
-        {
-            new SqlEstablishmentLinkDto { Urn = "123456" }
-        });
+        establishmentService
+            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>())
+            .Returns(
+                new List<SqlEstablishmentLinkDto> { new SqlEstablishmentLinkDto { Urn = "123456" } }
+            );
 
         var sut = CreateServiceUnderTest(
             contentful: contentful,
@@ -258,7 +287,8 @@ public class PagesViewBuilderTests
         var controller = new TestController();
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.RouteBasedOnOrganisationTypeAsync(controller, page));
+            sut.RouteBasedOnOrganisationTypeAsync(controller, page)
+        );
     }
 
     [Fact]
@@ -299,7 +329,13 @@ public class PagesViewBuilderTests
     public async Task RouteBasedOnOrganisationType_InternalErrorPage_Disables_Blue_Banner()
     {
         var errors = ErrorOpts(internalId: "err-500");
-        var page = MakePage("error", isLanding: false, title: "Err", displayOrg: false, id: "err-500");
+        var page = MakePage(
+            "error",
+            isLanding: false,
+            title: "Err",
+            displayOrg: false,
+            id: "err-500"
+        );
 
         var sut = CreateServiceUnderTest(errors: errors);
         var controller = new TestController();
@@ -335,7 +371,9 @@ public class PagesViewBuilderTests
     public async Task RouteToCategoryLandingPrintPageAsync_RedirectsToHomePage_When_CategoryNotFound()
     {
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetCategoryBySlugAsync("invalidCategory", 4).Returns(default(QuestionnaireCategoryEntry?));
+        contentful
+            .GetCategoryBySlugAsync("invalidCategory", 4)
+            .Returns(default(QuestionnaireCategoryEntry?));
 
         var current = Substitute.For<ICurrentUser>();
         var sut = CreateServiceUnderTest(contentful: contentful, currentUser: current);
@@ -383,8 +421,9 @@ public class PagesViewBuilderTests
     public async Task BuildNotFoundViewModel_Uses_Contact_Link_From_Contentful()
     {
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetLinkByIdAsync("contact-1")
-                  .Returns(new NavigationLinkEntry { Href = "/contact" });
+        contentful
+            .GetLinkByIdAsync("contact-1")
+            .Returns(new NavigationLinkEntry { Href = "/contact" });
 
         var sut = CreateServiceUnderTest(contentful: contentful);
 

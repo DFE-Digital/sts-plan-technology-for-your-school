@@ -12,7 +12,8 @@ public class BackgroundTaskHostedService(
     IBackgroundTaskQueue taskQueue
 ) : BackgroundService
 {
-    private readonly IBackgroundTaskQueue _taskQueue = taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
+    private readonly IBackgroundTaskQueue _taskQueue =
+        taskQueue ?? throw new ArgumentNullException(nameof(taskQueue));
 
     /// <summary>
     /// Starts processing the queue

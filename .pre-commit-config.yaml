@@ -60,6 +60,7 @@ repos:
         args: ['format']
         language: system
         types: ['c#']
+        pass_filenames: false
         exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)
 
   # Web and config formats
@@ -67,6 +68,6 @@ repos:
     rev: v4.0.0-alpha.8
     hooks:
       - id: prettier
-        name: Run Prettier linter on documentation, web and config files
-        files: /(js|mjs|ts|tsx|css|scss|html|md|yml|yaml|json)$
+        name: Run Prettier on documentation, web and config files
+        files: .(js|mjs|ts|tsx|css|scss|html|md|yml|yaml|json)$
         exclude: (^|/)(bin|obj|wwwroot)(/|$)|.*Generated.*

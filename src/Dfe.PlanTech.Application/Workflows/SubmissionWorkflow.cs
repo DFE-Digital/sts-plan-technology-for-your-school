@@ -13,10 +13,16 @@ public class SubmissionWorkflow(
     ISubmissionRepository submissionRepository
 ) : ISubmissionWorkflow
 {
-    private readonly IStoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
-    private readonly ISubmissionRepository _submissionRepository = submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
+    private readonly IStoredProcedureRepository _storedProcedureRepository =
+        storedProcedureRepository
+        ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
+    private readonly ISubmissionRepository _submissionRepository =
+        submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
-    public async Task<SqlSubmissionDto> CloneLatestCompletedSubmission(int establishmentId, QuestionnaireSectionEntry section)
+    public async Task<SqlSubmissionDto> CloneLatestCompletedSubmission(
+        int establishmentId,
+        QuestionnaireSectionEntry section
+    )
     {
         var submissionWithResponses = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, status: SubmissionStatus.CompleteReviewed);
         var newSubmission = await _submissionRepository.CloneSubmission(submissionWithResponses);
@@ -25,9 +31,21 @@ public class SubmissionWorkflow(
         return newSubmission.AsDto();
     }
 
-    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
+    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+        int establishmentId,
+        int? matEstablishmentId,
+        int submissionId,
+        int userId,
+        QuestionnaireSectionEntry section
+    )
     {
-        return _submissionRepository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
+        return _submissionRepository.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            establishmentId,
+            matEstablishmentId,
+            submissionId,
+            userId,
+            section
+        );
     }
 
     public async Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
@@ -56,23 +74,39 @@ public class SubmissionWorkflow(
 
     // On the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
     // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
-    public async Task<int> SubmitAnswer(int userId, int activeEstablishmentId, int userEstablishmentId, SubmitAnswerModel answerModel)
+    public async Task<int> SubmitAnswer(
+        int userId,
+        int activeEstablishmentId,
+        int userEstablishmentId,
+        SubmitAnswerModel answerModel
+    )
     {
         if (answerModel is null)
         {
             throw new InvalidDataException($"{nameof(answerModel)} is null");
         }
 
-        var model = new AssessmentResponseModel(userId, activeEstablishmentId, userEstablishmentId, answerModel);
+        var model = new AssessmentResponseModel(
+            userId,
+            activeEstablishmentId,
+            userEstablishmentId,
+            answerModel
+        );
         var responseId = await _storedProcedureRepository.SubmitResponse(model);
 
         return responseId;
     }
 
-    public async Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(int establishmentId, IEnumerable<string> sectionIds)
+    public async Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(
+        int establishmentId,
+        IEnumerable<string> sectionIds
+    )
     {
         var sectionIdsInput = string.Join(',', sectionIds);
-        var statuses = await _storedProcedureRepository.GetSectionStatusesAsync(sectionIdsInput, establishmentId);
+        var statuses = await _storedProcedureRepository.GetSectionStatusesAsync(
+            sectionIdsInput,
+            establishmentId
+        );
         return statuses.Select(s => s.AsDto()).ToList();
     }
 
@@ -97,14 +131,16 @@ public class SubmissionWorkflow(
         return new SqlSectionStatusDto
         {
             SectionId = sectionId,
-            Status = SubmissionStatus.NotStarted
+            Status = SubmissionStatus.NotStarted,
         };
     }
 
     public async Task SetMaturityAndMarkAsReviewedAsync(int submissionId)
     {
         await _storedProcedureRepository.SetMaturityForSubmissionAsync(submissionId);
-        await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
+        await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
+            submissionId
+        );
     }
 
     public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
@@ -114,7 +150,9 @@ public class SubmissionWorkflow(
 
     public async Task SetSubmissionReviewedAsync(int submissionId)
     {
-        await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
+        await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
+            submissionId
+        );
     }
 
     public Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)

@@ -2,9 +2,7 @@ using System.Reflection;
 
 namespace Dfe.PlanTech.Web.Factories;
 
-public class ComponentViewsFactory(
-    ILogger<ComponentViewsFactory> logger
-)
+public class ComponentViewsFactory(ILogger<ComponentViewsFactory> logger)
 {
     private const string GENERATED_VIEW_NAMESPACE = "AspNetCoreGeneratedDocument";
     private const string SHARED_PATH = "Views_Shared";
@@ -21,7 +19,9 @@ public class ComponentViewsFactory(
     public bool TryGetViewForType(object model, out string? viewPath)
     {
         var componentTypeName = model.GetType().Name[0..^5].Replace("Component", "");
-        var matchingViewType = _viewTypes.FirstOrDefault(FileNameMatchesComponentTypeName(componentTypeName));
+        var matchingViewType = _viewTypes.FirstOrDefault(
+            FileNameMatchesComponentTypeName(componentTypeName)
+        );
 
         if (matchingViewType is null)
         {
@@ -61,10 +61,7 @@ public class ComponentViewsFactory(
     /// Get all Types generated from Views that are in the "Shared" folder (or sub-folder)
     /// </summary>
     private static IEnumerable<Type> GetSharedViewTypes() =>
-        Assembly
-            .GetExecutingAssembly()
-            .GetTypes()
-            .Where(IsSharedViewType);
+        Assembly.GetExecutingAssembly().GetTypes().Where(IsSharedViewType);
 
     /// <summary>
     /// Is this type a View type, which is in the Shared folder path?

@@ -7,11 +7,14 @@ namespace Dfe.PlanTech.Application.Rendering;
 
 public class TableHeaderCellRenderer : BaseRichTextContentPartRenderer
 {
-    public TableHeaderCellRenderer() : base(RichTextNodeType.TableHeaderCell)
-    {
-    }
+    public TableHeaderCellRenderer()
+        : base(RichTextNodeType.TableHeaderCell) { }
 
-    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    )
     {
         stringBuilder.Append("<th class=\"govuk-table__header\">");
 

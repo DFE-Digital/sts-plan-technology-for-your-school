@@ -5,5 +5,5 @@ public enum HeaderTag
     Unknown,
     H1,
     H2,
-    H3
+    H3,
 }

@@ -9,7 +9,8 @@ internal class SignInEntityConfiguration : IEntityTypeConfiguration<SignInEntity
     public void Configure(EntityTypeBuilder<SignInEntity> builder)
     {
         builder.HasKey(signinId => signinId.Id);
-        builder.HasOne(signinId => signinId.User)
+        builder
+            .HasOne(signinId => signinId.User)
             .WithMany(signinId => signinId.SignIns)
             .HasForeignKey(signinId => signinId.UserId)
             .IsRequired();

@@ -1,4 +1,4 @@
-import { Answer } from "#src/content-types/answer";
+import { Answer } from '#src/content-types/answer';
 
 export class Question {
   answers;
@@ -15,7 +15,7 @@ export class Question {
     this.id = sys.id;
   }
 
-  get answerIds(){
+  get answerIds() {
     return this.answers.map((answer) => answer.id);
   }
 }

@@ -18,34 +18,38 @@ public class GridContainerTagHelperTests
 
         var loggerSubstitute = Substitute.For<ILogger<GridContainerTagHelper>>();
         var cardContainerRenderer = Substitute.For<ICardContainerContentPartRenderer>();
-        cardContainerRenderer.ToHtml(Arg.Any<IReadOnlyList<ComponentCardEntry>>()).Returns(expectedHtml);
+        cardContainerRenderer
+            .ToHtml(Arg.Any<IReadOnlyList<ComponentCardEntry>>())
+            .Returns(expectedHtml);
 
-        var context = new TagHelperContext(tagName: "grid-container",
-                                            allAttributes: new TagHelperAttributeList(),
-                                            items: new Dictionary<object, object>(),
-                                            uniqueId: "gridcontainer-test");
+        var context = new TagHelperContext(
+            tagName: "grid-container",
+            allAttributes: new TagHelperAttributeList(),
+            items: new Dictionary<object, object>(),
+            uniqueId: "gridcontainer-test"
+        );
 
-        var output = new TagHelperOutput("grid-container-tag",
-                                        attributes: new TagHelperAttributeList(),
-                                        getChildContentAsync: (useCachedResult, encoder) =>
-                                        {
-                                            var tagHelperContent = new DefaultTagHelperContent();
-                                            tagHelperContent.SetContent(content);
-                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
-                                        });
+        var output = new TagHelperOutput(
+            "grid-container-tag",
+            attributes: new TagHelperAttributeList(),
+            getChildContentAsync: (useCachedResult, encoder) =>
+            {
+                var tagHelperContent = new DefaultTagHelperContent();
+                tagHelperContent.SetContent(content);
+                return Task.FromResult<TagHelperContent>(tagHelperContent);
+            }
+        );
 
-        var gridContainerTagHelper = new GridContainerTagHelper(loggerSubstitute, cardContainerRenderer)
+        var gridContainerTagHelper = new GridContainerTagHelper(
+            loggerSubstitute,
+            cardContainerRenderer
+        )
         {
-            Content = [
-                new ComponentCardEntry()
-                {
-                    Description = "this is a test"
-                },
-                new ComponentCardEntry()
-                {
-                    Description = "second card test"
-                },
-            ]
+            Content =
+            [
+                new ComponentCardEntry() { Description = "this is a test" },
+                new ComponentCardEntry() { Description = "second card test" },
+            ],
         };
 
         await gridContainerTagHelper.ProcessAsync(context, output);
@@ -62,25 +66,34 @@ public class GridContainerTagHelperTests
 
         var loggerSubstitute = Substitute.For<ILogger<GridContainerTagHelper>>();
         var cardContainerRenderer = Substitute.For<ICardContainerContentPartRenderer>();
-        cardContainerRenderer.ToHtml(Arg.Any<IReadOnlyList<ComponentCardEntry>>()).Returns(expectedHtml);
+        cardContainerRenderer
+            .ToHtml(Arg.Any<IReadOnlyList<ComponentCardEntry>>())
+            .Returns(expectedHtml);
 
-        var context = new TagHelperContext(tagName: "grid-container",
-                                            allAttributes: new TagHelperAttributeList(),
-                                            items: new Dictionary<object, object>(),
-                                            uniqueId: "gridcontainer-test");
+        var context = new TagHelperContext(
+            tagName: "grid-container",
+            allAttributes: new TagHelperAttributeList(),
+            items: new Dictionary<object, object>(),
+            uniqueId: "gridcontainer-test"
+        );
 
-        var output = new TagHelperOutput("grid-container-tag",
-                                        attributes: new TagHelperAttributeList(),
-                                        getChildContentAsync: (useCachedResult, encoder) =>
-                                        {
-                                            var tagHelperContent = new DefaultTagHelperContent();
-                                            tagHelperContent.SetContent(content);
-                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
-                                        });
+        var output = new TagHelperOutput(
+            "grid-container-tag",
+            attributes: new TagHelperAttributeList(),
+            getChildContentAsync: (useCachedResult, encoder) =>
+            {
+                var tagHelperContent = new DefaultTagHelperContent();
+                tagHelperContent.SetContent(content);
+                return Task.FromResult<TagHelperContent>(tagHelperContent);
+            }
+        );
 
-        var gridContainerTagHelper = new GridContainerTagHelper(loggerSubstitute, cardContainerRenderer)
+        var gridContainerTagHelper = new GridContainerTagHelper(
+            loggerSubstitute,
+            cardContainerRenderer
+        )
         {
-            Content = null
+            Content = null,
         };
 
         await gridContainerTagHelper.ProcessAsync(context, output);

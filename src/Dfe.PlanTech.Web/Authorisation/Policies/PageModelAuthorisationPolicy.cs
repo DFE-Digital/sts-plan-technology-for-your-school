@@ -13,9 +13,8 @@ namespace Dfe.PlanTech.Web.Authorisation.Policies;
 /// <summary>
 /// Checks user authorisation for the current page, and retrieves a given <see cref="Page"/> from Contentful if needed for the request.
 /// </summary>
-public class PageModelAuthorisationPolicy(
-    ILogger<PageModelAuthorisationPolicy> logger
-) : AuthorizationHandler<PageAuthorisationRequirement>
+public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> logger)
+    : AuthorizationHandler<PageAuthorisationRequirement>
 {
     private const string IndexSlug = "/";
     public const string PolicyName = "UsePageAuthentication";
@@ -23,11 +22,17 @@ public class PageModelAuthorisationPolicy(
     public const string RouteValuesControllerNameKey = "controller";
     public const string RoutesValuesRouteNameKey = "route";
 
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PageAuthorisationRequirement requirement)
+    protected override async Task HandleRequirementAsync(
+        AuthorizationHandlerContext context,
+        PageAuthorisationRequirement requirement
+    )
     {
         if (context.Resource is not HttpContext httpContext)
         {
-            logger.LogError("Expected resource to be HttpContext but received {Type}", context.Resource?.GetType());
+            logger.LogError(
+                "Expected resource to be HttpContext but received {Type}",
+                context.Resource?.GetType()
+            );
             return;
         }
 
@@ -65,30 +70,52 @@ public class PageModelAuthorisationPolicy(
 
         if (!ControllerIsPagesController(httpContext))
         {
-            logger.LogTrace("Request is not from/to the Pages controller. Request is to controller {ControllerName} and action {ActioName}",
+            logger.LogTrace(
+                "Request is not from/to the Pages controller. Request is to controller {ControllerName} and action {ActioName}",
                 httpContext.Request.RouteValues[RouteValuesControllerNameKey],
-                httpContext.Request.RouteValues[RouteValuesActionNameKey]);
+                httpContext.Request.RouteValues[RouteValuesActionNameKey]
+            );
 
-            return new UserAuthorisationResult(PageRequiresAuthorisation: true, userAuthorisationStatus);
+            return new UserAuthorisationResult(
+                PageRequiresAuthorisation: true,
+                userAuthorisationStatus
+            );
         }
 
         string slug = GetSlugFromRoute(httpContext);
         try
         {
             var page = await GetPageForSlug(httpContext, slug);
-            return new UserAuthorisationResult(PageRequiresAuthorisation: page.RequiresAuthorisation, userAuthorisationStatus);
+            return new UserAuthorisationResult(
+                PageRequiresAuthorisation: page.RequiresAuthorisation,
+                userAuthorisationStatus
+            );
         }
         catch (ContentfulDataUnavailableException e)
         {
             // Pages which do not have corresponding Contentful entries do not require authorisation(?)
-            logger.LogWarning(e, "Could not retrieve page from Contentful for slug {Slug} (not found) therefore unable to determine authorisation requirements, defaulting to allowing access", slug);
-            return new UserAuthorisationResult(PageRequiresAuthorisation: false, userAuthorisationStatus);
+            logger.LogWarning(
+                e,
+                "Could not retrieve page from Contentful for slug {Slug} (not found) therefore unable to determine authorisation requirements, defaulting to allowing access",
+                slug
+            );
+            return new UserAuthorisationResult(
+                PageRequiresAuthorisation: false,
+                userAuthorisationStatus
+            );
         }
         catch (Exception e)
         {
             // Every other error should allow access(?)
-            logger.LogError(e, "Could not retrieve page from Contentful for slug {Slug}, unable to determine authorisation requirements, defaulting to allowing access", slug);
-            return new UserAuthorisationResult(PageRequiresAuthorisation: false, userAuthorisationStatus);
+            logger.LogError(
+                e,
+                "Could not retrieve page from Contentful for slug {Slug}, unable to determine authorisation requirements, defaulting to allowing access",
+                slug
+            );
+            return new UserAuthorisationResult(
+                PageRequiresAuthorisation: false,
+                userAuthorisationStatus
+            );
         }
     }
 
@@ -138,6 +165,7 @@ public class PageModelAuthorisationPolicy(
     {
         var controllerName = httpContext.Request.RouteValues[RouteValuesControllerNameKey];
 
-        return controllerName is string controllerString && controllerString == PagesController.ControllerName;
+        return controllerName is string controllerString
+            && controllerString == PagesController.ControllerName;
     }
 }

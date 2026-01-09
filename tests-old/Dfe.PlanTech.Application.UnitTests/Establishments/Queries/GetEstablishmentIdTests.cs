@@ -4,7 +4,6 @@ using Dfe.PlanTech.Application.Users.Queries;
 using Dfe.PlanTech.Domain.Establishments.Models;
 using NSubstitute;
 
-
 namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
 {
     public class GetEstablishmentIdQueryTests
@@ -13,21 +12,21 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
         {
             Id = 1,
             OrgName = "First establishment",
-            EstablishmentRef = "Ref-One"
+            EstablishmentRef = "Ref-One",
         };
 
         private static readonly Establishment SecondEstablishment = new()
         {
             Id = 2,
             OrgName = "Second establishment",
-            EstablishmentRef = "Ref-Two"
+            EstablishmentRef = "Ref-Two",
         };
 
         private static readonly Establishment ThirdEstablishment = new()
         {
             Id = 3,
             OrgName = "Third establishment",
-            EstablishmentRef = "Ref-Three"
+            EstablishmentRef = "Ref-Three",
         };
 
         private static readonly EstablishmentLink FirstEstablishmentLink = new()
@@ -35,7 +34,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
             Id = 1,
             GroupUid = "GroupUID123",
             EstablishmentName = "First Establishment",
-            Urn = "12345"
+            Urn = "12345",
         };
 
         private static readonly EstablishmentLink SecondEstablishmentLink = new()
@@ -43,7 +42,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
             Id = 2,
             GroupUid = "GroupUID456",
             EstablishmentName = "Second Establishment",
-            Urn = "67890"
+            Urn = "67890",
         };
 
         public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
@@ -53,8 +52,17 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
             return new GetEstablishmentIdQuery(Db);
         }
 
-        private readonly List<Establishment> _establishments = new() { FirstEstablishment, SecondEstablishment, ThirdEstablishment };
-        private readonly List<EstablishmentLink> _establishmentLinks = new() { FirstEstablishmentLink, SecondEstablishmentLink };
+        private readonly List<Establishment> _establishments = new()
+        {
+            FirstEstablishment,
+            SecondEstablishment,
+            ThirdEstablishment,
+        };
+        private readonly List<EstablishmentLink> _establishmentLinks = new()
+        {
+            FirstEstablishmentLink,
+            SecondEstablishmentLink,
+        };
 
         [Theory]
         [InlineData(1)]
@@ -65,16 +73,19 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
             //Arrange
             var strut = CreateStrut();
 
-            var expectedEstablishment = _establishments.FirstOrDefault(establishment => establishment.Id == establishmentId);
+            var expectedEstablishment = _establishments.FirstOrDefault(establishment =>
+                establishment.Id == establishmentId
+            );
 
             Assert.NotNull(expectedEstablishment);
 
-            Db.GetEstablishmentBy(Arg.Any<Expression<Func<Establishment, bool>>>()).Returns(callInfo =>
-            {
-                var query = callInfo.ArgAt<Expression<Func<Establishment, bool>>>(0);
+            Db.GetEstablishmentBy(Arg.Any<Expression<Func<Establishment, bool>>>())
+                .Returns(callInfo =>
+                {
+                    var query = callInfo.ArgAt<Expression<Func<Establishment, bool>>>(0);
 
-                return _establishments.AsQueryable().FirstOrDefault(query);
-            });
+                    return _establishments.AsQueryable().FirstOrDefault(query);
+                });
 
             //Act
             var result = await strut.GetEstablishmentId(expectedEstablishment.EstablishmentRef);
@@ -86,13 +97,15 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Queries
         [Theory]
         [InlineData(1)]
         [InlineData(2)]
-        public async Task GetGroupEstablishmentsById_Returns_Correct_Establishment_Links(int establishmentId)
+        public async Task GetGroupEstablishmentsById_Returns_Correct_Establishment_Links(
+            int establishmentId
+        )
         {
             // Arrange
             var query = new GetEstablishmentIdQuery(Db);
 
             Db.GetGroupEstablishmentsBy(Arg.Any<Expression<Func<Establishment, bool>>>())
-                     .Returns(_establishmentLinks);
+                .Returns(_establishmentLinks);
 
             // Act
             var result = await query.GetGroupEstablishments(establishmentId);

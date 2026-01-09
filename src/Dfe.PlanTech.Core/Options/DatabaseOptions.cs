@@ -11,7 +11,8 @@ public readonly record struct DatabaseOptions
         MaxDelayInMilliseconds = maxDelayInMilliseconds;
     }
 
-    public DatabaseOptions() : this(5, 5000) { }
+    public DatabaseOptions()
+        : this(5, 5000) { }
 
     /// <summary>
     /// Maximum number of retry attempts for transient failures.

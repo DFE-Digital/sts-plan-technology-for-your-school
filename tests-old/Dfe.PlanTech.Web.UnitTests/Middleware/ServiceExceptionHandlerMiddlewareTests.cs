@@ -14,7 +14,6 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
-
     public class ServiceExceptionHandlerMiddlewareTests
     {
         private const string InternalErrorSlug = "/server-error";
@@ -25,7 +24,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var internalErrorPageId = "Internal Error Page ID";
             var internalErrorPage = new Page { Slug = InternalErrorSlug };
 
-            var errorPages = new ErrorPagesConfiguration { InternalErrorPageId = internalErrorPageId };
+            var errorPages = new ErrorPagesConfiguration
+            {
+                InternalErrorPageId = internalErrorPageId,
+            };
             var errorPagesOptions = Substitute.For<IOptions<ErrorPagesConfiguration>>();
             errorPagesOptions.Value.Returns(errorPages);
 
@@ -66,7 +68,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             Assert.NotNull(context.Response);
             Assert.Equal("/server-error", context.Response.Headers.Values.FirstOrDefault());
         }
-
 
         [Fact]
         public async Task Should_Get_Service_Unavailable_Redirect_DatabaseException_Exception()
@@ -119,7 +120,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             //Assert
             Assert.NotNull(context.Response);
-            Assert.Equal(UrlConstants.OrgErrorPage, context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(
+                UrlConstants.OrgErrorPage,
+                context.Response.Headers.Values.FirstOrDefault()
+            );
         }
     }
 }

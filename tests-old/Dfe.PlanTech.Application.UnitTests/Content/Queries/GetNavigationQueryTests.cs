@@ -14,11 +14,13 @@ public class GetNavigationQueryTests
     private readonly NavigationLink _contentfulLink = new NavigationLink
     {
         Href = "ContentfulHref",
-        DisplayText = "ContentfulDisplayText"
+        DisplayText = "ContentfulDisplayText",
     };
 
     private readonly IList<NavigationLink> _contentfulLinks;
-    private readonly ILogger<GetNavigationQuery> _logger = Substitute.For<ILogger<GetNavigationQuery>>();
+    private readonly ILogger<GetNavigationQuery> _logger = Substitute.For<
+        ILogger<GetNavigationQuery>
+    >();
 
     public GetNavigationQueryTests()
     {
@@ -28,7 +30,9 @@ public class GetNavigationQueryTests
     [Fact]
     public async Task Should_Retrieve_Nav_Links_From_Contentful()
     {
-        _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Returns(_contentfulLinks);
+        _contentRepository
+            .GetEntities<NavigationLink>(CancellationToken.None)
+            .Returns(_contentfulLinks);
 
         GetNavigationQuery navQuery = new(_logger, _contentRepository);
 
@@ -40,13 +44,18 @@ public class GetNavigationQueryTests
     [Fact]
     public async Task Should_LogError_When_Contentful_Exception()
     {
-        _contentRepository.GetEntities<NavigationLink>(CancellationToken.None).Throws(_ => new Exception("Contentful error"));
+        _contentRepository
+            .GetEntities<NavigationLink>(CancellationToken.None)
+            .Throws(_ => new Exception("Contentful error"));
 
         GetNavigationQuery navQuery = new(_logger, _contentRepository);
 
         var result = await navQuery.GetNavigationLinks();
 
-        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(GetNavigationQuery.ExceptionMessageContentful, LogLevel.Error);
+        var receivedLoggerMessages = _logger.GetMatchingReceivedMessages(
+            GetNavigationQuery.ExceptionMessageContentful,
+            LogLevel.Error
+        );
 
         Assert.Single(receivedLoggerMessages);
         Assert.Empty(result);
@@ -55,7 +64,13 @@ public class GetNavigationQueryTests
     [Fact]
     public async Task Should_Retrieve_Nav_Link_By_Id_When_Exists()
     {
-        _contentRepository.GetEntityById<NavigationLink>(Arg.Any<string>(), Arg.Any<int>(), Arg.Any<CancellationToken>()).Returns(_contentfulLink);
+        _contentRepository
+            .GetEntityById<NavigationLink>(
+                Arg.Any<string>(),
+                Arg.Any<int>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(_contentfulLink);
         var navQuery = new GetNavigationQuery(_logger, _contentRepository);
         var result = await navQuery.GetLinkById("contentId");
 
@@ -67,7 +82,13 @@ public class GetNavigationQueryTests
     [Fact]
     public async Task Should_Return_Null_When_Nav_Link_Does_Not_Exist()
     {
-        _contentRepository.GetEntityById<NavigationLink?>(Arg.Any<string>(), Arg.Any<int>(), cancellationToken: CancellationToken.None).Returns((NavigationLink?)null);
+        _contentRepository
+            .GetEntityById<NavigationLink?>(
+                Arg.Any<string>(),
+                Arg.Any<int>(),
+                cancellationToken: CancellationToken.None
+            )
+            .Returns((NavigationLink?)null);
 
         var navQuery = new GetNavigationQuery(_logger, _contentRepository);
 

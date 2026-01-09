@@ -25,17 +25,14 @@ The goal is simple:
 Formatting is enforced through several complementary layers:
 
 1. **`.gitattributes`**
-
    - Controls how Git stores text files
    - Normalises line endings to LF
 
 2. **`.editorconfig`**
-
    - Controls whitespace, indentation, and basic conventions
    - Respected by Visual Studio, VS Code, Rider, and formatters
 
 3. **Language-specific formatters**
-
    - Own structural layout and wrapping
    - Opinionated and deterministic
 

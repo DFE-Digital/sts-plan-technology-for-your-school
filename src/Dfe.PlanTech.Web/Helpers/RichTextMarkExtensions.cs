@@ -10,10 +10,11 @@ public static class RichTextMarkExtensions
     public const string BOLD_CLASS = "govuk-!-font-weight-bold";
     public const string BOLD_MARK = "bold";
 
-    public static string GetClass(this IRichTextMark mark) => mark.Type switch
-    {
-        UNDERLINE_MARK => UNDERLINE_CLASS,
-        BOLD_MARK => BOLD_CLASS,
-        _ => ""
-    };
+    public static string GetClass(this IRichTextMark mark) =>
+        mark.Type switch
+        {
+            UNDERLINE_MARK => UNDERLINE_CLASS,
+            BOLD_MARK => BOLD_CLASS,
+            _ => "",
+        };
 }

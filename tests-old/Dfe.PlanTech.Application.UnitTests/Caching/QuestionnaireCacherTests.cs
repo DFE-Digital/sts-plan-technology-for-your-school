@@ -11,12 +11,15 @@ public class QuestionnaireCacherTests
     public void Should_Create_New_Cache_When_Not_Cached_Yet()
     {
         var cacherSubstitute = Substitute.For<ICacher>();
-        cacherSubstitute.Get(Arg.Any<string>(), Arg.Any<Func<QuestionnaireCache>>())
-            .Returns((callInfo) =>
-            {
-                Func<QuestionnaireCache> creator = (Func<QuestionnaireCache>)callInfo[1];
-                return creator();
-            });
+        cacherSubstitute
+            .Get(Arg.Any<string>(), Arg.Any<Func<QuestionnaireCache>>())
+            .Returns(
+                (callInfo) =>
+                {
+                    Func<QuestionnaireCache> creator = (Func<QuestionnaireCache>)callInfo[1];
+                    return creator();
+                }
+            );
 
         var questionnaireCacher = new QuestionnaireCacher(cacherSubstitute);
 
@@ -36,6 +39,8 @@ public class QuestionnaireCacherTests
 
         questionnaireCacher.SaveCache(new QuestionnaireCache());
 
-        cacherSubstitute.Received().Set(Arg.Any<string>(), Arg.Any<TimeSpan>(), Arg.Any<QuestionnaireCache>());
+        cacherSubstitute
+            .Received()
+            .Set(Arg.Any<string>(), Arg.Any<TimeSpan>(), Arg.Any<QuestionnaireCache>());
     }
 }

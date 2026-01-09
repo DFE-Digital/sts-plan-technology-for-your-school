@@ -10,33 +10,49 @@ namespace Dfe.PlanTech.Application.UnitTests.Services;
 
 public class SubmissionServiceTests
 {
-    private readonly IRecommendationWorkflow _recommendationWorkflow = Substitute.For<IRecommendationWorkflow>();
-    private readonly ISubmissionWorkflow _submissionWorkflow = Substitute.For<ISubmissionWorkflow>();
+    private readonly IRecommendationWorkflow _recommendationWorkflow =
+        Substitute.For<IRecommendationWorkflow>();
+    private readonly ISubmissionWorkflow _submissionWorkflow =
+        Substitute.For<ISubmissionWorkflow>();
 
-    private SubmissionService CreateServiceUnderTest() => new SubmissionService(_recommendationWorkflow, _submissionWorkflow);
+    private SubmissionService CreateServiceUnderTest() =>
+        new SubmissionService(_recommendationWorkflow, _submissionWorkflow);
 
-    private static (QuestionnaireSectionEntry section,
-                    QuestionnaireQuestionEntry q1,
-                    QuestionnaireQuestionEntry q2,
-                    QuestionnaireAnswerEntry a1_to_q2,
-                    QuestionnaireAnswerEntry a2_to_null)
-    BuildSectionGraph()
+    private static (
+        QuestionnaireSectionEntry section,
+        QuestionnaireQuestionEntry q1,
+        QuestionnaireQuestionEntry q2,
+        QuestionnaireAnswerEntry a1_to_q2,
+        QuestionnaireAnswerEntry a2_to_null
+    ) BuildSectionGraph()
     {
-        var q2 = new QuestionnaireQuestionEntry { Sys = new SystemDetails("2"), Answers = new List<QuestionnaireAnswerEntry>() };
+        var q2 = new QuestionnaireQuestionEntry
+        {
+            Sys = new SystemDetails("2"),
+            Answers = new List<QuestionnaireAnswerEntry>(),
+        };
         var a1 = new QuestionnaireAnswerEntry { Sys = new SystemDetails("1"), NextQuestion = q2 };
         var a2 = new QuestionnaireAnswerEntry { Sys = new SystemDetails("2"), NextQuestion = null };
-        var q1 = new QuestionnaireQuestionEntry { Sys = new SystemDetails("1"), Answers = new List<QuestionnaireAnswerEntry> { a1, a2 } };
+        var q1 = new QuestionnaireQuestionEntry
+        {
+            Sys = new SystemDetails("1"),
+            Answers = new List<QuestionnaireAnswerEntry> { a1, a2 },
+        };
 
         var section = new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("S1"),
-            Questions = new List<QuestionnaireQuestionEntry> { q1, q2 }
+            Questions = new List<QuestionnaireQuestionEntry> { q1, q2 },
         };
 
         return (section, q1, q2, a1, a2);
     }
 
-    private static SqlSubmissionDto SubmissionWithResponses(bool completed, string? maturity, params (string qId, string aId)[] responses)
+    private static SqlSubmissionDto SubmissionWithResponses(
+        bool completed,
+        string? maturity,
+        params (string qId, string aId)[] responses
+    )
     {
         return new SqlSubmissionDto
         {
@@ -75,7 +91,10 @@ public class SubmissionServiceTests
 
         _submissionWorkflow.CloneLatestCompletedSubmission(123, section).Returns(cloned);
 
-        var result = await sut.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(123, section);
+        var result = await sut.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(
+            123,
+            section
+        );
 
         Assert.Same(cloned, result);
 
@@ -95,7 +114,10 @@ public class SubmissionServiceTests
         var cloned = new SqlSubmissionDto { Id = 201, Status = SubmissionStatus.CompleteReviewed };
         _submissionWorkflow.CloneLatestCompletedSubmission(123, section).Returns(cloned);
 
-        var result = await sut.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(123, section);
+        var result = await sut.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(
+            123,
+            section
+        );
 
         Assert.Same(cloned, result);
         await _submissionWorkflow.Received(1).CloneLatestCompletedSubmission(123, section);
@@ -218,14 +240,19 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var expected = new List<SqlSectionStatusDto> { new SqlSectionStatusDto() };
 
-        _submissionWorkflow.GetSectionStatusesAsync(123, Arg.Any<IEnumerable<string>>())
+        _submissionWorkflow
+            .GetSectionStatusesAsync(123, Arg.Any<IEnumerable<string>>())
             .Returns(expected);
 
         var result = await sut.GetSectionStatusesForSchoolAsync(123, new[] { "sec1", "sec2" });
 
         Assert.Same(expected, result);
-        await _submissionWorkflow.Received(1)
-            .GetSectionStatusesAsync(123, Arg.Is<IEnumerable<string>>(ids => ids.Contains("sec1") && ids.Contains("sec2")));
+        await _submissionWorkflow
+            .Received(1)
+            .GetSectionStatusesAsync(
+                123,
+                Arg.Is<IEnumerable<string>>(ids => ids.Contains("sec1") && ids.Contains("sec2"))
+            );
     }
 
     [Fact]
@@ -271,7 +298,8 @@ public class SubmissionServiceTests
 
         await sut.ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 2, 3, 4, section);
 
-        await _submissionWorkflow.Received(1)
+        await _submissionWorkflow
+            .Received(1)
             .ConfirmCheckAnswersAndUpdateRecommendationsAsync(1, 2, 3, 4, section);
     }
 

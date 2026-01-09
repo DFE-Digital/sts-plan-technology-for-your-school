@@ -17,19 +17,21 @@ This project reads a CSV file containing a list of DfE Sign-In user ids, calls t
 ### Setup
 
 1. **Install dependencies**:
+
    ```bash
    npm install
    ```
- 
+
 2. Create a copy of the `.env.example` file, rename `.env` and populate with the client ID, API secret and endpoint. These are available from the DSI Manage console for the PTFYS service.
- 
+
 3. Create a `retrieve-user-data/data` folder if none exists, and within it create an `inputs.csv` file (or paste in .csv file and rename), ensuring that the `dfeSignInRef` column is populated:
-    ```
-    dfeSignInRef
-    user-id-123
-    user-id-456
-    user-id-789
-    ```
+
+   ```
+   dfeSignInRef
+   user-id-123
+   user-id-456
+   user-id-789
+   ```
 
 4. Run the script:
    ```bash
@@ -39,6 +41,7 @@ This project reads a CSV file containing a list of DfE Sign-In user ids, calls t
 ---
 
 ### Dependencies
+
 - dotenv
 - csv-parser
 - axios

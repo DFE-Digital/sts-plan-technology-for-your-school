@@ -13,10 +13,15 @@ public class SubmissionService(
     ISubmissionWorkflow submissionWorkflow
 ) : ISubmissionService
 {
-    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
-    private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
+    private readonly IRecommendationWorkflow _recommendationWorkflow =
+        recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
+    private readonly ISubmissionWorkflow _submissionWorkflow =
+        submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
-    public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section)
+    public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(
+        int establishmentId,
+        QuestionnaireSectionEntry section
+    )
     {
         // Check if an in-progress submission already exists
         var inProgressSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
@@ -32,11 +37,13 @@ public class SubmissionService(
         return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
     }
 
-    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByEstablishmentIdAsync(
-        int establishmentId
-    )
+    public Task<
+        Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+    > GetLatestRecommendationStatusesByEstablishmentIdAsync(int establishmentId)
     {
-        return _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
+        return _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
+            establishmentId
+        );
     }
 
     public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, SubmissionStatus status)
@@ -69,8 +76,7 @@ public class SubmissionService(
 
         if (isNullSubmissionOrInvalidStatus)
         {
-            return new SubmissionRoutingDataModel
-            (
+            return new SubmissionRoutingDataModel(
                 nextQuestion: section.Questions.First(),
                 questionnaireSection: section,
                 submission: null,
@@ -99,8 +105,7 @@ public class SubmissionService(
             sectionStatus = latestSubmission.Status;
         }
 
-        return new SubmissionRoutingDataModel
-        (
+        return new SubmissionRoutingDataModel(
             nextQuestion: cmsLastAnswer?.NextQuestion,
             questionnaireSection: section,
             submission: submissionResponsesModel,
@@ -108,7 +113,10 @@ public class SubmissionService(
         );
     }
 
-    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(int establishmentId, IEnumerable<string> sectionIds)
+    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(
+        int establishmentId,
+        IEnumerable<string> sectionIds
+    )
     {
         return _submissionWorkflow.GetSectionStatusesAsync(establishmentId, sectionIds);
     }
@@ -118,9 +126,19 @@ public class SubmissionService(
         return _submissionWorkflow.SetLatestSubmissionViewedAsync(establishmentId, sectionId);
     }
 
-    public Task<int> SubmitAnswerAsync(int userId, int activeEstablishmentId, int userEstablishmentId, SubmitAnswerModel answerModel)
+    public Task<int> SubmitAnswerAsync(
+        int userId,
+        int activeEstablishmentId,
+        int userEstablishmentId,
+        SubmitAnswerModel answerModel
+    )
     {
-        return _submissionWorkflow.SubmitAnswer(userId, activeEstablishmentId, userEstablishmentId, answerModel);
+        return _submissionWorkflow.SubmitAnswer(
+            userId,
+            activeEstablishmentId,
+            userEstablishmentId,
+            answerModel
+        );
     }
 
     public Task ConfirmCheckAnswersAsync(int submissionId)
@@ -128,9 +146,21 @@ public class SubmissionService(
         return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
-    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
+    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+        int establishmentId,
+        int? matEstablishmentId,
+        int submissionId,
+        int userId,
+        QuestionnaireSectionEntry section
+    )
     {
-        return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
+        return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            establishmentId,
+            matEstablishmentId,
+            submissionId,
+            userId,
+            section
+        );
     }
 
     public async Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)

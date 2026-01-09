@@ -1,6 +1,6 @@
 # 0039 - Consolidation of Azure Function into the Web App
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -24,6 +24,8 @@ The goal is to assess the feasibility of consolidating the functionality of the 
    - Keep the Azure Function and MVC web app as separate services without making any changes.
 
 ## Decision Outcome
+
 The decision is to proceed with the consolidation of the Azure Function into the ASP.NET Core MVC application by:
+
 - Creating a new controller to handle payloads from the Contentful webhook and save data to an Azure Service Bus queue.
 - Implementing a background service to read from the Azure Service Bus queue in batches, process the payloads, and save data to the database.

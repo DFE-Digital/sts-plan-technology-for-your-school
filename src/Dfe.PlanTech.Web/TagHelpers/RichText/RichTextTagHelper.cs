@@ -9,7 +9,8 @@ public class RichTextTagHelper(
     IRichTextRenderer richTextRenderer
 ) : TagHelper
 {
-    private readonly IRichTextRenderer _richTextRenderer = richTextRenderer ?? throw new ArgumentNullException(nameof(richTextRenderer));
+    private readonly IRichTextRenderer _richTextRenderer =
+        richTextRenderer ?? throw new ArgumentNullException(nameof(richTextRenderer));
 
     public RichTextContentField? Content { get; set; }
 

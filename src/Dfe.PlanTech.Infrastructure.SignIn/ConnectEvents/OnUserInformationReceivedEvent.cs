@@ -30,11 +30,15 @@ public static class OnUserInformationReceivedEvent
 
         var dsiReference = context.Principal.Claims.GetDsiReference();
         var establishment = context.Principal.Claims.GetOrganisation();
-        var signInWorkflow = context.HttpContext.RequestServices.GetRequiredService<ISignInWorkflow>();
+        var signInWorkflow =
+            context.HttpContext.RequestServices.GetRequiredService<ISignInWorkflow>();
 
         if (establishment is null)
         {
-            logger.LogWarning("User {UserId} is authenticated but has no establishment", dsiReference);
+            logger.LogWarning(
+                "User {UserId} is authenticated but has no establishment",
+                dsiReference
+            );
             await signInWorkflow.RecordSignInUserOnly(dsiReference);
             return;
         }
@@ -44,7 +48,10 @@ public static class OnUserInformationReceivedEvent
         AddClaimsToPrincipal(context, signin);
     }
 
-    private static void AddClaimsToPrincipal(UserInformationReceivedContext context, SqlSignInDto signin)
+    private static void AddClaimsToPrincipal(
+        UserInformationReceivedContext context,
+        SqlSignInDto signin
+    )
     {
         var principal = context.Principal;
 
@@ -53,11 +60,13 @@ public static class OnUserInformationReceivedEvent
             return;
         }
 
-        string establishmentId = (signin.EstablishmentId?.ToString()) ?? throw new InvalidDataException(nameof(signin.EstablishmentId));
+        string establishmentId =
+            (signin.EstablishmentId?.ToString())
+            ?? throw new InvalidDataException(nameof(signin.EstablishmentId));
 
         ClaimsIdentity claimsIdentity = new([
             new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),
-            new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, establishmentId)
+            new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, establishmentId),
         ]);
 
         principal.AddIdentity(claimsIdentity);

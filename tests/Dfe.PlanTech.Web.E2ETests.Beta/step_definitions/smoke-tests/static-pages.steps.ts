@@ -1,7 +1,6 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
-
 Given('I am on the accessibility page', async function () {
   await this.page.goto(`${process.env.URL}accessibility-statement`);
   await expect(this.page).toHaveURL(/\/accessibility-statement/);
@@ -10,7 +9,7 @@ Given('I am on the accessibility page', async function () {
 Then('I should see a back link to the previous page', async function () {
   const backLink = this.page.locator('a#back-button-link', { hasText: /back/i });
   await expect(backLink).toBeVisible();
-  
+
   const href = await backLink.getAttribute('href');
   expect(href).toContain('/');
 });
@@ -45,11 +44,13 @@ Then('I should see multiple paragraphs of explanatory text', async function () {
   expect(await paragraphs.count()).toBeGreaterThan(2);
 });
 
-
-Then('I should see a cookie preferences form with {int} radio options', async function (count: number) {
-  const radios = this.page.locator('form .govuk-radios__item');
-  await expect(radios).toHaveCount(count);
-});
+Then(
+  'I should see a cookie preferences form with {int} radio options',
+  async function (count: number) {
+    const radios = this.page.locator('form .govuk-radios__item');
+    await expect(radios).toHaveCount(count);
+  },
+);
 
 When('I choose to accept cookies and save settings', async function () {
   await this.page.locator('input#analytics-cookies-yes').check();
@@ -67,9 +68,12 @@ Then('I should see a notification banner confirming the action', async function 
 });
 
 Then('Google Tag Manager should be enabled', async function () {
-  await this.page.waitForFunction(() => {
-    return !!document.querySelector('script[src*="googletagmanager"]');
-  }, { timeout: 10000 });
+  await this.page.waitForFunction(
+    () => {
+      return !!document.querySelector('script[src*="googletagmanager"]');
+    },
+    { timeout: 10000 },
+  );
 
   const hasMeta = await this.page.locator('meta[name="google-site-verification"]').count();
   expect(hasMeta).toBeGreaterThan(0);
@@ -78,14 +82,18 @@ Then('Google Tag Manager should be enabled', async function () {
   expect(hasScript).toBeGreaterThan(0);
 
   const noScriptText = await this.page.locator('noscript').allTextContents();
-  const hasGtmNoScript = noScriptText.some((t: string | string[]) => t.includes('www.googletagmanager.com'));
+  const hasGtmNoScript = noScriptText.some((t: string | string[]) =>
+    t.includes('www.googletagmanager.com'),
+  );
   expect(hasGtmNoScript).toBe(true);
 });
 
 Then('Google Tag Manager should be disabled', async function () {
   await expect(this.page.locator('meta[name="google-site-verification"]')).toHaveCount(0);
   const noScriptText = await this.page.locator('noscript').allTextContents();
-  const hasGTM = noScriptText.some((t: string | string[]) => t.includes('www.googletagmanager.com'));
+  const hasGTM = noScriptText.some((t: string | string[]) =>
+    t.includes('www.googletagmanager.com'),
+  );
   expect(hasGTM).toBe(false);
   await expect(this.page.locator('head script[src*="googletagmanager"]')).toHaveCount(0);
 });

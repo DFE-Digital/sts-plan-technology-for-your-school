@@ -1,30 +1,28 @@
-import { FieldGenerator } from "./field-generator.js";
-import { faker } from "@faker-js/faker";
+import { FieldGenerator } from './field-generator.js';
+import { faker } from '@faker-js/faker';
 
 export class SymbolGenerator extends FieldGenerator {
-    constructor() {
-        super("Symbol");
+  constructor() {
+    super('Symbol');
+  }
+
+  getOptions(field) {
+    if (!field.validations?.length) {
+      return;
     }
 
-    getOptions(field) {
-        if (!field.validations?.length) {
-            return;
-        }
+    const options = field.validations.find((validation) => !!validation.in);
 
-        const options = field.validations.find((validation) => !!validation.in);
-
-        if (!options) {
-            return;
-        }
-
-        return options.in;
+    if (!options) {
+      return;
     }
 
-    concreteGenerateContent(field) {
-        const options = this.getOptions(field);
+    return options.in;
+  }
 
-        return !options
-            ? faker.lorem.words({ min: 1, max: 10 })
-            : faker.helpers.arrayElement(options);
-    }
+  concreteGenerateContent(field) {
+    const options = this.getOptions(field);
+
+    return !options ? faker.lorem.words({ min: 1, max: 10 }) : faker.helpers.arrayElement(options);
+  }
 }

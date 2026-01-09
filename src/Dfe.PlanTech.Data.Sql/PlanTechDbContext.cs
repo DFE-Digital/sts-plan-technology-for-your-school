@@ -21,11 +21,13 @@ public class PlanTechDbContext : DbContext
     public virtual DbSet<UserSettingsEntity> UserSettings { get; set; } = null!;
     public virtual DbSet<GroupReadActivityEntity> GroupReadActivities { get; set; } = null!;
     public virtual DbSet<RecommendationEntity> Recommendations { get; set; } = null!;
-    public virtual DbSet<EstablishmentRecommendationHistoryEntity> EstablishmentRecommendationHistories { get; set; } = null!;
+    public virtual DbSet<EstablishmentRecommendationHistoryEntity> EstablishmentRecommendationHistories { get; set; } =
+        null!;
 
     public PlanTechDbContext() { }
 
-    public PlanTechDbContext(DbContextOptions<PlanTechDbContext> options) : base(options) { }
+    public PlanTechDbContext(DbContextOptions<PlanTechDbContext> options)
+        : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -8,7 +8,7 @@ public enum SectionProgressStatus
     NotStarted,
     InProgress,
     Completed,
-    RetrievalError
+    RetrievalError,
 }
 
 public class CategoryLandingSection
@@ -35,7 +35,8 @@ public class CategoryLandingSection
         string shortDescription,
         bool retrievalError,
         SectionStatusDto? sectionStatus,
-        CategoryLandingSectionRecommendations recommendations)
+        CategoryLandingSectionRecommendations recommendations
+    )
     {
         Slug = slug;
         Name = name;
@@ -44,7 +45,10 @@ public class CategoryLandingSection
 
         if (sectionStatus != null)
         {
-            LastCompletionDate = sectionStatus.LastCompletionDate != null ? DateTimeFormatter.FormattedDateShort(sectionStatus.LastCompletionDate.Value) : "";
+            LastCompletionDate =
+                sectionStatus.LastCompletionDate != null
+                    ? DateTimeFormatter.FormattedDateShort(sectionStatus.LastCompletionDate.Value)
+                    : "";
             DateUpdated = DateTimeFormatter.FormattedDateShort(sectionStatus.DateUpdated);
         }
 

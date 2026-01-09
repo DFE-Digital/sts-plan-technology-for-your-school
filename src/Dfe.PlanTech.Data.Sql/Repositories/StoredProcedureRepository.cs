@@ -100,16 +100,25 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         // Parameters (in order): @userId INT, @userEstablishmentId INT, @selectedEstablishmentId INT, @selectedEstablishmentName NVARCHAR(MAX), @selectionId INT OUTPUT
         var selectionId = new SqlParameter(DatabaseConstants.SelectionIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var parameters = new SqlParameter[]
         {
             new(DatabaseConstants.UserIdParam, userGroupSelectionModel.UserId),
-            new(DatabaseConstants.EstablishmentIdParam, userGroupSelectionModel.UserEstablishmentId),
-            new(DatabaseConstants.SelectedEstablishmentIdParam, userGroupSelectionModel.SelectedEstablishmentId),
-            new(DatabaseConstants.SelectedEstablishmentNameParam, SqlValueOrDbNull(userGroupSelectionModel.SelectedEstablishmentName)),
-            selectionId
+            new(
+                DatabaseConstants.EstablishmentIdParam,
+                userGroupSelectionModel.UserEstablishmentId
+            ),
+            new(
+                DatabaseConstants.SelectedEstablishmentIdParam,
+                userGroupSelectionModel.SelectedEstablishmentId
+            ),
+            new(
+                DatabaseConstants.SelectedEstablishmentNameParam,
+                SqlValueOrDbNull(userGroupSelectionModel.SelectedEstablishmentName)
+            ),
+            selectionId,
         };
 
         var command = BuildCommand(DatabaseConstants.SpSubmitGroupSelection, parameters);
@@ -120,7 +129,9 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             return id;
         }
 
-        throw new InvalidCastException($"{nameof(selectionId)} is not an integer - value is {selectionId.Value ?? "null"}");
+        throw new InvalidCastException(
+            $"{nameof(selectionId)} is not an integer - value is {selectionId.Value ?? "null"}"
+        );
     }
 
     public Task<int> SetMaturityForSubmissionAsync(int submissionId)
@@ -132,7 +143,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         // Parameters (in order): @submissionId INT
         var parameters = new SqlParameter[]
         {
-            new(DatabaseConstants.SubmissionIdParam, submissionId)
+            new(DatabaseConstants.SubmissionIdParam, submissionId),
         };
 
         var command = BuildCommand(DatabaseConstants.SpCalculateMaturity, parameters);
@@ -157,12 +168,12 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
         var responseId = new SqlParameter(DatabaseConstants.ResponseIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var submissionId = new SqlParameter(DatabaseConstants.SubmissionIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var parameters = new SqlParameter[]
@@ -178,7 +189,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             new(DatabaseConstants.EstablishmentIdParam, response.EstablishmentId),
             new(DatabaseConstants.MaturityParam, ""),
             responseId,
-            submissionId
+            submissionId,
         };
 
         var command = BuildCommand(DatabaseConstants.SpSubmitAnswer, parameters);
@@ -189,7 +200,9 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             return id;
         }
 
-        throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}");
+        throw new InvalidCastException(
+            $"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}"
+        );
     }
 
     public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
@@ -202,7 +215,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         var parameters = new SqlParameter[]
         {
             new(DatabaseConstants.SectionIdParam, sectionId),
-            new(DatabaseConstants.EstablishmentIdParam, establishmentId)
+            new(DatabaseConstants.EstablishmentIdParam, establishmentId),
         };
 
         var command = BuildCommand(DatabaseConstants.SpDeleteCurrentSubmission, parameters);
@@ -214,13 +227,14 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         ParameterDirection[] outputParameterTypes =
         {
             ParameterDirection.InputOutput,
-            ParameterDirection.Output
+            ParameterDirection.Output,
         };
 
         var parameterNames = parameters.Select(p =>
             outputParameterTypes.Contains(p.Direction)
                 ? $"{p.ParameterName} OUTPUT"
-                : p.ParameterName);
+                : p.ParameterName
+        );
 
         return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
     }

@@ -15,14 +15,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Handlers;
 
 public class UserAuthorisationMiddlewareResultHandlerTests
 {
-    private static AuthorizationPolicy AnyPolicy()
-        => new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+    private static AuthorizationPolicy AnyPolicy() =>
+        new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
-    private static PolicyAuthorizationResult ForbiddenWith(params AuthorizationFailureReason[] reasons)
-        => PolicyAuthorizationResult.Forbid(AuthorizationFailure.Failed(reasons));
+    private static PolicyAuthorizationResult ForbiddenWith(
+        params AuthorizationFailureReason[] reasons
+    ) => PolicyAuthorizationResult.Forbid(AuthorizationFailure.Failed(reasons));
 
-    private static AuthorizationFailureReason ReasonFrom(IAuthorizationHandler handler, string message = "")
-        => new AuthorizationFailureReason(handler, message);
+    private static AuthorizationFailureReason ReasonFrom(
+        IAuthorizationHandler handler,
+        string message = ""
+    ) => new AuthorizationFailureReason(handler, message);
 
     private static HttpContext HttpWithAuthServices()
     {
@@ -33,15 +36,13 @@ public class UserAuthorisationMiddlewareResultHandlerTests
         services.AddLogging();
         services.AddOptions();
 
-        services.AddAuthentication("Test")
-                .AddScheme<AuthenticationSchemeOptions, DummyHandler>("Test", _ => { });
+        services
+            .AddAuthentication("Test")
+            .AddScheme<AuthenticationSchemeOptions, DummyHandler>("Test", _ => { });
 
         services.AddAuthorization(); // not strictly required here, but harmless
 
-        return new DefaultHttpContext
-        {
-            RequestServices = services.BuildServiceProvider()
-        };
+        return new DefaultHttpContext { RequestServices = services.BuildServiceProvider() };
     }
 
     [Fact]
@@ -51,7 +52,11 @@ public class UserAuthorisationMiddlewareResultHandlerTests
         var logger = Substitute.For<ILogger<UserOrganisationAuthorisationHandler>>();
         var http = new DefaultHttpContext();
         var calledNext = false;
-        RequestDelegate next = _ => { calledNext = true; return Task.CompletedTask; };
+        RequestDelegate next = _ =>
+        {
+            calledNext = true;
+            return Task.CompletedTask;
+        };
 
         var failure = ReasonFrom(new UserOrganisationAuthorisationHandler(logger), "No org");
         var authorizeResult = ForbiddenWith(failure);
@@ -74,7 +79,11 @@ public class UserAuthorisationMiddlewareResultHandlerTests
         // Arrange
         var http = HttpWithAuthServices();
         var calledNext = false;
-        RequestDelegate next = _ => { calledNext = true; return Task.CompletedTask; };
+        RequestDelegate next = _ =>
+        {
+            calledNext = true;
+            return Task.CompletedTask;
+        };
 
         // Use an unrelated handler to simulate a different failure reason
         var otherHandler = new DenyAnonymousAuthorizationRequirement(); // just a stand-in
@@ -99,7 +108,11 @@ public class UserAuthorisationMiddlewareResultHandlerTests
         // Arrange
         var http = new DefaultHttpContext();
         var calledNext = false;
-        RequestDelegate next = _ => { calledNext = true; return Task.CompletedTask; };
+        RequestDelegate next = _ =>
+        {
+            calledNext = true;
+            return Task.CompletedTask;
+        };
 
         var authorizeResult = PolicyAuthorizationResult.Success();
         var policy = AnyPolicy();
@@ -124,10 +137,9 @@ public class UserAuthorisationMiddlewareResultHandlerTests
     [Fact]
     public void GetRedirectUrl_With_OtherFailure_ReturnsNull()
     {
-        var fail = AuthorizationFailure.Failed(new[]
-        {
-            ReasonFrom(new StubHandler(), "not org missing")
-        });
+        var fail = AuthorizationFailure.Failed(
+            new[] { ReasonFrom(new StubHandler(), "not org missing") }
+        );
 
         Assert.Null(UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(fail));
     }
@@ -137,12 +149,14 @@ public class UserAuthorisationMiddlewareResultHandlerTests
     {
         var logger = Substitute.For<ILogger<UserOrganisationAuthorisationHandler>>();
 
-        var fail = AuthorizationFailure.Failed(new[]
-        {
-            ReasonFrom(new UserOrganisationAuthorisationHandler(logger), "org missing")
-        });
+        var fail = AuthorizationFailure.Failed(
+            new[] { ReasonFrom(new UserOrganisationAuthorisationHandler(logger), "org missing") }
+        );
 
-        Assert.Equal(UrlConstants.OrgErrorPage, UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(fail));
+        Assert.Equal(
+            UrlConstants.OrgErrorPage,
+            UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(fail)
+        );
     }
 
     // Minimal stub for a non-org handler
@@ -157,8 +171,10 @@ public sealed class DummyHandler : AuthenticationHandler<AuthenticationSchemeOpt
     public DummyHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
-        UrlEncoder encoder) : base(options, logger, encoder) { }
+        UrlEncoder encoder
+    )
+        : base(options, logger, encoder) { }
 
-    protected override Task<AuthenticateResult> HandleAuthenticateAsync()
-        => Task.FromResult(AuthenticateResult.NoResult());
+    protected override Task<AuthenticateResult> HandleAuthenticateAsync() =>
+        Task.FromResult(AuthenticateResult.NoResult());
 }

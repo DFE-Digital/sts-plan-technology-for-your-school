@@ -17,20 +17,20 @@ public static class RouteDataExtensions
     // DefaultPageTitle.
     public static string GetTitleForPage(this RouteData routeData)
     {
-        var sectionSlug = routeData.Values
-            .Where(routePart =>
+        var sectionSlug = routeData
+            .Values.Where(routePart =>
+            {
+                if (routePart.Key == SectionSlugKey)
                 {
-                    if (routePart.Key == SectionSlugKey)
-                    {
-                        return true;
-                    }
-
-                    var routePartValue = routePart.Value as string;
-
-
-                    return !string.IsNullOrEmpty(routePartValue) && routePartValue != "/" && !routePartValue.Any(char.IsNumber);
+                    return true;
                 }
-            )
+
+                var routePartValue = routePart.Value as string;
+
+                return !string.IsNullOrEmpty(routePartValue)
+                    && routePartValue != "/"
+                    && !routePartValue.Any(char.IsNumber);
+            })
             .OrderByDescending(routePart => routePart.Key)
             .Select(routePart => routePart.Value!.ToString())
             .FirstOrDefault();
@@ -43,7 +43,10 @@ public static class RouteDataExtensions
         sectionSlug = string.Concat(sectionSlug[0].ToString().ToUpper(), sectionSlug.AsSpan(1));
 
         //Add white space before every capital letter
-        sectionSlug = string.Concat(sectionSlug.Select(c => char.IsUpper(c) ? " " + c : c.ToString())).Trim();
+        sectionSlug = string.Concat(
+                sectionSlug.Select(c => char.IsUpper(c) ? " " + c : c.ToString())
+            )
+            .Trim();
 
         return sectionSlug;
     }

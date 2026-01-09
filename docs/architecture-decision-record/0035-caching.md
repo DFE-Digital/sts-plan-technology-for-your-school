@@ -1,6 +1,6 @@
 # 0035 - Caching
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -21,7 +21,6 @@ Three primary options were evaluated in the decision-making process:
 
 - [EFCoreSecondLevelCacheInterceptor](https://github.com/VahidN/EFCoreSecondLevelCacheInterceptor)
   - One of the most well used open-source second level caching packages for EF Core
-
 
 ## Decision Outcome
 

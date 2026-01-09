@@ -97,8 +97,17 @@ public class QueryBuildersTests
 
         var kv = qb.QueryStringValues();
         // We expect *some* entries referencing the fields and values we passed in
-        Assert.Contains(kv, p => p.Key.Contains("fields.title") && p.Value.Contains("Alpha", StringComparison.Ordinal));
-        Assert.Contains(kv, p => p.Key.Contains("fields.slug") && p.Value.Contains("intro", StringComparison.Ordinal));
+        Assert.Contains(
+            kv,
+            p =>
+                p.Key.Contains("fields.title")
+                && p.Value.Contains("Alpha", StringComparison.Ordinal)
+        );
+        Assert.Contains(
+            kv,
+            p =>
+                p.Key.Contains("fields.slug") && p.Value.Contains("intro", StringComparison.Ordinal)
+        );
     }
 
     [Fact]
@@ -112,17 +121,21 @@ public class QueryBuildersTests
             // so we set Queries here.
             Queries = new List<ContentfulQuery>
             {
-                new ContentfulQuerySingleValue { Field = "fields.category", Value = "security" }
-            }
+                new ContentfulQuerySingleValue { Field = "fields.category", Value = "security" },
+            },
         };
 
         qb = qb.WithQueries(opts);
 
         var kv = qb.QueryStringValues();
-        Assert.Contains(kv, p => p.Key.Contains("fields.category") && p.Value.Contains("security", StringComparison.Ordinal));
+        Assert.Contains(
+            kv,
+            p =>
+                p.Key.Contains("fields.category")
+                && p.Value.Contains("security", StringComparison.Ordinal)
+        );
     }
 
     // A dummy ContentfulQuery to trigger the default switch branch in WithQuery
     private sealed class UnknownQuery : ContentfulQuery { }
-
 }

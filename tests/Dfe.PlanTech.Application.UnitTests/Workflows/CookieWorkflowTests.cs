@@ -17,20 +17,30 @@ public class CookieWorkflowTests
         return context;
     }
 
-    private static string[] GetSetCookieHeaders(DefaultHttpContext context)
-        => context.Response.Headers.SetCookie.Where(header => !string.IsNullOrWhiteSpace(header)).Cast<string>().ToArray();
+    private static string[] GetSetCookieHeaders(DefaultHttpContext context) =>
+        context
+            .Response.Headers.SetCookie.Where(header => !string.IsNullOrWhiteSpace(header))
+            .Cast<string>()
+            .ToArray();
 
     private static DateTimeOffset? GetExpiresFromHeader(string setCookieHeader)
     {
-        var part = setCookieHeader.Split(';')
-            .FirstOrDefault(p => p.TrimStart()
-                .StartsWith("expires=", StringComparison.InvariantCultureIgnoreCase));
+        var part = setCookieHeader
+            .Split(';')
+            .FirstOrDefault(p =>
+                p.TrimStart().StartsWith("expires=", StringComparison.InvariantCultureIgnoreCase)
+            );
         if (part is null)
             return null;
 
         var value = part.Split('=', 2)[1].Trim();
         // RFC date format is GMT
-        return DateTimeOffset.TryParse(value, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out var dto)
+        return DateTimeOffset.TryParse(
+            value,
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.AdjustToUniversal,
+            out var dto
+        )
             ? dto
             : null;
     }
@@ -41,10 +51,7 @@ public class CookieWorkflowTests
     public void RemoveNonEssentialCookies_Deletes_Only_NonEssential()
     {
         // Arrange: essential prefixes are "keep" and "ess"
-        var options = new CookieWorkflowOptions
-        {
-            EssentialCookies = new[] { "keep", "ess" }
-        };
+        var options = new CookieWorkflowOptions { EssentialCookies = new[] { "keep", "ess" } };
         var workflow = new CookieWorkflow(options);
 
         // Cookies in request: 2 essentials (keep, ess-token), 2 non-essentials (non1, non2)
@@ -59,17 +66,20 @@ public class CookieWorkflowTests
 
         Assert.Contains(setCookies, header => header.StartsWith("non1=", StringComparison.Ordinal));
         Assert.Contains(setCookies, header => header.StartsWith("non2=", StringComparison.Ordinal));
-        Assert.DoesNotContain(setCookies, header => header.StartsWith("keep=", StringComparison.Ordinal));
-        Assert.DoesNotContain(setCookies, header => header.StartsWith("ess-token=", StringComparison.Ordinal));
+        Assert.DoesNotContain(
+            setCookies,
+            header => header.StartsWith("keep=", StringComparison.Ordinal)
+        );
+        Assert.DoesNotContain(
+            setCookies,
+            header => header.StartsWith("ess-token=", StringComparison.Ordinal)
+        );
     }
 
     [Fact]
     public void RemoveNonEssentialCookies_Writes_Empty_Value_Past_Expiry_Secure_HttpOnly()
     {
-        var options = new CookieWorkflowOptions
-        {
-            EssentialCookies = new[] { "keep" }
-        };
+        var options = new CookieWorkflowOptions { EssentialCookies = new[] { "keep" } };
         var workflow = new CookieWorkflow(options);
 
         // nonessential cookie 'x'; essential cookie 'keep'
@@ -93,10 +103,7 @@ public class CookieWorkflowTests
     [Fact]
     public void RemoveNonEssentialCookies_No_Request_Cookies_Writes_Nothing()
     {
-        var options = new CookieWorkflowOptions
-        {
-            EssentialCookies = ["keep"]
-        };
+        var options = new CookieWorkflowOptions { EssentialCookies = ["keep"] };
         var workflow = new CookieWorkflow(options);
 
         var context = ContextWithCookieHeader(string.Empty);
@@ -113,7 +120,7 @@ public class CookieWorkflowTests
         // so matching is case-sensitive. Prefix "Keep" will NOT match "keepX".
         var options = new CookieWorkflowOptions
         {
-            EssentialCookies = new[] { "Keep" } // note capital K
+            EssentialCookies = new[] { "Keep" }, // note capital K
         };
         var workflow = new CookieWorkflow(options);
 
@@ -123,19 +130,22 @@ public class CookieWorkflowTests
 
         var setCookies = GetSetCookieHeaders(context);
         // 'keepX' should be treated as NON-essential (prefix mismatch) -> deleted
-        Assert.Contains(setCookies, header => header.StartsWith("keepX=", StringComparison.Ordinal));
+        Assert.Contains(
+            setCookies,
+            header => header.StartsWith("keepX=", StringComparison.Ordinal)
+        );
         // 'KeepY' starts with "Keep" (exact case) -> essential -> NOT deleted
-        Assert.DoesNotContain(setCookies, header => header.StartsWith("KeepY=", StringComparison.Ordinal));
+        Assert.DoesNotContain(
+            setCookies,
+            header => header.StartsWith("KeepY=", StringComparison.Ordinal)
+        );
     }
 
     [Fact]
     public void RemoveNonEssentialCookies_Prefix_Match_Not_Exact_Name()
     {
         // Ensure prefix logic applies, not full-name matching
-        var options = new CookieWorkflowOptions
-        {
-            EssentialCookies = new[] { "__Host-" }
-        };
+        var options = new CookieWorkflowOptions { EssentialCookies = new[] { "__Host-" } };
         var workflow = new CookieWorkflow(options);
 
         var context = ContextWithCookieHeader("__Host-Auth=1; __Host-Session=2; other=3");
@@ -147,5 +157,4 @@ public class CookieWorkflowTests
         Assert.Single(setCookies);
         Assert.StartsWith("other=", setCookies[0], StringComparison.Ordinal);
     }
-
 }

@@ -1,9 +1,9 @@
-import "dotenv/config";
+import 'dotenv/config';
 
-import importContentfulData from "./helpers/import-content";
+import importContentfulData from './helpers/import-content';
 
 importContentfulData()
-    .then(() => console.log("Import completed successfully"))
-    .catch((error) => {
-        console.error("Error during import:", error);
-    });
+  .then(() => console.log('Import completed successfully'))
+  .catch((error) => {
+    console.error('Error during import:', error);
+  });

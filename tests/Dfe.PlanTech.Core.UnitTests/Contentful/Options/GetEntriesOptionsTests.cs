@@ -10,8 +10,8 @@ public class GetEntriesOptionsTests
     {
         var opts = new GetEntriesOptions();
 
-        Assert.Equal(1, opts.Page);          // default page
-        Assert.Equal(2, opts.Include);       // default include
+        Assert.Equal(1, opts.Page); // default page
+        Assert.Equal(2, opts.Include); // default include
         Assert.Null(opts.Limit);
         Assert.Null(opts.Select);
         Assert.Null(opts.Queries);
@@ -28,8 +28,9 @@ public class GetEntriesOptionsTests
     [Fact]
     public void Ctor_With_Queries_Sets_Queries_And_Leaves_Include_Default()
     {
-        var queries = new List<ContentfulQuery> {
-            new ContentfulQuerySingleValue { Field = "fields.slug", Value = "about" }
+        var queries = new List<ContentfulQuery>
+        {
+            new ContentfulQuerySingleValue { Field = "fields.slug", Value = "about" },
         };
 
         var opts = new GetEntriesOptions(queries);
@@ -40,8 +41,9 @@ public class GetEntriesOptionsTests
     [Fact]
     public void Ctor_With_Include_And_Queries_Sets_Both()
     {
-        var queries = new List<ContentfulQuery> {
-            new ContentfulQuerySingleValue { Field = "fields.type", Value = "page" }
+        var queries = new List<ContentfulQuery>
+        {
+            new ContentfulQuerySingleValue { Field = "fields.type", Value = "page" },
         };
 
         var opts = new GetEntriesOptions(include: 4, queries);
@@ -62,10 +64,7 @@ public class GetEntriesOptionsTests
     [Fact]
     public void Serialize_Emits_Select_CommaJoined_In_Brackets()
     {
-        var opts = new GetEntriesOptions(include: 2)
-        {
-            Select = new[] { "fields.title", "sys" }
-        };
+        var opts = new GetEntriesOptions(include: 2) { Select = new[] { "fields.title", "sys" } };
 
         var s = opts.SerializeToRedisFormat();
 
@@ -80,8 +79,12 @@ public class GetEntriesOptionsTests
             Queries = new List<ContentfulQuery>
             {
                 new ContentfulQuerySingleValue { Field = "fields.slug", Value = "intro" },
-                new ContentfulQueryMultipleValues { Field = "fields.tags", Value = new[] { "a", "b", "c" } }
-            }
+                new ContentfulQueryMultipleValues
+                {
+                    Field = "fields.tags",
+                    Value = new[] { "a", "b", "c" },
+                },
+            },
         };
 
         var s = opts.SerializeToRedisFormat();
@@ -106,8 +109,8 @@ public class GetEntriesOptionsTests
             Select = new[] { "fields.id" },
             Queries = new List<ContentfulQuery>
             {
-                new ContentfulQuerySingleValue { Field = "fields.type", Value = "page" }
-            }
+                new ContentfulQuerySingleValue { Field = "fields.type", Value = "page" },
+            },
         };
 
         var s = opts.SerializeToRedisFormat();
@@ -121,7 +124,7 @@ public class GetEntriesOptionsTests
         var opts = new GetEntriesOptions(include: 2)
         {
             Select = new string[0],
-            Queries = new List<ContentfulQuery>() // empty
+            Queries = new List<ContentfulQuery>(), // empty
         };
 
         var s = opts.SerializeToRedisFormat();
@@ -140,7 +143,12 @@ public class GetEntriesOptionsTests
             // Using object initializer: they are 'init' so assign at creation
         };
         // Workaround to set init-only in test: create via new and object init
-        opts = new GetEntriesOptions(include: 9) { Select = new[] { "sys" }, Limit = 50, Page = 3 };
+        opts = new GetEntriesOptions(include: 9)
+        {
+            Select = new[] { "sys" },
+            Limit = 50,
+            Page = 3,
+        };
 
         var s = opts.SerializeToRedisFormat();
 

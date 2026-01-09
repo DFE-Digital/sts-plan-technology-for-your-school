@@ -19,7 +19,7 @@ public class UserRepository : IUserRepository
         var userEntity = new UserEntity
         {
             DfeSignInRef = dfeSignInReference,
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
 
         await _db.Users.AddAsync(userEntity);

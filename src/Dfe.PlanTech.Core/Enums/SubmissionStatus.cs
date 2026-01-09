@@ -9,5 +9,5 @@ public enum SubmissionStatus
     CompleteReviewed,
     Inaccessible,
     Obsolete,
-    RetrievalError
+    RetrievalError,
 }

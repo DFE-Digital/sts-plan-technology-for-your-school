@@ -7,9 +7,8 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
 {
     private UserRepository _repository = null!;
 
-    public UserRepositoryTests(DatabaseFixture fixture) : base(fixture)
-    {
-    }
+    public UserRepositoryTests(DatabaseFixture fixture)
+        : base(fixture) { }
 
     public override async Task InitializeAsync()
     {
@@ -47,7 +46,7 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
         var user = new UserEntity
         {
             DfeSignInRef = "existing-user-456",
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();
@@ -75,15 +74,25 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
     public async Task UserRepository_GetUserByAsync_WhenPredicateMatches_ThenFiltersAndReturnsUser()
     {
         // Arrange
-        var user1 = new UserEntity { DfeSignInRef = "user-alpha", DateCreated = DateTime.UtcNow.AddDays(-5) };
-        var user2 = new UserEntity { DfeSignInRef = "user-beta", DateCreated = DateTime.UtcNow.AddDays(-1) };
+        var user1 = new UserEntity
+        {
+            DfeSignInRef = "user-alpha",
+            DateCreated = DateTime.UtcNow.AddDays(-5),
+        };
+        var user2 = new UserEntity
+        {
+            DfeSignInRef = "user-beta",
+            DateCreated = DateTime.UtcNow.AddDays(-1),
+        };
         var user3 = new UserEntity { DfeSignInRef = "user-gamma", DateCreated = DateTime.UtcNow };
 
         DbContext.Users.AddRange(user1, user2, user3);
         await DbContext.SaveChangesAsync();
 
         // Act - Find user created more than 2 days ago
-        var result = await _repository.GetUserByAsync(u => u.DateCreated < DateTime.UtcNow.AddDays(-2));
+        var result = await _repository.GetUserByAsync(u =>
+            u.DateCreated < DateTime.UtcNow.AddDays(-2)
+        );
 
         // Assert
         Assert.NotNull(result);
@@ -129,7 +138,7 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
         var user = new UserEntity
         {
             DfeSignInRef = "CaseSensitiveUser",
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
         DbContext.Users.Add(user);
         await DbContext.SaveChangesAsync();

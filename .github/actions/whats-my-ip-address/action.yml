@@ -15,44 +15,44 @@ runs:
       id: whats-my-ip
       run: |
         # Resolving IP Address
-        
+
         # Function for unbuffered echo
         function unbuffered_echo {
             stdbuf -o 0 echo "$1"
         }
-        
+
         # Maximum number of tries
         max_tries=10
-        
+
         # Delay between tries in seconds
         delay=0
 
         #Curl Timeout
         curl_timeout=30
-        
+
         for try in $(seq $max_tries); do
             # Make a GET request to the API
             response=$(curl --fail -m $curl_timeout -s https://api.ipify.org?format=json || true)
 
             unbuffered_echo "Response: $response"
-        
-            # Extract the IP address from the JSON response 
+
+            # Extract the IP address from the JSON response
             ip=$(echo $response | jq -r '.ip')
-        
+
             # If the request was successful, print the IP and exit
             if [[ $ip =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
                 unbuffered_echo "IP Address: $ip"
-                echo "ip=$ip" >> $GITHUB_OUTPUT 
+                echo "ip=$ip" >> $GITHUB_OUTPUT
                 exit 0
             fi
-        
+
             # If the request failed, wait and then try again
             unbuffered_echo "Attempt $try failed, retrying in $delay seconds..."
             sleep $delay
 
             delay=$((delay + 2))
         done
-        
+
         # If we reach this point, all attempts have failed
         unbuffered_echo "Failed to retrieve IP after $max_tries attempts."
         exit 1

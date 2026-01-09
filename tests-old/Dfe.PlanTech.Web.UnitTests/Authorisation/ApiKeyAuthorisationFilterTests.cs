@@ -11,6 +11,4 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Authorisation;
 
-public class ApiKeyAuthorisationFilterTests
-{
-    }
+public class ApiKeyAuthorisationFilterTests { }

@@ -14,11 +14,7 @@ public class ListItemRendererTests
     {
         const string listItemValue = "List item one";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = listItemValue,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = listItemValue };
 
         var renderer = new ListItemRenderer();
 
@@ -33,7 +29,7 @@ public class ListItemRendererTests
         var content = new RichTextContentField()
         {
             NodeType = "paragraph",
-            Value = "paragraph text"
+            Value = "paragraph text",
         };
 
         var renderer = new ListItemRenderer();
@@ -47,15 +43,14 @@ public class ListItemRendererTests
     public void Should_CreateListItem_When_PassedValidData()
     {
         var renderer = new ListItemRenderer();
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string listItemValue = "List item one";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = listItemValue,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = listItemValue };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 

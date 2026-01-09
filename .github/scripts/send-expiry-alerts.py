@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from notifications_python_client.notifications import NotificationsAPIClient
 from pathlib import Path
 
-ENVIRONMENT = os.environ.get("ENVIRONMENT") 
+ENVIRONMENT = os.environ.get("ENVIRONMENT")
 NOTIFICATIONS_API_KEY = os.environ.get("NOTIFICATIONS_API_KEY")
 RECIPIENT_ADDRESSES = os.environ.get("RECIPIENT_ADDRESSES")
 
@@ -21,11 +21,11 @@ def send_email(recipient_addresses, secret_expiry_details: str) -> None:
     if not recipient_addresses:
         print("⚠️  No recipient addresses configured, skipping email.")
         return
-    
+
     personalisation = {
         "secret expiry details": secret_expiry_details
     }
-    
+
     notifications_client = NotificationsAPIClient(NOTIFICATIONS_API_KEY)
 
     try:
@@ -64,10 +64,10 @@ for secret in all_secrets:
             secret_expiry_details += f"{secret['name']} expired on {expiry_date}. Please rotate it ASAP.\n"
         else:
             secret_expiry_details += f"{secret['name']} will expire in {days_left} days on {expiry_date}.\n"
-        
+
         if "vault" in secret:
             secret_expiry_details += f"Vault: {secret['vault']}\n"
-        
+
         secret_expiry_details += "\n"
 
 if secret_expiry_details == "":

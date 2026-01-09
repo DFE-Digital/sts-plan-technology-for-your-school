@@ -5,7 +5,7 @@ on:
     inputs:
       environment:
         type: string
-        description: "The environment to run terraform plan against:"
+        description: 'The environment to run terraform plan against:'
         required: true
   workflow_call:
     inputs:
@@ -23,14 +23,14 @@ env:
 
   TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
   TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
-  TF_BACKEND_KEY: "terraform-dns.tfstate"
+  TF_BACKEND_KEY: 'terraform-dns.tfstate'
   TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
 
   TF_VAR_project_name: ${{ secrets.DFE_PROJECT_NAME }}
   TF_VAR_environment: ${{ secrets.AZ_ENVIRONMENT }}
   TF_VAR_azure_location: ${{ vars.AZ_LOCATION }}
-  TF_VAR_primary_fqdn: "plan-technology-for-your-school.education.gov.uk"
-  TF_VAR_subdomains: "staging"
+  TF_VAR_primary_fqdn: 'plan-technology-for-your-school.education.gov.uk'
+  TF_VAR_subdomains: 'staging'
 
   TF_WORKING_DIRECTORY: terraform/dns-zone
 

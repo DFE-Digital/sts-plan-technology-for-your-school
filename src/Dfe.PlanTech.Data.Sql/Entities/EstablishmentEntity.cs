@@ -30,7 +30,7 @@ public class EstablishmentEntity
             OrgName = OrgName,
             GroupUid = GroupUid,
             DateCreated = DateCreated,
-            DateLastUpdated = DateLastUpdated
+            DateLastUpdated = DateLastUpdated,
         };
     }
 }

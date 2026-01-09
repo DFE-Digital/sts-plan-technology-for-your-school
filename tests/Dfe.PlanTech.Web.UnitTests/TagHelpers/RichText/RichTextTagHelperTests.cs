@@ -17,19 +17,23 @@ public class RichTextTagHelperTests
         var loggerSubstitute = Substitute.For<ILogger<RichTextTagHelper>>();
         var richTextRendererSubstitute = Substitute.For<IRichTextRenderer>();
 
-        var context = new TagHelperContext(tagName: "rich-text",
-                                                allAttributes: new TagHelperAttributeList(),
-                                                items: new Dictionary<object, object>(),
-                                                uniqueId: "richtext-test");
+        var context = new TagHelperContext(
+            tagName: "rich-text",
+            allAttributes: new TagHelperAttributeList(),
+            items: new Dictionary<object, object>(),
+            uniqueId: "richtext-test"
+        );
 
-        var output = new TagHelperOutput("rich-text-tag",
-                                        attributes: new TagHelperAttributeList(),
-                                        getChildContentAsync: (useCachedResult, encoder) =>
-                                        {
-                                            var tagHelperContent = new DefaultTagHelperContent();
-                                            tagHelperContent.SetContent(content);
-                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
-                                        });
+        var output = new TagHelperOutput(
+            "rich-text-tag",
+            attributes: new TagHelperAttributeList(),
+            getChildContentAsync: (useCachedResult, encoder) =>
+            {
+                var tagHelperContent = new DefaultTagHelperContent();
+                tagHelperContent.SetContent(content);
+                return Task.FromResult<TagHelperContent>(tagHelperContent);
+            }
+        );
 
         var richTextTagHelper = new RichTextTagHelper(loggerSubstitute, richTextRendererSubstitute);
 
@@ -48,26 +52,27 @@ public class RichTextTagHelperTests
         var richTextRendererSubstitute = Substitute.For<IRichTextRenderer>();
         richTextRendererSubstitute.ToHtml(Arg.Any<RichTextContentField>()).Returns(expectedHtml);
 
-        var context = new TagHelperContext(tagName: "rich-text",
-                                            allAttributes: new TagHelperAttributeList(),
-                                            items: new Dictionary<object, object>(),
-                                            uniqueId: "richtext-test");
+        var context = new TagHelperContext(
+            tagName: "rich-text",
+            allAttributes: new TagHelperAttributeList(),
+            items: new Dictionary<object, object>(),
+            uniqueId: "richtext-test"
+        );
 
-        var output = new TagHelperOutput("rich-text-tag",
-                                        attributes: new TagHelperAttributeList(),
-                                        getChildContentAsync: (useCachedResult, encoder) =>
-                                        {
-                                            var tagHelperContent = new DefaultTagHelperContent();
-                                            tagHelperContent.SetContent(content);
-                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
-                                        });
+        var output = new TagHelperOutput(
+            "rich-text-tag",
+            attributes: new TagHelperAttributeList(),
+            getChildContentAsync: (useCachedResult, encoder) =>
+            {
+                var tagHelperContent = new DefaultTagHelperContent();
+                tagHelperContent.SetContent(content);
+                return Task.FromResult<TagHelperContent>(tagHelperContent);
+            }
+        );
 
         var richTextTagHelper = new RichTextTagHelper(loggerSubstitute, richTextRendererSubstitute)
         {
-            Content = new RichTextContentField()
-            {
-                Value = expectedHtml
-            }
+            Content = new RichTextContentField() { Value = expectedHtml },
         };
 
         await richTextTagHelper.ProcessAsync(context, output);

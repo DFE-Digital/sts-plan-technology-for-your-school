@@ -48,7 +48,8 @@ public abstract class DatabaseIntegrationTestBase : IAsyncLifetime
     /// Helper method to count entities of a specific type within the current transaction.
     /// Useful for verifying CRUD operations without relying on specific ID values.
     /// </summary>
-    protected async Task<int> CountEntitiesAsync<T>() where T : class
+    protected async Task<int> CountEntitiesAsync<T>()
+        where T : class
     {
         return await DbContext.Set<T>().CountAsync();
     }

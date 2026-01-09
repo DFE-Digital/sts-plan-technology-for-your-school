@@ -31,13 +31,13 @@ import contentfulManagement from "contentful-management";
  * @param {ClientAPI} client
  */
 export async function validateEnvironment(client) {
-    const space = await client.getSpace(process.env.SPACE_ID);
-    const environments = await space.getEnvironments();
+  const space = await client.getSpace(process.env.SPACE_ID);
+  const environments = await space.getEnvironments();
 
-    const validNames = environments.items.map((env) => env.name);
-    if (!validNames.includes(process.env.ENVIRONMENT)) {
-        throw new Error(`Invalid Contentful environment`);
-    }
+  const validNames = environments.items.map((env) => env.name);
+  if (!validNames.includes(process.env.ENVIRONMENT)) {
+    throw new Error(`Invalid Contentful environment`);
+  }
 }
 
 /**
@@ -45,15 +45,15 @@ export async function validateEnvironment(client) {
  * @returns {ClientAPI}
  */
 export async function getClient() {
-    const client = contentfulManagement.createClient({
-        accessToken: process.env.MANAGEMENT_TOKEN
-    });
+  const client = contentfulManagement.createClient({
+    accessToken: process.env.MANAGEMENT_TOKEN
+  });
 
-    await validateEnvironment(client);
+  await validateEnvironment(client);
 
-    const space = await client.getSpace(process.env.SPACE_ID);
-    const environment = await space.getEnvironment(process.env.ENVIRONMENT);
-    return environment;
+  const space = await client.getSpace(process.env.SPACE_ID);
+  const environment = await space.getEnvironment(process.env.ENVIRONMENT);
+  return environment;
 }
 
 /**
@@ -61,8 +61,8 @@ export async function getClient() {
  * @returns {Promise<ClientAPI>}
  */
 export async function getAndValidateClient() {
-    const client = await getClient();
-    return client;
+  const client = await getClient();
+  return client;
 }
 
 export default getAndValidateClient;

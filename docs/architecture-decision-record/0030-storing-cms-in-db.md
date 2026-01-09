@@ -1,10 +1,10 @@
 # 0030 - Storing CMS Data In Database
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
-The context of this decision is whether to store CMS data in a database and if so, how to do it effectively. 
+The context of this decision is whether to store CMS data in a database and if so, how to do it effectively.
 
 ## Decision Drivers
 
@@ -12,7 +12,7 @@ The context of this decision is whether to store CMS data in a database and if s
 - Speed: moving to a database-only approach would be faster as the database will be hosted in the same environment as the web app.
 - Efficiency: improving request efficiency and implementing caching would greatly enhance the performance of the system.
 - Development: more infrastructure components means more points of failure.
-  
+
 ## Considered Options
 
 ### Storing Data in the Database
@@ -68,4 +68,3 @@ We could create new infrastructure in Azure that uses queue(s) to have an asynch
 After considering the pros and cons of each solution, we have decided to store our CMS data in the existing database using Azure Functions and Azure Service Bus (for queueing), and whatever other infrastructure is required. This approach will be more efficient and faster than the existing approach, and it will also remove the possible Contentful rate limit that we might hit in the next phase of the service.
 
 By having an asynchronous process as architected, it minimizes the risk of data loss, as it reduces the chances of errors. Although this approach is slightly more complex and costly, it is worth the investment as it will improve the system's performance and efficiency.
-

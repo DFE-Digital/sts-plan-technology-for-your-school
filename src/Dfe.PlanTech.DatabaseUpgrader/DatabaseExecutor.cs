@@ -13,7 +13,8 @@ public class DatabaseExecutor
     private readonly Options _options;
 
     private const string SCRIPTS_NAMESPACE = "Dfe.PlanTech.DatabaseUpgrader.Scripts";
-    private const string ENVIRONMENT_SPECIFIC_SCRIPTS_NAMESPACE = "Dfe.PlanTech.DatabaseUpgrader.EnvironmentSpecificScripts";
+    private const string ENVIRONMENT_SPECIFIC_SCRIPTS_NAMESPACE =
+        "Dfe.PlanTech.DatabaseUpgrader.EnvironmentSpecificScripts";
     private const int EXECUTION_TIMEOUT_MINUTES = 10;
 
     public DatabaseExecutor(Options options, Logger logger)
@@ -35,20 +36,28 @@ public class DatabaseExecutor
     {
         var executingAssembley = Assembly.GetExecutingAssembly();
 
-        var engine = DeployChanges.To.SqlDatabase(_options.DatabaseConnectionString)
-                                      .WithScriptsEmbeddedInAssembly(executingAssembley, ScriptNamespaceMatches(SCRIPTS_NAMESPACE));
+        var engine = DeployChanges
+            .To.SqlDatabase(_options.DatabaseConnectionString)
+            .WithScriptsEmbeddedInAssembly(
+                executingAssembley,
+                ScriptNamespaceMatches(SCRIPTS_NAMESPACE)
+            );
 
         AddSqlParameters(engine);
         AddEnvironmentSpecificScripts(executingAssembley, engine);
 
-        return engine.LogToConsole()
-        .LogScriptOutput()
-        .WithTransaction()
-        .WithExecutionTimeout(TimeSpan.FromMinutes(EXECUTION_TIMEOUT_MINUTES))
-        .Build();
+        return engine
+            .LogToConsole()
+            .LogScriptOutput()
+            .WithTransaction()
+            .WithExecutionTimeout(TimeSpan.FromMinutes(EXECUTION_TIMEOUT_MINUTES))
+            .Build();
     }
 
-    private void AddEnvironmentSpecificScripts(Assembly executingAssembley, UpgradeEngineBuilder engine)
+    private void AddEnvironmentSpecificScripts(
+        Assembly executingAssembley,
+        UpgradeEngineBuilder engine
+    )
     {
         foreach (var environment in _options.Environments)
         {
@@ -69,11 +78,15 @@ public class DatabaseExecutor
         }
     }
 
-    private static Func<string, bool> ScriptNamespaceMatches(string expectedStartsWith)
-     => scriptNamespace => scriptNamespace.StartsWith(expectedStartsWith, StringComparison.InvariantCultureIgnoreCase);
+    private static Func<string, bool> ScriptNamespaceMatches(string expectedStartsWith) =>
+        scriptNamespace =>
+            scriptNamespace.StartsWith(
+                expectedStartsWith,
+                StringComparison.InvariantCultureIgnoreCase
+            );
 
-    private static string GetNamespaceForEnvironment(string environment)
-     => string.Format("{0}.{1}", ENVIRONMENT_SPECIFIC_SCRIPTS_NAMESPACE, environment);
+    private static string GetNamespaceForEnvironment(string environment) =>
+        string.Format("{0}.{1}", ENVIRONMENT_SPECIFIC_SCRIPTS_NAMESPACE, environment);
 
     private bool TryExecute(UpgradeEngine upgrader)
     {
@@ -82,15 +95,18 @@ public class DatabaseExecutor
         if (result.Successful)
             return true;
 
-        _logger.DisplayErrors("The database migration was not successful.", result.Error.Message, result.Error.StackTrace);
+        _logger.DisplayErrors(
+            "The database migration was not successful.",
+            result.Error.Message,
+            result.Error.StackTrace
+        );
         return false;
     }
 
-    private static RetryPolicy SetupRetryPolicy() => Policy.Handle<Exception>().WaitAndRetry(
-          new[]
-          {
-                TimeSpan.FromMinutes(1),
-                TimeSpan.FromMinutes(2),
-                TimeSpan.FromMinutes(3)
-          });
+    private static RetryPolicy SetupRetryPolicy() =>
+        Policy
+            .Handle<Exception>()
+            .WaitAndRetry(
+                new[] { TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(3) }
+            );
 }

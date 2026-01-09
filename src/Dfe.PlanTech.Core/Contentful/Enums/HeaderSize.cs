@@ -6,5 +6,5 @@ public enum HeaderSize
     Small,
     Medium,
     Large,
-    ExtraLarge
+    ExtraLarge,
 }

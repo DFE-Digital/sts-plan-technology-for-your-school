@@ -13,10 +13,7 @@ public class EstablishmentDtoTests
             Ukprn = "UkPrn",
             Urn = null,
             OrgName = "Establishment",
-            Type = new EstablishmentTypeDto()
-            {
-                Name = "Establishment Type"
-            }
+            Type = new EstablishmentTypeDto() { Name = "Establishment Type" },
         };
 
         Assert.True(establishment.IsValid);
@@ -31,10 +28,7 @@ public class EstablishmentDtoTests
             Ukprn = ukprn,
             Urn = null,
             OrgName = "Establishment",
-            Type = new EstablishmentTypeDto()
-            {
-                Name = "Establishment Type"
-            }
+            Type = new EstablishmentTypeDto() { Name = "Establishment Type" },
         };
 
         Assert.Equal(ukprn, establishment.Reference);
@@ -48,10 +42,7 @@ public class EstablishmentDtoTests
             Ukprn = null,
             Urn = "Urn",
             OrgName = "Establishment",
-            Type = new EstablishmentTypeDto()
-            {
-                Name = "Establishment Type"
-            }
+            Type = new EstablishmentTypeDto() { Name = "Establishment Type" },
         };
 
         Assert.True(establishment.IsValid);
@@ -66,10 +57,7 @@ public class EstablishmentDtoTests
             Ukprn = null,
             Urn = urn,
             OrgName = "Establishment",
-            Type = new EstablishmentTypeDto()
-            {
-                Name = "Establishment Type"
-            }
+            Type = new EstablishmentTypeDto() { Name = "Establishment Type" },
         };
 
         Assert.Equal(urn, establishment.Reference);
@@ -83,15 +71,11 @@ public class EstablishmentDtoTests
             Ukprn = null,
             Urn = null,
             OrgName = "Establishment",
-            Type = new EstablishmentTypeDto()
-            {
-                Name = "Establishment Type"
-            }
+            Type = new EstablishmentTypeDto() { Name = "Establishment Type" },
         };
 
         Assert.False(establishment.IsValid);
     }
-
 
     [Fact]
     public void Should_Return_Invalid_When_Ids_Empty()
@@ -101,10 +85,7 @@ public class EstablishmentDtoTests
             Ukprn = "",
             Urn = "",
             OrgName = "Establishment",
-            Type = new EstablishmentTypeDto()
-            {
-                Name = "Establishment Type"
-            }
+            Type = new EstablishmentTypeDto() { Name = "Establishment Type" },
         };
 
         Assert.False(establishment.IsValid);
@@ -118,10 +99,7 @@ public class EstablishmentDtoTests
             Ukprn = null,
             Urn = null,
             OrgName = "Establishment",
-            Type = new EstablishmentTypeDto()
-            {
-                Name = "Establishment Type"
-            }
+            Type = new EstablishmentTypeDto() { Name = "Establishment Type" },
         };
 
         Assert.ThrowsAny<Exception>(() =>
@@ -138,10 +116,7 @@ public class EstablishmentDtoTests
             Ukprn = "",
             Urn = "",
             OrgName = "Establishment",
-            Type = new EstablishmentTypeDto()
-            {
-                Name = "Establishment Type"
-            }
+            Type = new EstablishmentTypeDto() { Name = "Establishment Type" },
         };
 
         Assert.ThrowsAny<Exception>(() =>
@@ -149,5 +124,4 @@ public class EstablishmentDtoTests
             var refrence = establishment.Reference;
         });
     }
-
 }

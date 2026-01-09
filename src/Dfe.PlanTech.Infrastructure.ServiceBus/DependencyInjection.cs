@@ -26,29 +26,51 @@ public static class DependencyInjection
     /// <param name="services"></param>
     /// <param name="configuration"></param>
     /// <returns></returns>
-    public static IServiceCollection AddDbWriterServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDbWriterServices(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
-        services.AddServiceBusServices(configuration)
-            .AddMessageRetryHandler();
+        services.AddServiceBusServices(configuration).AddMessageRetryHandler();
 
         services.AddTransient<IWebHookMessageProcessor, CmsWebHookMessageProcessor>();
-        services.AddSingleton(new JsonSerializerOptions()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
-        });
+        services.AddSingleton(
+            new JsonSerializerOptions()
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) },
+            }
+        );
 
         return services;
     }
 
-    private static IServiceCollection AddServiceBusServices(this IServiceCollection services, IConfiguration configuration)
+    private static IServiceCollection AddServiceBusServices(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         services.AddAzureClients(builder =>
         {
             builder.AddServiceBusClient(configuration.GetConnectionString("ServiceBus"));
 
-            builder.AddClient<ServiceBusProcessor, ServiceBusClientOptions>((_, _, provider) => provider.GetService<ServiceBusClient>()!.CreateProcessor("contentful", new ServiceBusProcessorOptions() { PrefetchCount = 10 })).WithName("contentfulprocessor");
-            builder.AddClient<ServiceBusSender, ServiceBusClientOptions>((_, _, provider) => provider.GetService<ServiceBusClient>()!.CreateSender("contentful")).WithName("contentfulsender");
+            builder
+                .AddClient<ServiceBusProcessor, ServiceBusClientOptions>(
+                    (_, _, provider) =>
+                        provider
+                            .GetService<ServiceBusClient>()!
+                            .CreateProcessor(
+                                "contentful",
+                                new ServiceBusProcessorOptions() { PrefetchCount = 10 }
+                            )
+                )
+                .WithName("contentfulprocessor");
+            builder
+                .AddClient<ServiceBusSender, ServiceBusClientOptions>(
+                    (_, _, provider) =>
+                        provider.GetService<ServiceBusClient>()!.CreateSender("contentful")
+                )
+                .WithName("contentfulsender");
 
             builder.UseCredential(new DefaultAzureCredential());
         });
@@ -59,17 +81,24 @@ public static class DependencyInjection
         services.AddTransient<IQueueWriter, QueueWriter>();
         services.AddTransient<IWriteCmsWebhookToQueueCommand, WriteCmsWebhookToQueueCommand>();
 
-        services.Configure<ServiceBusOptions>(configuration.GetRequiredSection(ConfigurationConstants.ServiceBusOptions));
+        services.Configure<ServiceBusOptions>(
+            configuration.GetRequiredSection(ConfigurationConstants.ServiceBusOptions)
+        );
         return services;
     }
 
     private static IServiceCollection AddMessageRetryHandler(this IServiceCollection services)
     {
-        services.AddOptions<MessageRetryHandlingOptions>()
-                .Configure<IConfiguration>((settings, configuration) =>
+        services
+            .AddOptions<MessageRetryHandlingOptions>()
+            .Configure<IConfiguration>(
+                (settings, configuration) =>
                 {
-                    configuration.GetSection(ConfigurationConstants.MessageRetryHandlingOptions).Bind(settings);
-                });
+                    configuration
+                        .GetSection(ConfigurationConstants.MessageRetryHandlingOptions)
+                        .Bind(settings);
+                }
+            );
 
         services.AddTransient<IMessageRetryHandler, MessageRetryHandler>();
         return services;

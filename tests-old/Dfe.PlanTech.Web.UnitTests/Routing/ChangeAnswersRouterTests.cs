@@ -21,16 +21,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
     public class ChangeAnswersRouterTests
     {
         private readonly IGetPageQuery _getPageQuery = Substitute.For<IGetPageQuery>();
-        private readonly IProcessSubmissionResponsesCommand _processCommand = Substitute.For<IProcessSubmissionResponsesCommand>();
+        private readonly IProcessSubmissionResponsesCommand _processCommand =
+            Substitute.For<IProcessSubmissionResponsesCommand>();
         private readonly IUser _user = Substitute.For<IUser>();
-        private readonly ISubmissionStatusProcessor _statusProcessor = Substitute.For<ISubmissionStatusProcessor>();
-        private readonly ISubmissionCommand _submissionCommand = Substitute.For<ISubmissionCommand>();
+        private readonly ISubmissionStatusProcessor _statusProcessor =
+            Substitute.For<ISubmissionStatusProcessor>();
+        private readonly ISubmissionCommand _submissionCommand =
+            Substitute.For<ISubmissionCommand>();
         private readonly IPlanTechDbContext _dbContext = Substitute.For<IPlanTechDbContext>();
         private IGetLatestResponsesQuery _responsesQuery;
 
-        private readonly ChangeAnswersController _controller = new(new NullLogger<ChangeAnswersController>(), Substitute.For<IUser>())
+        private readonly ChangeAnswersController _controller = new(
+            new NullLogger<ChangeAnswersController>(),
+            Substitute.For<IUser>()
+        )
         {
-            ControllerContext = ControllerHelpers.SubstituteControllerContext()
+            ControllerContext = ControllerHelpers.SubstituteControllerContext(),
         };
 
         private readonly ChangeAnswersRouter _router;
@@ -48,7 +54,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
             SectionName = "Test Section",
             EstablishmentId = 100,
             Status = SubmissionStatus.InProgress.ToString(),
-            Responses = new List<Response>()
+            Responses = new List<Response>(),
         };
 
         private readonly Submission LatestCompletedSubmission = new()
@@ -60,7 +66,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
             Status = SubmissionStatus.CompleteReviewed.ToString(),
             Completed = true,
             DateCreated = DateTime.UtcNow.AddDays(-1),
-            Responses = new List<Response>()
+            Responses = new List<Response>(),
         };
 
         private readonly Submission ClonedSubmission = new()
@@ -70,19 +76,26 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
             SectionName = "Test Section",
             EstablishmentId = 100,
             Status = SubmissionStatus.InProgress.ToString(),
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
 
         public ChangeAnswersRouterTests()
         {
-            _router = new ChangeAnswersRouter(_getPageQuery, _processCommand, _user, _statusProcessor, _responsesQuery!, _submissionCommand);
+            _router = new ChangeAnswersRouter(
+                _getPageQuery,
+                _processCommand,
+                _user,
+                _statusProcessor,
+                _responsesQuery!,
+                _submissionCommand
+            );
             _responsesQuery = new GetLatestResponsesQuery(_dbContext);
 
             _section = new Section
             {
                 Name = "Test Section",
                 Sys = new() { Id = "section-id" },
-                Questions = new List<Question> { new Question { Slug = "q1" } }
+                Questions = new List<Question> { new Question { Slug = "q1" } },
             };
 
             _responsesDto = new SubmissionResponsesDto
@@ -90,8 +103,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
                 SubmissionId = 123,
                 Responses = new List<QuestionWithAnswer>
                 {
-                    new QuestionWithAnswer { QuestionSysId = "q1", AnswerSysId = "a1" }
-                }
+                    new QuestionWithAnswer { QuestionSysId = "q1", AnswerSysId = "a1" },
+                },
             };
 
             _statusProcessor.Section.Returns(_section);
@@ -101,19 +114,25 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public async Task ValidateRoute_ShouldThrow_WhenCategorySlugIsNullOrEmpty(string? categorySlug)
+        public async Task ValidateRoute_ShouldThrow_WhenCategorySlugIsNullOrEmpty(
+            string? categorySlug
+        )
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _router.ValidateRoute(categorySlug!, _sectionSlug, null, _controller, default));
+                _router.ValidateRoute(categorySlug!, _sectionSlug, null, _controller, default)
+            );
         }
 
         [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public async Task ValidateRoute_ShouldThrow_WhenSectionSlugIsNullOrEmpty(string? sectionSlug)
+        public async Task ValidateRoute_ShouldThrow_WhenSectionSlugIsNullOrEmpty(
+            string? sectionSlug
+        )
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _router.ValidateRoute(_categorySlug, sectionSlug!, null, _controller, default));
+                _router.ValidateRoute(_categorySlug, sectionSlug!, null, _controller, default)
+            );
         }
 
         [Fact]
@@ -121,10 +140,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
         {
             _statusProcessor.Status = Status.CompleteNotReviewed;
 
-            _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, true, Arg.Any<CancellationToken>())
-                           .Returns(_responsesDto);
+            _processCommand
+                .GetSubmissionResponsesDtoForSection(
+                    _establishmentId,
+                    _section,
+                    true,
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(_responsesDto);
 
-            var result = await _router.ValidateRoute(_categorySlug, _sectionSlug, "error", _controller, default);
+            var result = await _router.ValidateRoute(
+                _categorySlug,
+                _sectionSlug,
+                "error",
+                _controller,
+                default
+            );
 
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<ChangeAnswersViewModel>(viewResult.Model);
@@ -136,6 +167,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
             Assert.Equal(_responsesDto, model.SubmissionResponses);
             Assert.Equal("error", model.ErrorMessage);
         }
+
         [Fact]
         public async Task ValidateRoute_ShouldCloneSubmission_IfCompleteReviewed()
         {
@@ -155,9 +187,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
                     {
                         QuestionId = 1,
                         AnswerId = 1,
-                        DateCreated = DateTime.UtcNow
-                    }
-                }
+                        DateCreated = DateTime.UtcNow,
+                    },
+                },
             };
 
             var latestCompletedSubmission = new Submission
@@ -168,7 +200,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
                 EstablishmentId = _establishmentId,
                 Completed = true,
                 Responses = new List<Response>(),
-                DateCreated = DateTime.UtcNow
+                DateCreated = DateTime.UtcNow,
             };
 
             var clonedSubmission = new Submission
@@ -178,32 +210,45 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
                 SectionName = _section.Name,
                 EstablishmentId = _establishmentId,
                 Responses = new List<Response>(),
-                DateCreated = DateTime.UtcNow
+                DateCreated = DateTime.UtcNow,
             };
 
             var responses = inProgressSubmission.Responses;
 
-            _dbContext.GetSubmissions.Returns(new List<Submission> { inProgressSubmission }.AsQueryable());
+            _dbContext.GetSubmissions.Returns(
+                new List<Submission> { inProgressSubmission }.AsQueryable()
+            );
 
             var submissions = new List<Submission> { latestCompletedSubmission };
             var firstSubmission = submissions.First();
 
-            _dbContext.FirstOrDefaultAsync(Arg.Any<IQueryable<Submission>>(), Arg.Any<CancellationToken>())
-                      .Returns(firstSubmission);
+            _dbContext
+                .FirstOrDefaultAsync(
+                    Arg.Any<IQueryable<Submission>>(),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(firstSubmission);
 
-
-            _dbContext.ToListAsync(Arg.Any<IQueryable<Response>>(), Arg.Any<CancellationToken>())
+            _dbContext
+                .ToListAsync(Arg.Any<IQueryable<Response>>(), Arg.Any<CancellationToken>())
                 .Returns(responses);
 
-            _submissionCommand.CloneSubmission(latestCompletedSubmission, Arg.Any<CancellationToken>())
+            _submissionCommand
+                .CloneSubmission(latestCompletedSubmission, Arg.Any<CancellationToken>())
                 .Returns(clonedSubmission);
 
             _responsesQuery = Substitute.For<IGetLatestResponsesQuery>();
 
-            _responsesQuery.GetInProgressSubmission(_establishmentId, _section.Sys.Id, Arg.Any<CancellationToken>())
+            _responsesQuery
+                .GetInProgressSubmission(
+                    _establishmentId,
+                    _section.Sys.Id,
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(inProgressSubmission);
 
-            _responsesQuery.GetLatestCompletedSubmission(_establishmentId, _section.Sys.Id)
+            _responsesQuery
+                .GetLatestCompletedSubmission(_establishmentId, _section.Sys.Id)
                 .Returns(latestCompletedSubmission);
 
             var router = new ChangeAnswersRouter(
@@ -217,31 +262,54 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
 
             _statusProcessor.Section.Returns(_section);
 
-            _dbContext.GetSubmissions.Returns(new List<Submission> { latestCompletedSubmission }.AsQueryable());
+            _dbContext.GetSubmissions.Returns(
+                new List<Submission> { latestCompletedSubmission }.AsQueryable()
+            );
 
-            _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, true, Arg.Any<CancellationToken>())
-                           .Returns(_responsesDto);
+            _processCommand
+                .GetSubmissionResponsesDtoForSection(
+                    _establishmentId,
+                    _section,
+                    true,
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(_responsesDto);
 
             _statusProcessor.User.Returns(_user);
             _user.GetEstablishmentId().Returns(_establishmentId);
 
-            var result = await router.ValidateRoute(_categorySlug, _sectionSlug, null, _controller, default);
+            var result = await router.ValidateRoute(
+                _categorySlug,
+                _sectionSlug,
+                null,
+                _controller,
+                default
+            );
 
-            await _submissionCommand.Received(1).DeleteSubmission(inProgressSubmission.Id, Arg.Any<CancellationToken>());
-            await _submissionCommand.Received(1).CloneSubmission(latestCompletedSubmission, Arg.Any<CancellationToken>());
+            await _submissionCommand
+                .Received(1)
+                .DeleteSubmission(inProgressSubmission.Id, Arg.Any<CancellationToken>());
+            await _submissionCommand
+                .Received(1)
+                .CloneSubmission(latestCompletedSubmission, Arg.Any<CancellationToken>());
 
             var viewResult = Assert.IsType<ViewResult>(result);
             var model = Assert.IsType<ChangeAnswersViewModel>(viewResult.Model);
             Assert.Equal(_responsesDto, model.SubmissionResponses);
         }
 
-
         [Fact]
         public async Task ValidateRoute_ShouldRedirectToHomePage_WhenStatusIsNotStarted()
         {
             _statusProcessor.Status = Status.NotStarted;
 
-            var result = await _router.ValidateRoute(_categorySlug, _sectionSlug, null, _controller, default);
+            var result = await _router.ValidateRoute(
+                _categorySlug,
+                _sectionSlug,
+                null,
+                _controller,
+                default
+            );
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
@@ -253,7 +321,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
             _statusProcessor.Status = Status.InProgress;
             _statusProcessor.NextQuestion.Returns(new Question { Slug = "next-q" });
 
-            var result = await _router.ValidateRoute(_categorySlug, _sectionSlug, null, _controller, default);
+            var result = await _router.ValidateRoute(
+                _categorySlug,
+                _sectionSlug,
+                null,
+                _controller,
+                default
+            );
 
             var redirect = Assert.IsType<RedirectToActionResult>(result);
             Assert.Equal("next-q", redirect.RouteValues?["questionSlug"]);
@@ -264,11 +338,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing
         {
             _statusProcessor.Status = Status.CompleteNotReviewed;
 
-            _processCommand.GetSubmissionResponsesDtoForSection(_establishmentId, _section, true, Arg.Any<CancellationToken>())
-                           .Returns((SubmissionResponsesDto?)null);
+            _processCommand
+                .GetSubmissionResponsesDtoForSection(
+                    _establishmentId,
+                    _section,
+                    true,
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns((SubmissionResponsesDto?)null);
 
             await Assert.ThrowsAsync<DatabaseException>(() =>
-                _router.ValidateRoute(_categorySlug, _sectionSlug, null, _controller, default));
+                _router.ValidateRoute(_categorySlug, _sectionSlug, null, _controller, default)
+            );
         }
     }
 }

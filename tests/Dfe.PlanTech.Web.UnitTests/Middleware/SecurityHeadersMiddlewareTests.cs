@@ -32,7 +32,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
                 { ConnectSrcKey, ConnectSrc },
                 { FrameSrcKey, FrameSrc },
                 { ScriptSrcKey, ScriptSrc },
-                { DefaultSrcKey, DefaultSrc }
+                { DefaultSrcKey, DefaultSrc },
             };
 
             IConfiguration configuration = new ConfigurationBuilder()
@@ -41,17 +41,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             var cfg = new ContentSecurityPolicyConfiguration(configuration);
 
-            var services = new ServiceCollection()
-                .AddSingleton(cfg)
-                .BuildServiceProvider();
+            var services = new ServiceCollection().AddSingleton(cfg).BuildServiceProvider();
 
             var ctx = new DefaultHttpContext
             {
                 RequestServices = services,
-                Response =
-                {
-                    Body = new MemoryStream()
-                }
+                Response = { Body = new MemoryStream() },
             };
 
             return ctx;

@@ -9,10 +9,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
         [Fact]
         public void Should_ReturnBold_When_Bold()
         {
-            var mark = new RichTextMark()
-            {
-                Type = RichTextMarkExtensions.BOLD_MARK
-            };
+            var mark = new RichTextMark() { Type = RichTextMarkExtensions.BOLD_MARK };
 
             var classForMark = mark.GetClass();
 
@@ -22,10 +19,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
         [Fact]
         public void Should_ReturnUnderline_When_Underline()
         {
-            var mark = new RichTextMark()
-            {
-                Type = RichTextMarkExtensions.UNDERLINE_MARK
-            };
+            var mark = new RichTextMark() { Type = RichTextMarkExtensions.UNDERLINE_MARK };
 
             var classForMark = mark.GetClass();
 
@@ -35,15 +29,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
         [Fact]
         public void Should_ReturnBlank_When_UnknownType()
         {
-            var mark = new RichTextMark()
-            {
-                Type = "Not a real type!"
-            };
+            var mark = new RichTextMark() { Type = "Not a real type!" };
 
             var classForMark = mark.GetClass();
 
             Assert.Equal("", classForMark);
         }
-
     }
 }

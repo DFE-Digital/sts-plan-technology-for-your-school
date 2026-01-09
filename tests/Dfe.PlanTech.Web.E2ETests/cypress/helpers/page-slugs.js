@@ -1,16 +1,16 @@
-export const homePageSlug = "/home";
+export const homePageSlug = '/home';
 
 export const FindPageForSlug = ({ slug, dataMapper }) => {
-    for (const [, page] of dataMapper.pages.entries()) {
-        if (page.fields.slug == slug) {
-            return page;
-        }
+  for (const [, page] of dataMapper.pages.entries()) {
+    if (page.fields.slug == slug) {
+      return page;
     }
-    return null;
-}
+  }
+  return null;
+};
 
-export const recommendationIntroFragment = "#overview";
-export const checkAnswersSlug = "/check-answers";
-export const recommendationSlug = "/recommendation";
-export const cookiesSlug = "/cookies";
-export const printRecommendationsSlug = "/print";
+export const recommendationIntroFragment = '#overview';
+export const checkAnswersSlug = '/check-answers';
+export const recommendationSlug = '/recommendation';
+export const cookiesSlug = '/cookies';
+export const printRecommendationsSlug = '/print';

@@ -12,45 +12,41 @@ public class TableRendererTests
 
     private static RichTextContentField CreateTestData()
     {
-        var tableCellText = new RichTextContentField()
-        {
-            NodeType = "text",
-            Value = "test"
-        };
+        var tableCellText = new RichTextContentField() { NodeType = "text", Value = "test" };
 
         var tableCell = new RichTextContentField()
         {
             Content = new() { tableCellText },
             NodeType = "paragraph",
-            Value = ""
+            Value = "",
         };
 
         var tableCellContent = new RichTextContentField()
         {
             Content = new() { tableCell },
             NodeType = "table-cell",
-            Value = ""
+            Value = "",
         };
 
         var tableHeaderCellsContent = new RichTextContentField()
         {
             Content = new() { tableCell },
             NodeType = "table-header-cell",
-            Value = ""
+            Value = "",
         };
 
         var tableCellContentTwo = new RichTextContentField()
         {
             Content = new() { tableCell },
             NodeType = "table-cell",
-            Value = ""
+            Value = "",
         };
 
         var tableHeaderCellsContentTwo = new RichTextContentField()
         {
             Content = new() { tableCell },
             NodeType = "table-header-cell",
-            Value = ""
+            Value = "",
         };
 
         var tableHeaderRowContent = new RichTextContentField()
@@ -82,11 +78,7 @@ public class TableRendererTests
     {
         const string value = "Text value";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
         var renderer = new TableRenderer();
 
@@ -94,7 +86,6 @@ public class TableRendererTests
 
         Assert.True(accepted);
     }
-
 
     [Fact]
     public void Renders_Table_Content_As_Expected()
@@ -106,18 +97,27 @@ public class TableRendererTests
         var tableCellRenderer = new TableCellRenderer();
 
         var renderers = new List<IRichTextContentPartRenderer>
-            { tableRenderer, tableRowRenderer, tableHeaderCellRenderer, tableCellRenderer };
+        {
+            tableRenderer,
+            tableRowRenderer,
+            tableHeaderCellRenderer,
+            tableCellRenderer,
+        };
 
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(),
-            renderers);
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            renderers
+        );
 
-        StringBuilder output = tableRenderer.AddHtml(content, rendererCollection, new StringBuilder());
+        StringBuilder output = tableRenderer.AddHtml(
+            content,
+            rendererCollection,
+            new StringBuilder()
+        );
 
         Assert.Equal(
             """<table class="govuk-table"><thead class="govuk-table__head"><tr class="govuk-table__row"><th class="govuk-table__header">test</th><th class="govuk-table__header">test</th></tr></thead><tbody class="govuk-table__body"><tr class="govuk-table__row"><th scope="row" class="govuk-table__header">test</th><td class="govuk-table__cell">test</td></tr></tbody></table>""",
-            output.ToString());
-
-
+            output.ToString()
+        );
     }
-
 }

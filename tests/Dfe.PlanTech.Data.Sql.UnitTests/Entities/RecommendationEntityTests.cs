@@ -21,7 +21,7 @@ public class RecommendationEntityTests
             Id = expectedQuestionId,
             QuestionText = "Arbitrary string - question text",
             ContentfulRef = "Arbitrary string - question contentful ref",
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
 
         var entity = new RecommendationEntity
@@ -32,7 +32,7 @@ public class RecommendationEntityTests
             DateCreated = expectedDateCreated,
             QuestionId = expectedQuestionId,
             Question = questionEntity,
-            Archived = expectedArchived
+            Archived = expectedArchived,
         };
 
         // Act
@@ -57,7 +57,7 @@ public class RecommendationEntityTests
                 nameof(SqlRecommendationDto.DateCreated),
                 nameof(SqlRecommendationDto.QuestionId),
                 nameof(SqlRecommendationDto.Question),
-                nameof(SqlRecommendationDto.Archived)
+                nameof(SqlRecommendationDto.Archived),
             }
         );
     }
@@ -71,7 +71,7 @@ public class RecommendationEntityTests
             Id = 1,
             QuestionText = "Arbitrary string - question text",
             ContentfulRef = "Arbitrary string - question contentful ref",
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
 
         var entity = new RecommendationEntity
@@ -82,7 +82,7 @@ public class RecommendationEntityTests
             DateCreated = DateTime.UtcNow,
             QuestionId = 123,
             Question = questionEntity,
-            Archived = false
+            Archived = false,
         };
 
         // Act
@@ -106,7 +106,7 @@ public class RecommendationEntityTests
             Id = 1,
             QuestionText = "Arbitrary string - question text",
             ContentfulRef = "Arbitrary string - question contentful ref",
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
 
         var entity = new RecommendationEntity
@@ -115,7 +115,7 @@ public class RecommendationEntityTests
             RecommendationText = "Arbitrary string - recommendation text",
             ContentfulRef = "Arbitrary string - contentful ref",
             QuestionId = 1234,
-            Question = questionEntity
+            Question = questionEntity,
             // DateCreated is not set explicitly
         };
 
@@ -138,7 +138,7 @@ public class RecommendationEntityTests
             Id = 1,
             QuestionText = "Arbitrary string - question text",
             ContentfulRef = "Arbitrary string - question contentful ref",
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
 
         var entity = new RecommendationEntity
@@ -148,7 +148,7 @@ public class RecommendationEntityTests
             ContentfulRef = "Arbitrary string - contentful ref",
             DateCreated = DateTime.UtcNow,
             QuestionId = 123,
-            Question = questionEntity
+            Question = questionEntity,
             // Archived is not set explicitly
         };
 

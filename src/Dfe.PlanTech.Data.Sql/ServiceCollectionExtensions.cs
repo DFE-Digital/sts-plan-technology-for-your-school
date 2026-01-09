@@ -12,14 +12,26 @@ namespace Dfe.PlanTech.Data.Sql;
 [ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddDatabase(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDatabase(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
-        void databaseOptionsAction(DbContextOptionsBuilder options) => options.UseSqlServer(configuration.GetConnectionString("Database"),
-        opts =>
-            {
-                var databaseRetryOptions = configuration.GetRequiredSection(ConfigurationConstants.Database).Get<DatabaseOptions>();
-                opts.EnableRetryOnFailure(databaseRetryOptions.MaxRetryCount, TimeSpan.FromMilliseconds(databaseRetryOptions.MaxDelayInMilliseconds), null);
-            });
+        void databaseOptionsAction(DbContextOptionsBuilder options) =>
+            options.UseSqlServer(
+                configuration.GetConnectionString("Database"),
+                opts =>
+                {
+                    var databaseRetryOptions = configuration
+                        .GetRequiredSection(ConfigurationConstants.Database)
+                        .Get<DatabaseOptions>();
+                    opts.EnableRetryOnFailure(
+                        databaseRetryOptions.MaxRetryCount,
+                        TimeSpan.FromMilliseconds(databaseRetryOptions.MaxDelayInMilliseconds),
+                        null
+                    );
+                }
+            );
 
         services.AddDbContext<PlanTechDbContext>(databaseOptionsAction);
 
@@ -30,14 +42,16 @@ public static class ServiceCollectionExtensions
     {
         return services
             .AddScoped<IEstablishmentLinkRepository, EstablishmentLinkRepository>()
-            .AddScoped<IEstablishmentRecommendationHistoryRepository, EstablishmentRecommendationHistoryRepository>()
+            .AddScoped<
+                IEstablishmentRecommendationHistoryRepository,
+                EstablishmentRecommendationHistoryRepository
+            >()
             .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
             .AddScoped<ISignInRepository, SignInRepository>()
             .AddScoped<IRecommendationRepository, RecommendationRepository>()
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
             .AddScoped<ISubmissionRepository, SubmissionRepository>()
             .AddScoped<IUserRepository, UserRepository>()
-            .AddScoped<IUserSettingsRepository, UserSettingsRepository>()
-            ;
+            .AddScoped<IUserSettingsRepository, UserSettingsRepository>();
     }
 }

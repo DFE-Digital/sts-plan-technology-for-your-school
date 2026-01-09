@@ -43,10 +43,18 @@ public static class ContentComponentJsonExtensions
     /// </summary>
     /// <param name="type"></param>
     /// <returns></returns>
-    private static List<JsonDerivedType> GetInheritingTypes(Type type) => [.. ReflectionHelper
-        .GetTypesInheritingFrom(type)
-        .Where(derivedType => derivedType != type &&
-                              derivedType.IsConcreteClass() &&
-                              derivedType.HasParameterlessConstructor())
-        .Select(type => new JsonDerivedType(type, ContentfulContentTypeConstants.EntryClassToContentTypeMap[type.Name]))];
+    private static List<JsonDerivedType> GetInheritingTypes(Type type) =>
+        [
+            .. ReflectionHelper
+                .GetTypesInheritingFrom(type)
+                .Where(derivedType =>
+                    derivedType != type
+                    && derivedType.IsConcreteClass()
+                    && derivedType.HasParameterlessConstructor()
+                )
+                .Select(type => new JsonDerivedType(
+                    type,
+                    ContentfulContentTypeConstants.EntryClassToContentTypeMap[type.Name]
+                )),
+        ];
 }

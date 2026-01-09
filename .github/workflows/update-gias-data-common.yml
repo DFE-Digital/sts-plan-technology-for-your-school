@@ -50,7 +50,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "add"
+          verb: 'add'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
@@ -81,7 +81,7 @@ jobs:
       - name: Fetch data and update database
         run: uv run python main.py ${{ inputs.skip_gias_validation && '--skip-validation' || '' }}
         env:
-            CONNECTION_STRING_PLANTECH_GIAS_UPDATE: ${{ steps.get-connection-string.outputs.secret_value }}
+          CONNECTION_STRING_PLANTECH_GIAS_UPDATE: ${{ steps.get-connection-string.outputs.secret_value }}
 
         ## Always run this step to ensure cleanup, even if previous steps fail
       - name: Remove Azure firewall rules
@@ -89,7 +89,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "remove"
+          verb: 'remove'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}

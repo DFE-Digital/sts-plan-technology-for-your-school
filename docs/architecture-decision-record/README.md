@@ -11,7 +11,7 @@ General information about architectural decision records is available at <https:
 ## List
 
 | Title                                                                                                       | Status   |
-|-------------------------------------------------------------------------------------------------------------|----------|
+| ----------------------------------------------------------------------------------------------------------- | -------- |
 | [0001 - Web Framework](./0001-web-framework.md)                                                             | Accepted |
 | [0002 - Application Framework](./0002-application-framework.md)                                             | Accepted |
 | [0003 - Build/Test/Deploy Environment](./0002-application-framework.md)                                     | Accepted |

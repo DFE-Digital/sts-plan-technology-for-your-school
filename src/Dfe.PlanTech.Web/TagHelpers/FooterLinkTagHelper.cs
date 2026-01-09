@@ -8,9 +8,7 @@ namespace Dfe.PlanTech.Web.TagHelpers;
 /// Renders a single navigation link in the footer.
 /// </summary>
 /// <remarks>Should be refactored in future to be any <see cref="NavigationLink"/>, and pass in HTML class used</remarks>
-public class FooterLinkTagHelper(
-    ILogger<FooterLinkTagHelper> logger
-) : TagHelper
+public class FooterLinkTagHelper(ILogger<FooterLinkTagHelper> logger) : TagHelper
 {
     public NavigationLinkEntry? Link { get; set; }
 
@@ -20,7 +18,11 @@ public class FooterLinkTagHelper(
         {
             output.TagName = null;
             output.Content.SetHtmlContent("");
-            logger.LogWarning("Missing or invalid {Name} {Link}", nameof(NavigationLinkEntry), Link);
+            logger.LogWarning(
+                "Missing or invalid {Name} {Link}",
+                nameof(NavigationLinkEntry),
+                Link
+            );
             return;
         }
 
@@ -57,7 +59,10 @@ public class FooterLinkTagHelper(
     {
         if (Link!.ContentToLinkTo == null && string.IsNullOrEmpty(Link.Href))
         {
-            logger.LogError("No href or content to link to for {LinkType}", nameof(NavigationLinkEntry));
+            logger.LogError(
+                "No href or content to link to for {LinkType}",
+                nameof(NavigationLinkEntry)
+            );
             return string.Empty;
         }
 
@@ -73,7 +78,11 @@ public class FooterLinkTagHelper(
 
         if (Link.ContentToLinkTo is not IHasSlug hasSlug)
         {
-            logger.LogError("Invalid content type received for Link. Expected {Interface} but type is {Concrete}", typeof(IHasSlug), Link.ContentToLinkTo.GetType());
+            logger.LogError(
+                "Invalid content type received for Link. Expected {Interface} but type is {Concrete}",
+                typeof(IHasSlug),
+                Link.ContentToLinkTo.GetType()
+            );
             return null;
         }
 

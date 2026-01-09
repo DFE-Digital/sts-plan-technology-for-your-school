@@ -17,7 +17,7 @@ public class HeadRequestMiddlewareTests
         var context = new DefaultHttpContext()
         {
             Request = { Method = HttpMethods.Head },
-            Response = { Body = new MemoryStream() }
+            Response = { Body = new MemoryStream() },
         };
 
         var middleware = new HeadRequestMiddleware(Next);
@@ -34,7 +34,7 @@ public class HeadRequestMiddlewareTests
         var context = new DefaultHttpContext()
         {
             Request = { Method = HttpMethods.Get },
-            Response = { Body = new MemoryStream() }
+            Response = { Body = new MemoryStream() },
         };
 
         var middleware = new HeadRequestMiddleware(Next);

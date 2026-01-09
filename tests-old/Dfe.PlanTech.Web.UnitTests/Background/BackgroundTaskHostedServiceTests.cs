@@ -7,10 +7,15 @@ using NSubstitute;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Background;
+
 public class BackgroundTaskHostedServiceTests
 {
-    private readonly ILogger<BackgroundTaskHostedService> logger = Substitute.For<ILogger<BackgroundTaskHostedService>>();
-    private readonly IOptions<BackgroundTaskQueueOptions> options = Substitute.For<IOptions<BackgroundTaskQueueOptions>>();
+    private readonly ILogger<BackgroundTaskHostedService> logger = Substitute.For<
+        ILogger<BackgroundTaskHostedService>
+    >();
+    private readonly IOptions<BackgroundTaskQueueOptions> options = Substitute.For<
+        IOptions<BackgroundTaskQueueOptions>
+    >();
     private readonly BackgroundTaskQueue _taskQueue;
     private readonly BackgroundTaskHostedService _service;
     private string _mockResult = "";
@@ -30,19 +35,31 @@ public class BackgroundTaskHostedServiceTests
         cancellationTokenSource.CancelAfter(2000);
         var cancellationToken = cancellationTokenSource.Token;
 
-        await Task.WhenAll(_taskQueue.QueueBackgroundWorkItemAsync(ct =>
-        {
-            _mockResult = _expectedResult;
-            return Task.CompletedTask;
-        }),
-        _service.StartAsync(cancellationToken));
+        await Task.WhenAll(
+            _taskQueue.QueueBackgroundWorkItemAsync(ct =>
+            {
+                _mockResult = _expectedResult;
+                return Task.CompletedTask;
+            }),
+            _service.StartAsync(cancellationToken)
+        );
 
         Assert.Equal(_expectedResult, _mockResult);
         cancellationTokenSource.Dispose();
 
         var loggedMessages = logger.ReceivedLogMessages().ToArray();
-        Assert.Contains(loggedMessages, message => message.Message.Equals("Starting processing background tasks") && message.LogLevel == LogLevel.Information);
-        Assert.Contains(loggedMessages, message => message.Message.Equals("Read item from the queue") && message.LogLevel == LogLevel.Information);
+        Assert.Contains(
+            loggedMessages,
+            message =>
+                message.Message.Equals("Starting processing background tasks")
+                && message.LogLevel == LogLevel.Information
+        );
+        Assert.Contains(
+            loggedMessages,
+            message =>
+                message.Message.Equals("Read item from the queue")
+                && message.LogLevel == LogLevel.Information
+        );
     }
 
     [Fact]
@@ -52,18 +69,35 @@ public class BackgroundTaskHostedServiceTests
         cancellationTokenSource.CancelAfter(2000);
         var cancellationToken = cancellationTokenSource.Token;
 
-        await Task.WhenAll(_taskQueue.QueueBackgroundWorkItemAsync(ct =>
-        {
-            throw new Exception("An error occurred with the task");
-        }),
-        _service.StartAsync(cancellationToken));
+        await Task.WhenAll(
+            _taskQueue.QueueBackgroundWorkItemAsync(ct =>
+            {
+                throw new Exception("An error occurred with the task");
+            }),
+            _service.StartAsync(cancellationToken)
+        );
         cancellationTokenSource.Dispose();
 
         var loggedMessages = logger.ReceivedLogMessages().ToArray();
 
-        Assert.Contains(loggedMessages, message => message.Message.Equals("Starting processing background tasks") && message.LogLevel == LogLevel.Information);
-        Assert.Contains(loggedMessages, message => message.Message.Equals("Read item from the queue") && message.LogLevel == LogLevel.Information);
-        Assert.Contains(loggedMessages, message => message.Message.StartsWith("Error occurred executing") && message.LogLevel == LogLevel.Error);
+        Assert.Contains(
+            loggedMessages,
+            message =>
+                message.Message.Equals("Starting processing background tasks")
+                && message.LogLevel == LogLevel.Information
+        );
+        Assert.Contains(
+            loggedMessages,
+            message =>
+                message.Message.Equals("Read item from the queue")
+                && message.LogLevel == LogLevel.Information
+        );
+        Assert.Contains(
+            loggedMessages,
+            message =>
+                message.Message.StartsWith("Error occurred executing")
+                && message.LogLevel == LogLevel.Error
+        );
     }
 
     [Fact]
@@ -76,6 +110,11 @@ public class BackgroundTaskHostedServiceTests
         await _service.StopAsync(cancellationToken);
 
         // Assert
-        Assert.Contains(logger.ReceivedLogMessages(), message => message.Message.Equals("Stopping processing background tasks") && message.LogLevel == LogLevel.Information);
+        Assert.Contains(
+            logger.ReceivedLogMessages(),
+            message =>
+                message.Message.Equals("Stopping processing background tasks")
+                && message.LogLevel == LogLevel.Information
+        );
     }
 }

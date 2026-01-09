@@ -1,6 +1,6 @@
 # 0011 - Content Management
 
-* **Status**: Accepted
+- **Status**: Accepted
 
 ## Context and Problem Statement
 
@@ -8,13 +8,13 @@ How can the Service content be managed by Content Designers without the need for
 
 ## Decision Drivers
 
-* Already used in other DfE’s projects
-* Must retain control of frontend design aspects to conform with standards
+- Already used in other DfE’s projects
+- Must retain control of frontend design aspects to conform with standards
 
 ## Considered Options
 
-* Contentful
-* Bespoke Content Management System
+- Contentful
+- Bespoke Content Management System
 
 ## Decision Outcome
 

@@ -43,7 +43,7 @@ public class SecurityHeadersMiddleware(RequestDelegate next)
         {
             // js enabled script from GovUK page template helper
             "sha256-wmo5EWLjw+Yuj9jZzGNNeSsUOBQmBvE1pvSPVNQzJ34=",
-            "sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw=" //C&S govUK
+            "sha256-GUQ5ad8JK5KmEWmROf3LZd9ge94daqNvd8xy9YS1iDw=", //C&S govUK
         };
 
         return string.Join(" ", allowedScriptHashes.Select(hash => $"'{hash}'"));
@@ -57,7 +57,8 @@ public class SecurityHeadersMiddleware(RequestDelegate next)
     {
         var nonce = GenerateNonce(context);
         var whitelist = GetAllowedScriptHashes();
-        var config = context.RequestServices.GetRequiredService<ContentSecurityPolicyConfiguration>();
+        var config =
+            context.RequestServices.GetRequiredService<ContentSecurityPolicyConfiguration>();
         var cspDirectives = new List<string>
         {
             "frame-ancestors 'none'",
@@ -79,6 +80,6 @@ public static class SecurityHeadersMiddlewareExtensions
     /// </summary>
     /// <param name="app"></param>
     /// <returns></returns>
-    public static IApplicationBuilder UseSecurityHeaders(
-        this IApplicationBuilder app) => app.UseMiddleware<SecurityHeadersMiddleware>();
+    public static IApplicationBuilder UseSecurityHeaders(this IApplicationBuilder app) =>
+        app.UseMiddleware<SecurityHeadersMiddleware>();
 }

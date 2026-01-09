@@ -1,5 +1,6 @@
-a.govuk-pagination__link{
-    &:visited,:hover{
-        color: var(--govuk-link-color);
-    }
+a.govuk-pagination__link {
+  &:visited,
+  :hover {
+    color: var(--govuk-link-color);
+  }
 }

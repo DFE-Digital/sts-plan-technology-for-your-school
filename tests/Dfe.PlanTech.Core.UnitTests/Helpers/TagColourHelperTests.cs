@@ -32,7 +32,10 @@ public class TagColourHelperTests
     [InlineData("red", "red")]
     [InlineData("green", "green")]
     [InlineData("yellow", "yellow")]
-    public void GetMatchingColour_ReturnsCorrectColour_WhenInputMatchesExactly(string input, string expected)
+    public void GetMatchingColour_ReturnsCorrectColour_WhenInputMatchesExactly(
+        string input,
+        string expected
+    )
     {
         var result = TagColourHelper.GetMatchingColour(input);
         Assert.Equal(expected, result);
@@ -44,7 +47,10 @@ public class TagColourHelperTests
     [InlineData("BlUe", "blue")]
     [InlineData("bLuE", "blue")]
     [InlineData("blue", "blue")]
-    public void GetMatchingColour_ReturnsCorrectColour_WhenInputMatchesCaseInsensitively(string input, string expected)
+    public void GetMatchingColour_ReturnsCorrectColour_WhenInputMatchesCaseInsensitively(
+        string input,
+        string expected
+    )
     {
         var result = TagColourHelper.GetMatchingColour(input);
         Assert.Equal(expected, result);

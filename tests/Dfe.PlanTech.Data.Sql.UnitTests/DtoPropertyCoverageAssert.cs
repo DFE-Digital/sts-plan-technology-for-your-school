@@ -10,7 +10,8 @@ public static class DtoPropertyCoverageAssert
     /// </summary>
     public static void AssertAllPropertiesAccountedFor<TDto>(
         IEnumerable<string> assertedPropertyNames,
-        IEnumerable<string>? excludePropertyNames = null)
+        IEnumerable<string>? excludePropertyNames = null
+    )
     {
         var asserted = new HashSet<string>(assertedPropertyNames);
         var excluded = excludePropertyNames is null
@@ -27,6 +28,7 @@ public static class DtoPropertyCoverageAssert
 
         Assert.True(
             missing.Length == 0,
-            $"Unasserted properties on {typeof(TDto).Name}: {string.Join(", ", missing)}");
+            $"Unasserted properties on {typeof(TDto).Name}: {string.Join(", ", missing)}"
+        );
     }
 }

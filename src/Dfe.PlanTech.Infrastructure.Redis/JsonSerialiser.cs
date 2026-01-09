@@ -19,10 +19,14 @@ public static class JsonSerialiser
     private static readonly JsonSerializerOptions JsonSerialiserOptions = new()
     {
         TypeInfoResolver = new DefaultJsonTypeInfoResolver()
-            .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<IContentfulEntry>)
-            .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentfulEntry>),
+            .WithAddedModifier(
+                ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<IContentfulEntry>
+            )
+            .WithAddedModifier(
+                ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentfulEntry>
+            ),
         ReferenceHandler = ReferenceHandler.Preserve,
-        MaxDepth = 256
+        MaxDepth = 256,
     };
 
     /// <summary>
@@ -31,7 +35,8 @@ public static class JsonSerialiser
     /// <typeparam name="T"></typeparam>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public static string Serialise<T>(this T obj) => JsonSerializer.Serialize(obj, JsonSerialiserOptions);
+    public static string Serialise<T>(this T obj) =>
+        JsonSerializer.Serialize(obj, JsonSerialiserOptions);
 
     /// <summary>
     /// Deserialise the object using the <see cref="JsonSerialiserOptions"/> options
@@ -39,5 +44,6 @@ public static class JsonSerialiser
     /// <typeparam name="T"></typeparam>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public static T? Deserialise<T>(this RedisValue redisValue) => JsonSerializer.Deserialize<T>(redisValue!, JsonSerialiserOptions);
+    public static T? Deserialise<T>(this RedisValue redisValue) =>
+        JsonSerializer.Deserialize<T>(redisValue!, JsonSerialiserOptions);
 }

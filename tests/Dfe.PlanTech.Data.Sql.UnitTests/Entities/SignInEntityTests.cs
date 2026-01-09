@@ -19,7 +19,7 @@ public class SignInEntityTests
             Id = expectedUserId,
             DfeSignInRef = "Arbitrary string - dsi ref",
             DateCreated = new DateTime(2024, 01, 01, 00, 00, 00, DateTimeKind.Utc),
-            Responses = null
+            Responses = null,
         };
 
         var entity = new SignInEntity
@@ -28,7 +28,7 @@ public class SignInEntityTests
             UserId = expectedUserId,
             EstablishmentId = expectedEstablishmentId,
             SignInDateTime = expectedSignInDateTime,
-            User = user
+            User = user,
         };
 
         // Act
@@ -51,7 +51,7 @@ public class SignInEntityTests
                 nameof(SqlSignInDto.UserId),
                 nameof(SqlSignInDto.EstablishmentId),
                 nameof(SqlSignInDto.SignInDateTime),
-                nameof(SqlSignInDto.User)
+                nameof(SqlSignInDto.User),
             }
         );
     }

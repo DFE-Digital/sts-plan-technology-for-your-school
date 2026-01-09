@@ -11,7 +11,7 @@ public static partial class DfeOpenIdConnectEvents
     private static partial Regex SchemeMatchRegexAttribute();
 
     public const string SchemeMatchRegexPattern = @"^(https?:\/\/)";
-    public readonly static Regex SchemeMatchRegex = SchemeMatchRegexAttribute();
+    public static readonly Regex SchemeMatchRegex = SchemeMatchRegexAttribute();
 
     private const string ForwardHostHeader = "X-Forwarded-Host";
 
@@ -22,9 +22,14 @@ public static partial class DfeOpenIdConnectEvents
     /// <returns></returns>
     public static Task OnRedirectToIdentityProvider(RedirectContext context)
     {
-        var config = context.HttpContext.RequestServices.GetRequiredService<DfeSignInConfiguration>();
+        var config =
+            context.HttpContext.RequestServices.GetRequiredService<DfeSignInConfiguration>();
 
-        context.ProtocolMessage.RedirectUri = CreateCallbackUrl(context, config, config.CallbackUrl);
+        context.ProtocolMessage.RedirectUri = CreateCallbackUrl(
+            context,
+            config,
+            config.CallbackUrl
+        );
 
         return Task.FromResult(0);
     }
@@ -38,9 +43,14 @@ public static partial class DfeOpenIdConnectEvents
     {
         if (context.ProtocolMessage != null)
         {
-            var config = context.HttpContext.RequestServices.GetRequiredService<DfeSignInConfiguration>();
+            var config =
+                context.HttpContext.RequestServices.GetRequiredService<DfeSignInConfiguration>();
 
-            context.ProtocolMessage.PostLogoutRedirectUri = CreateCallbackUrl(context, config, config.SignoutRedirectUrl);
+            context.ProtocolMessage.PostLogoutRedirectUri = CreateCallbackUrl(
+                context,
+                config,
+                config.SignoutRedirectUrl
+            );
         }
 
         return Task.FromResult(0);
@@ -56,10 +66,16 @@ public static partial class DfeOpenIdConnectEvents
     /// </remarks>
     public static string GetOriginUrl(RedirectContext context, DfeSignInConfiguration config)
     {
-        var forwardHostHeader = context.HttpContext.Request.Headers
-                                                            .Where(header => string.Equals(ForwardHostHeader, header.Key, StringComparison.InvariantCultureIgnoreCase))
-                                                            .Select(header => header.Value.FirstOrDefault())
-                                                            .FirstOrDefault();
+        var forwardHostHeader = context
+            .HttpContext.Request.Headers.Where(header =>
+                string.Equals(
+                    ForwardHostHeader,
+                    header.Key,
+                    StringComparison.InvariantCultureIgnoreCase
+                )
+            )
+            .Select(header => header.Value.FirstOrDefault())
+            .FirstOrDefault();
 
         return forwardHostHeader ?? config.FrontDoorUrl;
     }
@@ -70,7 +86,11 @@ public static partial class DfeOpenIdConnectEvents
     /// <param name="context">The context of the redirect request.</param>
     /// <param name="config">The configuration for OpenID Connect sign-ins.</param>
     /// <param name="callbackPath">The path of the callback URL.</param>
-    public static string CreateCallbackUrl(RedirectContext context, DfeSignInConfiguration config, string callbackPath)
+    public static string CreateCallbackUrl(
+        RedirectContext context,
+        DfeSignInConfiguration config,
+        string callbackPath
+    )
     {
         var originUrl = GetOriginUrl(context, config).EnsureScheme();
 
@@ -85,5 +105,6 @@ public static partial class DfeOpenIdConnectEvents
     /// </summary>
     /// <param name="url"></param>
     /// <returns></returns>
-    private static string EnsureScheme(this string url) => SchemeMatchRegex.Match(url).Success ? url : $"https://{url}";
+    private static string EnsureScheme(this string url) =>
+        SchemeMatchRegex.Match(url).Success ? url : $"https://{url}";
 }

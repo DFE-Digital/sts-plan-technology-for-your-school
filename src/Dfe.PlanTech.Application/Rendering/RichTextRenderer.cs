@@ -14,8 +14,10 @@ public class RichTextRenderer(
     IEnumerable<IRichTextContentPartRenderer> renderers
 ) : IRichTextRenderer, IRichTextContentPartRendererCollection
 {
-    private readonly ILogger<RichTextRenderer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly IReadOnlyList<IRichTextContentPartRenderer> _renderers = renderers?.ToList() ?? throw new ArgumentNullException(nameof(renderers));
+    private readonly ILogger<RichTextRenderer> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IReadOnlyList<IRichTextContentPartRenderer> _renderers =
+        renderers?.ToList() ?? throw new ArgumentNullException(nameof(renderers));
 
     public IReadOnlyList<IRichTextContentPartRenderer> Renderers => _renderers;
 
@@ -46,6 +48,6 @@ public class RichTextRenderer(
         }
     }
 
-    public IRichTextContentPartRenderer? GetRendererForContent(RichTextContentField content)
-        => Renderers.FirstOrDefault(renderer => renderer.Accepts(content));
+    public IRichTextContentPartRenderer? GetRendererForContent(RichTextContentField content) =>
+        Renderers.FirstOrDefault(renderer => renderer.Accepts(content));
 }

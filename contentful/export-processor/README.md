@@ -38,10 +38,10 @@ The main one of all of them is the [section](./src/contentful/export-processor/c
 2. Fill in the various values for the Contentful space, access token etc..
 3. Run `npm install` to install dependencies.
 4. Run `node data-tools` to generate the test suites
-    - You can also use:
-        1. `npm run generate-test-suites` to generate the test suites
-        2. `npm run data-tools` to run the other data tools but not the test suites
-        3. `npm run export-all-only` to export all data from Contentful, but not run any of the data validations etc.
+   - You can also use:
+     1. `npm run generate-test-suites` to generate the test suites
+     2. `npm run data-tools` to run the other data tools but not the test suites
+     3. `npm run export-all-only` to export all data from Contentful, but not run any of the data validations etc.
 
 #### Environment variables
 
@@ -106,11 +106,11 @@ For each sub-topic, the following tests should be created:
 11. A path for "High" recommendations
 12. A user can navigate the chunks of a recommendation
 13. A user can access C&S resources from their recommendation
-13. The accessibility page is accessibile from the footer link
-14. The contact page is accessibile from the footer link
-14. The cookies page is accessibile from the footer link
-14. The privacy policy page is accessibile from the footer link
-15. the 404 page is rendered when a user navigates to an invalid URL
+14. The accessibility page is accessibile from the footer link
+15. The contact page is accessibile from the footer link
+16. The cookies page is accessibile from the footer link
+17. The privacy policy page is accessibile from the footer link
+18. the 404 page is rendered when a user navigates to an invalid URL
 
 ### User Journey Paths
 
@@ -121,9 +121,11 @@ To export the journey paths, make sure `EXPORT_USER_JOURNEY_PATHS` is set to `tr
 By default, it will only export a minimal amount of data:
 
 1. Per subtopic, it will create a `json` file containing:
-  - Total number of possible user journeys through the sub-topic per maturity
-  - One+ user journey path required to navigate through all questions in the sub-topic
-  - One user journey per maturity rating
+
+- Total number of possible user journeys through the sub-topic per maturity
+- One+ user journey path required to navigate through all questions in the sub-topic
+- One user journey per maturity rating
+
 2. If `EXPORT_ALL_PATHS` is set to `true` it will save _all_ possible user journeys.
 
 ### Errors
@@ -160,7 +162,6 @@ SPACE_ID
 ENVIRONMENT
 FUNCTION_APP_URL
 
-
 ## Recommendations Exporter
 
 [recommmendations_csv_outputter.js](/src/contentful/export-processor/recommendations_csv_outputter.js) exports data from Contentful (uses the exporter) and generates a .csv in the output directory with the recommendations attached to each answer and a link to view on staging:
@@ -172,4 +173,3 @@ The recommendations exporter does not need any additional environment variables.
 3. Run `npm run export-recommendations-csv` to run the script.
 
 You may need to add the following parameter infront of the script in package.json (--max-old-space-size=9000) [`"export-recommendations-csv": "node --max-old-space-size=9000 recommendations_csv_outputter.js"`]
-

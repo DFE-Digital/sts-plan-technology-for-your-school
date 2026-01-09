@@ -15,13 +15,13 @@ public class WriteCmsWebhookToQueueCommandTests
 
     private readonly IQueueWriter _queueWriter = Substitute.For<IQueueWriter>();
 
-    private readonly ILogger<WriteCmsWebhookToQueueCommand> _logger =
-        Substitute.For<ILogger<WriteCmsWebhookToQueueCommand>>();
+    private readonly ILogger<WriteCmsWebhookToQueueCommand> _logger = Substitute.For<
+        ILogger<WriteCmsWebhookToQueueCommand>
+    >();
 
     private readonly HttpContext _httpContext = new DefaultHttpContext();
 
     private readonly WriteCmsWebhookToQueueCommand _command;
-
 
     public WriteCmsWebhookToQueueCommandTests()
     {
@@ -63,16 +63,23 @@ public class WriteCmsWebhookToQueueCommandTests
 
         Assert.False(result.Success);
         Assert.Equal(exception.Message, result.ErrorMessage);
-        var loggedMessages = _logger.GetMatchingReceivedMessages("Failed to save message to queue", LogLevel.Error);
+        var loggedMessages = _logger.GetMatchingReceivedMessages(
+            "Failed to save message to queue",
+            LogLevel.Error
+        );
 
         Assert.Single(loggedMessages);
     }
-    private static JsonDocument CreateWebhookBody() => JsonSerializer.Deserialize<JsonDocument>(JsonString)!;
+
+    private static JsonDocument CreateWebhookBody() =>
+        JsonSerializer.Deserialize<JsonDocument>(JsonString)!;
 
     private string AddCmsEventHeader()
     {
-        _httpContext.Request.Headers.Append(WriteCmsWebhookToQueueCommand.ContentfulTopicHeaderKey, CmsEvent);
+        _httpContext.Request.Headers.Append(
+            WriteCmsWebhookToQueueCommand.ContentfulTopicHeaderKey,
+            CmsEvent
+        );
         return CmsEvent;
     }
-
 }

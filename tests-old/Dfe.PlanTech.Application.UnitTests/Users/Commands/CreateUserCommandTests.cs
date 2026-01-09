@@ -25,11 +25,13 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Commands
             UserDataEntity? createdUser = null;
 
             Db.When(x => x.AddUser(Arg.Any<UserDataEntity>()))
-                    .Do((callInfo) =>
+                .Do(
+                    (callInfo) =>
                     {
                         UserDataEntity user = (UserDataEntity)callInfo[0];
                         createdUser = user;
-                    });
+                    }
+                );
 
             Db.When(x => x.SaveChangesAsync())
                 .Do(x =>

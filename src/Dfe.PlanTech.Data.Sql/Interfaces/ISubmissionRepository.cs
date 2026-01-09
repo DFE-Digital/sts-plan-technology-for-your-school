@@ -15,5 +15,7 @@ public interface ISubmissionRepository
     Task<SubmissionEntity> SetSubmissionInProgressAsync(int submissionId);
     Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId);
     Task SetSubmissionInProgressAsync(int establishmentId, string sectionId);
-    Task<SubmissionEntity> SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(int submissionId);
+    Task<SubmissionEntity> SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
+        int submissionId
+    );
 }

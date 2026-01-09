@@ -4,11 +4,10 @@ using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Application.Services;
 
-public class ContentfulService(
-    IContentfulWorkflow contentfulWorkflow
-) : IContentfulService
+public class ContentfulService(IContentfulWorkflow contentfulWorkflow) : IContentfulService
 {
-    private readonly IContentfulWorkflow _contentfulWorkflow = contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
+    private readonly IContentfulWorkflow _contentfulWorkflow =
+        contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
 
     public Task<IEnumerable<QuestionnaireSectionEntry>> GetAllSectionsAsync()
     {
@@ -20,7 +19,10 @@ public class ContentfulService(
         return _contentfulWorkflow.GetCategoryHeaderTextBySlugAsync(slug);
     }
 
-    public Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug, int? includeLevel = null)
+    public Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(
+        string slug,
+        int? includeLevel = null
+    )
     {
         return _contentfulWorkflow.GetCategoryBySlugAsync(slug, includeLevel);
     }
@@ -50,7 +52,9 @@ public class ContentfulService(
         return _contentfulWorkflow.GetPageBySlugAsync(slug);
     }
 
-    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page)
+    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(
+        int page
+    )
     {
         return _contentfulWorkflow.GetPaginatedRecommendationEntriesAsync(page);
     }
@@ -65,7 +69,10 @@ public class ContentfulService(
         return _contentfulWorkflow.GetRecommendationChunkCountAsync(page);
     }
 
-    public Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null)
+    public Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(
+        string slug,
+        int? includeLevel = null
+    )
     {
         return _contentfulWorkflow.GetSectionBySlugAsync(slug, includeLevel);
     }

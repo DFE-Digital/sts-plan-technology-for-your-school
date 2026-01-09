@@ -13,7 +13,8 @@ public class RecommendationChunkEntry : ContentfulEntry
     public List<QuestionnaireAnswerEntry> InProgressAnswers { get; init; } = [];
     public CAndSLinkEntry? CSLink { get; init; }
 
-    public List<QuestionnaireAnswerEntry> AllAnswers => CompletingAnswers.Union(InProgressAnswers).DistinctBy(a => a.Id).ToList();
+    public List<QuestionnaireAnswerEntry> AllAnswers =>
+        CompletingAnswers.Union(InProgressAnswers).DistinctBy(a => a.Id).ToList();
     public string HeaderText => Header;
     public string LinkText => HeaderText;
 

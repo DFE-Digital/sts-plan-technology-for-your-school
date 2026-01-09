@@ -19,20 +19,25 @@ namespace Dfe.PlanTech.Infrastructure.SignIn;
 [ExcludeFromCodeCoverage]
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddDfeSignIn(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddDfeSignIn(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         var config = GetDfeSignInConfig(configuration);
 
-        services.AddAuthentication(ConfigureAuthentication)
-                .AddOpenIdConnect(options => ConfigureOpenIdConnect(services, options, config))
-                .AddCookie(options => ConfigureCookie(options, config));
+        services
+            .AddAuthentication(ConfigureAuthentication)
+            .AddOpenIdConnect(options => ConfigureOpenIdConnect(services, options, config))
+            .AddCookie(options => ConfigureCookie(options, config));
 
         services.AddScoped((services) => config);
         services.AddScoped<DfeSignInConfiguration>((_) => config);
 
         services.Configure<ForwardedHeadersOptions>(options =>
         {
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            options.ForwardedHeaders =
+                ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             options.KnownNetworks.Clear();
             options.KnownProxies.Clear();
         });
@@ -47,7 +52,10 @@ public static class ServiceCollectionExtensions
         sharedOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
     }
 
-    private static void ConfigureCookie(CookieAuthenticationOptions options, DfeSignInConfiguration config)
+    private static void ConfigureCookie(
+        CookieAuthenticationOptions options,
+        DfeSignInConfiguration config
+    )
     {
         options.Cookie.Name = config.CookieName;
         options.Cookie.SameSite = SameSiteMode.Lax;
@@ -57,7 +65,11 @@ public static class ServiceCollectionExtensions
         options.AccessDeniedPath = config.AccessDeniedPath;
     }
 
-    private static void ConfigureOpenIdConnect(IServiceCollection services, OpenIdConnectOptions options, DfeSignInConfiguration config)
+    private static void ConfigureOpenIdConnect(
+        IServiceCollection services,
+        OpenIdConnectOptions options,
+        DfeSignInConfiguration config
+    )
     {
         options.ClientId = config.ClientId;
         options.ClientSecret = config.ClientSecret;
@@ -84,9 +96,11 @@ public static class ServiceCollectionExtensions
 
         options.Events = new OpenIdConnectEvents()
         {
-            OnUserInformationReceived = (UserInformationReceivedContext context) => OnUserInformationReceivedEvent.RecordUserSignIn(logger, context),
+            OnUserInformationReceived = (UserInformationReceivedContext context) =>
+                OnUserInformationReceivedEvent.RecordUserSignIn(logger, context),
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,
-            OnRedirectToIdentityProviderForSignOut = DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut,
+            OnRedirectToIdentityProviderForSignOut =
+                DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut,
         };
     }
 

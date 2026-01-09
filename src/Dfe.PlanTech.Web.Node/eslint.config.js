@@ -1,5 +1,3 @@
-import sharedConfig from "../../eslint.config.mjs";
+import sharedConfig from '../../eslint.config.mjs';
 
-export default [
-  ...sharedConfig,
-];
+export default [...sharedConfig];

@@ -138,5 +138,3 @@ Feature: MAT Multi Category Landing Page
       And I should not see the confirmation panel for "Category Two Section One"
       And I should not see the confirmation panel for "Category Two Section Two"
       And I should not see the confirmation panel for "Category Two Section Three"
-
-

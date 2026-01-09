@@ -9,13 +9,13 @@ namespace Dfe.PlanTech.Data.Contentful.Persistence;
 /// For mapping fields/properties of type <see chref="ContentfulEntry"/> to their concrete type,
 /// when serialising the returned API response from Contentful
 /// </summary>
-public class EntryResolver(
-) : IContentTypeResolver
+public class EntryResolver() : IContentTypeResolver
 {
     public Dictionary<string, Type> Types => _types;
 
-    private readonly Dictionary<string, Type> _types = ReflectionHelper.GetTypesInheritingFrom<ContentfulEntry>()
-                                                                       .ToDictionary(type => type.Name.ToLower());
+    private readonly Dictionary<string, Type> _types = ReflectionHelper
+        .GetTypesInheritingFrom<ContentfulEntry>()
+        .ToDictionary(type => type.Name.ToLower());
 
     /// <summary>
     /// Returns matching type for ID, or <see chref="MissingComponent"/> if none found.
@@ -24,7 +24,12 @@ public class EntryResolver(
     /// <returns></returns>
     public Type Resolve(string contentTypeId)
     {
-        if (ContentfulContentTypeConstants.ContentTypeToEntryClassTypeMap.TryGetValue(contentTypeId.ToLower(), out var type))
+        if (
+            ContentfulContentTypeConstants.ContentTypeToEntryClassTypeMap.TryGetValue(
+                contentTypeId.ToLower(),
+                out var type
+            )
+        )
         {
             return type;
         }

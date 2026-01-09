@@ -9,7 +9,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Rendering;
 
 public class TableCellRendererTests
 {
-    private readonly IRichTextContentPartRendererCollection _renderCollecion = Substitute.For<IRichTextContentPartRendererCollection>();
+    private readonly IRichTextContentPartRendererCollection _renderCollecion =
+        Substitute.For<IRichTextContentPartRendererCollection>();
 
     [Fact]
     public void CheckTableRendersAreBuiltCorrectly()
@@ -43,31 +44,20 @@ public class TableCellRendererTests
         return new RichTextContentField()
         {
             NodeType = RichTextNodeType.TableCell.ToString(),
-            Content = [
+            Content =
+            [
                 new RichTextContentField()
                 {
-                    Content = [
-                        new RichTextContentField(){
-                            Value = "This is the first line"
-                        },
-                    ]
+                    Content = [new RichTextContentField() { Value = "This is the first line" }],
                 },
                 new RichTextContentField()
                 {
-                    Content = [
-                        new RichTextContentField(){
-                            Value = "This is the Second line"
-                        },
-                    ]
+                    Content = [new RichTextContentField() { Value = "This is the Second line" }],
                 },
                 new RichTextContentField()
                 {
-                    Content = [
-                        new RichTextContentField(){
-                            Value = "This is the Third line"
-                        }
-                    ]
-                }
+                    Content = [new RichTextContentField() { Value = "This is the Third line" }],
+                },
             ],
             Data = new RichTextContentSupportDataField()
             {
@@ -82,13 +72,13 @@ public class TableCellRendererTests
                             SummaryLine = "Summary Line 1",
                             RichText = new RichTextContentField()
                             {
-                                Description = "This is just a description and has no render content"
+                                Description =
+                                    "This is just a description and has no render content",
                             },
                         },
-                    ]
-                }
-            }
+                    ],
+                },
+            },
         };
     }
-
 }

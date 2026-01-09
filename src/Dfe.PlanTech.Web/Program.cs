@@ -36,13 +36,10 @@ builder.Configuration.AddCommandLine(args);
 builder.AddSystemConfiguration();
 builder.AddContentAndSupportConfiguration();
 
-builder.Services
-    .AddGovUkFrontendConfiguration()
-    .AddGovUkFrontend()
-    .AddHttpContextAccessor();
+builder.Services.AddGovUkFrontendConfiguration().AddGovUkFrontend().AddHttpContextAccessor();
 
-builder.Services
-    .AddAuthorisationServices()
+builder
+    .Services.AddAuthorisationServices()
     .AddCaching()
     .AddContentfulServices(builder.Configuration)
     .AddCookies(builder.Configuration)
@@ -57,9 +54,7 @@ builder.Services
     .AddRepositories()
     .AddViewComponents();
 
-builder.Services
-    .AddApplicationServices()
-    .AddApplicationWorkflows();
+builder.Services.AddApplicationServices().AddApplicationWorkflows();
 
 var app = builder.Build();
 
@@ -68,12 +63,7 @@ app.UseRobotsTxtMiddleware();
 app.UseSecurityHeaders();
 app.UseMiddleware<HeadRequestMiddleware>();
 
-app.UseCookiePolicy(
-    new CookiePolicyOptions
-    {
-        Secure = CookieSecurePolicy.Always
-    }
-);
+app.UseCookiePolicy(new CookiePolicyOptions { Secure = CookieSecurePolicy.Always });
 
 app.UseForwardedHeaders();
 
@@ -88,7 +78,8 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 {
     exceptionHandlerApp.Run(async context =>
     {
-        var exceptionHandlerMiddleware = context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
+        var exceptionHandlerMiddleware =
+            context.RequestServices.GetRequiredService<IExceptionHandlerMiddleware>();
         await exceptionHandlerMiddleware.HandleExceptionAsync(context);
     });
 });
@@ -100,9 +91,6 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    pattern: "{controller=Pages}/{action=GetByRoute}/{id?}",
-    name: "default"
-);
+app.MapControllerRoute(pattern: "{controller=Pages}/{action=GetByRoute}/{id?}", name: "default");
 
 await app.RunAsync();

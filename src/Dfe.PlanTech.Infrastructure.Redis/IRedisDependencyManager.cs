@@ -21,7 +21,12 @@ public interface IRedisDependencyManager
     /// <param name="value">The <see cref="IContentComponent"/> parent of the dependencies </param>
     /// <param name="cancellationToken"></param>
     /// <returns>A task that represents the asynchronous operation.</returns>
-    Task RegisterDependenciesAsync<T>(IDatabase database, string key, T value, CancellationToken cancellationToken = default);
+    Task RegisterDependenciesAsync<T>(
+        IDatabase database,
+        string key,
+        T value,
+        CancellationToken cancellationToken = default
+    );
 
     /// <summary>
     /// Generates a key for the given content component ID.

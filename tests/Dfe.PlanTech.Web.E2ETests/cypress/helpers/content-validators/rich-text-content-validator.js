@@ -1,8 +1,8 @@
-import { parse } from "node-html-parser";
-import TableValidator from "./rich-text-validators/table-validator";
-import { CleanText } from "../text-helpers";
-import ValidateHeader from "./header-validator";
-import { prodUri, containerUri, externalLinkSuffix } from "../constants";
+import { parse } from 'node-html-parser';
+import TableValidator from './rich-text-validators/table-validator';
+import { CleanText } from '../text-helpers';
+import ValidateHeader from './header-validator';
+import { prodUri, containerUri, externalLinkSuffix } from '../constants';
 
 const tableValidator = new TableValidator();
 
@@ -18,39 +18,39 @@ export default ValidateRichTextContent;
 
 function validateByNodeType(content) {
   switch (content.nodeType) {
-    case "paragraph": {
+    case 'paragraph': {
       validateParagraph(content);
       break;
     }
 
-    case "table": {
+    case 'table': {
       tableValidator.validateTable(content);
-      break;
-      }
-
-      case "heading-2": {
-          const tag = "h2";
-          const size = "large";
-          const text = content.content[0].value;
-          const nodeContent = { fields: { tag, size, text } };
-          ValidateHeader(nodeContent);
-          break;
-      }
-
-      case "heading-3": {
-          const tag = "h3";
-          const size = "medium";
-          const text = content.content[0].value;
-          const nodeContent = { fields: { tag, size, text } };
-          ValidateHeader(nodeContent);
-          break;
-      }
-
-    case "unordered-list": {
       break;
     }
 
-    case "ordered-list": {
+    case 'heading-2': {
+      const tag = 'h2';
+      const size = 'large';
+      const text = content.content[0].value;
+      const nodeContent = { fields: { tag, size, text } };
+      ValidateHeader(nodeContent);
+      break;
+    }
+
+    case 'heading-3': {
+      const tag = 'h3';
+      const size = 'medium';
+      const text = content.content[0].value;
+      const nodeContent = { fields: { tag, size, text } };
+      ValidateHeader(nodeContent);
+      break;
+    }
+
+    case 'unordered-list': {
+      break;
+    }
+
+    case 'ordered-list': {
       break;
     }
     default: {
@@ -64,7 +64,7 @@ function validateParagraph(content) {
 
   const parsedElement = parse(expectedHtml);
 
-  cy.get("p").then(($paragraphs) => {
+  cy.get('p').then(($paragraphs) => {
     const paragraphHtmls = Array.from(
       Array.from($paragraphs.map((i, el) => Cypress.$(el).html()))
         .map((paragraph) => {
@@ -75,7 +75,7 @@ function validateParagraph(content) {
             parsed: parse(withoutWhitespaceEscaped),
           };
         })
-        .filter((paragraph) => paragraph.original != "")
+        .filter((paragraph) => paragraph.original != ''),
     );
 
     const anyMatches = paragraphHtmls.find(
@@ -83,27 +83,25 @@ function validateParagraph(content) {
         paragraph.original == expectedHtml ||
         paragraph.original.indexOf(expectedHtml) != -1 ||
         paragraph.parsed.innerHTML?.indexOf(parsedElement.innerHTML) != -1 ||
-        paragraph.parsed.innerText
-          ?.trim()
-          .indexOf(parsedElement.innerText.trim()) != -1
+        paragraph.parsed.innerText?.trim().indexOf(parsedElement.innerText.trim()) != -1,
     );
 
     if (!anyMatches) {
       console.error(`Could not find match for content`, expectedHtml, content);
-      } else {
-          expect(anyMatches).to.exist;
+    } else {
+      expect(anyMatches).to.exist;
     }
   });
 }
 
 function buildExpectedHtml(content) {
-  let html = "";
+  let html = '';
   for (const child of content.content) {
     if (child.value) {
-      html += child.value.replace(/\r\n/g, "\n");
+      html += child.value.replace(/\r\n/g, '\n');
     }
 
-    if (child.nodeType == "hyperlink") {
+    if (child.nodeType == 'hyperlink') {
       html += `<a href="${child.data.uri}" class="govuk-link">`;
     }
 
@@ -115,10 +113,10 @@ function buildExpectedHtml(content) {
       }
     }
 
-    if (child.nodeType == "hyperlink") {
-            if (!child.data.uri.includes(prodUri) && !child.data.uri.includes(containerUri)) {
-                html += externalLinkSuffix;
-            }
+    if (child.nodeType == 'hyperlink') {
+      if (!child.data.uri.includes(prodUri) && !child.data.uri.includes(containerUri)) {
+        html += externalLinkSuffix;
+      }
       html += `</a>`;
     }
   }

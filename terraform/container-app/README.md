@@ -1,6 +1,6 @@
 # Terraform
 
-The following article discusses developer tools and how to run the **Terraform** and **Teraform-Docs** tools. [Terraform Configuration](./terraform-configuration.md) page contains a detailed view of the Terraform configuration.  The [GitHub Workflows](../docs/GitHub-Workflows.md) page contains details of the Terraform pull request workflow.
+The following article discusses developer tools and how to run the **Terraform** and **Teraform-Docs** tools. [Terraform Configuration](./terraform-configuration.md) page contains a detailed view of the Terraform configuration. The [GitHub Workflows](../docs/GitHub-Workflows.md) page contains details of the Terraform pull request workflow.
 
 ## Contents
 
@@ -79,12 +79,12 @@ export ARM_CLIENT_ID = <client_id>
 export ARM_CLIENT_SECRET = <client_secret>
 ```
 
-| Key                   | Location                                                      |
-| --------------------- |---------------------------------------------------------------|
-| ARM_TENANT_ID         | DfE Platform Identity Overview (same for all envs)            |
-| ARM_SUBSCRIPTION_ID   | Managed identities -> s190XXX -> Subscription ID              |
-| ARM_CLIENT_ID         | go to s190-XXX terraform overview, and use the application ID |
-| ARM_CLIENT_SECRET     | service-principal-secret from the tf-kv                       |
+| Key                 | Location                                                      |
+| ------------------- | ------------------------------------------------------------- |
+| ARM_TENANT_ID       | DfE Platform Identity Overview (same for all envs)            |
+| ARM_SUBSCRIPTION_ID | Managed identities -> s190XXX -> Subscription ID              |
+| ARM_CLIENT_ID       | go to s190-XXX terraform overview, and use the application ID |
+| ARM_CLIENT_SECRET   | service-principal-secret from the tf-kv                       |
 
 And sign in to Azure using the Azure CLI, as the Terraform module uses this for part of the infrastructure deployoyment:
 
@@ -159,7 +159,7 @@ The terraform validate command validates the configuration files.
 
 ### Terraform Format
 
-Any changes to the Terraform configuration should be formatted correctly.  This can be done by running the following command:
+Any changes to the Terraform configuration should be formatted correctly. This can be done by running the following command:
 
 `terraform fmt`
 
@@ -177,7 +177,7 @@ This will generate the `terraform-configuration.md` markdown file.
 
 When running locally you see an error similar to the following:
 
-> Making Read request on Azure KeyVault Secret.  Client address is not authorized and caller is not a trusted service. Client address: 123.456.789.123.
+> Making Read request on Azure KeyVault Secret. Client address is not authorized and caller is not a trusted service. Client address: 123.456.789.123.
 
 To resolve this, you need to update the KeyVault Firewall to grant your IP access.
 

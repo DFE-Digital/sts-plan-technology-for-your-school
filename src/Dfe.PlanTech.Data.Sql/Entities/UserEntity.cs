@@ -26,7 +26,7 @@ public class UserEntity
             DfeSignInRef = DfeSignInRef,
             DateCreated = DateCreated,
             DateLastUpdated = DateLastUpdated,
-            Responses = Responses?.Select(r => r.AsDto()).ToList()
+            Responses = Responses?.Select(r => r.AsDto()).ToList(),
         };
     }
 }

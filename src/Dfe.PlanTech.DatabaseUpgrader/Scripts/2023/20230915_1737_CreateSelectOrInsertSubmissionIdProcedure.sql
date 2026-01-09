@@ -21,11 +21,11 @@ AS
       BEGIN
         INSERT INTO [dbo].[submission]
           (establishmentId, completed, sectionId, sectionName)
-        output INSERTED.ID 
+        output INSERTED.ID
         VALUES
           (@establishmentId, 0, @sectionId, @sectionName)
-      
-        SELECT @submissionId = Scope_Identity() 
+
+        SELECT @submissionId = Scope_Identity()
       END
     COMMIT TRAN
   END TRY

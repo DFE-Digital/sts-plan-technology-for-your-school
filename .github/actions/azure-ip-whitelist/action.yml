@@ -9,8 +9,8 @@ inputs:
     required: true
     type: choice
     options:
-      - "add"
-      - "remove"
+      - 'add'
+      - 'remove'
   az_resource_group:
     required: true
     type: string
@@ -19,7 +19,7 @@ inputs:
     type: string
   az_ip_name:
     type: string
-    default: "github_action"
+    default: 'github_action'
   az_sql_database_server_name:
     required: true
     type: string
@@ -33,7 +33,7 @@ runs:
       run: |
         az keyvault network-rule add --resource-group ${{ inputs.az_resource_group }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ inputs.ip_address }} &> /dev/null
         az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group }} --server ${{ inputs.az_sql_database_server_name }} --name ${{ inputs.az_ip_name }} --start-ip-address ${{ inputs.ip_address }} --end-ip-address ${{ inputs.ip_address }} &> /dev/null
-    
+
     - name: Remove from whitelist
       if: ${{ inputs.verb == 'remove' }}
       shell: bash

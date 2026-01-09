@@ -7,7 +7,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 
 public class HeaderExtensionsTests
 {
-    private static ComponentHeaderEntry Header(HeaderSize size) => new ComponentHeaderEntry { Size = size };
+    private static ComponentHeaderEntry Header(HeaderSize size) =>
+        new ComponentHeaderEntry { Size = size };
 
     [Theory]
     [InlineData(HeaderSize.Small, HeaderExtensions.SMALL)]

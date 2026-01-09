@@ -1,5 +1,5 @@
-import { Then } from "@cucumber/cucumber";
-import { expect } from "@playwright/test";
+import { Then } from '@cucumber/cucumber';
+import { expect } from '@playwright/test';
 
 Then('I should see a link to log into DfE Sign-in', async function () {
   const loginLink = this.page.getByRole('link', { name: 'DfE Sign-in account (opens in new tab)' });

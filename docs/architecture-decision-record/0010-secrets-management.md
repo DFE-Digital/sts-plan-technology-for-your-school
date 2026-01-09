@@ -1,6 +1,6 @@
 # 0010 - Secrets Management
 
-* **Status**: Accepted
+- **Status**: Accepted
 
 ## Context and Problem Statement
 
@@ -8,14 +8,14 @@ Where can we store sensitive application configuration data such as secrets so t
 
 ## Decision Drivers
 
-* Within DfE’s Technical Guidance
-* Compatible with selected hosting platform
-* Adequare security to protect sensitive data
+- Within DfE’s Technical Guidance
+- Compatible with selected hosting platform
+- Adequare security to protect sensitive data
 
 ## Considered Options
 
-* Azure Key Vault
-* F5
+- Azure Key Vault
+- F5
 
 ## Decision Outcome
 

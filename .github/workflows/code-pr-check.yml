@@ -3,15 +3,15 @@ name: Code PR Check
 on:
   pull_request:
     paths:
-      - "contentful/**"
-      - "src/**"
-      - "tests/**"
-      - ".github/workflows/code-pr-check.yml"
-      - ".github/actions/build-dotnet-app/action.yml"
-      - ".github/actions/run-unit-tests/action.yml"
+      - 'contentful/**'
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/code-pr-check.yml'
+      - '.github/actions/build-dotnet-app/action.yml'
+      - '.github/actions/run-unit-tests/action.yml'
 
 concurrency:
-  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
 
 env:
@@ -89,8 +89,8 @@ jobs:
       - name: Install latest JDK
         uses: actions/setup-java@v4
         with:
-          distribution: "microsoft"
-          java-version: "17"
+          distribution: 'microsoft'
+          java-version: '17'
 
       - name: Start SonarCloud scanner
         run: |
@@ -153,7 +153,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "latest"
+          node-version: 'latest'
 
       - name: Install Dependencies
         working-directory: ./tests/Dfe.PlanTech.Web.Node.UnitTests/
@@ -195,7 +195,7 @@ jobs:
         if: steps.contentful-check.outputs.changed == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "latest"
+          node-version: 'latest'
 
       - name: Install Dependencies
         if: steps.contentful-check.outputs.changed == 'true'

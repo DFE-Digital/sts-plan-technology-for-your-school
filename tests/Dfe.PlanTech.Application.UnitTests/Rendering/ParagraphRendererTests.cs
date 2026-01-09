@@ -15,11 +15,7 @@ public class ParagraphRendererTests
     {
         const string value = "Paragraph value";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
         var renderer = new ParagraphRenderer(new RichTextPartRendererOptions());
 
@@ -31,11 +27,7 @@ public class ParagraphRendererTests
     [Fact]
     public void Should_Reject_When_Not_Paragraph()
     {
-        var content = new RichTextContentField()
-        {
-            NodeType = "hyperlink",
-            Value = "hyperlink"
-        };
+        var content = new RichTextContentField() { NodeType = "hyperlink", Value = "hyperlink" };
 
         var renderer = new ParagraphRenderer(new RichTextPartRendererOptions());
 
@@ -48,15 +40,14 @@ public class ParagraphRendererTests
     public void Should_Create_Paragraph_When_PassedValidData()
     {
         var renderer = new ParagraphRenderer(new RichTextPartRendererOptions());
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "Paragraph text";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
@@ -65,21 +56,21 @@ public class ParagraphRendererTests
         Assert.Equal("<p></p>", html);
     }
 
-
     [Fact]
     public void Should_Create_Paragraph_WithClass__When_PassedValidData()
     {
         const string classes = "testing-classes";
-        var renderer = new ParagraphRenderer(new RichTextPartRendererOptions() { Classes = classes });
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var renderer = new ParagraphRenderer(
+            new RichTextPartRendererOptions() { Classes = classes }
+        );
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "Paragraph text";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
@@ -87,5 +78,4 @@ public class ParagraphRendererTests
 
         Assert.Equal($"<p class=\"{classes}\"></p>", html);
     }
-
 }

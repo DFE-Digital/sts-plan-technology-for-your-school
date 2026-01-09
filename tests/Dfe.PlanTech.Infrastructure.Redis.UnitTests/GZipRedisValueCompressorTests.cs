@@ -78,7 +78,6 @@ public class GZipRedisValueCompressorTests
 
         GZipRedisValueCompressor.Compress(ref compressed);
 
-
         byte[] decompressed = [.. compressed];
         GZipRedisValueCompressor.Decompress(ref decompressed);
 

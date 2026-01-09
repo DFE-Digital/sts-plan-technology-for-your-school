@@ -1,4 +1,3 @@
-
 using System.Text;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
@@ -8,11 +7,14 @@ namespace Dfe.PlanTech.Application.Rendering;
 
 public class ListItemRenderer : BaseRichTextContentPartRenderer
 {
-    public ListItemRenderer() : base(RichTextNodeType.ListItem)
-    {
-    }
+    public ListItemRenderer()
+        : base(RichTextNodeType.ListItem) { }
 
-    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    )
     {
         stringBuilder.Append("<li>");
 

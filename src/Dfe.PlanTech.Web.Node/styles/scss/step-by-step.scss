@@ -1,17 +1,17 @@
-@import "../../node_modules/govuk-frontend/dist/govuk/index.scss";
+@import '../../node_modules/govuk-frontend/dist/govuk/index.scss';
 
 //Step-by-step navigation pattern. See https://design-system.service.gov.uk/patterns/step-by-step-navigation/
-@import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation.scss";
-@import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-related.scss";
-@import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-header.scss";
+@import '../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation.scss';
+@import '../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-related.scss';
+@import '../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation-header.scss';
 
 html {
   scroll-behavior: smooth;
 }
 
 .recommendation-content {
-  &:not(:has(:target)){
-    .recommendation-piece-container:first-child{
+  &:not(:has(:target)) {
+    .recommendation-piece-container:first-child {
       display: block;
     }
   }
@@ -20,7 +20,7 @@ html {
 .recommendation-piece-container {
   display: none;
 
-  &:target{
+  &:target {
     display: block;
   }
 }
@@ -38,7 +38,7 @@ html {
 }
 
 @media screen {
-    .govuk-pagination__link:after {
-        position: relative;
-    }
+  .govuk-pagination__link:after {
+    position: relative;
+  }
 }

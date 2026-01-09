@@ -26,7 +26,10 @@ public class QueryBuilderByContentTypeTests
 
         var built = queryBuilder.Build();
 
-        Assert.True(built.Contains($"?content_type={TEST_CONTENT_TYPE}"), "Missing content type filter");
+        Assert.True(
+            built.Contains($"?content_type={TEST_CONTENT_TYPE}"),
+            "Missing content type filter"
+        );
     }
 
     [Fact]

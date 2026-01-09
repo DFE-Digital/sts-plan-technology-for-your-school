@@ -10,7 +10,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Queries
     {
         public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
-        private readonly UserDataEntity[] Users = new UserDataEntity[]{
+        private readonly UserDataEntity[] Users = new UserDataEntity[]
+        {
             new() { DfeSignInRef = "One", Id = 1 },
             new() { DfeSignInRef = "Two", Id = 2 },
             new() { DfeSignInRef = "Three", Id = 3 },
@@ -31,12 +32,14 @@ namespace Dfe.PlanTech.Application.UnitTests.Users.Queries
             var strut = CreateStrut();
 
             Db.GetUserBy(Arg.Any<Expression<Func<UserDataEntity, bool>>>())
-                .Returns((callinfo) =>
-                {
-                    var expression = callinfo.ArgAt<Expression<Func<UserDataEntity, bool>>>(0);
+                .Returns(
+                    (callinfo) =>
+                    {
+                        var expression = callinfo.ArgAt<Expression<Func<UserDataEntity, bool>>>(0);
 
-                    return Users.AsQueryable().FirstOrDefault(expression);
-                });
+                        return Users.AsQueryable().FirstOrDefault(expression);
+                    }
+                );
 
             //Act
             var result = await strut.GetUserId(userRef);

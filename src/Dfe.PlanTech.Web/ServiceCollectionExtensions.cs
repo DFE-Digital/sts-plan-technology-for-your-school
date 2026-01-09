@@ -45,24 +45,33 @@ public static class ServiceCollectionExtensions
     {
         services.AddAuthentication();
 
-        services.AddAuthorizationBuilder()
-            .AddDefaultPolicy(PageModelAuthorisationPolicy.PolicyName, policy =>
-            {
-                policy.Requirements.Add(new PageAuthorisationRequirement());
-                policy.Requirements.Add(new UserOrganisationAuthorisationRequirement());
-            })
-            .AddPolicy(SignedRequestAuthorisationPolicy.PolicyName, policy =>
-            {
-                policy.AddRequirements(new SignedRequestAuthorisationRequirement());
-            }
-        );
+        services
+            .AddAuthorizationBuilder()
+            .AddDefaultPolicy(
+                PageModelAuthorisationPolicy.PolicyName,
+                policy =>
+                {
+                    policy.Requirements.Add(new PageAuthorisationRequirement());
+                    policy.Requirements.Add(new UserOrganisationAuthorisationRequirement());
+                }
+            )
+            .AddPolicy(
+                SignedRequestAuthorisationPolicy.PolicyName,
+                policy =>
+                {
+                    policy.AddRequirements(new SignedRequestAuthorisationRequirement());
+                }
+            );
 
         return services
             .AddSingleton<ApiKeyAuthorisationFilter>()
             .AddSingleton<IAuthorizationHandler, SignedRequestAuthorisationPolicy>()
             .AddSingleton<IAuthorizationHandler, PageModelAuthorisationPolicy>()
             .AddSingleton<IAuthorizationHandler, UserOrganisationAuthorisationHandler>()
-            .AddSingleton<IAuthorizationMiddlewareResultHandler, UserAuthorisationMiddlewareResultHandler>();
+            .AddSingleton<
+                IAuthorizationMiddlewareResultHandler,
+                UserAuthorisationMiddlewareResultHandler
+            >();
     }
 
     public static IServiceCollection AddCaching(this IServiceCollection services)
@@ -85,39 +94,50 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    public static IServiceCollection AddContentfulServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddContentfulServices(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         services.AddTransient<IContractResolver, DependencyInjectionContractResolver>();
 
         services.SetupContentfulClient(configuration, HttpClientPolicyExtensions.AddRetryPolicy);
         services.SetupRichTextRenderers();
 
-        services.AddScoped((servicesInner) =>
-        {
-            var logger = servicesInner.GetRequiredService<ILogger<TextRendererOptions>>();
-
-            return new TextRendererOptions(logger, [
-                new(){
-                    Mark = "bold",
-                    HtmlTag = "span",
-                    Classes = "govuk-body govuk-!-font-weight-bold",
-                }]);
-        });
-
-        services.AddSingleton((_) =>
-        {
-            var configValue = configuration["CONTENTFUL_GET_ENTITY_INT"] ?? "5";
-
-            if (!int.TryParse(configValue, out int include))
+        services.AddScoped(
+            (servicesInner) =>
             {
-                throw new FormatException($"Could not parse CONTENTFUL_GET_ENTITY_INT environment variable to int. Value: {configValue}");
+                var logger = servicesInner.GetRequiredService<ILogger<TextRendererOptions>>();
+
+                return new TextRendererOptions(
+                    logger,
+                    [
+                        new()
+                        {
+                            Mark = "bold",
+                            HtmlTag = "span",
+                            Classes = "govuk-body govuk-!-font-weight-bold",
+                        },
+                    ]
+                );
             }
+        );
 
-            return new GetPageFromContentfulOptions()
+        services.AddSingleton(
+            (_) =>
             {
-                Include = include
-            };
-        });
+                var configValue = configuration["CONTENTFUL_GET_ENTITY_INT"] ?? "5";
+
+                if (!int.TryParse(configValue, out int include))
+                {
+                    throw new FormatException(
+                        $"Could not parse CONTENTFUL_GET_ENTITY_INT environment variable to int. Value: {configValue}"
+                    );
+                }
+
+                return new GetPageFromContentfulOptions() { Include = include };
+            }
+        );
 
         services.AddScoped((_) => new HyperlinkRendererOptions()
         {
@@ -126,41 +146,75 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped((_) => new RichTextPartRendererOptions());
 
-        services.AddOptions<ApiAuthenticationConfiguration>()
-            .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.ApiAuthentication).Bind(settings));
+        services
+            .AddOptions<ApiAuthenticationConfiguration>()
+            .Configure<IConfiguration>(
+                (settings, configuration) =>
+                    configuration
+                        .GetRequiredSection(ConfigurationConstants.ApiAuthentication)
+                        .Bind(settings)
+            );
 
-        services.AddOptions<ContentfulOptionsConfiguration>()
-            .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.Contentful).Bind(settings));
+        services
+            .AddOptions<ContentfulOptionsConfiguration>()
+            .Configure<IConfiguration>(
+                (settings, configuration) =>
+                    configuration
+                        .GetRequiredSection(ConfigurationConstants.Contentful)
+                        .Bind(settings)
+            );
 
-        services.AddOptions<SigningSecretConfiguration>()
-                .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.Contentful).Bind(settings));
+        services
+            .AddOptions<SigningSecretConfiguration>()
+            .Configure<IConfiguration>(
+                (settings, configuration) =>
+                    configuration
+                        .GetRequiredSection(ConfigurationConstants.Contentful)
+                        .Bind(settings)
+            );
 
-        services.AddTransient((services) => services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value);
-        services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptionsConfiguration>>().Value);
-        services.AddTransient((services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value);
+        services.AddTransient(
+            (services) =>
+                services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value
+        );
+        services.AddTransient(
+            (services) =>
+                services.GetRequiredService<IOptions<ContentfulOptionsConfiguration>>().Value
+        );
+        services.AddTransient(
+            (services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value
+        );
 
         services.AddScoped<ComponentViewsFactory>();
 
         return services;
     }
 
-    public static IServiceCollection AddCookies(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddCookies(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         services.AddScoped<ICookieService, CookieService>();
-        services.AddTransient<ICookieWorkflow, CookieWorkflow>((services) =>
-        {
-            var options = configuration.GetRequiredSection(ConfigurationConstants.Cookies).Get<CookieWorkflowOptions>();
+        services.AddTransient<ICookieWorkflow, CookieWorkflow>(
+            (services) =>
+            {
+                var options = configuration
+                    .GetRequiredSection(ConfigurationConstants.Cookies)
+                    .Get<CookieWorkflowOptions>();
 
-            return new CookieWorkflow(options ?? new CookieWorkflowOptions() { EssentialCookies = [] });
-        });
+                return new CookieWorkflow(
+                    options ?? new CookieWorkflowOptions() { EssentialCookies = [] }
+                );
+            }
+        );
 
         return services;
     }
 
     public static IServiceCollection AddCurrentUser(this IServiceCollection services)
     {
-        return services
-            .AddScoped<ICurrentUser, CurrentUser>();
+        return services.AddScoped<ICurrentUser, CurrentUser>();
     }
 
     public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)
@@ -173,50 +227,80 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddExceptionHandlingServices(this IServiceCollection services)
     {
         services.AddTransient<IExceptionHandlerMiddleware, ServiceExceptionHandlerMiddleware>();
-        services.AddTransient<IUserJourneyMissingContentExceptionHandler, UserJourneyMissingContentExceptionHandler>();
+        services.AddTransient<
+            IUserJourneyMissingContentExceptionHandler,
+            UserJourneyMissingContentExceptionHandler
+        >();
 
         return services;
     }
 
     public static IServiceCollection AddGoogleTagManager(this IServiceCollection services)
     {
-        services.AddOptions<GoogleTagManagerConfiguration>()
-                .Configure<IConfiguration>((settings, configuration) =>
+        services
+            .AddOptions<GoogleTagManagerConfiguration>()
+            .Configure<IConfiguration>(
+                (settings, configuration) =>
                 {
-                    configuration.GetRequiredSection(ConfigurationConstants.GoogleTagManager).Bind(settings);
-                });
+                    configuration
+                        .GetRequiredSection(ConfigurationConstants.GoogleTagManager)
+                        .Bind(settings);
+                }
+            );
 
-        services.AddTransient(services => services.GetRequiredService<IOptions<GoogleTagManagerConfiguration>>().Value);
+        services.AddTransient(services =>
+            services.GetRequiredService<IOptions<GoogleTagManagerConfiguration>>().Value
+        );
         services.AddTransient<GoogleTagManagerServiceServiceConfiguration>();
         return services;
     }
 
     public static IServiceCollection AddGovUkFrontendConfiguration(this IServiceCollection services)
     {
-        services.AddOptions<GovUkFrontendOptions>()
-           .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.GovUkFrontend).Bind(settings));
+        services
+            .AddOptions<GovUkFrontendOptions>()
+            .Configure<IConfiguration>(
+                (settings, configuration) =>
+                    configuration
+                        .GetRequiredSection(ConfigurationConstants.GovUkFrontend)
+                        .Bind(settings)
+            );
 
-        services.AddTransient((services) =>
-        {
-            var x = services.GetRequiredService<IOptions<GovUkFrontendOptions>>().Value;
-            return x;
-        });
+        services.AddTransient(
+            (services) =>
+            {
+                var x = services.GetRequiredService<IOptions<GovUkFrontendOptions>>().Value;
+                return x;
+            }
+        );
 
         return services;
     }
 
-    public static IServiceCollection AddRedisServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddRedisServices(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         services.AddSingleton(
-            new DistributedCachingOptions(ConnectionString: configuration.GetConnectionString("redis") ?? ""));
+            new DistributedCachingOptions(
+                ConnectionString: configuration.GetConnectionString("redis") ?? ""
+            )
+        );
         services.AddSingleton<ICmsCache, RedisCache>();
         services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
         services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
 
         services.AddSingleton<IRedisDependencyManager, RedisDependencyManager>();
 
-        services.AddOptions<BackgroundTaskQueueOptions>()
-                .Configure<IConfiguration>((settings, configuration) => configuration.GetSection(ConfigurationConstants.BackgroundTaskQueue).Bind(settings));
+        services
+            .AddOptions<BackgroundTaskQueueOptions>()
+            .Configure<IConfiguration>(
+                (settings, configuration) =>
+                    configuration
+                        .GetSection(ConfigurationConstants.BackgroundTaskQueue)
+                        .Bind(settings)
+            );
         services.AddSingleton<IBackgroundTaskQueue, BackgroundTaskQueue>();
         services.AddHostedService<BackgroundTaskHostedService>();
 
@@ -225,9 +309,15 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddRoutingServices(this IServiceCollection services)
     {
-        services.AddTransient<ICategorySectionViewComponentViewBuilder, CategorySectionViewComponentViewBuilder>();
+        services.AddTransient<
+            ICategorySectionViewComponentViewBuilder,
+            CategorySectionViewComponentViewBuilder
+        >();
         services.AddTransient<ICmsViewBuilder, CmsViewBuilder>();
-        services.AddTransient<IFooterLinksViewComponentViewBuilder, FooterLinksViewComponentViewBuilder>();
+        services.AddTransient<
+            IFooterLinksViewComponentViewBuilder,
+            FooterLinksViewComponentViewBuilder
+        >();
         services.AddTransient<IGroupsViewBuilder, GroupsViewBuilder>();
         services.AddTransient<IPagesViewBuilder, PagesViewBuilder>();
         services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();
@@ -239,7 +329,10 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddViewComponents(this IServiceCollection services)
     {
-        services.AddTransient<ICategoryLandingViewComponentViewBuilder, CategoryLandingViewComponentViewBuilder>();
+        services.AddTransient<
+            ICategoryLandingViewComponentViewBuilder,
+            CategoryLandingViewComponentViewBuilder
+        >();
 
         return services;
     }

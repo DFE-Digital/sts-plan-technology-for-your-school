@@ -14,12 +14,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Policies;
 
 public class SignedRequestAuthorisationPolicyTests
 {
-    private readonly ILogger<SignedRequestAuthorisationPolicy> _logger = Substitute.For<ILogger<SignedRequestAuthorisationPolicy>>();
+    private readonly ILogger<SignedRequestAuthorisationPolicy> _logger = Substitute.For<
+        ILogger<SignedRequestAuthorisationPolicy>
+    >();
 
     private const string MockSigningSecret = "super-secret-signing-secret";
-    private const string MockHeaderSignedValues = "x-contentful-signed-headers,x-contentful-timestamp";
+    private const string MockHeaderSignedValues =
+        "x-contentful-signed-headers,x-contentful-timestamp";
     private const string MockRequestBody = "{\"body\":\"something\"}";
-    private const string CorrectSignature = "6af1bb2c169c7e4ef43486f6c6f5e0ea676bda94eab980c3eb39a52c016b1808";
+    private const string CorrectSignature =
+        "6af1bb2c169c7e4ef43486f6c6f5e0ea676bda94eab980c3eb39a52c016b1808";
 
     private static AuthorizationHandlerContext BuildHandlerContext(HttpContext resource)
     {
@@ -46,11 +50,22 @@ public class SignedRequestAuthorisationPolicyTests
         httpContext.Request.Scheme = "https";
         httpContext.Request.Host = new HostString("example.test");
         httpContext.Request.Path = new PathString(path);
-        httpContext.Request.QueryString = string.IsNullOrEmpty(query) ? QueryString.Empty : new QueryString(query);
+        httpContext.Request.QueryString = string.IsNullOrEmpty(query)
+            ? QueryString.Empty
+            : new QueryString(query);
 
-        httpContext.Request.Headers.Append(SignedRequestAuthorisationPolicy.HeaderSignedValues, MockHeaderSignedValues);
-        httpContext.Request.Headers.Append(SignedRequestAuthorisationPolicy.HeaderSignature, CorrectSignature);
-        httpContext.Request.Headers.Append(SignedRequestAuthorisationPolicy.HeaderTimestamp, requestTimestamp);
+        httpContext.Request.Headers.Append(
+            SignedRequestAuthorisationPolicy.HeaderSignedValues,
+            MockHeaderSignedValues
+        );
+        httpContext.Request.Headers.Append(
+            SignedRequestAuthorisationPolicy.HeaderSignature,
+            CorrectSignature
+        );
+        httpContext.Request.Headers.Append(
+            SignedRequestAuthorisationPolicy.HeaderTimestamp,
+            requestTimestamp
+        );
         httpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(MockRequestBody));
         httpContext.Request.Path = new PathString("/api/cms/webhook");
 
@@ -65,9 +80,11 @@ public class SignedRequestAuthorisationPolicyTests
 
     private SignedRequestAuthorisationPolicy BuildPolicy(string? secret = null)
     {
-        var config = new SigningSecretConfiguration() { SigningSecret = secret ?? MockSigningSecret };
+        var config = new SigningSecretConfiguration()
+        {
+            SigningSecret = secret ?? MockSigningSecret,
+        };
         return new SignedRequestAuthorisationPolicy(_logger, config);
-
     }
 
     private static string Hmac(string message, string key)
@@ -104,8 +121,15 @@ public class SignedRequestAuthorisationPolicyTests
         await authorisationPolicy.HandleAsync(ctx);
 
         Assert.True(ctx.HasFailed);
-        _logger.ReceivedWithAnyArgs().Log(
-            LogLevel.Error, default, Arg.Any<object>(), null, Arg.Any<Func<object, Exception?, string>>());
+        _logger
+            .ReceivedWithAnyArgs()
+            .Log(
+                LogLevel.Error,
+                default,
+                Arg.Any<object>(),
+                null,
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -118,15 +142,21 @@ public class SignedRequestAuthorisationPolicyTests
         http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignedValues] = "content-type";
 
         // Expired timestamp
-        var past = DateTimeOffset.UtcNow.AddMinutes(-(SignedRequestAuthorisationPolicy.RequestTimeToLiveMinutes + 1))
-                                        .ToUnixTimeMilliseconds().ToString();
+        var past = DateTimeOffset
+            .UtcNow.AddMinutes(-(SignedRequestAuthorisationPolicy.RequestTimeToLiveMinutes + 1))
+            .ToUnixTimeMilliseconds()
+            .ToString();
         http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderTimestamp] = past;
 
         // Build message and bogus signature (won’t matter—timestamp already expired)
         var canonical = await SignedRequestAuthorisationPolicy.CreateCanonicalRepresentation(
             http.Request,
-            http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignedValues]);
-        http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignature] = Hmac(canonical, MockSigningSecret);
+            http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignedValues]
+        );
+        http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignature] = Hmac(
+            canonical,
+            MockSigningSecret
+        );
 
         var ctx = BuildHandlerContext(http);
         var authorisationPolicy = BuildPolicy(secret: string.Empty);
@@ -134,18 +164,31 @@ public class SignedRequestAuthorisationPolicyTests
         await authorisationPolicy.HandleAsync(ctx);
 
         Assert.True(ctx.HasFailed);
-        _logger.ReceivedWithAnyArgs().Log(
-            LogLevel.Error, default, Arg.Any<object>(), null, Arg.Any<Func<object, Exception?, string>>());
+        _logger
+            .ReceivedWithAnyArgs()
+            .Log(
+                LogLevel.Error,
+                default,
+                Arg.Any<object>(),
+                null,
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
     public async Task HandleRequirementAsync_When_Signature_Valid_Succeeds()
     {
-        var http = BuildHttpContext(method: "POST", path: "/webhook", query: "?a=1&b=2", body: "{\"id\":\"123\"}");
+        var http = BuildHttpContext(
+            method: "POST",
+            path: "/webhook",
+            query: "?a=1&b=2",
+            body: "{\"id\":\"123\"}"
+        );
 
         // headers included in canonical string
         http.Request.Headers["content-type"] = "application/json";
-        http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignedValues] = MockHeaderSignedValues;
+        http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignedValues] =
+            MockHeaderSignedValues;
 
         // fresh timestamp
         var nowMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString();
@@ -154,8 +197,12 @@ public class SignedRequestAuthorisationPolicyTests
         // compute canonical representation and valid signature
         var canonical = await SignedRequestAuthorisationPolicy.CreateCanonicalRepresentation(
             http.Request,
-            http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignedValues]);
-        http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignature] = Hmac(canonical, MockSigningSecret);
+            http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignedValues]
+        );
+        http.Request.Headers[SignedRequestAuthorisationPolicy.HeaderSignature] = Hmac(
+            canonical,
+            MockSigningSecret
+        );
 
         var ctx = BuildHandlerContext(http);
         var authorisationPolicy = BuildPolicy();
@@ -164,7 +211,9 @@ public class SignedRequestAuthorisationPolicyTests
 
         Assert.True(ctx.HasSucceeded);
         Assert.False(ctx.HasFailed);
-        _logger.DidNotReceiveWithAnyArgs().Log(LogLevel.Error, default, default!, default, default!);
+        _logger
+            .DidNotReceiveWithAnyArgs()
+            .Log(LogLevel.Error, default, default!, default, default!);
     }
 
     [Fact]
@@ -189,7 +238,10 @@ public class SignedRequestAuthorisationPolicyTests
         http.Request.Headers["x-extra"] = "abc";
         var signedHeaders = new StringValues("content-type,x-extra");
 
-        var canonical = await SignedRequestAuthorisationPolicy.CreateCanonicalRepresentation(http.Request, signedHeaders);
+        var canonical = await SignedRequestAuthorisationPolicy.CreateCanonicalRepresentation(
+            http.Request,
+            signedHeaders
+        );
 
         var expectedPathAndQuery = http.Request.GetEncodedPathAndQuery();
         // header order is as provided in signedHeaders, lower-cased, joined with ';'
@@ -202,15 +254,22 @@ public class SignedRequestAuthorisationPolicyTests
     [Fact]
     public async Task Should_Generate_Correct_Canonical_Representation()
     {
-        const string canonicalRepresentation = "POST\n/api/cms/webhook\nx-contentful-signed-headers:x-contentful-signed-headers,x-contentful-timestamp;x-contentful-timestamp:1704103200000\n{\"body\":\"something\"}";
+        const string canonicalRepresentation =
+            "POST\n/api/cms/webhook\nx-contentful-signed-headers:x-contentful-signed-headers,x-contentful-timestamp;x-contentful-timestamp:1704103200000\n{\"body\":\"something\"}";
 
         var requestTime = new DateTime(2024, 1, 1, 10, 0, 0);
         var requestTimestamp = new DateTimeOffset(requestTime).ToUnixTimeMilliseconds().ToString();
         var httpContext = BuildHttpContext();
         httpContext.Request.Headers.Remove(SignedRequestAuthorisationPolicy.HeaderTimestamp);
-        httpContext.Request.Headers.Append(SignedRequestAuthorisationPolicy.HeaderTimestamp, requestTimestamp);
+        httpContext.Request.Headers.Append(
+            SignedRequestAuthorisationPolicy.HeaderTimestamp,
+            requestTimestamp
+        );
 
-        var representation = await SignedRequestAuthorisationPolicy.CreateCanonicalRepresentation(httpContext.Request, MockHeaderSignedValues);
+        var representation = await SignedRequestAuthorisationPolicy.CreateCanonicalRepresentation(
+            httpContext.Request,
+            MockHeaderSignedValues
+        );
         Assert.Equal(canonicalRepresentation, representation);
     }
 
@@ -250,7 +309,10 @@ public class SignedRequestAuthorisationPolicyTests
 
     private static AuthorizationHandlerContext CreateHandlerContext(HttpContext httpContext)
     {
-        IEnumerable<IAuthorizationRequirement> requirements = [new SignedRequestAuthorisationRequirement()];
+        IEnumerable<IAuthorizationRequirement> requirements =
+        [
+            new SignedRequestAuthorisationRequirement(),
+        ];
         var user = httpContext.User;
         return new AuthorizationHandlerContext(requirements, user, httpContext);
     }

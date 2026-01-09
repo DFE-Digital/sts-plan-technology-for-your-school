@@ -1,15 +1,16 @@
 ﻿using System.Text;
+using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
 
 public class TableCellRendererTests
 {
-    private readonly IRichTextContentPartRendererCollection _renderCollecion = Substitute.For<IRichTextContentPartRendererCollection>();
+    private readonly IRichTextContentPartRendererCollection _renderCollecion =
+        Substitute.For<IRichTextContentPartRendererCollection>();
 
     [Fact]
     public void CheckTableRendersAreBuiltCorrectly()
@@ -43,31 +44,20 @@ public class TableCellRendererTests
         return new RichTextContent()
         {
             NodeType = RichTextNodeType.TableCell.ToString(),
-            Content = [
+            Content =
+            [
                 new RichTextContent()
                 {
-                    Content = [
-                        new RichTextContent(){
-                            Value = "This is the first line"
-                        },
-                    ]
+                    Content = [new RichTextContent() { Value = "This is the first line" }],
                 },
                 new RichTextContent()
                 {
-                    Content = [
-                        new RichTextContent(){
-                            Value = "This is the Second line"
-                        },
-                    ]
+                    Content = [new RichTextContent() { Value = "This is the Second line" }],
                 },
                 new RichTextContent()
                 {
-                    Content = [
-                        new RichTextContent(){
-                            Value = "This is the Third line"
-                        }
-                    ]
-                }
+                    Content = [new RichTextContent() { Value = "This is the Third line" }],
+                },
             ],
             Data = new RichTextContentSupportData()
             {
@@ -82,12 +72,13 @@ public class TableCellRendererTests
                             SummaryLine = "Summary Line 1",
                             RichText = new RichTextContent()
                             {
-                                Description = "This is just a description and has no render content"
+                                Description =
+                                    "This is just a description and has no render content",
                             },
                         },
-                    ]
-                }
-            }
+                    ],
+                },
+            },
         };
     }
 }

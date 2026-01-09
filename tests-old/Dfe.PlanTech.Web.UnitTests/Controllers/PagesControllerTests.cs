@@ -30,7 +30,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private const string INTERNAL_ERROR_ID = "InternalError";
         readonly ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
         readonly IUser userSubstitute = Substitute.For<IUser>();
-        private readonly IGetNavigationQuery _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
+        private readonly IGetNavigationQuery _getNavigationQuery =
+            Substitute.For<IGetNavigationQuery>();
         private readonly PagesController _controller;
         private readonly ControllerContext _controllerContext;
         private readonly IOptions<ContactOptionsConfiguration> _contactOptions;
@@ -41,22 +42,38 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var Logger = Substitute.For<ILogger<PagesController>>();
 
             _controllerContext = ControllerHelpers.SubstituteControllerContext();
-            _getNavigationQuery.GetLinkById(Arg.Any<string>()).Returns(new NavigationLink { DisplayText = "contact us", Href = "/contact-us", OpenInNewTab = true });
+            _getNavigationQuery
+                .GetLinkById(Arg.Any<string>())
+                .Returns(
+                    new NavigationLink
+                    {
+                        DisplayText = "contact us",
+                        Href = "/contact-us",
+                        OpenInNewTab = true,
+                    }
+                );
 
-            var contactUs = new ContactOptionsConfiguration
-            {
-                LinkId = "LinkId"
-            };
+            var contactUs = new ContactOptionsConfiguration { LinkId = "LinkId" };
             _contactOptions = Options.Create(contactUs);
-            _errorPages = Options.Create(new ErrorPagesConfiguration { InternalErrorPageId = INTERNAL_ERROR_ID });
+            _errorPages = Options.Create(
+                new ErrorPagesConfiguration { InternalErrorPageId = INTERNAL_ERROR_ID }
+            );
 
-            _controller = new PagesController(Logger, _getNavigationQuery, _contactOptions, _errorPages)
+            _controller = new PagesController(
+                Logger,
+                _getNavigationQuery,
+                _contactOptions,
+                _errorPages
+            )
             {
                 ControllerContext = _controllerContext,
-                TempData = Substitute.For<ITempDataDictionary>()
+                TempData = Substitute.For<ITempDataDictionary>(),
             };
 
-            var claimIdentity = new ClaimsIdentity(new[] { new Claim("Type", "Value") }, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimIdentity = new ClaimsIdentity(
+                new[] { new Claim("Type", "Value") },
+                CookieAuthenticationDefaults.AuthenticationScheme
+            );
             _controllerContext.HttpContext.User.Identity.Returns(claimIdentity);
         }
 
@@ -71,10 +88,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 OrgName = "Test Org",
                 Ukprn = "12345678",
                 Urn = "123456",
-                Type = new EstablishmentTypeDto()
-                {
-                    Name = "Test Name"
-                }
+                Type = new EstablishmentTypeDto() { Name = "Test Name" },
             };
 
             userSubstitute.GetOrganisationData().Returns(establishment);
@@ -83,10 +97,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Sys = new SystemDetails { Id = "index-id" },
                 Slug = INDEX_SLUG,
-                Title = new Title()
-                {
-                    Text = INDEX_TITLE
-                }
+                Title = new Title() { Text = INDEX_TITLE },
             };
 
             var result = _controller.GetByRoute(page, userSubstitute);
@@ -115,10 +126,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 OrgName = "Test Org",
                 Ukprn = "12345678",
                 Urn = "123456",
-                Type = new EstablishmentTypeDto()
-                {
-                    Name = "Test Name"
-                }
+                Type = new EstablishmentTypeDto() { Name = "Test Name" },
             };
             userSubstitute.GetOrganisationData().Returns(establishment);
 
@@ -126,11 +134,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Sys = new SystemDetails { Id = "self-assessment-id" },
                 Slug = SELF_ASSESSMENT_SLUG,
-                Title = new Title()
-                {
-                    Text = "Self assessment"
-                },
-                DisplayOrganisationName = true
+                Title = new Title() { Text = "Self assessment" },
+                DisplayOrganisationName = true,
             };
 
             var result = _controller.GetByRoute(page, userSubstitute);
@@ -156,21 +161,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 OrgName = "Test Org",
                 Ukprn = "12345678",
                 Urn = "123456",
-                Type = new EstablishmentTypeDto()
-                {
-                    Name = "Test Name"
-                }
+                Type = new EstablishmentTypeDto() { Name = "Test Name" },
             };
 
             var organisation = new OrganisationDto
             {
                 Id = "1",
                 Name = "",
-                Category = new OrganisationCategoryDto
-                {
-                    Id = "010",
-                    Name = "MAT"
-                }
+                Category = new OrganisationCategoryDto { Id = "010", Name = "MAT" },
             };
 
             var cookie = new DfeCookie { UserAcceptsCookies = true };
@@ -179,7 +177,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var claims = new List<Claim>
             {
-                new("organisation", JsonSerializer.Serialize(organisation))
+                new("organisation", JsonSerializer.Serialize(organisation)),
             };
 
             var identity = new ClaimsIdentity(claims, "TestAuthType");
@@ -187,21 +185,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext
-                {
-                    User = claimsPrincipal
-                }
+                HttpContext = new DefaultHttpContext { User = claimsPrincipal },
             };
 
             var page = new Page
             {
                 Sys = new SystemDetails { Id = "self-assessment-id" },
                 Slug = SELF_ASSESSMENT_SLUG,
-                Title = new Title
-                {
-                    Text = "Self assessment"
-                },
-                DisplayOrganisationName = true
+                Title = new Title { Text = "Self assessment" },
+                DisplayOrganisationName = true,
             };
 
             var result = _controller.GetByRoute(page, userSubstitute);
@@ -221,10 +213,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 OrgName = "Test Org",
                 Ukprn = "12345678",
                 Urn = "123456",
-                Type = new EstablishmentTypeDto()
-                {
-                    Name = "Test Name"
-                }
+                Type = new EstablishmentTypeDto() { Name = "Test Name" },
             };
             userSubstitute.GetOrganisationData().Returns(establishment);
 
@@ -232,11 +221,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Sys = new SystemDetails { Id = "self-assessment-id" },
                 Slug = SELF_ASSESSMENT_SLUG,
-                Title = new Title()
-                {
-                    Text = "Self assessment"
-                },
-                DisplayOrganisationName = false
+                Title = new Title() { Text = "Self assessment" },
+                DisplayOrganisationName = false,
             };
 
             var result = _controller.GetByRoute(page, userSubstitute);
@@ -257,10 +243,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void Should_Disable_Blue_Banner_For_ServerError_Page()
         {
-            var page = new Page()
-            {
-                Sys = new SystemDetails { Id = INTERNAL_ERROR_ID },
-            };
+            var page = new Page() { Sys = new SystemDetails { Id = INTERNAL_ERROR_ID } };
 
             var result = _controller.GetByRoute(page, userSubstitute);
 
@@ -280,10 +263,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public void Should_Not_Disable_Blue_Banner_For_Non_Error_Pages()
         {
-            var page = new Page()
-            {
-                Sys = new SystemDetails { Id = "normal-page" },
-            };
+            var page = new Page() { Sys = new SystemDetails { Id = "normal-page" } };
 
             var result = _controller.GetByRoute(page, userSubstitute);
 
@@ -305,10 +285,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var httpContextSubstitute = Substitute.For<HttpContext>();
 
-            var controllerContext = new ControllerContext
-            {
-                HttpContext = httpContextSubstitute
-            };
+            var controllerContext = new ControllerContext { HttpContext = httpContextSubstitute };
 
             _controller.ControllerContext = controllerContext;
 
@@ -329,10 +306,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 OrgName = "Test Org",
                 Ukprn = "12345678",
                 Urn = "123456",
-                Type = new EstablishmentTypeDto()
-                {
-                    Name = "Test Name"
-                }
+                Type = new EstablishmentTypeDto() { Name = "Test Name" },
             };
 
             userSubstitute.GetOrganisationData().Returns(establishment);
@@ -346,10 +320,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task Should_Render_NotFound_Page()
         {
             var httpContextSubstitute = Substitute.For<HttpContext>();
-            var controllerContext = new ControllerContext
-            {
-                HttpContext = httpContextSubstitute
-            };
+            var controllerContext = new ControllerContext { HttpContext = httpContextSubstitute };
             _controller.ControllerContext = controllerContext;
             var result = _controller.NotFoundError();
             var viewResult = await result as ViewResult;
