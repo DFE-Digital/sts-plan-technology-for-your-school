@@ -107,7 +107,7 @@ public class ContentfulServiceTests
         Assert.Same(expected, result);
         await contentfulWorkflow.Received(1).GetEntries<MicrocopyEntry>();
     }
-    
+
     [Fact]
     public async Task GetPageById_Uses_Generic_GetEntryById()
     {
