@@ -60,7 +60,6 @@ repos:
         args: ['format']
         language: system
         types: ['c#']
-        pass_filenames: false
         exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)
 
   # Web and config formats
