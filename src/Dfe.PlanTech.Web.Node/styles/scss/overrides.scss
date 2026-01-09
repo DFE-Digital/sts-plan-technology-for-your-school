@@ -213,3 +213,43 @@ ul.landing-page-list > li {
 .recommendation-action-header .govuk-table__header {
     vertical-align: middle;
 }
+
+@media (min-width: 27.5em) {
+    .app-auth-action {
+        text-align: right;
+        display: block;
+        position: absolute;
+        top: 0;
+        right: 0;
+        margin-top: 15px;
+        padding: 5px 0;
+    }
+}
+
+.app-auth-action {
+    margin: 15px 0 15px;
+}
+
+@media (min-width: 40.0625em) {
+    .app-auth-action__link {
+        font-size: 1.1875rem;
+        line-height: 1.3157894737;
+    }
+}
+.app-auth-action__link {
+    line-height: inherit;
+    text-decoration: none;
+}
+.app-auth-action__link:link, .app-auth-action__link:visited {
+    color: #fff;
+}
+
+.app-auth-action__link:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: .1578em;
+}
+
+.app-auth-action__link:hover, .app-auth-action__link:active {
+        color: hsla(0, 0%, 100%, .99);
+}

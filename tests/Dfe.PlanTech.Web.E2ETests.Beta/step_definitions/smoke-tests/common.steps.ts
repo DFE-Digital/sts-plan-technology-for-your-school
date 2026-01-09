@@ -247,25 +247,25 @@ When('I click the non-js back link', async function () {
 Then('the header should contain all the correct content', async function () {
 
   // wrapper
-  const header = this.page.locator('header.dfe-header[role="banner"]');
+  const header = this.page.locator('header.govuk-header[role="banner"]');
   await expect(header).toBeVisible();
 
   // check link to the logo
-  const logoLink = header.locator('.dfe-header__logo a.dfe-header__link--service');
+  const logoLink = header.locator('.govuk-header__link--homepage');
   await expect(logoLink).toBeVisible();
   await expect(logoLink).toHaveAttribute('href', '/home');
   await expect(logoLink).toHaveAttribute('aria-label', 'DfE homepage');
 
   // check the logo images
   const logoImages = logoLink.locator('img');
-  await expect(logoImages).toHaveCount(3);
-  await expect(logoImages.first()).toHaveAttribute('alt', 'DfE Homepage');
+  await expect(logoImages).toHaveCount(1);
+  await expect(logoImages.first()).toHaveAttribute('alt', 'Department for Education');
 
   const signOutLink = header.getByRole('link', { name: /sign out/i });
   await expect(signOutLink).toBeVisible();
   await expect(signOutLink).toHaveAttribute('href', '/auth/sign-out');
 
-  const serviceName = header.getByRole('link', { name: 'Plan technology for your school' });
+  const serviceName = header.getByRole('link', { name: 'DfE homepage' });
   await expect(serviceName).toBeVisible();
   await expect(serviceName).toHaveAttribute('href', '/home');
 });
