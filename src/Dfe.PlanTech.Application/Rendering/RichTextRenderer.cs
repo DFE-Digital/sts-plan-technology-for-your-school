@@ -14,9 +14,10 @@ public class RichTextRenderer(
     IEnumerable<IRichTextContentPartRenderer> renderers
 ) : IRichTextRenderer, IRichTextContentPartRendererCollection
 {
-    public IReadOnlyList<IRichTextContentPartRenderer> Renderers => renderers.ToList();
-
     private readonly ILogger<RichTextRenderer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IReadOnlyList<IRichTextContentPartRenderer> _renderers = renderers?.ToList() ?? throw new ArgumentNullException(nameof(renderers));
+
+    public IReadOnlyList<IRichTextContentPartRenderer> Renderers => _renderers;
 
     public ILogger Logger => _logger;
 
@@ -37,7 +38,7 @@ public class RichTextRenderer(
 
             if (renderer == null)
             {
-                _logger.LogWarning("Could not find renderer for {subContent}", subContent);
+                _logger.LogWarning("Could not find renderer for {SubContent}", subContent);
                 continue;
             }
 

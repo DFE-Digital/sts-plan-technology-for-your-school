@@ -53,7 +53,7 @@ public class ReviewAnswersViewBuilder(
             case SubmissionStatus.InProgress:
             case SubmissionStatus.CompleteNotReviewed:
             case SubmissionStatus.CompleteReviewed:
-                viewModel = await BuildCheckAnswersViewModel(controller, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
+                viewModel = await BuildCheckAnswersViewModel(submissionRoutingData, categorySlug, sectionSlug, errorMessage);
                 return controller.View(CheckAnswersViewName, viewModel);
 
             default:
@@ -94,7 +94,7 @@ public class ReviewAnswersViewBuilder(
                         $"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}"
                     );
 
-                viewModel = BuildViewAnswersViewModel(controller, section, submissionRoutingData, categorySlug, sectionSlug, errorMessage);
+                viewModel = BuildViewAnswersViewModel(section, submissionRoutingData, categorySlug, sectionSlug);
                 return controller.View(ViewAnswersViewName, viewModel);
 
             default:
@@ -128,7 +128,7 @@ public class ReviewAnswersViewBuilder(
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "There was an error while trying to calculate the maturity of submission {SubmissionId}", submissionId);
+            Logger.LogError(e, "An error occurred while confirming a user's answers for submission {SubmissionId}", submissionId);
             controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
@@ -137,29 +137,30 @@ public class ReviewAnswersViewBuilder(
         return controller.RedirectToCategoryLandingPage(categorySlug);
     }
 
-    private ViewAnswersViewModel BuildViewAnswersViewModel(
-        Controller controller,
+    private static ViewAnswersViewModel BuildViewAnswersViewModel(
         QuestionnaireSectionEntry section,
         SubmissionRoutingDataModel submissionModel,
         string categorySlug,
-        string sectionSlug,
-        string? errorMessage
+        string sectionSlug
     )
     {
         var submissionResponses = submissionModel.Submission?.Responses ?? [];
 
         // Get ordered CORE responses from section questions and select out the responses from the submission
         var orderedCoreResponses = section.Questions
-            .Select(q => submissionResponses.FirstOrDefault(r => r.QuestionSysId == q.Sys?.Id))
+            .Select(q => submissionModel.Submission?.Responses?.FirstOrDefault(r =>
+                q.Sys is not null && r.QuestionSysId == q.Sys.Id))
             .ToList();
 
         // Get ordered Retired responses from section questions and select out the responses from the submission
         var orderedRetiredResponses = submissionResponses.OrderBy(r => r.Order).ToList();
 
         //Join the two lists together with core first so we only rely on the order columnn for the retired responses
-        List<QuestionWithAnswerModel> responses = orderedCoreResponses.Union(orderedRetiredResponses).Where(r => r != null)
+        List<QuestionWithAnswerModel> responses = [.. orderedCoreResponses
+            .Union(orderedRetiredResponses)
+            .Where(r => r != null)
             .Cast<QuestionWithAnswerModel>()
-            .ToList();
+        ];
 
         var viewModel = new ViewAnswersViewModel
         {
@@ -174,18 +175,16 @@ public class ReviewAnswersViewBuilder(
     }
 
     private Task<ReviewAnswersViewModel> BuildCheckAnswersViewModel(
-       Controller controller,
        SubmissionRoutingDataModel routingData,
        string categorySlug,
        string sectionSlug,
        string? errorMessage
    )
     {
-        return BuildViewModel(controller, routingData, categorySlug, sectionSlug, PageTitleConstants.CheckAnswers, UrlConstants.CheckAnswersSlug, errorMessage);
+        return BuildViewModel(routingData, categorySlug, sectionSlug, PageTitleConstants.CheckAnswers, UrlConstants.CheckAnswersSlug, errorMessage);
     }
 
     private async Task<ReviewAnswersViewModel> BuildViewModel(
-        Controller controller,
         SubmissionRoutingDataModel routingData,
         string categorySlug,
         string sectionSlug,

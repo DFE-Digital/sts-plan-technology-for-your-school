@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
@@ -92,7 +93,7 @@ public class ContentfulRepository : IContentfulRepository
         return entries.Total;
     }
 
-    public GetEntriesOptions GetEntryByIdOptions(string id, int include = 2)
+    public static GetEntriesOptions GetEntryByIdOptions(string id, int include = 2)
     {
         if (string.IsNullOrEmpty(id))
             throw new ArgumentNullException(nameof(id));
@@ -139,10 +140,11 @@ public class ContentfulRepository : IContentfulRepository
         {
             var entryType = typeof(TEntry).Name;
 
-            _logger.LogError("Error retrieving one or more {entryType} entries from Contentful:\n{Errors}", entryType, entries.Errors.Select(CreateErrorString));
+            _logger.LogError("Error retrieving one or more {EntryType} entries from Contentful:\n{Errors}", entryType, entries.Errors.Select(CreateErrorString));
         }
     }
 
+    [ExcludeFromCodeCoverage]
     GetEntriesOptions IContentfulRepository.GetEntryByIdOptions(string id, int include)
     {
         if (string.IsNullOrEmpty(id))

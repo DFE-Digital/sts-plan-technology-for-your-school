@@ -26,7 +26,7 @@ public class ApiKeyAuthorisationFilterTests
             new RouteData(),
             new ActionDescriptor());
 
-        return new AuthorizationFilterContext(actionContext, new List<IFilterMetadata>());
+        return new AuthorizationFilterContext(actionContext, []);
     }
 
     private static ApiAuthenticationConfiguration ConfigWithKey(string key)

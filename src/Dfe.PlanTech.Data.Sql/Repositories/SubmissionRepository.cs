@@ -14,7 +14,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
     public async Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission)
     {
-        ArgumentNullException.ThrowIfNull(existingSubmission, nameof(existingSubmission));
+        ArgumentNullException.ThrowIfNull(existingSubmission);
 
         var newSubmission = new SubmissionEntity
         {

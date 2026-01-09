@@ -12,8 +12,7 @@ public class AttachmentComponentRendererTests
     [Fact]
     public void CheckEmptyContentReturnsNewStringBuilder()
     {
-        var renderer = new AttachmentComponentRenderer();
-        var result = renderer.AddHtml(new RichTextContentField(), new StringBuilder());
+        var result = AttachmentComponentRenderer.AddHtml(new RichTextContentField(), new StringBuilder());
 
         Assert.Equal(new StringBuilder().ToString(), result.ToString());
     }
@@ -21,11 +20,10 @@ public class AttachmentComponentRendererTests
     [Fact]
     public void CheckPdfGeneratedCorrectly()
     {
-        var renderer = new AttachmentComponentRenderer();
         var content = GetContent();
         content.Data!.Target!.Asset!.File.ContentType = "pdf";
 
-        var result = renderer.AddHtml(content, new StringBuilder());
+        var result = AttachmentComponentRenderer.AddHtml(content, new StringBuilder());
 
         Assert.Equal(GetPdfStringBuilderOutput().ToString(), result.ToString());
     }
@@ -33,11 +31,10 @@ public class AttachmentComponentRendererTests
     [Fact]
     public void CheckHtmlGeneratedCorrectly()
     {
-        var renderer = new AttachmentComponentRenderer();
         var content = GetContent();
         content.Data!.Target!.Asset!.File.ContentType = "html";
 
-        var result = renderer.AddHtml(content, new StringBuilder());
+        var result = AttachmentComponentRenderer.AddHtml(content, new StringBuilder());
 
         Assert.Equal(GetHtmlStringBuilderOutput().ToString(), result.ToString());
     }
@@ -45,13 +42,12 @@ public class AttachmentComponentRendererTests
     [Fact]
     public void CheckAttachmentsGeneratedCorrectly()
     {
-        var renderer = new AttachmentComponentRenderer();
-        var result = renderer.AddHtml(GetContent(), new StringBuilder());
+        var result = AttachmentComponentRenderer.AddHtml(GetContent(), new StringBuilder());
 
         Assert.Equal(GetStandardStringBuilderOutput().ToString(), result.ToString());
     }
 
-    private RichTextContentField GetContent()
+    private static RichTextContentField GetContent()
     {
         return new RichTextContentField()
         {
@@ -83,7 +79,7 @@ public class AttachmentComponentRendererTests
         };
     }
 
-    private StringBuilder GetStandardStringBuilderOutput()
+    private static StringBuilder GetStandardStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
@@ -111,7 +107,7 @@ public class AttachmentComponentRendererTests
 
         return stringBuilder;
     }
-    private StringBuilder GetPdfStringBuilderOutput()
+    private static StringBuilder GetPdfStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
@@ -140,7 +136,7 @@ public class AttachmentComponentRendererTests
         return stringBuilder;
     }
 
-    private StringBuilder GetHtmlStringBuilderOutput()
+    private static StringBuilder GetHtmlStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");

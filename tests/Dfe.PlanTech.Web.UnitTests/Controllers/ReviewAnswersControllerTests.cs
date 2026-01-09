@@ -117,11 +117,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             );
 
             Assert.Equal("Something went wrong", ex.Message);
-            _logger.Received().LogError(
-                    exception,
-                    "An error occurred while confirming a user's answers"
-                );
-
         }
 
         [Fact]

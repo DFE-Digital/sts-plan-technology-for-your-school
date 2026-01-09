@@ -12,7 +12,7 @@ public class BackgroundTaskQueue(IOptions<BackgroundTaskQueueOptions> options) :
     /// <inheritdoc cref="IBackgroundTaskQueue" />
     public async Task QueueBackgroundWorkItemAsync(Func<CancellationToken, Task> workItem)
     {
-        ArgumentNullException.ThrowIfNull(workItem, nameof(workItem));
+        ArgumentNullException.ThrowIfNull(workItem);
         await _queue.Writer.WriteAsync(workItem);
     }
 

@@ -21,6 +21,15 @@ public interface IRecommendationsViewBuilder
        string? originatingSlug
     );
 
+    Task<IActionResult> UpdateRecommendationStatusAsync(
+      Controller controller,
+      string categorySlug,
+      string sectionSlug,
+      string chunkSlug,
+      string selectedStatus,
+      string? notes
+  );
+
     Task<IActionResult> RouteToPrintSingle(
         Controller controller,
         string categorySlug,

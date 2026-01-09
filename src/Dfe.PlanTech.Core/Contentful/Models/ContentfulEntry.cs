@@ -10,5 +10,5 @@ public abstract class ContentfulEntry : IContentfulEntry
     public SystemDetails? Sys { get; set; }
     public string Description { get; set; } = null!;
 
-    public ContentfulEntry() { }
+    protected ContentfulEntry() { }
 }

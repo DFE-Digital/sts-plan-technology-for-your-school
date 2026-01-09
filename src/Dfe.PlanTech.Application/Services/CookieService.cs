@@ -11,8 +11,8 @@ public class CookieService(
     ICookieWorkflow cookieWorkflow
 ) : ICookieService
 {
-    private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(_contextAccessor));
-    private readonly ICookieWorkflow _cookieWorkflow = cookieWorkflow ?? throw new ArgumentNullException(nameof(_cookieWorkflow));
+    private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
+    private readonly ICookieWorkflow _cookieWorkflow = cookieWorkflow ?? throw new ArgumentNullException(nameof(cookieWorkflow));
 
     public const string CookieKey = "user_cookies_preferences";
 

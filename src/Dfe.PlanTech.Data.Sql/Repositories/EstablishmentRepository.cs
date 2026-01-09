@@ -17,7 +17,7 @@ public class EstablishmentRepository : IEstablishmentRepository
 
     public async Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(EstablishmentModel model)
     {
-        ArgumentNullException.ThrowIfNull(model, nameof(model));
+        ArgumentNullException.ThrowIfNull(model);
 
         var establishmentEntity = new EstablishmentEntity()
         {
@@ -35,7 +35,8 @@ public class EstablishmentRepository : IEstablishmentRepository
 
     public async Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(string establishmentReference)
     {
-        var establishments = await GetEstablishmentsByAsync(establishment => establishment.EstablishmentRef.Equals(establishmentReference));
+        var establishments = await GetEstablishmentsByAsync(establishment =>
+            establishment.EstablishmentRef == establishmentReference);
         return establishments.FirstOrDefault();
     }
 

@@ -96,6 +96,6 @@ public class SignedRequestAuthorisationPolicy(
 
         using var hmacsha256 = new HMACSHA256(keyBytes);
         var hashBytes = hmacsha256.ComputeHash(messageBytes);
-        return BitConverter.ToString(hashBytes).Replace("-", "").ToLower();
+        return Convert.ToHexStringLower(hashBytes);
     }
 }
