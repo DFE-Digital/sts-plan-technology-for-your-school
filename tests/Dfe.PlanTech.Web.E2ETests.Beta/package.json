@@ -13,6 +13,7 @@
     "test:all": "npm run test:parallel && npm run test:serial",
     "test:record:smoke": "cucumber-js -p smoke --retry 4 --format json:reports/cucumber-smoke.json --world-parameters=\"{\\\"record\\\": true}\"",
     "test:smoke": "cucumber-js -p smoke",
+    "test:regression": "cucumber-js -p regression --format json:reports/cucumber-report.json",
     "report": "node generate-report.ts"
   },
   "keywords": [],
