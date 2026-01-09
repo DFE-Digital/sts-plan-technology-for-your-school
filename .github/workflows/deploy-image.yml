@@ -38,7 +38,6 @@ jobs:
     runs-on: ubuntu-22.04
     name: Update Database for ${{ inputs.environment }}
     environment: ${{ inputs.environment }}
-    needs: deploy-maintenance-site
 
     steps:
       - uses: actions/checkout@v4
