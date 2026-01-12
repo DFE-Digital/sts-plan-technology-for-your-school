@@ -32,7 +32,7 @@ public class RichTextRendererTests
 
         var partRenderers = new List<IRichTextContentPartRenderer>(){
             _partRenderer,
-            new HyperlinkRenderer(new RichTextPartRendererOptions())
+            new HyperlinkRenderer(new HyperlinkRendererOptions())
         };
 
         _renderer = new RichTextRenderer(new NullLogger<RichTextRenderer>(), partRenderers);

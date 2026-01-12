@@ -26,7 +26,7 @@ public class HyperlinkRendererTests
             }
         };
 
-        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions());
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
 
         var accepted = renderer.Accepts(content);
 
@@ -42,7 +42,7 @@ public class HyperlinkRendererTests
             Value = "paragraph text"
         };
 
-        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions());
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
 
         var accepted = renderer.Accepts(content);
 
@@ -52,7 +52,7 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_Create_Link_For_New_Tab_When_PassedValidExternalLink()
     {
-        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions());
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
@@ -81,7 +81,7 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_Create_Link_For_Same_Tab_When_PassedValidInternalLink()
     {
-        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions());
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
@@ -110,7 +110,7 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_NotAddLink_When_MissingURI()
     {
-        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions());
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
@@ -131,9 +131,9 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_AddClasses_When_OptionsContainsClasses()
     {
-        const string testClasses = "testing-classes";
+        const string testHyperlinkClasses = "hyperlink-classes";
 
-        var renderer = new HyperlinkRenderer(new RichTextPartRendererOptions() { Classes = testClasses });
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions { Classes = testHyperlinkClasses });
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
@@ -154,6 +154,7 @@ public class HyperlinkRendererTests
 
         var html = result.ToString();
 
-        Assert.Contains($"class=\"{testClasses}\"", html);
+        Assert.Contains($"class=\"{testHyperlinkClasses}\"", html);
+
     }
 }

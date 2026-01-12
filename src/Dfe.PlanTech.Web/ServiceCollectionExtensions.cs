@@ -119,7 +119,7 @@ public static class ServiceCollectionExtensions
             };
         });
 
-        services.AddScoped((_) => new RichTextPartRendererOptions()
+        services.AddScoped((_) => new HyperlinkRendererOptions()
         {
             Classes = "govuk-link",
         });

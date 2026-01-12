@@ -18,7 +18,7 @@
 }
 
 @section CSS {
-    <link rel="stylesheet" as="style" href="~/css/step-by-step.css" />
+    <link rel="stylesheet" as="style" href="~/css/step-by-step.css"/>
 }
 
 @section RelatedActions {
@@ -75,26 +75,26 @@
 
                     <table class="govuk-table">
                         <thead class="govuk-table__head">
-                            <tr class="govuk-table__row">
-                                <th scope="col" class="govuk-table__header">Status</th>
-                                <th scope="col" class="govuk-table__header">Updated</th>
-                            </tr>
+                        <tr class="govuk-table__row">
+                            <th scope="col" class="govuk-table__header">Status</th>
+                            <th scope="col" class="govuk-table__header">Updated</th>
+                        </tr>
                         </thead>
                         <tbody class="govuk-table__body">
-                            <tr class="govuk-table__row">
-                                <td class="govuk-table__cell">
-                                    <strong class="govuk-tag @Model.StatusTagClass">
-                                        @Model.StatusText
-                                    </strong>
-                                </td>
-                                <td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
-                            </tr>
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">
+                                <strong class="govuk-tag @Model.StatusTagClass">
+                                    @Model.StatusText
+                                </strong>
+                            </td>
+                            <td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
+                        </tr>
                         </tbody>
                     </table>
 
                     @foreach (var content in recommendation.Content)
                     {
-                        <partial name="Components/PageComponentFactory" model="@content" />
+                        <partial name="Components/PageComponentFactory" model="@content"/>
                     }
                 </div>
 
@@ -144,14 +144,15 @@
                 <govuk-pagination>
                     @if (Model.PreviousChunk != null)
                     {
-                        <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug" label-text="@Model.PreviousChunk.LinkText" class="govuk-link--no-visited-state" />
+                        <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug" label-text="@Model.PreviousChunk.LinkText"/>
                     }
                     @if (Model.NextChunk != null)
                     {
-                        <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug" label-text="@Model.NextChunk.LinkText" class="govuk-link--no-visited-state" />
+                        <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug" label-text="@Model.NextChunk.LinkText"/>
                     }
                 </govuk-pagination>
+
             </div>
         </div>
-    </div>
-}
+    </div>}
+
