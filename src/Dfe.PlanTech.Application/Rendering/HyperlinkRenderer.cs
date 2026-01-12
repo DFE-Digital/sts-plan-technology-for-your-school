@@ -10,10 +10,12 @@ namespace Dfe.PlanTech.Application.Rendering;
 public class HyperlinkRenderer : BaseRichTextContentPartRenderer
 {
     private readonly RichTextPartRendererOptions _options;
+    private readonly HyperlinkRendererOptions _hyperlinkRendererOptions;
 
-    public HyperlinkRenderer(RichTextPartRendererOptions options) : base(RichTextNodeType.Hyperlink)
+    public HyperlinkRenderer(RichTextPartRendererOptions options, HyperlinkRendererOptions hyperlinkRendererOptions) : base(RichTextNodeType.Hyperlink)
     {
         _options = options;
+        _hyperlinkRendererOptions = hyperlinkRendererOptions;
     }
 
     public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
@@ -32,6 +34,11 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
         if (_options.Classes != null)
         {
             _options.AddClasses(stringBuilder);
+        }
+
+        if (_hyperlinkRendererOptions.Classes != null)
+        {
+            _hyperlinkRendererOptions.AddClasses(stringBuilder);
         }
 
         stringBuilder.Append('>');

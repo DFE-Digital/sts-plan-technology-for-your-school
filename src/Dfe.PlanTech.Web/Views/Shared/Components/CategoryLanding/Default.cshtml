@@ -28,8 +28,11 @@
     var title = new ComponentTitleEntry(Model.CategoryName);
 }
 
-<span class="govuk-caption-xl">How to meet the standard</span>
-<partial name="Components/PageComponentFactory" model="@title" />
+@if (!Model.Print)
+{
+    <span class="govuk-caption-xl">How to meet the standard</span>
+    <partial name="Components/PageComponentFactory" model="@title" />
+}
 
 @if (!Model.Print)
 {

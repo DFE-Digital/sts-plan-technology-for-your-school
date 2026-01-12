@@ -11,22 +11,6 @@
     }
 }
 
-@section RelatedActions {
-    @{
-        var isHomeCategoryPage = Model.Page.Slug.Equals(UrlConstants.HomePage.Replace("/", ""));
-
-        if (isHomeCategoryPage)
-        {
-            <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
-            <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
-
-            <p class="govuk-body-s">
-                <a class="govuk-link" href="/service-updates">Recent updates</a>
-            </p>
-        }
-    }
-}
-
 @foreach (var content in Model.Page.BeforeTitleContent)
 {
     await Html.RenderPartialAsync("Components/PageComponentFactory", content);
