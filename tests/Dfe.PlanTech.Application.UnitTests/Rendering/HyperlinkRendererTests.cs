@@ -26,7 +26,7 @@ public class HyperlinkRendererTests
             }
         };
 
-        var renderer = new HyperlinkRenderer( new HyperlinkRendererOptions());
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
 
         var accepted = renderer.Accepts(content);
 
@@ -133,7 +133,7 @@ public class HyperlinkRendererTests
     {
         const string testHyperlinkClasses = "hyperlink-classes";
 
-        var renderer = new HyperlinkRenderer( new HyperlinkRendererOptions { Classes = testHyperlinkClasses });
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions { Classes = testHyperlinkClasses });
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
