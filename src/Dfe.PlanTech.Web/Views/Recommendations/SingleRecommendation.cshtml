@@ -101,12 +101,11 @@
                 @if (recommendation.CSLink != null)
                 {
                     <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
-                        <a class="govuk-body govuk-link govuk-!-font-weight-bold"
-                           href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
+                        <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
                     </div>
                 }
 
-                <hr class="govuk-section-break govuk-section-break--l"/>
+                <hr class="govuk-section-break govuk-section-break--l" />
 
                 <govuk-radios name="SelectedStatus">
                     <govuk-radios-fieldset>
@@ -139,20 +138,17 @@
                 <govuk-button type="submit" prevent-double-click="true">Update status</govuk-button>
             </form>
 
-            <hr class="govuk-section-break govuk-section-break--l"/>
+            <hr class="govuk-section-break govuk-section-break--l" />
 
             <div>
                 <govuk-pagination>
                     @if (Model.PreviousChunk != null)
                     {
-                        <govuk-pagination-previous
-                            href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug"
-                            label-text="@Model.PreviousChunk.LinkText"/>
+                        <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug" label-text="@Model.PreviousChunk.LinkText"/>
                     }
                     @if (Model.NextChunk != null)
                     {
-                        <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug"
-                                               label-text="@Model.NextChunk.LinkText"/>
+                        <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug" label-text="@Model.NextChunk.LinkText"/>
                     }
                 </govuk-pagination>
 
