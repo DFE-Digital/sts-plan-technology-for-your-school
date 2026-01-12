@@ -9,8 +9,7 @@
 }
 
 @section NavButton {
-    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage"
-                     class="noprint non-js-only govuk-back-link">
+    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
         Home
     </govuk-back-link>
     <govuk-back-link id="nonjs-back-button-link" href="@($"/{Model.CategorySlug}")" class="noprint js-only">
@@ -71,8 +70,7 @@
             <form method="post" action="/@categorySlug/@sectionSlug/recommendations/@recommendation.Slug/update-status">
 
                 <div class="recommendation-piece-content">
-                    <span
-                        class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
+                    <span class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
                     <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
 
                     <table class="govuk-table">
@@ -160,6 +158,5 @@
 
             </div>
         </div>
-    </div>
-}
+    </div>}
 
