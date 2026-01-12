@@ -32,10 +32,7 @@
 {
     <span class="govuk-caption-xl">How to meet the standard</span>
     <partial name="Components/PageComponentFactory" model="@title" />
-}
 
-@if (!Model.Print)
-{
     @if (Model.CategoryLandingSections.Count != 1 && !Model.AllSectionsCompleted)
     {
         <div class="govuk-inset-text">
