@@ -9,7 +9,8 @@
 }
 
 @section NavButton {
-    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
+    <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage"
+                     class="noprint non-js-only govuk-back-link">
         Home
     </govuk-back-link>
     <govuk-back-link id="nonjs-back-button-link" href="@($"/{Model.CategorySlug}")" class="noprint js-only">
@@ -18,7 +19,7 @@
 }
 
 @section CSS {
-    <link rel="stylesheet" as="style" href="~/css/step-by-step.css" />
+    <link rel="stylesheet" as="style" href="~/css/step-by-step.css"/>
 }
 
 @section RelatedActions {
@@ -70,42 +71,44 @@
             <form method="post" action="/@categorySlug/@sectionSlug/recommendations/@recommendation.Slug/update-status">
 
                 <div class="recommendation-piece-content">
-                    <span class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
+                    <span
+                        class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
                     <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
 
                     <table class="govuk-table">
                         <thead class="govuk-table__head">
-                            <tr class="govuk-table__row">
-                                <th scope="col" class="govuk-table__header">Status</th>
-                                <th scope="col" class="govuk-table__header">Updated</th>
-                            </tr>
+                        <tr class="govuk-table__row">
+                            <th scope="col" class="govuk-table__header">Status</th>
+                            <th scope="col" class="govuk-table__header">Updated</th>
+                        </tr>
                         </thead>
                         <tbody class="govuk-table__body">
-                            <tr class="govuk-table__row">
-                                <td class="govuk-table__cell">
-                                    <strong class="govuk-tag @Model.StatusTagClass">
-                                        @Model.StatusText
-                                    </strong>
-                                </td>
-                                <td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
-                            </tr>
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">
+                                <strong class="govuk-tag @Model.StatusTagClass">
+                                    @Model.StatusText
+                                </strong>
+                            </td>
+                            <td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
+                        </tr>
                         </tbody>
                     </table>
 
                     @foreach (var content in recommendation.Content)
                     {
-                        <partial name="Components/PageComponentFactory" model="@content" />
+                        <partial name="Components/PageComponentFactory" model="@content"/>
                     }
                 </div>
 
                 @if (recommendation.CSLink != null)
                 {
                     <div class="govuk-!-margin-top-3 govuk-!-margin-bottom-9">
-                        <a class="govuk-body govuk-link govuk-!-font-weight-bold" href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
+                        <a class="govuk-body govuk-link govuk-!-font-weight-bold"
+                           href=@recommendation.CSLink.Url>@recommendation.CSLink.LinkText</a>
                     </div>
                 }
 
-                <hr class="govuk-section-break govuk-section-break--l" />
+                <hr class="govuk-section-break govuk-section-break--l"/>
 
                 <govuk-radios name="SelectedStatus">
                     <govuk-radios-fieldset>
@@ -138,24 +141,26 @@
                 <govuk-button type="submit" prevent-double-click="true">Update status</govuk-button>
             </form>
 
-            <hr class="govuk-section-break govuk-section-break--l" />
+            <hr class="govuk-section-break govuk-section-break--l"/>
 
             <div>
                 <govuk-pagination>
-                @if (Model.PreviousChunk != null)
-                {
-                    <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug" label-text="@Model.PreviousChunk.LinkText"/>
-                }
-                @if (Model.NextChunk != null)
-                {
-                    <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug" label-text="@Model.NextChunk.LinkText" />
-                }
+                    @if (Model.PreviousChunk != null)
+                    {
+                        <govuk-pagination-previous
+                            href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug"
+                            label-text="@Model.PreviousChunk.LinkText"/>
+                    }
+                    @if (Model.NextChunk != null)
+                    {
+                        <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug"
+                                               label-text="@Model.NextChunk.LinkText"/>
+                    }
                 </govuk-pagination>
 
             </div>
         </div>
-    </div>
-}
+    </div>}
 @model SingleRecommendationViewModel
 
 @{
@@ -305,11 +310,14 @@
                 <govuk-pagination>
                     @if (Model.PreviousChunk != null)
                     {
-                        <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug" label-text="@Model.PreviousChunk.LinkText" />
+                        <govuk-pagination-previous
+                            href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug"
+                            label-text="@Model.PreviousChunk.LinkText"/>
                     }
                     @if (Model.NextChunk != null)
                     {
-                        <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug" label-text="@Model.NextChunk.LinkText" />
+                        <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug"
+                                               label-text="@Model.NextChunk.LinkText"/>
                     }
                 </govuk-pagination>
             </div>
