@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Configuration;
+﻿using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -323,7 +323,7 @@ public class QuestionsViewBuilder(
         return errorMessage;
     }
 
-    private static QuestionViewModel GenerateViewModel(
+    private QuestionViewModel GenerateViewModel(
         Controller controller,
         QuestionnaireQuestionEntry question,
         QuestionnaireSectionEntry? section,
@@ -341,14 +341,14 @@ public class QuestionsViewBuilder(
         }
 
         // Workaround, to avoid infinite loop due to bi-directional/circular references:
-        foreach (var nextQuestion in question.Answers.Select(a => a.NextQuestion))
+        foreach (var answer in question.Answers)
         {
-            if (nextQuestion is null)
+            if (answer.NextQuestion is null)
             {
                 continue;
             }
 
-            nextQuestion.Answers = [];
+            answer.NextQuestion.Answers = [];
         }
 
         return new QuestionViewModel()

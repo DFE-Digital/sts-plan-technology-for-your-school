@@ -95,14 +95,6 @@ async function getConfirmationPanel(context: any, sectionName: string) {
   return {headerLocator, bodyLocator};
 }
 
-Then('I should see the confirmation panel for {string}',
-  async function (sectionName: string) {
-    const {headerLocator, bodyLocator} = await getConfirmationPanel(this, sectionName);
-
-    await expect(headerLocator).toBeVisible();
-    await expect(bodyLocator).toBeVisible();
-  }
-);
 
 Then('I should not see the confirmation panel for {string}', async function (sectionName: string) {
     const {headerLocator, bodyLocator} = await getConfirmationPanel(this, sectionName);

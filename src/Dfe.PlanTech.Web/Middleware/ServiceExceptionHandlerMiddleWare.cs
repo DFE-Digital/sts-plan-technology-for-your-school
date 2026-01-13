@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Configuration;
+﻿using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
@@ -17,13 +17,16 @@ public class ServiceExceptionHandlerMiddleware(
 
     public async Task HandleExceptionAsync(HttpContext context)
     {
+        var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
+        var exception = exceptionHandlerPathFeature?.Error;
+
         var internalErrorPage = await _contentfulService.GetPageByIdAsync(_errorPages.InternalErrorPageId);
         var internalErrorSlug = internalErrorPage?.Slug ?? UrlConstants.Error;
 
         ContextRedirect(internalErrorSlug, context);
     }
 
-    private static void ContextRedirect(string internalErrorSlug, HttpContext context)
+    private void ContextRedirect(string internalErrorSlug, HttpContext context)
     {
         var exceptionHandlerPathFeature = context.Features.Get<IExceptionHandlerPathFeature>();
         var exception = exceptionHandlerPathFeature?.Error;

@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -47,6 +46,7 @@ public class RecommendationsViewBuilder(
             ?? throw new ContentfulDataUnavailableException($"Could not find category header text for slug {categorySlug}");
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: true);
 
         var recommendationChunks = section.CoreRecommendations.ToList();
 
@@ -94,13 +94,14 @@ public class RecommendationsViewBuilder(
         return controller.View(SingleRecommendationViewName, viewModel);
     }
 
+
     public async Task<IActionResult> RouteBySectionAndRecommendation(
         Controller controller,
         string categorySlug,
         string sectionSlug,
         bool useChecklist,
-        string? singleChunkSlug,
-        string? originatingSlug)
+        string? singleChunkSlug = null,
+        string? originatingSlug = null)
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug)
@@ -148,7 +149,7 @@ public class RecommendationsViewBuilder(
                         CategorySlug = viewModel.CategorySlug,
                         SectionName = viewModel.SectionName,
                         SectionSlug = viewModel.SectionSlug,
-                        Chunks = [selectedChunk],
+                        Chunks = new List<RecommendationChunkViewModel> { selectedChunk },
                         CurrentChunkCount = viewModel.Chunks.IndexOf(selectedChunk) + 1,
                         TotalChunks = viewModel.Chunks.Count,
                         LatestCompletionDate = viewModel.LatestCompletionDate,
@@ -168,56 +169,6 @@ public class RecommendationsViewBuilder(
         }
     }
 
-    public async Task<IActionResult> UpdateRecommendationStatusAsync(
-        Controller controller,
-        string categorySlug,
-        string sectionSlug,
-        string chunkSlug,
-        string selectedStatus,
-        string? notes
-    )
-    {
-        var selectedStatusDisplayName = selectedStatus.GetRecommendationStatusEnumValue();
-
-        // Allow only specific statuses
-        if (selectedStatusDisplayName is null)
-        {
-            Logger.LogWarning("Invalid / unrecognised status value received: {SelectedStatus}: {SelectedStatusDisplayName}", selectedStatus, selectedStatusDisplayName);
-            controller.TempData["StatusUpdateError"] = "Select a valid status";
-            return await RouteToSingleRecommendation(controller, categorySlug, sectionSlug, chunkSlug, false);
-        }
-
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var userId = GetUserIdOrThrowException();
-        var userOrganisationId = CurrentUser.UserOrganisationId;
-
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
-            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: true);
-
-        var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var recommendationChunks = section.CoreRecommendations.ToList();
-
-        var currentRecommendationChunk = recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
-           ?? throw new ContentfulDataUnavailableException($"No recommendation chunk found with slug matching: {chunkSlug}");
-
-        await _recommendationService.UpdateRecommendationStatusAsync(
-            currentRecommendationChunk.Id,
-            establishmentId,
-            userId,
-            selectedStatus,
-            notes ?? $"Change reason: Status manually updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'",
-            CurrentUser.IsMat ? userOrganisationId : null
-        );
-
-        // Set success message for the banner
-        controller.TempData["StatusUpdateSuccessTitle"] = $"Status updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'";
-
-        // Redirect back to the single recommendation page
-        return await RouteToSingleRecommendation(controller, categorySlug, sectionSlug, chunkSlug, false);
-    }
-
-    [ExcludeFromCodeCoverage]
     public Task<IActionResult> RouteToPrintSingle(
     Controller controller,
     string categorySlug,
@@ -234,7 +185,6 @@ public class RecommendationsViewBuilder(
         );
     }
 
-    [ExcludeFromCodeCoverage]
     public Task<IActionResult> RouteToPrintAll(
     Controller controller,
     string categorySlug,
@@ -273,20 +223,18 @@ public class RecommendationsViewBuilder(
             Slug = cr.Slug
         }).ToList();
 
-        var submission = submissionRoutingData.Submission;
-
         return new RecommendationsViewModel
         {
             CategoryName = category.Header.Text,
             SectionName = section.Name,
             Chunks = chunkViewModels,
-            LatestCompletionDate = submission?.DateCompleted.HasValue == true
-                ? DateTimeHelper.FormattedDateShort(submission.DateCompleted.Value)
+            LatestCompletionDate = submissionRoutingData.Submission?.DateCompleted.HasValue == true
+                ? DateTimeHelper.FormattedDateShort(submissionRoutingData.Submission.DateCompleted.Value)
                 : null,
             SectionSlug = sectionSlug,
             CategorySlug = categorySlug,
             CurrentChunkCount = currentRecommendationCount,
-            SubmissionResponses = submission?.Responses ?? []
+            SubmissionResponses = submissionRoutingData.Submission.Responses
         };
     }
 }

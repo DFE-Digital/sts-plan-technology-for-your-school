@@ -1,4 +1,4 @@
-@import "../../node_modules/govuk-frontend/dist/govuk/index.scss";
+@import "../../node_modules/govuk-frontend/dist/govuk/all.scss";
 
 //Step-by-step navigation pattern. See https://design-system.service.gov.uk/patterns/step-by-step-navigation/
 @import "../../node_modules/@govuk-prototype-kit/step-by-step/sass/_step-by-step-navigation.scss";
@@ -31,14 +31,4 @@ html {
 
 .app-step-nav__list {
   margin-bottom: 0px;
-}
-
-.govuk-pagination--block .govuk-pagination__prev {
-  margin-bottom: 10px;
-}
-
-@media screen {
-    .govuk-pagination__link:after {
-        position: relative;
-    }
 }

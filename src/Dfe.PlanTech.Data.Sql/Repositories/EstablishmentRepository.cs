@@ -1,4 +1,4 @@
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -17,7 +17,7 @@ public class EstablishmentRepository : IEstablishmentRepository
 
     public async Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(EstablishmentModel model)
     {
-        ArgumentNullException.ThrowIfNull(model);
+        ArgumentNullException.ThrowIfNull(model, nameof(model));
 
         var establishmentEntity = new EstablishmentEntity()
         {
@@ -35,8 +35,7 @@ public class EstablishmentRepository : IEstablishmentRepository
 
     public async Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(string establishmentReference)
     {
-        var establishments = await GetEstablishmentsByAsync(establishment =>
-            establishment.EstablishmentRef == establishmentReference);
+        var establishments = await GetEstablishmentsByAsync(establishment => establishment.EstablishmentRef.Equals(establishmentReference));
         return establishments.FirstOrDefault();
     }
 

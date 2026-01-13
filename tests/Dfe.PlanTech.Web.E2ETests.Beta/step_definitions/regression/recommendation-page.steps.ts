@@ -49,14 +49,14 @@ Then('I should see the print recommendations caption text {string}', async funct
 });
 
 Then('I should see the related actions sidebar', async function () {
-  const sidebar = this.page.locator('.govuk-grid-column-one-third-from-desktop.govuk-float-right');
+  const sidebar = this.page.locator('div.govuk-grid-column-one-third:visible');
   await expect(sidebar).toBeVisible();
   await expect(sidebar.locator('h2')).toHaveText('Related actions');
 });
 
 Then('I should see the related actions links for category {string} section {string} recommendation {string}', async function (categoryName: string, sectionName: string, recommendationSlug: string) {
 
-  const container = this.page.locator('.govuk-grid-column-one-third-from-desktop.govuk-float-right');
+  const container = this.page.locator('.govuk-grid-column-one-third.govuk-float-right');
   await expect(container).toBeVisible();
 
   // check heading is there
@@ -87,7 +87,7 @@ Then('I should see the related actions links for category {string} section {stri
 
 Then('I click the print all recommendations link in the related actions for {string}', async function (topic:string) {
 
-  const container = this.page.locator('.govuk-grid-column-one-third-from-desktop.govuk-float-right');
+  const container = this.page.locator('.govuk-grid-column-one-third.govuk-float-right');
   const printLink = container.locator('a', { hasText: `Print your school's ${topic.toLowerCase()} recommendations` });
   await expect(printLink).toBeVisible();
   printLink.click();

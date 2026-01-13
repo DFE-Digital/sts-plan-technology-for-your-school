@@ -34,8 +34,13 @@ public class TableCellRenderer : BaseRichTextContentPartRenderer
         return stringBuilder;
     }
 
-    private static void AppendContent(StringBuilder stringBuilder, List<RichTextContentField> content)
+    private StringBuilder AppendContent(StringBuilder stringBuilder, List<RichTextContentField> content)
     {
+        if (content.Count == 0)
+        {
+            return stringBuilder;
+        }
+
         for (int i = 0; i < content.Count; i++)
         {
             stringBuilder.Append(content[i].Content[0].Value);
@@ -45,5 +50,8 @@ public class TableCellRenderer : BaseRichTextContentPartRenderer
                 stringBuilder.Append("<br /><br />");
             }
         }
+        ;
+
+        return stringBuilder;
     }
 }

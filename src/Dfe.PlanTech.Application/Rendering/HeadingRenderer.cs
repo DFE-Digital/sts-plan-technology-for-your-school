@@ -12,11 +12,7 @@ public partial class HeadingRenderer : BaseRichTextContentPartRenderer
     {
     }
 
-    public override StringBuilder AddHtml(
-        RichTextContentField content,
-        IRichTextContentPartRendererCollection rendererCollection,
-        StringBuilder stringBuilder
-    )
+    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
     {
         var tag = GetHeaderTag().Replace(content.NodeType, "$1$2");
 

@@ -131,8 +131,8 @@ public class RedisCache : ICmsCache
     /// <inheritdoc/>
     public async Task SetAddAsync(string key, string item, int databaseId = -1)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(key);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(item);
+        ArgumentNullException.ThrowIfNullOrEmpty(key);
+        ArgumentNullException.ThrowIfNullOrEmpty(item);
 
         _logger.LogInformation("Adding item to set with key: {Key}", key);
 

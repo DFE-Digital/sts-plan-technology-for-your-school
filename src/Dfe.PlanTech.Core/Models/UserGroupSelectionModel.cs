@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Core.Models;
+﻿namespace Dfe.PlanTech.Core.Models;
 
 public class UserGroupSelectionModel
 {

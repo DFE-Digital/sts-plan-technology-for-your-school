@@ -13,9 +13,10 @@ public class TextRendererOptions(
     public MarkOption? GetMatchingOptionForMark(RichTextMarkField mark)
     {
         var matchingOption = _markOptions.Find(option => option.Mark == mark.Type);
+
         if (matchingOption == null)
         {
-            _logger.LogWarning("Missing mark option for {Mark}", mark);
+            _logger.LogWarning("Missing mark option for {mark}", mark);
         }
 
         return matchingOption;

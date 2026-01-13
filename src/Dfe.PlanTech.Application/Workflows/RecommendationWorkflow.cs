@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Workflows.Interfaces;
+﻿using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
@@ -13,8 +13,9 @@ public class RecommendationWorkflow(
         string recommendationContentfulReference,
         int establishmentId)
     {
-        var recommendations = await recommendationRepository.GetRecommendationsByContentfulReferencesAsync([recommendationContentfulReference]);
+        var recommendations = await recommendationRepository.GetRecommendationsByContentfulReferencesAsync(new[] { recommendationContentfulReference });
         var recommendation = recommendations.FirstOrDefault();
+
         if (recommendation == null)
         {
             return null;
@@ -23,22 +24,6 @@ public class RecommendationWorkflow(
         var latestHistoryForRecommendation = await establishmentRecommendationHistoryRepository.GetLatestRecommendationHistoryAsync(establishmentId, recommendation.Id);
 
         return latestHistoryForRecommendation?.AsDto();
-    }
-
-    public async Task<IEnumerable<SqlEstablishmentRecommendationHistoryDto>> GetRecommendationHistoryAsync(
-        string recommendationContentfulReference,
-        int establishmentId)
-    {
-        var recommendations = await recommendationRepository.GetRecommendationsByContentfulReferencesAsync([recommendationContentfulReference]);
-        var recommendation = recommendations.FirstOrDefault();
-        if (recommendation == null)
-        {
-            return [];
-        }
-
-        var latestHistoryForRecommendation = await establishmentRecommendationHistoryRepository.GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(establishmentId, recommendation.Id);
-
-        return latestHistoryForRecommendation.Select(lhfr => lhfr.AsDto());
     }
 
     public async Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByEstablishmentIdAsync(

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Configuration;
+﻿using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -156,7 +156,7 @@ public class MaintainUrlOnKeyNotFoundAttributeTests
         // Arrange
         var linkId = "contact-link-id";
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetLinkByIdAsync(linkId).Returns(new NavigationLinkEntry());
+        contentful.GetLinkByIdAsync(linkId).Returns((NavigationLinkEntry?)null);
 
         var sut = BuildServiceUnderTest(linkId, contentful);
         var ctx = BuildExceptionContext();

@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Web.Helpers;
+﻿using Dfe.PlanTech.Web.Helpers;
 using Microsoft.ApplicationInsights.Channel;
 using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.ApplicationInsights.Extensibility;

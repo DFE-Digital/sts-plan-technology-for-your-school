@@ -9,13 +9,13 @@ public sealed class LogInvalidModelStateAttribute : ActionFilterAttribute
     {
         var svc = context.HttpContext.RequestServices;
         var logger = svc.GetService<ILogger<LogInvalidModelStateAttribute>>();
-
-        ArgumentNullException.ThrowIfNull(logger);
+        if (logger == null)
+            throw new ArgumentNullException(nameof(logger));
 
         if (!context.ModelState.IsValid)
         {
             var displayName = context.ActionDescriptor.DisplayName;
-            logger.LogError("Not able to validate model state for controller method: {DisplayName}", displayName);
+            logger.LogError("Not able to validate model state for controller method: {displayName}", displayName);
         }
     }
 }

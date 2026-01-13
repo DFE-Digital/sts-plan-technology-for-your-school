@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Services.Interfaces;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 
@@ -33,11 +33,6 @@ public class ContentfulService(
     public Task<List<NavigationLinkEntry>> GetNavigationLinksAsync()
     {
         return contentfulWorkflow.GetEntries<NavigationLinkEntry>();
-    }
-
-    public Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync()
-    {
-        return contentfulWorkflow.GetEntries<MicrocopyEntry>();
     }
 
     public Task<PageEntry> GetPageByIdAsync(string pageId)

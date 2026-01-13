@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Core.Constants;
+﻿namespace Dfe.PlanTech.Core.Constants;
 
 public static class PageIncludeLevelConstants
 {

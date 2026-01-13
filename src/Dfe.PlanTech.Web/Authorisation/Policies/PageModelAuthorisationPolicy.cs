@@ -27,7 +27,7 @@ public class PageModelAuthorisationPolicy(
     {
         if (context.Resource is not HttpContext httpContext)
         {
-            logger.LogError("Expected resource to be HttpContext but received {Type}", context.Resource?.GetType());
+            logger.LogError("Expected resource to be HttpContext but received {type}", context.Resource?.GetType());
             return;
         }
 
@@ -99,7 +99,7 @@ public class PageModelAuthorisationPolicy(
     /// The page ias added to the HttpContext for use in the <see cref="PageModelBinder"/>,
     /// to prevent the page being loaded multiple times for a single request
     /// </remarks>
-    private static async Task<PageEntry> GetPageForSlug(HttpContext httpContext, string slug)
+    private async Task<PageEntry> GetPageForSlug(HttpContext httpContext, string slug)
     {
         using var scope = httpContext.RequestServices.CreateAsyncScope();
         var contentfulService = scope.ServiceProvider.GetRequiredService<IContentfulService>();

@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Contentful.Core.Models;
 
 namespace Dfe.PlanTech.Core.Contentful.Models;

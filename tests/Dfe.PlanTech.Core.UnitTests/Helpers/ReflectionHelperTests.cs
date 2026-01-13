@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Core.UnitTests.Helpers;
+﻿namespace Dfe.PlanTech.Core.UnitTests.Helpers;
 
 public class ReflectionHelperTests
 {

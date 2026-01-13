@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Dfe.PlanTech.Application.Rendering;
 
 namespace Dfe.PlanTech.Application.UnitTests.Rendering;

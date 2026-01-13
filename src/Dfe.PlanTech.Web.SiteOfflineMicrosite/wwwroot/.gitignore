@@ -1,0 +1,13 @@
+﻿# Ignore all generated build artifacts
+*.css
+*.css.map
+*.js
+*.js.map
+
+# Keep directory structure
+!.gitkeep
+
+# Ignore copied assets (fonts, images, etc.)
+assets/**/*
+!assets/.gitkeep
+

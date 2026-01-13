@@ -85,6 +85,139 @@ public class EstablishmentEntityTests
     // -------------------------
 
     [Fact]
+    public void EstablishmentEntity_OrgName_WhenInputLengthExceedsMax_AdditionalCharactersTrimmed()
+    {
+        // Arrange
+        var inputLength = EstablishmentEntity.OrgNameMaxLengthInclusive + 1;
+        string original = new string('O', inputLength);
+
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = original,
+            EstablishmentRef = new string('R', EstablishmentEntity.EstablishmentRefMaxLengthInclusive - 1),
+            EstablishmentType = new string('T', EstablishmentEntity.EstablishmentTypeMaxLengthInclusive - 1),
+        };
+
+        // Assert
+        Assert.Equal(EstablishmentEntity.OrgNameMaxLengthInclusive, entity.OrgName.Length);
+        Assert.Equal(original.Substring(0, EstablishmentEntity.OrgNameMaxLengthInclusive), entity.OrgName);
+        Assert.NotEqual(original, entity.OrgName);
+    }
+
+    [Fact]
+    public void EstablishmentEntity_OrgName_WhenInputLengthAtOrUnderMax_NoChange()
+    {
+        var max = EstablishmentEntity.OrgNameMaxLengthInclusive;
+
+        for (var i = 0; i <= 1; i++)
+        {
+            // Arrange
+            string original = new string('O', max - i);
+
+            // Act
+            var entity = new EstablishmentEntity
+            {
+                OrgName = original,
+                EstablishmentRef = "R",
+                EstablishmentType = "T"
+            };
+
+            // Assert
+            Assert.Equal(original, entity.OrgName);
+        }
+    }
+
+    [Fact]
+    public void EstablishmentEntity_EstablishmentRef_WhenInputLengthExceedsMax_AdditionalCharactersTrimmed()
+    {
+        // Arrange
+        var inputLength = EstablishmentEntity.EstablishmentRefMaxLengthInclusive + 1;
+        string original = new string('R', inputLength);
+
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = new string('O', EstablishmentEntity.OrgNameMaxLengthInclusive - 1),
+            EstablishmentRef = original,
+            EstablishmentType = new string('T', EstablishmentEntity.EstablishmentTypeMaxLengthInclusive - 1),
+        };
+
+        // Assert
+        Assert.Equal(EstablishmentEntity.EstablishmentRefMaxLengthInclusive, entity.EstablishmentRef.Length);
+        Assert.Equal(original.Substring(0, EstablishmentEntity.EstablishmentRefMaxLengthInclusive), entity.EstablishmentRef);
+        Assert.NotEqual(original, entity.EstablishmentRef);
+    }
+
+    [Fact]
+    public void EstablishmentEntity_EstablishmentRef_WhenInputLengthAtOrUnderMax_NoChange()
+    {
+        var max = EstablishmentEntity.EstablishmentRefMaxLengthInclusive;
+
+        for (var i = 0; i <= 1; i++)
+        {
+            // Arrange
+            string original = new string('O', max - i);
+
+            // Act
+            var entity = new EstablishmentEntity
+            {
+                OrgName = "O",
+                EstablishmentRef = original,
+                EstablishmentType = "T"
+            };
+
+            // Assert
+            Assert.Equal(original, entity.EstablishmentRef);
+        }
+    }
+
+    [Fact]
+    public void EstablishmentEntity_EstablishmentType_WhenInputLengthExceedsMax_AdditionalCharactersTrimmed()
+    {
+        // Arrange
+        var inputLength = EstablishmentEntity.EstablishmentTypeMaxLengthInclusive + 1;
+        string original = new string('T', inputLength);
+
+        // Act
+        var entity = new EstablishmentEntity
+        {
+            OrgName = new string('O', EstablishmentEntity.OrgNameMaxLengthInclusive - 1),
+            EstablishmentRef = new string('R', EstablishmentEntity.EstablishmentRefMaxLengthInclusive - 1),
+            EstablishmentType = original
+        };
+
+        // Assert
+        Assert.NotNull(entity.EstablishmentType);
+        Assert.Equal(EstablishmentEntity.EstablishmentTypeMaxLengthInclusive, entity.EstablishmentType!.Length);
+        Assert.Equal(original.Substring(0, EstablishmentEntity.EstablishmentTypeMaxLengthInclusive), entity.EstablishmentType);
+        Assert.NotEqual(original, entity.EstablishmentType);
+    }
+
+    [Fact]
+    public void EstablishmentEntity_EstablishmentType_WhenInputLengthAtOrUnderMax_NoChange()
+    {
+        var max = EstablishmentEntity.EstablishmentTypeMaxLengthInclusive;
+
+        for (var i = 0; i <= 1; i++)
+        {
+            // Arrange
+            string original = new string('O', max - i);
+
+            // Act
+            var entity = new EstablishmentEntity
+            {
+                OrgName = "O",
+                EstablishmentRef = "R",
+                EstablishmentType = original
+            };
+
+            // Assert
+            Assert.Equal(original, entity.EstablishmentType);
+        }
+    }
+
+    [Fact]
     public void EstablishmentEntity_EstablishmentType_WhenNull_RemainsNull()
     {
         // Act

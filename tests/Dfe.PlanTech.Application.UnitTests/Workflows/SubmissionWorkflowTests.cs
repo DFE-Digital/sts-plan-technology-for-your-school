@@ -1,4 +1,4 @@
-using Contentful.Core.Models;
+﻿using Contentful.Core.Models;
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
@@ -15,7 +15,7 @@ public class SubmissionWorkflowTests
     private readonly ILogger<SubmissionWorkflow> _logger = Substitute.For<ILogger<SubmissionWorkflow>>();
     private readonly IStoredProcedureRepository _sp = Substitute.For<IStoredProcedureRepository>();
     private readonly ISubmissionRepository _repo = Substitute.For<ISubmissionRepository>();
-    private SubmissionWorkflow CreateServiceUnderTest() => new(_sp, _repo);
+    private SubmissionWorkflow CreateServiceUnderTest() => new(_logger, _sp, _repo);
 
     // ---------- Helpers: minimal Contentful section graph ----------
     private static EstablishmentEntity BuildEstablishment(int? id = 1)

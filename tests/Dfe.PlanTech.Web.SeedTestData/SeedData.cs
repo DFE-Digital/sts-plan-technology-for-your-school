@@ -24,9 +24,5 @@ Insert into [dbo].[user] (dfeSignInRef) Select CONCAT('sign-in-ref-', n) From Ra
         db.Database.ExecuteSql($@"With Range(n) AS (Select 1 union all select n+1 from Range where n < 100)
 Insert into [dbo].[establishment] (establishmentRef, establishmentType, orgName)
 Select CONCAT('Test Ref ', n), 'Test School', CONCAT('Test Establishment ', n) from Range");
-
-        // Seed test MAT group + links
-        db.Database.ExecuteSqlRaw(SqlConstants.DsiSeedData);
-
     }
 }

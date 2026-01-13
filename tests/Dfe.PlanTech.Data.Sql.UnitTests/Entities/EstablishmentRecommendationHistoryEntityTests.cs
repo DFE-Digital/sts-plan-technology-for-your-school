@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;

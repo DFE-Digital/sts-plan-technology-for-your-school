@@ -1,8 +1,8 @@
 using System.Text;
+using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Rendering;
@@ -20,7 +20,7 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
     {
         if (string.IsNullOrEmpty(content.Data?.Uri))
         {
-            rendererCollection.Logger.LogError("{This} has no Uri", this);
+            rendererCollection.Logger.LogError("{this} has no Uri", this);
             return stringBuilder;
         }
 

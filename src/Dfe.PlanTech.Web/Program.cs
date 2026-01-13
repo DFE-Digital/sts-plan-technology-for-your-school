@@ -36,8 +36,8 @@ builder.Configuration.AddCommandLine(args);
 builder.AddSystemConfiguration();
 builder.AddContentAndSupportConfiguration();
 
+
 builder.Services
-    .AddGovUkFrontendConfiguration()
     .AddGovUkFrontend()
     .AddHttpContextAccessor();
 

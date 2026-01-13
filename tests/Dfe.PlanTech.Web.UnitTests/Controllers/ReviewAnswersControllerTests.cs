@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.Contentful.Models;
+﻿using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Handlers;
@@ -117,6 +117,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             );
 
             Assert.Equal("Something went wrong", ex.Message);
+            _logger.Received().LogError(
+                    exception,
+                    "An error occurred while confirming a user's answers"
+                );
+
         }
 
         [Fact]

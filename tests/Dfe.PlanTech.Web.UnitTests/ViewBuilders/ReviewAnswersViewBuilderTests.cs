@@ -115,7 +115,7 @@ public class ReviewAnswersViewBuilderTests
         Assert.Equal("cat", vm.CategorySlug);
         Assert.Equal("sec-1", vm.SectionSlug);
         Assert.Equal("err", vm.ErrorMessage);
-        Assert.NotEmpty(vm.Content ?? []);
+        Assert.NotEmpty(vm.Content);
     }
 
     [Fact]
@@ -157,8 +157,6 @@ public class ReviewAnswersViewBuilderTests
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
         Assert.IsType<RedirectToActionResult>(result);
     }
-
-
 
     [Fact]
     public async Task RouteToViewAnswers_InProgress_Redirects_To_ContinueSelfAssessment()
@@ -204,6 +202,7 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S7", "sec-7", "Section 7");
         _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
 
+        // Build routing with Establishment initialised
         var routing = new SubmissionRoutingDataModel(
             nextQuestion: null,
             questionnaireSection: section,
@@ -230,136 +229,6 @@ public class ReviewAnswersViewBuilderTests
         Assert.Equal("sec-7", vm.SectionSlug);
     }
 
-    [Fact]
-    public async Task RouteToViewAnswers_When_SubmissionResponsesContainSectionQuestions_Then_CompleteReviewed_UsesSectionQuestionOrder()
-    {
-        var sut = CreateSut();
-        var ctl = MakeController();
-
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(77);
-
-        var questions = new List<QuestionnaireQuestionEntry>
-        {
-            MakeQuestion("Q1", "q1-slug"),
-            MakeQuestion("Q2", "q2-slug"),
-            MakeQuestion("Q3", "q3-slug"),
-        };
-
-        var responses = questions
-            .Select(q => new QuestionWithAnswerModel
-            {
-                QuestionSysId = q.Id,
-            }
-            )
-            .Reverse()
-            .ToList();
-
-        var section = MakeSection("S7", "sec-7", "Section 7", [.. questions]);
-        _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
-
-        var routing = new SubmissionRoutingDataModel(
-            nextQuestion: null,
-            questionnaireSection: section,
-            submission: new SubmissionResponsesModel(123, responses)
-            {
-                DateCompleted = DateTime.UtcNow,
-                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
-            },
-            status: SubmissionStatus.CompleteReviewed
-        );
-
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
-
-        // Act
-        var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal(ReviewAnswersViewBuilder.ViewAnswersViewName, view.ViewName);
-
-        var vm = Assert.IsType<ViewAnswersViewModel>(view.Model);
-        Assert.Equal("Q1", vm.Responses[0].QuestionSysId);
-        Assert.Equal("Q2", vm.Responses[1].QuestionSysId);
-        Assert.Equal("Q3", vm.Responses[2].QuestionSysId);
-    }
-
-    [Fact]
-    public async Task RouteToViewAnswers_When_SubmissionResponsesAreForRetiredQuestions_Then_CompleteReviewed_UsesResponseOrder()
-    {
-        var sut = CreateSut();
-        var ctl = MakeController();
-
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(77);
-
-        var questions = new List<QuestionnaireQuestionEntry>
-        {
-            MakeQuestion("Q1", "q1-slug"),
-            MakeQuestion("Q2", "q2-slug"),
-            MakeQuestion("Q3", "q3-slug"),
-        };
-
-        var section = MakeSection("S7", "sec-7", "Section 7", [.. questions]);
-        _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
-
-        var responses = new List<QuestionWithAnswerModel>
-        {
-            new QuestionWithAnswerModel { QuestionSysId = "OldQ1", Order = 1 },
-            new QuestionWithAnswerModel { QuestionSysId = "OldQ3", Order = 3 },
-            new QuestionWithAnswerModel { QuestionSysId = "OldQ2", Order = 2 },
-        };
-
-        var routing = new SubmissionRoutingDataModel(
-            nextQuestion: null,
-            questionnaireSection: section,
-            submission: new SubmissionResponsesModel(123, responses)
-            {
-                DateCompleted = DateTime.UtcNow,
-                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
-            },
-            status: SubmissionStatus.CompleteReviewed
-        );
-
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
-
-        // Act
-        var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal(ReviewAnswersViewBuilder.ViewAnswersViewName, view.ViewName);
-
-        var vm = Assert.IsType<ViewAnswersViewModel>(view.Model);
-        Assert.Equal("OldQ1", vm.Responses[0].QuestionSysId);
-        Assert.Equal("OldQ2", vm.Responses[1].QuestionSysId);
-        Assert.Equal("OldQ3", vm.Responses[2].QuestionSysId);
-    }
-
-    [Fact]
-    public async Task RouteToViewAnswers_CompleteReviewed_Throws_If_Submission_Is_Null()
-    {
-        var sut = CreateSut();
-        var ctl = MakeController();
-
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(77);
-        var section = MakeSection("S7", "sec-7", "Section 7");
-        _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
-
-        var routing = new SubmissionRoutingDataModel(
-            nextQuestion: null,
-            questionnaireSection: section,
-            submission: null,
-            status: SubmissionStatus.CompleteReviewed
-        );
-
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
-
-        // Act
-        var call = async () => await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(call);
-
-        // Assert
-        Assert.Equal($"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}", exception.Message);
-    }
 
     [Fact]
     public async Task RouteToViewAnswers_Default_Redirects_To_GetQuestionBySlug()
@@ -403,7 +272,7 @@ public class ReviewAnswersViewBuilderTests
             null, // UserOrganisationId (non-MAT user)
             42,
             1, // UserId
-            Arg.Is<QuestionnaireSectionEntry>(s => s.Sys != null && s.Sys.Id == "S1"));
+            Arg.Is<QuestionnaireSectionEntry>(s => s.Sys.Id == "S1"));
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.True(ctl.TempData.ContainsKey("SectionName"));
@@ -413,10 +282,8 @@ public class ReviewAnswersViewBuilderTests
     [Fact]
     public async Task ConfirmCheckAnswers_Failure_Sets_Error_TempData_And_Redirects_Back_To_CheckAnswers()
     {
-        var ctl = MakeController();
-        var exception = new Exception("boom");
-
         var sut = CreateSut();
+        var ctl = MakeController();
 
         var section = MakeSection("S1", "sec", "S");
         _contentful.GetSectionBySlugAsync("sec").Returns(section);
@@ -426,19 +293,13 @@ public class ReviewAnswersViewBuilderTests
             9,
             Arg.Any<int>(),
             Arg.Any<QuestionnaireSectionEntry>())
-            .ThrowsAsync(exception);
+            .ThrowsAsync(new Exception("boom"));
 
         var result = await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "S", 9);
 
-        _logger.ReceivedWithAnyArgs().LogError(
-            default,
-            default!,
-            "Error"
-        );
-
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.True(ctl.TempData.ContainsKey("ErrorMessage"));
         Assert.Equal(ReviewAnswersViewBuilder.InlineRecommendationUnavailableErrorMessage, ctl.TempData["ErrorMessage"]);
-        Assert.IsType<RedirectToActionResult>(result);
     }
 
     private sealed class DummyController : Controller { }

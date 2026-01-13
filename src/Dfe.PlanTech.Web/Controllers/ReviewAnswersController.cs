@@ -24,8 +24,8 @@ public class ReviewAnswersController(
     [HttpGet($"{{categorySlug}}/{{sectionSlug}}/{UrlConstants.CheckAnswersSlug}")]
     public async Task<IActionResult> CheckAnswers(string categorySlug, string sectionSlug)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
 
         try
         {
@@ -41,8 +41,8 @@ public class ReviewAnswersController(
     [HttpGet($"{{categorySlug}}/{{sectionSlug}}/{UrlConstants.ViewAnswersSlug}")]
     public async Task<IActionResult> ViewAnswers(string categorySlug, string sectionSlug)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
 
         try
         {
@@ -63,13 +63,20 @@ public class ReviewAnswersController(
         int submissionId
     )
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionName);
+        ArgumentNullException.ThrowIfNullOrEmpty(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionSlug, nameof(sectionSlug));
+        ArgumentNullException.ThrowIfNullOrEmpty(sectionName, nameof(sectionName));
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(submissionId);
 
-        TempData["SectionName"] = sectionName;
-
-        return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(this, categorySlug, sectionSlug, sectionName, submissionId);
+        try
+        {
+            TempData["SectionName"] = sectionName;
+            return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(this, categorySlug, sectionSlug, sectionName, submissionId);
+        }
+        catch (Exception e)
+        {
+            Logger.LogError(e, "An error occurred while confirming a user's answers");
+            throw;
+        }
     }
 }

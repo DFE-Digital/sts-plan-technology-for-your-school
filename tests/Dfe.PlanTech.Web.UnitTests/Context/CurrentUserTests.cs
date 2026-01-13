@@ -1,4 +1,4 @@
-using System.Security.Authentication;
+﻿using System.Security.Authentication;
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
@@ -428,10 +428,9 @@ public class CurrentUserTests
 
         var setCookies = ctx.Response.Headers[HeaderNames.SetCookie];
 
-        Assert.True(setCookies.Count > 0);
+        Assert.NotEmpty(setCookies);
 
         var cookie = setCookies.LastOrDefault(v =>
-            v != null &&
             v.StartsWith("SelectedSchool=", StringComparison.OrdinalIgnoreCase) &&
             !v.Contains("01 Jan 1970", StringComparison.OrdinalIgnoreCase));
 
@@ -697,7 +696,7 @@ public class CurrentUserTests
     // ---------- GetActiveEstablishmentUkprnAsync ----------
 
     [Fact]
-    public void GetActiveEstablishmentUkprnAsync_ForDirectSchoolUser_ReturnsSchoolUkprn()
+    public async Task GetActiveEstablishmentUkprnAsync_ForDirectSchoolUser_ReturnsSchoolUkprn()
     {
         // Arrange - Direct school user (logged in directly as a school)
         var orgJson = """
@@ -713,14 +712,14 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentUkprn();
+        var result = await sut.GetActiveEstablishmentUkprnAsync();
 
         // Assert
         Assert.Equal("10012345", result);
     }
 
     [Fact]
-    public void GetActiveEstablishmentUkprnAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupUkprn()
+    public async Task GetActiveEstablishmentUkprnAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupUkprn()
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
@@ -735,14 +734,14 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentUkprn();
+        var result = await sut.GetActiveEstablishmentUkprnAsync();
 
         // Assert - Should return MAT's UKPRN since no school selected
         Assert.Equal("10067890", result);
     }
 
     [Fact]
-    public void GetActiveEstablishmentUkprnAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
+    public async Task GetActiveEstablishmentUkprnAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
     {
         // Arrange - MAT user who has selected a school from their group
         // Business Rule: Schools do (sometimes) have an UKPRN on DSI, but we do not store it in our database,
@@ -771,7 +770,7 @@ public class CurrentUserTests
         var sut = new CurrentUser(accessor, establishmentService, logger);
 
         // Act
-        var result = sut.GetActiveEstablishmentUkprn();
+        var result = await sut.GetActiveEstablishmentUkprnAsync();
 
         // Assert - Should return null because selected establishment doesn't have UKPRN in the database
         Assert.Null(result);
@@ -780,7 +779,7 @@ public class CurrentUserTests
     // ---------- GetActiveEstablishmentUidAsync ----------
 
     [Fact]
-    public void GetActiveEstablishmentUidAsync_ForDirectSchoolUser_ReturnsNull()
+    public async Task GetActiveEstablishmentUidAsync_ForDirectSchoolUser_ReturnsNull()
     {
         // Arrange - Direct school user (logged in directly as a school)
         // Note: Schools don't have UID (only groups like MATs and SATs have a UID)
@@ -796,14 +795,14 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentUid();
+        var result = await sut.GetActiveEstablishmentUidAsync();
 
         // Assert - Schools don't have UID
         Assert.Null(result);
     }
 
     [Fact]
-    public void GetActiveEstablishmentUidAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupUid()
+    public async Task GetActiveEstablishmentUidAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupUid()
     {
         // Arrange - MAT user (logged in as MAT, no school selected) - MATs have UID
         var orgJson = """
@@ -818,14 +817,14 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentUid();
+        var result = await sut.GetActiveEstablishmentUidAsync();
 
         // Assert
         Assert.Equal("9876", result);
     }
 
     [Fact]
-    public void GetActiveEstablishmentUidAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
+    public async Task GetActiveEstablishmentUidAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
     {
         // Arrange - MAT user who has selected a school from their group
         // Note: Schools do not have a UID (UIDs are for establishment groups only),
@@ -854,7 +853,7 @@ public class CurrentUserTests
         var sut = new CurrentUser(accessor, establishmentService, logger);
 
         // Act
-        var result = sut.GetActiveEstablishmentUid();
+        var result = await sut.GetActiveEstablishmentUidAsync();
 
         // Assert - Should return null because selected schools don't have UID in the database
         Assert.Null(result);
@@ -863,7 +862,7 @@ public class CurrentUserTests
     // ---------- GetActiveEstablishmentDsiIdAsync ----------
 
     [Fact]
-    public void GetActiveEstablishmentDsiIdAsync_ForDirectSchoolUser_ReturnsSchoolDsiId()
+    public async Task GetActiveEstablishmentDsiIdAsync_ForDirectSchoolUser_ReturnsSchoolDsiId()
     {
         // Arrange - Direct school user (logged in directly as a school)
         var orgJson = """
@@ -877,14 +876,14 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentDsiId();
+        var result = await sut.GetActiveEstablishmentDsiIdAsync();
 
         // Assert
         Assert.Equal(Guid.Parse("CC1185B8-3142-4B6C-887C-ADC413CD3891"), result);
     }
 
     [Fact]
-    public void GetActiveEstablishmentDsiIdAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupDsiId()
+    public async Task GetActiveEstablishmentDsiIdAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupDsiId()
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
@@ -898,14 +897,14 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentDsiId();
+        var result = await sut.GetActiveEstablishmentDsiIdAsync();
 
         // Assert - Should return MAT's DSI ID since no school selected
         Assert.Equal(Guid.Parse("D9011C85-F851-4746-B4A2-D732536717F8"), result);
     }
 
     [Fact]
-    public void GetActiveEstablishmentDsiIdAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
+    public async Task GetActiveEstablishmentDsiIdAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
     {
         // Arrange - MAT user who has selected a school from their group
         // Note: Schools do have an organisation ID on DSI, but we do not store it in our database,
@@ -933,7 +932,7 @@ public class CurrentUserTests
         var sut = new CurrentUser(accessor, establishmentService, logger);
 
         // Act
-        var result = sut.GetActiveEstablishmentDsiId();
+        var result = await sut.GetActiveEstablishmentDsiIdAsync();
 
         // Assert - Should return null because we don't have DSI ID for selected schools
         Assert.Null(result);
@@ -942,7 +941,7 @@ public class CurrentUserTests
     // ---------- GetActiveEstablishmentReferenceAsync ----------
 
     [Fact]
-    public void GetActiveEstablishmentReferenceAsync_ForDirectSchoolUser_ReturnsSchoolUrn()
+    public async Task GetActiveEstablishmentReferenceAsync_ForDirectSchoolUser_ReturnsSchoolUrn()
     {
         // Arrange - Direct school user (logged in directly as a school with URN)
         var orgJson = """
@@ -957,14 +956,14 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentReference();
+        var result = await sut.GetActiveEstablishmentReferenceAsync();
 
         // Assert - Should use URN as reference
         Assert.Equal("123456", result);
     }
 
     [Fact]
-    public void GetActiveEstablishmentReferenceAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupReference()
+    public async Task GetActiveEstablishmentReferenceAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupReference()
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
@@ -979,14 +978,14 @@ public class CurrentUserTests
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
         // Act
-        var result = sut.GetActiveEstablishmentReference();
+        var result = await sut.GetActiveEstablishmentReferenceAsync();
 
         // Assert - Should return MAT's reference (UID) since no school selected
         Assert.Equal("9876", result);
     }
 
     [Fact]
-    public void GetActiveEstablishmentReferenceAsync_ForGroupUserWithSelectedSchool_ReturnsSelectedSchoolUrn()
+    public async Task GetActiveEstablishmentReferenceAsync_ForGroupUserWithSelectedSchool_ReturnsSelectedSchoolUrn()
     {
         // Arrange - MAT user who has selected a school from their group
         var orgJson = """
@@ -1013,7 +1012,7 @@ public class CurrentUserTests
         var sut = new CurrentUser(accessor, establishmentService, logger);
 
         // Act
-        var result = sut.GetActiveEstablishmentReference();
+        var result = await sut.GetActiveEstablishmentReferenceAsync();
 
         // Assert - Should return selected school URN, not MAT's UID
         Assert.Equal("999888", result);

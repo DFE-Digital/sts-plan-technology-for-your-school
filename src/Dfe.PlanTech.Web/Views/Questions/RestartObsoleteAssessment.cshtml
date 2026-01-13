@@ -1,25 +1,29 @@
-@model RestartObsoleteAssessmentViewModel
+﻿@model RestartObsoleteAssessmentViewModel
 
-@section NavButton {
+@section BeforeContent {
     @{
         await Html.RenderPartialAsync("BackButton");
     }
 }
 
-<span class="govuk-caption-xl">@Model.TopicName</span>
-<h1 class="govuk-heading-xl">Restart self-assessment</h1>
+<div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+        <span class="govuk-caption-xl">@Model.TopicName</span>
+        <h1 class="govuk-heading-xl">Restart self-assessment</h1>
 
-<p>
-    We have changed the order of questions since you started this self assessment. Due to this change, we need you to start the self assessment again.
-</p>
+        <p>
+            We have changed the order of questions since you started this self assessment. Due to this change, we need you to start the self assessment again.
+        </p>
 
-<div class="govuk-button-group">
-    <a href="@Url.Action(
-        nameof(QuestionsController.RestartSelfAssessment),
-        "Questions",
-        new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug, isObsoleteSubmissionFlow = true })"
-       class="govuk-button"
-       data-module="govuk-button">
-        Restart self-assessment
-    </a>
+        <div class="govuk-button-group">
+            <a href="@Url.Action(
+                                nameof(QuestionsController.RestartSelfAssessment),
+                                "Questions",
+                                new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug, isObsoleteSubmissionFlow = true })"
+               class="govuk-button"
+               data-module="govuk-button">
+                Restart self-assessment
+            </a>
+        </div>
+    </div>
 </div>

@@ -15,7 +15,7 @@ public class UserOrganisationAuthorisationHandler(
     {
         if (context.Resource is not HttpContext httpContext)
         {
-            logger.LogError("Expected resource to be HttpContext but received {Type}", context.Resource?.GetType());
+            logger.LogError("Expected resource to be HttpContext but received {type}", context.Resource?.GetType());
             return Task.CompletedTask;
         }
 

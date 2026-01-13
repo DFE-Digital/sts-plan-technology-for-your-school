@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware;
 
 public class HeadRequestMiddlewareTests
 {
-    private static async Task Next(HttpContext hc)
+    private static async Task _next(HttpContext hc)
     {
         hc.Response.StatusCode = StatusCodes.Status200OK;
         await hc.Response.WriteAsync("Response Body");
@@ -20,7 +20,7 @@ public class HeadRequestMiddlewareTests
             Response = { Body = new MemoryStream() }
         };
 
-        var middleware = new HeadRequestMiddleware(Next);
+        var middleware = new HeadRequestMiddleware(_next);
         await middleware.InvokeAsync(context);
 
         Assert.Equal(200, context.Response.StatusCode);
@@ -37,7 +37,7 @@ public class HeadRequestMiddlewareTests
             Response = { Body = new MemoryStream() }
         };
 
-        var middleware = new HeadRequestMiddleware(Next);
+        var middleware = new HeadRequestMiddleware(_next);
         await middleware.InvokeAsync(context);
 
         Assert.Equal(200, context.Response.StatusCode);

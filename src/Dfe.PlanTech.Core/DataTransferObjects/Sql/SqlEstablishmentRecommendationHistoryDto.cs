@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 public class SqlEstablishmentRecommendationHistoryDto : ISqlDto
 {

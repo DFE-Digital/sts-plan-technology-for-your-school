@@ -58,6 +58,15 @@ jobs:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
 
+  create-and-publish-site-offline-microsite:
+    needs: set-env
+    name: Create & Publish Site Offline Microsite
+    uses: ./.github/workflows/build-site-offline-microsite.yml
+    secrets: inherit
+    with:
+      branch: ${{ needs.set-env.outputs.branch }}
+      checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
+
   create-and-tag-release:
     needs: [set-env, create-and-publish-image]
     name: Create & Tag Release
@@ -69,6 +78,7 @@ jobs:
     needs: [
               set-env,
               create-and-publish-image,
+              create-and-publish-site-offline-microsite,
               create-and-tag-release
             ]
     if: needs.set-env.outputs.allow-deploy-to-dev == 'true'

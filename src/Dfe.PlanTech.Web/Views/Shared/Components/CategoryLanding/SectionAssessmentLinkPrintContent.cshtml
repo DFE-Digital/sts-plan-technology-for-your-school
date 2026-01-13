@@ -1,32 +1,32 @@
 ﻿@model StatusLinkViewModel
 
 @{
-    string statusText;
+	string statusText;
 
     var description = Model.Section.ShortDescription;
-    var topic = Model.Section;
-    var topicName = topic.Name.ToLower().Trim();
+	var topic = Model.Section;
+	var topicName = topic.Name.ToLower().Trim();
 
-    switch (topic.ProgressStatus)
-    {
-        case SubmissionStatus.InProgress:
-            statusText = $"A self-assessment was started on {topic.DateUpdated}. This must be completed before recommendations are available.";
-            break;
-        case SubmissionStatus.CompleteReviewed:
-            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
-            break;
-        default:
-            statusText = "Self-assessment not started.";
-            break;
-    }
+	switch (topic.ProgressStatus)
+	{
+		case SubmissionStatus.InProgress:
+			statusText = $"A self-assessment was started on {topic.DateUpdated}. This must be completed before recommendations are available.";
+			break;
+		case SubmissionStatus.CompleteReviewed:
+			statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
+			break;
+		default:
+			statusText = "Self-assessment not started.";
+			break;
+	}
 
-    if (Model.Context == "Sections")
-    {
+	if (Model.Context == "Sections")
+	{
         <p>
             @description
         </p>
-        <p>
-            @statusText
-        </p>
-    }
+		<p>
+			@statusText
+		</p>
+	}
 }

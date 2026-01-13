@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Data.Sql.Entities;
+﻿using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,13 +18,6 @@ public class EstablishmentRecommendationHistoryRepository : IEstablishmentRecomm
         return await _db.EstablishmentRecommendationHistories
             .Include(erh => erh.Recommendation)
             .Where(erh => erh.EstablishmentId == establishmentId)
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<EstablishmentRecommendationHistoryEntity>> GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(int establishmentId, int recommendationId)
-    {
-        return await _db.EstablishmentRecommendationHistories
-            .Where(erh => erh.EstablishmentId == establishmentId && erh.RecommendationId == recommendationId)
             .ToListAsync();
     }
 
