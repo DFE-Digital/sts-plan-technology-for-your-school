@@ -5,17 +5,16 @@ using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Application.Rendering;
 
-public abstract class BaseRichTextContentPartRenderer : IRichTextContentPartRenderer
+public abstract class BaseRichTextContentPartRenderer(RichTextNodeType nodeType) : IRichTextContentPartRenderer
 {
-    private readonly RichTextNodeType _nodeType;
-
-    protected BaseRichTextContentPartRenderer(RichTextNodeType nodeType)
-    {
-        _nodeType = nodeType;
-    }
+    private readonly RichTextNodeType _nodeType = nodeType;
 
     public bool Accepts(IRichTextContent content) =>
         content.MappedNodeType == _nodeType;
 
-    public abstract StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder);
+    public abstract StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    );
 }

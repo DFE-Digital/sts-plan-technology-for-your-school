@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Core.Helpers
 {

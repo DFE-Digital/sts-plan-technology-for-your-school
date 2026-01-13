@@ -1,7 +1,7 @@
-﻿using System.Text;
+using System.Text;
 using Dfe.PlanTech.Application.Rendering;
-using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Rendering;
@@ -131,9 +131,9 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_AddClasses_When_OptionsContainsClasses()
     {
-        const string testClasses = "testing-classes";
+        const string testHyperlinkClasses = "hyperlink-classes";
 
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions() { Classes = testClasses });
+        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions { Classes = testHyperlinkClasses });
         var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
 
         const string linkText = "Click Here";
@@ -154,6 +154,7 @@ public class HyperlinkRendererTests
 
         var html = result.ToString();
 
-        Assert.Contains($"class=\"{testClasses}\"", html);
+        Assert.Contains($"class=\"{testHyperlinkClasses}\"", html);
+
     }
 }

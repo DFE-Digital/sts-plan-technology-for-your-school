@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using NSubstitute;
@@ -91,6 +91,21 @@ public class ContentfulServiceTests
 
         Assert.Same(expected, result);
         await contentfulWorkflow.Received(1).GetEntries<NavigationLinkEntry>();
+    }
+
+    [Fact]
+    public async Task GetMicrocopyEntriesAsync_Uses_GetEntries()
+    {
+        var (contentfulService, contentfulWorkflow) = Build();
+        const string id = "M1";
+        var expected = new List<MicrocopyEntry> { new() { Sys = new SystemDetails(id) } };
+
+        contentfulWorkflow.GetEntries<MicrocopyEntry>().Returns(expected);
+
+        var result = await contentfulService.GetMicrocopyEntriesAsync();
+
+        Assert.Same(expected, result);
+        await contentfulWorkflow.Received(1).GetEntries<MicrocopyEntry>();
     }
 
     [Fact]

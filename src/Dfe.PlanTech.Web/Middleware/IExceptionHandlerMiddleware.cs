@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Web.Middleware;
+namespace Dfe.PlanTech.Web.Middleware;
 
 public interface IExceptionHandlerMiddleware
 {

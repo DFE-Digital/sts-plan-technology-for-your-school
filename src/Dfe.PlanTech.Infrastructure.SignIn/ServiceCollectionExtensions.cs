@@ -80,7 +80,7 @@ public static class ServiceCollectionExtensions
         options.SaveTokens = config.SaveTokens;
 
         var serviceProvider = services.BuildServiceProvider();
-        var logger = serviceProvider.GetRequiredService<ILogger<DfeSignIn>>();
+        var logger = serviceProvider.GetRequiredService<ILogger<IDfeSignIn>>();
 
         options.Events = new OpenIdConnectEvents()
         {

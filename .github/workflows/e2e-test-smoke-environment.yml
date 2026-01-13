@@ -119,7 +119,6 @@ jobs:
                 const a=JSON.parse(fs.readFileSync('reports/cucumber-smoke.json','utf8'));
                 fs.writeFileSync('reports/cucumber-report.json', JSON.stringify(a));"
 
-
             - name: Summarise Cucumber results
               if: always()
               run: |

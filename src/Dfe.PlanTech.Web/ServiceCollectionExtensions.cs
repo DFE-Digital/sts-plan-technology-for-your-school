@@ -2,7 +2,6 @@ using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Configuration;
-using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
@@ -28,6 +27,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
+using GovUk.Frontend.AspNetCore;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -124,19 +124,19 @@ public static class ServiceCollectionExtensions
             Classes = "govuk-link",
         });
 
-        services.AddScoped((_) => new ParagraphRendererOptions());
+        services.AddScoped((_) => new RichTextPartRendererOptions());
 
         services.AddOptions<ApiAuthenticationConfiguration>()
-                .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.ApiAuthentication).Bind(settings));
+            .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.ApiAuthentication).Bind(settings));
 
         services.AddOptions<ContentfulOptionsConfiguration>()
-                .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.Contentful).Bind(settings));
+            .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.Contentful).Bind(settings));
 
         services.AddOptions<SigningSecretConfiguration>()
                 .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.Contentful).Bind(settings));
 
-        services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptionsConfiguration>>().Value);
         services.AddTransient((services) => services.GetRequiredService<IOptions<ApiAuthenticationConfiguration>>().Value);
+        services.AddTransient((services) => services.GetRequiredService<IOptions<ContentfulOptionsConfiguration>>().Value);
         services.AddTransient((services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value);
 
         services.AddScoped<ComponentViewsFactory>();
@@ -188,6 +188,20 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient(services => services.GetRequiredService<IOptions<GoogleTagManagerConfiguration>>().Value);
         services.AddTransient<GoogleTagManagerServiceServiceConfiguration>();
+        return services;
+    }
+
+    public static IServiceCollection AddGovUkFrontendConfiguration(this IServiceCollection services)
+    {
+        services.AddOptions<GovUkFrontendOptions>()
+           .Configure<IConfiguration>((settings, configuration) => configuration.GetRequiredSection(ConfigurationConstants.GovUkFrontend).Bind(settings));
+
+        services.AddTransient((services) =>
+        {
+            var x = services.GetRequiredService<IOptions<GovUkFrontendOptions>>().Value;
+            return x;
+        });
+
         return services;
     }
 

@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Contentful.Enums;
+using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 

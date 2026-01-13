@@ -1,14 +1,18 @@
-@import "../../node_modules/govuk-frontend/dist/govuk/all.scss";
+@import "inter";
+$govuk-font-family: Inter, sans-serif;
+
+@import "../../node_modules/govuk-frontend/dist/govuk/index.scss";
 @import "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
 
 @import "variables";
 @import "app-task-list";
 @import "aside";
+@import "cands-site";
 @import "card-component";
 @import "error-message";
 @import "govuk-header";
 @import "hero-banner";
 @import "overrides";
+@import "pagination";
 @import "printing";
 @import "vertical-navigation";
-@import "pagination";

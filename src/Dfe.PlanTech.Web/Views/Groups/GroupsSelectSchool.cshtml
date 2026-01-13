@@ -1,40 +1,34 @@
-﻿@model GroupsSelectorViewModel
+@model GroupsSelectorViewModel
 
-@section DfePageHeaderInner {
-    @foreach (var content in Model.BeforeTitleContent)
-    {
-        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-    }
-    <partial name="Components/PageComponentFactory" model="@Model.Title" />
+@foreach (var content in Model.BeforeTitleContent)
+{
+    await Html.RenderPartialAsync("Components/PageComponentFactory", content);
 }
 
-<div class="govuk-grid-row">
-    <div class="govuk-grid-column-two-thirds">
-        @if (Model.Content != null)
-        {
-            foreach (var content in Model.Content)
-            {
-                <partial name="Components/PageComponentFactory" model="content" />
-            }
-        }
+<partial name="Components/PageComponentFactory" model="@Model.Title" />
 
-        @{
-            <h2 class="govuk-heading-l">Select a school</h2>
-            foreach (var school in @Model.GroupEstablishments)
-            {
-                var schoolUrn = school.Urn;
-                var schoolName = school.EstablishmentName;
-                
-                <form asp-action="SelectSchool" method="post">
-                    <button type="submit" class="govuk-button school-button govuk-!-text-align-left" value="@schoolUrn">@schoolName</button>
-                    <input type="hidden" name="schoolUrn" value="@schoolUrn" />
-                    <input type="hidden" name="schoolName" value="@schoolName" />
-                    <p>@school.InProgressOrCompletedRecommendationsCount out of @Model.TotalRecommendations recommendations completed or in progress</p>
-                </form>
-            }
-        }
-        <hr class="govuk-section-break govuk-section-break--m" />
-        <p class="govuk-body"><a href="@Model.ContactLinkHref" target="_blank" class="govuk-link">Contact us (opens in new tab)</a> if any school information is missing or incorrect.</p>
-    </div>
-</div>
+@if (Model.Content != null)
+{
+    foreach (var content in Model.Content)
+    {
+        <partial name="Components/PageComponentFactory" model="content" />
+    }
+}
 
+@{
+    <h2 class="govuk-heading-l">Select a school</h2>
+    foreach (var school in @Model.GroupEstablishments)
+    {
+        var schoolUrn = school.Urn;
+        var schoolName = school.EstablishmentName;
+
+        <form asp-action="SelectSchool" method="post">
+            <button type="submit" class="govuk-button school-button govuk-!-text-align-left" value="@schoolUrn">@schoolName</button>
+            <input type="hidden" name="schoolUrn" value="@schoolUrn" />
+            <input type="hidden" name="schoolName" value="@schoolName" />
+            <p>@school.InProgressOrCompletedRecommendationsCount out of @Model.TotalRecommendations recommendations completed or in progress</p>
+        </form>
+    }
+}
+<hr class="govuk-section-break govuk-section-break--m" />
+<p class="govuk-body"><a href="@Model.ContactLinkHref" target="_blank" class="govuk-link">Contact us (opens in new tab)</a> if any school information is missing or incorrect.</p>

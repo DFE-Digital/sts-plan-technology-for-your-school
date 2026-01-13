@@ -1,4 +1,4 @@
-﻿using System.Security.Authentication;
+using System.Security.Authentication;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -53,7 +53,7 @@ public class CurrentUser : ICurrentUser
         return selectedSchool?.EstablishmentRef ?? Organisation?.Urn;
     }
 
-    public async Task<string?> GetActiveEstablishmentUkprnAsync()
+    public string? GetActiveEstablishmentUkprn()
     {
         // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
         // If a school is selected but doesn't have UKPRN, return null
@@ -64,7 +64,7 @@ public class CurrentUser : ICurrentUser
         return Organisation?.Ukprn;
     }
 
-    public async Task<string?> GetActiveEstablishmentUidAsync()
+    public string? GetActiveEstablishmentUid()
     {
         // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
         // If a school is selected but doesn't have UID, return null
@@ -75,7 +75,7 @@ public class CurrentUser : ICurrentUser
         return Organisation?.Uid;
     }
 
-    public async Task<Guid?> GetActiveEstablishmentDsiIdAsync()
+    public Guid? GetActiveEstablishmentDsiId()
     {
         // Only fall back to Organisation if no school is selected (i.e., user is a direct establishment user)
         // If a school is selected, we don't have the DSI ID for it
@@ -86,7 +86,7 @@ public class CurrentUser : ICurrentUser
         return Organisation?.Id;
     }
 
-    public async Task<string?> GetActiveEstablishmentReferenceAsync()
+    public string? GetActiveEstablishmentReference()
     {
         // Use the selected school URN if available (MAT user has selected a school)
         // Otherwise fall back to the user's organisation reference
