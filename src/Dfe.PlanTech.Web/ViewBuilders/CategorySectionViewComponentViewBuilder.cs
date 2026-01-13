@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -18,9 +18,9 @@ public class CategorySectionViewComponentViewBuilder(
 
     public async Task<CategoryCardsViewComponentViewModel> BuildViewModelAsync(QuestionnaireCategoryEntry category)
     {
-        if (!category.Sections.Any())
+        if (category.Sections.Count == 0)
         {
-            Logger.LogError("Found no sections for category {id}", category.Id);
+            Logger.LogError("Found no sections for category {Id}", category.Id);
             throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 

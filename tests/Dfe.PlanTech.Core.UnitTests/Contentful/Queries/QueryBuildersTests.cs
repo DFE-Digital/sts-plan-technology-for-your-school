@@ -1,4 +1,4 @@
-﻿using Contentful.Core.Search;
+using Contentful.Core.Search;
 using Dfe.PlanTech.Core.Contentful.Options;
 using Dfe.PlanTech.Core.Contentful.Queries;
 

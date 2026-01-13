@@ -3,65 +3,68 @@
 
 @if (!GtmService.CookieService.Cookie.UseCookies)
 {
-	// No consent: bail (or init Consent Mode here if you use it)
-	return;
+    // No consent: bail (or init Consent Mode here if you use it)
+    return;
 }
 
 @{
-	var isAuthenticated = CurrentUser.IsAuthenticated;
-	object? dataLayerObj = null;
+    var isAuthenticated = CurrentUser.IsAuthenticated;
+    object? dataLayerObj = null;
 
-	if (isAuthenticated)
-	{
-		var establishmentId = (await CurrentUser.GetActiveEstablishmentIdAsync())?.ToString() ?? "Unknown";
-		var establishmentType = CurrentUser.UserOrganisationTypeName ?? (CurrentUser.UserOrganisationCategoryName ?? "Unknown");
+    if (isAuthenticated)
+    {
+        var establishmentId = (await CurrentUser.GetActiveEstablishmentIdAsync())?.ToString() ?? "Unknown";
+        var establishmentType = CurrentUser.UserOrganisationTypeName ?? (CurrentUser.UserOrganisationCategoryName ?? "Unknown");
 
-		dataLayerObj = new
-		{
+        dataLayerObj = new
+        {
             establishment_id = establishmentId,
-			establishment_type = establishmentType,
+            establishment_type = establishmentType,
             event_name = "establishmentTypeEvent"
-		};
-	}
+        };
+    }
 
-	var jsonOptions = new JsonSerializerOptions
-	{
-		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-	};
-	var dataLayerJson = dataLayerObj is null ? "" : JsonSerializer.Serialize(dataLayerObj, jsonOptions);
-	var nonce = Context.Items["nonce"]?.ToString();
+    var jsonOptions = new JsonSerializerOptions
+    {
+        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+    };
+    var dataLayerJson = dataLayerObj is null ? "" : JsonSerializer.Serialize(dataLayerObj, jsonOptions);
+    var nonce = Context.Items["nonce"]?.ToString();
 }
 
 @if (!string.IsNullOrEmpty(GtmService.Config.SiteVerificationId))
 {
-	<meta name="google-site-verification" content="@GtmService.Config.SiteVerificationId" />
+    <meta name="google-site-verification" content="@GtmService.Config.SiteVerificationId" />
 }
 
+<!-- Google Tag Manager -->
 <script nonce="@nonce">
-	(function (w, d, s, l, i) {
-		w[l] = w[l] || [];
+    (function (w, d, s, l, i) {
+        w[l] = w[l] || [];
 
-		if (@isAuthenticated.ToString().ToLower()) {
-			// Push server-derived context first
-			w[l].push(@Html.Raw(dataLayerJson));
-		}
+        if (@isAuthenticated.ToString().ToLower()) {
+            // Push server-derived context first
+            w[l].push(@Html.Raw(dataLayerJson));
+        }
 
-		// Then the GTM boot event
-		w[l].push({
-			'gtm.start': new Date().getTime(),
-			'event': 'gtm.js'
-		});
+        // Then the GTM boot event
+        w[l].push({
+            'gtm.start': new Date().getTime(),
+            'event': 'gtm.js'
+        });
 
-		var f = d.getElementsByTagName(s)[0],
-			j = d.createElement(s),
-			dl = l != 'dataLayer' ? '&l=' + l : '';
-		j.async = true;
+        var f = d.getElementsByTagName(s)[0],
+            j = d.createElement(s),
+            dl = l != 'dataLayer' ? '&l=' + l : '';
 
-		// Carry CSP nonce to external script
-		var n = d.querySelector('[nonce]');
-		if (n) { j.setAttribute('nonce', n.nonce || n.getAttribute('nonce')); }
+        // Carry CSP nonce to external script
+        var n = d.querySelector('[nonce]');
+        if (n) { j.setAttribute('nonce', n.nonce || n.getAttribute('nonce')); }
 
-		j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
-		f.parentNode.insertBefore(j, f);
-	})(window, document, 'script', 'dataLayer', '@GtmService.Config.Id');
+        j.async = true;
+        j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+        f.parentNode.insertBefore(j, f);
+    })
+    (window, document, 'script', 'dataLayer', '@GtmService.Config.Id');
 </script>
+<!-- End Google Tag Manager -->

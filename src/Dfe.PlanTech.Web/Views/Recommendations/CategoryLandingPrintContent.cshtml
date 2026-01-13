@@ -2,10 +2,8 @@
 @inject ICurrentUser CurrentUser
 
 @{
-	var schoolName = await CurrentUser.GetActiveEstablishmentNameAsync();
-}
+    var schoolName = await CurrentUser.GetActiveEstablishmentNameAsync();
 
-@{
     if (Model.Category.Header.Text != null)
     {
         ViewData["Title"] = $"{Model.Category.Header.Text} standard - print view";
@@ -17,35 +15,28 @@
     }
 }
 
-@section BeforeContent {
+@section NavButton {
     @{
         await Html.RenderPartialAsync("BackButton");
     }
 }
 
-<div class="govuk-!-margin-bottom-2">
-	@{
-		await Html.RenderPartialAsync("PrintButton", Model);
-	}
-	<p>&nbsp;</p>
-</div>
+@{
+    await Html.RenderPartialAsync("PrintButton", Model);
+}
 
 <span class="govuk-caption-xl">@schoolName</span>
 <h1 class="govuk-heading-xl">@Model.Category.Header.Text</h1>
 
 @if (!string.IsNullOrWhiteSpace(Model.SectionName))
 {
-	<partial name="Components/PageComponentFactory" model="@(new ComponentTitleEntry(Model.SectionName))" />
+    <partial name="Components/PageComponentFactory" model="@(new ComponentTitleEntry(Model.SectionName))" />
 }
 
-<div class="govuk-grid-row">
-	<div class="govuk-grid-column-two-thirds">
-		@await Component.InvokeAsync("CategoryLanding", new {
-			category = Model.Category,
-			slug = Model.Slug,
-			sectionName = Model.SectionName,
-			sortOrder = Model.SortOrder,
-			print = true
-		})
-	</div>
-</div>
+@await Component.InvokeAsync("CategoryLanding", new {
+    category = Model.Category,
+    slug = Model.Slug,
+    sectionName = Model.SectionName,
+    sortOrder = Model.SortOrder,
+    print = true
+})

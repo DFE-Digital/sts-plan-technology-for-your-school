@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -38,7 +38,7 @@ public class GroupsViewBuilder(
         var title = groupName ?? "Your organisation";
         List<ContentfulEntry> content = selectASchoolPageContent.Content ?? [];
 
-        var sections = await contentfulService.GetAllSectionsAsync();
+        var sections = await ContentfulService.GetAllSectionsAsync();
         var allRecommendations = sections.SelectMany(section => section.CoreRecommendations);
         string totalRecommendations = allRecommendations.Count().ToString();
 
@@ -48,7 +48,7 @@ public class GroupsViewBuilder(
 
         var viewModel = new GroupsSelectorViewModel
         {
-            GroupName = groupName,
+            GroupName = groupName ?? string.Empty,
             GroupEstablishments = groupSchools,
             BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(title),

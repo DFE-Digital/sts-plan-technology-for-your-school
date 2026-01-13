@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.TagHelpers.RichText;
 using Dfe.PlanTech.Web.UnitTests.TestHelpers;

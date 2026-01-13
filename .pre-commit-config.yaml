@@ -1,0 +1,14 @@
+repos:
+  # Universal hygiene (fast, huge payoff)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+    - id: end-of-file-fixer
+      name: Fix ends of files
+    - id: trailing-whitespace
+      name: Remove trailing whitespace
+    - id: mixed-line-ending
+      name: Normalize line endings to LF
+      args: ["--fix=lf"]
+    - id: check-yaml
+      name: Run YAML linter

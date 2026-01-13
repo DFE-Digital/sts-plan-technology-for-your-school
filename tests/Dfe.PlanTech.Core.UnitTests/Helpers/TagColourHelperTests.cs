@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Core.UnitTests.Helpers;
 

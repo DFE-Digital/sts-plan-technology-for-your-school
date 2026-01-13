@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.Interfaces;

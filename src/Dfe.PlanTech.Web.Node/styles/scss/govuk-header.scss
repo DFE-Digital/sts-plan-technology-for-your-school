@@ -5,10 +5,6 @@
 
 .govuk-header__container {
   position: relative;
-  margin-bottom: -10px;
-  padding-top: 25px;
-  padding-bottom: 15px;
-  border-bottom: 10px solid #347ca9;
 }
 
 .govuk-header__product-name,
@@ -36,6 +32,15 @@
 
 .govuk-header__logotype {
   margin-right: 0;
+}
+
+.govuk-header__link .govuk-header__logotype{
+  height: 30px;
+}
+
+.govuk-header__link:focus .govuk-header__logotype{
+  content: url(/assets/images/department-for-education_black.png);
+  height: 30px;
 }
 
 .govuk-header__navigation-item--active a:link,
@@ -69,4 +74,21 @@
     margin-top: 0px !important;
     margin-bottom: 20px;
   }
+}
+
+.app-auth-action {
+    margin: 15px 0 15px;
+}
+
+.app-auth-action__link {
+    font-weight: 400;
+    font-size: 1rem;
+    line-height: inherit;
+    text-decoration: none;
+     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.app-auth-action__link:link, .app-auth-action__link:visited {
+    color: #fff;
 }

@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Attributes;
 
+[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
 public class MaintainUrlOnKeyNotFoundAttribute(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IContentfulService contentfulService

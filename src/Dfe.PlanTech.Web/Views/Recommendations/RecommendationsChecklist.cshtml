@@ -12,60 +12,40 @@
     }
 }
 
-@section BeforeContent {
+@section NavButton {
     <govuk-back-link id="nonjs-back-button-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
         Home
     </govuk-back-link>
 
-    @if (!string.IsNullOrEmpty(Model.OriginatingSlug))
-    {
-        <govuk-back-link
-            id="js-back-button-link"
-            class="noprint js-only"
-            href="@Url.RouteUrl(
-                RecommendationsController.GetSingleRecommendationAction,
-                new {
-                    categorySlug = Model.CategorySlug,
-                    sectionSlug = Model.SectionSlug,
-                    chunkSlug = Model.OriginatingSlug
-                })">
-            Back
-        </govuk-back-link>
-    }
-    else
-    {
-        <govuk-back-link
-            id="js-back-button-link"
-            class="noprint js-only"
-            href="@Url.RouteUrl(
-                nameof(RecommendationsController.GetSingleRecommendationAction),
-                new {
-                    categorySlug = Model.CategorySlug,
-                    sectionSlug = Model.SectionSlug,
-                    chunkSlug = Model.Chunks.First().Slug
-                })">
-            Back
-        </govuk-back-link>
-    }
+    <govuk-back-link
+        id="js-back-button-link"
+        class="noprint js-only"
+        href="@Url.RouteUrl(
+            RecommendationsController.GetSingleRecommendationAction,
+            new {
+                categorySlug = Model.CategorySlug,
+                sectionSlug = Model.SectionSlug,
+                chunkSlug = string.IsNullOrEmpty(Model.OriginatingSlug)
+                            ? Model.Chunks.First().Slug
+                            : Model.OriginatingSlug
+            })">
+        Back
+    </govuk-back-link>
 }
 
 <div class="recommendation-content">
-    <div class="govuk-!-margin-bottom-2">
-        @{
-            await Html.RenderPartialAsync("PrintButton", Model);
-        }
-    </div>
+    @{
+        await Html.RenderPartialAsync("PrintButton", Model);
+    }
 
-    <div class="govuk-grid-row" id="checkYourAnswers-page">
-        <div class="govuk-grid-column-two-thirds-from-desktop">
-            @if (Model.Chunks != null && Model.Chunks.Count == 1)
-            {
-                <partial name="SingleRecommendationPrint" model="@Model" />
-            }
-            else
-            {
-                <partial name="RecommendationPrintContent" model="@Model" />
-            }
-        </div>
+    <div id="checkYourAnswers-page">
+        @if (Model.Chunks != null && Model.Chunks.Count == 1)
+        {
+            <partial name="SingleRecommendationPrint" model="@Model" />
+        }
+        else
+        {
+            <partial name="RecommendationPrintContent" model="@Model" />
+        }
     </div>
 </div>
