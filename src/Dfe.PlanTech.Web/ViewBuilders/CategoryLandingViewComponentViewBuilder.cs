@@ -32,9 +32,9 @@ public class CategoryLandingViewComponentViewBuilder(
         string? sortOrder,
         bool print = false)
     {
-        if (category.Sections.Count == 0)
+        if (!category.Sections.Any())
         {
-            Logger.LogError("Found no sections for category {Id}", category.Id);
+            Logger.LogError("Found no sections for category {id}", category.Id);
             throw new InvalidDataException($"Found no sections for category {category.Id}");
         }
 
@@ -91,7 +91,7 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                Logger.LogError("No slug found for subtopic with ID {SectionId} and name {SectionName}", section.Id, section.Name);
+                Logger.LogError("No slug found for subtopic with ID {sectionId} and name {sectionName}", section.Id, section.Name);
             }
 
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));

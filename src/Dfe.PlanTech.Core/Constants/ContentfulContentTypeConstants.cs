@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Core.Constants;
@@ -41,7 +41,6 @@ public static class ContentfulContentTypeConstants
             { typeof(ComponentWarningEntry), ComponentWarningContentfulContentTypeId },
             { typeof(ContentSupportPageEntry), ContentSupportPageContentfulContentTypeId },
             { typeof(CsBodyTextEntry), CsBodyTextContentfulContentTypeId },
-            { typeof(MicrocopyEntry), MicrocopyEntryTypeId},
             { typeof(MissingComponentEntry), MissingComponentContentfulContentTypeId },
             { typeof(NavigationLinkEntry), NavigationLinkContentfulContentTypeId },
             { typeof(PageEntry), PageContentfulContentTypeId },
@@ -83,7 +82,6 @@ public static class ContentfulContentTypeConstants
     public const string ComponentWarningContentfulContentTypeId = "warningComponent";
     public const string ContentSupportPageContentfulContentTypeId = "contentSupportPage";
     public const string CsBodyTextContentfulContentTypeId = "csBodyText";
-    public const string MicrocopyEntryTypeId = "microcopy";
     public const string MissingComponentContentfulContentTypeId = "missingComponent";
     public const string NavigationLinkContentfulContentTypeId = "navigationLink";
     public const string PageContentfulContentTypeId = "page";

@@ -28,24 +28,32 @@ Feature: MAT Multi Category Landing Page
 
     @selected-school-miscellaneous
     @clear-data-school
-    Scenario: MAT completing one topic on a multi-topic category shows the correct content
+    Scenario: Completing all topics on a multi-topic category shows the correct content
       Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "4, 1, 1"
-      Then I should see the confirmation panel for "Category Two Section One"
+      And I start a test assessment on "Category Two" category "Category Two Section Two" section with answers "3, 2, 2"
+      And I start a test assessment on "Category Two" category "Category Two Section Three" section with answers "1, 1, 1, 2, 4"
       And I am on the "category-two" page
       Then I should see the page heading "Category Two"
-      Then I should see the "completed" section "Category Two Section One" with description "" and link href "/category-two/category-two-section-one/view-answers"
-      And I should see the "not started" section "Category Two Section Two" with description "This is the Category Two Section Two description" and link href "/category-two/category-two-section-two/self-assessment"
-      And I should see the "not started" section "Category Two Section Three" with description "This is the Category Two Section Three description" and link href "/category-two/category-two-section-three/self-assessment"
+      Then I should see the "completed" section "Category Two Section One" with description "This is the Category Two Section One Description" and link href "/category-two/category-two-section-one/view-answers"
+      And I should see the "completed" section "Category Two Section Two" with description "This is the Category Two Section Two description" and link href "/category-two/category-two-section-two/view-answers"
+      And I should see the "completed" section "Category Two Section Three" with description "This is the Category Two Section Three description" and link href "/category-two/category-two-section-three/view-answers"
 
-      Then I should see an inset text containing "Complete the remaining self-assessments to get recommendations for your school's category two."
-      And in the inset text I should see the following links:
-      | Text                                                                | Href                                                                      |
-      | Go to self-assessment for category two section two                  | /category-two/category-two-section-two/self-assessment                    |
-      | Go to self-assessment for category two section three                | /category-two/category-two-section-three/self-assessment                  |
-
+      # Section One
       And I should see a link to the recommendation "Recommendation Header - C2 - S1 - Q1"
       And I should see a link to the recommendation "Recommendation Header - C2 - S1 - Q2"
       And I should see a link to the recommendation "Recommendation Header - C2 - S1 - Q3"
+
+      # Section Two
+      And I should see a link to the recommendation "Recommendation Header - C2 - S2 - Q1"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S2 - Q2"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S2 - Q3"
+
+      # Section Three
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q5"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q4"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q3"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q2"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q1"
 
       And I should not see the confirmation panel for "Category Two Section One"
       And I should not see the confirmation panel for "Category Two Section Two"

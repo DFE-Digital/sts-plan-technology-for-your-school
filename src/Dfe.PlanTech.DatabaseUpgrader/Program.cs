@@ -1,4 +1,4 @@
-using CommandLine;
+﻿using CommandLine;
 using Dfe.PlanTech.DatabaseUpgrader;
 
 /// <summary>

@@ -27,9 +27,9 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}", Name = GetQuestionBySlugAction)]
     public async Task<IActionResult> GetQuestionBySlug(string categorySlug, string sectionSlug, string questionSlug, string? returnTo)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(questionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(questionSlug, nameof(questionSlug));
 
         return await _questionsViewBuilder.RouteBySlugAndQuestionAsync(this, categorySlug, sectionSlug, questionSlug, returnTo);
     }
@@ -38,8 +38,8 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment", Name = "GetInterstitialPage")]
     public async Task<IActionResult> GetInterstitialPage(string categorySlug, string sectionSlug)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
 
         return await _questionsViewBuilder.RouteToInterstitialPage(this, categorySlug, sectionSlug);
     }
@@ -48,7 +48,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("question/preview/{questionId}")]
     public async Task<IActionResult> GetQuestionPreviewById(string questionId)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(questionId);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(questionId, nameof(questionId));
 
         return await _questionsViewBuilder.RouteByQuestionId(this, questionId);
     }
@@ -58,7 +58,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/next-question")]
     public async Task<IActionResult> GetNextUnansweredQuestion(string categorySlug, string sectionSlug)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
 
         return await _questionsViewBuilder.RouteToNextUnansweredQuestion(this, categorySlug, sectionSlug);
     }
@@ -66,7 +66,7 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/continue-previous", Name = "ContinuePreviousAssessment")]
     public async Task<IActionResult> ContinuePreviousAssessment(string categorySlug, string sectionSlug)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
 
         return await _questionsViewBuilder.ContinuePreviousAssessment(this, categorySlug, sectionSlug);
     }
@@ -75,8 +75,8 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/restart", Name = "RestartSelfAssessment")]
     public async Task<IActionResult> RestartSelfAssessment(string categorySlug, string sectionSlug, bool isObsoleteSubmissionFlow)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
 
         return await _questionsViewBuilder.RestartSelfAssessment(this, categorySlug, sectionSlug, isObsoleteSubmissionFlow);
     }
@@ -85,8 +85,8 @@ public class QuestionsController : BaseController<QuestionsController>
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/continue", Name = "GetContinueSelfAssessmentPage")]
     public async Task<IActionResult> GetContinueSelfAssessment(string categorySlug, string sectionSlug)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug, nameof(categorySlug));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug, nameof(sectionSlug));
 
         return await _questionsViewBuilder.RouteToContinueSelfAssessmentPage(this, categorySlug, sectionSlug);
     }

@@ -1,31 +1,64 @@
-@model PageViewModel
+﻿@model PageViewModel
 
-@section NavButton {
+@if (Model.DisplayBlueBanner)
+{
+    @section DfePageHeaderOuter {
     @if (Model.Page.DisplayBackButton)
-    {
-        await Html.RenderPartialAsync("BackButton", Model);
+        {
+            await Html.RenderPartialAsync("BackButton", Model);
+        }
+        @if (Model.Page.DisplayHomeButton)
+        {
+            await Html.RenderPartialAsync("HomeButton", Model);
+        }
     }
-    @if (Model.Page.DisplayHomeButton)
-    {
-        await Html.RenderPartialAsync("HomeButton", Model);
+
+    @section DfePageHeaderInner {
+        @foreach (var content in Model.Page.BeforeTitleContent)
+        {
+            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+        }
+
+        <span class="govuk-caption-xl govuk-!-margin-top-5">
+            @Model.ActiveEstablishmentName
+        </span>
+
+        @if (Model.Page.Title != null)
+        {
+            await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+        }
     }
 }
-
-@foreach (var content in Model.Page.BeforeTitleContent)
+else
 {
-    await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-}
+    @section BeforeContent {
 
-@if (Model.Page.DisplayOrganisationName)
-{
-    <span class="govuk-caption-xl">
-        @Model.ActiveEstablishmentName
-    </span>
-}
+    @if (Model.Page.DisplayBackButton)
+        {
+            await Html.RenderPartialAsync("BackButton", Model);
+        }
+        @if (Model.Page.DisplayHomeButton)
+        {
+            await Html.RenderPartialAsync("HomeButton", Model);
+        }
+    }
 
-@if (Model.Page.Title != null)
-{
-    await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+    foreach (var content in Model.Page.BeforeTitleContent)
+    {
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
+
+    if (Model.Page.DisplayOrganisationName)
+    {
+        <span class="govuk-caption-xl govuk-!-margin-top-5">
+            @Model.ActiveEstablishmentName
+        </span>
+    }
+
+    if (Model.Page.Title != null)
+    {
+        await Html.RenderPartialAsync("Components/Title", Model.Page.Title);
+    }
 }
 
 @{
@@ -51,14 +84,20 @@
 
     @if ((isHomeCategoryPage || isAutomatedTestingHomePage) && categories is not null && categories.Any())
     {
-        await Html.RenderPartialAsync("Components/Page", Model.Page);
-
-        <h2 class="govuk-heading-l">How to meet the digital and technology standards</h2>
-        <div class="dfe-grid-container">
-            @foreach (var category in categories)
-            {
-                @await Component.InvokeAsync("CategorySection", new { category })
+        <div class="govuk-grid-row">
+        <div class="govuk-grid-column-two-thirds">
+            @{
+                await Html.RenderPartialAsync("Components/Page", Model.Page);
             }
+
+            <h2 class="govuk-heading-l">How to meet the digital and technology standards</h2>
+            <div class="dfe-grid-container">
+                @foreach (var category in categories)
+                {
+                    @await Component.InvokeAsync("CategorySection", new { category })
+                }
+            </div>
+        </div>
         </div>
     }
     else

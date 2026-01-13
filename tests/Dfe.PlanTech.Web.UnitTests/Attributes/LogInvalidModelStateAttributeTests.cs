@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Web.Attributes;
+﻿using Dfe.PlanTech.Web.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -37,7 +37,7 @@ public class LogInvalidModelStateAttributeTests
 
         var controller = Substitute.For<Controller>();
 
-        return new ActionExecutingContext(actionContext, [], new Dictionary<string, object?>(), controller);
+        return new ActionExecutingContext(actionContext, new List<IFilterMetadata>(), new Dictionary<string, object?>(), controller);
     }
 
     [Fact]

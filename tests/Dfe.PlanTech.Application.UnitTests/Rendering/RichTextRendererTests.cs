@@ -1,8 +1,8 @@
-using System.Text;
+﻿using System.Text;
 using Dfe.PlanTech.Application.Rendering;
+using Dfe.PlanTech.Application.Rendering.Options;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 

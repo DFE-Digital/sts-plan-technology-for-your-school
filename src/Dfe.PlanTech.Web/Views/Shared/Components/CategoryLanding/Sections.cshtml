@@ -3,7 +3,7 @@
 @foreach (var topic in Model.CategoryLandingSections)
 {
     if (Model.CategoryLandingSections.Count != 1)
-    {
+    { 
         <h2 class="govuk-heading-l">@topic.Name</h2>
     }
 
@@ -11,31 +11,31 @@
 
     @if (!string.IsNullOrEmpty(topic.LastCompletionDate))
     {
-        <div class="recommendation-action-header">
-            <table class="govuk-table govuk-!-margin-bottom-8">
-                <thead class="govuk-table__head">
-                    <tr class="govuk-table__row">
-                        <th scope="col" class="govuk-table__header govuk-!-width-two-thirds">Recommendation</th>
-                        <th scope="col" class="govuk-table__header">Updated</th>
-                        <th scope="col" class="govuk-table__header govuk-!-text-align-right">Status</th>
-                    </tr>
-                </thead>
-                <tbody class="govuk-table__body">
-                    @foreach (var chunk in @topic.Recommendations.Chunks)
-                    {
+		<div class="recommendation-action-header">
+			<table class="govuk-table govuk-!-margin-bottom-8">
+				<thead class="govuk-table__head">
+					<tr class="govuk-table__row">
+						<th scope="col" class="govuk-table__header">Recommendations</th>
+						<th scope="col" class="govuk-table__header">Last updated</th>
+						<th scope="col" class="govuk-table__header govuk-!-text-align-right">Status</th>
+					</tr>
+				</thead>
+				<tbody class="govuk-table__body">
+					@foreach (var chunk in @topic.Recommendations.Chunks)
+					{
 
-                        <tr class="govuk-table__row">
-                            <td class="govuk-table__cell table__cell custom-height">
+						<tr class="govuk-table__row">
+							<td class="govuk-table__cell table__cell custom-height">
                                 @if (!Model.Print){
-                                <a href=@Url.RouteUrl("GetSingleRecommendation", new {
-                                    categorySlug = Model.CategorySlug,
-                                    sectionSlug = topic.Slug,
-                                    chunkSlug = chunk.Slug
-                                    })
-                                    class="govuk-link"
-                                    data-recommendation-header="@(chunk.HeaderText)-@(Model.StatusLinkPartialName.Split("/")[^1])"
-                                    data-recommendation-status="@chunk.Status.GetDisplayName()">
-                                    @chunk.HeaderText
+								<a href=@Url.RouteUrl("GetSingleRecommendation", new {
+									categorySlug = Model.CategorySlug,
+									sectionSlug = topic.Slug,
+									chunkSlug = chunk.Slug
+									})
+								    class="govuk-link"
+							        data-recommendation-header="@(chunk.HeaderText)-@(Model.StatusLinkPartialName.Split("/")[^1])"
+								    data-recommendation-status="@chunk.Status.GetDisplayName()">
+									@chunk.HeaderText
                                 </a>
                                 }
                                 else
@@ -43,18 +43,18 @@
                                     <div>@chunk.HeaderText</div>
                                 }
                             </td>
-                            <td class="govuk-table__cell govuk-hint govuk-!-font-size-16 govuk-!-padding-top-3">
-                                @chunk.LastUpdated.ToString("d MMM yyy")
-                            </td>
-                            <td class="govuk-table__cell govuk-!-text-align-right">
-                                <strong class="govuk-tag @((chunk.Status as RecommendationStatus?).GetCssClassOrDefault(RecommendationConstants.DefaultTagClass))">
-                                    @chunk.Status.GetDisplayName()
-                                </strong>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+							<td class="govuk-table__cell govuk-hint govuk-!-font-size-16 govuk-!-padding-top-3">
+								@chunk.LastUpdated.ToString("d MMM yyy")
+							</td>
+							<td class="govuk-table__cell govuk-!-text-align-right">
+								<strong class="govuk-tag @((chunk.Status as RecommendationStatus?).GetCssClassOrDefault(RecommendationConstants.DefaultTagClass))">
+									@chunk.Status.GetDisplayName()
+								</strong>
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		</div>
     }
 }

@@ -143,27 +143,6 @@ public class RecommendationsViewBuilderTests
         _recommendationService.GetCurrentRecommendationStatusAsync("C2", 123)
             .Returns(currentRecommendationStatus);
 
-        // Setup recommendation service with history
-
-        var recommendationHistory1 = new SqlEstablishmentRecommendationHistoryDto
-        {
-            DateCreated = new DateTime(2025, 11, 14)
-        };
-
-        var recommendationHistory2 = new SqlEstablishmentRecommendationHistoryDto
-        {
-            DateCreated = new DateTime(2025, 11, 11)
-        };
-
-        _recommendationService.GetRecommendationHistoryAsync("C2", 123)
-            .Returns([recommendationHistory1, recommendationHistory2]);
-
-        var expectedDictionary = new Dictionary<string, IEnumerable<SqlEstablishmentRecommendationHistoryDto>>
-        {
-            { "November activity", [recommendationHistory2, recommendationHistory1] }
-        };
-
-
         // Act (choose middle chunk to test prev/next both populated)
         var result = await sut.RouteToSingleRecommendation(ctl, categorySlug, "sec-1", "second-chunk-2", useChecklist: false);
 
@@ -177,15 +156,15 @@ public class RecommendationsViewBuilderTests
         Assert.Equal("sec-1", vm.SectionSlug);
         Assert.Equal(3, vm.Chunks.Count);
         Assert.Equal("second-chunk-2", vm.CurrentChunk.Slug);
-        Assert.NotNull(vm.PreviousChunk);
-        Assert.NotNull(vm.NextChunk);
         Assert.Equal(2, vm.CurrentChunkPosition);
         Assert.Equal(3, vm.TotalChunks);
+        Assert.NotNull(vm.PreviousChunk);
+        Assert.NotNull(vm.NextChunk);
         Assert.Equal("first-chunk-1", vm.PreviousChunk!.Slug);
         Assert.Equal("third-chunk-3", vm.NextChunk!.Slug);
+
         Assert.Equal("Completed", vm.SelectedStatusKey);
         Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
-        Assert.Equal("second-chunk-2", vm.OriginatingSlug);
 
         await _recommendationService.Received(1).GetCurrentRecommendationStatusAsync("C2", 123);
     }
@@ -231,7 +210,7 @@ public class RecommendationsViewBuilderTests
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
 
         // Act
-        var result = await sut.RouteBySectionAndRecommendation(ctl, "cat", "sec-1", useChecklist: false, null, null);
+        var result = await sut.RouteBySectionAndRecommendation(ctl, "cat", "sec-1", useChecklist: false);
 
         // Assert
         Assert.IsType<RedirectToActionResult>(result);
@@ -255,7 +234,7 @@ public class RecommendationsViewBuilderTests
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
 
         // Act
-        var result = await sut.RouteBySectionAndRecommendation(ctl, "cat", "sec-1", useChecklist: false, null, null);
+        var result = await sut.RouteBySectionAndRecommendation(ctl, "cat", "sec-1", useChecklist: false);
 
         // Assert
         var redirect = Assert.IsType<RedirectToActionResult>(result);
@@ -284,7 +263,7 @@ public class RecommendationsViewBuilderTests
         _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
 
         // Act
-        var result = await sut.RouteBySectionAndRecommendation(ctl, "cat", "sec-1", useChecklist: false, null, null);
+        var result = await sut.RouteBySectionAndRecommendation(ctl, "cat", "sec-1", useChecklist: false);
 
         // Assert
         Assert.IsType<RedirectToActionResult>(result);
@@ -337,7 +316,7 @@ public class RecommendationsViewBuilderTests
             });
 
         // Act (useChecklist=false -> "Recommendations"; true -> "RecommendationsChecklist")
-        var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: false, null, null);
+        var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: false);
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
@@ -395,7 +374,7 @@ public class RecommendationsViewBuilderTests
             });
 
         // Act
-        var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: true, null, null);
+        var result = await sut.RouteBySectionAndRecommendation(ctl, "connectivity", "sec-1", useChecklist: true);
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
@@ -462,217 +441,8 @@ public class RecommendationsViewBuilderTests
 
         Assert.Equal("Connectivity", vm.CategoryName);
         Assert.Equal(sectionSlug, vm.SectionSlug);
-        Assert.Equal(routing.Submission?.Responses, vm.SubmissionResponses);
+        Assert.Equal(routing.Submission.Responses, vm.SubmissionResponses);
         Assert.Equal(expectedSlug, vm.OriginatingSlug);
-    }
-
-    // ---------- UpdateRecommendationStatusAsync ----------
-
-    [Fact]
-    public async Task UpdateRecommendationStatusAsync_InvalidStatus_Sets_Error_And_Reroutes_To_SingleRecommendation()
-    {
-        // Arrange
-        var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
-
-        const int establishmentId = 123;
-        const string categorySlug = "cat-a";
-        const string sectionSlug = "sec-1";
-        const string chunkSlug = "second-chunk-2";
-
-        _currentUser.UserId.Returns(123);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(establishmentId);
-
-        var section = MakeSection("S1", sectionSlug, "Section One");
-
-        _contentful.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
-        _contentful.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
-
-        var routing = MakeRouting(
-            SubmissionStatus.CompleteReviewed,
-            section,
-            answerSysIds: ["C1", "C2", "C3"]);
-
-        _submissions
-            .GetSubmissionRoutingDataAsync(establishmentId, section, true)
-            .Returns(routing);
-
-        // Status is invalid so the extension GetRecommendationStatusEnumValue() should return null
-        const string invalidStatus = "TotallyInvalidStatus";
-
-        // History needed for RouteToSingleRecommendation
-        var history1 = new SqlEstablishmentRecommendationHistoryDto { DateCreated = new DateTime(2025, 11, 14) };
-        var history2 = new SqlEstablishmentRecommendationHistoryDto { DateCreated = new DateTime(2025, 11, 11) };
-
-        _recommendationService
-            .GetCurrentRecommendationStatusAsync("C2", establishmentId)
-            .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
-
-        _recommendationService
-            .GetRecommendationHistoryAsync("C2", establishmentId)
-            .Returns([history1, history2]);
-
-        // Act
-        var result = await sut.UpdateRecommendationStatusAsync(
-            ctl,
-            categorySlug,
-            sectionSlug,
-            chunkSlug,
-            invalidStatus,
-            notes: null);
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal("SingleRecommendation", view.ViewName);
-
-        Assert.Equal("Select a valid status", ctl.TempData["StatusUpdateError"]);
-
-        await _recommendationService
-            .DidNotReceiveWithAnyArgs()
-            .UpdateRecommendationStatusAsync(default!, default, default, default!, default!, default);
-    }
-
-    [Fact]
-    public async Task UpdateRecommendationStatusAsync_ValidStatus_Uses_Default_Notes_And_Sets_Success_Message()
-    {
-        // Arrange
-        var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
-
-        const int establishmentId = 123;
-        const int userId = 42;
-        const string categorySlug = "cat-a";
-        const string sectionSlug = "sec-1";
-        const string chunkSlug = "second-chunk-2";
-
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(establishmentId);
-        _currentUser.UserId.Returns(userId);
-        _currentUser.IsMat.Returns(false);
-
-        var section = MakeSection("S1", sectionSlug, "Section One");
-
-        _contentful.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
-        _contentful.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
-
-        var routing = MakeRouting(
-            SubmissionStatus.CompleteReviewed,
-            section,
-            answerSysIds: ["C1", "C2", "C3"]);
-
-        _submissions
-            .GetSubmissionRoutingDataAsync(establishmentId, section, true)
-            .Returns(routing);
-
-        // For the redirect back to RouteToSingleRecommendation
-        var currentRecommendationStatus = new SqlEstablishmentRecommendationHistoryDto
-        {
-            EstablishmentId = establishmentId,
-            RecommendationId = 2,
-            UserId = userId,
-            NewStatus = RecommendationStatus.NotStarted.ToString(),
-            DateCreated = DateTime.UtcNow.AddDays(-1)
-        };
-
-        _recommendationService
-            .GetCurrentRecommendationStatusAsync("C2", establishmentId)
-            .Returns(currentRecommendationStatus);
-
-        _recommendationService
-            .GetRecommendationHistoryAsync("C2", establishmentId)
-            .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
-
-        var selectedStatus = RecommendationStatus.NotStarted.ToString();
-
-        // Act
-        var result = await sut.UpdateRecommendationStatusAsync(
-            ctl,
-            categorySlug,
-            sectionSlug,
-            chunkSlug,
-            selectedStatus,
-            notes: null);
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal("SingleRecommendation", view.ViewName);
-
-        // TempData success banner should be set
-        var successTitle = Assert.IsType<string>(ctl.TempData["StatusUpdateSuccessTitle"]);
-        Assert.Contains("Status updated to", successTitle);
-
-        // Service is called with the correct ids and a default note containing our literal text
-        await _recommendationService.Received(1).UpdateRecommendationStatusAsync(
-            "C2",
-            establishmentId,
-            userId,
-            selectedStatus,
-            Arg.Is<string>(n => n.Contains("Status manually updated")),
-            Arg.Any<int?>());
-    }
-
-    [Fact]
-    public async Task UpdateRecommendationStatusAsync_ValidStatus_Uses_Provided_Notes()
-    {
-        // Arrange
-        var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
-
-        const int establishmentId = 123;
-        const int userId = 99;
-        const string categorySlug = "cat-a";
-        const string sectionSlug = "sec-1";
-        const string chunkSlug = "second-chunk-2";
-
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(establishmentId);
-        _currentUser.UserId.Returns(userId);
-        _currentUser.IsMat.Returns(true);
-        _currentUser.UserOrganisationId.Returns(555);
-
-        var section = MakeSection("S1", sectionSlug, "Section One");
-
-        _contentful.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
-        _contentful.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
-
-        var routing = MakeRouting(
-            SubmissionStatus.CompleteReviewed,
-            section,
-            answerSysIds: ["C1", "C2", "C3"]);
-
-        _submissions
-            .GetSubmissionRoutingDataAsync(establishmentId, section, true)
-            .Returns(routing);
-
-        _recommendationService
-            .GetCurrentRecommendationStatusAsync("C2", establishmentId)
-            .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
-
-        _recommendationService
-            .GetRecommendationHistoryAsync("C2", establishmentId)
-            .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
-
-        var selectedStatus = RecommendationStatus.NotStarted.ToString();
-        const string customNotes = "This is a custom reason";
-
-        // Act
-        var result = await sut.UpdateRecommendationStatusAsync(
-            ctl,
-            categorySlug,
-            sectionSlug,
-            chunkSlug,
-            selectedStatus,
-            notes: customNotes);
-
-        // Assert
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal("SingleRecommendation", view.ViewName);
-
-        await _recommendationService.Received(1).UpdateRecommendationStatusAsync(
-            "C2",
-            establishmentId,
-            userId,
-            selectedStatus,
-            customNotes,
-            555);
     }
 
     // ---------- Support ----------

@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 
@@ -20,15 +20,6 @@ public interface IRecommendationsViewBuilder
        string? singleChunkSlug,
        string? originatingSlug
     );
-
-    Task<IActionResult> UpdateRecommendationStatusAsync(
-      Controller controller,
-      string categorySlug,
-      string sectionSlug,
-      string chunkSlug,
-      string selectedStatus,
-      string? notes
-  );
 
     Task<IActionResult> RouteToPrintSingle(
         Controller controller,

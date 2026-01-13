@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 
@@ -8,10 +8,6 @@ public interface IRecommendationWorkflow
         string recommendationContentfulReference,
         int establishmentId
     );
-
-    Task<IEnumerable<SqlEstablishmentRecommendationHistoryDto>> GetRecommendationHistoryAsync(
-        string recommendationContentfulReference,
-        int establishmentId);
 
     Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByEstablishmentIdAsync(
             int establishmentId

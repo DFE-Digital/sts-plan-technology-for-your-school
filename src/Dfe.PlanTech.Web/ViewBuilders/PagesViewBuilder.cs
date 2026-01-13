@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Configuration;
+﻿using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -58,7 +58,7 @@ public class PagesViewBuilder(
             {
                 throw new ContentfulDataUnavailableException($"Could not find category at {controller.Request.Path.Value}");
             }
-            var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
+            var landingPageViewModel = await BuildLandingPageViewModelAsync(controller, category);
             return controller.View(CategoryLandingPageView, landingPageViewModel);
         }
 
@@ -71,7 +71,7 @@ public class PagesViewBuilder(
         {
             if (!CurrentUser.IsAuthenticated)
             {
-                Logger.LogWarning("Tried to display establishment on {PageTitle} but user is not authenticated", page.Title?.Text ?? page.Id);
+                Logger.LogWarning("Tried to display establishment on {page} but user is not authenticated", page.Title?.Text ?? page.Id);
             }
             else
             {
@@ -96,17 +96,17 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var viewModel = BuildLandingPageViewModelAsync(controller, category);
+        var viewModel = await BuildLandingPageViewModelAsync(controller, category);
 
         return controller.View(CategoryLandingPagePrintView, viewModel);
     }
 
-    private CategoryLandingPageViewModel BuildLandingPageViewModelAsync(Controller controller, QuestionnaireCategoryEntry category)
+    private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(Controller controller, QuestionnaireCategoryEntry category)
     {
         return new CategoryLandingPageViewModel
         {
-            Slug = category.LandingPage?.Slug ?? string.Empty,
-            BeforeTitleContent = category.LandingPage?.BeforeTitleContent ?? [],
+            Slug = category.LandingPage.Slug,
+            BeforeTitleContent = category.LandingPage.BeforeTitleContent,
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,

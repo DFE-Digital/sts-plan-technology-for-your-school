@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Services.Interfaces;
+﻿using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
@@ -10,26 +10,13 @@ public class RecommendationService(
 {
     public Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
         string recommendationContentfulReference,
-        int establishmentId
-    )
+        int establishmentId)
     {
         return recommendationWorkflow.GetCurrentRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId
         );
     }
-
-    public Task<IEnumerable<SqlEstablishmentRecommendationHistoryDto>> GetRecommendationHistoryAsync(
-         string recommendationContentfulReference,
-        int establishmentId
-    )
-    {
-        return recommendationWorkflow.GetRecommendationHistoryAsync(
-            recommendationContentfulReference,
-            establishmentId
-        );
-    }
-
 
     public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesAsync(
         int establishmentId

@@ -20,7 +20,7 @@ public static class UserClaimsExtensions
 
     public static string GetDsiReference(this IEnumerable<Claim> claims)
     {
-        ArgumentNullException.ThrowIfNull(claims);
+        ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
         return claims
             .Where(c => c.Type.Contains(ClaimConstants.NameIdentifier))
@@ -40,7 +40,7 @@ public static class UserClaimsExtensions
     /// </exception>
     public static EstablishmentModel? GetOrganisation(this IEnumerable<Claim> claims)
     {
-        ArgumentNullException.ThrowIfNull(claims);
+        ArgumentNullException.ThrowIfNull(claims, nameof(claims));
 
         string? organisationJson = claims
             .FirstOrDefault(c => c.Type == ClaimConstants.Organisation)?

@@ -1,8 +1,6 @@
 root = true
 
 [*]
-charset = utf-8
-end_of_line = lf
 indent_style = space
 indent_size = 4
 tab_width = 4
@@ -109,3 +107,4 @@ dotnet_naming_style.pascal_case.required_prefix =
 dotnet_naming_style.pascal_case.required_suffix = 
 dotnet_naming_style.pascal_case.word_separator = 
 dotnet_naming_style.pascal_case.capitalization = pascal_case
+end_of_line = lf

@@ -1,12 +1,10 @@
-using Dfe.PlanTech.Data.Sql.Entities;
+﻿using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.Interfaces;
 
 public interface IEstablishmentRecommendationHistoryRepository
 {
     Task<IEnumerable<EstablishmentRecommendationHistoryEntity>> GetRecommendationHistoryByEstablishmentIdAsync(int establishmentId);
-
-    Task<IEnumerable<EstablishmentRecommendationHistoryEntity>> GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(int establishmentId, int recommendationId);
 
     Task<EstablishmentRecommendationHistoryEntity?> GetLatestRecommendationHistoryAsync(int establishmentId, int recommendationId);
 

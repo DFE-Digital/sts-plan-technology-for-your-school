@@ -35,6 +35,10 @@ public interface IContentfulRepository
     /// <returns></returns>
     Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options);
 
+    Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options);
+
+    Task<int> GetEntriesCountAsync<TEntry>();
+
     /// <summary>
     /// Get entities without filtering
     /// </summary>
@@ -42,8 +46,4 @@ public interface IContentfulRepository
     /// <typeparam name="TEntry"></typeparam>
     /// <returns></returns>
     Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>();
-
-    Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options);
-
-    Task<int> GetEntriesCountAsync<TEntry>();
 }

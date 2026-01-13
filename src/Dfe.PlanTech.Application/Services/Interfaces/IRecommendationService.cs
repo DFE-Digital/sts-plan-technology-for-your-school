@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+﻿using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Application.Services.Interfaces;
 
@@ -8,11 +8,6 @@ public interface IRecommendationService
         string recommendationContentfulReference,
         int establishmentId
     );
-
-    Task<IEnumerable<SqlEstablishmentRecommendationHistoryDto>> GetRecommendationHistoryAsync(
-        string recommendationContentfulReference,
-        int establishmentId
-   );
 
     Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesAsync(
         int establishmentId

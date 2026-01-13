@@ -8,3 +8,4 @@ csv-test.csv
 
 #Env variables
 .env
+.env.*

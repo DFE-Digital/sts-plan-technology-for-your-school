@@ -1,4 +1,4 @@
-using System.Text;
+﻿using System.Text;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging;
@@ -10,11 +10,8 @@ namespace Dfe.PlanTech.Application.Rendering
     ) : IRichTextContentPartRendererCollection
     {
         private readonly ILogger<AccordionComponentRenderer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
         public ILogger Logger => _logger;
-        public IReadOnlyList<IRichTextContentPartRenderer> Renderers { get; private set; } = [];
-
-        private const string _closingDiv = "</div>";
+        public IReadOnlyList<IRichTextContentPartRenderer> Renderers { get; private set; } = new List<IRichTextContentPartRenderer>();
 
         public StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
         {
@@ -49,10 +46,10 @@ namespace Dfe.PlanTech.Application.Rendering
                     {
                         stringBuilder.Append($"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{summaryId}\">");
                         stringBuilder.Append(innerContent.SummaryLine);
-                        stringBuilder.Append(_closingDiv);
+                        stringBuilder.Append("</div>");
                     }
 
-                    stringBuilder.Append(_closingDiv);
+                    stringBuilder.Append("</div>");
 
                     stringBuilder.Append($"<div id=\"{contentId}\" class=\"govuk-accordion__section-content\">");
 
@@ -61,11 +58,11 @@ namespace Dfe.PlanTech.Application.Rendering
                         RenderChildren(innerContent.RichText, stringBuilder);
                     }
 
-                    stringBuilder.Append(_closingDiv);
-                    stringBuilder.Append(_closingDiv);
+                    stringBuilder.Append("</div>");
+                    stringBuilder.Append("</div>");
                 }
 
-                stringBuilder.Append(_closingDiv);
+                stringBuilder.Append("</div>");
             }
             return stringBuilder;
         }
