@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Application.Workflows.Options;
 using Microsoft.AspNetCore.Http;

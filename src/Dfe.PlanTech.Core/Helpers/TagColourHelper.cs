@@ -1,4 +1,4 @@
-﻿namespace Dfe.PlanTech.Core.Helpers;
+namespace Dfe.PlanTech.Core.Helpers;
 
 public static class TagColourHelper
 {

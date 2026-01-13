@@ -2,88 +2,95 @@
 
 @if (Model.NoSectionsErrorRedirectUrl != null)
 {
-	Context.Response.Redirect(Url.Content(Model.NoSectionsErrorRedirectUrl));
+    Context.Response.Redirect(Url.Content(Model.NoSectionsErrorRedirectUrl));
 }
 
 @if (Model.ProgressRetrievalErrorMessage != null)
 {
-	<p id="progress-error" class="govuk-error-message">
-		<span class="govuk-visually-hidden">Error:</span>@Model.ProgressRetrievalErrorMessage
-	</p>
+    <p id="progress-error" class="govuk-error-message">
+        <span class="govuk-visually-hidden">Error:</span>@Model.ProgressRetrievalErrorMessage
+    </p>
 }
 
 @if (!string.IsNullOrEmpty(Model.SectionName))
 {
-	<div class="govuk-panel govuk-panel--confirmation">
-		<h1 class="govuk-panel__title">
-			Your self-assessment for @Model.SectionName.ToLower() is complete
-		</h1>
-		<div class="govuk-panel__body">
-			Recommendations are available
-		</div>
-	</div>
+    <div class="govuk-panel govuk-panel--confirmation govuk-!-margin-bottom-8">
+        <h1 class="govuk-panel__title">
+            Your self-assessment for @Model.SectionName.ToLower() is complete
+        </h1>
+        <div class="govuk-panel__body">
+            Recommendations are available
+        </div>
+    </div>
+}
+
+@{
+    var title = new ComponentTitleEntry(Model.CategoryName);
 }
 
 @if (!Model.Print)
 {
-	@if (Model.CategoryLandingSections.Count != 1 && !Model.AllSectionsCompleted)
-	{
-		<div class="govuk-inset-text">
-			@{
-				if (!Model.AnySectionsCompleted)
-				{
-					<p>You have not completed any self-assessments for the @Model.CategoryName.ToLower() standard. Complete self-assessments to view all recommendations.</p>
-				}
-				else if (Model.AllSectionsCompleted)
-				{
-					<p>You have completed all self-assessments for the @Model.CategoryName.ToLower() standard.</p>
-				}
-				else
-				{
-					<p>Complete the remaining self-assessments to get recommendations for your school's @Model.CategoryName.ToLower().</p>
+    <span class="govuk-caption-xl">How to meet the standard</span>
+    <partial name="Components/PageComponentFactory" model="@title" />
 
-					foreach (var topic in Model.CategoryLandingSections)
-					{
-						<partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = @Model.CategorySlug, Section = topic, Context = "Default" }' />
-					}
-				}
-			}
-		</div>
-	}
+    @if (Model.CategoryLandingSections.Count != 1 && !Model.AllSectionsCompleted)
+    {
+        <div class="govuk-inset-text">
+            @{
+                if (!Model.AnySectionsCompleted)
+                {
+                    <p>You have not completed any self-assessments for the @Model.CategoryName.ToLower() standard. Complete self-assessments to view all recommendations.</p>
+                }
+                else if (Model.AllSectionsCompleted)
+                {
+                    <p>You have completed all self-assessments for the @Model.CategoryName.ToLower() standard.</p>
+                }
+                else
+                {
+                    <p>Complete the remaining self-assessments to get recommendations for your school's @Model.CategoryName.ToLower().</p>
 
-	@if (Model.AnySectionsCompleted)
-	{
-		<form method="get" class="govuk-form-group">
-			<label class="govuk-label" for="sort">
-				Sort recommendations by
-			</label>
+                    foreach (var topic in Model.CategoryLandingSections)
+                    {
+                        <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = @Model.CategorySlug, Section = topic, Context = "Default" }' />
+                    }
+                }
+            }
+        </div>
+    }
 
-			<select class="govuk-select" id="sort" name="sort">
-				@foreach (RecommendationSortOrder sortType in Enum.GetValues(typeof(RecommendationSortOrder)))
-				{
-					var value = sortType.GetDisplayName();
-					var label = sortType.GetDisplayName();
+    @if (Model.AnySectionsCompleted)
+    {
+        <form method="get" class="govuk-form-group">
+            <label class="govuk-label" for="sort">
+                Sort recommendations by
+            </label>
 
-					var isSelected = Model.SortType.HasValue
-					? string.Equals(label, Model.SortType.GetDisplayName())
-					: string.Equals(label, RecommendationSortOrder.Default.GetDisplayName());
+            <select class="govuk-select" id="sort" name="sort">
+                @foreach (RecommendationSortOrder sortType in Enum.GetValues(typeof(RecommendationSortOrder)))
+                {
+                    var value = sortType.GetDisplayName();
+                    var label = sortType.GetDisplayName();
 
-					@if (isSelected)
-					{
-						<option value="@value" selected>@label</option>
-					}
-					else
-					{
-						<option value="@value">@label</option>
-					}
-				}
-			</select>
+                    var isSelected = Model.SortType.HasValue
+                    ? string.Equals(label, Model.SortType.GetDisplayName())
+                    : string.Equals(label, RecommendationSortOrder.Default.GetDisplayName());
 
-			<button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button">
-				Apply
-			</button>
-		</form>
-	}
+                    @if (isSelected)
+                    {
+                        <option value="@value" selected>@label</option>
+                    }
+                    else
+                    {
+                        <option value="@value">@label</option>
+                    }
+                }
+            </select>
+
+            <button type="submit" class="govuk-button govuk-button--secondary" data-module="govuk-button">
+                Apply
+            </button>
+        </form>
+    }
 }
 
 <partial name="Components/CategoryLanding/Sections" model="@Model" />

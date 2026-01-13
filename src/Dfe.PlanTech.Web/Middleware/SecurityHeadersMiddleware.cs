@@ -5,19 +5,15 @@ namespace Dfe.PlanTech.Web.Middleware;
 /// <summary>
 /// Middleware that sets various response headers for security reasons.
 /// </summary>
-public class SecurityHeadersMiddleware
+public class SecurityHeadersMiddleware(RequestDelegate next)
 {
-    private readonly RequestDelegate _next;
-
-    public SecurityHeadersMiddleware(RequestDelegate next)
-    {
-        _next = next;
-    }
+    private readonly RequestDelegate _next = next ?? throw new ArgumentNullException(nameof(next));
 
     public async Task InvokeAsync(HttpContext context)
     {
         AddFramejackingPreventHeaders(context);
         AddContentSecurityPolicy(context);
+
         await _next(context);
     }
 

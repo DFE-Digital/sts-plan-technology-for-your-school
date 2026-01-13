@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Http;
@@ -12,11 +12,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         {
             var nextCalled = false;
 
-            RequestDelegate next = _ =>
+            Task next(HttpContext _)
             {
                 nextCalled = true;
                 return Task.CompletedTask;
-            };
+            }
 
             wasNextCalled = () => nextCalled;
 
@@ -38,7 +38,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var cfg = new RobotsConfiguration
             {
                 UserAgent = "*",
-                DisallowedPaths = new[] { "/admin", "/private" },
+                DisallowedPaths = ["/admin", "/private"],
                 CacheMaxAge = 3600
             };
 
@@ -70,7 +70,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var cfg = new RobotsConfiguration
             {
                 UserAgent = "Googlebot",
-                DisallowedPaths = new string[0],
+                DisallowedPaths = [],
                 CacheMaxAge = 120
             };
 
@@ -95,7 +95,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var cfg = new RobotsConfiguration
             {
                 UserAgent = "*",
-                DisallowedPaths = new[] { "/hidden" },
+                DisallowedPaths = ["/hidden"],
                 CacheMaxAge = 10
             };
 

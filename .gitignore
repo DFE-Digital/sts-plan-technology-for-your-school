@@ -15,6 +15,8 @@
 
 # Local settings.
 src/Dfe.PlanTech.Web/Properties/launchSettings.json
+src/Dfe.PlanTech.DatabaseUpgrader/Properties/launchSettings.json
+tests/Dfe.PlanTech.Web.SiteOfflineMicrosite.UnitTests/Properties/launchSettings.json
 
 # Mono auto generated files
 mono_crash.*
@@ -512,5 +514,3 @@ contentful/migration-scripts/contentful-export-*.json
 azure-secrets-expiring.yml
 
 StrykerOutput/
-/src/Dfe.PlanTech.DatabaseUpgrader/Properties/launchSettings.json
-/tests/Dfe.PlanTech.Web.SiteOfflineMicrosite.UnitTests/Properties/launchSettings.json

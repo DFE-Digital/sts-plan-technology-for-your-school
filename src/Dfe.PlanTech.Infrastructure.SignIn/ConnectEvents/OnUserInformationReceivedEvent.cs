@@ -18,7 +18,7 @@ public static class OnUserInformationReceivedEvent
     /// <param name="context"></param>
     /// <returns></returns>
     public static async Task RecordUserSignIn(
-        ILogger<DfeSignIn> logger,
+        ILogger<IDfeSignIn> logger,
         UserInformationReceivedContext context
     )
     {

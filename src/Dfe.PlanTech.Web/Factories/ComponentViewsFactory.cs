@@ -24,7 +24,7 @@ public class ComponentViewsFactory(
 
         if (matchingViewType is null)
         {
-            logger.LogWarning("Could not find matching view for {model}", model);
+            logger.LogWarning("Could not find matching view for {Model}", model);
             viewPath = null;
             return false;
         }

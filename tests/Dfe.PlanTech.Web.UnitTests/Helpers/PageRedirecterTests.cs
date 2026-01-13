@@ -1,1 +1,1 @@
-﻿namespace Dfe.PlanTech.Web.UnitTests.Helpers;
+namespace Dfe.PlanTech.Web.UnitTests.Helpers;

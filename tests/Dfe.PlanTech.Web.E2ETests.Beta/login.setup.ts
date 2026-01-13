@@ -30,12 +30,36 @@ async function loginAndSaveSession(
   const ignoreHTTPSErrors = process.env.CI === 'true';
   const context = await browser.newContext({ ignoreHTTPSErrors });
 
+  await context.addCookies([
+    {
+      name: "user_cookie_preferences",
+      value: JSON.stringify({
+        IsVisible: false,
+        UserAcceptsCookies: true,
+      }),
+      domain: "localhost",
+      path: "/",
+      httpOnly: false,
+      secure: false,
+      sameSite: "Lax",
+    }
+  ]);
+
   const page = await context.newPage();
 
   try {
     await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
 
-    await page.locator('input#username').waitFor({ timeout: 10000 });
+    try {
+      await page.locator('input#username').waitFor({ timeout: 10000 });
+    }
+    catch (err) {
+      console.error('Timeout waiting for #username');
+      console.error('Final URL:', page.url());
+
+      throw err;
+    }
+
     await page.fill('input#username', email);
     const usernameSubmit = page.locator('button.govuk-button').first();
     await usernameSubmit.click();
@@ -45,20 +69,17 @@ async function loginAndSaveSession(
     const passwordSubmit = page.locator('div.govuk-button-group button.govuk-button').first();
     await passwordSubmit.click();
 
-  //Click the cookies banners so we get the cookie preferences set in the storage state.json
-    await page.locator('button[name="accept-cookies"]').first().click();
-    await page.locator('button[name="hide-cookies"]').first().click();
 
     // Settle the app
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => { });
 
     // Persist storage state
     const outputPath = path.resolve(storageDir, outputFilename);
     await context.storageState({ path: outputPath });
     console.log(`Saved storage state for ${outputFilename}`);
   } finally {
-    await context.close().catch(() => {});
-    await browser.close().catch(() => {});
+    await context.close().catch(() => { });
+    await browser.close().catch(() => { });
   }
 }
 

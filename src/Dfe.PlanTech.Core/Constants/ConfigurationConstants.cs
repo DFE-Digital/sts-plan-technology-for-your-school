@@ -1,4 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Core.Constants;
 
@@ -17,6 +17,7 @@ public static class ConfigurationConstants
     public const string ErrorMessages = "ErrorMessages";
     public const string ErrorPages = "ErrorPages";
     public const string GoogleTagManager = "GTM";
+    public const string GovUkFrontend = "GovUkFrontend";
     public const string MessageRetryHandlingOptions = "MessageRetryHandlingOptions";
     public const string Robots = "Robots";
     public const string ServiceBusOptions = "ServiceBusOptions";

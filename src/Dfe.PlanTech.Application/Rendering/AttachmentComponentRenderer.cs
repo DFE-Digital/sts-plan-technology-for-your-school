@@ -1,13 +1,13 @@
-﻿using System.Text;
+using System.Text;
 using Dfe.PlanTech.Application.Rendering.Models;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Application.Rendering;
 
-public class AttachmentComponentRenderer
+public static class AttachmentComponentRenderer
 {
-    public StringBuilder AddHtml(RichTextContentField content, StringBuilder stringBuilder)
+    public static StringBuilder AddHtml(RichTextContentField content, StringBuilder stringBuilder)
     {
         var target = content?.Data?.Target;
 
@@ -47,21 +47,19 @@ public class AttachmentComponentRenderer
         return stringBuilder;
     }
 
-    private string GetImageTag(string fileExtension)
+    private static string GetImageTag(string fileExtension)
     {
-        switch (fileExtension)
+        const string pdf = "<img src=\"/assets/images/pdf-file-icon.svg\" alt=\"pdf file type\" >";
+        const string table = "<img src=\"/assets/images/spreadsheet-file-icon.svg\" alt=\"spreadsheet file type\" />";
+        const string htm = "<img src =\"/assets/images/html-file-icon.svg\" alt=\"html file type\">";
+        const string @default = "<img src =\"/assets/images/generic-file-icon.svg\" alt=\"generic file type\">";
+
+        return fileExtension switch
         {
-            case FileExtensionConstants.PDF:
-                return "<img src=\"/assets/images/pdf-file-icon.svg\" alt=\"pdf file type\" >";
-            case FileExtensionConstants.CSV:
-            case FileExtensionConstants.XLS:
-            case FileExtensionConstants.XLSX:
-                return "<img src=\"/assets/images/spreadsheet-file-icon.svg\" alt=\"spreadsheet file type\" />";
-            case FileExtensionConstants.HTML:
-            case FileExtensionConstants.HTM:
-                return "<img src =\"/assets/images/html-file-icon.svg\" alt=\"html file type\">";
-            default:
-                return "<img src =\"/assets/images/generic-file-icon.svg\" alt=\"generic file type\">";
-        }
+            FileExtensionConstants.PDF => pdf,
+            FileExtensionConstants.CSV or FileExtensionConstants.XLS or FileExtensionConstants.XLSX => table,
+            FileExtensionConstants.HTML or FileExtensionConstants.HTM => htm,
+            _ => @default
+        };
     }
 }

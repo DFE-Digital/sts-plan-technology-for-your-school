@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Web.ViewModels.QaVisualiser;
+using Dfe.PlanTech.Web.ViewModels.QaVisualiser;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces

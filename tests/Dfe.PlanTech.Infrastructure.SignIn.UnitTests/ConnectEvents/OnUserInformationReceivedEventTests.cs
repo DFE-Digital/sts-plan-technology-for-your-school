@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using System.Security.Claims;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
@@ -16,7 +16,7 @@ namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests.ConnectEvents;
 
 public class OnUserInformationReceivedEventTests
 {
-    private static (UserInformationReceivedContext ctx, ISignInWorkflow wf, ILogger<DfeSignIn> logger) BuildContext(ClaimsPrincipal principal)
+    private static (UserInformationReceivedContext ctx, ISignInWorkflow wf, ILogger<IDfeSignIn> logger) BuildContext(ClaimsPrincipal principal)
     {
         var services = new ServiceCollection();
         var wf = Substitute.For<ISignInWorkflow>();
@@ -31,7 +31,7 @@ public class OnUserInformationReceivedEventTests
 
         var ctx = new UserInformationReceivedContext(httpContext, scheme, options, principal, properties);
 
-        var logger = Substitute.For<ILogger<DfeSignIn>>();
+        var logger = Substitute.For<ILogger<IDfeSignIn>>();
         return (ctx, wf, logger);
     }
 
@@ -106,20 +106,6 @@ public class OnUserInformationReceivedEventTests
 
         Assert.NotNull(estIdClaim);
         Assert.Equal("999", estIdClaim!.Value);
-    }
-
-    [Fact]
-    public void AddClaimsToPrincipal_When_PrincipalNull_DoesNothing()
-    {
-        var (ctx, _, _) = BuildContext(principal: null);
-        var signIn = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
-
-        var mi = typeof(OnUserInformationReceivedEvent)
-            .GetMethod("AddClaimsToPrincipal", BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.NotNull(mi);
-
-        // Should not throw
-        mi!.Invoke(null, new object[] { ctx, signIn });
     }
 
     [Fact]

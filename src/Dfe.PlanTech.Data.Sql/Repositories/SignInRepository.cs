@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
