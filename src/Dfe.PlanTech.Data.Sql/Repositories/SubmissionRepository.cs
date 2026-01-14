@@ -54,6 +54,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
         var sectionQuestions = await GetQuestionsForSection(section);
 
+        // Create recommendation dtos each of the core recs
         var recommendationDtos = section.CoreRecommendations
             .Select(r =>
             {
@@ -118,12 +119,14 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
     }
 
+    // No need to save changes as this is done in the call above
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
         int establishmentId,
         string sectionId,
         SubmissionStatus? status
     )
     {
+        // Get latest submission
         var submission = await GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, status)
             .FirstOrDefaultAsync();
 

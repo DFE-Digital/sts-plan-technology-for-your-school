@@ -168,6 +168,7 @@ public class SubmissionServiceTests
         Assert.Equal(SubmissionStatus.InProgress, rd.Status);
         Assert.Same(q2, rd.NextQuestion);
         Assert.NotNull(rd.Submission);
+        // also verify pass-through arg:
         await _submissionWorkflow.Received(1).GetLatestSubmissionWithOrderedResponsesAsync(22, section, status: null);
     }
 
@@ -192,6 +193,7 @@ public class SubmissionServiceTests
     [Fact]
     public async Task Routing_Next_Question_When_Status_InProgress()
     {
+        // Arrange
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, _) = BuildSectionGraph();
 
@@ -201,8 +203,10 @@ public class SubmissionServiceTests
         _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(44, section, status: SubmissionStatus.InProgress)
            .Returns(sub);
 
+        // Act
         var rd = await sut.GetSubmissionRoutingDataAsync(44, section, status: SubmissionStatus.InProgress);
 
+        // Assert
         Assert.Equal(SubmissionStatus.InProgress, rd.Status);
         Assert.NotNull(rd.NextQuestion);
         Assert.Equal("2", rd.NextQuestion.Id);

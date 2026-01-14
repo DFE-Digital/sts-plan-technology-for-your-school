@@ -34,6 +34,15 @@ public class QuestionService(
         return GetValidatedNextUnansweredQuestion(section, submissionResponsesModel);
     }
 
+
+    /// <summary>
+    /// Uses answered questions to find the next. If it is not possible to order user responses against the current questions,
+    /// this indicates that content has changed or another user finished the submission concurrently.
+    /// </summary>
+    /// <param name="section"></param>
+    /// <param name="answeredQuestions"></param>
+    /// <returns></returns>
+    /// <exception cref="DatabaseException"></exception>
     private static QuestionnaireQuestionEntry? GetValidatedNextUnansweredQuestion(QuestionnaireSectionEntry section, SubmissionResponsesModel answeredQuestions)
     {
         var lastAttachedResponse = answeredQuestions.Responses.LastOrDefault();

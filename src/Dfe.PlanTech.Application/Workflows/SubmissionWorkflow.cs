@@ -54,6 +54,8 @@ public class SubmissionWorkflow(
         return latestSubmission.AsDto();
     }
 
+    // On the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
+    // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
     public async Task<int> SubmitAnswer(int userId, int activeEstablishmentId, int userEstablishmentId, SubmitAnswerModel answerModel)
     {
         if (answerModel is null)

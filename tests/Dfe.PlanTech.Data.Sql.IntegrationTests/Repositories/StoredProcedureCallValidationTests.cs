@@ -218,6 +218,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         await _storedProcRepository.SetSubmissionDeletedAsync(establishment.Id, "test-section-delete");
 
         // Assert - Verify submission is marked as deleted (soft delete)
+        // Clear the change tracker to force EF to query the database fresh
+        // rather than returning cached entities
         DbContext.ChangeTracker.Clear();
         var submissionAfterDelete = await DbContext.Submissions.AsNoTracking().FirstOrDefaultAsync(s => s.Id == submissionId);
         Assert.NotNull(submissionAfterDelete);

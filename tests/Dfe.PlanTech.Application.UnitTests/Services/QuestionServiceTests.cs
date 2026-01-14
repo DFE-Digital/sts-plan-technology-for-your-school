@@ -12,6 +12,8 @@ public class QuestionServiceTests
 {
     private readonly ISubmissionWorkflow _mockSubmissionWorkflow = Substitute.For<ISubmissionWorkflow>();
 
+    // Helper: build a minimal section graph with 2 questions.
+    // Q1 has answers A1 (-> Q2) and A2 (-> null). Q2 has no answers.
     private static QuestionnaireSectionEntry BuildSectionGraph()
     {
         var q2 = new QuestionnaireQuestionEntry
@@ -50,6 +52,7 @@ public class QuestionServiceTests
     [Fact]
     public async Task Returns_FirstQuestion_When_No_Submission()
     {
+        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
@@ -58,8 +61,10 @@ public class QuestionServiceTests
 
         var questionService = CreateServiceUnderTest();
 
+        // Act
         var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
 
+        // Assert
         Assert.NotNull(next);
         Assert.Equal("Q1", next!.Id);
 
@@ -70,6 +75,7 @@ public class QuestionServiceTests
     [Fact]
     public async Task Returns_FirstQuestion_When_Submission_Inaccessible()
     {
+        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
         var submission = new SqlSubmissionDto { Status = SubmissionStatus.Inaccessible };
@@ -79,8 +85,10 @@ public class QuestionServiceTests
 
         var questionService = CreateServiceUnderTest();
 
+        // Act
         var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
 
+        // Assert
         Assert.NotNull(next);
         Assert.Equal("Q1", next!.Id);
 
@@ -91,6 +99,7 @@ public class QuestionServiceTests
     [Fact]
     public async Task Throws_When_Submission_Has_No_Responses()
     {
+        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
@@ -101,6 +110,7 @@ public class QuestionServiceTests
 
         var questionService = CreateServiceUnderTest();
 
+        // Act + Assert
         var ex = await Assert.ThrowsAsync<DatabaseException>(
             () => questionService.GetNextUnansweredQuestion(establishmentId, section));
 
@@ -112,9 +122,11 @@ public class QuestionServiceTests
     [Fact]
     public async Task Uses_Last_Response_To_Find_NextQuestion()
     {
+        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
+        // Last response points to Q1/A1, which should lead to Q2.
         var submission = new SqlSubmissionDto
         {
             Id = 1,
@@ -153,8 +165,10 @@ public class QuestionServiceTests
 
         var questionService = CreateServiceUnderTest();
 
+        // Act
         var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
 
+        // Assert
         Assert.NotNull(next);
         Assert.Equal("Q2", next!.Id);
     }
@@ -162,9 +176,11 @@ public class QuestionServiceTests
     [Fact]
     public async Task Returns_Null_When_Response_Refs_Dont_Match_Section()
     {
+        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
+        // The last response references non-existent Q/A in the current section.
         var submission = new SqlSubmissionDto
         {
             Id = 1,
@@ -190,8 +206,10 @@ public class QuestionServiceTests
 
         var questionService = CreateServiceUnderTest();
 
+        // Act
         var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
 
+        // Assert
         Assert.Null(next);
     }
 }

@@ -16,6 +16,7 @@ public class SubmissionWorkflowTests
     private readonly ISubmissionRepository _repo = Substitute.For<ISubmissionRepository>();
     private SubmissionWorkflow CreateServiceUnderTest() => new(_sp, _repo);
 
+    // ---------- Helpers: minimal Contentful section graph ----------
     private static EstablishmentEntity BuildEstablishment(int? id = 1)
     {
         return new EstablishmentEntity
@@ -53,6 +54,7 @@ public class SubmissionWorkflowTests
         };
     }
 
+    // Allows a quick workaround for self-referential submissions, which causes an endless loop when mapping to DTO.
     private static SubmissionEntity BuildEmptySubmission()
     {
         return new SubmissionEntity
@@ -92,6 +94,7 @@ public class SubmissionWorkflowTests
         var section = BuildSection(out var q1, out var q2, out var q3, out var a1, out var a2, out _);
         var emptySubmission = BuildEmptySubmission();
 
+        // Latest completed submission (source to clone)
         var latestCompleted = new SubmissionEntity
         {
             Id = 10,
@@ -103,6 +106,8 @@ public class SubmissionWorkflowTests
             Responses = new List<ResponseEntity>()
         };
 
+        // Cloned submission comes back with responses out of order and with duplicates by question;
+        // ordering should pick the *latest per question* by DateCreated, then follow Q->A.NextQuestion chain.
         var now = DateTime.UtcNow;
         var clone = new SubmissionEntity
         {
@@ -114,8 +119,11 @@ public class SubmissionWorkflowTests
             Status = SubmissionStatus.InProgress,
             Responses = new List<ResponseEntity>
             {
+                // Q1 older A1 (should be ignored because newer exists)
                 BuildResponse(q1.Id, a1.Id, now.AddMinutes(-10), 1, emptySubmission),
+                // Q2 A2
                 BuildResponse(q2.Id, a2.Id, now.AddMinutes(-5), 2, emptySubmission),
+                // Q1 newer A1 (should be selected for Q1)
                 BuildResponse(q1.Id, a1.Id, now.AddMinutes(-1), 3, emptySubmission)
             }
         };
@@ -125,12 +133,14 @@ public class SubmissionWorkflowTests
 
         var dto = await sut.CloneLatestCompletedSubmission(123, section);
 
+        // Expect path: Q1 (latest) -> Q2 -> Q3 (no response for Q3 so stop after Q2)
         Assert.Equal(new[] { "Q1", "Q2" }, dto.Responses.Select(r => r.Question.ContentfulSysId).ToArray());
         Assert.Equal(new[] { "A1", "A2" }, dto.Responses.Select(r => r.Answer.ContentfulSysId).ToArray());
 
         await _repo.Received(1).CloneSubmission(latestCompleted);
     }
 
+    // ---------- GetLatestSubmissionWithOrderedResponsesAsync ----------
     [Fact]
     public async Task GetLatestSubmissionWithOrderedResponses_Returns_Null_When_None()
     {
@@ -175,10 +185,12 @@ public class SubmissionWorkflowTests
 
         Assert.NotNull(dto);
         Assert.Equal(2, dto!.Responses.Count());
+        // Should start at Q1 then go to Q2 per chain
         Assert.Equal(new[] { "Q1", "Q2" }, dto.Responses.Select(r => r.Question.ContentfulSysId).ToArray());
         Assert.Equal("developing", dto.Maturity);
     }
 
+    // ---------- SubmitAnswer ----------
     [Fact]
     public async Task SubmitAnswer_Throws_When_Model_Null()
     {
@@ -202,11 +214,13 @@ public class SubmissionWorkflowTests
             m.Answer!.Id == "A1"))
           .Returns(777);
 
+        // activeEstablishmentId = 8, userEstablishmentId = 7 (simulating MAT user selecting a school)
         var id = await sut.SubmitAnswer(9, 8, 7, model);
 
         Assert.Equal(777, id);
     }
 
+    // ---------- GetSectionStatusesAsync ----------
     [Fact]
     public async Task GetSectionStatuses_Joins_Ids_And_Maps_Dtos()
     {
@@ -228,6 +242,7 @@ public class SubmissionWorkflowTests
         await _sp.Received(1).GetSectionStatusesAsync("S1,S2", 123);
     }
 
+    // ---------- GetSectionSubmissionStatusAsync ----------
     [Fact]
     public async Task GetSectionSubmissionStatus_When_Found_Completed_True()
     {
@@ -284,6 +299,7 @@ public class SubmissionWorkflowTests
         Assert.Equal(SubmissionStatus.NotStarted, dto.Status);
     }
 
+    // ---------- Set / Delete delegations ----------
     [Fact]
     public async Task SetMaturityAndMarkAsReviewed_Calls_SP_Then_Repo()
     {
