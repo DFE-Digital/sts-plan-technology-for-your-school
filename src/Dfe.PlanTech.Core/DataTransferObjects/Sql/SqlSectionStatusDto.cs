@@ -8,7 +8,6 @@ namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 public class SqlSectionStatusDto : ISqlDto
 {
     public string SectionId { get; set; } = null!;
-    public bool Completed { get; set; }
     public bool? HasBeenViewed { get; set; }
     public DateTime? LastCompletionDate { get; set; }
     public string? LastMaturity { get; set; }

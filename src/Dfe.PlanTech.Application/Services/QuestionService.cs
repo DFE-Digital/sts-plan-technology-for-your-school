@@ -15,9 +15,12 @@ public class QuestionService(
 
     public async Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(int establishmentId, QuestionnaireSectionEntry section)
     {
-        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+            establishmentId,
+            section,
+            status: SubmissionStatus.InProgress);
 
-        if (submission?.Status == nameof(SubmissionStatus.Inaccessible) || submission?.Status == nameof(SubmissionStatus.Obsolete))
+        if (submission?.Status == SubmissionStatus.Inaccessible || submission?.Status == SubmissionStatus.Obsolete)
             submission = null;
 
         if (submission is null)
@@ -31,14 +34,6 @@ public class QuestionService(
         return GetValidatedNextUnansweredQuestion(section, submissionResponsesModel);
     }
 
-    /// <summary>
-    /// Uses answered questions to find the next. If it is not possible to order user responses against the current questions,
-    /// this indicates that content has changed or another user finished the submission concurrently.
-    /// </summary>
-    /// <param name="section"></param>
-    /// <param name="answeredQuestions"></param>
-    /// <returns></returns>
-    /// <exception cref="DatabaseException"></exception>
     private static QuestionnaireQuestionEntry? GetValidatedNextUnansweredQuestion(QuestionnaireSectionEntry section, SubmissionResponsesModel answeredQuestions)
     {
         var lastAttachedResponse = answeredQuestions.Responses.LastOrDefault();

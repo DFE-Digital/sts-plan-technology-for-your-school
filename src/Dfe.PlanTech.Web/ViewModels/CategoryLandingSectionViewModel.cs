@@ -43,30 +43,9 @@ public class CategoryLandingSectionViewModel
         }
         else
         {
-            ProgressStatus = GetSectionSubmissionStatus(sectionStatus, hadRetrievalError);
-        }
-    }
-
-    private SubmissionStatus GetSectionSubmissionStatus(SqlSectionStatusDto? sectionStatus, bool hadRetrievalError)
-    {
-        var started = sectionStatus is not null;
-        var completed = started && sectionStatus?.LastCompletionDate is not null;
-
-        if (hadRetrievalError)
-        {
-            return SubmissionStatus.RetrievalError;
-        }
-        else if (completed)
-        {
-            return SubmissionStatus.CompleteReviewed;
-        }
-        else if (started)
-        {
-            return SubmissionStatus.InProgress;
-        }
-        else
-        {
-            return SubmissionStatus.NotStarted;
+            ProgressStatus = hadRetrievalError
+                 ? SubmissionStatus.RetrievalError
+                 : sectionStatus?.Status ?? SubmissionStatus.NotStarted;
         }
     }
 }

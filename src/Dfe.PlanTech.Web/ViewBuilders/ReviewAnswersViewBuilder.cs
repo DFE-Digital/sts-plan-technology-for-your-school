@@ -41,7 +41,7 @@ public class ReviewAnswersViewBuilder(
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
             establishmentId,
             section,
-            isCompletedSubmission: false
+            status: SubmissionStatus.InProgress
         );
         ReviewAnswersViewModel viewModel;
 
@@ -75,7 +75,7 @@ public class ReviewAnswersViewBuilder(
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
             establishmentId,
             section,
-            isCompletedSubmission: true
+            status: SubmissionStatus.CompleteReviewed
         );
 
         ViewAnswersViewModel viewModel;

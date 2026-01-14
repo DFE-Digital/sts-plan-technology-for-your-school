@@ -3,7 +3,6 @@ using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 
@@ -19,11 +18,10 @@ public class SubmissionService(
 
     public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section)
     {
-        // Check if an in-progress submission already exists
         var inProgressSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
             section,
-            isCompletedSubmission: false);
+            status: SubmissionStatus.InProgress);
 
         if (inProgressSubmission is not null)
         {
@@ -40,9 +38,9 @@ public class SubmissionService(
         return _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
     }
 
-    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, bool isCompletedSubmission)
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, SubmissionStatus status)
     {
-        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission);
+        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status);
         return submission is null
             ? null
             : new SubmissionResponsesModel(submission, section);
@@ -53,17 +51,20 @@ public class SubmissionService(
         return _submissionWorkflow.GetSubmissionByIdAsync(submissionId);
     }
 
-    public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(int establishmentId, QuestionnaireSectionEntry section, bool? isCompletedSubmission)
+    public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        SubmissionStatus? status)
     {
         var latestSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
             section,
-            isCompletedSubmission);
+            status);
 
         bool isNullSubmissionOrInvalidStatus =
             latestSubmission == null ||
-            (latestSubmission.Status?.Equals(nameof(SubmissionStatus.Inaccessible)) ?? false) ||
-            (latestSubmission.Status?.Equals(nameof(SubmissionStatus.Obsolete)) ?? false);
+            latestSubmission.Status == SubmissionStatus.Inaccessible ||
+            latestSubmission.Status == SubmissionStatus.Obsolete;
 
         if (isNullSubmissionOrInvalidStatus)
         {
@@ -78,7 +79,7 @@ public class SubmissionService(
 
         var submissionResponsesModel = new SubmissionResponsesModel(latestSubmission!, section);
 
-        var lastResponse = submissionResponsesModel!.Responses[^1];
+        var lastResponse = submissionResponsesModel.Responses.Last();
         var cmsLastAnswer = section.Questions
             .FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))?
             .Answers
@@ -86,7 +87,7 @@ public class SubmissionService(
 
         SubmissionStatus sectionStatus;
 
-        if (latestSubmission!.Status is null)
+        if (latestSubmission!.Status == SubmissionStatus.None)
         {
             sectionStatus = cmsLastAnswer?.NextQuestion is null
                 ? SubmissionStatus.CompleteNotReviewed
@@ -94,7 +95,7 @@ public class SubmissionService(
         }
         else
         {
-            sectionStatus = latestSubmission.Status.ToSubmissionStatus();
+            sectionStatus = latestSubmission.Status;
         }
 
         return new SubmissionRoutingDataModel

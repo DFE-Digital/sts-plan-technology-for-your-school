@@ -41,9 +41,8 @@ public class SubmissionServiceTests
         return new SqlSubmissionDto
         {
             Id = 1,
-            Completed = completed,
             Maturity = maturity,
-            Status = null, // let routing derive from last answer path
+            Status = SubmissionStatus.None,
             Responses = responses.Select(r => new SqlResponseDto
             {
                 Question = new SqlQuestionDto
@@ -68,10 +67,10 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, _) = BuildSectionGraph();
 
-        var inProgress = new SqlSubmissionDto { Id = 100, Completed = false, Responses = new List<SqlResponseDto> { new() { QuestionId = 1, AnswerId = 1 } } };
-        var cloned = new SqlSubmissionDto { Id = 200, Completed = true };
+        var inProgress = new SqlSubmissionDto { Id = 100, Status = SubmissionStatus.InProgress, Responses = new List<SqlResponseDto> { new() { QuestionId = 1, AnswerId = 1 } } };
+        var cloned = new SqlSubmissionDto { Id = 200, Status = SubmissionStatus.CompleteReviewed };
 
-        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(123, section, isCompletedSubmission: false)
+        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(123, section, status: SubmissionStatus.InProgress)
            .Returns(inProgress);
 
         _submissionWorkflow.CloneLatestCompletedSubmission(123, section).Returns(cloned);
@@ -90,10 +89,10 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, _) = BuildSectionGraph();
 
-        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(123, section, false)
+        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(123, section, status: SubmissionStatus.InProgress)
            .Returns((SqlSubmissionDto?)null);
 
-        var cloned = new SqlSubmissionDto { Id = 201, Completed = true };
+        var cloned = new SqlSubmissionDto { Id = 201, Status = SubmissionStatus.CompleteReviewed };
         _submissionWorkflow.CloneLatestCompletedSubmission(123, section).Returns(cloned);
 
         var result = await sut.RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(123, section);
@@ -109,10 +108,10 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, _) = BuildSectionGraph();
 
-        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(1, section, true)
+        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(1, section, status: SubmissionStatus.CompleteReviewed)
            .Returns((SqlSubmissionDto?)null);
 
-        var model = await sut.GetLatestSubmissionResponsesModel(1, section, isCompletedSubmission: true);
+        var model = await sut.GetLatestSubmissionResponsesModel(1, section, status: SubmissionStatus.CompleteReviewed);
 
         Assert.Null(model);
     }
@@ -124,10 +123,10 @@ public class SubmissionServiceTests
         var (section, _, _, _, _) = BuildSectionGraph();
 
         var sub = SubmissionWithResponses(completed: false, maturity: "medium", ("1", "1"));
-        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(1, section, false)
+        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(1, section, SubmissionStatus.InProgress)
            .Returns(sub);
 
-        var model = await sut.GetLatestSubmissionResponsesModel(1, section, isCompletedSubmission: false);
+        var model = await sut.GetLatestSubmissionResponsesModel(1, section, status: SubmissionStatus.InProgress);
 
         Assert.NotNull(model);
         Assert.Equal("medium", model!.Maturity);
@@ -141,13 +140,13 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var (section, q1, _, _, _) = BuildSectionGraph();
 
-        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(10, section, null)
+        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(10, section, status: null)
            .Returns((SqlSubmissionDto?)null);
 
-        var rd = await sut.GetSubmissionRoutingDataAsync(10, section, isCompletedSubmission: null);
+        var rd = await sut.GetSubmissionRoutingDataAsync(10, section, status: null);
 
         Assert.Equal(SubmissionStatus.NotStarted, rd.Status);
-        Assert.Same(q1, rd.NextQuestion); // first question
+        Assert.Same(q1, rd.NextQuestion);
         Assert.Same(section, rd.QuestionnaireSection);
         Assert.Null(rd.Submission);
     }
@@ -159,18 +158,17 @@ public class SubmissionServiceTests
         var (section, _, q2, a1_to_q2, _) = BuildSectionGraph();
 
         var sub = SubmissionWithResponses(completed: false, maturity: "medium",
-                                          ("1", a1_to_q2.Id)); // last answer -> Q2
+                                          ("1", a1_to_q2.Id));
 
-        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(22, section, null)
+        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(22, section, status: null)
            .Returns(sub);
 
-        var rd = await sut.GetSubmissionRoutingDataAsync(22, section, isCompletedSubmission: null);
+        var rd = await sut.GetSubmissionRoutingDataAsync(22, section, status: null);
 
         Assert.Equal(SubmissionStatus.InProgress, rd.Status);
         Assert.Same(q2, rd.NextQuestion);
         Assert.NotNull(rd.Submission);
-        // also verify pass-through arg:
-        await _submissionWorkflow.Received(1).GetLatestSubmissionWithOrderedResponsesAsync(22, section, null);
+        await _submissionWorkflow.Received(1).GetLatestSubmissionWithOrderedResponsesAsync(22, section, status: null);
     }
 
     [Fact]
@@ -180,12 +178,12 @@ public class SubmissionServiceTests
         var (section, _, _, _, a2_to_null) = BuildSectionGraph();
 
         var sub = SubmissionWithResponses(completed: true, maturity: "secure",
-                                          ("1", a2_to_null.Id)); // last answer -> null
+                                          ("1", a2_to_null.Id));
 
-        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(33, section, null)
+        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(33, section, status: null)
            .Returns(sub);
 
-        var rd = await sut.GetSubmissionRoutingDataAsync(33, section, isCompletedSubmission: null);
+        var rd = await sut.GetSubmissionRoutingDataAsync(33, section, status: null);
 
         Assert.Equal(SubmissionStatus.CompleteNotReviewed, rd.Status);
         Assert.Null(rd.NextQuestion);
@@ -194,25 +192,21 @@ public class SubmissionServiceTests
     [Fact]
     public async Task Routing_Next_Question_When_Status_InProgress()
     {
-        // Arrange
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, _) = BuildSectionGraph();
 
         var sub = SubmissionWithResponses(completed: false, maturity: "medium", ("1", "1"));
-        sub.Status = "InProgress";
+        sub.Status = SubmissionStatus.InProgress;
 
-        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(44, section, false)
+        _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(44, section, status: SubmissionStatus.InProgress)
            .Returns(sub);
 
-        // Act
-        var rd = await sut.GetSubmissionRoutingDataAsync(44, section, isCompletedSubmission: false);
+        var rd = await sut.GetSubmissionRoutingDataAsync(44, section, status: SubmissionStatus.InProgress);
 
-        // Assert
         Assert.Equal(SubmissionStatus.InProgress, rd.Status);
         Assert.NotNull(rd.NextQuestion);
         Assert.Equal("2", rd.NextQuestion.Id);
     }
-
 
     [Fact]
     public async Task GetSectionStatusesForSchoolAsync_Calls_Workflow_And_Returns_Result()

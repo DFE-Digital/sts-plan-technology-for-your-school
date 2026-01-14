@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
@@ -37,8 +38,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section1",
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
-            Status = "Completed",
-            Completed = true,
+            Status = SubmissionStatus.CompleteReviewed,
             DateCreated = DateTime.UtcNow.AddDays(-1)
         };
 
@@ -47,8 +47,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section2",
             SectionName = "Section 2",
             EstablishmentId = establishment.Id,
-            Status = "InProgress",
-            Completed = false,
+            Status = SubmissionStatus.InProgress,
             DateCreated = DateTime.UtcNow.AddDays(-2)
         };
 
@@ -62,8 +61,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section1",
             SectionName = "Section 1 Other",
             EstablishmentId = otherEstablishment.Id,
-            Status = "Completed",
-            Completed = true,
+            Status = SubmissionStatus.CompleteReviewed,
             DateCreated = DateTime.UtcNow
         };
 
@@ -206,8 +204,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         var savedResponse = await DbContext.Responses.AsNoTracking().Include(r => r.Submission).FirstOrDefaultAsync(r => r.Id == responseId);
         Assert.NotNull(savedResponse);
         Assert.NotNull(savedResponse!.Submission);
-        Assert.Equal("InProgress", savedResponse.Submission!.Status);
-        Assert.False(savedResponse.Submission.Completed, "Submission should not be marked as completed for first response");
+        Assert.Equal(SubmissionStatus.InProgress, savedResponse.Submission!.Status);
     }
 
     [Fact]
@@ -248,7 +245,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(1, await DbContext.Submissions.CountAsync());
         var savedSubmission = await DbContext.Submissions.FirstOrDefaultAsync();
         Assert.NotNull(savedSubmission);
-        Assert.Equal(activeSchoolEstablishment.Id, savedSubmission.EstablishmentId);
+        Assert.Equal(activeSchoolEstablishment.Id, savedSubmission!.EstablishmentId);
         Assert.NotEqual(groupEstablishment.Id, savedSubmission.EstablishmentId);
     }
 
@@ -273,7 +270,6 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Answers.Add(answer);
         await DbContext.SaveChangesAsync();
 
-
         // Act & Assert (1) - Group user submits first response (creating the "submission"),
         // the "response" establishment ID is the active establishment ID
         var submitAnswerModel1 = new SubmitAnswerModel
@@ -292,7 +288,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(1, await DbContext.Submissions.CountAsync());
         var savedSubmission = await DbContext.Submissions.FirstOrDefaultAsync();
         Assert.NotNull(savedSubmission);
-        Assert.Equal(activeSchoolEstablishment.Id, savedSubmission.EstablishmentId);
+        Assert.Equal(activeSchoolEstablishment.Id, savedSubmission!.EstablishmentId);
         Assert.NotEqual(groupEstablishment.Id, savedSubmission.EstablishmentId);
 
         // Act & Assert (2) - Now school user submits a response to the same section,
@@ -314,7 +310,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(1, await DbContext.Submissions.CountAsync());
         var savedSubmission2 = await DbContext.Submissions.FirstOrDefaultAsync();
         Assert.NotNull(savedSubmission2);
-        Assert.Equal(savedSubmission.Id, savedSubmission2.Id);
+        Assert.Equal(savedSubmission!.Id, savedSubmission2!.Id);
         Assert.Equal(activeSchoolEstablishment.Id, savedSubmission2.EstablishmentId);
         Assert.NotEqual(groupEstablishment.Id, savedSubmission2.EstablishmentId);
 
@@ -337,11 +333,10 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(1, await DbContext.Submissions.CountAsync());
         var savedSubmission3 = await DbContext.Submissions.FirstOrDefaultAsync();
         Assert.NotNull(savedSubmission3);
-        Assert.Equal(savedSubmission.Id, savedSubmission3.Id);
+        Assert.Equal(savedSubmission!.Id, savedSubmission3!.Id);
         Assert.Equal(activeSchoolEstablishment.Id, savedSubmission3.EstablishmentId);
         Assert.NotEqual(groupEstablishment.Id, savedSubmission3.EstablishmentId);
     }
-
 
     [Fact]
     public async Task StoredProcedureRepository_SetMaturityForSubmissionAsync_WhenCalledWithValidSubmissionId_ThenExecutesWithoutError()
@@ -359,7 +354,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = "InProgress"
+            Status = SubmissionStatus.InProgress
         };
 
         DbContext.Submissions.Add(submission);
@@ -386,7 +381,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-to-delete",
             SectionName = "Section To Delete",
             EstablishmentId = establishment.Id,
-            Status = "InProgress"
+            Status = SubmissionStatus.InProgress
         };
 
         DbContext.Submissions.Add(submission);

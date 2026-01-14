@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using NSubstitute;
 
@@ -11,8 +12,6 @@ public class QuestionServiceTests
 {
     private readonly ISubmissionWorkflow _mockSubmissionWorkflow = Substitute.For<ISubmissionWorkflow>();
 
-    // Helper: build a minimal section graph with 2 questions.
-    // Q1 has answers A1 (-> Q2) and A2 (-> null). Q2 has no answers.
     private static QuestionnaireSectionEntry BuildSectionGraph()
     {
         var q2 = new QuestionnaireQuestionEntry
@@ -39,7 +38,6 @@ public class QuestionServiceTests
             Answers = new List<QuestionnaireAnswerEntry> { a1, a2 }
         };
 
-
         return new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("S1"),
@@ -52,65 +50,57 @@ public class QuestionServiceTests
     [Fact]
     public async Task Returns_FirstQuestion_When_No_Submission()
     {
-        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns((SqlSubmissionDto?)null);
 
         var questionService = CreateServiceUnderTest();
 
-        // Act
         var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
 
-        // Assert
         Assert.NotNull(next);
         Assert.Equal("Q1", next!.Id);
 
         await _mockSubmissionWorkflow.Received(1)
-                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress);
     }
 
     [Fact]
     public async Task Returns_FirstQuestion_When_Submission_Inaccessible()
     {
-        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
-        var submission = new SqlSubmissionDto { Status = "Inaccessible" };
+        var submission = new SqlSubmissionDto { Status = SubmissionStatus.Inaccessible };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
 
-        // Act
         var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
 
-        // Assert
         Assert.NotNull(next);
         Assert.Equal("Q1", next!.Id);
 
         await _mockSubmissionWorkflow.Received(1)
-                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress);
     }
 
     [Fact]
     public async Task Throws_When_Submission_Has_No_Responses()
     {
-        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
         var submission = new SqlSubmissionDto { Id = 1, Responses = [] };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
 
-        // Act + Assert
         var ex = await Assert.ThrowsAsync<DatabaseException>(
             () => questionService.GetNextUnansweredQuestion(establishmentId, section));
 
@@ -122,14 +112,13 @@ public class QuestionServiceTests
     [Fact]
     public async Task Uses_Last_Response_To_Find_NextQuestion()
     {
-        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
-        // Last response points to Q1/A1, which should lead to Q2.
         var submission = new SqlSubmissionDto
         {
             Id = 1,
+            Status = SubmissionStatus.InProgress,
             Responses =
             [
                 new() {
@@ -140,7 +129,7 @@ public class QuestionServiceTests
                     },
                     Answer = new SqlAnswerDto
                     {
-                        Id = 2,
+                        Id = 1,
                         ContentfulSysId = "A2"
                     }
                 },
@@ -152,22 +141,20 @@ public class QuestionServiceTests
                     },
                     Answer = new SqlAnswerDto
                     {
-                        Id = 1,
+                        Id = 2,
                         ContentfulSysId = "A1"
                     }
                 },
             ]
         };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
 
-        // Act
         var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
 
-        // Assert
         Assert.NotNull(next);
         Assert.Equal("Q2", next!.Id);
     }
@@ -175,11 +162,9 @@ public class QuestionServiceTests
     [Fact]
     public async Task Returns_Null_When_Response_Refs_Dont_Match_Section()
     {
-        // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
-        // The last response references non-existent Q/A in the current section.
         var submission = new SqlSubmissionDto
         {
             Id = 1,
@@ -200,15 +185,13 @@ public class QuestionServiceTests
             ]
         };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
 
-        // Act
         var next = await questionService.GetNextUnansweredQuestion(establishmentId, section);
 
-        // Assert
         Assert.Null(next);
     }
 }
