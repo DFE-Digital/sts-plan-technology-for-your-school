@@ -34,7 +34,6 @@ public class QuestionService(
         return GetValidatedNextUnansweredQuestion(section, submissionResponsesModel);
     }
 
-
     /// <summary>
     /// Uses answered questions to find the next. If it is not possible to order user responses against the current questions,
     /// this indicates that content has changed or another user finished the submission concurrently.
