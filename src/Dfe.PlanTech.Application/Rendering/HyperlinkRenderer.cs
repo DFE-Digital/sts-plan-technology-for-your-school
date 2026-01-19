@@ -9,9 +9,9 @@ namespace Dfe.PlanTech.Application.Rendering;
 
 public class HyperlinkRenderer : BaseRichTextContentPartRenderer
 {
-    private readonly RichTextPartRendererOptions _options;
+    private readonly HyperlinkRendererOptions _options;
 
-    public HyperlinkRenderer(RichTextPartRendererOptions options) : base(RichTextNodeType.Hyperlink)
+    public HyperlinkRenderer(HyperlinkRendererOptions options) : base(RichTextNodeType.Hyperlink)
     {
         _options = options;
     }
