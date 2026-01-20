@@ -2,7 +2,11 @@ import fs from "fs";
 import path from "path";
 import "dotenv/config";
 
-function isValidUrlFormat(uri) {
+const PLANTECH_BASE_URL = "https://www.plan-technology-for-your-school.education.gov.uk";
+const LINKS_FILE_PATH = path.resolve("./result/links.json");
+const REQUEST_TIMEOUT = 15000;
+
+function isValidUrl(uri) {
   try {
     new URL(uri);
     return true;
@@ -11,41 +15,56 @@ function isValidUrlFormat(uri) {
   }
 }
 
-const filePath = path.resolve("./result/links.json");
+function readLinksData() {
+  if (!fs.existsSync(LINKS_FILE_PATH)) {
+    console.error(`Links file does not exist at ${LINKS_FILE_PATH}`);
+    process.exit(1);
+  }
 
-if (!fs.existsSync(filePath)) {
-  console.error(`Contentful JSON does not exist at ${filePath}`);
-  process.exit(1);
+  try {
+    return JSON.parse(fs.readFileSync(LINKS_FILE_PATH, "utf8"));
+  } catch (e) {
+    console.error("Failed to read/parse links file:", e.message);
+    process.exit(1);
+  }
 }
 
-// get the data
-let data;
-try {
-  data = JSON.parse(fs.readFileSync(filePath, "utf8"));
-} catch (e) {
-  console.error("Failed to read/parse JSON:", e.message);
-  process.exit(1);
+function categoriseLinks(data) {
+  const internalLinks = [];
+  const externalLinks = [];
+
+  for (const link of data) {
+    const uri = link.uri;
+    const isHttp = uri.startsWith("http");
+    const isEmail = uri.startsWith("mailto:");
+    const isPlanTech = uri.startsWith(PLANTECH_BASE_URL);
+
+    if ((!isEmail && !isHttp) || isPlanTech) {
+      internalLinks.push(link);
+    } else if (isHttp && !isPlanTech) {
+      externalLinks.push(link);
+    }
+  }
+
+  return { internalLinks, externalLinks };
 }
 
-// Internal links to check (ignore external http + include any http plantech links)
-const internalLinks = data.filter(d => {
-  const uri = d.uri;
-  const isHttp = uri.startsWith("http");
-  const isEmail = uri.startsWith("mailto:");
-  const isPlanTech = uri.startsWith("https://www.plan-technology-for-your-school.education.gov.uk");
+function groupLinksByUrl(links) {
+  const grouped = new Map();
 
-  return (!isEmail && !isHttp) || isPlanTech;
-});
+  for (const link of links) {
+    if (!grouped.has(link.uri)) {
+      grouped.set(link.uri, []);
+    }
+    grouped.get(link.uri).push(link);
+  }
 
-// all the links that aren't plan-tech
-const nonPlanTechHttpLinks = data.filter(d => d.uri.startsWith("http") && !d.uri.startsWith("https://www.plan-technology-for-your-school.education.gov.uk"));
-
-// remove any duplicates
-const uniqueExternalLinks = [...new Map(nonPlanTechHttpLinks.map(item => [item.uri, item])).values()];
+  return grouped;
+}
 
 async function checkExternalLink(url) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
 
   try {
     const res = await fetch(url, {
@@ -53,15 +72,13 @@ async function checkExternalLink(url) {
       redirect: "follow",
       signal: controller.signal,
       headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "Accept-Language": "en-GB,en;q=0.9",
         "Range": "bytes=0-0",
       },
     });
 
-    // clear the buffer
     try {
       await res.arrayBuffer();
     } catch {
@@ -69,71 +86,108 @@ async function checkExternalLink(url) {
     }
 
     clearTimeout(timeout);
-
-    if (res.ok) return { valid: true };
-
-    return { valid: false, status: res.status };
+    return { valid: res.ok, status: res.status };
   } catch (e) {
     clearTimeout(timeout);
     return { valid: false, error: e.name };
   }
 }
 
-let failedExternalLinks = [];
+async function validateExternalLinks(groupedLinks) {
+  const failedLinks = [];
 
-async function run() {
-  for (const ex of uniqueExternalLinks) {
-    const isValidUrl = isValidUrlFormat(ex.uri);
-    if (!isValidUrl) {
-      failedExternalLinks.push({ id: ex.entryId, uri: ex.uri });
+  for (const [url, links] of groupedLinks.entries()) {
+    if (!isValidUrl(url)) {
+      // all instances of this invalid URL fail
+      failedLinks.push(...links.map(link => ({
+        id: link.entryId,
+        uri: link.uri,
+        reason: "Invalid URL format"
+      })));
       continue;
     }
 
-    const result = await checkExternalLink(ex.uri);
+    const result = await checkExternalLink(url);
 
     if (!result.valid) {
-      failedExternalLinks.push({ id: ex.entryId, uri: ex.uri });
+      // all instances of this failed URL
+      failedLinks.push(...links.map(link => ({
+        id: link.entryId,
+        uri: link.uri,
+        reason: result.error || `HTTP ${result.status}`
+      })));
     }
   }
+
+  return failedLinks;
 }
 
-await run();
+function buildMarkdownReport(failedLinks, internalLinks, groupedExternal) {
+  let md = `## Contentful Broken Link Check Summary\n\n`;
 
-// github summary output
-const outPath = process.env.GITHUB_STEP_SUMMARY;
+  // failed external links
+  md += `### ❌ Failed External Links (${failedLinks.length} instances across ${new Set(failedLinks.map(l => l.uri)).size} unique URLs)\n`;
+  if (failedLinks.length === 0) {
+    md += `_None_ ✅\n`;
+  } else {
 
-// build the markdown
-let md = `## Contentful Broken Link Check Summary\n\n`;
+    // group by the url
+    const failedByUrl = new Map();
+    for (const link of failedLinks) {
+      if (!failedByUrl.has(link.uri)) {
+        failedByUrl.set(link.uri, []);
+      }
+      failedByUrl.get(link.uri).push(link);
+    }
 
-// Failed external links
-md += `### ❌ Failed External Links (${failedExternalLinks.length})\n`;
-if (failedExternalLinks.length === 0) {
-  md += `_None_ ✅\n`;
-} else {
-  failedExternalLinks.forEach(link => {
-    md += `- ❌ (${link.uri}) - [${link.id}]\n`;
-  });
+    for (const [url, instances] of failedByUrl.entries()) {
+      md += `\n**${url}** (${instances.length} instance${instances.length > 1 ? 's' : ''})\n`;
+      for (const link of instances) {
+        md += `  - Entry: ${link.id}${link.reason ? ` - ${link.reason}` : ''}\n`;
+      }
+    }
+  }
+
+  // internal links to check
+  md += `\n### Internal Links to Check (${internalLinks.length})\n`;
+  if (internalLinks.length === 0) {
+    md += `_None_ ✅\n`;
+  } else {
+    internalLinks.forEach(link => {
+      md += `- ${link.uri} - [${link.entryId}]\n`;
+    });
+  }
+
+  // summary stats
+  md += `\n### Summary\n`;
+  md += `- Total external links checked: ${groupedExternal.size}\n`;
+  md += `- Total link instances: ${Array.from(groupedExternal.values()).reduce((sum, arr) => sum + arr.length, 0)}\n`;
+  md += `- Failed URLs: ${new Set(failedLinks.map(l => l.uri)).size}\n`;
+  md += `- Failed instances: ${failedLinks.length}\n`;
+
+  return md;
 }
 
-// internal links to check
-md += `\n### Internal Links to Check (${internalLinks.length})\n`;
-if (internalLinks.length === 0) {
-  md += `_None_ ✅\n`;
-} else {
-  internalLinks.forEach(link => {
-    md += `- (${link.uri}) - [${link.entryId}]\n`;
-  });
+async function main() {
+  const data = readLinksData();
+  const { internalLinks, externalLinks } = categoriseLinks(data);
+  const groupedExternal = groupLinksByUrl(externalLinks);
+
+  console.log(`Checking ${groupedExternal.size} unique external URLs (${externalLinks.length} total instances)...`);
+
+  const failedLinks = await validateExternalLinks(groupedExternal);
+
+  const markdown = buildMarkdownReport(failedLinks, internalLinks, groupedExternal);
+
+  const outPath = process.env.GITHUB_STEP_SUMMARY;
+  if (outPath) {
+    fs.appendFileSync(outPath, markdown);
+    console.log("Wrote link summary to GITHUB_STEP_SUMMARY");
+  } else {
+    console.log(markdown);
+  }
+
+  process.exit(failedLinks.length > 0 ? 1 : 0);
 }
 
-md += `\n`;
-
-// output to github
-if (outPath) {
-  fs.appendFileSync(outPath, md);
-  console.log("Wrote link summary to GITHUB_STEP_SUMMARY");
-} else {
-  console.log(md);
-}
-
-// Explicitly exit to close any lingering connections
-process.exit(0);
+main();
