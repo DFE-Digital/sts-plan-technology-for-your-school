@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Core.Models;
 
@@ -21,7 +22,7 @@ public class SubmissionResponsesModel
 
     public bool HasResponses => Responses is not null && Responses.Count != 0;
 
-    public string? Status { get; init; }
+    public SubmissionStatus? Status { get; init; }
 
     public SubmissionResponsesModel(int submissionId, List<QuestionWithAnswerModel> responses)
     {

@@ -18,7 +18,7 @@ public class SubmissionWorkflow(
 
     public async Task<SqlSubmissionDto> CloneLatestCompletedSubmission(int establishmentId, QuestionnaireSectionEntry section)
     {
-        var submissionWithResponses = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, isCompletedSubmission: true);
+        var submissionWithResponses = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, status: SubmissionStatus.CompleteReviewed);
         var newSubmission = await _submissionRepository.CloneSubmission(submissionWithResponses);
         newSubmission.Responses = GetOrderedResponses(newSubmission.Responses).ToList();
 
@@ -41,10 +41,10 @@ public class SubmissionWorkflow(
     public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
         int establishmentId,
         QuestionnaireSectionEntry section,
-        bool? isCompletedSubmission
+        SubmissionStatus? status
     )
     {
-        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, isCompletedSubmission);
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(establishmentId, section.Id, status);
         if (latestSubmission is null)
         {
             return null;
@@ -76,25 +76,26 @@ public class SubmissionWorkflow(
         return statuses.Select(s => s.AsDto()).ToList();
     }
 
-    public async Task<SqlSectionStatusDto> GetSectionSubmissionStatusAsync(int establishmentId, string sectionId, bool isCompleted)
+    public async Task<SqlSectionStatusDto> GetSectionSubmissionStatusAsync(
+        int establishmentId,
+        string sectionId,
+        SubmissionStatus status)
     {
         var latestSubmission = await _submissionRepository
-            .GetLatestSubmissionAndResponsesAsync(establishmentId, sectionId, isCompleted);
+            .GetLatestSubmissionAndResponsesAsync(establishmentId, sectionId, status);
 
         if (latestSubmission is not null)
         {
             return new SqlSectionStatusDto
             {
-                Completed = latestSubmission.Completed,
                 LastMaturity = latestSubmission.Maturity,
                 SectionId = latestSubmission.SectionId,
-                Status = latestSubmission.Completed ? SubmissionStatus.CompleteReviewed : SubmissionStatus.InProgress
+                Status = latestSubmission.Status
             };
         }
 
         return new SqlSectionStatusDto
         {
-            Completed = false,
             SectionId = sectionId,
             Status = SubmissionStatus.NotStarted
         };
@@ -125,6 +126,7 @@ public class SubmissionWorkflow(
     {
         return _submissionRepository.SetSubmissionInaccessibleAsync(submissionId);
     }
+
     public Task SetSubmissionInProgressAsync(int establishmentId, string sectionId)
     {
         return _submissionRepository.SetSubmissionInProgressAsync(establishmentId, sectionId);

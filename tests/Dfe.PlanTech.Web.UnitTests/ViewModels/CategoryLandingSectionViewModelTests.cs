@@ -70,7 +70,8 @@ public class CategoryLandingSectionViewModelTests
         {
             SectionId = "sec-1",
             DateUpdated = new DateTime(2024, 10, 10, 12, 0, 0, DateTimeKind.Utc),
-            LastCompletionDate = new DateTime(2024, 10, 11, 12, 0, 0, DateTimeKind.Utc)
+            LastCompletionDate = new DateTime(2024, 10, 11, 12, 0, 0, DateTimeKind.Utc),
+            Status = SubmissionStatus.CompleteReviewed
         };
 
         var vm = new CategoryLandingSectionViewModel(section, Recs(), status, hadRetrievalError: false);
@@ -91,7 +92,8 @@ public class CategoryLandingSectionViewModelTests
         {
             SectionId = "sec-1",
             DateUpdated = DateTime.UtcNow.AddDays(-2),
-            LastCompletionDate = null
+            LastCompletionDate = null,
+            Status = SubmissionStatus.InProgress
         };
 
         var vm = new CategoryLandingSectionViewModel(section, Recs(), status, hadRetrievalError: false);

@@ -80,7 +80,7 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S1", "sec-1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        _submissions.GetSubmissionRoutingDataAsync(1, section, false)
+        _submissions.GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.InProgress)
                     .Returns(MakeRouting(SubmissionStatus.NotStarted, section));
 
         var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1");
@@ -103,7 +103,7 @@ public class ReviewAnswersViewBuilderTests
         _contentful.GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
                    .Returns(new PageEntry { Content = new List<ContentfulEntry> { new PageEntry { Sys = new SystemDetails("X") } } });
 
-        _submissions.GetSubmissionRoutingDataAsync(1, section, false)
+        _submissions.GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.InProgress)
                     .Returns(MakeRouting(status, section, next: MakeQuestion("Q2", "q-2")));
 
         var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1", errorMessage: "err");
@@ -133,7 +133,7 @@ public class ReviewAnswersViewBuilderTests
         typeof(SubmissionRoutingDataModel).GetProperty(nameof(SubmissionRoutingDataModel.Status))!
             .SetValue(routing, weirdStatus);
 
-        _submissions.GetSubmissionRoutingDataAsync(1, section, false).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.InProgress).Returns(routing);
 
         var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1");
         Assert.IsType<RedirectToActionResult>(result);
@@ -151,7 +151,7 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
-        _submissions.GetSubmissionRoutingDataAsync(2, section, true)
+        _submissions.GetSubmissionRoutingDataAsync(2, section, SubmissionStatus.CompleteReviewed)
                     .Returns(MakeRouting(SubmissionStatus.NotStarted, section));
 
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
@@ -170,7 +170,7 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
-        _submissions.GetSubmissionRoutingDataAsync(2, section, true)
+        _submissions.GetSubmissionRoutingDataAsync(2, section, SubmissionStatus.CompleteReviewed)
                     .Returns(MakeRouting(SubmissionStatus.InProgress, section));
 
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
@@ -187,7 +187,7 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
-        _submissions.GetSubmissionRoutingDataAsync(2, section, true)
+        _submissions.GetSubmissionRoutingDataAsync(2, section, SubmissionStatus.CompleteReviewed)
                     .Returns(MakeRouting(SubmissionStatus.CompleteNotReviewed, section));
 
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
@@ -215,7 +215,7 @@ public class ReviewAnswersViewBuilderTests
             status: SubmissionStatus.CompleteReviewed
         );
 
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(77, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         // Act
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
@@ -268,7 +268,7 @@ public class ReviewAnswersViewBuilderTests
             status: SubmissionStatus.CompleteReviewed
         );
 
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(77, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         // Act
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
@@ -319,7 +319,7 @@ public class ReviewAnswersViewBuilderTests
             status: SubmissionStatus.CompleteReviewed
         );
 
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(77, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         // Act
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
@@ -351,7 +351,7 @@ public class ReviewAnswersViewBuilderTests
             status: SubmissionStatus.CompleteReviewed
         );
 
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(77, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         // Act
         var call = async () => await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
@@ -373,7 +373,7 @@ public class ReviewAnswersViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
         var routing = MakeRouting((SubmissionStatus)999, section, next: q1);
-        _submissions.GetSubmissionRoutingDataAsync(2, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(2, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
         Assert.IsType<RedirectToActionResult>(result);
