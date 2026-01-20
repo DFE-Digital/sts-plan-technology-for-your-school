@@ -18,6 +18,10 @@ jobs:
           node-version: "20"
           cache: "npm"
 
+      - name: Install export-processor deps
+        working-directory: ./contentful/export-processor/
+        run: npm ci
+
       - name: Install dependencies
         working-directory: ./contentful/broken-link-checker/
         run: npm ci
