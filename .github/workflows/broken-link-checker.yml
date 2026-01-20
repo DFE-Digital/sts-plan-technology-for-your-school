@@ -40,5 +40,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
             name: csvs
-            path: ./contentful/broken-link-checker/reports/
+            path: ./contentful/broken-link-checker/report/
             if-no-files-found: warn
