@@ -7,8 +7,8 @@ const LINKS_FILE_PATH = path.resolve("./result/links.json");
 const REQUEST_TIMEOUT = 15000;
 
 const CSV_REPORT_DIR = path.resolve("./report");
-const EXTERNAL_LINK_CSV_PATH = path.join(CSV_OUT_DIR, "failed-external-links.csv");
-const INTERNAL_LINK_CSV_PATH = path.join(CSV_OUT_DIR, "internal-links-to-check.csv");
+const EXTERNAL_LINK_CSV_PATH = path.join(CSV_REPORT_DIR, "failed-external-links.csv");
+const INTERNAL_LINK_CSV_PATH = path.join(CSV_REPORT_DIR, "internal-links-to-check.csv");
 
 function isValidUrl(uri) {
   try {

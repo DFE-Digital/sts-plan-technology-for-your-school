@@ -37,7 +37,6 @@ jobs:
         run: npm run checker
 
       - name: Upload CSV's
-        if: always()
         uses: actions/upload-artifact@v4
         with:
             name: csvs
