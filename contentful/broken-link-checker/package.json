@@ -4,7 +4,6 @@
   "description": "",
   "main": "checker.js",
   "scripts": {
-    "preinstall": "npm install ../../contentful/export-processor -S && npm link ../../contentful/export-processor",
     "checker": "node get-links.js && node checker.js"
   },
   "type": "module",
