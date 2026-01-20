@@ -51,7 +51,7 @@ public class QuestionsViewBuilder(
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
-        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, isCompletedSubmission: false);
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(establishmentId, section, status: SubmissionStatus.InProgress);
 
         var isSlugForNextQuestion = submissionRoutingData.NextQuestion?.Slug?.Equals(questionSlug) ?? false;
 
@@ -177,14 +177,14 @@ public class QuestionsViewBuilder(
             ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
 
         var submissionModel = await _submissionService.GetLatestSubmissionResponsesModel(
-            establishmentId, section, isCompletedSubmission: false);
+            establishmentId, section, status: SubmissionStatus.InProgress);
 
         if (submissionModel is null || !submissionModel.HasResponses)
         {
             return controller.RedirectToInterstitialPage(sectionSlug);
         }
 
-        if (!String.IsNullOrEmpty(submissionModel.Status) && submissionModel.Status.Equals(nameof(SubmissionStatus.Obsolete)))
+        if (submissionModel.Status.Equals(nameof(SubmissionStatus.Obsolete)))
         {
             var restartObsoleteViewModel = new RestartObsoleteAssessmentViewModel
             {

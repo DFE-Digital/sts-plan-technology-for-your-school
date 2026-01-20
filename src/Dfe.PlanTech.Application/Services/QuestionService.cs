@@ -15,9 +15,12 @@ public class QuestionService(
 
     public async Task<QuestionnaireQuestionEntry?> GetNextUnansweredQuestion(int establishmentId, QuestionnaireSectionEntry section)
     {
-        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+            establishmentId,
+            section,
+            status: SubmissionStatus.InProgress);
 
-        if (submission?.Status == nameof(SubmissionStatus.Inaccessible) || submission?.Status == nameof(SubmissionStatus.Obsolete))
+        if (submission?.Status == SubmissionStatus.Inaccessible || submission?.Status == SubmissionStatus.Obsolete)
             submission = null;
 
         if (submission is null)

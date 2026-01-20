@@ -21,10 +21,9 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             SectionId = existingSubmission.SectionId,
             SectionName = existingSubmission.SectionName,
             EstablishmentId = existingSubmission.EstablishmentId,
-            Completed = false,
             Maturity = existingSubmission.Maturity,
             DateCreated = DateTime.UtcNow,
-            Status = SubmissionStatus.InProgress.ToString(),
+            Status = SubmissionStatus.InProgress,
             Responses = existingSubmission.Responses.Select(r => new ResponseEntity
             {
                 QuestionId = r.QuestionId,
@@ -118,19 +117,21 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         await _db.EstablishmentRecommendationHistories.AddRangeAsync(recommendationStatuses);
 
         await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(submissionId);
-
-        // No need to save changes as this is done in the call above
     }
 
-    public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(int establishmentId, string sectionId, bool? isCompletedSubmission)
+    // No need to save changes as this is done in the call above
+    public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        SubmissionStatus? status
+    )
     {
         // Get latest submission
-        var submission = await GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission)
+        var submission = await GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, status)
             .FirstOrDefaultAsync();
+
         if (submission is null)
-        {
             return null;
-        }
 
         submission.Responses = submission.Responses
             .OrderByDescending(response => response.DateLastUpdated)
@@ -139,8 +140,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 .OrderByDescending(response => response.DateLastUpdated)
                 .ThenByDescending(response => response.Id)
                 .First()
-            )
-            .ToList();
+            ).ToList();
 
         return submission;
     }
@@ -176,15 +176,14 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var currentSubmission = await GetLatestSubmissionAndResponsesAsync(
                 establishmentId,
                 sectionId,
-                isCompletedSubmission: true
+                status: SubmissionStatus.CompleteReviewed
             );
 
         if (currentSubmission is not null)
         {
             currentSubmission.Viewed = true;
+            await _db.SaveChangesAsync();
         }
-
-        await _db.SaveChangesAsync();
     }
 
     public async Task<SubmissionEntity> SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(int submissionId)
@@ -195,22 +194,21 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
-        submission.Completed = true;
         submission.DateCompleted = DateTime.UtcNow;
-        submission.Status = SubmissionStatus.CompleteReviewed.ToString();
+        submission.Status = SubmissionStatus.CompleteReviewed;
 
         var otherSubmissions = await _db.Submissions
             .Where(s =>
                 s.Id != submission.Id &&
                 s.EstablishmentId == submission.EstablishmentId &&
                 string.Equals(s.SectionId, submission.SectionId) &&
-                string.Equals(s.Status, SubmissionStatus.CompleteReviewed.ToString())
+                s.Status == SubmissionStatus.CompleteReviewed
             )
             .ToListAsync();
 
         foreach (var oldSubmissions in otherSubmissions)
         {
-            oldSubmissions.Status = SubmissionStatus.Inaccessible.ToString();
+            oldSubmissions.Status = SubmissionStatus.Inaccessible;
             oldSubmissions.Deleted = true;
         }
 
@@ -219,17 +217,13 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         return submission;
     }
 
-    public async Task SetSubmissionInaccessibleAsync(
-        int establishmentId,
-        string sectionId)
+    public async Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)
     {
-        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission: false);
+        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, status: SubmissionStatus.InProgress);
 
-        var submission = await query.FirstOrDefaultAsync();
-        if (submission is null)
-        {
-            throw new InvalidOperationException($"Submission not found for establishment ID '{establishmentId}' and section ID '{sectionId}'");
-        }
+        var submission = await query.FirstOrDefaultAsync()
+            ?? throw new InvalidOperationException(
+                $"Submission not found for establishment ID '{establishmentId}' and section ID '{sectionId}'");
 
         await SetSubmissionInaccessibleAsync(submission.Id);
     }
@@ -242,9 +236,8 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
-        submission.Status = SubmissionStatus.Inaccessible.ToString();
+        submission.Status = SubmissionStatus.Inaccessible;
         await _db.SaveChangesAsync();
-
 
         return submission;
     }
@@ -253,7 +246,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         int establishmentId,
         string sectionId)
     {
-        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, isCompletedSubmission: false);
+        var query = GetPreviousSubmissionsInDescendingOrder(establishmentId, sectionId, status: SubmissionStatus.InProgress);
 
         var submission = await query.FirstOrDefaultAsync();
         if (submission is null)
@@ -272,9 +265,9 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
-        if (submission.Status != null && submission.Status.Equals(nameof(SubmissionStatus.Inaccessible)))
+        if (submission.Status.Equals(SubmissionStatus.Inaccessible))
         {
-            submission.Status = SubmissionStatus.InProgress.ToString();
+            submission.Status = SubmissionStatus.InProgress;
             await _db.SaveChangesAsync();
         }
 
@@ -284,16 +277,15 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
     private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
         int establishmentId,
         string sectionId,
-        bool? isCompletedSubmission
+        SubmissionStatus? status
     )
     {
         return GetSubmissionsBy(submission =>
                 !submission.Deleted &&
                 submission.EstablishmentId == establishmentId &&
                 submission.SectionId == sectionId &&
-                (isCompletedSubmission == null || submission.Completed == isCompletedSubmission)
-            )
-            .OrderByDescending(submission => submission.DateCreated);
+                (status == null || submission.Status == status)
+        ).OrderByDescending(submission => submission.DateCreated);
     }
 
     private IQueryable<SubmissionEntity> GetSubmissionsBy(Expression<Func<SubmissionEntity, bool>> predicate)
@@ -336,7 +328,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             .Where(rm => !existingRecommendationContentfulRefs.Contains(rm.ContentfulSysId))
             .Select(BuildRecommendationEntity)
             .ToList();
-
 
         var recommendationDtoDictionary = recommendationDtos.ToDictionary(r => r.ContentfulSysId, r => r);
         var recommendationsWithNoChanges = new List<RecommendationEntity>();

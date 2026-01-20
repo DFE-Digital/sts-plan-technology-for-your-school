@@ -128,7 +128,7 @@ public class RecommendationsViewBuilderTests
 
         // Submission has answers that match chunk ids "C1","C2","C3"
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: new[] { "C1", "C2", "C3" });
-        _submissions.GetSubmissionRoutingDataAsync(123, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(123, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         // Setup recommendation service with status data for the specific chunk being tested
         var currentRecommendationStatus = new SqlEstablishmentRecommendationHistoryDto
@@ -204,7 +204,7 @@ public class RecommendationsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: new[] { "C1" });
-        _submissions.GetSubmissionRoutingDataAsync(123, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(123, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         // Act + Assert
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
@@ -228,7 +228,7 @@ public class RecommendationsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         var routing = MakeRouting(SubmissionStatus.NotStarted, section);
-        _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         // Act
         var result = await sut.RouteBySectionAndRecommendation(ctl, "cat", "sec-1", useChecklist: false, null, null);
@@ -252,7 +252,7 @@ public class RecommendationsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         var routing = MakeRouting(SubmissionStatus.InProgress, section, nextQuestionSlug: "q-2");
-        _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         // Act
         var result = await sut.RouteBySectionAndRecommendation(ctl, "cat", "sec-1", useChecklist: false, null, null);
@@ -281,7 +281,7 @@ public class RecommendationsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         var routing = MakeRouting(SubmissionStatus.CompleteNotReviewed, section);
-        _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         // Act
         var result = await sut.RouteBySectionAndRecommendation(ctl, "cat", "sec-1", useChecklist: false, null, null);
@@ -310,7 +310,7 @@ public class RecommendationsViewBuilderTests
             "nextQuestionSlug",
             completed: new DateTime(2024, 1, 2),
             "C1", "C2");
-        _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         _recommendationService
             .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
@@ -368,7 +368,7 @@ public class RecommendationsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: "C1");
-        _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         _recommendationService
             .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
@@ -427,7 +427,7 @@ public class RecommendationsViewBuilderTests
             section,
             answerSysIds: new[] { "C1", "C2", "C3" });
 
-        _submissions.GetSubmissionRoutingDataAsync(1, section, true).Returns(routing);
+        _submissions.GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed).Returns(routing);
 
         _recommendationService
             .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
@@ -494,7 +494,7 @@ public class RecommendationsViewBuilderTests
             answerSysIds: ["C1", "C2", "C3"]);
 
         _submissions
-            .GetSubmissionRoutingDataAsync(establishmentId, section, true)
+            .GetSubmissionRoutingDataAsync(establishmentId, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
 
         // Status is invalid so the extension GetRecommendationStatusEnumValue() should return null
@@ -560,7 +560,7 @@ public class RecommendationsViewBuilderTests
             answerSysIds: ["C1", "C2", "C3"]);
 
         _submissions
-            .GetSubmissionRoutingDataAsync(establishmentId, section, true)
+            .GetSubmissionRoutingDataAsync(establishmentId, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
 
         // For the redirect back to RouteToSingleRecommendation
@@ -639,7 +639,7 @@ public class RecommendationsViewBuilderTests
             answerSysIds: ["C1", "C2", "C3"]);
 
         _submissions
-            .GetSubmissionRoutingDataAsync(establishmentId, section, true)
+            .GetSubmissionRoutingDataAsync(establishmentId, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
 
         _recommendationService
