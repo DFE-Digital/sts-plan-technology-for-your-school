@@ -162,8 +162,9 @@ function buildMarkdownReport(failedLinks, groupedExternal) {
   md += `- Total link instances: ${Array.from(groupedExternal.values()).reduce((sum, arr) => sum + arr.length, 0)}\n`;
   md += `- Failed URLs: ${new Set(failedLinks.map(l => l.uri)).size}\n`;
   md += `- Failed instances: ${failedLinks.length}\n`;
-  md += ``;
-  md += `Download the CSV's to view report\n`;
+  md += `\n`;
+  md += `\n`;
+  md += `Download the CSV's to view the results\n`;
 
 
   return md;
@@ -232,7 +233,7 @@ async function main() {
 
   const { failedLinks, failedExternalRows } = await validateExternalLinks(groupedExternal);
 
-  const markdown = buildMarkdownReport(failedLinks, internalLinks, groupedExternal);
+  const markdown = buildMarkdownReport(failedLinks, groupedExternal);
 
   const outPath = process.env.GITHUB_STEP_SUMMARY;
   if (outPath) {
