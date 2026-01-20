@@ -6,6 +6,10 @@ const PLANTECH_BASE_URL = "https://www.plan-technology-for-your-school.education
 const LINKS_FILE_PATH = path.resolve("./result/links.json");
 const REQUEST_TIMEOUT = 15000;
 
+const CSV_REPORT_DIR = path.resolve("./report");
+const EXTERNAL_LINK_CSV_PATH = path.join(CSV_OUT_DIR, "failed-external-links.csv");
+const INTERNAL_LINK_CSV_PATH = path.join(CSV_OUT_DIR, "internal-links-to-check.csv");
+
 function isValidUrl(uri) {
   try {
     new URL(uri);
@@ -91,7 +95,7 @@ async function checkExternalLink(url) {
         return { valid: false, status: res.status, redirected: res.redirected };
     }
 
-    if ([401, 403, 406, 429].includes(res.status)) {
+    if ([403, 406, 429].includes(res.status)) {
         return { valid: true, status: res.status, redirected: res.redirected };
     }
 
@@ -104,31 +108,49 @@ async function checkExternalLink(url) {
 
 async function validateExternalLinks(groupedLinks) {
   const failedLinks = [];
+  const failedExternalRows = [];
 
   for (const [url, links] of groupedLinks.entries()) {
     if (!isValidUrl(url)) {
       // all instances of this invalid URL fail
-      failedLinks.push(...links.map(link => ({
-        id: link.entryId,
-        uri: link.uri,
-        reason: "Invalid URL format"
-      })));
+      for (const link of links) {
+        failedLinks.push({
+          id: link.entryId,
+          uri: link.uri,
+          reason: "Invalid URL format",
+        });
+
+        failedExternalRows.push({
+          entryId: link.entryId,
+          uri: link.uri,
+          status: "",
+          redirected: "",
+        });
+      }
       continue;
     }
 
     const result = await checkExternalLink(url);
 
     if (!result.valid) {
-      // all instances of this failed URL
-      failedLinks.push(...links.map(link => ({
-        id: link.entryId,
-        uri: link.uri,
-        reason: result.error || `HTTP ${result.status}`
-      })));
+      for (const link of links) {
+        failedLinks.push({
+          id: link.entryId,
+          uri: link.uri,
+          reason: result.error || `HTTP ${result.status}`,
+        });
+
+        failedExternalRows.push({
+          entryId: link.entryId,
+          uri: link.uri,
+          status: result.status ?? "",
+          redirected: result.redirected ?? false,
+        });
+      }
     }
   }
 
-  return failedLinks;
+  return { failedLinks, failedExternalRows };
 }
 
 function buildMarkdownReport(failedLinks, internalLinks, groupedExternal) {
@@ -177,6 +199,59 @@ function buildMarkdownReport(failedLinks, internalLinks, groupedExternal) {
   return md;
 }
 
+function csvEscape(value) {
+  const s = String(value ?? "");
+  // escape quotes by doubling them; wrap in quotes if contains commas/newlines/quotes
+  if (/[",\n\r]/.test(s)) {
+    return `"${s.replace(/"/g, '""')}"`;
+  }
+  return s;
+}
+
+function writeCsv(filePath, headers, rows) {
+  const lines = [];
+  lines.push(headers.map(csvEscape).join(","));
+  for (const row of rows) {
+    lines.push(headers.map((h) => csvEscape(row[h])).join(","));
+  }
+  fs.mkdirSync(path.dirname(filePath), { recursive: true });
+  fs.writeFileSync(filePath, lines.join("\n"), "utf8");
+}
+
+function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
+  // external links csv
+  // columns -  entryId, link, statusCode, redirected
+  const externalRows = failedExternalRows.map((r) => ({
+    entryId: r.entryId,
+    link: r.uri,
+    statusCode: r.status,
+    redirected: r.redirected,
+  }));
+
+  writeCsv(
+    EXTERNAL_LINK_CSV_PATH,
+    ["entryId", "link", "statusCode", "redirected"],
+    externalRows
+  );
+
+  // internal links csv
+  // columns - link, entryId
+  const internalRows = internalLinks.map((l) => ({
+    link: l.uri,
+    entryId: l.entryId,
+  }));
+
+  writeCsv(
+    CSV_REPORT_DIR,
+    ["link", "entryId"],
+    internalRows
+  );
+
+  console.log(`Wrote CSV: ${FAILED_EXTERNAL_CSV_PATH}`);
+  console.log(`Wrote CSV: ${INTERNAL_TO_CHECK_CSV_PATH}`);
+}
+
+
 async function main() {
   const data = readLinksData();
   const { internalLinks, externalLinks } = categoriseLinks(data);
@@ -184,7 +259,7 @@ async function main() {
 
   console.log(`Checking ${groupedExternal.size} unique external URLs (${externalLinks.length} total instances)...`);
 
-  const failedLinks = await validateExternalLinks(groupedExternal);
+  const { failedLinks, failedExternalRows } = await validateExternalLinks(groupedExternal);
 
   const markdown = buildMarkdownReport(failedLinks, internalLinks, groupedExternal);
 
@@ -195,6 +270,9 @@ async function main() {
   } else {
     console.log(markdown);
   }
+
+    exportLinkReportsToCsv(failedExternalRows, internalLinks);
+
 
   process.exit(0);
 }
