@@ -242,7 +242,7 @@ function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
   }));
 
   writeCsv(
-    CSV_REPORT_DIR,
+    INTERNAL_LINK_CSV_PATH,
     ["link", "entryId"],
     internalRows
   );
