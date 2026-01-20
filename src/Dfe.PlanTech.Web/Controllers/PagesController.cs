@@ -51,7 +51,7 @@ public class PagesController(
         View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
 
     [HttpGet("{categorySlug}/{sectionSlug}/{*path}")]
-    public async Task<IActionResult> HandleUnknownRoutes(string path)
+    public async Task<IActionResult> HandleUnknownRoutes(string? path)
     {
         var viewModel = await _pagesViewBuilder.BuildNotFoundViewModel();
 
