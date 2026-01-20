@@ -154,48 +154,17 @@ async function validateExternalLinks(groupedLinks) {
   return { failedLinks, failedExternalRows };
 }
 
-function buildMarkdownReport(failedLinks, internalLinks, groupedExternal) {
+function buildMarkdownReport(failedLinks, groupedExternal) {
   let md = `## Contentful Broken Link Check Summary\n\n`;
-
-  // failed external links
-  md += `### ❌ Failed External Links (${failedLinks.length} instances across ${new Set(failedLinks.map(l => l.uri)).size} unique URLs)\n`;
-  if (failedLinks.length === 0) {
-    md += `_None_ ✅\n`;
-  } else {
-
-    // group by the url
-    const failedByUrl = new Map();
-    for (const link of failedLinks) {
-      if (!failedByUrl.has(link.uri)) {
-        failedByUrl.set(link.uri, []);
-      }
-      failedByUrl.get(link.uri).push(link);
-    }
-
-    for (const [url, instances] of failedByUrl.entries()) {
-      md += `\n**${url}** (${instances.length} instance${instances.length > 1 ? 's' : ''})\n`;
-      for (const link of instances) {
-        md += `  - Entry: ${link.id}${link.reason ? ` - ${link.reason}` : ''}\n`;
-      }
-    }
-  }
-
-  // internal links to check
-  md += `\n### Internal Links to Check (${internalLinks.length})\n`;
-  if (internalLinks.length === 0) {
-    md += `_None_ ✅\n`;
-  } else {
-    internalLinks.forEach(link => {
-      md += `- ${link.uri} - [${link.entryId}]\n`;
-    });
-  }
-
   // summary stats
   md += `\n### Summary\n`;
   md += `- Total external links checked: ${groupedExternal.size}\n`;
   md += `- Total link instances: ${Array.from(groupedExternal.values()).reduce((sum, arr) => sum + arr.length, 0)}\n`;
   md += `- Failed URLs: ${new Set(failedLinks.map(l => l.uri)).size}\n`;
   md += `- Failed instances: ${failedLinks.length}\n`;
+  md += ``;
+  md += `Download the CSV's to view report\n`;
+
 
   return md;
 }
