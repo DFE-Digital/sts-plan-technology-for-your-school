@@ -5,6 +5,7 @@ on:
 
 jobs:
   checker:
+    - name: Contentful broken link checker
     runs-on: ubuntu-latest
     environment: StagingUnprotected
 
@@ -22,11 +23,11 @@ jobs:
         working-directory: ./contentful/export-processor/
         run: npm ci
 
-      - name: Install dependencies
+      - name: Install broken-link-checker dependencies
         working-directory: ./contentful/broken-link-checker/
         run: npm ci
 
-      - name: Run checker
+      - name: Run get-links.js && checker.js
         working-directory: ./contentful/broken-link-checker/
         env:
           MANAGEMENT_TOKEN: ${{ secrets.CONTENTFUL_MANAGEMENT_TOKEN }}
