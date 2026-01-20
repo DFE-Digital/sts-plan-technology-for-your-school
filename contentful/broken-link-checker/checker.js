@@ -247,8 +247,8 @@ function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
     internalRows
   );
 
-  console.log(`Wrote CSV: ${FAILED_EXTERNAL_CSV_PATH}`);
-  console.log(`Wrote CSV: ${INTERNAL_TO_CHECK_CSV_PATH}`);
+  console.log(`Wrote CSV: ${EXTERNAL_LINK_CSV_PATH}`);
+  console.log(`Wrote CSV: ${INTERNAL_LINK_CSV_PATH}`);
 }
 
 
