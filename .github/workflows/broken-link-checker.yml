@@ -19,9 +19,11 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
+        working-directory: ./contentful/broken-link-checker/
         run: npm ci
 
       - name: Run checker
+        working-directory: ./contentful/broken-link-checker/
         env:
           MANAGEMENT_TOKEN: ${{ secrets.MANAGEMENT_TOKEN }}
           USE_PREVIEW: false
