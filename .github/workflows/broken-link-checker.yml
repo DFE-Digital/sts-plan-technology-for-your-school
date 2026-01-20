@@ -1,0 +1,30 @@
+name: Contentful Broken Link Checker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  checker:
+    runs-on: ubuntu-latest
+    environment: StagingUnprotected
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run checker
+        env:
+          MANAGEMENT_TOKEN: ${{ secrets.MANAGEMENT_TOKEN }}
+          USE_PREVIEW: false
+          SPACE_ID: ${{ secrets.SPACE_ID }}
+          CONTENTFUL_ENVIRONMENT: work_in_progress
+        run: npm run checker
