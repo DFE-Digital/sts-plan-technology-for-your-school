@@ -29,8 +29,8 @@ jobs:
       - name: Run checker
         working-directory: ./contentful/broken-link-checker/
         env:
-          MANAGEMENT_TOKEN: ${{ secrets.MANAGEMENT_TOKEN }}
+          MANAGEMENT_TOKEN: ${{ secrets.CONTENTFUL_MANAGEMENT_TOKEN }}
           USE_PREVIEW: false
           SPACE_ID: ${{ secrets.SPACE_ID }}
-          CONTENTFUL_ENVIRONMENT: work_in_progress
+          CONTENTFUL_ENVIRONMENT: ${{ secrets.CONTENTFUL_ENVIRONMENT }}
         run: npm run checker
