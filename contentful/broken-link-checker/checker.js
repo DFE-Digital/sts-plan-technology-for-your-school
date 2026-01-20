@@ -86,7 +86,16 @@ async function checkExternalLink(url) {
     }
 
     clearTimeout(timeout);
-    return { valid: res.ok, status: res.status };
+
+    if (res.redirected) {
+        return { valid: false, status: res.status, redirected: res.redirected };
+    }
+
+    if ([401, 403, 406, 429].includes(res.status)) {
+        return { valid: true, status: res.status, redirected: res.redirected };
+    }
+
+    return { valid: res.ok, status: res.status, redirected: res.redirected };
   } catch (e) {
     clearTimeout(timeout);
     return { valid: false, error: e.name };
