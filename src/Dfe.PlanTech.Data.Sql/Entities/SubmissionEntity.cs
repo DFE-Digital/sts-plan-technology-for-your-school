@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
@@ -11,8 +12,6 @@ public class SubmissionEntity
     public int EstablishmentId { get; set; }
 
     public EstablishmentEntity Establishment { get; set; } = null!;
-
-    public bool Completed { get; set; }
 
     public required string SectionId { get; set; }
 
@@ -32,7 +31,7 @@ public class SubmissionEntity
 
     public bool Viewed { get; set; }
 
-    public string? Status { get; set; }
+    public SubmissionStatus Status { get; set; }
 
     public SqlSubmissionDto AsDto()
     {
@@ -41,7 +40,6 @@ public class SubmissionEntity
             Id = Id,
             EstablishmentId = EstablishmentId,
             Establishment = Establishment.AsDto(),
-            Completed = Completed,
             SectionId = SectionId,
             SectionName = SectionName,
             Maturity = Maturity,

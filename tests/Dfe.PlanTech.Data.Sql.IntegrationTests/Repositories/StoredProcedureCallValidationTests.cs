@@ -47,8 +47,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "section1",
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
-            Status = "Completed",
-            Completed = true,
+            Status = Core.Enums.SubmissionStatus.CompleteReviewed,
             DateCreated = DateTime.UtcNow.AddDays(-1)
         };
 
@@ -57,8 +56,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "section2",
             SectionName = "Section 2",
             EstablishmentId = establishment.Id,
-            Status = "InProgress",
-            Completed = false,
+            Status = Core.Enums.SubmissionStatus.InProgress,
             DateCreated = DateTime.UtcNow.AddDays(-2)
         };
 
@@ -134,7 +132,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "test-section",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = "InProgress"
+            Status = Core.Enums.SubmissionStatus.InProgress
         };
         DbContext.Submissions.Add(submission);
         await DbContext.SaveChangesAsync();
@@ -203,8 +201,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "test-section-delete",
             SectionName = "Test Section To Delete",
             EstablishmentId = establishment.Id,
-            Status = "InProgress",
-            Completed = false,
+            Status = Core.Enums.SubmissionStatus.InProgress,
             Deleted = false
         };
         DbContext.Submissions.Add(submission);
@@ -274,7 +271,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "param-section",
             SectionName = "Parameter Section",
             EstablishmentId = establishment.Id,
-            Status = "InProgress"
+            Status = Core.Enums.SubmissionStatus.InProgress
         };
         DbContext.Submissions.Add(submission);
         await DbContext.SaveChangesAsync();
@@ -324,8 +321,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "section1",
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
-            Status = "Completed",
-            Completed = true,
+            Status = Core.Enums.SubmissionStatus.CompleteReviewed,
             DateCreated = DateTime.UtcNow.AddDays(-1)
         };
 
@@ -334,8 +330,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "section2",
             SectionName = "Section 2",
             EstablishmentId = establishment.Id,
-            Status = "InProgress",
-            Completed = false,
+            Status = Core.Enums.SubmissionStatus.InProgress,
             DateCreated = DateTime.UtcNow.AddDays(-2)
         };
 
@@ -344,8 +339,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "section3",
             SectionName = "Section 3",
             EstablishmentId = establishment.Id,
-            Status = "NotStarted",
-            Completed = false,
+            Status = Core.Enums.SubmissionStatus.NotStarted,
             DateCreated = DateTime.UtcNow.AddDays(-3)
         };
 

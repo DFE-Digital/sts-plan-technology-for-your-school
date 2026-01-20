@@ -225,7 +225,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                   .Returns(statuses);
 
         // Force the null-coalescing throw in SUT:
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
+        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
                   .Returns((SubmissionResponsesModel?)null);
 
         var contentful = Substitute.For<IContentfulService>();
@@ -259,7 +259,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
 
         // Throw anything inside the try block to trigger the catch path in SUT
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
+        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
                   .Throws(new DatabaseException("boom"));
 
         var sut = CreateSut(contentful: contentful, submission: submission);
@@ -325,7 +325,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var submission = Substitute.For<ISubmissionService>();
         submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
             .Returns(statuses);
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
+        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
             .Returns(responses);
         submission.GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
             .Returns(recommendationHistory);
@@ -363,7 +363,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var submission = Substitute.For<ISubmissionService>();
         submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
                   .Returns(statuses);
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
+        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
                   .Returns(new SubmissionResponsesModel(1, new()));
 
         var sut = CreateSut(submission: submission);
@@ -459,7 +459,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var submission = Substitute.For<ISubmissionService>();
         submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
             .Returns(statuses);
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
+        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
             .Returns(responses);
         submission.GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
             .Returns(recommendationHistory);
@@ -560,7 +560,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var submission = Substitute.For<ISubmissionService>();
         submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
             .Returns(statuses);
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, true)
+        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
             .Returns(responses);
         submission.GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
             .Returns(recommendationHistory);

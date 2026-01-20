@@ -1,5 +1,6 @@
 using System.Data;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -38,28 +39,59 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         _db = dbContext;
     }
 
-    public Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId)
+    // Moved GetSectionStatuses sproc into code (need to remove more sprocs when completed column is removed from db)
+    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId)
     {
-        // Stored procedure defined in:
-        // - 2023/20230718_168650_GetSectionStatusesSproc.sql (CREATE)
-        // - 2023/20230725_166107_ModifyGetSectionStatusesSproc.sql (ALTER)
-        // - 2023/20230725_166107_ModifyGetSectionStatusesSprocFix.sql (ALTER)
-        // - 2023/20230922_1420_UpdateGetSectionStatusToAcceptEstablishmentId.sql (ALTER)
-        // - 2024/20240524_1730_UpdateGetSectionStatusesSproc.sql (ALTER)
-        // - 2024/20240605_1030_UpdateGetSectionStatusesSproc.sql (ALTER)
-        // - 2024/20240612_1220_CreateGetSectionStatusesForCategory.sql (CREATE related proc)
-        // - 2024/20240702_1700_RenameUpdatedSectionStatusesProc.sql (ALTER)
-        // - 2024/20240717_1510_AlterSectionStatusesProc.sql (ALTER)
-        // - 2024/20241002_0900_CreateDateUpdatedTriggers.sql (ALTER)
-        // - 2024/20241104_1200_RemoveContentfulDependencies.sql (ALTER)
-        // - 2024/20241127_1700_AddSubmissionViewedColumn.sql (ALTER)
-        // - 2024/20241212_1500_DatafixForDateLastUpdated.sql (ALTER)
-        // - 2025/20250404_1500_UpdateGetSectionStatusesSproc.sql (ALTER - LATEST)
-        // Parameters (in order): @sectionIds NVARCHAR(MAX), @establishmentId INT
-        return _db.SectionStatuses
-            .FromSqlInterpolated($"EXEC {DatabaseConstants.SpGetSectionStatuses} {sectionIds}, {establishmentId}")
+        var sectionIdList = sectionIds
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+
+        var currentSubmissions = await _db.Submissions
+            .Where(s =>
+                !s.Deleted &&
+                s.EstablishmentId == establishmentId &&
+                sectionIdList.Contains(s.SectionId))
+            .GroupBy(s => s.SectionId)
+            .Select(g => g
+                .OrderByDescending(s => s.DateCreated)
+                .First())
             .ToListAsync();
+
+        var lastCompleteSubmissions = await _db.Submissions
+            .Where(s =>
+                !s.Deleted &&
+                s.EstablishmentId == establishmentId &&
+                sectionIdList.Contains(s.SectionId) &&
+                (s.Status == SubmissionStatus.CompleteReviewed))
+            .GroupBy(s => s.SectionId)
+            .Select(g => g
+                .OrderByDescending(s => s.DateCreated)
+                .First())
+            .ToListAsync();
+
+        var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
+        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(s => s.SectionId, s => s);
+
+        var result = sectionIdList.Select(sectionId =>
+        {
+            currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
+            lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
+
+            return new SectionStatusEntity
+            {
+                SectionId = sectionId,
+                Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
+                DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
+                DateUpdated = currentSubmission?.DateLastUpdated ?? currentSubmission?.DateCreated ?? DateTime.UtcNow,
+                LastMaturity = lastCompleteSubmission?.Maturity,
+                LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                Viewed = lastCompleteSubmission?.Viewed
+            };
+        }).ToList();
+
+        return result;
     }
+
 
     public async Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
     {
