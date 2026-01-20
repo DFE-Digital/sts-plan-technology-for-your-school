@@ -64,10 +64,9 @@ public class SubmissionRepositoryTests
             SectionId = "SEC",
             SectionName = "Section Name",
             EstablishmentId = 123,
-            Completed = true,
             Maturity = "developing",
             DateCreated = DateTime.UtcNow.AddDays(-1),
-            Status = SubmissionStatus.CompleteReviewed.ToString(),
+            Status = SubmissionStatus.CompleteReviewed,
             Responses = new List<ResponseEntity>
             {
                 new ResponseEntity
@@ -89,9 +88,8 @@ public class SubmissionRepositoryTests
         Assert.Equal("SEC", clone.SectionId);
         Assert.Equal("Section Name", clone.SectionName);
         Assert.Equal(123, clone.EstablishmentId);
-        Assert.False(clone.Completed);
         Assert.Equal("developing", clone.Maturity);
-        Assert.Equal(SubmissionStatus.InProgress.ToString(), clone.Status);
+        Assert.Equal(SubmissionStatus.InProgress, clone.Status);
         Assert.InRange(clone.DateCreated, before, after);
 
         var r = Assert.Single(clone.Responses);

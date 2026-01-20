@@ -42,4 +42,26 @@ public class ComponentViewsFactoryTests
             Arg.Any<Exception?>(),
             Arg.Any<Func<object, Exception?, string>>());
     }
+
+    [Fact]
+    public void TryGetViewForType_ReturnsFalse_DoesNotLog_QuestionnaireCategory()
+    {
+        var logger = Substitute.For<ILogger<ComponentViewsFactory>>();
+        var sut = new ComponentViewsFactory(logger);
+
+        var model = new QuestionnaireCategoryEntry();
+
+        var ok = sut.TryGetViewForType(model, out var path);
+
+        Assert.False(ok);
+        Assert.Null(path);
+
+        // Verify no warning logged
+        logger.ReceivedWithAnyArgs(0).Log(
+            LogLevel.Warning,
+            Arg.Any<EventId>(),
+            Arg.Any<object>(),
+            Arg.Any<Exception?>(),
+            Arg.Any<Func<object, Exception?, string>>());
+    }
 }

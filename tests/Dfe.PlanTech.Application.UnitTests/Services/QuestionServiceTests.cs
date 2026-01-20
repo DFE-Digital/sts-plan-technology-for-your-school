@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using NSubstitute;
 
@@ -39,7 +40,6 @@ public class QuestionServiceTests
             Answers = new List<QuestionnaireAnswerEntry> { a1, a2 }
         };
 
-
         return new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("S1"),
@@ -56,7 +56,7 @@ public class QuestionServiceTests
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns((SqlSubmissionDto?)null);
 
         var questionService = CreateServiceUnderTest();
@@ -69,7 +69,7 @@ public class QuestionServiceTests
         Assert.Equal("Q1", next!.Id);
 
         await _mockSubmissionWorkflow.Received(1)
-                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress);
     }
 
     [Fact]
@@ -78,9 +78,9 @@ public class QuestionServiceTests
         // Arrange
         var section = BuildSectionGraph();
         const int establishmentId = 1;
-        var submission = new SqlSubmissionDto { Status = "Inaccessible" };
+        var submission = new SqlSubmissionDto { Status = SubmissionStatus.Inaccessible };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
@@ -93,7 +93,7 @@ public class QuestionServiceTests
         Assert.Equal("Q1", next!.Id);
 
         await _mockSubmissionWorkflow.Received(1)
-                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false);
+                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress);
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public class QuestionServiceTests
 
         var submission = new SqlSubmissionDto { Id = 1, Responses = [] };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
@@ -130,6 +130,7 @@ public class QuestionServiceTests
         var submission = new SqlSubmissionDto
         {
             Id = 1,
+            Status = SubmissionStatus.InProgress,
             Responses =
             [
                 new() {
@@ -140,7 +141,7 @@ public class QuestionServiceTests
                     },
                     Answer = new SqlAnswerDto
                     {
-                        Id = 2,
+                        Id = 1,
                         ContentfulSysId = "A2"
                     }
                 },
@@ -152,14 +153,14 @@ public class QuestionServiceTests
                     },
                     Answer = new SqlAnswerDto
                     {
-                        Id = 1,
+                        Id = 2,
                         ContentfulSysId = "A1"
                     }
                 },
             ]
         };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
@@ -200,7 +201,7 @@ public class QuestionServiceTests
             ]
         };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, isCompletedSubmission: false)
+        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
