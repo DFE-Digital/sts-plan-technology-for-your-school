@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import "dotenv/config";
-import { getGlobalDispatcher } from "undici";
 
 function isValidUrlFormat(uri) {
   try {
@@ -28,21 +27,18 @@ try {
   process.exit(1);
 }
 
-
-
 // Internal links to check (ignore external http + include any http plantech links)
 const internalLinks = data.filter(d => {
   const uri = d.uri;
   const isHttp = uri.startsWith("http");
+  const isEmail = uri.startsWith("mailto:");
   const isPlanTech = uri.startsWith("https://www.plan-technology-for-your-school.education.gov.uk");
 
-  return !isHttp || isPlanTech;
+  return (!isEmail && !isHttp) || isPlanTech;
 });
-
 
 // all the links that aren't plan-tech
 const nonPlanTechHttpLinks = data.filter(d => d.uri.startsWith("http") && !d.uri.startsWith("https://www.plan-technology-for-your-school.education.gov.uk"));
-
 
 // remove any duplicates
 const uniqueExternalLinks = [...new Map(nonPlanTechHttpLinks.map(item => [item.uri, item])).values()];
@@ -51,7 +47,6 @@ async function checkExternalLink(url) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15000);
 
-  // headers/user-agent added to prevent cloudfront blocking the request
   try {
     const res = await fetch(url, {
       method: "GET",
@@ -70,22 +65,23 @@ async function checkExternalLink(url) {
     try {
       await res.arrayBuffer();
     } catch {
+      // ignore buffer errors
     }
+
+    clearTimeout(timeout);
 
     if (res.ok) return { valid: true };
 
     return { valid: false, status: res.status };
   } catch (e) {
-    return { valid: false, error: e.name };
-  } finally {
     clearTimeout(timeout);
+    return { valid: false, error: e.name };
   }
 }
 
 let failedExternalLinks = [];
 
 async function run() {
-
   for (const ex of uniqueExternalLinks) {
     const isValidUrl = isValidUrlFormat(ex.uri);
     if (!isValidUrl) {
@@ -103,15 +99,10 @@ async function run() {
 
 await run();
 
-
-//github summary output
-
-
+// github summary output
 const outPath = process.env.GITHUB_STEP_SUMMARY;
 
-
 // build the markdown
-
 let md = `## Contentful Broken Link Check Summary\n\n`;
 
 // Failed external links
@@ -123,7 +114,6 @@ if (failedExternalLinks.length === 0) {
     md += `- ❌ (${link.uri}) - [${link.id}]\n`;
   });
 }
-
 
 // internal links to check
 md += `\n### Internal Links to Check (${internalLinks.length})\n`;
@@ -144,3 +134,6 @@ if (outPath) {
 } else {
   console.log(md);
 }
+
+// Explicitly exit to close any lingering connections
+process.exit(0);
