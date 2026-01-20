@@ -4,6 +4,7 @@
   "description": "",
   "main": "checker.js",
   "scripts": {
+    "preinstall": "npm install ../../contentful/export-processor -S && npm link ../../contentful/export-processor",
     "checker": "node get-links.js && node checker.js"
   },
   "type": "module",
@@ -11,7 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^17.2.3",
-    "export-processor": "file:../../contentful/export-processor",
+    "export-processor": "file:../export-processor",
     "node-html-parser": "^6.1.13",
     "undici": "^7.18.2"
   }
