@@ -92,7 +92,7 @@ async function checkExternalLink(url) {
     clearTimeout(timeout);
 
     if (res.redirected) {
-        return { valid: false, status: res.status, redirected: res.redirected };
+        return { valid: false, status: res.status, redirected: res.redirected, finalUrl: res.url };
     }
 
     if ([403, 406, 429].includes(res.status)) {
@@ -145,6 +145,7 @@ async function validateExternalLinks(groupedLinks) {
           uri: link.uri,
           status: result.status ?? "",
           redirected: result.redirected ?? false,
+          finalUrl: result.finalUrl ?? ""
         });
       }
     }
@@ -226,11 +227,12 @@ function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
     link: r.uri,
     statusCode: r.status,
     redirected: r.redirected,
+    finalUrl: r.finalUrl,
   }));
 
   writeCsv(
     EXTERNAL_LINK_CSV_PATH,
-    ["entryId", "link", "statusCode", "redirected"],
+    ["entryId", "link", "statusCode", "redirected", "finalUrl"],
     externalRows
   );
 
