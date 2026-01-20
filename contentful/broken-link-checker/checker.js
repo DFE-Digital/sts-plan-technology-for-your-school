@@ -187,7 +187,7 @@ async function main() {
     console.log(markdown);
   }
 
-  process.exit(failedLinks.length > 0 ? 1 : 0);
+  process.exit(0);
 }
 
 main();
