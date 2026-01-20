@@ -13,7 +13,7 @@ export default async function () {
 const CONTENT_TYPE_ID = "textBody";
 const RICH_TEXT_FIELD_ID = "richText";
 const LOCALE = "en-US";
-const DRY_RUN = false;
+const DRY_RUN = true;
 
 /**
  * Recursively removes underline marks from Rich Text node
