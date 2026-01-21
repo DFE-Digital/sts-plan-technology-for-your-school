@@ -3,6 +3,7 @@ name: Code PR Check
 on:
   pull_request:
     paths:
+      - "contentful/**"
       - "src/**"
       - "tests/**"
       - ".github/workflows/code-pr-check.yml"
