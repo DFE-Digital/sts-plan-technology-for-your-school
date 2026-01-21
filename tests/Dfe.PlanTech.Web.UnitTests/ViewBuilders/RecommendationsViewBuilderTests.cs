@@ -142,7 +142,9 @@ public class RecommendationsViewBuilderTests
 
         // Submission has answers that match chunk ids "C1","C2","C3"
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c123);
-        _submissions.GetSubmissionRoutingDataAsync(123, section, true).Returns(routing);
+        _submissions
+            .GetSubmissionRoutingDataAsync(123, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
 
         // Setup recommendation service with status data for the specific chunk being tested
         var currentRecommendationStatus = new SqlEstablishmentRecommendationHistoryDto
@@ -228,7 +230,9 @@ public class RecommendationsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c1);
-        _submissions.GetSubmissionRoutingDataAsync(123, section, true).Returns(routing);
+        _submissions
+            .GetSubmissionRoutingDataAsync(123, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
 
         // Act + Assert
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
