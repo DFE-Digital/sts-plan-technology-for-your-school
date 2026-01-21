@@ -18,15 +18,13 @@ env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
-  lint-code:
-    name: Lint & Commit
+  lint:
+    name: Lint
     runs-on: ubuntu-22.04
     if: ${{ github.event_name == 'pull_request' }}
 
     permissions:
-      contents: write
-      pull-requests: write
-      checks: write
+      contents: read
 
     steps:
       - name: Checkout Repository
@@ -41,30 +39,32 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
-          cache: false
 
-      - name: Lint plan-technology-for-your-school.sln solution
-        run: dotnet format plan-technology-for-your-school.sln
+      - name: Set up CSharpier
+        run: dotnet tool restore
 
-      - name: Commit and push changes if necessary
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install pre-commit
+        run: python -m pip install --upgrade pip pre-commit
+
+      - name: Run pre-commit (all files)
         run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
-          if [[ `git status --porcelain` ]]; then
-            git add src/*
-            git add tests/*
-            git commit -m "chore: Linted code for plan-technology-for-your-school.sln solution"
-            git push
-          else
-            echo 'No linting changes'
-          fi
+          python -m pre_commit run --all-files --show-diff-on-failure
 
   build-test-web-app:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
-    if: ${{ always() && needs.lint-code.result == 'success' }}
-    needs: [lint-code]
+    if: ${{ always() && needs.lint.result == 'success' }}
+    needs: [lint]
 
     steps:
       - name: Check out repository

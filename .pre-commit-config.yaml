@@ -5,16 +5,17 @@ repos:
     hooks:
       - id: end-of-file-fixer
         name: Fix ends of files
-      - id: trailing-whitespace
-        name: Remove trailing whitespace
       - id: mixed-line-ending
         name: Normalize line endings to LF
         args: ['--fix=lf']
-      - id: check-yaml
-        name: Run GitHub YAML linter
+      - id: trailing-whitespace
+        name: Remove trailing whitespace
+        args: ['--markdown-linebreak-ext=md']
       - id: check-json
         name: Run GitHub JSON linter on files except tsconfig.json
         exclude: tsconfig.json$ # Exlude tsconfig*.json from check-json hook as it contains comments
+      - id: check-yaml
+        name: Run GitHub YAML linter
 
   # CSharpier formatting (avoids opinionated style rewrites)
   - repo: local
@@ -33,5 +34,5 @@ repos:
     hooks:
       - id: prettier
         name: Run Prettier on documentation, web and config files
-        files: .(js|mjs|ts|tsx|css|scss|html|md|yml|yaml|json)$
+        files: .(html|js|mjs|ts|tsx|css|scss|json|md)$
         exclude: (^|/)(bin|obj|wwwroot)(/|$)|.*Generated.*

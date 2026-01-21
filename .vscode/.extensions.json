@@ -1,23 +1,23 @@
 {
   "recommendations": [
+    "alexkrechik.cucumberautocomplete",
+    "csharpier.csharpier-vscode",
     "DavidAnson.vscode-markdownlint",
-    "pkief.material-icon-theme",
-    "usernamehw.errorlens",
-    "github.vscode-pull-request-github",
-    "github.vscode-github-actions",
     "esbenp.prettier-vscode",
     "formulahendry.auto-rename-tag",
+    "github.vscode-pull-request-github",
+    "github.vscode-github-actions",
+    "hashicorp.terraform",
+    "inferrinizzard.prettier-sql-vscode",
+    "mechatroner.rainbow-csv",
     "ms-dotnettools.csdevkit",
     "ms-dotnettools.csharp",
     "ms-dotnettools.vscode-dotnet-runtime",
-    "hashicorp.terraform",
+    "ms-vscode.powershell",
+    "pkief.material-icon-theme",
     "redhat.vscode-yaml",
     "redhat.vscode-xml",
-    "mechatroner.rainbow-csv",
-    "inferrinizzard.prettier-sql-vscode",
-    "alexkrechik.cucumberautocomplete",
-    "ms-vscode.powershell",
     "seyyedkhandon.firacode",
-    "neo4j-extensions.neo4j-for-vscode"
+    "usernamehw.errorlens"
   ]
 }

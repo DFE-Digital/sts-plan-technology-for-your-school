@@ -10,7 +10,7 @@
   "terminal.integrated.defaultProfile.windows": "Git Bash",
 
   "[csharp]": {
-    "editor.defaultFormatter": "ms-dotnettools.csharp"
+    "editor.defaultFormatter": "csharpier.csharpier-vscode"
   },
 
   "[css]": {
