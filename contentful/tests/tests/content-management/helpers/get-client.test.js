@@ -62,7 +62,7 @@ describe("getAndValidateClient", () => {
         );
 
         expect(mockGetEnvironments).toHaveBeenCalledTimes(1);
-        expect(mockGetSpace).toHaveBeenCalledTimes(1);
+        expect(mockGetSpace).toHaveBeenCalledTimes(2);
 
         expect(client).toBe(mockClient);
     });

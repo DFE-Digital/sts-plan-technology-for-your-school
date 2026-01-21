@@ -21,15 +21,33 @@ const filePath = path.join(
     testFileName
 );
 
-const { default: mockTestChange } = await import(filePath);
-const main = (await import("../../../content-management/main.js")).main;
+let mockTestChange;
+let main;
+
+jest.unstable_mockModule(filePath, () => ({
+    default: jest.fn()
+}));
+
+
+beforeAll(async () => {
+    const mod1 = await import(filePath);
+    mockTestChange = mod1.default;
+
+    const mod2 = await import("../../../content-management/main.js");
+    main = mod2.main;
+});
 
 describe("main.js", () => {
     it("should handle invalid filename", async () => {
         existsSyncMock.mockImplementation(() => false);
-        const consoleSpy = jest.spyOn(console, "error");
+        const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => {});
+
+        const originalArgv = process.argv;
+        process.argv = ["node", "main.js"]
 
         await main();
+
+        process.argv = originalArgv;
 
         expect(consoleSpy).toHaveBeenCalledWith("Invalid filename provided");
         expect(consoleSpy).toHaveBeenCalledTimes(1);
