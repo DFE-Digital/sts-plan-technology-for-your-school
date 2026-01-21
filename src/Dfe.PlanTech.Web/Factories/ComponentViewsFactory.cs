@@ -8,6 +8,7 @@ public class ComponentViewsFactory(
 {
     private const string GENERATED_VIEW_NAMESPACE = "AspNetCoreGeneratedDocument";
     private const string SHARED_PATH = "Views_Shared";
+    private const string EXCLUDED_COMPONENT_TYPE = "QuestionnaireCategory";
 
     private readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
 
@@ -24,7 +25,10 @@ public class ComponentViewsFactory(
 
         if (matchingViewType is null)
         {
-            logger.LogWarning("Could not find matching view for {Model}", model);
+            if (componentTypeName != EXCLUDED_COMPONENT_TYPE)
+            {
+                logger.LogWarning("Could not find matching view for {Model}", model);
+            }
             viewPath = null;
             return false;
         }

@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
@@ -11,7 +12,6 @@ public class SubmissionEntityTests
         // Arrange
         var expectedId = 61;
         var expectedEstablishmentId = 71;
-        var expectedCompleted = false;
         var expectedSectionId = "Arbitrary string - section id";
         var expectedSectionName = "Arbitrary string - section name";
         var expectedMaturity = "Arbitrary string - maturity";
@@ -20,7 +20,7 @@ public class SubmissionEntityTests
         DateTime? expectedDateCompleted = null;
         var expectedDeleted = false;
         var expectedViewed = true;
-        string? expectedStatus = "Arbitrary string - status";
+        var expectedStatus = SubmissionStatus.InProgress;
 
         var establishment = new EstablishmentEntity
         {
@@ -36,7 +36,6 @@ public class SubmissionEntityTests
             Id = expectedId,
             EstablishmentId = expectedEstablishmentId,
             Establishment = establishment,
-            Completed = expectedCompleted,
             SectionId = expectedSectionId,
             SectionName = expectedSectionName,
             Maturity = expectedMaturity,
@@ -60,7 +59,6 @@ public class SubmissionEntityTests
         Assert.Equal(expectedEstablishmentId, dto.EstablishmentId);
         Assert.NotNull(dto.Establishment);
         Assert.Equal(expectedEstablishmentId, dto.Establishment.Id);
-        Assert.Equal(expectedCompleted, dto.Completed);
         Assert.Equal(expectedSectionId, dto.SectionId);
         Assert.Equal(expectedSectionName, dto.SectionName);
         Assert.Equal(expectedMaturity, dto.Maturity);
@@ -79,7 +77,6 @@ public class SubmissionEntityTests
                 nameof(SqlSubmissionDto.Id),
                 nameof(SqlSubmissionDto.EstablishmentId),
                 nameof(SqlSubmissionDto.Establishment),
-                nameof(SqlSubmissionDto.Completed),
                 nameof(SqlSubmissionDto.SectionId),
                 nameof(SqlSubmissionDto.SectionName),
                 nameof(SqlSubmissionDto.Maturity),

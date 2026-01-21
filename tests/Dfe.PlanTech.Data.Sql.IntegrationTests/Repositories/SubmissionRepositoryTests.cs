@@ -91,14 +91,13 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         return new SubmissionEntity
         {
             EstablishmentId = establishmentId,
-            Completed = true,
             SectionId = "S001",
             SectionName = "Test Section 1",
             Responses = [],
             DateCreated = DateTime.Now.AddDays(-7),
             DateLastUpdated = DateTime.Now.AddDays(-6),
             DateCompleted = DateTime.Now.AddDays(-5),
-            Status = submissionStatus.ToString()
+            Status = submissionStatus ?? SubmissionStatus.None
         };
     }
 
@@ -147,8 +146,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(submission.Maturity, clonedSubmission.Maturity);
 
         // Should have different timestamps and status
-        Assert.False(clonedSubmission.Completed);
-        Assert.Equal(SubmissionStatus.InProgress.ToString(), clonedSubmission.Status);
+        Assert.Equal(SubmissionStatus.InProgress, clonedSubmission.Status);
         Assert.True(clonedSubmission.DateCreated >= beforeClone);
 
         // Should clone responses
@@ -374,8 +372,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.NotNull(oldSubmissionEntity);
         Assert.NotNull(newSubmissionEntity);
 
-        Assert.Equal(SubmissionStatus.Inaccessible.ToString(), oldSubmission.Status);
-        Assert.Equal(SubmissionStatus.CompleteReviewed.ToString(), newSubmission.Status);
+        Assert.Equal(SubmissionStatus.Inaccessible, oldSubmission.Status);
+        Assert.Equal(SubmissionStatus.CompleteReviewed, newSubmission.Status);
     }
 
     [Fact]
@@ -400,9 +398,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Completed = true,
             DateCreated = DateTime.UtcNow.AddDays(-2),
-            Status = SubmissionStatus.CompleteNotReviewed.ToString()
+            Status = SubmissionStatus.CompleteReviewed
         };
 
         // Create newer submission with multiple responses for same question
@@ -411,9 +408,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Completed = true,
             DateCreated = DateTime.UtcNow.AddDays(-1),
-            Status = SubmissionStatus.CompleteNotReviewed.ToString(),
+            Status = SubmissionStatus.CompleteReviewed,
             Responses = new List<ResponseEntity>
             {
                 // Older response for Q1
@@ -453,7 +449,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetLatestSubmissionAndResponsesAsync(establishment.Id, "section-1", true);
+        var result = await _repository.GetLatestSubmissionAndResponsesAsync(establishment.Id, "section-1", status: SubmissionStatus.CompleteReviewed);
 
         // Assert
         Assert.NotNull(result);
@@ -489,7 +485,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.InProgress.ToString(),
+            Status = SubmissionStatus.InProgress,
             Responses = new List<ResponseEntity>
             {
                 new ResponseEntity
@@ -537,10 +533,9 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Completed = true,
             Viewed = false,
             DateCreated = DateTime.UtcNow,
-            Status = SubmissionStatus.CompleteNotReviewed.ToString()
+            Status = SubmissionStatus.CompleteReviewed
         };
 
         DbContext.Submissions.Add(submission);
@@ -568,7 +563,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.CompleteReviewed.ToString(),
+            Status = SubmissionStatus.CompleteReviewed,
             DateCreated = DateTime.UtcNow.AddDays(-2)
         };
 
@@ -577,7 +572,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.CompleteNotReviewed.ToString(),
+            Status = SubmissionStatus.CompleteNotReviewed,
             DateCreated = DateTime.UtcNow.AddDays(-1)
         };
 
@@ -591,16 +586,15 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(SubmissionStatus.CompleteReviewed.ToString(), result.Status);
+        Assert.Equal(SubmissionStatus.CompleteReviewed, result.Status);
         Assert.True(result.DateCompleted >= beforeUpdate);
 
         // Check that the other submission was marked inaccessible
         var otherSubmission = await DbContext.Submissions.FindAsync(submission1.Id);
         Assert.NotNull(otherSubmission);
-        Assert.Equal(SubmissionStatus.Inaccessible.ToString(), otherSubmission!.Status);
+        Assert.Equal(SubmissionStatus.Inaccessible, otherSubmission!.Status);
         Assert.True(otherSubmission.Deleted);
     }
-
 
     [Fact]
     public async Task GetQuestionsForSection_ReturnsMatchingQuestions_WhenContentfulRefsMatch()
@@ -631,7 +625,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.Contains(result, q => q.ContentfulRef == "ref-102");
     }
 
-
     [Fact]
     public async Task GetQuestionsForSection_ReturnsEmptyList_WhenNoMatchingQuestions()
     {
@@ -655,7 +648,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         // Assert
         Assert.Empty(result);
     }
-
 
     [Fact]
     public async Task GetQuestionsForSection_IgnoresNullSysIds()
@@ -704,7 +696,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.Inaccessible.ToString(),
+            Status = SubmissionStatus.Inaccessible,
             Responses = new List<ResponseEntity>
             {
                 new ResponseEntity
@@ -724,6 +716,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         var result = await _repository.SetSubmissionInProgressAsync(submission.Id);
 
         Assert.NotNull(result);
-        Assert.Equal(nameof(SubmissionStatus.InProgress), result.Status);
+        Assert.Equal(SubmissionStatus.InProgress, result.Status);
     }
 }

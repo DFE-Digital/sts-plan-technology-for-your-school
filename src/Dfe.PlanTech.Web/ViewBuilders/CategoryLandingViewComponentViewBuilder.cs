@@ -87,7 +87,7 @@ public class CategoryLandingViewComponentViewBuilder(
         RecommendationSortOrder sortType
     )
     {
-        foreach (var section in category.Sections)
+        foreach (var section in category.Sections ?? [])
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
@@ -119,7 +119,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 throw new ContentfulDataUnavailableException($"Could not find {section.Name} interstitial page");
             }
 
-            var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, true)
+            var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, status: SubmissionStatus.CompleteReviewed)
                 ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
 
             var recommendationChunks = section.CoreRecommendations;
