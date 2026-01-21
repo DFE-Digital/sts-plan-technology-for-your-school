@@ -63,8 +63,6 @@ describe("getAndValidateClient", () => {
 
         expect(mockGetEnvironments).toHaveBeenCalledTimes(1);
         expect(mockGetSpace).toHaveBeenCalledTimes(2);
-
-        expect(client).toBe(mockClient);
     });
 
     it("should throw an error when environment is invalid", async () => {

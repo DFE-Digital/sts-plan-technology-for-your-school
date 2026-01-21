@@ -3,33 +3,36 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const existsSyncMock = jest.fn().mockImplementation(() => true);
+
 jest.unstable_mockModule("fs", () => ({
     existsSync: existsSyncMock,
 }));
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-const testFileName = "test-change.js";
-const filePath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "..",
-    "content-management",
-    "changes",
-    testFileName
-);
-
 let mockTestChange;
 let main;
-
-jest.unstable_mockModule(filePath, () => ({
-    default: jest.fn()
-}));
-
+let filePath;
+let __filename;
+let __dirname;
 
 beforeAll(async () => {
+    __filename = fileURLToPath(import.meta.url);
+    __dirname = path.dirname(__filename);
+
+    const testFileName = "test-change.js";
+    filePath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "..",
+        "content-management",
+        "changes",
+        testFileName
+    );
+
+    jest.unstable_mockModule(filePath, () => ({
+        default: jest.fn()
+    }));
+
     const mod1 = await import(filePath);
     mockTestChange = mod1.default;
 
