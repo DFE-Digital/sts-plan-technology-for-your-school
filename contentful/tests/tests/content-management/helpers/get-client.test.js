@@ -1,25 +1,24 @@
 import { jest } from "@jest/globals";
 
-const mockGetMany = jest.fn().mockImplementation(() => ({
-    items: [{ name: "master" }, { name: "test-env" }, { name: "staging" }],
-}));
+const mockGetEnvironments = jest.fn().mockResolvedValue({
+    items: [
+        { sys: { id: "master" } },
+        { sys: { id: "test-env" } },
+        { sys: { id: "staging" } }
+    ]
+});
 
-const mockClient = {
-    environment: {
-        getMany: mockGetMany,
-    },
+const mockSpace = {
+    getEnvironments: mockGetEnvironments
 };
 
-const createClientMock = jest.fn().mockImplementation(() => mockClient);
+const mockGetSpace = jest.fn().mockResolvedValue(mockSpace);
 
-jest.mock("contentful-management", () => {
-    return {
-        default: {
-            createClient: createClientMock,
-        },
-        createClient: createClientMock,
-    };
-});
+jest.mock("contentful-management", () => ({
+    createClient: jest.fn(() => ({
+        getSpace: mockGetSpace
+    }))
+}));
 
 const contentfulManagement = (await import("contentful-management")).default;
 
@@ -51,19 +50,11 @@ describe("getAndValidateClient", () => {
         expect(contentfulManagement.createClient).toHaveBeenCalledWith(
             {
                 accessToken: "test-token",
-            },
-            {
-                type: "plain",
-                defaults: {
-                    spaceId: "test-space",
-                    environmentId: "test-env",
-                },
             }
         );
 
-        expect(mockGetMany).toHaveBeenCalledWith({
-            spaceId: "test-space",
-        });
+        expect(mockGetEnvironments).toHaveBeenCalledTimes(1);
+        expect(mockGetSpace).toHaveBeenCalledTimes(1);
 
         expect(client).toBe(mockClient);
     });
