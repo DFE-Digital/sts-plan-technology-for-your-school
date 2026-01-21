@@ -1,13 +1,13 @@
 # Broken Link Checker
 
-The broken link checker pulls down the contentful data and isolates any links. It will check any external links within the content and then produce a list of internal links (e.g. /contact-us or https://plan-tech...) to check manually.
+The broken link checker pulls down the Contentful data and isolates any links. It will check any external links within the content and then produce a list of internal links (e.g. /contact-us or https://plan-tech...) to check manually.
 
-These are written to the console as well as outputted into two .csvs inside the /report/ directory.
+These are written to the console as well as outputted into two .csv files inside the /report/ directory.
 
 
 ### Environment Variables
 
-- MANAGEMENT_TOKEN - This is he contentful management token 
+- MANAGEMENT_TOKEN - This is the contentful management token 
 - SPACE_ID - Contentful space ID
 - CONTENTFUL_ENVIRONMENT - Contentful environment to target e.g. (work_in_progress/master/development)
 

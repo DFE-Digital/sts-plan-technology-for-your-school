@@ -164,7 +164,7 @@ function buildMarkdownReport(failedLinks, groupedExternal) {
   md += `- Failed instances: ${failedLinks.length}\n`;
   md += `\n`;
   md += `\n`;
-  md += `Download the CSV's to view the results\n`;
+  md += `Download the CSVs to view the results\n`;
 
 
   return md;
