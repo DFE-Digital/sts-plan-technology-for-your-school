@@ -36,7 +36,7 @@ export async function validateEnvironment(client) {
 
     const validNames = environments.items.map((env) => env.name);
     if (!validNames.includes(process.env.ENVIRONMENT)) {
-        throw new Error(`Invalid Contentful environment, ${validNames}`);
+        throw new Error(`Invalid Contentful environment`);
     }
 }
 
