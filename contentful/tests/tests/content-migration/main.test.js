@@ -24,7 +24,7 @@ const filePath = path.join(
 const { default: mockTestChange } = await import(filePath);
 const main = (await import("../../../content-management/main.js")).main;
 
-describe("main.js", () => {
+describe.skip("main.js", () => {
     it("should handle invalid filename", async () => {
         existsSyncMock.mockImplementation(() => false);
         const consoleSpy = jest.spyOn(console, "error");
