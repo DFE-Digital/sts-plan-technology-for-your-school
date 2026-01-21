@@ -9,10 +9,18 @@ const mockGetEnvironments = jest.fn().mockResolvedValue({
 });
 
 const mockSpace = {
-    getEnvironments: mockGetEnvironments
+    getEnvironments: mockGetEnvironments,
+    getEnvironment: mockGetEnvironment
 };
 
 const mockGetSpace = jest.fn().mockResolvedValue(mockSpace);
+
+const mockEnvironment = {
+    getEntries: jest.fn().mockResolvedValue({ items: [] }),
+    getEntry: jest.fn(),
+};
+
+const mockGetEnvironment = jest.fn().mockResolvedValue(mockEnvironment);
 
 jest.mock("contentful-management", () => ({
     createClient: jest.fn(() => ({
