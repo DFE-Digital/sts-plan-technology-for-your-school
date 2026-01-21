@@ -2,9 +2,9 @@ import { jest } from "@jest/globals";
 
 const mockGetEnvironments = jest.fn().mockResolvedValue({
     items: [
-        { sys: { id: "master" } },
-        { sys: { id: "test-env" } },
-        { sys: { id: "staging" } }
+        { name: "master" },
+        { name: "test-env" },
+        { name: "staging" }
     ]
 });
 
