@@ -52,7 +52,7 @@ Handled by `.gitattributes` and `.editorconfig`.
 - Charset: **UTF-8**
 - Trailing whitespace: **removed**
 - Final newline: **required**
-- Tabs: **never used** (spaces only)
+- Tabs: **never used** (spaces only, indentation set per language)
 
 These rules apply to _all text files_, regardless of language.
 
