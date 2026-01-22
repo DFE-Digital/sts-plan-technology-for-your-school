@@ -1,0 +1,44 @@
+name: Contentful Broken Link Checker
+
+on:
+  workflow_dispatch:
+
+jobs:
+  checker:
+    name: Contentful broken link checker
+    runs-on: ubuntu-latest
+    environment: StagingUnprotected
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install export-processor deps
+        working-directory: ./contentful/export-processor/
+        run: npm ci
+
+      - name: Install broken-link-checker dependencies
+        working-directory: ./contentful/broken-link-checker/
+        run: npm ci
+
+      - name: Run get-links.js && checker.js
+        working-directory: ./contentful/broken-link-checker/
+        env:
+          MANAGEMENT_TOKEN: ${{ secrets.CONTENTFUL_MANAGEMENT_TOKEN }}
+          USE_PREVIEW: false
+          SPACE_ID: ${{ secrets.SPACE_ID }}
+          CONTENTFUL_ENVIRONMENT: ${{ secrets.CONTENTFUL_ENVIRONMENT }}
+        run: npm run checker
+
+      - name: Upload CSV's
+        uses: actions/upload-artifact@v4
+        with:
+            name: csvs
+            path: ./contentful/broken-link-checker/report/
+            if-no-files-found: warn
