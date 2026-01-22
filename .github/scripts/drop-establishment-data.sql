@@ -1,1 +1,1 @@
-exec [dbo].[deleteDataForEstablishment] @establishmentRef = '00000018'
+exec [dbo].[deleteDataForEstablishment] @establishmentRef = '900008'
