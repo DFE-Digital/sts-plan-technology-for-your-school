@@ -55,4 +55,15 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
             matEstablishmentId
         );
     }
+
+    public Task<SqlFirstActivityForEstablishmentRecommendationDto> GetFirstActivityForEstablishmentRecommendation(
+        string id,
+        int establishmentId
+    )
+    {
+        return recommendationWorkflow.GetFirstActivityForEstablishmentRecommendation(
+            id,
+            establishmentId
+        );
+    }
 }

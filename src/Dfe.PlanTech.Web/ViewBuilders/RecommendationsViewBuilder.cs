@@ -82,10 +82,17 @@ public class RecommendationsViewBuilder(
             currentRecommendationChunk.Id,
             establishmentId
         );
+
         var groupedHistory = recommendationHistory
             .OrderByDescending(rh => rh.DateCreated)
             .GroupBy(rh => $"{rh.DateCreated.Date:MMMM} activity")
             .ToDictionary(group => group.Key, group => group.Select(g => g));
+
+        var firstActivity =
+            await _recommendationService.GetFirstActivityForEstablishmentRecommendation(
+                currentRecommendationChunk.Id,
+                establishmentId
+            );
 
         var viewModel = new SingleRecommendationViewModel
         {
@@ -110,6 +117,7 @@ public class RecommendationsViewBuilder(
                 .ToDictionary(key => key.ToString(), key => key.GetDisplayName()),
             OriginatingSlug = chunkSlug,
             History = groupedHistory,
+            FirstActivity = firstActivity,
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);

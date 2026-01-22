@@ -30,17 +30,20 @@ public class SingleRecommendationViewModel
     public IDictionary<string, string> StatusOptions { get; set; } =
         new Dictionary<string, string>();
     public required string SelectedStatusKey { get; init; }
+    public required DateTime? LastUpdated { get; init; }
+    public Dictionary<
+        string,
+        IEnumerable<SqlEstablishmentRecommendationHistoryDto>
+    > History { get; init; } = [];
+
+    public SqlFirstActivityForEstablishmentRecommendationDto? FirstActivity { get; init; }
+
+    public string LastUpdatedFormatted =>
+        LastUpdated?.ToString("d MMMM yyyy") ?? RecommendationConstants.DefaultLastUpdatedText;
     public string StatusText =>
         SelectedStatusKey.GetRecommendationStatusEnumValue()?.GetDisplayName() ?? SelectedStatusKey;
     public string StatusTagClass =>
         SelectedStatusKey
             .GetRecommendationStatusEnumValue()
             .GetCssClassOrDefault(RecommendationConstants.DefaultTagClass);
-    public required DateTime? LastUpdated { get; init; }
-    public string LastUpdatedFormatted =>
-        LastUpdated?.ToString("d MMMM yyyy") ?? RecommendationConstants.DefaultLastUpdatedText;
-    public Dictionary<
-        string,
-        IEnumerable<SqlEstablishmentRecommendationHistoryDto>
-    > History { get; init; } = [];
 }

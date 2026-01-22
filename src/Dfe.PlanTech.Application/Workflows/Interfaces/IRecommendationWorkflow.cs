@@ -26,4 +26,8 @@ public interface IRecommendationWorkflow
         string? noteText = null,
         int? matEstablishmentId = null
     );
+    Task<SqlFirstActivityForEstablishmentRecommendationDto> GetFirstActivityForEstablishmentRecommendation(
+        string id,
+        int establishmentId
+    );
 }

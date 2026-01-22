@@ -1,9 +1,13 @@
 using System.Data;
+using System.Data.Common;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -37,6 +41,147 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         _db = dbContext;
     }
 
+    public async Task<FirstActivityForEstablishmentRecommendationEntity> GetFirstActivityForEstablishmentRecommendationAsync(
+        int establishmentId,
+        string recommendationContentfulReference
+    )
+    {
+        // Stored procedure defined in:
+        // - 2026/20260122_1720_GetFirstActivityForEstablishmentRecommendation.sql (CREATE)
+        // Parameters (in order): @establishmentId INT, @recommendationContentfulReference NVARCHAR(50)
+
+        var parameters = new SqlParameter[]
+        {
+            new(DatabaseConstants.EstablishmentIdParam, establishmentId),
+            new(
+                DatabaseConstants.RecommendationContentfulReferenceParam,
+                recommendationContentfulReference
+            ),
+        };
+
+        var reader =
+            await BuildAndExecuteDbCommand<FirstActivityForEstablishmentRecommendationEntity>(
+                DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation,
+                parameters
+            );
+
+        var result = new FirstActivityForEstablishmentRecommendationEntity
+        {
+            StatusChangeDate = reader.GetDateTime(reader.GetOrdinal("statusChangeDate")),
+            StatusText = reader.GetString(reader.GetOrdinal("statusText")),
+            SchoolName = reader.GetString(reader.GetOrdinal("schoolName")),
+            GroupName = reader.GetString(reader.GetOrdinal("groupName")),
+            UserId = reader.GetInt32(reader.GetOrdinal("userId")),
+            QuestionText = reader.GetString(reader.GetOrdinal("QuestionText")),
+            AnswerText = reader.GetString(reader.GetOrdinal("AnswerText")),
+        };
+
+        return result;
+    }
+
+    // Moved GetSectionStatuses sproc into code (need to remove more sprocs when completed column is removed from db)
+    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
+        string sectionIds,
+        int establishmentId
+    )
+    {
+        var sectionIdList = sectionIds
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+
+        var currentSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+            )
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
+            .ToListAsync();
+
+        var lastCompleteSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+                && (s.Status == SubmissionStatus.CompleteReviewed)
+            )
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
+            .ToListAsync();
+
+        var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
+        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(
+            s => s.SectionId,
+            s => s
+        );
+
+        var result = sectionIdList
+            .Select(sectionId =>
+            {
+                currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
+                lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
+
+                return new SectionStatusEntity
+                {
+                    SectionId = sectionId,
+                    Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
+                    DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
+                    DateUpdated =
+                        currentSubmission?.DateLastUpdated
+                        ?? currentSubmission?.DateCreated
+                        ?? DateTime.UtcNow,
+                    LastMaturity = lastCompleteSubmission?.Maturity,
+                    LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                    Viewed = lastCompleteSubmission?.Viewed,
+                };
+            })
+            .ToList();
+
+        return result;
+    }
+
+    public async Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
+    {
+        // Stored procedure defined in:
+        // - 2025/20250409_1900_CreateSubmitGroupSelectionProcedure.sql (CREATE)
+        // Parameters (in order): @userId INT, @userEstablishmentId INT, @selectedEstablishmentId INT, @selectedEstablishmentName NVARCHAR(MAX), @selectionId INT OUTPUT
+        var selectionId = new SqlParameter(DatabaseConstants.SelectionIdParam, SqlDbType.Int)
+        {
+            Direction = ParameterDirection.Output,
+        };
+
+        var parameters = new SqlParameter[]
+        {
+            new(DatabaseConstants.UserIdParam, userGroupSelectionModel.UserId),
+            new(
+                DatabaseConstants.EstablishmentIdParam,
+                userGroupSelectionModel.UserEstablishmentId
+            ),
+            new(
+                DatabaseConstants.SelectedEstablishmentIdParam,
+                userGroupSelectionModel.SelectedEstablishmentId
+            ),
+            new(
+                DatabaseConstants.SelectedEstablishmentNameParam,
+                SqlValueOrDbNull(userGroupSelectionModel.SelectedEstablishmentName)
+            ),
+            selectionId,
+        };
+
+        var command = BuildCommandString(DatabaseConstants.SpSubmitGroupSelection, parameters);
+        await _db.Database.ExecuteSqlRawAsync(command, parameters);
+
+        if (selectionId.Value is int id)
+        {
+            return id;
+        }
+
+        throw new InvalidCastException(
+            $"{nameof(selectionId)} is not an integer - value is {selectionId.Value ?? "null"}"
+        );
+    }
+
     public Task<int> SetMaturityForSubmissionAsync(int submissionId)
     {
         // Stored procedure defined in:
@@ -49,7 +194,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             new(DatabaseConstants.SubmissionIdParam, submissionId),
         };
 
-        var command = BuildCommand(DatabaseConstants.SpCalculateMaturity, parameters);
+        var command = BuildCommandString(DatabaseConstants.SpCalculateMaturity, parameters);
         return _db.Database.ExecuteSqlRawAsync(command, parameters);
     }
 
@@ -95,7 +240,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             submissionId,
         };
 
-        var command = BuildCommand(DatabaseConstants.SpSubmitAnswer, parameters);
+        var command = BuildCommandString(DatabaseConstants.SpSubmitAnswer, parameters);
         await _db.Database.ExecuteSqlRawAsync(command, parameters);
 
         if (responseId.Value is int id)
@@ -108,7 +253,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         );
     }
 
-    private static string BuildCommand(string storedProcedureName, SqlParameter[] parameters)
+    private static string BuildCommandString(string storedProcedureName, SqlParameter[] parameters)
     {
         ParameterDirection[] outputParameterTypes =
         {
@@ -124,4 +269,39 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
         return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
     }
+
+    private async Task<DbDataReader> BuildAndExecuteDbCommand<TReturn>(
+        string storedProcedureName,
+        SqlParameter[] parameters
+    )
+    {
+        using var command = _db.Database.GetDbConnection().CreateCommand();
+
+        command.CommandText = storedProcedureName;
+        command.CommandType = CommandType.StoredProcedure;
+        command.Parameters.AddRange(parameters);
+
+        if (command.Connection is null)
+        {
+            throw new InvalidOperationException(
+                "Cannot call stored procedure. Database connection is null."
+            );
+        }
+
+        if (command.Connection.State != ConnectionState.Open)
+        {
+            command.Connection.Open();
+        }
+
+        using var reader = await command.ExecuteReaderAsync();
+
+        if (!reader.Read())
+        {
+            throw new DatabaseException($"No data returned from {storedProcedureName}");
+        }
+
+        return reader;
+    }
+
+    private static object SqlValueOrDbNull(string? value) => value ?? (object)DBNull.Value;
 }
