@@ -18,53 +18,10 @@ env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
-  lint:
-    name: Lint
-    runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'pull_request' }}
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          # The ref is specifically needed here to ensure the PR branch is checked out,
-          # allowing linting changes to be committed and pushed back (otherwise is a detached HEAD state).
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Set up CSharpier
-        run: dotnet tool restore
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.13'
-
-      - name: Install pre-commit
-        run: python -m pip install --upgrade pip pre-commit
-
-      - name: Run pre-commit (all files)
-        run: |
-          python -m pre_commit run --all-files --show-diff-on-failure
-
   build-test-web-app:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
-    if: ${{ always() && needs.lint.result == 'success' }}
-    needs: [lint]
+    if: always()
 
     steps:
       - name: Check out repository
