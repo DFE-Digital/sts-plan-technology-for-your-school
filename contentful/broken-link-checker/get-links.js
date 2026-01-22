@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
-import fs from "fs";
-import path from "path";
-import { loadAndSaveContentfulData } from "./contentful-data-loader.js";
-import "dotenv/config";
+import fs from 'fs';
+import path from 'path';
+import { loadAndSaveContentfulData } from './contentful-data-loader.js';
+import 'dotenv/config';
 
-const EXCLUDED_TAG_IDS = new Set(["e2e"]);
-const CONTENTFUL_DATA_PATH = "./export/contentful-data.json";
-const OUTPUT_PATH = "result/links.json";
+const EXCLUDED_TAG_IDS = new Set(['e2e']);
+const CONTENTFUL_DATA_PATH = './export/contentful-data.json';
+const OUTPUT_PATH = 'result/links.json';
 
 function isPlainObject(v) {
-  return v && typeof v === "object" && !Array.isArray(v);
+  return v && typeof v === 'object' && !Array.isArray(v);
 }
 
 function safeGet(obj, keys) {
@@ -27,27 +27,23 @@ function isEntry(obj) {
   return (
     isPlainObject(obj) &&
     isPlainObject(obj.sys) &&
-    obj.sys.type === "Entry" &&
-    typeof obj.sys.id === "string" &&
+    obj.sys.type === 'Entry' &&
+    typeof obj.sys.id === 'string' &&
     isPlainObject(obj.fields)
   );
 }
 
 function isRichTextDocument(value) {
-  return (
-    isPlainObject(value) &&
-    value.nodeType === "document" &&
-    Array.isArray(value.content)
-  );
+  return isPlainObject(value) && value.nodeType === 'document' && Array.isArray(value.content);
 }
 
 function getNodeText(node) {
-  if (!isPlainObject(node)) return "";
-  if (node.nodeType === "text") return node.value || "";
+  if (!isPlainObject(node)) return '';
+  if (node.nodeType === 'text') return node.value || '';
   if (Array.isArray(node.content)) {
-    return node.content.map(getNodeText).join("");
+    return node.content.map(getNodeText).join('');
   }
-  return "";
+  return '';
 }
 
 function walkRichText(node, callback, path = []) {
@@ -57,7 +53,7 @@ function walkRichText(node, callback, path = []) {
 
   if (Array.isArray(node.content)) {
     node.content.forEach((child, idx) => {
-      walkRichText(child, callback, [...path, "content", idx]);
+      walkRichText(child, callback, [...path, 'content', idx]);
     });
   }
 }
@@ -65,25 +61,25 @@ function walkRichText(node, callback, path = []) {
 function extractLink(node) {
   const { nodeType } = node;
 
-  if (nodeType === "hyperlink") {
-    const uri = safeGet(node, ["data", "uri"]);
+  if (nodeType === 'hyperlink') {
+    const uri = safeGet(node, ['data', 'uri']);
     if (!uri) return null;
 
     return {
-      linkType: "hyperlink",
+      linkType: 'hyperlink',
       uri,
       text: getNodeText(node).trim(),
     };
   }
 
-  if (nodeType === "entry-hyperlink" || nodeType === "asset-hyperlink") {
-    const targetSys = safeGet(node, ["data", "target", "sys"]);
+  if (nodeType === 'entry-hyperlink' || nodeType === 'asset-hyperlink') {
+    const targetSys = safeGet(node, ['data', 'target', 'sys']);
     const targetId = targetSys?.id;
     if (!targetId) return null;
 
     return {
       linkType: nodeType,
-      targetType: targetSys.linkType || (nodeType === "entry-hyperlink" ? "Entry" : "Asset"),
+      targetType: targetSys.linkType || (nodeType === 'entry-hyperlink' ? 'Entry' : 'Asset'),
       targetId,
       text: getNodeText(node).trim(),
     };
@@ -97,7 +93,7 @@ function collectEntries(data) {
   const seen = new Set();
 
   // Check standard contentful export structure
-  for (const key of ["entries", "contentTypes", "items"]) {
+  for (const key of ['entries', 'contentTypes', 'items']) {
     const list = data?.[key];
     if (!Array.isArray(list)) continue;
 
@@ -126,8 +122,8 @@ function collectEntries(data) {
 
 function extractLinksFromEntry(entry) {
   const links = [];
-  const entryId = safeGet(entry, ["sys", "id"]);
-  const contentType = safeGet(entry, ["sys", "contentType", "sys", "id"]) || null;
+  const entryId = safeGet(entry, ['sys', 'id']);
+  const contentType = safeGet(entry, ['sys', 'contentType', 'sys', 'id']) || null;
   const fields = entry.fields || {};
 
   for (const [fieldId, fieldValue] of Object.entries(fields)) {
@@ -144,7 +140,7 @@ function extractLinksFromEntry(entry) {
               contentType,
               fieldId,
               locale,
-              richTextPath: nodePath.join("."),
+              richTextPath: nodePath.join('.'),
               ...link,
             });
           }
@@ -163,7 +159,7 @@ function extractLinksFromEntry(entry) {
             contentType,
             fieldId,
             locale: null,
-            richTextPath: nodePath.join("."),
+            richTextPath: nodePath.join('.'),
             ...link,
           });
         }
@@ -184,9 +180,9 @@ async function main() {
 
   let data;
   try {
-    data = JSON.parse(fs.readFileSync(path.resolve(CONTENTFUL_DATA_PATH), "utf8"));
+    data = JSON.parse(fs.readFileSync(path.resolve(CONTENTFUL_DATA_PATH), 'utf8'));
   } catch (e) {
-    console.error("Failed to read/parse contentful data:", e.message);
+    console.error('Failed to read/parse contentful data:', e.message);
     process.exit(1);
   }
 
@@ -198,7 +194,7 @@ async function main() {
   const links = entries.flatMap(extractLinksFromEntry);
 
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
-  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(links, null, 2), "utf8");
+  fs.writeFileSync(OUTPUT_PATH, JSON.stringify(links, null, 2), 'utf8');
 
   console.log(`Extracted ${links.length} links from ${entries.length} entries`);
 }

@@ -1,14 +1,14 @@
-import fs from "fs";
-import path from "path";
-import "dotenv/config";
+import fs from 'fs';
+import path from 'path';
+import 'dotenv/config';
 
-const PLANTECH_BASE_URL = "https://www.plan-technology-for-your-school.education.gov.uk";
-const LINKS_FILE_PATH = path.resolve("./result/links.json");
+const PLANTECH_BASE_URL = 'https://www.plan-technology-for-your-school.education.gov.uk';
+const LINKS_FILE_PATH = path.resolve('./result/links.json');
 const REQUEST_TIMEOUT = 15000;
 
-const CSV_REPORT_DIR = path.resolve("./report");
-const EXTERNAL_LINK_CSV_PATH = path.join(CSV_REPORT_DIR, "failed-external-links.csv");
-const INTERNAL_LINK_CSV_PATH = path.join(CSV_REPORT_DIR, "internal-links-to-check.csv");
+const CSV_REPORT_DIR = path.resolve('./report');
+const EXTERNAL_LINK_CSV_PATH = path.join(CSV_REPORT_DIR, 'failed-external-links.csv');
+const INTERNAL_LINK_CSV_PATH = path.join(CSV_REPORT_DIR, 'internal-links-to-check.csv');
 
 function isValidUrl(uri) {
   try {
@@ -26,9 +26,9 @@ function readLinksData() {
   }
 
   try {
-    return JSON.parse(fs.readFileSync(LINKS_FILE_PATH, "utf8"));
+    return JSON.parse(fs.readFileSync(LINKS_FILE_PATH, 'utf8'));
   } catch (e) {
-    console.error("Failed to read/parse links file:", e.message);
+    console.error('Failed to read/parse links file:', e.message);
     process.exit(1);
   }
 }
@@ -39,8 +39,8 @@ function categoriseLinks(data) {
 
   for (const link of data) {
     const uri = link.uri;
-    const isHttp = uri.startsWith("http");
-    const isEmail = uri.startsWith("mailto:");
+    const isHttp = uri.startsWith('http');
+    const isEmail = uri.startsWith('mailto:');
     const isPlanTech = uri.startsWith(PLANTECH_BASE_URL);
 
     if ((!isEmail && !isHttp) || isPlanTech) {
@@ -72,14 +72,15 @@ async function checkExternalLink(url) {
 
   try {
     const res = await fetch(url, {
-      method: "GET",
-      redirect: "follow",
+      method: 'GET',
+      redirect: 'follow',
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-GB,en;q=0.9",
-        "Range": "bytes=0-0",
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36',
+        Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en;q=0.9',
+        Range: 'bytes=0-0',
       },
     });
 
@@ -92,11 +93,11 @@ async function checkExternalLink(url) {
     clearTimeout(timeout);
 
     if (res.redirected) {
-        return { valid: false, status: res.status, redirected: res.redirected, finalUrl: res.url };
+      return { valid: false, status: res.status, redirected: res.redirected, finalUrl: res.url };
     }
 
     if ([403, 406, 429].includes(res.status)) {
-        return { valid: true, status: res.status, redirected: res.redirected };
+      return { valid: true, status: res.status, redirected: res.redirected };
     }
 
     return { valid: res.ok, status: res.status, redirected: res.redirected };
@@ -117,14 +118,14 @@ async function validateExternalLinks(groupedLinks) {
         failedLinks.push({
           id: link.entryId,
           uri: link.uri,
-          reason: "Invalid URL format",
+          reason: 'Invalid URL format',
         });
 
         failedExternalRows.push({
           entryId: link.entryId,
           uri: link.uri,
-          status: "",
-          redirected: "",
+          status: '',
+          redirected: '',
         });
       }
       continue;
@@ -143,9 +144,9 @@ async function validateExternalLinks(groupedLinks) {
         failedExternalRows.push({
           entryId: link.entryId,
           uri: link.uri,
-          status: result.status ?? "",
+          status: result.status ?? '',
           redirected: result.redirected ?? false,
-          finalUrl: result.finalUrl ?? ""
+          finalUrl: result.finalUrl ?? '',
         });
       }
     }
@@ -160,18 +161,17 @@ function buildMarkdownReport(failedLinks, groupedExternal) {
   md += `\n### Summary\n`;
   md += `- Total external links checked: ${groupedExternal.size}\n`;
   md += `- Total link instances: ${Array.from(groupedExternal.values()).reduce((sum, arr) => sum + arr.length, 0)}\n`;
-  md += `- Failed URLs: ${new Set(failedLinks.map(l => l.uri)).size}\n`;
+  md += `- Failed URLs: ${new Set(failedLinks.map((l) => l.uri)).size}\n`;
   md += `- Failed instances: ${failedLinks.length}\n`;
   md += `\n`;
   md += `\n`;
   md += `Download the CSVs to view the results\n`;
 
-
   return md;
 }
 
 function csvEscape(value) {
-  const s = String(value ?? "");
+  const s = String(value ?? '');
   // escape quotes by doubling them; wrap in quotes if contains commas/newlines/quotes
   if (/[",\n\r]/.test(s)) {
     return `"${s.replace(/"/g, '""')}"`;
@@ -181,12 +181,12 @@ function csvEscape(value) {
 
 function writeCsv(filePath, headers, rows) {
   const lines = [];
-  lines.push(headers.map(csvEscape).join(","));
+  lines.push(headers.map(csvEscape).join(','));
   for (const row of rows) {
-    lines.push(headers.map((h) => csvEscape(row[h])).join(","));
+    lines.push(headers.map((h) => csvEscape(row[h])).join(','));
   }
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, lines.join("\n"), "utf8");
+  fs.writeFileSync(filePath, lines.join('\n'), 'utf8');
 }
 
 function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
@@ -202,8 +202,8 @@ function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
 
   writeCsv(
     EXTERNAL_LINK_CSV_PATH,
-    ["entryId", "link", "statusCode", "redirected", "finalUrl"],
-    externalRows
+    ['entryId', 'link', 'statusCode', 'redirected', 'finalUrl'],
+    externalRows,
   );
 
   // internal links csv
@@ -213,23 +213,20 @@ function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
     entryId: l.entryId,
   }));
 
-  writeCsv(
-    INTERNAL_LINK_CSV_PATH,
-    ["link", "entryId"],
-    internalRows
-  );
+  writeCsv(INTERNAL_LINK_CSV_PATH, ['link', 'entryId'], internalRows);
 
   console.log(`Wrote CSV: ${EXTERNAL_LINK_CSV_PATH}`);
   console.log(`Wrote CSV: ${INTERNAL_LINK_CSV_PATH}`);
 }
-
 
 async function main() {
   const data = readLinksData();
   const { internalLinks, externalLinks } = categoriseLinks(data);
   const groupedExternal = groupLinksByUrl(externalLinks);
 
-  console.log(`Checking ${groupedExternal.size} unique external URLs (${externalLinks.length} total instances)...`);
+  console.log(
+    `Checking ${groupedExternal.size} unique external URLs (${externalLinks.length} total instances)...`,
+  );
 
   const { failedLinks, failedExternalRows } = await validateExternalLinks(groupedExternal);
 
@@ -238,13 +235,12 @@ async function main() {
   const outPath = process.env.GITHUB_STEP_SUMMARY;
   if (outPath) {
     fs.appendFileSync(outPath, markdown);
-    console.log("Wrote link summary to GITHUB_STEP_SUMMARY");
+    console.log('Wrote link summary to GITHUB_STEP_SUMMARY');
   } else {
     console.log(markdown);
   }
 
-    exportLinkReportsToCsv(failedExternalRows, internalLinks);
-
+  exportLinkReportsToCsv(failedExternalRows, internalLinks);
 
   process.exit(0);
 }

@@ -4,7 +4,7 @@ import { fileURLToPath } from 'url';
 
 const existsSyncMock = jest.fn().mockImplementation(() => true);
 
-jest.unstable_mockModule("fs", () => ({
+jest.unstable_mockModule('fs', () => ({
   existsSync: existsSyncMock,
 }));
 
@@ -18,35 +18,27 @@ beforeAll(async () => {
   __filename = fileURLToPath(import.meta.url);
   __dirname = path.dirname(__filename);
 
-  const testFileName = "test-change.js";
-  filePath = path.join(
-    __dirname,
-    "..",
-    "..",
-    "..",
-    "content-management",
-    "changes",
-    testFileName
-  );
+  const testFileName = 'test-change.js';
+  filePath = path.join(__dirname, '..', '..', '..', 'content-management', 'changes', testFileName);
 
   jest.unstable_mockModule(filePath, () => ({
-    default: jest.fn()
+    default: jest.fn(),
   }));
 
   const mod1 = await import(filePath);
   mockTestChange = mod1.default;
 
-  const mod2 = await import("../../../content-management/main.js");
+  const mod2 = await import('../../../content-management/main.js');
   main = mod2.main;
 });
 
-describe.skip("main.js", () => {
-  it("should handle invalid filename", async () => {
+describe.skip('main.js', () => {
+  it('should handle invalid filename', async () => {
     existsSyncMock.mockImplementation(() => false);
-    const consoleSpy = jest.spyOn(console, "error").mockImplementation(() => { });
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     const originalArgv = process.argv;
-    process.argv = ["node", "main.js"]
+    process.argv = ['node', 'main.js'];
 
     await main();
 

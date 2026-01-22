@@ -87,29 +87,28 @@ jobs:
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
         run: npx playwright install --with-deps chromium
 
-            - name: Run Playwright + Cucumber tests (with recording)
-              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
-              env:
-                  URL: ${{ secrets.APP_URL }}
-                  DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
-                  DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
-                  DSI_SCHOOL_ESTABLISHMENT_REF: '900008'
-                  DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
-                  DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
-                  DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '900007'
-                  DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
-                  DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
-                  DB_SERVER: ${{ secrets.AZ_DB_SERVER }}
-                  DB_MODE: azure
-                  DB_USER: sa
-                  DB_DATABASE: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-sqldb
-                  HEADLESS: true
-                  NODE_ICU_DATA: ./node_modules/full-icu
-                  LANG: en_GB.UTF-8
-                  LC_ALL: en_GB.UTF-8
-                  TZ: Europe/London
-              run: npm run test:login && npm run test:record:smoke
-
+      - name: Run Playwright + Cucumber tests (with recording)
+        working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+        env:
+          URL: ${{ secrets.APP_URL }}
+          DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
+          DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
+          DSI_SCHOOL_ESTABLISHMENT_REF: '900008'
+          DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
+          DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
+          DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '900007'
+          DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
+          DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
+          DB_SERVER: ${{ secrets.AZ_DB_SERVER }}
+          DB_MODE: azure
+          DB_USER: sa
+          DB_DATABASE: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-sqldb
+          HEADLESS: true
+          NODE_ICU_DATA: ./node_modules/full-icu
+          LANG: en_GB.UTF-8
+          LC_ALL: en_GB.UTF-8
+          TZ: Europe/London
+        run: npm run test:login && npm run test:record:smoke
       - name: Merge cucumber JSON reports
         if: always()
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/

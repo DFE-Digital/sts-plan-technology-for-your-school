@@ -1,11 +1,7 @@
 import { jest } from '@jest/globals';
 
 const mockGetEnvironments = jest.fn().mockResolvedValue({
-  items: [
-    { name: "master" },
-    { name: "test-env" },
-    { name: "staging" }
-  ]
+  items: [{ name: 'master' }, { name: 'test-env' }, { name: 'staging' }],
 });
 
 const mockEnvironment = {
@@ -17,15 +13,15 @@ const mockGetEnvironment = jest.fn().mockResolvedValue(mockEnvironment);
 
 const mockSpace = {
   getEnvironments: mockGetEnvironments,
-  getEnvironment: mockGetEnvironment
+  getEnvironment: mockGetEnvironment,
 };
 
 const mockGetSpace = jest.fn().mockResolvedValue(mockSpace);
 
-jest.mock("contentful-management", () => ({
+jest.mock('contentful-management', () => ({
   createClient: jest.fn(() => ({
-    getSpace: mockGetSpace
-  }))
+    getSpace: mockGetSpace,
+  })),
 }));
 
 const contentfulManagement = (await import('contentful-management')).default;
@@ -53,11 +49,9 @@ describe('getAndValidateClient', () => {
   it('should create and return a valid client when environment is valid', async () => {
     const client = await getAndValidateClient();
 
-    expect(contentfulManagement.createClient).toHaveBeenCalledWith(
-      {
-        accessToken: "test-token",
-      }
-    );
+    expect(contentfulManagement.createClient).toHaveBeenCalledWith({
+      accessToken: 'test-token',
+    });
 
     expect(mockGetEnvironments).toHaveBeenCalledTimes(1);
     expect(mockGetSpace).toHaveBeenCalledTimes(2);

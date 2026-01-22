@@ -1,4 +1,4 @@
-import contentfulManagement from "contentful-management";
+import contentfulManagement from 'contentful-management';
 
 /**
  * @typedef {Object} ClientAPI
@@ -46,7 +46,7 @@ export async function validateEnvironment(client) {
  */
 export async function getClient() {
   const client = contentfulManagement.createClient({
-    accessToken: process.env.MANAGEMENT_TOKEN
+    accessToken: process.env.MANAGEMENT_TOKEN,
   });
 
   await validateEnvironment(client);

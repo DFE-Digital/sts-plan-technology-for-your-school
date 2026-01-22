@@ -68,7 +68,7 @@ This section discusses how to set-up and run Terraform locally on a development 
 
 ### Authenticating using Service Principle
 
-The Terraform configuration can be executed using an Azure Service Principle.  To do this you'll need to set the following environment variables:
+The Terraform configuration can be executed using an Azure Service Principle. To do this you'll need to set the following environment variables:
 
 MacOS:
 
@@ -106,36 +106,36 @@ Run the following command to initialise Terraform.
 
 To run the plan command, first rename the `terraform.tfvars.example` file to `terraform.tfvars` and complete the following configuration.
 
-| Title                                                   | description                                                                  |
-| ------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| project_name                                            | DFE Project name                                                             |
-| environment                                             | The environment prefix                                                       |
-| azure_location                                          | The Azure location  (e.g. "westeurope")                                      |
-|                                                         |                                                                              |
-| az_tag_environment                                      | Environment tag for Azure resources (e.g. "Dev")                             |
-| az_tag_product                                          | Product tag for Azure resources                                              |
-|                                                         |                                                                              |
-| az_sql_azuread_admin_username                           | User for the SQL server  (this will be prepended by the resource group name) |
-| az_sql_azuread_admin_objectid                           | Guid representing the Azure admin resource                                   |
-| az_sql_admin_password                                   | Password for SQL server admin                                                |
-|                                                         |                                                                              |
-| az_app_kestrel_endpoint                                 | Expected endpoint for the Kestrel server (e.g. "<https://127.0.0.1:8080>)    |
-| container_app_min_replicas                              |                                                                              |
-| container_app_max_replicas                              |                                                                              |
-| container_app_http_concurrency                          |                                                                              |
-|                                                         |                                                                              |
-| registry_server                                         |                                                                              |
-| registry_username                                       |                                                                              |
-| registry_password                                       |                                                                              |
-| image_tag                                               |                                                                              |
-|                                                         |                                                                              |
-| storage_account_public_access_enabled                   |                                                                              |
-| container_app_storage_account_shared_access_key_enabled |                                                                              |
-|                                                         |                                                                              |
-| container_environment                                   |                                                                              |
-| contentful_management_token                             |                                                                              |
-| contentful_upsert_webhook                               |                                                                              |
-| contentful_webhook_endpoint                             |                                                                              |
+| Title                                                   | description                                                                 |
+| ------------------------------------------------------- | --------------------------------------------------------------------------- |
+| project_name                                            | DFE Project name                                                            |
+| environment                                             | The environment prefix                                                      |
+| azure_location                                          | The Azure location (e.g. "westeurope")                                      |
+|                                                         |                                                                             |
+| az_tag_environment                                      | Environment tag for Azure resources (e.g. "Dev")                            |
+| az_tag_product                                          | Product tag for Azure resources                                             |
+|                                                         |                                                                             |
+| az_sql_azuread_admin_username                           | User for the SQL server (this will be prepended by the resource group name) |
+| az_sql_azuread_admin_objectid                           | Guid representing the Azure admin resource                                  |
+| az_sql_admin_password                                   | Password for SQL server admin                                               |
+|                                                         |                                                                             |
+| az_app_kestrel_endpoint                                 | Expected endpoint for the Kestrel server (e.g. "<https://127.0.0.1:8080>)   |
+| container_app_min_replicas                              |                                                                             |
+| container_app_max_replicas                              |                                                                             |
+| container_app_http_concurrency                          |                                                                             |
+|                                                         |                                                                             |
+| registry_server                                         |                                                                             |
+| registry_username                                       |                                                                             |
+| registry_password                                       |                                                                             |
+| image_tag                                               |                                                                             |
+|                                                         |                                                                             |
+| storage_account_public_access_enabled                   |                                                                             |
+| container_app_storage_account_shared_access_key_enabled |                                                                             |
+|                                                         |                                                                             |
+| container_environment                                   |                                                                             |
+| contentful_management_token                             |                                                                             |
+| contentful_upsert_webhook                               |                                                                             |
+| contentful_webhook_endpoint                             |                                                                             |
 
 Run the following command to execute the Plan command:
 
