@@ -1,14 +1,14 @@
 export const MAT_SCHOOLS = {
   COMMUNITY: {
-    URN: "00000002",
+    URN: "900006",
     NAME: "DSI TEST Establishment (001) Community School (01)"
   },
   MISCELLANEOUS: {
-    URN: "00000018",
+    URN: "900008",
     NAME: "DSI TEST Establishment (001) Miscellaneous (27)"
   },
   FOUNDATION: {
-    URN: "00000005",
+    URN: "900007",
     NAME: "DSI TEST Establishment (001) Foundation School (05)"
   },
 } as const;

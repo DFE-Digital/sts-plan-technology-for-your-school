@@ -120,7 +120,7 @@ public class ReviewAnswersViewBuilder(
 
             await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
                 establishmentId,
-                userOrganisationId,
+                CurrentUser.IsMat ? userOrganisationId : null,
                 submissionId,
                 userId,
                 section

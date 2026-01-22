@@ -77,7 +77,7 @@ Then(
 
     expect(cookie, `Cookie "${cookieName}" not found`).toBeDefined();
 
-    // e.g. cookie {"Urn":"00000002","Name":"DSI TEST Establishment (001) Community School (01)"}
+    // e.g. cookie {"Urn":"900006","Name":"DSI TEST Establishment (001) Community School (01)"}
     let parsed: any;
 
     try {
