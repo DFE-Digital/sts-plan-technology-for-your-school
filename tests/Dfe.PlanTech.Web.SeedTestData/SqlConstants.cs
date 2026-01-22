@@ -24,16 +24,16 @@ namespace Dfe.PlanTech.Web.SeedTestData
                                 -- Insert test establishments linked to that MAT
                                 INSERT INTO [dbo].[establishmentLink] (groupUid, establishmentName, urn)
                                 VALUES
-                                ('99999', 'DSI TEST Establishment (001) Community School (01)', '00000002'),
-                                ('99999', 'DSI TEST Establishment (001) Miscellaneous (27)', '00000018'),
-                                ('99999', 'DSI TEST Establishment (001) Foundation School (05)', '00000005');
+                                ('99999', 'DSI TEST Establishment (001) Community School (01)', '900006'),
+                                ('99999', 'DSI TEST Establishment (001) Miscellaneous (27)', '900008'),
+                                ('99999', 'DSI TEST Establishment (001) Foundation School (05)', '900007');
 
                                 -- Insert test establishments
                                 INSERT INTO [dbo].[establishment] (establishmentRef, establishmentType, orgName, groupUid)
                                 VALUES
-                                ('00000002', 'Community School', 'DSI TEST Establishment (001) Community School (01)', null),
-                                ('00000018', 'Miscellaneous','DSI TEST Establishment (001) Miscellaneous (27)', null),
-                                ('00000005', 'Foundation School', 'DSI TEST Establishment (001) Foundation School (05)', null),
+                                ('900006', 'Community School', 'DSI TEST Establishment (001) Community School (01)', null),
+                                ('900008', 'Miscellaneous','DSI TEST Establishment (001) Miscellaneous (27)', null),
+                                ('900007', 'Foundation School', 'DSI TEST Establishment (001) Foundation School (05)', null),
                                 ('00000046', null, 'DSI TEST Multi-Academy Trust (010)', '99999');
                            ";
 

@@ -93,10 +93,10 @@ jobs:
                   URL: ${{ secrets.APP_URL }}
                   DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
                   DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
-                  DSI_SCHOOL_ESTABLISHMENT_REF: '00000018'
+                  DSI_SCHOOL_ESTABLISHMENT_REF: '900008'
                   DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
                   DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
-                  DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '00000005'
+                  DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '900007'
                   DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
                   DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
                   DB_SERVER: ${{ secrets.AZ_DB_SERVER }}
