@@ -25,5 +25,5 @@ Feature: MAT user selects a school
     When I select the school "DSI TEST Establishment (001) Community School (01)"
     Then I should be on the URL containing "/home"
     And I should see the selected school name "DSI TEST Establishment (001) Community School (01)"
-    And the selected school cookie "SelectedSchool" should have URN "00000002" and name "DSI TEST Establishment (001) Community School (01)"
+    And the selected school cookie "SelectedSchool" should have URN "900006" and name "DSI TEST Establishment (001) Community School (01)"
 
