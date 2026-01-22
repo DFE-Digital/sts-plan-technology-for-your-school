@@ -15,7 +15,10 @@ public sealed class LogInvalidModelStateAttribute : ActionFilterAttribute
         if (!context.ModelState.IsValid)
         {
             var displayName = context.ActionDescriptor.DisplayName;
-            logger.LogError("Not able to validate model state for controller method: {DisplayName}", displayName);
+            logger.LogError(
+                "Not able to validate model state for controller method: {DisplayName}",
+                displayName
+            );
         }
     }
 }

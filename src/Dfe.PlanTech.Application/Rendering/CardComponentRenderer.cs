@@ -16,7 +16,9 @@ public class CardComponentRenderer : ICardContentPartRenderer
         stringBuilder.Append("<div class=\"dfe-card\">");
         stringBuilder.Append("<div class=\"dfe-card-container\">");
         stringBuilder.Append("<h3 class=\"govuk-heading-m\">");
-        stringBuilder.Append($"<a href=\"{content.Uri}\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">{content.InternalName}</a>");
+        stringBuilder.Append(
+            $"<a href=\"{content.Uri}\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">{content.InternalName}</a>"
+        );
         stringBuilder.Append("</h3>");
         stringBuilder.Append($"<p class=\"govuk-body-s\">{content.Description}</p>");
         stringBuilder.Append("</div></div>");

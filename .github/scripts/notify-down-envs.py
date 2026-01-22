@@ -16,11 +16,11 @@ def send_email(recipient_addresses, env_summary: str) -> None:
     if not recipient_addresses:
         print("⚠️  No recipient addresses configured, skipping email.")
         return
-    
+
     personalisation = {
         "environment summary": env_summary
     }
-    
+
     notifications_client = NotificationsAPIClient(NOTIFICATIONS_API_KEY)
 
     try:
@@ -71,7 +71,7 @@ if not RECIPIENT_ADDRESSES:
     sys.exit(0)
 
 recipient_addresses = [
-    address.strip() 
+    address.strip()
     for address in RECIPIENT_ADDRESSES.split(";")
     if address.strip()
 ]

@@ -14,7 +14,6 @@ public static class Program
         var configurationBuilder = new ConfigurationBuilder();
         configurationBuilder.AddUserSecrets("f2f25d53-aecc-4c9f-9aef-3b2447db4f97");
 
-
         var configuration = configurationBuilder.Build();
         var services = new ServiceCollection();
 

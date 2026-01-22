@@ -5,9 +5,7 @@ using Microsoft.AspNetCore.Razor.TagHelpers;
 
 namespace Dfe.PlanTech.Web.TagHelpers;
 
-public class HeaderComponentTagHelper(
-    ILogger<HeaderComponentTagHelper> logger
-) : TagHelper
+public class HeaderComponentTagHelper(ILogger<HeaderComponentTagHelper> logger) : TagHelper
 {
     public ComponentHeaderEntry? Model { get; set; }
 

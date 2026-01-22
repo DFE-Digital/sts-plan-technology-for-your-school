@@ -8,7 +8,7 @@ Then(
     state: 'not started' | 'in progress' | 'completed',
     heading: string,
     description: string,
-    href: string
+    href: string,
   ) {
     const container = this.page.locator('#main-content');
     const currentDate = getCurrentShortDate();
@@ -36,7 +36,7 @@ Then(
       // Paragraph with the "started on" text
       const inProgressPara = headingEl
         .locator(
-          'xpath=following-sibling::p[contains(normalize-space(.), "A self-assessment was started on")]'
+          'xpath=following-sibling::p[contains(normalize-space(.), "A self-assessment was started on")]',
         )
         .first();
 
@@ -51,9 +51,7 @@ Then(
       const link = headingEl.locator('xpath=following-sibling::p[a][1]/a');
 
       await expect(link).toBeVisible();
-      await expect(link).toHaveText(
-        `Continue your self-assessment for ${sectionLower}`
-      );
+      await expect(link).toHaveText(`Continue your self-assessment for ${sectionLower}`);
       await expect(link).toHaveAttribute('href', href);
       return;
     }
@@ -71,7 +69,7 @@ Then(
       expect(normalisedText).toMatch(expectedText);
 
       const viewLink = headingEl.locator(
-        'xpath=following-sibling::p[a[contains(normalize-space(.), "View answers for")]][1]/a'
+        'xpath=following-sibling::p[a[contains(normalize-space(.), "View answers for")]][1]/a',
       );
       await expect(viewLink).toBeVisible();
       await expect(viewLink).toHaveText(`View answers for ${sectionLower}`);
@@ -80,5 +78,5 @@ Then(
     }
 
     throw new Error(`Unknown state "${state}". Use "not started", "in progress", or "completed".`);
-  }
+  },
 );

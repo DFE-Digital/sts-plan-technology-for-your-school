@@ -10,13 +10,17 @@ namespace Dfe.PlanTech.Application.UnitTests.Rendering;
 
 public class TextRendererTests
 {
-    private readonly ILogger<TextRendererOptions> _logger = Substitute.For<ILogger<TextRendererOptions>>();
+    private readonly ILogger<TextRendererOptions> _logger = Substitute.For<
+        ILogger<TextRendererOptions>
+    >();
 
     private const string NODE_TYPE = "text";
 
     private Application.Rendering.TextRenderer BuildSut(List<MarkOption>? markOptions = null)
     {
-        return new Application.Rendering.TextRenderer(new TextRendererOptions(_logger, markOptions ?? []));
+        return new Application.Rendering.TextRenderer(
+            new TextRendererOptions(_logger, markOptions ?? [])
+        );
     }
 
     [Fact]
@@ -24,11 +28,7 @@ public class TextRendererTests
     {
         const string value = "Text value";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
         var renderer = BuildSut();
 
@@ -40,11 +40,7 @@ public class TextRendererTests
     [Fact]
     public void Should_Reject_When_Not_Text()
     {
-        var content = new RichTextContentField()
-        {
-            NodeType = "hyperlink",
-            Value = "hyperlink"
-        };
+        var content = new RichTextContentField() { NodeType = "hyperlink", Value = "hyperlink" };
 
         var renderer = BuildSut();
 
@@ -59,14 +55,13 @@ public class TextRendererTests
         const string boldType = "bold";
         const string htmlTagForBold = "strong";
 
-        var boldMarkOption = new MarkOption()
-        {
-            Mark = boldType,
-            HtmlTag = htmlTagForBold,
-        };
+        var boldMarkOption = new MarkOption() { Mark = boldType, HtmlTag = htmlTagForBold };
 
         var renderer = BuildSut([boldMarkOption]);
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), [renderer]);
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            [renderer]
+        );
 
         const string value = "Paragraph text";
 
@@ -74,11 +69,7 @@ public class TextRendererTests
         {
             NodeType = NODE_TYPE,
             Value = value,
-            Marks = new() {
-                new RichTextMarkField() {
-                    Type = boldType,
-                }
-            }
+            Marks = new() { new RichTextMarkField() { Type = boldType } },
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
@@ -99,11 +90,14 @@ public class TextRendererTests
         {
             Mark = boldType,
             HtmlTag = htmlTagForBold,
-            Classes = testClasses
+            Classes = testClasses,
         };
 
         var renderer = BuildSut([boldMarkOption]);
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), [renderer]);
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            [renderer]
+        );
 
         const string value = "Paragraph text";
 
@@ -111,7 +105,7 @@ public class TextRendererTests
         {
             NodeType = NODE_TYPE,
             Value = value,
-            Marks = [new RichTextMarkField() { Type = boldType }]
+            Marks = [new RichTextMarkField() { Type = boldType }],
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
@@ -120,7 +114,6 @@ public class TextRendererTests
 
         Assert.Equal($"<{htmlTagForBold} class=\"{testClasses}\">{value}</{htmlTagForBold}>", html);
     }
-
 
     [Fact]
     public void Should_RenderText_When_HasNoMarks()
@@ -133,19 +126,18 @@ public class TextRendererTests
         {
             Mark = boldType,
             HtmlTag = htmlTagForBold,
-            Classes = testClasses
+            Classes = testClasses,
         };
 
         var renderer = BuildSut([boldMarkOption]);
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "Paragraph text";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
@@ -154,17 +146,16 @@ public class TextRendererTests
         Assert.Equal(value, html);
     }
 
-
     [Fact]
     public void Should_Log_On_Missing_Mark_Option()
     {
-        var boldMarkField = new RichTextMarkField()
-        {
-            Type = "bold"
-        };
+        var boldMarkField = new RichTextMarkField() { Type = "bold" };
 
         var renderer = BuildSut();
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), [renderer]);
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            [renderer]
+        );
 
         var content = new RichTextContentField()
         {
@@ -175,17 +166,20 @@ public class TextRendererTests
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
-        _logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<IReadOnlyList<KeyValuePair<string, object>>>(state =>
-                state.Any(kv => kv.Key == "{OriginalFormat}" &&
-                                (string)kv.Value == "Missing mark option for {Mark}")
-                && state.Any(kv => kv.Key == "Mark" &&
-                                   ReferenceEquals(kv.Value, boldMarkField))
-            ),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>()
-        );
+        _logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<IReadOnlyList<KeyValuePair<string, object>>>(state =>
+                    state.Any(kv =>
+                        kv.Key == "{OriginalFormat}"
+                        && (string)kv.Value == "Missing mark option for {Mark}"
+                    )
+                    && state.Any(kv => kv.Key == "Mark" && ReferenceEquals(kv.Value, boldMarkField))
+                ),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 }

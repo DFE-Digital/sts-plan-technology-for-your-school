@@ -20,60 +20,45 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 
         public TextBody BuildTextBody()
         {
-            return new TextBody
-            {
-                RichText = BuildRichContent()
-            };
+            return new TextBody { RichText = BuildRichContent() };
         }
 
         public ComponentDropDown BuildDropDownComponent()
         {
-            return new ComponentDropDown
-            {
-                Title = "Dropdown",
-                Content = BuildRichContent()
-            };
+            return new ComponentDropDown { Title = "Dropdown", Content = BuildRichContent() };
         }
 
         public ButtonWithLink BuildButtonWithLink()
         {
-            return new ButtonWithLink
-            {
-                Button = BuildButton(),
-                Href = "/FakeLink"
-            };
+            return new ButtonWithLink { Button = BuildButton(), Href = "/FakeLink" };
         }
 
-        public ButtonWithEntryReference BuildButtonWithEntryReference()
-        => new()
-        {
-            Button = BuildButton(),
-            LinkToEntry = BuildButton()
-        };
+        public ButtonWithEntryReference BuildButtonWithEntryReference() =>
+            new() { Button = BuildButton(), LinkToEntry = BuildButton() };
 
-        public InsetText BuildInsetText() => new()
-        {
-            Text = "Inset Text"
-        };
+        public InsetText BuildInsetText() => new() { Text = "Inset Text" };
 
-        public List<Section> BuildSections()
-        =>
-        [
-            new Section
+        public List<Section> BuildSections() =>
+            [new Section { Name = "Section", Questions = BuildQuestions() }];
+
+        public static RecommendationsViewModel BuildRecommendationViewModel(
+            List<QuestionWithAnswer>? submission = null
+        ) =>
+            new()
             {
-                Name = "Section",
-                Questions = BuildQuestions(),
-            }
-        ];
+                Chunks =
+                [
+                    BuildRecommendationChunk("First", "Title one"),
+                    BuildRecommendationChunk("Second", "Title two"),
+                    BuildRecommendationChunk("Third", "Title three"),
+                ],
+                SubmissionResponses = submission ?? BuildSubmissionResponses(),
+            };
 
-        public static RecommendationsViewModel BuildRecommendationViewModel(List<QuestionWithAnswer>? submission = null)
-        => new()
-        {
-            Chunks = [BuildRecommendationChunk("First", "Title one"), BuildRecommendationChunk("Second", "Title two"), BuildRecommendationChunk("Third", "Title three")],
-            SubmissionResponses = submission ?? BuildSubmissionResponses()
-        };
-
-        public static RecommendationChunk BuildRecommendationChunk(string header, string title = "Title") => new() { Header = header };
+        public static RecommendationChunk BuildRecommendationChunk(
+            string header,
+            string title = "Title"
+        ) => new() { Header = header };
 
         private static List<Question> BuildQuestions()
         {
@@ -84,27 +69,35 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
                     Text = "Question Text",
                     HelpText = "Help Text",
                     Answers = BuildAnswers(),
-                }
+                },
             ];
         }
 
         private static List<Answer> BuildAnswers()
         {
-            return
-            [
-                new Answer
-                {
-                    Text = "Answer"
-                }
-            ];
+            return [new Answer { Text = "Answer" }];
         }
 
         public static IEnumerable<QuestionWithAnswer> BuildSubmissionResponses()
         {
             return new List<QuestionWithAnswer>
             {
-                new QuestionWithAnswer { QuestionSysId = "Question1", QuestionText = "Question 1", AnswerSysId = "Answer1", AnswerText = "Answer 1", DateCreated = new DateTime() },
-                new QuestionWithAnswer { QuestionSysId = "Question2", QuestionText = "Question 2", AnswerSysId = "Answer2", AnswerText = "Answer 2", DateCreated = new DateTime() },
+                new QuestionWithAnswer
+                {
+                    QuestionSysId = "Question1",
+                    QuestionText = "Question 1",
+                    AnswerSysId = "Answer1",
+                    AnswerText = "Answer 1",
+                    DateCreated = new DateTime(),
+                },
+                new QuestionWithAnswer
+                {
+                    QuestionSysId = "Question2",
+                    QuestionText = "Question 2",
+                    AnswerSysId = "Answer2",
+                    AnswerText = "Answer 2",
+                    DateCreated = new DateTime(),
+                },
             };
         }
 
@@ -120,11 +113,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
 
         private static Button BuildButton()
         {
-            return new Button
-            {
-                Value = "Submit",
-                IsStartButton = false,
-            };
+            return new Button { Value = "Submit", IsStartButton = false };
         }
 
         public Page BuildPage()
@@ -135,24 +124,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
                 Slug = "testing-page",
                 SectionTitle = "Section Title",
                 Title = BuildTitle(),
-                Content = []
+                Content = [],
             };
         }
 
-        private static Title BuildTitle(string text = "Testing Title")
-        => new()
-        {
-            Text = text
-        };
+        private static Title BuildTitle(string text = "Testing Title") => new() { Text = text };
 
         public static WarningComponent BuildWarningComponent(string text)
         {
             return new WarningComponent
             {
-                Text = new TextBody
-                {
-                    RichText = BuildRichContent(text)
-                }
+                Text = new TextBody { RichText = BuildRichContent(text) },
             };
         }
 
@@ -160,10 +142,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Models
         {
             return new NotificationBanner()
             {
-                Text = new TextBody
-                {
-                    RichText = BuildRichContent(text)
-                }
+                Text = new TextBody { RichText = BuildRichContent(text) },
             };
         }
     }

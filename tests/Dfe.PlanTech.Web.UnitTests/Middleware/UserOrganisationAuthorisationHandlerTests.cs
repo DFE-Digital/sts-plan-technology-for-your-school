@@ -27,8 +27,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var context = new DefaultHttpContext();
             var requirement = new UserOrganisationAuthorisationRequirement();
 
-            context.Items[UserAuthorisationResult.HttpContextKey] =
-                    new UserAuthorisationResult(true, new UserAuthorisationStatus(true, true));
+            context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(
+                true,
+                new UserAuthorisationStatus(true, true)
+            );
 
             var authContext = new AuthorizationHandlerContext(
                 new[] { requirement },
@@ -47,8 +49,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             var context = new DefaultHttpContext();
             var requirement = new UserOrganisationAuthorisationRequirement();
 
-            context.Items[UserAuthorisationResult.HttpContextKey] =
-                    new UserAuthorisationResult(true, new UserAuthorisationStatus(true, true));
+            context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(
+                true,
+                new UserAuthorisationStatus(true, true)
+            );
 
             var authContext = new AuthorizationHandlerContext(
                 new[] { requirement },
@@ -72,11 +76,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             var requirement = new UserOrganisationAuthorisationRequirement();
 
-            context.Items[UserAuthorisationResult.HttpContextKey] =
-                new UserAuthorisationResult(
-                    true,
-                    new UserAuthorisationStatus(true, false)
-                );
+            context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(
+                true,
+                new UserAuthorisationStatus(true, false)
+            );
 
             var authContext = new AuthorizationHandlerContext(
                 new[] { requirement },
@@ -90,8 +93,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             Assert.True(authContext.HasFailed);
             Assert.NotEmpty(authContext.FailureReasons);
         }
-
-
 
         [Fact]
         public async Task HandleRequirementAsync_ShouldSucceed_WhenRequestIsSignoutUrl()
@@ -128,10 +129,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             Assert.False(authContext.HasSucceeded);
             Assert.False(authContext.HasFailed);
 
-            _logger.Received(1).Log(
+            _logger
+                .Received(1)
+                .Log(
                     LogLevel.Error,
                     Arg.Any<EventId>(),
-                    Arg.Is<object>(o => o != null && o.ToString() == $"Expected resource to be HttpContext but received {typeof(object)}"),
+                    Arg.Is<object>(o =>
+                        o != null
+                        && o.ToString()
+                            == $"Expected resource to be HttpContext but received {typeof(object)}"
+                    ),
                     Arg.Any<Exception?>(),
                     Arg.Any<Func<object, Exception?, string>>()
                 );
@@ -140,10 +147,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
     public class UserOrganisationAuthorisationHandlerMock : UserOrganisationAuthorisationHandler
     {
-        public UserOrganisationAuthorisationHandlerMock(ILogger<UserOrganisationAuthorisationHandler> logger)
+        public UserOrganisationAuthorisationHandlerMock(
+            ILogger<UserOrganisationAuthorisationHandler> logger
+        )
             : base(logger) { }
 
-        public Task PublicHandleRequirementAsync(AuthorizationHandlerContext context, UserOrganisationAuthorisationRequirement requirement)
-            => HandleRequirementAsync(context, requirement);
+        public Task PublicHandleRequirementAsync(
+            AuthorizationHandlerContext context,
+            UserOrganisationAuthorisationRequirement requirement
+        ) => HandleRequirementAsync(context, requirement);
     }
 }

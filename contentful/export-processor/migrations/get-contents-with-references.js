@@ -1,11 +1,11 @@
 // eslint-disable-next-line no-unused-vars
-import DataMapper from "../data-mapper.js";
+import DataMapper from '../data-mapper.js';
 
 /**
  * Creates an object with all content entries with their outgoing references
  * @param {object} params
- * @param {DataMapper} params.dataMapper 
- * @param {object[]} params.entries - original exported contentful entries 
+ * @param {DataMapper} params.dataMapper
+ * @param {object[]} params.entries - original exported contentful entries
  */
 export const getContentsWithReferences = ({ dataMapper, entries }) => {
   const contents = getOutgoingReferences(dataMapper);
@@ -46,7 +46,9 @@ function getIncomingReferences(contents) {
       const matching = contents[referencedId];
 
       if (!matching) {
-        console.error(`Content ${id} has outgoing reference ID ${referencedId} which was not found`);
+        console.error(
+          `Content ${id} has outgoing reference ID ${referencedId} which was not found`,
+        );
         continue;
       }
 
@@ -56,23 +58,27 @@ function getIncomingReferences(contents) {
 }
 
 function getContentsWithReferenceFields({ referenceFields, content, id }) {
-  const referenceFieldValues = referenceFields.map(field => field[0]).map(field => content.fields[field]).filter(field => !!field).flatMap(field => field);
+  const referenceFieldValues = referenceFields
+    .map((field) => field[0])
+    .map((field) => content.fields[field])
+    .filter((field) => !!field)
+    .flatMap((field) => field);
 
   return {
     id: id,
-    referencedIds: Array.from(referenceFieldValues.map(getReferenceId).filter(id => !!id)) ?? [],
-    referencedByIds: new Set()
+    referencedIds: Array.from(referenceFieldValues.map(getReferenceId).filter((id) => !!id)) ?? [],
+    referencedByIds: new Set(),
   };
 }
 
 /**
  * Adds the original contentful entry value to each content
- * @param {*} param0 
- * @returns 
+ * @param {*} param0
+ * @returns
  */
 function addOriginalContentEntries({ contents, entries }) {
   return Object.entries(contents).map(([id, content]) => {
-    const matchingEntry = entries.find(entry => entry.sys.id == id);
+    const matchingEntry = entries.find((entry) => entry.sys.id == id);
 
     if (!matchingEntry) {
       console.error(`Couldn't find original entry for ${id}`);
@@ -82,12 +88,11 @@ function addOriginalContentEntries({ contents, entries }) {
     return {
       ...content,
       referencedByIds: Array.from(content.referencedByIds.values()) ?? [],
-      entry: matchingEntry
+      entry: matchingEntry,
     };
   });
-
 }
-const getReferenceId = value => {
+const getReferenceId = (value) => {
   const id = value?.sys?.id;
 
   if (!id) {

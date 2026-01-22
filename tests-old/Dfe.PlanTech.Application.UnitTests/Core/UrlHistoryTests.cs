@@ -16,11 +16,14 @@ public class UrlHistoryTests
         cacherSubstitute.Get<Stack<Uri>>(UrlHistory.CACHE_KEY).Returns(history);
 
         cacherSubstitute.Get(UrlHistory.CACHE_KEY, Arg.Any<Func<Stack<Uri>>>()).Returns(history);
-        cacherSubstitute.When(x => x.Set(UrlHistory.CACHE_KEY, Arg.Any<TimeSpan>(), Arg.Any<Stack<Uri>>()))
-            .Do((callInfo) =>
-            {
-                history = (Stack<Uri>)callInfo[2];
-            });
+        cacherSubstitute
+            .When(x => x.Set(UrlHistory.CACHE_KEY, Arg.Any<TimeSpan>(), Arg.Any<Stack<Uri>>()))
+            .Do(
+                (callInfo) =>
+                {
+                    history = (Stack<Uri>)callInfo[2];
+                }
+            );
 
         cacher = cacherSubstitute;
     }

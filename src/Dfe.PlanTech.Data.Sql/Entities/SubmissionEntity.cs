@@ -49,7 +49,7 @@ public class SubmissionEntity
             Responses = Responses.Select(r => r.AsDto()).ToList(),
             Deleted = Deleted,
             Viewed = Viewed,
-            Status = Status
+            Status = Status,
         };
     }
 }

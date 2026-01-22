@@ -1,33 +1,28 @@
-describe("Accessibility Page - Unauthenticated", () => {
-  const url = "/";
+describe('Accessibility Page - Unauthenticated', () => {
+  const url = '/';
 
   beforeEach(() => {
     cy.visit(url);
-    cy.get(
-      "footer.govuk-footer ul.govuk-footer__inline-list a.govuk-footer__link"
-    )
-      .contains("Accessibility")
+    cy.get('footer.govuk-footer ul.govuk-footer__inline-list a.govuk-footer__link')
+      .contains('Accessibility')
       .click();
-    cy.url().should("contain", "/accessibility");
+    cy.url().should('contain', '/accessibility');
     cy.injectAxe();
   });
 
-  it("Should Have Heading", () => {
-    cy.get("h1.govuk-heading-xl").should("exist");
+  it('Should Have Heading', () => {
+    cy.get('h1.govuk-heading-xl').should('exist');
   });
 
-  it("Should Have Back Button", () => {
-    cy.get('a:contains("Back")')
-      .should("exist")
-      .should("have.attr", "href")
-      .and("include", "/");
+  it('Should Have Back Button', () => {
+    cy.get('a:contains("Back")').should('exist').should('have.attr', 'href').and('include', '/');
   });
 
-  it("Should Have Content", () => {
-    cy.get("p").should("exist");
+  it('Should Have Content', () => {
+    cy.get('p').should('exist');
   });
 
-  it("Passes Accessibility Testing", () => {
+  it('Passes Accessibility Testing', () => {
     cy.runAxe();
   });
 });

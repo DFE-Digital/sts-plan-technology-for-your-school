@@ -4,7 +4,6 @@ using Dfe.PlanTech.Domain.Cookie;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 
-
 namespace Dfe.PlanTech.Application.UnitTests.Cookie.Service;
 
 public class CookieServiceTests
@@ -89,9 +88,15 @@ public class CookieServiceTests
     [InlineData(null, false)]
     [InlineData(true, true)]
     [InlineData(false, true)]
-    public void UserPreferencesSet_Returns_UserAcceptsCookies_Status(bool? userAcceptsCookies, bool expectedResult)
+    public void UserPreferencesSet_Returns_UserAcceptsCookies_Status(
+        bool? userAcceptsCookies,
+        bool expectedResult
+    )
     {
-        var cookieSerialized = SerializeCookie(visibility: true, userAcceptsCookies: userAcceptsCookies);
+        var cookieSerialized = SerializeCookie(
+            visibility: true,
+            userAcceptsCookies: userAcceptsCookies
+        );
         var requestCookiesSubstitute = Substitute.For<IRequestCookieCollection>();
         requestCookiesSubstitute[CookieService.Cookie_Key].Returns(cookieSerialized);
 
@@ -118,7 +123,11 @@ public class CookieServiceTests
 
     private static string SerializeCookie(bool visibility, bool? userAcceptsCookies)
     {
-        var cookie = new DfeCookieModel { IsVisible = visibility, UserAcceptsCookies = userAcceptsCookies };
+        var cookie = new DfeCookieModel
+        {
+            IsVisible = visibility,
+            UserAcceptsCookies = userAcceptsCookies,
+        };
         return JsonSerializer.Serialize(cookie);
     }
 }

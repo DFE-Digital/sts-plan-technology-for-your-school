@@ -7,13 +7,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Background;
 
 public class BackgroundTaskQueueTests
 {
-    private static BackgroundTaskQueue NewQueue(int size = 10, BoundedChannelFullMode mode = BoundedChannelFullMode.Wait)
+    private static BackgroundTaskQueue NewQueue(
+        int size = 10,
+        BoundedChannelFullMode mode = BoundedChannelFullMode.Wait
+    )
     {
-        var opts = Options.Create(new BackgroundTaskQueueOptions
-        {
-            MaxQueueSize = size,
-            FullMode = mode
-        });
+        var opts = Options.Create(
+            new BackgroundTaskQueueOptions { MaxQueueSize = size, FullMode = mode }
+        );
         return new BackgroundTaskQueue(opts);
     }
 
@@ -21,7 +22,9 @@ public class BackgroundTaskQueueTests
     public async Task QueueBackgroundWorkItemAsync_Throws_On_Null()
     {
         var q = NewQueue();
-        await Assert.ThrowsAsync<ArgumentNullException>(() => q.QueueBackgroundWorkItemAsync(null!));
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            q.QueueBackgroundWorkItemAsync(null!)
+        );
     }
 
     [Fact]
@@ -68,8 +71,16 @@ public class BackgroundTaskQueueTests
 
         var order = new List<int>();
 
-        Func<CancellationToken, Task> a = _ => { order.Add(1); return Task.CompletedTask; };
-        Func<CancellationToken, Task> b = _ => { order.Add(2); return Task.CompletedTask; };
+        Func<CancellationToken, Task> a = _ =>
+        {
+            order.Add(1);
+            return Task.CompletedTask;
+        };
+        Func<CancellationToken, Task> b = _ =>
+        {
+            order.Add(2);
+            return Task.CompletedTask;
+        };
 
         await q.QueueBackgroundWorkItemAsync(a);
         await q.QueueBackgroundWorkItemAsync(b);

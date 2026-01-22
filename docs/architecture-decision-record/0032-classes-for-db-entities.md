@@ -1,6 +1,6 @@
 # 0032 - Classes/Code Structure for DB Entities
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -11,17 +11,17 @@ How do we model our C# classes for reading/writing CMS models?
 - Development ease: how easy it is to develop and maintain the C# classes for the CMS and database.
 - Speed/efficiency: how quickly and efficiently the database can be queried and updated.
 - Best coding practices: following best practices for code maintainability and readability.
-  
+
 ## Considered Options
 
 ### One class per content model
 
-- We could simply amend our existing content models so that they are used for the CMS **and** for storing in the DB. 
+- We could simply amend our existing content models so that they are used for the CMS **and** for storing in the DB.
 
 #### Pros
 
 - Much quicker to develop
-  
+
 #### Cons
 
 - Worse coding practices: this approach violates the Single Responsibility Principle, as the same class is responsible for both the CMS and the database.
@@ -31,7 +31,7 @@ How do we model our C# classes for reading/writing CMS models?
 ### Multiple classes for each content model
 
 - For each content model:
-  - One class for CMS 
+  - One class for CMS
   - One class for DB
   - As many view model classes as needed
 

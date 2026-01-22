@@ -1,6 +1,6 @@
 # 0000 - ADR Title
 
-* **Status**: proposed/accepted/deprecated
+- **Status**: proposed/accepted/deprecated
 
 ## Context and Problem Statement
 
@@ -9,4 +9,3 @@
 ## Considered Options
 
 ## Decision Outcome
-

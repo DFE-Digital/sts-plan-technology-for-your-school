@@ -5,7 +5,6 @@ namespace Dfe.PlanTech.Web.SeedTestData;
 
 public class SeedData(PlanTechDbContext db)
 {
-
     public void CreateData()
     {
         CreateBaseData();
@@ -18,11 +17,15 @@ public class SeedData(PlanTechDbContext db)
     private void CreateBaseData()
     {
         // Add 100 dummy users & establishments to align with test account logins
-        db.Database.ExecuteSql(@$"With Range(n) AS (Select 1 union all select n+1 from Range where n < 100)
-Insert into [dbo].[user] (dfeSignInRef) Select CONCAT('sign-in-ref-', n) From Range");
+        db.Database.ExecuteSql(
+            @$"With Range(n) AS (Select 1 union all select n+1 from Range where n < 100)
+Insert into [dbo].[user] (dfeSignInRef) Select CONCAT('sign-in-ref-', n) From Range"
+        );
 
-        db.Database.ExecuteSql($@"With Range(n) AS (Select 1 union all select n+1 from Range where n < 100)
+        db.Database.ExecuteSql(
+            $@"With Range(n) AS (Select 1 union all select n+1 from Range where n < 100)
 Insert into [dbo].[establishment] (establishmentRef, establishmentType, orgName)
-Select CONCAT('Test Ref ', n), 'Test School', CONCAT('Test Establishment ', n) from Range");
+Select CONCAT('Test Ref ', n), 'Test School', CONCAT('Test Establishment ', n) from Range"
+        );
     }
 }

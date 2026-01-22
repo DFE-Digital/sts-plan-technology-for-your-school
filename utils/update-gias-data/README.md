@@ -21,7 +21,7 @@ To run the data-updater locally:
 3. Setup your .env file by copying .env.example and filling in the required environment variables:
 
    | Variable          | Description                                      | Example / Location                              |
-   |-------------------|--------------------------------------------------|-------------------------------------------------|
+   | ----------------- | ------------------------------------------------ | ----------------------------------------------- |
    | CONNECTION_STRING | SQL Connection string for the plan-tech database | Keyvault value for `python--dbconnectionstring` |
 
 4. create a virtual environment and install dependencies:

@@ -1,152 +1,152 @@
-@import "../..//node_modules/govuk-frontend/dist/govuk/settings/_colours-applied.scss";
-@import "../../node_modules/govuk-frontend/dist/govuk/helpers/_typography.scss";
+@import '../..//node_modules/govuk-frontend/dist/govuk/settings/_colours-applied.scss';
+@import '../../node_modules/govuk-frontend/dist/govuk/helpers/_typography.scss';
 @media print {
-    .noprint {
-        display: none !important;
-    }
-    .print {
-        width: 100%;
-    }
+  .noprint {
+    display: none !important;
+  }
+  .print {
+    width: 100%;
+  }
 }
 
 .print-header {
-    float: none;
+  float: none;
 }
 
 .print-only {
-    display: none;
+  display: none;
 }
 
 .print-button {
-    background: url(/assets/icon-print.png) no-repeat 10px 50%;
-    background-size: 16px 18px;
-    border: 1px solid black !important;
-    font-size: 1.1875rem !important;
-    padding: 8px 16px 8px 38px;
-    text-decoration: none;
-    border: 1px solid #b1b4b6;
-    color: #1d70b8;
-    cursor: pointer;
-    margin-top: 0 !important;
+  background: url(/assets/icon-print.png) no-repeat 10px 50%;
+  background-size: 16px 18px;
+  border: 1px solid black !important;
+  font-size: 1.1875rem !important;
+  padding: 8px 16px 8px 38px;
+  text-decoration: none;
+  border: 1px solid #b1b4b6;
+  color: #1d70b8;
+  cursor: pointer;
+  margin-top: 0 !important;
 }
 
 //C&S recommendations printing
 
 //Append " (opens in new tab)" to links with the appropriate class, so that we can _hide_ the text if printing
 a.opens-in-new-tab::after {
-    content: " (opens in new tab)";
-    display: inline;
+  content: ' (opens in new tab)';
+  display: inline;
 }
 
 @media print {
-    .print-only {
-        visibility: visible;
-        display: block !important;
+  .print-only {
+    visibility: visible;
+    display: block !important;
+  }
+
+  //Hide hr elements where the sections between them have been hidden
+  .govuk-\!-display-none-print + hr,
+  hr + .govuk-\!-display-none-print,
+  hr + div:only-child.govuk-\!-display-none-print,
+  div > div:only-child.govuk-\!-display-none-print + hr,
+  div > div.govuk-\!-display-none-print + hr,
+  div > div:has(> .govuk-\!-display-none-print) + hr,
+  div:has(div.govuk-\!-display-none-print) + hr {
+    display: none;
+  }
+
+  //Service name - i.e. Plan Technology for your School
+  div.dfe-header__service-name {
+    margin-top: 10px;
+  }
+
+  //Reduces padding between the page title/subtitle + main content
+  main.govuk-main-wrapper#main-content {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+
+  //Page title
+  h1.govuk-\!-margin-bottom-4.govuk-\!-margin-top-5 {
+    margin-top: 10px !important;
+    margin-bottom: 5px !important;
+  }
+
+  //Make links look like text
+  a,
+  a.govuk-link {
+    color: inherit !important;
+    text-decoration: none;
+
+    //Remove the "(opens in new tab)" text
+    .opens-in-new-tab::after {
+      content: '';
     }
 
-    //Hide hr elements where the sections between them have been hidden
-    .govuk-\!-display-none-print + hr,
-    hr + .govuk-\!-display-none-print,
-    hr + div:only-child.govuk-\!-display-none-print,
-    div > div:only-child.govuk-\!-display-none-print + hr,
-    div > div.govuk-\!-display-none-print + hr,
-    div > div:has(> .govuk-\!-display-none-print) + hr,
-    div:has(div.govuk-\!-display-none-print) + hr {
-        display: none;
+    &.dfe-header__link--service {
+      color: black !important;
     }
+  }
 
-    //Service name - i.e. Plan Technology for your School
-    div.dfe-header__service-name {
-        margin-top: 10px;
-    }
+  //Make page full width
+  div.govuk-grid-column-three-quarters {
+    width: 100%;
+  }
 
-    //Reduces padding between the page title/subtitle + main content
-    main.govuk-main-wrapper#main-content {
-        padding-top: 10px !important;
-        padding-bottom: 10px !important;
-    }
-
-    //Page title
-    h1.govuk-\!-margin-bottom-4.govuk-\!-margin-top-5 {
-        margin-top: 10px !important;
-        margin-bottom: 5px !important;
-    }
-
-    //Make links look like text
-    a,
-    a.govuk-link {
-        color: inherit !important;
-        text-decoration: none;
-
-        //Remove the "(opens in new tab)" text
-        .opens-in-new-tab::after {
-            content: "";
-        }
-
-        &.dfe-header__link--service {
-            color: black !important;
-        }
-    }
-
-    //Make page full width
-    div.govuk-grid-column-three-quarters {
-        width: 100%;
-    }
-
-    /*
+  /*
   * Accordion
   */
-    span.govuk-accordion__section-toggle {
-        display: none !important;
-    }
+  span.govuk-accordion__section-toggle {
+    display: none !important;
+  }
 
-    //Show content
-    div.govuk-accordion__section-content {
-        display: block !important;
-        padding-top: 0px !important;
-        padding-bottom: 0px !important;
-        content-visibility: visible !important;
-    }
+  //Show content
+  div.govuk-accordion__section-content {
+    display: block !important;
+    padding-top: 0px !important;
+    padding-bottom: 0px !important;
+    content-visibility: visible !important;
+  }
 
-    div.govuk-accordion__controls {
-        display: none !important;
-    }
+  div.govuk-accordion__controls {
+    display: none !important;
+  }
 
-    //Remove border from first section in accordion. Use 2nd of type, because 1st wasn't working for some reason?
-    div.govuk-accordion
-        div.govuk-accordion__section:nth-of-type(2)
-        button.govuk-accordion__section-button {
-        border-top: 0px !important;
-    }
+  //Remove border from first section in accordion. Use 2nd of type, because 1st wasn't working for some reason?
+  div.govuk-accordion
+    div.govuk-accordion__section:nth-of-type(2)
+    button.govuk-accordion__section-button {
+    border-top: 0px !important;
+  }
 
-    body,
-    .govuk-body,
-    .govuk-body-m {
-        font-size: 12pt;
-    }
+  body,
+  .govuk-body,
+  .govuk-body-m {
+    font-size: 12pt;
+  }
 
-    .dfefrontend-heading-xl,
-    .govuk-heading-xl {
-        font-size: 2.5rem;
-    }
+  .dfefrontend-heading-xl,
+  .govuk-heading-xl {
+    font-size: 2.5rem;
+  }
 
-    .dfefrontend-heading-l,
-    .govuk-heading-l {
-        font-size: 2rem;
-    }
+  .dfefrontend-heading-l,
+  .govuk-heading-l {
+    font-size: 2rem;
+  }
 
-    .dfefrontend-heading-m,
-    .govuk-heading-m {
-        font-size: 1.75rem;
-    }
+  .dfefrontend-heading-m,
+  .govuk-heading-m {
+    font-size: 1.75rem;
+  }
 
-    .dfefrontend-heading-s,
-    .govuk-heading-s {
-        font-size: 1.5rem;
-    }
+  .dfefrontend-heading-s,
+  .govuk-heading-s {
+    font-size: 1.5rem;
+  }
 
-    .attachment .attachment-thumbnail {
-        max-width: 35px;
-        max-width: auto;
-    }
+  .attachment .attachment-thumbnail {
+    max-width: 35px;
+    max-width: auto;
+  }
 }

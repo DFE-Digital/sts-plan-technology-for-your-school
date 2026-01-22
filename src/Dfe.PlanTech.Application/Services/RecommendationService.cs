@@ -4,9 +4,8 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Application.Services;
 
-public class RecommendationService(
-    IRecommendationWorkflow recommendationWorkflow
-) : IRecommendationService
+public class RecommendationService(IRecommendationWorkflow recommendationWorkflow)
+    : IRecommendationService
 {
     public Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
         string recommendationContentfulReference,
@@ -19,10 +18,9 @@ public class RecommendationService(
         );
     }
 
-    public Task<IEnumerable<SqlEstablishmentRecommendationHistoryDto>> GetRecommendationHistoryAsync(
-         string recommendationContentfulReference,
-        int establishmentId
-    )
+    public Task<
+        IEnumerable<SqlEstablishmentRecommendationHistoryDto>
+    > GetRecommendationHistoryAsync(string recommendationContentfulReference, int establishmentId)
     {
         return recommendationWorkflow.GetRecommendationHistoryAsync(
             recommendationContentfulReference,
@@ -30,10 +28,9 @@ public class RecommendationService(
         );
     }
 
-
-    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesAsync(
-        int establishmentId
-    )
+    public Task<
+        Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+    > GetLatestRecommendationStatusesAsync(int establishmentId)
     {
         return recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
             establishmentId
@@ -46,7 +43,8 @@ public class RecommendationService(
         int userId,
         string newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null)
+        int? matEstablishmentId = null
+    )
     {
         return recommendationWorkflow.UpdateRecommendationStatusAsync(
             recommendationContentfulReference,

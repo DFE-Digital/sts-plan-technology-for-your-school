@@ -18,14 +18,15 @@ public class PageModelBinderTests
             http,
             new RouteData(),
             new ActionDescriptor(),
-            new ModelStateDictionary());
+            new ModelStateDictionary()
+        );
 
         return new DefaultModelBindingContext
         {
             ActionContext = actionContext,
             ModelName = "page",
             ModelMetadata = new EmptyModelMetadataProvider().GetMetadataForType(typeof(PageEntry)),
-            FieldName = "page"
+            FieldName = "page",
         };
     }
 
@@ -52,8 +53,15 @@ public class PageModelBinderTests
         Assert.True(ctx.Result.IsModelSet == false);
         Assert.True(ctx.Result == ModelBindingResult.Failed());
 
-        logger.ReceivedWithAnyArgs(1).Log(
-            LogLevel.Error, 0, Arg.Any<object>(), null, Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .ReceivedWithAnyArgs(1)
+            .Log(
+                LogLevel.Error,
+                0,
+                Arg.Any<object>(),
+                null,
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -72,8 +80,15 @@ public class PageModelBinderTests
         Assert.True(ctx.Result.IsModelSet == false);
         Assert.True(ctx.Result == ModelBindingResult.Failed());
 
-        logger.ReceivedWithAnyArgs(1).Log(
-            LogLevel.Error, 0, Arg.Any<object>(), null, Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .ReceivedWithAnyArgs(1)
+            .Log(
+                LogLevel.Error,
+                0,
+                Arg.Any<object>(),
+                null,
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]

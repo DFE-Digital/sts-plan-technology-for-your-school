@@ -2,7 +2,8 @@ namespace Dfe.PlanTech.Web.SeedTestData
 {
     public static class SqlConstants
     {
-        public const string DsiSeedData = $@"
+        public const string DsiSeedData =
+            $@"
                                 SET NOCOUNT ON;
 
                                 -- Clear any existing test data for this group
@@ -36,6 +37,5 @@ namespace Dfe.PlanTech.Web.SeedTestData
                                 ('900007', 'Foundation School', 'DSI TEST Establishment (001) Foundation School (05)', null),
                                 ('00000046', null, 'DSI TEST Multi-Academy Trust (010)', '99999');
                            ";
-
     }
 }

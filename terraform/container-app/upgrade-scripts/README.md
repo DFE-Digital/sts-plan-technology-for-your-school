@@ -12,7 +12,6 @@ This folder contains various scripts designed to be ran before a specific sprint
 | -------- | ---------------------------------- |
 | 33       | [Sprint 33](./sprint_33/README.md) |
 
-
 ### Other
 
 | Name                                                        | Description                                                                            |

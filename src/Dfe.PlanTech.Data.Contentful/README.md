@@ -27,7 +27,7 @@ Note: This assumes you setup the services using the section name "Contentful". E
 builder.Services.SetupContentfulClient(builder.Configuration, "Contentful");
 `
 
-Note: Depending on the OS, you will not be able to set an env variable with a colon - use double underscores instead. E.g. ```Contentful:DeliveryApiKey``` would become ```Contentful__DeliveryApiKey```
+Note: Depending on the OS, you will not be able to set an env variable with a colon - use double underscores instead. E.g. `Contentful:DeliveryApiKey` would become `Contentful__DeliveryApiKey`
 
 ### Dotnet User-Secrets
 

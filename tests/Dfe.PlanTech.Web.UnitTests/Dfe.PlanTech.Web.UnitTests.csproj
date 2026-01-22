@@ -25,13 +25,13 @@
   <ItemGroup>
     <Using Include="Xunit" />
   </ItemGroup>
-    
+
   <ItemGroup>
     <None Update="StubData\ContentfulCollection.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
-    
+
   <ItemGroup>
     <ProjectReference Include="..\..\src\Dfe.PlanTech.Web\Dfe.PlanTech.Web.csproj" />
     <ProjectReference Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj" />

@@ -28,7 +28,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             DateCreated = expectedDateCreated,
             PreviousStatus = expectedPreviousStatus,
             NewStatus = expectedNewStatus,
-            NoteText = expectedNoteText
+            NoteText = expectedNoteText,
         };
 
         // Act
@@ -55,7 +55,7 @@ public class EstablishmentRecommendationHistoryEntityTests
                 nameof(SqlEstablishmentRecommendationHistoryDto.DateCreated),
                 nameof(SqlEstablishmentRecommendationHistoryDto.PreviousStatus),
                 nameof(SqlEstablishmentRecommendationHistoryDto.NewStatus),
-                nameof(SqlEstablishmentRecommendationHistoryDto.NoteText)
+                nameof(SqlEstablishmentRecommendationHistoryDto.NoteText),
             }
         );
     }
@@ -74,7 +74,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             DateCreated = DateTime.UtcNow,
             PreviousStatus = null, // Optional
             NewStatus = "Arbitrary string - new status",
-            NoteText = null // Optional
+            NoteText = null, // Optional
         };
 
         // Act
@@ -99,7 +99,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             EstablishmentId = 1,
             RecommendationId = 2,
             UserId = 3,
-            NewStatus = "Arbitrary string - new status"
+            NewStatus = "Arbitrary string - new status",
             // DateCreated is not set explicitly
         };
 

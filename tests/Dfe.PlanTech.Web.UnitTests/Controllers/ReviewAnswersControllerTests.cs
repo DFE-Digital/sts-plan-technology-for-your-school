@@ -14,9 +14,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class ReviewAnswersControllerTests
     {
-        private readonly ILogger<ReviewAnswersController> _logger = Substitute.For<ILogger<ReviewAnswersController>>();
-        private readonly IReviewAnswersViewBuilder _viewBuilder = Substitute.For<IReviewAnswersViewBuilder>();
-        private readonly IUserJourneyMissingContentExceptionHandler _exceptionHandler = Substitute.For<IUserJourneyMissingContentExceptionHandler>();
+        private readonly ILogger<ReviewAnswersController> _logger = Substitute.For<
+            ILogger<ReviewAnswersController>
+        >();
+        private readonly IReviewAnswersViewBuilder _viewBuilder =
+            Substitute.For<IReviewAnswersViewBuilder>();
+        private readonly IUserJourneyMissingContentExceptionHandler _exceptionHandler =
+            Substitute.For<IUserJourneyMissingContentExceptionHandler>();
         private readonly ReviewAnswersController _controller;
 
         public ReviewAnswersControllerTests()
@@ -25,7 +29,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var httpContext = new DefaultHttpContext();
             var tempDataProvider = Substitute.For<ITempDataProvider>();
             _controller.TempData = new TempDataDictionary(httpContext, tempDataProvider);
-
         }
 
         [Fact]
@@ -55,12 +58,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var sectionSlug = "sec";
 
             _controller.TempData["ErrorMessage"] = "error";
-            _viewBuilder.RouteToCheckAnswers(_controller, categorySlug, sectionSlug, "error")
+            _viewBuilder
+                .RouteToCheckAnswers(_controller, categorySlug, sectionSlug, "error")
                 .Returns(new OkResult());
 
             var result = await _controller.CheckAnswers(categorySlug, sectionSlug);
 
-            await _viewBuilder.Received(1).RouteToCheckAnswers(_controller, categorySlug, sectionSlug, "error");
+            await _viewBuilder
+                .Received(1)
+                .RouteToCheckAnswers(_controller, categorySlug, sectionSlug, "error");
             Assert.IsType<OkResult>(result);
         }
 
@@ -70,8 +76,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var categorySlug = "cat";
             var sectionSlug = "sec";
 
-            var exception = new UserJourneyMissingContentException("Missing content", new QuestionnaireSectionEntry());
-            _viewBuilder.RouteToCheckAnswers(_controller, categorySlug, sectionSlug, null)
+            var exception = new UserJourneyMissingContentException(
+                "Missing content",
+                new QuestionnaireSectionEntry()
+            );
+            _viewBuilder
+                .RouteToCheckAnswers(_controller, categorySlug, sectionSlug, null)
                 .Throws(exception);
 
             _exceptionHandler.Handle(_controller, exception).Returns(new BadRequestResult());
@@ -90,12 +100,32 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var sectionName = "Section A";
             var submissionId = 1;
 
-            _viewBuilder.ConfirmCheckAnswers(_controller, categorySlug, sectionSlug, sectionName, submissionId)
+            _viewBuilder
+                .ConfirmCheckAnswers(
+                    _controller,
+                    categorySlug,
+                    sectionSlug,
+                    sectionName,
+                    submissionId
+                )
                 .Returns(new OkResult());
 
-            var result = await _controller.ConfirmCheckAnswers(categorySlug, sectionSlug, sectionName, submissionId);
+            var result = await _controller.ConfirmCheckAnswers(
+                categorySlug,
+                sectionSlug,
+                sectionName,
+                submissionId
+            );
 
-            await _viewBuilder.Received(1).ConfirmCheckAnswers(_controller, categorySlug, sectionSlug, sectionName, submissionId);
+            await _viewBuilder
+                .Received(1)
+                .ConfirmCheckAnswers(
+                    _controller,
+                    categorySlug,
+                    sectionSlug,
+                    sectionName,
+                    submissionId
+                );
             Assert.IsType<OkResult>(result);
             Assert.Equal("Section A", _controller.TempData["SectionName"]);
         }
@@ -109,11 +139,23 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var submissionId = 1;
 
             var exception = new Exception("Something went wrong");
-            _viewBuilder.ConfirmCheckAnswers(_controller, categorySlug, sectionSlug, sectionName, submissionId)
+            _viewBuilder
+                .ConfirmCheckAnswers(
+                    _controller,
+                    categorySlug,
+                    sectionSlug,
+                    sectionName,
+                    submissionId
+                )
                 .Throws(exception);
 
             var ex = await Assert.ThrowsAsync<Exception>(() =>
-                _controller.ConfirmCheckAnswers(categorySlug, sectionSlug, sectionName, submissionId)
+                _controller.ConfirmCheckAnswers(
+                    categorySlug,
+                    sectionSlug,
+                    sectionName,
+                    submissionId
+                )
             );
 
             Assert.Equal("Something went wrong", ex.Message);
@@ -126,12 +168,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var sectionSlug = "sec";
 
             _controller.TempData["ErrorMessage"] = "error";
-            _viewBuilder.RouteToViewAnswers(_controller, categorySlug, sectionSlug, "error")
+            _viewBuilder
+                .RouteToViewAnswers(_controller, categorySlug, sectionSlug, "error")
                 .Returns(new OkResult());
 
             var result = await _controller.ViewAnswers(categorySlug, sectionSlug);
 
-            await _viewBuilder.Received(1).RouteToViewAnswers(_controller, categorySlug, sectionSlug, "error");
+            await _viewBuilder
+                .Received(1)
+                .RouteToViewAnswers(_controller, categorySlug, sectionSlug, "error");
             Assert.IsType<OkResult>(result);
         }
 
@@ -141,8 +186,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var categorySlug = "cat";
             var sectionSlug = "sec";
 
-            var exception = new UserJourneyMissingContentException("Missing content", new QuestionnaireSectionEntry());
-            _viewBuilder.RouteToViewAnswers(_controller, categorySlug, sectionSlug, null)
+            var exception = new UserJourneyMissingContentException(
+                "Missing content",
+                new QuestionnaireSectionEntry()
+            );
+            _viewBuilder
+                .RouteToViewAnswers(_controller, categorySlug, sectionSlug, null)
                 .Throws(exception);
 
             _exceptionHandler.Handle(_controller, exception).Returns(new BadRequestResult());
@@ -152,6 +201,5 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             await _exceptionHandler.Received(1).Handle(_controller, exception);
             Assert.IsType<BadRequestResult>(result);
         }
-
     }
 }

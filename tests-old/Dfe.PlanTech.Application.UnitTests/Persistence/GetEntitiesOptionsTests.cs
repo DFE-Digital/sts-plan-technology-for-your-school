@@ -15,30 +15,33 @@ public class GetEntitiesOptionsTests
             { "Empty", new GetEntitiesOptions() },
             { "Include", new GetEntitiesOptions(include: 4) },
             {
-                "Select", new GetEntitiesOptions()
-                {
-                    Select = ["field.intros", "field.sys"]
-                }
+                "Select",
+                new GetEntitiesOptions() { Select = ["field.intros", "field.sys"] }
             },
             {
-                "Query", new GetEntitiesOptions(queries:
-                [
-                    new ContentQuerySingleValue() { Field = "slug", Value = "/" },
-                    new ContentQuerySingleValue() { Field = "id", Value = "1234" },
-                    new ContentQueryMultipleValues() { Field = "toinclude", Value = ["value1", "value2"] }
-                ])
+                "Query",
+                new GetEntitiesOptions(
+                    queries:
+                    [
+                        new ContentQuerySingleValue() { Field = "slug", Value = "/" },
+                        new ContentQuerySingleValue() { Field = "id", Value = "1234" },
+                        new ContentQueryMultipleValues()
+                        {
+                            Field = "toinclude",
+                            Value = ["value1", "value2"],
+                        },
+                    ]
+                )
             },
             {
-                "Combined", new GetEntitiesOptions()
+                "Combined",
+                new GetEntitiesOptions()
                 {
                     Select = ["field.intros", "field.sys"],
-                    Queries =
-                    [
-                        new ContentQuerySingleValue() { Field = "slug", Value = "/test" },
-                    ],
-                    Include = 6
+                    Queries = [new ContentQuerySingleValue() { Field = "slug", Value = "/test" }],
+                    Include = 6,
                 }
-            }
+            },
         };
     }
 
@@ -54,11 +57,7 @@ public class GetEntitiesOptionsTests
     [Fact]
     public void Should_Set_Queries()
     {
-        var queries = new List<IContentQuery>(){
-            new ContentQuery(){
-                Field = "Testing"
-            }
-        };
+        var queries = new List<IContentQuery>() { new ContentQuery() { Field = "Testing" } };
 
         var options = new GetEntitiesOptions(queries);
 
@@ -81,11 +80,13 @@ public class GetEntitiesOptionsTests
     [InlineData("Include", ":Include=4")]
     [InlineData("Query", ":Include=2:Queries=[slug=/,id=1234,toinclude=[value1,value2]]")]
     [InlineData("Combined", ":Include=6:Select=[field.intros,field.sys]:Queries=[slug=/test]")]
-    public void Should_Serialise_Options_Into_Suitable_Redis_Format(string testDataKey, string expectedValue)
+    public void Should_Serialise_Options_Into_Suitable_Redis_Format(
+        string testDataKey,
+        string expectedValue
+    )
     {
         var testData = _testData[testDataKey];
         var serialized = testData.SerializeToRedisFormat();
         Assert.Equal(expectedValue, serialized);
     }
-
 }

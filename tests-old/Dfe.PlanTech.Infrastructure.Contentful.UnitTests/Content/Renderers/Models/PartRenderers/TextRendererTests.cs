@@ -1,7 +1,7 @@
 using System.Text;
+using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
@@ -15,13 +15,14 @@ public class TextRendererTests
     {
         const string value = "Text value";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = value };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { }));
+        var renderer = new TextRenderer(
+            new TextRendererOptions(
+                new NullLogger<TextRendererOptions>(),
+                new List<MarkOption>() { }
+            )
+        );
 
         var accepted = renderer.Accepts(content);
 
@@ -31,13 +32,14 @@ public class TextRendererTests
     [Fact]
     public void Should_Reject_When_Not_Text()
     {
-        var content = new RichTextContent()
-        {
-            NodeType = "hyperlink",
-            Value = "hyperlink"
-        };
+        var content = new RichTextContent() { NodeType = "hyperlink", Value = "hyperlink" };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { }));
+        var renderer = new TextRenderer(
+            new TextRendererOptions(
+                new NullLogger<TextRendererOptions>(),
+                new List<MarkOption>() { }
+            )
+        );
 
         var accepted = renderer.Accepts(content);
 
@@ -50,14 +52,18 @@ public class TextRendererTests
         const string boldType = "bold";
         const string htmlTagForBold = "strong";
 
-        var boldMarkOption = new MarkOption()
-        {
-            Mark = boldType,
-            HtmlTag = htmlTagForBold,
-        };
+        var boldMarkOption = new MarkOption() { Mark = boldType, HtmlTag = htmlTagForBold };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var renderer = new TextRenderer(
+            new TextRendererOptions(
+                new NullLogger<TextRendererOptions>(),
+                new List<MarkOption>() { boldMarkOption }
+            )
+        );
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "Paragraph text";
 
@@ -65,11 +71,7 @@ public class TextRendererTests
         {
             NodeType = NODE_TYPE,
             Value = value,
-            Marks = new() {
-                new RichTextMark() {
-                    Type = boldType,
-                }
-            }
+            Marks = new() { new RichTextMark() { Type = boldType } },
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
@@ -90,11 +92,19 @@ public class TextRendererTests
         {
             Mark = boldType,
             HtmlTag = htmlTagForBold,
-            Classes = testClasses
+            Classes = testClasses,
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var renderer = new TextRenderer(
+            new TextRendererOptions(
+                new NullLogger<TextRendererOptions>(),
+                new List<MarkOption>() { boldMarkOption }
+            )
+        );
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "Paragraph text";
 
@@ -102,11 +112,7 @@ public class TextRendererTests
         {
             NodeType = NODE_TYPE,
             Value = value,
-            Marks = new() {
-                new RichTextMark() {
-                    Type = boldType,
-                }
-            }
+            Marks = new() { new RichTextMark() { Type = boldType } },
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
@@ -115,7 +121,6 @@ public class TextRendererTests
 
         Assert.Equal($"<{htmlTagForBold} class=\"{testClasses}\">{value}</{htmlTagForBold}>", html);
     }
-
 
     [Fact]
     public void Should_RenderText_When_HasNoMarks()
@@ -128,19 +133,23 @@ public class TextRendererTests
         {
             Mark = boldType,
             HtmlTag = htmlTagForBold,
-            Classes = testClasses
+            Classes = testClasses,
         };
 
-        var renderer = new TextRenderer(new TextRendererOptions(new NullLogger<TextRendererOptions>(), new List<MarkOption>() { boldMarkOption }));
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var renderer = new TextRenderer(
+            new TextRendererOptions(
+                new NullLogger<TextRendererOptions>(),
+                new List<MarkOption>() { boldMarkOption }
+            )
+        );
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "Paragraph text";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = value };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 

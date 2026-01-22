@@ -33,7 +33,4 @@ public class ComponentViewsFactoryTests
     }
 }
 
-public class NotARealClass
-{
-
-}
+public class NotARealClass { }

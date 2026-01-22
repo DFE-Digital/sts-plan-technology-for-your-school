@@ -5,7 +5,6 @@ namespace Dfe.PlanTech.Application.Configuration;
 [ExcludeFromCodeCoverage]
 public record ContentfulOptionsConfiguration(bool UsePreviewApi)
 {
-    public ContentfulOptionsConfiguration() : this(false)
-    {
-    }
+    public ContentfulOptionsConfiguration()
+        : this(false) { }
 }

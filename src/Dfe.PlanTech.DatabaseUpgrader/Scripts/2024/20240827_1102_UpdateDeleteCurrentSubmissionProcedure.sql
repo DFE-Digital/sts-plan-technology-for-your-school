@@ -17,7 +17,7 @@ AS
             FROM [dbo].[submission] S
             WHERE S.id = @submissionId
         COMMIT TRAN
-        
+
     END TRY
     BEGIN CATCH
         ROLLBACK TRAN

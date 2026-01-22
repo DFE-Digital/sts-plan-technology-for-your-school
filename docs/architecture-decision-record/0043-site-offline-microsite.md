@@ -1,6 +1,6 @@
 ﻿# 0043 - Site Offline Microsite for Maintenance Windows
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -14,26 +14,29 @@ The plan technology for your school service requires periodic maintenance window
 
 ## Decision Drivers
 
-* Azure Front Door configuration changes are currently disabled, preventing redirect-based solutions
-* Database migrations require the main application to be offline
-* Need to maintain infrastructure health checks (liveness/readiness probes)
-* Deployment pipeline requires manual approval gates between critical steps
-* Must provide clear user communication during maintenance
-* Search engines and monitoring tools need appropriate HTTP status codes (503)
-* Need to test maintenance page functionality independently
-* Prefer solutions that utilize existing infrastructure over provisioning new resources (avoiding Terraform complexity)
+- Azure Front Door configuration changes are currently disabled, preventing redirect-based solutions
+- Database migrations require the main application to be offline
+- Need to maintain infrastructure health checks (liveness/readiness probes)
+- Deployment pipeline requires manual approval gates between critical steps
+- Must provide clear user communication during maintenance
+- Search engines and monitoring tools need appropriate HTTP status codes (503)
+- Need to test maintenance page functionality independently
+- Prefer solutions that utilize existing infrastructure over provisioning new resources (avoiding Terraform complexity)
 
 ## Considered Options
 
 ### Option 1: Static HTML Page Only
+
 A single static HTML file deployed to blob storage or served directly.
 
 **Pros:**
+
 - Simple to implement
 - Minimal infrastructure
 - Fast to serve
 
 **Cons:**
+
 - Cannot set HTTP 503 status code (would return 200)
 - No health check endpoint differentiation
 - Cannot set Retry-After headers
@@ -42,21 +45,26 @@ A single static HTML file deployed to blob storage or served directly.
 - Would require new infrastructure (blob storage/basic web app) necessitating Terraform changes and additional deployment complexity
 
 ### Option 2: Azure Front Door Redirect
+
 Configure Azure Front Door to redirect all traffic to a maintenance page during downtime.
 
 **Pros:**
+
 - Centralized traffic management
 - No application deployment needed
 
 **Cons:**
+
 - Azure Front Door configuration changes are currently disabled
 - Would require infrastructure changes during critical maintenance window
 - Risk of misconfiguration affecting production traffic
 
 ### Option 3: Dedicated Microsite Application (Selected)
+
 A separate lightweight ASP.NET Core MVC application that serves the maintenance page with full control over HTTP responses.
 
 **Pros:**
+
 - Full control over HTTP status codes (503 for maintenance, 200 for health)
 - Can implement proper health/readiness endpoints
 - Supports Retry-After headers
@@ -67,6 +75,7 @@ A separate lightweight ASP.NET Core MVC application that serves the maintenance 
 - Reuses existing container infrastructure (no new Terraform resources required)
 
 **Cons:**
+
 - Additional application to maintain
 - Requires container deployment infrastructure
 
@@ -150,6 +159,7 @@ The continuous deployment workflow has been modified to support maintenance wind
    - Scale down site offline microsite
 
 This approach ensures:
+
 - Users see maintenance page before database changes begin
 - Manual intervention points allow for issue resolution
 - Automated steps can be paused between stages
@@ -179,12 +189,14 @@ Tests follow naming convention: `Subject_ContextAndOrScenario_Outcome`
 ### Alternative Approaches Not Viable
 
 **Why not just a static HTML page?**
+
 - Cannot set HTTP 503 status code
 - No control over response headers
 - Cannot differentiate health check endpoint
 - Poor user experience for search engines and monitoring
 
 **Why not Azure Front Door redirect?**
+
 - Configuration changes currently disabled
 - Would require changes during critical maintenance window
 - Risk of misconfiguration during high-pressure situation
@@ -192,6 +204,7 @@ Tests follow naming convention: `Subject_ContextAndOrScenario_Outcome`
 ## Consequences
 
 ### Positive
+
 - Clear separation of concerns between main app and maintenance mode
 - Infrastructure orchestration remains functional during maintenance
 - Search engines and monitoring tools receive appropriate signals
@@ -201,12 +214,14 @@ Tests follow naming convention: `Subject_ContextAndOrScenario_Outcome`
 - Can be tested independently before maintenance window
 
 ### Negative
+
 - Additional application to maintain and deploy
 - Requires coordination between main app and microsite scaling
 - Infrastructure cost of running additional container (minimal, only during maintenance)
 - Need to keep GovUK Frontend dependency versions synchronized
 
 ### Neutral
+
 - Adds complexity to deployment pipeline but improves safety
 - Requires team understanding of when microsite is active vs inactive
 
@@ -215,10 +230,12 @@ Tests follow naming convention: `Subject_ContextAndOrScenario_Outcome`
 The microsite supports configurable maintenance messages via environment variables, enabling flexibility in the message displayed without requiring redeployment:
 
 **Configuration Options:**
+
 1. **Default Generic Message** (no configuration required)
    - Displays generic "service temporarily unavailable" messaging
    - Suitable when specific timing is unknown or maintenance is brief
    - Example:
+
      ```
      You'll be able to use the service later.
 
@@ -248,11 +265,11 @@ This design addresses the scenario of updating the message mid-deployment (e.g. 
 - Default fallback ensures users always see appropriate messaging
 
 **Implementation Details:**
+
 - Configuration bound via `IOptions<MaintenanceConfiguration>` pattern
 - View renders paragraphs from `MessageParagraphs` list or falls back to defaults
 - No code changes required to modify messaging
 - See `src/Dfe.PlanTech.Web.SiteOfflineMicrosite/Configuration/MaintenanceConfiguration.cs` for structure
-
 
 ## Future Considerations
 
@@ -260,7 +277,6 @@ This design addresses the scenario of updating the message mid-deployment (e.g. 
    - Integrate health endpoint with application monitoring
    - Alert on unexpected maintenance mode activation
 
-3. **Azure Front Door Configuration**
+2. **Azure Front Door Configuration**
    - If/when AFD configuration changes are re-enabled, evaluate whether traffic routing could be simplified
    - Current microsite approach remains valid regardless
-

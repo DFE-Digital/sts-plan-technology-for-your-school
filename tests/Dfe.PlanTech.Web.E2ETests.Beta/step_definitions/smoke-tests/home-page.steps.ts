@@ -26,16 +26,18 @@ Then('I should see multiple section cards on the page', async function () {
   expect(count).toBeGreaterThan(1);
 });
 
-Then('I should see a card for {string} with a link labelled {string}', async function (section: string, label: string) {
-  const card = this.page.locator('.dfe-card').filter({ hasText: section });
+Then(
+  'I should see a card for {string} with a link labelled {string}',
+  async function (section: string, label: string) {
+    const card = this.page.locator('.dfe-card').filter({ hasText: section });
 
-  const linkElement = card.locator('a.govuk-link');
-  const labelElement = card.locator('p.govuk-body-s', { hasText: label });
+    const linkElement = card.locator('a.govuk-link');
+    const labelElement = card.locator('p.govuk-body-s', { hasText: label });
 
-  await expect(linkElement).toBeVisible();
-  await expect(labelElement).toBeVisible();
-});
-
+    await expect(linkElement).toBeVisible();
+    await expect(labelElement).toBeVisible();
+  },
+);
 
 Then('I click the card {string}', async function (section) {
   const card = this.page.locator('.dfe-card', { hasText: section });

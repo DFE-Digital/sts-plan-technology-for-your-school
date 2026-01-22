@@ -28,10 +28,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
             var getNavigationQuery = Substitute.For<IGetNavigationQuery>();
             getNavigationQuery.GetLinkById(href).Returns(navigationLink);
 
-            var options = new ContactOptionsConfiguration
-            {
-                LinkId = href
-            };
+            var options = new ContactOptionsConfiguration { LinkId = href };
             var contactOptions = Substitute.For<IOptions<ContactOptionsConfiguration>>();
             contactOptions.Value.Returns(options);
 
@@ -53,10 +50,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
             // Arrange
             var actionContext = GetMockedActionContext();
             var exception = new Exception();
-            var context = new ExceptionContext(actionContext, [])
-            {
-                Exception = exception
-            };
+            var context = new ExceptionContext(actionContext, []) { Exception = exception };
 
             // Act
             await _attribute.OnExceptionAsync(context);
@@ -71,10 +65,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
             // Arrange
             var actionContext = GetMockedActionContext();
             var exception = new KeyNotFoundException(ClaimConstants.Organisation);
-            var context = new ExceptionContext(actionContext, [])
-            {
-                Exception = exception
-            };
+            var context = new ExceptionContext(actionContext, []) { Exception = exception };
 
             // Act
             await _attribute.OnExceptionAsync(context);
@@ -89,10 +80,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
             // Arrange
             var actionContext = GetMockedActionContext();
             var exception = new KeyNotFoundException();
-            var context = new ExceptionContext(actionContext, [])
-            {
-                Exception = exception
-            };
+            var context = new ExceptionContext(actionContext, []) { Exception = exception };
 
             // Act
             await _attribute.OnExceptionAsync(context);

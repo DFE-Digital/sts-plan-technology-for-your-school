@@ -6,11 +6,19 @@ namespace Dfe.PlanTech.Core.Helpers
 {
     public static class RecommendationStatusHelper
     {
-        public static RecommendationStatus? GetRecommendationStatusEnumValue(this string recommendationStatus)
+        public static RecommendationStatus? GetRecommendationStatusEnumValue(
+            this string recommendationStatus
+        )
         {
             return Enum.GetValues<RecommendationStatus>()
                 .Cast<RecommendationStatus?>()
-                .FirstOrDefault(rs => string.Equals(rs!.ToString(), recommendationStatus, StringComparison.InvariantCultureIgnoreCase));
+                .FirstOrDefault(rs =>
+                    string.Equals(
+                        rs!.ToString(),
+                        recommendationStatus,
+                        StringComparison.InvariantCultureIgnoreCase
+                    )
+                );
         }
 
         public static RecommendationStatus GetStatus(
@@ -19,8 +27,8 @@ namespace Dfe.PlanTech.Core.Helpers
         )
         {
             var status = history.TryGetValue(chunk.Id, out var recommendationHistory)
-               ? recommendationHistory.NewStatus
-               : RecommendationStatus.NotStarted.ToString();
+                ? recommendationHistory.NewStatus
+                : RecommendationStatus.NotStarted.ToString();
 
             return status.GetRecommendationStatusEnumValue() ?? RecommendationStatus.NotStarted;
         }

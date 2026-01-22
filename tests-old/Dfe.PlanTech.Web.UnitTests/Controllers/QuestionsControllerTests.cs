@@ -50,24 +50,15 @@ public class QuestionsControllerTests
     private readonly Question _validQuestion = new Question()
     {
         Slug = QuestionSlug,
-        Sys = new SystemDetails()
-        {
-            Id = "QuestionId"
-        }
+        Sys = new SystemDetails() { Id = "QuestionId" },
     };
 
     private readonly Section _validSection = new Section()
     {
         Name = "Valid Section",
-        Sys = new SystemDetails()
-        {
-            Id = "SectionId"
-        },
-        InterstitialPage = new Page()
-        {
-            Slug = SectionSlug,
-        },
-        Questions = new(1)
+        Sys = new SystemDetails() { Id = "SectionId" },
+        InterstitialPage = new Page() { Slug = SectionSlug },
+        Questions = new(1),
     };
 
     public QuestionsControllerTests()
@@ -81,42 +72,44 @@ public class QuestionsControllerTests
         _getEntityFromContentfulQuery = Substitute.For<IGetEntityFromContentfulQuery>();
         _getNavigationQuery = Substitute.For<IGetNavigationQuery>();
 
-        _getEntityFromContentfulQuery.GetEntityById<Question>(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns((callinfo) =>
-            {
-                var questionId = callinfo.ArgAt<string>(0);
-                if (questionId == _validQuestion.Sys.Id)
+        _getEntityFromContentfulQuery
+            .GetEntityById<Question>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(
+                (callinfo) =>
                 {
-                    return _validQuestion;
+                    var questionId = callinfo.ArgAt<string>(0);
+                    if (questionId == _validQuestion.Sys.Id)
+                    {
+                        return _validQuestion;
+                    }
+
+                    return null;
                 }
+            );
 
-                return null;
-            });
-
-        _getSectionQuery.GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-            .Returns((callInfo) =>
-            {
-                var sectionSlug = callInfo.ArgAt<string>(0);
-
-                if (sectionSlug == _validSection.InterstitialPage.Slug)
+        _getSectionQuery
+            .GetSectionBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(
+                (callInfo) =>
                 {
-                    return _validSection;
-                }
+                    var sectionSlug = callInfo.ArgAt<string>(0);
 
-                return null;
-            });
+                    if (sectionSlug == _validSection.InterstitialPage.Slug)
+                    {
+                        return _validSection;
+                    }
+
+                    return null;
+                }
+            );
 
         var message = new ErrorMessagesConfiguration
         {
-            ConcurrentUsersOrContentChange = "An error occurred. Please contact us."
+            ConcurrentUsersOrContentChange = "An error occurred. Please contact us.",
         };
         _errorMessages = Options.Create(message);
 
-
-        var contactUs = new ContactOptionsConfiguration
-        {
-            LinkId = "LinkId"
-        };
+        var contactUs = new ContactOptionsConfiguration { LinkId = "LinkId" };
         _contactOptions = Options.Create(contactUs);
 
         _getResponseQuery = Substitute.For<IGetLatestResponsesQuery>();
@@ -127,20 +120,43 @@ public class QuestionsControllerTests
         _user = Substitute.For<IUser>();
         _user.GetEstablishmentId().Returns(EstablishmentId);
 
-        _controller = new QuestionsController(_logger, _getSectionQuery, _getResponseQuery, _getEntityFromContentfulQuery, _getNavigationQuery, _user, _errorMessages, _contactOptions);
+        _controller = new QuestionsController(
+            _logger,
+            _getSectionQuery,
+            _getResponseQuery,
+            _getEntityFromContentfulQuery,
+            _getNavigationQuery,
+            _user,
+            _errorMessages,
+            _contactOptions
+        );
         _controller.TempData = Substitute.For<ITempDataDictionary>();
     }
 
     [Fact]
     public async Task GetQuestionBySlug_Should_Error_When_Missing_SectionId()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug(null!, "question-slug", "testReturn", _getQuestionBySlugRouter));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _controller.GetQuestionBySlug(
+                null!,
+                "question-slug",
+                "testReturn",
+                _getQuestionBySlugRouter
+            )
+        );
     }
 
     [Fact]
     public async Task GetQuestionBySlug_Should_Error_When_Missing_QuestionId()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetQuestionBySlug("section-slug", null!, "testReturn", _getQuestionBySlugRouter));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _controller.GetQuestionBySlug(
+                "section-slug",
+                null!,
+                "testReturn",
+                _getQuestionBySlugRouter
+            )
+        );
     }
 
     [Fact]
@@ -150,20 +166,33 @@ public class QuestionsControllerTests
         var questionSlug = string.Empty;
         QuestionsController? controller = null;
 
-        _getQuestionBySlugRouter.ValidateRoute(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<QuestionsController>(), Arg.Any<CancellationToken>())
-                                .Returns((callinfo) =>
-                                {
-                                    sectionSlug = callinfo.ArgAt<string>(0);
-                                    questionSlug = callinfo.ArgAt<string>(1);
-                                    controller = callinfo.ArgAt<QuestionsController>(2);
+        _getQuestionBySlugRouter
+            .ValidateRoute(
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<QuestionsController>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(
+                (callinfo) =>
+                {
+                    sectionSlug = callinfo.ArgAt<string>(0);
+                    questionSlug = callinfo.ArgAt<string>(1);
+                    controller = callinfo.ArgAt<QuestionsController>(2);
 
-                                    return new AcceptedResult();
-                                });
+                    return new AcceptedResult();
+                }
+            );
 
         string section = "section";
         string question = "question";
 
-        await _controller.GetQuestionBySlug(section, question, "testReturn", _getQuestionBySlugRouter);
+        await _controller.GetQuestionBySlug(
+            section,
+            question,
+            "testReturn",
+            _getQuestionBySlugRouter
+        );
 
         Assert.Equal(section, sectionSlug);
         Assert.Equal(question, questionSlug);
@@ -173,20 +202,35 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_Null()
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _controller.GetNextUnansweredQuestion(null!, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _controller.GetNextUnansweredQuestion(
+                null!,
+                _getNextUnansweredQuestionQuery,
+                _deleteCurrentSubmissionCommand
+            )
+        );
     }
 
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Error_When_SectionSlug_NotFound()
     {
-        var action = () => _controller.GetNextUnansweredQuestion("Not a real section", _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
+        var action = () =>
+            _controller.GetNextUnansweredQuestion(
+                "Not a real section",
+                _getNextUnansweredQuestionQuery,
+                _deleteCurrentSubmissionCommand
+            );
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(action);
     }
 
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Redirect_To_CheckAnswersPage_When_No_Question_Returned()
     {
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
+        var result = await _controller.GetNextUnansweredQuestion(
+            SectionSlug,
+            _getNextUnansweredQuestionQuery,
+            _deleteCurrentSubmissionCommand
+        );
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
@@ -197,10 +241,15 @@ public class QuestionsControllerTests
     [Fact]
     public async Task GetNextUnansweredQuestion_Should_Redirect_To_GetQuestionBySlug_When_NextQuestion_Exsts()
     {
-        _getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(EstablishmentId, _validSection, Arg.Any<CancellationToken>())
-                                        .Returns((callinfo) => _validQuestion);
+        _getNextUnansweredQuestionQuery
+            .GetNextUnansweredQuestion(EstablishmentId, _validSection, Arg.Any<CancellationToken>())
+            .Returns((callinfo) => _validQuestion);
 
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
+        var result = await _controller.GetNextUnansweredQuestion(
+            SectionSlug,
+            _getNextUnansweredQuestionQuery,
+            _deleteCurrentSubmissionCommand
+        );
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
@@ -209,8 +258,12 @@ public class QuestionsControllerTests
         var routeValues = redirectResult.RouteValues;
         Assert.NotNull(routeValues);
 
-        var sectionSlug = routeValues.FirstOrDefault(routeValue => routeValue.Key == "sectionSlug").Value as string;
-        var questionSlug = routeValues.FirstOrDefault(routeValue => routeValue.Key == "questionSlug").Value as string;
+        var sectionSlug =
+            routeValues.FirstOrDefault(routeValue => routeValue.Key == "sectionSlug").Value
+            as string;
+        var questionSlug =
+            routeValues.FirstOrDefault(routeValue => routeValue.Key == "questionSlug").Value
+            as string;
 
         Assert.Equal(SectionSlug, sectionSlug);
         Assert.Equal(_validQuestion.Slug, questionSlug);
@@ -225,7 +278,11 @@ public class QuestionsControllerTests
 
         _controller.TempData = Substitute.For<ITempDataDictionary>();
 
-        var result = await _controller.GetNextUnansweredQuestion(SectionSlug, _getNextUnansweredQuestionQuery, _deleteCurrentSubmissionCommand);
+        var result = await _controller.GetNextUnansweredQuestion(
+            SectionSlug,
+            _getNextUnansweredQuestionQuery,
+            _deleteCurrentSubmissionCommand
+        );
 
         var errorMessage = _controller.TempData["SubtopicError"] as string;
         var redirectResult = result as RedirectToActionResult;
@@ -238,10 +295,7 @@ public class QuestionsControllerTests
     [Fact]
     public async Task SubmitAnswer_Should_Return_To_Question_When_Invalid_ModelState()
     {
-        var errorMessages = new[] {
-      "QuestionId cannot be null",
-      "QuestionText cannot be null"
-    };
+        var errorMessages = new[] { "QuestionId cannot be null", "QuestionText cannot be null" };
         var sectionSlug = SectionSlug;
         var questionSlug = QuestionSlug;
         var submitAnswerDto = new SubmitAnswerViewModel();
@@ -253,7 +307,14 @@ public class QuestionsControllerTests
         _controller.ModelState.AddModelError("submitAnswerDto.QuestionId", errorMessages[0]);
         _controller.ModelState.AddModelError("submitAnswerDto.QuestionText", errorMessages[1]);
 
-        var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken: cancellationToken);
+        var result = await _controller.SubmitAnswer(
+            sectionSlug,
+            questionSlug,
+            submitAnswerDto,
+            submitAnswerCommand,
+            nextUnanswered,
+            cancellationToken: cancellationToken
+        );
 
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", viewResult.ViewName);
@@ -269,7 +330,6 @@ public class QuestionsControllerTests
         }
     }
 
-
     [Fact]
     public async Task SubmitAnswer_Should_Handle_Exception_And_Return_InLine_Error_Message()
     {
@@ -283,10 +343,19 @@ public class QuestionsControllerTests
         var expectedErrorMessage = "Save failed. Please try again later.";
 
         submitAnswerCommand
-          .When(x => x.SubmitAnswer(Arg.Any<SubmitAnswerViewModel>(), Arg.Any<CancellationToken>()))
-          .Do(x => throw new Exception("A Dummy exception thrown by the test"));
+            .When(x =>
+                x.SubmitAnswer(Arg.Any<SubmitAnswerViewModel>(), Arg.Any<CancellationToken>())
+            )
+            .Do(x => throw new Exception("A Dummy exception thrown by the test"));
 
-        var result = await _controller.SubmitAnswer(sectionSlug, questionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken: cancellationToken);
+        var result = await _controller.SubmitAnswer(
+            sectionSlug,
+            questionSlug,
+            submitAnswerDto,
+            submitAnswerCommand,
+            nextUnanswered,
+            cancellationToken: cancellationToken
+        );
 
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", viewResult.ViewName);
@@ -307,7 +376,13 @@ public class QuestionsControllerTests
 
         submitAnswerCommand.SubmitAnswer(dto, Arg.Any<CancellationToken>()).Returns(1);
 
-        var result = await _controller.SubmitAnswer(SectionSlug, QuestionSlug, dto, submitAnswerCommand, nextUnanswered);
+        var result = await _controller.SubmitAnswer(
+            SectionSlug,
+            QuestionSlug,
+            dto,
+            submitAnswerCommand,
+            nextUnanswered
+        );
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("GetNextUnansweredQuestion", redirect.ActionName);
@@ -324,20 +399,36 @@ public class QuestionsControllerTests
         submitAnswerCommand.SubmitAnswer(dto, Arg.Any<CancellationToken>()).Returns(1);
 
         _user.GetEstablishmentId().Returns(EstablishmentId);
-        _getResponseQuery.GetLatestResponses(EstablishmentId, _validSection.Sys.Id, false, Arg.Any<CancellationToken>())
-            .Returns(new SubmissionResponsesDto
-            {
-                Responses = new List<QuestionWithAnswer>
+        _getResponseQuery
+            .GetLatestResponses(
+                EstablishmentId,
+                _validSection.Sys.Id,
+                false,
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(
+                new SubmissionResponsesDto
                 {
-                    new QuestionWithAnswer { QuestionSysId = _validQuestion.Sys.Id }
+                    Responses = new List<QuestionWithAnswer>
+                    {
+                        new QuestionWithAnswer { QuestionSysId = _validQuestion.Sys.Id },
+                    },
                 }
-            });
+            );
 
         var nextQuestion = new Question { Slug = "next-question" };
-        nextUnanswered.GetNextUnansweredQuestion(EstablishmentId, _validSection, Arg.Any<CancellationToken>())
+        nextUnanswered
+            .GetNextUnansweredQuestion(EstablishmentId, _validSection, Arg.Any<CancellationToken>())
             .Returns(nextQuestion);
 
-        var result = await _controller.SubmitAnswer(SectionSlug, QuestionSlug, dto, submitAnswerCommand, nextUnanswered, returnTo: FlowConstants.ChangeAnswersFlow);
+        var result = await _controller.SubmitAnswer(
+            SectionSlug,
+            QuestionSlug,
+            dto,
+            submitAnswerCommand,
+            nextUnanswered,
+            returnTo: FlowConstants.ChangeAnswersFlow
+        );
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("GetQuestionBySlug", redirect.ActionName);
@@ -356,19 +447,28 @@ public class QuestionsControllerTests
         submitAnswerCommand.SubmitAnswer(dto, Arg.Any<CancellationToken>()).Returns(1);
 
         _user.GetEstablishmentId().Returns(EstablishmentId);
-        _getResponseQuery.GetLatestResponses(EstablishmentId, _validSection.Sys.Id, false, Arg.Any<CancellationToken>())
-            .Returns(new SubmissionResponsesDto
-            {
-                Responses = new List<QuestionWithAnswer>()
-            });
+        _getResponseQuery
+            .GetLatestResponses(
+                EstablishmentId,
+                _validSection.Sys.Id,
+                false,
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(new SubmissionResponsesDto { Responses = new List<QuestionWithAnswer>() });
 
-        var result = await _controller.SubmitAnswer(SectionSlug, QuestionSlug, dto, submitAnswerCommand, nextUnanswered, returnTo: FlowConstants.ChangeAnswersFlow);
+        var result = await _controller.SubmitAnswer(
+            SectionSlug,
+            QuestionSlug,
+            dto,
+            submitAnswerCommand,
+            nextUnanswered,
+            returnTo: FlowConstants.ChangeAnswersFlow
+        );
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal("CheckAnswersPage", redirect.ActionName);
         Assert.Equal("CheckAnswers", redirect.ControllerName);
     }
-
 
     [Fact]
     public async Task SubmitAnswer_Should_Redirect_To_NextUnansweredQuestion_When_Success()
@@ -380,10 +480,16 @@ public class QuestionsControllerTests
         var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
         var nextUnanswered = Substitute.For<IGetNextUnansweredQuestionQuery>();
 
-        submitAnswerCommand.SubmitAnswer(submitAnswerDto, Arg.Any<CancellationToken>())
-                          .Returns(1);
+        submitAnswerCommand.SubmitAnswer(submitAnswerDto, Arg.Any<CancellationToken>()).Returns(1);
 
-        var result = await _controller.SubmitAnswer(SectionSlug, QuestionSlug, submitAnswerDto, submitAnswerCommand, nextUnanswered, cancellationToken: cancellationToken);
+        var result = await _controller.SubmitAnswer(
+            SectionSlug,
+            QuestionSlug,
+            submitAnswerDto,
+            submitAnswerCommand,
+            nextUnanswered,
+            cancellationToken: cancellationToken
+        );
 
         var redirectResult = result as RedirectToActionResult;
         Assert.NotNull(redirectResult);
@@ -392,7 +498,9 @@ public class QuestionsControllerTests
         var routeValues = redirectResult.RouteValues;
         Assert.NotNull(routeValues);
 
-        var sectionSlug = routeValues.FirstOrDefault(routeValue => routeValue.Key == "sectionSlug").Value as string;
+        var sectionSlug =
+            routeValues.FirstOrDefault(routeValue => routeValue.Key == "sectionSlug").Value
+            as string;
 
         Assert.Equal(SectionSlug, sectionSlug);
     }
@@ -400,7 +508,10 @@ public class QuestionsControllerTests
     [Fact]
     public async Task QuestionPreview_Should_Redirect_When_UsePreview_Is_False()
     {
-        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptionsConfiguration(false));
+        var result = await _controller.GetQuestionPreviewById(
+            _validQuestion.Sys.Id,
+            new ContentfulOptionsConfiguration(false)
+        );
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
@@ -410,7 +521,10 @@ public class QuestionsControllerTests
     [Fact]
     public async Task QuestionPreview_Should_Return_Valid_Model_With_Section_Omitted_When_UsePreview_Is_True()
     {
-        var result = await _controller.GetQuestionPreviewById(_validQuestion.Sys.Id, new ContentfulOptionsConfiguration(true));
+        var result = await _controller.GetQuestionPreviewById(
+            _validQuestion.Sys.Id,
+            new ContentfulOptionsConfiguration(true)
+        );
 
         var viewResult = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", viewResult.ViewName);
@@ -432,7 +546,13 @@ public class QuestionsControllerTests
         var submitAnswerCommand = Substitute.For<ISubmitAnswerCommand>();
         var nextUnanswered = Substitute.For<IGetNextUnansweredQuestionQuery>();
 
-        var result = await _controller.SubmitAnswer(SectionSlug, QuestionSlug, dto, submitAnswerCommand, nextUnanswered);
+        var result = await _controller.SubmitAnswer(
+            SectionSlug,
+            QuestionSlug,
+            dto,
+            submitAnswerCommand,
+            nextUnanswered
+        );
 
         var viewResult = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<QuestionViewModel>(viewResult.Model);
@@ -450,7 +570,13 @@ public class QuestionsControllerTests
             .When(cmd => cmd.SubmitAnswer(dto, Arg.Any<CancellationToken>()))
             .Do(_ => throw new Exception("DB error"));
 
-        var result = await _controller.SubmitAnswer(SectionSlug, QuestionSlug, dto, submitAnswerCommand, nextUnanswered);
+        var result = await _controller.SubmitAnswer(
+            SectionSlug,
+            QuestionSlug,
+            dto,
+            submitAnswerCommand,
+            nextUnanswered
+        );
 
         var viewResult = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<QuestionViewModel>(viewResult.Model);

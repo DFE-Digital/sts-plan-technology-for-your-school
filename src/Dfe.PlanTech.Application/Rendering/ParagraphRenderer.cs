@@ -9,12 +9,18 @@ namespace Dfe.PlanTech.Application.Rendering;
 public class ParagraphRenderer : BaseRichTextContentPartRenderer
 {
     private readonly RichTextPartRendererOptions _options;
-    public ParagraphRenderer(RichTextPartRendererOptions options) : base(RichTextNodeType.Paragraph)
+
+    public ParagraphRenderer(RichTextPartRendererOptions options)
+        : base(RichTextNodeType.Paragraph)
     {
         _options = options;
     }
 
-    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    )
     {
         if (_options.Classes == null)
         {

@@ -25,14 +25,16 @@ public class MaintainUrlOnKeyNotFoundAttributeTests
             http,
             new RouteData(),
             new ActionDescriptor(),
-            new ModelStateDictionary());
+            new ModelStateDictionary()
+        );
 
         return new ExceptionContext(actionContext, new List<IFilterMetadata>());
     }
 
     private static MaintainUrlOnKeyNotFoundAttribute BuildServiceUnderTest(
         string linkId,
-        IContentfulService? contentful = null)
+        IContentfulService? contentful = null
+    )
     {
         var opts = Options.Create(new ContactOptionsConfiguration { LinkId = linkId });
         var svc = contentful ?? Substitute.For<IContentfulService>();
@@ -45,14 +47,18 @@ public class MaintainUrlOnKeyNotFoundAttributeTests
     public void Ctor_Throws_When_Options_Null()
     {
         var svc = Substitute.For<IContentfulService>();
-        Assert.Throws<ArgumentNullException>(() => new MaintainUrlOnKeyNotFoundAttribute(null!, svc));
+        Assert.Throws<ArgumentNullException>(() =>
+            new MaintainUrlOnKeyNotFoundAttribute(null!, svc)
+        );
     }
 
     [Fact]
     public void Ctor_Throws_When_ContentfulService_Null()
     {
         var opts = Options.Create(new ContactOptionsConfiguration { LinkId = "link-1" });
-        Assert.Throws<ArgumentNullException>(() => new MaintainUrlOnKeyNotFoundAttribute(opts, null!));
+        Assert.Throws<ArgumentNullException>(() =>
+            new MaintainUrlOnKeyNotFoundAttribute(opts, null!)
+        );
     }
 
     // ---------- Handles ContentfulDataUnavailableException ----------
@@ -63,7 +69,11 @@ public class MaintainUrlOnKeyNotFoundAttributeTests
         // Arrange
         var linkId = "contact-link-id";
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetLinkByIdAsync(linkId).Returns(new NavigationLinkEntry { Sys = new SystemDetails(linkId), Href = "/contact-us" });
+        contentful
+            .GetLinkByIdAsync(linkId)
+            .Returns(
+                new NavigationLinkEntry { Sys = new SystemDetails(linkId), Href = "/contact-us" }
+            );
 
         var sut = BuildServiceUnderTest(linkId, contentful);
         var ctx = BuildExceptionContext();
@@ -87,7 +97,8 @@ public class MaintainUrlOnKeyNotFoundAttributeTests
         // Arrange
         var linkId = "contact-link-id";
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetLinkByIdAsync(linkId)
+        contentful
+            .GetLinkByIdAsync(linkId)
             .Returns(new NavigationLinkEntry { Sys = new SystemDetails(linkId), Href = "/help" });
 
         var sut = BuildServiceUnderTest(linkId, contentful);

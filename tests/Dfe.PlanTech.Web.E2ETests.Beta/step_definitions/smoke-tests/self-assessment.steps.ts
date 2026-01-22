@@ -8,7 +8,7 @@ Then(
     state: 'not started' | 'in progress' | 'completed',
     heading: string,
     description: string,
-    href: string
+    href: string,
   ) {
     const container = this.page.locator('#main-content');
     const currentDate = getCurrentShortDate();
@@ -36,7 +36,7 @@ Then(
       // Paragraph with the "started on" text
       const inProgressPara = headingEl
         .locator(
-          'xpath=following-sibling::p[contains(normalize-space(.), "A self-assessment was started on")]'
+          'xpath=following-sibling::p[contains(normalize-space(.), "A self-assessment was started on")]',
         )
         .first();
 
@@ -51,9 +51,7 @@ Then(
       const link = headingEl.locator('xpath=following-sibling::p[a][1]/a');
 
       await expect(link).toBeVisible();
-      await expect(link).toHaveText(
-        `Continue your self-assessment for ${sectionLower}`
-      );
+      await expect(link).toHaveText(`Continue your self-assessment for ${sectionLower}`);
       await expect(link).toHaveAttribute('href', href);
       return;
     }
@@ -71,7 +69,7 @@ Then(
       expect(normalisedText).toMatch(expectedText);
 
       const viewLink = headingEl.locator(
-        'xpath=following-sibling::p[a[contains(normalize-space(.), "View answers for")]][1]/a'
+        'xpath=following-sibling::p[a[contains(normalize-space(.), "View answers for")]][1]/a',
       );
       await expect(viewLink).toBeVisible();
       await expect(viewLink).toHaveText(`View answers for ${sectionLower}`);
@@ -80,7 +78,7 @@ Then(
     }
 
     throw new Error(`Unknown state "${state}". Use "not started", "in progress", or "completed".`);
-  }
+  },
 );
 
 async function getConfirmationPanel(context: any, sectionName: string) {
@@ -92,25 +90,22 @@ async function getConfirmationPanel(context: any, sectionName: string) {
     hasText: 'Recommendations are available',
   });
 
-  return {headerLocator, bodyLocator};
+  return { headerLocator, bodyLocator };
 }
 
-Then('I should see the confirmation panel for {string}',
-  async function (sectionName: string) {
-    const {headerLocator, bodyLocator} = await getConfirmationPanel(this, sectionName);
+Then('I should see the confirmation panel for {string}', async function (sectionName: string) {
+  const { headerLocator, bodyLocator } = await getConfirmationPanel(this, sectionName);
 
-    await expect(headerLocator).toBeVisible();
-    await expect(bodyLocator).toBeVisible();
-  }
-);
+  await expect(headerLocator).toBeVisible();
+  await expect(bodyLocator).toBeVisible();
+});
 
 Then('I should not see the confirmation panel for {string}', async function (sectionName: string) {
-    const {headerLocator, bodyLocator} = await getConfirmationPanel(this, sectionName);
+  const { headerLocator, bodyLocator } = await getConfirmationPanel(this, sectionName);
 
-    await expect(headerLocator).not.toBeVisible();
-    await expect(bodyLocator).not.toBeVisible();
-}
-);
+  await expect(headerLocator).not.toBeVisible();
+  await expect(bodyLocator).not.toBeVisible();
+});
 
 When(
   'I click the recommendation link {string} on the category landing page',
@@ -120,14 +115,11 @@ When(
       .getByRole('link', { name: linkText });
 
     await link.click();
-  }
+  },
 );
 
 When('I click the first recommendation link on the category landing page', async function () {
-  const firstLink = this.page
-    .locator('.recommendation-action-header')
-    .getByRole('link')
-    .first();
+  const firstLink = this.page.locator('.recommendation-action-header').getByRole('link').first();
 
   await firstLink.click();
 });
@@ -137,4 +129,3 @@ Then('I should not see any recommendation links', async function () {
 
   await expect(recommendationLinks).toHaveCount(0);
 });
-

@@ -384,4 +384,3 @@ BEGIN
     JOIN inserted I ON I.id = CC.id
 END
 GO
-

@@ -11,5 +11,6 @@ namespace Dfe.PlanTech.Application.Background;
 [ExcludeFromCodeCoverage]
 public record BackgroundTaskQueueOptions(int MaxQueueSize, BoundedChannelFullMode FullMode)
 {
-    public BackgroundTaskQueueOptions() : this(10, BoundedChannelFullMode.Wait) { }
+    public BackgroundTaskQueueOptions()
+        : this(10, BoundedChannelFullMode.Wait) { }
 }

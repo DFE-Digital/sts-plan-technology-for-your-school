@@ -18,7 +18,11 @@ public static class GZipRedisValueCompressor
     /// <returns>True if it was compressed, false if it was not compressed</returns>
     public static bool Compress(ref byte[] value)
     {
-        if (value == null || value.Length < CompressionThreshold || value.Take(_gzipHeader.Length).SequenceEqual(_gzipHeader))
+        if (
+            value == null
+            || value.Length < CompressionThreshold
+            || value.Take(_gzipHeader.Length).SequenceEqual(_gzipHeader)
+        )
         {
             return false;
         }
@@ -59,7 +63,11 @@ public static class GZipRedisValueCompressor
     /// <returns>True if decompressed, false if not.</returns>
     public static bool Decompress(ref byte[] value)
     {
-        if (value == null || value.Length == 0 || !value.Take(_gzipHeader.Length).SequenceEqual(_gzipHeader))
+        if (
+            value == null
+            || value.Length == 0
+            || !value.Take(_gzipHeader.Length).SequenceEqual(_gzipHeader)
+        )
         {
             return false;
         }

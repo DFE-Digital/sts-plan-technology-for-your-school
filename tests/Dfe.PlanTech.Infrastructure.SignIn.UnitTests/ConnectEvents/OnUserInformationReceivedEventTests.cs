@@ -16,7 +16,11 @@ namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests.ConnectEvents;
 
 public class OnUserInformationReceivedEventTests
 {
-    private static (UserInformationReceivedContext ctx, ISignInWorkflow wf, ILogger<IDfeSignIn> logger) BuildContext(ClaimsPrincipal principal)
+    private static (
+        UserInformationReceivedContext ctx,
+        ISignInWorkflow wf,
+        ILogger<IDfeSignIn> logger
+    ) BuildContext(ClaimsPrincipal principal)
     {
         var services = new ServiceCollection();
         var wf = Substitute.For<ISignInWorkflow>();
@@ -25,11 +29,21 @@ public class OnUserInformationReceivedEventTests
         var sp = services.BuildServiceProvider();
 
         var httpContext = new DefaultHttpContext { RequestServices = sp };
-        var scheme = new AuthenticationScheme(OpenIdConnectDefaults.AuthenticationScheme, null, typeof(OpenIdConnectHandler));
+        var scheme = new AuthenticationScheme(
+            OpenIdConnectDefaults.AuthenticationScheme,
+            null,
+            typeof(OpenIdConnectHandler)
+        );
         var options = new OpenIdConnectOptions();
         var properties = new AuthenticationProperties();
 
-        var ctx = new UserInformationReceivedContext(httpContext, scheme, options, principal, properties);
+        var ctx = new UserInformationReceivedContext(
+            httpContext,
+            scheme,
+            options,
+            principal,
+            properties
+        );
 
         var logger = Substitute.For<ILogger<IDfeSignIn>>();
         return (ctx, wf, logger);
@@ -62,7 +76,9 @@ public class OnUserInformationReceivedEventTests
     public async Task RecordUserSignIn_When_EstablishmentMissing_LogsWarning_And_RecordsUserOnly()
     {
         // Arrange: authenticated principal but no establishment-related claims
-        var principal = AuthenticatedPrincipal(new Claim(ClaimConstants.NameIdentifier, "dsi-ref-123"));
+        var principal = AuthenticatedPrincipal(
+            new Claim(ClaimConstants.NameIdentifier, "dsi-ref-123")
+        );
         var (ctx, wf, logger) = BuildContext(principal);
 
         // Act
@@ -84,22 +100,22 @@ public class OnUserInformationReceivedEventTests
         // Arrange
         var principal = AuthenticatedPrincipal();
         var (ctx, _, _) = BuildContext(principal);
-        var signIn = new SqlSignInDto
-        {
-            UserId = 42,
-            EstablishmentId = 999
-        };
+        var signIn = new SqlSignInDto { UserId = 42, EstablishmentId = 999 };
 
         // Invoke private static AddClaimsToPrincipal(UserInformationReceivedContext, SqlSignInDto)
-        var mi = typeof(OnUserInformationReceivedEvent)
-            .GetMethod("AddClaimsToPrincipal", BindingFlags.NonPublic | BindingFlags.Static);
+        var mi = typeof(OnUserInformationReceivedEvent).GetMethod(
+            "AddClaimsToPrincipal",
+            BindingFlags.NonPublic | BindingFlags.Static
+        );
         Assert.NotNull(mi);
 
         mi!.Invoke(null, new object[] { ctx, signIn });
 
         // Assert
         var userIdClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimConstants.DB_USER_ID);
-        var estIdClaim = principal.Claims.FirstOrDefault(c => c.Type == ClaimConstants.DB_ESTABLISHMENT_ID);
+        var estIdClaim = principal.Claims.FirstOrDefault(c =>
+            c.Type == ClaimConstants.DB_ESTABLISHMENT_ID
+        );
 
         Assert.NotNull(userIdClaim);
         Assert.Equal("42", userIdClaim!.Value);
@@ -115,11 +131,14 @@ public class OnUserInformationReceivedEventTests
         var (ctx, _, _) = BuildContext(principal);
         var signIn = new SqlSignInDto { UserId = 7, EstablishmentId = null };
 
-        var mi = typeof(OnUserInformationReceivedEvent)
-            .GetMethod("AddClaimsToPrincipal", BindingFlags.NonPublic | BindingFlags.Static)!;
+        var mi = typeof(OnUserInformationReceivedEvent).GetMethod(
+            "AddClaimsToPrincipal",
+            BindingFlags.NonPublic | BindingFlags.Static
+        )!;
 
         var ex = Assert.Throws<TargetInvocationException>(() =>
-            mi.Invoke(null, new object[] { ctx, signIn }));
+            mi.Invoke(null, new object[] { ctx, signIn })
+        );
 
         // Inner exception should be the InvalidDataException thrown by the method
         Assert.IsType<InvalidDataException>(ex.InnerException);

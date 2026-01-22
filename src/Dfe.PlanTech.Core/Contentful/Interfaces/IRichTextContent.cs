@@ -29,15 +29,18 @@ public partial interface IRichTextContent
             }
         );
 
-    public bool MatchesNodeType(string? enumName)
-    => string.Equals(enumName, RemoveHyphensAndNumbersRegEx().Replace(NodeType, ""), StringComparison.InvariantCultureIgnoreCase);
+    public bool MatchesNodeType(string? enumName) =>
+        string.Equals(
+            enumName,
+            RemoveHyphensAndNumbersRegEx().Replace(NodeType, ""),
+            StringComparison.InvariantCultureIgnoreCase
+        );
 
     public string? GetNameForNodeType(RichTextNodeType value) => Enum.GetName(value);
 
     [GeneratedRegex("-|\\d")]
     private static partial Regex RemoveHyphensAndNumbersRegEx();
 }
-
 
 public interface IRichTextContent<TMark, TContentType, TData> : IRichTextContent
     where TMark : IRichTextMark, new()

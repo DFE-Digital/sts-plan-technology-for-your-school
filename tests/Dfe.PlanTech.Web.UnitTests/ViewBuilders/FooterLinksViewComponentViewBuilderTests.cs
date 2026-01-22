@@ -13,17 +13,14 @@ public class FooterLinksViewComponentViewBuilderTests
     private static FooterLinksViewComponentViewBuilder CreateServiceUnderTest(
         IContentfulService? contentful = null,
         ICurrentUser? currentUser = null,
-        ILogger<FooterLinksViewComponentViewBuilder>? mockLogger = null)
+        ILogger<FooterLinksViewComponentViewBuilder>? mockLogger = null
+    )
     {
         contentful ??= Substitute.For<IContentfulService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         mockLogger ??= Substitute.For<ILogger<FooterLinksViewComponentViewBuilder>>();
 
-        return new FooterLinksViewComponentViewBuilder(
-            mockLogger,
-            contentful,
-            currentUser
-        );
+        return new FooterLinksViewComponentViewBuilder(mockLogger, contentful, currentUser);
     }
 
     [Fact]
@@ -62,12 +59,16 @@ public class FooterLinksViewComponentViewBuilderTests
         await sut.GetNavigationLinksAsync();
 
         // Assert: one Critical log with the expected message fragment and exception
-        logger.Received(1).Log(
-            LogLevel.Critical,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o =>
-                o.ToString()!.Contains("Error retrieving navigation links for footer")),
-            Arg.Is<Exception?>(e => e!.Message.Equals("boom")),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Critical,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o =>
+                    o.ToString()!.Contains("Error retrieving navigation links for footer")
+                ),
+                Arg.Is<Exception?>(e => e!.Message.Equals("boom")),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 }

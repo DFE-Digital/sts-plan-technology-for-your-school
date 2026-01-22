@@ -16,7 +16,7 @@ public class UserSettingsEntity
         return new SqlUserSettingsDto
         {
             UserId = UserId,
-            SortOrder = SortOrder.GetRecommendationSortEnumValue()
+            SortOrder = SortOrder.GetRecommendationSortEnumValue(),
         };
     }
 }

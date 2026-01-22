@@ -16,7 +16,8 @@ public class LogInvalidModelStateAttributeTests
     private static ActionExecutingContext BuildContext(
         ILogger<LogInvalidModelStateAttribute>? logger,
         bool isModelStateValid,
-        string displayName = "TestController.TestAction")
+        string displayName = "TestController.TestAction"
+    )
     {
         var services = new ServiceCollection();
         if (logger is not null)
@@ -37,7 +38,12 @@ public class LogInvalidModelStateAttributeTests
 
         var controller = Substitute.For<Controller>();
 
-        return new ActionExecutingContext(actionContext, [], new Dictionary<string, object?>(), controller);
+        return new ActionExecutingContext(
+            actionContext,
+            [],
+            new Dictionary<string, object?>(),
+            controller
+        );
     }
 
     [Fact]
@@ -71,17 +77,19 @@ public class LogInvalidModelStateAttributeTests
 
         attribute.OnActionExecuting(ctx);
 
-        logger.Received(1).Log(
-            LogLevel.Error,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o =>
-                o.ToString()!.Contains("Not able to validate model state") &&
-                o.ToString()!.Contains(displayName)),
-            Arg.Is<Exception?>(e => e == null),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Error,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o =>
+                    o.ToString()!.Contains("Not able to validate model state")
+                    && o.ToString()!.Contains(displayName)
+                ),
+                Arg.Is<Exception?>(e => e == null),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 }
 
-internal class NullController : Controller
-{
-}
+internal class NullController : Controller { }

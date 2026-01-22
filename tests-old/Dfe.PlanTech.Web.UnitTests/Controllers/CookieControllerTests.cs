@@ -22,18 +22,20 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Slug = "cookies",
                 Title = new Title() { Text = "Cookies" },
-                Content = [new Header() { Tag = HeaderTag.H1, Text = "Analytical Cookies" }]
+                Content = [new Header() { Tag = HeaderTag.H1, Text = "Analytical Cookies" }],
             },
         ];
 
         public static CookiesController CreateStrut()
         {
-            ILogger<CookiesController> loggerSubstitute = Substitute.For<ILogger<CookiesController>>();
+            ILogger<CookiesController> loggerSubstitute = Substitute.For<
+                ILogger<CookiesController>
+            >();
             ICookieService cookiesSubstitute = Substitute.For<ICookieService>();
 
             return new CookiesController(loggerSubstitute, cookiesSubstitute)
             {
-                ControllerContext = ControllerHelpers.SubstituteControllerContext()
+                ControllerContext = ControllerHelpers.SubstituteControllerContext(),
             };
         }
 
@@ -47,10 +49,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Headers.Referer = url;
 
-            strut.ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContext
-            };
+            strut.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
             //Act
             var result = strut.HideBanner() as RedirectResult;
@@ -63,16 +62,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Theory]
         [InlineData("https://localhost:8080/home", "true")]
         [InlineData("https://www.dfe.gov.uk/home", "false")]
-        public void SetCookiePreference_Redirects_BackToPlaceOfOrigin(string url, string userAcceptsCookie)
+        public void SetCookiePreference_Redirects_BackToPlaceOfOrigin(
+            string url,
+            string userAcceptsCookie
+        )
         {
             //Arrange
             var strut = CreateStrut();
             var httpContext = new DefaultHttpContext();
             httpContext.Request.Headers.Referer = url;
-            strut.ControllerContext = new ControllerContext
-            {
-                HttpContext = httpContext
-            };
+            strut.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
             //Act
             var result = strut.SetCookiePreference(userAcceptsCookie) as RedirectResult;
@@ -92,7 +91,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             CookiesController cookiesController = CreateStrut();
             cookiesController.HttpContext.Request.Headers.Referer = referrerUrl;
 
-            var result = await cookiesController.GetCookiesPage(getPageQuery, CancellationToken.None);
+            var result = await cookiesController.GetCookiesPage(
+                getPageQuery,
+                CancellationToken.None
+            );
             Assert.IsType<ViewResult>(result);
 
             var model = (result as ViewResult)!.Model as CookiesViewModel;
@@ -108,7 +110,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             IGetPageQuery getPageQuery = SetupPageQueryMock();
 
             CookiesController cookiesController = CreateStrut();
-            var result = await cookiesController.GetCookiesPage(getPageQuery, CancellationToken.None);
+            var result = await cookiesController.GetCookiesPage(
+                getPageQuery,
+                CancellationToken.None
+            );
             Assert.IsType<ViewResult>(result);
 
             var viewResult = result as ViewResult;
@@ -157,19 +162,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             cookiesController.TempData = tempDataSubstitute;
 
-            var result = Assert.Throws<ArgumentException>(() => cookiesController.SetCookiePreference(userPreference!));
+            var result = Assert.Throws<ArgumentException>(() =>
+                cookiesController.SetCookiePreference(userPreference!)
+            );
             Assert.Contains("Can't convert preference", result.Message);
         }
 
         private IGetPageQuery SetupPageQueryMock()
         {
             var getPageQuery = Substitute.For<IGetPageQuery>();
-            getPageQuery.GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
-                                .Returns(callinfo =>
-                                    {
-                                        var slug = callinfo.ArgAt<string>(0);
-                                        return _pages.FirstOrDefault(page => page.Slug == slug);
-                                    });
+            getPageQuery
+                .GetPageBySlug(Arg.Any<string>(), Arg.Any<CancellationToken>())
+                .Returns(callinfo =>
+                {
+                    var slug = callinfo.ArgAt<string>(0);
+                    return _pages.FirstOrDefault(page => page.Slug == slug);
+                });
             return getPageQuery;
         }
     }

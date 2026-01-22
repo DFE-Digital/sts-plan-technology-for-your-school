@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Http;
 
 namespace Dfe.PlanTech.Application.Services;
 
-public class CookieService(
-    IHttpContextAccessor contextAccessor,
-    ICookieWorkflow cookieWorkflow
-) : ICookieService
+public class CookieService(IHttpContextAccessor contextAccessor, ICookieWorkflow cookieWorkflow)
+    : ICookieService
 {
-    private readonly IHttpContextAccessor _contextAccessor = contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
-    private readonly ICookieWorkflow _cookieWorkflow = cookieWorkflow ?? throw new ArgumentNullException(nameof(cookieWorkflow));
+    private readonly IHttpContextAccessor _contextAccessor =
+        contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
+    private readonly ICookieWorkflow _cookieWorkflow =
+        cookieWorkflow ?? throw new ArgumentNullException(nameof(cookieWorkflow));
 
     public const string CookieKey = "user_cookies_preferences";
 
@@ -28,7 +28,9 @@ public class CookieService(
     {
         if (_contextAccessor.HttpContext is null)
         {
-            throw new InvalidOperationException($"Cannot set cookie acceptance as {nameof(_contextAccessor.HttpContext)} is null");
+            throw new InvalidOperationException(
+                $"Cannot set cookie acceptance as {nameof(_contextAccessor.HttpContext)} is null"
+            );
         }
 
         CreateCookie(CookieKey, userAcceptsCookies: userAcceptsCookies);
@@ -62,7 +64,7 @@ public class CookieService(
         {
             Secure = true,
             HttpOnly = true,
-            Expires = new DateTimeOffset(DateTime.Now.AddYears(1))
+            Expires = new DateTimeOffset(DateTime.Now.AddYears(1)),
         };
 
         DeleteCookie();
@@ -70,7 +72,7 @@ public class CookieService(
         var cookie = Cookie with
         {
             UserAcceptsCookies = userAcceptsCookies ?? Cookie.UserAcceptsCookies,
-            IsVisible = visibility ?? Cookie.IsVisible
+            IsVisible = visibility ?? Cookie.IsVisible,
         };
 
         var serializedCookie = JsonSerializer.Serialize(cookie);

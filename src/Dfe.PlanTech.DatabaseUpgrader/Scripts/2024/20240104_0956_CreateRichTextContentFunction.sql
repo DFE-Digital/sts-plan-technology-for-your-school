@@ -6,13 +6,13 @@ RETURNS TABLE AS RETURN (
   (
     SELECT Id, [Value], NodeType, DataId, ParentId FROM [Contentful].[RichTextContents] WHERE Id = @ParentId
     UNION ALL
-    SELECT 
+    SELECT
       c.Id, c.[Value], c.NodeType, c.DataId, c.ParentId
     FROM
       [Contentful].[RichTextContents] c
     JOIN cte t
-    ON c.ParentId = t.Id 
+    ON c.ParentId = t.Id
   )
-  
+
   SELECT [Id], [Value], [NodeType], [DataId], [ParentId] FROM cte
 )

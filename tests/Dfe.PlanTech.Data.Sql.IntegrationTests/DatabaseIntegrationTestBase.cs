@@ -48,14 +48,16 @@ public abstract class DatabaseIntegrationTestBase : IAsyncLifetime
     /// Helper method to count entities of a specific type within the current transaction.
     /// Useful for verifying CRUD operations without relying on specific ID values.
     /// </summary>
-    protected async Task<int> CountEntitiesAsync<T>() where T : class
+    protected async Task<int> CountEntitiesAsync<T>()
+        where T : class
     {
         return await DbContext.Set<T>().CountAsync();
     }
 
     private async Task EnsureSubmissionCompletedHasDefaultAsync()
     {
-        const string sql = @"
+        const string sql =
+            @"
                             DECLARE @tblId int = OBJECT_ID(N'dbo.submission');
 
                             IF @tblId IS NOT NULL AND COL_LENGTH('dbo.submission', 'completed') IS NOT NULL
@@ -77,5 +79,4 @@ public abstract class DatabaseIntegrationTestBase : IAsyncLifetime
                             ";
         await DbContext.Database.ExecuteSqlRawAsync(sql);
     }
-
 }

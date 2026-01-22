@@ -17,7 +17,8 @@ public class CurrentUserTests
 {
     private static (CurrentUser sut, DefaultHttpContext ctx) Build(
         IEnumerable<Claim>? claims = null,
-        bool authenticated = true)
+        bool authenticated = true
+    )
     {
         var id = authenticated ? new ClaimsIdentity("test") : new ClaimsIdentity();
         if (claims != null)
@@ -46,7 +47,9 @@ public class CurrentUserTests
     {
         var establishmentService = Substitute.For<IEstablishmentService>();
         var logger = Substitute.For<ILogger<CurrentUser>>();
-        Assert.Throws<ArgumentNullException>(() => new CurrentUser(null!, establishmentService, logger));
+        Assert.Throws<ArgumentNullException>(() =>
+            new CurrentUser(null!, establishmentService, logger)
+        );
     }
 
     [Fact]
@@ -79,7 +82,9 @@ public class CurrentUserTests
     [Fact]
     public void Email_Returns_Value_When_Claim_Present()
     {
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.VerifiedEmail, "user@example.com") });
+        var (sut, _) = Build(
+            new[] { BuildClaim(ClaimConstants.VerifiedEmail, "user@example.com") }
+        );
         Assert.Equal("user@example.com", sut.Email);
     }
 
@@ -111,42 +116,62 @@ public class CurrentUserTests
     {
         // Arrange - MAT user with selected school
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's ID
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Set selected school cookie
         var schoolData = new { Urn = "999888", Name = "Selected Academy" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
-            {
-                new() { Urn = "999888", EstablishmentName = "Selected Academy", Id = 42 }
-            });
+        establishmentService
+            .GetEstablishmentLinksWithRecommendationCounts(100)
+            .Returns(
+                new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
+                {
+                    new()
+                    {
+                        Urn = "999888",
+                        EstablishmentName = "Selected Academy",
+                        Id = 42,
+                    },
+                }
+            );
 
-        establishmentService.GetEstablishmentByReferenceAsync("999888")
-            .Returns(new Core.DataTransferObjects.Sql.SqlEstablishmentDto
-            {
-                Id = 42, // Selected school's DB ID
-                OrgName = "Selected Academy",
-                EstablishmentRef = "999888"
-            });
+        establishmentService
+            .GetEstablishmentByReferenceAsync("999888")
+            .Returns(
+                new Core.DataTransferObjects.Sql.SqlEstablishmentDto
+                {
+                    Id = 42, // Selected school's DB ID
+                    OrgName = "Selected Academy",
+                    EstablishmentRef = "999888",
+                }
+            );
 
         var logger = Substitute.For<ILogger<CurrentUser>>();
         var sut = new CurrentUser(accessor, establishmentService, logger);
@@ -168,7 +193,9 @@ public class CurrentUserTests
     [Fact]
     public async Task GetActiveEstablishmentIdAsync_WhenClaimIsNonNumeric_ReturnsNull()
     {
-        var (sut2, _) = Build(new[] { BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "not-an-int") });
+        var (sut2, _) = Build(
+            new[] { BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "not-an-int") }
+        );
         Assert.Null(await sut2.GetActiveEstablishmentIdAsync());
     }
 
@@ -212,22 +239,22 @@ public class CurrentUserTests
         // Arrange - using realistic JSON from DSI for a direct establishment (Miscellaneous school)
         // Note: Establishments have URN (not UID)
         var orgJson = """
-        {
-          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
-          "name": "DSI TEST Establishment (001) Miscellanenous (27)",
-          "category": {
-            "id": "001",
-            "name": "Establishment"
-          },
-          "type": {
-            "id": "27",
-            "name": "Miscellaneous"
-          },
-          "urn": "123456",
-          "uid": null,
-          "ukprn": "00000018"
-        }
-        """;
+            {
+              "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+              "name": "DSI TEST Establishment (001) Miscellanenous (27)",
+              "category": {
+                "id": "001",
+                "name": "Establishment"
+              },
+              "type": {
+                "id": "27",
+                "name": "Miscellaneous"
+              },
+              "urn": "123456",
+              "uid": null,
+              "ukprn": "00000018"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -247,19 +274,19 @@ public class CurrentUserTests
         // Arrange - using realistic JSON from DSI for a Multi-Academy Trust
         // Note: MATs (establishment groups) have UID (not URN), and don't have a "type" property
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "DSI TEST Multi-Academy Trust (010)",
-          "category": {
-            "id": "010",
-            "name": "Multi-Academy Trust"
-          },
-          "urn": null,
-          "uid": "9876",
-          "upin": "100004",
-          "ukprn": "00000046"
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "DSI TEST Multi-Academy Trust (010)",
+              "category": {
+                "id": "010",
+                "name": "Multi-Academy Trust"
+              },
+              "urn": null,
+              "uid": "9876",
+              "upin": "100004",
+              "ukprn": "00000046"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -282,7 +309,7 @@ public class CurrentUserTests
             Id = Guid.NewGuid(),
             Urn = "12345",
             Ukprn = "67890",
-            Uid = "99999"
+            Uid = "99999",
         };
         var json1 = JsonSerializer.Serialize(orgWithUrn);
         var (sut1, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, json1) });
@@ -294,7 +321,7 @@ public class CurrentUserTests
             Id = Guid.NewGuid(),
             Urn = null,
             Ukprn = "67890",
-            Uid = "99999"
+            Uid = "99999",
         };
         var json2 = JsonSerializer.Serialize(orgWithUkprn);
         var (sut2, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, json2) });
@@ -306,7 +333,7 @@ public class CurrentUserTests
             Id = Guid.NewGuid(),
             Urn = null,
             Ukprn = null,
-            Uid = "99999"
+            Uid = "99999",
         };
         var json3 = JsonSerializer.Serialize(orgWithUid);
         var (sut3, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, json3) });
@@ -318,7 +345,7 @@ public class CurrentUserTests
             Id = Guid.NewGuid(),
             Urn = null,
             Ukprn = null,
-            Uid = null
+            Uid = null,
         };
         var json4 = JsonSerializer.Serialize(orgWithDsiId);
         var (sut4, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, json4) });
@@ -362,7 +389,11 @@ public class CurrentUserTests
 
         var ctx = new DefaultHttpContext { User = principal };
         var accessor = new HttpContextAccessor { HttpContext = ctx };
-        var sut = new CurrentUser(accessor, Substitute.For<IEstablishmentService>(), Substitute.For<ILogger<CurrentUser>>());
+        var sut = new CurrentUser(
+            accessor,
+            Substitute.For<IEstablishmentService>(),
+            Substitute.For<ILogger<CurrentUser>>()
+        );
 
         Assert.True(sut.IsInRole("Admin"));
         Assert.False(sut.IsInRole("Other"));
@@ -431,9 +462,10 @@ public class CurrentUserTests
         Assert.True(setCookies.Count > 0);
 
         var cookie = setCookies.LastOrDefault(v =>
-            v != null &&
-            v.StartsWith("SelectedSchool=", StringComparison.OrdinalIgnoreCase) &&
-            !v.Contains("01 Jan 1970", StringComparison.OrdinalIgnoreCase));
+            v != null
+            && v.StartsWith("SelectedSchool=", StringComparison.OrdinalIgnoreCase)
+            && !v.Contains("01 Jan 1970", StringComparison.OrdinalIgnoreCase)
+        );
 
         Assert.False(string.IsNullOrEmpty(cookie), $"Expected an appended SelectedSchool cookie.");
 
@@ -456,7 +488,9 @@ public class CurrentUserTests
         var sut = new CurrentUser(httpContextAccessor, establishmentService, logger);
 
         // Act & Assert
-        var ex = Assert.Throws<InvalidDataException>(() => sut.SetGroupSelectedSchool(urn!, "Test School"));
+        var ex = Assert.Throws<InvalidDataException>(() =>
+            sut.SetGroupSelectedSchool(urn!, "Test School")
+        );
 
         Assert.Equal("No Urn/School name set for selection.", ex.Message);
     }
@@ -468,14 +502,14 @@ public class CurrentUserTests
     {
         // Arrange - Direct school user (logged in directly as a school)
         var orgJson = """
-        {
-          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
-          "name": "Test Primary School",
-          "category": { "id": "001", "name": "Establishment" },
-          "type": { "id": "27", "name": "Miscellaneous" },
-          "urn": "123456"
-        }
-        """;
+            {
+              "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+              "name": "Test Primary School",
+              "category": { "id": "001", "name": "Establishment" },
+              "type": { "id": "27", "name": "Miscellaneous" },
+              "urn": "123456"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -491,12 +525,12 @@ public class CurrentUserTests
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -512,42 +546,62 @@ public class CurrentUserTests
     {
         // Arrange - MAT user who has selected a school from their group
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's ID
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Set selected school cookie
         var schoolData = new { Urn = "999888", Name = "Selected Academy" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
-            {
-                new() { Urn = "999888", EstablishmentName = "Selected Academy", Id = 42 }
-            });
+        establishmentService
+            .GetEstablishmentLinksWithRecommendationCounts(100)
+            .Returns(
+                new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
+                {
+                    new()
+                    {
+                        Urn = "999888",
+                        EstablishmentName = "Selected Academy",
+                        Id = 42,
+                    },
+                }
+            );
 
-        establishmentService.GetEstablishmentByReferenceAsync("999888")
-            .Returns(new Core.DataTransferObjects.Sql.SqlEstablishmentDto
-            {
-                Id = 42,
-                OrgName = "Selected Academy from DB",
-                EstablishmentRef = "999888"
-            });
+        establishmentService
+            .GetEstablishmentByReferenceAsync("999888")
+            .Returns(
+                new Core.DataTransferObjects.Sql.SqlEstablishmentDto
+                {
+                    Id = 42,
+                    OrgName = "Selected Academy from DB",
+                    EstablishmentRef = "999888",
+                }
+            );
 
         var logger = Substitute.For<ILogger<CurrentUser>>();
         var sut = new CurrentUser(accessor, establishmentService, logger);
@@ -564,26 +618,36 @@ public class CurrentUserTests
     {
         // Arrange - MAT user who has selected a school, but database lookup fails
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+        );
         context.User = principal;
 
         // Set selected school cookie
         var schoolData = new { Urn = "999888", Name = "Selected Academy" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        establishmentService.GetEstablishmentByReferenceAsync("999888")
-            .Returns(Task.FromException<Core.DataTransferObjects.Sql.SqlEstablishmentDto?>(new Exception("Database error")));
+        establishmentService
+            .GetEstablishmentByReferenceAsync("999888")
+            .Returns(
+                Task.FromException<Core.DataTransferObjects.Sql.SqlEstablishmentDto?>(
+                    new Exception("Database error")
+                )
+            );
 
         var logger = Substitute.For<ILogger<CurrentUser>>();
         var sut = new CurrentUser(accessor, establishmentService, logger);
@@ -602,13 +666,13 @@ public class CurrentUserTests
     {
         // Arrange - Direct school user (logged in directly as a school)
         var orgJson = """
-        {
-          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
-          "name": "Test Primary School",
-          "category": { "id": "001", "name": "Establishment" },
-          "urn": "123456"
-        }
-        """;
+            {
+              "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+              "name": "Test Primary School",
+              "category": { "id": "001", "name": "Establishment" },
+              "urn": "123456"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -625,13 +689,13 @@ public class CurrentUserTests
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         // Business Rule: MATs don't have URN (only UID), so return null
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" },
-          "uid": "9876"
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" },
+              "uid": "9876"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -647,42 +711,62 @@ public class CurrentUserTests
     {
         // Arrange - MAT user who has selected a school from their group
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's ID
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Set selected school cookie
         var schoolData = new { Urn = "999888", Name = "Selected Academy" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Mock the validation - confirm the school is in the MAT's group
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
-            {
-                new() { Urn = "999888", EstablishmentName = "Selected Academy", Id = 42 }
-            });
+        establishmentService
+            .GetEstablishmentLinksWithRecommendationCounts(100)
+            .Returns(
+                new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
+                {
+                    new()
+                    {
+                        Urn = "999888",
+                        EstablishmentName = "Selected Academy",
+                        Id = 42,
+                    },
+                }
+            );
 
-        establishmentService.GetEstablishmentByReferenceAsync("999888")
-            .Returns(new Core.DataTransferObjects.Sql.SqlEstablishmentDto
-            {
-                Id = 42,
-                OrgName = "Selected Academy",
-                EstablishmentRef = "999888"
-            });
+        establishmentService
+            .GetEstablishmentByReferenceAsync("999888")
+            .Returns(
+                new Core.DataTransferObjects.Sql.SqlEstablishmentDto
+                {
+                    Id = 42,
+                    OrgName = "Selected Academy",
+                    EstablishmentRef = "999888",
+                }
+            );
 
         var logger = Substitute.For<ILogger<CurrentUser>>();
         var sut = new CurrentUser(accessor, establishmentService, logger);
@@ -701,14 +785,14 @@ public class CurrentUserTests
     {
         // Arrange - Direct school user (logged in directly as a school)
         var orgJson = """
-        {
-          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
-          "name": "Test Primary School",
-          "category": { "id": "001", "name": "Establishment" },
-          "urn": "123456",
-          "ukprn": "10012345"
-        }
-        """;
+            {
+              "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+              "name": "Test Primary School",
+              "category": { "id": "001", "name": "Establishment" },
+              "urn": "123456",
+              "ukprn": "10012345"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -724,13 +808,13 @@ public class CurrentUserTests
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" },
-          "ukprn": "10067890"
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" },
+              "ukprn": "10067890"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -748,22 +832,27 @@ public class CurrentUserTests
         // Business Rule: Schools do (sometimes) have an UKPRN on DSI, but we do not store it in our database,
         // therefore we cannot return it here for a group user (the user is not logged in directly as the school).
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" },
-          "ukprn": "10067890"
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" },
+              "ukprn": "10067890"
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+        );
         context.User = principal;
 
         // Set selected school cookie
         var schoolData = new { Urn = "999888", Name = "Selected Academy" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -785,13 +874,13 @@ public class CurrentUserTests
         // Arrange - Direct school user (logged in directly as a school)
         // Note: Schools don't have UID (only groups like MATs and SATs have a UID)
         var orgJson = """
-        {
-          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
-          "name": "Test Primary School",
-          "category": { "id": "001", "name": "Establishment" },
-          "urn": "123456"
-        }
-        """;
+            {
+              "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+              "name": "Test Primary School",
+              "category": { "id": "001", "name": "Establishment" },
+              "urn": "123456"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -807,13 +896,13 @@ public class CurrentUserTests
     {
         // Arrange - MAT user (logged in as MAT, no school selected) - MATs have UID
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" },
-          "uid": "9876"
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" },
+              "uid": "9876"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -831,22 +920,27 @@ public class CurrentUserTests
         // Note: Schools do not have a UID (UIDs are for establishment groups only),
         // therefore we expect null for the "active" school when a group user has selected one
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" },
-          "uid": "9876"
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" },
+              "uid": "9876"
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+        );
         context.User = principal;
 
         // Set selected school cookie
         var schoolData = new { Urn = "999888", Name = "Selected Academy" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -867,12 +961,12 @@ public class CurrentUserTests
     {
         // Arrange - Direct school user (logged in directly as a school)
         var orgJson = """
-        {
-          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
-          "name": "Test Primary School",
-          "category": { "id": "001", "name": "Establishment" }
-        }
-        """;
+            {
+              "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+              "name": "Test Primary School",
+              "category": { "id": "001", "name": "Establishment" }
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -888,12 +982,12 @@ public class CurrentUserTests
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -911,21 +1005,26 @@ public class CurrentUserTests
         // Note: Schools do have an organisation ID on DSI, but we do not store it in our database,
         // therefore we cannot return it here for a group user (the user is not logged in directly as the school).
         var orgJson = """
-                      {
-                        "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-                        "name": "Test Multi-Academy Trust",
-                        "category": { "id": "010", "name": "Multi-Academy Trust" }
-                      }
-                      """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+        );
         context.User = principal;
 
         // Set selected school cookie
         var schoolData = new { Urn = "999888", Name = "Selected Academy" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -946,13 +1045,13 @@ public class CurrentUserTests
     {
         // Arrange - Direct school user (logged in directly as a school with URN)
         var orgJson = """
-        {
-          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
-          "name": "Test Primary School",
-          "category": { "id": "001", "name": "Establishment" },
-          "urn": "123456"
-        }
-        """;
+            {
+              "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+              "name": "Test Primary School",
+              "category": { "id": "001", "name": "Establishment" },
+              "urn": "123456"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -968,13 +1067,13 @@ public class CurrentUserTests
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" },
-          "uid": "9876"
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" },
+              "uid": "9876"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -990,22 +1089,27 @@ public class CurrentUserTests
     {
         // Arrange - MAT user who has selected a school from their group
         var orgJson = """
-                      {
-                        "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-                        "name": "Test Multi-Academy Trust",
-                        "category": { "id": "010", "name": "Multi-Academy Trust" },
-                        "uid": "9876"
-                      }
-                      """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" },
+              "uid": "9876"
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+        );
         context.User = principal;
 
         // Set selected school cookie
         var schoolData = new { Urn = "999888", Name = "Selected Academy" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1026,12 +1130,12 @@ public class CurrentUserTests
     {
         // Arrange - MAT organisation
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "Test Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "Test Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -1080,13 +1184,13 @@ public class CurrentUserTests
     {
         // Arrange - Direct establishment (not a group)
         var orgJson = """
-        {
-          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
-          "name": "Test Primary School",
-          "category": { "id": "001", "name": "Establishment" },
-          "urn": "123456"
-        }
-        """;
+            {
+              "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+              "name": "Test Primary School",
+              "category": { "id": "001", "name": "Establishment" },
+              "urn": "123456"
+            }
+            """;
 
         var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
 
@@ -1111,25 +1215,34 @@ public class CurrentUserTests
     {
         // Arrange - Direct school user with URN 123456
         var orgJson = """
-        {
-          "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
-          "name": "My Primary School",
-          "category": { "id": "001", "name": "Establishment" },
-          "urn": "123456"
-        }
-        """;
+            {
+              "id": "CC1185B8-3142-4B6C-887C-ADC413CD3891",
+              "name": "My Primary School",
+              "category": { "id": "001", "name": "Establishment" },
+              "urn": "123456"
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Bad actor: User manually adds a selected school cookie for a different school
         var maliciousSchoolData = new { Urn = "999888", Name = "Someone Elses School" };
         var json = JsonSerializer.Serialize(maliciousSchoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1147,15 +1260,23 @@ public class CurrentUserTests
         Assert.Equal("My Primary School", activeEstablishmentName);
 
         // Verify the cookie was cleared (warning logged)
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Non-group user has school selection cookie but should not")),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o =>
+                    o.ToString()!
+                        .Contains("Non-group user has school selection cookie but should not")
+                ),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
 
         // Verify we never called the establishment service (short-circuited early)
-        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+        await establishmentService
+            .DidNotReceive()
+            .GetEstablishmentByReferenceAsync(Arg.Any<string>());
     }
 
     [Fact]
@@ -1163,35 +1284,57 @@ public class CurrentUserTests
     {
         // Arrange - MAT user (group ID 100) who tries to access a school not in their group
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's DB ID
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's DB ID
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Bad actor: User manually edits cookie to try accessing a school outside their MAT
         var maliciousSchoolData = new { Urn = "888777", Name = "School From Different MAT" };
         var json = JsonSerializer.Serialize(maliciousSchoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Setup: The MAT only has schools with URNs 111222 and 333444
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(new List<SqlEstablishmentLinkDto>
-            {
-                new() { Urn = "111222", EstablishmentName = "My School 1", Id = 1 },
-                new() { Urn = "333444", EstablishmentName = "My School 2", Id = 2 }
-            });
+        establishmentService
+            .GetEstablishmentLinksWithRecommendationCounts(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new()
+                    {
+                        Urn = "111222",
+                        EstablishmentName = "My School 1",
+                        Id = 1,
+                    },
+                    new()
+                    {
+                        Urn = "333444",
+                        EstablishmentName = "My School 2",
+                        Id = 2,
+                    },
+                }
+            );
 
         var logger = Substitute.For<ILogger<CurrentUser>>();
         var sut = new CurrentUser(accessor, establishmentService, logger);
@@ -1210,12 +1353,15 @@ public class CurrentUserTests
         await establishmentService.Received(1).GetEstablishmentLinksWithRecommendationCounts(100);
 
         // Verify the cookie was cleared (warning logged)
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("not within their group")),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o => o.ToString()!.Contains("not within their group")),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
 
         // Verify we never tried to load the malicious school
         await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync("888777");
@@ -1231,7 +1377,10 @@ public class CurrentUserTests
 
         var schoolData = new { Urn = "123456", Name = "Some School" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1249,8 +1398,12 @@ public class CurrentUserTests
         Assert.Null(activeEstablishmentName);
 
         // Verify we never called the establishment service
-        await establishmentService.DidNotReceive().GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
-        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+        await establishmentService
+            .DidNotReceive()
+            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
+        await establishmentService
+            .DidNotReceive()
+            .GetEstablishmentByReferenceAsync(Arg.Any<string>());
     }
 
     [Fact]
@@ -1258,44 +1411,69 @@ public class CurrentUserTests
     {
         // Arrange - MAT user (group ID 100) with a valid school selection within their group
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100") // MAT's DB ID
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's DB ID
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Valid selection: User selects a school within their MAT
         var validSchoolData = new { Urn = "111222", Name = "My School 1" };
         var json = JsonSerializer.Serialize(validSchoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Setup: The MAT has this school
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(new List<SqlEstablishmentLinkDto>
-            {
-                new() { Urn = "111222", EstablishmentName = "My School 1", Id = 42 },
-                new() { Urn = "333444", EstablishmentName = "My School 2", Id = 43 }
-            });
+        establishmentService
+            .GetEstablishmentLinksWithRecommendationCounts(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new()
+                    {
+                        Urn = "111222",
+                        EstablishmentName = "My School 1",
+                        Id = 42,
+                    },
+                    new()
+                    {
+                        Urn = "333444",
+                        EstablishmentName = "My School 2",
+                        Id = 43,
+                    },
+                }
+            );
 
         // Setup: Return the school details from the database
-        establishmentService.GetEstablishmentByReferenceAsync("111222")
-            .Returns(new SqlEstablishmentDto
-            {
-                Id = 42,
-                OrgName = "My School 1 (Full Name)",
-                EstablishmentRef = "111222"
-            });
+        establishmentService
+            .GetEstablishmentByReferenceAsync("111222")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 42,
+                    OrgName = "My School 1 (Full Name)",
+                    EstablishmentRef = "111222",
+                }
+            );
 
         var logger = Substitute.For<ILogger<CurrentUser>>();
         var sut = new CurrentUser(accessor, establishmentService, logger);
@@ -1317,12 +1495,15 @@ public class CurrentUserTests
         await establishmentService.Received(1).GetEstablishmentByReferenceAsync("111222");
 
         // Verify no warnings were logged
-        logger.DidNotReceive().Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Any<object>(),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .DidNotReceive()
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Any<object>(),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -1330,30 +1511,44 @@ public class CurrentUserTests
     {
         // Arrange - MAT user with a school selection, but validation fails due to service error
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         var schoolData = new { Urn = "111222", Name = "My School 1" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Setup: Service throws an exception during validation
-        establishmentService.GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(Task.FromException<List<SqlEstablishmentLinkDto>>(new Exception("Database connection failed")));
+        establishmentService
+            .GetEstablishmentLinksWithRecommendationCounts(100)
+            .Returns(
+                Task.FromException<List<SqlEstablishmentLinkDto>>(
+                    new Exception("Database connection failed")
+                )
+            );
 
         var logger = Substitute.For<ILogger<CurrentUser>>();
         var sut = new CurrentUser(accessor, establishmentService, logger);
@@ -1369,15 +1564,20 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify error was logged
-        logger.Received(1).Log(
-            LogLevel.Error,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("Failed to validate group membership")),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Error,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o => o.ToString()!.Contains("Failed to validate group membership")),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
 
         // Verify we never tried to load the school after validation failed
-        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+        await establishmentService
+            .DidNotReceive()
+            .GetEstablishmentByReferenceAsync(Arg.Any<string>());
     }
 
     [Fact]
@@ -1385,23 +1585,32 @@ public class CurrentUserTests
     {
         // Arrange - Group user without an organisation ID in claims (edge case / data corruption scenario)
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson)
-            // Note: No DB_ESTABLISHMENT_ID claim
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    // Note: No DB_ESTABLISHMENT_ID claim
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         var schoolData = new { Urn = "111222", Name = "My School 1" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1419,15 +1628,20 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify warning was logged
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("but has no organisation ID")),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o => o.ToString()!.Contains("but has no organisation ID")),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
 
         // Verify we never called the establishment service
-        await establishmentService.DidNotReceive().GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
+        await establishmentService
+            .DidNotReceive()
+            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
     }
 
     // ---------- Cookie corruption and validation tests ----------
@@ -1437,23 +1651,32 @@ public class CurrentUserTests
     {
         // Arrange - Group user with malformed JSON in cookie (e.g., browser corruption, manual editing)
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Set malformed JSON cookie
         var malformedJson = "{\"Urn\":\"123456\",\"Name\":\"Test School\""; // Missing closing brace
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(malformedJson)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(malformedJson)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1471,16 +1694,25 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify warning was logged with exception details
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie contains invalid JSON")),
-            Arg.Is<Exception>(ex => ex is JsonException),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o =>
+                    o.ToString()!.Contains("School selection cookie contains invalid JSON")
+                ),
+                Arg.Is<Exception>(ex => ex is JsonException),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
 
         // Verify we never tried to validate or load the school
-        await establishmentService.DidNotReceive().GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
-        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+        await establishmentService
+            .DidNotReceive()
+            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
+        await establishmentService
+            .DidNotReceive()
+            .GetEstablishmentByReferenceAsync(Arg.Any<string>());
     }
 
     [Fact]
@@ -1488,24 +1720,33 @@ public class CurrentUserTests
     {
         // Arrange - Group user with empty URN in cookie (corrupted data or manual editing)
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Set cookie with empty URN
         var schoolData = new { Urn = "", Name = "Test School" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1523,16 +1764,25 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify warning was logged
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie is missing URN value")),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o =>
+                    o.ToString()!.Contains("School selection cookie is missing URN value")
+                ),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
 
         // Verify we never tried to validate or load the school
-        await establishmentService.DidNotReceive().GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
-        await establishmentService.DidNotReceive().GetEstablishmentByReferenceAsync(Arg.Any<string>());
+        await establishmentService
+            .DidNotReceive()
+            .GetEstablishmentLinksWithRecommendationCounts(Arg.Any<int>());
+        await establishmentService
+            .DidNotReceive()
+            .GetEstablishmentByReferenceAsync(Arg.Any<string>());
     }
 
     [Fact]
@@ -1540,24 +1790,33 @@ public class CurrentUserTests
     {
         // Arrange - Group user with whitespace-only URN in cookie
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Set cookie with whitespace URN
         var schoolData = new { Urn = "   ", Name = "Test School" };
         var json = JsonSerializer.Serialize(schoolData);
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(json)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(json)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1575,12 +1834,17 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify warning was logged
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie is missing URN value")),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o =>
+                    o.ToString()!.Contains("School selection cookie is missing URN value")
+                ),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -1588,23 +1852,32 @@ public class CurrentUserTests
     {
         // Arrange - Group user with null URN in cookie (JSON contains "Urn":null)
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Manually construct JSON with null URN
         var jsonWithNull = "{\"Urn\":null,\"Name\":\"Test School\"}";
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(jsonWithNull)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(jsonWithNull)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1622,12 +1895,17 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify warning was logged
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie is missing URN value")),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o =>
+                    o.ToString()!.Contains("School selection cookie is missing URN value")
+                ),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -1635,23 +1913,32 @@ public class CurrentUserTests
     {
         // Arrange - Group user with completely invalid cookie value (not even JSON)
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Set completely invalid cookie value
         var invalidValue = "this-is-not-json-at-all-just-random-text";
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(invalidValue)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(invalidValue)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1669,12 +1956,17 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify warning was logged with exception
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie contains invalid JSON")),
-            Arg.Is<Exception>(ex => ex is JsonException),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o =>
+                    o.ToString()!.Contains("School selection cookie contains invalid JSON")
+                ),
+                Arg.Is<Exception>(ex => ex is JsonException),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -1683,23 +1975,32 @@ public class CurrentUserTests
         // Arrange - Simulates scenario after a code deployment where old cookie format is no longer valid
         // This is a common real-world scenario that should be handled gracefully
         var orgJson = """
-        {
-          "id": "D9011C85-F851-4746-B4A2-D732536717F8",
-          "name": "My Multi-Academy Trust",
-          "category": { "id": "010", "name": "Multi-Academy Trust" }
-        }
-        """;
+            {
+              "id": "D9011C85-F851-4746-B4A2-D732536717F8",
+              "name": "My Multi-Academy Trust",
+              "category": { "id": "010", "name": "Multi-Academy Trust" }
+            }
+            """;
 
         var context = new DefaultHttpContext();
-        var principal = new ClaimsPrincipal(new ClaimsIdentity(new[] {
-            BuildClaim(ClaimConstants.Organisation, orgJson),
-            BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100")
-        }, "test"));
+        var principal = new ClaimsPrincipal(
+            new ClaimsIdentity(
+                new[]
+                {
+                    BuildClaim(ClaimConstants.Organisation, orgJson),
+                    BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
+                },
+                "test"
+            )
+        );
         context.User = principal;
 
         // Old format cookie (different property names)
         var oldFormatJson = "{\"SchoolUrn\":\"123456\",\"SchoolName\":\"Old Format School\"}";
-        context.Request.Headers.Append(HeaderNames.Cookie, $"SelectedSchool={Uri.EscapeDataString(oldFormatJson)}");
+        context.Request.Headers.Append(
+            HeaderNames.Cookie,
+            $"SelectedSchool={Uri.EscapeDataString(oldFormatJson)}"
+        );
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
@@ -1715,13 +2016,16 @@ public class CurrentUserTests
         Assert.Equal("My Multi-Academy Trust", activeEstablishmentName);
 
         // Verify appropriate warning was logged
-        logger.Received(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(o => o.ToString()!.Contains("School selection cookie is missing URN value")),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .Received(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Is<object>(o =>
+                    o.ToString()!.Contains("School selection cookie is missing URN value")
+                ),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
-
-
 }

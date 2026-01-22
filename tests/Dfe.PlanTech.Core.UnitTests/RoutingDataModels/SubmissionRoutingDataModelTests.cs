@@ -29,32 +29,29 @@ public class SubmissionRoutingDataModelTests
         // Arrange: build a simplified set of responses to search against
         var questionnaireSection = new QuestionnaireSectionEntry();
         var responses = new List<SqlResponseDto>
+        {
+            new SqlResponseDto
             {
-                new SqlResponseDto
-                {
-                    Question = new SqlQuestionDto {ContentfulSysId = "111"},
-                    Answer = new SqlAnswerDto {ContentfulSysId = "ans-111"}
-                },
-                new SqlResponseDto
-                {
-                    Question = new SqlQuestionDto {ContentfulSysId = "222"},
-                    Answer = new SqlAnswerDto {ContentfulSysId = "ans-222"}
-                },
-                new SqlResponseDto
-                {
-                    Question = new SqlQuestionDto {ContentfulSysId = "333"},
-                    Answer = new SqlAnswerDto {ContentfulSysId = "ans-333"}
-                }
-            }
+                Question = new SqlQuestionDto { ContentfulSysId = "111" },
+                Answer = new SqlAnswerDto { ContentfulSysId = "ans-111" },
+            },
+            new SqlResponseDto
+            {
+                Question = new SqlQuestionDto { ContentfulSysId = "222" },
+                Answer = new SqlAnswerDto { ContentfulSysId = "ans-222" },
+            },
+            new SqlResponseDto
+            {
+                Question = new SqlQuestionDto { ContentfulSysId = "333" },
+                Answer = new SqlAnswerDto { ContentfulSysId = "ans-333" },
+            },
+        }
             .Select(dto => new QuestionWithAnswerModel(dto, questionnaireSection))
             .ToList();
 
-        var submission = new SubmissionResponsesModel(
-            new SqlSubmissionDto(),
-            questionnaireSection
-        )
+        var submission = new SubmissionResponsesModel(new SqlSubmissionDto(), questionnaireSection)
         {
-            Responses = responses
+            Responses = responses,
         };
 
         var routingData = new SubmissionRoutingDataModel(
@@ -85,16 +82,13 @@ public class SubmissionRoutingDataModelTests
         {
             new SqlResponseDto
             {
-                Question = new SqlQuestionDto {ContentfulSysId = questionSysId},
-                Answer = new SqlAnswerDto {ContentfulSysId = "arbitrary"}
-            }
+                Question = new SqlQuestionDto { ContentfulSysId = questionSysId },
+                Answer = new SqlAnswerDto { ContentfulSysId = "arbitrary" },
+            },
         };
         var questionnaireSection = new QuestionnaireSectionEntry();
         var submission = new SubmissionResponsesModel(
-            new SqlSubmissionDto
-            {
-                Responses = responses
-            },
+            new SqlSubmissionDto { Responses = responses },
             questionnaireSection
         );
         var expectedResponse = submission.Responses[0];
@@ -120,10 +114,7 @@ public class SubmissionRoutingDataModelTests
         var questionSysId = "123";
         var questionnaireSection = new QuestionnaireSectionEntry();
         var submission = new SubmissionResponsesModel(
-            new SqlSubmissionDto
-            {
-                Responses = new List<SqlResponseDto>()
-            },
+            new SqlSubmissionDto { Responses = new List<SqlResponseDto>() },
             questionnaireSection
         );
 
@@ -135,7 +126,9 @@ public class SubmissionRoutingDataModelTests
         );
 
         // Act & Assert
-        Assert.Throws<DatabaseException>(() => routingData.GetLatestResponseForQuestion(questionSysId));
+        Assert.Throws<DatabaseException>(() =>
+            routingData.GetLatestResponseForQuestion(questionSysId)
+        );
     }
 
     #endregion
@@ -150,7 +143,7 @@ public class SubmissionRoutingDataModelTests
         var expectedQuestion = new QuestionnaireQuestionEntry { Slug = slug };
         var questionnaireSection = new QuestionnaireSectionEntry
         {
-            Questions = new List<QuestionnaireQuestionEntry> { expectedQuestion }
+            Questions = new List<QuestionnaireQuestionEntry> { expectedQuestion },
         };
 
         var routingData = new SubmissionRoutingDataModel(
@@ -174,7 +167,7 @@ public class SubmissionRoutingDataModelTests
         var slug = "test-slug";
         var questionnaireSection = new QuestionnaireSectionEntry
         {
-            Questions = new List<QuestionnaireQuestionEntry>()
+            Questions = new List<QuestionnaireQuestionEntry>(),
         };
 
         var routingData = new SubmissionRoutingDataModel(
@@ -185,7 +178,9 @@ public class SubmissionRoutingDataModelTests
         );
 
         // Act & Assert
-        Assert.Throws<ContentfulDataUnavailableException>(() => routingData.GetQuestionForSlug(slug));
+        Assert.Throws<ContentfulDataUnavailableException>(() =>
+            routingData.GetQuestionForSlug(slug)
+        );
     }
 
     #endregion
@@ -198,10 +193,7 @@ public class SubmissionRoutingDataModelTests
         // Arrange
         var questionnaireSection = new QuestionnaireSectionEntry();
         var nextQuestion = new QuestionnaireQuestionEntry { Slug = "arbitrary-next" };
-        var submission = new SubmissionResponsesModel(
-            new SqlSubmissionDto(),
-            questionnaireSection
-        );
+        var submission = new SubmissionResponsesModel(new SqlSubmissionDto(), questionnaireSection);
 
         // Act
         var routingData = new SubmissionRoutingDataModel(

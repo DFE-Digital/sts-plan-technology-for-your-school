@@ -20,8 +20,10 @@ public class GroupsViewBuilder(
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
-    private readonly IEstablishmentService _establishmentService = establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly IEstablishmentService _establishmentService =
+        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly ContactOptionsConfiguration _contactOptions =
+        contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
 
     private const string SelectASchoolViewName = "GroupsSelectSchool";
 
@@ -31,8 +33,11 @@ public class GroupsViewBuilder(
         // At this point, the user hasn't selected a school yet
         var establishmentId = GetUserOrganisationIdOrThrowException();
 
-        var selectASchoolPageContent = await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
-                                       ?? throw new ContentfulDataUnavailableException($"Could not find contentful page for slug '{UrlConstants.GroupsSelectionPageSlug}'");
+        var selectASchoolPageContent =
+            await ContentfulService.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find contentful page for slug '{UrlConstants.GroupsSelectionPageSlug}'"
+            );
 
         var groupName = CurrentUser.UserOrganisationName;
         var title = groupName ?? "Your organisation";
@@ -42,7 +47,10 @@ public class GroupsViewBuilder(
         var allRecommendations = sections.SelectMany(section => section.CoreRecommendations);
         string totalRecommendations = allRecommendations.Count().ToString();
 
-        var groupSchools = await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(establishmentId);
+        var groupSchools =
+            await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(
+                establishmentId
+            );
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 
@@ -57,14 +65,17 @@ public class GroupsViewBuilder(
             ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalRecommendations)
                 ? "Unable to retrieve progress"
                 : null,
-            ContactLinkHref = contactLink?.Href
+            ContactLinkHref = contactLink?.Href,
         };
 
         controller.ViewData["Title"] = "Select a school";
         return controller.View(SelectASchoolViewName, viewModel);
     }
 
-    public async Task RecordGroupSelectionAsync(string selectedEstablishmentUrn, string selectedEstablishmentName)
+    public async Task RecordGroupSelectionAsync(
+        string selectedEstablishmentUrn,
+        string selectedEstablishmentName
+    )
     {
         var userDsiReference = GetDsiReferenceOrThrowException();
         var userOrganisationId = CurrentUser.UserOrganisationId;
@@ -80,7 +91,7 @@ public class GroupsViewBuilder(
             GroupUid = CurrentUser.UserOrganisationUid, // TODO: resolve some confusion here - the database table is `GroupUid` and is populated from the `uid` OIDC claim - possibly remove `groupUid` from `EstablishmentModel`?
             Type = CurrentUser.UserOrganisationTypeName is null
                 ? null
-                : new IdWithNameModel { Name = CurrentUser.UserOrganisationTypeName }
+                : new IdWithNameModel { Name = CurrentUser.UserOrganisationTypeName },
         };
 
         await _establishmentService.RecordGroupSelection(

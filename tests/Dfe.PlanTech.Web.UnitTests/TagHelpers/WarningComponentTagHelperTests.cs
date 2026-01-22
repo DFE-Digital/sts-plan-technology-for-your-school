@@ -11,19 +11,23 @@ public class WarningComponentTagHelperTests
     {
         var content = "test content";
 
-        var context = new TagHelperContext(tagName: "warning-component",
-                                                allAttributes: new TagHelperAttributeList(),
-                                                items: new Dictionary<object, object>(),
-                                                uniqueId: "warning-component-test");
+        var context = new TagHelperContext(
+            tagName: "warning-component",
+            allAttributes: new TagHelperAttributeList(),
+            items: new Dictionary<object, object>(),
+            uniqueId: "warning-component-test"
+        );
 
-        var output = new TagHelperOutput("warning-component",
-                                        attributes: new TagHelperAttributeList(),
-                                        getChildContentAsync: (useCachedResult, encoder) =>
-                                        {
-                                            var tagHelperContent = new DefaultTagHelperContent();
-                                            tagHelperContent.SetContent(content);
-                                            return Task.FromResult<TagHelperContent>(tagHelperContent);
-                                        });
+        var output = new TagHelperOutput(
+            "warning-component",
+            attributes: new TagHelperAttributeList(),
+            getChildContentAsync: (useCachedResult, encoder) =>
+            {
+                var tagHelperContent = new DefaultTagHelperContent();
+                tagHelperContent.SetContent(content);
+                return Task.FromResult<TagHelperContent>(tagHelperContent);
+            }
+        );
 
         var tagHelper = new WarningComponentTagHelper();
 
@@ -39,5 +43,4 @@ public class WarningComponentTagHelperTests
         Assert.Contains(WarningComponentTagHelper.OpeningSpan, htmlString);
         Assert.Contains(WarningComponentTagHelper.AssistiveText, htmlString);
     }
-
 }

@@ -10,7 +10,10 @@ public class RecommendationSortHelperTests
     [InlineData("Default", RecommendationSortOrder.Default)]
     [InlineData("Status", RecommendationSortOrder.Status)]
     [InlineData("Last updated", RecommendationSortOrder.LastUpdated)]
-    public void Should_Return_Correct_Enum_Value(string? sortOrder, RecommendationSortOrder expected)
+    public void Should_Return_Correct_Enum_Value(
+        string? sortOrder,
+        RecommendationSortOrder expected
+    )
     {
         var result = sortOrder.GetRecommendationSortEnumValue();
         Assert.Equal(expected, result);

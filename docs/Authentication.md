@@ -13,6 +13,7 @@ DFE Signin authentication is handled by ASP .NET Core's built-in OIDC support.
 It is setup in the [DfeSignInSetup.cs](/src/Dfe.PlanTech.Infrastructure.SignIn/DfeSignInSetup.cs) file.
 
 We have various event callbacks to handle things such as recording user signins. These are in:
+
 - [DfeOpenIdConnectEvents.cs](/src/Dfe.PlanTech.Infrastructure.SignIn/DfeOpenIdConnectEvents.cs)
 - [OnUserInformationReceivedEvent.cs](/src/Dfe.PlanTech.Infrastructure.SignIn/ConnectEvents/OnUserInformationReceivedEvent.cs)
 
@@ -36,11 +37,12 @@ This `AuthorizationHandler` loads up the page authentication requirements, and t
 
 ### [UserAuthorisationMiddlewareResultHandler](/src/Dfe.PlanTech.Web/Authorisation/UserAuthorisationMiddlewareResultHandler.cs)
 
-The last piece is of the authorisation workflow. 
+The last piece is of the authorisation workflow.
 
 Since you cannot redirect from an `AuthorizationHandler`, we require some sort of middleware to handle redirecting users to the `no organisation error page` if appropriate. ASP .NET Core has a built in middleware that handles authorisation results, so this handler implements the interface for this.
 
 This `IAuthorizationMiddlewareResultHandler` does two things:
+
 - If the user's request resulted in a `forbidden` result, _and_ the result was thrown by the `UserOrganisationAuthorisationHandler`, then we redirect the user to the `no organisation error page`
 - Otherwise, just return the result from the default `AuthorizationMiddlewareResultHandler`
 
@@ -72,7 +74,7 @@ graph TD
 
 1. **User Requests Access**
    - A user attempts to access a protected resource.
-  
+
 2. **Authentication Check**
    - The application checks if the user is authenticated.
    - If not, the user is redirected to the login page.
@@ -85,6 +87,7 @@ graph TD
    - This is done using `UserOrganisationAuthorisationHandler`.
 
 5. **Access Decision**
+
 - If the user is not authenticated, they are redirected to the DFE Signin login page
 - If the user is authenticated, and has an organisation, then access is granted.
 - If the user is authenticated, but does not have an organisation, they are redirected the `no organisation error page`.
@@ -92,6 +95,6 @@ graph TD
 ## See also
 
 - [Customize the behavior of AuthorizationMiddleware (Microsft official documentation)
-](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/customizingauthorizationmiddlewareresponse?view=aspnetcore-8.0): an overview of how to implement a class that implements `IAuthorizationMiddlewareResultHandler`
+  ](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/customizingauthorizationmiddlewareresponse?view=aspnetcore-8.0): an overview of how to implement a class that implements `IAuthorizationMiddlewareResultHandler`
 - [Policy-based authorization in ASP.NET Core
- (Microsoft official documentation)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-8.0)
+  (Microsoft official documentation)](https://learn.microsoft.com/en-us/aspnet/core/security/authorization/policies?view=aspnetcore-8.0)

@@ -14,15 +14,19 @@ namespace Dfe.PlanTech.Web.UnitTests.Authorisation;
 public class SignedRequestAuthorisationPolicyTests
 {
     private const string MockSigningSecret = "super-secret-signing-secret";
-    private const string MockHeaderSignedValues = "x-contentful-signed-headers,x-contentful-timestamp";
+    private const string MockHeaderSignedValues =
+        "x-contentful-signed-headers,x-contentful-timestamp";
     private const string MockRequestBody = "{\"body\":\"something\"}";
-    private const string CorrectSignature = "6af1bb2c169c7e4ef43486f6c6f5e0ea676bda94eab980c3eb39a52c016b1808";
+    private const string CorrectSignature =
+        "6af1bb2c169c7e4ef43486f6c6f5e0ea676bda94eab980c3eb39a52c016b1808";
 
     private readonly DateTime _requestTime;
     private readonly string _requestTimestamp;
 
     private readonly SignedRequestAuthorisationPolicy _authorisationPolicy;
-    private readonly ILogger<SignedRequestAuthorisationPolicy> _logger = Substitute.For<ILogger<SignedRequestAuthorisationPolicy>>();
+    private readonly ILogger<SignedRequestAuthorisationPolicy> _logger = Substitute.For<
+        ILogger<SignedRequestAuthorisationPolicy>
+    >();
     private readonly ISystemTime _systemTime = Substitute.For<ISystemTime>();
 
     public SignedRequestAuthorisationPolicyTests()
@@ -38,9 +42,13 @@ public class SignedRequestAuthorisationPolicyTests
     [Fact]
     public async Task Should_Generate_Correct_Canonical_Representation()
     {
-        const string canonicalRepresentation = "POST\n/api/cms/webhook\nx-contentful-signed-headers:x-contentful-signed-headers,x-contentful-timestamp;x-contentful-timestamp:1704103200000\n{\"body\":\"something\"}";
+        const string canonicalRepresentation =
+            "POST\n/api/cms/webhook\nx-contentful-signed-headers:x-contentful-signed-headers,x-contentful-timestamp;x-contentful-timestamp:1704103200000\n{\"body\":\"something\"}";
         var httpContext = CreateMockHttpContext();
-        var representation = await SignedRequestAuthorisationPolicy.CreateCanonicalRepresentation(httpContext.Request, MockHeaderSignedValues);
+        var representation = await SignedRequestAuthorisationPolicy.CreateCanonicalRepresentation(
+            httpContext.Request,
+            MockHeaderSignedValues
+        );
         Assert.Equal(canonicalRepresentation, representation);
     }
 
@@ -58,7 +66,9 @@ public class SignedRequestAuthorisationPolicyTests
     {
         var httpContext = CreateMockHttpContext();
 
-        var expiredTime = _requestTime.AddMinutes(SignedRequestAuthorisationPolicy.RequestTimeToLiveMinutes + 1);
+        var expiredTime = _requestTime.AddMinutes(
+            SignedRequestAuthorisationPolicy.RequestTimeToLiveMinutes + 1
+        );
         _systemTime.UtcNow.Returns(expiredTime);
 
         var handlerContext = CreateHandlerContext(httpContext);
@@ -89,7 +99,10 @@ public class SignedRequestAuthorisationPolicyTests
 
     private static AuthorizationHandlerContext CreateHandlerContext(HttpContext httpContext)
     {
-        IEnumerable<IAuthorizationRequirement> requirements = [new SignedRequestAuthorisationRequirement()];
+        IEnumerable<IAuthorizationRequirement> requirements =
+        [
+            new SignedRequestAuthorisationRequirement(),
+        ];
         var user = httpContext.User;
         return new AuthorizationHandlerContext(requirements, user, httpContext);
     }
@@ -97,9 +110,18 @@ public class SignedRequestAuthorisationPolicyTests
     private DefaultHttpContext CreateMockHttpContext()
     {
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers.Append(SignedRequestAuthorisationPolicy.HeaderSignedValues, MockHeaderSignedValues);
-        httpContext.Request.Headers.Append(SignedRequestAuthorisationPolicy.HeaderSignature, CorrectSignature);
-        httpContext.Request.Headers.Append(SignedRequestAuthorisationPolicy.HeaderTimestamp, _requestTimestamp);
+        httpContext.Request.Headers.Append(
+            SignedRequestAuthorisationPolicy.HeaderSignedValues,
+            MockHeaderSignedValues
+        );
+        httpContext.Request.Headers.Append(
+            SignedRequestAuthorisationPolicy.HeaderSignature,
+            CorrectSignature
+        );
+        httpContext.Request.Headers.Append(
+            SignedRequestAuthorisationPolicy.HeaderTimestamp,
+            _requestTimestamp
+        );
         httpContext.Request.Body = new MemoryStream(Encoding.UTF8.GetBytes(MockRequestBody));
         httpContext.Request.Path = new PathString("/api/cms/webhook");
         httpContext.Request.Method = "POST";

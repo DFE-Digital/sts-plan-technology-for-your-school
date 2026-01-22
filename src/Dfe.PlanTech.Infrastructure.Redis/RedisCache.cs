@@ -28,22 +28,35 @@ public class RedisCache : ICmsCache
     )
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-        _backgroundTaskService = backgroundTaskQueue ?? throw new ArgumentNullException(nameof(backgroundTaskQueue));
-        _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
-        _dependencyManager = dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager));
+        _backgroundTaskService =
+            backgroundTaskQueue ?? throw new ArgumentNullException(nameof(backgroundTaskQueue));
+        _connectionManager =
+            connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
+        _dependencyManager =
+            dependencyManager ?? throw new ArgumentNullException(nameof(dependencyManager));
 
-        var retryPolicyBuilder = Policy.Handle<TimeoutException>()
+        var retryPolicyBuilder = Policy
+            .Handle<TimeoutException>()
             .Or<RedisServerException>()
             .Or<RedisException>()
             .OrInner<TimeoutException>()
             .OrInner<RedisServerException>()
             .OrInner<RedisException>();
 
-        _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(3, _ => TimeSpan.FromMilliseconds(50));
+        _retryPolicyAsync = retryPolicyBuilder.WaitAndRetryAsync(
+            3,
+            _ => TimeSpan.FromMilliseconds(50)
+        );
     }
 
     /// <inheritdoc/>
-    public async Task<T?> GetOrCreateAsync<T>(string key, Func<Task<T>> action, TimeSpan? expiry = null, Func<T, Task>? onCacheItemCreation = null, int databaseId = -1)
+    public async Task<T?> GetOrCreateAsync<T>(
+        string key,
+        Func<Task<T>> action,
+        TimeSpan? expiry = null,
+        Func<T, Task>? onCacheItemCreation = null,
+        int databaseId = -1
+    )
     {
         _logger.LogInformation("Attempting to get or create cache item with key: {Key}", key);
 
@@ -76,13 +89,23 @@ public class RedisCache : ICmsCache
         }
         catch (RedisConnectionException redisException)
         {
-            _logger.LogError(redisException, "Failed to connect to Redis server: \"{Message}\". Retrieving server using {Action}.", redisException.Message, nameof(Action));
+            _logger.LogError(
+                redisException,
+                "Failed to connect to Redis server: \"{Message}\". Retrieving server using {Action}.",
+                redisException.Message,
+                nameof(Action)
+            );
             return await action();
         }
     }
 
     /// <inheritdoc/>
-    public async Task<string> SetAsync<T>(string key, T value, TimeSpan? expiry = null, int databaseId = -1)
+    public async Task<string> SetAsync<T>(
+        string key,
+        T value,
+        TimeSpan? expiry = null,
+        int databaseId = -1
+    )
     {
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         await _dependencyManager.RegisterDependenciesAsync(database, key, value);
@@ -107,7 +130,11 @@ public class RedisCache : ICmsCache
     /// <inheritdoc/>
     public async Task RemoveAsync(int databaseId, params string[] keys)
     {
-        _logger.LogInformation("Removing cache items with keys: {Keys} from database {DatabaseId}", string.Join(", ", keys), databaseId);
+        _logger.LogInformation(
+            "Removing cache items with keys: {Keys} from database {DatabaseId}",
+            string.Join(", ", keys),
+            databaseId
+        );
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         await Task.WhenAll(keys.Select(key => RemoveAsync(database, key)));
     }
@@ -144,31 +171,50 @@ public class RedisCache : ICmsCache
     public async Task<IEnumerable<string>> GetSetMembersAsync(string key, int databaseId = -1)
     {
         _logger.LogInformation("Getting set members for key: {Key}", key);
-        return await _retryPolicyAsync.ExecuteAsync(async () => (await (await _connectionManager.GetDatabaseAsync(databaseId)).SetMembersAsync(key)).Select(x => x.ToString()));
+        return await _retryPolicyAsync.ExecuteAsync(async () =>
+            (
+                await (await _connectionManager.GetDatabaseAsync(databaseId)).SetMembersAsync(key)
+            ).Select(x => x.ToString())
+        );
     }
 
     /// <inheritdoc/>
     public Task SetRemoveAsync(string key, string item, int databaseId = -1)
     {
         _logger.LogInformation("Removing item from set with key: {Key}", key);
-        return _retryPolicyAsync.ExecuteAsync(async () => (await _connectionManager.GetDatabaseAsync(databaseId)).SetRemoveAsync(key, item));
+        return _retryPolicyAsync.ExecuteAsync(async () =>
+            (await _connectionManager.GetDatabaseAsync(databaseId)).SetRemoveAsync(key, item)
+        );
     }
 
     /// <inheritdoc/>
-    public async Task SetRemoveItemsAsync(string key, IEnumerable<string> items, int databaseId = -1)
+    public async Task SetRemoveItemsAsync(
+        string key,
+        IEnumerable<string> items,
+        int databaseId = -1
+    )
     {
         _logger.LogInformation("Removing multiple items from set with key: {Key}", key);
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
-        await _retryPolicyAsync.ExecuteAsync(() => database.SetRemoveAsync(key, [.. items.Select(x => (RedisValue)x)]));
+        await _retryPolicyAsync.ExecuteAsync(() =>
+            database.SetRemoveAsync(key, [.. items.Select(x => (RedisValue)x)])
+        );
     }
 
     /// <inheritdoc/>
-    private async Task<string> SetAsync<T>(IDatabase database, string key, T value, TimeSpan? expiry = null)
+    private async Task<string> SetAsync<T>(
+        IDatabase database,
+        string key,
+        T value,
+        TimeSpan? expiry = null
+    )
     {
         var redisValue = value as string ?? value.Serialise();
         _logger.LogInformation("Setting cache item with key: {Key}", key);
         _logger.LogTrace("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
-        await _retryPolicyAsync.ExecuteAsync(() => database.StringSetAsync(key, GZipRedisValueCompressor.Compress(redisValue), expiry));
+        await _retryPolicyAsync.ExecuteAsync(() =>
+            database.StringSetAsync(key, GZipRedisValueCompressor.Compress(redisValue), expiry)
+        );
         await _dependencyManager.RegisterDependenciesAsync(database, key, value, default);
         return key;
     }
@@ -191,7 +237,9 @@ public class RedisCache : ICmsCache
             }
 
             _logger.LogInformation("Getting cache item with key: {Key}", key);
-            var redisResult = await _retryPolicyAsync.ExecuteAsync(async () => GZipRedisValueCompressor.Decompress(await database.StringGetAsync(key)));
+            var redisResult = await _retryPolicyAsync.ExecuteAsync(async () =>
+                GZipRedisValueCompressor.Decompress(await database.StringGetAsync(key))
+            );
 
             return CreateCacheResult<T>(redisResult);
         }
@@ -246,9 +294,18 @@ public class RedisCache : ICmsCache
     /// <param name="expiry">Optional. The time span after which the cached item expires.</param>
     /// <param name="onCacheItemCreation">Optional. A function that is called after the item is created and cached.</param>
     /// <returns>The newly created cached item or default value if the action returned null.</returns>
-    private async Task<T?> CreateAndCacheItemAsync<T>(IDatabase db, string key, Func<Task<T>> action, TimeSpan? expiry, Func<T, Task>? onCacheItemCreation)
+    private async Task<T?> CreateAndCacheItemAsync<T>(
+        IDatabase db,
+        string key,
+        Func<Task<T>> action,
+        TimeSpan? expiry,
+        Func<T, Task>? onCacheItemCreation
+    )
     {
-        _logger.LogTrace("Cache item with key: {Key} not found, executing action to create it", key);
+        _logger.LogTrace(
+            "Cache item with key: {Key} not found, executing action to create it",
+            key
+        );
         var result = await action();
 
         if (EqualityComparer<T>.Default.Equals(result, default))
@@ -272,18 +329,20 @@ public class RedisCache : ICmsCache
     }
 
     /// <inheritdoc/>
-    public Task InvalidateCacheAsync(string contentComponentId, string contentType)
-    => _backgroundTaskService.QueueBackgroundWorkItemAsync(async (cancellationToken) =>
-        {
-            var key = _dependencyManager.GetDependencyKey(contentComponentId);
-            await RemoveDependenciesAsync(key);
+    public Task InvalidateCacheAsync(string contentComponentId, string contentType) =>
+        _backgroundTaskService.QueueBackgroundWorkItemAsync(
+            async (cancellationToken) =>
+            {
+                var key = _dependencyManager.GetDependencyKey(contentComponentId);
+                await RemoveDependenciesAsync(key);
 
-            // Invalidate all empty collections
-            await RemoveDependenciesAsync(_dependencyManager.EmptyCollectionDependencyKey);
+                // Invalidate all empty collections
+                await RemoveDependenciesAsync(_dependencyManager.EmptyCollectionDependencyKey);
 
-            // Invalidate collection of the content type if there is one
-            await RemoveAsync($"{contentType}s");
-        });
+                // Invalidate collection of the content type if there is one
+                await RemoveAsync($"{contentType}s");
+            }
+        );
 
     private async Task RemoveDependenciesAsync(string dependencyKey)
     {

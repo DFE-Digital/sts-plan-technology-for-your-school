@@ -19,14 +19,19 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus;
 /// <param name="resultProcessor">Processes results from the <see cref="CmsWebHookMessageProcessor"/> </param>
 /// <param name="logger"></param>
 /// <param name="serviceScopeFactory">Service factory - used to create transient services to prevent state problems</param>
-public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcessor> processorFactory,
-                                           IServiceBusResultProcessor resultProcessor,
-                                           ILogger<ContentfulServiceBusProcessor> logger,
-                                           IServiceScopeFactory serviceScopeFactory,
-                                           IOptions<ServiceBusOptions> options) : BackgroundService
+public class ContentfulServiceBusProcessor(
+    IAzureClientFactory<ServiceBusProcessor> processorFactory,
+    IServiceBusResultProcessor resultProcessor,
+    ILogger<ContentfulServiceBusProcessor> logger,
+    IServiceScopeFactory serviceScopeFactory,
+    IOptions<ServiceBusOptions> options
+) : BackgroundService
 {
-    private readonly ILogger<ContentfulServiceBusProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly ServiceBusProcessor _processor = processorFactory.CreateClient("contentfulprocessor");
+    private readonly ILogger<ContentfulServiceBusProcessor> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ServiceBusProcessor _processor = processorFactory.CreateClient(
+        "contentfulprocessor"
+    );
 
     /// <summary>
     /// Adds event handlers for the message received event + error event
@@ -35,7 +40,10 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     {
         if (!options.Value.EnableQueueReading)
         {
-            _logger.LogInformation("{QueueReadingProperty} is set to disabling - not enabling processing queue reading", nameof(options.Value.EnableQueueReading));
+            _logger.LogInformation(
+                "{QueueReadingProperty} is set to disabling - not enabling processing queue reading",
+                nameof(options.Value.EnableQueueReading)
+            );
             return;
         }
         _processor.ProcessMessageAsync += MessageHandler;
@@ -53,27 +61,40 @@ public class ContentfulServiceBusProcessor(IAzureClientFactory<ServiceBusProcess
     private async Task MessageHandler(ProcessMessageEventArgs processMessageEventArgs)
     {
         using var scope = serviceScopeFactory.CreateScope();
-        var webHookMessageProcessor = scope.ServiceProvider.GetRequiredService<IWebHookMessageProcessor>();
+        var webHookMessageProcessor =
+            scope.ServiceProvider.GetRequiredService<IWebHookMessageProcessor>();
 
         try
         {
             var body = Encoding.UTF8.GetString(processMessageEventArgs.Message.Body);
 
-            var result = await webHookMessageProcessor.ProcessMessage(processMessageEventArgs.Message.Subject,
-                                                                 body,
-                                                                 processMessageEventArgs.Message.MessageId,
-                                                                 processMessageEventArgs.CancellationToken);
+            var result = await webHookMessageProcessor.ProcessMessage(
+                processMessageEventArgs.Message.Subject,
+                body,
+                processMessageEventArgs.Message.MessageId,
+                processMessageEventArgs.CancellationToken
+            );
 
-            await resultProcessor.ProcessMessageResult(processMessageEventArgs,
-                                                       result,
-                                                       processMessageEventArgs.CancellationToken);
+            await resultProcessor.ProcessMessageResult(
+                processMessageEventArgs,
+                result,
+                processMessageEventArgs.CancellationToken
+            );
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing message: {Message}", ex.Message);
-            await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, ex.Message,
-                ex.StackTrace, processMessageEventArgs.CancellationToken);
-            _logger.LogInformation("Abandoned message: {MessageId}", processMessageEventArgs.Message.MessageId);
+            await processMessageEventArgs.DeadLetterMessageAsync(
+                processMessageEventArgs.Message,
+                null,
+                ex.Message,
+                ex.StackTrace,
+                processMessageEventArgs.CancellationToken
+            );
+            _logger.LogInformation(
+                "Abandoned message: {MessageId}",
+                processMessageEventArgs.Message.MessageId
+            );
         }
     }
 

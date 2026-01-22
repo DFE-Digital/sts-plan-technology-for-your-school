@@ -5,7 +5,7 @@ on:
     inputs:
       environment:
         type: choice
-        description: "The environment to run infrastructure deployment on:"
+        description: 'The environment to run infrastructure deployment on:'
         required: true
         options: ['Dev', 'Tst', 'Staging', 'Production']
 

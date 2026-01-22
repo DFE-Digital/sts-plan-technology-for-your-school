@@ -14,11 +14,7 @@ public class UnorderedListRendererTests
     {
         const string value = "List item one";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
         var renderer = new UnorderedListRenderer();
 
@@ -33,7 +29,7 @@ public class UnorderedListRendererTests
         var content = new RichTextContentField()
         {
             NodeType = "paragraph",
-            Value = "paragraph text"
+            Value = "paragraph text",
         };
 
         var renderer = new UnorderedListRenderer();
@@ -47,15 +43,14 @@ public class UnorderedListRendererTests
     public void Should_CreateUnorderedList_When_PassedValidData()
     {
         var renderer = new UnorderedListRenderer();
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "List item one";
 
-        var content = new RichTextContentField()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
@@ -63,5 +58,4 @@ public class UnorderedListRendererTests
 
         Assert.Equal("<ul></ul>", html);
     }
-
 }

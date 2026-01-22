@@ -19,7 +19,7 @@ public class EstablishmentLinkEntityTests
             Id = expectedId,
             GroupUid = expectedGroupUid,
             EstablishmentName = expectedEstablishmentName,
-            Urn = expectedUrn
+            Urn = expectedUrn,
         };
 
         // Act
@@ -46,7 +46,7 @@ public class EstablishmentLinkEntityTests
             new[]
             {
                 // Assigned dynamically within `Dfe.PlanTech.Application.Services.EstablishmentService.GetEstablishmentLinksWithRecommendationCounts`
-                nameof(SqlEstablishmentLinkDto.InProgressOrCompletedRecommendationsCount)
+                nameof(SqlEstablishmentLinkDto.InProgressOrCompletedRecommendationsCount),
             }
         );
     }

@@ -22,7 +22,8 @@ public class CategoryLandingViewComponentViewBuilderTests
         ISubmissionService? submission = null,
         IUserService? user = null,
         ICurrentUser? currentUser = null,
-        ILogger<BaseViewBuilder>? logger = null)
+        ILogger<BaseViewBuilder>? logger = null
+    )
     {
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
@@ -42,21 +43,27 @@ public class CategoryLandingViewComponentViewBuilderTests
         );
     }
 
-    private static QuestionnaireCategoryEntry MakeCategory(params QuestionnaireSectionEntry[] sections) =>
+    private static QuestionnaireCategoryEntry MakeCategory(
+        params QuestionnaireSectionEntry[] sections
+    ) =>
         new QuestionnaireCategoryEntry
         {
             Sys = new SystemDetails("cat-1"),
             Header = new ComponentHeaderEntry { Text = "Category Title" },
-            Sections = sections.ToList()
+            Sections = sections.ToList(),
         };
 
     private static QuestionnaireSectionEntry MakeSection(
-        string id, string name, string slug, string? interstitialSlug = null) =>
+        string id,
+        string name,
+        string slug,
+        string? interstitialSlug = null
+    ) =>
         new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails(id),
             Name = name,
-            InterstitialPage = new PageEntry { Slug = interstitialSlug ?? slug }
+            InterstitialPage = new PageEntry { Slug = interstitialSlug ?? slug },
         };
 
     // ---------- Tests ----------
@@ -70,7 +77,13 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         // Act + Assert
         var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.BuildViewModelAsync(category, "cat-slug", null, RecommendationConstants.DefaultSortOrder));
+            sut.BuildViewModelAsync(
+                category,
+                "cat-slug",
+                null,
+                RecommendationConstants.DefaultSortOrder
+            )
+        );
 
         Assert.Contains("Found no sections", ex.Message);
     }
@@ -84,20 +97,29 @@ public class CategoryLandingViewComponentViewBuilderTests
         var category = MakeCategory(sectionA, sectionB);
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Throws(new Exception("boom"));
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Throws(new Exception("boom"));
 
         var sut = CreateSut(submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat-slug", "Some Section", RecommendationConstants.DefaultSortOrder);
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat-slug",
+            "Some Section",
+            RecommendationConstants.DefaultSortOrder
+        );
 
         // Assert
         Assert.Equal("Category Title", vm.CategoryName);
         Assert.Equal("cat-slug", vm.CategorySlug);
         Assert.NotNull(vm.ProgressRetrievalErrorMessage);
         Assert.NotEmpty(vm.CategoryLandingSections);
-        Assert.All(vm.CategoryLandingSections, s => Assert.Equal(SubmissionStatus.RetrievalError, s.ProgressStatus));
+        Assert.All(
+            vm.CategoryLandingSections,
+            s => Assert.Equal(SubmissionStatus.RetrievalError, s.ProgressStatus)
+        );
     }
 
     [Theory]
@@ -105,7 +127,10 @@ public class CategoryLandingViewComponentViewBuilderTests
     [InlineData(1, true, false)]
     [InlineData(2, true, true)]
     public async Task BuildViewModelAsync_Computed_Completion_Flags_Are_Correct(
-        int completedCount, bool anyCompleted, bool allCompleted)
+        int completedCount,
+        bool anyCompleted,
+        bool allCompleted
+    )
     {
         // Arrange
         var s1 = MakeSection("A", "A", "a");
@@ -117,23 +142,29 @@ public class CategoryLandingViewComponentViewBuilderTests
             new SqlSectionStatusDto
             {
                 SectionId = "A",
-                LastCompletionDate = completedCount >= 1 ? DateTime.UtcNow : (DateTime?)null
+                LastCompletionDate = completedCount >= 1 ? DateTime.UtcNow : (DateTime?)null,
             },
             new SqlSectionStatusDto
             {
                 SectionId = "B",
-                LastCompletionDate = completedCount >= 2 ? DateTime.UtcNow : (DateTime?)null
-            }
+                LastCompletionDate = completedCount >= 2 ? DateTime.UtcNow : (DateTime?)null,
+            },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(statuses);
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
 
         var sut = CreateSut(submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationConstants.DefaultSortOrder);
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
 
         // Assert
         Assert.Equal(anyCompleted, vm.AnySectionsCompleted);
@@ -145,7 +176,10 @@ public class CategoryLandingViewComponentViewBuilderTests
     [InlineData("Default", RecommendationSortOrder.Default)]
     [InlineData("Last updated", RecommendationSortOrder.LastUpdated)]
     [InlineData("Status", RecommendationSortOrder.Status)]
-    public async Task BuildViewModelAsync_Computed_SortType_Is_Correct(string? inputSortOrder, RecommendationSortOrder expectedSortOrder)
+    public async Task BuildViewModelAsync_Computed_SortType_Is_Correct(
+        string? inputSortOrder,
+        RecommendationSortOrder expectedSortOrder
+    )
     {
         // Arrange
         var s1 = MakeSection("A", "A", "a");
@@ -154,21 +188,14 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto
-            {
-                SectionId = "A",
-                LastCompletionDate = DateTime.UtcNow
-            },
-            new SqlSectionStatusDto
-            {
-                SectionId = "B",
-                LastCompletionDate = DateTime.UtcNow
-            }
+            new SqlSectionStatusDto { SectionId = "A", LastCompletionDate = DateTime.UtcNow },
+            new SqlSectionStatusDto { SectionId = "B", LastCompletionDate = DateTime.UtcNow },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(statuses);
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
 
         var sut = CreateSut(submission: submission);
 
@@ -188,24 +215,32 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "developing" }
+            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "developing" },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(statuses);
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
 
         var contentful = Substitute.For<IContentfulService>();
 
         var sut = CreateSut(contentful: contentful, submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationConstants.DefaultSortOrder);
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal("Unable to retrieve Networking recommendation",
-                     secVm.Recommendations.NoRecommendationFoundErrorMessage);
+        Assert.Equal(
+            "Unable to retrieve Networking recommendation",
+            secVm.Recommendations.NoRecommendationFoundErrorMessage
+        );
     }
 
     [Fact]
@@ -217,27 +252,40 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "established" }
+            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "established" },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(statuses);
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
 
         // Force the null-coalescing throw in SUT:
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
-                  .Returns((SubmissionResponsesModel?)null);
+        submission
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                section,
+                SubmissionStatus.CompleteReviewed
+            )
+            .Returns((SubmissionResponsesModel?)null);
 
         var contentful = Substitute.For<IContentfulService>();
         var sut = CreateSut(contentful: contentful, submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationConstants.DefaultSortOrder);
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal("Unable to retrieve Security recommendation",
-                     secVm.Recommendations.NoRecommendationFoundErrorMessage);
+        Assert.Equal(
+            "Unable to retrieve Security recommendation",
+            secVm.Recommendations.NoRecommendationFoundErrorMessage
+        );
     }
 
     [Fact]
@@ -249,28 +297,41 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "exemplary" }
+            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "exemplary" },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(statuses);
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
 
         var contentful = Substitute.For<IContentfulService>();
 
         // Throw anything inside the try block to trigger the catch path in SUT
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
-                  .Throws(new DatabaseException("boom"));
+        submission
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                section,
+                SubmissionStatus.CompleteReviewed
+            )
+            .Throws(new DatabaseException("boom"));
 
         var sut = CreateSut(contentful: contentful, submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationConstants.DefaultSortOrder);
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal("Unable to retrieve Devices recommendation",
-                     secVm.Recommendations.NoRecommendationFoundErrorMessage);
+        Assert.Equal(
+            "Unable to retrieve Devices recommendation",
+            secVm.Recommendations.NoRecommendationFoundErrorMessage
+        );
     }
 
     [Fact]
@@ -280,14 +341,18 @@ public class CategoryLandingViewComponentViewBuilderTests
         var section = MakeSection("S4", "Broadband", "broadband", "broadband-connection");
         section.CoreRecommendations = new List<RecommendationChunkEntry>
         {
-            new RecommendationChunkEntry { Sys = new SystemDetails("chunk-1"), Header = "Broadband" }
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-1"),
+                Header = "Broadband",
+            },
         };
 
         var category = MakeCategory(section);
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S4", LastMaturity = "developing" }
+            new() { SectionId = "S4", LastMaturity = "developing" },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -300,9 +365,10 @@ public class CategoryLandingViewComponentViewBuilderTests
                     QuestionText = "Do you have a safeguarding lead?",
                     AnswerSysId = "A1",
                     AnswerText = "Yes",
-                    DateCreated = DateTime.UtcNow
-                }
-            });
+                    DateCreated = DateTime.UtcNow,
+                },
+            }
+        );
 
         var recommendationHistory = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
         {
@@ -317,23 +383,35 @@ public class CategoryLandingViewComponentViewBuilderTests
                     DateCreated = DateTime.Now,
                     PreviousStatus = "In Progress",
                     NewStatus = "Complete",
-                    NoteText = "Test note"
+                    NoteText = "Test note",
                 }
-            }
+            },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
             .Returns(statuses);
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
+        submission
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                section,
+                SubmissionStatus.CompleteReviewed
+            )
             .Returns(responses);
-        submission.GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
+        submission
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
             .Returns(recommendationHistory);
 
         var sut = CreateSut(submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationConstants.DefaultSortOrder);
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
@@ -357,24 +435,37 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6", LastMaturity = "exemplary" }
+            new() { SectionId = "S6", LastMaturity = "exemplary" },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(statuses);
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
-                  .Returns(new SubmissionResponsesModel(1, new()));
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
+        submission
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                section,
+                SubmissionStatus.CompleteReviewed
+            )
+            .Returns(new SubmissionResponsesModel(1, new()));
 
         var sut = CreateSut(submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationConstants.DefaultSortOrder);
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
-        Assert.Equal("Unable to retrieve Devices recommendation",
-                     secVm.Recommendations.NoRecommendationFoundErrorMessage);
+        Assert.Equal(
+            "Unable to retrieve Devices recommendation",
+            secVm.Recommendations.NoRecommendationFoundErrorMessage
+        );
     }
 
     [Fact]
@@ -384,16 +475,28 @@ public class CategoryLandingViewComponentViewBuilderTests
         var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
         section.CoreRecommendations = new List<RecommendationChunkEntry>
         {
-            new RecommendationChunkEntry { Sys = new SystemDetails("chunk-1"), Header = "Devices 1" },
-            new RecommendationChunkEntry { Sys = new SystemDetails("chunk-2"), Header = "Devices 2" },
-            new RecommendationChunkEntry { Sys = new SystemDetails("chunk-3"), Header = "Devices 3" },
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-1"),
+                Header = "Devices 1",
+            },
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-2"),
+                Header = "Devices 2",
+            },
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-3"),
+                Header = "Devices 3",
+            },
         };
 
         var category = MakeCategory(section);
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6", LastMaturity = "developing" }
+            new() { SectionId = "S6", LastMaturity = "developing" },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -406,9 +509,10 @@ public class CategoryLandingViewComponentViewBuilderTests
                     QuestionText = "Do you have a safeguarding lead?",
                     AnswerSysId = "A1",
                     AnswerText = "Yes",
-                    DateCreated = DateTime.UtcNow
-                }
-            });
+                    DateCreated = DateTime.UtcNow,
+                },
+            }
+        );
 
         var recommendationHistory = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
         {
@@ -423,7 +527,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     DateCreated = DateTime.Now,
                     PreviousStatus = RecommendationStatus.InProgress.ToString(),
                     NewStatus = RecommendationStatus.Complete.ToString(),
-                    NoteText = "Test note 1"
+                    NoteText = "Test note 1",
                 }
             },
             {
@@ -437,7 +541,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     DateCreated = DateTime.Now,
                     PreviousStatus = RecommendationStatus.NotStarted.ToString(),
                     NewStatus = RecommendationStatus.InProgress.ToString(),
-                    NoteText = "Test note 2"
+                    NoteText = "Test note 2",
                 }
             },
             {
@@ -451,23 +555,35 @@ public class CategoryLandingViewComponentViewBuilderTests
                     DateCreated = DateTime.Now,
                     PreviousStatus = null,
                     NewStatus = RecommendationStatus.NotStarted.ToString(),
-                    NoteText = "Test note 3"
+                    NoteText = "Test note 3",
                 }
-            }
+            },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
             .Returns(statuses);
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
+        submission
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                section,
+                SubmissionStatus.CompleteReviewed
+            )
             .Returns(responses);
-        submission.GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
+        submission
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
             .Returns(recommendationHistory);
 
         var sut = CreateSut(submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationSortOrder.Status.GetDisplayName());
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationSortOrder.Status.GetDisplayName()
+        );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
@@ -485,16 +601,28 @@ public class CategoryLandingViewComponentViewBuilderTests
         var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
         section.CoreRecommendations = new List<RecommendationChunkEntry>
         {
-            new RecommendationChunkEntry { Sys = new SystemDetails("chunk-1"), Header = "Devices 1" },
-            new RecommendationChunkEntry { Sys = new SystemDetails("chunk-2"), Header = "Devices 2" },
-            new RecommendationChunkEntry { Sys = new SystemDetails("chunk-3"), Header = "Devices 3" },
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-1"),
+                Header = "Devices 1",
+            },
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-2"),
+                Header = "Devices 2",
+            },
+            new RecommendationChunkEntry
+            {
+                Sys = new SystemDetails("chunk-3"),
+                Header = "Devices 3",
+            },
         };
 
         var category = MakeCategory(section);
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6", LastMaturity = "developing" }
+            new() { SectionId = "S6", LastMaturity = "developing" },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -507,9 +635,10 @@ public class CategoryLandingViewComponentViewBuilderTests
                     QuestionText = "Do you have a safeguarding lead?",
                     AnswerSysId = "A1",
                     AnswerText = "Yes",
-                    DateCreated = DateTime.UtcNow
-                }
-            });
+                    DateCreated = DateTime.UtcNow,
+                },
+            }
+        );
 
         var recommendationHistory = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
         {
@@ -524,7 +653,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     DateCreated = DateTime.Now.AddDays(-2),
                     PreviousStatus = RecommendationStatus.InProgress.ToString(),
                     NewStatus = RecommendationStatus.Complete.ToString(),
-                    NoteText = "Test note 1"
+                    NoteText = "Test note 1",
                 }
             },
             {
@@ -538,7 +667,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     DateCreated = DateTime.Now.AddDays(-1),
                     PreviousStatus = RecommendationStatus.NotStarted.ToString(),
                     NewStatus = RecommendationStatus.InProgress.ToString(),
-                    NoteText = "Test note 2"
+                    NoteText = "Test note 2",
                 }
             },
             {
@@ -552,28 +681,43 @@ public class CategoryLandingViewComponentViewBuilderTests
                     DateCreated = DateTime.Now,
                     PreviousStatus = null,
                     NewStatus = RecommendationStatus.NotStarted.ToString(),
-                    NoteText = "Test note 3"
+                    NoteText = "Test note 3",
                 }
-            }
+            },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
             .Returns(statuses);
-        submission.GetLatestSubmissionResponsesModel(Arg.Any<int>(), section, SubmissionStatus.CompleteReviewed)
+        submission
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                section,
+                SubmissionStatus.CompleteReviewed
+            )
             .Returns(responses);
-        submission.GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
+        submission
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(Arg.Any<int>())
             .Returns(recommendationHistory);
 
         var sut = CreateSut(submission: submission);
 
         // Act
-        var vm = await sut.BuildViewModelAsync(category, "cat", null, RecommendationSortOrder.LastUpdated.GetDisplayName());
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationSortOrder.LastUpdated.GetDisplayName()
+        );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         var chunks = secVm.Recommendations.Chunks;
         Assert.NotEmpty(chunks);
-        Assert.True(chunks[0].LastUpdated > chunks[1].LastUpdated && chunks[1].LastUpdated > chunks[2].LastUpdated);
+        Assert.True(
+            chunks[0].LastUpdated > chunks[1].LastUpdated
+                && chunks[1].LastUpdated > chunks[2].LastUpdated
+        );
     }
 }

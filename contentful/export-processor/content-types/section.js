@@ -1,8 +1,8 @@
-import { Question } from "./question.js";
-import { PathCalculator } from "../user-journey/path-calculator.js";
-import { SectionStats } from "#src/user-journey/section-stats";
-import { UserJourney } from "#src/user-journey/user-journey";
-import PathPart from "#src/user-journey/path-part";
+import { Question } from './question.js';
+import { PathCalculator } from '../user-journey/path-calculator.js';
+import { SectionStats } from '#src/user-journey/section-stats';
+import { UserJourney } from '#src/user-journey/user-journey';
+import PathPart from '#src/user-journey/path-part';
 
 /**
  * @typedef {import("./subtopic-recommendation.js").SubtopicRecommendation} SubtopicRecommendation
@@ -25,99 +25,95 @@ import PathPart from "#src/user-journey/path-part";
  * @class
  */
 export class Section {
-    /**
-     * @type {{fields: Record<string, any>, sys: { id: string}}}
-     */
-    interstitialPage;
+  /**
+   * @type {{fields: Record<string, any>, sys: { id: string}}}
+   */
+  interstitialPage;
 
-    /**
-     * @type {SubtopicRecommendation}
-     */
-    recommendation;
+  /**
+   * @type {SubtopicRecommendation}
+   */
+  recommendation;
 
-    /**
-     * @type {Question[]}
-     */
-    questions;
+  /**
+   * @type {Question[]}
+   */
+  questions;
 
-    /**
-     * @type {string}
-     */
-    name;
+  /**
+   * @type {string}
+   */
+  name;
 
-    /**
-     * @type {string}
-     */
-    id;
+  /**
+   * @type {string}
+   */
+  id;
 
-    /**
-     * @type {PathCalculator}
-     */
-    pathInfo;
+  /**
+   * @type {PathCalculator}
+   */
+  pathInfo;
 
-    /**
-     * @type {SectionStats}
-     */
-    stats;
+  /**
+   * @type {SectionStats}
+   */
+  stats;
 
-    /**
-     * @param {{fields: Record<string, any>, sys: {id: string }}} params
-     * @param {SubtopicRecommendation} recommendation - Subtopic recommendation for the seciton
-     */
-    constructor({ fields, sys }, recommendation) {
-        this.interstitialPage = fields.interstitialPage;
-        this.questions =
-            fields.questions?.map((question) => new Question(question)) ?? [];
-        this.id = sys.id;
-        this.name = fields.name;
-        this.recommendation = recommendation;
+  /**
+   * @param {{fields: Record<string, any>, sys: {id: string }}} params
+   * @param {SubtopicRecommendation} recommendation - Subtopic recommendation for the seciton
+   */
+  constructor({ fields, sys }, recommendation) {
+    this.interstitialPage = fields.interstitialPage;
+    this.questions = fields.questions?.map((question) => new Question(question)) ?? [];
+    this.id = sys.id;
+    this.name = fields.name;
+    this.recommendation = recommendation;
 
-        this.pathInfo = new PathCalculator({
-            questions: this.questions,
-            recommendation,
-            sectionId: this.id,
-        });
+    this.pathInfo = new PathCalculator({
+      questions: this.questions,
+      recommendation,
+      sectionId: this.id,
+    });
 
-        this.stats = new SectionStats({ paths: this.pathInfo.paths });
-    }
+    this.stats = new SectionStats({ paths: this.pathInfo.paths });
+  }
 
-    /**
-     * Convert section to minimal section info; only information we care for writing to file
-     * @param {boolean} writeAllPossiblePaths - Whether to write all possible paths
-     * @returns {SectionMinimalOutput} Minimal section info
-     */
-    toMinimalOutput(writeAllPossiblePaths) {
-        const recommendationPaths =
-            this.pathInfo.minimumPathsForRecommendations;
+  /**
+   * Convert section to minimal section info; only information we care for writing to file
+   * @param {boolean} writeAllPossiblePaths - Whether to write all possible paths
+   * @returns {SectionMinimalOutput} Minimal section info
+   */
+  toMinimalOutput(writeAllPossiblePaths) {
+    const recommendationPaths = this.pathInfo.minimumPathsForRecommendations;
 
-        for (const [maturity, path] of Object.entries(recommendationPaths)) {
-            recommendationPaths[maturity] = path.map((part) => {
-                if (!(part instanceof PathPart)) {
-                    part = new PathPart(part)
-                }
-                return part.toMinimalOutput()
-            });
+    for (const [maturity, path] of Object.entries(recommendationPaths)) {
+      recommendationPaths[maturity] = path.map((part) => {
+        if (!(part instanceof PathPart)) {
+          part = new PathPart(part);
         }
-
-        const result = {
-            section: this.name,
-            allPathsStats: this.stats.pathsPerMaturity,
-            minimumQuestionPaths:
-                this.pathInfo.minimumPathsToNavigateQuestions.map((path) =>
-                    path.map((part) => part.toMinimalOutput())
-                ),
-            minimumRecommendationPaths:
-                this.pathInfo.minimumPathsForRecommendations,
-            pathsForAnswers: this.pathInfo.pathsForAllPossibleAnswers.map(
-                (path) => path.toMinimalOutput()
-            ),
-            allPossiblePaths: writeAllPossiblePaths
-                ? this.pathInfo.paths.map((path) => path.toMinimalOutput())
-                : undefined,
-        };
-
-        return result;
+        return part.toMinimalOutput();
+      });
     }
+
+    const result = {
+      section: this.name,
+      allPathsStats: this.stats.pathsPerMaturity,
+      minimumQuestionPaths: this.pathInfo.minimumPathsToNavigateQuestions.map((path) =>
+        path.map((part) => part.toMinimalOutput()),
+      ),
+      minimumRecommendationPaths: this.pathInfo.minimumPathsForRecommendations,
+      pathsForAnswers: this.pathInfo.pathsForAllPossibleAnswers.map((path) =>
+        path.toMinimalOutput(),
+      ),
+      allPossiblePaths: writeAllPossiblePaths
+        ? this.pathInfo.paths.map((path) => path.toMinimalOutput())
+        : undefined,
+    };
+
+    return result;
+  }
 }
 
 /**

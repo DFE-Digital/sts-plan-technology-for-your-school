@@ -20,17 +20,18 @@ public class CmsViewBuilderTests
         return new CmsViewBuilder(contentful);
     }
 
-    private static QuestionnaireSectionEntry MakeSection(string id, List<QuestionnaireQuestionEntry>? questions = null) =>
+    private static QuestionnaireSectionEntry MakeSection(
+        string id,
+        List<QuestionnaireQuestionEntry>? questions = null
+    ) =>
         new QuestionnaireSectionEntry
         {
             Questions = questions ?? [],
             Sys = new SystemDetails(id),
-            Name = $"Section {id}"
+            Name = $"Section {id}",
         };
 
-    private static RecommendationChunkEntry MakeRecEntry(
-       string header,
-       params string?[] answerIds)
+    private static RecommendationChunkEntry MakeRecEntry(string header, params string?[] answerIds)
     {
         return new RecommendationChunkEntry
         {
@@ -56,10 +57,9 @@ public class CmsViewBuilderTests
     public async Task GetAllSectionsAsync_Returns_SectionViewModels_For_All_Sections()
     {
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetAllSectionsAsync().Returns(new[]
-        {
-            MakeSection("A"), MakeSection("B"), MakeSection("C")
-        });
+        contentful
+            .GetAllSectionsAsync()
+            .Returns(new[] { MakeSection("A"), MakeSection("B"), MakeSection("C") });
 
         var sut = CreateSut(contentful);
 
@@ -77,12 +77,16 @@ public class CmsViewBuilderTests
     {
         var contentful = Substitute.For<IContentfulService>();
         contentful.GetRecommendationChunkCountAsync(1).Returns(5);
-        contentful.GetPaginatedRecommendationEntriesAsync(1).Returns(new[]
-        {
-            MakeRecEntry("H1", "a1", null),  // null id should be filtered out
-            MakeRecEntry("H2", "b1"),
-            MakeRecEntry("H3", "b2"),
-        });
+        contentful
+            .GetPaginatedRecommendationEntriesAsync(1)
+            .Returns(
+                new[]
+                {
+                    MakeRecEntry("H1", "a1", null), // null id should be filtered out
+                    MakeRecEntry("H2", "b1"),
+                    MakeRecEntry("H3", "b2"),
+                }
+            );
 
         var questions = new List<QuestionnaireQuestionEntry>
         {
@@ -93,15 +97,11 @@ public class CmsViewBuilderTests
                     new() { Sys = new SystemDetails("a1"), Text = "A1" },
                     new() { Sys = new SystemDetails("b1"), Text = "B1" },
                     new() { Sys = new SystemDetails("b2"), Text = "B2" },
-                }
-            }
+                },
+            },
         };
 
-        contentful.GetAllSectionsAsync().Returns(new[]
-        {
-            MakeSection("A", questions),
-        });
-
+        contentful.GetAllSectionsAsync().Returns(new[] { MakeSection("A", questions) });
 
         var sut = CreateSut(contentful);
         var controller = new TestController();
@@ -116,9 +116,18 @@ public class CmsViewBuilderTests
 
         // Expected chunks: "a1" from H1, and "b1" from H2 and "b3" from "h3" => 3 total, no null IDs
         Assert.Equal(3, model.Items.Count);
-        Assert.Contains(model.Items, i => i.CompletingAnswerId == "a1" && i.RecommendationHeader == "H1");
-        Assert.Contains(model.Items, i => i.CompletingAnswerId == "b1" && i.RecommendationHeader == "H2");
-        Assert.Contains(model.Items, i => i.CompletingAnswerId == "b2" && i.RecommendationHeader == "H3");
+        Assert.Contains(
+            model.Items,
+            i => i.CompletingAnswerId == "a1" && i.RecommendationHeader == "H1"
+        );
+        Assert.Contains(
+            model.Items,
+            i => i.CompletingAnswerId == "b1" && i.RecommendationHeader == "H2"
+        );
+        Assert.Contains(
+            model.Items,
+            i => i.CompletingAnswerId == "b2" && i.RecommendationHeader == "H3"
+        );
     }
 
     [Fact]
@@ -126,13 +135,17 @@ public class CmsViewBuilderTests
     {
         var contentful = Substitute.For<IContentfulService>();
         contentful.GetRecommendationChunkCountAsync(3).Returns(10);
-        contentful.GetPaginatedRecommendationEntriesAsync(3).Returns(new[]
-        {
-            MakeRecEntry("Header A", "x1"),
-            MakeRecEntry("Header B", "y1", null), // null filtered
-            MakeRecEntry("Header C", "y2", null),
-            MakeRecEntry("Header D") // no answers
-        });
+        contentful
+            .GetPaginatedRecommendationEntriesAsync(3)
+            .Returns(
+                new[]
+                {
+                    MakeRecEntry("Header A", "x1"),
+                    MakeRecEntry("Header B", "y1", null), // null filtered
+                    MakeRecEntry("Header C", "y2", null),
+                    MakeRecEntry("Header D"), // no answers
+                }
+            );
 
         var questions = new List<QuestionnaireQuestionEntry>
         {
@@ -143,14 +156,11 @@ public class CmsViewBuilderTests
                     new() { Sys = new SystemDetails("x1"), Text = "X1" },
                     new() { Sys = new SystemDetails("y1"), Text = "Y1" },
                     new() { Sys = new SystemDetails("y2"), Text = "Y2" },
-                }
-            }
+                },
+            },
         };
 
-        contentful.GetAllSectionsAsync().Returns(new[]
-        {
-            MakeSection("A", questions),
-        });
+        contentful.GetAllSectionsAsync().Returns(new[] { MakeSection("A", questions) });
 
         var sut = CreateSut(contentful);
         var controller = new TestController();
@@ -166,8 +176,10 @@ public class CmsViewBuilderTests
         // Expected chunk models: x1 (A), y1 (B), y2 (C) => 3 total
         Assert.Equal(4, model.Items.Count);
 
-        var (ids, headers) = (model.Items.Select(i => i.CompletingAnswerId).ToList(),
-                              model.Items.Select(i => i.RecommendationHeader).ToList());
+        var (ids, headers) = (
+            model.Items.Select(i => i.CompletingAnswerId).ToList(),
+            model.Items.Select(i => i.RecommendationHeader).ToList()
+        );
 
         Assert.Contains("x1", ids);
         Assert.Contains("y1", ids);

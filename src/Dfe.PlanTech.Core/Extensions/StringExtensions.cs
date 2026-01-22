@@ -39,12 +39,12 @@ public static partial class StringExtensions
     public static string FirstCharToLower(this string input) => char.ToLower(input[0]) + input[1..];
 
     // Extension method to slugify a string by removing non-alphanumeric characters (except hyphens to preserve hyphenated words), replacing spaces with hyphens, and converting to lowercase.
-    public static string Slugify(this string text) => text.Trim().ReplaceWhitespaceCharacters("-").ReplaceNonSlugCharacters("").ToLower();
+    public static string Slugify(this string text) =>
+        text.Trim().ReplaceWhitespaceCharacters("-").ReplaceNonSlugCharacters("").ToLower();
 
-    private static string ReplaceWhitespaceCharacters(this string text, string replacement)
-    => MatchWhitespaceCharactersPattern().Replace(text, replacement);
+    private static string ReplaceWhitespaceCharacters(this string text, string replacement) =>
+        MatchWhitespaceCharactersPattern().Replace(text, replacement);
 
-    private static string ReplaceNonSlugCharacters(this string text, string replacement)
-    => MatchNonAlphaNumericExceptHyphensPattern().Replace(text, replacement);
-
+    private static string ReplaceNonSlugCharacters(this string text, string replacement) =>
+        MatchNonAlphaNumericExceptHyphensPattern().Replace(text, replacement);
 }

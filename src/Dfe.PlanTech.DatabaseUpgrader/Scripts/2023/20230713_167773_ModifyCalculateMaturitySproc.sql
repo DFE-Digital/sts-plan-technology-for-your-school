@@ -5,14 +5,14 @@ DECLARE @completed bit = 0
 
 BEGIN TRY
 	BEGIN TRAN
-	
-		SELECT	maturity 
+
+		SELECT	maturity
 		INTO	#TempMaturityResponse
-		FROM	response rp 
+		FROM	response rp
 		WHERE	rp.submissionId = @submissionId
 
 		if (SELECT	count(*) FROM #TempMaturityResponse
-			WHERE	maturity = 'Low' COLLATE SQL_Latin1_General_CP1_CI_AS) > 0 
+			WHERE	maturity = 'Low' COLLATE SQL_Latin1_General_CP1_CI_AS) > 0
 		BEGIN
 			UPDATE	SUBMISSION
 			SET		maturity = 'Low', completed = 1, dateCompleted = GETDATE()

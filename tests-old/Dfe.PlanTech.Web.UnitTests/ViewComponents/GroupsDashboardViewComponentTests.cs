@@ -22,13 +22,15 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
 {
     public class GroupsDashboardViewComponentTests
     {
-        private readonly ILogger<GroupsDashboardViewComponent> _logger =
-            Substitute.For<ILogger<GroupsDashboardViewComponent>>();
+        private readonly ILogger<GroupsDashboardViewComponent> _logger = Substitute.For<
+            ILogger<GroupsDashboardViewComponent>
+        >();
 
         private readonly IGetSubmissionStatusesQuery _submissionStatusesQuery =
             Substitute.For<IGetSubmissionStatusesQuery>();
 
-        private readonly IGetGroupSelectionQuery _groupSelectionQuery = Substitute.For<IGetGroupSelectionQuery>();
+        private readonly IGetGroupSelectionQuery _groupSelectionQuery =
+            Substitute.For<IGetGroupSelectionQuery>();
         private readonly IUser _user = Substitute.For<IUser>();
         private readonly ISystemTime _systemTime = Substitute.For<ISystemTime>();
 
@@ -53,7 +55,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var category = new Category
             {
                 Sys = new SystemDetails { Id = "cat1" },
-                Sections = new List<Section>()
+                Sections = new List<Section>(),
             };
 
             var component = CreateComponent();
@@ -61,7 +63,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var result = await component.InvokeAsync(category);
 
             var viewResult = Assert.IsType<ViewViewComponentResult>(result);
-            var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(viewResult?.ViewData?.Model);
+            var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(
+                viewResult?.ViewData?.Model
+            );
             Assert.Equal("ServiceUnavailable", model.NoSectionsErrorRedirectUrl);
         }
 
@@ -70,14 +74,22 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             var category = new Category
             {
-                Sections = new List<Section> { new Section { Sys = new SystemDetails { Id = "sec1" } } }
+                Sections = new List<Section>
+                {
+                    new Section { Sys = new SystemDetails { Id = "sec1" } },
+                },
             };
 
             _submissionStatusesQuery
                 .GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), Arg.Any<int>())
                 .Throws(new Exception("Database error"));
 
-            var result = await SubmissionStatusHelper.RetrieveSectionStatuses(category, _logger, _submissionStatusesQuery, 1);
+            var result = await SubmissionStatusHelper.RetrieveSectionStatuses(
+                category,
+                _logger,
+                _submissionStatusesQuery,
+                1
+            );
 
             Assert.True(result.RetrievalError);
         }
@@ -88,13 +100,26 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var section = new Section { Sys = new SystemDetails { Id = "s1" } };
             var category = new Category { Sections = new List<Section> { section } };
 
-            var statuses = new List<SectionStatusDto> { new SectionStatusDto { SectionId = "s1", Completed = true, LastCompletionDate = new DateTime() } };
+            var statuses = new List<SectionStatusDto>
+            {
+                new SectionStatusDto
+                {
+                    SectionId = "s1",
+                    Completed = true,
+                    LastCompletionDate = new DateTime(),
+                },
+            };
 
             _submissionStatusesQuery
                 .GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), Arg.Any<int>())
                 .Returns(statuses);
 
-            var result = await SubmissionStatusHelper.RetrieveSectionStatuses(category, _logger, _submissionStatusesQuery, 1);
+            var result = await SubmissionStatusHelper.RetrieveSectionStatuses(
+                category,
+                _logger,
+                _submissionStatusesQuery,
+                1
+            );
 
             Assert.False(result.RetrievalError);
             Assert.Single(result.SectionStatuses);
@@ -106,15 +131,20 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
         {
             var category = new Category
             {
-                Sections = new List<Section> { new Section { Sys = new SystemDetails { Id = "s1" } } },
+                Sections = new List<Section>
+                {
+                    new Section { Sys = new SystemDetails { Id = "s1" } },
+                },
             };
 
             _user.GetCurrentUserId().Returns(1);
             _user.GetEstablishmentId().Returns(10);
-            _groupSelectionQuery.GetLatestSelectedGroupSchool(1, 10)
+            _groupSelectionQuery
+                .GetLatestSelectedGroupSchool(1, 10)
                 .Returns(new GroupReadActivityDto() { SelectedEstablishmentId = 20 });
 
-            _submissionStatusesQuery.GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), 20)
+            _submissionStatusesQuery
+                .GetSectionSubmissionStatuses(Arg.Any<IEnumerable<Section>>(), 20)
                 .Returns(new List<SectionStatusDto>());
 
             var component = CreateComponent();
@@ -122,7 +152,9 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             var result = await component.InvokeAsync(category);
 
             var viewResult = Assert.IsType<ViewViewComponentResult>(result);
-            var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(viewResult?.ViewData?.Model);
+            var model = Assert.IsType<GroupsDashboardViewComponentViewModel>(
+                viewResult?.ViewData?.Model
+            );
             Assert.IsType<MissingComponent>(model.Description);
         }
 
@@ -133,28 +165,32 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewComponents
             {
                 Name = "Section A",
                 InterstitialPage = new Page { Slug = "slug" },
-                Sys = new SystemDetails { Id = "s1" }
+                Sys = new SystemDetails { Id = "s1" },
             };
 
-            var status = new SectionStatusDto
-            {
-                SectionId = "s1",
-                LastMaturity = "NonMatching"
-            };
+            var status = new SectionStatusDto { SectionId = "s1", LastMaturity = "NonMatching" };
 
-            _recommendationQuery.GetRecommendationsViewDto("s1", "NonMatching")
+            _recommendationQuery
+                .GetRecommendationsViewDto("s1", "NonMatching")
                 .Returns((RecommendationsViewDto?)null);
 
             var component = CreateComponent();
 
-            var method = component.GetType()
-                .GetMethod("GetCategorySectionRecommendationDto", BindingFlags.NonPublic | BindingFlags.Instance);
+            var method = component
+                .GetType()
+                .GetMethod(
+                    "GetCategorySectionRecommendationDto",
+                    BindingFlags.NonPublic | BindingFlags.Instance
+                );
 
-            var task = (Task<CategorySectionRecommendationDto>)method!.Invoke(component,
-                new object[] { section, status })!;
+            var task =
+                (Task<CategorySectionRecommendationDto>)
+                    method!.Invoke(component, new object[] { section, status })!;
             var dto = await task;
-            Assert.Equal("Unable to retrieve Section A recommendation", dto.NoRecommendationFoundErrorMessage);
-
+            Assert.Equal(
+                "Unable to retrieve Section A recommendation",
+                dto.NoRecommendationFoundErrorMessage
+            );
         }
     }
 }

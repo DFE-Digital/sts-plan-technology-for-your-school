@@ -3,12 +3,12 @@ name: Multi stage build & deploy
 on:
   workflow_dispatch:
   push:
-    branches: ["main", "development"]
+    branches: ['main', 'development']
     paths:
-      - "src/**"
-      - ".github/actions/**"
-      - ".github/workflows/**"
-      - ".gitmodules"
+      - 'src/**'
+      - '.github/actions/**'
+      - '.github/workflows/**'
+      - '.gitmodules'
 
 jobs:
   set-env:
@@ -66,11 +66,7 @@ jobs:
 
   deploy-to-dev:
     name: Deployment to Dev
-    needs: [
-              set-env,
-              create-and-publish-image,
-              create-and-tag-release
-            ]
+    needs: [set-env, create-and-publish-image, create-and-tag-release]
     if: needs.set-env.outputs.allow-deploy-to-dev == 'true'
     strategy:
       max-parallel: 1

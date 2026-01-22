@@ -11,7 +11,7 @@ public class CardTests
         {
             InternalName = "FirstCard",
             Uri = "http://www.linktofirstcard.com",
-            Description = "Description of first card"
+            Description = "Description of first card",
         };
     }
 
@@ -21,7 +21,7 @@ public class CardTests
         {
             InternalName = "SecondCard",
             Uri = "http://www.linktosecondcard.com",
-            Description = "Description of second card"
+            Description = "Description of second card",
         };
     }
 
@@ -31,7 +31,7 @@ public class CardTests
         {
             InternalName = "ThirdCard",
             Uri = "http://www.linktothirdcard.com",
-            Description = "Description of third card"
+            Description = "Description of third card",
         };
     }
 
@@ -41,7 +41,7 @@ public class CardTests
         {
             InternalName = "FourthCard",
             Uri = "http://www.linktoffourthcard.com",
-            Description = "Description of fourth card"
+            Description = "Description of fourth card",
         };
     }
 
@@ -51,7 +51,9 @@ public class CardTests
         stringBuilder.Append("<div class=\"dfe-card\">");
         stringBuilder.Append("<div class=\"dfe-card-container\">");
         stringBuilder.Append("<h3 class=\"govuk-heading-m\">");
-        stringBuilder.Append($"<a href=\"http://www.linktofirstcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">FirstCard</a>");
+        stringBuilder.Append(
+            $"<a href=\"http://www.linktofirstcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">FirstCard</a>"
+        );
         stringBuilder.Append("</h3>");
         stringBuilder.Append($"<p class=\"govuk-body-s\">Description of first card</p>");
         stringBuilder.Append("</div></div>");
@@ -65,7 +67,9 @@ public class CardTests
         stringBuilder.Append("<div class=\"dfe-card\">");
         stringBuilder.Append("<div class=\"dfe-card-container\">");
         stringBuilder.Append("<h3 class=\"govuk-heading-m\">");
-        stringBuilder.Append($"<a href=\"http://www.linktosecondcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">SecondCard</a>");
+        stringBuilder.Append(
+            $"<a href=\"http://www.linktosecondcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">SecondCard</a>"
+        );
         stringBuilder.Append("</h3>");
         stringBuilder.Append($"<p class=\"govuk-body-s\">Description of second card</p>");
         stringBuilder.Append("</div></div>");
@@ -79,7 +83,9 @@ public class CardTests
         stringBuilder.Append("<div class=\"dfe-card\">");
         stringBuilder.Append("<div class=\"dfe-card-container\">");
         stringBuilder.Append("<h3 class=\"govuk-heading-m\">");
-        stringBuilder.Append($"<a href=\"http://www.linktothirdcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">ThirdCard</a>");
+        stringBuilder.Append(
+            $"<a href=\"http://www.linktothirdcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">ThirdCard</a>"
+        );
         stringBuilder.Append("</h3>");
         stringBuilder.Append($"<p class=\"govuk-body-s\">Description of third card</p>");
         stringBuilder.Append("</div></div>");
@@ -93,7 +99,9 @@ public class CardTests
         stringBuilder.Append("<div class=\"dfe-card\">");
         stringBuilder.Append("<div class=\"dfe-card-container\">");
         stringBuilder.Append("<h3 class=\"govuk-heading-m\">");
-        stringBuilder.Append($"<a href=\"http://www.linktoffourthcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">FourthCard</a>");
+        stringBuilder.Append(
+            $"<a href=\"http://www.linktoffourthcard.com\" class=\"govuk-link govuk-link--no-visited-state dfe-card-link--header\">FourthCard</a>"
+        );
         stringBuilder.Append("</h3>");
         stringBuilder.Append($"<p class=\"govuk-body-s\">Description of fourth card</p>");
         stringBuilder.Append("</div></div>");
@@ -103,13 +111,7 @@ public class CardTests
 
     protected List<ComponentCardEntry> GetCards()
     {
-        return
-        [
-            GetFirstCard(),
-            GetSecondCard(),
-            GetThirdCard(),
-            GetFourthCard(),
-        ];
+        return [GetFirstCard(), GetSecondCard(), GetThirdCard(), GetFourthCard()];
     }
 
     protected StringBuilder GetCardViews(StringBuilder stringBuilder)

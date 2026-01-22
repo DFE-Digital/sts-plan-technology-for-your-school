@@ -8,7 +8,8 @@ on:
         description: Which Contentful environment to backup
         required: true
         type: choice
-        options: [ 'Dev', 'Tst', 'Staging', 'Production', 'StagingUnprotected', 'ProductionUnprotected' ]
+        options:
+          ['Dev', 'Tst', 'Staging', 'Production', 'StagingUnprotected', 'ProductionUnprotected']
         default: 'Staging'
 
 jobs:
@@ -31,7 +32,7 @@ jobs:
       SQL_IP_NAME: export-processor
       USE_PREVIEW: true
       SAVE_FILE: true
-      OUTPUT_FILE_DIR: "./output/"
+      OUTPUT_FILE_DIR: './output/'
 
     steps:
       - name: Checkout Repository
@@ -52,7 +53,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "add"
+          verb: 'add'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
@@ -103,7 +104,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
-          verb: "remove"
+          verb: 'remove'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}

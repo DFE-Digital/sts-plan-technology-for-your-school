@@ -11,9 +11,7 @@ public abstract class BaseTaskListTagHelper : TagHelper
 
     public string TagName { get; init; } = null!;
 
-    protected BaseTaskListTagHelper()
-    {
-    }
+    protected BaseTaskListTagHelper() { }
 
     public override void Process(TagHelperContext context, TagHelperOutput output)
     {

@@ -33,8 +33,11 @@ public class ContentfulRepository : IContentfulRepository
     {
         _logger = logger;
         _client = client ?? throw new ArgumentNullException(nameof(client));
-        _hostEnvironment = hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
-        _automatedTestingOptions = automatedTestingOptions?.Value ?? throw new ArgumentNullException(nameof(automatedTestingOptions));
+        _hostEnvironment =
+            hostEnvironment ?? throw new ArgumentNullException(nameof(hostEnvironment));
+        _automatedTestingOptions =
+            automatedTestingOptions?.Value
+            ?? throw new ArgumentNullException(nameof(automatedTestingOptions));
 
         _client.ContentTypeResolver = new EntryResolver();
     }
@@ -50,13 +53,22 @@ public class ContentfulRepository : IContentfulRepository
         return entities.FirstOrDefault();
     }
 
-    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
-        => await GetEntriesAsync<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), null);
+    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>() =>
+        await GetEntriesAsync<TEntry>(
+            ContentfulContentTypeHelper.GetContentTypeName<TEntry>(),
+            null
+        );
 
-    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options)
-        => await GetEntriesAsync<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), options);
+    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(GetEntriesOptions options) =>
+        await GetEntriesAsync<TEntry>(
+            ContentfulContentTypeHelper.GetContentTypeName<TEntry>(),
+            options
+        );
 
-    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(string entityTypeId, GetEntriesOptions? options)
+    public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>(
+        string entityTypeId,
+        GetEntriesOptions? options
+    )
     {
         var queryBuilder = BuildQueryBuilder<TEntry>(entityTypeId, options);
 
@@ -66,10 +78,18 @@ public class ContentfulRepository : IContentfulRepository
         return entries.Items ?? [];
     }
 
-    public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(GetEntriesOptions options)
-        => await GetPaginatedEntriesAsync<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), options);
+    public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(
+        GetEntriesOptions options
+    ) =>
+        await GetPaginatedEntriesAsync<TEntry>(
+            ContentfulContentTypeHelper.GetContentTypeName<TEntry>(),
+            options
+        );
 
-    public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(string entryTypeId, GetEntriesOptions options)
+    public async Task<IEnumerable<TEntry>> GetPaginatedEntriesAsync<TEntry>(
+        string entryTypeId,
+        GetEntriesOptions options
+    )
     {
         var limit = options?.Limit ?? 100;
         var queryBuilder = BuildQueryBuilder<TEntry>(entryTypeId, options)
@@ -85,7 +105,11 @@ public class ContentfulRepository : IContentfulRepository
 
     public async Task<int> GetEntriesCountAsync<TEntry>()
     {
-        var queryBuilder = BuildQueryBuilder<TEntry>(ContentfulContentTypeHelper.GetContentTypeName<TEntry>(), null).Limit(0);
+        var queryBuilder = BuildQueryBuilder<TEntry>(
+                ContentfulContentTypeHelper.GetContentTypeName<TEntry>(),
+                null
+            )
+            .Limit(0);
         var entries = await _client.GetEntries(queryBuilder);
 
         ProcessContentfulErrors(entries);
@@ -102,18 +126,25 @@ public class ContentfulRepository : IContentfulRepository
         // option doesn't seem to have any effect there - it only seems to return the main parent entry
         // with links to children. This was proving rather useless, so I have used the "GetEntries" option here
         // instead.
-        return new GetEntriesOptions(include, [
-            new ContentfulQuerySingleValue(){
-                Field = "sys.id",
-                Value = id
-            }]);
+        return new GetEntriesOptions(
+            include,
+            [new ContentfulQuerySingleValue() { Field = "sys.id", Value = id }]
+        );
     }
 
-    private QueryBuilder<TEntry> BuildQueryBuilder<TEntry>(string contentfulContentTypeId, GetEntriesOptions? options)
+    private QueryBuilder<TEntry> BuildQueryBuilder<TEntry>(
+        string contentfulContentTypeId,
+        GetEntriesOptions? options
+    )
     {
-        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntry>(contentfulContentTypeId, options);
+        var queryBuilder = QueryBuilders.BuildQueryBuilder<TEntry>(
+            contentfulContentTypeId,
+            options
+        );
 
-        var shouldExcludeTestingContent = _hostEnvironment.IsProduction() || (!_automatedTestingOptions?.Contentful!?.IncludeTaggedContent ?? false);
+        var shouldExcludeTestingContent =
+            _hostEnvironment.IsProduction()
+            || (!_automatedTestingOptions?.Contentful!?.IncludeTaggedContent ?? false);
         if (shouldExcludeTestingContent)
         {
             var tag = _automatedTestingOptions?.Contentful?.Tag ?? null;
@@ -140,7 +171,11 @@ public class ContentfulRepository : IContentfulRepository
         {
             var entryType = typeof(TEntry).Name;
 
-            _logger.LogError("Error retrieving one or more {EntryType} entries from Contentful:\n{Errors}", entryType, entries.Errors.Select(CreateErrorString));
+            _logger.LogError(
+                "Error retrieving one or more {EntryType} entries from Contentful:\n{Errors}",
+                entryType,
+                entries.Errors.Select(CreateErrorString)
+            );
         }
     }
 
@@ -150,10 +185,9 @@ public class ContentfulRepository : IContentfulRepository
         if (string.IsNullOrEmpty(id))
             throw new ArgumentNullException(nameof(id));
 
-        return new GetEntriesOptions(include, [
-            new ContentfulQuerySingleValue(){
-                Field = "sys.id",
-                Value = id
-            }]);
+        return new GetEntriesOptions(
+            include,
+            [new ContentfulQuerySingleValue() { Field = "sys.id", Value = id }]
+        );
     }
 }

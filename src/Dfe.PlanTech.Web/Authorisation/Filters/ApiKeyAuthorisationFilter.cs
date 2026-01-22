@@ -12,7 +12,9 @@ public class ApiKeyAuthorisationFilter(
     public const string AuthHeaderKey = "Authorization";
     public const string AuthValuePrefix = "Bearer ";
 
-    private readonly ApiAuthenticationConfiguration _authenticationConfiguration = authenticationConfiguration ?? throw new ArgumentNullException(nameof(authenticationConfiguration));
+    private readonly ApiAuthenticationConfiguration _authenticationConfiguration =
+        authenticationConfiguration
+        ?? throw new ArgumentNullException(nameof(authenticationConfiguration));
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
@@ -26,7 +28,10 @@ public class ApiKeyAuthorisationFilter(
     {
         if (!_authenticationConfiguration.HasApiKey)
         {
-            logger.LogError("API key {KeyName} is missing", nameof(_authenticationConfiguration.KeyValue));
+            logger.LogError(
+                "API key {KeyName} is missing",
+                nameof(_authenticationConfiguration.KeyValue)
+            );
         }
 
         return _authenticationConfiguration.HasApiKey;
@@ -34,9 +39,14 @@ public class ApiKeyAuthorisationFilter(
 
     private bool AuthorisationHeaderValid(AuthorizationFilterContext context)
     {
-        if (!TryGetProvidedApiKey(context, out string? providedApiKey) || string.IsNullOrEmpty(providedApiKey))
+        if (
+            !TryGetProvidedApiKey(context, out string? providedApiKey)
+            || string.IsNullOrEmpty(providedApiKey)
+        )
         {
-            logger.LogInformation("Request to authorised route denied due to missing authentication header");
+            logger.LogInformation(
+                "Request to authorised route denied due to missing authentication header"
+            );
             return false;
         }
 
@@ -45,9 +55,14 @@ public class ApiKeyAuthorisationFilter(
 
     private static bool TryGetProvidedApiKey(AuthorizationFilterContext context, out string? apiKey)
     {
-        var authorisationHeaderValue = context.HttpContext.Request.Headers[AuthHeaderKey].ToString();
+        var authorisationHeaderValue = context
+            .HttpContext.Request.Headers[AuthHeaderKey]
+            .ToString();
 
-        if (string.IsNullOrEmpty(authorisationHeaderValue) || !authorisationHeaderValue.StartsWith(AuthValuePrefix))
+        if (
+            string.IsNullOrEmpty(authorisationHeaderValue)
+            || !authorisationHeaderValue.StartsWith(AuthValuePrefix)
+        )
         {
             apiKey = null;
             return false;

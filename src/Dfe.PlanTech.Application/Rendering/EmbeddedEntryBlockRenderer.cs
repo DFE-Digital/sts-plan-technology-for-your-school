@@ -7,11 +7,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Rendering;
 
-public class EmbeddedEntryBlockRenderer(
-    ILoggerFactory loggerFactory
-) : BaseRichTextContentPartRenderer(RichTextNodeType.EmbeddedEntryBlock)
+public class EmbeddedEntryBlockRenderer(ILoggerFactory loggerFactory)
+    : BaseRichTextContentPartRenderer(RichTextNodeType.EmbeddedEntryBlock)
 {
-    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    )
     {
         var richTextData = content.Data?.Target ?? null;
         if (richTextData == null)
@@ -24,7 +27,9 @@ public class EmbeddedEntryBlockRenderer(
             case ContentfulContentTypeConstants.ComponentAttachmentContentfulContentTypeId:
                 return AttachmentComponentRenderer.AddHtml(content, stringBuilder);
             case ContentfulContentTypeConstants.ComponentAccordionContentfulContentTypeId:
-                var accordionComponent = new AccordionComponentRenderer(loggerFactory.CreateLogger<AccordionComponentRenderer>());
+                var accordionComponent = new AccordionComponentRenderer(
+                    loggerFactory.CreateLogger<AccordionComponentRenderer>()
+                );
                 return accordionComponent.AddHtml(content, rendererCollection, stringBuilder);
             default:
                 break;

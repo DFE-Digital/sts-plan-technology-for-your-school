@@ -9,7 +9,10 @@ namespace Dfe.PlanTech.Web;
 [ExcludeFromCodeCoverage]
 public static class ReleaseProgramExtensions
 {
-    public static IServiceCollection AddReleaseServices(this IServiceCollection services, ConfigurationManager configuration)
+    public static IServiceCollection AddReleaseServices(
+        this IServiceCollection services,
+        ConfigurationManager configuration
+    )
     {
         var keyVaultUri = $"https://{configuration["KeyVaultName"]}.vault.azure.net/";
         var azureCredentials = new DefaultAzureCredential();
@@ -20,11 +23,22 @@ public static class ReleaseProgramExtensions
         return services;
     }
 
-    public static void AddDataProtection(IServiceCollection services, ConfigurationManager configuration, string keyVaultUri, DefaultAzureCredential azureCredentials)
+    public static void AddDataProtection(
+        IServiceCollection services,
+        ConfigurationManager configuration,
+        string keyVaultUri,
+        DefaultAzureCredential azureCredentials
+    )
     {
-        services.AddDbContext<DataProtectionDbContext>(options => options.UseSqlServer(configuration.GetConnectionString("Database")));
-        services.AddDataProtection()
-                .PersistKeysToDbContext<DataProtectionDbContext>()
-                .ProtectKeysWithAzureKeyVault(new Uri(keyVaultUri + "keys/dataprotection"), azureCredentials);
+        services.AddDbContext<DataProtectionDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("Database"))
+        );
+        services
+            .AddDataProtection()
+            .PersistKeysToDbContext<DataProtectionDbContext>()
+            .ProtectKeysWithAzureKeyVault(
+                new Uri(keyVaultUri + "keys/dataprotection"),
+                azureCredentials
+            );
     }
 }

@@ -7,4 +7,3 @@ public class DatabaseCollection : ICollectionFixture<DatabaseFixture>
     // to be the place to apply [CollectionDefinition] and all the
     // ICollectionFixture<> interfaces.
 }
-

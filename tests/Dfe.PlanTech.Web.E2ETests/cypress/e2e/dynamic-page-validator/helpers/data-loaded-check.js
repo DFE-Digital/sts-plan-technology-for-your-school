@@ -6,11 +6,11 @@
  */
 
 export const dataLoaded = ({ contents }) => {
-    const haveContent = contents?.size > 0 || contents?.length > 0;
+  const haveContent = contents?.size > 0 || contents?.length > 0;
 
-    if (!haveContent) {
-        console.log("Data has not been loaded");
-    }
+  if (!haveContent) {
+    console.log('Data has not been loaded');
+  }
 
-    return haveContent;
-}
+  return haveContent;
+};

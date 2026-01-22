@@ -29,42 +29,48 @@ namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
             int userEstablishmentId = 10;
             var activities = new List<GroupReadActivity>
             {
-                new ()
+                new()
                 {
                     UserId = userId,
                     UserEstablishmentId = userEstablishmentId,
                     SelectedEstablishmentId = 99,
                     SelectedEstablishmentName = "New School",
-                    DateSelected = new DateTime(2023, 1, 1)
+                    DateSelected = new DateTime(2023, 1, 1),
                 },
-                new ()
+                new()
                 {
                     UserId = userId,
                     UserEstablishmentId = userEstablishmentId,
                     SelectedEstablishmentId = 100,
                     SelectedEstablishmentName = "Old School",
-                    DateSelected = new DateTime(2023, 1, 1)
+                    DateSelected = new DateTime(2023, 1, 1),
                 },
-                new ()
+                new()
                 {
                     UserId = userId,
                     UserEstablishmentId = userEstablishmentId,
                     SelectedEstablishmentId = 101,
                     SelectedEstablishmentName = "New School",
-                    DateSelected = new DateTime(2024, 1, 1)
-                }
+                    DateSelected = new DateTime(2024, 1, 1),
+                },
             }.AsQueryable();
 
             _db.GetGroupReadActivities.Returns(activities);
-            _db.FirstOrDefaultAsync(Arg.Any<IQueryable<GroupReadActivityDto>>(), Arg.Any<CancellationToken>())
+            _db.FirstOrDefaultAsync(
+                    Arg.Any<IQueryable<GroupReadActivityDto>>(),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(ci =>
                 {
                     var query = ci.Arg<IQueryable<GroupReadActivityDto>>();
                     return Task.FromResult(query.FirstOrDefault());
                 });
 
-            var result =
-                await _service.GetLatestSelectedGroupSchool(userId, userEstablishmentId, CancellationToken.None);
+            var result = await _service.GetLatestSelectedGroupSchool(
+                userId,
+                userEstablishmentId,
+                CancellationToken.None
+            );
 
             Assert.NotNull(result);
             Assert.Equal(101, result.SelectedEstablishmentId);
@@ -76,7 +82,10 @@ namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
         {
             _db.GetGroupReadActivities.Returns(new List<GroupReadActivity>().AsQueryable());
 
-            _db.FirstOrDefaultAsync(Arg.Any<IQueryable<GroupReadActivityDto>>(), Arg.Any<CancellationToken>())
+            _db.FirstOrDefaultAsync(
+                    Arg.Any<IQueryable<GroupReadActivityDto>>(),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(Task.FromResult<GroupReadActivityDto?>(null));
 
             var result = await _service.GetLatestSelectedGroupSchool(1, 1, CancellationToken.None);
@@ -98,7 +107,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
                     UserEstablishmentId = userEstablishmentId,
                     SelectedEstablishmentId = 300,
                     SelectedEstablishmentName = "Wrong User School",
-                    DateSelected = new DateTime(2024, 1, 1)
+                    DateSelected = new DateTime(2024, 1, 1),
                 },
                 new GroupReadActivity
                 {
@@ -106,20 +115,26 @@ namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
                     UserEstablishmentId = 99, // different establishment
                     SelectedEstablishmentId = 301,
                     SelectedEstablishmentName = "Wrong Establishment",
-                    DateSelected = new DateTime(2024, 1, 2)
-                }
+                    DateSelected = new DateTime(2024, 1, 2),
+                },
             }.AsQueryable();
 
             _db.GetGroupReadActivities.Returns(activities);
-            _db.FirstOrDefaultAsync(Arg.Any<IQueryable<GroupReadActivityDto>>(), Arg.Any<CancellationToken>())
+            _db.FirstOrDefaultAsync(
+                    Arg.Any<IQueryable<GroupReadActivityDto>>(),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(ci =>
                 {
                     var query = ci.Arg<IQueryable<GroupReadActivityDto>>();
                     return Task.FromResult(query.FirstOrDefault());
                 });
 
-            var result =
-                await _service.GetLatestSelectedGroupSchool(userId, userEstablishmentId, CancellationToken.None);
+            var result = await _service.GetLatestSelectedGroupSchool(
+                userId,
+                userEstablishmentId,
+                CancellationToken.None
+            );
 
             Assert.Null(result);
         }
@@ -139,7 +154,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
                     UserEstablishmentId = userEstablishmentId,
                     SelectedEstablishmentId = 200,
                     SelectedEstablishmentName = "First School",
-                    DateSelected = sameDate
+                    DateSelected = sameDate,
                 },
                 new GroupReadActivity
                 {
@@ -147,20 +162,26 @@ namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
                     UserEstablishmentId = userEstablishmentId,
                     SelectedEstablishmentId = 201,
                     SelectedEstablishmentName = "Second School",
-                    DateSelected = sameDate
-                }
+                    DateSelected = sameDate,
+                },
             }.AsQueryable();
 
             _db.GetGroupReadActivities.Returns(activities);
-            _db.FirstOrDefaultAsync(Arg.Any<IQueryable<GroupReadActivityDto>>(), Arg.Any<CancellationToken>())
+            _db.FirstOrDefaultAsync(
+                    Arg.Any<IQueryable<GroupReadActivityDto>>(),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(ci =>
                 {
                     var query = ci.Arg<IQueryable<GroupReadActivityDto>>();
                     return Task.FromResult(query.FirstOrDefault());
                 });
 
-            var result =
-                await _service.GetLatestSelectedGroupSchool(userId, userEstablishmentId, CancellationToken.None);
+            var result = await _service.GetLatestSelectedGroupSchool(
+                userId,
+                userEstablishmentId,
+                CancellationToken.None
+            );
 
             Assert.NotNull(result);
             Assert.Equal(200, result.SelectedEstablishmentId);
@@ -180,25 +201,30 @@ namespace Dfe.PlanTech.Application.UnitTests.Groups.Queries
                     UserEstablishmentId = userEstablishmentId,
                     SelectedEstablishmentId = 400,
                     SelectedEstablishmentName = "Establishment Name",
-                    DateSelected = new DateTime(2024, 2, 1)
-                }
+                    DateSelected = new DateTime(2024, 2, 1),
+                },
             }.AsQueryable();
 
             _db.GetGroupReadActivities.Returns(activities);
-            _db.FirstOrDefaultAsync(Arg.Any<IQueryable<GroupReadActivityDto>>(), Arg.Any<CancellationToken>())
+            _db.FirstOrDefaultAsync(
+                    Arg.Any<IQueryable<GroupReadActivityDto>>(),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(ci =>
                 {
                     var query = ci.Arg<IQueryable<GroupReadActivityDto>>();
                     return Task.FromResult(query.FirstOrDefault());
                 });
 
-            var result =
-                await _service.GetLatestSelectedGroupSchool(userId, userEstablishmentId, CancellationToken.None);
+            var result = await _service.GetLatestSelectedGroupSchool(
+                userId,
+                userEstablishmentId,
+                CancellationToken.None
+            );
 
             Assert.NotNull(result);
             Assert.Equal(400, result.SelectedEstablishmentId);
             Assert.Equal("Establishment Name", result.SelectedEstablishmentName);
         }
-
     }
 }

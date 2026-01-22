@@ -1,8 +1,8 @@
 const defaultLogOptions = {
-    addBlankLine: true,
-    addSeperator: false,
-    seperator: "============",
-    level: "INFO",
+  addBlankLine: true,
+  addSeperator: false,
+  seperator: '============',
+  level: 'INFO',
 };
 
 /**
@@ -11,27 +11,24 @@ const defaultLogOptions = {
  * @param {{addBlankLine: boolean, addSeperator: boolean, seperator: string, level: "INFO" | "WARNING" | "ERROR"}} options
  */
 const logMessage = (message, options = defaultLogOptions) => {
-    const { addBlankLine, addSeperator, seperator, level } = {
-        ...defaultLogOptions,
-        ...options,
-    };
+  const { addBlankLine, addSeperator, seperator, level } = {
+    ...defaultLogOptions,
+    ...options,
+  };
 
-    const logger = level == "ERROR" ? console.error : console.log;
+  const logger = level == 'ERROR' ? console.error : console.log;
 
-    const formattedMessage = formatMessage(
-        level ?? defaultLogOptions.level,
-        message
-    );
-    logger(formattedMessage);
+  const formattedMessage = formatMessage(level ?? defaultLogOptions.level, message);
+  logger(formattedMessage);
 
-    if (addBlankLine) {
-        console.log("");
-    }
+  if (addBlankLine) {
+    console.log('');
+  }
 
-    if (addSeperator) {
-        console.log(seperator);
-        console.log("");
-    }
+  if (addSeperator) {
+    console.log(seperator);
+    console.log('');
+  }
 };
 
 /**
@@ -40,12 +37,11 @@ const logMessage = (message, options = defaultLogOptions) => {
  * @param {string} message
  * @returns
  */
-const formatMessage = (level, message) =>
-    `[${getTimeString()}] ${level} - ${message}`;
+const formatMessage = (level, message) => `[${getTimeString()}] ${level} - ${message}`;
 
 const getTimeString = () => {
-    var now = new Date();
-    return `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+  var now = new Date();
+  return `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 };
 
 export { logMessage as log };

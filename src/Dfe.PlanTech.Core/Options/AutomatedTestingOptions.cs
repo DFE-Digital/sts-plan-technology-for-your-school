@@ -3,7 +3,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace Dfe.PlanTech.Core.Options
 {
     [ExcludeFromCodeCoverage]
-
     public class AutomatedTestingOptions
     {
         public ContentfulOptions? Contentful { get; init; }

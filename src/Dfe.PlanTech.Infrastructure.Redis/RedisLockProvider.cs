@@ -12,28 +12,48 @@ public class RedisLockProvider(
     DistributedCachingOptions options
 ) : IDistributedLockProvider
 {
-    private readonly ILogger<RedisLockProvider> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly IRedisConnectionManager _connectionManager = connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
-    private readonly DistributedCachingOptions _options = options ?? throw new ArgumentNullException(nameof(options));
+    private readonly ILogger<RedisLockProvider> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IRedisConnectionManager _connectionManager =
+        connectionManager ?? throw new ArgumentNullException(nameof(connectionManager));
+    private readonly DistributedCachingOptions _options =
+        options ?? throw new ArgumentNullException(nameof(options));
 
     /// <inheritdoc />
     public async Task<bool> LockReleaseAsync(string key, string lockValue, int databaseId = -1)
     {
-        _logger.LogInformation("Releasing lock for key: {Key} with lock value: {LockValue}", key, lockValue);
+        _logger.LogInformation(
+            "Releasing lock for key: {Key} with lock value: {LockValue}",
+            key,
+            lockValue
+        );
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         return await database.LockReleaseAsync(key, lockValue, CommandFlags.DemandMaster);
     }
 
     /// <inheritdoc />
-    public async Task<bool> LockExtendAsync(string key, string lockValue, TimeSpan duration, int databaseId = -1)
+    public async Task<bool> LockExtendAsync(
+        string key,
+        string lockValue,
+        TimeSpan duration,
+        int databaseId = -1
+    )
     {
-        _logger.LogInformation("Extending lock for key: {Key} with lock value: {LockValue} for duration: {Duration}", key, lockValue, duration);
+        _logger.LogInformation(
+            "Extending lock for key: {Key} with lock value: {LockValue} for duration: {Duration}",
+            key,
+            lockValue,
+            duration
+        );
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         return await database.LockExtendAsync(key, lockValue, duration, CommandFlags.DemandMaster);
     }
 
     /// <inheritdoc />
-    public async Task<string?> WaitForLockAsync(string key, bool throwExceptionIfLockNotAcquired = true)
+    public async Task<string?> WaitForLockAsync(
+        string key,
+        bool throwExceptionIfLockNotAcquired = true
+    )
     {
         var lockValue = Guid.NewGuid().ToString();
         var totalTime = TimeSpan.Zero;
@@ -47,7 +67,11 @@ public class RedisLockProvider(
         {
             if (await LockTakeAsync(key, lockValue, expiration))
             {
-                _logger.LogInformation("Lock acquired for key: {Key} with lock value: {LockValue}", key, lockValue);
+                _logger.LogInformation(
+                    "Lock acquired for key: {Key} with lock value: {LockValue}",
+                    key,
+                    lockValue
+                );
                 return lockValue;
             }
 
@@ -119,9 +143,19 @@ public class RedisLockProvider(
     /// <param name="duration">The duration for which the lock should be held.</param>
     /// <param name="databaseId">The Redis database ID to use. Defaults to -1, which means using the default database.</param>
     /// <returns>True if the lock was successfully taken; otherwise, false.</returns>
-    private async Task<bool> LockTakeAsync(string key, string lockValue, TimeSpan duration, int databaseId = -1)
+    private async Task<bool> LockTakeAsync(
+        string key,
+        string lockValue,
+        TimeSpan duration,
+        int databaseId = -1
+    )
     {
-        _logger.LogInformation("Taking lock for key: {Key} with lock value: {LockValue} for duration: {Duration}", key, lockValue, duration);
+        _logger.LogInformation(
+            "Taking lock for key: {Key} with lock value: {LockValue} for duration: {Duration}",
+            key,
+            lockValue,
+            duration
+        );
         var database = await _connectionManager.GetDatabaseAsync(databaseId);
         return await database.LockTakeAsync(key, lockValue, duration);
     }

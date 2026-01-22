@@ -8,8 +8,10 @@ namespace Dfe.PlanTech.Web.Helpers;
 /// </summary>
 public class CacheHelper(ICacheOptions options, IMemoryCache memoryCache) : ICacher
 {
-    private readonly ICacheOptions _options = options ?? throw new ArgumentNullException(nameof(options));
-    private readonly IMemoryCache _memoryCache = memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
+    private readonly ICacheOptions _options =
+        options ?? throw new ArgumentNullException(nameof(options));
+    private readonly IMemoryCache _memoryCache =
+        memoryCache ?? throw new ArgumentNullException(nameof(memoryCache));
 
     public T? Get<T>(string key, Func<T> getFromService, TimeSpan timeToLive)
     {
@@ -32,7 +34,8 @@ public class CacheHelper(ICacheOptions options, IMemoryCache memoryCache) : ICac
         return value;
     }
 
-    public T? Get<T>(string key, Func<T> getFromService) => Get(key, getFromService, _options.DefaultTimeToLive);
+    public T? Get<T>(string key, Func<T> getFromService) =>
+        Get(key, getFromService, _options.DefaultTimeToLive);
 
     public async Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService, TimeSpan timeToLive)
     {
@@ -48,7 +51,8 @@ public class CacheHelper(ICacheOptions options, IMemoryCache memoryCache) : ICac
         return value;
     }
 
-    public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService) => GetAsync(key, getFromService, _options.DefaultTimeToLive);
+    public Task<T?> GetAsync<T>(string key, Func<Task<T>> getFromService) =>
+        GetAsync(key, getFromService, _options.DefaultTimeToLive);
 
     public void Set<T>(string key, TimeSpan timeToLive, T? value)
     {
@@ -59,7 +63,9 @@ public class CacheHelper(ICacheOptions options, IMemoryCache memoryCache) : ICac
 
     public void Set<T>(string key, T? value)
     {
-        var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(_options.DefaultTimeToLive);
+        var cacheEntryOptions = new MemoryCacheEntryOptions().SetSlidingExpiration(
+            _options.DefaultTimeToLive
+        );
 
         _memoryCache.Set(key, value, cacheEntryOptions);
     }

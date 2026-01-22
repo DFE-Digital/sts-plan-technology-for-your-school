@@ -40,58 +40,66 @@ public class StoredProcedureRepository : IStoredProcedureRepository
     }
 
     // Moved GetSectionStatuses sproc into code (need to remove more sprocs when completed column is removed from db)
-    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId)
+    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
+        string sectionIds,
+        int establishmentId
+    )
     {
         var sectionIdList = sectionIds
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
 
-        var currentSubmissions = await _db.Submissions
-            .Where(s =>
-                !s.Deleted &&
-                s.EstablishmentId == establishmentId &&
-                sectionIdList.Contains(s.SectionId))
+        var currentSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+            )
             .GroupBy(s => s.SectionId)
-            .Select(g => g
-                .OrderByDescending(s => s.DateCreated)
-                .First())
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
 
-        var lastCompleteSubmissions = await _db.Submissions
-            .Where(s =>
-                !s.Deleted &&
-                s.EstablishmentId == establishmentId &&
-                sectionIdList.Contains(s.SectionId) &&
-                (s.Status == SubmissionStatus.CompleteReviewed))
+        var lastCompleteSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+                && (s.Status == SubmissionStatus.CompleteReviewed)
+            )
             .GroupBy(s => s.SectionId)
-            .Select(g => g
-                .OrderByDescending(s => s.DateCreated)
-                .First())
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
 
         var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
-        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(s => s.SectionId, s => s);
+        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(
+            s => s.SectionId,
+            s => s
+        );
 
-        var result = sectionIdList.Select(sectionId =>
-        {
-            currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
-            lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
-
-            return new SectionStatusEntity
+        var result = sectionIdList
+            .Select(sectionId =>
             {
-                SectionId = sectionId,
-                Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
-                DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
-                DateUpdated = currentSubmission?.DateLastUpdated ?? currentSubmission?.DateCreated ?? DateTime.UtcNow,
-                LastMaturity = lastCompleteSubmission?.Maturity,
-                LastCompletionDate = lastCompleteSubmission?.DateCompleted,
-                Viewed = lastCompleteSubmission?.Viewed
-            };
-        }).ToList();
+                currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
+                lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
+
+                return new SectionStatusEntity
+                {
+                    SectionId = sectionId,
+                    Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
+                    DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
+                    DateUpdated =
+                        currentSubmission?.DateLastUpdated
+                        ?? currentSubmission?.DateCreated
+                        ?? DateTime.UtcNow,
+                    LastMaturity = lastCompleteSubmission?.Maturity,
+                    LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                    Viewed = lastCompleteSubmission?.Viewed,
+                };
+            })
+            .ToList();
 
         return result;
     }
-
 
     public async Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
     {
@@ -100,16 +108,25 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         // Parameters (in order): @userId INT, @userEstablishmentId INT, @selectedEstablishmentId INT, @selectedEstablishmentName NVARCHAR(MAX), @selectionId INT OUTPUT
         var selectionId = new SqlParameter(DatabaseConstants.SelectionIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var parameters = new SqlParameter[]
         {
             new(DatabaseConstants.UserIdParam, userGroupSelectionModel.UserId),
-            new(DatabaseConstants.EstablishmentIdParam, userGroupSelectionModel.UserEstablishmentId),
-            new(DatabaseConstants.SelectedEstablishmentIdParam, userGroupSelectionModel.SelectedEstablishmentId),
-            new(DatabaseConstants.SelectedEstablishmentNameParam, SqlValueOrDbNull(userGroupSelectionModel.SelectedEstablishmentName)),
-            selectionId
+            new(
+                DatabaseConstants.EstablishmentIdParam,
+                userGroupSelectionModel.UserEstablishmentId
+            ),
+            new(
+                DatabaseConstants.SelectedEstablishmentIdParam,
+                userGroupSelectionModel.SelectedEstablishmentId
+            ),
+            new(
+                DatabaseConstants.SelectedEstablishmentNameParam,
+                SqlValueOrDbNull(userGroupSelectionModel.SelectedEstablishmentName)
+            ),
+            selectionId,
         };
 
         var command = BuildCommand(DatabaseConstants.SpSubmitGroupSelection, parameters);
@@ -120,7 +137,9 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             return id;
         }
 
-        throw new InvalidCastException($"{nameof(selectionId)} is not an integer - value is {selectionId.Value ?? "null"}");
+        throw new InvalidCastException(
+            $"{nameof(selectionId)} is not an integer - value is {selectionId.Value ?? "null"}"
+        );
     }
 
     public Task<int> SetMaturityForSubmissionAsync(int submissionId)
@@ -132,7 +151,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         // Parameters (in order): @submissionId INT
         var parameters = new SqlParameter[]
         {
-            new(DatabaseConstants.SubmissionIdParam, submissionId)
+            new(DatabaseConstants.SubmissionIdParam, submissionId),
         };
 
         var command = BuildCommand(DatabaseConstants.SpCalculateMaturity, parameters);
@@ -157,12 +176,12 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
         var responseId = new SqlParameter(DatabaseConstants.ResponseIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var submissionId = new SqlParameter(DatabaseConstants.SubmissionIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var parameters = new SqlParameter[]
@@ -178,7 +197,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             new(DatabaseConstants.EstablishmentIdParam, response.EstablishmentId),
             new(DatabaseConstants.MaturityParam, ""),
             responseId,
-            submissionId
+            submissionId,
         };
 
         var command = BuildCommand(DatabaseConstants.SpSubmitAnswer, parameters);
@@ -189,7 +208,9 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             return id;
         }
 
-        throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}");
+        throw new InvalidCastException(
+            $"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}"
+        );
     }
 
     public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
@@ -202,7 +223,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         var parameters = new SqlParameter[]
         {
             new(DatabaseConstants.SectionIdParam, sectionId),
-            new(DatabaseConstants.EstablishmentIdParam, establishmentId)
+            new(DatabaseConstants.EstablishmentIdParam, establishmentId),
         };
 
         var command = BuildCommand(DatabaseConstants.SpDeleteCurrentSubmission, parameters);
@@ -214,13 +235,14 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         ParameterDirection[] outputParameterTypes =
         {
             ParameterDirection.InputOutput,
-            ParameterDirection.Output
+            ParameterDirection.Output,
         };
 
         var parameterNames = parameters.Select(p =>
             outputParameterTypes.Contains(p.Direction)
                 ? $"{p.ParameterName} OUTPUT"
-                : p.ParameterName);
+                : p.ParameterName
+        );
 
         return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
     }

@@ -1,17 +1,12 @@
-const fs = require("fs");
+const fs = require('fs');
 
-const MUTATIONS_THRESHOLD = parseInt(
-    process.env.MUTATIONS_THRESHOLD || process.argv[2] || "60"
-);
+const MUTATIONS_THRESHOLD = parseInt(process.env.MUTATIONS_THRESHOLD || process.argv[2] || '60');
 
-const MAX_CHARACTER_COUNT = parseInt(
-    process.env.MAX_CHARACTER_COUNT || process.argv[3] || "20000"
-);
+const MAX_CHARACTER_COUNT = parseInt(process.env.MAX_CHARACTER_COUNT || process.argv[3] || '20000');
 
 const INPUT_PATH = process.env.INPUT_PATH || process.argv[4];
 
-const OUTPUT_PATH =
-    process.env.OUTPUT_PATH || process.argv[5] || "filtered-report-table.md";
+const OUTPUT_PATH = process.env.OUTPUT_PATH || process.argv[5] || 'filtered-report-table.md';
 
 /**
  * Removes columns from a row and returns an object with relevant information.
@@ -30,22 +25,22 @@ const OUTPUT_PATH =
  * // Output: undefined (if MUTATIONS_THRESHOLD < 0.95)
  */
 const removeColumns = (row) => {
-    const cols = row
-        .split("|")
-        .map((col) => col.trim())
-        .filter(Boolean);
-    const score = parseFloat(cols[1]);
-    const survived = parseInt(cols[2]);
+  const cols = row
+    .split('|')
+    .map((col) => col.trim())
+    .filter(Boolean);
+  const score = parseFloat(cols[1]);
+  const survived = parseInt(cols[2]);
 
-    // Only return data for rows where:
-    //   - the score is below the mutations threshold and survived is greater than 0.
-    //   - there is at least one survived (i.e. filter out entries where there is 0% coverage)
-    if (score < MUTATIONS_THRESHOLD && survived > 0) {
-        return {
-            file: cols[0],
-            score: score,
-        };
-    }
+  // Only return data for rows where:
+  //   - the score is below the mutations threshold and survived is greater than 0.
+  //   - there is at least one survived (i.e. filter out entries where there is 0% coverage)
+  if (score < MUTATIONS_THRESHOLD && survived > 0) {
+    return {
+      file: cols[0],
+      score: score,
+    };
+  }
 };
 
 /**
@@ -53,9 +48,9 @@ const removeColumns = (row) => {
  * @param {string[]} columns
  * @returns {string} Columns joined, prefixed, and suffixed by pipes.
  */
-const toTableRowString = (columns) => `| ${columns.join(" | ")} |`;
+const toTableRowString = (columns) => `| ${columns.join(' | ')} |`;
 
-const isTableRow = (row) => row.indexOf("|") > -1;
+const isTableRow = (row) => row.indexOf('|') > -1;
 
 /**
  *
@@ -64,14 +59,14 @@ const isTableRow = (row) => row.indexOf("|") > -1;
  * @returns {string} Combined table string up to a certain max character count
  */
 const combineLinesToLength = (previous, current) => {
-    const currentLength = current.length;
-    const previousLength = previous.length;
+  const currentLength = current.length;
+  const previousLength = previous.length;
 
-    if (currentLength + previousLength + 10 > MAX_CHARACTER_COUNT) {
-        return previous;
-    }
+  if (currentLength + previousLength + 10 > MAX_CHARACTER_COUNT) {
+    return previous;
+  }
 
-    return previous + "\n" + current;
+  return previous + '\n' + current;
 };
 
 /**
@@ -80,46 +75,42 @@ const combineLinesToLength = (previous, current) => {
  * @returns {string}
  */
 const filterTable = (markdownContent) => {
-    const lines = markdownContent.split("\n");
-    const headers = ["File", "Score"];
+  const lines = markdownContent.split('\n');
+  const headers = ['File', 'Score'];
 
-    const tableHeaders = [headers, headers.map(() => " - ")]
-        .map(toTableRowString)
-        .join("\n");
+  const tableHeaders = [headers, headers.map(() => ' - ')].map(toTableRowString).join('\n');
 
-    const startOfTable = lines.findIndex(isTableRow);
+  const startOfTable = lines.findIndex(isTableRow);
 
-    const contentStartingAtTable = lines.slice(startOfTable);
-    const endOfTable = contentStartingAtTable.findIndex(
-        (row) => !isTableRow(row)
-    );
+  const contentStartingAtTable = lines.slice(startOfTable);
+  const endOfTable = contentStartingAtTable.findIndex((row) => !isTableRow(row));
 
-    const rowValues = contentStartingAtTable
-        .slice(0, endOfTable + 1)
-        .map(removeColumns)
-        .filter((row) => !!row)
-        .sort((a, b) => a.score - b.score)
-        .map((row) => [row.file, `${row.score}%`])
-        .map(toTableRowString);
+  const rowValues = contentStartingAtTable
+    .slice(0, endOfTable + 1)
+    .map(removeColumns)
+    .filter((row) => !!row)
+    .sort((a, b) => a.score - b.score)
+    .map((row) => [row.file, `${row.score}%`])
+    .map(toTableRowString);
 
-    return [tableHeaders, ...rowValues].reduce(combineLinesToLength, "");
+  return [tableHeaders, ...rowValues].reduce(combineLinesToLength, '');
 };
 
 const readMutationsReport = (filePath) => {
-    const content = fs.readFileSync(filePath, "utf-8");
+  const content = fs.readFileSync(filePath, 'utf-8');
 
-    return content;
+  return content;
 };
 
 const saveFilteredReport = (contents, filePath) => {
-    fs.writeFileSync(filePath, contents);
+  fs.writeFileSync(filePath, contents);
 };
 
 const processMutationsReport = () => {
-    const content = readMutationsReport(INPUT_PATH);
+  const content = readMutationsReport(INPUT_PATH);
 
-    const filtered = filterTable(content);
-    saveFilteredReport(filtered, OUTPUT_PATH);
+  const filtered = filterTable(content);
+  saveFilteredReport(filtered, OUTPUT_PATH);
 };
 
 processMutationsReport();

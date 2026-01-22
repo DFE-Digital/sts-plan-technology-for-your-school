@@ -30,11 +30,7 @@ public class SubmitAnswerInputViewModel
 
     public SubmitAnswerModel ToModel()
     {
-        var questionModel = new IdWithTextModel
-        {
-            Id = QuestionId,
-            Text = QuestionText,
-        };
+        var questionModel = new IdWithTextModel { Id = QuestionId, Text = QuestionText };
 
         var answerModel = ChosenAnswer?.Answer;
 
@@ -43,7 +39,7 @@ public class SubmitAnswerInputViewModel
             SectionId = SectionId,
             SectionName = SectionName,
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
     }
 }

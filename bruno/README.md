@@ -4,7 +4,7 @@ This folder contains a collection of useful [bruno](https://usebruno.com/) reque
 
 ## Usage
 
-### Setup 
+### Setup
 
 1. [Download and install bruno](https://www.usebruno.com/downloads)
 2. Open bruno

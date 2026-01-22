@@ -7,7 +7,8 @@ namespace Dfe.PlanTech.Application.UnitTests.Rendering;
 
 public class GridContainerRendererTests : CardTests
 {
-    private readonly ICardContentPartRenderer _cardContentPartRendererSubstitute = Substitute.For<ICardContentPartRenderer>();
+    private readonly ICardContentPartRenderer _cardContentPartRendererSubstitute =
+        Substitute.For<ICardContentPartRenderer>();
 
     [Fact]
     public void CheckNullContentReturnsEmptyString()

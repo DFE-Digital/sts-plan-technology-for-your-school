@@ -24,7 +24,7 @@ public class QuestionEntity
             QuestionText = QuestionText,
             ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated,
-            Order = Order
+            Order = Order,
         };
     }
 }

@@ -3,20 +3,20 @@ name: Terraform PR Check
 on:
   pull_request:
     paths:
-      - "terraform/**"
-      - ".github/workflows/terraform-pr-check.yml"
+      - 'terraform/**'
+      - '.github/workflows/terraform-pr-check.yml'
   push:
-    branches: ["main"]
+    branches: ['main']
     paths:
-      - "terraform/**"
+      - 'terraform/**'
 
 permissions:
   id-token: write
   contents: write
-  pull-requests: write                # Required to commit to branch with documentation changes
+  pull-requests: write # Required to commit to branch with documentation changes
 
 concurrency:
-  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
 
 env:
@@ -45,11 +45,11 @@ env:
   TF_VAR_az_sql_azuread_admin_username: ${{ secrets.AZ_SERVICE_PRINCIPAL }}
   TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
   TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
-  TF_VAR_registry_server: "ghcr.io/dfe-digital"
-  TF_VAR_image_tag: "latest"
+  TF_VAR_registry_server: 'ghcr.io/dfe-digital'
+  TF_VAR_image_tag: 'latest'
   TF_VAR_registry_username: ${{ github.repository_owner }}
   TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
-  TF_VAR_container_environment: "Dev"
+  TF_VAR_container_environment: 'Dev'
 
   TF_WORKING_DIRECTORY: terraform/container-app
 
@@ -145,7 +145,7 @@ jobs:
           config-file: .terraform-docs.yml
           output-file: terraform-configuration.md
           output-method: inject
-          git-push: "true"
+          git-push: 'true'
 
       - name: Update PR with Terraform results
         uses: ./.github/actions/post-terraform-results

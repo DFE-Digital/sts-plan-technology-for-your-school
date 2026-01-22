@@ -7,7 +7,7 @@ Simple Javascript script that creates a Contentful webhook, ensuring it follows 
 1. Install required packages by running `npm install`
 2. Copy `.env.example` and rename it to `.env`
 3. Fill in the required variables as described below
-4. Create the webhook by running `npm run create-webhook`  
+4. Create the webhook by running `npm run create-webhook`
 
 ## Environment Variables
 

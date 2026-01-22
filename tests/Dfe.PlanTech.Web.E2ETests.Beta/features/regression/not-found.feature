@@ -1,5 +1,5 @@
 @user-school
-Feature: Not found page 
+Feature: Not found page
 
   Background:
     Scenario: Not found page returns on paths /non-existent-slug
@@ -17,5 +17,3 @@ Feature: Not found page
     Scenario:Not found page returns on paths {category-here}/non-existent-page
       Given I visit the page "category-one-section-one/non-existent-page"
       Then I should see the page heading "Page not found"
-
-

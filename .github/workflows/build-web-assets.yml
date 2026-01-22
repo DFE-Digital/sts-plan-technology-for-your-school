@@ -2,12 +2,12 @@ name: Build and commit web assets (JS + CSS)
 
 on:
   pull_request:
-    branches: ["main", "development"]
+    branches: ['main', 'development']
     paths:
-      - "src/Dfe.PlanTech.Web.Node/**"
+      - 'src/Dfe.PlanTech.Web.Node/**'
 
 concurrency:
-  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
 
 jobs:
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "latest"
+          node-version: 'latest'
 
       - name: Install Dependencies
         run: npm install
@@ -41,7 +41,7 @@ jobs:
         run: |
           if [[ `git status --porcelain` ]]; then
             git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git config --local user.name "github-actions[bot]"  
+            git config --local user.name "github-actions[bot]"
             git commit -am "Updated JS + CSS files"
             git push
             echo "Commited changes"

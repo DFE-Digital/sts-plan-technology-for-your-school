@@ -15,8 +15,14 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             var result = controller.SignOut();
 
             var signOutResult = Assert.IsType<SignOutResult>(result);
-            Assert.Contains(OpenIdConnectDefaults.AuthenticationScheme, signOutResult.AuthenticationSchemes);
-            Assert.Contains(CookieAuthenticationDefaults.AuthenticationScheme, signOutResult.AuthenticationSchemes);
+            Assert.Contains(
+                OpenIdConnectDefaults.AuthenticationScheme,
+                signOutResult.AuthenticationSchemes
+            );
+            Assert.Contains(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                signOutResult.AuthenticationSchemes
+            );
         }
     }
 }

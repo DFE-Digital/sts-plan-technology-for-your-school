@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Application.Background;
 public interface IBackgroundTaskQueue
 {
     /// <summary>
-    /// Add an async operation to the queue for background processing. 
+    /// Add an async operation to the queue for background processing.
     /// </summary>
     /// <param name="workItem"></param>
     /// <returns></returns>

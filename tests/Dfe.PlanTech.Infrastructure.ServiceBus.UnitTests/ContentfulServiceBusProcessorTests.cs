@@ -15,13 +15,22 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests;
 
 public class ContentfulServiceBusProcessorTests
 {
-    private readonly IAzureClientFactory<ServiceBusProcessor> _processorFactory = Substitute.For<IAzureClientFactory<ServiceBusProcessor>>();
-    private readonly ServiceBusProcessor _serviceBusProcessor = Substitute.For<ServiceBusProcessor>();
+    private readonly IAzureClientFactory<ServiceBusProcessor> _processorFactory = Substitute.For<
+        IAzureClientFactory<ServiceBusProcessor>
+    >();
+    private readonly ServiceBusProcessor _serviceBusProcessor =
+        Substitute.For<ServiceBusProcessor>();
     private readonly ServiceBusReceiver _serviceBusReceiver = Substitute.For<ServiceBusReceiver>();
-    private readonly ILogger<ContentfulServiceBusProcessor> _logger = Substitute.For<ILogger<ContentfulServiceBusProcessor>>();
-    private readonly IWebHookMessageProcessor _webHookMessageProcessor = Substitute.For<IWebHookMessageProcessor>();
-    private readonly IServiceScopeFactory _serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
-    private readonly IOptions<ServiceBusOptions> _options = Substitute.For<IOptions<ServiceBusOptions>>();
+    private readonly ILogger<ContentfulServiceBusProcessor> _logger = Substitute.For<
+        ILogger<ContentfulServiceBusProcessor>
+    >();
+    private readonly IWebHookMessageProcessor _webHookMessageProcessor =
+        Substitute.For<IWebHookMessageProcessor>();
+    private readonly IServiceScopeFactory _serviceScopeFactory =
+        Substitute.For<IServiceScopeFactory>();
+    private readonly IOptions<ServiceBusOptions> _options = Substitute.For<
+        IOptions<ServiceBusOptions>
+    >();
     private readonly IServiceBusResultProcessor _serviceBusResultProcessor;
     private readonly ContentfulServiceBusProcessor _contentfulServiceBusProcessor;
 
@@ -38,16 +47,31 @@ public class ContentfulServiceBusProcessorTests
         _serviceBusResultProcessor = Substitute.For<IServiceBusResultProcessor>();
         _processorFactory.CreateClient("contentfulprocessor").Returns(_serviceBusProcessor);
         _options.Value.Returns(new ServiceBusOptions() { EnableQueueReading = true });
-        _contentfulServiceBusProcessor = new ContentfulServiceBusProcessor(_processorFactory, _serviceBusResultProcessor, _logger, _serviceScopeFactory, _options);
+        _contentfulServiceBusProcessor = new ContentfulServiceBusProcessor(
+            _processorFactory,
+            _serviceBusResultProcessor,
+            _logger,
+            _serviceScopeFactory,
+            _options
+        );
     }
 
     [Fact]
     public async Task EnableQueueReading_Should_PreventQueueProcessing_When_False()
     {
         _options.Value.Returns(new ServiceBusOptions() { EnableQueueReading = false });
-        var contentfulServiceBusProcessor = new ContentfulServiceBusProcessor(_processorFactory, _serviceBusResultProcessor, _logger, _serviceScopeFactory, _options);
+        var contentfulServiceBusProcessor = new ContentfulServiceBusProcessor(
+            _processorFactory,
+            _serviceBusResultProcessor,
+            _logger,
+            _serviceScopeFactory,
+            _options
+        );
 
-        await contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("ExecuteAsync", [CancellationToken.None]);
+        await contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
+            "ExecuteAsync",
+            [CancellationToken.None]
+        );
 
         Assert.Empty(_serviceBusProcessor.ReceivedCalls());
     }
@@ -62,7 +86,7 @@ public class ContentfulServiceBusProcessorTests
     [Fact]
     public async Task StopProcessingAsync_ShouldStopAndDisposeProcessor()
     {
-        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("StopProcessingAsync", new object[] { });
+        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("StopProcessingAsync", []);
         await _serviceBusProcessor.Received(1).StopProcessingAsync();
         await _serviceBusProcessor.Received(1).DisposeAsync();
     }
@@ -75,16 +99,33 @@ public class ContentfulServiceBusProcessorTests
         var id = "message-id";
 
         var message = CreateServiceBusMessage(body, subject, id);
-        var eventArgs = Substitute.For<ProcessMessageEventArgs>(message, _serviceBusReceiver, CancellationToken.None);
+        var eventArgs = Substitute.For<ProcessMessageEventArgs>(
+            message,
+            _serviceBusReceiver,
+            CancellationToken.None
+        );
 
         var result = new ServiceBusSuccessResult();
-        _webHookMessageProcessor.ProcessMessage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
-                            .Returns(result);
+        _webHookMessageProcessor
+            .ProcessMessage(
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(result);
 
-        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("MessageHandler", new object[] { eventArgs });
+        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
+            "MessageHandler",
+            [eventArgs]
+        );
 
-        await _webHookMessageProcessor.Received(1).ProcessMessage(subject, body, id, Arg.Any<CancellationToken>());
-        await _serviceBusResultProcessor.Received(1).ProcessMessageResult(eventArgs, result, Arg.Any<CancellationToken>());
+        await _webHookMessageProcessor
+            .Received(1)
+            .ProcessMessage(subject, body, id, Arg.Any<CancellationToken>());
+        await _serviceBusResultProcessor
+            .Received(1)
+            .ProcessMessageResult(eventArgs, result, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -95,18 +136,36 @@ public class ContentfulServiceBusProcessorTests
         var id = "message-id";
 
         var message = CreateServiceBusMessage(body, subject, id);
-        var eventArgs = Substitute.For<ProcessMessageEventArgs>(message, _serviceBusReceiver, CancellationToken.None);
+        var eventArgs = Substitute.For<ProcessMessageEventArgs>(
+            message,
+            _serviceBusReceiver,
+            CancellationToken.None
+        );
 
         string errorReason = "error reason";
         string errorDescription = "error description";
 
         var result = new ServiceBusErrorResult(errorReason, errorDescription, false);
-        _webHookMessageProcessor.ProcessMessage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(result);
+        _webHookMessageProcessor
+            .ProcessMessage(
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(result);
 
-        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("MessageHandler", new object[] { eventArgs });
+        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
+            "MessageHandler",
+            [eventArgs]
+        );
 
-        await _webHookMessageProcessor.Received(1).ProcessMessage(subject, body, id, Arg.Any<CancellationToken>());
-        await _serviceBusResultProcessor.Received(1).ProcessMessageResult(eventArgs, result, Arg.Any<CancellationToken>());
+        await _webHookMessageProcessor
+            .Received(1)
+            .ProcessMessage(subject, body, id, Arg.Any<CancellationToken>());
+        await _serviceBusResultProcessor
+            .Received(1)
+            .ProcessMessageResult(eventArgs, result, Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -117,27 +176,69 @@ public class ContentfulServiceBusProcessorTests
         var id = "message-id";
 
         var message = CreateServiceBusMessage(body, subject, id);
-        var eventArgs = Substitute.For<ProcessMessageEventArgs>(message, _serviceBusReceiver, CancellationToken.None);
-        eventArgs.DeadLetterMessageAsync(message, null, Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>()).Returns(Task.CompletedTask);
+        var eventArgs = Substitute.For<ProcessMessageEventArgs>(
+            message,
+            _serviceBusReceiver,
+            CancellationToken.None
+        );
+        eventArgs
+            .DeadLetterMessageAsync(
+                message,
+                null,
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(Task.CompletedTask);
         var exception = new Exception("Problem with the thing");
 
         _webHookMessageProcessor
-            .ProcessMessage(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .ProcessMessage(
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>()
+            )
             .ThrowsAsync(exception);
 
-        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("MessageHandler", new object[] { eventArgs });
+        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
+            "MessageHandler",
+            [eventArgs]
+        );
 
-        await _webHookMessageProcessor.Received(1).ProcessMessage(subject, body, id, Arg.Any<CancellationToken>());
-        await _serviceBusResultProcessor.Received(0).ProcessMessageResult(eventArgs, Arg.Any<ServiceBusResult>(), Arg.Any<CancellationToken>());
+        await _webHookMessageProcessor
+            .Received(1)
+            .ProcessMessage(subject, body, id, Arg.Any<CancellationToken>());
+        await _serviceBusResultProcessor
+            .Received(0)
+            .ProcessMessageResult(
+                eventArgs,
+                Arg.Any<ServiceBusResult>(),
+                Arg.Any<CancellationToken>()
+            );
 
-        await eventArgs.Received(1).DeadLetterMessageAsync(message, null, exception.Message, Arg.Any<string>(), Arg.Any<CancellationToken>());
+        await eventArgs
+            .Received(1)
+            .DeadLetterMessageAsync(
+                message,
+                null,
+                exception.Message,
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>()
+            );
         var loggedMessages = _logger.ReceivedLogMessages().ToArray();
         Assert.Equal(2, loggedMessages.Length);
 
-        var matchingErrorMessage = loggedMessages.FirstOrDefault(msg => msg.LogLevel == LogLevel.Error && msg.Message.Equals($"Error processing message: {exception.Message}"));
+        var matchingErrorMessage = loggedMessages.FirstOrDefault(msg =>
+            msg.LogLevel == LogLevel.Error
+            && msg.Message.Equals($"Error processing message: {exception.Message}")
+        );
         Assert.NotNull(matchingErrorMessage);
 
-        var matchingAbandonMessage = loggedMessages.FirstOrDefault(msg => msg.LogLevel == LogLevel.Information && msg.Message.Equals($"Abandoned message: {message.MessageId}"));
+        var matchingAbandonMessage = loggedMessages.FirstOrDefault(msg =>
+            msg.LogLevel == LogLevel.Information
+            && msg.Message.Equals($"Abandoned message: {message.MessageId}")
+        );
         Assert.NotNull(matchingAbandonMessage);
     }
 
@@ -146,24 +247,40 @@ public class ContentfulServiceBusProcessorTests
     {
         var message = "Test error message";
         var exception = new Exception(message);
-        var eventArgs = new ProcessErrorEventArgs(exception, ServiceBusErrorSource.AcceptSession, "", "", "", CancellationToken.None);
+        var eventArgs = new ProcessErrorEventArgs(
+            exception,
+            ServiceBusErrorSource.AcceptSession,
+            "",
+            "",
+            "",
+            CancellationToken.None
+        );
 
-        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("ErrorHandler", new object[] { eventArgs });
+        await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod(
+            "ErrorHandler",
+            [eventArgs]
+        );
 
-        var receivedLoggerCalls = _logger.GetMatchingReceivedMessages($"Error occurred: {message}", LogLevel.Error);
+        var receivedLoggerCalls = _logger.GetMatchingReceivedMessages(
+            $"Error occurred: {message}",
+            LogLevel.Error
+        );
         Assert.Single(receivedLoggerCalls);
     }
 
-    private static ServiceBusReceivedMessage CreateServiceBusMessage(string body, string subject, string id)
+    private static ServiceBusReceivedMessage CreateServiceBusMessage(
+        string body,
+        string subject,
+        string id
+    )
     {
-        var message = new ServiceBusMessage(body)
-        {
-            Subject = subject,
-            MessageId = id
-        };
+        var message = new ServiceBusMessage(body) { Subject = subject, MessageId = id };
 
         var mock = Substitute.For<ServiceBusReceivedMessage>();
-        var serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(message.GetRawAmqpMessage(), BinaryData.FromBytes(Encoding.UTF8.GetBytes(mock.LockToken)));
+        var serviceBusReceivedMessage = ServiceBusReceivedMessage.FromAmqpMessage(
+            message.GetRawAmqpMessage(),
+            BinaryData.FromBytes(Encoding.UTF8.GetBytes(mock.LockToken))
+        );
         return serviceBusReceivedMessage;
     }
 }

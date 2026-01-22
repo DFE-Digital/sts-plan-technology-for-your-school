@@ -1,6 +1,6 @@
 # 0007 - Infrastructure As Code
 
-* **Status**: Accepted
+- **Status**: Accepted
 
 ## Context and Problem Statement
 
@@ -8,16 +8,16 @@ How can we ensure that hosting environments are configured consistently and trac
 
 ## Decision Drivers
 
-* Open source as per Service Standard
-* Compatible with selected hosting platform
-* Infrastructure changes are scripted, versioned and reversible
-* Portability
-* Prominent within industry
+- Open source as per Service Standard
+- Compatible with selected hosting platform
+- Infrastructure changes are scripted, versioned and reversible
+- Portability
+- Prominent within industry
 
 ## Considered Options
 
-* Terraform
-* ARM Templates 
+- Terraform
+- ARM Templates
 
 ## Decision Outcome
 

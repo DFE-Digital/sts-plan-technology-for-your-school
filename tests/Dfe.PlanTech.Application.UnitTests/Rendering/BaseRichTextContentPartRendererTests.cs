@@ -10,7 +10,9 @@ public class BaseRichTextContentPartRendererTests
 {
     private sealed class TestRenderer : BaseRichTextContentPartRenderer
     {
-        public TestRenderer(RichTextNodeType nodeType) : base(nodeType) { }
+        public TestRenderer(RichTextNodeType nodeType)
+            : base(nodeType) { }
+
         public override StringBuilder AddHtml(
             RichTextContentField content,
             IRichTextContentPartRendererCollection rendererCollection,
@@ -21,6 +23,7 @@ public class BaseRichTextContentPartRendererTests
     private sealed class TestContent : IRichTextContent
     {
         public TestContent(RichTextNodeType mapped) => MappedNodeType = mapped;
+
         public RichTextNodeType MappedNodeType { get; }
         public string Value { get; set; } = null!;
         public string NodeType { get; set; } = null!;
@@ -37,7 +40,11 @@ public class BaseRichTextContentPartRendererTests
     [Theory]
     [InlineData(RichTextNodeType.Paragraph, RichTextNodeType.Paragraph, true)]
     [InlineData(RichTextNodeType.Paragraph, RichTextNodeType.Table, false)]
-    public void Accepts_Matches_Only_When_Types_Equal(RichTextNodeType rendererType, RichTextNodeType contentType, bool expected)
+    public void Accepts_Matches_Only_When_Types_Equal(
+        RichTextNodeType rendererType,
+        RichTextNodeType contentType,
+        bool expected
+    )
     {
         var renderer = new TestRenderer(rendererType);
         var content = new TestContent(contentType);

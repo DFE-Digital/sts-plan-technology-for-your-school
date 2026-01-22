@@ -38,7 +38,14 @@ public class UserAuthorisationMiddlewareResultHandlerTests
     [Fact]
     public async Task HandleAsync_WhenForbiddenAndUserMissingOrganisation_ShouldRedirectToOrgErrorPage()
     {
-        var authorizationFailure = AuthorizationFailure.Failed([new AuthorizationFailureReason(new UserOrganisationAuthorisationHandler(new NullLogger<UserOrganisationAuthorisationHandler>()), "User missing org")]);
+        var authorizationFailure = AuthorizationFailure.Failed([
+            new AuthorizationFailureReason(
+                new UserOrganisationAuthorisationHandler(
+                    new NullLogger<UserOrganisationAuthorisationHandler>()
+                ),
+                "User missing org"
+            ),
+        ]);
         var authoriseResult = PolicyAuthorizationResult.Forbid(authorizationFailure);
 
         await _handler.HandleAsync(_next, _context, _policy, authoriseResult);
@@ -49,7 +56,12 @@ public class UserAuthorisationMiddlewareResultHandlerTests
     [Fact]
     public async Task HandleAsync_WhenForbiddenButUserHasOrganisation_ShouldNotRedirect()
     {
-        var authorizationFailure = AuthorizationFailure.Failed([new AuthorizationFailureReason(new PageModelAuthorisationPolicy(new NullLogger<PageModelAuthorisationPolicy>()), "")]);
+        var authorizationFailure = AuthorizationFailure.Failed([
+            new AuthorizationFailureReason(
+                new PageModelAuthorisationPolicy(new NullLogger<PageModelAuthorisationPolicy>()),
+                ""
+            ),
+        ]);
 
         var authoriseResult = PolicyAuthorizationResult.Forbid(authorizationFailure);
 
@@ -79,7 +91,14 @@ public class UserAuthorisationMiddlewareResultHandlerTests
     [Fact]
     public void GetRedirectUrl_WhenUserMissingOrganisation_ShouldReturnOrgErrorPage()
     {
-        var authorizationFailure = AuthorizationFailure.Failed([new AuthorizationFailureReason(new UserOrganisationAuthorisationHandler(new NullLogger<UserOrganisationAuthorisationHandler>()), "")]);
+        var authorizationFailure = AuthorizationFailure.Failed([
+            new AuthorizationFailureReason(
+                new UserOrganisationAuthorisationHandler(
+                    new NullLogger<UserOrganisationAuthorisationHandler>()
+                ),
+                ""
+            ),
+        ]);
 
         var result = UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(authorizationFailure);
 
@@ -89,7 +108,12 @@ public class UserAuthorisationMiddlewareResultHandlerTests
     [Fact]
     public void GetRedirectUrl_WhenUserHasOrganisation_ShouldReturnNull()
     {
-        var authorizationFailure = AuthorizationFailure.Failed([new AuthorizationFailureReason(new PageModelAuthorisationPolicy(new NullLogger<PageModelAuthorisationPolicy>()), "some other reason")]);
+        var authorizationFailure = AuthorizationFailure.Failed([
+            new AuthorizationFailureReason(
+                new PageModelAuthorisationPolicy(new NullLogger<PageModelAuthorisationPolicy>()),
+                "some other reason"
+            ),
+        ]);
 
         var result = UserAuthorisationMiddlewareResultHandler.GetRedirectUrl(authorizationFailure);
 

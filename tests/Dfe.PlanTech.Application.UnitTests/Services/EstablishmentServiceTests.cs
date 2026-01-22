@@ -9,15 +9,16 @@ namespace Dfe.PlanTech.Application.UnitTests.Services;
 
 public class EstablishmentServiceTests
 {
-    private readonly IEstablishmentWorkflow _establishmentWorkflow = Substitute.For<IEstablishmentWorkflow>();
-    private readonly IRecommendationWorkflow _recommendationWorkflow = Substitute.For<IRecommendationWorkflow>();
+    private readonly IEstablishmentWorkflow _establishmentWorkflow =
+        Substitute.For<IEstablishmentWorkflow>();
+    private readonly IRecommendationWorkflow _recommendationWorkflow =
+        Substitute.For<IRecommendationWorkflow>();
     private readonly IUserWorkflow _userWorkflow = Substitute.For<IUserWorkflow>();
+    private static readonly string[] urnAandB = ["URN-A", "URN-B"];
+    private static readonly string[] urnAandBandC = ["URN-A", "URN-B", "URN-C"];
 
-    private EstablishmentService CreateServiceUnderTest()
-        => new EstablishmentService(
-            _establishmentWorkflow,
-            _recommendationWorkflow,
-            _userWorkflow);
+    private EstablishmentService CreateServiceUnderTest() =>
+        new EstablishmentService(_establishmentWorkflow, _recommendationWorkflow, _userWorkflow);
 
     [Fact]
     public async Task GetOrCreateEstablishmentAsync_Delegates_To_Workflow()
@@ -30,7 +31,7 @@ public class EstablishmentServiceTests
             LegacyId = "testLegacyId",
             Name = "Test Establishment",
             Sid = "testSid",
-            Urn = "123"
+            Urn = "123",
         };
 
         var expected = new SqlEstablishmentDto
@@ -38,12 +39,10 @@ public class EstablishmentServiceTests
             Id = 1,
             EstablishmentRef = "123",
             OrgName = "Test Establishment",
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
 
-        _establishmentWorkflow
-            .GetOrCreateEstablishmentAsync(establishmentModel)
-            .Returns(expected);
+        _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel).Returns(expected);
 
         var sut = CreateServiceUnderTest();
 
@@ -52,9 +51,7 @@ public class EstablishmentServiceTests
 
         // Assert
         Assert.Same(expected, actual);
-        await _establishmentWorkflow
-            .Received(1)
-            .GetOrCreateEstablishmentAsync(establishmentModel);
+        await _establishmentWorkflow.Received(1).GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
     [Fact]
@@ -74,7 +71,7 @@ public class EstablishmentServiceTests
                     new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-002" } },
                     new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-003" } },
                     new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-004" } },
-                }
+                },
             },
             new QuestionnaireSectionEntry
             {
@@ -85,26 +82,51 @@ public class EstablishmentServiceTests
                 {
                     new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-005" } },
                     new RecommendationChunkEntry { Sys = new SystemDetails { Id = "rec-006" } },
-                }
-            }
+                },
+            },
         };
 
         const int groupEstablishmentId = 101;
         var groupEstablishments = new List<SqlEstablishmentLinkDto>
         {
-            new SqlEstablishmentLinkDto { Id = groupEstablishmentId, Urn = "URN-A", EstablishmentName = "A" },
-            new SqlEstablishmentLinkDto { Id = 102, Urn = "URN-B", EstablishmentName = "B" }
+            new SqlEstablishmentLinkDto
+            {
+                Id = groupEstablishmentId,
+                Urn = "URN-A",
+                EstablishmentName = "A",
+            },
+            new SqlEstablishmentLinkDto
+            {
+                Id = 102,
+                Urn = "URN-B",
+                EstablishmentName = "B",
+            },
         };
-        _establishmentWorkflow.GetGroupEstablishments(groupEstablishmentId).Returns(groupEstablishments);
+        _establishmentWorkflow
+            .GetGroupEstablishments(groupEstablishmentId)
+            .Returns(groupEstablishments);
 
         var establishments = new List<SqlEstablishmentDto>
         {
-            new SqlEstablishmentDto { Id = 1001, EstablishmentRef = "URN-A", OrgName = "A" },
-            new SqlEstablishmentDto { Id = 1002, EstablishmentRef = "URN-B", OrgName = "B" }
+            new SqlEstablishmentDto
+            {
+                Id = 1001,
+                EstablishmentRef = "URN-A",
+                OrgName = "A",
+            },
+            new SqlEstablishmentDto
+            {
+                Id = 1002,
+                EstablishmentRef = "URN-B",
+                OrgName = "B",
+            },
         };
 
-        _establishmentWorkflow.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B" })))
-                              .Returns(establishments);
+        _establishmentWorkflow
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(urnAandB))
+            )
+            .Returns(establishments);
 
         var recommendationsEst1 = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
         {
@@ -114,7 +136,7 @@ public class EstablishmentServiceTests
                 RecommendationId = 1,
                 UserId = 1,
                 NewStatus = "Complete",
-                DateCreated = DateTime.UtcNow.AddDays(-1)
+                DateCreated = DateTime.UtcNow.AddDays(-1),
             },
             ["rec-002"] = new SqlEstablishmentRecommendationHistoryDto
             {
@@ -122,7 +144,7 @@ public class EstablishmentServiceTests
                 RecommendationId = 2,
                 UserId = 1,
                 NewStatus = "InProgress",
-                DateCreated = DateTime.UtcNow.AddDays(-2)
+                DateCreated = DateTime.UtcNow.AddDays(-2),
             },
             ["rec-003"] = new SqlEstablishmentRecommendationHistoryDto
             {
@@ -130,8 +152,8 @@ public class EstablishmentServiceTests
                 RecommendationId = 3,
                 UserId = 1,
                 NewStatus = "NotStarted",
-                DateCreated = DateTime.UtcNow.AddDays(-2)
-            }
+                DateCreated = DateTime.UtcNow.AddDays(-2),
+            },
         };
 
         var recommendationsEst2 = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
@@ -142,7 +164,7 @@ public class EstablishmentServiceTests
                 RecommendationId = 4,
                 UserId = 1,
                 NewStatus = "NotStarted",
-                DateCreated = DateTime.UtcNow.AddDays(-1)
+                DateCreated = DateTime.UtcNow.AddDays(-1),
             },
             ["rec-005"] = new SqlEstablishmentRecommendationHistoryDto
             {
@@ -150,12 +172,16 @@ public class EstablishmentServiceTests
                 RecommendationId = 5,
                 UserId = 1,
                 NewStatus = "InProgress",
-                DateCreated = DateTime.UtcNow.AddDays(-2)
-            }
+                DateCreated = DateTime.UtcNow.AddDays(-2),
+            },
         };
 
-        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1001).Returns(recommendationsEst1);
-        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1002).Returns(recommendationsEst2);
+        _recommendationWorkflow
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(1001)
+            .Returns(recommendationsEst1);
+        _recommendationWorkflow
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(1002)
+            .Returns(recommendationsEst2);
 
         var sut = CreateServiceUnderTest();
 
@@ -179,11 +205,7 @@ public class EstablishmentServiceTests
         const string urn = "123";
         const int userId = 1;
 
-        var user = new SqlUserDto
-        {
-            Id = userId,
-            DfeSignInRef = dsiRef
-        };
+        var user = new SqlUserDto { Id = userId, DfeSignInRef = dsiRef };
 
         var establishmentModel = new EstablishmentModel
         {
@@ -192,31 +214,38 @@ public class EstablishmentServiceTests
             LegacyId = "testLegacyId",
             Name = orgName,
             Sid = "testSid",
-            Urn = urn
+            Urn = urn,
         };
 
         var createdUserEstablishment = new SqlEstablishmentDto
         {
             Id = establishmentId,
             EstablishmentRef = establishmentModel.Urn,
-            OrgName = establishmentModel.Name
+            OrgName = establishmentModel.Name,
         };
 
         var createdSelectedEstablishment = new SqlEstablishmentDto
         {
             Id = establishmentId,
             EstablishmentRef = urn,
-            OrgName = orgName
+            OrgName = orgName,
         };
 
         _userWorkflow.GetUserBySignInRefAsync(dsiRef).Returns(user);
-        _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel).Returns(createdUserEstablishment);
-        _establishmentWorkflow.GetEstablishmentByReferenceAsync(urn).Returns((SqlEstablishmentDto?)null);
-        _establishmentWorkflow.GetOrCreateEstablishmentAsync(urn, orgName).Returns(createdSelectedEstablishment);
+        _establishmentWorkflow
+            .GetOrCreateEstablishmentAsync(establishmentModel)
+            .Returns(createdUserEstablishment);
+        _establishmentWorkflow
+            .GetEstablishmentByReferenceAsync(urn)
+            .Returns((SqlEstablishmentDto?)null);
+        _establishmentWorkflow
+            .GetOrCreateEstablishmentAsync(urn, orgName)
+            .Returns(createdSelectedEstablishment);
 
         // Record and return id
         const int expectedSelectionId = 3;
-        _establishmentWorkflow.RecordGroupSelection(Arg.Any<UserGroupSelectionModel>())
+        _establishmentWorkflow
+            .RecordGroupSelection(Arg.Any<UserGroupSelectionModel>())
             .Returns(expectedSelectionId);
 
         var sut = CreateServiceUnderTest();
@@ -227,7 +256,8 @@ public class EstablishmentServiceTests
             userEstablishmentId: null,
             userEstablishmentModel: establishmentModel,
             selectedEstablishmentUrn: urn,
-            selectedEstablishmentName: orgName);
+            selectedEstablishmentName: orgName
+        );
 
         await _userWorkflow.Received(1).GetUserBySignInRefAsync(dsiRef);
 
@@ -236,12 +266,16 @@ public class EstablishmentServiceTests
         await _establishmentWorkflow.Received(1).GetEstablishmentByReferenceAsync(urn);
         await _establishmentWorkflow.Received(1).GetOrCreateEstablishmentAsync(urn, orgName);
 
-        await _establishmentWorkflow.Received(1).RecordGroupSelection(
-            Arg.Is<UserGroupSelectionModel>(m =>
-                m.SelectedEstablishmentId == createdSelectedEstablishment.Id &&
-                m.SelectedEstablishmentName == orgName &&
-                m.UserEstablishmentId == createdUserEstablishment.Id &&
-                m.UserId == user.Id));
+        await _establishmentWorkflow
+            .Received(1)
+            .RecordGroupSelection(
+                Arg.Is<UserGroupSelectionModel>(m =>
+                    m.SelectedEstablishmentId == createdSelectedEstablishment.Id
+                    && m.SelectedEstablishmentName == orgName
+                    && m.UserEstablishmentId == createdUserEstablishment.Id
+                    && m.UserId == user.Id
+                )
+            );
     }
 
     [Fact]
@@ -249,8 +283,7 @@ public class EstablishmentServiceTests
     {
         // Arrange
         const string dsiRef = "missingUser";
-        _userWorkflow.GetUserBySignInRefAsync(dsiRef)
-            .Returns(Task.FromResult<SqlUserDto?>(null));
+        _userWorkflow.GetUserBySignInRefAsync(dsiRef).Returns(Task.FromResult<SqlUserDto?>(null));
 
         var sut = CreateServiceUnderTest();
 
@@ -261,7 +294,9 @@ public class EstablishmentServiceTests
                 userEstablishmentId: null,
                 userEstablishmentModel: new EstablishmentModel { Urn = "U", Name = "N" },
                 selectedEstablishmentUrn: "SURN",
-                selectedEstablishmentName: "SNAME"));
+                selectedEstablishmentName: "SNAME"
+            )
+        );
     }
 
     [Fact]
@@ -271,21 +306,51 @@ public class EstablishmentServiceTests
         const int groupEstablishmentId = 101;
         var groupEstablishments = new List<SqlEstablishmentLinkDto>
         {
-            new SqlEstablishmentLinkDto { Id = groupEstablishmentId, Urn = "URN-A", EstablishmentName = "School A" },
-            new SqlEstablishmentLinkDto { Id = 102, Urn = "URN-B", EstablishmentName = "School B" },
-            new SqlEstablishmentLinkDto { Id = 103, Urn = "URN-C", EstablishmentName = "School C (Never Logged In)" }
+            new SqlEstablishmentLinkDto
+            {
+                Id = groupEstablishmentId,
+                Urn = "URN-A",
+                EstablishmentName = "School A",
+            },
+            new SqlEstablishmentLinkDto
+            {
+                Id = 102,
+                Urn = "URN-B",
+                EstablishmentName = "School B",
+            },
+            new SqlEstablishmentLinkDto
+            {
+                Id = 103,
+                Urn = "URN-C",
+                EstablishmentName = "School C (Never Logged In)",
+            },
         };
-        _establishmentWorkflow.GetGroupEstablishments(groupEstablishmentId).Returns(groupEstablishments);
+        _establishmentWorkflow
+            .GetGroupEstablishments(groupEstablishmentId)
+            .Returns(groupEstablishments);
 
         // Only URN-A and URN-B exist in establishment table (URN-C has never logged in)
         var establishments = new List<SqlEstablishmentDto>
         {
-            new SqlEstablishmentDto { Id = 1001, EstablishmentRef = "URN-A", OrgName = "School A" },
-            new SqlEstablishmentDto { Id = 1002, EstablishmentRef = "URN-B", OrgName = "School B" }
+            new SqlEstablishmentDto
+            {
+                Id = 1001,
+                EstablishmentRef = "URN-A",
+                OrgName = "School A",
+            },
+            new SqlEstablishmentDto
+            {
+                Id = 1002,
+                EstablishmentRef = "URN-B",
+                OrgName = "School B",
+            },
         };
 
-        _establishmentWorkflow.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(new[] { "URN-A", "URN-B", "URN-C" })))
-                              .Returns(establishments);
+        _establishmentWorkflow
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(us => us.SequenceEqual(urnAandBandC))
+            )
+            .Returns(establishments);
 
         var recommendationsEst1 = new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
         {
@@ -295,12 +360,16 @@ public class EstablishmentServiceTests
                 RecommendationId = 1,
                 UserId = 1,
                 NewStatus = "Complete",
-                DateCreated = DateTime.UtcNow
-            }
+                DateCreated = DateTime.UtcNow,
+            },
         };
 
-        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1001).Returns(recommendationsEst1);
-        _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(1002).Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>());
+        _recommendationWorkflow
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(1001)
+            .Returns(recommendationsEst1);
+        _recommendationWorkflow
+            .GetLatestRecommendationStatusesByEstablishmentIdAsync(1002)
+            .Returns(new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>());
 
         var sut = CreateServiceUnderTest();
 

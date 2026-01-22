@@ -24,7 +24,7 @@ Feature: Recommendations Page
 
       Then I click the previous recommendation link
       Then I should see the page heading "Recommendation Header - C1 - S1 - Q1"
-    
+
     Scenario: Homepage shows View recommendations after completing an assessment
       Given I visit the self-assessment-testing page
       Then I should see a card for "Category One" with a link labelled "View recommendations"

@@ -19,7 +19,7 @@ public static class RedisCacheTestHelpers
         Sys = new SystemDetails { Id = "question-one-id" },
         Slug = "question-one-slug",
         Text = "question-one-text",
-        Answers = [_firstAnswer, _secondAnswer]
+        Answers = [_firstAnswer, _secondAnswer],
     };
 
     public static QuestionnaireAnswerEntry FirstAnswer => _firstAnswer;

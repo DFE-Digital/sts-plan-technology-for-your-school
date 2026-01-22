@@ -24,6 +24,6 @@ Feature: Content & Support Page Richtext components
 
   Scenario: The page has the correct footer links
     And I should see the GOV.UK footer with expected links
-    
+
   Scenario: The page has the beta header
     And I should see the beta header

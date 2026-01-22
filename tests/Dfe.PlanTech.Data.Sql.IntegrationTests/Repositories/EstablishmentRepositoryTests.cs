@@ -8,9 +8,8 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
 {
     private EstablishmentRepository _repository = null!;
 
-    public EstablishmentRepositoryTests(DatabaseFixture fixture) : base(fixture)
-    {
-    }
+    public EstablishmentRepositoryTests(DatabaseFixture fixture)
+        : base(fixture) { }
 
     public override async Task InitializeAsync()
     {
@@ -27,7 +26,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
             Urn = "TEST123",
             Name = "Test School",
             Type = new IdWithNameModel { Name = "Academy" },
-            GroupUid = "group-123"
+            GroupUid = "group-123",
         };
 
         // Act
@@ -55,7 +54,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
         {
             Urn = "TEST456",
             Name = "Test School 2",
-            Type = null
+            Type = null,
         };
 
         // Act
@@ -73,7 +72,8 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
     {
         // Act & Assert
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            _repository.CreateEstablishmentFromModelAsync(null!));
+            _repository.CreateEstablishmentFromModelAsync(null!)
+        );
     }
 
     [Fact]
@@ -83,7 +83,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
         var establishment = new EstablishmentEntity
         {
             EstablishmentRef = "EXIST123",
-            OrgName = "Existing School"
+            OrgName = "Existing School",
         };
         DbContext.Establishments.Add(establishment);
         await DbContext.SaveChangesAsync();
@@ -111,9 +111,21 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
     public async Task EstablishmentRepository_GetEstablishmentsByReferencesAsync_WhenReferencesMatch_ThenReturnsMatchingEstablishments()
     {
         // Arrange
-        var establishment1 = new EstablishmentEntity { EstablishmentRef = "REF001", OrgName = "School 1" };
-        var establishment2 = new EstablishmentEntity { EstablishmentRef = "REF002", OrgName = "School 2" };
-        var establishment3 = new EstablishmentEntity { EstablishmentRef = "REF003", OrgName = "School 3" };
+        var establishment1 = new EstablishmentEntity
+        {
+            EstablishmentRef = "REF001",
+            OrgName = "School 1",
+        };
+        var establishment2 = new EstablishmentEntity
+        {
+            EstablishmentRef = "REF002",
+            OrgName = "School 2",
+        };
+        var establishment3 = new EstablishmentEntity
+        {
+            EstablishmentRef = "REF003",
+            OrgName = "School 3",
+        };
 
         DbContext.Establishments.AddRange(establishment1, establishment2, establishment3);
         await DbContext.SaveChangesAsync();
@@ -135,7 +147,11 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
     public async Task EstablishmentRepository_GetEstablishmentsByReferencesAsync_WhenNoReferencesMatch_ThenReturnsEmptyCollection()
     {
         // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EXISTING", OrgName = "School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EXISTING",
+            OrgName = "School",
+        };
         DbContext.Establishments.Add(establishment);
         await DbContext.SaveChangesAsync();
 
@@ -153,15 +169,32 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
     public async Task EstablishmentRepository_GetEstablishmentsByAsync_WhenPredicateMatches_ThenFiltersEstablishmentsByPredicate()
     {
         // Arrange
-        var establishment1 = new EstablishmentEntity { EstablishmentRef = "ACADEMY1", OrgName = "Academy School", EstablishmentType = "Academy" };
-        var establishment2 = new EstablishmentEntity { EstablishmentRef = "PRIMARY1", OrgName = "Primary School", EstablishmentType = "Primary" };
-        var establishment3 = new EstablishmentEntity { EstablishmentRef = "ACADEMY2", OrgName = "Another Academy", EstablishmentType = "Academy" };
+        var establishment1 = new EstablishmentEntity
+        {
+            EstablishmentRef = "ACADEMY1",
+            OrgName = "Academy School",
+            EstablishmentType = "Academy",
+        };
+        var establishment2 = new EstablishmentEntity
+        {
+            EstablishmentRef = "PRIMARY1",
+            OrgName = "Primary School",
+            EstablishmentType = "Primary",
+        };
+        var establishment3 = new EstablishmentEntity
+        {
+            EstablishmentRef = "ACADEMY2",
+            OrgName = "Another Academy",
+            EstablishmentType = "Academy",
+        };
 
         DbContext.Establishments.AddRange(establishment1, establishment2, establishment3);
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetEstablishmentsByAsync(e => e.EstablishmentType == "Academy");
+        var result = await _repository.GetEstablishmentsByAsync(e =>
+            e.EstablishmentType == "Academy"
+        );
 
         // Assert
         Assert.NotNull(result);
@@ -173,12 +206,18 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
     public async Task EstablishmentRepository_GetEstablishmentsByAsync_WhenPredicateDoesNotMatch_ThenReturnsEmptyResult()
     {
         // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EXISTING", OrgName = "School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EXISTING",
+            OrgName = "School",
+        };
         DbContext.Establishments.Add(establishment);
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetEstablishmentsByAsync(e => e.EstablishmentRef == "NONEXISTENT");
+        var result = await _repository.GetEstablishmentsByAsync(e =>
+            e.EstablishmentRef == "NONEXISTENT"
+        );
 
         // Assert
         Assert.NotNull(result);

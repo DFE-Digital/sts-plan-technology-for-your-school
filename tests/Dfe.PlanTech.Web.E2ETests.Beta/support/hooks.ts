@@ -15,7 +15,7 @@ import { MAT_SCHOOLS } from '../constants/matConstants';
 
 type MatSchoolKey = keyof typeof MAT_SCHOOLS;
 
-setDefaultTimeout(60 * 1000)
+setDefaultTimeout(60 * 1000);
 
 let browser: Browser;
 
@@ -31,13 +31,9 @@ BeforeAll(async () => {
 });
 
 Before(async function (scenario: ITestCaseHookParameter) {
-const tag = scenario.pickle.tags.find(t =>
-  t.name.startsWith('@user-')
-);
+  const tag = scenario.pickle.tags.find((t) => t.name.startsWith('@user-'));
 
-const userType = tag
-  ? tag.name.replace('@user-', '')
-  : 'school'; 
+  const userType = tag ? tag.name.replace('@user-', '') : 'school';
 
   const storagePath = path.resolve(__dirname, `../storage/${userType}.json`);
 
@@ -72,8 +68,8 @@ const userType = tag
   this.page = page;
   this.shouldRecord = shouldRecord;
 
-  const resetTag = scenario.pickle.tags.find(t =>
-    t.name === '@clear-data-school' || t.name === '@clear-data-mat'
+  const resetTag = scenario.pickle.tags.find(
+    (t) => t.name === '@clear-data-school' || t.name === '@clear-data-mat',
   );
 
   if (resetTag) {
@@ -88,7 +84,9 @@ const userType = tag
     }
 
     if (!establishmentRef) {
-      throw new Error(`No establishmentRef found for tag ${tagName}. Check the environment variables.`);
+      throw new Error(
+        `No establishmentRef found for tag ${tagName}. Check the environment variables.`,
+      );
     }
 
     console.log(`Clearing establishment data for establishmentRef: ${establishmentRef}`);
@@ -96,9 +94,7 @@ const userType = tag
     await clearTestEstablishmentData(establishmentRef);
   }
 
-  const schoolTag = scenario.pickle.tags.find(t =>
-    t.name.startsWith('@selected-school-')
-  );
+  const schoolTag = scenario.pickle.tags.find((t) => t.name.startsWith('@selected-school-'));
 
   if (schoolTag) {
     const rawKey = schoolTag.name.replace('@selected-school-', '');
@@ -107,7 +103,7 @@ const userType = tag
     if (!(keyFromTag in MAT_SCHOOLS)) {
       throw new Error(
         `Unknown school key "${keyFromTag}" in tag ${schoolTag.name}. ` +
-        `Expected one of: ${Object.keys(MAT_SCHOOLS).join(', ')}`
+          `Expected one of: ${Object.keys(MAT_SCHOOLS).join(', ')}`,
       );
     }
 
@@ -125,7 +121,6 @@ const userType = tag
 
     console.log(`Selected school via tag: ${this.selectedSchool.NAME}`);
   }
-
 });
 
 After(async function (scenario: ITestCaseHookParameter) {
@@ -192,7 +187,7 @@ After(async function (scenario: ITestCaseHookParameter) {
 AfterAll(async () => {
   try {
     if (browser) {
-      await Promise.all(browser.contexts().map(c => c.close().catch(() => { })));
+      await Promise.all(browser.contexts().map((c) => c.close().catch(() => {})));
       await browser.close();
     }
   } catch (e) {

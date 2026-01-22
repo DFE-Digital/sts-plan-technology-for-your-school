@@ -1,181 +1,180 @@
-@use "../../node_modules/dfe-frontend/packages/dfefrontend.scss";
+@use '../../node_modules/dfe-frontend/packages/dfefrontend.scss';
 
 html {
-    font-family: Inter, sans-serif;
+  font-family: Inter, sans-serif;
 }
 
 .logo {
-    display: block;
-    max-height: 32px;
-    max-width: 100%;
+  display: block;
+  max-height: 32px;
+  max-width: 100%;
 }
 
 .govuk-table {
-    margin-top: 30px;
-    margin-bottom: 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 a.govuk-home-link {
-    position: relative;
-    display: inline-block;
-    margin-top: 15px;
-    margin-bottom: 15px;
+  position: relative;
+  display: inline-block;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 //Remove the padding from paragraphs within lists
 li > p {
-    margin-top: 0px;
-    margin-bottom: 0px;
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 
 div.govuk-width-container {
-    @extend .dfe-width-container;
+  @extend .dfe-width-container;
 }
 
 strong.govuk-tag {
-    max-width: fit-content;
-    vertical-align: middle;
+  max-width: fit-content;
+  vertical-align: middle;
 
-    &:first-letter {
-        text-transform: uppercase;
-    }
+  &:first-letter {
+    text-transform: uppercase;
+  }
 }
 
 @media (min-width: 40.0625em) {
-    .dfe-self-assessment-list {
-        > .govuk-summary-list__row {
-            height: 4rem;
-        }
+  .dfe-self-assessment-list {
+    > .govuk-summary-list__row {
+      height: 4rem;
     }
+  }
 }
 
 // MAT View Dashboard Topic List
 .dfe-mat-self-assessment-list {
-    .govuk-task-list__item {
-        height: 2.7rem;
-    }
+  .govuk-task-list__item {
+    height: 2.7rem;
+  }
 
-    .govuk-task-list__name-and-hint,
-    .govuk-task-list__status {
-        vertical-align: middle;
-    }
+  .govuk-task-list__name-and-hint,
+  .govuk-task-list__status {
+    vertical-align: middle;
+  }
 
-    .govuk-tag {
-        white-space: nowrap;
+  .govuk-tag {
+    white-space: nowrap;
 
-        @media (max-width: 350px) {
-            white-space: normal;
-        }
+    @media (max-width: 350px) {
+      white-space: normal;
     }
+  }
 
-    .govuk-task-list__item:first-child {
-        border-top: none;
-    }
+  .govuk-task-list__item:first-child {
+    border-top: none;
+  }
 }
-
 
 .govuk-summary-list__key,
 .govuk-summary-list__value {
-    vertical-align: middle;
+  vertical-align: middle;
 
-    > .govuk-button {
-        vertical-align: middle;
-    }
+  > .govuk-button {
+    vertical-align: middle;
+  }
 }
 
 .dfe-header {
-    border-bottom: 10px solid #347ca9;
+  border-bottom: 10px solid #347ca9;
 }
 
 .dfe-header__action-links {
-    margin-top: 1em;
+  margin-top: 1em;
 }
 
 .share-html-img {
-    width: 100px;
-    float: left;
-    padding-right: 10px;
+  width: 100px;
+  float: left;
+  padding-right: 10px;
 }
 
 //Hide GTM iframe
 iframe {
-    display: none;
+  display: none;
 }
 
 .whitespace-preline {
-    white-space: pre-line;
+  white-space: pre-line;
 }
 
 button.govuk-button--white {
-    background-color: white;
+  background-color: white;
 }
 
 .js-only {
-    display: none !important;
-    visibility: hidden !important;
+  display: none !important;
+  visibility: hidden !important;
 }
 
 .school-button {
-    font-size: 24px;
-    background-color: #ffffff;
-    color: #1d70b8;
-    padding-left: 0px;
-    box-shadow: none !important;
-    text-decoration: underline 1px !important;
-    text-underline-offset: 4px;
-    font-weight: bold !important;
-    margin-bottom: 8px;
+  font-size: 24px;
+  background-color: #ffffff;
+  color: #1d70b8;
+  padding-left: 0px;
+  box-shadow: none !important;
+  text-decoration: underline 1px !important;
+  text-underline-offset: 4px;
+  font-weight: bold !important;
+  margin-bottom: 8px;
 }
 
 .school-button:hover {
-    color: #003078;
-    background-color: #ffffff;
-    text-decoration-thickness: 2px !important;
+  color: #003078;
+  background-color: #ffffff;
+  text-decoration-thickness: 2px !important;
 }
 
 .school-ident {
-    padding: 20px 0;
-    margin-bottom: 0px;
+  padding: 20px 0;
+  margin-bottom: 0px;
 }
 
 .dfe-page-header-inner {
-    > .school-ident {
-        padding-top: 0px;
-    }
+  > .school-ident {
+    padding-top: 0px;
+  }
 }
 
 .school-ident-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: baseline;
+  max-width: 1200px;
+  margin: 0 auto;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
 }
 
 .school-ident-name {
-    display: inline-block !important;
-    padding-top: 0 !important;
-    margin: 0 10px 0 0;
+  display: inline-block !important;
+  padding-top: 0 !important;
+  margin: 0 10px 0 0;
 }
 
 .groups-list-tag {
-    padding-right: 0px !important;
+  padding-right: 0px !important;
 }
 
 .groups-recommendation-piece-header {
-    padding-top: 32px;
-    padding-bottom: 16px;
+  padding-top: 32px;
+  padding-bottom: 16px;
 }
 
 .groups-recommendation-piece-header {
-    > h1.govuk-heading-xl {
-        padding-top: 0px !important;
-    }
+  > h1.govuk-heading-xl {
+    padding-top: 0px !important;
+  }
 }
 
 .govuk-task-list__name-and-hint.custom-height {
-    height: 2.5rem;
-    vertical-align: middle !important;
+  height: 2.5rem;
+  vertical-align: middle !important;
 }
 
 .govuk-section-break--visible.custom-hr-blue {
@@ -190,66 +189,68 @@ button.govuk-button--white {
 
 //Progress tracking
 ul.landing-page-list > li {
-    height: 40px !important;
+  height: 40px !important;
 }
 
 .landing-page-list__name-and-hint {
-    vertical-align: middle !important;
+  vertical-align: middle !important;
 }
 
 .landing-page-list-heading {
-    border-top: none !important;
+  border-top: none !important;
 }
 
 .recommendation-content > div > div.noprint button#print-page-button {
-    margin-top: 0px;
+  margin-top: 0px;
 }
 
 .govuk-table__cell.custom-height {
-    height: 40px;
+  height: 40px;
 }
 
 .recommendation-action-header .govuk-table__cell,
 .recommendation-action-header .govuk-table__header {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
 @media (min-width: 27.5em) {
-    .app-auth-action {
-        text-align: right;
-        display: block;
-        position: absolute;
-        top: 0;
-        right: 0;
-        margin-top: 15px;
-        padding: 5px 0;
-    }
+  .app-auth-action {
+    text-align: right;
+    display: block;
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-top: 15px;
+    padding: 5px 0;
+  }
 }
 
 .app-auth-action {
-    margin: 15px 0 15px;
+  margin: 15px 0 15px;
 }
 
 @media (min-width: 40.0625em) {
-    .app-auth-action__link {
-        font-size: 1.1875rem;
-        line-height: 1.3157894737;
-    }
+  .app-auth-action__link {
+    font-size: 1.1875rem;
+    line-height: 1.3157894737;
+  }
 }
 .app-auth-action__link {
-    line-height: inherit;
-    text-decoration: none;
+  line-height: inherit;
+  text-decoration: none;
 }
-.app-auth-action__link:link, .app-auth-action__link:visited {
-    color: #fff;
+.app-auth-action__link:link,
+.app-auth-action__link:visited {
+  color: #fff;
 }
 
 .app-auth-action__link:hover {
-    text-decoration: underline;
-    text-decoration-thickness: 3px;
-    text-underline-offset: .1578em;
+  text-decoration: underline;
+  text-decoration-thickness: 3px;
+  text-underline-offset: 0.1578em;
 }
 
-.app-auth-action__link:hover, .app-auth-action__link:active {
-        color: hsla(0, 0%, 100%, .99);
+.app-auth-action__link:hover,
+.app-auth-action__link:active {
+  color: hsla(0, 0%, 100%, 0.99);
 }

@@ -31,6 +31,7 @@ The design for the ticket is based on:
 Guidance/instructions for reviewing the PR. Linking to existing documentation, DevOps tickets, etc. is acceptable, but as much information as is required for testing the PR should be included/referenced.
 
 Include things such as:
+
 - Setting up the PR. E.g.
   - Any instructions required for running the web app
   - If Contentful content is required, what the changes are, what existing content could be used, etc

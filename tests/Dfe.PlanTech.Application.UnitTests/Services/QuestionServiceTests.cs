@@ -10,44 +10,38 @@ namespace Dfe.PlanTech.Application.UnitTests.Services;
 
 public class QuestionServiceTests
 {
-    private readonly ISubmissionWorkflow _mockSubmissionWorkflow = Substitute.For<ISubmissionWorkflow>();
+    private readonly ISubmissionWorkflow _mockSubmissionWorkflow =
+        Substitute.For<ISubmissionWorkflow>();
 
     // Helper: build a minimal section graph with 2 questions.
     // Q1 has answers A1 (-> Q2) and A2 (-> null). Q2 has no answers.
     private static QuestionnaireSectionEntry BuildSectionGraph()
     {
-        var q2 = new QuestionnaireQuestionEntry
-        {
-            Sys = new SystemDetails("Q2"),
-            Answers = []
-        };
+        var q2 = new QuestionnaireQuestionEntry { Sys = new SystemDetails("Q2"), Answers = [] };
 
-        var a1 = new QuestionnaireAnswerEntry
-        {
-            Sys = new SystemDetails("A1"),
-            NextQuestion = q2
-        };
+        var a1 = new QuestionnaireAnswerEntry { Sys = new SystemDetails("A1"), NextQuestion = q2 };
 
         var a2 = new QuestionnaireAnswerEntry
         {
             Sys = new SystemDetails("A2"),
-            NextQuestion = null
+            NextQuestion = null,
         };
 
         var q1 = new QuestionnaireQuestionEntry
         {
             Sys = new SystemDetails("Q1"),
-            Answers = new List<QuestionnaireAnswerEntry> { a1, a2 }
+            Answers = new List<QuestionnaireAnswerEntry> { a1, a2 },
         };
 
         return new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("S1"),
-            Questions = [q1, q2]
+            Questions = [q1, q2],
         };
     }
 
-    private QuestionService CreateServiceUnderTest() => new QuestionService(_mockSubmissionWorkflow);
+    private QuestionService CreateServiceUnderTest() =>
+        new QuestionService(_mockSubmissionWorkflow);
 
     [Fact]
     public async Task Returns_FirstQuestion_When_No_Submission()
@@ -56,8 +50,13 @@ public class QuestionServiceTests
         var section = BuildSectionGraph();
         const int establishmentId = 1;
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
-           .Returns((SqlSubmissionDto?)null);
+        _mockSubmissionWorkflow
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status: SubmissionStatus.InProgress
+            )
+            .Returns((SqlSubmissionDto?)null);
 
         var questionService = CreateServiceUnderTest();
 
@@ -68,8 +67,13 @@ public class QuestionServiceTests
         Assert.NotNull(next);
         Assert.Equal("Q1", next!.Id);
 
-        await _mockSubmissionWorkflow.Received(1)
-                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress);
+        await _mockSubmissionWorkflow
+            .Received(1)
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status: SubmissionStatus.InProgress
+            );
     }
 
     [Fact]
@@ -80,8 +84,13 @@ public class QuestionServiceTests
         const int establishmentId = 1;
         var submission = new SqlSubmissionDto { Status = SubmissionStatus.Inaccessible };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
-           .Returns(submission);
+        _mockSubmissionWorkflow
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status: SubmissionStatus.InProgress
+            )
+            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
 
@@ -92,8 +101,13 @@ public class QuestionServiceTests
         Assert.NotNull(next);
         Assert.Equal("Q1", next!.Id);
 
-        await _mockSubmissionWorkflow.Received(1)
-                 .GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress);
+        await _mockSubmissionWorkflow
+            .Received(1)
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status: SubmissionStatus.InProgress
+            );
     }
 
     [Fact]
@@ -105,14 +119,20 @@ public class QuestionServiceTests
 
         var submission = new SqlSubmissionDto { Id = 1, Responses = [] };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
-           .Returns(submission);
+        _mockSubmissionWorkflow
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status: SubmissionStatus.InProgress
+            )
+            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
 
         // Act + Assert
-        var ex = await Assert.ThrowsAsync<DatabaseException>(
-            () => questionService.GetNextUnansweredQuestion(establishmentId, section));
+        var ex = await Assert.ThrowsAsync<DatabaseException>(() =>
+            questionService.GetNextUnansweredQuestion(establishmentId, section)
+        );
 
         Assert.Contains("no responses", ex.Message, StringComparison.InvariantCultureIgnoreCase);
         Assert.Contains(submission.Id.ToString(), ex.Message);
@@ -133,35 +153,26 @@ public class QuestionServiceTests
             Status = SubmissionStatus.InProgress,
             Responses =
             [
-                new() {
-                    Question = new SqlQuestionDto
-                    {
-                        Id = 1,
-                        ContentfulSysId = "Q1"
-                    },
-                    Answer = new SqlAnswerDto
-                    {
-                        Id = 1,
-                        ContentfulSysId = "A2"
-                    }
+                new()
+                {
+                    Question = new SqlQuestionDto { Id = 1, ContentfulSysId = "Q1" },
+                    Answer = new SqlAnswerDto { Id = 1, ContentfulSysId = "A2" },
                 },
-                new() {
-                    Question = new SqlQuestionDto
-                    {
-                        Id = 1,
-                        ContentfulSysId = "Q1"
-                    },
-                    Answer = new SqlAnswerDto
-                    {
-                        Id = 2,
-                        ContentfulSysId = "A1"
-                    }
+                new()
+                {
+                    Question = new SqlQuestionDto { Id = 1, ContentfulSysId = "Q1" },
+                    Answer = new SqlAnswerDto { Id = 2, ContentfulSysId = "A1" },
                 },
-            ]
+            ],
         };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
-           .Returns(submission);
+        _mockSubmissionWorkflow
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status: SubmissionStatus.InProgress
+            )
+            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
 
@@ -186,23 +197,21 @@ public class QuestionServiceTests
             Id = 1,
             Responses =
             [
-                new() {
-                    Question = new SqlQuestionDto
-                    {
-                        Id = 999,
-                        ContentfulSysId = "Q999",
-                    },
-                    Answer = new SqlAnswerDto
-                    {
-                        Id = 999,
-                        ContentfulSysId = "A999"
-                    }
-                }
-            ]
+                new()
+                {
+                    Question = new SqlQuestionDto { Id = 999, ContentfulSysId = "Q999" },
+                    Answer = new SqlAnswerDto { Id = 999, ContentfulSysId = "A999" },
+                },
+            ],
         };
 
-        _mockSubmissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status: SubmissionStatus.InProgress)
-           .Returns(submission);
+        _mockSubmissionWorkflow
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status: SubmissionStatus.InProgress
+            )
+            .Returns(submission);
 
         var questionService = CreateServiceUnderTest();
 

@@ -14,24 +14,44 @@ public class UserJourneyMissingContentExceptionHandler(
     ICurrentUser currentUser
 ) : IUserJourneyMissingContentExceptionHandler
 {
-    private readonly IConfiguration _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
-    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly ICurrentUser _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+    private readonly IConfiguration _configuration =
+        configuration ?? throw new ArgumentNullException(nameof(configuration));
+    private readonly ISubmissionService _submissionService =
+        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ICurrentUser _currentUser =
+        currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     public const string ErrorMessageConfigKey = "ErrorMessages:ConcurrentUsersOrContentChange";
     public const string ErrorMessageTempDataKey = "SubtopicError";
 
-    public async Task<IActionResult> Handle(Controller controller, UserJourneyMissingContentException exception)
+    public async Task<IActionResult> Handle(
+        Controller controller,
+        UserJourneyMissingContentException exception
+    )
     {
-        logger.LogError(exception, "Handling errored user journey for section {Section}", exception.Section.Name);
+        logger.LogError(
+            exception,
+            "Handling errored user journey for section {Section}",
+            exception.Section.Name
+        );
 
-        var activeEstablishmentId = await _currentUser.GetActiveEstablishmentIdAsync()
-            ?? throw new InvalidDataException($"Current user has no {nameof(_currentUser.GetActiveEstablishmentIdAsync)}");
+        var activeEstablishmentId =
+            await _currentUser.GetActiveEstablishmentIdAsync()
+            ?? throw new InvalidDataException(
+                $"Current user has no {nameof(_currentUser.GetActiveEstablishmentIdAsync)}"
+            );
 
-        await _submissionService.SetSubmissionInaccessibleAsync(activeEstablishmentId, exception.Section.Id);
+        await _submissionService.SetSubmissionInaccessibleAsync(
+            activeEstablishmentId,
+            exception.Section.Id
+        );
 
         controller.TempData[ErrorMessageTempDataKey] = _configuration[ErrorMessageConfigKey];
 
-        return controller.RedirectToAction(PagesController.GetPageByRouteAction, PagesController.ControllerName, new { route = UrlConstants.Home });
+        return controller.RedirectToAction(
+            PagesController.GetPageByRouteAction,
+            PagesController.ControllerName,
+            new { route = UrlConstants.Home }
+        );
     }
 }

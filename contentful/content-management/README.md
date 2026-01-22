@@ -22,10 +22,11 @@ Note that the `contentful-management` library defaults to the `master` environme
 
 1. Add your content update script following the convention of `YYYYMMDD-HHMM-description-of-crud-operation.js`
 2. run the update with
-    ```bash
-    npm run crud-operation YYYYMMDD-HHMM-description-of-crud-operation.js
-    ```
-____
+   ```bash
+   npm run crud-operation YYYYMMDD-HHMM-description-of-crud-operation.js
+   ```
+
+---
 
 ## Importing Content
 
@@ -52,8 +53,8 @@ Required Environment variables
 
 ## Deleting all content
 
-You may wish to remove all content from an environment, for example, before importing from a backup. 
-This is an environment variable option in the import process, or it can be run standalone with the `delete-all-content` script, which will clear down the entire environment. 
+You may wish to remove all content from an environment, for example, before importing from a backup.
+This is an environment variable option in the import process, or it can be run standalone with the `delete-all-content` script, which will clear down the entire environment.
 
 ### Setup
 

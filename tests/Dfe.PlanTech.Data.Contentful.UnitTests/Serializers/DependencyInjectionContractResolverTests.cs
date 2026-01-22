@@ -37,8 +37,10 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Serializers
             Assert.NotNull(contract);
         }
 
-
-        private static JsonObjectContract? InvokeProtectedCreateObjectContract(DependencyInjectionContractResolver resolver, Type objectType)
+        private static JsonObjectContract? InvokeProtectedCreateObjectContract(
+            DependencyInjectionContractResolver resolver,
+            Type objectType
+        )
         {
             var methodInfo = typeof(DependencyInjectionContractResolver).GetMethod(
                 "CreateObjectContract",
@@ -50,13 +52,13 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Serializers
 
             if (methodInfo != null)
             {
-                return (JsonObjectContract)methodInfo.Invoke(resolver, new object[] { objectType })!;
+                return (JsonObjectContract)
+                    methodInfo.Invoke(resolver, new object[] { objectType })!;
             }
 
             throw new MissingMethodException("CreateObjectContract method not found.");
         }
     }
 
-    public class DummyModel
-    { }
+    public class DummyModel { }
 }
