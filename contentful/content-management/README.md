@@ -1,5 +1,7 @@
 # Scripting Content Management
 
+**Note - get-client.js has been updated to return an environment rather than a raw client - helper functions will not behave until these have been updated.**
+
 Guidance for creating, updating and deleting content programatically from contentful
 
 Unfortunately the contentful-migration api does not support deleting entries, so this is something that has to be done
