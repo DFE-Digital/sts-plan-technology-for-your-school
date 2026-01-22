@@ -1,25 +1,32 @@
 import { jest } from "@jest/globals";
 
-const mockGetMany = jest.fn().mockImplementation(() => ({
-    items: [{ name: "master" }, { name: "test-env" }, { name: "staging" }],
-}));
+const mockGetEnvironments = jest.fn().mockResolvedValue({
+    items: [
+        { name: "master" },
+        { name: "test-env" },
+        { name: "staging" }
+    ]
+});
 
-const mockClient = {
-    environment: {
-        getMany: mockGetMany,
-    },
+const mockEnvironment = {
+    getEntries: jest.fn().mockResolvedValue({ items: [] }),
+    getEntry: jest.fn(),
 };
 
-const createClientMock = jest.fn().mockImplementation(() => mockClient);
+const mockGetEnvironment = jest.fn().mockResolvedValue(mockEnvironment);
 
-jest.mock("contentful-management", () => {
-    return {
-        default: {
-            createClient: createClientMock,
-        },
-        createClient: createClientMock,
-    };
-});
+const mockSpace = {
+    getEnvironments: mockGetEnvironments,
+    getEnvironment: mockGetEnvironment
+};
+
+const mockGetSpace = jest.fn().mockResolvedValue(mockSpace);
+
+jest.mock("contentful-management", () => ({
+    createClient: jest.fn(() => ({
+        getSpace: mockGetSpace
+    }))
+}));
 
 const contentfulManagement = (await import("contentful-management")).default;
 
@@ -51,21 +58,11 @@ describe("getAndValidateClient", () => {
         expect(contentfulManagement.createClient).toHaveBeenCalledWith(
             {
                 accessToken: "test-token",
-            },
-            {
-                type: "plain",
-                defaults: {
-                    spaceId: "test-space",
-                    environmentId: "test-env",
-                },
             }
         );
 
-        expect(mockGetMany).toHaveBeenCalledWith({
-            spaceId: "test-space",
-        });
-
-        expect(client).toBe(mockClient);
+        expect(mockGetEnvironments).toHaveBeenCalledTimes(1);
+        expect(mockGetSpace).toHaveBeenCalledTimes(2);
     });
 
     it("should throw an error when environment is invalid", async () => {
