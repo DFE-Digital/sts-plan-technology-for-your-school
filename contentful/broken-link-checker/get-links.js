@@ -23,6 +23,13 @@ function getTagIds(entry) {
   return tags.map((t) => t?.sys?.id).filter(Boolean);
 }
 
+function getInternalName(entry) {
+  const internalName = entry?.fields?.internalName;
+  if (!isPlainObject(internalName)) return null;
+
+  return internalName['en-GB'] ?? Object.values(internalName)[0] ?? null;
+}
+
 function isEntry(obj) {
   return (
     isPlainObject(obj) &&
@@ -124,6 +131,7 @@ function extractLinksFromEntry(entry) {
   const links = [];
   const entryId = safeGet(entry, ['sys', 'id']);
   const contentType = safeGet(entry, ['sys', 'contentType', 'sys', 'id']) || null;
+  const internalName = getInternalName(entry);
   const fields = entry.fields || {};
 
   for (const [fieldId, fieldValue] of Object.entries(fields)) {
@@ -137,6 +145,7 @@ function extractLinksFromEntry(entry) {
           if (link) {
             links.push({
               entryId,
+              internalName,
               contentType,
               fieldId,
               locale,
@@ -156,6 +165,7 @@ function extractLinksFromEntry(entry) {
         if (link) {
           links.push({
             entryId,
+            internalName,
             contentType,
             fieldId,
             locale: null,
