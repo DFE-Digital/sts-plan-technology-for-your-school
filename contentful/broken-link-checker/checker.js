@@ -123,6 +123,7 @@ async function validateExternalLinks(groupedLinks) {
 
         failedExternalRows.push({
           entryId: link.entryId,
+          internalName: link.internalName,
           uri: link.uri,
           status: '',
           redirected: '',
@@ -143,6 +144,7 @@ async function validateExternalLinks(groupedLinks) {
 
         failedExternalRows.push({
           entryId: link.entryId,
+          internalName: link.internalName,
           uri: link.uri,
           status: result.status ?? '',
           redirected: result.redirected ?? false,
@@ -194,6 +196,7 @@ function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
   // columns -  entryId, link, statusCode, redirected
   const externalRows = failedExternalRows.map((r) => ({
     entryId: r.entryId,
+    internalName: r.internalName,
     link: r.uri,
     statusCode: r.status,
     redirected: r.redirected,
@@ -202,7 +205,7 @@ function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
 
   writeCsv(
     EXTERNAL_LINK_CSV_PATH,
-    ['entryId', 'link', 'statusCode', 'redirected', 'finalUrl'],
+    ['entryId', 'internalName', 'link', 'statusCode', 'redirected', 'finalUrl'],
     externalRows,
   );
 
@@ -211,9 +214,10 @@ function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
   const internalRows = internalLinks.map((l) => ({
     link: l.uri,
     entryId: l.entryId,
+    internalName: l.internalName
   }));
 
-  writeCsv(INTERNAL_LINK_CSV_PATH, ['link', 'entryId'], internalRows);
+  writeCsv(INTERNAL_LINK_CSV_PATH, ['link', 'entryId', 'internalName'], internalRows);
 
   console.log(`Wrote CSV: ${EXTERNAL_LINK_CSV_PATH}`);
   console.log(`Wrote CSV: ${INTERNAL_LINK_CSV_PATH}`);
