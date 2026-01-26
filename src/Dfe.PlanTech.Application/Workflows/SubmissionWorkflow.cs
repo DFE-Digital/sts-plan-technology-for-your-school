@@ -72,7 +72,7 @@ public class SubmissionWorkflow(
     public async Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(int establishmentId, IEnumerable<string> sectionIds)
     {
         var sectionIdsInput = string.Join(',', sectionIds);
-        var statuses = await _storedProcedureRepository.GetSectionStatusesAsync(sectionIdsInput, establishmentId);
+        var statuses = await _submissionRepository.GetSectionStatusesAsync(sectionIdsInput, establishmentId);
         return statuses.Select(s => s.AsDto()).ToList();
     }
 
@@ -139,7 +139,7 @@ public class SubmissionWorkflow(
 
     public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
     {
-        return _storedProcedureRepository.SetSubmissionDeletedAsync(establishmentId, sectionId);
+        return _submissionRepository.SetSubmissionDeletedAsync(establishmentId, sectionId);
     }
 
     private static Dictionary<string, ResponseEntity>.ValueCollection GetOrderedResponses(

@@ -7,13 +7,11 @@ namespace Dfe.PlanTech.Application.Workflows;
 
 public class EstablishmentWorkflow(
     IEstablishmentRepository establishmentRepository,
-    IEstablishmentLinkRepository establishmentLinkRepository,
-    IStoredProcedureRepository storedProcedureRepository
+    IEstablishmentLinkRepository establishmentLinkRepository
 ) : IEstablishmentWorkflow
 {
     private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository = establishmentLinkRepository ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
-    private readonly IStoredProcedureRepository _storedProcedureRepository = storedProcedureRepository ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
 
     public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
     {
@@ -54,6 +52,6 @@ public class EstablishmentWorkflow(
 
     public Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
     {
-        return _storedProcedureRepository.RecordGroupSelection(userGroupSelectionModel);
+        return _establishmentLinkRepository.RecordGroupSelection(userGroupSelectionModel);
     }
 }

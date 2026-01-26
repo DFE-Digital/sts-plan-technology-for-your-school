@@ -231,7 +231,7 @@ public class SubmissionWorkflowTests
             new() { SectionId = "S2", Status = SubmissionStatus.NotStarted, LastMaturity = null }
         };
 
-        _sp.GetSectionStatusesAsync("S1,S2", 123).Returns(entities);
+        _repo.GetSectionStatusesAsync("S1,S2", 123).Returns(entities);
 
         var result = await sut.GetSectionStatusesAsync(123, ["S1", "S2"]);
 
@@ -239,7 +239,7 @@ public class SubmissionWorkflowTests
             s => { Assert.Equal("S1", s.SectionId); Assert.Equal(SubmissionStatus.CompleteReviewed, s.Status); Assert.Equal("developing", s.LastMaturity); },
             s => { Assert.Equal("S2", s.SectionId); Assert.Equal(SubmissionStatus.NotStarted, s.Status); Assert.Null(s.LastMaturity); });
 
-        await _sp.Received(1).GetSectionStatusesAsync("S1,S2", 123);
+        await _repo.Received(1).GetSectionStatusesAsync("S1,S2", 123);
     }
 
     // ---------- GetSectionSubmissionStatusAsync ----------
@@ -362,7 +362,7 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionDeletedAsync(1, "SEC");
-        await _sp.Received(1).SetSubmissionDeletedAsync(1, "SEC");
+        await _repo.Received(1).SetSubmissionDeletedAsync(1, "SEC");
     }
 
     [Fact]
