@@ -21,5 +21,5 @@ public enum RecommendationStatus
 
     [Display(Name = "Complete")]
     [CssClass(ClassName = "govuk-tag--green")]
-    Complete = 3
+    Complete = 3,
 }

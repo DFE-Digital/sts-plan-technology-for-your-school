@@ -11,7 +11,9 @@ namespace Dfe.PlanTech.Core.Helpers
                 return status;
             }
 
-            throw new ArgumentOutOfRangeException($"Could not parse {submissionStatus} to a known {nameof(SubmissionStatus)}");
+            throw new ArgumentOutOfRangeException(
+                $"Could not parse {submissionStatus} to a known {nameof(SubmissionStatus)}"
+            );
         }
     }
 }

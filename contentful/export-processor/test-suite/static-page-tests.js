@@ -1,6 +1,6 @@
-import TestSuiteRow from "./test-suite-row.js";
+import TestSuiteRow from './test-suite-row.js';
 
-const ADO_TAG = "Functional.js";
+const ADO_TAG = 'Functional.js';
 
 export default class StaticPageTests {
   testReferenceIndex = 1;
@@ -10,7 +10,7 @@ export default class StaticPageTests {
     this.generateContactUsPage.bind(this),
     this.generateCookiesPage.bind(this),
     this.generatePrivacyPolicyPage.bind(this),
-    this.generate404Page.bind(this)
+    this.generate404Page.bind(this),
   ];
 
   testCases = [];
@@ -18,7 +18,9 @@ export default class StaticPageTests {
   subtopicName;
 
   constructor() {
-    this.testCases = this.testCaseGenerators.map((generator) => generator()).filter((testCase) => !!testCase);
+    this.testCases = this.testCaseGenerators
+      .map((generator) => generator())
+      .filter((testCase) => !!testCase);
   }
 
   createRow(testScenario, testSteps, expectedOutcome, appendix) {
@@ -27,10 +29,10 @@ export default class StaticPageTests {
       adoTag: ADO_TAG,
       subtopic: null,
       testScenario: testScenario,
-      preConditions: "None",
+      preConditions: 'None',
       testSteps: testSteps,
       expectedOutcome: expectedOutcome,
-      appendixRef: appendix?.reference
+      appendixRef: appendix?.reference,
     });
     return row;
   }
@@ -63,7 +65,7 @@ export default class StaticPageTests {
     const testScenario = `User can access the privacy policy page`;
     const testSteps = `1 - click the footer 'Privacy Policy' link
     2 - Verify that you are taken to the correct privacy page`;
-    const expectedOutcome =  'Privacy policy page is accessible';
+    const expectedOutcome = 'Privacy policy page is accessible';
     return this.createRow(testScenario, testSteps, expectedOutcome);
   }
 

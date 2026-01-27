@@ -14,7 +14,7 @@ BEGIN TRY
     VALUES
       (@userId, @establishmentId, @selectedEstablishmentId, @selectedEstablishmentName)
 
-    SELECT @selectionId = Scope_Identity() 
+    SELECT @selectionId = Scope_Identity()
   COMMIT TRAN
 
   END TRY

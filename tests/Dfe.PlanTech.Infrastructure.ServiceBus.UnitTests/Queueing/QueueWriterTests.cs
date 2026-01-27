@@ -11,7 +11,9 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests.Queueing;
 
 public class QueueWriterTests
 {
-    private readonly IAzureClientFactory<ServiceBusSender> _serviceBusFactory = Substitute.For<IAzureClientFactory<ServiceBusSender>>();
+    private readonly IAzureClientFactory<ServiceBusSender> _serviceBusFactory = Substitute.For<
+        IAzureClientFactory<ServiceBusSender>
+    >();
     private readonly ServiceBusSender _serviceBusSender = Substitute.For<ServiceBusSender>();
     private readonly ILogger<QueueWriter> _logger = Substitute.For<ILogger<QueueWriter>>();
     private readonly QueueWriter _queueWriter;
@@ -30,8 +32,9 @@ public class QueueWriterTests
 
         await _queueWriter.WriteMessage(body, subject);
 
-        await _serviceBusSender.Received(1)
-                        .SendMessageAsync(Arg.Any<ServiceBusMessage>(), Arg.Any<CancellationToken>());
+        await _serviceBusSender
+            .Received(1)
+            .SendMessageAsync(Arg.Any<ServiceBusMessage>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -42,14 +45,17 @@ public class QueueWriterTests
 
         var exception = new Exception("Thrown exception message");
 
-        _serviceBusSender.SendMessageAsync(Arg.Any<ServiceBusMessage>(), Arg.Any<CancellationToken>()).ThrowsAsync(exception);
+        _serviceBusSender
+            .SendMessageAsync(Arg.Any<ServiceBusMessage>(), Arg.Any<CancellationToken>())
+            .ThrowsAsync(exception);
 
         var result = await _queueWriter.WriteMessage(body, subject);
 
         Assert.False(result.Success);
         Assert.Equal(exception.Message, result.ErrorMessage);
 
-        await _serviceBusSender.Received(1)
+        await _serviceBusSender
+            .Received(1)
             .SendMessageAsync(Arg.Any<ServiceBusMessage>(), Arg.Any<CancellationToken>());
 
         var loggedMessages = _logger.ReceivedLogMessages().ToArray();

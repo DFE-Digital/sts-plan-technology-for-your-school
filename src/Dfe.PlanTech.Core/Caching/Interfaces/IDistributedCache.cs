@@ -15,7 +15,13 @@ public interface IDistributedCache
     /// <param name="onCacheItemCreation">An optional callback to invoke after the cache item is created.</param>
     /// <param name="databaseId">The optional database identifier.</param>
     /// <returns>The cached item or default value if not found.</returns>
-    Task<T?> GetOrCreateAsync<T>(string key, Func<Task<T>> action, TimeSpan? expiry = null, Func<T, Task>? onCacheItemCreation = null, int databaseId = -1);
+    Task<T?> GetOrCreateAsync<T>(
+        string key,
+        Func<Task<T>> action,
+        TimeSpan? expiry = null,
+        Func<T, Task>? onCacheItemCreation = null,
+        int databaseId = -1
+    );
 
     /// <summary>
     /// Sets a cache item asynchronously.

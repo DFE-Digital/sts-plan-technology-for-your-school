@@ -11,10 +11,7 @@ public class QueryBuilderSelectTests
     public void Should_Add_Select_Properties()
     {
         var queryBuilder = new QueryBuilder<TestClass>();
-        var options = new GetEntriesOptions()
-        {
-            Select = new[] { "fields.one", "fields.two" }
-        };
+        var options = new GetEntriesOptions() { Select = new[] { "fields.one", "fields.two" } };
 
         var joinedSelect = string.Join("%2C", options.Select);
 
@@ -31,9 +28,7 @@ public class QueryBuilderSelectTests
     public void Should_DoNothing_When_Select_Null()
     {
         var queryBuilder = new QueryBuilder<TestClass>();
-        var options = new GetEntriesOptions()
-        {
-        };
+        var options = new GetEntriesOptions() { };
 
         queryBuilder = queryBuilder.WithSelect(options);
 
@@ -41,5 +36,4 @@ public class QueryBuilderSelectTests
 
         Assert.Empty(built);
     }
-
 }

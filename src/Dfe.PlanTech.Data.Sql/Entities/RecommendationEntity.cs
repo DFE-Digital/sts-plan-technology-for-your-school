@@ -30,7 +30,7 @@ public class RecommendationEntity
             DateCreated = DateCreated,
             QuestionId = QuestionId,
             Question = Question.AsDto(),
-            Archived = Archived
+            Archived = Archived,
         };
     }
 }

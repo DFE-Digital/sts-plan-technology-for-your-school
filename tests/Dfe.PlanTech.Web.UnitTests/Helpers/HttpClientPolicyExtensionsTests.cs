@@ -26,7 +26,9 @@ public class HttpClientPolicyExtensionsTests
                 attempts++;
                 if (attempts <= 6)
                 {
-                    return Task.FromResult(new HttpResponseMessage(HttpStatusCode.InternalServerError));
+                    return Task.FromResult(
+                        new HttpResponseMessage(HttpStatusCode.InternalServerError)
+                    );
                 }
                 return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
             });

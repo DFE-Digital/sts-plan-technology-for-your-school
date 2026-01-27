@@ -1,6 +1,6 @@
 using System.Text;
-using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
+using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
@@ -14,11 +14,7 @@ public class ListItemRendererTests
     {
         const string listItemValue = "List item one";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = listItemValue,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = listItemValue };
 
         var renderer = new ListItemRenderer();
 
@@ -30,11 +26,7 @@ public class ListItemRendererTests
     [Fact]
     public void Should_Reject_When_Not_ListItem()
     {
-        var content = new RichTextContent()
-        {
-            NodeType = "paragraph",
-            Value = "paragraph text"
-        };
+        var content = new RichTextContent() { NodeType = "paragraph", Value = "paragraph text" };
 
         var renderer = new ListItemRenderer();
 
@@ -47,15 +39,14 @@ public class ListItemRendererTests
     public void Should_CreateListItem_When_PassedValidData()
     {
         var renderer = new ListItemRenderer();
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string listItemValue = "List item one";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = listItemValue,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = listItemValue };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 

@@ -18,13 +18,16 @@ public class BackgroundTaskHostedServiceTests
         var cts = new CancellationTokenSource();
 
         // Dequeue once, then cancel so the loop exits
-        queue.DequeueAsync(Arg.Any<CancellationToken>())
-             .Returns(Task.FromResult<Func<CancellationToken, Task>>(ct =>
-             {
-                 ran = true;
-                 cts.Cancel(); // stop the loop after this item
-                 return Task.CompletedTask;
-             }));
+        queue
+            .DequeueAsync(Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult<Func<CancellationToken, Task>>(ct =>
+                {
+                    ran = true;
+                    cts.Cancel(); // stop the loop after this item
+                    return Task.CompletedTask;
+                })
+            );
 
         var sut = new BackgroundTaskHostedService(logger, queue);
 
@@ -36,9 +39,14 @@ public class BackgroundTaskHostedServiceTests
         await queue.Received(1).DequeueAsync(Arg.Any<CancellationToken>());
 
         // At least two info logs: starting + read item
-        var infoLogs = logger.ReceivedCalls()
+        var infoLogs = logger
+            .ReceivedCalls()
             .Where(c => c.GetMethodInfo().Name == nameof(ILogger.Log))
-            .Where(c => c.GetArguments().Length > 0 && c.GetArguments()[0] is LogLevel lvl && lvl == LogLevel.Information)
+            .Where(c =>
+                c.GetArguments().Length > 0
+                && c.GetArguments()[0] is LogLevel lvl
+                && lvl == LogLevel.Information
+            )
             .ToList();
 
         Assert.True(infoLogs.Count >= 2, $"Expected >= 2 info logs, got {infoLogs.Count}");
@@ -53,15 +61,18 @@ public class BackgroundTaskHostedServiceTests
         var cts = new CancellationTokenSource();
 
         // First dequeued item throws
-        queue.DequeueAsync(Arg.Any<CancellationToken>())
-             .Returns(
-                 Task.FromResult<Func<CancellationToken, Task>>(_ => throw new InvalidOperationException("boom")),
-                 Task.FromResult<Func<CancellationToken, Task>>(ct =>
-                 {
-                     cts.Cancel(); // stop after processing the second item
-                     return Task.CompletedTask;
-                 })
-             );
+        queue
+            .DequeueAsync(Arg.Any<CancellationToken>())
+            .Returns(
+                Task.FromResult<Func<CancellationToken, Task>>(_ =>
+                    throw new InvalidOperationException("boom")
+                ),
+                Task.FromResult<Func<CancellationToken, Task>>(ct =>
+                {
+                    cts.Cancel(); // stop after processing the second item
+                    return Task.CompletedTask;
+                })
+            );
 
         var sut = new BackgroundTaskHostedService(logger, queue);
 
@@ -69,7 +80,9 @@ public class BackgroundTaskHostedServiceTests
         await sut.StartAsync(cts.Token);
 
         // Assert: error was logged at least once
-        logger.ReceivedWithAnyArgs().Log(LogLevel.Error, 0, default!, Arg.Any<Exception>(), default!);
+        logger
+            .ReceivedWithAnyArgs()
+            .Log(LogLevel.Error, 0, default, Arg.Any<Exception>(), default!);
 
         // Both dequeues happened (first threw, second cancelled the loop)
         await queue.Received(2).DequeueAsync(Arg.Any<CancellationToken>());
@@ -101,13 +114,14 @@ public class BackgroundTaskHostedServiceTests
 
         CancellationToken? captured = null;
 
-        queue.DequeueAsync(Arg.Any<CancellationToken>())
-             .Returns(ci =>
-             {
-                 captured = ci.Arg<CancellationToken>();
-                 cts.Cancel();
-                 return Task.FromResult<Func<CancellationToken, Task>>(_ => Task.CompletedTask);
-             });
+        queue
+            .DequeueAsync(Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                captured = ci.Arg<CancellationToken>();
+                cts.Cancel();
+                return Task.FromResult<Func<CancellationToken, Task>>(_ => Task.CompletedTask);
+            });
 
         await sut.StartAsync(cts.Token);
 

@@ -35,12 +35,15 @@ public class ComponentViewsFactoryTests
         Assert.Null(path);
 
         // Verify a warning log occurred
-        logger.ReceivedWithAnyArgs(1).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Any<object>(),
-            Arg.Any<Exception?>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .ReceivedWithAnyArgs(1)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Any<object>(),
+                Arg.Any<Exception?>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -57,11 +60,14 @@ public class ComponentViewsFactoryTests
         Assert.Null(path);
 
         // Verify no warning logged
-        logger.ReceivedWithAnyArgs(0).Log(
-            LogLevel.Warning,
-            Arg.Any<EventId>(),
-            Arg.Any<object>(),
-            Arg.Any<Exception?>(),
-            Arg.Any<Func<object, Exception?, string>>());
+        logger
+            .ReceivedWithAnyArgs(0)
+            .Log(
+                LogLevel.Warning,
+                Arg.Any<EventId>(),
+                Arg.Any<object>(),
+                Arg.Any<Exception?>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 }

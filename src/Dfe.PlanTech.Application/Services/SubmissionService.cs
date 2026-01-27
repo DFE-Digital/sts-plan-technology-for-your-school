@@ -13,16 +13,23 @@ public class SubmissionService(
     ISubmissionWorkflow submissionWorkflow
 ) : ISubmissionService
 {
-    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
-    private readonly ISubmissionWorkflow _submissionWorkflow = submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
+    private readonly IRecommendationWorkflow _recommendationWorkflow =
+        recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
+    private readonly ISubmissionWorkflow _submissionWorkflow =
+        submissionWorkflow ?? throw new ArgumentNullException(nameof(submissionWorkflow));
 
-    public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(int establishmentId, QuestionnaireSectionEntry section)
+    public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(
+        int establishmentId,
+        QuestionnaireSectionEntry section
+    )
     {
         // Check if an in-progress submission already exists
-        var inProgressSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
-            establishmentId,
-            section,
-            status: SubmissionStatus.InProgress);
+        var inProgressSubmission =
+            await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status: SubmissionStatus.InProgress
+            );
 
         if (inProgressSubmission is not null)
         {
@@ -32,19 +39,27 @@ public class SubmissionService(
         return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
     }
 
-    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByEstablishmentIdAsync(
-        int establishmentId
-    )
+    public Task<
+        Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+    > GetLatestRecommendationStatusesByEstablishmentIdAsync(int establishmentId)
     {
-        return _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
+        return _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
+            establishmentId
+        );
     }
 
-    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(int establishmentId, QuestionnaireSectionEntry section, SubmissionStatus status)
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        SubmissionStatus status
+    )
     {
-        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(establishmentId, section, status);
-        return submission is null
-            ? null
-            : new SubmissionResponsesModel(submission, section);
+        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+            establishmentId,
+            section,
+            status
+        );
+        return submission is null ? null : new SubmissionResponsesModel(submission, section);
     }
 
     public Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
@@ -55,22 +70,24 @@ public class SubmissionService(
     public async Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(
         int establishmentId,
         QuestionnaireSectionEntry section,
-        SubmissionStatus? status)
+        SubmissionStatus? status
+    )
     {
-        var latestSubmission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
-            establishmentId,
-            section,
-            status);
+        var latestSubmission =
+            await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+                establishmentId,
+                section,
+                status
+            );
 
         bool isNullSubmissionOrInvalidStatus =
-            latestSubmission == null ||
-            latestSubmission.Status == SubmissionStatus.Inaccessible ||
-            latestSubmission.Status == SubmissionStatus.Obsolete;
+            latestSubmission == null
+            || latestSubmission.Status == SubmissionStatus.Inaccessible
+            || latestSubmission.Status == SubmissionStatus.Obsolete;
 
         if (isNullSubmissionOrInvalidStatus)
         {
-            return new SubmissionRoutingDataModel
-            (
+            return new SubmissionRoutingDataModel(
                 nextQuestion: section.Questions.First(),
                 questionnaireSection: section,
                 submission: null,
@@ -81,10 +98,9 @@ public class SubmissionService(
         var submissionResponsesModel = new SubmissionResponsesModel(latestSubmission!, section);
 
         var lastResponse = submissionResponsesModel.Responses.Last();
-        var cmsLastAnswer = section.Questions
-            .FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))?
-            .Answers
-            .FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
+        var cmsLastAnswer = section
+            .Questions.FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))
+            ?.Answers.FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
 
         SubmissionStatus sectionStatus;
 
@@ -99,8 +115,7 @@ public class SubmissionService(
             sectionStatus = latestSubmission.Status;
         }
 
-        return new SubmissionRoutingDataModel
-        (
+        return new SubmissionRoutingDataModel(
             nextQuestion: cmsLastAnswer?.NextQuestion,
             questionnaireSection: section,
             submission: submissionResponsesModel,
@@ -108,7 +123,10 @@ public class SubmissionService(
         );
     }
 
-    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(int establishmentId, IEnumerable<string> sectionIds)
+    public Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(
+        int establishmentId,
+        IEnumerable<string> sectionIds
+    )
     {
         return _submissionWorkflow.GetSectionStatusesAsync(establishmentId, sectionIds);
     }
@@ -118,9 +136,19 @@ public class SubmissionService(
         return _submissionWorkflow.SetLatestSubmissionViewedAsync(establishmentId, sectionId);
     }
 
-    public Task<int> SubmitAnswerAsync(int userId, int activeEstablishmentId, int userEstablishmentId, SubmitAnswerModel answerModel)
+    public Task<int> SubmitAnswerAsync(
+        int userId,
+        int activeEstablishmentId,
+        int userEstablishmentId,
+        SubmitAnswerModel answerModel
+    )
     {
-        return _submissionWorkflow.SubmitAnswer(userId, activeEstablishmentId, userEstablishmentId, answerModel);
+        return _submissionWorkflow.SubmitAnswer(
+            userId,
+            activeEstablishmentId,
+            userEstablishmentId,
+            answerModel
+        );
     }
 
     public Task ConfirmCheckAnswersAsync(int submissionId)
@@ -128,9 +156,21 @@ public class SubmissionService(
         return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
-    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(int establishmentId, int? matEstablishmentId, int submissionId, int userId, QuestionnaireSectionEntry section)
+    public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+        int establishmentId,
+        int? matEstablishmentId,
+        int submissionId,
+        int userId,
+        QuestionnaireSectionEntry section
+    )
     {
-        return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(establishmentId, matEstablishmentId, submissionId, userId, section);
+        return _submissionWorkflow.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+            establishmentId,
+            matEstablishmentId,
+            submissionId,
+            userId,
+            section
+        );
     }
 
     public async Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId)

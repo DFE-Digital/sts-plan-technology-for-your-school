@@ -26,15 +26,19 @@ public class DatabaseFixture : IAsyncLifetime
 
         // Run DbUp migrations
         EnsureDatabase.For.SqlDatabase(ConnectionString);
-        var upgrader = DeployChanges.To
-            .SqlDatabase(ConnectionString)
+        var upgrader = DeployChanges
+            .To.SqlDatabase(ConnectionString)
             .WithScriptsEmbeddedInAssembly(
                 typeof(DatabaseUpgrader.Options).Assembly,
                 s =>
                 {
                     filterOutput.Add(s);
-                    return s.StartsWith("Dfe.PlanTech.DatabaseUpgrader.Scripts", StringComparison.Ordinal);
-                })
+                    return s.StartsWith(
+                        "Dfe.PlanTech.DatabaseUpgrader.Scripts",
+                        StringComparison.Ordinal
+                    );
+                }
+            )
             .LogToConsole()
             .Build();
         var result = upgrader.PerformUpgrade();

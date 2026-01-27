@@ -19,5 +19,9 @@ public interface IRichTextContentPartRenderer
     /// <param name="rendererCollection"></param>
     /// <param name="stringBuilder"></param>
     /// <returns></returns>
-    public StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder);
+    public StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    );
 }

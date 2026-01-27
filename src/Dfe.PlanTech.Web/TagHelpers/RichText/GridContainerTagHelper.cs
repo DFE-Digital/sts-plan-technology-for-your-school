@@ -9,7 +9,8 @@ public class GridContainerTagHelper(
     ICardContainerContentPartRenderer cardContentPartRenderer
 ) : TagHelper
 {
-    private readonly ICardContainerContentPartRenderer _cardContentPartRenderer = cardContentPartRenderer ?? throw new ArgumentNullException(nameof(cardContentPartRenderer));
+    private readonly ICardContainerContentPartRenderer _cardContentPartRenderer =
+        cardContentPartRenderer ?? throw new ArgumentNullException(nameof(cardContentPartRenderer));
 
     public IReadOnlyList<ComponentCardEntry>? Content { get; set; }
 

@@ -5,9 +5,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 public class ViewHelpersTests
 {
     [Theory]
-    [InlineData("Hello, World!", "hello-world")]               // punctuation stripped, space -> hyphen
-    [InlineData("C# & .NET 9", "c-net-9")]                     // symbols stripped, digits kept
-    [InlineData("Room 101", "room-101")]                       // digits preserved
+    [InlineData("Hello, World!", "hello-world")] // punctuation stripped, space -> hyphen
+    [InlineData("C# & .NET 9", "c-net-9")] // symbols stripped, digits kept
+    [InlineData("Room 101", "room-101")] // digits preserved
     [InlineData("Under_score and-dash", "underscore-anddash")] // '_' and '-' stripped, spaces -> hyphens
     public void Slugify_CommonCases(string input, string expected)
     {
@@ -36,7 +36,7 @@ public class ViewHelpersTests
     [Fact]
     public void Slugify_Tabs_And_Newlines_AreNotConverted_ToHyphens()
     {
-        var input = "A B\tC\nD";        // space, tab, newline
+        var input = "A B\tC\nD"; // space, tab, newline
         var slug = input.Slugify();
         // Only spaces become '-'; tabs/newlines remain
         Assert.Equal("a-b\tc\nd", slug);

@@ -3,10 +3,10 @@ name: QA Visualiser Lint and Test
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ "main", "development" ]
+    branches: ['main', 'development']
     paths:
-      - "contentful/qa-visualiser/**"
-      - ".github/workflows/qa-viz-tests.yml"
+      - 'contentful/qa-visualiser/**'
+      - '.github/workflows/qa-viz-tests.yml'
 
 jobs:
   run-tests:

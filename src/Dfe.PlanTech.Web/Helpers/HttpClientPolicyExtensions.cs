@@ -6,9 +6,7 @@ namespace Dfe.PlanTech.Web.Helpers;
 public static class HttpClientPolicyExtensions
 {
     public static void AddRetryPolicy(IHttpClientBuilder builder) =>
-        builder
-            .SetHandlerLifetime(TimeSpan.FromMinutes(5))
-            .AddPolicyHandler(GetRetryPolicy());
+        builder.SetHandlerLifetime(TimeSpan.FromMinutes(5)).AddPolicyHandler(GetRetryPolicy());
 
     public static IAsyncPolicy<HttpResponseMessage> GetRetryPolicy() =>
         HttpPolicyExtensions

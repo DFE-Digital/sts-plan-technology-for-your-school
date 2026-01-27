@@ -29,13 +29,13 @@ Feature: Recommendations Status
       Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "3, 2, 4"
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "Not started"
       And I click the recommendation link "Recommendation Header - C2 - S1 - Q1" on the category landing page
-      
+
       # In Progress
       When I change the recommendation status to "In progress" and save it
       Then I should see a confirmation panel saying "Status updated to 'In progress'"
       Then recommendation status is shown as "In progress"
       Then recommendation status in the header matches the selected status in the form
-      
+
       When I click the non-js back link
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "In progress"
       Then I click the recommendation link "Recommendation Header - C2 - S1 - Q1" on the category landing page
@@ -60,6 +60,3 @@ Feature: Recommendations Status
       When I click the non-js back link
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "Not started"
       Then I click the recommendation link "Recommendation Header - C2 - S1 - Q1" on the category landing page
-      
-
-

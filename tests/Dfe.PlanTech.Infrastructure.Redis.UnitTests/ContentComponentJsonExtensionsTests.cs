@@ -16,15 +16,26 @@ public class ContentComponentJsonExtensionsTests
     {
         var options = new JsonSerializerOptions()
         {
-            TypeInfoResolver = new DefaultJsonTypeInfoResolver().WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentfulEntry>)
-                                                                .WithAddedModifier(ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<IContentfulEntry>)
+            TypeInfoResolver = new DefaultJsonTypeInfoResolver()
+                .WithAddedModifier(
+                    ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<ContentfulEntry>
+                )
+                .WithAddedModifier(
+                    ContentComponentJsonExtensions.AddContentComponentPolymorphicInfo<IContentfulEntry>
+                ),
         };
 
         var typeInfo = options.GetTypeInfo(type);
         Assert.NotNull(typeInfo);
         Assert.NotNull(typeInfo.PolymorphismOptions);
-        Assert.Equal("$" + type.Name.ToLower(), typeInfo.PolymorphismOptions.TypeDiscriminatorPropertyName);
+        Assert.Equal(
+            "$" + type.Name.ToLower(),
+            typeInfo.PolymorphismOptions.TypeDiscriminatorPropertyName
+        );
         Assert.True(typeInfo.PolymorphismOptions.IgnoreUnrecognizedTypeDiscriminators);
-        Assert.Equal(JsonUnknownDerivedTypeHandling.FailSerialization, typeInfo.PolymorphismOptions.UnknownDerivedTypeHandling);
+        Assert.Equal(
+            JsonUnknownDerivedTypeHandling.FailSerialization,
+            typeInfo.PolymorphismOptions.UnknownDerivedTypeHandling
+        );
     }
 }

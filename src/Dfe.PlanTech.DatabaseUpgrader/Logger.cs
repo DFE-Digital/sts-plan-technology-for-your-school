@@ -1,4 +1,3 @@
-
 namespace Dfe.PlanTech.DatabaseUpgrader;
 
 public class Logger

@@ -9,7 +9,9 @@ namespace Dfe.PlanTech.Application.UnitTests.Workflows;
 public class EstablishmentWorkflowTests
 {
     private readonly IEstablishmentRepository _estRepo = Substitute.For<IEstablishmentRepository>();
-    private readonly IEstablishmentLinkRepository _linkRepo = Substitute.For<IEstablishmentLinkRepository>();
+    private readonly IEstablishmentLinkRepository _linkRepo =
+        Substitute.For<IEstablishmentLinkRepository>();
+    private static readonly string[] abString = new[] { "A", "B" };
 
     private EstablishmentWorkflow CreateServiceUnderTest() =>
         new EstablishmentWorkflow(_estRepo, _linkRepo);
@@ -17,14 +19,21 @@ public class EstablishmentWorkflowTests
     // ── Helpers: create minimal entities that map via AsDto() in YOUR codebase ──
     // Replace these types with your real entity classes (what the repos return),
     // and set properties so that AsDto() maps to the asserted DTOs.
-    private EstablishmentEntity MakeEstablishment(int id, string urn, string name)
-        => new EstablishmentEntity { Id = id, EstablishmentRef = urn, OrgName = name };
+    private static EstablishmentEntity MakeEstablishment(int id, string urn, string name) =>
+        new EstablishmentEntity
+        {
+            Id = id,
+            EstablishmentRef = urn,
+            OrgName = name,
+        };
 
-    private EstablishmentLinkEntity MakeLink(int id, string urn, string name)
-        => new EstablishmentLinkEntity { Id = id, Urn = urn, EstablishmentName = name };
-
-    private GroupReadActivityEntity MakeRead(int id, int userId, int selectedEstablishmentId)
-        => new GroupReadActivityEntity { Id = id, UserId = userId, SelectedEstablishmentId = selectedEstablishmentId };
+    private static EstablishmentLinkEntity MakeLink(int id, string urn, string name) =>
+        new EstablishmentLinkEntity
+        {
+            Id = id,
+            Urn = urn,
+            EstablishmentName = name,
+        };
 
     // ────────────────────────────────────────────────────────────────────────────
     // GetOrCreateEstablishmentAsync(EstablishmentModel)
@@ -36,7 +45,12 @@ public class EstablishmentWorkflowTests
         var serviceUnderTest = CreateServiceUnderTest();
         var urn = "12345";
         var name = "testName";
-        var model = new EstablishmentModel { Id = Guid.NewGuid(), Urn = urn, Name = name };
+        var model = new EstablishmentModel
+        {
+            Id = Guid.NewGuid(),
+            Urn = urn,
+            Name = name,
+        };
         var establishment = MakeEstablishment(10, urn, name);
 
         _estRepo.GetEstablishmentByReferenceAsync(urn).Returns(establishment);
@@ -49,7 +63,9 @@ public class EstablishmentWorkflowTests
         Assert.Equal(name, dto.OrgName);
 
         await _estRepo.Received(1).GetEstablishmentByReferenceAsync(urn);
-        await _estRepo.DidNotReceive().CreateEstablishmentFromModelAsync(Arg.Any<EstablishmentModel>());
+        await _estRepo
+            .DidNotReceive()
+            .CreateEstablishmentFromModelAsync(Arg.Any<EstablishmentModel>());
     }
 
     [Fact]
@@ -58,11 +74,11 @@ public class EstablishmentWorkflowTests
         var serviceUnderTest = CreateServiceUnderTest();
         var model = new EstablishmentModel { Urn = "999", Name = "New School" };
 
-        _estRepo.GetEstablishmentByReferenceAsync("999")
-                .Returns((EstablishmentEntity?)null);
+        _estRepo.GetEstablishmentByReferenceAsync("999").Returns((EstablishmentEntity?)null);
 
-        _estRepo.CreateEstablishmentFromModelAsync(model)
-                .Returns(MakeEstablishment(77, "999", "New School"));
+        _estRepo
+            .CreateEstablishmentFromModelAsync(model)
+            .Returns(MakeEstablishment(77, "999", "New School"));
 
         var dto = await serviceUnderTest.GetOrCreateEstablishmentAsync(model);
 
@@ -82,14 +98,20 @@ public class EstablishmentWorkflowTests
         var establishmentReference = "ABC123";
         var name = "testName";
 
-        _estRepo.GetEstablishmentByReferenceAsync(establishmentReference)
-                .Returns((EstablishmentEntity?)null);
+        _estRepo
+            .GetEstablishmentByReferenceAsync(establishmentReference)
+            .Returns((EstablishmentEntity?)null);
 
-        _estRepo.CreateEstablishmentFromModelAsync(
-                Arg.Is<EstablishmentModel>(m => m.Urn == establishmentReference && m.Name == name))
+        _estRepo
+            .CreateEstablishmentFromModelAsync(
+                Arg.Is<EstablishmentModel>(m => m.Urn == establishmentReference && m.Name == name)
+            )
             .Returns(MakeEstablishment(5, establishmentReference, name));
 
-        var dto = await serviceUnderTest.GetOrCreateEstablishmentAsync(establishmentReference, name);
+        var dto = await serviceUnderTest.GetOrCreateEstablishmentAsync(
+            establishmentReference,
+            name
+        );
 
         Assert.Equal(5, dto.Id);
         Assert.Equal(name, dto.OrgName);
@@ -107,15 +129,21 @@ public class EstablishmentWorkflowTests
         var serviceUnderTest = CreateServiceUnderTest();
         var establishments = new[] { MakeEstablishment(1, "U1", "One") }.ToList();
 
-        _estRepo.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(r => r.Single() == "U1"))
-                .Returns(establishments);
+        _estRepo
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(r => r.Single() == "U1")
+            )
+            .Returns(establishments);
 
         var found = await serviceUnderTest.GetEstablishmentByReferenceAsync("U1");
         Assert.NotNull(found);
         Assert.Equal(1, found!.Id);
 
-        _estRepo.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(r => r.Single() == "MISSING"))
-                .Returns([]);
+        _estRepo
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(r => r.Single() == "MISSING")
+            )
+            .Returns([]);
 
         var missing = await serviceUnderTest.GetEstablishmentByReferenceAsync("MISSING");
         Assert.Null(missing);
@@ -132,17 +160,30 @@ public class EstablishmentWorkflowTests
         var establishments = new[]
         {
             MakeEstablishment(11, "A", "A School"),
-            MakeEstablishment(22, "B", "B School")
+            MakeEstablishment(22, "B", "B School"),
         }.ToList();
 
-        _estRepo.GetEstablishmentsByReferencesAsync(Arg.Is<IEnumerable<string>>(r => r.SequenceEqual(new[] { "A", "B" })))
-                .Returns(establishments);
+        _estRepo
+            .GetEstablishmentsByReferencesAsync(
+                Arg.Is<IEnumerable<string>>(r => r.SequenceEqual(abString))
+            )
+            .Returns(establishments);
 
-        var list = (await serviceUnderTest.GetEstablishmentsByReferencesAsync(new[] { "A", "B" })).ToList();
+        var list = (await serviceUnderTest.GetEstablishmentsByReferencesAsync(abString)).ToList();
 
-        Assert.Collection(list,
-            e => { Assert.Equal(11, e.Id); Assert.Equal("A School", e.OrgName); },
-            e => { Assert.Equal(22, e.Id); Assert.Equal("B School", e.OrgName); });
+        Assert.Collection(
+            list,
+            e =>
+            {
+                Assert.Equal(11, e.Id);
+                Assert.Equal("A School", e.OrgName);
+            },
+            e =>
+            {
+                Assert.Equal(22, e.Id);
+                Assert.Equal("B School", e.OrgName);
+            }
+        );
     }
 
     // ────────────────────────────────────────────────────────────────────────────
@@ -156,17 +197,28 @@ public class EstablishmentWorkflowTests
         var establishments = new[]
         {
             MakeLink(100, "URN-1", "Child 1"),
-            MakeLink(200, "URN-2", "Child 2")
+            MakeLink(200, "URN-2", "Child 2"),
         }.ToList();
 
-        _linkRepo.GetGroupEstablishmentsByEstablishmentIdAsync(42)
-                 .Returns(establishments);
+        _linkRepo.GetGroupEstablishmentsByEstablishmentIdAsync(42).Returns(establishments);
 
         var links = await serviceUnderTest.GetGroupEstablishments(42);
 
-        Assert.Collection(links,
-            l => { Assert.Equal(100, l.Id); Assert.Equal("URN-1", l.Urn); Assert.Equal("Child 1", l.EstablishmentName); },
-            l => { Assert.Equal(200, l.Id); Assert.Equal("URN-2", l.Urn); Assert.Equal("Child 2", l.EstablishmentName); });
+        Assert.Collection(
+            links,
+            l =>
+            {
+                Assert.Equal(100, l.Id);
+                Assert.Equal("URN-1", l.Urn);
+                Assert.Equal("Child 1", l.EstablishmentName);
+            },
+            l =>
+            {
+                Assert.Equal(200, l.Id);
+                Assert.Equal("URN-2", l.Urn);
+                Assert.Equal("Child 2", l.EstablishmentName);
+            }
+        );
     }
 
     // ────────────────────────────────────────────────────────────────────────────
@@ -182,7 +234,7 @@ public class EstablishmentWorkflowTests
             UserId = 7,
             UserEstablishmentId = 1,
             SelectedEstablishmentId = 2,
-            SelectedEstablishmentName = "Pick"
+            SelectedEstablishmentName = "Pick",
         };
 
         _linkRepo.RecordGroupSelection(model).Returns(999);
@@ -200,8 +252,14 @@ public class EstablishmentWorkflowTests
     [Fact]
     public void Ctor_Null_Repos_Throw()
     {
-        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(null!, _linkRepo));
-        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(_estRepo, null!));
-        Assert.Throws<ArgumentNullException>(() => new EstablishmentWorkflow(null!, null!));
+        Assert.Throws<ArgumentNullException>(() =>
+            new EstablishmentWorkflow(null!, _linkRepo)
+        );
+        Assert.Throws<ArgumentNullException>(() =>
+            new EstablishmentWorkflow(_estRepo, null!)
+        );
+        Assert.Throws<ArgumentNullException>(() =>
+            new EstablishmentWorkflow(null!, null!)
+        );
     }
 }

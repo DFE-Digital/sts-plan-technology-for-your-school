@@ -1,30 +1,27 @@
-describe("beta header", () => {
-  const expectedFeedbackLink = "https://forms.office.com/e/Jk5PuNWvGe";
+describe('beta header', () => {
+  const expectedFeedbackLink = 'https://forms.office.com/e/Jk5PuNWvGe';
 
-  const phaseBannerSelector = "div.govuk-phase-banner";
+  const phaseBannerSelector = 'div.govuk-phase-banner';
 
   beforeEach(() => {
-    cy.visit("/");
+    cy.visit('/');
   });
 
-  it("displays phase banner", () => {
-    cy.get(phaseBannerSelector).should("exist").and("be.visible");
+  it('displays phase banner', () => {
+    cy.get(phaseBannerSelector).should('exist').and('be.visible');
   });
 
   it("should display 'Beta' tag", () => {
     const tag = cy.get(`${phaseBannerSelector} strong.govuk-tag`);
 
-    tag.should("exist").and("be.visible");
+    tag.should('exist').and('be.visible');
 
-    tag.invoke("text").should("match", /^\s*Beta\s*$/);
+    tag.invoke('text').should('match', /^\s*Beta\s*$/);
   });
 
-  it("should link to feedback url", () => {
+  it('should link to feedback url', () => {
     const feedbackLink = cy.get(`${phaseBannerSelector} a`);
 
-    feedbackLink
-      .should("exist")
-      .and("have.attr", "href")
-      .and("include", expectedFeedbackLink);
+    feedbackLink.should('exist').and('have.attr', 'href').and('include', expectedFeedbackLink);
   });
 });

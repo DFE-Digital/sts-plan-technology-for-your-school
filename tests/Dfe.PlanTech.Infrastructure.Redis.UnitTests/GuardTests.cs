@@ -6,6 +6,7 @@ namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
 public class GuardTests
 {
     static Exception ExceptionFactory() => new GuardException("Custom exception");
+
     static bool Constraint(int x) => x > 10;
 
     [Fact]
@@ -111,7 +112,9 @@ public class GuardTests
     public void IsTrue_ThrowsTypedException()
     {
         bool condition = false;
-        Assert.Throws<InvalidOperationException>(() => GuardModel.IsTrue<InvalidOperationException>(condition));
+        Assert.Throws<InvalidOperationException>(() =>
+            GuardModel.IsTrue<InvalidOperationException>(condition)
+        );
     }
 
     [Fact]
@@ -129,7 +132,6 @@ public class GuardTests
         bool condition = false;
         Assert.Throws<GuardException>(() => GuardModel.IsTrue(condition, ExceptionFactory));
     }
-
 
     [Fact]
     public void IsFalseWithExceptionType_ThrowsExceptionOfSpecifiedType_WhenConditionIsTrue()
@@ -168,7 +170,9 @@ public class GuardTests
     public void IsFalse_ThrowsTypedException()
     {
         bool condition = true;
-        Assert.Throws<InvalidOperationException>(() => GuardModel.IsFalse<InvalidOperationException>(condition));
+        Assert.Throws<InvalidOperationException>(() =>
+            GuardModel.IsFalse<InvalidOperationException>(condition)
+        );
     }
 
     [Fact]
@@ -192,5 +196,4 @@ public class GuardTests
 
         Assert.Equal("", stringToModify);
     }
-
 }

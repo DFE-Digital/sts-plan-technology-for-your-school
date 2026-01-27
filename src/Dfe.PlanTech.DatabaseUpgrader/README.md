@@ -13,9 +13,11 @@ When running the project, it takes several command line arguments:
 | sql-params       | p          | Any SQL params that might be needed for SQL scripts                | No       | -p firstName=Bob surname=Dole                                                    |
 
 ## SQL Transactions
-DbUp has been configured to run in single transaction mode which means if one script fails then all changes will be rolled back.  There are limitations to this, for more details please refer to the following [Microsoft Article](https://learn.microsoft.com/en-us/sql/t-sql/language-elements/transactions-sql-data-warehouse?view=aps-pdw-2016-au7#limitations-and-restrictions).
+
+DbUp has been configured to run in single transaction mode which means if one script fails then all changes will be rolled back. There are limitations to this, for more details please refer to the following [Microsoft Article](https://learn.microsoft.com/en-us/sql/t-sql/language-elements/transactions-sql-data-warehouse?view=aps-pdw-2016-au7#limitations-and-restrictions).
 
 ## MSSQL scripts.
+
 **⚠️ Do not add the sql scripts directly within Visual Studio, they are picked up automatically when added to the scripts folder ⚠️**
 
 The Scripts folder contains a folder for each year, which contains the MSSQL scripts for that year. The naming convention for a MSSQL scripts is `[year]_[time]_ScriptName.sql`. The scripts are executed in ascending order, so it's important to make sure that the year and time of the script name reflects the intended order of execution.

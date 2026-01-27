@@ -5,13 +5,15 @@ using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Application.Services;
 
-public class UserService(
-    IUserWorkflow userWorkflow
-) : IUserService
+public class UserService(IUserWorkflow userWorkflow) : IUserService
 {
-    private readonly IUserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
+    private readonly IUserWorkflow _userWorkflow =
+        userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 
-    public Task<SqlUserSettingsDto> UpsertUserSettingsAsync(int userId, RecommendationSortOrder sortOrder)
+    public Task<SqlUserSettingsDto> UpsertUserSettingsAsync(
+        int userId,
+        RecommendationSortOrder sortOrder
+    )
     {
         return _userWorkflow.UpsertUserSettingsAsync(userId, sortOrder);
     }

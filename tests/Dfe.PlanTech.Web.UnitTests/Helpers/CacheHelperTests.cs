@@ -42,11 +42,15 @@ public class CacheHelperTests
         int factoryCalls = 0;
 
         // Act
-        var result = _sut.Get(key, () =>
-        {
-            factoryCalls++;
-            return 123;
-        }, TimeSpan.FromMinutes(1));
+        var result = _sut.Get(
+            key,
+            () =>
+            {
+                factoryCalls++;
+                return 123;
+            },
+            TimeSpan.FromMinutes(1)
+        );
 
         // Assert
         Assert.Equal(123, result);
@@ -72,11 +76,15 @@ public class CacheHelperTests
         var key = "key4";
         _memoryCache.Set(key, 77);
 
-        var result = await _sut.GetAsync(key, async () =>
-        {
-            await Task.Delay(1);
-            return 888;
-        }, TimeSpan.FromMinutes(1));
+        var result = await _sut.GetAsync(
+            key,
+            async () =>
+            {
+                await Task.Delay(1);
+                return 888;
+            },
+            TimeSpan.FromMinutes(1)
+        );
 
         Assert.Equal(77, result); // should come from cache
     }
@@ -87,11 +95,15 @@ public class CacheHelperTests
         var key = "key5";
         int calls = 0;
 
-        var result = await _sut.GetAsync(key, () =>
-        {
-            calls++;
-            return Task.FromResult(321);
-        }, TimeSpan.FromMinutes(1));
+        var result = await _sut.GetAsync(
+            key,
+            () =>
+            {
+                calls++;
+                return Task.FromResult(321);
+            },
+            TimeSpan.FromMinutes(1)
+        );
 
         Assert.Equal(321, result);
         Assert.Equal(1, calls);

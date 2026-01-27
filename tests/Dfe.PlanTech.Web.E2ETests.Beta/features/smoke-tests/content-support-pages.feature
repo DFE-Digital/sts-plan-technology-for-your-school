@@ -1,7 +1,7 @@
 @smoke
-Feature: Content & Support Page 
+Feature: Content & Support Page
 
-  Scenario: 
+  Scenario:
     Given I visit the information asset register content support page
     Then I should see an attachment block
     And the attachment should include a downloadable link
@@ -19,5 +19,5 @@ Feature: Content & Support Page
     Then the first accordion section should be collapsed
 
     And I should see the GOV.UK footer with expected links
-    
+
     And I should see the beta header

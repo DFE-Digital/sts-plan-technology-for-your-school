@@ -38,12 +38,15 @@ public class SubmissionResponsesModel
         DateLastUpdated = submission.DateLastUpdated;
         Maturity = submission.Maturity;
         Establishment = submission.Establishment;
-        Responses = submission.Responses
-            .Select(response => new QuestionWithAnswerModel(response, section))
+        Responses = submission
+            .Responses.Select(response => new QuestionWithAnswerModel(response, section))
             .GroupBy(questionWithAnswer => questionWithAnswer.QuestionSysId)
-            .Select(group => group.OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated).First())
+            .Select(group =>
+                group
+                    .OrderByDescending(questionWithAnswer => questionWithAnswer.DateCreated)
+                    .First()
+            )
             .ToList();
         Status = submission.Status;
     }
 }
-

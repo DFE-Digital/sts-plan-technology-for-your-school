@@ -11,11 +11,12 @@ public interface IRecommendationWorkflow
 
     Task<IEnumerable<SqlEstablishmentRecommendationHistoryDto>> GetRecommendationHistoryAsync(
         string recommendationContentfulReference,
-        int establishmentId);
+        int establishmentId
+    );
 
-    Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesByEstablishmentIdAsync(
-            int establishmentId
-        );
+    Task<
+        Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+    > GetLatestRecommendationStatusesByEstablishmentIdAsync(int establishmentId);
 
     Task UpdateRecommendationStatusAsync(
         string recommendationContentfulReference,

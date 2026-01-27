@@ -5,7 +5,7 @@ on:
     inputs:
       environment:
         type: choice
-        description: "The environment to run infrastructure deployment on:"
+        description: 'The environment to run infrastructure deployment on:'
         required: true
         options: ['Dev', 'Tst', 'Staging', 'Production']
 
@@ -17,7 +17,7 @@ env:
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
   ARM_USE_OIDC: true
 
-  AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP	}}-kv
+  AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}-kv
   AZ_SA_COSTING_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}costing
 
   TF_WORKING_DIRECTORY: terraform/container-app
@@ -25,7 +25,7 @@ env:
   TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
   TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
   TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-  
+
   container_app_min_replicas: ${{secrets.CONTAINER_MIN_REPLICAS}}
   container_app_max_replicas: ${{secrets.CONTAINER_MAX_REPLICAS}}
   container_app_http_concurrency: ${{secrets.CONTAINER_HTTP_CONCURRENCY}}
@@ -77,7 +77,8 @@ jobs:
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          sa-costing-name: $SA_COSTING_NAME
+          sa-costing-name: ${{ env.SA_COSTING_NAME }}
+          sa-costing-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
           az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
@@ -106,7 +107,7 @@ jobs:
             -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
 
       - name: Plan Terraform changes
-        run: terraform plan -var-file="normalisedTerraformVars.tfvars" -var="image_tag=$TF_VAR_image_tag" -var="workflow_runner_ip=$TF_VAR_github_ip"
+        run: terraform plan -var-file="normalisedTerraformVars.tfvars" -var="image_tag=$TF_VAR_image_tag" -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
 
       - name: Delete generated files
         shell: pwsh
@@ -117,7 +118,8 @@ jobs:
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          sa-costing-name: $SA_COSTING_NAME
+          sa-costing-name: ${{ env.SA_COSTING_NAME }}
+          sa-costing-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
           az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
@@ -170,7 +172,8 @@ jobs:
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          sa-costing-name: $SA_COSTING_NAME
+          sa-costing-name: ${{ env.SA_COSTING_NAME }}
+          sa-costing-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
           az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
@@ -200,7 +203,7 @@ jobs:
 
       - name: Apply Terraform changes
         id: apply
-        run: terraform apply -var-file="normalisedTerraformVars.tfvars" -var="image_tag=$TF_VAR_image_tag" -var="workflow_runner_ip=$TF_VAR_github_ip" -auto-approve
+        run: terraform apply -var-file="normalisedTerraformVars.tfvars" -var="image_tag=$TF_VAR_image_tag" -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" -auto-approve
 
       - name: Delete generated files
         shell: pwsh
@@ -211,7 +214,8 @@ jobs:
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          sa-costing-name: $SA_COSTING_NAME
+          sa-costing-name: ${{ env.SA_COSTING_NAME }}
+          sa-costing-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
           az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
           tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}

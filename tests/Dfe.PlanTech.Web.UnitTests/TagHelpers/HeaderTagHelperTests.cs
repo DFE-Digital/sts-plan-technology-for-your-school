@@ -30,7 +30,8 @@ public class HeaderComponentTagHelperTests
             tagName: "header",
             allAttributes: new TagHelperAttributeList(),
             items: new Dictionary<object, object>(),
-            uniqueId: "header-test");
+            uniqueId: "header-test"
+        );
     }
 
     private TagHelperOutput CreateTagHelperOutput()
@@ -43,7 +44,8 @@ public class HeaderComponentTagHelperTests
                 var tagHelperContent = new DefaultTagHelperContent();
                 tagHelperContent.SetContent("");
                 return Task.FromResult<TagHelperContent>(tagHelperContent);
-            });
+            }
+        );
     }
 
     [Theory]
@@ -53,19 +55,20 @@ public class HeaderComponentTagHelperTests
     [InlineData(HeaderTag.H1, "h1", HeaderSize.Medium)]
     [InlineData(HeaderTag.H1, "h1", HeaderSize.Large)]
     [InlineData(HeaderTag.H1, "h1", HeaderSize.ExtraLarge)]
-    public void Should_Render_Valid_Tag_And_Class(HeaderTag headerTag, string expectedTag, HeaderSize headerSize)
+    public void Should_Render_Valid_Tag_And_Class(
+        HeaderTag headerTag,
+        string expectedTag,
+        HeaderSize headerSize
+    )
     {
         var header = new ComponentHeaderEntry()
         {
             Text = "Header text",
             Tag = headerTag,
-            Size = headerSize
+            Size = headerSize,
         };
 
-        _tagHelper = new HeaderComponentTagHelper(_loggerSubstitute)
-        {
-            Model = header
-        };
+        _tagHelper = new HeaderComponentTagHelper(_loggerSubstitute) { Model = header };
 
         _tagHelper.Process(_context, _output);
 
@@ -95,16 +98,9 @@ public class HeaderComponentTagHelperTests
     [Fact]
     public async Task Should_LogWarning_When_HeaderTag_Is_Unknown()
     {
-        var header = new ComponentHeaderEntry()
-        {
-            Text = "Header text",
-            Tag = HeaderTag.Unknown
-        };
+        var header = new ComponentHeaderEntry() { Text = "Header text", Tag = HeaderTag.Unknown };
 
-        _tagHelper = new HeaderComponentTagHelper(_loggerSubstitute)
-        {
-            Model = header
-        };
+        _tagHelper = new HeaderComponentTagHelper(_loggerSubstitute) { Model = header };
 
         await _tagHelper.ProcessAsync(_context, _output);
 
@@ -122,15 +118,14 @@ public class HeaderComponentTagHelperTests
         {
             Text = "Header text",
             Tag = HeaderTag.H1,
-            Size = HeaderSize.Unknown
+            Size = HeaderSize.Unknown,
         };
 
-        _tagHelper = new HeaderComponentTagHelper(_loggerSubstitute)
-        {
-            Model = header
-        };
+        _tagHelper = new HeaderComponentTagHelper(_loggerSubstitute) { Model = header };
 
-        var exception = await Assert.ThrowsAsync<InvalidEnumArgumentException>(async () => await _tagHelper.ProcessAsync(_context, _output));
+        var exception = await Assert.ThrowsAsync<InvalidEnumArgumentException>(async () =>
+            await _tagHelper.ProcessAsync(_context, _output)
+        );
 
         Assert.Equal($"Could not find header size for {header.Size}", exception.Message);
     }

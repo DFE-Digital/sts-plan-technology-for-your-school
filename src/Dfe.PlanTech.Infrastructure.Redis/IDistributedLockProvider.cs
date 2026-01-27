@@ -22,7 +22,12 @@ public interface IDistributedLockProvider
     /// <param name="duration">The new duration to set for the lock's expiration.</param>
     /// <param name="databaseId">The Redis database ID to use. Defaults to -1, which means using the default database.</param>
     /// <returns>True if the lock was successfully extended; otherwise, false.</returns>
-    Task<bool> LockExtendAsync(string key, string lockValue, TimeSpan duration, int databaseId = -1);
+    Task<bool> LockExtendAsync(
+        string key,
+        string lockValue,
+        TimeSpan duration,
+        int databaseId = -1
+    );
 
     /// <summary>
     /// Waits for a distributed lock to be acquired.

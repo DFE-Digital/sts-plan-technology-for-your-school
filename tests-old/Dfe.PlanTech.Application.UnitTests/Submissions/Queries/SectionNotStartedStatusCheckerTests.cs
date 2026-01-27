@@ -9,14 +9,17 @@ namespace Dfe.PlanTech.Application.UnitTests.Submissions.Queries;
 
 public class SectionNotStartedStatusCheckerTests
 {
-    public readonly ISubmissionStatusChecker StatusChecker = SectionNotStartedStatusChecker.SectionNotStarted;
+    public readonly ISubmissionStatusChecker StatusChecker =
+        SectionNotStartedStatusChecker.SectionNotStarted;
 
     [Fact]
     public void Should_Match_NotStarted_Status()
     {
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.NotStarted, Completed = false });
+        processor.SectionStatus.Returns(
+            new SectionStatus() { Status = Status.NotStarted, Completed = false }
+        );
 
         var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
@@ -30,7 +33,9 @@ public class SectionNotStartedStatusCheckerTests
     {
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatus() { Status = status, Completed = status == Status.CompleteReviewed });
+        processor.SectionStatus.Returns(
+            new SectionStatus() { Status = status, Completed = status == Status.CompleteReviewed }
+        );
 
         var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
@@ -43,18 +48,16 @@ public class SectionNotStartedStatusCheckerTests
         var section = new Section()
         {
             Questions = new()
-          {
-        new Question(){
-          Slug = "question-one"
-        },
-        new Question(){
-          Slug = "question-two"
-        }
-          }
+            {
+                new Question() { Slug = "question-one" },
+                new Question() { Slug = "question-two" },
+            },
         };
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(section);
-        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.NotStarted, Completed = false });
+        processor.SectionStatus.Returns(
+            new SectionStatus() { Status = Status.NotStarted, Completed = false }
+        );
 
         await StatusChecker.ProcessSubmission(processor, default);
         Assert.Equal(Status.NotStarted, processor.Status);

@@ -21,9 +21,14 @@ public class SignedRequestAuthorisationPolicy(
     public const string HeaderSignedValues = "x-contentful-signed-headers";
     public const int RequestTimeToLiveMinutes = 5;
 
-    private readonly SigningSecretConfiguration _signingSecretConfiguration = signingSecretConfiguration ?? throw new ArgumentNullException(nameof(signingSecretConfiguration));
+    private readonly SigningSecretConfiguration _signingSecretConfiguration =
+        signingSecretConfiguration
+        ?? throw new ArgumentNullException(nameof(signingSecretConfiguration));
 
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, SignedRequestAuthorisationRequirement requirement)
+    protected override async Task HandleRequirementAsync(
+        AuthorizationHandlerContext context,
+        SignedRequestAuthorisationRequirement requirement
+    )
     {
         var signingSecret = _signingSecretConfiguration.SigningSecret;
         if (string.IsNullOrEmpty(signingSecret))
@@ -33,7 +38,10 @@ public class SignedRequestAuthorisationPolicy(
             return;
         }
 
-        if (context.Resource is HttpContext httpContext && await VerifyRequest(signingSecret, httpContext.Request))
+        if (
+            context.Resource is HttpContext httpContext
+            && await VerifyRequest(signingSecret, httpContext.Request)
+        )
         {
             context.Succeed(requirement);
             return;
@@ -49,38 +57,51 @@ public class SignedRequestAuthorisationPolicy(
     /// </summary>
     private async Task<bool> VerifyRequest(string signingKey, HttpRequest request)
     {
-        if (!request.Headers.TryGetValue(HeaderSignature, out var requestSignature) ||
-            !request.Headers.TryGetValue(HeaderTimestamp, out var requestTimestamp) ||
-            !request.Headers.TryGetValue(HeaderSignedValues, out var requestSignedHeaders) ||
-            string.IsNullOrEmpty(requestSignature) ||
-            string.IsNullOrEmpty(requestTimestamp) ||
-            string.IsNullOrEmpty(requestSignedHeaders))
+        if (
+            !request.Headers.TryGetValue(HeaderSignature, out var requestSignature)
+            || !request.Headers.TryGetValue(HeaderTimestamp, out var requestTimestamp)
+            || !request.Headers.TryGetValue(HeaderSignedValues, out var requestSignedHeaders)
+            || string.IsNullOrEmpty(requestSignature)
+            || string.IsNullOrEmpty(requestTimestamp)
+            || string.IsNullOrEmpty(requestSignedHeaders)
+        )
         {
             logger.LogError("Request to CMS route denied due to missing headers");
             return false;
         }
 
         // Check timestamp is within the TTL
-        var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(long.Parse(requestTimestamp!, CultureInfo.InvariantCulture));
+        var timestamp = DateTimeOffset.FromUnixTimeMilliseconds(
+            long.Parse(requestTimestamp!, CultureInfo.InvariantCulture)
+        );
         if (timestamp.AddMinutes(RequestTimeToLiveMinutes) <= DateTime.UtcNow)
         {
             logger.LogError("Request to CMS route denied due to expired timestamp");
             return false;
         }
 
-        var canonicalRepresentation = await CreateCanonicalRepresentation(request, requestSignedHeaders);
+        var canonicalRepresentation = await CreateCanonicalRepresentation(
+            request,
+            requestSignedHeaders
+        );
         var signature = CreateSignature(canonicalRepresentation, signingKey);
 
         return signature == requestSignature;
     }
 
-    public static async Task<string> CreateCanonicalRepresentation(HttpRequest request, StringValues signedHeaders)
+    public static async Task<string> CreateCanonicalRepresentation(
+        HttpRequest request,
+        StringValues signedHeaders
+    )
     {
         var requestPath = request.GetEncodedPathAndQuery();
-        var requestHeaders = string.Join(";", signedHeaders
-            .ToString()
-            .Split(',')
-            .Select(header => header.ToLower() + ":" + request.Headers[header]));
+        var requestHeaders = string.Join(
+            ";",
+            signedHeaders
+                .ToString()
+                .Split(',')
+                .Select(header => header.ToLower() + ":" + request.Headers[header])
+        );
 
         request.EnableBuffering();
         var requestBody = await new StreamReader(request.Body).ReadToEndAsync();

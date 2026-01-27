@@ -1,6 +1,6 @@
 # 0005 - Source Repository Hosting
 
-* **Status**: Accepted
+- **Status**: Accepted
 
 ## Context and Problem Statement
 
@@ -8,14 +8,14 @@ Where should the solution's source code be stored?
 
 ## Decision Drivers
 
-* Within DfE’s Technical Guidance
-* Open source as per Service Standard
-* Compatible with selected hosting platform and deployment tooling
+- Within DfE’s Technical Guidance
+- Open source as per Service Standard
+- Compatible with selected hosting platform and deployment tooling
 
 ## Considered Options
 
-* GitHub
-* Azure DevOps
+- GitHub
+- Azure DevOps
 
 ## Decision Outcome
 

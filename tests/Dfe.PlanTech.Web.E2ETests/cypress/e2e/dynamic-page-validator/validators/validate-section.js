@@ -1,5 +1,15 @@
-import { continueButtonText, FindPageForSlug, homePageSlug, ValidatePage } from "../helpers/index.js";
-import { validateCompletionTags, validateQuestionPages, validateCheckAnswersPage, validateAnswersHintAndUrl } from "./index.js";
+import {
+  continueButtonText,
+  FindPageForSlug,
+  homePageSlug,
+  ValidatePage,
+} from '../helpers/index.js';
+import {
+  validateCompletionTags,
+  validateQuestionPages,
+  validateCheckAnswersPage,
+  validateAnswersHintAndUrl,
+} from './index.js';
 
 /**
  * Validates sections using the given paths
@@ -10,36 +20,35 @@ import { validateCompletionTags, validateQuestionPages, validateCheckAnswersPage
  */
 
 export const validateAndTestSections = (section, paths, dataMapper) => {
+  for (const path of paths) {
+    it(`${section.name} should have interstitial page with correct content`, () => {
+      cy.visit(`${homePageSlug}`);
 
-    for (const path of paths) {
-        it(`${section.name} should have interstitial page with correct content`, () => {
-            cy.visit(`${homePageSlug}`);
+      const sectionSlug = section.interstitialPage.fields.slug;
+      cy.findSectionLink(section.name, sectionSlug).click();
 
-            const sectionSlug = section.interstitialPage.fields.slug;
-            cy.findSectionLink(section.name, sectionSlug).click();
-                
-            cy.url().should("include", sectionSlug);
+      cy.url().should('include', sectionSlug);
 
-            // Validate interstititial page content
-            const interstitialPage = FindPageForSlug({ slug: sectionSlug, dataMapper });
-            ValidatePage(sectionSlug, interstitialPage);
-        });
+      // Validate interstititial page content
+      const interstitialPage = FindPageForSlug({ slug: sectionSlug, dataMapper });
+      ValidatePage(sectionSlug, interstitialPage);
+    });
 
-        it(`${section.name} should have every question with correct content`, () => {
-            // Conduct self assessment according to path
-            cy.get("a.govuk-button.govuk-link").contains(continueButtonText).click();
-            validateQuestionPages(path, section, validateAnswersHintAndUrl);
-        });
+    it(`${section.name} should have every question with correct content`, () => {
+      // Conduct self assessment according to path
+      cy.get('a.govuk-button.govuk-link').contains(continueButtonText).click();
+      validateQuestionPages(path, section, validateAnswersHintAndUrl);
+    });
 
-        it(`${section.name} should have Check Answers page with correct content`, () => {
-            // Validate check answers page (questions and answers correspond to those listed in path) and return to self assessment page
-            validateCheckAnswersPage(path, section);
-            cy.url().should("include", homePageSlug);
-        });
+    it(`${section.name} should have Check Answers page with correct content`, () => {
+      // Validate check answers page (questions and answers correspond to those listed in path) and return to self assessment page
+      validateCheckAnswersPage(path, section);
+      cy.url().should('include', homePageSlug);
+    });
 
-        it(`${section.name} should show recent completion tags on self-assessment page`, () => {
-            // Validate self-assessment page post-section completion
-            validateCompletionTags(section);
-        });
-    }
-}
+    it(`${section.name} should show recent completion tags on self-assessment page`, () => {
+      // Validate self-assessment page post-section completion
+      validateCompletionTags(section);
+    });
+  }
+};

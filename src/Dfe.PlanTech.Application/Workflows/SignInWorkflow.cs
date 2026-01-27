@@ -11,11 +11,17 @@ public class SignInWorkflow(
     IUserRepository userRepository
 ) : ISignInWorkflow
 {
-    private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
-    private readonly ISignInRepository _signInRepository = signInRepository ?? throw new ArgumentNullException(nameof(signInRepository));
-    private readonly IUserRepository _userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+    private readonly IEstablishmentRepository _establishmentRepository =
+        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
+    private readonly ISignInRepository _signInRepository =
+        signInRepository ?? throw new ArgumentNullException(nameof(signInRepository));
+    private readonly IUserRepository _userRepository =
+        userRepository ?? throw new ArgumentNullException(nameof(userRepository));
 
-    public virtual async Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, EstablishmentModel establishmentModel)
+    public virtual async Task<SqlSignInDto> RecordSignIn(
+        string dfeSignInRef,
+        EstablishmentModel establishmentModel
+    )
     {
         var user = await GetOrCreateUserAsync(dfeSignInRef);
         var establishment = await GetOrCreateEstablishmentAsync(establishmentModel);
@@ -44,9 +50,13 @@ public class SignInWorkflow(
         return newUser.AsDto();
     }
 
-    private async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
+    private async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
+        EstablishmentModel establishmentModel
+    )
     {
-        var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(establishmentModel.Reference);
+        var existingEstablishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(
+            establishmentModel.Reference
+        );
         if (existingEstablishment is not null)
         {
             return existingEstablishment.AsDto();
@@ -60,11 +70,12 @@ public class SignInWorkflow(
                 ? null
                 : new IdWithNameModel { Name = establishmentModel.Type.Name },
             Name = establishmentModel.Name,
-            GroupUid = establishmentModel.Uid
+            GroupUid = establishmentModel.Uid,
         };
 
-        var newEstablishment = await _establishmentRepository
-            .CreateEstablishmentFromModelAsync(newEstablishmentData);
+        var newEstablishment = await _establishmentRepository.CreateEstablishmentFromModelAsync(
+            newEstablishmentData
+        );
 
         return newEstablishment.AsDto();
     }

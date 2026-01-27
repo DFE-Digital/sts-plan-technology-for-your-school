@@ -20,11 +20,13 @@ public class ReviewAnswersViewBuilder(
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
-    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly ISubmissionService _submissionService =
+        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     public const string ViewAnswersViewName = "~/Views/ViewAnswers/ViewAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
-    public const string InlineRecommendationUnavailableErrorMessage = "Unable to save. Please try again. If this problem continues you can";
+    public const string InlineRecommendationUnavailableErrorMessage =
+        "Unable to save. Please try again. If this problem continues you can";
 
     public async Task<IActionResult> RouteToCheckAnswers(
         Controller controller,
@@ -35,8 +37,11 @@ public class ReviewAnswersViewBuilder(
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
 
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
             establishmentId,
@@ -53,11 +58,20 @@ public class ReviewAnswersViewBuilder(
             case SubmissionStatus.InProgress:
             case SubmissionStatus.CompleteNotReviewed:
             case SubmissionStatus.CompleteReviewed:
-                viewModel = await BuildCheckAnswersViewModel(submissionRoutingData, categorySlug, sectionSlug, errorMessage);
+                viewModel = await BuildCheckAnswersViewModel(
+                    submissionRoutingData,
+                    categorySlug,
+                    sectionSlug,
+                    errorMessage
+                );
                 return controller.View(CheckAnswersViewName, viewModel);
 
             default:
-                return controller.RedirectToGetQuestionBySlug(categorySlug, sectionSlug, submissionRoutingData.NextQuestion!.Slug);
+                return controller.RedirectToGetQuestionBySlug(
+                    categorySlug,
+                    sectionSlug,
+                    submissionRoutingData.NextQuestion!.Slug
+                );
         }
     }
 
@@ -69,8 +83,11 @@ public class ReviewAnswersViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug)
-            ?? throw new ContentfulDataUnavailableException($"Could not find section for slug {sectionSlug}");
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
 
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
             establishmentId,
@@ -94,11 +111,20 @@ public class ReviewAnswersViewBuilder(
                         $"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}"
                     );
 
-                viewModel = BuildViewAnswersViewModel(section, submissionRoutingData, categorySlug, sectionSlug);
+                viewModel = BuildViewAnswersViewModel(
+                    section,
+                    submissionRoutingData,
+                    categorySlug,
+                    sectionSlug
+                );
                 return controller.View(ViewAnswersViewName, viewModel);
 
             default:
-                return controller.RedirectToGetQuestionBySlug(categorySlug, sectionSlug, submissionRoutingData.NextQuestion!.Slug);
+                return controller.RedirectToGetQuestionBySlug(
+                    categorySlug,
+                    sectionSlug,
+                    submissionRoutingData.NextQuestion!.Slug
+                );
         }
     }
 
@@ -120,7 +146,7 @@ public class ReviewAnswersViewBuilder(
 
             await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
                 establishmentId,
-                userOrganisationId,
+                CurrentUser.IsMat ? userOrganisationId : null,
                 submissionId,
                 userId,
                 section
@@ -128,7 +154,11 @@ public class ReviewAnswersViewBuilder(
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "An error occurred while confirming a user's answers for submission {SubmissionId}", submissionId);
+            Logger.LogError(
+                e,
+                "An error occurred while confirming a user's answers for submission {SubmissionId}",
+                submissionId
+            );
             controller.TempData["ErrorMessage"] = InlineRecommendationUnavailableErrorMessage;
             return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
         }
@@ -147,19 +177,24 @@ public class ReviewAnswersViewBuilder(
         var submissionResponses = submissionModel.Submission?.Responses ?? [];
 
         // Get ordered CORE responses from section questions and select out the responses from the submission
-        var orderedCoreResponses = section.Questions
-            .Select(q => submissionModel.Submission?.Responses?.FirstOrDefault(r =>
-                q.Sys is not null && r.QuestionSysId == q.Sys.Id))
+        var orderedCoreResponses = section
+            .Questions.Select(q =>
+                submissionModel.Submission?.Responses?.FirstOrDefault(r =>
+                    q.Sys is not null && r.QuestionSysId == q.Sys.Id
+                )
+            )
             .ToList();
 
         // Get ordered Retired responses from section questions and select out the responses from the submission
         var orderedRetiredResponses = submissionResponses.OrderBy(r => r.Order).ToList();
 
         //Join the two lists together with core first so we only rely on the order columnn for the retired responses
-        List<QuestionWithAnswerModel> responses = [.. orderedCoreResponses
-            .Union(orderedRetiredResponses)
-            .Where(r => r != null)
-            .Cast<QuestionWithAnswerModel>()
+        List<QuestionWithAnswerModel> responses =
+        [
+            .. orderedCoreResponses
+                .Union(orderedRetiredResponses)
+                .Where(r => r != null)
+                .Cast<QuestionWithAnswerModel>(),
         ];
 
         var viewModel = new ViewAnswersViewModel
@@ -168,20 +203,27 @@ public class ReviewAnswersViewBuilder(
             TopicName = section.Name,
             Responses = responses,
             CategorySlug = categorySlug,
-            SectionSlug = sectionSlug
+            SectionSlug = sectionSlug,
         };
 
         return viewModel;
     }
 
     private Task<ReviewAnswersViewModel> BuildCheckAnswersViewModel(
-       SubmissionRoutingDataModel routingData,
-       string categorySlug,
-       string sectionSlug,
-       string? errorMessage
-   )
+        SubmissionRoutingDataModel routingData,
+        string categorySlug,
+        string sectionSlug,
+        string? errorMessage
+    )
     {
-        return BuildViewModel(routingData, categorySlug, sectionSlug, PageTitleConstants.CheckAnswers, UrlConstants.CheckAnswersSlug, errorMessage);
+        return BuildViewModel(
+            routingData,
+            categorySlug,
+            sectionSlug,
+            PageTitleConstants.CheckAnswers,
+            UrlConstants.CheckAnswersSlug,
+            errorMessage
+        );
     }
 
     private async Task<ReviewAnswersViewModel> BuildViewModel(
@@ -215,7 +257,7 @@ public class ReviewAnswersViewBuilder(
             Slug = pageSlug,
             SubmissionId = routingData.Submission?.SubmissionId,
             SubmissionResponses = submissionResponsesViewModel,
-            ErrorMessage = errorMessage
+            ErrorMessage = errorMessage,
         };
     }
 }

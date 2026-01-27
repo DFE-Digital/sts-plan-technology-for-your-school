@@ -3,7 +3,7 @@
 - [PR Checks](#pr-checks)
 - [Deployment pipelines](#deployment-pipelines)
 - [Other workflows](#other-workflows)
-  
+
 ## PR Checks
 
 The following GitHub workflows are used during the PR process to validate the changes being merged into the `main` branch
@@ -16,24 +16,24 @@ The following GitHub workflows are used during the PR process to validate the ch
 
 ### code-pr-check workflow
 
-* Builds the main solution file (`plan-technology-for-your-school.sln`), and runs all its unit tests
-* Builds the database upgrader project
-* Builds and runs the unit tests for the `Dfe.PlanTech.Web.Node` project
-  
+- Builds the main solution file (`plan-technology-for-your-school.sln`), and runs all its unit tests
+- Builds the database upgrader project
+- Builds and runs the unit tests for the `Dfe.PlanTech.Web.Node` project
+
 ### e2e-tests workflow
 
-* Clears out all submissions for a particular testing establishment reference, so that all tests are fresh
-* Runs end-to-end tests using Cypress
+- Clears out all submissions for a particular testing establishment reference, so that all tests are fresh
+- Runs end-to-end tests using Cypress
 
 ### terraform-pr-check workflow
 
 This workflow validates the following:
 
-* Validates the Terraform configuration by running Init/Plan
-* Checks the Terraform format 
-* Runs Terraform Linter
-* Validates that the Terraform configuration doc is upto date
-* Runs a Terraform Security Check
+- Validates the Terraform configuration by running Init/Plan
+- Checks the Terraform format
+- Runs Terraform Linter
+- Validates that the Terraform configuration doc is upto date
+- Runs a Terraform Security Check
 
 And will update the PR with the Plan results so reviews can easily see what changes will be applied to the infrastructure.
 
@@ -80,11 +80,13 @@ To execute the workflow manually using the GitHub CLI tool, you can execute the 
 ```shell
 gh workflow run 'Clear user data from DB' --ref development -f environment=development
 ```
+
 Which would run the workflow as it exists in the `development` branch, using `development` as the target environment. To execute against tst, you would do
 
 ```shell
 gh workflow run 'Clear user data from DB' --ref development -f environment=tst
 ```
+
 etc.
 
 ## Workflow Actions

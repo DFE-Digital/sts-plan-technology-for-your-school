@@ -19,5 +19,3 @@ Feature: MAT Not found page
     Scenario:Not found page returns on paths {category-here}/non-existent-page
       Given I visit the page "category-one-section-one/non-existent-page"
       Then I should see the page heading "Page not found"
-
-

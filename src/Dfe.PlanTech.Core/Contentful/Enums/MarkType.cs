@@ -4,5 +4,5 @@ public enum MarkType
 {
     Unknown,
     Underline,
-    Bold
+    Bold,
 }

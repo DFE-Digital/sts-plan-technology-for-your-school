@@ -10,43 +10,65 @@ public class EstablishmentWorkflow(
     IEstablishmentLinkRepository establishmentLinkRepository
 ) : IEstablishmentWorkflow
 {
-    private readonly IEstablishmentRepository _establishmentRepository = establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
-    private readonly IEstablishmentLinkRepository _establishmentLinkRepository = establishmentLinkRepository ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
+    private readonly IEstablishmentRepository _establishmentRepository =
+        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
+    private readonly IEstablishmentLinkRepository _establishmentLinkRepository =
+        establishmentLinkRepository
+        ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
 
-    public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
+    public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
+        EstablishmentModel establishmentModel
+    )
     {
-        var establishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(establishmentModel.Reference);
-        establishment ??= await _establishmentRepository.CreateEstablishmentFromModelAsync(establishmentModel);
+        var establishment = await _establishmentRepository.GetEstablishmentByReferenceAsync(
+            establishmentModel.Reference
+        );
+        establishment ??= await _establishmentRepository.CreateEstablishmentFromModelAsync(
+            establishmentModel
+        );
 
         return establishment.AsDto();
     }
 
-    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(string establishmentUrn, string establishmentName)
+    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
+        string establishmentUrn,
+        string establishmentName
+    )
     {
         var establishmentModel = new EstablishmentModel()
         {
             Name = establishmentName,
-            Urn = establishmentUrn
+            Urn = establishmentUrn,
         };
 
         return GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
-    public async Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(string establishmentReference)
+    public async Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(
+        string establishmentReference
+    )
     {
-        var establishments = await _establishmentRepository.GetEstablishmentsByReferencesAsync([establishmentReference]);
+        var establishments = await _establishmentRepository.GetEstablishmentsByReferencesAsync([
+            establishmentReference,
+        ]);
         return establishments.FirstOrDefault()?.AsDto();
     }
 
-    public async Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)
+    public async Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
+        IEnumerable<string> establishmentReferences
+    )
     {
-        var establishments = await _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentReferences);
+        var establishments = await _establishmentRepository.GetEstablishmentsByReferencesAsync(
+            establishmentReferences
+        );
         return establishments.Select(e => e.AsDto());
     }
 
     public async Task<List<SqlEstablishmentLinkDto>> GetGroupEstablishments(int establishmentId)
     {
-        var links = await _establishmentLinkRepository.GetGroupEstablishmentsByEstablishmentIdAsync(establishmentId);
+        var links = await _establishmentLinkRepository.GetGroupEstablishmentsByEstablishmentIdAsync(
+            establishmentId
+        );
         return links.Select(l => l.AsDto()).ToList();
     }
 

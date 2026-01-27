@@ -1,6 +1,6 @@
 ---
-formatter: "markdown table"
-version: "~> 0.16"
+formatter: 'markdown table'
+version: '~> 0.16'
 settings:
   anchor: true
   default: true
@@ -21,6 +21,6 @@ output:
   file: terraform-configuration.md
   mode: inject
   template: |-
-        <!-- BEGIN_TF_DOCS -->
-        {{ .Content }}
-        <!-- END_TF_DOCS -->
+    <!-- BEGIN_TF_DOCS -->
+    {{ .Content }}
+    <!-- END_TF_DOCS -->

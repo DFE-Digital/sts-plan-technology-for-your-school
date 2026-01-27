@@ -12,16 +12,21 @@ internal class Program
     {
         var success = false;
 
-        Parser.Default.ParseArguments<Options>(args)
-          .WithParsed((options) =>
-          {
-              var databaseExecutor = new DatabaseExecutor(options, _logger);
-              success = databaseExecutor.MigrateDatabase();
-          })
-          .WithNotParsed((errors) =>
-          {
-              success = HandleParseError(errors);
-          });
+        Parser
+            .Default.ParseArguments<Options>(args)
+            .WithParsed(
+                (options) =>
+                {
+                    var databaseExecutor = new DatabaseExecutor(options, _logger);
+                    success = databaseExecutor.MigrateDatabase();
+                }
+            )
+            .WithNotParsed(
+                (errors) =>
+                {
+                    success = HandleParseError(errors);
+                }
+            );
 
         if (!success)
         {

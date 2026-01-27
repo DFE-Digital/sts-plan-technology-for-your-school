@@ -6,7 +6,11 @@ namespace Dfe.PlanTech.Data.Sql.Interfaces;
 
 public interface IEstablishmentLinkRepository
 {
+    Task<List<EstablishmentLinkEntity>> GetGroupEstablishmentsByAsync(
+        Expression<Func<EstablishmentEntity, bool>> predicate
+    );
+    Task<List<EstablishmentLinkEntity>> GetGroupEstablishmentsByEstablishmentIdAsync(
+        int establishmentId
+    );
     Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel);
-    Task<List<EstablishmentLinkEntity>> GetGroupEstablishmentsByAsync(Expression<Func<EstablishmentEntity, bool>> predicate);
-    Task<List<EstablishmentLinkEntity>> GetGroupEstablishmentsByEstablishmentIdAsync(int establishmentId);
 }

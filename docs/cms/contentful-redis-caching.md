@@ -3,6 +3,7 @@
 ## Overview
 
 We save content from Contentful in a redis cache to:
+
 1. Reduce calls to Contentful to avoid rate limiting
 2. Caching data for improved performance
 

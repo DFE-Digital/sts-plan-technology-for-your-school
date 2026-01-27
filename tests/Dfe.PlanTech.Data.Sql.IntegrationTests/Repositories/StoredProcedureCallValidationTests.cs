@@ -13,9 +13,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     private StoredProcedureRepository _storedProcRepository = null!;
     private SubmissionRepository _submissionRepository = null!;
 
-    public StoredProcedureCallValidationTests(DatabaseFixture fixture) : base(fixture)
-    {
-    }
+    public StoredProcedureCallValidationTests(DatabaseFixture fixture)
+        : base(fixture) { }
 
     public override async Task InitializeAsync()
     {
@@ -28,7 +27,11 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     public async Task StoredProcedureRepository_SetMaturityForSubmissionAsync_WhenCalledWithValidSubmissionId_ThenReturnsNonNegativeResult()
     {
         // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "TEST001",
+            OrgName = "Test School",
+        };
         DbContext.Establishments.Add(establishment);
         await DbContext.SaveChangesAsync();
 
@@ -37,7 +40,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "test-section",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.InProgress
+            Status = Core.Enums.SubmissionStatus.InProgress,
         };
         DbContext.Submissions.Add(submission);
         await DbContext.SaveChangesAsync();
@@ -54,11 +57,24 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     {
         // Arrange
         var user = new UserEntity { DfeSignInRef = "test-user" };
-        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School", GroupUid = null };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "TEST001",
+            OrgName = "Test School",
+            GroupUid = null,
+        };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
-        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
-        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+        var questionModel = new IdWithTextModel
+        {
+            Id = question.ContentfulRef,
+            Text = question.QuestionText,
+        };
+        var answerModel = new IdWithTextModel
+        {
+            Id = answer.ContentfulRef,
+            Text = answer.AnswerText,
+        };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -71,11 +87,16 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "test-section",
             SectionName = "Test Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
 
         // When user is logged in directly as a school (not MAT), both IDs are the same
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
+        var assessmentResponse = new AssessmentResponseModel(
+            user.Id,
+            establishment.Id,
+            establishment.Id,
+            submitAnswerModel
+        );
 
         // Act & Assert - Should execute without parameter type or order errors
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);
@@ -101,11 +122,31 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
 
         // Arrange
         var user = new UserEntity { DfeSignInRef = "param-test-user" };
-        var establishment = new EstablishmentEntity { EstablishmentRef = "PARAM001", OrgName = "Parameter Test School" };
-        var question = new QuestionEntity { QuestionText = "Parameter Test Question", ContentfulRef = "PQ1" };
-        var answer = new AnswerEntity { AnswerText = "Parameter Test Answer", ContentfulRef = "PA1" };
-        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
-        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "PARAM001",
+            OrgName = "Parameter Test School",
+        };
+        var question = new QuestionEntity
+        {
+            QuestionText = "Parameter Test Question",
+            ContentfulRef = "PQ1",
+        };
+        var answer = new AnswerEntity
+        {
+            AnswerText = "Parameter Test Answer",
+            ContentfulRef = "PA1",
+        };
+        var questionModel = new IdWithTextModel
+        {
+            Id = question.ContentfulRef,
+            Text = question.QuestionText,
+        };
+        var answerModel = new IdWithTextModel
+        {
+            Id = answer.ContentfulRef,
+            Text = answer.AnswerText,
+        };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -121,10 +162,15 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "param-section",
             SectionName = "Parameter Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
         // When user is logged in directly as a school (not MAT), both IDs are the same
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
+        var assessmentResponse = new AssessmentResponseModel(
+            user.Id,
+            establishment.Id,
+            establishment.Id,
+            submitAnswerModel
+        );
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);
         Assert.True(responseId > 0);
 
@@ -134,12 +180,14 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "param-section",
             SectionName = "Parameter Section",
             EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.InProgress
+            Status = Core.Enums.SubmissionStatus.InProgress,
         };
         DbContext.Submissions.Add(submission);
         await DbContext.SaveChangesAsync();
 
-        var maturityResult = await _storedProcRepository.SetMaturityForSubmissionAsync(submission.Id);
+        var maturityResult = await _storedProcRepository.SetMaturityForSubmissionAsync(
+            submission.Id
+        );
         Assert.True(maturityResult >= 0);
 
         // If we reach here, all stored procedure calls succeeded without parameter order/type errors

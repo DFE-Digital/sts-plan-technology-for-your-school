@@ -24,7 +24,7 @@ public class SignInEntity
             UserId = UserId,
             EstablishmentId = EstablishmentId,
             SignInDateTime = SignInDateTime,
-            User = User.AsDto()
+            User = User.AsDto(),
         };
     }
 }

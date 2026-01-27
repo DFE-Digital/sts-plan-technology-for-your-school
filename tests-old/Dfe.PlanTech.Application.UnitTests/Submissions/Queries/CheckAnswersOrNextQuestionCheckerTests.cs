@@ -13,85 +13,80 @@ namespace Dfe.PlanTech.Application.UnitTests.Submissions.Queries;
 
 public class CheckAnswersOrNextQuestionCheckerTests
 {
-    public readonly ISubmissionStatusChecker StatusChecker = CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion;
+    public readonly ISubmissionStatusChecker StatusChecker =
+        CheckAnswersOrNextQuestionChecker.CheckAnswersOrNextQuestion;
 
-    public static readonly List<Question> Questions = new() {
-    new(){
-      Sys = new SystemDetails(){ Id = "Question-One" },
-      Answers = new()
-    },
-    new(){
-      Sys = new SystemDetails(){ Id = "Question-Two" },
-      Answers = new()
-    },
-    new(){
-      Sys = new SystemDetails(){ Id = "Question-Three" },
-      Answers = new()
-    },
-    new(){
-      Sys = new SystemDetails(){ Id = "Question-Four" },
-      Answers = new()
-    },
-    new(){
-      Sys = new SystemDetails(){ Id = "Question-Five" },
-      Answers = new()
-    },
-  };
+    public static readonly List<Question> Questions = new()
+    {
+        new()
+        {
+            Sys = new SystemDetails() { Id = "Question-One" },
+            Answers = new(),
+        },
+        new()
+        {
+            Sys = new SystemDetails() { Id = "Question-Two" },
+            Answers = new(),
+        },
+        new()
+        {
+            Sys = new SystemDetails() { Id = "Question-Three" },
+            Answers = new(),
+        },
+        new()
+        {
+            Sys = new SystemDetails() { Id = "Question-Four" },
+            Answers = new(),
+        },
+        new()
+        {
+            Sys = new SystemDetails() { Id = "Question-Five" },
+            Answers = new(),
+        },
+    };
 
-    public readonly List<Answer> Answers = new(){
-          new(){
-            Sys = new SystemDetails(){
-              Id = "Answer-One"
-            },
+    public readonly List<Answer> Answers = new()
+    {
+        new()
+        {
+            Sys = new SystemDetails() { Id = "Answer-One" },
             NextQuestion = Questions[1], //two
-          },
-          new(){
-            Sys = new SystemDetails(){
-              Id = "Answer-Two",
-            },
+        },
+        new()
+        {
+            Sys = new SystemDetails() { Id = "Answer-Two" },
             NextQuestion = Questions[3], //four
-          },new(){
-            Sys = new SystemDetails(){
-              Id = "Answer-Three"
-            },
+        },
+        new()
+        {
+            Sys = new SystemDetails() { Id = "Answer-Three" },
             NextQuestion = Questions[4], //five
-          },new(){
-            Sys = new SystemDetails(){
-              Id = "Answer-Four"
-            },
-          },
-        };
-
+        },
+        new() { Sys = new SystemDetails() { Id = "Answer-Four" } },
+    };
 
     public SubmissionResponsesDto ResponsesForSubmissionDto = new()
     {
-        Responses = [
-          new QuestionWithAnswer()
-          {
-              QuestionSysId = "Question-One",
-              AnswerSysId = "Answer-One"
-          },
-            new QuestionWithAnswer()
-            {
-                QuestionSysId = "Question-Two",
-                AnswerSysId = "Answer-Two"
-            },
+        Responses =
+        [
+            new QuestionWithAnswer() { QuestionSysId = "Question-One", AnswerSysId = "Answer-One" },
+            new QuestionWithAnswer() { QuestionSysId = "Question-Two", AnswerSysId = "Answer-Two" },
             new QuestionWithAnswer()
             {
                 QuestionSysId = "Question-Three",
-                AnswerSysId = "Answer-Three"
+                AnswerSysId = "Answer-Three",
             },
             new QuestionWithAnswer()
             {
                 QuestionSysId = "Question-Four",
-                AnswerSysId = "Answer-Four"
+                AnswerSysId = "Answer-Four",
             },
             new QuestionWithAnswer()
             {
                 QuestionSysId = "Question-Five",
-                AnswerSysId = "Answer-Four"
+                AnswerSysId = "Answer-Four",
             },
-        ]
+        ],
     };
 
     public CheckAnswersOrNextQuestionCheckerTests()
@@ -148,20 +143,30 @@ public class CheckAnswersOrNextQuestionCheckerTests
         processor.User.Returns(user);
 
         var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(ResponsesForSubmissionDto);
+        getResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(ResponsesForSubmissionDto);
 
         processor.GetResponsesQuery.Returns(getResponsesQuery);
 
         var section = Substitute.For<ISectionComponent>();
-        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
-                .Returns(new[] {
-              ResponsesForSubmissionDto.Responses[0],ResponsesForSubmissionDto.Responses[1],ResponsesForSubmissionDto.Responses[4]
-                });
+        section
+            .GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+            .Returns(
+                new[]
+                {
+                    ResponsesForSubmissionDto.Responses[0],
+                    ResponsesForSubmissionDto.Responses[1],
+                    ResponsesForSubmissionDto.Responses[4],
+                }
+            );
 
-        section.Sys.Returns(new SystemDetails()
-        {
-            Id = "section-id"
-        });
+        section.Sys.Returns(new SystemDetails() { Id = "section-id" });
 
         section.Questions.Returns(Questions);
 
@@ -183,18 +188,26 @@ public class CheckAnswersOrNextQuestionCheckerTests
         processor.User.Returns(user);
 
         var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>()).Returns(ResponsesForSubmissionDto);
+        getResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(ResponsesForSubmissionDto);
 
         processor.GetResponsesQuery.Returns(getResponsesQuery);
 
         var section = Substitute.For<ISectionComponent>();
-        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
-                .Returns([ResponsesForSubmissionDto.Responses[0], ResponsesForSubmissionDto.Responses[1]]);
+        section
+            .GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+            .Returns([
+                ResponsesForSubmissionDto.Responses[0],
+                ResponsesForSubmissionDto.Responses[1],
+            ]);
 
-        section.Sys.Returns(new SystemDetails()
-        {
-            Id = "section-id"
-        });
+        section.Sys.Returns(new SystemDetails() { Id = "section-id" });
 
         section.Questions.Returns(Questions);
 
@@ -217,37 +230,50 @@ public class CheckAnswersOrNextQuestionCheckerTests
         processor.User.Returns(user);
 
         var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
-                            .Returns(ResponsesForSubmissionDto);
+        getResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(ResponsesForSubmissionDto);
 
         processor.GetResponsesQuery.Returns(getResponsesQuery);
 
         var section = Substitute.For<ISectionComponent>();
-        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
-            .Returns([ResponsesForSubmissionDto.Responses[0], ResponsesForSubmissionDto.Responses[1]]);
+        section
+            .GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+            .Returns([
+                ResponsesForSubmissionDto.Responses[0],
+                ResponsesForSubmissionDto.Responses[1],
+            ]);
 
-        section.Sys.Returns(new SystemDetails()
-        {
-            Id = "section-id"
-        });
+        section.Sys.Returns(new SystemDetails() { Id = "section-id" });
 
-        section.Questions.Returns(new List<Question>()
-        {
-            new Question()
+        section.Questions.Returns(
+            new List<Question>()
             {
-                Text = "not a question text",
-                Slug = "not a slug",
-                Sys = new(){ Id = "Not a question id"}
+                new Question()
+                {
+                    Text = "not a question text",
+                    Slug = "not a slug",
+                    Sys = new() { Id = "Not a question id" },
+                },
             }
-        });
+        );
 
         processor.Section.Returns(section);
         processor.SectionStatus.Returns(new SectionStatus() { Status = Status.InProgress });
 
-        var exception = await Assert.ThrowsAsync<UserJourneyMissingContentException>(() => StatusChecker.ProcessSubmission(processor, default));
+        var exception = await Assert.ThrowsAsync<UserJourneyMissingContentException>(() =>
+            StatusChecker.ProcessSubmission(processor, default)
+        );
         Assert.Equal(section, exception.Section);
 
-        var lastResponse = section.GetOrderedResponsesForJourney(ResponsesForSubmissionDto.Responses).Last();
+        var lastResponse = section
+            .GetOrderedResponsesForJourney(ResponsesForSubmissionDto.Responses)
+            .Last();
 
         var expectedErrorMessage = $"Could not find question with ID {lastResponse.QuestionSysId}";
 
@@ -264,53 +290,54 @@ public class CheckAnswersOrNextQuestionCheckerTests
         processor.User.Returns(user);
 
         var getResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(),
-                Arg.Any<CancellationToken>())
+        getResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
+            )
             .Returns(ResponsesForSubmissionDto);
 
         processor.GetResponsesQuery.Returns(getResponsesQuery);
 
         var section = Substitute.For<ISectionComponent>();
-        section.GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
-            .Returns([ResponsesForSubmissionDto.Responses[0], ResponsesForSubmissionDto.Responses[1]]);
+        section
+            .GetOrderedResponsesForJourney(Arg.Any<IEnumerable<QuestionWithAnswer>>())
+            .Returns([
+                ResponsesForSubmissionDto.Responses[0],
+                ResponsesForSubmissionDto.Responses[1],
+            ]);
 
-        section.Sys.Returns(new SystemDetails()
-        {
-            Id = "section-id"
-        });
+        section.Sys.Returns(new SystemDetails() { Id = "section-id" });
 
-        section.Questions.Returns(new List<Question>()
-        {
-            new Question()
+        section.Questions.Returns(
+            new List<Question>()
             {
-                Text = "Question text",
-                Slug = "Question Slug",
-                Sys = new()
+                new Question()
                 {
-                    Id = "Question-Two",
-
+                    Text = "Question text",
+                    Slug = "Question Slug",
+                    Sys = new() { Id = "Question-Two" },
+                    Answers = [new Answer() { Sys = new() { Id = "Not a found answer" } }],
                 },
-                Answers =
-                [
-                    new Answer()
-                    {
-                        Sys = new() { Id = "Not a found answer" }
-                    }
-                ]
             }
-        });
+        );
 
         processor.Section.Returns(section);
         processor.SectionStatus.Returns(new SectionStatus() { Status = Status.InProgress });
 
-        var exception =
-            await Assert.ThrowsAsync<UserJourneyMissingContentException>(() =>
-                StatusChecker.ProcessSubmission(processor, default));
+        var exception = await Assert.ThrowsAsync<UserJourneyMissingContentException>(() =>
+            StatusChecker.ProcessSubmission(processor, default)
+        );
         Assert.Equal(section, exception.Section);
 
-        var lastResponse = section.GetOrderedResponsesForJourney(ResponsesForSubmissionDto.Responses).Last();
+        var lastResponse = section
+            .GetOrderedResponsesForJourney(ResponsesForSubmissionDto.Responses)
+            .Last();
 
-        var expectedErrorMessage = $"Could not find answer with ID {lastResponse.AnswerSysId} in question {lastResponse.QuestionSysId}";
+        var expectedErrorMessage =
+            $"Could not find answer with ID {lastResponse.AnswerSysId} in question {lastResponse.QuestionSysId}";
 
         Assert.Equal(expectedErrorMessage, exception.Message);
     }

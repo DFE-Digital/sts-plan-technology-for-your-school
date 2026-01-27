@@ -44,8 +44,8 @@ public class CategoryLandingSectionViewModel
         else
         {
             ProgressStatus = hadRetrievalError
-                 ? SubmissionStatus.RetrievalError
-                 : sectionStatus?.Status ?? SubmissionStatus.NotStarted;
+                ? SubmissionStatus.RetrievalError
+                : sectionStatus?.Status ?? SubmissionStatus.NotStarted;
         }
     }
 }

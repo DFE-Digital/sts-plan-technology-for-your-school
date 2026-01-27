@@ -11,19 +11,28 @@ namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Handlers;
 
 public class UserOrganisationAuthorisationHandlerTests
 {
-    private static AuthorizationHandlerContext Ctx(UserOrganisationAuthorisationRequirement req, object resource)
+    private static AuthorizationHandlerContext Ctx(
+        UserOrganisationAuthorisationRequirement req,
+        object resource
+    )
     {
         var user = new ClaimsPrincipal(new ClaimsIdentity()); // identity itself is irrelevant here
         return new AuthorizationHandlerContext(new[] { req }, user, resource);
     }
 
-    private static UserOrganisationAuthorisationHandler SUT(out ILogger<UserOrganisationAuthorisationHandler> logger)
+    private static UserOrganisationAuthorisationHandler SUT(
+        out ILogger<UserOrganisationAuthorisationHandler> logger
+    )
     {
         logger = Substitute.For<ILogger<UserOrganisationAuthorisationHandler>>();
         return new UserOrganisationAuthorisationHandler(logger);
     }
 
-    private static UserAuthorisationResult BuildUserAuthorisationResult(bool pageRequiresAuthorisation, bool isAuthorised, bool isAuthenticated)
+    private static UserAuthorisationResult BuildUserAuthorisationResult(
+        bool pageRequiresAuthorisation,
+        bool isAuthorised,
+        bool isAuthenticated
+    )
     {
         var userAuthorisationStatus = new UserAuthorisationStatus(isAuthenticated, isAuthorised);
         return new UserAuthorisationResult(pageRequiresAuthorisation, userAuthorisationStatus);
@@ -40,7 +49,7 @@ public class UserOrganisationAuthorisationHandlerTests
 
         Assert.False(context.HasSucceeded);
         Assert.False(context.HasFailed);
-        logger.ReceivedWithAnyArgs(1).Log(default, default, default!, default, default!);
+        logger.ReceivedWithAnyArgs(1).Log(default, default, default!, "{Message}", default!);
     }
 
     [Fact]
@@ -63,7 +72,11 @@ public class UserOrganisationAuthorisationHandlerTests
         var handler = SUT(out _);
         var req = new UserOrganisationAuthorisationRequirement();
         var http = new DefaultHttpContext();
-        http.Items[UserAuthorisationResult.HttpContextKey] = BuildUserAuthorisationResult(false, true, false);
+        http.Items[UserAuthorisationResult.HttpContextKey] = BuildUserAuthorisationResult(
+            false,
+            true,
+            false
+        );
 
         var context = Ctx(req, http);
         await handler.HandleAsync(context);
@@ -78,7 +91,11 @@ public class UserOrganisationAuthorisationHandlerTests
         var handler = SUT(out _);
         var req = new UserOrganisationAuthorisationRequirement();
         var http = new DefaultHttpContext();
-        http.Items[UserAuthorisationResult.HttpContextKey] = BuildUserAuthorisationResult(true, true, false);
+        http.Items[UserAuthorisationResult.HttpContextKey] = BuildUserAuthorisationResult(
+            true,
+            true,
+            false
+        );
 
         var context = Ctx(req, http);
         await handler.HandleAsync(context);
@@ -94,7 +111,11 @@ public class UserOrganisationAuthorisationHandlerTests
         var req = new UserOrganisationAuthorisationRequirement();
         var http = new DefaultHttpContext();
         http.Request.Path = "/auth/sign-out";
-        http.Items[UserAuthorisationResult.HttpContextKey] = BuildUserAuthorisationResult(true, false, false);
+        http.Items[UserAuthorisationResult.HttpContextKey] = BuildUserAuthorisationResult(
+            true,
+            false,
+            false
+        );
 
         var context = Ctx(req, http);
         await handler.HandleAsync(context);
@@ -110,7 +131,11 @@ public class UserOrganisationAuthorisationHandlerTests
         var req = new UserOrganisationAuthorisationRequirement();
         var http = new DefaultHttpContext();
         http.Request.Path = "/some/other";
-        http.Items[UserAuthorisationResult.HttpContextKey] = BuildUserAuthorisationResult(true, false, false);
+        http.Items[UserAuthorisationResult.HttpContextKey] = BuildUserAuthorisationResult(
+            true,
+            false,
+            false
+        );
 
         var context = Ctx(req, http);
         await handler.HandleAsync(context);
@@ -119,7 +144,9 @@ public class UserOrganisationAuthorisationHandlerTests
         Assert.True(context.HasFailed);
 
         // Ensure the failure reason came from this handler instance
-        Assert.Contains(context.FailureReasons,
-            r => ReferenceEquals(r.Handler, handler) && r.Message.Contains("Missing organisation"));
+        Assert.Contains(
+            context.FailureReasons,
+            r => ReferenceEquals(r.Handler, handler) && r.Message.Contains("Missing organisation")
+        );
     }
 }

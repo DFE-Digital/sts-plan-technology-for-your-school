@@ -1,6 +1,6 @@
 /*
 import { printAllRecommendationsText, printDateTime, backText, printRecommendationsAnswerHeader } from "../../helpers/constants";
-import { homePageSlug, printRecommendationsSlug } from "../../helpers/page-slugs"; 
+import { homePageSlug, printRecommendationsSlug } from "../../helpers/page-slugs";
 
 describe("Recommendation Checklist Page", () => {
 

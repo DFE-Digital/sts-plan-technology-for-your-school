@@ -10,10 +10,12 @@ public class ContentfulContentTypeHelperTests
     public void GetContentTypeName_ReturnsExpectedContentfulContentTypeId_ForValidEntryClass()
     {
         // Arrange
-        var expectedContentfulContentTypeId = ContentfulContentTypeConstants.ComponentAccordionContentfulContentTypeId;
+        var expectedContentfulContentTypeId =
+            ContentfulContentTypeConstants.ComponentAccordionContentfulContentTypeId;
 
         // Act
-        var actualContentfulContentTypeId = ContentfulContentTypeHelper.GetContentTypeName<ComponentAccordionEntry>();
+        var actualContentfulContentTypeId =
+            ContentfulContentTypeHelper.GetContentTypeName<ComponentAccordionEntry>();
 
         // Assert
         Assert.Equal(expectedContentfulContentTypeId, actualContentfulContentTypeId);
@@ -26,8 +28,13 @@ public class ContentfulContentTypeHelperTests
         var invalidEntryClassType = typeof(InvalidEntryClass);
 
         // Act & Assert
-        var exception = Assert.Throws<InvalidOperationException>(() => ContentfulContentTypeHelper.GetContentTypeName<InvalidEntryClass>());
-        Assert.Equal($"Could not find content type ID for class type {invalidEntryClassType.Name}", exception.Message);
+        var exception = Assert.Throws<InvalidOperationException>(() =>
+            ContentfulContentTypeHelper.GetContentTypeName<InvalidEntryClass>()
+        );
+        Assert.Equal(
+            $"Could not find content type ID for class type {invalidEntryClassType.Name}",
+            exception.Message
+        );
     }
 
     private class InvalidEntryClass { }

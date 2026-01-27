@@ -5,26 +5,30 @@ namespace Dfe.PlanTech.UnitTests.Shared.Extensions;
 
 public static class LoggingHelpers
 {
-    public static IEnumerable<ReceivedLoggerCall> ReceivedLogMessages<T>(this ILogger<T> logger)
-        => logger.ReceivedCalls().Select(call =>
-        {
-            var args = call.GetArguments();
+    public static IEnumerable<ReceivedLoggerCall> ReceivedLogMessages<T>(this ILogger<T> logger) =>
+        logger
+            .ReceivedCalls()
+            .Select(call =>
+            {
+                var args = call.GetArguments();
 
-            var msg = args[2]?.ToString() ?? "";
+                var msg = args[2]?.ToString() ?? "";
 
-            var level = Enum.Parse<LogLevel>(args[0]?.ToString() ?? "");
+                var level = Enum.Parse<LogLevel>(args[0]?.ToString() ?? "");
 
-            return new ReceivedLoggerCall(level, msg);
-        });
+                return new ReceivedLoggerCall(level, msg);
+            });
 
-    public static IEnumerable<ReceivedLoggerCall> GetMatchingReceivedMessages<T>(this ILogger<T> logger, string message, LogLevel logLevel)
-        => logger.ReceivedLogMessages().Where(LogMessageMatches(message, logLevel));
+    public static IEnumerable<ReceivedLoggerCall> GetMatchingReceivedMessages<T>(
+        this ILogger<T> logger,
+        string message,
+        LogLevel logLevel
+    ) => logger.ReceivedLogMessages().Where(LogMessageMatches(message, logLevel));
 
-    private static Func<ReceivedLoggerCall, bool> LogMessageMatches(string message, LogLevel logLevel)
-    => args => args.Message.Equals(message) && args.LogLevel == logLevel;
+    private static Func<ReceivedLoggerCall, bool> LogMessageMatches(
+        string message,
+        LogLevel logLevel
+    ) => args => args.Message.Equals(message) && args.LogLevel == logLevel;
 }
 
-public record ReceivedLoggerCall(LogLevel LogLevel, string Message)
-{
-
-}
+public record ReceivedLoggerCall(LogLevel LogLevel, string Message) { }

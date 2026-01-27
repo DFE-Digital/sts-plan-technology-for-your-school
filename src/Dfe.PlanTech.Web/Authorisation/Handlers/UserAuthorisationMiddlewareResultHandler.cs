@@ -8,7 +8,12 @@ public class UserAuthorisationMiddlewareResultHandler : IAuthorizationMiddleware
 {
     private readonly AuthorizationMiddlewareResultHandler defaultHandler = new();
 
-    public async Task HandleAsync(RequestDelegate next, HttpContext context, AuthorizationPolicy policy, PolicyAuthorizationResult authorizeResult)
+    public async Task HandleAsync(
+        RequestDelegate next,
+        HttpContext context,
+        AuthorizationPolicy policy,
+        PolicyAuthorizationResult authorizeResult
+    )
     {
         if (authorizeResult.Forbidden)
         {
@@ -36,6 +41,9 @@ public class UserAuthorisationMiddlewareResultHandler : IAuthorizationMiddleware
         return userMissingOrganisation ? UrlConstants.OrgErrorPage : null;
     }
 
-    private static bool UserMissingOrganisation(AuthorizationFailure authorisationFailure)
-    => authorisationFailure.FailureReasons.Select(reason => reason.Handler).OfType<UserOrganisationAuthorisationHandler>().Any();
+    private static bool UserMissingOrganisation(AuthorizationFailure authorisationFailure) =>
+        authorisationFailure
+            .FailureReasons.Select(reason => reason.Handler)
+            .OfType<UserOrganisationAuthorisationHandler>()
+            .Any();
 }

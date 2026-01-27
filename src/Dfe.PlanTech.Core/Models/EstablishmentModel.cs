@@ -5,7 +5,8 @@ namespace Dfe.PlanTech.Core.Models;
 
 public sealed class EstablishmentModel
 {
-    public const string InvalidEstablishmentErrorMessage = $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
+    public const string InvalidEstablishmentErrorMessage =
+        $"{nameof(Urn)}, {nameof(Ukprn)}, {nameof(Uid)}, and {nameof(Id)} are all invalid";
 
     [JsonPropertyName("id")]
     public Guid Id { get; set; }
@@ -41,9 +42,9 @@ public sealed class EstablishmentModel
 
     public bool IsValid => References.Any(reference => !string.IsNullOrEmpty(reference));
 
-    public string Reference => References
-        .FirstOrDefault(reference => !string.IsNullOrEmpty(reference))
-            ?? throw new InvalidEstablishmentException(InvalidEstablishmentErrorMessage);
+    public string Reference =>
+        References.FirstOrDefault(reference => !string.IsNullOrEmpty(reference))
+        ?? throw new InvalidEstablishmentException(InvalidEstablishmentErrorMessage);
 
     private IEnumerable<string?> References
     {

@@ -8,9 +8,8 @@ namespace Dfe.PlanTech.Application.Rendering;
 
 public partial class HeadingRenderer : BaseRichTextContentPartRenderer
 {
-    public HeadingRenderer() : base(RichTextNodeType.Heading)
-    {
-    }
+    public HeadingRenderer()
+        : base(RichTextNodeType.Heading) { }
 
     public override StringBuilder AddHtml(
         RichTextContentField content,

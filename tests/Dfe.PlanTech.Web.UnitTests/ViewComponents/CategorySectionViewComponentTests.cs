@@ -17,10 +17,12 @@ namespace Dfe.PlanTech.Web.Tests.ViewComponents
             var expectedViewModel = new CategoryCardsViewComponentViewModel()
             {
                 CategoryHeaderText = "Arbitrary header text",
-                Description = new MissingComponentEntry()
+                Description = new MissingComponentEntry(),
             };
 
-            mockViewBuilder.BuildViewModelAsync(categoryEntry).Returns(Task.FromResult(expectedViewModel));
+            mockViewBuilder
+                .BuildViewModelAsync(categoryEntry)
+                .Returns(Task.FromResult(expectedViewModel));
 
             var viewComponent = new CategorySectionViewComponent(mockViewBuilder);
 

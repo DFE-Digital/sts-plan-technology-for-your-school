@@ -1,6 +1,6 @@
 # 0036 - DB Unit Tests
 
-* **Status**: proposed
+- **Status**: proposed
 
 ## Context and Problem Statement
 
@@ -20,7 +20,7 @@ Microsoft particularly recommend [the latter](https://learn.microsoft.com/en-us/
   - Not recommended by Microsoft
   - We could mock the various DB Sets in the database
   - This is easily done with external Nuget packages such as [MockQueryable](https://www.nuget.org/packages/MockQueryable.Core)
- 
+
 - We could test against a local in memory database copy (e.g. SQLite):
   - Not recommended by Microsoft
   - Database provider used is unlikely to match MSSQL/Azure SQL 1-to-1, meaning errors could occur
@@ -29,7 +29,6 @@ Microsoft particularly recommend [the latter](https://learn.microsoft.com/en-us/
   - Recommended solution by Microsoft
   - A lot of initial work
   - Would mean our unit tests would test against an _exact copy_ of the functionality of the database.
-
 
 ## Decision Outcome
 

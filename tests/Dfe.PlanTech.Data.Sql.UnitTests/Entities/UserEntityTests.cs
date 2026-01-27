@@ -20,7 +20,7 @@ public class UserEntityTests
             DfeSignInRef = expectedDsiRef,
             DateCreated = expectedDateCreated,
             DateLastUpdated = expectedDateLastUpdated,
-            Responses = null
+            Responses = null,
         };
 
         // Act
@@ -41,7 +41,7 @@ public class UserEntityTests
                 nameof(SqlUserDto.DfeSignInRef),
                 nameof(SqlUserDto.DateCreated),
                 nameof(SqlUserDto.DateLastUpdated),
-                nameof(SqlUserDto.Responses)
+                nameof(SqlUserDto.Responses),
             }
         );
     }
@@ -55,7 +55,7 @@ public class UserEntityTests
         var entity = new UserEntity
         {
             Id = 22,
-            DfeSignInRef = "dsi-123"
+            DfeSignInRef = "dsi-123",
             // DateCreated not set explicitly
         };
 

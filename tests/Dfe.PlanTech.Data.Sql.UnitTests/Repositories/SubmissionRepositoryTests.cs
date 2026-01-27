@@ -24,9 +24,10 @@ public class SubmissionRepositoryTests
             Id = id,
             QuestionText = $"Question {id}",
             ContentfulRef = $"Q{id}",
-            DateCreated = DateTime.UtcNow.AddMinutes(-20)
+            DateCreated = DateTime.UtcNow.AddMinutes(-20),
         };
     }
+
     private static AnswerEntity BuildAnswer(int id)
     {
         return new AnswerEntity
@@ -34,7 +35,7 @@ public class SubmissionRepositoryTests
             Id = id,
             AnswerText = $"Answer {id}",
             ContentfulRef = $"A{id}",
-            DateCreated = DateTime.UtcNow.AddMinutes(-20)
+            DateCreated = DateTime.UtcNow.AddMinutes(-20),
         };
     }
 
@@ -50,7 +51,9 @@ public class SubmissionRepositoryTests
     [Fact]
     public async Task CloneSubmission_Copies_Fields_Resets_State_And_Persists()
     {
-        using var db = BuildPlanTechDbContext(nameof(CloneSubmission_Copies_Fields_Resets_State_And_Persists));
+        using var db = BuildPlanTechDbContext(
+            nameof(CloneSubmission_Copies_Fields_Resets_State_And_Persists)
+        );
         var repo = new SubmissionRepository(db);
 
         var q = BuildQuestion(1);
@@ -75,9 +78,9 @@ public class SubmissionRepositoryTests
                     AnswerId = 2,
                     UserId = 999,
                     Maturity = "developing",
-                    DateCreated = DateTime.UtcNow.AddMinutes(-10)
-                }
-            }
+                    DateCreated = DateTime.UtcNow.AddMinutes(-10),
+                },
+            },
         };
 
         var before = DateTime.UtcNow.AddSeconds(-2);
@@ -109,7 +112,9 @@ public class SubmissionRepositoryTests
     [Fact]
     public async Task GetLatestSubmissionAndResponses_Returns_Null_When_None()
     {
-        using var db = BuildPlanTechDbContext(nameof(GetLatestSubmissionAndResponses_Returns_Null_When_None));
+        using var db = BuildPlanTechDbContext(
+            nameof(GetLatestSubmissionAndResponses_Returns_Null_When_None)
+        );
         var repo = new SubmissionRepository(db);
 
         var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", null);
@@ -119,7 +124,9 @@ public class SubmissionRepositoryTests
     [Fact]
     public async Task SetLatestSubmissionViewed_No_Submission_No_Throw()
     {
-        using var db = BuildPlanTechDbContext(nameof(SetLatestSubmissionViewed_No_Submission_No_Throw));
+        using var db = BuildPlanTechDbContext(
+            nameof(SetLatestSubmissionViewed_No_Submission_No_Throw)
+        );
         var repo = new SubmissionRepository(db);
 
         await repo.SetLatestSubmissionViewedAsync(99, "NA");
@@ -130,48 +137,65 @@ public class SubmissionRepositoryTests
     [Fact]
     public async Task SetSubmissionReviewed_Throws_When_Submission_Not_Found()
     {
-        using var db = BuildPlanTechDbContext(nameof(SetSubmissionReviewed_Throws_When_Submission_Not_Found));
+        using var db = BuildPlanTechDbContext(
+            nameof(SetSubmissionReviewed_Throws_When_Submission_Not_Found)
+        );
         var repo = new SubmissionRepository(db);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            repo.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(999));
+            repo.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(999)
+        );
     }
 
     [Fact]
     public async Task SetSubmissionInaccessible_ById_Throws_When_NotFound()
     {
-        using var db = BuildPlanTechDbContext(nameof(SetSubmissionInaccessible_ById_Throws_When_NotFound));
+        using var db = BuildPlanTechDbContext(
+            nameof(SetSubmissionInaccessible_ById_Throws_When_NotFound)
+        );
         var repo = new SubmissionRepository(db);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => repo.SetSubmissionInaccessibleAsync(12345));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            repo.SetSubmissionInaccessibleAsync(12345)
+        );
     }
 
     [Fact]
     public async Task SetSubmissionInaccessible_ByScope_Throws_When_NotFound()
     {
-        using var db = BuildPlanTechDbContext(nameof(SetSubmissionInaccessible_ByScope_Throws_When_NotFound));
+        using var db = BuildPlanTechDbContext(
+            nameof(SetSubmissionInaccessible_ByScope_Throws_When_NotFound)
+        );
         var repo = new SubmissionRepository(db);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            repo.SetSubmissionInaccessibleAsync(establishmentId: 99, sectionId: "NA"));
+            repo.SetSubmissionInaccessibleAsync(establishmentId: 99, sectionId: "NA")
+        );
     }
 
     [Fact]
     public async Task SetSubmissionInProgress_ById_Throws_When_NotFound()
     {
-        using var db = BuildPlanTechDbContext(nameof(SetSubmissionInProgress_ById_Throws_When_NotFound));
+        using var db = BuildPlanTechDbContext(
+            nameof(SetSubmissionInProgress_ById_Throws_When_NotFound)
+        );
         var repo = new SubmissionRepository(db);
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() => repo.SetSubmissionInProgressAsync(12345));
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            repo.SetSubmissionInProgressAsync(12345)
+        );
     }
 
     [Fact]
     public async Task SetSubmissionInProgress_ByScope_Throws_When_NotFound()
     {
-        using var db = BuildPlanTechDbContext(nameof(SetSubmissionInProgress_ByScope_Throws_When_NotFound));
+        using var db = BuildPlanTechDbContext(
+            nameof(SetSubmissionInProgress_ByScope_Throws_When_NotFound)
+        );
         var repo = new SubmissionRepository(db);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            repo.SetSubmissionInProgressAsync(establishmentId: 99, sectionId: "NA"));
+            repo.SetSubmissionInProgressAsync(establishmentId: 99, sectionId: "NA")
+        );
     }
 }

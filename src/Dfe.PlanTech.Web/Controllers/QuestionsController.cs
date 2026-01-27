@@ -19,19 +19,35 @@ public class QuestionsController : BaseController<QuestionsController>
     public QuestionsController(
         ILogger<QuestionsController> logger,
         IQuestionsViewBuilder questionsViewBuilder
-    ) : base(logger)
+    )
+        : base(logger)
     {
-        _questionsViewBuilder = questionsViewBuilder ?? throw new ArgumentNullException(nameof(questionsViewBuilder));
+        _questionsViewBuilder =
+            questionsViewBuilder ?? throw new ArgumentNullException(nameof(questionsViewBuilder));
     }
 
-    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}", Name = GetQuestionBySlugAction)]
-    public async Task<IActionResult> GetQuestionBySlug(string categorySlug, string sectionSlug, string questionSlug, string? returnTo)
+    [HttpGet(
+        "{categorySlug}/{sectionSlug}/self-assessment/{questionSlug}",
+        Name = GetQuestionBySlugAction
+    )]
+    public async Task<IActionResult> GetQuestionBySlug(
+        string categorySlug,
+        string sectionSlug,
+        string questionSlug,
+        string? returnTo
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(questionSlug);
 
-        return await _questionsViewBuilder.RouteBySlugAndQuestionAsync(this, categorySlug, sectionSlug, questionSlug, returnTo);
+        return await _questionsViewBuilder.RouteBySlugAndQuestionAsync(
+            this,
+            categorySlug,
+            sectionSlug,
+            questionSlug,
+            returnTo
+        );
     }
 
     [LogInvalidModelState]
@@ -53,42 +69,79 @@ public class QuestionsController : BaseController<QuestionsController>
         return await _questionsViewBuilder.RouteByQuestionId(this, questionId);
     }
 
-
     [LogInvalidModelState]
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/next-question")]
-    public async Task<IActionResult> GetNextUnansweredQuestion(string categorySlug, string sectionSlug)
+    public async Task<IActionResult> GetNextUnansweredQuestion(
+        string categorySlug,
+        string sectionSlug
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        return await _questionsViewBuilder.RouteToNextUnansweredQuestion(this, categorySlug, sectionSlug);
+        return await _questionsViewBuilder.RouteToNextUnansweredQuestion(
+            this,
+            categorySlug,
+            sectionSlug
+        );
     }
 
-    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/continue-previous", Name = "ContinuePreviousAssessment")]
-    public async Task<IActionResult> ContinuePreviousAssessment(string categorySlug, string sectionSlug)
+    [HttpGet(
+        "{categorySlug}/{sectionSlug}/self-assessment/continue-previous",
+        Name = "ContinuePreviousAssessment"
+    )]
+    public async Task<IActionResult> ContinuePreviousAssessment(
+        string categorySlug,
+        string sectionSlug
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        return await _questionsViewBuilder.ContinuePreviousAssessment(this, categorySlug, sectionSlug);
+        return await _questionsViewBuilder.ContinuePreviousAssessment(
+            this,
+            categorySlug,
+            sectionSlug
+        );
     }
 
     [LogInvalidModelState]
-    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/restart", Name = "RestartSelfAssessment")]
-    public async Task<IActionResult> RestartSelfAssessment(string categorySlug, string sectionSlug, bool isObsoleteSubmissionFlow)
+    [HttpGet(
+        "{categorySlug}/{sectionSlug}/self-assessment/restart",
+        Name = "RestartSelfAssessment"
+    )]
+    public async Task<IActionResult> RestartSelfAssessment(
+        string categorySlug,
+        string sectionSlug,
+        bool isObsoleteSubmissionFlow
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        return await _questionsViewBuilder.RestartSelfAssessment(this, categorySlug, sectionSlug, isObsoleteSubmissionFlow);
+        return await _questionsViewBuilder.RestartSelfAssessment(
+            this,
+            categorySlug,
+            sectionSlug,
+            isObsoleteSubmissionFlow
+        );
     }
 
-
-    [HttpGet("{categorySlug}/{sectionSlug}/self-assessment/continue", Name = "GetContinueSelfAssessmentPage")]
-    public async Task<IActionResult> GetContinueSelfAssessment(string categorySlug, string sectionSlug)
+    [HttpGet(
+        "{categorySlug}/{sectionSlug}/self-assessment/continue",
+        Name = "GetContinueSelfAssessmentPage"
+    )]
+    public async Task<IActionResult> GetContinueSelfAssessment(
+        string categorySlug,
+        string sectionSlug
+    )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        return await _questionsViewBuilder.RouteToContinueSelfAssessmentPage(this, categorySlug, sectionSlug);
+        return await _questionsViewBuilder.RouteToContinueSelfAssessmentPage(
+            this,
+            categorySlug,
+            sectionSlug
+        );
     }
 
     [LogInvalidModelState]
@@ -101,6 +154,13 @@ public class QuestionsController : BaseController<QuestionsController>
         string? returnTo = ""
     )
     {
-        return await _questionsViewBuilder.SubmitAnswerAndRedirect(this, answerViewModel, categorySlug, sectionSlug, questionSlug, returnTo);
+        return await _questionsViewBuilder.SubmitAnswerAndRedirect(
+            this,
+            answerViewModel,
+            categorySlug,
+            sectionSlug,
+            questionSlug,
+            returnTo
+        );
     }
 }

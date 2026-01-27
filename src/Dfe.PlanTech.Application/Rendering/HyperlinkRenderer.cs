@@ -11,12 +11,17 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
 {
     private readonly HyperlinkRendererOptions _options;
 
-    public HyperlinkRenderer(HyperlinkRendererOptions options) : base(RichTextNodeType.Hyperlink)
+    public HyperlinkRenderer(HyperlinkRendererOptions options)
+        : base(RichTextNodeType.Hyperlink)
     {
         _options = options;
     }
 
-    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    )
     {
         if (string.IsNullOrEmpty(content.Data?.Uri))
         {
@@ -44,7 +49,11 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
         return stringBuilder;
     }
 
-    private static void AddAttributes(RichTextContentField content, StringBuilder stringBuilder, bool isExternalLink)
+    private static void AddAttributes(
+        RichTextContentField content,
+        StringBuilder stringBuilder,
+        bool isExternalLink
+    )
     {
         stringBuilder.Append("href=\"");
         stringBuilder.Append(content.Data?.Uri ?? "");
@@ -56,7 +65,11 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
         }
     }
 
-    private static void AddLinkText(RichTextContentField content, StringBuilder stringBuilder, bool isExternalLink)
+    private static void AddLinkText(
+        RichTextContentField content,
+        StringBuilder stringBuilder,
+        bool isExternalLink
+    )
     {
         stringBuilder.Append(content.Value);
 

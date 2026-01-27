@@ -6,16 +6,18 @@ using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 
-
 public class CustomTelemetryInitializerTests
 {
-    private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+    private readonly IHttpContextAccessor _httpContextAccessor =
+        Substitute.For<IHttpContextAccessor>();
 
     [Fact]
     public void CustomInitializerAddsRequestIdToRequestTelemetry()
     {
         var telemetry = new RequestTelemetry();
-        var customInitializer = new CustomRequestDimensionsTelemetryInitializer(_httpContextAccessor);
+        var customInitializer = new CustomRequestDimensionsTelemetryInitializer(
+            _httpContextAccessor
+        );
 
         var httpContext = new DefaultHttpContext();
         httpContext.TraceIdentifier = "TestTraceId";
@@ -31,7 +33,9 @@ public class CustomTelemetryInitializerTests
     public void CustomInitializerDoesNotAddRequestIdToNonRequestTelemetry()
     {
         var telemetry = new DependencyTelemetry();
-        var customInitializer = new CustomRequestDimensionsTelemetryInitializer(_httpContextAccessor);
+        var customInitializer = new CustomRequestDimensionsTelemetryInitializer(
+            _httpContextAccessor
+        );
 
         customInitializer.Initialize(telemetry);
 

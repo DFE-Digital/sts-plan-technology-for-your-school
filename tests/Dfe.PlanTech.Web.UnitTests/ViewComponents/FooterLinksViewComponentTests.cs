@@ -15,7 +15,7 @@ namespace Dfe.PlanTech.Web.Tests.ViewComponents
             var expectedLinks = new List<NavigationLinkEntry>
             {
                 new NavigationLinkEntry { DisplayText = "Cookies", Href = "/cookies" },
-                new NavigationLinkEntry { DisplayText = "Contact", Href = "/contact" }
+                new NavigationLinkEntry { DisplayText = "Contact", Href = "/contact" },
             };
 
             mockViewBuilder.GetNavigationLinksAsync().Returns(Task.FromResult(expectedLinks));
@@ -34,7 +34,9 @@ namespace Dfe.PlanTech.Web.Tests.ViewComponents
         [Fact]
         public void Constructor_ShouldThrowArgumentNullException_WhenViewBuilderIsNull()
         {
-            var exception = Assert.Throws<ArgumentNullException>(() => new FooterLinksViewComponent(null!));
+            var exception = Assert.Throws<ArgumentNullException>(() =>
+                new FooterLinksViewComponent(null!)
+            );
             Assert.Equal("viewBuilder", exception.ParamName);
         }
     }

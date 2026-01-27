@@ -49,10 +49,14 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
         [Theory]
         [InlineData(ContentfulContentTypeConstants.CAndSLinkContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentAccordionContentfulContentTypeId)]
-        [InlineData(ContentfulContentTypeConstants.ComponentAccordionSectionContentfulContentTypeId)]
+        [InlineData(
+            ContentfulContentTypeConstants.ComponentAccordionSectionContentfulContentTypeId
+        )]
         [InlineData(ContentfulContentTypeConstants.ComponentAttachmentContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentButtonContentfulContentTypeId)]
-        [InlineData(ContentfulContentTypeConstants.ComponentButtonWithEntryReferenceContentfulContentTypeId)]
+        [InlineData(
+            ContentfulContentTypeConstants.ComponentButtonWithEntryReferenceContentfulContentTypeId
+        )]
         [InlineData(ContentfulContentTypeConstants.ComponentButtonWithLinkContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentCardContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentCsHeadingContentfulContentTypeId)]
@@ -63,9 +67,13 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
         [InlineData(ContentfulContentTypeConstants.ComponentHeroContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentInsetTextContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentJumpLinkContentfulContentTypeId)]
-        [InlineData(ContentfulContentTypeConstants.ComponentNotificationBannerContentfulContentTypeId)]
+        [InlineData(
+            ContentfulContentTypeConstants.ComponentNotificationBannerContentfulContentTypeId
+        )]
         [InlineData(ContentfulContentTypeConstants.ComponentTextBodyContentfulContentTypeId)]
-        [InlineData(ContentfulContentTypeConstants.ComponentTextBodyWithMaturityContentfulContentTypeId)]
+        [InlineData(
+            ContentfulContentTypeConstants.ComponentTextBodyWithMaturityContentfulContentTypeId
+        )]
         [InlineData(ContentfulContentTypeConstants.ComponentTitleContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentWarningContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ContentSupportPageContentfulContentTypeId)]
@@ -82,9 +90,13 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
         [InlineData(ContentfulContentTypeConstants.RecommendationPageContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.RichTextContentContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.RichTextContentDataContentfulContentTypeId)]
-        [InlineData(ContentfulContentTypeConstants.RichTextContentSupportDataContentfulContentTypeId)]
+        [InlineData(
+            ContentfulContentTypeConstants.RichTextContentSupportDataContentfulContentTypeId
+        )]
         [InlineData(ContentfulContentTypeConstants.RichTextMarkContentfulContentTypeId)]
-        public void ContentfulContentId_KnownContentfulId_ReturnsMatchingCsharpType_ForAllMappings(string contentfulTypeId)
+        public void ContentfulContentId_KnownContentfulId_ReturnsMatchingCsharpType_ForAllMappings(
+            string contentfulTypeId
+        )
         {
             // Arrange
             var entityResolver = new EntryResolver();

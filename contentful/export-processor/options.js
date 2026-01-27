@@ -1,28 +1,34 @@
-import "dotenv/config";
+import 'dotenv/config';
 import { program } from 'commander';
-import fs from "fs";
-import path from "path";
-import { getArgumentValue, getValueFromOptionsOrEnv } from "./options-helpers.js";
+import fs from 'fs';
+import path from 'path';
+import { getArgumentValue, getValueFromOptionsOrEnv } from './options-helpers.js';
 
-const DefaultOutputDirectory = "./output/";
+const DefaultOutputDirectory = './output/';
 
 /**
  * Get CLI arguments
  */
 const getCliArgs = () => {
   program
-    .option('-ts, --test-suites <true/false>', "Generate test suites.")
-    .option('-uj, --export-user-journeys <true/false>', "Export user journeys for subtopics.")
-    .option('-o, --output-dir <path>', "Relative path for saving files. E.g. ./output")
-    .option('-s, --save-all-journeys <true/false>', "Save all user journeys..")
-    .option('--environment <environment>', "Contentful environment.")
-    .option('--space-id <space-id>', "Contentful space id.")
-    .option('--delivery-token <delivery-token>', "Contentful delivery token.")
-    .option('--management-token <management-token>', "Contentful management token.")
-    .option("--save-file <true/false>", "Whether to save file or not. Defaults to true")
-    .option("--use-preview <true/false>", "Whether to export preview content or not. Defaults to false");
+    .option('-ts, --test-suites <true/false>', 'Generate test suites.')
+    .option('-uj, --export-user-journeys <true/false>', 'Export user journeys for subtopics.')
+    .option('-o, --output-dir <path>', 'Relative path for saving files. E.g. ./output')
+    .option('-s, --save-all-journeys <true/false>', 'Save all user journeys..')
+    .option('--environment <environment>', 'Contentful environment.')
+    .option('--space-id <space-id>', 'Contentful space id.')
+    .option('--delivery-token <delivery-token>', 'Contentful delivery token.')
+    .option('--management-token <management-token>', 'Contentful management token.')
+    .option('--save-file <true/false>', 'Whether to save file or not. Defaults to true')
+    .option(
+      '--use-preview <true/false>',
+      'Whether to export preview content or not. Defaults to false',
+    );
 
-  program.option('-e, --export [export...]', `What stuff to export from Contentful; this HAS to be the last option provided. Options are 'content', 'contentmodel', 'webhooks', 'roles', 'editorinterfaces'. Defaults to content and contentmodel. Specify '<TYPE>=<true/false> or just <TYPE> for true. E.g. --export "content=false contentmodel=false webhooks" would result in content and content model not being exported, but would export webhooks.`);
+  program.option(
+    '-e, --export [export...]',
+    `What stuff to export from Contentful; this HAS to be the last option provided. Options are 'content', 'contentmodel', 'webhooks', 'roles', 'editorinterfaces'. Defaults to content and contentmodel. Specify '<TYPE>=<true/false> or just <TYPE> for true. E.g. --export "content=false contentmodel=false webhooks" would result in content and content model not being exported, but would export webhooks.`,
+  );
 
   program.parse();
 
@@ -31,7 +37,7 @@ const getCliArgs = () => {
 
 /**
  * Get the "export" argument value from the CLI; what data (e.g. content, contentmodel, etc.) to export/not export from Contentful
- * @param {Object} args 
+ * @param {Object} args
  * @returns {Object | undefined} What data to export from Contentful
  */
 const getExportOptions = (args) => {
@@ -41,18 +47,18 @@ const getExportOptions = (args) => {
   const exportOptions = {
     content: true,
     contentmodel: true,
-    webhooks: false
+    webhooks: false,
   };
 
   for (const option of args.export) {
-    if (!option.includes("=")) {
+    if (!option.includes('=')) {
       exportOptions[option] = true;
       continue;
     }
 
-    const [whatToExport, shouldExport] = option.split("=");
+    const [whatToExport, shouldExport] = option.split('=');
 
-    if (shouldExport != "true" && shouldExport != "false") {
+    if (shouldExport != 'true' && shouldExport != 'false') {
       console.error(`Invalid option "${option}". Expected "true" or "false".`);
       continue;
     }
@@ -69,24 +75,30 @@ const getExportOptions = (args) => {
 const getOptions = () => {
   const args = getCliArgs();
 
-  const getOptionValue = (optionKey, environmentKey, defaultValue, isBoolean) => getValueFromOptionsOrEnv(args, optionKey, environmentKey, defaultValue, isBoolean);
+  const getOptionValue = (optionKey, environmentKey, defaultValue, isBoolean) =>
+    getValueFromOptionsOrEnv(args, optionKey, environmentKey, defaultValue, isBoolean);
 
   const options = {
-    generateTestSuites: getOptionValue("testSuites", "GENERATE_TEST_SUITES", false, true),
-    exportUserJourneyPaths: getOptionValue("exportUserJourneys", "EXPORT_USER_JOURNEY_PATHS", false, true),
-    outputDir: getOptionValue("outputDir", "OUTPUT_FILE_DIR", DefaultOutputDirectory, false),
-    saveAllJourneys: getOptionValue("saveAllJourneys", "EXPORT_ALL_PATHS", false, true),
+    generateTestSuites: getOptionValue('testSuites', 'GENERATE_TEST_SUITES', false, true),
+    exportUserJourneyPaths: getOptionValue(
+      'exportUserJourneys',
+      'EXPORT_USER_JOURNEY_PATHS',
+      false,
+      true,
+    ),
+    outputDir: getOptionValue('outputDir', 'OUTPUT_FILE_DIR', DefaultOutputDirectory, false),
+    saveAllJourneys: getOptionValue('saveAllJourneys', 'EXPORT_ALL_PATHS', false, true),
     exportOptions: getExportOptions(args),
     spaceId: args.spaceId ?? process.env.SPACE_ID,
     deliveryToken: args.deliveryToken ?? process.env.DELIVERY_TOKEN,
     managementToken: args.managementToken ?? process.env.MANAGEMENT_TOKEN,
-    environment: args.environment ?? process.env.ENV ?? process.env.ENVIRONMENT ?? "master",
-    saveFile: getOptionValue("saveFile", "SAVE_FILE", true, true),
-    usePreview: getOptionValue("usePreview", "USE_PREVIEW", false, true),
+    environment: args.environment ?? process.env.ENV ?? process.env.ENVIRONMENT ?? 'master',
+    saveFile: getOptionValue('saveFile', 'SAVE_FILE', true, true),
+    usePreview: getOptionValue('usePreview', 'USE_PREVIEW', false, true),
   };
 
   options.exportDirectory = getAndCreateOutputDir(options);
-  options.outputDir = options.exportDirectory;;
+  options.outputDir = options.exportDirectory;
   return options;
 };
 
@@ -94,7 +106,12 @@ const getOptions = () => {
  * Creats an output directory for the export, using the Contentful environment, the current time, and the specified parent output directory.
  */
 const getOutputDirPath = ({ outputDir, environment }) => {
-  const now = new Date().toISOString().replaceAll(":", "").replaceAll("-", "").replace("T", "").split(".")[0];
+  const now = new Date()
+    .toISOString()
+    .replaceAll(':', '')
+    .replaceAll('-', '')
+    .replace('T', '')
+    .split('.')[0];
 
   const subDirectory = `${outputDir}${environment}-${now}/`;
 
@@ -102,7 +119,6 @@ const getOutputDirPath = ({ outputDir, environment }) => {
 
   return path.join(currentDirectory, subDirectory);
 };
-
 
 /**
  * Get and create the output directory if it doesn't exist
@@ -119,7 +135,6 @@ const getAndCreateOutputDir = ({ outputDir, environment }) => {
   return path;
 };
 
-
 /**
  * Create the file directory if it doesn't exist
  * @param {string} outputDir - The directory to be created
@@ -132,18 +147,15 @@ function createFileDirectoryIfNonExistent(outputDir) {
   try {
     fs.mkdirSync(outputDir, { recursive: true });
     return outputDir;
-  }
-  catch (e) {
-    console.error(`Error creating directory ${outputDir}. Defaulting to ${DefaultOutputDirectory}`, e);
+  } catch (e) {
+    console.error(
+      `Error creating directory ${outputDir}. Defaulting to ${DefaultOutputDirectory}`,
+      e,
+    );
     return DefaultOutputDirectory;
   }
 }
 
 const options = getOptions();
 
-export {
-  options,
-  DefaultOutputDirectory,
-  getArgumentValue
-}
-
+export { options, DefaultOutputDirectory, getArgumentValue };

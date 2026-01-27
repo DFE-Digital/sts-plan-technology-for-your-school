@@ -9,10 +9,16 @@ public class ServiceBusResultProcessor(
     IMessageRetryHandler retryHandler
 ) : IServiceBusResultProcessor
 {
-    private readonly ILogger<ServiceBusResultProcessor> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly IMessageRetryHandler _retryHandler = retryHandler ?? throw new ArgumentNullException(nameof(retryHandler));
+    private readonly ILogger<ServiceBusResultProcessor> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly IMessageRetryHandler _retryHandler =
+        retryHandler ?? throw new ArgumentNullException(nameof(retryHandler));
 
-    public async Task ProcessMessageResult(ProcessMessageEventArgs processMessageEventArgs, IServiceBusResult result, CancellationToken cancellationToken)
+    public async Task ProcessMessageResult(
+        ProcessMessageEventArgs processMessageEventArgs,
+        IServiceBusResult result,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -22,10 +28,17 @@ public class ServiceBusResultProcessor(
                     await ProcessSuccessResult(processMessageEventArgs, cancellationToken);
                     break;
                 case ServiceBusErrorResult deadLetterResult:
-                    await ProcessErrorResult(processMessageEventArgs, deadLetterResult, cancellationToken);
+                    await ProcessErrorResult(
+                        processMessageEventArgs,
+                        deadLetterResult,
+                        cancellationToken
+                    );
                     break;
                 default:
-                    _logger.LogError("Unexpected service bus result type: {Type}", result.GetType().Name);
+                    _logger.LogError(
+                        "Unexpected service bus result type: {Type}",
+                        result.GetType().Name
+                    );
                     break;
             }
         }
@@ -35,21 +48,53 @@ public class ServiceBusResultProcessor(
         }
     }
 
-    private static async Task ProcessSuccessResult(ProcessMessageEventArgs processMessageEventArgs, CancellationToken cancellationToken)
-      => await processMessageEventArgs.CompleteMessageAsync(processMessageEventArgs.Message, cancellationToken);
+    private static async Task ProcessSuccessResult(
+        ProcessMessageEventArgs processMessageEventArgs,
+        CancellationToken cancellationToken
+    ) =>
+        await processMessageEventArgs.CompleteMessageAsync(
+            processMessageEventArgs.Message,
+            cancellationToken
+        );
 
-    private async Task ProcessErrorResult(ProcessMessageEventArgs processMessageEventArgs, ServiceBusErrorResult errorResult, CancellationToken cancellationToken)
+    private async Task ProcessErrorResult(
+        ProcessMessageEventArgs processMessageEventArgs,
+        ServiceBusErrorResult errorResult,
+        CancellationToken cancellationToken
+    )
     {
-        var shouldRetry = await _retryHandler.RetryRequired(processMessageEventArgs.Message, cancellationToken);
+        var shouldRetry = await _retryHandler.RetryRequired(
+            processMessageEventArgs.Message,
+            cancellationToken
+        );
 
         if (shouldRetry)
         {
-            _logger.LogWarning("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nWill retry again", processMessageEventArgs.Message.MessageId, errorResult.Reason, errorResult.Description ?? "");
-            await processMessageEventArgs.CompleteMessageAsync(processMessageEventArgs.Message, cancellationToken);
+            _logger.LogWarning(
+                "Error processing message ID {MessageId}.\n{Reason}\n{Description}\nWill retry again",
+                processMessageEventArgs.Message.MessageId,
+                errorResult.Reason,
+                errorResult.Description ?? ""
+            );
+            await processMessageEventArgs.CompleteMessageAsync(
+                processMessageEventArgs.Message,
+                cancellationToken
+            );
             return;
         }
 
-        _logger.LogError("Error processing message ID {MessageId}.\n{Reason}\n{Description}\nThe maximum delivery count has been reached", processMessageEventArgs.Message.MessageId, errorResult.Reason, errorResult.Description ?? "");
-        await processMessageEventArgs.DeadLetterMessageAsync(processMessageEventArgs.Message, null, errorResult.Reason, errorResult.Description, cancellationToken);
+        _logger.LogError(
+            "Error processing message ID {MessageId}.\n{Reason}\n{Description}\nThe maximum delivery count has been reached",
+            processMessageEventArgs.Message.MessageId,
+            errorResult.Reason,
+            errorResult.Description ?? ""
+        );
+        await processMessageEventArgs.DeadLetterMessageAsync(
+            processMessageEventArgs.Message,
+            null,
+            errorResult.Reason,
+            errorResult.Description,
+            cancellationToken
+        );
     }
 }

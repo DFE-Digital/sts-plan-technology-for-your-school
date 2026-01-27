@@ -20,17 +20,24 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
         {
             var internalErrorPageId = "Internal Error Page ID";
 
-            var errorPages = new ErrorPagesConfiguration { InternalErrorPageId = internalErrorPageId };
+            var errorPages = new ErrorPagesConfiguration
+            {
+                InternalErrorPageId = internalErrorPageId,
+            };
             var errorPagesOptions = Substitute.For<IOptions<ErrorPagesConfiguration>>();
             errorPagesOptions.Value.Returns(errorPages);
 
             var contentfulService = Substitute.For<IContentfulService>();
 
             var internalErrorPage = new PageEntry { Slug = InternalErrorSlug };
-            contentfulService.GetPageByIdAsync(internalErrorPageId)
+            contentfulService
+                .GetPageByIdAsync(internalErrorPageId)
                 .Returns(Task.FromResult<PageEntry>(internalErrorPage));
 
-            _middleware = new ServiceExceptionHandlerMiddleware(errorPagesOptions, contentfulService);
+            _middleware = new ServiceExceptionHandlerMiddleware(
+                errorPagesOptions,
+                contentfulService
+            );
         }
 
         [Fact]
@@ -101,7 +108,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             await _middleware.HandleExceptionAsync(context);
 
             Assert.NotNull(context.Response);
-            Assert.Equal(UrlConstants.OrgErrorPage, context.Response.Headers.Values.FirstOrDefault());
+            Assert.Equal(
+                UrlConstants.OrgErrorPage,
+                context.Response.Headers.Values.FirstOrDefault()
+            );
         }
 
         [Fact]

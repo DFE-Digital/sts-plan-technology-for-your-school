@@ -7,11 +7,14 @@ namespace Dfe.PlanTech.Application.Rendering;
 
 public class TableRenderer : BaseRichTextContentPartRenderer
 {
-    public TableRenderer() : base(RichTextNodeType.Table)
-    {
-    }
+    public TableRenderer()
+        : base(RichTextNodeType.Table) { }
 
-    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    )
     {
         stringBuilder.Append("<table class=\"govuk-table\">");
 
@@ -22,5 +25,4 @@ public class TableRenderer : BaseRichTextContentPartRenderer
 
         return stringBuilder;
     }
-
 }

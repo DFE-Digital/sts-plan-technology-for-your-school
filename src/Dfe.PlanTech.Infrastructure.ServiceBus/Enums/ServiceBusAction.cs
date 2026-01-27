@@ -4,5 +4,5 @@ public enum ServiceBusAction
 {
     NotSet,
     DeadLetter,
-    Complete
+    Complete,
 }

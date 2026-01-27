@@ -15,7 +15,10 @@ public static class RandomNumberHelper
     {
         if (min >= max)
         {
-            throw new ArgumentOutOfRangeException(nameof(min), "Minimum value must be less than maximum value.");
+            throw new ArgumentOutOfRangeException(
+                nameof(min),
+                "Minimum value must be less than maximum value."
+            );
         }
 
         long range = (long)max - min;

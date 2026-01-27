@@ -1,5 +1,5 @@
-import { ValidateContent } from "./content-validator.js";
-import ValidateTitle from "./title-validator.js";
+import { ValidateContent } from './content-validator.js';
+import ValidateTitle from './title-validator.js';
 
 export const ValidatePage = (slug, page) => {
   if (!page.fields.requiresAuthorisation) {
@@ -29,7 +29,7 @@ export const ValidatePage = (slug, page) => {
       ValidateContent(content);
     }
   }
-}
+};
 
 function ShouldMatchUrl(url) {
   cy.location().should((loc) => {

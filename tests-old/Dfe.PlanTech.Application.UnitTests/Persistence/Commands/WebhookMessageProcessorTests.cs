@@ -15,7 +15,9 @@ public class WebhookMessageProcessorTests
 
     private const string QuestionId = "2VSR0emw0SPy8dlR9XlgfF";
 
-    private readonly ILogger<ContentfulMessageProcessor> _logger = Substitute.For<ILogger<ContentfulMessageProcessor>>();
+    private readonly ILogger<ContentfulMessageProcessor> _logger = Substitute.For<
+        ILogger<ContentfulMessageProcessor>
+    >();
     private readonly JsonSerializerOptions _jsonSerializerOptions;
     private readonly ICmsCache _cache = Substitute.For<ICmsCache>();
 
@@ -32,14 +34,20 @@ public class WebhookMessageProcessorTests
         _webhookMessageProcessor = CreateWebhookToDbCommand(true);
     }
 
-    private ContentfulMessageProcessor CreateWebhookToDbCommand(bool usePreview) => new(_cache, _jsonSerializerOptions, _logger);
+    private ContentfulMessageProcessor CreateWebhookToDbCommand(bool usePreview) =>
+        new(_cache, _jsonSerializerOptions, _logger);
 
     [Fact]
     public async Task ProcessMessage_Should_Execute_Successfully()
     {
         var subject = "ContentManagement.Entry.save";
 
-        var result = await _webhookMessageProcessor.ProcessMessage(subject, QuestionJsonBody, "message id", CancellationToken.None);
+        var result = await _webhookMessageProcessor.ProcessMessage(
+            subject,
+            QuestionJsonBody,
+            "message id",
+            CancellationToken.None
+        );
 
         Assert.IsType<ServiceBusSuccessResult>(result);
         await _cache.Received(1).InvalidateCacheAsync(QuestionId, "question");
@@ -52,7 +60,12 @@ public class WebhookMessageProcessorTests
 
         var subject = "ContentManagement.Entry.save";
 
-        var result = await _webhookMessageProcessor.ProcessMessage(subject, nonMappableJson, "message id", CancellationToken.None);
+        var result = await _webhookMessageProcessor.ProcessMessage(
+            subject,
+            nonMappableJson,
+            "message id",
+            CancellationToken.None
+        );
 
         Assert.IsType<ServiceBusErrorResult>(result);
 

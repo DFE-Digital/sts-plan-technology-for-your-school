@@ -7,11 +7,9 @@ namespace Dfe.PlanTech.Core.Exceptions;
 [ExcludeFromCodeCoverage]
 public class GetEntriesException : Exception
 {
-    public GetEntriesException(string? message) : base(message)
-    {
-    }
+    public GetEntriesException(string? message)
+        : base(message) { }
 
-    protected GetEntriesException(SerializationInfo info, StreamingContext context) : base()
-    {
-    }
+    protected GetEntriesException(SerializationInfo info, StreamingContext context)
+        : base() { }
 }

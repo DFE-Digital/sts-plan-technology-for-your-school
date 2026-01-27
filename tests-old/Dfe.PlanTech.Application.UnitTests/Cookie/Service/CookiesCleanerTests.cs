@@ -11,10 +11,15 @@ public class CookiesCleanerTests
         var nonEssentialCookieKey = "nonessential_cookie";
         var essentialCookies = new string[] { "essential1", "essential2" };
 
-        var cleaner = new CookiesCleaner(new CookieWorkflowOptions() { EssentialCookies = essentialCookies });
+        var cleaner = new CookiesCleaner(
+            new CookieWorkflowOptions() { EssentialCookies = essentialCookies }
+        );
         var context = new DefaultHttpContext();
 
-        context.Request.Headers.TryAdd("Cookie", "essential1_cookie=value; essential2_cookie=value; nonessential_cookie=value;");
+        context.Request.Headers.TryAdd(
+            "Cookie",
+            "essential1_cookie=value; essential2_cookie=value; nonessential_cookie=value;"
+        );
 
         cleaner.RemoveNonEssentialCookies(context);
 
@@ -27,7 +32,9 @@ public class CookiesCleanerTests
 
         foreach (var essentialCookie in essentialCookies)
         {
-            var matchingCookie = cookies.FirstOrDefault(c => c.Name.ToString().StartsWith(essentialCookie));
+            var matchingCookie = cookies.FirstOrDefault(c =>
+                c.Name.ToString().StartsWith(essentialCookie)
+            );
             Assert.Null(matchingCookie);
         }
     }

@@ -17,5 +17,6 @@ public class QuestionnaireCacher
 
     public QuestionnaireCache? Cached => _cacher.Get(CACHE_KEY, () => new QuestionnaireCache());
 
-    public void SaveCache(QuestionnaireCache cache) => _cacher.Set(CACHE_KEY, TimeSpan.FromHours(1), cache);
+    public void SaveCache(QuestionnaireCache cache) =>
+        _cacher.Set(CACHE_KEY, TimeSpan.FromHours(1), cache);
 }

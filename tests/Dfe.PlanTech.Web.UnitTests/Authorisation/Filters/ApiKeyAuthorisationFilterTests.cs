@@ -21,16 +21,13 @@ public class ApiKeyAuthorisationFilterTests
             http.Request.Headers[ApiKeyAuthorisationFilter.AuthHeaderKey] = authHeaderValue;
         }
 
-        var actionContext = new ActionContext(
-            http,
-            new RouteData(),
-            new ActionDescriptor());
+        var actionContext = new ActionContext(http, new RouteData(), new ActionDescriptor());
 
         return new AuthorizationFilterContext(actionContext, []);
     }
 
-    private static ApiAuthenticationConfiguration ConfigWithKey(string key)
-        => new ApiAuthenticationConfiguration { KeyValue = key };
+    private static ApiAuthenticationConfiguration ConfigWithKey(string key) =>
+        new ApiAuthenticationConfiguration { KeyValue = key };
 
     [Fact]
     public void OnAuthorization_When_ConfigMissingApiKey_Returns_Unauthorized_And_LogsError()
@@ -46,7 +43,7 @@ public class ApiKeyAuthorisationFilterTests
 
         // Assert
         Assert.IsType<UnauthorizedResult>(ctx.Result);
-        logger.ReceivedWithAnyArgs().Log(LogLevel.Error, default, default!, default, default!);
+        logger.ReceivedWithAnyArgs().Log(LogLevel.Error, default, default!, "{Message}", default!);
     }
 
     [Fact]
@@ -60,7 +57,9 @@ public class ApiKeyAuthorisationFilterTests
         sut.OnAuthorization(ctx);
 
         Assert.IsType<UnauthorizedResult>(ctx.Result);
-        logger.ReceivedWithAnyArgs().Log(LogLevel.Information, default, default!, default, default!);
+        logger
+            .ReceivedWithAnyArgs()
+            .Log(LogLevel.Information, default, default!, "{Message}", default!);
     }
 
     [Fact]
@@ -87,7 +86,9 @@ public class ApiKeyAuthorisationFilterTests
         sut.OnAuthorization(ctx);
 
         Assert.IsType<UnauthorizedResult>(ctx.Result);
-        logger.ReceivedWithAnyArgs().Log(LogLevel.Information, default, default!, default, default!);
+        logger
+            .ReceivedWithAnyArgs()
+            .Log(LogLevel.Information, default, default!, "{Message}", default!);
     }
 
     [Fact]
@@ -119,7 +120,10 @@ public class ApiKeyAuthorisationFilterTests
 
     private const string KeyValue = "mock-refresh-api-key";
     private readonly ApiKeyAuthorisationFilter _authorisationFilter;
-    private readonly ILogger<ApiKeyAuthorisationFilter> _logger = Substitute.For<ILogger<ApiKeyAuthorisationFilter>>();
+    private readonly ILogger<ApiKeyAuthorisationFilter> _logger = Substitute.For<
+        ILogger<ApiKeyAuthorisationFilter>
+    >();
+
     public ApiKeyAuthorisationFilterTests()
     {
         var config = new ApiAuthenticationConfiguration { KeyValue = KeyValue };
@@ -133,7 +137,7 @@ public class ApiKeyAuthorisationFilterTests
         {
             HttpContext = new DefaultHttpContext(),
             RouteData = new RouteData(),
-            ActionDescriptor = new ActionDescriptor()
+            ActionDescriptor = new ActionDescriptor(),
         };
         var filterContext = new AuthorizationFilterContext(actionContext, []);
         _authorisationFilter.OnAuthorization(filterContext);
@@ -153,7 +157,7 @@ public class ApiKeyAuthorisationFilterTests
         {
             HttpContext = httpContext,
             RouteData = new RouteData(),
-            ActionDescriptor = new ActionDescriptor()
+            ActionDescriptor = new ActionDescriptor(),
         };
         var filterContext = new AuthorizationFilterContext(actionContext, []);
         _authorisationFilter.OnAuthorization(filterContext);
@@ -164,12 +168,15 @@ public class ApiKeyAuthorisationFilterTests
     public void Should_Continue_Authorised_If_Valid_ApiKey()
     {
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers.Append(ApiKeyAuthorisationFilter.AuthHeaderKey, ApiKeyAuthorisationFilter.AuthValuePrefix + KeyValue);
+        httpContext.Request.Headers.Append(
+            ApiKeyAuthorisationFilter.AuthHeaderKey,
+            ApiKeyAuthorisationFilter.AuthValuePrefix + KeyValue
+        );
         var actionContext = new ActionContext
         {
             HttpContext = httpContext,
             RouteData = new RouteData(),
-            ActionDescriptor = new ActionDescriptor()
+            ActionDescriptor = new ActionDescriptor(),
         };
         var filterContext = new AuthorizationFilterContext(actionContext, []);
         _authorisationFilter.OnAuthorization(filterContext);
@@ -186,12 +193,15 @@ public class ApiKeyAuthorisationFilterTests
         var authorisationFilter = new ApiKeyAuthorisationFilter(_logger, config);
 
         var httpContext = new DefaultHttpContext();
-        httpContext.Request.Headers.Append(ApiKeyAuthorisationFilter.AuthHeaderKey, ApiKeyAuthorisationFilter.AuthValuePrefix + KeyValue);
+        httpContext.Request.Headers.Append(
+            ApiKeyAuthorisationFilter.AuthHeaderKey,
+            ApiKeyAuthorisationFilter.AuthValuePrefix + KeyValue
+        );
         var actionContext = new ActionContext
         {
             HttpContext = httpContext,
             RouteData = new RouteData(),
-            ActionDescriptor = new ActionDescriptor()
+            ActionDescriptor = new ActionDescriptor(),
         };
         var filterContext = new AuthorizationFilterContext(actionContext, []);
         authorisationFilter.OnAuthorization(filterContext);

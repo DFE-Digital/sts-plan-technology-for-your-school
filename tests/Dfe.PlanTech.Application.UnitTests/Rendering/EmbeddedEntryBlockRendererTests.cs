@@ -14,8 +14,11 @@ namespace Dfe.PlanTech.Application.UnitTests.Rendering;
 public class EmbeddedEntryBlockRendererTests
 {
     private readonly ILoggerFactory _loggerFactory = Substitute.For<ILoggerFactory>();
-    private readonly ILogger<AccordionComponentRenderer> _accordionLogger = Substitute.For<ILogger<AccordionComponentRenderer>>();
-    private readonly IRichTextContentPartRendererCollection _richTextContentPartRendererCollection = Substitute.For<IRichTextContentPartRendererCollection>();
+    private readonly ILogger<AccordionComponentRenderer> _accordionLogger = Substitute.For<
+        ILogger<AccordionComponentRenderer>
+    >();
+    private readonly IRichTextContentPartRendererCollection _richTextContentPartRendererCollection =
+        Substitute.For<IRichTextContentPartRendererCollection>();
 
     [Fact]
     public void ShouldReturnNull_WhenNoRichTextContent()
@@ -24,7 +27,11 @@ public class EmbeddedEntryBlockRendererTests
 
         var stringBuilder = new StringBuilder();
 
-        var result = renderer.AddHtml(new RichTextContentField(), new AccordionComponentRenderer(_accordionLogger), stringBuilder);
+        var result = renderer.AddHtml(
+            new RichTextContentField(),
+            new AccordionComponentRenderer(_accordionLogger),
+            stringBuilder
+        );
 
         Assert.Equal(stringBuilder.ToString(), result.ToString());
     }
@@ -34,7 +41,11 @@ public class EmbeddedEntryBlockRendererTests
     {
         var renderer = new EmbeddedEntryBlockRenderer(_loggerFactory);
 
-        var result = renderer.AddHtml(GetGenericAttachmentContent(), _richTextContentPartRendererCollection, new StringBuilder());
+        var result = renderer.AddHtml(
+            GetGenericAttachmentContent(),
+            _richTextContentPartRendererCollection,
+            new StringBuilder()
+        );
 
         Assert.Equal(GetGenericAttachmentStringBuilderOutput().ToString(), result.ToString());
     }
@@ -44,7 +55,11 @@ public class EmbeddedEntryBlockRendererTests
     {
         var renderer = new EmbeddedEntryBlockRenderer(_loggerFactory);
 
-        var result = renderer.AddHtml(GetCsAccordionContent(), new AccordionComponentRenderer(_accordionLogger), new StringBuilder());
+        var result = renderer.AddHtml(
+            GetCsAccordionContent(),
+            new AccordionComponentRenderer(_accordionLogger),
+            new StringBuilder()
+        );
 
         Assert.Equal(GetAccordionStringBuilderOutput().ToString(), result.ToString());
     }
@@ -66,15 +81,12 @@ public class EmbeddedEntryBlockRendererTests
                         {
                             ContentType = "Wav",
                             Url = "test.com",
-                            Details = new FileDetails()
-                            {
-                                Size = 2048
-                            }
+                            Details = new FileDetails() { Size = 2048 },
                         },
                         SystemProperties = new SystemProperties()
                         {
                             UpdatedAt = DateTime.Parse("2025-01-01"),
-                        }
+                        },
                     },
                     SystemProperties = new SystemProperties()
                     {
@@ -82,37 +94,48 @@ public class EmbeddedEntryBlockRendererTests
                         {
                             SystemProperties = new SystemProperties()
                             {
-                                Id = ContentfulContentTypeConstants.ComponentAttachmentContentfulContentTypeId,
-                            }
-                        }
+                                Id =
+                                    ContentfulContentTypeConstants.ComponentAttachmentContentfulContentTypeId,
+                            },
+                        },
                     },
-                }
-            }
+                },
+            },
         };
     }
 
     private StringBuilder GetGenericAttachmentStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
-        stringBuilder.Append("<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">");
+        stringBuilder.Append(
+            "<div class=\"guidance-container govuk-!-padding-8 govuk-!-margin-bottom-8 govuk-!-display-none-print govuk-body \">"
+        );
         stringBuilder.Append("<div class=\"attachment\">");
         stringBuilder.Append("<div class=\"attachment-thumbnail govuk-!-margin-right-8\">");
         stringBuilder.Append($"<a href=\"test.com\" download>");
-        stringBuilder.Append("<img src =\"/assets/images/generic-file-icon.svg\" alt=\"generic file type\">");
+        stringBuilder.Append(
+            "<img src =\"/assets/images/generic-file-icon.svg\" alt=\"generic file type\">"
+        );
         stringBuilder.Append("</a></div>");
         stringBuilder.Append("<div class=\"attachment-details\">");
         stringBuilder.Append("<h2 class=\"attachment-title\">");
-        stringBuilder.Append("<a href=\"test.com\" aria-describedby=\"file-details\" class=\"govuk-link attachment-link\" download>The Title");
+        stringBuilder.Append(
+            "<a href=\"test.com\" aria-describedby=\"file-details\" class=\"govuk-link attachment-link\" download>The Title"
+        );
         stringBuilder.Append("</a></h2>");
 
         stringBuilder.Append("<p class=\"attachment-metadata\" id=\"file-details\">");
-        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"file type\">WAV</span>,");
+        stringBuilder.Append(
+            "<span class=\"attachment-attribute\" aria-label=\"file type\">WAV</span>,"
+        );
         stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"file size\">");
         stringBuilder.Append("2 KB");
         stringBuilder.Append("</span></p>");
 
         stringBuilder.Append("<p class=\"attachment-metadata\">");
-        stringBuilder.Append("<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated 1 January 2025");
+        stringBuilder.Append(
+            "<span class=\"attachment-attribute\" aria-label=\"updated date\">Last updated 1 January 2025"
+        );
         stringBuilder.Append("</span></p>");
 
         stringBuilder.Append("</div></div></div>");
@@ -138,9 +161,10 @@ public class EmbeddedEntryBlockRendererTests
                         {
                             SystemProperties = new SystemProperties()
                             {
-                                Id = ContentfulContentTypeConstants.ComponentAccordionContentfulContentTypeId,
-                            }
-                        }
+                                Id =
+                                    ContentfulContentTypeConstants.ComponentAccordionContentfulContentTypeId,
+                            },
+                        },
                     },
                     Content =
                     [
@@ -165,9 +189,9 @@ public class EmbeddedEntryBlockRendererTests
                             SummaryLine = "Summary Line 3",
                             RichText = new RichTextContentField(),
                         },
-                    ]
-                }
-            }
+                    ],
+                },
+            },
         };
     }
 
@@ -176,42 +200,62 @@ public class EmbeddedEntryBlockRendererTests
         var accId = "accordion-Internal Name 1";
         var stringBuilder = new StringBuilder();
 
-        stringBuilder.AppendLine($"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"{accId}\">");
+        stringBuilder.AppendLine(
+            $"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"{accId}\">"
+        );
 
         stringBuilder.Append("<div class=\"govuk-accordion__section\">");
         stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
         stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
-        stringBuilder.Append($"<span class=\"govuk-accordion__section-button\" id=\"{accId}-heading-1\">");
+        stringBuilder.Append(
+            $"<span class=\"govuk-accordion__section-button\" id=\"{accId}-heading-1\">"
+        );
         stringBuilder.Append("Title 1");
         stringBuilder.Append("</span></h2>");
-        stringBuilder.Append($"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{accId}-summary-1\">");
+        stringBuilder.Append(
+            $"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{accId}-summary-1\">"
+        );
         stringBuilder.Append("Summary Line 1");
         stringBuilder.Append("</div></div>");
-        stringBuilder.Append($"<div id=\"{accId}-content-1\" class=\"govuk-accordion__section-content\">");
+        stringBuilder.Append(
+            $"<div id=\"{accId}-content-1\" class=\"govuk-accordion__section-content\">"
+        );
         stringBuilder.Append("</div></div>");
 
         stringBuilder.Append("<div class=\"govuk-accordion__section\">");
         stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
         stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
-        stringBuilder.Append($"<span class=\"govuk-accordion__section-button\" id=\"{accId}-heading-2\">");
+        stringBuilder.Append(
+            $"<span class=\"govuk-accordion__section-button\" id=\"{accId}-heading-2\">"
+        );
         stringBuilder.Append("Title 2");
         stringBuilder.Append("</span></h2>");
-        stringBuilder.Append($"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{accId}-summary-2\">");
+        stringBuilder.Append(
+            $"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{accId}-summary-2\">"
+        );
         stringBuilder.Append("Summary Line 2");
         stringBuilder.Append("</div></div>");
-        stringBuilder.Append($"<div id=\"{accId}-content-2\" class=\"govuk-accordion__section-content\">");
+        stringBuilder.Append(
+            $"<div id=\"{accId}-content-2\" class=\"govuk-accordion__section-content\">"
+        );
         stringBuilder.Append("</div></div>");
 
         stringBuilder.Append("<div class=\"govuk-accordion__section\">");
         stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
         stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
-        stringBuilder.Append($"<span class=\"govuk-accordion__section-button\" id=\"{accId}-heading-3\">");
+        stringBuilder.Append(
+            $"<span class=\"govuk-accordion__section-button\" id=\"{accId}-heading-3\">"
+        );
         stringBuilder.Append("Title 3");
         stringBuilder.Append("</span></h2>");
-        stringBuilder.Append($"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{accId}-summary-3\">");
+        stringBuilder.Append(
+            $"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{accId}-summary-3\">"
+        );
         stringBuilder.Append("Summary Line 3");
         stringBuilder.Append("</div></div>");
-        stringBuilder.Append($"<div id=\"{accId}-content-3\" class=\"govuk-accordion__section-content\">");
+        stringBuilder.Append(
+            $"<div id=\"{accId}-content-3\" class=\"govuk-accordion__section-content\">"
+        );
         stringBuilder.Append("</div></div>");
 
         stringBuilder.Append("</div>");

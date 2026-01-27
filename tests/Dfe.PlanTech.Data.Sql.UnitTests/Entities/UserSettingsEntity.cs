@@ -27,11 +27,9 @@ public class UserSettingsEntityTests
         Assert.Equal(expectedSortOrder, dto.SortOrder);
 
         // Assert - ensure all DTO properties are accounted for
-        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlUserSettingsDto>(
-            [
-                nameof(SqlUserSettingsDto.UserId),
-                nameof(SqlUserSettingsDto.SortOrder)
-            ]
-        );
+        DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlUserSettingsDto>([
+            nameof(SqlUserSettingsDto.UserId),
+            nameof(SqlUserSettingsDto.SortOrder),
+        ]);
     }
 }

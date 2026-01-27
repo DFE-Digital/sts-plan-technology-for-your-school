@@ -15,7 +15,9 @@ public class EstablishmentRepository : IEstablishmentRepository
         _db = dbContext;
     }
 
-    public async Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(EstablishmentModel model)
+    public async Task<EstablishmentEntity> CreateEstablishmentFromModelAsync(
+        EstablishmentModel model
+    )
     {
         ArgumentNullException.ThrowIfNull(model);
 
@@ -24,7 +26,7 @@ public class EstablishmentRepository : IEstablishmentRepository
             EstablishmentRef = model.Reference,
             EstablishmentType = model.Type?.Name,
             OrgName = model.Name,
-            GroupUid = model.GroupUid // TODO: Consider getting it from `uid` instead, noting that `GroupUid` is populated from `uid`
+            GroupUid = model.GroupUid, // TODO: Consider getting it from `uid` instead, noting that `GroupUid` is populated from `uid`
         };
 
         await _db.Establishments.AddAsync(establishmentEntity);
@@ -33,22 +35,31 @@ public class EstablishmentRepository : IEstablishmentRepository
         return establishmentEntity;
     }
 
-    public async Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(string establishmentReference)
+    public async Task<EstablishmentEntity?> GetEstablishmentByReferenceAsync(
+        string establishmentReference
+    )
     {
         var establishments = await GetEstablishmentsByAsync(establishment =>
-            establishment.EstablishmentRef == establishmentReference);
+            establishment.EstablishmentRef == establishmentReference
+        );
         return establishments.FirstOrDefault();
     }
 
-    public Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(IEnumerable<string> establishmentReferences)
+    public Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(
+        IEnumerable<string> establishmentReferences
+    )
     {
-        return GetEstablishmentsByAsync(establishment => establishmentReferences.Contains(establishment.EstablishmentRef));
+        return GetEstablishmentsByAsync(establishment =>
+            establishmentReferences.Contains(establishment.EstablishmentRef)
+        );
     }
 
-    public Task<List<EstablishmentEntity>> GetEstablishmentsByAsync(Expression<Func<EstablishmentEntity, bool>> predicate)
+    public Task<List<EstablishmentEntity>> GetEstablishmentsByAsync(
+        Expression<Func<EstablishmentEntity, bool>> predicate
+    )
     {
-        return _db.Establishments
-            .Where(predicate)
+        return _db
+            .Establishments.Where(predicate)
             .Where(establishment => establishment != null)
             .ToListAsync();
     }

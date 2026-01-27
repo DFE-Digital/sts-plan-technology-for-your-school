@@ -1,25 +1,20 @@
-import { contactUsText, notFoundText } from "../../helpers/constants";
+import { contactUsText, notFoundText } from '../../helpers/constants';
 
+describe('not found', () => {
+  beforeEach(() => {
+    cy.visit('/some-slug-that-doesnt-exist');
+    cy.injectAxe();
+  });
 
-describe("not found", () => {
-    beforeEach(() => {
-        cy.visit("/some-slug-that-doesnt-exist");
-        cy.injectAxe();
-    });
+  it('should contain heading', () => {
+    cy.get('h1.govuk-heading-xl').should('exist').and('contain', notFoundText);
+  });
 
-    it("should contain heading", () => {
-        cy.get("h1.govuk-heading-xl")
-            .should("exist")
-            .and("contain", notFoundText);
-    });
+  it('should contain text bodies', () => {
+    cy.get('p').should('exist').and('have.length.of.at.least', 3);
+  });
 
-    it("should contain text bodies", () => {
-        cy.get("p")
-            .should("exist")
-            .and("have.length.of.at.least", 3);
-    });
-
-    it("should have contact us link", () => {
-        cy.get("a").should("exist").and("contain", contactUsText);
-    });
+  it('should have contact us link', () => {
+    cy.get('a').should('exist').and('contain', contactUsText);
+  });
 });

@@ -14,5 +14,8 @@ public interface IMessageRetryHandler
     /// <param name="message"></param>
     /// <param name="cancellationToken"></param>
     /// <returns>True if retry was required, false if not</returns>
-    Task<bool> RetryRequired(ServiceBusReceivedMessage message, CancellationToken cancellationToken);
+    Task<bool> RetryRequired(
+        ServiceBusReceivedMessage message,
+        CancellationToken cancellationToken
+    );
 }

@@ -7,19 +7,23 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewModels;
 
 public class CategoryLandingSectionViewModelTests
 {
-    private static QuestionnaireSectionEntry Section(string? slug, string name = "Networking", string shortDesc = "Keep things safe")
-        => new QuestionnaireSectionEntry
+    private static QuestionnaireSectionEntry Section(
+        string? slug,
+        string name = "Networking",
+        string shortDesc = "Keep things safe"
+    ) =>
+        new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("sec-1"),
             Name = name,
             ShortDescription = shortDesc,
             InterstitialPage = slug is null
                 ? new PageEntry { Sys = new SystemDetails(), Slug = string.Empty }
-                : new PageEntry { Sys = new SystemDetails("p-1"), Slug = slug }
+                : new PageEntry { Sys = new SystemDetails("p-1"), Slug = slug },
         };
 
-    private static CategoryLandingSectionRecommendationsViewModel Recs()
-        => new CategoryLandingSectionRecommendationsViewModel
+    private static CategoryLandingSectionRecommendationsViewModel Recs() =>
+        new CategoryLandingSectionRecommendationsViewModel
         {
             // add minimal fields if your type requires them; not used by these tests
         };
@@ -29,7 +33,12 @@ public class CategoryLandingSectionViewModelTests
     {
         var section = Section(slug: null, name: "Devices", shortDesc: "desc");
 
-        var vm = new CategoryLandingSectionViewModel(section, Recs(), sectionStatus: null, hadRetrievalError: false);
+        var vm = new CategoryLandingSectionViewModel(
+            section,
+            Recs(),
+            sectionStatus: null,
+            hadRetrievalError: false
+        );
 
         Assert.Equal(SubmissionStatus.RetrievalError, vm.ProgressStatus);
         Assert.Equal("Devices at  unavailable", vm.ErrorMessage); // Slug is null => string interpolation shows empty after 'at '
@@ -48,10 +57,15 @@ public class CategoryLandingSectionViewModelTests
         {
             SectionId = "sec-1",
             DateUpdated = DateTime.UtcNow.AddDays(-1),
-            LastCompletionDate = DateTime.UtcNow.AddDays(-1)
+            LastCompletionDate = DateTime.UtcNow.AddDays(-1),
         };
 
-        var vm = new CategoryLandingSectionViewModel(section, Recs(), status, hadRetrievalError: true);
+        var vm = new CategoryLandingSectionViewModel(
+            section,
+            Recs(),
+            status,
+            hadRetrievalError: true
+        );
 
         Assert.Equal(SubmissionStatus.RetrievalError, vm.ProgressStatus);
         Assert.NotNull(vm.DateUpdated);
@@ -71,10 +85,15 @@ public class CategoryLandingSectionViewModelTests
             SectionId = "sec-1",
             DateUpdated = new DateTime(2024, 10, 10, 12, 0, 0, DateTimeKind.Utc),
             LastCompletionDate = new DateTime(2024, 10, 11, 12, 0, 0, DateTimeKind.Utc),
-            Status = SubmissionStatus.CompleteReviewed
+            Status = SubmissionStatus.CompleteReviewed,
         };
 
-        var vm = new CategoryLandingSectionViewModel(section, Recs(), status, hadRetrievalError: false);
+        var vm = new CategoryLandingSectionViewModel(
+            section,
+            Recs(),
+            status,
+            hadRetrievalError: false
+        );
 
         Assert.Equal(SubmissionStatus.CompleteReviewed, vm.ProgressStatus);
         Assert.NotNull(vm.DateUpdated);
@@ -93,10 +112,15 @@ public class CategoryLandingSectionViewModelTests
             SectionId = "sec-1",
             DateUpdated = DateTime.UtcNow.AddDays(-2),
             LastCompletionDate = null,
-            Status = SubmissionStatus.InProgress
+            Status = SubmissionStatus.InProgress,
         };
 
-        var vm = new CategoryLandingSectionViewModel(section, Recs(), status, hadRetrievalError: false);
+        var vm = new CategoryLandingSectionViewModel(
+            section,
+            Recs(),
+            status,
+            hadRetrievalError: false
+        );
 
         Assert.Equal(SubmissionStatus.InProgress, vm.ProgressStatus);
         Assert.NotNull(vm.DateUpdated);
@@ -110,7 +134,12 @@ public class CategoryLandingSectionViewModelTests
     {
         var section = Section(slug: "hosting");
 
-        var vm = new CategoryLandingSectionViewModel(section, Recs(), sectionStatus: null, hadRetrievalError: false);
+        var vm = new CategoryLandingSectionViewModel(
+            section,
+            Recs(),
+            sectionStatus: null,
+            hadRetrievalError: false
+        );
 
         Assert.Equal(SubmissionStatus.NotStarted, vm.ProgressStatus);
         Assert.Null(vm.DateUpdated);
@@ -125,7 +154,12 @@ public class CategoryLandingSectionViewModelTests
         var section = Section(slug: "connectivity", name: "Connectivity", shortDesc: "Get online");
         var recs = Recs();
 
-        var vm = new CategoryLandingSectionViewModel(section, recs, sectionStatus: null, hadRetrievalError: false);
+        var vm = new CategoryLandingSectionViewModel(
+            section,
+            recs,
+            sectionStatus: null,
+            hadRetrievalError: false
+        );
 
         Assert.Equal("Connectivity", vm.Name);
         Assert.Equal("Get online", vm.ShortDescription);

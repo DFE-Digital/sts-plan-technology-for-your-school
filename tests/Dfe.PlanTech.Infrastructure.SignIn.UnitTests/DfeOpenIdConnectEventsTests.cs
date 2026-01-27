@@ -24,7 +24,7 @@ public partial class DfeOpenIdConnectEventsTests
     private static partial Regex SchemeMatchRegexAttribute();
 
     public const string SchemeMatchRegexPattern = @"^(https?:\/\/)";
-    public readonly static Regex SchemeMatchRegex = SchemeMatchRegexAttribute();
+    public static readonly Regex SchemeMatchRegex = SchemeMatchRegexAttribute();
 
     [Fact]
     public async Task OnRedirectToIdentityProvider_Should_Rewrite_Url_Always()
@@ -32,20 +32,24 @@ public partial class DfeOpenIdConnectEventsTests
         var config = new DfeSignInConfiguration()
         {
             CallbackUrl = "/auth/cb",
-            FrontDoorUrl = "www.frontdoorurl.com"
+            FrontDoorUrl = "www.frontdoorurl.com",
         };
 
         var contextSubstitute = Substitute.For<HttpContext>();
-        contextSubstitute.RequestServices.GetService(typeof(DfeSignInConfiguration)).Returns(config);
+        contextSubstitute
+            .RequestServices.GetService(typeof(DfeSignInConfiguration))
+            .Returns(config);
 
-        var context = new RedirectContext(contextSubstitute,
+        var context = new RedirectContext(
+            contextSubstitute,
             new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
             new OpenIdConnectOptions(),
-            new AuthenticationProperties());
+            new AuthenticationProperties()
+        );
 
         var openIdConnectMessage = new OpenIdConnectMessage
         {
-            RedirectUri = "https://notarealaddress.ua"
+            RedirectUri = "https://notarealaddress.ua",
         };
 
         context.ProtocolMessage = openIdConnectMessage;
@@ -63,20 +67,24 @@ public partial class DfeOpenIdConnectEventsTests
         var config = new DfeSignInConfiguration()
         {
             SignoutRedirectUrl = "/signout/cb",
-            FrontDoorUrl = "www.frontdoorurl.com"
+            FrontDoorUrl = "www.frontdoorurl.com",
         };
 
         var contextSubstitute = Substitute.For<HttpContext>();
-        contextSubstitute.RequestServices.GetService(typeof(DfeSignInConfiguration)).Returns(config);
+        contextSubstitute
+            .RequestServices.GetService(typeof(DfeSignInConfiguration))
+            .Returns(config);
 
-        var context = new RedirectContext(contextSubstitute,
+        var context = new RedirectContext(
+            contextSubstitute,
             new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
             new OpenIdConnectOptions(),
-            new AuthenticationProperties());
+            new AuthenticationProperties()
+        );
 
         var openIdConnectMessage = new OpenIdConnectMessage
         {
-            PostLogoutRedirectUri = "https://notarealaddress.ua"
+            PostLogoutRedirectUri = "https://notarealaddress.ua",
         };
 
         context.ProtocolMessage = openIdConnectMessage;
@@ -94,7 +102,9 @@ public partial class DfeOpenIdConnectEventsTests
         Guid userId = Guid.NewGuid();
 
         var identitySubstitute = Substitute.For<ClaimsIdentity>();
-        identitySubstitute.Claims.Returns([new Claim(ClaimConstants.NameIdentifier, userId.ToString()),]);
+        identitySubstitute.Claims.Returns([
+            new Claim(ClaimConstants.NameIdentifier, userId.ToString()),
+        ]);
         identitySubstitute.IsAuthenticated.Returns(true);
 
         var user = new UserEntity
@@ -103,7 +113,7 @@ public partial class DfeOpenIdConnectEventsTests
             DfeSignInRef = "testSignInRef",
             DateCreated = DateTime.UtcNow,
             DateLastUpdated = DateTime.UtcNow,
-            Responses = []
+            Responses = [],
         };
 
         var signIn = new SignInEntity
@@ -112,7 +122,7 @@ public partial class DfeOpenIdConnectEventsTests
             UserId = 2,
             EstablishmentId = 3,
             SignInDateTime = DateTime.UtcNow,
-            User = user
+            User = user,
         };
         var establishmentRepositorySubstitute = Substitute.For<IEstablishmentRepository>();
 
@@ -122,7 +132,11 @@ public partial class DfeOpenIdConnectEventsTests
         var signInRepositorySubstitute = Substitute.For<ISignInRepository>();
         signInRepositorySubstitute.CreateSignInAsync(Arg.Any<int>()).Returns(signIn);
 
-        var signInWorkflowSubstitute = Substitute.For<SignInWorkflow>(establishmentRepositorySubstitute, signInRepositorySubstitute, userRepositorySubstitute);
+        var signInWorkflowSubstitute = Substitute.For<SignInWorkflow>(
+            establishmentRepositorySubstitute,
+            signInRepositorySubstitute,
+            userRepositorySubstitute
+        );
 
         var serviceProvider = Substitute.For<IServiceProvider>();
         serviceProvider.GetService(typeof(ISignInWorkflow)).Returns(signInWorkflowSubstitute);
@@ -131,16 +145,23 @@ public partial class DfeOpenIdConnectEventsTests
         contextSubstitute.RequestServices.Returns(serviceProvider);
 
         var claimsPrincipal = new ClaimsPrincipal(identitySubstitute);
-        var context = new UserInformationReceivedContext(contextSubstitute,
+        var context = new UserInformationReceivedContext(
+            contextSubstitute,
             new AuthenticationScheme("name", "display name", typeof(DummyAuthHandler)),
             new OpenIdConnectOptions(),
             claimsPrincipal,
-            new AuthenticationProperties());
+            new AuthenticationProperties()
+        );
 
         var logger = Substitute.For<ILogger<IDfeSignIn>>();
         await OnUserInformationReceivedEvent.RecordUserSignIn(logger, context);
 
-        Assert.Single(logger.GetMatchingReceivedMessages($"User {userId} is authenticated but has no establishment", LogLevel.Warning));
+        Assert.Single(
+            logger.GetMatchingReceivedMessages(
+                $"User {userId} is authenticated but has no establishment",
+                LogLevel.Warning
+            )
+        );
         await signInWorkflowSubstitute.Received(1).RecordSignInUserOnly(Arg.Any<string>());
     }
 
@@ -153,27 +174,25 @@ public partial class DfeOpenIdConnectEventsTests
         var configUrl = "www.shouldnt-return-this.com";
 
         var httpContext = Substitute.For<HttpContext>();
-        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+        var context = new RedirectContext(
+            httpContext,
+            new AuthenticationScheme("", "", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            new AuthenticationProperties() { }
+        );
 
         var request = Substitute.For<HttpRequest>();
-        var headers = new HeaderDictionary
-        {
-            { "X-Forwarded-Host", host }
-        };
+        var headers = new HeaderDictionary { { "X-Forwarded-Host", host } };
 
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
-        var config = new DfeSignInConfiguration()
-        {
-            FrontDoorUrl = configUrl
-        };
+        var config = new DfeSignInConfiguration() { FrontDoorUrl = configUrl };
 
         var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, config);
 
         Assert.Contains(host, originUrl);
     }
-
 
     [Theory]
     [InlineData("www.should-return-this.com")]
@@ -182,47 +201,48 @@ public partial class DfeOpenIdConnectEventsTests
     public void GetOriginUrl_Should_Return_FrontDoorURL_If_Header_Not_Found(string host)
     {
         var httpContext = Substitute.For<HttpContext>();
-        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+        var context = new RedirectContext(
+            httpContext,
+            new AuthenticationScheme("", "", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            new AuthenticationProperties() { }
+        );
 
         var request = Substitute.For<HttpRequest>();
-        var headers = new HeaderDictionary
-        {
-        };
+        var headers = new HeaderDictionary { };
 
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
-        var config = new DfeSignInConfiguration()
-        {
-            FrontDoorUrl = host
-        };
+        var config = new DfeSignInConfiguration() { FrontDoorUrl = host };
 
         var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, config);
 
         Assert.Contains(host, originUrl);
     }
 
-
     [Theory]
     [InlineData("www.should-return-this.com")]
     [InlineData("www.should-return-this.com/")]
-    public void GetOriginUrl_Should_Return_Append_ForwardSlash_To_FrontDoorUrl_If_Missing(string host)
+    public void GetOriginUrl_Should_Return_Append_ForwardSlash_To_FrontDoorUrl_If_Missing(
+        string host
+    )
     {
         var httpContext = Substitute.For<HttpContext>();
-        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+        var context = new RedirectContext(
+            httpContext,
+            new AuthenticationScheme("", "", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            new AuthenticationProperties() { }
+        );
 
         var request = Substitute.For<HttpRequest>();
-        var headers = new HeaderDictionary
-        {
-        };
+        var headers = new HeaderDictionary { };
 
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
-        var config = new DfeSignInConfiguration()
-        {
-            FrontDoorUrl = host
-        };
+        var config = new DfeSignInConfiguration() { FrontDoorUrl = host };
 
         var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, config);
 
@@ -232,26 +252,27 @@ public partial class DfeOpenIdConnectEventsTests
     [Theory]
     [InlineData("www.should-return-this.com")]
     [InlineData("www.should-return-this.com/")]
-    public void GetOriginUrl_Should_Return_Append_ForwardSlash_To_ForwardedHostHeader_If_Missing(string host)
+    public void GetOriginUrl_Should_Return_Append_ForwardSlash_To_ForwardedHostHeader_If_Missing(
+        string host
+    )
     {
         var configUrl = "www.shouldnt-return-this.com";
 
         var httpContext = Substitute.For<HttpContext>();
-        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+        var context = new RedirectContext(
+            httpContext,
+            new AuthenticationScheme("", "", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            new AuthenticationProperties() { }
+        );
 
         var request = Substitute.For<HttpRequest>();
-        var headers = new HeaderDictionary
-        {
-            { "X-Forwarded-Host", host }
-        };
+        var headers = new HeaderDictionary { { "X-Forwarded-Host", host } };
 
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
-        var config = new DfeSignInConfiguration()
-        {
-            FrontDoorUrl = configUrl
-        };
+        var config = new DfeSignInConfiguration() { FrontDoorUrl = configUrl };
 
         var originUrl = DfeOpenIdConnectEvents.GetOriginUrl(context, config);
 
@@ -272,26 +293,28 @@ public partial class DfeOpenIdConnectEventsTests
     [InlineData("http://plantech.education.gov.uk", "auth/cb")]
     [InlineData("https://plantech.education.gov.uk", "/auth/cb")]
     [InlineData("https://plantech.education.gov.uk", "auth/cb")]
-    public void CreateCallbackUrl_Should_Return_Correct_Url_For_ForwardedHost_Headers(string host, string callback)
+    public void CreateCallbackUrl_Should_Return_Correct_Url_For_ForwardedHost_Headers(
+        string host,
+        string callback
+    )
     {
         var configUrl = "www.shouldnt-return-this.com";
 
         var httpContext = Substitute.For<HttpContext>();
-        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+        var context = new RedirectContext(
+            httpContext,
+            new AuthenticationScheme("", "", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            new AuthenticationProperties() { }
+        );
 
         var request = Substitute.For<HttpRequest>();
-        var headers = new HeaderDictionary
-        {
-            { "X-Forwarded-Host", host }
-        };
+        var headers = new HeaderDictionary { { "X-Forwarded-Host", host } };
 
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
-        var config = new DfeSignInConfiguration()
-        {
-            FrontDoorUrl = configUrl
-        };
+        var config = new DfeSignInConfiguration() { FrontDoorUrl = configUrl };
 
         var originUrl = DfeOpenIdConnectEvents.CreateCallbackUrl(context, config, callback);
 
@@ -311,23 +334,26 @@ public partial class DfeOpenIdConnectEventsTests
     [InlineData("http://plantech.education.gov.uk", "auth/cb")]
     [InlineData("https://plantech.education.gov.uk", "/auth/cb")]
     [InlineData("https://plantech.education.gov.uk", "auth/cb")]
-    public void CreateCallbackUrl_Should_Return_Correct_Url_For_FrontdoorUrl(string host, string callback)
+    public void CreateCallbackUrl_Should_Return_Correct_Url_For_FrontdoorUrl(
+        string host,
+        string callback
+    )
     {
         var httpContext = Substitute.For<HttpContext>();
-        var context = new RedirectContext(httpContext, new AuthenticationScheme("", "", typeof(DummyAuthHandler)), new OpenIdConnectOptions(), new AuthenticationProperties() { });
+        var context = new RedirectContext(
+            httpContext,
+            new AuthenticationScheme("", "", typeof(DummyAuthHandler)),
+            new OpenIdConnectOptions(),
+            new AuthenticationProperties() { }
+        );
 
         var request = Substitute.For<HttpRequest>();
-        var headers = new HeaderDictionary
-        {
-        };
+        var headers = new HeaderDictionary { };
 
         request.Headers.Returns(headers);
         context.Request.Returns(request);
 
-        var config = new DfeSignInConfiguration()
-        {
-            FrontDoorUrl = host
-        };
+        var config = new DfeSignInConfiguration() { FrontDoorUrl = host };
 
         var originUrl = DfeOpenIdConnectEvents.CreateCallbackUrl(context, config, callback);
 
@@ -350,7 +376,10 @@ public partial class DfeOpenIdConnectEventsTests
         string expectedHost = GetExpectedHost(host);
         Assert.Equal(expectedHost, uri.Host);
 
-        Assert.False(uri.AbsolutePath.StartsWith("//"), CreateFailureMessage(originUrl, expectedPath, expectedHost));
+        Assert.False(
+            uri.AbsolutePath.StartsWith("//"),
+            CreateFailureMessage(originUrl, expectedPath, expectedHost)
+        );
     }
 
     private static string GetExpectedPath(string callbackUrl)
@@ -367,6 +396,6 @@ public partial class DfeOpenIdConnectEventsTests
         return expectedHost.EndsWith('/') ? expectedHost[..^1] : expectedHost;
     }
 
-    private static string CreateFailureMessage(string originUrl, string host, string callbackUrl)
-    => $"Result not a valid URI - \"{originUrl}\" from host \"{host}\" and callback url \"{callbackUrl}\".";
+    private static string CreateFailureMessage(string originUrl, string host, string callbackUrl) =>
+        $"Result not a valid URI - \"{originUrl}\" from host \"{host}\" and callback url \"{callbackUrl}\".";
 }

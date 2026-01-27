@@ -11,7 +11,6 @@ public class SectionStatusEntityTests
     {
         // Arrange
         var expectedSectionId = "Arbitrary string - section id";
-        var expectedCompleted = true;
         var expectedLastMaturity = "Arbitrary string - last maturity";
         var expectedDateCreated = new DateTime(2024, 01, 01, 10, 00, 00, DateTimeKind.Utc);
         var expectedDateUpdated = new DateTime(2024, 02, 01, 10, 00, 00, DateTimeKind.Utc);
@@ -47,17 +46,17 @@ public class SectionStatusEntityTests
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlSectionStatusDto>(
             new[]
             {
-            nameof(SqlSectionStatusDto.SectionId),
-            nameof(SqlSectionStatusDto.LastMaturity),
-            nameof(SqlSectionStatusDto.DateCreated),
-            nameof(SqlSectionStatusDto.DateUpdated),
-            nameof(SqlSectionStatusDto.HasBeenViewed),
-            nameof(SqlSectionStatusDto.LastCompletionDate),
+                nameof(SqlSectionStatusDto.SectionId),
+                nameof(SqlSectionStatusDto.LastMaturity),
+                nameof(SqlSectionStatusDto.DateCreated),
+                nameof(SqlSectionStatusDto.DateUpdated),
+                nameof(SqlSectionStatusDto.HasBeenViewed),
+                nameof(SqlSectionStatusDto.LastCompletionDate),
             },
             new[]
             {
-            // Synthetic property, not directly mapped from database entity
-            nameof(SqlSectionStatusDto.Status),
+                // Synthetic property, not directly mapped from database entity
+                nameof(SqlSectionStatusDto.Status),
             }
         );
     }

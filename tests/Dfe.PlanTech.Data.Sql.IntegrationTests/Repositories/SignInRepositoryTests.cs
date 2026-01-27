@@ -7,9 +7,8 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
 {
     private SignInRepository _repository = null!;
 
-    public SignInRepositoryTests(DatabaseFixture fixture) : base(fixture)
-    {
-    }
+    public SignInRepositoryTests(DatabaseFixture fixture)
+        : base(fixture) { }
 
     public override async Task InitializeAsync()
     {
@@ -22,7 +21,11 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
     {
         // Arrange
         var user = new UserEntity { DfeSignInRef = "user123" };
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -74,7 +77,8 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
     {
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            _repository.CreateSignInAsync(0));
+            _repository.CreateSignInAsync(0)
+        );
 
         Assert.Contains("userId", exception.Message);
         Assert.Contains("cannot be 0", exception.Message);
@@ -112,7 +116,8 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
     {
         // Act & Assert
         var exception = await Assert.ThrowsAsync<ArgumentException>(() =>
-            _repository.RecordSignInWithoutEstablishmentIdAsync("nonexistent-user"));
+            _repository.RecordSignInWithoutEstablishmentIdAsync("nonexistent-user")
+        );
 
         Assert.Contains("Could not find user", exception.Message);
         Assert.Contains("nonexistent-user", exception.Message);

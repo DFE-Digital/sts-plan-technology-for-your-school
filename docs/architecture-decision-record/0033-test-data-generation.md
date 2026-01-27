@@ -1,6 +1,6 @@
 # 0033 - Unit Test Data
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -14,7 +14,7 @@ Determining the optimal approach for creating, using, and generating data for un
 - Ease of use when developing
 - Speed of development
 - DFE standards
-  
+
 ## Considered Options
 
 - Manual test case creation:

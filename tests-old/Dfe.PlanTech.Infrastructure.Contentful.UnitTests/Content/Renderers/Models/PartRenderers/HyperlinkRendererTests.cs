@@ -1,7 +1,7 @@
 using System.Text;
+using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
@@ -20,10 +20,7 @@ public class HyperlinkRendererTests
         {
             NodeType = NODE_TYPE,
             Value = linkText,
-            Data = new RichTextContentSupportData()
-            {
-                Uri = url
-            }
+            Data = new RichTextContentSupportData() { Uri = url },
         };
 
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
@@ -36,11 +33,7 @@ public class HyperlinkRendererTests
     [Fact]
     public void Should_Reject_When_NotHyperlink()
     {
-        var content = new RichTextContent()
-        {
-            NodeType = "paragraph",
-            Value = "paragraph text"
-        };
+        var content = new RichTextContent() { NodeType = "paragraph", Value = "paragraph text" };
 
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
 
@@ -53,7 +46,10 @@ public class HyperlinkRendererTests
     public void Should_Create_Link_For_New_Tab_When_PassedValidExternalLink()
     {
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string linkText = "Click Here";
         const string url = "https://www.test-url.com";
@@ -66,7 +62,7 @@ public class HyperlinkRendererTests
             {
                 Uri = url,
                 Target = new RichTextContentData(),
-            }
+            },
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
@@ -82,7 +78,10 @@ public class HyperlinkRendererTests
     public void Should_Create_Link_For_Same_Tab_When_PassedValidInternalLink()
     {
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string linkText = "Click Here";
         const string url = "content/hello-world";
@@ -95,7 +94,7 @@ public class HyperlinkRendererTests
             {
                 Uri = url,
                 Target = new RichTextContentData(),
-            }
+            },
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
@@ -111,15 +110,14 @@ public class HyperlinkRendererTests
     public void Should_NotAddLink_When_MissingURI()
     {
         var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions());
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string linkText = "Click Here";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = linkText,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = linkText };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
@@ -133,8 +131,13 @@ public class HyperlinkRendererTests
     {
         const string testClasses = "testing-classes";
 
-        var renderer = new HyperlinkRenderer(new HyperlinkRendererOptions() { Classes = testClasses });
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var renderer = new HyperlinkRenderer(
+            new HyperlinkRendererOptions() { Classes = testClasses }
+        );
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string linkText = "Click Here";
         const string url = "https://www.test-url.com";
@@ -147,7 +150,7 @@ public class HyperlinkRendererTests
             {
                 Uri = url,
                 Target = new RichTextContentData(),
-            }
+            },
         };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
@@ -156,5 +159,4 @@ public class HyperlinkRendererTests
 
         Assert.Contains($"class=\"{testClasses}\"", html);
     }
-
 }

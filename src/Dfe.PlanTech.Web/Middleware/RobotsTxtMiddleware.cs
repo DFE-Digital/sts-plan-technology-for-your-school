@@ -32,8 +32,8 @@ public class RobotsTxtMiddleware(RequestDelegate next, IOptions<RobotsConfigurat
         await context.Response.Body.WriteAsync(result, context.RequestAborted);
     }
 
-    private static ReadOnlyMemory<byte> GetResponseBody(RobotsConfiguration config)
-    => new(Encoding.UTF8.GetBytes(BuildRobotsTxt(config)));
+    private static ReadOnlyMemory<byte> GetResponseBody(RobotsConfiguration config) =>
+        new(Encoding.UTF8.GetBytes(BuildRobotsTxt(config)));
 
     private static string BuildRobotsTxt(RobotsConfiguration config)
     {
@@ -74,5 +74,6 @@ public static class RobotsTxtMiddlewareExtensions
 
     public static bool IsRobotsPath(HttpContext context) => context.Request.Path == RobotsTxtPath;
 
-    public static IApplicationBuilder UseRobotsTxtMiddleware(this IApplicationBuilder builder) => builder.UseWhen(IsRobotsPath, app => app.UseMiddleware<RobotsTxtMiddleware>());
+    public static IApplicationBuilder UseRobotsTxtMiddleware(this IApplicationBuilder builder) =>
+        builder.UseWhen(IsRobotsPath, app => app.UseMiddleware<RobotsTxtMiddleware>());
 }

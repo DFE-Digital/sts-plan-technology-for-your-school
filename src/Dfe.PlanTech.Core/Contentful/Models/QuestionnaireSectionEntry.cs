@@ -14,6 +14,8 @@ public class QuestionnaireSectionEntry : ContentfulEntry
     public QuestionnaireQuestionEntry GetQuestionBySlug(string questionSlug)
     {
         return Questions.FirstOrDefault(question => question.Slug.Equals(questionSlug))
-             ?? throw new ContentfulDataUnavailableException($"Could not find question slug '{questionSlug}' under section '{Name}'");
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find question slug '{questionSlug}' under section '{Name}'"
+            );
     }
 }

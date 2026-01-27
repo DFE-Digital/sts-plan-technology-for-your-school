@@ -9,7 +9,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware;
 
 public class SecurityHeadersMiddlewareTests
 {
-
     public readonly IConfiguration Configuration;
 
     private const string ImgSrcKey = "CSP:ImgSrc";
@@ -35,14 +34,11 @@ public class SecurityHeadersMiddlewareTests
             { ConnectSrcKey, ConnectSrc },
             { FrameSrcKey, FrameSrc },
             { ScriptSrcKey, ScriptSrc },
-            { DefaultSrcKey, DefaultSrc }
+            { DefaultSrcKey, DefaultSrc },
         };
 
-        Configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(inMemorySettings)
-            .Build();
+        Configuration = new ConfigurationBuilder().AddInMemoryCollection(inMemorySettings).Build();
     }
-
 
     [Fact]
     public async Task Should_Set_Headers()

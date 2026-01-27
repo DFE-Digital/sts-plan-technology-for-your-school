@@ -1,6 +1,6 @@
 # 0034 - Entity Mapping
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 

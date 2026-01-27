@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "What environment to clear"
+        description: 'What environment to clear'
         required: true
         type: choice
         options:
@@ -51,7 +51,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "add"
+          verb: 'add'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
@@ -68,14 +68,14 @@ jobs:
         uses: azure/sql-action@v2.2
         with:
           connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
-          path: "./.github/scripts/clear-user-data-from-db.sql"
+          path: './.github/scripts/clear-user-data-from-db.sql'
 
       - name: Remove Azure firewall rules
         if: always()
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: "remove"
+          verb: 'remove'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}

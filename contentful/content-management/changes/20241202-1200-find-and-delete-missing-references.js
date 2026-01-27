@@ -3,11 +3,11 @@
  * This script finds all entries which link to deleted/removed content and removes those references.
  */
 
-import getClient from "../helpers/get-client.js";
+import getClient from '../helpers/get-client.js';
 
 export default async function () {
-    const client = await getClient();
-    await removeInvalidReferences(client);
+  const client = await getClient();
+  await removeInvalidReferences(client);
 }
 
 /**
@@ -16,16 +16,16 @@ export default async function () {
  * @param {ClientAPI} client - Contentful management client instance.
  */
 async function removeInvalidReferences(client) {
-    const contentTypes = await client.contentType.getMany();
-    const entryIds = await getAllValidEntryIds({ client, contentTypes });
+  const contentTypes = await client.contentType.getMany();
+  const entryIds = await getAllValidEntryIds({ client, contentTypes });
 
-    for (const contentType of contentTypes.items) {
-        await removeInvalidReferencesForContentType({
-            client,
-            validEntryIds: entryIds,
-            contentType,
-        });
-    }
+  for (const contentType of contentTypes.items) {
+    await removeInvalidReferencesForContentType({
+      client,
+      validEntryIds: entryIds,
+      contentType,
+    });
+  }
 }
 
 /**
@@ -34,18 +34,18 @@ async function removeInvalidReferences(client) {
  * @param {{client: ClientAPI, contentTypes: object}} params
  */
 async function getAllValidEntryIds({ client, contentTypes }) {
-    console.log("Finding all valid entryIds");
-    const entryIds = new Set();
+  console.log('Finding all valid entryIds');
+  const entryIds = new Set();
 
-    for (const contentType of contentTypes.items) {
-        const entries = await client.entry.getMany({
-            query: { limit: 1000, content_type: contentType.sys.id },
-        });
-        contentType.entries = entries;
-        entries.items.map((entry) => entryIds.add(entry.sys.id));
-    }
+  for (const contentType of contentTypes.items) {
+    const entries = await client.entry.getMany({
+      query: { limit: 1000, content_type: contentType.sys.id },
+    });
+    contentType.entries = entries;
+    entries.items.map((entry) => entryIds.add(entry.sys.id));
+  }
 
-    return entryIds;
+  return entryIds;
 }
 
 /**
@@ -57,27 +57,23 @@ async function getAllValidEntryIds({ client, contentTypes }) {
  * @param {Set(string)} params.validEntryIds - ALl valid entry ids.
  * @param {string} params.contentType - The content type for which entries are being handled.
  */
-async function removeInvalidReferencesForContentType({
-    client,
-    validEntryIds,
-    contentType,
-}) {
-    console.log(`Processing contentType: ${contentType.sys.id}`);
-    const entries = contentType.entries;
-    for (const entry of entries.items) {
-        for (const [key, fieldValue] of Object.entries(entry.fields)) {
-            for (const [locale, value] of Object.entries(fieldValue)) {
-                processField({
-                    client: client,
-                    entry: entry,
-                    validEntryIds: validEntryIds,
-                    locale: locale,
-                    fieldKey: key,
-                    fieldValue: value,
-                });
-            }
-        }
+async function removeInvalidReferencesForContentType({ client, validEntryIds, contentType }) {
+  console.log(`Processing contentType: ${contentType.sys.id}`);
+  const entries = contentType.entries;
+  for (const entry of entries.items) {
+    for (const [key, fieldValue] of Object.entries(entry.fields)) {
+      for (const [locale, value] of Object.entries(fieldValue)) {
+        processField({
+          client: client,
+          entry: entry,
+          validEntryIds: validEntryIds,
+          locale: locale,
+          fieldKey: key,
+          fieldValue: value,
+        });
+      }
     }
+  }
 }
 
 /**
@@ -90,32 +86,25 @@ async function removeInvalidReferencesForContentType({
  * @param {string} params.fieldKey - Key of the field in the entry.
  * @param {any} params.fieldValue - Value of the field in the entry.
  */
-async function processField({
-    client,
-    entry,
-    validEntryIds,
-    locale,
-    fieldKey,
-    fieldValue,
-}) {
-    if (Array.isArray(fieldValue)) {
-        await removeMissingReferencesInArray({
-            client,
-            entry,
-            validEntryIds,
-            locale,
-            fieldKey,
-            fieldItems: fieldValue,
-        });
-    } else if (fieldValue?.sys?.type === "Link") {
-        await removeLinkIfMissing({
-            client,
-            entry,
-            validEntryIds,
-            fieldKey,
-            fieldValue,
-        });
-    }
+async function processField({ client, entry, validEntryIds, locale, fieldKey, fieldValue }) {
+  if (Array.isArray(fieldValue)) {
+    await removeMissingReferencesInArray({
+      client,
+      entry,
+      validEntryIds,
+      locale,
+      fieldKey,
+      fieldItems: fieldValue,
+    });
+  } else if (fieldValue?.sys?.type === 'Link') {
+    await removeLinkIfMissing({
+      client,
+      entry,
+      validEntryIds,
+      fieldKey,
+      fieldValue,
+    });
+  }
 }
 
 /**
@@ -127,26 +116,20 @@ async function processField({
  * @param {string} params.fieldKey - Key of the field in the entry.
  * @param {any} params.fieldValue - Value of the field in the entry.
  */
-async function removeLinkIfMissing({
-    client,
-    entry,
-    validEntryIds,
-    fieldKey,
-    fieldValue,
-}) {
-    if (!validEntryIds.has(fieldValue.sys?.id)) {
-        console.log(
-            `Removing invalid link in entry "${entry.sys.id}" field "${fieldKey}" value "${fieldValue.sys.id}}".`
-        );
-        delete entry.fields[fieldKey];
-        await client.entry.update(
-            { entryId: entry.sys.id },
-            {
-                sys: entry.sys,
-                fields: entry.fields,
-            }
-        );
-    }
+async function removeLinkIfMissing({ client, entry, validEntryIds, fieldKey, fieldValue }) {
+  if (!validEntryIds.has(fieldValue.sys?.id)) {
+    console.log(
+      `Removing invalid link in entry "${entry.sys.id}" field "${fieldKey}" value "${fieldValue.sys.id}}".`,
+    );
+    delete entry.fields[fieldKey];
+    await client.entry.update(
+      { entryId: entry.sys.id },
+      {
+        sys: entry.sys,
+        fields: entry.fields,
+      },
+    );
+  }
 }
 
 /**
@@ -160,35 +143,35 @@ async function removeLinkIfMissing({
  * @param {object[]} params.fieldItems - Value of the field in the entry.
  */
 async function removeMissingReferencesInArray({
-    client,
-    entry,
-    validEntryIds,
-    locale,
-    fieldKey,
-    fieldItems,
+  client,
+  entry,
+  validEntryIds,
+  locale,
+  fieldKey,
+  fieldItems,
 }) {
-    let updated = false;
-    let validReferences = [];
-    for (const reference of fieldItems) {
-        if (reference.sys?.type === "Link") {
-            if (validEntryIds.has(reference.sys?.id)) {
-                validReferences.push(reference);
-            } else {
-                console.log(
-                    `Removing invalid link in entry "${entry.sys.id}" array "${fieldKey}" value "${reference.sys.id}}".`
-                );
-                updated = true;
-            }
-        }
-    }
-    if (updated) {
-        entry.fields[fieldKey][locale] = validReferences;
-        await client.entry.update(
-            { entryId: entry.sys.id },
-            {
-                sys: entry.sys,
-                fields: entry.fields,
-            }
+  let updated = false;
+  let validReferences = [];
+  for (const reference of fieldItems) {
+    if (reference.sys?.type === 'Link') {
+      if (validEntryIds.has(reference.sys?.id)) {
+        validReferences.push(reference);
+      } else {
+        console.log(
+          `Removing invalid link in entry "${entry.sys.id}" array "${fieldKey}" value "${reference.sys.id}}".`,
         );
+        updated = true;
+      }
     }
+  }
+  if (updated) {
+    entry.fields[fieldKey][locale] = validReferences;
+    await client.entry.update(
+      { entryId: entry.sys.id },
+      {
+        sys: entry.sys,
+        fields: entry.fields,
+      },
+    );
+  }
 }

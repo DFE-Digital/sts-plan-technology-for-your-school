@@ -1,7 +1,7 @@
 using System.Text;
+using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Options;
-using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
@@ -15,11 +15,7 @@ public class ParagraphRendererTests
     {
         const string value = "Paragraph value";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = value };
 
         var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
 
@@ -31,11 +27,7 @@ public class ParagraphRendererTests
     [Fact]
     public void Should_Reject_When_Not_Paragraph()
     {
-        var content = new RichTextContent()
-        {
-            NodeType = "hyperlink",
-            Value = "hyperlink"
-        };
+        var content = new RichTextContent() { NodeType = "hyperlink", Value = "hyperlink" };
 
         var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
 
@@ -48,15 +40,14 @@ public class ParagraphRendererTests
     public void Should_Create_Paragraph_When_PassedValidData()
     {
         var renderer = new ParagraphRenderer(new ParagraphRendererOptions());
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "Paragraph text";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = value };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
@@ -65,21 +56,19 @@ public class ParagraphRendererTests
         Assert.Equal("<p></p>", html);
     }
 
-
     [Fact]
     public void Should_Create_Paragraph_WithClass__When_PassedValidData()
     {
         const string classes = "testing-classes";
         var renderer = new ParagraphRenderer(new ParagraphRendererOptions() { Classes = classes });
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "Paragraph text";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = value };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 

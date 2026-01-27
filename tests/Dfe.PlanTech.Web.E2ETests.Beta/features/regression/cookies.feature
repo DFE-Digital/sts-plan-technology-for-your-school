@@ -26,11 +26,9 @@ Feature: Cookies Page
     When I choose to reject cookies and save settings
     Then I should see a notification banner confirming the action
     And Google Tag Manager should be disabled
-  
+
   Scenario: Cookies page has the correct footer links
     And I should see the GOV.UK footer with expected links
-    
+
   Scenario: Cookies page has the beta header
     And I should see the beta header
-
-  

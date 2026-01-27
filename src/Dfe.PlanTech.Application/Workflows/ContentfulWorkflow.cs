@@ -19,23 +19,31 @@ public class ContentfulWorkflow(
     public const string ExceptionMessageEntityContentful = "Error fetching Entity from Contentful";
     public const string SlugFieldPath = "fields.interstitialPage.fields.slug";
 
-    private readonly IContentfulRepository _contentfulRepository = contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
-    private readonly GetPageFromContentfulOptions _getPageOptions = getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
+    private readonly IContentfulRepository _contentfulRepository =
+        contentfulRepository ?? throw new ArgumentNullException(nameof(contentfulRepository));
+    private readonly GetPageFromContentfulOptions _getPageOptions =
+        getPageOptions ?? throw new ArgumentNullException(nameof(getPageOptions));
 
     public async Task<TEntry> GetEntryById<TEntry>(string entryId)
         where TEntry : ContentfulEntry
     {
         try
         {
-            var entry = await _contentfulRepository.GetEntryByIdAsync<TEntry>(entryId)
-                ?? throw new ContentfulDataUnavailableException($"Could not find entry with ID '{entryId}'");
+            var entry =
+                await _contentfulRepository.GetEntryByIdAsync<TEntry>(entryId)
+                ?? throw new ContentfulDataUnavailableException(
+                    $"Could not find entry with ID '{entryId}'"
+                );
 
             return entry;
         }
         catch (Exception ex)
         {
             logger.LogError(ex, ExceptionMessageEntityContentful);
-            throw new ContentfulDataUnavailableException($"Could not find entry with ID '{entryId}'", ex);
+            throw new ContentfulDataUnavailableException(
+                $"Could not find entry with ID '{entryId}'",
+                ex
+            );
         }
     }
 
@@ -47,7 +55,9 @@ public class ContentfulWorkflow(
             var entries = await _contentfulRepository.GetEntriesAsync<TEntry>();
             if (!entries.Any())
             {
-                throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TEntry).Name}");
+                throw new ContentfulDataUnavailableException(
+                    $"Could not find entries of type {typeof(TEntry).Name}"
+                );
             }
 
             return entries.ToList();
@@ -55,7 +65,10 @@ public class ContentfulWorkflow(
         catch (Exception ex)
         {
             logger.LogError(ex, ExceptionMessageEntityContentful);
-            throw new ContentfulDataUnavailableException($"Could not find entries of type {typeof(TEntry).Name}", ex);
+            throw new ContentfulDataUnavailableException(
+                $"Could not find entries of type {typeof(TEntry).Name}",
+                ex
+            );
         }
     }
 
@@ -64,43 +77,77 @@ public class ContentfulWorkflow(
         try
         {
             var options = new GetEntriesOptions(include: 3);
-            var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(options);
+            var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(
+                options
+            );
             return sections;
         }
         catch (Exception ex)
         {
-            throw new ContentfulDataUnavailableException("Error getting sections from Contentful", ex);
+            throw new ContentfulDataUnavailableException(
+                "Error getting sections from Contentful",
+                ex
+            );
         }
     }
 
     public async Task<string?> GetCategoryHeaderTextBySlugAsync(string slug)
     {
-        var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.sys.contentType.sys.id", Value = "page" };
-        var slugQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.fields.slug", Value = slug };
+        var contentTypeQuery = new ContentfulQuerySingleValue
+        {
+            Field = "fields.landingPage.sys.contentType.sys.id",
+            Value = "page",
+        };
+        var slugQuery = new ContentfulQuerySingleValue
+        {
+            Field = "fields.landingPage.fields.slug",
+            Value = slug,
+        };
         var options = new GetEntriesOptions(include: 2, [contentTypeQuery, slugQuery]);
 
-        var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(options);
+        var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(
+            options
+        );
         var headerText = categories.FirstOrDefault()?.Header.Text;
         if (headerText is null)
         {
-            logger.LogError("Could not find header text for questionnaire category with slug {Slug} from Contentful", slug);
+            logger.LogError(
+                "Could not find header text for questionnaire category with slug {Slug} from Contentful",
+                slug
+            );
         }
 
         return headerText;
     }
 
-    public async Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug, int? includeLevel = null)
+    public async Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(
+        string slug,
+        int? includeLevel = null
+    )
     {
-        var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.sys.contentType.sys.id", Value = "page" };
-        var slugQuery = new ContentfulQuerySingleValue { Field = "fields.landingPage.fields.slug", Value = slug };
+        var contentTypeQuery = new ContentfulQuerySingleValue
+        {
+            Field = "fields.landingPage.sys.contentType.sys.id",
+            Value = "page",
+        };
+        var slugQuery = new ContentfulQuerySingleValue
+        {
+            Field = "fields.landingPage.fields.slug",
+            Value = slug,
+        };
         var options = new GetEntriesOptions(includeLevel ?? 5, [contentTypeQuery, slugQuery]);
 
-        var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(options);
+        var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(
+            options
+        );
         var category = categories.FirstOrDefault();
 
         if (category is null)
         {
-            logger.LogError("Could not find questionnaire category with slug {Slug} from Contentful", slug);
+            logger.LogError(
+                "Could not find questionnaire category with slug {Slug} from Contentful",
+                slug
+            );
         }
 
         return category;
@@ -110,7 +157,10 @@ public class ContentfulWorkflow(
     {
         var query = new ContentfulQuerySingleValue { Field = "fields.slug", Value = slug };
 
-        GetEntriesOptions options = PageIncludeLevelConstants.IncludeLevelOverrides.TryGetValue(slug, out int includeLevelOverride)
+        GetEntriesOptions options = PageIncludeLevelConstants.IncludeLevelOverrides.TryGetValue(
+            slug,
+            out int includeLevelOverride
+        )
             ? new GetEntriesOptions(includeLevelOverride, [query])
             : new GetEntriesOptions(_getPageOptions.Include, [query]);
 
@@ -120,14 +170,19 @@ public class ContentfulWorkflow(
             var page = pages.FirstOrDefault();
             if (page is null)
             {
-                throw new ContentfulDataUnavailableException($"Could not find a page matching slug '{slug}'");
+                throw new ContentfulDataUnavailableException(
+                    $"Could not find a page matching slug '{slug}'"
+                );
             }
 
             return page;
         }
         catch (Exception ex)
         {
-            throw new ContentfulDataUnavailableException($"Error getting page with slug {slug} from Contentful", ex);
+            throw new ContentfulDataUnavailableException(
+                $"Error getting page with slug {slug} from Contentful",
+                ex
+            );
         }
     }
 
@@ -136,34 +191,54 @@ public class ContentfulWorkflow(
         return await _contentfulRepository.GetEntriesCountAsync<RecommendationChunkEntry>();
     }
 
-    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page)
+    public Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(
+        int page
+    )
     {
         var options = new GetEntriesOptions(include: 3) { Page = page };
         return _contentfulRepository.GetPaginatedEntriesAsync<RecommendationChunkEntry>(options);
     }
 
-    public async Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string sectionSlug, int? includeLevel = null)
+    public async Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(
+        string sectionSlug,
+        int? includeLevel = null
+    )
     {
-        var sectionSlugQuery = new ContentfulQuerySingleValue { Field = SlugFieldPath, Value = sectionSlug };
-        var contentTypeQuery = new ContentfulQuerySingleValue { Field = "fields.interstitialPage.sys.contentType.sys.id", Value = "page" };
+        var sectionSlugQuery = new ContentfulQuerySingleValue
+        {
+            Field = SlugFieldPath,
+            Value = sectionSlug,
+        };
+        var contentTypeQuery = new ContentfulQuerySingleValue
+        {
+            Field = "fields.interstitialPage.sys.contentType.sys.id",
+            Value = "page",
+        };
         var options = includeLevel is null
             ? new GetEntriesOptions([sectionSlugQuery, contentTypeQuery])
             : new GetEntriesOptions(includeLevel.Value, [sectionSlugQuery, contentTypeQuery]);
 
         try
         {
-            var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(options);
+            var sections = await _contentfulRepository.GetEntriesAsync<QuestionnaireSectionEntry>(
+                options
+            );
             var section = sections.FirstOrDefault();
             if (section is null)
             {
-                throw new ContentfulDataUnavailableException($"Could not find a section matching slug '{sectionSlug}'");
+                throw new ContentfulDataUnavailableException(
+                    $"Could not find a section matching slug '{sectionSlug}'"
+                );
             }
 
             return section;
         }
         catch (Exception ex)
         {
-            throw new ContentfulDataUnavailableException($"Error getting section with slug {sectionSlug} from Contentful", ex);
+            throw new ContentfulDataUnavailableException(
+                $"Error getting section with slug {sectionSlug} from Contentful",
+                ex
+            );
         }
     }
 }

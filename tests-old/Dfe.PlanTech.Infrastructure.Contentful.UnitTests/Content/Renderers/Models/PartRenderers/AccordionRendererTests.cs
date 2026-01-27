@@ -1,7 +1,7 @@
 ﻿using System.Text;
+using Dfe.PlanTech.Data.Contentful.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;
-using Dfe.PlanTech.Data.Contentful.PartRenderers;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -9,8 +9,9 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRe
 
 public class AccordionRendererTests
 {
-    private readonly ILogger<AccordionComponent> _logger = Substitute.For<ILogger<AccordionComponent>>();
-
+    private readonly ILogger<AccordionComponent> _logger = Substitute.For<
+        ILogger<AccordionComponent>
+    >();
 
     [Fact]
     public void CheckNoContentReturnsEmptyStringBuilder()
@@ -22,7 +23,7 @@ public class AccordionRendererTests
         var content = new RichTextContent()
         {
             NodeType = RichTextNodeType.EmbeddedEntryBlock.ToString(),
-            Data = new RichTextContentSupportData()
+            Data = new RichTextContentSupportData(),
         };
 
         var rendererCollection = new AccordionComponent(_logger);
@@ -55,12 +56,13 @@ public class AccordionRendererTests
                             SummaryLine = "Summary Line 1",
                             RichText = new RichTextContent()
                             {
-                                Description = "This is just a description and has no render content"
-                            }
+                                Description =
+                                    "This is just a description and has no render content",
+                            },
                         },
-                    ]
-                }
-            }
+                    ],
+                },
+            },
         };
 
         var rendererCollection = new AccordionComponent(_logger);
@@ -73,17 +75,25 @@ public class AccordionRendererTests
     private StringBuilder GetStandardStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
-        stringBuilder.AppendLine($"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"accordion-Internal Name 1\">");
+        stringBuilder.AppendLine(
+            $"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"accordion-Internal Name 1\">"
+        );
         stringBuilder.Append("<div class=\"govuk-accordion__section govuk-body\">");
         stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
         stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
-        stringBuilder.Append("<span class=\"govuk-accordion__section-button\" id=\"Internal Name 1-heading\">");
+        stringBuilder.Append(
+            "<span class=\"govuk-accordion__section-button\" id=\"Internal Name 1-heading\">"
+        );
         stringBuilder.Append("Title 1");
         stringBuilder.Append("</span></h2>");
-        stringBuilder.Append("<div class=\"govuk-accordion__section-summary govuk-body\" id=\"Internal Name 1-summary\">");
+        stringBuilder.Append(
+            "<div class=\"govuk-accordion__section-summary govuk-body\" id=\"Internal Name 1-summary\">"
+        );
         stringBuilder.Append("Summary Line 1");
         stringBuilder.Append("</div></div>");
-        stringBuilder.Append("<div id=\"Internal Name 1-content\" class=\"govuk-accordion__section-content\">");
+        stringBuilder.Append(
+            "<div id=\"Internal Name 1-content\" class=\"govuk-accordion__section-content\">"
+        );
         stringBuilder.Append("</div></div>");
         stringBuilder.Append("</div>");
         return stringBuilder;

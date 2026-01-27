@@ -31,161 +31,96 @@ public class GetRecommendationRouterTests
 
     private static Answer AnswerOne = new()
     {
-        Sys = new()
-        {
-            Id = "Answer-1"
-        },
+        Sys = new() { Id = "Answer-1" },
         Text = "Answer-1-Text",
         NextQuestion = QuestionTwo,
     };
 
     private static Answer AnswerTwo = new()
     {
-        Sys = new()
-        {
-            Id = "Answer-2"
-        },
+        Sys = new() { Id = "Answer-2" },
         Text = "Answer-2-Text",
         NextQuestion = QuestionTwo,
     };
 
     private static Answer AnswerThree = new()
     {
-        Sys = new()
-        {
-            Id = "Answer-3"
-        },
+        Sys = new() { Id = "Answer-3" },
         Text = "Answer-3-Text",
         NextQuestion = QuestionFour,
     };
 
     private static Answer AnswerFour = new()
     {
-        Sys = new()
-        {
-            Id = "Answer-4"
-        },
+        Sys = new() { Id = "Answer-4" },
         Text = "Answer-4-Text",
     };
 
     private static Answer AnswerFive = new()
     {
-        Sys = new()
-        {
-            Id = "Answer-5"
-        },
+        Sys = new() { Id = "Answer-5" },
         Text = "Answer-5-Text",
     };
 
     private static readonly Question QuestionOne = new()
     {
-        Sys = new()
-        {
-            Id = "Question-1"
-        },
+        Sys = new() { Id = "Question-1" },
         Text = "Question-Text",
         Slug = "Question-1-Slug",
-        Answers = []
+        Answers = [],
     };
 
     private static readonly Question QuestionTwo = new()
     {
-        Sys = new()
-        {
-            Id = "Question-2"
-        },
+        Sys = new() { Id = "Question-2" },
         Text = "Question-2-Text",
         Slug = "Question-2-Slug",
-        Answers = []
+        Answers = [],
     };
 
     private static readonly Question QuestionThree = new()
     {
-        Sys = new()
-        {
-            Id = "Question-3"
-        },
+        Sys = new() { Id = "Question-3" },
         Text = "Question-3-Text",
         Slug = "Question-3-Slug",
-        Answers = []
+        Answers = [],
     };
 
     private static readonly Question QuestionFour = new()
     {
-        Sys = new()
-        {
-            Id = "Question-4"
-        },
+        Sys = new() { Id = "Question-4" },
         Text = "Question-4-Text",
         Slug = "Question-4-Slug",
-        Answers = []
+        Answers = [],
     };
 
     private static readonly Section _section = new()
     {
-        InterstitialPage = new Page()
-        {
-            Slug = "section-slug"
-        },
-        Sys = new SystemDetails()
-        {
-            Id = "section-id"
-        },
-        Questions = [QuestionOne, QuestionTwo, QuestionThree, QuestionFour]
+        InterstitialPage = new Page() { Slug = "section-slug" },
+        Sys = new SystemDetails() { Id = "section-id" },
+        Questions = [QuestionOne, QuestionTwo, QuestionThree, QuestionFour],
     };
 
     private readonly SubtopicRecommendation? _subtopicRecommendation = new()
     {
         Intros =
         [
-            new()
-            {
-                Slug = "high-slug",
-                Maturity = "High",
-            },
-            new()
-            {
-                Slug = "medium-slug",
-                Maturity = "Medium",
-            },
-            new()
-            {
-                Slug = "low-slug",
-                Maturity = "Low",
-            }
+            new() { Slug = "high-slug", Maturity = "High" },
+            new() { Slug = "medium-slug", Maturity = "Medium" },
+            new() { Slug = "low-slug", Maturity = "Low" },
         ],
         Section = new RecommendationSection()
         {
             Chunks =
             [
-                new()
-                {
-                    Header = "test-header-1",
-                    Answers = [AnswerOne]
-                },
-                new()
-                {
-                    Header = "test-header-2",
-                    Answers = [AnswerTwo]
-                },
-                new()
-                {
-                    Header = "test-header-3",
-                    Answers = [AnswerThree]
-                },
-                new()
-                {
-                    Header = "test-header-4",
-                    Answers = [AnswerFour]
-                },
-                new()
-                {
-                    Header = "test-header-5",
-                    Answers = [AnswerFive]
-                }
-            ]
+                new() { Header = "test-header-1", Answers = [AnswerOne] },
+                new() { Header = "test-header-2", Answers = [AnswerTwo] },
+                new() { Header = "test-header-3", Answers = [AnswerThree] },
+                new() { Header = "test-header-4", Answers = [AnswerFour] },
+                new() { Header = "test-header-5", Answers = [AnswerFive] },
+            ],
         },
-        Subtopic = _section
+        Subtopic = _section,
     };
 
     public GetRecommendationRouterTests()
@@ -195,35 +130,26 @@ public class GetRecommendationRouterTests
         {
             Sys = AnswerOne.Sys,
             Text = AnswerOne.Text,
-            NextQuestion = QuestionTwo
+            NextQuestion = QuestionTwo,
         };
 
         AnswerTwo = new Answer()
         {
             Sys = AnswerTwo.Sys,
             Text = AnswerTwo.Text,
-            NextQuestion = QuestionTwo
+            NextQuestion = QuestionTwo,
         };
 
         AnswerThree = new Answer()
         {
             Sys = AnswerThree.Sys,
             Text = AnswerThree.Text,
-            NextQuestion = QuestionFour
+            NextQuestion = QuestionFour,
         };
 
-        AnswerFour = new Answer()
-        {
-            Sys = AnswerFour.Sys,
-            Text = AnswerFour.Text,
-        };
+        AnswerFour = new Answer() { Sys = AnswerFour.Sys, Text = AnswerFour.Text };
 
-        AnswerFive = new Answer()
-        {
-            Sys = AnswerThree.Sys,
-            Text = AnswerThree.Text,
-        };
-
+        AnswerFive = new Answer() { Sys = AnswerThree.Sys, Text = AnswerThree.Text };
 
         QuestionOne.Answers.Add(AnswerOne);
         QuestionOne.Answers.Add(AnswerTwo);
@@ -242,7 +168,11 @@ public class GetRecommendationRouterTests
         _getSubTopicRecommendationQuery = Substitute.For<IGetSubTopicRecommendationQuery>();
 
         _controller = new RecommendationsController(new NullLogger<RecommendationsController>());
-        _router = new GetRecommendationRouter(_submissionStatusProcessor, _getLatestResponsesQuery, _getSubTopicRecommendationQuery);
+        _router = new GetRecommendationRouter(
+            _submissionStatusProcessor,
+            _getLatestResponsesQuery,
+            _getSubTopicRecommendationQuery
+        );
     }
 
     [Theory]
@@ -250,22 +180,41 @@ public class GetRecommendationRouterTests
     [InlineData(null, true)]
     [InlineData("", false)]
     [InlineData("", true)]
-    public async Task Should_ThrowException_When_SectionSlug_NullOrEmpty(string? sectionSlug, bool checklist)
+    public async Task Should_ThrowException_When_SectionSlug_NullOrEmpty(
+        string? sectionSlug,
+        bool checklist
+    )
     {
         await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
-            _router.ValidateRoute(sectionSlug!, "recommendation-slug", checklist, _controller, default));
+            _router.ValidateRoute(
+                sectionSlug!,
+                "recommendation-slug",
+                checklist,
+                _controller,
+                default
+            )
+        );
     }
-
 
     [Theory]
     [InlineData(null, false)]
     [InlineData(null, true)]
     [InlineData("", false)]
     [InlineData("", true)]
-    public async Task Should_ThrowException_When_RecommendationSlug_NullOrEmpty(string? recommendationSlug, bool checklist)
+    public async Task Should_ThrowException_When_RecommendationSlug_NullOrEmpty(
+        string? recommendationSlug,
+        bool checklist
+    )
     {
         await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
-            _router.ValidateRoute("section-slug", recommendationSlug!, checklist, _controller, default));
+            _router.ValidateRoute(
+                "section-slug",
+                recommendationSlug!,
+                checklist,
+                _controller,
+                default
+            )
+        );
     }
 
     [Theory]
@@ -275,22 +224,32 @@ public class GetRecommendationRouterTests
     {
         Assert.NotNull(_section.InterstitialPage);
 
-        var nextQuestion = new Question()
-        {
-            Slug = "next-question"
-        };
+        var nextQuestion = new Question() { Slug = "next-question" };
 
-        _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, true, Arg.Any<CancellationToken>()))
-            .Do((callinfo) =>
-            {
-                _submissionStatusProcessor.Status = Status.InProgress;
-                _submissionStatusProcessor.NextQuestion = nextQuestion;
-            });
+        _submissionStatusProcessor
+            .When(processor =>
+                processor.GetJourneyStatusForSectionRecommendation(
+                    _section.InterstitialPage.Slug,
+                    true,
+                    Arg.Any<CancellationToken>()
+                )
+            )
+            .Do(
+                (callinfo) =>
+                {
+                    _submissionStatusProcessor.Status = Status.InProgress;
+                    _submissionStatusProcessor.NextQuestion = nextQuestion;
+                }
+            );
 
         var sectionSlug = _section.InterstitialPage?.Slug ?? "default-section-slug"; // Handle null appropriately
-        var result = await _router.ValidateRoute(sectionSlug, "recommendation-slug", checklist, _controller,
-            default);
+        var result = await _router.ValidateRoute(
+            sectionSlug,
+            "recommendation-slug",
+            checklist,
+            _controller,
+            default
+        );
 
         var redirectResult = result as RedirectToActionResult;
 
@@ -317,21 +276,30 @@ public class GetRecommendationRouterTests
     public async Task Should_Redirect_To_InterstitialPage_When_NotStarted(bool checklist)
     {
         Assert.NotNull(_section.InterstitialPage);
-        var nextQuestion = new Question()
-        {
-            Slug = "next-question"
-        };
+        var nextQuestion = new Question() { Slug = "next-question" };
 
-        _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, cancellationToken: Arg.Any<CancellationToken>()))
-            .Do((callinfo) =>
-            {
-                _submissionStatusProcessor.Status = Status.NotStarted;
-                _submissionStatusProcessor.NextQuestion = nextQuestion;
-            });
+        _submissionStatusProcessor
+            .When(processor =>
+                processor.GetJourneyStatusForSectionRecommendation(
+                    _section.InterstitialPage.Slug,
+                    cancellationToken: Arg.Any<CancellationToken>()
+                )
+            )
+            .Do(
+                (callinfo) =>
+                {
+                    _submissionStatusProcessor.Status = Status.NotStarted;
+                    _submissionStatusProcessor.NextQuestion = nextQuestion;
+                }
+            );
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", checklist, _controller,
-            default);
+        var result = await _router.ValidateRoute(
+            _section.InterstitialPage.Slug,
+            "recommendation-slug",
+            checklist,
+            _controller,
+            default
+        );
 
         var redirectResult = result as RedirectToActionResult;
 
@@ -351,19 +319,33 @@ public class GetRecommendationRouterTests
     public async Task Should_Throw_Exception_When_Maturity_Null(bool checklist)
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, true, Arg.Any<CancellationToken>()))
-            .Do((callinfo) =>
-            {
-                _submissionStatusProcessor.Status = Status.CompleteReviewed;
-                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatus()
+        _submissionStatusProcessor
+            .When(processor =>
+                processor.GetJourneyStatusForSectionRecommendation(
+                    _section.InterstitialPage.Slug,
+                    true,
+                    Arg.Any<CancellationToken>()
+                )
+            )
+            .Do(
+                (callinfo) =>
                 {
-                    Maturity = null
-                });
-            });
+                    _submissionStatusProcessor.Status = Status.CompleteReviewed;
+                    _submissionStatusProcessor.SectionStatus.Returns(
+                        new SectionStatus() { Maturity = null }
+                    );
+                }
+            );
 
         await Assert.ThrowsAnyAsync<DatabaseException>(() =>
-            _router.ValidateRoute(_section.InterstitialPage.Slug, "recommendation-slug", checklist, _controller, default));
+            _router.ValidateRoute(
+                _section.InterstitialPage.Slug,
+                "recommendation-slug",
+                checklist,
+                _controller,
+                default
+            )
+        );
     }
 
     [Theory]
@@ -372,50 +354,94 @@ public class GetRecommendationRouterTests
     public async Task Should_Throw_Exception_When_Recommendation_Not_In_Section(bool checklist)
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, true, Arg.Any<CancellationToken>()))
-            .Do((callinfo) =>
-            {
-                _submissionStatusProcessor.Status = Status.CompleteReviewed;
-                _submissionStatusProcessor.Section.Returns(_section);
-                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatus()
+        _submissionStatusProcessor
+            .When(processor =>
+                processor.GetJourneyStatusForSectionRecommendation(
+                    _section.InterstitialPage.Slug,
+                    true,
+                    Arg.Any<CancellationToken>()
+                )
+            )
+            .Do(
+                (callinfo) =>
                 {
-                    Maturity = "High"
-                });
-            });
+                    _submissionStatusProcessor.Status = Status.CompleteReviewed;
+                    _submissionStatusProcessor.Section.Returns(_section);
+                    _submissionStatusProcessor.SectionStatus.Returns(
+                        new SectionStatus() { Maturity = "High" }
+                    );
+                }
+            );
 
-        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
-                                .Returns((callinfo) => MockValidLatestResponse(callinfo));
+        _getLatestResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns((callinfo) => MockValidLatestResponse(callinfo));
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
-            _router.ValidateRoute(_section.InterstitialPage.Slug, "other-recommendation-slug", checklist, _controller, default));
+            _router.ValidateRoute(
+                _section.InterstitialPage.Slug,
+                "other-recommendation-slug",
+                checklist,
+                _controller,
+                default
+            )
+        );
     }
 
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
-    public async Task Should_Throw_Exception_When_NotFind_Recommendation_For_Maturity(bool checklist)
+    public async Task Should_Throw_Exception_When_NotFind_Recommendation_For_Maturity(
+        bool checklist
+    )
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor =>
-                processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, true, Arg.Any<CancellationToken>()))
-            .Do((callinfo) =>
-            {
-                _submissionStatusProcessor.Status = Status.CompleteReviewed;
-                _submissionStatusProcessor.Section.Returns(_section);
-                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatus()
+        _submissionStatusProcessor
+            .When(processor =>
+                processor.GetJourneyStatusForSectionRecommendation(
+                    _section.InterstitialPage.Slug,
+                    true,
+                    Arg.Any<CancellationToken>()
+                )
+            )
+            .Do(
+                (callinfo) =>
                 {
-                    Maturity = "not a real maturity"
-                });
-            });
+                    _submissionStatusProcessor.Status = Status.CompleteReviewed;
+                    _submissionStatusProcessor.Section.Returns(_section);
+                    _submissionStatusProcessor.SectionStatus.Returns(
+                        new SectionStatus() { Maturity = "not a real maturity" }
+                    );
+                }
+            );
 
-        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
-                                .Returns((callinfo) => MockValidLatestResponse(callinfo));
+        _getLatestResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns((callinfo) => MockValidLatestResponse(callinfo));
 
-        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopicRecommendation);
+        _getSubTopicRecommendationQuery
+            .GetSubTopicRecommendation(Arg.Any<string>())
+            .Returns(_subtopicRecommendation);
 
         await Assert.ThrowsAnyAsync<ContentfulDataUnavailableException>(() =>
-            _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", checklist, _controller,
-                default));
+            _router.ValidateRoute(
+                _section.InterstitialPage.Slug,
+                "any-recommendation-slug",
+                checklist,
+                _controller,
+                default
+            )
+        );
     }
 
     [Fact]
@@ -423,7 +449,13 @@ public class GetRecommendationRouterTests
     {
         Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation();
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", false, _controller, default);
+        var result = await _router.ValidateRoute(
+            _section.InterstitialPage.Slug,
+            "any-recommendation-slug",
+            false,
+            _controller,
+            default
+        );
 
         var viewResult = result as ViewResult;
 
@@ -440,14 +472,15 @@ public class GetRecommendationRouterTests
     public async Task Should_Return_Only_Last_Recommendation_Journey()
     {
         Assert.NotNull(_section.InterstitialPage);
-        List<QuestionWithAnswer> responses = [
+        List<QuestionWithAnswer> responses =
+        [
             new QuestionWithAnswer()
             {
                 AnswerText = AnswerOne.Text,
                 AnswerSysId = AnswerOne.Sys.Id,
                 QuestionSysId = QuestionOne.Sys.Id,
                 QuestionSlug = QuestionOne.Slug,
-                QuestionText = QuestionOne.Text
+                QuestionText = QuestionOne.Text,
             },
             new QuestionWithAnswer()
             {
@@ -455,7 +488,7 @@ public class GetRecommendationRouterTests
                 AnswerSysId = AnswerThree.Sys.Id,
                 QuestionSysId = QuestionTwo.Sys.Id,
                 QuestionSlug = QuestionTwo.Slug,
-                QuestionText = QuestionTwo.Text
+                QuestionText = QuestionTwo.Text,
             },
             new QuestionWithAnswer()
             {
@@ -463,7 +496,7 @@ public class GetRecommendationRouterTests
                 AnswerSysId = AnswerFour.Sys.Id,
                 QuestionSysId = QuestionThree.Sys.Id,
                 QuestionSlug = QuestionThree.Slug,
-                QuestionText = QuestionThree.Text
+                QuestionText = QuestionThree.Text,
             },
             new QuestionWithAnswer()
             {
@@ -471,7 +504,7 @@ public class GetRecommendationRouterTests
                 AnswerSysId = AnswerFive.Sys.Id,
                 QuestionSysId = QuestionFour.Sys.Id,
                 QuestionSlug = QuestionFour.Slug,
-                QuestionText = QuestionFour.Text
+                QuestionText = QuestionFour.Text,
             },
         ];
 
@@ -479,7 +512,13 @@ public class GetRecommendationRouterTests
 
         Setup_Valid_Recommendation(responses);
 
-        var result = await _router.ValidateRoute(_section.InterstitialPage.Slug, "any-recommendation-slug", true, _controller, default);
+        var result = await _router.ValidateRoute(
+            _section.InterstitialPage.Slug,
+            "any-recommendation-slug",
+            true,
+            _controller,
+            default
+        );
 
         var viewResult = result as ViewResult;
 
@@ -503,7 +542,12 @@ public class GetRecommendationRouterTests
         Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation(isCompleted: false);
 
-        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, null, _controller, default);
+        var result = await _router.GetRecommendationPreview(
+            _section.InterstitialPage.Slug,
+            null,
+            _controller,
+            default
+        );
         var viewResult = result as ViewResult;
 
         Assert.NotNull(viewResult);
@@ -526,7 +570,12 @@ public class GetRecommendationRouterTests
 
         Setup_Valid_Recommendation(isCompleted: false);
 
-        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, maturity, _controller, default);
+        var result = await _router.GetRecommendationPreview(
+            _section.InterstitialPage.Slug,
+            maturity,
+            _controller,
+            default
+        );
         var viewResult = result as ViewResult;
 
         Assert.NotNull(viewResult);
@@ -535,7 +584,9 @@ public class GetRecommendationRouterTests
 
         Assert.NotNull(model);
 
-        var expectedIntro = _subtopicRecommendation!.Intros.FirstOrDefault(intro => intro.Maturity == maturity);
+        var expectedIntro = _subtopicRecommendation!.Intros.FirstOrDefault(intro =>
+            intro.Maturity == maturity
+        );
         Assert.Equal(expectedIntro, model.Intro);
         Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, model.Chunks.Count);
     }
@@ -544,12 +595,18 @@ public class GetRecommendationRouterTests
     [InlineData("Low", "low-slug")]
     [InlineData("Medium", "medium-slug")]
     [InlineData("High", "high-slug")]
-    public async Task GetRecommendationSlugForSection_Should_Return_MatchingSlugForMaturity(string maturity, string expectedSlug)
+    public async Task GetRecommendationSlugForSection_Should_Return_MatchingSlugForMaturity(
+        string maturity,
+        string expectedSlug
+    )
     {
         Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation(maturity: maturity);
 
-        var result = await _router.GetRecommendationSlugForSection(_section.InterstitialPage.Slug, default);
+        var result = await _router.GetRecommendationSlugForSection(
+            _section.InterstitialPage.Slug,
+            default
+        );
 
         Assert.Equal(result, expectedSlug);
     }
@@ -563,7 +620,12 @@ public class GetRecommendationRouterTests
         Assert.NotNull(_section.InterstitialPage);
         Setup_Valid_Recommendation(isCompleted: false);
 
-        var result = await _router.GetRecommendationPreview(_section.InterstitialPage.Slug, maturity, _controller, default);
+        var result = await _router.GetRecommendationPreview(
+            _section.InterstitialPage.Slug,
+            maturity,
+            _controller,
+            default
+        );
         var viewResult = result as ViewResult;
 
         Assert.NotNull(viewResult);
@@ -575,42 +637,65 @@ public class GetRecommendationRouterTests
         Assert.Equal(_subtopicRecommendation.Section.Chunks.Count, model.Chunks.Count);
     }
 
-    private void Setup_Valid_Recommendation(List<QuestionWithAnswer>? responses = null, string maturity = "High", bool isCompleted = true)
+    private void Setup_Valid_Recommendation(
+        List<QuestionWithAnswer>? responses = null,
+        string maturity = "High",
+        bool isCompleted = true
+    )
     {
         Assert.NotNull(_section.InterstitialPage);
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSectionRecommendation(_section.InterstitialPage.Slug, isCompleted, Arg.Any<CancellationToken>()))
+        _submissionStatusProcessor
+            .When(processor =>
+                processor.GetJourneyStatusForSectionRecommendation(
+                    _section.InterstitialPage.Slug,
+                    isCompleted,
+                    Arg.Any<CancellationToken>()
+                )
+            )
             .Do(_ =>
             {
                 _submissionStatusProcessor.Status = Status.CompleteReviewed;
                 _submissionStatusProcessor.Section.Returns(_section);
-                _submissionStatusProcessor.SectionStatus.Returns(new SectionStatus()
-                {
-                    Maturity = maturity
-                });
+                _submissionStatusProcessor.SectionStatus.Returns(
+                    new SectionStatus() { Maturity = maturity }
+                );
             });
 
-        _getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), Arg.Any<bool>(), Arg.Any<CancellationToken>())
-                                .Returns((callinfo) => MockValidLatestResponse(callinfo, responses));
+        _getLatestResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<bool>(),
+                Arg.Any<CancellationToken>()
+            )
+            .Returns((callinfo) => MockValidLatestResponse(callinfo, responses));
 
-        _getSubTopicRecommendationQuery.GetSubTopicRecommendation(Arg.Any<string>()).Returns(_subtopicRecommendation);
+        _getSubTopicRecommendationQuery
+            .GetSubTopicRecommendation(Arg.Any<string>())
+            .Returns(_subtopicRecommendation);
     }
 
-    private static SubmissionResponsesDto MockValidLatestResponse(CallInfo callinfo, List<QuestionWithAnswer>? responses = null)
+    private static SubmissionResponsesDto MockValidLatestResponse(
+        CallInfo callinfo,
+        List<QuestionWithAnswer>? responses = null
+    )
     {
         return new SubmissionResponsesDto()
         {
             SubmissionId = 1234,
-            Responses = responses ??
-            [
-                new QuestionWithAnswer()
-                {
-                    AnswerText = AnswerOne.Text,
-                    AnswerSysId = AnswerOne.Sys.Id,
-                    QuestionSysId = QuestionOne.Sys.Id,
-                    QuestionSlug = QuestionOne.Slug,
-                    QuestionText = QuestionOne.Text
-                },
-            ]
+            Responses =
+                responses
+                ??
+                [
+                    new QuestionWithAnswer()
+                    {
+                        AnswerText = AnswerOne.Text,
+                        AnswerSysId = AnswerOne.Sys.Id,
+                        QuestionSysId = QuestionOne.Sys.Id,
+                        QuestionSlug = QuestionOne.Slug,
+                        QuestionText = QuestionOne.Text,
+                    },
+                ],
         };
     }
 }

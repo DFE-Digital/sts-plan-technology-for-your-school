@@ -24,7 +24,7 @@ public class SignInRepository : ISignInRepository
         {
             SignInDateTime = DateTime.UtcNow,
             UserId = userId,
-            EstablishmentId = establishmentId
+            EstablishmentId = establishmentId,
         };
 
         await _db.SignIns.AddAsync(signInEntity);
@@ -32,7 +32,6 @@ public class SignInRepository : ISignInRepository
 
         return signInEntity;
     }
-
 
     public async Task<SignInEntity> RecordSignInWithoutEstablishmentIdAsync(string dfeSignInRef)
     {
@@ -42,11 +41,7 @@ public class SignInRepository : ISignInRepository
             throw new ArgumentException($"Could not find user with reference '{dfeSignInRef}'");
         }
 
-        var signInEntity = new SignInEntity
-        {
-            SignInDateTime = DateTime.UtcNow,
-            UserId = user.Id
-        };
+        var signInEntity = new SignInEntity { SignInDateTime = DateTime.UtcNow, UserId = user.Id };
 
         await _db.SignIns.AddAsync(signInEntity);
         await _db.SaveChangesAsync();

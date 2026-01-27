@@ -21,15 +21,16 @@ public class GroupsViewBuilderTests
 
     private sealed class TestController : Controller { }
 
-    private static IOptions<ContactOptionsConfiguration> Opt(string linkId = "contact-123")
-        => Options.Create(new ContactOptionsConfiguration { LinkId = linkId });
+    private static IOptions<ContactOptionsConfiguration> Opt(string linkId = "contact-123") =>
+        Options.Create(new ContactOptionsConfiguration { LinkId = linkId });
 
     private static GroupsViewBuilder CreateServiceUnderTest(
         IOptions<ContactOptionsConfiguration>? contactOpts = null,
         IContentfulService? contentful = null,
         IEstablishmentService? est = null,
         ICurrentUser? currentUser = null,
-        ILogger<BaseViewBuilder>? logger = null)
+        ILogger<BaseViewBuilder>? logger = null
+    )
     {
         contactOpts ??= Opt();
         contentful ??= Substitute.For<IContentfulService>();
@@ -58,21 +59,25 @@ public class GroupsViewBuilderTests
         return new GroupsViewBuilder(logger, contactOpts, contentful, est, currentUser);
     }
 
-    private static QuestionnaireCategoryEntry MakeCategory(params QuestionnaireSectionEntry[] sections)
-        => new QuestionnaireCategoryEntry
+    private static QuestionnaireCategoryEntry MakeCategory(
+        params QuestionnaireSectionEntry[] sections
+    ) =>
+        new QuestionnaireCategoryEntry
         {
             Sys = new SystemDetails("cat-1"),
             Header = new ComponentHeaderEntry { Text = "Header" },
-            Sections = sections.ToList()
+            Sections = sections.ToList(),
         };
 
-    private static QuestionnaireSectionEntry MakeSection(string id, int countAnswers = 0)
-        => new QuestionnaireSectionEntry
+    private static QuestionnaireSectionEntry MakeSection(string id, int countAnswers = 0) =>
+        new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails(id),
             Name = $"Sec {id}",
             Questions = Enumerable.Repeat(new QuestionnaireQuestionEntry(), countAnswers).ToList(),
-            CoreRecommendations = Enumerable.Repeat(new RecommendationChunkEntry(), countAnswers).ToList()
+            CoreRecommendations = Enumerable
+                .Repeat(new RecommendationChunkEntry(), countAnswers)
+                .ToList(),
         };
 
     // --- ctor guards --------------------------------------------------------
@@ -85,7 +90,14 @@ public class GroupsViewBuilderTests
         var current = Substitute.For<ICurrentUser>();
 
         Assert.Throws<ArgumentNullException>(() =>
-            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, null!, contentful, est, current));
+            new GroupsViewBuilder(
+                NullLogger<BaseViewBuilder>.Instance,
+                null!,
+                contentful,
+                est,
+                current
+            )
+        );
     }
 
     [Fact]
@@ -97,7 +109,14 @@ public class GroupsViewBuilderTests
         var est = Substitute.For<IEstablishmentService>();
 
         Assert.Throws<ArgumentNullException>(() =>
-            new GroupsViewBuilder(NullLogger<BaseViewBuilder>.Instance, opts, contentful, null!, current));
+            new GroupsViewBuilder(
+                NullLogger<BaseViewBuilder>.Instance,
+                opts,
+                contentful,
+                null!,
+                current
+            )
+        );
     }
 
     // --- RouteToSelectASchoolViewModelAsync --------------------------------
@@ -109,8 +128,14 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
 
         // selection page content (only Content list is used)
-        contentful.GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
-                  .Returns(new PageEntry { Content = new List<ContentfulEntry> { new MissingComponentEntry() } });
+        contentful
+            .GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
+            .Returns(
+                new PageEntry
+                {
+                    Content = new List<ContentfulEntry> { new MissingComponentEntry() },
+                }
+            );
         var sec1 = MakeSection("Sec1", 3);
         var sec2 = MakeSection("Sec2", 2);
         var sec3 = MakeSection("Sec3", 5);
@@ -121,21 +146,36 @@ public class GroupsViewBuilderTests
         contentful.GetAllSectionsAsync().Returns(allSections);
 
         // home page content: supplies categories with sections
-        var homePage = new PageEntry { Content = new List<ContentfulEntry> { cat1, cat2 } };
-        contentful.GetPageBySlugAsync(Arg.Any<string>())
-                  .Returns(homePage);
+        var homePage = new PageEntry
+        {
+            Content = new List<ContentfulEntry> { cat1, cat2 },
+        };
+        contentful.GetPageBySlugAsync(Arg.Any<string>()).Returns(homePage);
 
         // contact link
-        contentful.GetLinkByIdAsync("contact-123")
-                  .Returns(new NavigationLinkEntry { Href = "/contact-us" });
+        contentful
+            .GetLinkByIdAsync("contact-123")
+            .Returns(new NavigationLinkEntry { Href = "/contact-us" });
 
         var est = Substitute.For<IEstablishmentService>();
         est.GetEstablishmentLinksWithRecommendationCounts(100)
-           .Returns(new List<SqlEstablishmentLinkDto>
-           {
-               new SqlEstablishmentLinkDto { Id = 1, EstablishmentName = "School A", InProgressOrCompletedRecommendationsCount = 2 },
-               new SqlEstablishmentLinkDto { Id = 2, EstablishmentName = "School B", InProgressOrCompletedRecommendationsCount = 1 },
-           });
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new SqlEstablishmentLinkDto
+                    {
+                        Id = 1,
+                        EstablishmentName = "School A",
+                        InProgressOrCompletedRecommendationsCount = 2,
+                    },
+                    new SqlEstablishmentLinkDto
+                    {
+                        Id = 2,
+                        EstablishmentName = "School B",
+                        InProgressOrCompletedRecommendationsCount = 1,
+                    },
+                }
+            );
 
         var sut = CreateServiceUnderTest(contentful: contentful, est: est);
         var controller = new TestController();
@@ -184,11 +224,17 @@ public class GroupsViewBuilderTests
 
         await sut.RecordGroupSelectionAsync("URN-007", "Bond Primary");
 
-        await est.Received(1).RecordGroupSelection(
-            "dsi-123",
-            200,
-            Arg.Is<EstablishmentModel>(m => m.Id == customGroupDsiId && m.Name == "Custom Academy Trust" && m.Urn == "GRP-200"),
-            "URN-007",
-            "Bond Primary");
+        await est.Received(1)
+            .RecordGroupSelection(
+                "dsi-123",
+                200,
+                Arg.Is<EstablishmentModel>(m =>
+                    m.Id == customGroupDsiId
+                    && m.Name == "Custom Academy Trust"
+                    && m.Urn == "GRP-200"
+                ),
+                "URN-007",
+                "Bond Primary"
+            );
     }
 }

@@ -10,7 +10,13 @@ internal class ResponseEntityConfiguration : IEntityTypeConfiguration<ResponseEn
     {
         builder.HasKey(response => response.Id);
         builder.ToTable(tb => tb.HasTrigger("tr_response"));
-        builder.Property(response => response.DateCreated).HasColumnType("datetime").ValueGeneratedOnAdd();
-        builder.Property(submission => submission.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
+        builder
+            .Property(response => response.DateCreated)
+            .HasColumnType("datetime")
+            .ValueGeneratedOnAdd();
+        builder
+            .Property(submission => submission.DateLastUpdated)
+            .HasColumnType("datetime")
+            .HasDefaultValue();
     }
 }

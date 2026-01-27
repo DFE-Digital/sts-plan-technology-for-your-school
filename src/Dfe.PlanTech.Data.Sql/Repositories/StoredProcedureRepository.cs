@@ -46,7 +46,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         // Parameters (in order): @submissionId INT
         var parameters = new SqlParameter[]
         {
-            new(DatabaseConstants.SubmissionIdParam, submissionId)
+            new(DatabaseConstants.SubmissionIdParam, submissionId),
         };
 
         var command = BuildCommand(DatabaseConstants.SpCalculateMaturity, parameters);
@@ -71,12 +71,12 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
         var responseId = new SqlParameter(DatabaseConstants.ResponseIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var submissionId = new SqlParameter(DatabaseConstants.SubmissionIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var parameters = new SqlParameter[]
@@ -92,7 +92,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             new(DatabaseConstants.EstablishmentIdParam, response.EstablishmentId),
             new(DatabaseConstants.MaturityParam, ""),
             responseId,
-            submissionId
+            submissionId,
         };
 
         var command = BuildCommand(DatabaseConstants.SpSubmitAnswer, parameters);
@@ -103,7 +103,9 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             return id;
         }
 
-        throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}");
+        throw new InvalidCastException(
+            $"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}"
+        );
     }
 
     private static string BuildCommand(string storedProcedureName, SqlParameter[] parameters)
@@ -111,13 +113,14 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         ParameterDirection[] outputParameterTypes =
         {
             ParameterDirection.InputOutput,
-            ParameterDirection.Output
+            ParameterDirection.Output,
         };
 
         var parameterNames = parameters.Select(p =>
             outputParameterTypes.Contains(p.Direction)
                 ? $"{p.ParameterName} OUTPUT"
-                : p.ParameterName);
+                : p.ParameterName
+        );
 
         return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
     }

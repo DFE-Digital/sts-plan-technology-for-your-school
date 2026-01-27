@@ -10,8 +10,11 @@ namespace Dfe.PlanTech.Infrastructure.Redis.UnitTests;
 public class RedisLockProviderUnitTests
 {
     private readonly DistributedCachingOptions _options = new("", 1, 1);
-    private readonly IRedisConnectionManager _connectionManager = Substitute.For<IRedisConnectionManager>();
-    private readonly ILogger<RedisLockProvider> _logger = Substitute.For<ILogger<RedisLockProvider>>();
+    private readonly IRedisConnectionManager _connectionManager =
+        Substitute.For<IRedisConnectionManager>();
+    private readonly ILogger<RedisLockProvider> _logger = Substitute.For<
+        ILogger<RedisLockProvider>
+    >();
     private readonly IDatabase _database = Substitute.For<IDatabase>();
 
     private readonly RedisLockProvider _provider;
@@ -40,7 +43,9 @@ public class RedisLockProviderUnitTests
 
         var timespan = TimeSpan.FromSeconds(100);
         await _provider.LockExtendAsync(key, value, timespan);
-        await _database.Received(1).LockExtendAsync(key, value, timespan, CommandFlags.DemandMaster);
+        await _database
+            .Received(1)
+            .LockExtendAsync(key, value, timespan, CommandFlags.DemandMaster);
     }
 
     [Fact]
@@ -48,7 +53,14 @@ public class RedisLockProviderUnitTests
     {
         const string key = "key";
 
-        _database.LockTakeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<CommandFlags>()).Returns(true);
+        _database
+            .LockTakeAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan>(),
+                Arg.Any<CommandFlags>()
+            )
+            .Returns(true);
 
         var result = await _provider.WaitForLockAsync(key, true);
 
@@ -60,7 +72,14 @@ public class RedisLockProviderUnitTests
     {
         const string key = "key";
 
-        _database.LockTakeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<CommandFlags>()).Returns(false);
+        _database
+            .LockTakeAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan>(),
+                Arg.Any<CommandFlags>()
+            )
+            .Returns(false);
 
         var result = await _provider.WaitForLockAsync(key, false);
 
@@ -72,7 +91,14 @@ public class RedisLockProviderUnitTests
     {
         const string key = "key";
 
-        _database.LockTakeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<CommandFlags>()).Returns(false);
+        _database
+            .LockTakeAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan>(),
+                Arg.Any<CommandFlags>()
+            )
+            .Returns(false);
 
         await Assert.ThrowsAnyAsync<LockException>(() => _provider.WaitForLockAsync(key, true));
     }
@@ -84,12 +110,25 @@ public class RedisLockProviderUnitTests
 
         var runnable = Substitute.For<IMockRunnable>();
 
-        _database.LockTakeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<CommandFlags>()).Returns(true);
+        _database
+            .LockTakeAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan>(),
+                Arg.Any<CommandFlags>()
+            )
+            .Returns(true);
 
         await _provider.LockAndRun(key, runnable.Action);
 
         await runnable.Received(1).Action();
-        await _database.Received(1).LockReleaseAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), CommandFlags.DemandMaster);
+        await _database
+            .Received(1)
+            .LockReleaseAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                CommandFlags.DemandMaster
+            );
     }
 
     [Fact]
@@ -99,11 +138,24 @@ public class RedisLockProviderUnitTests
 
         var runnable = Substitute.For<IMockRunnable>();
 
-        _database.LockTakeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<CommandFlags>()).Returns(false);
+        _database
+            .LockTakeAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan>(),
+                Arg.Any<CommandFlags>()
+            )
+            .Returns(false);
 
         await Assert.ThrowsAnyAsync<Exception>(() => _provider.LockAndRun(key, runnable.Action));
         await runnable.Received(0).Action();
-        await _database.Received(0).LockReleaseAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), CommandFlags.DemandMaster);
+        await _database
+            .Received(0)
+            .LockReleaseAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                CommandFlags.DemandMaster
+            );
     }
 
     [Fact]
@@ -112,14 +164,32 @@ public class RedisLockProviderUnitTests
         const string key = "key";
         const string thrownErrorMessage = "Error occurred";
 
-        _database.LockTakeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<CommandFlags>()).Returns(true);
+        _database
+            .LockTakeAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan>(),
+                Arg.Any<CommandFlags>()
+            )
+            .Returns(true);
 
         await _provider.LockAndRun(key, () => throw new Exception(thrownErrorMessage));
 
-        var loggedMessage = _logger.ReceivedLogMessages().FirstOrDefault(message => message.LogLevel == LogLevel.Error && message.Message.Contains("Error while executing locked operation for key:"));
+        var loggedMessage = _logger
+            .ReceivedLogMessages()
+            .FirstOrDefault(message =>
+                message.LogLevel == LogLevel.Error
+                && message.Message.Contains("Error while executing locked operation for key:")
+            );
         Assert.NotNull(loggedMessage);
 
-        await _database.Received(1).LockReleaseAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), CommandFlags.DemandMaster);
+        await _database
+            .Received(1)
+            .LockReleaseAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                CommandFlags.DemandMaster
+            );
     }
 
     [Fact]
@@ -131,7 +201,14 @@ public class RedisLockProviderUnitTests
         var runnable = Substitute.For<IMockRunnable>();
         runnable.Func().Returns(returnValue);
 
-        _database.LockTakeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<CommandFlags>()).Returns(true);
+        _database
+            .LockTakeAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan>(),
+                Arg.Any<CommandFlags>()
+            )
+            .Returns(true);
 
         var result = await _provider.LockAndGet(key, runnable.Func);
 
@@ -148,7 +225,14 @@ public class RedisLockProviderUnitTests
         var runnable = Substitute.For<IMockRunnable>();
         runnable.Func().Returns(returnValue);
 
-        _database.LockTakeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<CommandFlags>()).Returns(false);
+        _database
+            .LockTakeAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan>(),
+                Arg.Any<CommandFlags>()
+            )
+            .Returns(false);
 
         await Assert.ThrowsAnyAsync<Exception>(() => _provider.LockAndGet(key, runnable.Func));
         await runnable.Received(0).Func();
@@ -161,14 +245,32 @@ public class RedisLockProviderUnitTests
         const string thrownErrorMessage = "Error occurred";
         static Func<Task<string>> func() => throw new Exception(thrownErrorMessage);
 
-        _database.LockTakeAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), Arg.Any<TimeSpan>(), Arg.Any<CommandFlags>()).Returns(true);
+        _database
+            .LockTakeAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                Arg.Any<TimeSpan>(),
+                Arg.Any<CommandFlags>()
+            )
+            .Returns(true);
 
         await _provider.LockAndGet(key, () => Task.FromResult(func()));
 
-        var loggedMessage = _logger.ReceivedLogMessages().FirstOrDefault(message => message.LogLevel == LogLevel.Error && message.Message.Contains("Error while executing locked operation for key:"));
+        var loggedMessage = _logger
+            .ReceivedLogMessages()
+            .FirstOrDefault(message =>
+                message.LogLevel == LogLevel.Error
+                && message.Message.Contains("Error while executing locked operation for key:")
+            );
         Assert.NotNull(loggedMessage);
 
-        await _database.Received(1).LockReleaseAsync(Arg.Any<RedisKey>(), Arg.Any<RedisValue>(), CommandFlags.DemandMaster);
+        await _database
+            .Received(1)
+            .LockReleaseAsync(
+                Arg.Any<RedisKey>(),
+                Arg.Any<RedisValue>(),
+                CommandFlags.DemandMaster
+            );
     }
 }
 

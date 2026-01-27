@@ -19,7 +19,7 @@ inputs:
     type: string
 
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - name: Azure Login
       uses: ./.github/actions/azure-login
@@ -27,7 +27,7 @@ runs:
         az_tenant_id: ${{ inputs.az_tenant_id }}
         az_subscription_id: ${{ inputs.az_subscription_id }}
         az_client_id: ${{ inputs.az_client_id }}
-    
+
     - name: Get GitHub Runner IP
       id: whats-my-ip
       uses: ./.github/actions/whats-my-ip-address

@@ -1,6 +1,4 @@
-import contentfulManagement from "contentful-management";
-
-const { createClient } = contentfulManagement;
+import contentfulManagement from 'contentful-management';
 
 /**
  * @typedef {Object} ClientAPI
@@ -33,34 +31,29 @@ const { createClient } = contentfulManagement;
  * @param {ClientAPI} client
  */
 export async function validateEnvironment(client) {
-    const environments = await client.environment.getMany({
-        spaceId: process.env.SPACE_ID,
-    });
-    const validNames = environments.items.map((env) => env.name);
-    if (!validNames.includes(process.env.ENVIRONMENT)) {
-        throw new Error(`Invalid Contentful environment`);
-    }
+  const space = await client.getSpace(process.env.SPACE_ID);
+  const environments = await space.getEnvironments();
+
+  const validNames = environments.items.map((env) => env.name);
+  if (!validNames.includes(process.env.ENVIRONMENT)) {
+    throw new Error(`Invalid Contentful environment`);
+  }
 }
 
 /**
  * Creates client without validation
  * @returns {ClientAPI}
  */
-export function getClient() {
-    const client = createClient(
-        {
-            accessToken: process.env.MANAGEMENT_TOKEN,
-        },
-        {
-            type: "plain",
-            defaults: {
-                spaceId: process.env.SPACE_ID,
-                environmentId: process.env.ENVIRONMENT,
-            },
-        }
-    );
+export async function getClient() {
+  const client = contentfulManagement.createClient({
+    accessToken: process.env.MANAGEMENT_TOKEN,
+  });
 
-    return client;
+  await validateEnvironment(client);
+
+  const space = await client.getSpace(process.env.SPACE_ID);
+  const environment = await space.getEnvironment(process.env.ENVIRONMENT);
+  return environment;
 }
 
 /**
@@ -68,9 +61,8 @@ export function getClient() {
  * @returns {Promise<ClientAPI>}
  */
 export async function getAndValidateClient() {
-    const client = getClient();
-    await validateEnvironment(client);
-    return client;
+  const client = await getClient();
+  return client;
 }
 
 export default getAndValidateClient;

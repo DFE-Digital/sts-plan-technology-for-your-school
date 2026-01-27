@@ -3,67 +3,25 @@ name: Code PR Check
 on:
   pull_request:
     paths:
-      - "src/**"
-      - "tests/**"
-      - ".github/workflows/code-pr-check.yml"
-      - ".github/actions/build-dotnet-app/action.yml"
-      - ".github/actions/run-unit-tests/action.yml"
+      - 'contentful/**'
+      - 'src/**'
+      - 'tests/**'
+      - '.github/workflows/code-pr-check.yml'
+      - '.github/actions/build-dotnet-app/action.yml'
+      - '.github/actions/run-unit-tests/action.yml'
 
 concurrency:
-  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
-  lint-code:
-    name: Lint & Commit
-    runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'pull_request' }}
-
-    permissions:
-      contents: write
-      pull-requests: write
-      checks: write
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          # The ref is specifically needed here to ensure the PR branch is checked out,
-          # allowing linting changes to be committed and pushed back (otherwise is a detached HEAD state).
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-          cache: false
-
-      - name: Lint plan-technology-for-your-school.sln solution
-        run: dotnet format plan-technology-for-your-school.sln
-
-      - name: Commit and push changes if necessary
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
-
-          if [[ `git status --porcelain` ]]; then
-            git add src/*
-            git add tests/*
-            git commit -m "chore: Linted code for plan-technology-for-your-school.sln solution"
-            git push
-          else
-            echo 'No linting changes'
-          fi
-
   build-test-web-app:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
-    if: ${{ always() && needs.lint-code.result == 'success' }}
-    needs: [lint-code]
+    if: always()
 
     steps:
       - name: Check out repository
@@ -88,8 +46,8 @@ jobs:
       - name: Install latest JDK
         uses: actions/setup-java@v4
         with:
-          distribution: "microsoft"
-          java-version: "17"
+          distribution: 'microsoft'
+          java-version: '17'
 
       - name: Start SonarCloud scanner
         run: |
@@ -152,7 +110,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "latest"
+          node-version: 'latest'
 
       - name: Install Dependencies
         working-directory: ./tests/Dfe.PlanTech.Web.Node.UnitTests/
@@ -194,7 +152,7 @@ jobs:
         if: steps.contentful-check.outputs.changed == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: "latest"
+          node-version: 'latest'
 
       - name: Install Dependencies
         if: steps.contentful-check.outputs.changed == 'true'

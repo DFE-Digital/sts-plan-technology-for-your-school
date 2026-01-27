@@ -17,7 +17,7 @@ public class QuestionEntityTests
         {
             Id = expectedId,
             QuestionText = expectedQuestionText,
-            ContentfulRef = expectedContentfulRef
+            ContentfulRef = expectedContentfulRef,
         };
 
         // Act
@@ -36,7 +36,7 @@ public class QuestionEntityTests
                 nameof(SqlQuestionDto.QuestionText),
                 nameof(SqlQuestionDto.ContentfulSysId),
                 nameof(SqlQuestionDto.DateCreated),
-                nameof(SqlQuestionDto.Order)
+                nameof(SqlQuestionDto.Order),
             }
         );
     }
@@ -51,7 +51,7 @@ public class QuestionEntityTests
         {
             Id = 6,
             QuestionText = "Arbitrary string - question text",
-            ContentfulRef = "Arbitrary string - contentful ref"
+            ContentfulRef = "Arbitrary string - contentful ref",
         };
 
         var after = DateTime.UtcNow;

@@ -11,28 +11,39 @@ namespace Dfe.PlanTech.Application.UnitTests.Rendering;
 public class RichTextRendererTests
 {
     private readonly RichTextRenderer _renderer;
-    private readonly IRichTextContentPartRenderer _partRenderer = Substitute.For<IRichTextContentPartRenderer>();
+    private readonly IRichTextContentPartRenderer _partRenderer =
+        Substitute.For<IRichTextContentPartRenderer>();
 
     public RichTextRendererTests()
     {
-        _partRenderer.Accepts(Arg.Any<RichTextContentField>())
-                    .Returns((content) => ((IRichTextContent)content[0]).NodeType == "paragraph");
+        _partRenderer
+            .Accepts(Arg.Any<RichTextContentField>())
+            .Returns((content) => ((IRichTextContent)content[0]).NodeType == "paragraph");
 
-        _partRenderer.AddHtml(Arg.Any<RichTextContentField>(), Arg.Any<IRichTextContentPartRendererCollection>(), Arg.Any<StringBuilder>())
-                    .Returns((CallInfo) =>
-                    {
-                        IRichTextContent content = (IRichTextContent)CallInfo[0];
-                        IRichTextContentPartRendererCollection collection = (IRichTextContentPartRendererCollection)CallInfo[1];
-                        StringBuilder stringBuilder = (StringBuilder)CallInfo[2];
+        _partRenderer
+            .AddHtml(
+                Arg.Any<RichTextContentField>(),
+                Arg.Any<IRichTextContentPartRendererCollection>(),
+                Arg.Any<StringBuilder>()
+            )
+            .Returns(
+                (CallInfo) =>
+                {
+                    IRichTextContent content = (IRichTextContent)CallInfo[0];
+                    IRichTextContentPartRendererCollection collection =
+                        (IRichTextContentPartRendererCollection)CallInfo[1];
+                    StringBuilder stringBuilder = (StringBuilder)CallInfo[2];
 
-                        stringBuilder.Append(content.Value);
+                    stringBuilder.Append(content.Value);
 
-                        return stringBuilder;
-                    });
+                    return stringBuilder;
+                }
+            );
 
-        var partRenderers = new List<IRichTextContentPartRenderer>(){
+        var partRenderers = new List<IRichTextContentPartRenderer>()
+        {
             _partRenderer,
-            new HyperlinkRenderer(new HyperlinkRendererOptions())
+            new HyperlinkRenderer(new HyperlinkRendererOptions()),
         };
 
         _renderer = new RichTextRenderer(new NullLogger<RichTextRenderer>(), partRenderers);
@@ -41,10 +52,7 @@ public class RichTextRendererTests
     [Fact]
     public void Should_RetrieveCorrectRenderer_WhenParagraph()
     {
-        var content = new RichTextContentField()
-        {
-            NodeType = "paragraph",
-        };
+        var content = new RichTextContentField() { NodeType = "paragraph" };
 
         var renderer = _renderer.GetRendererForContent(content);
 
@@ -59,16 +67,20 @@ public class RichTextRendererTests
         var content = new RichTextContentField()
         {
             NodeType = "document",
-            Content = new() {
-                new RichTextContentField() {
-                    NodeType = "paragraph",
-                    Value = testHtml
-                }
-            }
+            Content = new()
+            {
+                new RichTextContentField() { NodeType = "paragraph", Value = testHtml },
+            },
         };
 
         var html = _renderer.ToHtml(content);
-        _partRenderer.Received().AddHtml(Arg.Any<RichTextContentField>(), Arg.Any<IRichTextContentPartRendererCollection>(), Arg.Any<StringBuilder>());
+        _partRenderer
+            .Received()
+            .AddHtml(
+                Arg.Any<RichTextContentField>(),
+                Arg.Any<IRichTextContentPartRendererCollection>(),
+                Arg.Any<StringBuilder>()
+            );
 
         Assert.Equal(testHtml, html);
     }

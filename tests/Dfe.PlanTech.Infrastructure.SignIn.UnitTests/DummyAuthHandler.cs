@@ -5,16 +5,16 @@ using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
 
-public class DummyAuthHandlerOptions : AuthenticationSchemeOptions
-{
-
-}
+public class DummyAuthHandlerOptions : AuthenticationSchemeOptions { }
 
 public class DummyAuthHandler : AuthenticationHandler<DummyAuthHandlerOptions>
 {
-    public DummyAuthHandler(IOptionsMonitor<DummyAuthHandlerOptions> options, ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
-    {
-    }
+    public DummyAuthHandler(
+        IOptionsMonitor<DummyAuthHandlerOptions> options,
+        ILoggerFactory logger,
+        UrlEncoder encoder
+    )
+        : base(options, logger, encoder) { }
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {

@@ -23,7 +23,7 @@ public class GroupReadActivityEntityTests
             UserEstablishmentId = expectedUserEstablishmentId,
             SelectedEstablishmentId = expectedSelectedEstablishmentId,
             SelectedEstablishmentName = expectedSelectedEstablishmentName,
-            DateSelected = expectedDateSelected
+            DateSelected = expectedDateSelected,
         };
 
         // Act
@@ -46,7 +46,7 @@ public class GroupReadActivityEntityTests
                 nameof(SqlGroupReadActivityDto.UserEstablishmentId),
                 nameof(SqlGroupReadActivityDto.SelectedEstablishmentId),
                 nameof(SqlGroupReadActivityDto.SelectedEstablishmentName),
-                nameof(SqlGroupReadActivityDto.DateSelected)
+                nameof(SqlGroupReadActivityDto.DateSelected),
             }
         );
     }

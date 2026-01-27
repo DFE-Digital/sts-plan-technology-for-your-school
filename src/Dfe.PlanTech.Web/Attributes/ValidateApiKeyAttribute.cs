@@ -8,7 +8,6 @@ namespace Dfe.PlanTech.Web.Attributes;
 [ExcludeFromCodeCoverage]
 public class ValidateApiKeyAttribute : ServiceFilterAttribute
 {
-    public ValidateApiKeyAttribute() : base(typeof(ApiKeyAuthorisationFilter))
-    {
-    }
+    public ValidateApiKeyAttribute()
+        : base(typeof(ApiKeyAuthorisationFilter)) { }
 }

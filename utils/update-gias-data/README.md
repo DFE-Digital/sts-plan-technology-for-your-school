@@ -1,6 +1,7 @@
 # GIAS data updater
 
 ## Overview
+
 Establishment groups reside in the `dbo.establishmentGroup` table, which the `dbo.establishment` table maps to by foreign key.
 
 GIAS data is updated daily and there is no API to retrieve it,
@@ -20,15 +21,17 @@ To run the data-updater locally:
 3. Setup your .env file by copying .env.example and filling in the required environment variables:
 
    | Variable          | Description                                      | Example / Location                              |
-   |-------------------|--------------------------------------------------|-------------------------------------------------|
+   | ----------------- | ------------------------------------------------ | ----------------------------------------------- |
    | CONNECTION_STRING | SQL Connection string for the plan-tech database | Keyvault value for `python--dbconnectionstring` |
 
 4. create a virtual environment and install dependencies:
+
    ```bash
    make setup
    ```
 
 5. Fetch the GIAS data and update the database with
+
    ```bash
    make run
    ```
@@ -48,6 +51,7 @@ If you don't have make installed on your machine, you can run the above steps by
 For windows setup this would be:
 
 1. First time setup
+
    ```bash
    cd utils/update-gias-data
    pip install uv
@@ -58,11 +62,13 @@ For windows setup this would be:
    ```
 
 2. Running the Project
+
    ```bash
    uv run main.py
    ```
 
 3. Linting and formatting
+
    ```bash
    uv run ruff check --fix
    uv run ruff format

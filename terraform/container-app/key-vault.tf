@@ -5,7 +5,6 @@ resource "azurerm_key_vault" "vault" {
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 90
-  enable_rbac_authorization  = false
   tags                       = local.tags
   purge_protection_enabled   = true
 
@@ -187,11 +186,10 @@ resource "azurerm_key_vault_key" "data_protection_key" {
 
   rotation_policy {
     automatic {
-      time_before_expiry = "P30D"
+      time_before_expiry = "P7D"
     }
-
-    expire_after         = "P90D"
-    notify_before_expiry = "P29D"
+    expire_after         = "P1M"
+    notify_before_expiry = "P14D"
   }
 
   lifecycle {

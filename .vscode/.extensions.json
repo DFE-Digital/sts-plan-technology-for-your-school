@@ -1,0 +1,23 @@
+{
+  "recommendations": [
+    "alexkrechik.cucumberautocomplete",
+    "csharpier.csharpier-vscode",
+    "DavidAnson.vscode-markdownlint",
+    "esbenp.prettier-vscode",
+    "formulahendry.auto-rename-tag",
+    "github.vscode-pull-request-github",
+    "github.vscode-github-actions",
+    "hashicorp.terraform",
+    "inferrinizzard.prettier-sql-vscode",
+    "mechatroner.rainbow-csv",
+    "ms-dotnettools.csdevkit",
+    "ms-dotnettools.csharp",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "ms-vscode.powershell",
+    "pkief.material-icon-theme",
+    "redhat.vscode-yaml",
+    "redhat.vscode-xml",
+    "seyyedkhandon.firacode",
+    "usernamehw.errorlens"
+  ]
+}

@@ -19,7 +19,7 @@ public class CategoryLandingViewComponentTests
 
         var category = new QuestionnaireCategoryEntry
         {
-            Sections = new List<QuestionnaireSectionEntry> { new() }
+            Sections = new List<QuestionnaireSectionEntry> { new() },
         };
         var slug = "test-slug";
         var sectionName = "test-section";
@@ -34,14 +34,33 @@ public class CategoryLandingViewComponentTests
             CategoryLandingSections = new List<CategoryLandingSectionViewModel>(),
             Sections = category.Sections,
             Print = false,
-            StatusLinkPartialName = "status"
+            StatusLinkPartialName = "status",
         };
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder).Returns(Task.FromResult(expectedViewModel));
+        viewBuilder
+            .BuildViewModelAsync(
+                category,
+                slug,
+                sectionName,
+                RecommendationConstants.DefaultSortOrder
+            )
+            .Returns(Task.FromResult(expectedViewModel));
 
-        var result = await component.InvokeAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder);
+        var result = await component.InvokeAsync(
+            category,
+            slug,
+            sectionName,
+            RecommendationConstants.DefaultSortOrder
+        );
 
-        await viewBuilder.Received(1).BuildViewModelAsync(category, slug, sectionName, RecommendationSortOrder.Default.ToString());
+        await viewBuilder
+            .Received(1)
+            .BuildViewModelAsync(
+                category,
+                slug,
+                sectionName,
+                RecommendationSortOrder.Default.ToString()
+            );
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
         Assert.NotNull(viewResult.ViewData);
         Assert.Equal(expectedViewModel, viewResult.ViewData.Model);
@@ -55,7 +74,7 @@ public class CategoryLandingViewComponentTests
 
         var category = new QuestionnaireCategoryEntry
         {
-            Sections = new List<QuestionnaireSectionEntry> { new() }
+            Sections = new List<QuestionnaireSectionEntry> { new() },
         };
         var slug = "another-slug";
         string? sectionName = null;
@@ -70,12 +89,24 @@ public class CategoryLandingViewComponentTests
             CategoryLandingSections = new List<CategoryLandingSectionViewModel>(),
             Sections = category.Sections,
             Print = false,
-            StatusLinkPartialName = "status"
+            StatusLinkPartialName = "status",
         };
 
-        viewBuilder.BuildViewModelAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder).Returns(Task.FromResult(expectedViewModel));
+        viewBuilder
+            .BuildViewModelAsync(
+                category,
+                slug,
+                sectionName,
+                RecommendationConstants.DefaultSortOrder
+            )
+            .Returns(Task.FromResult(expectedViewModel));
 
-        var result = await component.InvokeAsync(category, slug, sectionName, RecommendationConstants.DefaultSortOrder);
+        var result = await component.InvokeAsync(
+            category,
+            slug,
+            sectionName,
+            RecommendationConstants.DefaultSortOrder
+        );
 
         var viewResult = Assert.IsType<ViewViewComponentResult>(result);
         Assert.NotNull(viewResult.ViewData);

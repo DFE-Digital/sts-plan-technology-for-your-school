@@ -13,7 +13,9 @@ public class UserClaimsExtensionsTests
     {
         string expectedUserId = "TestingName";
 
-        var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.NameIdentifier, expectedUserId) });
+        var identity = new ClaimsIdentity(
+            new[] { new Claim(ClaimConstants.NameIdentifier, expectedUserId) }
+        );
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
         var userId = UserClaimsExtensions.GetDsiReference(claimsPrincipal.Claims);
@@ -27,9 +29,10 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(Array.Empty<Claim>());
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetDsiReference(claimsPrincipal.Claims));
+        Assert.ThrowsAny<Exception>(() =>
+            UserClaimsExtensions.GetDsiReference(claimsPrincipal.Claims)
+        );
     }
-
 
     [Fact]
     public void GetDsiReference_Should_Throw_When_ClaimsPrincipal_Is_Null()
@@ -57,10 +60,14 @@ public class UserClaimsExtensionsTests
     [Fact]
     public void GetOrganisation_Should_Throw_When_OrgClaim_Is_NotJson()
     {
-        var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.Organisation, "not a real claim") });
+        var identity = new ClaimsIdentity(
+            new[] { new Claim(ClaimConstants.Organisation, "not a real claim") }
+        );
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        Assert.ThrowsAny<Exception>(() => UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims));
+        Assert.ThrowsAny<Exception>(() =>
+            UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims)
+        );
     }
 
     [Fact]
@@ -70,12 +77,14 @@ public class UserClaimsExtensionsTests
         {
             Id = Guid.Empty,
             Urn = "testUrn",
-            Ukprn = "testUkPrn"
+            Ukprn = "testUkPrn",
         };
 
         var organisationJson = JsonSerializer.Serialize(organisation);
 
-        var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.Organisation, organisationJson) });
+        var identity = new ClaimsIdentity(
+            new[] { new Claim(ClaimConstants.Organisation, organisationJson) }
+        );
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
         var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
@@ -90,12 +99,14 @@ public class UserClaimsExtensionsTests
         {
             Id = Guid.NewGuid(),
             Urn = "testUrn",
-            Ukprn = "testUkPrn"
+            Ukprn = "testUkPrn",
         };
 
         var organisationJson = JsonSerializer.Serialize(organisation);
 
-        var identity = new ClaimsIdentity(new[] { new Claim(ClaimConstants.Organisation, organisationJson) });
+        var identity = new ClaimsIdentity(
+            new[] { new Claim(ClaimConstants.Organisation, organisationJson) }
+        );
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
         var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);

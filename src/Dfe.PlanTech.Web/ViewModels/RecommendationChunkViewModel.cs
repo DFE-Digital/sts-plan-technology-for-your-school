@@ -11,7 +11,8 @@ public class RecommendationChunkViewModel
     public string Header { get; init; } = null!;
     public string HeaderText => Header;
     public DateTime LastUpdated { get; set; }
-    public string LastUpdatedFormatted => LastUpdated.ToString("d MMMM yyyy") ?? RecommendationConstants.DefaultLastUpdatedText;
+    public string LastUpdatedFormatted =>
+        LastUpdated.ToString("d MMMM yyyy") ?? RecommendationConstants.DefaultLastUpdatedText;
     public RecommendationStatus Status { get; set; }
     public string StatusText => Status.GetDisplayName();
     public string StatusTagClass => Status.GetCssClass();

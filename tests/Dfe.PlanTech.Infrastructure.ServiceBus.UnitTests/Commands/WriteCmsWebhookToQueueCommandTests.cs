@@ -10,7 +10,9 @@ namespace Dfe.PlanTech.Infrastructure.ServiceBus.UnitTests.Commands;
 
 public class WriteCmsWebhookToQueueCommandTests
 {
-    private readonly ILogger<WriteCmsWebhookToQueueCommand> _logger = Substitute.For<ILogger<WriteCmsWebhookToQueueCommand>>();
+    private readonly ILogger<WriteCmsWebhookToQueueCommand> _logger = Substitute.For<
+        ILogger<WriteCmsWebhookToQueueCommand>
+    >();
     private readonly IQueueWriter _writer = Substitute.For<IQueueWriter>();
 
     private static HttpRequest NewRequestWithHeader(string? headerValue)
@@ -23,7 +25,8 @@ public class WriteCmsWebhookToQueueCommandTests
         else
         {
             // If you want to simulate an "empty" header, pass string.Empty
-            httpContext.Request.Headers[WriteCmsWebhookToQueueCommand.ContentfulTopicHeaderKey] = headerValue;
+            httpContext.Request.Headers[WriteCmsWebhookToQueueCommand.ContentfulTopicHeaderKey] =
+                headerValue;
         }
         return httpContext.Request;
     }
@@ -37,7 +40,9 @@ public class WriteCmsWebhookToQueueCommandTests
         using var json = JsonDocument.Parse("{\"id\":\"123\",\"type\":\"entry\"}");
 
         var expected = new QueueWriteResult(true);
-        _writer.WriteMessage(Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(expected));
+        _writer
+            .WriteMessage(Arg.Any<string>(), Arg.Any<string>())
+            .Returns(Task.FromResult(expected));
 
         // Act
         var result = await sut.WriteMessageToQueue(json, request);
@@ -47,13 +52,23 @@ public class WriteCmsWebhookToQueueCommandTests
 
         // Verify the exact arguments passed to the writer
         var serializedJson = JsonSerializer.Serialize(json);
-        await _writer.Received(1).WriteMessage(
-            Arg.Is<string>(s => s == serializedJson),
-            Arg.Is<string>(s => s == "ContentManagement.Entry.publish"));
+        await _writer
+            .Received(1)
+            .WriteMessage(
+                Arg.Is<string>(s => s == serializedJson),
+                Arg.Is<string>(s => s == "ContentManagement.Entry.publish")
+            );
 
         // We traced; keep the logger assertion loose
-        _logger.ReceivedWithAnyArgs().Log(
-            LogLevel.Trace, 0, Arg.Any<object>(), null, Arg.Any<Func<object, Exception?, string>>());
+        _logger
+            .ReceivedWithAnyArgs()
+            .Log(
+                LogLevel.Trace,
+                0,
+                Arg.Any<object>(),
+                null,
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -75,8 +90,15 @@ public class WriteCmsWebhookToQueueCommandTests
         // Otherwise, at least ensure we got a non-default object back:
         Assert.NotNull(result);
 
-        _logger.ReceivedWithAnyArgs().Log(
-            LogLevel.Error, 0, Arg.Any<object>(), null, Arg.Any<Func<object, Exception?, string>>());
+        _logger
+            .ReceivedWithAnyArgs()
+            .Log(
+                LogLevel.Error,
+                0,
+                Arg.Any<object>(),
+                null,
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -94,8 +116,15 @@ public class WriteCmsWebhookToQueueCommandTests
         await _writer.DidNotReceive().WriteMessage(Arg.Any<string>(), Arg.Any<string>());
         Assert.NotNull(result);
 
-        _logger.ReceivedWithAnyArgs().Log(
-            LogLevel.Error, 0, Arg.Any<object>(), null, Arg.Any<Func<object, Exception?, string>>());
+        _logger
+            .ReceivedWithAnyArgs()
+            .Log(
+                LogLevel.Error,
+                0,
+                Arg.Any<object>(),
+                null,
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 
     [Fact]
@@ -106,8 +135,9 @@ public class WriteCmsWebhookToQueueCommandTests
         var request = NewRequestWithHeader("ContentManagement.Entry.unpublish");
         using var json = JsonDocument.Parse("{\"id\":\"xyz\"}");
 
-        _writer.WriteMessage(Arg.Any<string>(), Arg.Any<string>())
-               .Returns<Task<QueueWriteResult>>(_ => throw new InvalidOperationException("boom"));
+        _writer
+            .WriteMessage(Arg.Any<string>(), Arg.Any<string>())
+            .Returns<Task<QueueWriteResult>>(_ => throw new InvalidOperationException("boom"));
 
         // Act
         var result = await sut.WriteMessageToQueue(json, request);
@@ -117,7 +147,14 @@ public class WriteCmsWebhookToQueueCommandTests
         // Assert.Equal("boom", result.Error);
         Assert.NotNull(result);
 
-        _logger.ReceivedWithAnyArgs().Log(
-            LogLevel.Error, 0, Arg.Any<object>(), Arg.Any<Exception>(), Arg.Any<Func<object, Exception?, string>>());
+        _logger
+            .ReceivedWithAnyArgs()
+            .Log(
+                LogLevel.Error,
+                0,
+                Arg.Any<object>(),
+                Arg.Any<Exception>(),
+                Arg.Any<Func<object, Exception?, string>>()
+            );
     }
 }

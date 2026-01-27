@@ -7,10 +7,12 @@ namespace Dfe.PlanTech.Application.Rendering;
 public class GridContainerRenderer : ICardContainerContentPartRenderer
 {
     private readonly ICardContentPartRenderer _cardContentPartRenderer;
+
     public GridContainerRenderer(ICardContentPartRenderer cardContentPartRenderer)
     {
         _cardContentPartRenderer = cardContentPartRenderer;
     }
+
     public string ToHtml(IReadOnlyList<ComponentCardEntry>? content)
     {
         if (content is null || !content.Any())

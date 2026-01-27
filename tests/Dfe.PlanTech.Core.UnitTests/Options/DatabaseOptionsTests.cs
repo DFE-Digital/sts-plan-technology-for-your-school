@@ -9,7 +9,10 @@ public class DatabaseRetryOptionsTests
     [InlineData(5, 5000)]
     [InlineData(10, 10000)]
     [InlineData(15, 15000)]
-    public void DatabaseRetryOptions_Should_Set_Properties(int maxRetryCount, int maxDelayInMilliseconds)
+    public void DatabaseRetryOptions_Should_Set_Properties(
+        int maxRetryCount,
+        int maxDelayInMilliseconds
+    )
     {
         var options = new DatabaseOptions(maxRetryCount, maxDelayInMilliseconds);
 

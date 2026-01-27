@@ -11,17 +11,19 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 [Route("api/cms")]
 [LogInvalidModelState]
-public class CmsController(
-    ILogger<CmsController> logger,
-    ICmsViewBuilder viewBuilder
-) : BaseController<CmsController>(logger)
+public class CmsController(ILogger<CmsController> logger, ICmsViewBuilder viewBuilder)
+    : BaseController<CmsController>(logger)
 {
-    private readonly ICmsViewBuilder _viewBuilder = viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
+    private readonly ICmsViewBuilder _viewBuilder =
+        viewBuilder ?? throw new ArgumentNullException(nameof(viewBuilder));
 
     [HttpPost("webhook")]
     [ValidateApiKey]
     [Authorize(SignedRequestAuthorisationPolicy.PolicyName)]
-    public async Task<IActionResult> WebhookPayload([FromBody] JsonDocument json, [FromServices] IWriteCmsWebhookToQueueCommand writeToQueueCommand)
+    public async Task<IActionResult> WebhookPayload(
+        [FromBody] JsonDocument json,
+        [FromServices] IWriteCmsWebhookToQueueCommand writeToQueueCommand
+    )
     {
         try
         {
@@ -34,7 +36,11 @@ public class CmsController(
         }
         catch (Exception e)
         {
-            Logger.LogError(e, "An error occured while trying to write the message to the queue: {message}", e.Message);
+            Logger.LogError(
+                e,
+                "An error occured while trying to write the message to the queue: {Message}",
+                e.Message
+            );
             return BadRequest(e.Message);
         }
     }

@@ -17,20 +17,27 @@ public class CategoryLandingViewComponentViewBuilder(
     ISubmissionService submissionService,
     IUserService userService,
     ICurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser), ICategoryLandingViewComponentViewBuilder
+)
+    : BaseViewBuilder(logger, contentfulService, currentUser),
+        ICategoryLandingViewComponentViewBuilder
 {
-    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-    private readonly IUserService _userService = userService ?? throw new ArgumentNullException(nameof(userService));
+    private readonly ISubmissionService _submissionService =
+        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IUserService _userService =
+        userService ?? throw new ArgumentNullException(nameof(userService));
 
-    private const string CategoryLandingSectionAssessmentLink = "Components/CategoryLanding/SectionAssessmentLink";
-    private const string CategoryLandingSectionAssessmentLinkPrintContent = "Components/CategoryLanding/SectionAssessmentLinkPrintContent";
+    private const string CategoryLandingSectionAssessmentLink =
+        "Components/CategoryLanding/SectionAssessmentLink";
+    private const string CategoryLandingSectionAssessmentLinkPrintContent =
+        "Components/CategoryLanding/SectionAssessmentLinkPrintContent";
 
     public async Task<CategoryLandingViewComponentViewModel> BuildViewModelAsync(
         QuestionnaireCategoryEntry category,
         string slug,
         string? sectionName,
         string? sortOrder,
-        bool print = false)
+        bool print = false
+    )
     {
         if (category.Sections.Count == 0)
         {
@@ -44,7 +51,10 @@ public class CategoryLandingViewComponentViewBuilder(
         string? progressRetrievalErrorMessage = null;
         try
         {
-            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(establishmentId, category.Sections.Select(s => s.Id));
+            sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(
+                establishmentId,
+                category.Sections.Select(s => s.Id)
+            );
         }
         catch (Exception ex)
         {
@@ -53,12 +63,20 @@ public class CategoryLandingViewComponentViewBuilder(
                 "An exception has occurred while trying to retrieve section progress with the following message: {message}",
                 ex.Message
             );
-            progressRetrievalErrorMessage = "Unable to retrieve progress, please refresh your browser.";
+            progressRetrievalErrorMessage =
+                "Unable to retrieve progress, please refresh your browser.";
         }
 
         var sortType = await GetUserSortType(sortOrder);
 
-        var categoryLandingSections = await BuildCategoryLandingSectionViewModels(establishmentId, category, sectionStatuses, progressRetrievalErrorMessage is not null, sortType).ToListAsync();
+        var categoryLandingSections = await BuildCategoryLandingSectionViewModels(
+                establishmentId,
+                category,
+                sectionStatuses,
+                progressRetrievalErrorMessage is not null,
+                sortType
+            )
+            .ToListAsync();
         var completedSectionCount = sectionStatuses.Count(ss => ss.LastCompletionDate != null);
 
         var viewModel = new CategoryLandingViewComponentViewModel
@@ -73,7 +91,9 @@ public class CategoryLandingViewComponentViewBuilder(
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
             SortType = sortType,
             Print = print,
-            StatusLinkPartialName = print ? CategoryLandingSectionAssessmentLinkPrintContent : CategoryLandingSectionAssessmentLink
+            StatusLinkPartialName = print
+                ? CategoryLandingSectionAssessmentLinkPrintContent
+                : CategoryLandingSectionAssessmentLink,
         };
 
         return viewModel;
@@ -91,11 +111,21 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             if (string.IsNullOrWhiteSpace(section.InterstitialPage?.Slug))
             {
-                Logger.LogError("No slug found for subtopic with ID {SectionId} and name {SectionName}", section.Id, section.Name);
+                Logger.LogError(
+                    "No slug found for subtopic with ID {SectionId} and name {SectionName}",
+                    section.Id,
+                    section.Name
+                );
             }
 
-            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus => sectionStatus.SectionId.Equals(section.Id));
-            var recommendations = await GetCategoryLandingSectionRecommendations(establishmentId, section, sortType);
+            var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus =>
+                sectionStatus.SectionId.Equals(section.Id)
+            );
+            var recommendations = await GetCategoryLandingSectionRecommendations(
+                establishmentId,
+                section,
+                sortType
+            );
 
             yield return new CategoryLandingSectionViewModel(
                 section,
@@ -116,22 +146,38 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             if (section.InterstitialPage is null)
             {
-                throw new ContentfulDataUnavailableException($"Could not find {section.Name} interstitial page");
+                throw new ContentfulDataUnavailableException(
+                    $"Could not find {section.Name} interstitial page"
+                );
             }
 
-            var latestResponses = await _submissionService.GetLatestSubmissionResponsesModel(establishmentId, section, status: SubmissionStatus.CompleteReviewed)
-                ?? throw new DatabaseException($"Could not find user's answers for section {section.Name}");
+            var latestResponses =
+                await _submissionService.GetLatestSubmissionResponsesModel(
+                    establishmentId,
+                    section,
+                    status: SubmissionStatus.CompleteReviewed
+                )
+                ?? throw new DatabaseException(
+                    $"Could not find user's answers for section {section.Name}"
+                );
 
             var recommendationChunks = section.CoreRecommendations;
-            var recommendations = await _submissionService.GetLatestRecommendationStatusesByEstablishmentIdAsync(establishmentId);
-            var sortedRecommendations = recommendationChunks.SortByStatus(recommendations, sortType);
-            var chunks = sortedRecommendations.Select(sr => new RecommendationChunkViewModel
-            {
-                Header = sr.HeaderText,
-                LastUpdated = recommendations[sr.Id].DateCreated,
-                Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
-                Slug = sr.Slug
-            })
+            var recommendations =
+                await _submissionService.GetLatestRecommendationStatusesByEstablishmentIdAsync(
+                    establishmentId
+                );
+            var sortedRecommendations = recommendationChunks.SortByStatus(
+                recommendations,
+                sortType
+            );
+            var chunks = sortedRecommendations
+                .Select(sr => new RecommendationChunkViewModel
+                {
+                    Header = sr.HeaderText,
+                    LastUpdated = recommendations[sr.Id].DateCreated,
+                    Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
+                    Slug = sr.Slug,
+                })
                 .ToList();
 
             return new CategoryLandingSectionRecommendationsViewModel
@@ -139,14 +185,15 @@ public class CategoryLandingViewComponentViewBuilder(
                 SectionName = section.Name,
                 SectionSlug = section.InterstitialPage.Slug,
                 Answers = latestResponses.Responses,
-                Chunks = chunks
+                Chunks = chunks,
             };
         }
         catch
         {
             return new CategoryLandingSectionRecommendationsViewModel
             {
-                NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
+                NoRecommendationFoundErrorMessage =
+                    $"Unable to retrieve {section.Name} recommendation",
             };
         }
     }
@@ -158,11 +205,16 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             if (sortType != null)
             {
-                await _userService.UpsertUserSettingsAsync(CurrentUser.UserId.Value, sortType.Value);
+                await _userService.UpsertUserSettingsAsync(
+                    CurrentUser.UserId.Value,
+                    sortType.Value
+                );
             }
             else
             {
-                var userSettings = await _userService.GetUserSettingsByUserIdAsync(CurrentUser.UserId.Value);
+                var userSettings = await _userService.GetUserSettingsByUserIdAsync(
+                    CurrentUser.UserId.Value
+                );
                 sortType = userSettings?.SortOrder;
             }
         }

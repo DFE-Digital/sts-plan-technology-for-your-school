@@ -8,9 +8,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers;
 
 public class GtmServiceTests
 {
-    public GtmServiceTests()
-    {
-    }
+    public GtmServiceTests() { }
 
     [Theory]
     [InlineData("", "")]
@@ -19,11 +17,7 @@ public class GtmServiceTests
     [InlineData("example", "other example")]
     public void Should_Set_Values(string id, string siteVerificationId)
     {
-        var config = new GtmConfiguration
-        {
-            Id = id,
-            SiteVerificationId = siteVerificationId
-        };
+        var config = new GtmConfiguration { Id = id, SiteVerificationId = siteVerificationId };
 
         var cookieService = Substitute.For<ICookieService>();
 

@@ -2,7 +2,7 @@ name: Verify Checks Running
 
 on:
   pull_request:
-    branches: ["main", "development"]
+    branches: ['main', 'development']
 
 jobs:
   verify-checks-running:

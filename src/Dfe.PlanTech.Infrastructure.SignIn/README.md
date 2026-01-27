@@ -4,12 +4,12 @@ Project containing code for integrating with DFE Sign-in
 
 ## Overview
 
-| File                                                            | Purpose/Functionality                                                                              |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| [DfeSignInSetup.cs](./DfeSignInSetup.cs)                        | Methods to inject services + authentication to the web application                                 |
-| [DfeOpenIdConnectEvents](./DfeOpenIdConnectEvents.cs)           | Manages URIs and URLs for login and signout events |
-| [UserClaimsExtensions.cs](./Extensions/UserClaimsExtensions.cs) | Extensions for retrieving common values from user roles (currently UserId and Organisation)       |
-| [OnUserInformationReceivedEvent.cs](./ConnectEvents/OnUserInformationReceivedEvent.cs) | Records sign in and adds user and organisation claims to principal       |
+| File                                                                                   | Purpose/Functionality                                                                       |
+| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| [DfeSignInSetup.cs](./DfeSignInSetup.cs)                                               | Methods to inject services + authentication to the web application                          |
+| [DfeOpenIdConnectEvents](./DfeOpenIdConnectEvents.cs)                                  | Manages URIs and URLs for login and signout events                                          |
+| [UserClaimsExtensions.cs](./Extensions/UserClaimsExtensions.cs)                        | Extensions for retrieving common values from user roles (currently UserId and Organisation) |
+| [OnUserInformationReceivedEvent.cs](./ConnectEvents/OnUserInformationReceivedEvent.cs) | Records sign in and adds user and organisation claims to principal                          |
 
 ## How to use
 
@@ -27,7 +27,7 @@ These should be set in the `Azure KeyVault` for deployed instances, or `dotnet u
 
 ## Running Locally
 
-With DSi enabled, when running the application locally you need to ensure that the server is running in `https` mode. Failure to do so will result in an error similar to 
+With DSi enabled, when running the application locally you need to ensure that the server is running in `https` mode. Failure to do so will result in an error similar to
 
 ```
 Exception: Correlation failed.
@@ -38,7 +38,7 @@ Microsoft.AspNetCore.Authentication.RemoteAuthenticationHandler<TOptions>.Handle
 
 The easiest way to do this is through the Kestrel settings, by adding something similar to the following to your `appsettings.json`:
 
-``` 
+```
 "Kestrel": {
     "Endpoints": {
       "Https": {
@@ -49,7 +49,6 @@ The easiest way to do this is through the Kestrel settings, by adding something 
 ```
 
 **Note: Your `DfeSignIn:FrontDoorUrl` variable should match the URL that the site is running from, and this is currently set to `http://localhost:16251`, so you will need to change this as well**
-
 
 ## Additional Information
 

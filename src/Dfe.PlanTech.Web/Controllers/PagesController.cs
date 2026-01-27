@@ -14,12 +14,11 @@ namespace Dfe.PlanTech.Web.Controllers;
 
 [LogInvalidModelState]
 [Route("/")]
-public class PagesController(
-    ILogger<PagesController> logger,
-    IPagesViewBuilder pagesViewBuilder
-) : BaseController<PagesController>(logger)
+public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder pagesViewBuilder)
+    : BaseController<PagesController>(logger)
 {
-    private readonly IPagesViewBuilder _pagesViewBuilder = pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
+    private readonly IPagesViewBuilder _pagesViewBuilder =
+        pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
 
     public const string ControllerName = "Pages";
     public const string GetPageByRouteAction = nameof(GetByRoute);
@@ -31,7 +30,9 @@ public class PagesController(
         if (page is null)
         {
             Logger.LogInformation("Could not find page at {Path}", Request.Path.Value);
-            throw new ContentfulDataUnavailableException($"Could not find page at {Request.Path.Value}");
+            throw new ContentfulDataUnavailableException(
+                $"Could not find page at {Request.Path.Value}"
+            );
         }
 
         return _pagesViewBuilder.RouteBasedOnOrganisationTypeAsync(this, page);
@@ -48,7 +49,9 @@ public class PagesController(
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     [HttpGet(UrlConstants.Error, Name = UrlConstants.Error)]
     public IActionResult Error() =>
-        View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        View(
+            new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier }
+        );
 
     [HttpGet("{categorySlug}/{sectionSlug}/{*path}")]
     public async Task<IActionResult> HandleUnknownRoutes(string? path)

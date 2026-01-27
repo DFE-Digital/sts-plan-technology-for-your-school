@@ -10,9 +10,8 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
 {
     private StoredProcedureRepository _repository = null!;
 
-    public StoredProcedureRepositoryTests(DatabaseFixture fixture) : base(fixture)
-    {
-    }
+    public StoredProcedureRepositoryTests(DatabaseFixture fixture)
+        : base(fixture) { }
 
     public override async Task InitializeAsync()
     {
@@ -25,11 +24,23 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     {
         // Arrange
         var user = new UserEntity { DfeSignInRef = "user123" };
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
-        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
-        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+        var questionModel = new IdWithTextModel
+        {
+            Id = question.ContentfulRef,
+            Text = question.QuestionText,
+        };
+        var answerModel = new IdWithTextModel
+        {
+            Id = answer.ContentfulRef,
+            Text = answer.AnswerText,
+        };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -42,11 +53,16 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
 
         // When user is logged in directly as a school (not MAT), both IDs are the same
-        var response = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
+        var response = new AssessmentResponseModel(
+            user.Id,
+            establishment.Id,
+            establishment.Id,
+            submitAnswerModel
+        );
 
         var result = await _repository.SubmitResponse(response);
         Assert.True(result > 0);
@@ -63,11 +79,32 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     {
         // Arrange
         var user = new UserEntity { DfeSignInRef = "first-response-user" };
-        var establishment = new EstablishmentEntity { EstablishmentRef = "FIRST001", OrgName = "First Response School", GroupUid = null };
-        var question = new QuestionEntity { QuestionText = "First Response Question", ContentfulRef = "FRQ1" };
-        var answer = new AnswerEntity { AnswerText = "First Response Answer", ContentfulRef = "FRA1" };
-        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
-        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "FIRST001",
+            OrgName = "First Response School",
+            GroupUid = null,
+        };
+        var question = new QuestionEntity
+        {
+            QuestionText = "First Response Question",
+            ContentfulRef = "FRQ1",
+        };
+        var answer = new AnswerEntity
+        {
+            AnswerText = "First Response Answer",
+            ContentfulRef = "FRA1",
+        };
+        var questionModel = new IdWithTextModel
+        {
+            Id = question.ContentfulRef,
+            Text = question.QuestionText,
+        };
+        var answerModel = new IdWithTextModel
+        {
+            Id = answer.ContentfulRef,
+            Text = answer.AnswerText,
+        };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -80,10 +117,15 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "first-response-section",
             SectionName = "First Response Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
 
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
+        var assessmentResponse = new AssessmentResponseModel(
+            user.Id,
+            establishment.Id,
+            establishment.Id,
+            submitAnswerModel
+        );
 
         // Act - Submit the first response for this section
         var responseId = await _repository.SubmitResponse(assessmentResponse);
@@ -95,7 +137,10 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         DbContext.ChangeTracker.Clear();
 
         // Verify the submission was created and is marked as InProgress
-        var savedResponse = await DbContext.Responses.AsNoTracking().Include(r => r.Submission).FirstOrDefaultAsync(r => r.Id == responseId);
+        var savedResponse = await DbContext
+            .Responses.AsNoTracking()
+            .Include(r => r.Submission)
+            .FirstOrDefaultAsync(r => r.Id == responseId);
         Assert.NotNull(savedResponse);
         Assert.NotNull(savedResponse!.Submission);
         Assert.Equal(SubmissionStatus.InProgress, savedResponse.Submission!.Status);
@@ -106,15 +151,35 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     {
         // Arrange - A group user submitting a response for an establishment different from their own
         var schoolUser = new UserEntity { DfeSignInRef = "school-user" };
-        var activeSchoolEstablishment = new EstablishmentEntity { EstablishmentRef = "USER003", OrgName = "Group Establishment" };
+        var activeSchoolEstablishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "USER003",
+            OrgName = "Group Establishment",
+        };
 
         var groupUser = new UserEntity { DfeSignInRef = "group-user" };
-        var groupEstablishment = new EstablishmentEntity { EstablishmentRef = "USER002", OrgName = "User Establishment" };
+        var groupEstablishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "USER002",
+            OrgName = "User Establishment",
+        };
 
-        var question = new QuestionEntity { QuestionText = "Estab Diff Question", ContentfulRef = "EDQ1" };
+        var question = new QuestionEntity
+        {
+            QuestionText = "Estab Diff Question",
+            ContentfulRef = "EDQ1",
+        };
         var answer = new AnswerEntity { AnswerText = "Estab Diff Answer", ContentfulRef = "EDA1" };
-        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
-        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+        var questionModel = new IdWithTextModel
+        {
+            Id = question.ContentfulRef,
+            Text = question.QuestionText,
+        };
+        var answerModel = new IdWithTextModel
+        {
+            Id = answer.ContentfulRef,
+            Text = answer.AnswerText,
+        };
 
         DbContext.Users.AddRange(groupUser, schoolUser);
         DbContext.Establishments.AddRange(groupEstablishment, activeSchoolEstablishment);
@@ -127,9 +192,14 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "estab-diff-section",
             SectionName = "Estab Diff Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
-        var assessmentResponse = new AssessmentResponseModel(groupUser.Id, activeSchoolEstablishment.Id, groupEstablishment.Id, submitAnswerModel);
+        var assessmentResponse = new AssessmentResponseModel(
+            groupUser.Id,
+            activeSchoolEstablishment.Id,
+            groupEstablishment.Id,
+            submitAnswerModel
+        );
 
         // Act - Create a new "submission" by submitting a first response
         var responseId = await _repository.SubmitResponse(assessmentResponse);
@@ -148,15 +218,35 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     {
         // Arrange - A group user submitting a response for an establishment different from their own
         var schoolUser = new UserEntity { DfeSignInRef = "school-user" };
-        var activeSchoolEstablishment = new EstablishmentEntity { EstablishmentRef = "USER003", OrgName = "Group Establishment" };
+        var activeSchoolEstablishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "USER003",
+            OrgName = "Group Establishment",
+        };
 
         var groupUser = new UserEntity { DfeSignInRef = "group-user" };
-        var groupEstablishment = new EstablishmentEntity { EstablishmentRef = "USER002", OrgName = "User Establishment" };
+        var groupEstablishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "USER002",
+            OrgName = "User Establishment",
+        };
 
-        var question = new QuestionEntity { QuestionText = "Estab Diff Question", ContentfulRef = "EDQ1" };
+        var question = new QuestionEntity
+        {
+            QuestionText = "Estab Diff Question",
+            ContentfulRef = "EDQ1",
+        };
         var answer = new AnswerEntity { AnswerText = "Estab Diff Answer", ContentfulRef = "EDA1" };
-        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
-        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+        var questionModel = new IdWithTextModel
+        {
+            Id = question.ContentfulRef,
+            Text = question.QuestionText,
+        };
+        var answerModel = new IdWithTextModel
+        {
+            Id = answer.ContentfulRef,
+            Text = answer.AnswerText,
+        };
 
         DbContext.Users.AddRange(groupUser, schoolUser);
         DbContext.Establishments.AddRange(groupEstablishment, activeSchoolEstablishment);
@@ -171,9 +261,14 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "estab-diff-section",
             SectionName = "Estab Diff Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
-        var assessmentResponse1 = new AssessmentResponseModel(groupUser.Id, activeSchoolEstablishment.Id, groupEstablishment.Id, submitAnswerModel1);
+        var assessmentResponse1 = new AssessmentResponseModel(
+            groupUser.Id,
+            activeSchoolEstablishment.Id,
+            groupEstablishment.Id,
+            submitAnswerModel1
+        );
         _ = await _repository.SubmitResponse(assessmentResponse1);
 
         Assert.Equal(1, await DbContext.Responses.CountAsync());
@@ -192,9 +287,14 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "estab-diff-section",
             SectionName = "Estab Diff Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
-        var assessmentResponse2 = new AssessmentResponseModel(schoolUser.Id, activeSchoolEstablishment.Id, activeSchoolEstablishment.Id, submitAnswerModel2);
+        var assessmentResponse2 = new AssessmentResponseModel(
+            schoolUser.Id,
+            activeSchoolEstablishment.Id,
+            activeSchoolEstablishment.Id,
+            submitAnswerModel2
+        );
         _ = await _repository.SubmitResponse(assessmentResponse2);
 
         Assert.Equal(2, await DbContext.Responses.CountAsync());
@@ -215,9 +315,14 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "estab-diff-section",
             SectionName = "Estab Diff Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
-        var assessmentResponse3 = new AssessmentResponseModel(groupUser.Id, activeSchoolEstablishment.Id, groupEstablishment.Id, submitAnswerModel3);
+        var assessmentResponse3 = new AssessmentResponseModel(
+            groupUser.Id,
+            activeSchoolEstablishment.Id,
+            groupEstablishment.Id,
+            submitAnswerModel3
+        );
         _ = await _repository.SubmitResponse(assessmentResponse3);
 
         Assert.Equal(3, await DbContext.Responses.CountAsync());
@@ -236,7 +341,11 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     public async Task StoredProcedureRepository_SetMaturityForSubmissionAsync_WhenCalledWithValidSubmissionId_ThenExecutesWithoutError()
     {
         // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
 
         DbContext.Establishments.Add(establishment);
@@ -248,7 +357,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "section-1",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = SubmissionStatus.InProgress
+            Status = SubmissionStatus.InProgress,
         };
 
         DbContext.Submissions.Add(submission);

@@ -13,9 +13,19 @@ namespace Dfe.PlanTech.Core.Helpers
             }
 
             return Enum.GetValues<RecommendationSortOrder>()
-                .Cast<RecommendationSortOrder?>()
-                .FirstOrDefault(s => string.Equals(sortOrder, s!.GetDisplayName(), StringComparison.InvariantCultureIgnoreCase)
-                                     || string.Equals(sortOrder, s!.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                    .Cast<RecommendationSortOrder?>()
+                    .FirstOrDefault(s =>
+                        string.Equals(
+                            sortOrder,
+                            s!.GetDisplayName(),
+                            StringComparison.InvariantCultureIgnoreCase
+                        )
+                        || string.Equals(
+                            sortOrder,
+                            s!.ToString(),
+                            StringComparison.InvariantCultureIgnoreCase
+                        )
+                    )
                 ?? RecommendationSortOrder.Default;
         }
     }

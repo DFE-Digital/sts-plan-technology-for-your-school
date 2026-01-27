@@ -17,8 +17,6 @@ public class SubmissionResponsesViewModel
     public SubmissionResponsesViewModel(SubmissionResponsesModel submission)
     {
         SubmissionId = submission.SubmissionId;
-        Responses = submission?.Responses
-            .Select(r => new SubmissionResponseViewModel(r))
-            .ToList();
+        Responses = submission?.Responses.Select(r => new SubmissionResponseViewModel(r)).ToList();
     }
 }

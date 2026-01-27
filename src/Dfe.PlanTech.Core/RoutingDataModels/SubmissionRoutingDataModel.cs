@@ -26,14 +26,21 @@ namespace Dfe.PlanTech.Core.RoutingDataModels
         }
 
         public bool IsQuestionInResponses(string questionSysId) =>
-            Submission?.Responses.Any(response => response.QuestionSysId.Equals(questionSysId)) ?? false;
+            Submission?.Responses.Any(response => response.QuestionSysId.Equals(questionSysId))
+            ?? false;
 
         public QuestionWithAnswerModel GetLatestResponseForQuestion(string questionSysId) =>
-            Submission?.Responses.FirstOrDefault(response => response.QuestionSysId.Equals(questionSysId))
-                ?? throw new DatabaseException($"Could not find response for question entry with sys ID '{questionSysId}'");
+            Submission?.Responses.FirstOrDefault(response =>
+                response.QuestionSysId.Equals(questionSysId)
+            )
+            ?? throw new DatabaseException(
+                $"Could not find response for question entry with sys ID '{questionSysId}'"
+            );
 
         public QuestionnaireQuestionEntry GetQuestionForSlug(string questionSlug) =>
             QuestionnaireSection.Questions.FirstOrDefault(q => q.Slug == questionSlug)
-                ?? throw new ContentfulDataUnavailableException($"Could not find question with slug '{questionSlug}'");
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find question with slug '{questionSlug}'"
+            );
     }
 }

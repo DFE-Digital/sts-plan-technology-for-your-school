@@ -22,19 +22,18 @@
 - [x] RecommendationIntro
 - [x] RecommendationChunk
 - [x] RecommendationSection
-- [x] Section *
-- [x] TextBody *
+- [x] Section \*
+- [x] TextBody \*
 - [x] Titles
 - [x] WarningComponent
 - [x] NotificationBanner
 
 * Not fully complete. See below for notes.
 
-| Content Type        | Status Notes                                                                                                                        |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Section             | Not currently testing for 'Not started' and 'In progress' section statuses                                                          |
-| TextBody            | Haven't added validations for all element types (e.g. hyperlinks, strong, italics, etc.), haven't validated classes for most things |
-
+| Content Type | Status Notes                                                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Section      | Not currently testing for 'Not started' and 'In progress' section statuses                                                          |
+| TextBody     | Haven't added validations for all element types (e.g. hyperlinks, strong, italics, etc.), haven't validated classes for most things |
 
 ### Page routing validated
 
@@ -54,7 +53,7 @@
 - [ ] Complete/reset journey if failing during question/answer validation (leaving section on 'In progress' fails the url check in the next routed test on that section)
 - [x] Split tests up; not just one `it` function
 - [ ] Complete documentation:
-   - [ ] Merge with documentation in `contentful-helpers`
+  - [ ] Merge with documentation in `contentful-helpers`
 - [x] Make a Node project for the `contentful-helpers` to allow re-use, and prevent the fact that the code is copied and pasted into two places
 - [ ] Validate content order within a page
 - [x] Break up tests further to prevent skipping of future tests in a path if early errors will not affect later tests

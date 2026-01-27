@@ -19,7 +19,7 @@ activeSubmissions AS (
         s.sectionName,
         s.dateCreated,
         s.dateCompleted
-	FROM mostRecentCompleted mrc 
+	FROM mostRecentCompleted mrc
 	INNER JOIN dbo.submission s
 		ON s.establishmentId = mrc.establishmentId
 		AND s.sectionId = mrc.sectionId
