@@ -23,17 +23,17 @@ test_links = pd.DataFrame(
         {
             "groupUid": "99999",
             "establishmentName": "DSI TEST Establishment (001) Community School (01)",
-            "urn": 2,
+            "urn": '900006',
         },
         {
             "groupUid": "99999",
             "establishmentName": "DSI TEST Establishment (001) Miscellaneous (27)",
-            "urn": 18,
+            "urn": '900008',
         },
         {
             "groupUid": "99999",
             "establishmentName": "DSI TEST Establishment (001) Foundation School (05)",
-            "urn": 5,
+            "urn": '900007',
         },
     ]
 )
