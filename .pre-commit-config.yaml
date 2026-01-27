@@ -36,3 +36,10 @@ repos:
         name: Run Prettier on documentation, web and config files
         files: .(html|js|mjs|ts|tsx|css|scss|json|md)$
         exclude: (^|/)(bin|obj|wwwroot)(/|$)|.*Generated.*
+
+  - repo: https://github.com/lirantal/anti-trojan-source
+    rev: v1.8.1
+    hooks:
+      - id: anti-trojan-source
+        name: Detect trojan source attacks
+        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)
