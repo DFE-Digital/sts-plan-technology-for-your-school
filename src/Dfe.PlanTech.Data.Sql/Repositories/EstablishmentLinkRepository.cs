@@ -47,12 +47,15 @@ public class EstablishmentLinkRepository : IEstablishmentLinkRepository
     {
         ArgumentNullException.ThrowIfNull(userGroupSelectionModel);
 
+        var now = DateTime.UtcNow;
+
         var entity = new GroupReadActivityEntity
         {
             UserId = userGroupSelectionModel.UserId,
             UserEstablishmentId = userGroupSelectionModel.UserEstablishmentId,
             SelectedEstablishmentId = userGroupSelectionModel.SelectedEstablishmentId,
-            SelectedEstablishmentName = userGroupSelectionModel.SelectedEstablishmentName ?? string.Empty
+            SelectedEstablishmentName = userGroupSelectionModel.SelectedEstablishmentName ?? string.Empty,
+            DateSelected = now,
         };
 
         _db.GroupReadActivities.Add(entity);
@@ -60,4 +63,5 @@ public class EstablishmentLinkRepository : IEstablishmentLinkRepository
 
         return entity.Id;
     }
+
 }
