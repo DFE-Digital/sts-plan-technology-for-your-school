@@ -5,15 +5,22 @@ repos:
     hooks:
       - id: end-of-file-fixer
         name: Fix ends of files
+
+      - id: fix-byte-order-marker
+        name: Remove UTF-8 BOM
+
       - id: mixed-line-ending
         name: Normalize line endings to LF
         args: ['--fix=lf']
+
       - id: trailing-whitespace
         name: Remove trailing whitespace
         args: ['--markdown-linebreak-ext=md']
+
       - id: check-json
         name: Run GitHub JSON linter on files except tsconfig.json
         exclude: tsconfig.json$ # Exlude tsconfig*.json from check-json hook as it contains comments
+
       - id: check-yaml
         name: Run GitHub YAML linter
 
@@ -42,4 +49,5 @@ repos:
     hooks:
       - id: anti-trojan-source
         name: Detect trojan source attacks
+        args: ['--verbose']
         exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)

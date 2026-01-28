@@ -25,20 +25,25 @@ To run the qa-visualiser locally:
    | Variable                | Description                                                                            | Example / Location                                 |
    | ----------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------- |
    | PLANTECH_API_KEY        | The API key the cms controller uses for authentication                                 | Keyvault value for `api--authentication--keyvalue` |
-   | PLANTECH_API_URL        | Base url of the cms controller                                                         | https://localhost:8080/api/cms                     |
+   | PLANTECH_API_URL        | Base url of the cms controller                                                         | <https://localhost:8080/api/cms>                   |
    | DISPLAY_RECOMMENDATIONS | Boolean option to display recommendation header text linked to the answer on the image | true/false                                         |
 
 4. create and activate a virtual environment with:
+
    ```bash
    cd qa-visualiser
    uv venv
    source .venv/bin/activate
    ```
+
 5. Install project dependencies with:
+
    ```bash
    uv sync
    ```
+
 6. Run the tool to generate visualisations with:
+
    ```bash
    uv run main.py
    ```

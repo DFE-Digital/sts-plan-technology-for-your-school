@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Extensions;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.Helpers

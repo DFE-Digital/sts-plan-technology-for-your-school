@@ -16,9 +16,9 @@ When running the project, it takes several command line arguments:
 
 DbUp has been configured to run in single transaction mode which means if one script fails then all changes will be rolled back. There are limitations to this, for more details please refer to the following [Microsoft Article](https://learn.microsoft.com/en-us/sql/t-sql/language-elements/transactions-sql-data-warehouse?view=aps-pdw-2016-au7#limitations-and-restrictions).
 
-## MSSQL scripts.
+## MSSQL scripts
 
-**⚠️ Do not add the sql scripts directly within Visual Studio, they are picked up automatically when added to the scripts folder ⚠️**
+> **⚠ Do not add the sql scripts directly within Visual Studio, they are picked up automatically when added to the scripts folder ⚠**
 
 The Scripts folder contains a folder for each year, which contains the MSSQL scripts for that year. The naming convention for a MSSQL scripts is `[year]_[time]_ScriptName.sql`. The scripts are executed in ascending order, so it's important to make sure that the year and time of the script name reflects the intended order of execution.
 
@@ -34,6 +34,6 @@ You can add a new script by placing it in the relevant year folder in Scripts. T
 
 ### Environment Specific Scripts
 
-There may be certain SQL scripts that should be executed only against certain environments. These are stored in the (EnvironmentSpecificScripts)[./EnvironmentSpecificScripts] folder, then within a subfolder with their respective environment, finally they follow the convention mentioned above (i.e. a subfolder per year, then `[year]_[time]_[script_name].sql`)
+There may be certain SQL scripts that should be executed only against certain environments. These are stored in the [EnvironmentSpecificScripts](./EnvironmentSpecificScripts) folder, then within a subfolder with their respective environment, finally they follow the convention mentioned above (i.e. a subfolder per year, then `[year]_[time]_[script_name].sql`)
 
 E.g. scripts created in 2023 for dev environment should be in `/EnvironmentSpecificScripts/dev/2023/`

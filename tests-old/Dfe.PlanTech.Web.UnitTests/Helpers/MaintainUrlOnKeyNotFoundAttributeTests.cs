@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Web.Attributes;

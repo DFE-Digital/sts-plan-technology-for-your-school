@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Dfe.PlanTech.Application.Cookie.Service;
 using Dfe.PlanTech.Domain.Cookie;
 using Microsoft.AspNetCore.Http;
