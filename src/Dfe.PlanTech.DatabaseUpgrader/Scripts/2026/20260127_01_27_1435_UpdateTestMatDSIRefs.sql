@@ -1,6 +1,6 @@
 UPDATE dbo.establishment
 SET establishmentRef = '900006'
-WHERE orgName LIKE 'DSI TEST Establishment (001) Community School%'
+WHERE orgName LIKE 'DSI TEST Establishment (001) Community School%';
 
 UPDATE dbo.establishment
 SET establishmentRef = '900008'
