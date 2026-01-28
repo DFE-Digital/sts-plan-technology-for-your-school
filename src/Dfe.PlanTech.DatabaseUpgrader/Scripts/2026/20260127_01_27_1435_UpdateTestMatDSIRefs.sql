@@ -4,7 +4,7 @@ WHERE orgName LIKE 'DSI TEST Establishment (001) Community School%';
 
 UPDATE dbo.establishment
 SET establishmentRef = '900008'
-WHERE orgName LIKE 'DSI TEST Establishment (001) Miscellaneous%'
+WHERE orgName LIKE 'DSI TEST Establishment (001) Miscellaneous%';
 
 UPDATE dbo.establishment
 SET establishmentRef = '900007'
