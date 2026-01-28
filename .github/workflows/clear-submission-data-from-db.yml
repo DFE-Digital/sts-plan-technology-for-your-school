@@ -91,6 +91,7 @@ jobs:
           path: './.github/scripts/clear-submission-data-from-db.sql'
           variables: |
             ESTABLISHMENT_REF: ${{ steps.get-establishment-ref.outputs.ref }}
+          arguments: '-h -1 -W'
 
       - name: Remove Azure firewall rules
         if: always()
