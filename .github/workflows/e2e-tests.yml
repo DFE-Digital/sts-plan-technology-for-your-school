@@ -69,9 +69,10 @@ jobs:
           connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
           path: './.github/scripts/clear-submission-data-from-db.sql'
           arguments: >
-            --headers="-1"
-            --variables "ESTABLISHMENT_REF=900008"
-            --error-level=1
+            -v ESTABLISHMENT_REF="900008"
+            -h -1
+            -W
+            -b
 
       - name: Remove Azure firewall rules
         if: always()
