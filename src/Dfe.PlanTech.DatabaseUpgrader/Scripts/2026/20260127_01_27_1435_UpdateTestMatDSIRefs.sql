@@ -8,7 +8,7 @@ WHERE orgName LIKE 'DSI TEST Establishment (001) Miscellaneous%'
 
 UPDATE dbo.establishment
 SET establishmentRef = '900007'
-WHERE orgName LIKE 'DSI TEST Establishment (001) Foundation School%'
+WHERE orgName LIKE 'DSI TEST Establishment (001) Foundation School%';
 
 UPDATE dbo.establishmentLink
 SET urn = '900006'
