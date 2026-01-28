@@ -1,6 +1,7 @@
 name: Clear submission data from DB
 
 on:
+  push:  
   workflow_dispatch:
     inputs:
       environment:
