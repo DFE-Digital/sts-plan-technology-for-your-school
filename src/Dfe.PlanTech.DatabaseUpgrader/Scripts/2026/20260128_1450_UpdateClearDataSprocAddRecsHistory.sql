@@ -1,6 +1,9 @@
-ALTER PROCEDURE [dbo].[deleteDataForEstablishment] @establishmentRef nvarchar(50)
+ALTER PROCEDURE [dbo].[deleteDataForEstablishment]
+  @establishmentRef nvarchar(50),
+  @establishmentId BIGINT OUTPUT
 AS
     BEGIN TRY
+        SET NOCOUNT ON
         BEGIN TRAN
             DECLARE @establishmentId BIGINT;
 
@@ -23,8 +26,6 @@ AS
             WHERE [establishmentId] = @establishmentId
 
         COMMIT TRAN
-
-        RETURN @@ROWCOUNT
     END TRY
     BEGIN CATCH
 	    ROLLBACK TRAN
