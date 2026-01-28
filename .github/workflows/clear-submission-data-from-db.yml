@@ -1,7 +1,6 @@
 name: Clear submission data from DB
 
 on:
-  push:  
   workflow_dispatch:
     inputs:
       environment:
@@ -90,9 +89,10 @@ jobs:
         with:
           connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
           path: './.github/scripts/clear-submission-data-from-db.sql'
-          variables: |
-            ESTABLISHMENT_REF: ${{ steps.get-establishment-ref.outputs.ref }}
-          arguments: '-h -1 -W'
+          arguments: >
+            --headers="-1"
+            --variables "ESTABLISHMENT_REF=${{ steps.get-establishment-ref.outputs.ref }}"
+            --error-level=1
 
       - name: Remove Azure firewall rules
         if: always()
