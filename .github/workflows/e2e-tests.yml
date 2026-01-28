@@ -70,7 +70,7 @@ jobs:
           path: './.github/scripts/clear-submission-data-from-db.sql'
           arguments: >
             -v ESTABLISHMENT_REF="900008"
-            -h -1
+            --headers=-1
             -W
             -b
 
