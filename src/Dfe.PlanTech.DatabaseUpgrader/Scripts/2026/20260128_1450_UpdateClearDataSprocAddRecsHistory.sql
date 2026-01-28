@@ -5,8 +5,6 @@ AS
     BEGIN TRY
         SET NOCOUNT ON
         BEGIN TRAN
-            DECLARE @establishmentId BIGINT;
-
             SELECT @establishmentId = [id]
             FROM [dbo].[establishment]
             WHERE [establishmentRef] = @establishmentRef;
