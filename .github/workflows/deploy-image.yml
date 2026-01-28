@@ -220,7 +220,11 @@ jobs:
         uses: azure/sql-action@v2.2
         with:
           connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
-          path: './.github/scripts/drop-establishment-data.sql'
+          path: './.github/scripts/clear-submission-data-from-db.sql'
+          arguments: >
+            --headers="-1"
+            --variables "ESTABLISHMENT_REF=900008"
+            --error-level=1
 
       - name: Cypress Testing
         uses: ./.github/actions/run-e2e-tests
