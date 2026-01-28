@@ -2,7 +2,7 @@ SET NOCOUNT ON
 
 DECLARE @id AS BIGINT
 
-EXEC [dbo].[testWorkflow]
+EXEC [dbo].[deleteDataForEstablishment]
   @establishmentRef = N'$(ESTABLISHMENT_REF)',
   @establishmentId = @id OUTPUT;
 
