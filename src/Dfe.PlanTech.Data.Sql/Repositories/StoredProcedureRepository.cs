@@ -59,21 +59,43 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             ),
         };
 
-        var reader =
-            await BuildAndExecuteDbCommand<FirstActivityForEstablishmentRecommendationEntity>(
-                DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation,
-                parameters
+        using var command = _db.Database.GetDbConnection().CreateCommand();
+        command.CommandText = DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation;
+        command.CommandType = CommandType.StoredProcedure;
+        command.Parameters.AddRange(parameters);
+
+        if (command.Connection is null)
+        {
+            throw new InvalidOperationException(
+                "Cannot call stored procedure. Database connection is null."
             );
+        }
+
+        if (command.Connection.State != ConnectionState.Open)
+        {
+            command.Connection.Open();
+        }
+
+        using var reader = await command.ExecuteReaderAsync();
+
+        if (!reader.Read())
+        {
+            throw new DatabaseException(
+                $"No data returned from {DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation}"
+            );
+        }
 
         var result = new FirstActivityForEstablishmentRecommendationEntity
         {
             StatusChangeDate = reader.GetDateTime(reader.GetOrdinal("statusChangeDate")),
             StatusText = reader.GetString(reader.GetOrdinal("statusText")),
             SchoolName = reader.GetString(reader.GetOrdinal("schoolName")),
-            GroupName = reader.GetString(reader.GetOrdinal("groupName")),
+            GroupName = reader.IsDBNull(reader.GetOrdinal("groupName"))
+                ? null
+                : reader.GetString(reader.GetOrdinal("groupName")),
             UserId = reader.GetInt32(reader.GetOrdinal("userId")),
-            QuestionText = reader.GetString(reader.GetOrdinal("QuestionText")),
-            AnswerText = reader.GetString(reader.GetOrdinal("AnswerText")),
+            QuestionText = reader.GetString(reader.GetOrdinal("questionText")),
+            AnswerText = reader.GetString(reader.GetOrdinal("answerText")),
         };
 
         return result;
@@ -268,39 +290,6 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         );
 
         return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
-    }
-
-    private async Task<DbDataReader> BuildAndExecuteDbCommand<TReturn>(
-        string storedProcedureName,
-        SqlParameter[] parameters
-    )
-    {
-        using var command = _db.Database.GetDbConnection().CreateCommand();
-
-        command.CommandText = storedProcedureName;
-        command.CommandType = CommandType.StoredProcedure;
-        command.Parameters.AddRange(parameters);
-
-        if (command.Connection is null)
-        {
-            throw new InvalidOperationException(
-                "Cannot call stored procedure. Database connection is null."
-            );
-        }
-
-        if (command.Connection.State != ConnectionState.Open)
-        {
-            command.Connection.Open();
-        }
-
-        using var reader = await command.ExecuteReaderAsync();
-
-        if (!reader.Read())
-        {
-            throw new DatabaseException($"No data returned from {storedProcedureName}");
-        }
-
-        return reader;
     }
 
     private static object SqlValueOrDbNull(string? value) => value ?? (object)DBNull.Value;

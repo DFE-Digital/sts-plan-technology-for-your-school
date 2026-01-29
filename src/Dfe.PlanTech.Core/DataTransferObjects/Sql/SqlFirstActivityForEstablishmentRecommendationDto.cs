@@ -4,11 +4,11 @@ public class SqlFirstActivityForEstablishmentRecommendationDto : ISqlDto
 {
     public DateTime StatusChangeDate { get; init; }
 
-    public string StatusText { get; init; }
+    public string StatusText { get; init; } = null!;
 
     public string SchoolName { get; init; } = null!;
 
-    public string GroupName { get; init; } = null!;
+    public string? GroupName { get; init; }
 
     public int UserId { get; init; }
 

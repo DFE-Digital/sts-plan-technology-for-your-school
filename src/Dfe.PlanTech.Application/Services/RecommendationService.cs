@@ -56,14 +56,14 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         );
     }
 
-    public Task<SqlFirstActivityForEstablishmentRecommendationDto> GetFirstActivityForEstablishmentRecommendation(
-        string id,
-        int establishmentId
+    public Task<SqlFirstActivityForEstablishmentRecommendationDto> GetFirstActivityForEstablishmentRecommendationAsync(
+        int establishmentId,
+        string recommendationContentfulReference
     )
     {
-        return recommendationWorkflow.GetFirstActivityForEstablishmentRecommendation(
-            id,
-            establishmentId
+        return recommendationWorkflow.GetFirstActivityForEstablishmentRecommendationAsync(
+            establishmentId,
+            recommendationContentfulReference
         );
     }
 }

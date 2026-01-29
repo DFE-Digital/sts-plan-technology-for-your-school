@@ -14,6 +14,7 @@ using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -83,15 +84,16 @@ public class RecommendationsViewBuilder(
             establishmentId
         );
 
-        var groupedHistory = recommendationHistory
-            .OrderByDescending(rh => rh.DateCreated)
+        var orderedHistory = recommendationHistory.OrderByDescending(rh => rh.DateCreated).ToList();
+
+        var groupedHistory = orderedHistory
             .GroupBy(rh => $"{rh.DateCreated.Date:MMMM} activity")
             .ToDictionary(group => group.Key, group => group.Select(g => g));
 
         var firstActivity =
-            await _recommendationService.GetFirstActivityForEstablishmentRecommendation(
-                currentRecommendationChunk.Id,
-                establishmentId
+            await _recommendationService.GetFirstActivityForEstablishmentRecommendationAsync(
+                establishmentId,
+                currentRecommendationChunk.Id
             );
 
         var viewModel = new SingleRecommendationViewModel

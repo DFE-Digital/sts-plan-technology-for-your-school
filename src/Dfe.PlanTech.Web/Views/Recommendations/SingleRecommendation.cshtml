@@ -166,14 +166,28 @@
                             {
                                 <h3 class="govuk-heading-s">@history.DateCreated.ToString("dd MMMM yyyy")</h3>
 
-                                @if (!string.Equals(history.PreviousStatus, history.NewStatus))
+                                @if (Model.FirstActivity is not null && history.DateCreated.Equals(Model.FirstActivity.StatusChangeDate))
                                 {
-                                    <p>Status changed to <strong>@history.NewStatus</strong></p>
-                                }
+                                    <p>
+                                        Status of '@Model.FirstActivity.StatusText.ToLower()' added based on self-assessment
+                                        by @(Model.FirstActivity.SchoolName).
+                                    </p>
 
-                                @if (!string.IsNullOrWhiteSpace(history.NoteText))
+                                    <p><strong>@Model.FirstActivity.QuestionText</strong></p>
+
+                                    <p>Your answer: @Model.FirstActivity.AnswerText</p>
+                                }
+                                else
                                 {
-                                    <p>@history.NoteText</p>
+                                    @if (!string.Equals(history.PreviousStatus, history.NewStatus))
+                                    {
+                                        <p>Status changed to <strong>@history.NewStatus</strong>.</p>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(history.NoteText))
+                                    {
+                                        <p>@history.NoteText</p>
+                                    }
                                 }
                             }
                         </govuk-accordion-item-content>
