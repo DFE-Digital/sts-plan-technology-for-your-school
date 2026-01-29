@@ -27,7 +27,8 @@ BEGIN TRY
     IF (
         SELECT COUNT(*)
         FROM #TempMaturityResponse
-        WHERE maturity = 'Low' COLLATE SQL_Latin1_General_CP1_CI_AS) > 0
+        WHERE maturity = 'Low' COLLATE SQL_Latin1_General_CP1_CI_AS
+    ) > 0
     BEGIN
         UPDATE SUBMISSION
         SET
