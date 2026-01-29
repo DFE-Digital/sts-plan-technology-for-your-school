@@ -302,7 +302,7 @@ public class SubmissionWorkflowTests
             },
         };
 
-        _sp.GetSectionStatusesAsync("S1,S2", 123).Returns(entities);
+        _repo.GetSectionStatusesAsync("S1,S2", 123).Returns(entities);
 
         var result = await sut.GetSectionStatusesAsync(123, ["S1", "S2"]);
 
@@ -322,7 +322,7 @@ public class SubmissionWorkflowTests
             }
         );
 
-        await _sp.Received(1).GetSectionStatusesAsync("S1,S2", 123);
+        await _repo.Received(1).GetSectionStatusesAsync("S1,S2", 123);
     }
 
     // ---------- GetSectionSubmissionStatusAsync ----------
@@ -463,7 +463,7 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionDeletedAsync(1, "SEC");
-        await _sp.Received(1).SetSubmissionDeletedAsync(1, "SEC");
+        await _repo.Received(1).SetSubmissionDeletedAsync(1, "SEC");
     }
 
     [Fact]

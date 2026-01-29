@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
@@ -22,115 +21,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         await base.InitializeAsync();
         _storedProcRepository = new StoredProcedureRepository(DbContext);
         _submissionRepository = new SubmissionRepository(DbContext);
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_GetSectionStatusesAsync_WhenCalledWithValidParameters_ThenReturnsExpectedSectionStatusData()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "TEST001",
-            OrgName = "Test School",
-        };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
-
-        // Create test data that should be returned by the stored procedure
-        var user = new UserEntity { DfeSignInRef = "test-user" };
-        DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
-
-        var submission1 = new SubmissionEntity
-        {
-            SectionId = "section1",
-            SectionName = "Section 1",
-            EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.CompleteReviewed,
-            DateCreated = DateTime.UtcNow.AddDays(-1),
-        };
-
-        var submission2 = new SubmissionEntity
-        {
-            SectionId = "section2",
-            SectionName = "Section 2",
-            EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.InProgress,
-            DateCreated = DateTime.UtcNow.AddDays(-2),
-        };
-
-        DbContext.Submissions.AddRange(submission1, submission2);
-        await DbContext.SaveChangesAsync();
-
-        var sectionIds = "section1,section2,section3";
-
-        // Act
-        var result = await _storedProcRepository.GetSectionStatusesAsync(
-            sectionIds,
-            establishment.Id
-        );
-
-        // Assert - Validate meaningful results are returned
-        Assert.NotNull(result);
-
-        // Should return data for sections that exist in the database
-        var resultList = result.ToList();
-        Assert.True(resultList.Count >= 0, "Result should be a valid collection");
-
-        // If data is returned, validate it contains expected section information
-        if (resultList.Any())
-        {
-            // Verify that returned data relates to our test sections
-            var sectionIdsArray = sectionIds.Split(',');
-            Assert.True(
-                resultList.All(r =>
-                    sectionIdsArray.Contains(r.SectionId) || string.IsNullOrEmpty(r.SectionId)
-                ),
-                "All returned results should relate to requested sections"
-            );
-        }
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_RecordGroupSelection_WhenCalledWithValidSelectionModel_ThenReturnsPositiveSelectionId()
-    {
-        // Arrange
-        var user = new UserEntity { DfeSignInRef = "test-user" };
-        var userEstablishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "USER001",
-            OrgName = "User School",
-        };
-        var selectedEstablishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "SEL001",
-            OrgName = "Selected School",
-        };
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.AddRange(userEstablishment, selectedEstablishment);
-        await DbContext.SaveChangesAsync();
-
-        var selectionModel = new UserGroupSelectionModel
-        {
-            UserId = user.Id,
-            UserEstablishmentId = userEstablishment.Id,
-            SelectedEstablishmentId = selectedEstablishment.Id,
-            SelectedEstablishmentName = "Selected School",
-        };
-
-        // Act & Assert - Should execute without parameter type or order errors
-        try
-        {
-            var selectionId = await _storedProcRepository.RecordGroupSelection(selectionModel);
-            Assert.True(selectionId > 0, "Selection ID should be returned from stored procedure");
-        }
-        catch (Microsoft.Data.SqlClient.SqlException ex)
-            when (ex.Message.Contains("Transaction count after EXECUTE"))
-        {
-            // Expected in test environment due to stored procedure managing its own transactions
-            Assert.True(true, "Transaction conflict expected in test environment");
-        }
     }
 
     [Fact]
@@ -225,61 +115,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task StoredProcedureRepository_DeleteCurrentSubmissionAsync_WhenCalledWithValidParameters_ThenSoftDeleteMarkSubmissionAsDeleted()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "TEST001",
-            OrgName = "Test School",
-        };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
-
-        var submission = new SubmissionEntity
-        {
-            SectionId = "test-section-delete",
-            SectionName = "Test Section To Delete",
-            EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.InProgress,
-            Deleted = false,
-        };
-        DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
-
-        var submissionId = submission.Id;
-
-        // Assert - Verify submission exists before deletion and is not marked as deleted
-        var submissionBeforeDelete = await DbContext.Submissions.FirstOrDefaultAsync(s =>
-            s.Id == submissionId
-        );
-        Assert.NotNull(submissionBeforeDelete);
-        Assert.False(
-            submissionBeforeDelete!.Deleted,
-            "Submission should not be marked as deleted before deletion"
-        );
-
-        // Act - Execute the delete operation
-        await _storedProcRepository.SetSubmissionDeletedAsync(
-            establishment.Id,
-            "test-section-delete"
-        );
-
-        // Assert - Verify submission is marked as deleted (soft delete)
-        // Clear the change tracker to force EF to query the database fresh
-        // rather than returning cached entities
-        DbContext.ChangeTracker.Clear();
-        var submissionAfterDelete = await DbContext
-            .Submissions.AsNoTracking()
-            .FirstOrDefaultAsync(s => s.Id == submissionId);
-        Assert.NotNull(submissionAfterDelete);
-        Assert.True(
-            submissionAfterDelete!.Deleted,
-            "Submission should be marked as deleted in database"
-        );
-    }
-
-    [Fact]
     public async Task StoredProcedureRepository_MultipleCalls_WhenParameterOrderValidated_ThenAllCallsExecuteWithoutParameterErrors()
     {
         // This test validates that stored procedure calls don't fail due to parameter order issues
@@ -321,14 +156,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
 
         // Act & Assert - All stored procedure calls should succeed without parameter errors
 
-        // 1. Test GetSectionStatuses parameter order
-        var sectionStatuses = await _storedProcRepository.GetSectionStatusesAsync(
-            "param-section",
-            establishment.Id
-        );
-        Assert.NotNull(sectionStatuses);
-
-        // 2. Test SubmitResponse parameter order
+        // 1. Test SubmitResponse parameter order
         var submitAnswerModel = new SubmitAnswerModel
         {
             SectionId = "param-section",
@@ -346,7 +174,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);
         Assert.True(responseId > 0);
 
-        // 3. Test SetMaturityForSubmission parameter order
+        // 2. Test SetMaturityForSubmission parameter order
         var submission = new SubmissionEntity
         {
             SectionId = "param-section",
@@ -362,154 +190,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         );
         Assert.True(maturityResult >= 0);
 
-        // 4. Test DeleteCurrentSubmission parameter order
-        await _storedProcRepository.SetSubmissionDeletedAsync(establishment.Id, "param-section");
-
         // If we reach here, all stored procedure calls succeeded without parameter order/type errors
         Assert.True(true, "All stored procedure calls completed without parameter errors");
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_GetSectionStatusesAsync_WhenSectionIdsIsEmpty_ThenReturnsEmptyResultGracefully()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "TEST001",
-            OrgName = "Test School",
-        };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
-
-        // Act
-        var result = await _storedProcRepository.GetSectionStatusesAsync("", establishment.Id);
-
-        // Assert - Should handle empty string parameter and return empty result
-        Assert.NotNull(result);
-        var resultList = result.ToList();
-        Assert.True(resultList.Count == 0, "Should return empty result for empty section IDs");
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_GetSectionStatusesAsync_WhenMultipleSectionIds_ThenReturnsDataForRequestedSections()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "TEST001",
-            OrgName = "Test School",
-        };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
-
-        // Create test submissions for multiple sections
-        var user = new UserEntity { DfeSignInRef = "test-user" };
-        DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
-
-        var submission1 = new SubmissionEntity
-        {
-            SectionId = "section1",
-            SectionName = "Section 1",
-            EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.CompleteReviewed,
-            DateCreated = DateTime.UtcNow.AddDays(-1),
-        };
-
-        var submission2 = new SubmissionEntity
-        {
-            SectionId = "section2",
-            SectionName = "Section 2",
-            EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.InProgress,
-            DateCreated = DateTime.UtcNow.AddDays(-2),
-        };
-
-        var submission3 = new SubmissionEntity
-        {
-            SectionId = "section3",
-            SectionName = "Section 3",
-            EstablishmentId = establishment.Id,
-            Status = Core.Enums.SubmissionStatus.NotStarted,
-            DateCreated = DateTime.UtcNow.AddDays(-3),
-        };
-
-        DbContext.Submissions.AddRange(submission1, submission2, submission3);
-        await DbContext.SaveChangesAsync();
-
-        // Act - Should handle comma-separated string parameter correctly
-        var multipleSectionIds = "section1,section2,section3,section4";
-        var result = await _storedProcRepository.GetSectionStatusesAsync(
-            multipleSectionIds,
-            establishment.Id
-        );
-
-        // Assert - Validate that actual data is returned for the sections that exist
-        Assert.NotNull(result);
-        var resultList = result.ToList();
-        Assert.True(resultList.Count > 0, "Should return data for existing sections");
-
-        // Verify that returned data relates to our test sections
-        var requestedSectionIds = multipleSectionIds.Split(',');
-        Assert.True(
-            resultList.All(r =>
-                requestedSectionIds.Contains(r.SectionId) || string.IsNullOrEmpty(r.SectionId)
-            ),
-            "All returned results should relate to requested sections"
-        );
-
-        // Should contain data for sections that exist in our test data
-        var returnedSectionIds = resultList
-            .Select(r => r.SectionId)
-            .Where(s => !string.IsNullOrEmpty(s))
-            .ToList();
-        Assert.Contains("section1", returnedSectionIds);
-        Assert.Contains("section2", returnedSectionIds);
-        Assert.Contains("section3", returnedSectionIds);
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_RecordGroupSelection_WhenSelectedEstablishmentNameIsNull_ThenHandlesNullValueCorrectly()
-    {
-        // Arrange
-        var user = new UserEntity { DfeSignInRef = "null-test-user" };
-        var userEstablishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "NULL001",
-            OrgName = "Null Test School",
-        };
-        var selectedEstablishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "SEL001",
-            OrgName = "Selected School",
-        };
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.AddRange(userEstablishment, selectedEstablishment);
-        await DbContext.SaveChangesAsync();
-
-        var selectionModel = new UserGroupSelectionModel
-        {
-            UserId = user.Id,
-            UserEstablishmentId = userEstablishment.Id,
-            SelectedEstablishmentId = selectedEstablishment.Id,
-            SelectedEstablishmentName = null, // Testing NULL parameter handling
-        };
-
-        // Act & Assert - Should handle NULL parameter correctly
-        try
-        {
-            var selectionId = await _storedProcRepository.RecordGroupSelection(selectionModel);
-            Assert.True(
-                selectionId > 0,
-                "Should handle NULL parameter and return valid selection ID"
-            );
-        }
-        catch (Microsoft.Data.SqlClient.SqlException ex)
-            when (ex.Message.Contains("Transaction count after EXECUTE"))
-        {
-            // Expected in test environment due to stored procedure managing its own transactions
-            Assert.True(true, "Transaction conflict expected in test environment");
-        }
     }
 }

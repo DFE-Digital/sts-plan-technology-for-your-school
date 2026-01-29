@@ -112,7 +112,7 @@ public class SubmissionWorkflow(
     )
     {
         var sectionIdsInput = string.Join(',', sectionIds);
-        var statuses = await _storedProcedureRepository.GetSectionStatusesAsync(
+        var statuses = await _submissionRepository.GetSectionStatusesAsync(
             sectionIdsInput,
             establishmentId
         );
@@ -190,7 +190,7 @@ public class SubmissionWorkflow(
 
     public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
     {
-        return _storedProcedureRepository.SetSubmissionDeletedAsync(establishmentId, sectionId);
+        return _submissionRepository.SetSubmissionDeletedAsync(establishmentId, sectionId);
     }
 
     private static Dictionary<string, ResponseEntity>.ValueCollection GetOrderedResponses(
