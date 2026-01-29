@@ -8,6 +8,7 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -59,46 +60,24 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             ),
         };
 
-        using var command = _db.Database.GetDbConnection().CreateCommand();
-        command.CommandText = DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation;
-        command.CommandType = CommandType.StoredProcedure;
-        command.Parameters.AddRange(parameters);
+        var command = BuildCommandString(
+            DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation,
+            parameters
+        );
 
-        if (command.Connection is null)
-        {
-            throw new InvalidOperationException(
-                "Cannot call stored procedure. Database connection is null."
-            );
-        }
+        var results = await _db.Set<FirstActivityForEstablishmentRecommendationEntity>()
+            .FromSqlRaw(command, parameters)
+            .AsNoTracking()
+            .ToListAsync();
 
-        if (command.Connection.State != ConnectionState.Open)
-        {
-            command.Connection.Open();
-        }
-
-        using var reader = await command.ExecuteReaderAsync();
-
-        if (!reader.Read())
+        if (results.Count == 0)
         {
             throw new DatabaseException(
                 $"No data returned from {DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation}"
             );
         }
 
-        var result = new FirstActivityForEstablishmentRecommendationEntity
-        {
-            StatusChangeDate = reader.GetDateTime(reader.GetOrdinal("statusChangeDate")),
-            StatusText = reader.GetString(reader.GetOrdinal("statusText")),
-            SchoolName = reader.GetString(reader.GetOrdinal("schoolName")),
-            GroupName = reader.IsDBNull(reader.GetOrdinal("groupName"))
-                ? null
-                : reader.GetString(reader.GetOrdinal("groupName")),
-            UserId = reader.GetInt32(reader.GetOrdinal("userId")),
-            QuestionText = reader.GetString(reader.GetOrdinal("questionText")),
-            AnswerText = reader.GetString(reader.GetOrdinal("answerText")),
-        };
-
-        return result;
+        return results[0];
     }
 
     // Moved GetSectionStatuses sproc into code (need to remove more sprocs when completed column is removed from db)

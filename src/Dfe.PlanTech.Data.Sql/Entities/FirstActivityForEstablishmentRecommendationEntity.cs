@@ -1,7 +1,11 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
+[ExcludeFromCodeCoverage]
+[Keyless]
 public class FirstActivityForEstablishmentRecommendationEntity
 {
     public DateTime StatusChangeDate { get; init; }

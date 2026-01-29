@@ -408,4 +408,71 @@ public class RecommendationServiceTests
                 null
             );
     }
+
+    [Fact]
+    public async Task GetFirstActivityForEstablishmentRecommendationAsync_WhenCalledWithAllParameters_ThenDelegatesToWorkflow()
+    {
+        // Arrange
+        var establishmentId = 123;
+        var recommendationContentfulReference = "rec-001";
+
+        var service = CreateServiceUnderTest();
+
+        // Act
+        await service.GetFirstActivityForEstablishmentRecommendationAsync(
+            establishmentId,
+            recommendationContentfulReference
+        );
+
+        // Assert
+        await _recommendationWorkflow
+            .Received(1)
+            .GetFirstActivityForEstablishmentRecommendationAsync(
+                establishmentId,
+                recommendationContentfulReference
+            );
+    }
+
+    [Fact]
+    public async Task GetFirstActivityForEstablishmentRecommendationAsync_WhenWorkflowThrows_ThenPropagatesException()
+    {
+        // Arrange
+        var establishmentId = 123;
+        var recommendationContentfulReference = "rec-error";
+
+        var expectedException = new InvalidOperationException("Recommendation not found");
+
+        _recommendationWorkflow
+            .GetFirstActivityForEstablishmentRecommendationAsync(
+                establishmentId,
+                recommendationContentfulReference
+            )
+            .ThrowsAsync(expectedException);
+
+        var service = CreateServiceUnderTest();
+
+        // Act and assert
+        var actualException = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.GetFirstActivityForEstablishmentRecommendationAsync(
+                establishmentId,
+                recommendationContentfulReference
+            )
+        );
+
+        // Assert
+        await _recommendationWorkflow
+            .Received(1)
+            .GetFirstActivityForEstablishmentRecommendationAsync(
+                establishmentId,
+                recommendationContentfulReference
+            );
+
+        Assert.Equal(expectedException.Message, actualException.Message);
+        await _recommendationWorkflow
+            .Received(1)
+            .GetFirstActivityForEstablishmentRecommendationAsync(
+                establishmentId,
+                recommendationContentfulReference
+            );
+    }
 }

@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
+[ExcludeFromCodeCoverage]
 public class SqlFirstActivityForEstablishmentRecommendationDto : ISqlDto
 {
     public DateTime StatusChangeDate { get; init; }

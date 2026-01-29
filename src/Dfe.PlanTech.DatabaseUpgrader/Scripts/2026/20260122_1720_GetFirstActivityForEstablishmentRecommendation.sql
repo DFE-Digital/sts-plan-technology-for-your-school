@@ -33,7 +33,7 @@ BEGIN TRY
       rh.dateCreated
   )
 
-  SELECT TOP 100
+  SELECT TOP 1
     history.dateCreated AS statusChangeDate,
     history.newStatus AS statusText,
     school.orgName AS schoolName,
