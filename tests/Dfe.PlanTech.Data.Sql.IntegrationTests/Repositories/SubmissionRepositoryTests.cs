@@ -3,6 +3,7 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
@@ -870,4 +871,229 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.NotNull(result);
         Assert.Equal(SubmissionStatus.InProgress, result.Status);
     }
+
+    [Fact]
+    public async Task SubmissionRepository_GetSectionStatusesAsync_WhenNoSubmissionsExist_ThenReturnsNotStartedForEachSection()
+    {
+        var sectionIds = "S1,S2";
+
+        var result = await _repository.GetSectionStatusesAsync(sectionIds, 123);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+
+        var s1 = result.Single(r => r.SectionId == "S1");
+        var s2 = result.Single(r => r.SectionId == "S2");
+
+        Assert.Equal(SubmissionStatus.NotStarted, s1.Status);
+        Assert.Equal(SubmissionStatus.NotStarted, s2.Status);
+        Assert.Null(s1.LastMaturity);
+        Assert.Null(s2.LastMaturity);
+        Assert.Null(s1.LastCompletionDate);
+        Assert.Null(s2.LastCompletionDate);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_GetSectionStatusesAsync_WhenMultipleSubmissionsExist_ThenUsesLatestCurrentAndLatestCompleteReviewedForMaturity()
+    {
+        var establishment = CreateEstablishment(1001);
+        DbContext.Establishments.Add(establishment);
+        await DbContext.SaveChangesAsync();
+
+        var older = new SubmissionEntity
+        {
+            SectionId = "S1",
+            SectionName = "Section 1",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.CompleteReviewed,
+            Maturity = "developing",
+            Viewed = true,
+            DateCreated = DateTime.UtcNow.AddDays(-10),
+            DateLastUpdated = DateTime.UtcNow.AddDays(-9),
+            DateCompleted = DateTime.UtcNow.AddDays(-8),
+            Deleted = false
+        };
+
+        var newerCurrent = new SubmissionEntity
+        {
+            SectionId = "S1",
+            SectionName = "Section 1",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.InProgress,
+            Maturity = "ignored",
+            Viewed = false,
+            DateCreated = DateTime.UtcNow.AddDays(-2),
+            DateLastUpdated = DateTime.UtcNow.AddDays(-1),
+            DateCompleted = null,
+            Deleted = false
+        };
+
+        var latestCompleteReviewed = new SubmissionEntity
+        {
+            SectionId = "S1",
+            SectionName = "Section 1",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.CompleteReviewed,
+            Maturity = "secure",
+            Viewed = false,
+            DateCreated = DateTime.UtcNow.AddDays(-3),
+            DateLastUpdated = DateTime.UtcNow.AddDays(-3),
+            DateCompleted = DateTime.UtcNow.AddDays(-3),
+            Deleted = false
+        };
+
+        var s2 = new SubmissionEntity
+        {
+            SectionId = "S2",
+            SectionName = "Section 2",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.CompleteReviewed,
+            Maturity = "low",
+            Viewed = true,
+            DateCreated = DateTime.UtcNow.AddDays(-4),
+            DateLastUpdated = DateTime.UtcNow.AddDays(-4),
+            DateCompleted = DateTime.UtcNow.AddDays(-4),
+            Deleted = false
+        };
+
+        DbContext.Submissions.AddRange(older, newerCurrent, latestCompleteReviewed, s2);
+        await DbContext.SaveChangesAsync();
+
+        var result = await _repository.GetSectionStatusesAsync("S1,S2", establishment.Id);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+
+        var r1 = result.Single(r => r.SectionId == "S1");
+        var r2 = result.Single(r => r.SectionId == "S2");
+
+        Assert.Equal(SubmissionStatus.InProgress, r1.Status);
+        Assert.Equal(newerCurrent.DateCreated, r1.DateCreated);
+        Assert.Equal(newerCurrent.DateLastUpdated, r1.DateUpdated);
+        Assert.Equal("secure", r1.LastMaturity);
+        Assert.Equal(latestCompleteReviewed.DateCompleted, r1.LastCompletionDate);
+        Assert.False(r1.Viewed);
+
+        Assert.Equal(SubmissionStatus.CompleteReviewed, r2.Status);
+        Assert.Equal(s2.DateCreated, r2.DateCreated);
+        Assert.Equal(s2.DateLastUpdated, r2.DateUpdated);
+        Assert.Equal("low", r2.LastMaturity);
+        Assert.Equal(s2.DateCompleted, r2.LastCompletionDate);
+        Assert.True(r2.Viewed);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_GetSectionStatusesAsync_IgnoresDeletedSubmissions()
+    {
+        var establishment = CreateEstablishment(2001);
+        DbContext.Establishments.Add(establishment);
+        await DbContext.SaveChangesAsync();
+
+        var deleted = new SubmissionEntity
+        {
+            SectionId = "S1",
+            SectionName = "Section 1",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.CompleteReviewed,
+            Maturity = "should-not-appear",
+            DateCreated = DateTime.UtcNow.AddDays(-2),
+            DateLastUpdated = DateTime.UtcNow.AddDays(-2),
+            DateCompleted = DateTime.UtcNow.AddDays(-2),
+            Deleted = true
+        };
+
+        DbContext.Submissions.Add(deleted);
+        await DbContext.SaveChangesAsync();
+
+        var result = await _repository.GetSectionStatusesAsync("S1", establishment.Id);
+
+        var r1 = result.Single(r => r.SectionId == "S1");
+        Assert.Equal(SubmissionStatus.NotStarted, r1.Status);
+        Assert.Null(r1.LastMaturity);
+        Assert.Null(r1.LastCompletionDate);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_SetSubmissionDeletedAsync_WhenSubmissionExists_ThenMarksLatestNonInaccessibleAsDeleted()
+    {
+        var establishment = CreateEstablishment(3001);
+        DbContext.Establishments.Add(establishment);
+        await DbContext.SaveChangesAsync();
+
+        var older = new SubmissionEntity
+        {
+            SectionId = "SEC",
+            SectionName = "Section",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.InProgress,
+            Deleted = false,
+            DateCreated = DateTime.UtcNow.AddDays(-10)
+        };
+
+        var latest = new SubmissionEntity
+        {
+            SectionId = "SEC",
+            SectionName = "Section",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.CompleteReviewed,
+            Deleted = false,
+            DateCreated = DateTime.UtcNow.AddDays(-1)
+        };
+
+        var inaccessibleLatestById = new SubmissionEntity
+        {
+            SectionId = "SEC",
+            SectionName = "Section",
+            EstablishmentId = establishment.Id,
+            Status = SubmissionStatus.Inaccessible,
+            Deleted = false,
+            DateCreated = DateTime.UtcNow
+        };
+
+        DbContext.Submissions.AddRange(older, latest, inaccessibleLatestById);
+        await DbContext.SaveChangesAsync();
+
+        await _repository.SetSubmissionDeletedAsync(establishment.Id, "SEC");
+
+        // I had to add .AsNoTracking() for this to work, non-test code works fine still
+        var refreshedOlder = await DbContext.Submissions
+            .AsNoTracking()
+            .SingleAsync(s => s.Id == older.Id);
+
+        var refreshedLatest = await DbContext.Submissions
+            .AsNoTracking()
+            .SingleAsync(s => s.Id == latest.Id);
+
+        var refreshedInaccessible = await DbContext.Submissions
+            .AsNoTracking()
+            .SingleAsync(s => s.Id == inaccessibleLatestById.Id);
+
+
+        Assert.NotNull(refreshedOlder);
+        Assert.NotNull(refreshedLatest);
+        Assert.NotNull(refreshedInaccessible);
+
+        Assert.False(refreshedOlder!.Deleted);
+        Assert.True(refreshedLatest!.Deleted);
+        Assert.False(refreshedInaccessible!.Deleted);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_SetSubmissionDeletedAsync_WhenNoMatchingSubmission_ThenDoesNothing()
+    {
+        var establishment = CreateEstablishment(4001);
+        DbContext.Establishments.Add(establishment);
+        await DbContext.SaveChangesAsync();
+
+        await _repository.SetSubmissionDeletedAsync(establishment.Id, "SEC");
+
+        Assert.Empty(DbContext.Submissions);
+    }
+
+    [Fact]
+    public async Task SubmissionRepository_SetSubmissionDeletedAsync_WhenSectionIdIsNullOrWhitespace_ThenThrows()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => _repository.SetSubmissionDeletedAsync(1, ""));
+    }
+
 }

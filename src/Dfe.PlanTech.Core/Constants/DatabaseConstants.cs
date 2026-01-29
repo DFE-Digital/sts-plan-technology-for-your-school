@@ -8,10 +8,7 @@ public static class DatabaseConstants
     #region Stored Procedures
 
     public const string SpCalculateMaturity = "[dbo].[CalculateMaturityForSubmission]";
-    public const string SpDeleteCurrentSubmission = "[dbo].[DeleteCurrentSubmission]";
-    public const string SpGetSectionStatuses = "[dbo].[GetSectionStatuses]";
     public const string SpSubmitAnswer = "[dbo].[SubmitAnswer]";
-    public const string SpSubmitGroupSelection = "[dbo].[SubmitGroupSelection]";
 
     public const string AnswerContentfulIdParam = "@AnswerContentfulId";
     public const string AnswerTextParam = "@AnswerText";

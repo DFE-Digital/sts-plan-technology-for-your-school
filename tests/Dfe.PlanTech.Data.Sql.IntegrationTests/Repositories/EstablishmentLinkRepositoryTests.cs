@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -146,4 +147,98 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         Assert.NotNull(result);
         Assert.Empty(result);
     }
+
+    [Fact]
+    public async Task EstablishmentLinkRepository_RecordGroupSelection_WhenModelIsValid_ThenInsertsRowAndReturnsId()
+    {
+        // Arrange
+        var model = new UserGroupSelectionModel
+        {
+            UserId = 1,
+            UserEstablishmentId = 10,
+            SelectedEstablishmentId = 99,
+            SelectedEstablishmentName = "Selected School"
+        };
+
+        // Act
+        var id = await _repository.RecordGroupSelection(model);
+
+        // Assert
+        Assert.True(id > 0);
+
+        var saved = await DbContext.GroupReadActivities.FindAsync(id);
+        Assert.NotNull(saved);
+        Assert.Equal(1, saved!.UserId);
+        Assert.Equal(10, saved.UserEstablishmentId);
+        Assert.Equal(99, saved.SelectedEstablishmentId);
+        Assert.Equal("Selected School", saved.SelectedEstablishmentName);
+    }
+
+    [Fact]
+    public async Task EstablishmentLinkRepository_RecordGroupSelection_WhenSelectedEstablishmentNameIsNull_ThenStoresEmptyString()
+    {
+        // Arrange
+        var model = new UserGroupSelectionModel
+        {
+            UserId = 2,
+            UserEstablishmentId = 20,
+            SelectedEstablishmentId = 199,
+            SelectedEstablishmentName = null
+        };
+
+        // Act
+        var id = await _repository.RecordGroupSelection(model);
+
+        // Assert
+        Assert.True(id > 0);
+
+        var saved = await DbContext.GroupReadActivities.FindAsync(id);
+        Assert.NotNull(saved);
+        Assert.Equal(string.Empty, saved!.SelectedEstablishmentName);
+    }
+
+    [Fact]
+    public async Task EstablishmentLinkRepository_RecordGroupSelection_WhenModelIsNull_ThenThrows()
+    {
+        await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.RecordGroupSelection(null!));
+    }
+
+    [Fact]
+    public async Task EstablishmentLinkRepository_RecordGroupSelection_WhenCalledMultipleTimes_ThenCreatesMultipleRows()
+    {
+        // Arrange
+        var model1 = new UserGroupSelectionModel
+        {
+            UserId = 3,
+            UserEstablishmentId = 30,
+            SelectedEstablishmentId = 300,
+            SelectedEstablishmentName = "School A"
+        };
+
+        var model2 = new UserGroupSelectionModel
+        {
+            UserId = 3,
+            UserEstablishmentId = 30,
+            SelectedEstablishmentId = 301,
+            SelectedEstablishmentName = "School B"
+        };
+
+        // Act
+        var id1 = await _repository.RecordGroupSelection(model1);
+        var id2 = await _repository.RecordGroupSelection(model2);
+
+        // Assert
+        Assert.True(id1 > 0);
+        Assert.True(id2 > 0);
+        Assert.NotEqual(id1, id2);
+
+        var saved1 = await DbContext.GroupReadActivities.FindAsync(id1);
+        var saved2 = await DbContext.GroupReadActivities.FindAsync(id2);
+
+        Assert.NotNull(saved1);
+        Assert.NotNull(saved2);
+        Assert.Equal("School A", saved1!.SelectedEstablishmentName);
+        Assert.Equal("School B", saved2!.SelectedEstablishmentName);
+    }
+
 }

@@ -11,12 +11,10 @@ public class EstablishmentWorkflowTests
     private readonly IEstablishmentRepository _estRepo = Substitute.For<IEstablishmentRepository>();
     private readonly IEstablishmentLinkRepository _linkRepo =
         Substitute.For<IEstablishmentLinkRepository>();
-    private readonly IStoredProcedureRepository _spRepo =
-        Substitute.For<IStoredProcedureRepository>();
     private static readonly string[] abString = new[] { "A", "B" };
 
     private EstablishmentWorkflow CreateServiceUnderTest() =>
-        new EstablishmentWorkflow(_estRepo, _linkRepo, _spRepo);
+        new EstablishmentWorkflow(_estRepo, _linkRepo);
 
     // ── Helpers: create minimal entities that map via AsDto() in YOUR codebase ──
     // Replace these types with your real entity classes (what the repos return),
@@ -239,12 +237,12 @@ public class EstablishmentWorkflowTests
             SelectedEstablishmentName = "Pick",
         };
 
-        _spRepo.RecordGroupSelection(model).Returns(999);
+        _linkRepo.RecordGroupSelection(model).Returns(999);
 
         var id = await serviceUnderTest.RecordGroupSelection(model);
 
         Assert.Equal(999, id);
-        await _spRepo.Received(1).RecordGroupSelection(model);
+        await _linkRepo.Received(1).RecordGroupSelection(model);
     }
 
     // ────────────────────────────────────────────────────────────────────────────
@@ -255,13 +253,13 @@ public class EstablishmentWorkflowTests
     public void Ctor_Null_Repos_Throw()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(null!, _linkRepo, _spRepo)
+            new EstablishmentWorkflow(null!, _linkRepo)
         );
         Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(_estRepo, null!, _spRepo)
+            new EstablishmentWorkflow(_estRepo, null!)
         );
         Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(_estRepo, _linkRepo, null!)
+            new EstablishmentWorkflow(null!, null!)
         );
     }
 }
