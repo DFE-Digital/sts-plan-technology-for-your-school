@@ -21,33 +21,67 @@
 @{
     var showChangeSchool = false;
 
-    @* Conditionally show the change school partial on all pages except for specific pages in the exclusion list for MAT's*@
-    if (CurrentUser.IsAuthenticated && CurrentUser.IsMat)
+    var selectedSchool = CurrentUser.GroupSelectedSchoolName;
+
+    var controller = ViewContext.RouteData.Values["controller"] as string ?? "";
+    var action = ViewContext.RouteData.Values["action"] as string ?? "";
+
+    var pageRoute =
+        ViewContext.RouteData.Values["route"] as string
+        ?? ViewContext.RouteData.Values["slug"] as string
+        ?? ViewContext.RouteData.Values["pageSlug"] as string;
+
+    var path = (Context.Request.Path.Value ?? "").Trim('/');
+
+    var pageKey = (pageRoute ?? path).Trim('/');
+
+    var footerPageKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        var controller = (string?)ViewContext.RouteData.Values["controller"] ?? "";
-        var action = (string?)ViewContext.RouteData.Values["action"] ?? "";
+        "cookies",
+        "privacy-notice",
+        "accessibility-statement",
+        "service-updates"
+    };
 
-        @* Controller actions where change-school option won't be shown *@
-        var excluded = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
-{
-{
-"ReviewAnswers", new HashSet<string>(
-[nameof(ReviewAnswersController.CheckAnswers)],
-StringComparer.OrdinalIgnoreCase)
-},
-{
-"Questions", new HashSet<string>(
-[QuestionsController.GetQuestionBySlugAction, nameof(QuestionsController.SubmitAnswer)],
-StringComparer.OrdinalIgnoreCase)
-},
-{
-"Groups", new HashSet<string>(
-[GroupsController.GetSelectASchoolAction],
-StringComparer.OrdinalIgnoreCase)
-},
-};
+    var isFooterPage = footerPageKeys.Contains(pageKey);
 
-        showChangeSchool = !(excluded.TryGetValue(controller, out var actions) && actions.Contains(action));
+    @* Conditionally show the change school partial on all pages except for specific pages in the exclusion list for MAT's*@
+    if (!string.IsNullOrWhiteSpace(selectedSchool)
+        && CurrentUser.IsAuthenticated
+        && CurrentUser.IsMat)
+    {
+        if (isFooterPage)
+        {
+            showChangeSchool = true;
+        }
+        else
+        {
+            @* Controller actions where change-school option won't be shown *@
+            var excluded = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                {
+                    "ReviewAnswers", new HashSet<string>(
+                        [nameof(ReviewAnswersController.CheckAnswers)],
+                        StringComparer.OrdinalIgnoreCase)
+                },
+                {
+                    "Questions", new HashSet<string>(
+                        [
+                            QuestionsController.GetQuestionBySlugAction,
+                            nameof(QuestionsController.SubmitAnswer)
+                        ],
+                        StringComparer.OrdinalIgnoreCase)
+                },
+                {
+                    "Groups", new HashSet<string>(
+                        [GroupsController.GetSelectASchoolAction],
+                        StringComparer.OrdinalIgnoreCase)
+                },
+            };
+
+            showChangeSchool =
+                !(excluded.TryGetValue(controller, out var actions) && actions.Contains(action));
+        }
     }
 }
 
@@ -67,7 +101,7 @@ StringComparer.OrdinalIgnoreCase)
 
     @if (showChangeSchool)
     {
-        <partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
+        <partial name="ChangeSchool" model="selectedSchool" />
     }
 }
 
