@@ -138,3 +138,36 @@ Feature: MAT Multi Category Landing Page
       And I should not see the confirmation panel for "Category Two Section One"
       And I should not see the confirmation panel for "Category Two Section Two"
       And I should not see the confirmation panel for "Category Two Section Three"
+
+    @user-school
+    Scenario: Recommendations and answers are the same when logged in as a school
+      Given I visit the self-assessment-testing page
+      When I click the card "Category Two"
+      Then I should see the page heading "Category Two"
+      And I am on the "category-two" page
+
+      Then I should see the "completed" section "Category Two Section One" with description "This is the Category Two Section One Description" and link href "/category-two/category-two-section-one/view-answers"
+      And I should see the "completed" section "Category Two Section Two" with description "This is the Category Two Section Two description" and link href "/category-two/category-two-section-two/view-answers"
+      And I should see the "completed" section "Category Two Section Three" with description "This is the Category Two Section Three description" and link href "/category-two/category-two-section-three/view-answers"
+
+      # Section One
+      And I should see a link to the recommendation "Recommendation Header - C2 - S1 - Q1"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S1 - Q2"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S1 - Q3"
+
+      # Section Two
+      And I should see a link to the recommendation "Recommendation Header - C2 - S2 - Q1"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S2 - Q2"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S2 - Q3"
+
+      # Section Three
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q5"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q4"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q3"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q2"
+      And I should see a link to the recommendation "Recommendation Header - C2 - S3 - Q1"
+
+
+
+
+
