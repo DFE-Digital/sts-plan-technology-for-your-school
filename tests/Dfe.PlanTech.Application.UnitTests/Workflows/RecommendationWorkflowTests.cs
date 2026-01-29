@@ -12,9 +12,15 @@ public class RecommendationWorkflowTests
         Substitute.For<IEstablishmentRecommendationHistoryRepository>();
     private readonly IRecommendationRepository _recommendationRepository =
         Substitute.For<IRecommendationRepository>();
+    private readonly IStoredProcedureRepository _storedProcedureRepository =
+        Substitute.For<IStoredProcedureRepository>();
 
     private RecommendationWorkflow CreateServiceUnderTest() =>
-        new(_establishmentRecommendationHistoryRepository, _recommendationRepository);
+        new(
+            _establishmentRecommendationHistoryRepository,
+            _recommendationRepository,
+            _storedProcedureRepository
+        );
 
     private static EstablishmentRecommendationHistoryEntity MakeHistoryEntity(
         int id,

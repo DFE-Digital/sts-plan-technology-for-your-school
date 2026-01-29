@@ -55,10 +55,10 @@ public class GroupsViewBuilder(
 
         var viewModel = new GroupsSelectorViewModel
         {
-            GroupName = groupName ?? string.Empty,
+            GroupName = groupName,
             GroupEstablishments = groupSchools,
             BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent ?? [],
-            Title = new ComponentTitleEntry(groupName ?? ""),
+            Title = new ComponentTitleEntry(groupName),
             Content = content,
             TotalRecommendations = totalRecommendations,
             ProgressRetrievalErrorMessage = string.IsNullOrEmpty(totalRecommendations)
