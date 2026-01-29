@@ -37,18 +37,29 @@ Run `npm run test:login` - This will create the different session.jsons that the
 | test:all             | npm run test:parallel && npm run test:serial                                                                                                                | Runs all regression tests without recording                                  |
 | test:record:smoke    | cucumber-js -p smoke --retry 4 --format json:reports/cucumber-smoke.json --world-parameters="{\"record\": true}"                                            | Runs smoke tests with recording enabled                                      |
 | test:smoke           | cucumber-js -p smoke                                                                                                                                        | Runs smoke tests with default settings                                       |
+| test:regression           | cucumber-js -p smoke                                                                                                                                        | Runs regression tests with default settings                                       |
 
 Key commands are:
 
 regression:
 
-npm run test:all - runs all regression tests
-npm run test:record - runs all regression tests and records the videos/traces/screenshots
+- npm run test:all - runs all regression tests
+- npm run test:record - runs all regression tests and records the videos/traces/screenshots
+- npm run test:regression - runs all smoke tests
 
 smoke:
 
-npm run test:smoke - runs all smoke tests
-npm run test:record:smoke - runs all smoke test and records the videos/traces/screenshots
+- npm run test:smoke - runs all smoke tests
+- npm run test:record:smoke - runs all smoke test and records the videos/traces/screenshots
+
+
+You can use the below commands to run individual feature files.
+
+smoke + regression:
+
+- npm run test:smoke features/smoke-tests/self-assessment.feature
+- npm run test:regression features/regression/cookies.feature
+
 
 ## Environment Variables
 
