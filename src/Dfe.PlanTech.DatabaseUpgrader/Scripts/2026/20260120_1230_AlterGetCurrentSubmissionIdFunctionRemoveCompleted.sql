@@ -12,7 +12,7 @@ BEGIN
     FROM [dbo].[submission]
     WHERE sectionId = @sectionId
       AND establishmentId = @establishmentId
-      AND (status IS NULL OR status <> 'Inaccessible') -- Exclude inaccessible submissions
+      AND (status IS NULL OR status NOT IN ('Inaccessible', 'Obsolete')) -- Exclude inaccessible submissions
     ORDER BY Id DESC;
 
     RETURN @submissionId;
