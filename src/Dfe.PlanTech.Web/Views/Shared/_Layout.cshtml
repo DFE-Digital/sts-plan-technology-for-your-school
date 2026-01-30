@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Infrastructure.SignIn.Models
 @inject ICurrentUser CurrentUser
 
 @section Head {
@@ -26,31 +27,29 @@
     var controller = ViewContext.RouteData.Values["controller"] as string ?? "";
     var action = ViewContext.RouteData.Values["action"] as string ?? "";
 
-    var pageRoute =
-        ViewContext.RouteData.Values["route"] as string
-        ?? ViewContext.RouteData.Values["slug"] as string
-        ?? ViewContext.RouteData.Values["pageSlug"] as string;
+    UserAuthorisationResult? userAuthResult = null;
 
-    var path = (Context.Request.Path.Value ?? "").Trim('/');
-
-    var pageKey = (pageRoute ?? path).Trim('/');
-
-    var footerPageKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    if (Context.Items.TryGetValue(UserAuthorisationResult.HttpContextKey, out var value))
     {
-        "cookies",
-        "privacy-notice",
-        "accessibility-statement",
-        "service-updates"
-    };
+        if (value is UserAuthorisationResult result)
+        {
+            userAuthResult = result;
+        }
+    }
 
-    var isFooterPage = footerPageKeys.Contains(pageKey);
+    var isNonAuthorisedPage = true;
+
+    if (userAuthResult == null || userAuthResult.PageRequiresAuthorisation)
+    {
+        isNonAuthorisedPage = false;
+    }
 
     @* Conditionally show the change school partial on all pages except for specific pages in the exclusion list for MAT's*@
     if (!string.IsNullOrWhiteSpace(selectedSchool)
         && CurrentUser.IsAuthenticated
         && CurrentUser.IsMat)
     {
-        if (isFooterPage)
+        if (isNonAuthorisedPage)
         {
             showChangeSchool = true;
         }
