@@ -1,4 +1,4 @@
-name: Clear user data from DB
+name: Clear submission data from DB
 
 on:
   workflow_dispatch:
@@ -8,25 +8,34 @@ on:
         required: true
         type: choice
         options:
-          - development
-          - tst
-          - staging
+          - Dev
+          - Tst
+          - StagingUnprotected
+          - ProductionUnprotected
+      establishment:
+        description: 'Which establishment to clear'
+        required: true
+        type: choice
+        options:
+          - DSI TEST Establishment (001) Community School
+          - DSI TEST Establishment (001) Foundation School
+          - DSI TEST Establishment (001) Miscellanenous
 
 jobs:
   clear-db:
     permissions:
       id-token: write
       contents: read
-    if: ${{ inputs.environment != 'Production' }}
     environment: ${{ inputs.environment }}
-    name: Clear user data from DB
+    name: Clear submission data from DB
     runs-on: ubuntu-latest
     env:
       az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
       az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-      SQL_IP_NAME: github-action-clear-user-data
+      SQL_IP_NAME: github-action-clear-submission-data
+      establishment_name: ${{ inputs.establishment }}
 
     steps:
       - name: Checkout
@@ -35,6 +44,17 @@ jobs:
       - name: Log Environment
         run: |
           echo "Environment: ${{ inputs.environment }}"
+
+      - name: Get establishment ref
+        id: get-establishment-ref
+        run: |
+          INPUT="${{ env.establishment_name }}"
+          ESTABLISHMENT_REF=$(jq -r --arg key "$INPUT" '.[$key] // empty' .github/mappings/dsi-test-accounts.json)
+          if [ -z "$ESTABLISHMENT_REF" ]; then
+            echo "No mapping found for: $INPUT" >&2
+            exit 1
+          fi
+          echo "ref=$ESTABLISHMENT_REF" >> "$GITHUB_OUTPUT"
 
       - name: Login with AZ
         uses: ./.github/actions/azure-login
@@ -68,7 +88,11 @@ jobs:
         uses: azure/sql-action@v2.2
         with:
           connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
-          path: './.github/scripts/clear-user-data-from-db.sql'
+          path: './.github/scripts/clear-submission-data-from-db.sql'
+          arguments: >
+            --headers="-1"
+            --variables "ESTABLISHMENT_REF=${{ steps.get-establishment-ref.outputs.ref }}"
+            --error-level=1
 
       - name: Remove Azure firewall rules
         if: always()
