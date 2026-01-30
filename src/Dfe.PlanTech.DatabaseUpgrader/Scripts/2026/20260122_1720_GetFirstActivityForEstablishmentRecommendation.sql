@@ -27,10 +27,11 @@ BEGIN TRY
       JOIN migration.sectionRecommendations sr
         ON sr.recommendationRef = rec.contentfulRef
     WHERE
-      rh.establishmentId = @establishmentId
+	    rh.previousStatus IS NULL
+      AND rh.establishmentId = @establishmentId
       AND rec.contentfulRef = @recommendationContentfulRef
     ORDER BY
-      rh.dateCreated
+	    rh.id DESC
   )
 
   SELECT TOP 1
@@ -62,4 +63,5 @@ END TRY
 BEGIN CATCH
     ROLLBACK TRAN
 END CATCH
+
 GO

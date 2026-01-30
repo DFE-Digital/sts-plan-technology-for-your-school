@@ -169,7 +169,7 @@
                                 @if (Model.FirstActivity is not null && history.DateCreated.Equals(Model.FirstActivity.StatusChangeDate))
                                 {
                                     <p>
-                                        Status of '@Model.FirstActivity.StatusText.ToLower()' added based on self-assessment
+                                        Status of '@Model.FirstActivity.Status.GetDisplayName()' added based on self-assessment
                                         by @(Model.FirstActivity.SchoolName).
                                     </p>
 

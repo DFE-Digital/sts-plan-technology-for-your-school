@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
@@ -7,7 +8,7 @@ public class SqlFirstActivityForEstablishmentRecommendationDto : ISqlDto
 {
     public DateTime StatusChangeDate { get; init; }
 
-    public string StatusText { get; init; } = null!;
+    public RecommendationStatus Status { get; init; }
 
     public string SchoolName { get; init; } = null!;
 
