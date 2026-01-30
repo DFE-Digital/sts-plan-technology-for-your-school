@@ -199,16 +199,16 @@
                 <govuk-pagination>
                     @if (Model.PreviousChunk != null)
                     {
-                        <govuk-pagination-previous class="govuk-link--no-visited-state"
-                                                   href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug"
-                                                   label-text="@Model.PreviousChunk.LinkText"/>
+                        <govuk-pagination-previous
+                            href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug"
+                            label-text="@Model.PreviousChunk.LinkText" />
                     }
 
                     @if (Model.NextChunk != null)
                     {
-                        <govuk-pagination-next class="govuk-link--no-visited-state"
-                                               href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug"
-                                               label-text="@Model.NextChunk.LinkText"/>
+                        <govuk-pagination-next
+                            href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug"
+                            label-text="@Model.NextChunk.LinkText" />
                     }
                 </govuk-pagination>
             </div>
