@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.Interfaces;
@@ -11,4 +12,5 @@ public interface IEstablishmentLinkRepository
     Task<List<EstablishmentLinkEntity>> GetGroupEstablishmentsByEstablishmentIdAsync(
         int establishmentId
     );
+    Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel);
 }

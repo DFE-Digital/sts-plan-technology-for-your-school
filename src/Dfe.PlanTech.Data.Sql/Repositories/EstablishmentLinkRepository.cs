@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -41,4 +42,26 @@ public class EstablishmentLinkRepository : IEstablishmentLinkRepository
     {
         return GetGroupEstablishmentsByAsync(establishment => establishment.Id == establishmentId);
     }
+
+    public async Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
+    {
+        ArgumentNullException.ThrowIfNull(userGroupSelectionModel);
+
+        var now = DateTime.UtcNow;
+
+        var entity = new GroupReadActivityEntity
+        {
+            UserId = userGroupSelectionModel.UserId,
+            UserEstablishmentId = userGroupSelectionModel.UserEstablishmentId,
+            SelectedEstablishmentId = userGroupSelectionModel.SelectedEstablishmentId,
+            SelectedEstablishmentName = userGroupSelectionModel.SelectedEstablishmentName ?? string.Empty,
+            DateSelected = now,
+        };
+
+        _db.GroupReadActivities.Add(entity);
+        await _db.SaveChangesAsync();
+
+        return entity.Id;
+    }
+
 }
