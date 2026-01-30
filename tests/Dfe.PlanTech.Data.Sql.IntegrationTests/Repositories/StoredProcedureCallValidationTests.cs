@@ -3,6 +3,7 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
@@ -397,48 +398,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
                 ),
                 "All returned results should relate to requested sections"
             );
-        }
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_RecordGroupSelection_WhenCalledWithValidSelectionModel_ThenReturnsPositiveSelectionId()
-    {
-        // Arrange
-        var user = new UserEntity { DfeSignInRef = "test-user" };
-        var userEstablishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "USER001",
-            OrgName = "User School",
-        };
-        var selectedEstablishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "SEL001",
-            OrgName = "Selected School",
-        };
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.AddRange(userEstablishment, selectedEstablishment);
-        await DbContext.SaveChangesAsync();
-
-        var selectionModel = new UserGroupSelectionModel
-        {
-            UserId = user.Id,
-            UserEstablishmentId = userEstablishment.Id,
-            SelectedEstablishmentId = selectedEstablishment.Id,
-            SelectedEstablishmentName = "Selected School",
-        };
-
-        // Act & Assert - Should execute without parameter type or order errors
-        try
-        {
-            var selectionId = await _storedProcRepository.RecordGroupSelection(selectionModel);
-            Assert.True(selectionId > 0, "Selection ID should be returned from stored procedure");
-        }
-        catch (Microsoft.Data.SqlClient.SqlException ex)
-            when (ex.Message.Contains("Transaction count after EXECUTE"))
-        {
-            // Expected in test environment due to stored procedure managing its own transactions
-            Assert.True(true, "Transaction conflict expected in test environment");
         }
     }
 

@@ -4,6 +4,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -140,47 +141,6 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             .ToList();
 
         return result;
-    }
-
-    public async Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
-    {
-        // Stored procedure defined in:
-        // - 2025/20250409_1900_CreateSubmitGroupSelectionProcedure.sql (CREATE)
-        // Parameters (in order): @userId INT, @userEstablishmentId INT, @selectedEstablishmentId INT, @selectedEstablishmentName NVARCHAR(MAX), @selectionId INT OUTPUT
-        var selectionId = new SqlParameter(DatabaseConstants.SelectionIdParam, SqlDbType.Int)
-        {
-            Direction = ParameterDirection.Output,
-        };
-
-        var parameters = new SqlParameter[]
-        {
-            new(DatabaseConstants.UserIdParam, userGroupSelectionModel.UserId),
-            new(
-                DatabaseConstants.EstablishmentIdParam,
-                userGroupSelectionModel.UserEstablishmentId
-            ),
-            new(
-                DatabaseConstants.SelectedEstablishmentIdParam,
-                userGroupSelectionModel.SelectedEstablishmentId
-            ),
-            new(
-                DatabaseConstants.SelectedEstablishmentNameParam,
-                SqlValueOrDbNull(userGroupSelectionModel.SelectedEstablishmentName)
-            ),
-            selectionId,
-        };
-
-        var command = BuildCommandString(DatabaseConstants.SpSubmitGroupSelection, parameters);
-        await _db.Database.ExecuteSqlRawAsync(command, parameters);
-
-        if (selectionId.Value is int id)
-        {
-            return id;
-        }
-
-        throw new InvalidCastException(
-            $"{nameof(selectionId)} is not an integer - value is {selectionId.Value ?? "null"}"
-        );
     }
 
     public Task<int> SetMaturityForSubmissionAsync(int submissionId)
