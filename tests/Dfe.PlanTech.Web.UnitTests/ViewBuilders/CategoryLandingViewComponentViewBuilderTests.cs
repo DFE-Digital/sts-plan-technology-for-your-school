@@ -526,7 +526,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
                     PreviousStatus = RecommendationStatus.InProgress.ToString(),
-                    NewStatus = RecommendationStatus.Completed.ToString(),
+                    NewStatus = RecommendationStatus.Complete.ToString(),
                     NoteText = "Test note 1",
                 }
             },
@@ -591,7 +591,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         Assert.NotEmpty(chunks);
         Assert.Equal(RecommendationStatus.NotStarted, chunks[0].Status);
         Assert.Equal(RecommendationStatus.InProgress, chunks[1].Status);
-        Assert.Equal(RecommendationStatus.Completed, chunks[2].Status);
+        Assert.Equal(RecommendationStatus.Complete, chunks[2].Status);
     }
 
     [Fact]
