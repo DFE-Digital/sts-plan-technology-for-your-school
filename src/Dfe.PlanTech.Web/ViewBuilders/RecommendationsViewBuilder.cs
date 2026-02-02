@@ -289,12 +289,11 @@ public class RecommendationsViewBuilder(
             $"Status updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'";
 
         // Redirect back to the single recommendation page
-        return await RouteToSingleRecommendation(
+        return PageRedirecter.RedirectToGetSingleRecommendation(
             controller,
             categorySlug,
             sectionSlug,
-            chunkSlug,
-            false
+            chunkSlug
         );
     }
 
