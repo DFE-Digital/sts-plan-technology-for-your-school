@@ -19,9 +19,12 @@ internal class EstablishmentRecommendationHistoryEntityConfiguration
             .Property(history => history.DateCreated)
             .HasColumnType("datetime")
             .HasDefaultValue();
+
         builder.Property(history => history.PreviousStatus).HasMaxLength(50);
+
         builder.Property(history => history.NewStatus).HasMaxLength(50);
-        builder.Property(history => history.NoteText).HasMaxLength(4000); // NVARCHAR max length
+
+        builder.Property(history => history.NoteText);
 
         // Create index on the composite key for performance (matches migration script)
         builder

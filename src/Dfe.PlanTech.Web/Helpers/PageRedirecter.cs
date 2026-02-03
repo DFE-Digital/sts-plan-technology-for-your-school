@@ -76,6 +76,23 @@ public static class PageRedirecter
             new { categorySlug, sectionSlug }
         );
 
+    public static RedirectToActionResult RedirectToGetSingleRecommendation(
+        this Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    ) =>
+        controller.RedirectToAction(
+            nameof(RecommendationsController.GetSingleRecommendation),
+            nameof(RecommendationsController).GetControllerNameSlug(),
+            new
+            {
+                categorySlug,
+                sectionSlug,
+                chunkSlug,
+            }
+        );
+
     private static RedirectToActionResult RedirectToPage(
         this Controller controller,
         string route

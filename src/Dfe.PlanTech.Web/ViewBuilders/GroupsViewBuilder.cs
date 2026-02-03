@@ -39,8 +39,7 @@ public class GroupsViewBuilder(
                 $"Could not find contentful page for slug '{UrlConstants.GroupsSelectionPageSlug}'"
             );
 
-        var groupName = CurrentUser.UserOrganisationName;
-        var title = groupName ?? "Your organisation";
+        var groupName = CurrentUser.UserOrganisationName ?? "Your organisation";
         List<ContentfulEntry> content = selectASchoolPageContent.Content ?? [];
 
         var sections = await ContentfulService.GetAllSectionsAsync();
@@ -56,13 +55,13 @@ public class GroupsViewBuilder(
 
         var viewModel = new GroupsSelectorViewModel
         {
-            GroupName = groupName ?? string.Empty,
+            GroupName = groupName,
             GroupEstablishments = groupSchools,
             BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent ?? [],
-            Title = new ComponentTitleEntry(title),
+            Title = new ComponentTitleEntry(groupName),
             Content = content,
             TotalRecommendations = totalRecommendations,
-            ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalRecommendations)
+            ProgressRetrievalErrorMessage = string.IsNullOrEmpty(totalRecommendations)
                 ? "Unable to retrieve progress"
                 : null,
             ContactLinkHref = contactLink?.Href,

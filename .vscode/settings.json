@@ -5,7 +5,6 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.formatOnSave": true,
   "editor.renderWhitespace": "all",
-  "editor.tabSize": 2,
 
   "terminal.integrated.defaultProfile.windows": "Git Bash",
 
@@ -20,6 +19,7 @@
   "[markdown]": {
     "editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
   },
+
   "[terraform]": {
     "editor.defaultFormatter": "hashicorp.terraform"
   },

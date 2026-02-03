@@ -65,26 +65,28 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var sectionQuestions = await GetQuestionsForSection(section);
 
         // Create recommendation dtos each of the core recs
-        var recommendationDtos = section.CoreRecommendations.Select(r =>
-        {
-            var question = sectionQuestions.FirstOrDefault(q =>
-                string.Equals(q.ContentfulRef, r.Question.Id)
-            );
-
-            if (question is null)
+        var recommendationDtos = section
+            .CoreRecommendations.Where(r => r.Question is not null)
+            .Select(r =>
             {
-                throw new InvalidOperationException(
-                    "Could not find the question identified in the submission"
+                var question = sectionQuestions.FirstOrDefault(q =>
+                    string.Equals(q.ContentfulRef, r.Question.Id)
                 );
-            }
 
-            return new SqlRecommendationDto
-            {
-                RecommendationText = r.Header,
-                ContentfulSysId = r.Id,
-                QuestionId = question.Id,
-            };
-        });
+                if (question is null)
+                {
+                    throw new InvalidOperationException(
+                        "Could not find the question identified in the submission"
+                    );
+                }
+
+                return new SqlRecommendationDto
+                {
+                    RecommendationText = r.Header,
+                    ContentfulSysId = r.Id,
+                    QuestionId = question.Id,
+                };
+            });
 
         var recommendations = await UpsertRecommendations(recommendationDtos);
 
