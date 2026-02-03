@@ -6,7 +6,8 @@ namespace Dfe.PlanTech.Application.Workflows;
 
 public class RecommendationWorkflow(
     IEstablishmentRecommendationHistoryRepository establishmentRecommendationHistoryRepository,
-    IRecommendationRepository recommendationRepository
+    IRecommendationRepository recommendationRepository,
+    IStoredProcedureRepository storedProcedureRepository
 ) : IRecommendationWorkflow
 {
     public async Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
@@ -109,5 +110,18 @@ public class RecommendationWorkflow(
             newStatus,
             noteText ?? string.Empty
         );
+    }
+
+    public async Task<SqlFirstActivityForEstablishmentRecommendationDto> GetFirstActivityForEstablishmentRecommendationAsync(
+        int establishmentId,
+        string recommendationContentfulReference
+    )
+    {
+        var firstActivity =
+            await storedProcedureRepository.GetFirstActivityForEstablishmentRecommendationAsync(
+                establishmentId,
+                recommendationContentfulReference
+            );
+        return firstActivity.AsDto();
     }
 }

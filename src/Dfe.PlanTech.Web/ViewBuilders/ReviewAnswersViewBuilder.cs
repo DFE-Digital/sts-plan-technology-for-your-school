@@ -107,9 +107,11 @@ public class ReviewAnswersViewBuilder(
 
             case SubmissionStatus.CompleteReviewed:
                 if (submissionRoutingData.Submission is null)
+                {
                     throw new InvalidOperationException(
                         $"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}"
                     );
+                }
 
                 viewModel = BuildViewAnswersViewModel(
                     section,
@@ -167,26 +169,43 @@ public class ReviewAnswersViewBuilder(
         return controller.RedirectToCategoryLandingPage(categorySlug);
     }
 
-    private static ViewAnswersViewModel BuildViewAnswersViewModel(
+    public static ViewAnswersViewModel BuildViewAnswersViewModel(
         QuestionnaireSectionEntry section,
         SubmissionRoutingDataModel submissionModel,
         string categorySlug,
         string sectionSlug
     )
     {
-        var submissionResponses = submissionModel.Submission?.Responses ?? [];
+        /*
+         * The questions in Contentful are always returned in the order they're appear in the list
+         * on the UI, but we didn't used to store this order in the database when we populated
+         * the dbo.question table. This caused problems when the questions were rewritten for the
+         * Core Recommendations work.
+         *
+         * When we moved from 'question set v1' to Core Recommendations we found that we could only
+         * order by response date, and so if a user had changed an answer it jumped to the bottom.
+         *
+         * To ensure that questions and answers were always shown to the user in the true question
+         * order, we added an [order] column to dbo.question so that we could be sure that the user
+         * saw the questions and answers in their intended order.
+         *
+         * However, we have no idea which question set the responses came from and so we have to
+         * cover all bases. The code below was the easiest way to do it.
+         */
 
         // Get ordered CORE responses from section questions and select out the responses from the submission
         var orderedCoreResponses = section
-            .Questions.Select(q =>
+            .Questions.Where(q => q.Sys is not null)
+            .Select(q =>
                 submissionModel.Submission?.Responses?.FirstOrDefault(r =>
-                    q.Sys is not null && r.QuestionSysId == q.Sys.Id
+                    r.QuestionSysId == q.Sys!.Id
                 )
             )
             .ToList();
 
-        // Get ordered Retired responses from section questions and select out the responses from the submission
-        var orderedRetiredResponses = submissionResponses.OrderBy(r => r.Order).ToList();
+        // Get ordered retired responses from section questions and select out the responses from the submission
+        var orderedRetiredResponses =
+            submissionModel.Submission?.Responses?.OrderBy(r => r.Order).ToList() ?? [];
 
         //Join the two lists together with core first so we only rely on the order columnn for the retired responses
         List<QuestionWithAnswerModel> responses =

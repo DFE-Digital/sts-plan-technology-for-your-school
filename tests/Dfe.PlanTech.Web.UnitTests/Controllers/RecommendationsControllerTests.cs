@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Web.Tests.Controllers
+namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class RecommendationsControllerTests
     {
@@ -151,39 +151,6 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
                     "Complete",
                     null
                 )
-            );
-        }
-
-        [Fact]
-        public async Task UpdateRecommendationStatus_ThrowsIfSelectedStatusNull()
-        {
-            await _controller.UpdateRecommendationStatus(
-                "category-slug",
-                "section-slug",
-                "chunk-slug",
-                "",
-                null
-            );
-
-            var viewBuilderCalls = _viewBuilder
-                .ReceivedCalls()
-                .Where(c =>
-                    c.GetMethodInfo().Name
-                    == nameof(IRecommendationsViewBuilder.RouteToSingleRecommendation)
-                )
-                .Where(c =>
-                    c.GetArguments().Length == 5
-                    && c.GetArguments()[0] is Controller controller
-                    && c.GetArguments()[1] is string categorySlug
-                    && c.GetArguments()[2] is string sectionSlug
-                    && c.GetArguments()[3] is string chunkSlug
-                    && c.GetArguments()[4] is bool useChecklist
-                )
-                .ToList();
-
-            Assert.True(
-                viewBuilderCalls.Count == 1,
-                $"Expected 1 call to RouteToSingleRecommendation, got {viewBuilderCalls.Count}"
             );
         }
     }

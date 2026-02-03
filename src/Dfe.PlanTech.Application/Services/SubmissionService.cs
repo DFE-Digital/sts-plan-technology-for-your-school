@@ -20,14 +20,14 @@ public class SubmissionService(
 
     public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(
         int establishmentId,
-        QuestionnaireSectionEntry section
+        string sectionId
     )
     {
         // Check if an in-progress submission already exists
         var inProgressSubmission =
             await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                sectionId,
                 status: SubmissionStatus.InProgress
             );
 
@@ -36,7 +36,7 @@ public class SubmissionService(
             await _submissionWorkflow.SetSubmissionInaccessibleAsync(inProgressSubmission.Id);
         }
 
-        return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
+        return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, sectionId);
     }
 
     public Task<
@@ -56,7 +56,7 @@ public class SubmissionService(
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
-            section,
+            section.Id,
             status
         );
         return submission is null ? null : new SubmissionResponsesModel(submission, section);
@@ -76,7 +76,7 @@ public class SubmissionService(
         var latestSubmission =
             await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                section.Id,
                 status
             );
 

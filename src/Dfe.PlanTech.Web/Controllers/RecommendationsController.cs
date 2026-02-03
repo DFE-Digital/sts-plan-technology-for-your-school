@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -111,12 +112,11 @@ public class RecommendationsController(
             { /* TempData will be null during unit testing and without this some tests fail. */
             }
 
-            return await _recommendationsViewBuilder.RouteToSingleRecommendation(
+            return PageRedirecter.RedirectToGetSingleRecommendation(
                 this,
                 categorySlug,
                 sectionSlug,
-                chunkSlug,
-                false
+                chunkSlug
             );
         }
 

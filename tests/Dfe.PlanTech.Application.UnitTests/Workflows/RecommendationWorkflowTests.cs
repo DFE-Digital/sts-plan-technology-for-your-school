@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Workflows;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using NSubstitute;
@@ -11,9 +12,44 @@ public class RecommendationWorkflowTests
         Substitute.For<IEstablishmentRecommendationHistoryRepository>();
     private readonly IRecommendationRepository _recommendationRepository =
         Substitute.For<IRecommendationRepository>();
+    private readonly IStoredProcedureRepository _storedProcedureRepository =
+        Substitute.For<IStoredProcedureRepository>();
 
     private RecommendationWorkflow CreateServiceUnderTest() =>
-        new(_establishmentRecommendationHistoryRepository, _recommendationRepository);
+        new(
+            _establishmentRecommendationHistoryRepository,
+            _recommendationRepository,
+            _storedProcedureRepository
+        );
+
+    private static EstablishmentRecommendationHistoryEntity MakeHistoryEntity(
+        int id,
+        int dateCreatedDelta,
+        int establishmentId,
+        int? recommendationId,
+        RecommendationEntity? recommendation,
+        int userId,
+        RecommendationStatus newStatus
+    )
+    {
+        if (recommendationId is null && recommendation is null)
+        {
+            throw new InvalidDataException(
+                $"At least one of {nameof(recommendationId)} and {nameof(recommendation)} must have a value"
+            );
+        }
+
+        return new EstablishmentRecommendationHistoryEntity
+        {
+            Id = id,
+            DateCreated = DateTime.UtcNow.AddDays(dateCreatedDelta),
+            EstablishmentId = establishmentId,
+            RecommendationId = recommendationId ?? recommendation!.Id,
+            Recommendation = recommendation!,
+            UserId = userId,
+            NewStatus = newStatus.ToString(),
+        };
+    }
 
     [Fact]
     public async Task GetLatestRecommendationStatusesAsync_WhenValidInput_ThenReturnsCorrectDictionary()
@@ -48,66 +84,62 @@ public class RecommendationWorkflowTests
         var historyEntities = new[]
         {
             // Multiple entries for rec-001 (ID 1) - should return the latest one
-            new EstablishmentRecommendationHistoryEntity
-            {
-                Id = 1,
-                EstablishmentId = establishmentId,
-                Recommendation = recommendations[0],
-                NewStatus = "InProgress",
-                DateCreated = DateTime.UtcNow.AddDays(-2),
-            },
-            new EstablishmentRecommendationHistoryEntity
-            {
-                Id = 2,
-                EstablishmentId = establishmentId,
-                RecommendationId = 1,
-                Recommendation = recommendations[0],
-                UserId = 1,
-                NewStatus = "Completed",
-                DateCreated = DateTime.UtcNow.AddDays(-1),
-            },
+            MakeHistoryEntity(
+                1,
+                -2,
+                establishmentId,
+                null,
+                recommendations[0],
+                1,
+                RecommendationStatus.InProgress
+            ),
+            MakeHistoryEntity(
+                2,
+                -1,
+                establishmentId,
+                null,
+                recommendations[0],
+                1,
+                RecommendationStatus.Complete
+            ),
             // Single entry for rec-002 (ID 2)
-            new EstablishmentRecommendationHistoryEntity
-            {
-                Id = 3,
-                EstablishmentId = establishmentId,
-                RecommendationId = 2,
-                Recommendation = recommendations[1],
-                UserId = 1,
-                NewStatus = "Reviewed",
-                DateCreated = DateTime.UtcNow.AddDays(-3),
-            },
+            MakeHistoryEntity(
+                3,
+                -3,
+                establishmentId,
+                null,
+                recommendations[1],
+                1,
+                RecommendationStatus.InProgress
+            ),
             // Multiple entries for rec-003 (ID 3) - should return the latest one
-            new EstablishmentRecommendationHistoryEntity
-            {
-                Id = 4,
-                EstablishmentId = establishmentId,
-                RecommendationId = 3,
-                Recommendation = recommendations[2],
-                UserId = 1,
-                NewStatus = "InProgress",
-                DateCreated = DateTime.UtcNow.AddDays(-4),
-            },
-            new EstablishmentRecommendationHistoryEntity
-            {
-                Id = 5,
-                EstablishmentId = establishmentId,
-                RecommendationId = 3,
-                Recommendation = recommendations[2],
-                UserId = 1,
-                NewStatus = "Completed",
-                DateCreated = DateTime.UtcNow.AddDays(-2),
-            },
-            new EstablishmentRecommendationHistoryEntity
-            {
-                Id = 6,
-                EstablishmentId = establishmentId,
-                RecommendationId = 3,
-                Recommendation = recommendations[2],
-                UserId = 1,
-                NewStatus = "Reviewed",
-                DateCreated = DateTime.UtcNow,
-            },
+            MakeHistoryEntity(
+                4,
+                -4,
+                establishmentId,
+                null,
+                recommendations[2],
+                1,
+                RecommendationStatus.NotStarted
+            ),
+            MakeHistoryEntity(
+                5,
+                -2,
+                establishmentId,
+                null,
+                recommendations[2],
+                1,
+                RecommendationStatus.InProgress
+            ),
+            MakeHistoryEntity(
+                6,
+                0,
+                establishmentId,
+                null,
+                recommendations[2],
+                1,
+                RecommendationStatus.Complete
+            ),
         };
 
         _establishmentRecommendationHistoryRepository
@@ -126,15 +158,15 @@ public class RecommendationWorkflowTests
 
         // Verify rec-001 returns the latest status (Completed from ID 2)
         Assert.True(result.ContainsKey("rec-001"));
-        Assert.Equal("Completed", result["rec-001"].NewStatus);
+        Assert.Equal("Complete", result["rec-001"].NewStatus);
 
         // Verify rec-002 returns the single status (Reviewed from ID 3)
         Assert.True(result.ContainsKey("rec-002"));
-        Assert.Equal("Reviewed", result["rec-002"].NewStatus);
+        Assert.Equal("In progress", result["rec-002"].NewStatus);
 
         // Verify rec-003 returns the latest status (Reviewed from ID 6)
         Assert.True(result.ContainsKey("rec-003"));
-        Assert.Equal("Reviewed", result["rec-003"].NewStatus);
+        Assert.Equal("Complete", result["rec-003"].NewStatus);
     }
 
     [Fact]
@@ -181,7 +213,7 @@ public class RecommendationWorkflowTests
                 RecommendationId = 1,
                 UserId = 1,
                 Recommendation = recommendation,
-                NewStatus = "InProgress",
+                NewStatus = RecommendationStatus.NotStarted.ToString(),
                 DateCreated = DateTime.UtcNow.AddDays(-5),
             },
             new EstablishmentRecommendationHistoryEntity
@@ -191,7 +223,7 @@ public class RecommendationWorkflowTests
                 RecommendationId = 1,
                 Recommendation = recommendation,
                 UserId = 1,
-                NewStatus = "Completed",
+                NewStatus = RecommendationStatus.InProgress.ToString(),
                 DateCreated = DateTime.UtcNow.AddDays(-2),
             },
             new EstablishmentRecommendationHistoryEntity
@@ -201,7 +233,7 @@ public class RecommendationWorkflowTests
                 RecommendationId = 1,
                 Recommendation = recommendation,
                 UserId = 1,
-                NewStatus = "Reviewed",
+                NewStatus = RecommendationStatus.Complete.ToString(),
                 DateCreated = DateTime.UtcNow, // Most recent
             },
         };
@@ -220,7 +252,7 @@ public class RecommendationWorkflowTests
         // Assert - Verify it returns the latest status with correct properties
         Assert.Single(result);
         Assert.True(result.ContainsKey("rec-001"));
-        Assert.Equal("Reviewed", result["rec-001"].NewStatus);
+        Assert.Equal("Complete", result["rec-001"].NewStatus);
         Assert.Equal(establishmentId, result["rec-001"].EstablishmentId);
         Assert.Equal(1, result["rec-001"].RecommendationId);
     }
@@ -249,8 +281,8 @@ public class RecommendationWorkflowTests
             EstablishmentId = establishmentId,
             RecommendationId = 1,
             UserId = 42,
-            NewStatus = "Completed",
-            PreviousStatus = "InProgress",
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
             NoteText = "Work completed",
             DateCreated = DateTime.UtcNow,
         };
@@ -279,8 +311,8 @@ public class RecommendationWorkflowTests
         Assert.Equal(establishmentId, result.EstablishmentId);
         Assert.Equal(1, result.RecommendationId);
         Assert.Equal(42, result.UserId);
-        Assert.Equal("Completed", result.NewStatus);
-        Assert.Equal("InProgress", result.PreviousStatus);
+        Assert.Equal("Complete", result.NewStatus);
+        Assert.Equal("In progress", result.PreviousStatus);
         Assert.Equal("Work completed", result.NoteText);
         Assert.Equal(historyEntity.DateCreated, result.DateCreated);
     }
@@ -350,6 +382,101 @@ public class RecommendationWorkflowTests
     }
 
     [Fact]
+    public async Task GetRecommendationHistoryAsync_WhenNoRecommendationFound_ThenReturnsEmpty()
+    {
+        // Arrange - Setup recommendation but no history entries
+        var recommendationContentfulReference = "rec-001";
+        var establishmentId = 123;
+
+        _recommendationRepository
+            .GetRecommendationsByContentfulReferencesAsync(
+                new[] { recommendationContentfulReference }
+            )
+            .Returns([]);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        var result = await workflow.GetRecommendationHistoryAsync(
+            recommendationContentfulReference,
+            establishmentId
+        );
+
+        // Assert
+        Assert.Empty(result);
+    }
+
+    [Fact]
+    public async Task GetRecommendationHistoryAsync_WhenRecommendationExists_ThenReturnsHistory()
+    {
+        // Arrange - Setup recommendation but no history entries
+        var recommendationContentfulReference = "rec-001";
+        var establishmentId = 123;
+
+        var recommendation = new RecommendationEntity
+        {
+            Id = 1,
+            ContentfulRef = recommendationContentfulReference,
+            RecommendationText = "Test Recommendation",
+            QuestionId = 1,
+        };
+
+        var historyEntities = new[]
+        {
+            MakeHistoryEntity(
+                1,
+                -4,
+                establishmentId,
+                null,
+                recommendation,
+                1,
+                RecommendationStatus.NotStarted
+            ),
+            MakeHistoryEntity(
+                2,
+                -2,
+                establishmentId,
+                null,
+                recommendation,
+                1,
+                RecommendationStatus.InProgress
+            ),
+            MakeHistoryEntity(
+                3,
+                0,
+                establishmentId,
+                null,
+                recommendation,
+                1,
+                RecommendationStatus.Complete
+            ),
+        };
+
+        _recommendationRepository
+            .GetRecommendationsByContentfulReferencesAsync(
+                Arg.Is<IEnumerable<string>>(refs =>
+                    refs.Contains(recommendationContentfulReference)
+                )
+            )
+            .Returns([recommendation]);
+        _establishmentRecommendationHistoryRepository
+            .GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(establishmentId, 1)
+            .Returns(historyEntities);
+
+        var workflow = CreateServiceUnderTest();
+
+        // Act
+        var result = await workflow.GetRecommendationHistoryAsync(
+            recommendationContentfulReference,
+            establishmentId
+        );
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(3, result.Count());
+    }
+
+    [Fact]
     public async Task UpdateRecommendationStatusAsync_WhenRecommendationExists_ThenCreatesHistoryWithCorrectData()
     {
         // Arrange - Setup recommendation and current status to test status transition logic
@@ -412,7 +539,7 @@ public class RecommendationWorkflowTests
                 1,
                 userId,
                 matEstablishmentId,
-                "InProgress", // Should use current status as previous
+                "In progress", // Should use current status as previous
                 newStatus,
                 noteText
             );

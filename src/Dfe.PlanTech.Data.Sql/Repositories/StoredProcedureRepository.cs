@@ -1,9 +1,15 @@
 using System.Data;
+using System.Data.Common;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -37,6 +43,106 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         _db = dbContext;
     }
 
+    public async Task<FirstActivityForEstablishmentRecommendationEntity> GetFirstActivityForEstablishmentRecommendationAsync(
+        int establishmentId,
+        string recommendationContentfulReference
+    )
+    {
+        // Stored procedure defined in:
+        // - 2026/20260122_1720_GetFirstActivityForEstablishmentRecommendation.sql (CREATE)
+        // Parameters (in order): @establishmentId INT, @recommendationContentfulReference NVARCHAR(50)
+
+        var parameters = new SqlParameter[]
+        {
+            new(DatabaseConstants.EstablishmentIdParam, establishmentId),
+            new(
+                DatabaseConstants.RecommendationContentfulReferenceParam,
+                recommendationContentfulReference
+            ),
+        };
+
+        var command = BuildCommandString(
+            DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation,
+            parameters
+        );
+
+        var results = await _db.Set<FirstActivityForEstablishmentRecommendationEntity>()
+            .FromSqlRaw(command, parameters)
+            .AsNoTracking()
+            .ToListAsync();
+
+        if (results.Count == 0)
+        {
+            throw new DatabaseException(
+                $"No data returned from {DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation}"
+            );
+        }
+
+        return results[0];
+    }
+
+    // Moved GetSectionStatuses sproc into code (need to remove more sprocs when completed column is removed from db)
+    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
+        string sectionIds,
+        int establishmentId
+    )
+    {
+        var sectionIdList = sectionIds
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+
+        var currentSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+            )
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
+            .ToListAsync();
+
+        var lastCompleteSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+                && (s.Status == SubmissionStatus.CompleteReviewed)
+            )
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
+            .ToListAsync();
+
+        var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
+        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(
+            s => s.SectionId,
+            s => s
+        );
+
+        var result = sectionIdList
+            .Select(sectionId =>
+            {
+                currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
+                lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
+
+                return new SectionStatusEntity
+                {
+                    SectionId = sectionId,
+                    Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
+                    DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
+                    DateUpdated =
+                        currentSubmission?.DateLastUpdated
+                        ?? currentSubmission?.DateCreated
+                        ?? DateTime.UtcNow,
+                    LastMaturity = lastCompleteSubmission?.Maturity,
+                    LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                    Viewed = lastCompleteSubmission?.Viewed,
+                };
+            })
+            .ToList();
+
+        return result;
+    }
+
     public Task<int> SetMaturityForSubmissionAsync(int submissionId)
     {
         // Stored procedure defined in:
@@ -49,7 +155,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             new(DatabaseConstants.SubmissionIdParam, submissionId),
         };
 
-        var command = BuildCommand(DatabaseConstants.SpCalculateMaturity, parameters);
+        var command = BuildCommandString(DatabaseConstants.SpCalculateMaturity, parameters);
         return _db.Database.ExecuteSqlRawAsync(command, parameters);
     }
 
@@ -95,7 +201,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             submissionId,
         };
 
-        var command = BuildCommand(DatabaseConstants.SpSubmitAnswer, parameters);
+        var command = BuildCommandString(DatabaseConstants.SpSubmitAnswer, parameters);
         await _db.Database.ExecuteSqlRawAsync(command, parameters);
 
         if (responseId.Value is int id)
@@ -108,7 +214,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         );
     }
 
-    private static string BuildCommand(string storedProcedureName, SqlParameter[] parameters)
+    private static string BuildCommandString(string storedProcedureName, SqlParameter[] parameters)
     {
         ParameterDirection[] outputParameterTypes =
         {

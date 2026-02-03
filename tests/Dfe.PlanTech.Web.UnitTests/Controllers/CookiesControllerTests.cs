@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Web.Tests.Controllers
+namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class CookiesControllerTests
     {

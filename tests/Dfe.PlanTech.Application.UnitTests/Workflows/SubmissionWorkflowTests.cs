@@ -175,7 +175,7 @@ public class SubmissionWorkflowTests
             .Returns(latestCompleted);
         _repo.CloneSubmission(latestCompleted).Returns(clone);
 
-        var dto = await sut.CloneLatestCompletedSubmission(123, section);
+        var dto = await sut.CloneLatestCompletedSubmission(123, section.Id);
 
         // Expect path: Q1 (latest) -> Q2 -> Q3 (no response for Q3 so stop after Q2)
         Assert.Equal(q1q2, dto.Responses.Select(r => r.Question.ContentfulSysId).ToArray());
@@ -195,7 +195,7 @@ public class SubmissionWorkflowTests
             .GetLatestSubmissionAndResponsesAsync(1, section.Id, status: (SubmissionStatus?)null)
             .Returns((SubmissionEntity?)null);
 
-        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section, null);
+        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, null);
         Assert.Null(dto);
     }
 
@@ -237,7 +237,7 @@ public class SubmissionWorkflowTests
 
         var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(
             5,
-            section,
+            section.Id,
             SubmissionStatus.InProgress
         );
 

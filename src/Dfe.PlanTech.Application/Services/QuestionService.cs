@@ -19,7 +19,7 @@ public class QuestionService(ISubmissionWorkflow submissionWorkflow) : IQuestion
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
-            section,
+            section.Id,
             status: SubmissionStatus.InProgress
         );
 

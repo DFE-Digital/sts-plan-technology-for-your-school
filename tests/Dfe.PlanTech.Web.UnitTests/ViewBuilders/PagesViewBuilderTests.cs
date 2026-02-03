@@ -292,6 +292,26 @@ public class PagesViewBuilderTests
     }
 
     [Fact]
+    public async Task RouteBasedOnOrganisationType_LandingPage_Throws_When_Category_Landing_Slug_Null()
+    {
+        var page = MakePage("missing", isLanding: true);
+        var contentful = Substitute.For<IContentfulService>();
+
+        var category = new QuestionnaireCategoryEntry
+        {
+            LandingPage = null
+        };
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        contentful.GetCategoryBySlugAsync("missing", 4).Returns(category);
+
+        var controller = new TestController();
+
+        await Assert.ThrowsAsync<InvalidDataException>(() =>
+            sut.RouteBasedOnOrganisationTypeAsync(controller, page));
+    }
+
+    [Fact]
     public async Task RouteBasedOnOrganisationType_NormalPage_Sets_Title_And_OrgName_When_Requested_And_Authenticated()
     {
         var page = MakePage("about", isLanding: false, title: "About Us", displayOrg: true);

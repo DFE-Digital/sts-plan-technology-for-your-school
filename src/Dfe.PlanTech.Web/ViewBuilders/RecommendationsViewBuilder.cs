@@ -14,6 +14,7 @@ using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -78,6 +79,23 @@ public class RecommendationsViewBuilder(
                 ? recommendationChunks[currentRecommendationIndex + 1]
                 : null;
 
+        var recommendationHistory = await _recommendationService.GetRecommendationHistoryAsync(
+            currentRecommendationChunk.Id,
+            establishmentId
+        );
+
+        var orderedHistory = recommendationHistory.OrderByDescending(rh => rh.DateCreated).ToList();
+
+        var groupedHistory = orderedHistory
+            .GroupBy(rh => $"{rh.DateCreated.Date:MMMM} activity")
+            .ToDictionary(group => group.Key, group => group.Select(g => g));
+
+        var firstActivity =
+            await _recommendationService.GetFirstActivityForEstablishmentRecommendationAsync(
+                establishmentId,
+                currentRecommendationChunk.Id
+            );
+
         var viewModel = new SingleRecommendationViewModel
         {
             CategoryName = categoryHeaderText,
@@ -100,6 +118,8 @@ public class RecommendationsViewBuilder(
             StatusOptions = Enum.GetValues<RecommendationStatus>()
                 .ToDictionary(key => key.ToString(), key => key.GetDisplayName()),
             OriginatingSlug = chunkSlug,
+            History = groupedHistory,
+            FirstActivity = firstActivity,
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
@@ -269,12 +289,11 @@ public class RecommendationsViewBuilder(
             $"Status updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'";
 
         // Redirect back to the single recommendation page
-        return await RouteToSingleRecommendation(
+        return PageRedirecter.RedirectToGetSingleRecommendation(
             controller,
             categorySlug,
             sectionSlug,
-            chunkSlug,
-            false
+            chunkSlug
         );
     }
 

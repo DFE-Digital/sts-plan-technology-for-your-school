@@ -125,9 +125,9 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var viewModel = BuildLandingPageViewModelAsync(controller, category);
+        var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
 
-        return controller.View(CategoryLandingPagePrintView, viewModel);
+        return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
 
     private static CategoryLandingPageViewModel BuildLandingPageViewModelAsync(
@@ -135,6 +135,11 @@ public class PagesViewBuilder(
         QuestionnaireCategoryEntry category
     )
     {
+        if (category.LandingPage is null)
+        {
+            throw new InvalidDataException("Cannot build a landing page with an empty slug");
+        }
+
         return new CategoryLandingPageViewModel
         {
             Slug = category.LandingPage?.Slug ?? string.Empty,
