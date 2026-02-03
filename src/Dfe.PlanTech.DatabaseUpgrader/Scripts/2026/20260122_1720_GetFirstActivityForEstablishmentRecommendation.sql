@@ -9,6 +9,9 @@ CREATE PROCEDURE [dbo].[GetFirstActivityForEstablishmentRecommendation]
   @RecommendationContentfulRef VARCHAR(50)
 AS
 BEGIN TRY
+  BEGIN TRAN;
+  SET NOCOUNT ON;
+
   ;WITH history AS
   (
     SELECT TOP 1
@@ -59,9 +62,10 @@ BEGIN TRY
     JOIN dbo.answer a
       ON a.id = resp.answerId
 
+    COMMIT TRAN;
 END TRY
 BEGIN CATCH
-    ROLLBACK TRAN
+    ROLLBACK TRAN;
 END CATCH
 
 GO
