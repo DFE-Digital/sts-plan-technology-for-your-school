@@ -1,3 +1,4 @@
+@using Dfe.PlanTech.Infrastructure.SignIn.Models
 @inject ICurrentUser CurrentUser
 
 @section Head {
@@ -21,33 +22,65 @@
 @{
     var showChangeSchool = false;
 
-    @* Conditionally show the change school partial on all pages except for specific pages in the exclusion list for MAT's*@
-    if (CurrentUser.IsAuthenticated && CurrentUser.IsMat)
+    var selectedSchool = CurrentUser.GroupSelectedSchoolName;
+
+    var controller = ViewContext.RouteData.Values["controller"] as string ?? "";
+    var action = ViewContext.RouteData.Values["action"] as string ?? "";
+
+    UserAuthorisationResult? userAuthResult = null;
+
+    if (Context.Items.TryGetValue(UserAuthorisationResult.HttpContextKey, out var value))
     {
-        var controller = (string?)ViewContext.RouteData.Values["controller"] ?? "";
-        var action = (string?)ViewContext.RouteData.Values["action"] ?? "";
+        if (value is UserAuthorisationResult result)
+        {
+            userAuthResult = result;
+        }
+    }
 
-        @* Controller actions where change-school option won't be shown *@
-        var excluded = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
-{
-{
-"ReviewAnswers", new HashSet<string>(
-[nameof(ReviewAnswersController.CheckAnswers)],
-StringComparer.OrdinalIgnoreCase)
-},
-{
-"Questions", new HashSet<string>(
-[QuestionsController.GetQuestionBySlugAction, nameof(QuestionsController.SubmitAnswer)],
-StringComparer.OrdinalIgnoreCase)
-},
-{
-"Groups", new HashSet<string>(
-[GroupsController.GetSelectASchoolAction],
-StringComparer.OrdinalIgnoreCase)
-},
-};
+    var isNonAuthorisedPage = true;
 
-        showChangeSchool = !(excluded.TryGetValue(controller, out var actions) && actions.Contains(action));
+    if (userAuthResult == null || userAuthResult.PageRequiresAuthorisation)
+    {
+        isNonAuthorisedPage = false;
+    }
+
+    @* Conditionally show the change school partial on all pages except for specific pages in the exclusion list for MAT's*@
+    if (!string.IsNullOrWhiteSpace(selectedSchool)
+        && CurrentUser.IsAuthenticated
+        && CurrentUser.IsMat)
+    {
+        if (isNonAuthorisedPage)
+        {
+            showChangeSchool = true;
+        }
+        else
+        {
+            @* Controller actions where change-school option won't be shown *@
+            var excluded = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                {
+                    "ReviewAnswers", new HashSet<string>(
+                        [nameof(ReviewAnswersController.CheckAnswers)],
+                        StringComparer.OrdinalIgnoreCase)
+                },
+                {
+                    "Questions", new HashSet<string>(
+                        [
+                            QuestionsController.GetQuestionBySlugAction,
+                            nameof(QuestionsController.SubmitAnswer)
+                        ],
+                        StringComparer.OrdinalIgnoreCase)
+                },
+                {
+                    "Groups", new HashSet<string>(
+                        [GroupsController.GetSelectASchoolAction],
+                        StringComparer.OrdinalIgnoreCase)
+                },
+            };
+
+            showChangeSchool =
+                !(excluded.TryGetValue(controller, out var actions) && actions.Contains(action));
+        }
     }
 }
 
@@ -67,7 +100,7 @@ StringComparer.OrdinalIgnoreCase)
 
     @if (showChangeSchool)
     {
-        <partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
+        <partial name="ChangeSchool" model="selectedSchool" />
     }
 }
 
