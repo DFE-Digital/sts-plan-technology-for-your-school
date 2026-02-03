@@ -230,6 +230,4 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
         return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
     }
-
-    private static object SqlValueOrDbNull(string? value) => value ?? (object)DBNull.Value;
 }
