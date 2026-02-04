@@ -34,7 +34,7 @@ runs:
       uses: ./.github/actions/build-dotnet-app
       with:
         dotnet_version: ${{ inputs.dotnet_version }}
-        solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+        solution_filename: ./src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.sln
 
     - name: Get workflow IP address
       id: whats-my-ip

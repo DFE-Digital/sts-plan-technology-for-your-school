@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Users.Commands;
 using Dfe.PlanTech.Domain.Users.Models;
 using NSubstitute;

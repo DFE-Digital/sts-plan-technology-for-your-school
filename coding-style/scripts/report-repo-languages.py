@@ -83,14 +83,16 @@ NAME_TO_TYPE: dict[str, str] = {
 
 # Dotfiles (treated as filenames)
 DOTFILE_TO_TYPE: dict[str, str] = {
+    ".dockerignore": "Docker ignore",
     ".editorconfig": "EditorConfig",
     ".gitattributes": "Git attributes",
     ".gitignore": "Git ignore",
     ".gitmodules": "Git submodules",
-    ".dockerignore": "Docker ignore",
     ".npmrc": "NPM config",
-    ".yarnrc": "Yarn config",
+    ".prettierrc": "Prettier config",
+    ".prettierignore": "Prettier ignore",
     ".python-version": "Python version",
+    ".yarnrc": "Yarn config",
 }
 
 

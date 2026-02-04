@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.Content.Interfaces;
 using Dfe.PlanTech.Domain.Content.Models;

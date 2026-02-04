@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Contentful.Core.Models;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Data.Contentful.PartRenderers;

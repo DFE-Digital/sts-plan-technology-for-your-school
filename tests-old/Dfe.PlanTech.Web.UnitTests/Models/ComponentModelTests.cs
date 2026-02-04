@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Submissions.Models;
+using Dfe.PlanTech.Domain.Submissions.Models;
 using Dfe.PlanTech.Infrastructure.Data.Contentful.Models;
 using Xunit;
 

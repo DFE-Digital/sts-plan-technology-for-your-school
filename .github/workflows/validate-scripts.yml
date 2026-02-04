@@ -35,7 +35,7 @@ jobs:
         uses: ./.github/actions/build-dotnet-app
         with:
           dotnet_version: ${{ vars.DOTNET_VERSION }}
-          solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+          solution_filename: ./src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.sln
 
       - name: Get DB Connection String
         id: connection-string

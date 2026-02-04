@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Content.Models;
+using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Domain.Content.Models.Buttons;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Submissions.Models;

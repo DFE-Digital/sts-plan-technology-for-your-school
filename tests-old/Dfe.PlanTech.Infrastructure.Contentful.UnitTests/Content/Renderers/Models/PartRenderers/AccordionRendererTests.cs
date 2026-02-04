@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Dfe.PlanTech.Data.Contentful.PartRenderers;
 using Dfe.PlanTech.Domain.Content.Enums;
 using Dfe.PlanTech.Domain.Content.Models;

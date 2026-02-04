@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
 
 namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers
