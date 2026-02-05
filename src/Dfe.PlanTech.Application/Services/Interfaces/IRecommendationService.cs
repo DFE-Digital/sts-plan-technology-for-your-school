@@ -26,7 +26,7 @@ public interface IRecommendationService
         string? noteText = null,
         int? matEstablishmentId = null
     );
-    Task<SqlFirstActivityForEstablishmentRecommendationDto> GetFirstActivityForEstablishmentRecommendationAsync(
+    Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
         string recommendationContentfulReference
     );

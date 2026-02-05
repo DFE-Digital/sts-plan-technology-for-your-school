@@ -112,7 +112,7 @@ public class RecommendationWorkflow(
         );
     }
 
-    public async Task<SqlFirstActivityForEstablishmentRecommendationDto> GetFirstActivityForEstablishmentRecommendationAsync(
+    public async Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
         string recommendationContentfulReference
     )
@@ -122,6 +122,7 @@ public class RecommendationWorkflow(
                 establishmentId,
                 recommendationContentfulReference
             );
-        return firstActivity.AsDto();
+
+        return firstActivity?.AsDto();
     }
 }
