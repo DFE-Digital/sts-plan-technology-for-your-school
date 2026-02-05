@@ -1,3 +1,5 @@
+using Dfe.PlanTech.Core.Enums;
+
 namespace Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 public class SqlEstablishmentRecommendationHistoryDto : ISqlDto
@@ -7,7 +9,7 @@ public class SqlEstablishmentRecommendationHistoryDto : ISqlDto
     public int UserId { get; init; }
     public int? MatEstablishmentId { get; init; }
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
-    public string? PreviousStatus { get; init; }
-    public string NewStatus { get; init; } = null!;
+    public RecommendationStatus? PreviousStatus { get; init; }
+    public RecommendationStatus? NewStatus { get; init; }
     public string? NoteText { get; init; }
 }

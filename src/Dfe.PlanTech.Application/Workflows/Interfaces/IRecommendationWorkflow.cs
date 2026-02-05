@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 
@@ -22,7 +23,7 @@ public interface IRecommendationWorkflow
         string recommendationContentfulReference,
         int establishmentId,
         int userId,
-        string newStatus,
+        RecommendationStatus newStatus,
         string? noteText = null,
         int? matEstablishmentId = null
     );

@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.Interfaces;
@@ -25,8 +26,8 @@ public interface IEstablishmentRecommendationHistoryRepository
         int recommendationId,
         int userId,
         int? matEstablishmentId,
-        string? previousStatus,
-        string newStatus,
+        RecommendationStatus? previousStatus,
+        RecommendationStatus? newStatus,
         string noteText
     );
 }

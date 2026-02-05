@@ -26,7 +26,7 @@ public class EstablishmentRecommendationHistoryEntity
 
     public string? PreviousStatus { get; set; }
 
-    public string NewStatus { get; set; } = null!;
+    public string? NewStatus { get; set; } = null!;
 
     public string? NoteText { get; set; }
 
@@ -41,8 +41,8 @@ public class EstablishmentRecommendationHistoryEntity
             DateCreated = DateCreated,
             PreviousStatus = PreviousStatus is null
                 ? null
-                : PreviousStatus.GetRecommendationStatusEnumValue()!.GetDisplayName(),
-            NewStatus = NewStatus.GetRecommendationStatusEnumValue()!.GetDisplayName(),
+                : PreviousStatus.GetRecommendationStatusEnumValue()!,
+            NewStatus = NewStatus.GetRecommendationStatusEnumValue()!,
             NoteText = NoteText,
         };
     }

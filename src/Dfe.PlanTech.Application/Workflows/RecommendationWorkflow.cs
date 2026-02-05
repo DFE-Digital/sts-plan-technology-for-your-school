@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
@@ -78,7 +79,7 @@ public class RecommendationWorkflow(
         string recommendationContentfulReference,
         int establishmentId,
         int userId,
-        string newStatus,
+        RecommendationStatus newStatus,
         string? noteText = null,
         int? matEstablishmentId = null
     )

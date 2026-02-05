@@ -110,13 +110,13 @@ public class RecommendationsViewBuilder(
             TotalChunks = recommendationChunks.Count,
             SelectedStatusKey =
                 currentRecommendationHistoryStatus?.NewStatus
-                ?? RecommendationStatus.NotStarted.ToString(),
+                ?? RecommendationStatus.NotStarted,
             LastUpdated = currentRecommendationHistoryStatus?.DateCreated,
             SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
             SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
             StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
             StatusOptions = Enum.GetValues<RecommendationStatus>()
-                .ToDictionary(key => key.ToString(), key => key.GetDisplayName()),
+                .ToDictionary(key => key, key => key.GetDisplayName()),
             OriginatingSlug = chunkSlug,
             History = groupedHistory,
             FirstActivity = firstActivity,
@@ -226,19 +226,19 @@ public class RecommendationsViewBuilder(
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        string selectedStatus,
+        string? selectedStatus,
         string? notes
     )
     {
-        var selectedStatusDisplayName = selectedStatus.GetRecommendationStatusEnumValue();
+        var selectedStatusEnum = selectedStatus.GetRecommendationStatusEnumValue();
 
         // Allow only specific statuses
-        if (selectedStatusDisplayName is null)
+        if (selectedStatusEnum is null)
         {
             Logger.LogWarning(
                 "Invalid / unrecognised status value received: {SelectedStatus}: {SelectedStatusDisplayName}",
                 selectedStatus,
-                selectedStatusDisplayName
+                selectedStatusEnum
             );
             controller.TempData["StatusUpdateError"] = "Select a valid status";
             return await RouteToSingleRecommendation(
@@ -278,15 +278,15 @@ public class RecommendationsViewBuilder(
             currentRecommendationChunk.Id,
             establishmentId,
             userId,
-            selectedStatus,
+            selectedStatusEnum.Value,
             notes
-                ?? $"Change reason: Status manually updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'",
+                ?? $"Change reason: Status manually updated to '{selectedStatusEnum.Value.GetDisplayName()}'",
             CurrentUser.IsMat ? userOrganisationId : null
         );
 
         // Set success message for the banner
         controller.TempData["StatusUpdateSuccessTitle"] =
-            $"Status updated to '{selectedStatusDisplayName.Value.GetDisplayName()}'";
+            $"Status updated to '{selectedStatusEnum.Value.GetDisplayName()}'";
 
         // Redirect back to the single recommendation page
         return PageRedirecter.RedirectToGetSingleRecommendation(
@@ -355,7 +355,7 @@ public class RecommendationsViewBuilder(
                 Header = cr.HeaderText,
                 LastUpdated = details[cr.Id].DateCreated,
                 Status =
-                    details[cr.Id].NewStatus.GetRecommendationStatusEnumValue()
+                    details[cr.Id].NewStatus
                     ?? RecommendationStatus.NotStarted,
                 Slug = cr.Slug,
             })
