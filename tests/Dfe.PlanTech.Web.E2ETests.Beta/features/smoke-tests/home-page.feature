@@ -7,7 +7,7 @@ Feature: home page
     Then the header should contain all the correct content
     And I should see the beta header
 
-    Then I should see the page heading "Technology self‑assessment"
+    Then I should see the page heading "Plan technology for your school"
 
     Then I should see a subheading with the text "How to meet the digital and technology standards"
 
