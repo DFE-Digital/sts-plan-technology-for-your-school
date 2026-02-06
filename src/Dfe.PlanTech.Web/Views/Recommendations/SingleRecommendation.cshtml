@@ -128,7 +128,7 @@
 
                         @foreach (var option in Model.StatusOptions)
                         {
-                            <govuk-radios-item value="@option.Key" checked="@(Model.SelectedStatusKey == option.Key)">
+                            <govuk-radios-item value="@option.Key.ToString()" checked="@(Model.SelectedStatusKey == option.Key)">
                                 @option.Value
                             </govuk-radios-item>
                         }
@@ -179,9 +179,9 @@
                                 }
                                 else
                                 {
-                                    @if (!string.Equals(history.PreviousStatus, history.NewStatus))
+                                    @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
                                     {
-                                        <p>Status changed to <strong>@history.NewStatus</strong>.</p>
+                                        <p>Status changed to <strong>@history.NewStatus.Value.GetDisplayName()</strong>.</p>
                                     }
 
                                     @if (!string.IsNullOrWhiteSpace(history.NoteText))

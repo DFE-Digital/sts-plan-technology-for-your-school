@@ -312,7 +312,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task StoredProcedureRepository_GetFirstActivityForEstablishmentRecommendationAsync_WhenNoDataReturned_ThenThrowsDatabaseException()
+    public async Task StoredProcedureRepository_GetFirstActivityForEstablishmentRecommendationAsync_WhenNoDataReturned_ThenReturnsNull()
     {
         // Arrange
         var establishment = new EstablishmentEntity
@@ -324,12 +324,13 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         // Act & Assert
-        await Assert.ThrowsAsync<DatabaseException>(() =>
-            _storedProcRepository.GetFirstActivityForEstablishmentRecommendationAsync(
+        var result =
+            await _storedProcRepository.GetFirstActivityForEstablishmentRecommendationAsync(
                 establishment.Id,
                 "REC-DOES-NOT-EXIST"
-            )
-        );
+            );
+
+        Assert.Null(result);
     }
 
     /* =================================================== */

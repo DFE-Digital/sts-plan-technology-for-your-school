@@ -43,7 +43,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         _db = dbContext;
     }
 
-    public async Task<FirstActivityForEstablishmentRecommendationEntity> GetFirstActivityForEstablishmentRecommendationAsync(
+    public async Task<FirstActivityForEstablishmentRecommendationEntity?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
         string recommendationContentfulReference
     )
@@ -73,9 +73,7 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
         if (results.Count == 0)
         {
-            throw new DatabaseException(
-                $"No data returned from {DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation}"
-            );
+            return null;
         }
 
         return results[0];

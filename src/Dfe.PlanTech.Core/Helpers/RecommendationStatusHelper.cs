@@ -8,7 +8,7 @@ namespace Dfe.PlanTech.Core.Helpers
     public static class RecommendationStatusHelper
     {
         public static RecommendationStatus? GetRecommendationStatusEnumValue(
-            this string recommendationStatus
+            this string? recommendationStatus
         )
         {
             return recommendationStatus.GetEnumValue<RecommendationStatus>();
@@ -21,9 +21,9 @@ namespace Dfe.PlanTech.Core.Helpers
         {
             var status = history.TryGetValue(chunk.Id, out var recommendationHistory)
                 ? recommendationHistory.NewStatus
-                : RecommendationStatus.NotStarted.ToString();
+                : RecommendationStatus.NotStarted;
 
-            return status.GetRecommendationStatusEnumValue() ?? RecommendationStatus.NotStarted;
+            return status ?? RecommendationStatus.NotStarted;
         }
 
         public static DateTime GetLastUpdatedUtc(

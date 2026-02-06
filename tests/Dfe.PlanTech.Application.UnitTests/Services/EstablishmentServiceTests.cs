@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using NSubstitute;
 
@@ -135,7 +136,7 @@ public class EstablishmentServiceTests
                 EstablishmentId = 1001,
                 RecommendationId = 1,
                 UserId = 1,
-                NewStatus = "Complete",
+                NewStatus = RecommendationStatus.Complete,
                 DateCreated = DateTime.UtcNow.AddDays(-1),
             },
             ["rec-002"] = new SqlEstablishmentRecommendationHistoryDto
@@ -143,7 +144,7 @@ public class EstablishmentServiceTests
                 EstablishmentId = 1001,
                 RecommendationId = 2,
                 UserId = 1,
-                NewStatus = "InProgress",
+                NewStatus = RecommendationStatus.InProgress,
                 DateCreated = DateTime.UtcNow.AddDays(-2),
             },
             ["rec-003"] = new SqlEstablishmentRecommendationHistoryDto
@@ -151,7 +152,7 @@ public class EstablishmentServiceTests
                 EstablishmentId = 1001,
                 RecommendationId = 3,
                 UserId = 1,
-                NewStatus = "NotStarted",
+                NewStatus = RecommendationStatus.NotStarted,
                 DateCreated = DateTime.UtcNow.AddDays(-2),
             },
         };
@@ -163,7 +164,7 @@ public class EstablishmentServiceTests
                 EstablishmentId = 1002,
                 RecommendationId = 4,
                 UserId = 1,
-                NewStatus = "NotStarted",
+                NewStatus = RecommendationStatus.NotStarted,
                 DateCreated = DateTime.UtcNow.AddDays(-1),
             },
             ["rec-005"] = new SqlEstablishmentRecommendationHistoryDto
@@ -171,7 +172,7 @@ public class EstablishmentServiceTests
                 EstablishmentId = 1002,
                 RecommendationId = 5,
                 UserId = 1,
-                NewStatus = "InProgress",
+                NewStatus = RecommendationStatus.InProgress,
                 DateCreated = DateTime.UtcNow.AddDays(-2),
             },
         };
@@ -359,7 +360,7 @@ public class EstablishmentServiceTests
                 EstablishmentId = 1001,
                 RecommendationId = 1,
                 UserId = 1,
-                NewStatus = "Complete",
+                NewStatus = RecommendationStatus.Complete,
                 DateCreated = DateTime.UtcNow,
             },
         };

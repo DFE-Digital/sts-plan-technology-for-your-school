@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -120,7 +121,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     null!,
                     "section-slug",
                     "chunk-slug",
-                    "Complete",
+                    RecommendationStatus.Complete.ToString(),
                     null
                 )
             );
@@ -134,7 +135,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     "category-slug",
                     null!,
                     "chunk-slug",
-                    "Complete",
+                    RecommendationStatus.Complete.ToString(),
                     null
                 )
             );
@@ -148,7 +149,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     "category-slug",
                     "section-slug",
                     null!,
-                    "Complete",
+                    RecommendationStatus.Complete.ToString(),
                     null
                 )
             );

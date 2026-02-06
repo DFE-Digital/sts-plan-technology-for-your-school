@@ -152,7 +152,7 @@ public class RecommendationsViewBuilderTests
             EstablishmentId = 123,
             RecommendationId = 2,
             UserId = 1,
-            NewStatus = "Completed",
+            NewStatus = RecommendationStatus.Complete,
             DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
@@ -209,7 +209,7 @@ public class RecommendationsViewBuilderTests
         Assert.Equal(3, vm.TotalChunks);
         Assert.Equal("first-chunk-1", vm.PreviousChunk!.Slug);
         Assert.Equal("third-chunk-3", vm.NextChunk!.Slug);
-        Assert.Equal("Completed", vm.SelectedStatusKey);
+        Assert.Equal(RecommendationStatus.Complete, vm.SelectedStatusKey);
         Assert.Equal(DateTime.UtcNow.AddDays(-1).Date, vm.LastUpdated?.Date);
         Assert.Equal("second-chunk-2", vm.OriginatingSlug);
         Assert.Single(vm.History.Keys);
@@ -391,19 +391,19 @@ public class RecommendationsViewBuilderTests
                     {
                         RecommendationId = 1,
                         DateCreated = DateTime.UtcNow,
-                        NewStatus = "InProgress",
+                        NewStatus = RecommendationStatus.InProgress,
                     },
                     ["C2"] = new SqlEstablishmentRecommendationHistoryDto
                     {
                         RecommendationId = 2,
                         DateCreated = DateTime.UtcNow,
-                        NewStatus = "Complete",
+                        NewStatus = RecommendationStatus.Complete,
                     },
                     ["C3"] = new SqlEstablishmentRecommendationHistoryDto
                     {
                         RecommendationId = 3,
                         DateCreated = DateTime.UtcNow,
-                        NewStatus = "NotStarted",
+                        NewStatus = RecommendationStatus.NotStarted,
                     },
                 }
             );
@@ -459,19 +459,19 @@ public class RecommendationsViewBuilderTests
                     {
                         RecommendationId = 1,
                         DateCreated = DateTime.UtcNow,
-                        NewStatus = "InProgress",
+                        NewStatus = RecommendationStatus.InProgress,
                     },
                     ["C2"] = new SqlEstablishmentRecommendationHistoryDto
                     {
                         RecommendationId = 2,
                         DateCreated = DateTime.UtcNow,
-                        NewStatus = "InProgress",
+                        NewStatus = RecommendationStatus.InProgress,
                     },
                     ["C3"] = new SqlEstablishmentRecommendationHistoryDto
                     {
                         RecommendationId = 3,
                         DateCreated = DateTime.UtcNow,
-                        NewStatus = "InProgress",
+                        NewStatus = RecommendationStatus.InProgress,
                     },
                 }
             );
@@ -526,19 +526,19 @@ public class RecommendationsViewBuilderTests
                     {
                         RecommendationId = 1,
                         DateCreated = DateTime.UtcNow.AddDays(-1),
-                        NewStatus = "Completed",
+                        NewStatus = RecommendationStatus.Complete,
                     },
                     ["C2"] = new()
                     {
                         RecommendationId = 2,
                         DateCreated = DateTime.UtcNow.AddDays(-2),
-                        NewStatus = "Completed",
+                        NewStatus = RecommendationStatus.Complete,
                     },
                     ["C3"] = new()
                     {
                         RecommendationId = 3,
                         DateCreated = DateTime.UtcNow.AddDays(-3),
-                        NewStatus = "Completed",
+                        NewStatus = RecommendationStatus.Complete,
                     },
                 }
             );
@@ -699,7 +699,7 @@ public class RecommendationsViewBuilderTests
             EstablishmentId = establishmentId,
             RecommendationId = 2,
             UserId = userId,
-            NewStatus = RecommendationStatus.NotStarted.ToString(),
+            NewStatus = RecommendationStatus.NotStarted,
             DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
@@ -711,7 +711,7 @@ public class RecommendationsViewBuilderTests
             .GetRecommendationHistoryAsync("C2", establishmentId)
             .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
 
-        var selectedStatus = RecommendationStatus.NotStarted.ToString();
+        var selectedStatus = RecommendationStatus.NotStarted;
 
         // Act
         var result = await sut.UpdateRecommendationStatusAsync(
@@ -719,7 +719,7 @@ public class RecommendationsViewBuilderTests
             categorySlug,
             sectionSlug,
             chunkSlug,
-            selectedStatus,
+            selectedStatus.ToString(),
             notes: null
         );
 
@@ -789,7 +789,7 @@ public class RecommendationsViewBuilderTests
             .GetRecommendationHistoryAsync("C2", establishmentId)
             .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
 
-        var selectedStatus = RecommendationStatus.NotStarted.ToString();
+        var selectedStatus = RecommendationStatus.NotStarted;
         const string customNotes = "This is a custom reason";
 
         // Act
@@ -798,7 +798,7 @@ public class RecommendationsViewBuilderTests
             categorySlug,
             sectionSlug,
             chunkSlug,
-            selectedStatus,
+            selectedStatus.ToString(),
             notes: customNotes
         );
 
