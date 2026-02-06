@@ -17,13 +17,18 @@ public class GroupsController : BaseController<GroupsController>
         ILogger<GroupsController> logger,
         ICurrentUser currentUser,
         IGroupsViewBuilder groupsViewBuilder
-    ) : base(logger)
+    )
+        : base(logger)
     {
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-        _groupsViewBuilder = groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
+        _groupsViewBuilder =
+            groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
     }
 
-    [HttpGet($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}", Name = GetSelectASchoolAction)]
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}",
+        Name = GetSelectASchoolAction
+    )]
     public async Task<IActionResult> GetSelectASchoolView()
     {
         return await _groupsViewBuilder.RouteToSelectASchoolViewModelAsync(this);

@@ -1,0 +1,6 @@
+# Auto-detect text and normalize line endings in repo
+* text=auto eol=lf
+
+# Keep Windows scripts sane if you have them (optional; delete if you don't)
+*.bat text eol=crlf
+*.cmd text eol=crlf

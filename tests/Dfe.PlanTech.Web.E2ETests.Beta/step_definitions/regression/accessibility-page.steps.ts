@@ -1,7 +1,6 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 
-
 Given('I am on the accessibility page', async function () {
   await this.page.goto(`${process.env.URL}accessibility-statement`);
   await expect(this.page).toHaveURL(/\/accessibility-statement/);
@@ -10,7 +9,7 @@ Given('I am on the accessibility page', async function () {
 Then('I should see a back link to the previous page', async function () {
   const backLink = this.page.locator('a#back-button-link', { hasText: /back/i });
   await expect(backLink).toBeVisible();
-  
+
   const href = await backLink.getAttribute('href');
   expect(href).toContain('/');
 });

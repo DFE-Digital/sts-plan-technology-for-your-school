@@ -1,6 +1,6 @@
 # 0001 - Web Framework Language
 
-* **Status**: Accepted
+- **Status**: Accepted
 
 ## Context and Problem Statement
 
@@ -8,15 +8,15 @@ Within the DfE there are a choice of web frameworks that are used for the implem
 
 ## Decision Drivers
 
-* Within DfE’s Technical Guidance
-* Open source as per Service Standard
-* Prominent and widely used within the industry today
-* Software Engineers are easy to source
+- Within DfE’s Technical Guidance
+- Open source as per Service Standard
+- Prominent and widely used within the industry today
+- Software Engineers are easy to source
 
 ## Considered Options
 
-* .NET
-* Ruby on Rails
+- .NET
+- Ruby on Rails
 
 ## Decision Outcome
 

@@ -2,18 +2,22 @@ namespace Dfe.PlanTech.Core.Helpers;
 
 public static class TagColourHelper
 {
-    public readonly static string Default = "blue";
-    public readonly static string Blue = "blue";
-    public readonly static string Grey = "grey";
-    public readonly static string LightBlue = "light-blue";
-    public readonly static string Red = "red";
-    public readonly static string Green = "green";
-    public readonly static string Yellow = "yellow";
+    public static readonly string Default = "blue";
+    public static readonly string Blue = "blue";
+    public static readonly string Grey = "grey";
+    public static readonly string LightBlue = "light-blue";
+    public static readonly string Red = "red";
+    public static readonly string Green = "green";
+    public static readonly string Yellow = "yellow";
 
-    private readonly static string[] _colours = [Blue, Grey, LightBlue, Red, Green, Yellow];
+    private static readonly string[] _colours = [Blue, Grey, LightBlue, Red, Green, Yellow];
 
     public static string GetMatchingColour(string? toMatch) =>
         string.IsNullOrEmpty(toMatch)
             ? Default
-            : _colours.FirstOrDefault(colour => string.Equals(colour, toMatch, StringComparison.InvariantCultureIgnoreCase), Default);
+            : _colours.FirstOrDefault(
+                colour =>
+                    string.Equals(colour, toMatch, StringComparison.InvariantCultureIgnoreCase),
+                Default
+            );
 }

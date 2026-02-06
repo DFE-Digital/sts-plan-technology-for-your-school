@@ -14,7 +14,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
             {
                 Text = "Test",
                 Size = HeaderSize.Small,
-                Tag = HeaderTag.H1
+                Tag = HeaderTag.H1,
             };
 
             var classForHeader = header.GetClassForSize();
@@ -29,7 +29,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
             {
                 Text = "Test",
                 Size = HeaderSize.Medium,
-                Tag = HeaderTag.H1
+                Tag = HeaderTag.H1,
             };
 
             var classForHeader = header.GetClassForSize();
@@ -44,7 +44,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
             {
                 Text = "Test",
                 Size = HeaderSize.Large,
-                Tag = HeaderTag.H1
+                Tag = HeaderTag.H1,
             };
 
             var classForHeader = header.GetClassForSize();
@@ -59,7 +59,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Helpers
             {
                 Text = "Test",
                 Size = HeaderSize.ExtraLarge,
-                Tag = HeaderTag.H1
+                Tag = HeaderTag.H1,
             };
 
             var classForHeader = header.GetClassForSize();

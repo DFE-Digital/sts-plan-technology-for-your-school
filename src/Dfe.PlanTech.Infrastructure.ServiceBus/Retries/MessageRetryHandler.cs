@@ -7,22 +7,30 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Infrastructure.ServiceBus.Retries;
 
 /// <inheritdoc cref="IMessageRetryHandler"/>
-public class MessageRetryHandler(IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory,
-                                 IOptions<MessageRetryHandlingOptions> options)
-    : IMessageRetryHandler
+public class MessageRetryHandler(
+    IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory,
+    IOptions<MessageRetryHandlingOptions> options
+) : IMessageRetryHandler
 {
-    private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient("contentfulsender");
+    private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient(
+        "contentfulsender"
+    );
     private readonly MessageRetryHandlingOptions _messageRetryHandlingOptions = options.Value;
 
     private const string CustomMessageProperty = "DeliveryAttempts";
 
     /// <inheritdoc cref="IMessageRetryHandler"/>
-    public async Task<bool> RetryRequired(ServiceBusReceivedMessage message, CancellationToken cancellationToken)
+    public async Task<bool> RetryRequired(
+        ServiceBusReceivedMessage message,
+        CancellationToken cancellationToken
+    )
     {
         var deliveryAttempts = 0;
 
-        if (message.ApplicationProperties.TryGetValue(CustomMessageProperty, out object? attemptObj) &&
-            int.TryParse(attemptObj?.ToString(), out int existingAttempt))
+        if (
+            message.ApplicationProperties.TryGetValue(CustomMessageProperty, out object? attemptObj)
+            && int.TryParse(attemptObj?.ToString(), out int existingAttempt)
+        )
         {
             deliveryAttempts = existingAttempt;
         }
@@ -48,13 +56,19 @@ public class MessageRetryHandler(IAzureClientFactory<ServiceBusSender> serviceBu
     /// <param name="deliveryAttempts"></param>
     /// <param name="cancellationToken"></param>
     /// <returns></returns>
-    private async Task RedeliverMessage(ServiceBusReceivedMessage message, int deliveryAttempts, CancellationToken cancellationToken)
+    private async Task RedeliverMessage(
+        ServiceBusReceivedMessage message,
+        int deliveryAttempts,
+        CancellationToken cancellationToken
+    )
     {
         var resubmittedMessage = new ServiceBusMessage()
         {
-            ScheduledEnqueueTime = DateTime.UtcNow.AddSeconds(_messageRetryHandlingOptions.MessageDeliveryDelayInSeconds),
+            ScheduledEnqueueTime = DateTime.UtcNow.AddSeconds(
+                _messageRetryHandlingOptions.MessageDeliveryDelayInSeconds
+            ),
             Subject = message.Subject,
-            Body = message.Body
+            Body = message.Body,
         };
 
         ++deliveryAttempts;

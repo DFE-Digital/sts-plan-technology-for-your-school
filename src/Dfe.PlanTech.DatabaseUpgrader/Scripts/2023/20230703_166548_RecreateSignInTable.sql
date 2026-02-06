@@ -10,7 +10,7 @@
 	 CONSTRAINT [PK_signIn] PRIMARY KEY CLUSTERED ( [id] ASC)
 	)
 
-	ALTER TABLE [dbo].[signIn] WITH CHECK 
+	ALTER TABLE [dbo].[signIn] WITH CHECK
 	ADD CONSTRAINT [FK_establishmentId_establishmentId] FOREIGN KEY([establishmentId])
 	REFERENCES [dbo].[establishment] ([id])
 

@@ -1,6 +1,6 @@
 # 0042 - GIAS Data Refresh
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -44,7 +44,6 @@ Currently, the GIAS data is static/manually updated and does not refresh automat
       - there is no concept within the service of "privileged users" or a backoffice/admin interface within the service currently,
         which would be needed for DfE personnel to track the status of the GIAS data refresh process, or to trigger it manually (currently provided via GitHub Actions)
 
-
 ## Decision Outcome
 
 Given timings and desire to have something functional sooner rather than later,
@@ -53,4 +52,3 @@ and despite caveats about future maintainability concerns,
 we have chosen to implement option (3a) and make minimal changes to get the previous PoC code functioning and run on a schedule.
 
 Future work is on the backlog to investigate further improvements and optimisations (e.g. options 2/3b/others).
-

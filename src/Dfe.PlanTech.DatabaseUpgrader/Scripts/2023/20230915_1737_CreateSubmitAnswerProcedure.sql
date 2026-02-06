@@ -22,25 +22,24 @@ BEGIN TRY
       (answerText, contentfulRef)
     VALUES
       (@answerText, @answerContentfulId)
-    SELECT @answerId = Scope_Identity() 
+    SELECT @answerId = Scope_Identity()
 
     DECLARE @questionId INT
     INSERT INTO [dbo].[question]
       (questionText, contentfulRef)
     VALUES
       (@questionText, @questionContentfulId)
-    SELECT @questionId = Scope_Identity() 
+    SELECT @questionId = Scope_Identity()
 
     INSERT INTO [dbo].[response]
       (userId, submissionId, questionId, answerId, maturity)
     VALUES
       (@userId, @submissionId, @questionId, @answerId, @maturity)
 
-    SELECT @responseId = Scope_Identity() 
+    SELECT @responseId = Scope_Identity()
   COMMIT TRAN
 
   END TRY
   BEGIN CATCH
     ROLLBACK TRAN
   END CATCH
-  

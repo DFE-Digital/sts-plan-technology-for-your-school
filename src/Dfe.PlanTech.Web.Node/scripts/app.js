@@ -1,3 +1,3 @@
-import { BrowserHistory } from "./browser-history";
+import { BrowserHistory } from './browser-history';
 
 new BrowserHistory();

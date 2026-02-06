@@ -10,13 +10,16 @@ namespace Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 [ExcludeFromCodeCoverage]
 public static class UserClaimsExtensions
 {
-    private static readonly JsonSerializerOptions _jsonSerialiserOptions = new JsonSerializerOptions()
-    {
-        PropertyNameCaseInsensitive = true
-    };
+    private static readonly JsonSerializerOptions _jsonSerialiserOptions =
+        new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };
 
-    public static UserAuthorisationStatus GetAuthorisationStatus(this ClaimsPrincipal claimsPrincipal) =>
-        new(claimsPrincipal.Identity?.IsAuthenticated == true, claimsPrincipal.Claims.GetOrganisation() != null);
+    public static UserAuthorisationStatus GetAuthorisationStatus(
+        this ClaimsPrincipal claimsPrincipal
+    ) =>
+        new(
+            claimsPrincipal.Identity?.IsAuthenticated == true,
+            claimsPrincipal.Claims.GetOrganisation() != null
+        );
 
     public static string GetDsiReference(this IEnumerable<Claim> claims)
     {
@@ -43,15 +46,18 @@ public static class UserClaimsExtensions
         ArgumentNullException.ThrowIfNull(claims);
 
         string? organisationJson = claims
-            .FirstOrDefault(c => c.Type == ClaimConstants.Organisation)?
-            .Value;
+            .FirstOrDefault(c => c.Type == ClaimConstants.Organisation)
+            ?.Value;
 
         if (organisationJson == null)
         {
             return null;
         }
 
-        var organisation = JsonSerializer.Deserialize<EstablishmentModel>(organisationJson, _jsonSerialiserOptions);
+        var organisation = JsonSerializer.Deserialize<EstablishmentModel>(
+            organisationJson,
+            _jsonSerialiserOptions
+        );
         if (organisation?.Id == Guid.Empty)
         {
             return null;

@@ -5,18 +5,22 @@ using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Rendering
 {
-    public class AccordionComponentRenderer(
-        ILogger<AccordionComponentRenderer> logger
-    ) : IRichTextContentPartRendererCollection
+    public class AccordionComponentRenderer(ILogger<AccordionComponentRenderer> logger)
+        : IRichTextContentPartRendererCollection
     {
-        private readonly ILogger<AccordionComponentRenderer> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly ILogger<AccordionComponentRenderer> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
 
         public ILogger Logger => _logger;
         public IReadOnlyList<IRichTextContentPartRenderer> Renderers { get; private set; } = [];
 
         private const string _closingDiv = "</div>";
 
-        public StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+        public StringBuilder AddHtml(
+            RichTextContentField content,
+            IRichTextContentPartRendererCollection rendererCollection,
+            StringBuilder stringBuilder
+        )
         {
             Renderers = rendererCollection.Renderers;
 
@@ -24,7 +28,9 @@ namespace Dfe.PlanTech.Application.Rendering
             if (nestedContent != null && nestedContent.Any())
             {
                 var accordionId = $"accordion-{nestedContent[0].InternalName}";
-                stringBuilder.AppendLine($"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"{accordionId}\">");
+                stringBuilder.AppendLine(
+                    $"<div class=\"govuk-accordion\" data-module=\"govuk-accordion\" id=\"{accordionId}\">"
+                );
 
                 for (int i = 0; i < nestedContent.Count; i++)
                 {
@@ -40,21 +46,27 @@ namespace Dfe.PlanTech.Application.Rendering
                     stringBuilder.Append("<div class=\"govuk-accordion__section-header\">");
                     stringBuilder.Append("<h2 class=\"govuk-accordion__section-heading\">");
 
-                    stringBuilder.Append($"<span class=\"govuk-accordion__section-button\" id=\"{headingId}\">");
+                    stringBuilder.Append(
+                        $"<span class=\"govuk-accordion__section-button\" id=\"{headingId}\">"
+                    );
                     stringBuilder.Append(innerContent.Title);
                     stringBuilder.Append("</span>");
                     stringBuilder.Append("</h2>");
 
                     if (!string.IsNullOrWhiteSpace(innerContent.SummaryLine))
                     {
-                        stringBuilder.Append($"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{summaryId}\">");
+                        stringBuilder.Append(
+                            $"<div class=\"govuk-accordion__section-summary govuk-body\" id=\"{summaryId}\">"
+                        );
                         stringBuilder.Append(innerContent.SummaryLine);
                         stringBuilder.Append(_closingDiv);
                     }
 
                     stringBuilder.Append(_closingDiv);
 
-                    stringBuilder.Append($"<div id=\"{contentId}\" class=\"govuk-accordion__section-content\">");
+                    stringBuilder.Append(
+                        $"<div id=\"{contentId}\" class=\"govuk-accordion__section-content\">"
+                    );
 
                     if (innerContent.RichText != null)
                     {
@@ -86,7 +98,7 @@ namespace Dfe.PlanTech.Application.Rendering
             }
         }
 
-        public IRichTextContentPartRenderer? GetRendererForContent(RichTextContentField content)
-            => Renderers.FirstOrDefault(renderer => renderer.Accepts(content));
+        public IRichTextContentPartRenderer? GetRendererForContent(RichTextContentField content) =>
+            Renderers.FirstOrDefault(renderer => renderer.Accepts(content));
     }
 }

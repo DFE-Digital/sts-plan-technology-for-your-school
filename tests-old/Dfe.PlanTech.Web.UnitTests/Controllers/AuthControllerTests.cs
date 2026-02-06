@@ -18,12 +18,16 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext()
+                HttpContext = new DefaultHttpContext(),
             };
 
             controller.HttpContext.User = new ClaimsPrincipal();
-            controller.HttpContext.User.AddIdentity(new ClaimsIdentity(claims, OpenIdConnectDefaults.AuthenticationScheme));
-            controller.HttpContext.User.AddIdentity(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme));
+            controller.HttpContext.User.AddIdentity(
+                new ClaimsIdentity(claims, OpenIdConnectDefaults.AuthenticationScheme)
+            );
+            controller.HttpContext.User.AddIdentity(
+                new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)
+            );
 
             var result = controller.SignOut();
 
@@ -32,8 +36,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var signOutResult = result as SignOutResult;
             Assert.NotNull(signOutResult);
-            Assert.Contains(OpenIdConnectDefaults.AuthenticationScheme, signOutResult!.AuthenticationSchemes);
-            Assert.Contains(CookieAuthenticationDefaults.AuthenticationScheme, signOutResult.AuthenticationSchemes);
+            Assert.Contains(
+                OpenIdConnectDefaults.AuthenticationScheme,
+                signOutResult!.AuthenticationSchemes
+            );
+            Assert.Contains(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                signOutResult.AuthenticationSchemes
+            );
         }
     }
 }

@@ -9,12 +9,15 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Web.Tests.Controllers
+namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class CookiesControllerTests
     {
-        private readonly ILogger<CookiesController> _logger = Substitute.For<ILogger<CookiesController>>();
-        private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
+        private readonly ILogger<CookiesController> _logger = Substitute.For<
+            ILogger<CookiesController>
+        >();
+        private readonly IContentfulService _contentfulService =
+            Substitute.For<IContentfulService>();
         private readonly ICookieService _cookieService = Substitute.For<ICookieService>();
         private readonly CookiesController _controller;
 
@@ -23,7 +26,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             _controller = new CookiesController(_logger, _contentfulService, _cookieService);
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext()
+                HttpContext = new DefaultHttpContext(),
             };
         }
 
@@ -33,7 +36,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             var pageContent = new PageEntry
             {
                 Title = new ComponentTitleEntry("Test title"),
-                Content = new List<ContentfulEntry>()
+                Content = new List<ContentfulEntry>(),
             };
 
             var testCookie = new DfeCookieModel();
@@ -55,7 +58,10 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         [Theory]
         [InlineData("true", true)]
         [InlineData("false", false)]
-        public void SetCookiePreference_ValidPreference_SetsCookieAndRedirects(string input, bool expected)
+        public void SetCookiePreference_ValidPreference_SetsCookieAndRedirects(
+            string input,
+            bool expected
+        )
         {
             _controller.HttpContext.Request.Headers["Referer"] = "http://cookietests.com";
 
@@ -69,14 +75,19 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         public void SetCookiePreference_InvalidPreference_ThrowsArgumentException()
         {
             var invalidParam = "not a bool";
-            var ex = Assert.Throws<ArgumentException>(() => _controller.SetCookiePreference(invalidParam));
+            var ex = Assert.Throws<ArgumentException>(() =>
+                _controller.SetCookiePreference(invalidParam)
+            );
             Assert.Equal($"Can't convert preference (Parameter '{invalidParam}')", ex.Message);
         }
 
         [Fact]
         public void SetCookiePreference_FromCookiesPage_SetsTempDataAndRedirectsToCookies()
         {
-            _controller.TempData = new TempDataDictionary(_controller.HttpContext, Substitute.For<ITempDataProvider>());
+            _controller.TempData = new TempDataDictionary(
+                _controller.HttpContext,
+                Substitute.For<ITempDataProvider>()
+            );
 
             var result = _controller.SetCookiePreference("true", isCookiesPage: true);
 
@@ -121,11 +132,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         [Fact]
         public async Task GetCookiesPage_UsesFallbackTitle_WhenTitleIsNull()
         {
-            var pageContent = new PageEntry
-            {
-                Title = null,
-                Content = new List<ContentfulEntry>()
-            };
+            var pageContent = new PageEntry { Title = null, Content = new List<ContentfulEntry>() };
 
             _contentfulService.GetPageBySlugAsync("cookies").Returns(pageContent);
             _cookieService.Cookie.Returns(new DfeCookieModel());
@@ -145,7 +152,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             var pageContent = new PageEntry
             {
                 Title = new ComponentTitleEntry("Test title"),
-                Content = null
+                Content = null,
             };
 
             _contentfulService.GetPageBySlugAsync("cookies").Returns(pageContent);
@@ -166,7 +173,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             var pageContent = new PageEntry
             {
                 Title = new ComponentTitleEntry("Test title"),
-                Content = new List<ContentfulEntry>()
+                Content = new List<ContentfulEntry>(),
             };
 
             _contentfulService.GetPageBySlugAsync("cookies").Returns(pageContent);
@@ -185,7 +192,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             var pageContent = new PageEntry
             {
                 Title = new ComponentTitleEntry("Test title"),
-                Content = new List<ContentfulEntry>()
+                Content = new List<ContentfulEntry>(),
             };
 
             _contentfulService.GetPageBySlugAsync("cookies").Returns(pageContent);

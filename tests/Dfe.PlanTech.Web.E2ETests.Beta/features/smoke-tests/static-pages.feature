@@ -40,7 +40,7 @@ Scenario: Cookies Page
     When I choose to reject cookies and save settings
     Then I should see a notification banner confirming the action
     And Google Tag Manager should be disabled
-  
+
     And I should see the GOV.UK footer with expected links
     And I should see the beta header
 

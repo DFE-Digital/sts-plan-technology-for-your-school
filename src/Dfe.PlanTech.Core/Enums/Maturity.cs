@@ -5,5 +5,5 @@ public enum Maturity
     Unknown,
     Low,
     Medium,
-    High
+    High,
 }

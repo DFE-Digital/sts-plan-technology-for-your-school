@@ -33,7 +33,7 @@ public class ReviewAnswersViewBuilderTests
         return new ReviewAnswersViewBuilder(_logger, _contentful, _submissions, _currentUser);
     }
 
-    private static Controller MakeController()
+    private static DummyController MakeController()
     {
         var ctl = new DummyController();
         var http = new DefaultHttpContext();
@@ -42,27 +42,54 @@ public class ReviewAnswersViewBuilderTests
         return ctl;
     }
 
-    private static QuestionnaireSectionEntry MakeSection(string id, string slug, string name = "Section", params QuestionnaireQuestionEntry[] qs)
-        => new QuestionnaireSectionEntry { Sys = new SystemDetails(id), Name = name, Questions = qs?.ToList() ?? new List<QuestionnaireQuestionEntry>() };
+    private static QuestionnaireSectionEntry MakeSection(
+        string id,
+        string slug,
+        string name = "Section",
+        params QuestionnaireQuestionEntry[] qs
+    ) =>
+        new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails(id),
+            Name = name,
+            Questions = qs?.ToList() ?? new List<QuestionnaireQuestionEntry>(),
+        };
 
-    private static QuestionnaireQuestionEntry MakeQuestion(string id, string slug, string text = "Q")
-        => new QuestionnaireQuestionEntry { Sys = new SystemDetails(id), Slug = slug, Text = text };
+    private static QuestionnaireQuestionEntry MakeQuestion(
+        string id,
+        string slug,
+        string text = "Q"
+    ) =>
+        new QuestionnaireQuestionEntry
+        {
+            Sys = new SystemDetails(id),
+            Slug = slug,
+            Text = text,
+        };
+
+    private static QuestionnaireQuestionEntry MakeQuestion(int id) =>
+        new QuestionnaireQuestionEntry
+        {
+            Sys = new SystemDetails($"Q{id}"),
+            Slug = $"slug-question-{id}",
+            Text = $"Question {id}",
+        };
 
     private static SubmissionRoutingDataModel MakeRouting(
         SubmissionStatus status,
         QuestionnaireSectionEntry section,
         QuestionnaireQuestionEntry? next = null,
         DateTime? completed = null,
-        params string[] answerIds)
+        params string[] answerIds
+    )
     {
-        var submission = new SubmissionResponsesModel(123,
-            answerIds.Select(a => new QuestionWithAnswerModel { AnswerSysId = a }).ToList())
+        var submission = new SubmissionResponsesModel(
+            123,
+            answerIds.Select(a => new QuestionWithAnswerModel { AnswerSysId = a }).ToList()
+        )
         {
             DateCompleted = completed,
-            Establishment = new SqlEstablishmentDto
-            {
-                OrgName = "Test Trust"
-            }
+            Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" },
         };
 
         return new SubmissionRoutingDataModel(next, section, submission, status);
@@ -80,8 +107,9 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S1", "sec-1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        _submissions.GetSubmissionRoutingDataAsync(1, section, false)
-                    .Returns(MakeRouting(SubmissionStatus.NotStarted, section));
+        _submissions
+            .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.InProgress)
+            .Returns(MakeRouting(SubmissionStatus.NotStarted, section));
 
         var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1");
         Assert.IsType<RedirectToActionResult>(result);
@@ -91,7 +119,9 @@ public class ReviewAnswersViewBuilderTests
     [InlineData(SubmissionStatus.InProgress)]
     [InlineData(SubmissionStatus.CompleteNotReviewed)]
     [InlineData(SubmissionStatus.CompleteReviewed)]
-    public async Task RouteToCheckAnswers_Shows_CheckAnswers_For_Allowed_Statuses(SubmissionStatus status)
+    public async Task RouteToCheckAnswers_Shows_CheckAnswers_For_Allowed_Statuses(
+        SubmissionStatus status
+    )
     {
         var sut = CreateSut();
         var ctl = MakeController();
@@ -100,11 +130,21 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S1", "sec-1", "Section 1");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        _contentful.GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
-                   .Returns(new PageEntry { Content = new List<ContentfulEntry> { new PageEntry { Sys = new SystemDetails("X") } } });
+        _contentful
+            .GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
+            .Returns(
+                new PageEntry
+                {
+                    Content = new List<ContentfulEntry>
+                    {
+                        new PageEntry { Sys = new SystemDetails("X") },
+                    },
+                }
+            );
 
-        _submissions.GetSubmissionRoutingDataAsync(1, section, false)
-                    .Returns(MakeRouting(status, section, next: MakeQuestion("Q2", "q-2")));
+        _submissions
+            .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.InProgress)
+            .Returns(MakeRouting(status, section, next: MakeQuestion("Q2", "q-2")));
 
         var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1", errorMessage: "err");
         var view = Assert.IsType<ViewResult>(result);
@@ -129,11 +169,18 @@ public class ReviewAnswersViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         var weirdStatus = (SubmissionStatus)999;
-        var routing = MakeRouting(SubmissionStatus.InProgress, section, next: MakeQuestion("Q1", "q-1"));
-        typeof(SubmissionRoutingDataModel).GetProperty(nameof(SubmissionRoutingDataModel.Status))!
+        var routing = MakeRouting(
+            SubmissionStatus.InProgress,
+            section,
+            next: MakeQuestion("Q1", "q-1")
+        );
+        typeof(SubmissionRoutingDataModel)
+            .GetProperty(nameof(SubmissionRoutingDataModel.Status))!
             .SetValue(routing, weirdStatus);
 
-        _submissions.GetSubmissionRoutingDataAsync(1, section, false).Returns(routing);
+        _submissions
+            .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.InProgress)
+            .Returns(routing);
 
         var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1");
         Assert.IsType<RedirectToActionResult>(result);
@@ -151,14 +198,13 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
-        _submissions.GetSubmissionRoutingDataAsync(2, section, true)
-                    .Returns(MakeRouting(SubmissionStatus.NotStarted, section));
+        _submissions
+            .GetSubmissionRoutingDataAsync(2, section, SubmissionStatus.CompleteReviewed)
+            .Returns(MakeRouting(SubmissionStatus.NotStarted, section));
 
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
         Assert.IsType<RedirectToActionResult>(result);
     }
-
-
 
     [Fact]
     public async Task RouteToViewAnswers_InProgress_Redirects_To_ContinueSelfAssessment()
@@ -170,8 +216,9 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
-        _submissions.GetSubmissionRoutingDataAsync(2, section, true)
-                    .Returns(MakeRouting(SubmissionStatus.InProgress, section));
+        _submissions
+            .GetSubmissionRoutingDataAsync(2, section, SubmissionStatus.CompleteReviewed)
+            .Returns(MakeRouting(SubmissionStatus.InProgress, section));
 
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
         Assert.IsType<RedirectToActionResult>(result);
@@ -187,11 +234,39 @@ public class ReviewAnswersViewBuilderTests
         var section = MakeSection("S2", "sec-2");
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
-        _submissions.GetSubmissionRoutingDataAsync(2, section, true)
-                    .Returns(MakeRouting(SubmissionStatus.CompleteNotReviewed, section));
+        _submissions
+            .GetSubmissionRoutingDataAsync(2, section, SubmissionStatus.CompleteReviewed)
+            .Returns(MakeRouting(SubmissionStatus.CompleteNotReviewed, section));
 
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
         Assert.IsType<RedirectToActionResult>(result);
+    }
+
+    [Fact]
+    public async Task RouteToViewAnswers_CompleteReviewed_Throws_If_Submission_Null()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(77);
+        var section = MakeSection("S7", "sec-7", "Section 7");
+        _contentful.GetSectionBySlugAsync("sec-7").Returns(section);
+
+        // Build routing with Establishment initialised
+        var routing = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: null,
+            status: SubmissionStatus.CompleteReviewed
+        );
+
+        _submissions
+            .GetSubmissionRoutingDataAsync(77, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            sut.RouteToViewAnswers(ctl, "cat", "sec-7")
+        );
     }
 
     [Fact]
@@ -210,12 +285,14 @@ public class ReviewAnswersViewBuilderTests
             submission: new SubmissionResponsesModel(123, [])
             {
                 DateCompleted = DateTime.UtcNow,
-                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
+                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" },
             },
             status: SubmissionStatus.CompleteReviewed
         );
 
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+        _submissions
+            .GetSubmissionRoutingDataAsync(77, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
 
         // Act
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
@@ -246,11 +323,7 @@ public class ReviewAnswersViewBuilderTests
         };
 
         var responses = questions
-            .Select(q => new QuestionWithAnswerModel
-            {
-                QuestionSysId = q.Id,
-            }
-            )
+            .Select(q => new QuestionWithAnswerModel { QuestionSysId = q.Id })
             .Reverse()
             .ToList();
 
@@ -263,12 +336,14 @@ public class ReviewAnswersViewBuilderTests
             submission: new SubmissionResponsesModel(123, responses)
             {
                 DateCompleted = DateTime.UtcNow,
-                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
+                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" },
             },
             status: SubmissionStatus.CompleteReviewed
         );
 
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+        _submissions
+            .GetSubmissionRoutingDataAsync(77, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
 
         // Act
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
@@ -314,12 +389,14 @@ public class ReviewAnswersViewBuilderTests
             submission: new SubmissionResponsesModel(123, responses)
             {
                 DateCompleted = DateTime.UtcNow,
-                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
+                Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" },
             },
             status: SubmissionStatus.CompleteReviewed
         );
 
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+        _submissions
+            .GetSubmissionRoutingDataAsync(77, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
 
         // Act
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
@@ -351,14 +428,19 @@ public class ReviewAnswersViewBuilderTests
             status: SubmissionStatus.CompleteReviewed
         );
 
-        _submissions.GetSubmissionRoutingDataAsync(77, section, true).Returns(routing);
+        _submissions
+            .GetSubmissionRoutingDataAsync(77, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
 
         // Act
         var call = async () => await sut.RouteToViewAnswers(ctl, "cat", "sec-7");
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(call);
 
         // Assert
-        Assert.Equal($"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}", exception.Message);
+        Assert.Equal(
+            $"Submission cannot be null when status is {SubmissionStatus.CompleteReviewed}",
+            exception.Message
+        );
     }
 
     [Fact]
@@ -373,7 +455,9 @@ public class ReviewAnswersViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-2").Returns(section);
 
         var routing = MakeRouting((SubmissionStatus)999, section, next: q1);
-        _submissions.GetSubmissionRoutingDataAsync(2, section, true).Returns(routing);
+        _submissions
+            .GetSubmissionRoutingDataAsync(2, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
 
         var result = await sut.RouteToViewAnswers(ctl, "cat", "sec-2");
         Assert.IsType<RedirectToActionResult>(result);
@@ -389,21 +473,27 @@ public class ReviewAnswersViewBuilderTests
 
         var section = MakeSection("S1", "sec", "My Section");
         _contentful.GetSectionBySlugAsync("sec").Returns(section);
-        _submissions.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-            Arg.Any<int>(),
-            Arg.Any<int?>(),
-            42,
-            Arg.Any<int>(),
-            Arg.Any<QuestionnaireSectionEntry>()).Returns(Task.CompletedTask);
+        _submissions
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                Arg.Any<int>(),
+                Arg.Any<int?>(),
+                42,
+                Arg.Any<int>(),
+                Arg.Any<QuestionnaireSectionEntry>()
+            )
+            .Returns(Task.CompletedTask);
 
         var result = await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "My Section", 42);
 
-        await _submissions.Received(1).ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-            2, // ActiveEstablishmentId
-            null, // UserOrganisationId (non-MAT user)
-            42,
-            1, // UserId
-            Arg.Is<QuestionnaireSectionEntry>(s => s.Sys != null && s.Sys.Id == "S1"));
+        await _submissions
+            .Received(1)
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                establishmentId: 2,
+                matEstablishmentId: null,
+                42,
+                1, // UserId
+                Arg.Is<QuestionnaireSectionEntry>(s => s.Sys != null && s.Sys.Id == "S1")
+            );
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.True(ctl.TempData.ContainsKey("SectionName"));
@@ -420,25 +510,120 @@ public class ReviewAnswersViewBuilderTests
 
         var section = MakeSection("S1", "sec", "S");
         _contentful.GetSectionBySlugAsync("sec").Returns(section);
-        _submissions.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-            Arg.Any<int>(),
-            Arg.Any<int?>(),
-            9,
-            Arg.Any<int>(),
-            Arg.Any<QuestionnaireSectionEntry>())
+        _submissions
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                Arg.Any<int>(),
+                Arg.Any<int?>(),
+                9,
+                Arg.Any<int>(),
+                Arg.Any<QuestionnaireSectionEntry>()
+            )
             .ThrowsAsync(exception);
 
         var result = await sut.ConfirmCheckAnswers(ctl, "cat", "sec", "S", 9);
 
-        _logger.ReceivedWithAnyArgs().LogError(
-            default,
-            default!,
-            "Error"
-        );
+        _logger.ReceivedWithAnyArgs().LogError(default, default!, "Error");
 
         Assert.True(ctl.TempData.ContainsKey("ErrorMessage"));
-        Assert.Equal(ReviewAnswersViewBuilder.InlineRecommendationUnavailableErrorMessage, ctl.TempData["ErrorMessage"]);
+        Assert.Equal(
+            ReviewAnswersViewBuilder.InlineRecommendationUnavailableErrorMessage,
+            ctl.TempData["ErrorMessage"]
+        );
         Assert.IsType<RedirectToActionResult>(result);
+    }
+
+    [Fact]
+    public void BuildViewAnswersViewModel_Returns_Responses_In_Section_Question_Order()
+    {
+        var numberOfQuestions = 3;
+
+        var controller = MakeController();
+        var questions = Enumerable.Range(1, numberOfQuestions).Select(MakeQuestion);
+        var section = new QuestionnaireSectionEntry { Questions = questions };
+
+        var responses = questions
+            .Select(
+                (q, i) =>
+                    new QuestionWithAnswerModel
+                    {
+                        QuestionSysId = q.Sys!.Id,
+                        QuestionText = q.Text,
+                        AnswerSysId = $"A{q.Sys!.Id}",
+                        AnswerText = $"Answer for {q.Sys!.Id}",
+                        DateCreated = DateTime.Now,
+                        Order = numberOfQuestions - i,
+                    }
+            )
+            .ToList();
+
+        var submission = new SubmissionResponsesModel(1, responses);
+        var submissionModel = new SubmissionRoutingDataModel(
+            questions.First(),
+            section,
+            submission,
+            SubmissionStatus.CompleteReviewed
+        );
+
+        var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
+            section,
+            submissionModel,
+            "category-slug",
+            "section-slug"
+        );
+
+        Assert.NotNull(viewModel);
+        Assert.Equal(numberOfQuestions, viewModel.Responses.Count);
+        for (int i = 0; i < numberOfQuestions; i++)
+        {
+            Assert.Equal(numberOfQuestions - i, viewModel.Responses.Skip(i).First().Order);
+        }
+    }
+
+    [Fact]
+    public void BuildViewAnswersViewModel_Returns_Responses_In_Database_Question_Order()
+    {
+        var numberOfQuestions = 3;
+
+        var controller = MakeController();
+        var questions = Enumerable.Range(1, numberOfQuestions).Select(MakeQuestion);
+        var section = new QuestionnaireSectionEntry { Questions = [] };
+
+        var responses = questions
+            .Select(
+                (q, i) =>
+                    new QuestionWithAnswerModel
+                    {
+                        QuestionSysId = q.Sys!.Id,
+                        QuestionText = q.Text,
+                        AnswerSysId = $"A{q.Sys!.Id}",
+                        AnswerText = $"Answer for {q.Sys!.Id}",
+                        DateCreated = DateTime.Now,
+                        Order = numberOfQuestions - i,
+                    }
+            )
+            .ToList();
+
+        var submission = new SubmissionResponsesModel(1, responses);
+        var submissionModel = new SubmissionRoutingDataModel(
+            questions.First(),
+            section,
+            submission,
+            SubmissionStatus.CompleteReviewed
+        );
+
+        var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
+            section,
+            submissionModel,
+            "category-slug",
+            "section-slug"
+        );
+
+        Assert.NotNull(viewModel);
+        Assert.Equal(numberOfQuestions, viewModel.Responses.Count);
+        for (int i = 0; i < numberOfQuestions; i++)
+        {
+            Assert.Equal(i + 1, viewModel.Responses.Skip(i).First().Order);
+        }
     }
 
     private sealed class DummyController : Controller { }

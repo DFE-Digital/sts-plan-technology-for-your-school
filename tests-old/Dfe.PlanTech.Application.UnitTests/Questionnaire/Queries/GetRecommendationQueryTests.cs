@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Exceptions;
+using Dfe.PlanTech.Application.Exceptions;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Persistence.Models;
 using Dfe.PlanTech.Application.Questionnaire.Queries;
@@ -14,13 +14,18 @@ namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries
         {
             var repository = Substitute.For<IContentRepository>();
             repository
-                .When(repo => repo.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()))
+                .When(repo =>
+                    repo.GetPaginatedEntities<RecommendationChunk>(
+                        Arg.Any<GetEntitiesOptions>(),
+                        Arg.Any<CancellationToken>()
+                    )
+                )
                 .Throw(new Exception("Dummy Exception"));
 
             var getRecommendationQuery = new GetRecommendationQuery(repository);
 
-            await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
-                async () => await getRecommendationQuery.GetChunksByPage(1, CancellationToken.None)
+            await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () =>
+                await getRecommendationQuery.GetChunksByPage(1, CancellationToken.None)
             );
         }
 
@@ -30,17 +35,29 @@ namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries
             var repository = Substitute.For<IContentRepository>();
             var expectedPage = 2;
             var expectedTotalCount = 100;
-            var expectedChunks = new List<RecommendationChunk> { new RecommendationChunk(), new RecommendationChunk() };
+            var expectedChunks = new List<RecommendationChunk>
+            {
+                new RecommendationChunk(),
+                new RecommendationChunk(),
+            };
 
-            repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
+            repository
+                .GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult(expectedTotalCount));
 
-            repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+            repository
+                .GetPaginatedEntities<RecommendationChunk>(
+                    Arg.Any<GetEntitiesOptions>(),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(expectedChunks));
 
             var getRecommendationQuery = new GetRecommendationQuery(repository);
 
-            var result = await getRecommendationQuery.GetChunksByPage(expectedPage, CancellationToken.None);
+            var result = await getRecommendationQuery.GetChunksByPage(
+                expectedPage,
+                CancellationToken.None
+            );
 
             Assert.Equal(expectedPage, result.Pagination.Page);
             Assert.Equal(expectedTotalCount, result.Pagination.Total);
@@ -52,11 +69,20 @@ namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries
         {
             var repository = Substitute.For<IContentRepository>();
 
-            repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
+            repository
+                .GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult(0));
 
-            repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(new List<RecommendationChunk>()));
+            repository
+                .GetPaginatedEntities<RecommendationChunk>(
+                    Arg.Any<GetEntitiesOptions>(),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(
+                    Task.FromResult<IEnumerable<RecommendationChunk>>(
+                        new List<RecommendationChunk>()
+                    )
+                );
 
             var getRecommendationQuery = new GetRecommendationQuery(repository);
 
@@ -71,12 +97,21 @@ namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries
         public async Task GetChunksByPage_FirstPageReturnsCorrectly()
         {
             var repository = Substitute.For<IContentRepository>();
-            var expectedChunks = new List<RecommendationChunk> { new RecommendationChunk(), new RecommendationChunk() };
+            var expectedChunks = new List<RecommendationChunk>
+            {
+                new RecommendationChunk(),
+                new RecommendationChunk(),
+            };
 
-            repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
+            repository
+                .GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult(50));
 
-            repository.GetPaginatedEntities<RecommendationChunk>(Arg.Is<GetEntitiesOptions>(opt => opt.Page == 1), Arg.Any<CancellationToken>())
+            repository
+                .GetPaginatedEntities<RecommendationChunk>(
+                    Arg.Is<GetEntitiesOptions>(opt => opt.Page == 1),
+                    Arg.Any<CancellationToken>()
+                )
                 .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(expectedChunks));
 
             var getRecommendationQuery = new GetRecommendationQuery(repository);
@@ -93,17 +128,28 @@ namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries
         {
             var repository = Substitute.For<IContentRepository>();
 
-            repository.GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
+            repository
+                .GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult(100));
 
-            repository.GetPaginatedEntities<RecommendationChunk>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
-                .Returns(Task.FromResult<IEnumerable<RecommendationChunk>>(new List<RecommendationChunk>()));
+            repository
+                .GetPaginatedEntities<RecommendationChunk>(
+                    Arg.Any<GetEntitiesOptions>(),
+                    Arg.Any<CancellationToken>()
+                )
+                .Returns(
+                    Task.FromResult<IEnumerable<RecommendationChunk>>(
+                        new List<RecommendationChunk>()
+                    )
+                );
 
             var getRecommendationQuery = new GetRecommendationQuery(repository);
 
             await getRecommendationQuery.GetChunksByPage(1, CancellationToken.None);
 
-            await repository.Received(1).GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>());
+            await repository
+                .Received(1)
+                .GetEntitiesCount<RecommendationChunk>(Arg.Any<CancellationToken>());
         }
     }
 }

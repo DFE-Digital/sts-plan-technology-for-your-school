@@ -14,9 +14,15 @@ public class CmsWebHookMessageProcessor(
 ) : IWebHookMessageProcessor
 {
     private readonly ICmsCache _cache = cache ?? throw new ArgumentNullException(nameof(cache));
-    private readonly JsonSerializerOptions _jsonSerialiserOptions = jsonSerialiserOptions ?? throw new ArgumentNullException(nameof(jsonSerialiserOptions));
+    private readonly JsonSerializerOptions _jsonSerialiserOptions =
+        jsonSerialiserOptions ?? throw new ArgumentNullException(nameof(jsonSerialiserOptions));
 
-    public async Task<IServiceBusResult> ProcessMessage(string subject, string body, string id, CancellationToken cancellationToken)
+    public async Task<IServiceBusResult> ProcessMessage(
+        string subject,
+        string body,
+        string id,
+        CancellationToken cancellationToken
+    )
     {
         try
         {
@@ -46,6 +52,8 @@ public class CmsWebHookMessageProcessor(
         logger.LogInformation("Processing mesasge:\n{MessageBody}", body);
 
         return JsonSerializer.Deserialize<CmsWebHookPayload>(body, _jsonSerialiserOptions)
-            ?? throw new InvalidOperationException($"Could not serialise body to {typeof(CmsWebHookPayload)}. Body was {body}");
+            ?? throw new InvalidOperationException(
+                $"Could not serialise body to {typeof(CmsWebHookPayload)}. Body was {body}"
+            );
     }
 }

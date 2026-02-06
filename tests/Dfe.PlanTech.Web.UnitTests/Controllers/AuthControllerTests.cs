@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dfe.PlanTech.Web.Tests.Controllers
+namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class AuthControllerTests
     {
@@ -15,8 +15,14 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             var result = controller.SignOut();
 
             var signOutResult = Assert.IsType<SignOutResult>(result);
-            Assert.Contains(OpenIdConnectDefaults.AuthenticationScheme, signOutResult.AuthenticationSchemes);
-            Assert.Contains(CookieAuthenticationDefaults.AuthenticationScheme, signOutResult.AuthenticationSchemes);
+            Assert.Contains(
+                OpenIdConnectDefaults.AuthenticationScheme,
+                signOutResult.AuthenticationSchemes
+            );
+            Assert.Contains(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                signOutResult.AuthenticationSchemes
+            );
         }
     }
 }

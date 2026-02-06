@@ -1,3 +1,5 @@
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
@@ -12,18 +14,326 @@ namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
 {
     private StoredProcedureRepository _storedProcRepository = null!;
-    private SubmissionRepository _submissionRepository = null!;
 
-    public StoredProcedureCallValidationTests(DatabaseFixture fixture) : base(fixture)
-    {
-    }
+    public StoredProcedureCallValidationTests(DatabaseFixture fixture)
+        : base(fixture) { }
 
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
         _storedProcRepository = new StoredProcedureRepository(DbContext);
-        _submissionRepository = new SubmissionRepository(DbContext);
     }
+
+    [Fact]
+    public async Task StoredProcedureRepository_GetFirstActivityForEstablishmentRecommendationAsync_WhenCalledWithValidParameters_ThenReturnsExpectedData_WithNullGroupName()
+    {
+        async Task insertSectionRecommendationAsync(
+            string sectionRef,
+            string recommendationContentfulRef
+        )
+        {
+            var sql =
+                @$"
+                IF OBJECT_ID('migration.sectionRecommendations', 'U') IS NULL
+                BEGIN
+                    CREATE TABLE [migration].[sectionRecommendations](
+	                    [sectionRef] [nvarchar](100) NULL,
+	                    [recommendationRef] [nvarchar](100) NULL
+                    ) ON [PRIMARY]
+                END;
+
+                INSERT INTO migration.sectionRecommendations (sectionRef, recommendationRef)
+                VALUES ('{sectionRef}', '{recommendationContentfulRef}');
+            ";
+
+            await DbContext.Database.ExecuteSqlRawAsync(sql);
+        }
+
+        // Arrange
+        var school = new EstablishmentEntity
+        {
+            EstablishmentRef = "SCHOOL001",
+            OrgName = "Test School",
+        };
+        DbContext.Establishments.Add(school);
+
+        var group = new EstablishmentEntity
+        {
+            EstablishmentRef = "GROUP001",
+            OrgName = "Test Group",
+        };
+        DbContext.Establishments.Add(group);
+
+        var user = new UserEntity { DfeSignInRef = "test-user" };
+        DbContext.Users.Add(user);
+
+        var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
+        var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+
+        await DbContext.SaveChangesAsync();
+
+        const string recommendationContentfulRef = "REC-001";
+        const string sectionRef = "section-xyz";
+
+        var submission = new SubmissionEntity
+        {
+            EstablishmentId = school.Id,
+            SectionId = sectionRef,
+            SectionName = "Section XYZ",
+            Status = SubmissionStatus.InProgress,
+            DateCreated = DateTime.UtcNow.AddDays(-10),
+        };
+        DbContext.Submissions.Add(submission);
+        await DbContext.SaveChangesAsync();
+
+        var response = new ResponseEntity
+        {
+            SubmissionId = submission.Id,
+            UserId = user.Id,
+            UserEstablishmentId = school.Id,
+            QuestionId = question.Id,
+            AnswerId = answer.Id,
+            DateCreated = DateTime.UtcNow.AddDays(-9),
+            Maturity = "",
+        };
+        DbContext.Responses.Add(response);
+        await DbContext.SaveChangesAsync();
+
+        var recommendation = new RecommendationEntity
+        {
+            ContentfulRef = recommendationContentfulRef,
+            QuestionId = question.Id,
+            RecommendationText = "Test Recommendation",
+            Question = question,
+            DateCreated = DateTime.UtcNow,
+            Archived = false,
+        };
+        DbContext.Recommendations.Add(recommendation);
+        await DbContext.SaveChangesAsync();
+
+        await insertSectionRecommendationAsync(sectionRef, recommendationContentfulRef);
+
+        var earliest = DateTime.UtcNow.AddDays(-8);
+        var later = DateTime.UtcNow.AddDays(-7);
+
+        var recommendationHistory1 = new EstablishmentRecommendationHistoryEntity
+        {
+            DateCreated = earliest,
+            EstablishmentId = school.Id,
+            MatEstablishmentId = group.Id,
+            RecommendationId = recommendation.Id,
+            UserId = user.Id,
+            PreviousStatus = null,
+            NewStatus = RecommendationStatus.NotStarted.ToString(),
+            NoteText = null,
+        };
+
+        var recommendationHistory2 = new EstablishmentRecommendationHistoryEntity
+        {
+            DateCreated = later,
+            EstablishmentId = school.Id,
+            MatEstablishmentId = group.Id,
+            RecommendationId = recommendation.Id,
+            UserId = user.Id,
+            PreviousStatus = RecommendationStatus.NotStarted.ToString(),
+            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NoteText = null,
+        };
+
+        DbContext.EstablishmentRecommendationHistories.AddRange(
+            recommendationHistory1,
+            recommendationHistory2
+        );
+        await DbContext.SaveChangesAsync();
+
+        // Act
+        var result =
+            await _storedProcRepository.GetFirstActivityForEstablishmentRecommendationAsync(
+                school.Id,
+                recommendationContentfulRef
+            );
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("Test School", result.SchoolName);
+        Assert.Equal("Test Group", result.GroupName);
+        Assert.Equal(user.Id, result.UserId);
+        Assert.Equal("Test Question", result.QuestionText);
+        Assert.Equal("Test Answer", result.AnswerText);
+
+        // Should reflect the earliest history record
+        Assert.Equal(RecommendationStatus.NotStarted.ToString(), result.StatusText);
+        Assert.True(
+            (result.StatusChangeDate - earliest).Duration() < TimeSpan.FromMilliseconds(3.3),
+            $"Expected timtstamp within 3.3ms of record value. Expected={earliest:o}, Actual={result.StatusChangeDate:o}"
+        );
+    }
+
+    [Fact]
+    public async Task StoredProcedureRepository_GetFirstActivityForEstablishmentRecommendationAsync_WhenGroupNameIsNull_ThenReturnsNullGroupName()
+    {
+        async Task insertSectionRecommendationAsync(
+            string sectionRef,
+            string recommendationContentfulRef
+        )
+        {
+            var sql =
+                @$"
+                IF OBJECT_ID('migration.sectionRecommendations', 'U') IS NULL
+                BEGIN
+                    CREATE TABLE [migration].[sectionRecommendations](
+	                    [sectionRef] [nvarchar](100) NULL,
+	                    [recommendationRef] [nvarchar](100) NULL
+                    ) ON [PRIMARY]
+                END;
+
+                INSERT INTO migration.sectionRecommendations (sectionRef, recommendationRef)
+                VALUES ('{sectionRef}', '{recommendationContentfulRef}');
+            ";
+
+            await DbContext.Database.ExecuteSqlRawAsync(sql);
+        }
+
+        // Arrange
+        var school = new EstablishmentEntity
+        {
+            EstablishmentRef = "SCHOOL001",
+            OrgName = "Test School",
+        };
+        DbContext.Establishments.Add(school);
+
+        var user = new UserEntity { DfeSignInRef = "test-user" };
+        DbContext.Users.Add(user);
+
+        var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
+        var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
+        DbContext.Questions.Add(question);
+        DbContext.Answers.Add(answer);
+
+        await DbContext.SaveChangesAsync();
+
+        const string recommendationContentfulRef = "REC-001";
+        const string sectionRef = "section-xyz";
+
+        var submission = new SubmissionEntity
+        {
+            EstablishmentId = school.Id,
+            SectionId = sectionRef,
+            SectionName = "Section XYZ",
+            Status = SubmissionStatus.InProgress,
+            DateCreated = DateTime.UtcNow.AddDays(-10),
+        };
+        DbContext.Submissions.Add(submission);
+        await DbContext.SaveChangesAsync();
+
+        var response = new ResponseEntity
+        {
+            SubmissionId = submission.Id,
+            UserId = user.Id,
+            UserEstablishmentId = school.Id,
+            QuestionId = question.Id,
+            AnswerId = answer.Id,
+            DateCreated = DateTime.UtcNow.AddDays(-9),
+            Maturity = "",
+        };
+        DbContext.Responses.Add(response);
+        await DbContext.SaveChangesAsync();
+
+        var recommendation = new RecommendationEntity
+        {
+            ContentfulRef = recommendationContentfulRef,
+            QuestionId = question.Id,
+            RecommendationText = "Test Recommendation",
+            Question = question,
+            DateCreated = DateTime.UtcNow,
+            Archived = false,
+        };
+        DbContext.Recommendations.Add(recommendation);
+        await DbContext.SaveChangesAsync();
+
+        await insertSectionRecommendationAsync(sectionRef, recommendationContentfulRef);
+
+        var earliest = DateTime.UtcNow.AddDays(-8);
+        var later = DateTime.UtcNow.AddDays(-7);
+
+        var recommendationHistory1 = new EstablishmentRecommendationHistoryEntity
+        {
+            DateCreated = earliest,
+            EstablishmentId = school.Id,
+            MatEstablishmentId = null,
+            RecommendationId = recommendation.Id,
+            UserId = user.Id,
+            PreviousStatus = null,
+            NewStatus = RecommendationStatus.NotStarted.ToString(),
+            NoteText = null,
+        };
+
+        var recommendationHistory2 = new EstablishmentRecommendationHistoryEntity
+        {
+            DateCreated = later,
+            EstablishmentId = school.Id,
+            MatEstablishmentId = null,
+            RecommendationId = recommendation.Id,
+            UserId = user.Id,
+            PreviousStatus = RecommendationStatus.NotStarted.ToString(),
+            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NoteText = null,
+        };
+
+        DbContext.EstablishmentRecommendationHistories.AddRange(
+            recommendationHistory1,
+            recommendationHistory2
+        );
+        await DbContext.SaveChangesAsync();
+
+        // Act
+        var result =
+            await _storedProcRepository.GetFirstActivityForEstablishmentRecommendationAsync(
+                school.Id,
+                recommendationContentfulRef
+            );
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal("Test School", result.SchoolName);
+        Assert.Null(result.GroupName);
+        Assert.Equal(user.Id, result.UserId);
+        Assert.Equal("Test Question", result.QuestionText);
+        Assert.Equal("Test Answer", result.AnswerText);
+
+        // Should reflect the earliest history record
+        Assert.Equal(RecommendationStatus.NotStarted.ToString(), result.StatusText);
+        Assert.True(
+            (result.StatusChangeDate - earliest).Duration() < TimeSpan.FromMilliseconds(3.3),
+            $"Expected timtstamp within 3.3ms of record value. Expected={earliest:o}, Actual={result.StatusChangeDate:o}"
+        );
+    }
+
+    [Fact]
+    public async Task StoredProcedureRepository_GetFirstActivityForEstablishmentRecommendationAsync_WhenNoDataReturned_ThenReturnsNull()
+    {
+        // Arrange
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "TEST003",
+            OrgName = "Test School",
+        };
+        DbContext.Establishments.Add(establishment);
+        await DbContext.SaveChangesAsync();
+
+        // Act & Assert
+        var result =
+            await _storedProcRepository.GetFirstActivityForEstablishmentRecommendationAsync(
+                establishment.Id,
+                "REC-DOES-NOT-EXIST"
+            );
+
+        Assert.Null(result);
+    }
+
+    /* =================================================== */
 
     [Fact]
     public async Task StoredProcedureRepository_GetSectionStatusesAsync_WhenCalledWithValidParameters_ThenReturnsExpectedSectionStatusData()
@@ -32,7 +342,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         var establishment = new EstablishmentEntity
         {
             EstablishmentRef = "TEST001",
-            OrgName = "Test School"
+            OrgName = "Test School",
         };
         DbContext.Establishments.Add(establishment);
         await DbContext.SaveChangesAsync();
@@ -47,9 +357,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "section1",
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
-            Status = "Completed",
-            Completed = true,
-            DateCreated = DateTime.UtcNow.AddDays(-1)
+            Status = Core.Enums.SubmissionStatus.CompleteReviewed,
+            DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
         var submission2 = new SubmissionEntity
@@ -57,9 +366,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "section2",
             SectionName = "Section 2",
             EstablishmentId = establishment.Id,
-            Status = "InProgress",
-            Completed = false,
-            DateCreated = DateTime.UtcNow.AddDays(-2)
+            Status = Core.Enums.SubmissionStatus.InProgress,
+            DateCreated = DateTime.UtcNow.AddDays(-2),
         };
 
         DbContext.Submissions.AddRange(submission1, submission2);
@@ -68,7 +376,10 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         var sectionIds = "section1,section2,section3";
 
         // Act
-        var result = await _storedProcRepository.GetSectionStatusesAsync(sectionIds, establishment.Id);
+        var result = await _storedProcRepository.GetSectionStatusesAsync(
+            sectionIds,
+            establishment.Id
+        );
 
         // Assert - Validate meaningful results are returned
         Assert.NotNull(result);
@@ -82,42 +393,12 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         {
             // Verify that returned data relates to our test sections
             var sectionIdsArray = sectionIds.Split(',');
-            Assert.True(resultList.All(r => sectionIdsArray.Contains(r.SectionId) ||
-                                           string.IsNullOrEmpty(r.SectionId)),
-                       "All returned results should relate to requested sections");
-        }
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_RecordGroupSelection_WhenCalledWithValidSelectionModel_ThenReturnsPositiveSelectionId()
-    {
-        // Arrange
-        var user = new UserEntity { DfeSignInRef = "test-user" };
-        var userEstablishment = new EstablishmentEntity { EstablishmentRef = "USER001", OrgName = "User School" };
-        var selectedEstablishment = new EstablishmentEntity { EstablishmentRef = "SEL001", OrgName = "Selected School" };
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.AddRange(userEstablishment, selectedEstablishment);
-        await DbContext.SaveChangesAsync();
-
-        var selectionModel = new UserGroupSelectionModel
-        {
-            UserId = user.Id,
-            UserEstablishmentId = userEstablishment.Id,
-            SelectedEstablishmentId = selectedEstablishment.Id,
-            SelectedEstablishmentName = "Selected School"
-        };
-
-        // Act & Assert - Should execute without parameter type or order errors
-        try
-        {
-            var selectionId = await _storedProcRepository.RecordGroupSelection(selectionModel);
-            Assert.True(selectionId > 0, "Selection ID should be returned from stored procedure");
-        }
-        catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Message.Contains("Transaction count after EXECUTE"))
-        {
-            // Expected in test environment due to stored procedure managing its own transactions
-            Assert.True(true, "Transaction conflict expected in test environment");
+            Assert.True(
+                resultList.All(r =>
+                    sectionIdsArray.Contains(r.SectionId) || string.IsNullOrEmpty(r.SectionId)
+                ),
+                "All returned results should relate to requested sections"
+            );
         }
     }
 
@@ -125,7 +406,11 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     public async Task StoredProcedureRepository_SetMaturityForSubmissionAsync_WhenCalledWithValidSubmissionId_ThenReturnsNonNegativeResult()
     {
         // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "TEST001",
+            OrgName = "Test School",
+        };
         DbContext.Establishments.Add(establishment);
         await DbContext.SaveChangesAsync();
 
@@ -134,7 +419,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "test-section",
             SectionName = "Test Section",
             EstablishmentId = establishment.Id,
-            Status = "InProgress"
+            Status = Core.Enums.SubmissionStatus.InProgress,
         };
         DbContext.Submissions.Add(submission);
         await DbContext.SaveChangesAsync();
@@ -151,11 +436,24 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     {
         // Arrange
         var user = new UserEntity { DfeSignInRef = "test-user" };
-        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School", GroupUid = null };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "TEST001",
+            OrgName = "Test School",
+            GroupUid = null,
+        };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         var answer = new AnswerEntity { AnswerText = "Test Answer", ContentfulRef = "A1" };
-        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
-        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+        var questionModel = new IdWithTextModel
+        {
+            Id = question.ContentfulRef,
+            Text = question.QuestionText,
+        };
+        var answerModel = new IdWithTextModel
+        {
+            Id = answer.ContentfulRef,
+            Text = answer.AnswerText,
+        };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -168,11 +466,16 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             SectionId = "test-section",
             SectionName = "Test Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
 
         // When user is logged in directly as a school (not MAT), both IDs are the same
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
+        var assessmentResponse = new AssessmentResponseModel(
+            user.Id,
+            establishment.Id,
+            establishment.Id,
+            submitAnswerModel
+        );
 
         // Act & Assert - Should execute without parameter type or order errors
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);
@@ -191,45 +494,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task StoredProcedureRepository_DeleteCurrentSubmissionAsync_WhenCalledWithValidParameters_ThenSoftDeleteMarkSubmissionAsDeleted()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School" };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
-
-        var submission = new SubmissionEntity
-        {
-            SectionId = "test-section-delete",
-            SectionName = "Test Section To Delete",
-            EstablishmentId = establishment.Id,
-            Status = "InProgress",
-            Completed = false,
-            Deleted = false
-        };
-        DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
-
-        var submissionId = submission.Id;
-
-        // Assert - Verify submission exists before deletion and is not marked as deleted
-        var submissionBeforeDelete = await DbContext.Submissions.FirstOrDefaultAsync(s => s.Id == submissionId);
-        Assert.NotNull(submissionBeforeDelete);
-        Assert.False(submissionBeforeDelete!.Deleted, "Submission should not be marked as deleted before deletion");
-
-        // Act - Execute the delete operation
-        await _storedProcRepository.SetSubmissionDeletedAsync(establishment.Id, "test-section-delete");
-
-        // Assert - Verify submission is marked as deleted (soft delete)
-        // Clear the change tracker to force EF to query the database fresh
-        // rather than returning cached entities
-        DbContext.ChangeTracker.Clear();
-        var submissionAfterDelete = await DbContext.Submissions.AsNoTracking().FirstOrDefaultAsync(s => s.Id == submissionId);
-        Assert.NotNull(submissionAfterDelete);
-        Assert.True(submissionAfterDelete!.Deleted, "Submission should be marked as deleted in database");
-    }
-
-    [Fact]
     public async Task StoredProcedureRepository_MultipleCalls_WhenParameterOrderValidated_ThenAllCallsExecuteWithoutParameterErrors()
     {
         // This test validates that stored procedure calls don't fail due to parameter order issues
@@ -237,11 +501,31 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
 
         // Arrange
         var user = new UserEntity { DfeSignInRef = "param-test-user" };
-        var establishment = new EstablishmentEntity { EstablishmentRef = "PARAM001", OrgName = "Parameter Test School" };
-        var question = new QuestionEntity { QuestionText = "Parameter Test Question", ContentfulRef = "PQ1" };
-        var answer = new AnswerEntity { AnswerText = "Parameter Test Answer", ContentfulRef = "PA1" };
-        var questionModel = new IdWithTextModel { Id = question.ContentfulRef, Text = question.QuestionText };
-        var answerModel = new IdWithTextModel { Id = answer.ContentfulRef, Text = answer.AnswerText };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "PARAM001",
+            OrgName = "Parameter Test School",
+        };
+        var question = new QuestionEntity
+        {
+            QuestionText = "Parameter Test Question",
+            ContentfulRef = "PQ1",
+        };
+        var answer = new AnswerEntity
+        {
+            AnswerText = "Parameter Test Answer",
+            ContentfulRef = "PA1",
+        };
+        var questionModel = new IdWithTextModel
+        {
+            Id = question.ContentfulRef,
+            Text = question.QuestionText,
+        };
+        var answerModel = new IdWithTextModel
+        {
+            Id = answer.ContentfulRef,
+            Text = answer.AnswerText,
+        };
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
@@ -251,159 +535,41 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
 
         // Act & Assert - All stored procedure calls should succeed without parameter errors
 
-        // 1. Test GetSectionStatuses parameter order
-        var sectionStatuses = await _storedProcRepository.GetSectionStatusesAsync("param-section", establishment.Id);
-        Assert.NotNull(sectionStatuses);
-
-        // 2. Test SubmitResponse parameter order
+        // 1. Test SubmitResponse parameter order
         var submitAnswerModel = new SubmitAnswerModel
         {
             SectionId = "param-section",
             SectionName = "Parameter Section",
             Question = questionModel,
-            ChosenAnswer = answerModel
+            ChosenAnswer = answerModel,
         };
         // When user is logged in directly as a school (not MAT), both IDs are the same
-        var assessmentResponse = new AssessmentResponseModel(user.Id, establishment.Id, establishment.Id, submitAnswerModel);
+        var assessmentResponse = new AssessmentResponseModel(
+            user.Id,
+            establishment.Id,
+            establishment.Id,
+            submitAnswerModel
+        );
         var responseId = await _storedProcRepository.SubmitResponse(assessmentResponse);
         Assert.True(responseId > 0);
 
-        // 3. Test SetMaturityForSubmission parameter order
+        // 2. Test SetMaturityForSubmission parameter order
         var submission = new SubmissionEntity
         {
             SectionId = "param-section",
             SectionName = "Parameter Section",
             EstablishmentId = establishment.Id,
-            Status = "InProgress"
+            Status = Core.Enums.SubmissionStatus.InProgress,
         };
         DbContext.Submissions.Add(submission);
         await DbContext.SaveChangesAsync();
 
-        var maturityResult = await _storedProcRepository.SetMaturityForSubmissionAsync(submission.Id);
+        var maturityResult = await _storedProcRepository.SetMaturityForSubmissionAsync(
+            submission.Id
+        );
         Assert.True(maturityResult >= 0);
-
-        // 4. Test DeleteCurrentSubmission parameter order
-        await _storedProcRepository.SetSubmissionDeletedAsync(establishment.Id, "param-section");
 
         // If we reach here, all stored procedure calls succeeded without parameter order/type errors
         Assert.True(true, "All stored procedure calls completed without parameter errors");
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_GetSectionStatusesAsync_WhenSectionIdsIsEmpty_ThenReturnsEmptyResultGracefully()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School" };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
-
-        // Act
-        var result = await _storedProcRepository.GetSectionStatusesAsync("", establishment.Id);
-
-        // Assert - Should handle empty string parameter and return empty result
-        Assert.NotNull(result);
-        var resultList = result.ToList();
-        Assert.True(resultList.Count == 0, "Should return empty result for empty section IDs");
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_GetSectionStatusesAsync_WhenMultipleSectionIds_ThenReturnsDataForRequestedSections()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity { EstablishmentRef = "TEST001", OrgName = "Test School" };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
-
-        // Create test submissions for multiple sections
-        var user = new UserEntity { DfeSignInRef = "test-user" };
-        DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
-
-        var submission1 = new SubmissionEntity
-        {
-            SectionId = "section1",
-            SectionName = "Section 1",
-            EstablishmentId = establishment.Id,
-            Status = "Completed",
-            Completed = true,
-            DateCreated = DateTime.UtcNow.AddDays(-1)
-        };
-
-        var submission2 = new SubmissionEntity
-        {
-            SectionId = "section2",
-            SectionName = "Section 2",
-            EstablishmentId = establishment.Id,
-            Status = "InProgress",
-            Completed = false,
-            DateCreated = DateTime.UtcNow.AddDays(-2)
-        };
-
-        var submission3 = new SubmissionEntity
-        {
-            SectionId = "section3",
-            SectionName = "Section 3",
-            EstablishmentId = establishment.Id,
-            Status = "NotStarted",
-            Completed = false,
-            DateCreated = DateTime.UtcNow.AddDays(-3)
-        };
-
-        DbContext.Submissions.AddRange(submission1, submission2, submission3);
-        await DbContext.SaveChangesAsync();
-
-        // Act - Should handle comma-separated string parameter correctly
-        var multipleSectionIds = "section1,section2,section3,section4";
-        var result = await _storedProcRepository.GetSectionStatusesAsync(multipleSectionIds, establishment.Id);
-
-        // Assert - Validate that actual data is returned for the sections that exist
-        Assert.NotNull(result);
-        var resultList = result.ToList();
-        Assert.True(resultList.Count > 0, "Should return data for existing sections");
-
-        // Verify that returned data relates to our test sections
-        var requestedSectionIds = multipleSectionIds.Split(',');
-        Assert.True(resultList.All(r =>
-            requestedSectionIds.Contains(r.SectionId) || string.IsNullOrEmpty(r.SectionId)),
-            "All returned results should relate to requested sections");
-
-        // Should contain data for sections that exist in our test data
-        var returnedSectionIds = resultList.Select(r => r.SectionId).Where(s => !string.IsNullOrEmpty(s)).ToList();
-        Assert.Contains("section1", returnedSectionIds);
-        Assert.Contains("section2", returnedSectionIds);
-        Assert.Contains("section3", returnedSectionIds);
-    }
-
-    [Fact]
-    public async Task StoredProcedureRepository_RecordGroupSelection_WhenSelectedEstablishmentNameIsNull_ThenHandlesNullValueCorrectly()
-    {
-        // Arrange
-        var user = new UserEntity { DfeSignInRef = "null-test-user" };
-        var userEstablishment = new EstablishmentEntity { EstablishmentRef = "NULL001", OrgName = "Null Test School" };
-        var selectedEstablishment = new EstablishmentEntity { EstablishmentRef = "SEL001", OrgName = "Selected School" };
-
-        DbContext.Users.Add(user);
-        DbContext.Establishments.AddRange(userEstablishment, selectedEstablishment);
-        await DbContext.SaveChangesAsync();
-
-        var selectionModel = new UserGroupSelectionModel
-        {
-            UserId = user.Id,
-            UserEstablishmentId = userEstablishment.Id,
-            SelectedEstablishmentId = selectedEstablishment.Id,
-            SelectedEstablishmentName = null // Testing NULL parameter handling
-        };
-
-        // Act & Assert - Should handle NULL parameter correctly
-        try
-        {
-            var selectionId = await _storedProcRepository.RecordGroupSelection(selectionModel);
-            Assert.True(selectionId > 0, "Should handle NULL parameter and return valid selection ID");
-        }
-        catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Message.Contains("Transaction count after EXECUTE"))
-        {
-            // Expected in test environment due to stored procedure managing its own transactions
-            Assert.True(true, "Transaction conflict expected in test environment");
-        }
     }
 }

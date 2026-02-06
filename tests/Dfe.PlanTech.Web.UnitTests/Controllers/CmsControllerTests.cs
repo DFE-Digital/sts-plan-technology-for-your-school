@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
-namespace Dfe.PlanTech.Web.Tests.Controllers
+namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class CmsControllerTests
     {
@@ -24,7 +24,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             _controller = new CmsController(_logger, _viewBuilder);
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext()
+                HttpContext = new DefaultHttpContext(),
             };
         }
 
@@ -33,7 +33,8 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         {
             var json = JsonDocument.Parse("{}");
             var writeToQueueCommand = Substitute.For<IWriteCmsWebhookToQueueCommand>();
-            writeToQueueCommand.WriteMessageToQueue(json, _controller.HttpContext.Request)
+            writeToQueueCommand
+                .WriteMessageToQueue(json, _controller.HttpContext.Request)
                 .Returns(Task.FromResult(new QueueWriteResult(true)));
 
             var result = await _controller.WebhookPayload(json, writeToQueueCommand);
@@ -47,7 +48,8 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             var json = JsonDocument.Parse("{}");
             var writeToQueueCommand = Substitute.For<IWriteCmsWebhookToQueueCommand>();
             var failureResult = new QueueWriteResult(false);
-            writeToQueueCommand.WriteMessageToQueue(json, _controller.HttpContext.Request)
+            writeToQueueCommand
+                .WriteMessageToQueue(json, _controller.HttpContext.Request)
                 .Returns(Task.FromResult(failureResult));
 
             var result = await _controller.WebhookPayload(json, writeToQueueCommand);
@@ -62,7 +64,8 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             // Arrange
             var json = JsonDocument.Parse("{}");
             var writeToQueueCommand = Substitute.For<IWriteCmsWebhookToQueueCommand>();
-            writeToQueueCommand.WriteMessageToQueue(json, _controller.HttpContext.Request)
+            writeToQueueCommand
+                .WriteMessageToQueue(json, _controller.HttpContext.Request)
                 .Throws(new Exception("Queue error"));
 
             var result = await _controller.WebhookPayload(json, writeToQueueCommand);
@@ -76,11 +79,25 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         {
             var sections = new List<SectionViewModel>
             {
-                new SectionViewModel(new QuestionnaireSectionEntry{ Name = "test-section 1", Sys = new SystemDetails { Id = "1" } }),
-                new SectionViewModel(new QuestionnaireSectionEntry{ Name = "test-section 2", Sys = new SystemDetails { Id = "2" } })
+                new SectionViewModel(
+                    new QuestionnaireSectionEntry
+                    {
+                        Name = "test-section 1",
+                        Sys = new SystemDetails { Id = "1" },
+                    }
+                ),
+                new SectionViewModel(
+                    new QuestionnaireSectionEntry
+                    {
+                        Name = "test-section 2",
+                        Sys = new SystemDetails { Id = "2" },
+                    }
+                ),
             };
 
-            _viewBuilder.GetAllSectionsAsync().Returns(Task.FromResult<IEnumerable<SectionViewModel>>(sections));
+            _viewBuilder
+                .GetAllSectionsAsync()
+                .Returns(Task.FromResult<IEnumerable<SectionViewModel>>(sections));
 
             var result = await _controller.GetSections();
 
@@ -92,7 +109,9 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         {
             var page = 1;
             var expectedResult = new OkResult();
-            _viewBuilder.GetChunks(_controller, page).Returns(Task.FromResult<IActionResult>(expectedResult));
+            _viewBuilder
+                .GetChunks(_controller, page)
+                .Returns(Task.FromResult<IActionResult>(expectedResult));
 
             var result = await _controller.GetChunks(page);
 

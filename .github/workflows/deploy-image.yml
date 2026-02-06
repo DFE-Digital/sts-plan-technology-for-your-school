@@ -203,7 +203,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
-          verb: "add"
+          verb: 'add'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}
@@ -220,7 +220,12 @@ jobs:
         uses: azure/sql-action@v2.2
         with:
           connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
-          path: "./.github/scripts/drop-establishment-data.sql"
+          path: './.github/scripts/clear-submission-data-from-db.sql'
+          arguments: >
+            -v ESTABLISHMENT_REF="900008"
+            --headers=-1
+            -W
+            -b
 
       - name: Cypress Testing
         uses: ./.github/actions/run-e2e-tests
@@ -238,7 +243,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
-          verb: "remove"
+          verb: 'remove'
           az_keyvault_name: ${{ env.az_keyvault_name }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.az_resource_group_name}}

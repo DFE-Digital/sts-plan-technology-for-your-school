@@ -1,4 +1,4 @@
-﻿using System.Data.SqlTypes;
+using System.Data.SqlTypes;
 using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submissions.Commands;
 using Dfe.PlanTech.Core.Constants;
@@ -6,6 +6,7 @@ using Microsoft.Data.SqlClient;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Submissions;
+
 public class CalculateMaturityCommandTests
 {
     public IPlanTechDbContext _dbSubstitute = Substitute.For<IPlanTechDbContext>();
@@ -13,23 +14,32 @@ public class CalculateMaturityCommandTests
 
     public CalculateMaturityCommandTests()
     {
-        _dbSubstitute.CallStoredProcedureWithReturnInt(DatabaseConstants.CalculateMaturitySproc, Arg.Any<List<SqlParameter>>())
-        .Returns((callinfo) =>
-        {
-            var sqlParams = callinfo.ArgAt<List<SqlParameter>>(1);
+        _dbSubstitute
+            .CallStoredProcedureWithReturnInt(
+                DatabaseConstants.CalculateMaturitySproc,
+                Arg.Any<List<SqlParameter>>()
+            )
+            .Returns(
+                (callinfo) =>
+                {
+                    var sqlParams = callinfo.ArgAt<List<SqlParameter>>(1);
 
-            _sqlParams = sqlParams;
+                    _sqlParams = sqlParams;
 
-            var submissionIdParam = _sqlParams.FirstOrDefault(sqlParam => sqlParam.ParameterName == DatabaseConstants.SubmissionIdParam);
+                    var submissionIdParam = _sqlParams.FirstOrDefault(sqlParam =>
+                        sqlParam.ParameterName == DatabaseConstants.SubmissionIdParam
+                    );
 
-            if (submissionIdParam != null && submissionIdParam.Value is int i && i > 0)
-            {
-                return i;
-            }
+                    if (submissionIdParam != null && submissionIdParam.Value is int i && i > 0)
+                    {
+                        return i;
+                    }
 
-            throw new SqlTypeException("Invalid submission Id");
-        });
+                    throw new SqlTypeException("Invalid submission Id");
+                }
+            );
     }
+
     private CalculateMaturityCommand CreateStrut() => new(_dbSubstitute);
 
     [Fact]

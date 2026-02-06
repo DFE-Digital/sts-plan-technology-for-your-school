@@ -26,14 +26,19 @@ public static class ServiceCollectionExtensions
         Action<IHttpClientBuilder> addRetryPolicy
     )
     {
-        var options = configuration.GetRequiredSection(ConfigurationConstants.Contentful).Get<ContentfulOptions>()
+        var options =
+            configuration
+                .GetRequiredSection(ConfigurationConstants.Contentful)
+                .Get<ContentfulOptions>()
             ?? throw new KeyNotFoundException(nameof(ContentfulOptions));
 
         services.AddSingleton(options);
 
         services
             .AddScoped<IContentfulClient, ContentfulClient>()
-            .AddKeyedScoped<IContentfulRepository, ContentfulRepository>(KeyedServiceConstants.ContentfulRepository)
+            .AddKeyedScoped<IContentfulRepository, ContentfulRepository>(
+                KeyedServiceConstants.ContentfulRepository
+            )
             .AddScoped<IContentfulRepository, CachedContentfulRepository>();
 
         addRetryPolicy(services.AddHttpClient<ContentfulClient>());

@@ -1,6 +1,6 @@
 # 0041 - Redis Cache
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 

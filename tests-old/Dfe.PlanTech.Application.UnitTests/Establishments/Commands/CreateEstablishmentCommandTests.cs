@@ -11,7 +11,10 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
     public class CreateEstablishmentCommandTests
     {
         private const string OrgName = "Org name";
-        private readonly EstablishmentTypeDto EstablishmentType = new() { Name = "Establishment Type" };
+        private readonly EstablishmentTypeDto EstablishmentType = new()
+        {
+            Name = "Establishment Type",
+        };
 
         public IPlanTechDbContext Db = Substitute.For<IPlanTechDbContext>();
 
@@ -29,17 +32,23 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
             //Arrange
             var strut = CreateStrut();
             Db.When(db => db.AddEstablishment(Arg.Any<Establishment>()))
-            .Do(callinfo =>
-            {
-                var dto = callinfo.ArgAt<Establishment>(0);
+                .Do(callinfo =>
+                {
+                    var dto = callinfo.ArgAt<Establishment>(0);
 
-                establishment = dto;
-                establishment.Id = establishmentId;
-            });
+                    establishment = dto;
+                    establishment.Id = establishmentId;
+                });
 
             Db.SaveChangesAsync().Returns(Task.FromResult(establishment.Id));
 
-            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = new Guid().ToString(), Type = EstablishmentType, OrgName = OrgName };
+            var establishmentDto = new EstablishmentDto()
+            {
+                Urn = null,
+                Ukprn = new Guid().ToString(),
+                Type = EstablishmentType,
+                OrgName = OrgName,
+            };
 
             //Act
             var result = await strut.CreateEstablishment(establishmentDto);
@@ -58,16 +67,22 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
             //Arrange
             var strut = CreateStrut();
             Db.When(db => db.AddEstablishment(Arg.Any<Establishment>()))
-            .Do(callinfo =>
-            {
-                var dto = callinfo.ArgAt<Establishment>(0);
+                .Do(callinfo =>
+                {
+                    var dto = callinfo.ArgAt<Establishment>(0);
 
-                establishment = dto;
-                establishment.Id = establishmentId;
-            });
+                    establishment = dto;
+                    establishment.Id = establishmentId;
+                });
 
             Db.SaveChangesAsync().Returns(Task.FromResult(establishment.Id));
-            var establishmentDto = new EstablishmentDto() { Urn = new Guid().ToString(), Ukprn = null, Type = EstablishmentType, OrgName = OrgName };
+            var establishmentDto = new EstablishmentDto()
+            {
+                Urn = new Guid().ToString(),
+                Ukprn = null,
+                Type = EstablishmentType,
+                OrgName = OrgName,
+            };
 
             //Act
             var result = await strut.CreateEstablishment(establishmentDto);
@@ -76,17 +91,23 @@ namespace Dfe.PlanTech.Application.UnitTests.Establishments.Commands
             Assert.Equal(establishmentId, result);
         }
 
-
         [Fact]
         public async Task CreateEstablishmentDoesThrowsExceptionWhenUrnAndUkprnAreNotPresent()
         {
             var strut = CreateStrut();
-            var establishmentDto = new EstablishmentDto() { Urn = null, Ukprn = null, OrgName = OrgName, Type = EstablishmentType };
+            var establishmentDto = new EstablishmentDto()
+            {
+                Urn = null,
+                Ukprn = null,
+                OrgName = OrgName,
+                Type = EstablishmentType,
+            };
 
-            var exception = await Assert.ThrowsAsync<InvalidEstablishmentException>(() => strut.CreateEstablishment(establishmentDto));
+            var exception = await Assert.ThrowsAsync<InvalidEstablishmentException>(() =>
+                strut.CreateEstablishment(establishmentDto)
+            );
 
             Assert.Equal(EstablishmentDto.InvalidEstablishmentErrorMessage, exception.Message);
         }
-
     }
 }

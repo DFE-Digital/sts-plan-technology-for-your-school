@@ -1,6 +1,6 @@
 # 0028 - Command Line Arguments Parsing
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -8,9 +8,9 @@ One of our projects ([DatabaseUpgrader](../../src/Dfe.PlanTech.DatabaseUpgrader/
 
 ## Decision Drivers
 
-* Open-source
-* Readability
-* Ease of development
+- Open-source
+- Readability
+- Ease of development
 
 ## Considered Options
 
@@ -24,7 +24,7 @@ However this is hard to maintain, hard to document, and leads to problems if cer
 
 ### Command Line Parser
 
-[Command Line Parser](https://github.com/commandlineparser/commandline) is a FOSS project designed for parsing command line arguments, named, easily. 
+[Command Line Parser](https://github.com/commandlineparser/commandline) is a FOSS project designed for parsing command line arguments, named, easily.
 
 It is well used, well documented, and well supported.
 

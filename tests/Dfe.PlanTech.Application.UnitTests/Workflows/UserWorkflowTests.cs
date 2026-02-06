@@ -10,15 +10,19 @@ namespace Dfe.PlanTech.Application.UnitTests.Workflows;
 public class UserWorkflowTests
 {
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
-    private readonly IUserSettingsRepository _userSettingsRepository = Substitute.For<IUserSettingsRepository>();
+    private readonly IUserSettingsRepository _userSettingsRepository =
+        Substitute.For<IUserSettingsRepository>();
 
-    private UserWorkflow CreateServiceUnderTest() => new UserWorkflow(_userRepository, _userSettingsRepository);
+    private UserWorkflow CreateServiceUnderTest() =>
+        new UserWorkflow(_userRepository, _userSettingsRepository);
 
     // --- ctor guard ---
     [Fact]
     public void Ctor_NullUserRepository_Throws()
     {
-        Assert.Throws<ArgumentNullException>(() => new UserWorkflow(null!, _userSettingsRepository));
+        Assert.Throws<ArgumentNullException>(() =>
+            new UserWorkflow(null!, _userSettingsRepository)
+        );
     }
 
     [Fact]
@@ -63,12 +67,21 @@ public class UserWorkflowTests
     {
         var sut = CreateServiceUnderTest();
 
-        _userSettingsRepository.UpsertUserSettingsAsync(123, Arg.Any<RecommendationSortOrder>())
-            .Returns(new UserSettingsEntity { UserId = 123, SortOrder = nameof(RecommendationSortOrder.LastUpdated) });
+        _userSettingsRepository
+            .UpsertUserSettingsAsync(123, Arg.Any<RecommendationSortOrder>())
+            .Returns(
+                new UserSettingsEntity
+                {
+                    UserId = 123,
+                    SortOrder = nameof(RecommendationSortOrder.LastUpdated),
+                }
+            );
 
         var result = await sut.UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
 
-        await _userSettingsRepository.Received(1).UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
+        await _userSettingsRepository
+            .Received(1)
+            .UpsertUserSettingsAsync(123, RecommendationSortOrder.LastUpdated);
     }
 
     // --- GetUserSettingsByUserIdAsync ---
@@ -77,7 +90,9 @@ public class UserWorkflowTests
     public async Task GetUserSettingsByUserIdAsync_Returns_Null_When_Not_Found()
     {
         var sut = CreateServiceUnderTest();
-        _userSettingsRepository.GetUserSettingsByUserIdAsync(123).Returns((UserSettingsEntity?)null);
+        _userSettingsRepository
+            .GetUserSettingsByUserIdAsync(123)
+            .Returns((UserSettingsEntity?)null);
 
         var result = await sut.GetUserSettingsByUserIdAsync(123);
 
@@ -89,7 +104,11 @@ public class UserWorkflowTests
     public async Task GetUserSettingsByUserIdAsync_Returns_Mapped_Dto_When_Found()
     {
         var sut = CreateServiceUnderTest();
-        var entity = new UserSettingsEntity { UserId = 42, SortOrder = RecommendationSortOrder.LastUpdated.GetDisplayName() };
+        var entity = new UserSettingsEntity
+        {
+            UserId = 42,
+            SortOrder = RecommendationSortOrder.LastUpdated.GetDisplayName(),
+        };
         _userSettingsRepository.GetUserSettingsByUserIdAsync(42).Returns(entity);
 
         var dto = await sut.GetUserSettingsByUserIdAsync(42);

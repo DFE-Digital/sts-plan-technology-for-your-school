@@ -1,8 +1,9 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submissions.Commands;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Models;
 using NSubstitute;
+
 public class SubmissionCommandTests
 {
     private readonly IPlanTechDbContext _db = Substitute.For<IPlanTechDbContext>();
@@ -17,7 +18,8 @@ public class SubmissionCommandTests
     public async Task CloneSubmission_Should_Throw_When_Submission_Null()
     {
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            _command.CloneSubmission(null, CancellationToken.None));
+            _command.CloneSubmission(null, CancellationToken.None)
+        );
     }
 
     [Fact]
@@ -36,12 +38,15 @@ public class SubmissionCommandTests
                     QuestionId = 1,
                     AnswerId = 1,
                     UserId = 1,
-                    Maturity = "Medium"
-                }
-            }
+                    Maturity = "Medium",
+                },
+            },
         };
 
-        var newSubmission = await _command.CloneSubmission(existingSubmission, CancellationToken.None);
+        var newSubmission = await _command.CloneSubmission(
+            existingSubmission,
+            CancellationToken.None
+        );
 
         Assert.NotNull(newSubmission);
         Assert.Equal(existingSubmission.SectionId, newSubmission.SectionId);
@@ -61,13 +66,20 @@ public class SubmissionCommandTests
         _db.Submissions.Find(Arg.Any<int>()).Returns((Submission?)null);
 
         await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            _command.SetSubmissionInaccessible(42, CancellationToken.None));
+            _command.SetSubmissionInaccessible(42, CancellationToken.None)
+        );
     }
 
     [Fact]
     public async Task DeleteSubmission_Should_Mark_Status_And_Save()
     {
-        var submission = new Submission { Id = 1, SectionId = "section-1", SectionName = "Test Section", Status = SubmissionStatus.CompleteReviewed.ToString() };
+        var submission = new Submission
+        {
+            Id = 1,
+            SectionId = "section-1",
+            SectionName = "Test Section",
+            Status = SubmissionStatus.CompleteReviewed.ToString(),
+        };
         _db.Submissions.Find(1).Returns(submission);
 
         await _command.SetSubmissionInaccessible(1, CancellationToken.None);

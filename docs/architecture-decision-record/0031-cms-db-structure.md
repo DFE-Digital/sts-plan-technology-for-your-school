@@ -1,6 +1,6 @@
 # 0031 - CMS DB Structure
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -10,7 +10,7 @@ How do we store our CMS data in DB? Schemas?
 
 - Development ease
 - Speed/effeciency
-  
+
 ## Considered Options
 
 ### Singular Table
@@ -18,6 +18,7 @@ How do we store our CMS data in DB? Schemas?
 We could store all of our differnet content models in a single SQL table, by using JSON.
 
 The rough strucure could be something like:
+
 - Id (Contentful ID)
 - Content model type
 - JSON data (entire content as JSON)
@@ -31,7 +32,6 @@ The rough strucure could be something like:
 
 - Whilst MSSQL supports JSON columns, the reading from them is extremely slow.
   - This can be mitigated by things such as indexes, but this would likely require multiple for various content models. At this point, this approach becomes more questionable
-
 
 #### Multiple Tables
 

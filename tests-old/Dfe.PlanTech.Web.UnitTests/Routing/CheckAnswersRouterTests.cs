@@ -19,11 +19,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Routing;
 public class CheckAnswersRouterTests
 {
     private readonly IGetPageQuery _getPageQuery = Substitute.For<IGetPageQuery>();
-    private readonly IProcessSubmissionResponsesCommand _checkAnswerCommand = Substitute.For<IProcessSubmissionResponsesCommand>();
+    private readonly IProcessSubmissionResponsesCommand _checkAnswerCommand =
+        Substitute.For<IProcessSubmissionResponsesCommand>();
     private readonly IUser _user = Substitute.For<IUser>();
-    private readonly ISubmissionStatusProcessor _submissionStatusProcessor = Substitute.For<ISubmissionStatusProcessor>();
+    private readonly ISubmissionStatusProcessor _submissionStatusProcessor =
+        Substitute.For<ISubmissionStatusProcessor>();
 
-    private readonly CheckAnswersController _controller = new(new NullLogger<CheckAnswersController>());
+    private readonly CheckAnswersController _controller = new(
+        new NullLogger<CheckAnswersController>()
+    );
 
     private readonly CheckAnswersRouter _router;
 
@@ -31,60 +35,66 @@ public class CheckAnswersRouterTests
 
     private readonly Section _section = new()
     {
-        Sys = new SystemDetails()
-        {
-            Id = "section-id"
-        },
-        InterstitialPage = new Page()
-        {
-            Slug = "section-slug"
-        },
-        Name = "Section name"
+        Sys = new SystemDetails() { Id = "section-id" },
+        InterstitialPage = new Page() { Slug = "section-slug" },
+        Name = "Section name",
     };
 
     private readonly SubmissionResponsesDto _checkAnswersDto = new()
     {
-        Responses = [
-            new()
-            {
-                QuestionRef = "q1",
-                AnswerRef = "a1"
-            },
-            new()
-            {
-                QuestionRef = "q2",
-                AnswerRef = "q2-a1"
-            }
-        ]
+        Responses =
+        [
+            new() { QuestionRef = "q1", AnswerRef = "a1" },
+            new() { QuestionRef = "q2", AnswerRef = "q2-a1" },
+        ],
     };
 
-    private readonly List<ContentComponent> _checkAnswersPageContent = new(){
-        new Title(){Text = "page title" }
-      };
+    private readonly List<ContentComponent> _checkAnswersPageContent = new()
+    {
+        new Title() { Text = "page title" },
+    };
 
     public CheckAnswersRouterTests()
     {
         _user.GetEstablishmentId().Returns(establishmentId);
-        _checkAnswerCommand.GetSubmissionResponsesDtoForSection(establishmentId, Arg.Any<Section>(), cancellationToken: Arg.Any<CancellationToken>())
-                            .Returns((callinfo) =>
-                            {
-                                var sectionArg = callinfo.ArgAt<ISection>(1);
-                                if (sectionArg == _section)
-                                {
-                                    return _checkAnswersDto;
-                                }
-
-                                return null;
-                            });
-
-        _getPageQuery.GetPageBySlug(CheckAnswersController.CheckAnswersPageSlug, Arg.Any<CancellationToken>())
-                    .Returns(new Page()
+        _checkAnswerCommand
+            .GetSubmissionResponsesDtoForSection(
+                establishmentId,
+                Arg.Any<Section>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            )
+            .Returns(
+                (callinfo) =>
+                {
+                    var sectionArg = callinfo.ArgAt<ISection>(1);
+                    if (sectionArg == _section)
                     {
-                        Slug = CheckAnswersController.CheckAnswersPageSlug,
-                        Content = _checkAnswersPageContent
-                    });
+                        return _checkAnswersDto;
+                    }
 
-        _router = new CheckAnswersRouter(_getPageQuery, _checkAnswerCommand, _user, _submissionStatusProcessor);
+                    return null;
+                }
+            );
+
+        _getPageQuery
+            .GetPageBySlug(
+                CheckAnswersController.CheckAnswersPageSlug,
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(
+                new Page()
+                {
+                    Slug = CheckAnswersController.CheckAnswersPageSlug,
+                    Content = _checkAnswersPageContent,
+                }
+            );
+
+        _router = new CheckAnswersRouter(
+            _getPageQuery,
+            _checkAnswerCommand,
+            _user,
+            _submissionStatusProcessor
+        );
     }
 
     [Theory]
@@ -92,7 +102,9 @@ public class CheckAnswersRouterTests
     [InlineData(null)]
     public async Task Should_Throw_Exception_When_CategorySlug_NullOrEmpty(string? categorySlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute(categorySlug!, "section-slug", null, _controller, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _router.ValidateRoute(categorySlug!, "section-slug", null, _controller, default)
+        );
     }
 
     [Theory]
@@ -100,23 +112,39 @@ public class CheckAnswersRouterTests
     [InlineData(null)]
     public async Task Should_Throw_Exception_When_SectionSlug_NullOrEmpty(string? sectionSlug)
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _router.ValidateRoute("category-slug", sectionSlug!, null, _controller, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _router.ValidateRoute("category-slug", sectionSlug!, null, _controller, default)
+        );
     }
 
     [Fact]
     public async Task Should_Return_CheckAnswersPage_When_Status_Is_CheckAnswers()
     {
         var categorySlug = "category-slug";
-        var sectionSlug = _section.InterstitialPage?.Slug ?? throw new InvalidOperationException("InterstitialPage cannot be null.");
+        var sectionSlug =
+            _section.InterstitialPage?.Slug
+            ?? throw new InvalidOperationException("InterstitialPage cannot be null.");
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
-                                  .Do(processor =>
-                                  {
-                                      _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
-                                      _submissionStatusProcessor.Section.Returns(_section);
-                                  });
+        _submissionStatusProcessor
+            .When(processor =>
+                processor.GetJourneyStatusForSection(
+                    sectionSlug,
+                    cancellationToken: Arg.Any<CancellationToken>()
+                )
+            )
+            .Do(processor =>
+            {
+                _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
+                _submissionStatusProcessor.Section.Returns(_section);
+            });
 
-        var result = await _router.ValidateRoute(categorySlug, sectionSlug, null, _controller, default);
+        var result = await _router.ValidateRoute(
+            categorySlug,
+            sectionSlug,
+            null,
+            _controller,
+            default
+        );
 
         var pageResult = result as ViewResult;
 
@@ -139,25 +167,27 @@ public class CheckAnswersRouterTests
     {
         var noneAnsweredSection = new Section()
         {
-            Sys = new SystemDetails()
-            {
-                Id = "non-answered-section"
-            },
-            InterstitialPage = new Page()
-            {
-                Slug = "non-answered-section-slug"
-            }
+            Sys = new SystemDetails() { Id = "non-answered-section" },
+            InterstitialPage = new Page() { Slug = "non-answered-section-slug" },
         };
 
         var sectionSlug = noneAnsweredSection.InterstitialPage.Slug;
 
-        _submissionStatusProcessor.When(processor => processor.GetJourneyStatusForSection(sectionSlug, cancellationToken: Arg.Any<CancellationToken>()))
-                                  .Do(processor =>
-                                  {
-                                      _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
-                                      _submissionStatusProcessor.Section.Returns(noneAnsweredSection);
-                                  });
+        _submissionStatusProcessor
+            .When(processor =>
+                processor.GetJourneyStatusForSection(
+                    sectionSlug,
+                    cancellationToken: Arg.Any<CancellationToken>()
+                )
+            )
+            .Do(processor =>
+            {
+                _submissionStatusProcessor.Status = Status.CompleteNotReviewed;
+                _submissionStatusProcessor.Section.Returns(noneAnsweredSection);
+            });
 
-        await Assert.ThrowsAnyAsync<DatabaseException>(() => _router.ValidateRoute("category-slug", sectionSlug, null, _controller, default));
+        await Assert.ThrowsAnyAsync<DatabaseException>(() =>
+            _router.ValidateRoute("category-slug", sectionSlug, null, _controller, default)
+        );
     }
 }

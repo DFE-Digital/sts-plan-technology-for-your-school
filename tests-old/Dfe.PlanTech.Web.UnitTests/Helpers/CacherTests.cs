@@ -49,10 +49,7 @@ public class CacherTests
         var testKey = "Testing";
         var testObject = "Test value";
 
-        var service = new TestService
-        {
-            Value = testObject
-        };
+        var service = new TestService { Value = testObject };
 
         var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
@@ -88,8 +85,7 @@ public class CacherTests
     public void Set_Should_Save_Using_Default_CacheOptions()
     {
         var cacheOptionsSubstitute = Substitute.For<ICacheOptions>();
-        cacheOptionsSubstitute.DefaultTimeToLive
-                        .Returns(TimeSpan.FromMinutes(60));
+        cacheOptionsSubstitute.DefaultTimeToLive.Returns(TimeSpan.FromMinutes(60));
 
         var testKey = "Testing";
         var testObject = "Test value";
@@ -115,7 +111,11 @@ public class CacherTests
 
         var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
-        var result = await cacher.GetAsync(testKey, () => Task.FromResult("new value"), TimeSpan.MaxValue);
+        var result = await cacher.GetAsync(
+            testKey,
+            () => Task.FromResult("new value"),
+            TimeSpan.MaxValue
+        );
 
         Assert.NotNull(result);
         Assert.Equal(testObject, result);
@@ -129,7 +129,11 @@ public class CacherTests
 
         var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
-        var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.MaxValue);
+        var result = await cacher.GetAsync(
+            testKey,
+            () => Task.FromResult(newValue),
+            TimeSpan.MaxValue
+        );
 
         Assert.NotNull(result);
         Assert.Equal(newValue, result);
@@ -143,7 +147,11 @@ public class CacherTests
 
         var cacher = new CacheHelper(new CacheOptions(), _memoryCache);
 
-        var result = await cacher.GetAsync(testKey, () => Task.FromResult(newValue), TimeSpan.MaxValue);
+        var result = await cacher.GetAsync(
+            testKey,
+            () => Task.FromResult(newValue),
+            TimeSpan.MaxValue
+        );
 
         var cachedResult = _memoryCache.Get(testKey);
 
@@ -168,7 +176,6 @@ public class CacherTests
 
         _ = cacheOptionsSubstitute.Received().DefaultTimeToLive;
     }
-
 }
 
 public class TestService
@@ -185,7 +192,6 @@ public class TestService
             GetHasBeenCalled = true;
             return _value;
         }
-
         set
         {
             _value = value;

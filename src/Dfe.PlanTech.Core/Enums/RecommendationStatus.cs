@@ -19,7 +19,8 @@ public enum RecommendationStatus
     //[CssClass(ClassName = "govuk-tag--red")]
     //OnHold = 2,
 
+    // Legacy enum value
     [Display(Name = "Complete")]
     [CssClass(ClassName = "govuk-tag--green")]
-    Complete = 3
+    Complete = 3,
 }

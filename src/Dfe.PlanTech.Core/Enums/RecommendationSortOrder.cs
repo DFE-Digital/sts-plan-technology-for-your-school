@@ -11,5 +11,5 @@ public enum RecommendationSortOrder
     Status = 1,
 
     [Display(Name = "Last updated")]
-    LastUpdated = 2
+    LastUpdated = 2,
 }

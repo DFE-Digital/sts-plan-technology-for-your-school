@@ -12,11 +12,14 @@ public class TableCellRenderer : BaseRichTextContentPartRenderer
     private const string HeaderOpeningTag = "<th scope=\"row\" class=\"govuk-table__header\">";
     private const string CellOpeningTag = "<td class=\"govuk-table__cell\">";
 
-    public TableCellRenderer() : base(RichTextNodeType.TableCell)
-    {
-    }
+    public TableCellRenderer()
+        : base(RichTextNodeType.TableCell) { }
 
-    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    )
     {
         if (stringBuilder.EndsWith(BeginningOfRowString))
         {
@@ -34,7 +37,10 @@ public class TableCellRenderer : BaseRichTextContentPartRenderer
         return stringBuilder;
     }
 
-    private static void AppendContent(StringBuilder stringBuilder, List<RichTextContentField> content)
+    private static void AppendContent(
+        StringBuilder stringBuilder,
+        List<RichTextContentField> content
+    )
     {
         for (int i = 0; i < content.Count; i++)
         {

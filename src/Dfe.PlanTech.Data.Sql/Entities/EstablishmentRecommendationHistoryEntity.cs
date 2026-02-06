@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
@@ -24,7 +26,7 @@ public class EstablishmentRecommendationHistoryEntity
 
     public string? PreviousStatus { get; set; }
 
-    public string NewStatus { get; set; } = null!;
+    public string? NewStatus { get; set; } = null!;
 
     public string? NoteText { get; set; }
 
@@ -37,8 +39,10 @@ public class EstablishmentRecommendationHistoryEntity
             UserId = UserId,
             MatEstablishmentId = MatEstablishmentId,
             DateCreated = DateCreated,
-            PreviousStatus = PreviousStatus,
-            NewStatus = NewStatus,
+            PreviousStatus = PreviousStatus is null
+                ? null
+                : PreviousStatus.GetRecommendationStatusEnumValue()!,
+            NewStatus = NewStatus.GetRecommendationStatusEnumValue()!,
             NoteText = NoteText,
         };
     }

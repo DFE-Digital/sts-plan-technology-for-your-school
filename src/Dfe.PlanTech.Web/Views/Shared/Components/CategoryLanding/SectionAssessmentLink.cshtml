@@ -1,4 +1,4 @@
-﻿@model StatusLinkViewModel
+@model StatusLinkViewModel
 
 @{
     string statusText;
@@ -42,14 +42,14 @@
     * The "Sections" context refers to the text/link underneath each Section (above Recommendations where applicable):
     * - If the section has been started or completed show the status message followed by the link
     * - If the section has never been started, show the short description followed by the link.
-    * 
+    *
     * The "Default" context refers to the inset text shown at the top of the CategoryLanding page:
     * - Only show a link for that section if it is not completed
     * - Do not show the status message or the description
     *
     * NB inset text does not appear for single-section categories, this is handled elsewhere
     */
-    
+
     bool noDescriptionFormat =
         topicStatus == SubmissionStatus.CompleteReviewed ||
         topicStatus == SubmissionStatus.Obsolete ||

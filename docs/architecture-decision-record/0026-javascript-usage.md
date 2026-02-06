@@ -1,6 +1,6 @@
 # 0026 - Back button functionality
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
 
@@ -8,9 +8,9 @@ We have a "Back" link at the top of most of our pages. How do we best keep track
 
 ## Decision Drivers
 
-* Accessibility
-* Performance
-* Existing DFE usage
+- Accessibility
+- Performance
+- Existing DFE usage
 
 ## Considered Options
 
@@ -36,9 +36,8 @@ We could cache the user's history server side, using something like SQL server (
 
 Javascript will limit the amount of people who can use it (as people might have it disabled for example), however it keeps the data client side, minimises request data transfered, and minimises excessive requests from the server.
 
-
 ## Decision Outcome
 
-From looking at other Gov/DFE websites, it appears most either hard code the back link directly, or use Javascript. Given the problems with the content model solution, Javascript was chosen as our best 
+From looking at other Gov/DFE websites, it appears most either hard code the back link directly, or use Javascript. Given the problems with the content model solution, Javascript was chosen as our best
 
 Javascript was chosen as it is the best use case for the project,

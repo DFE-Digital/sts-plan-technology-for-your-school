@@ -1,25 +1,21 @@
-import ValidateHeader from "./header-validator.js";
-import ValidateSection from "./section-validator.js";
+import ValidateHeader from './header-validator.js';
+import ValidateSection from './section-validator.js';
 
-function ValidateCategory({ fields}) {
+function ValidateCategory({ fields }) {
   const header = fields.header;
 
   const headerTest = ValidateHeader(header);
 
-  const progressHeaderTest = headerTest.next().contains("Progress");
+  const progressHeaderTest = headerTest.next().contains('Progress');
 
-  const progressTest = progressHeaderTest
-    .next("p")
-    .contains("You have completed");
+  const progressTest = progressHeaderTest.next('p').contains('You have completed');
 
-  const appTaskList = progressTest
-    .next("dl.govuk-summary-list")
-    .should("exist");
+  const appTaskList = progressTest.next('dl.govuk-summary-list').should('exist');
 
-    const sections = fields.sections;
+  const sections = fields.sections;
 
-    appTaskList.find("div.govuk-summary-list__row").then(($listItems) => {
-       expect($listItems).to.have.length(sections.length);
+  appTaskList.find('div.govuk-summary-list__row').then(($listItems) => {
+    expect($listItems).to.have.length(sections.length);
 
     for (let index = 0; index < sections.length; index++) {
       const section = sections[index];

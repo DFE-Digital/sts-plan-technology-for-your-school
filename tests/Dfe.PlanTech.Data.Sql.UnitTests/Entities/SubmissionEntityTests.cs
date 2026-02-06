@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
@@ -11,16 +12,23 @@ public class SubmissionEntityTests
         // Arrange
         var expectedId = 61;
         var expectedEstablishmentId = 71;
-        var expectedCompleted = false;
         var expectedSectionId = "Arbitrary string - section id";
         var expectedSectionName = "Arbitrary string - section name";
         var expectedMaturity = "Arbitrary string - maturity";
         var expectedDateCreated = new DateTime(2024, 08, 01, 10, 00, 00, DateTimeKind.Utc);
-        DateTime? expectedDateLastUpdated = new DateTime(2024, 08, 02, 11, 00, 00, DateTimeKind.Utc);
+        DateTime? expectedDateLastUpdated = new DateTime(
+            2024,
+            08,
+            02,
+            11,
+            00,
+            00,
+            DateTimeKind.Utc
+        );
         DateTime? expectedDateCompleted = null;
         var expectedDeleted = false;
         var expectedViewed = true;
-        string? expectedStatus = "Arbitrary string - status";
+        var expectedStatus = SubmissionStatus.InProgress;
 
         var establishment = new EstablishmentEntity
         {
@@ -28,7 +36,7 @@ public class SubmissionEntityTests
             EstablishmentRef = "Arbitrary string - establishment ref",
             EstablishmentType = "Arbitrary string - establishment type",
             OrgName = "Arbitrary string - organisation name",
-            DateCreated = new DateTime(2024, 01, 01, 00, 00, 00, DateTimeKind.Utc)
+            DateCreated = new DateTime(2024, 01, 01, 00, 00, 00, DateTimeKind.Utc),
         };
 
         var entity = new SubmissionEntity
@@ -36,7 +44,6 @@ public class SubmissionEntityTests
             Id = expectedId,
             EstablishmentId = expectedEstablishmentId,
             Establishment = establishment,
-            Completed = expectedCompleted,
             SectionId = expectedSectionId,
             SectionName = expectedSectionName,
             Maturity = expectedMaturity,
@@ -49,7 +56,7 @@ public class SubmissionEntityTests
             Responses = new List<ResponseEntity>(),
             Deleted = expectedDeleted,
             Viewed = expectedViewed,
-            Status = expectedStatus
+            Status = expectedStatus,
         };
 
         // Act
@@ -60,7 +67,6 @@ public class SubmissionEntityTests
         Assert.Equal(expectedEstablishmentId, dto.EstablishmentId);
         Assert.NotNull(dto.Establishment);
         Assert.Equal(expectedEstablishmentId, dto.Establishment.Id);
-        Assert.Equal(expectedCompleted, dto.Completed);
         Assert.Equal(expectedSectionId, dto.SectionId);
         Assert.Equal(expectedSectionName, dto.SectionName);
         Assert.Equal(expectedMaturity, dto.Maturity);
@@ -79,7 +85,6 @@ public class SubmissionEntityTests
                 nameof(SqlSubmissionDto.Id),
                 nameof(SqlSubmissionDto.EstablishmentId),
                 nameof(SqlSubmissionDto.Establishment),
-                nameof(SqlSubmissionDto.Completed),
                 nameof(SqlSubmissionDto.SectionId),
                 nameof(SqlSubmissionDto.SectionName),
                 nameof(SqlSubmissionDto.Maturity),
@@ -89,7 +94,7 @@ public class SubmissionEntityTests
                 nameof(SqlSubmissionDto.Responses),
                 nameof(SqlSubmissionDto.Deleted),
                 nameof(SqlSubmissionDto.Viewed),
-                nameof(SqlSubmissionDto.Status)
+                nameof(SqlSubmissionDto.Status),
             }
         );
     }

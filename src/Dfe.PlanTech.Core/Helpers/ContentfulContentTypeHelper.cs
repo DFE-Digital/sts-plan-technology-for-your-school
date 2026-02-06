@@ -10,7 +10,12 @@ public static class ContentfulContentTypeHelper
     {
         var type = typeof(TEntry);
         var typeName = type.Name;
-        if (ContentfulContentTypeConstants.EntryClassToContentTypeMap.TryGetValue(typeName, out var contentfulContentTypeId))
+        if (
+            ContentfulContentTypeConstants.EntryClassToContentTypeMap.TryGetValue(
+                typeName,
+                out var contentfulContentTypeId
+            )
+        )
         {
             return contentfulContentTypeId!;
         }
@@ -22,6 +27,8 @@ public static class ContentfulContentTypeHelper
             return attribute.Id;
         }
 
-        throw new InvalidOperationException($"Could not find content type ID for class type {typeName}");
+        throw new InvalidOperationException(
+            $"Could not find content type ID for class type {typeName}"
+        );
     }
 }

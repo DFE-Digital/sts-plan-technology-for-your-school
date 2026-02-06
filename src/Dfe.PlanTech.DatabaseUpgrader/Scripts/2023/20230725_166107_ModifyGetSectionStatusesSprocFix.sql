@@ -7,22 +7,22 @@ CREATE TABLE #ReturnTable(sectionId nvarchar(50), completed int, maturity nvarch
 INSERT INTO #splitTable
 SELECT * FROM STRING_SPLIT(@splitStringVal, ',')
 
-DECLARE db_cursor CURSOR FOR 
-SELECT val FROM #splitTable 
+DECLARE db_cursor CURSOR FOR
+SELECT val FROM #splitTable
 
-OPEN db_cursor  
-FETCH NEXT FROM db_cursor INTO @val  
+OPEN db_cursor
+FETCH NEXT FROM db_cursor INTO @val
 
-WHILE @@FETCH_STATUS = 0  
-BEGIN  
+WHILE @@FETCH_STATUS = 0
+BEGIN
 	  INSERT INTO #ReturnTable
-      select Top 1 sectionId, completed, maturity, dateCreated from submission 
+      select Top 1 sectionId, completed, maturity, dateCreated from submission
 	  where sectionId = @val
 	  order by dateCreated desc
-      FETCH NEXT FROM db_cursor INTO @val 
-END 
+      FETCH NEXT FROM db_cursor INTO @val
+END
 
-CLOSE db_cursor  
-DEALLOCATE db_cursor 
+CLOSE db_cursor
+DEALLOCATE db_cursor
 
 select * from #ReturnTable

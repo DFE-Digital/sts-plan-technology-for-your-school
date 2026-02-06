@@ -8,7 +8,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 {
     public class RobotsTxtMiddlewareTests
     {
-        private static RobotsTxtMiddleware BuildSut(RobotsConfiguration cfg, out Func<bool> wasNextCalled)
+        private static RobotsTxtMiddleware BuildSut(
+            RobotsConfiguration cfg,
+            out Func<bool> wasNextCalled
+        )
         {
             var nextCalled = false;
 
@@ -24,7 +27,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             return new RobotsTxtMiddleware(next, options);
         }
 
-        private static DefaultHttpContext BuildContext(string path = RobotsTxtMiddlewareExtensions.RobotsTxtPath)
+        private static DefaultHttpContext BuildContext(
+            string path = RobotsTxtMiddlewareExtensions.RobotsTxtPath
+        )
         {
             var ctx = new DefaultHttpContext();
             ctx.Request.Path = path;
@@ -39,7 +44,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             {
                 UserAgent = "*",
                 DisallowedPaths = ["/admin", "/private"],
-                CacheMaxAge = 3600
+                CacheMaxAge = 3600,
             };
 
             var sut = BuildSut(cfg, out var _);
@@ -55,14 +60,10 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
 
             body = body.Replace("\r\n", "\n");
 
-            var expected =
-                "User-agent: *\n" +
-                "Disallow: /admin\n" +
-                "Disallow: /private";
+            var expected = "User-agent: *\n" + "Disallow: /admin\n" + "Disallow: /private";
 
             Assert.Equal(expected, body);
         }
-
 
         [Fact]
         public async Task Handles_Empty_DisallowedPaths_Cleanly()
@@ -71,7 +72,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             {
                 UserAgent = "Googlebot",
                 DisallowedPaths = [],
-                CacheMaxAge = 120
+                CacheMaxAge = 120,
             };
 
             var sut = BuildSut(cfg, out var _);
@@ -96,7 +97,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware
             {
                 UserAgent = "*",
                 DisallowedPaths = ["/hidden"],
-                CacheMaxAge = 10
+                CacheMaxAge = 10,
             };
 
             var sut = BuildSut(cfg, out var wasNextCalled);

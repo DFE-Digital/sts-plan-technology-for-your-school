@@ -21,7 +21,9 @@ public class LogInvalidModelStateTests
         var controller = Substitute.For<Controller>();
 
         var context = Substitute.For<HttpContext>();
-        context.RequestServices.GetService(typeof(ILogger<LogInvalidModelStateAttribute>)).Returns(logger);
+        context
+            .RequestServices.GetService(typeof(ILogger<LogInvalidModelStateAttribute>))
+            .Returns(logger);
 
         var actionContext = new ActionContext
         {
@@ -30,7 +32,12 @@ public class LogInvalidModelStateTests
             ActionDescriptor = Substitute.For<ActionDescriptor>(),
         };
 
-        var actionExecutingContext = new ActionExecutingContext(actionContext, filters, actionArguments, controller);
+        var actionExecutingContext = new ActionExecutingContext(
+            actionContext,
+            filters,
+            actionArguments,
+            controller
+        );
         actionExecutingContext.ModelState.AddModelError("Property", "Is Missing");
 
         var filter = new LogInvalidModelStateAttribute();

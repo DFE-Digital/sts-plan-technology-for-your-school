@@ -1,13 +1,13 @@
-import { dataLoaded, ValidateContent } from "../helpers/index.js";
+import { dataLoaded, ValidateContent } from '../helpers/index.js';
 
 export const validateNavigationLinks = (dataMapper) => {
-    if (!dataLoaded(dataMapper)) {
-        return;
-    }
+  if (!dataLoaded(dataMapper)) {
+    return;
+  }
 
-    cy.visit("/");
+  cy.visit('/');
 
-    for (const navigationLink of dataMapper.contents.get("navigationLink").values()) {
-        ValidateContent(navigationLink);
-    }
-}
+  for (const navigationLink of dataMapper.contents.get('navigationLink').values()) {
+    ValidateContent(navigationLink);
+  }
+};

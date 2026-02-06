@@ -19,15 +19,37 @@ public class RedisDependencyManagerTests : RedisCacheTestsBase
         var batch = Substitute.For<IBatch>();
         Database.CreateBatch().Returns(batch);
 
-        await _dependencyManager.RegisterDependenciesAsync(Database, Key, RedisCacheTestHelpers.Question);
+        await _dependencyManager.RegisterDependenciesAsync(
+            Database,
+            Key,
+            RedisCacheTestHelpers.Question
+        );
 
         Assert.NotNull(QueuedFunc);
 
         await QueuedFunc(default);
 
-        await batch.Received(1).SetAddAsync(_dependencyManager.GetDependencyKey(RedisCacheTestHelpers.Question.Sys!.Id), Key, CommandFlags.FireAndForget);
-        await batch.Received(1).SetAddAsync(_dependencyManager.GetDependencyKey(RedisCacheTestHelpers.FirstAnswer.Sys!.Id), Key, CommandFlags.FireAndForget);
-        await batch.Received(1).SetAddAsync(_dependencyManager.GetDependencyKey(RedisCacheTestHelpers.SecondAnswer.Sys!.Id), Key, CommandFlags.FireAndForget);
+        await batch
+            .Received(1)
+            .SetAddAsync(
+                _dependencyManager.GetDependencyKey(RedisCacheTestHelpers.Question.Sys!.Id),
+                Key,
+                CommandFlags.FireAndForget
+            );
+        await batch
+            .Received(1)
+            .SetAddAsync(
+                _dependencyManager.GetDependencyKey(RedisCacheTestHelpers.FirstAnswer.Sys!.Id),
+                Key,
+                CommandFlags.FireAndForget
+            );
+        await batch
+            .Received(1)
+            .SetAddAsync(
+                _dependencyManager.GetDependencyKey(RedisCacheTestHelpers.SecondAnswer.Sys!.Id),
+                Key,
+                CommandFlags.FireAndForget
+            );
     }
 
     [Fact]
@@ -36,13 +58,23 @@ public class RedisDependencyManagerTests : RedisCacheTestsBase
         var batch = Substitute.For<IBatch>();
         Database.CreateBatch().Returns(batch);
 
-        await _dependencyManager.RegisterDependenciesAsync(Database, Key, RedisCacheTestHelpers.EmptyQuestionCollection);
+        await _dependencyManager.RegisterDependenciesAsync(
+            Database,
+            Key,
+            RedisCacheTestHelpers.EmptyQuestionCollection
+        );
 
         Assert.NotNull(QueuedFunc);
 
         await QueuedFunc(default);
 
-        await batch.Received(1).SetAddAsync(_dependencyManager.EmptyCollectionDependencyKey, Key, CommandFlags.FireAndForget);
+        await batch
+            .Received(1)
+            .SetAddAsync(
+                _dependencyManager.EmptyCollectionDependencyKey,
+                Key,
+                CommandFlags.FireAndForget
+            );
     }
 
     [Fact]
@@ -53,10 +85,14 @@ public class RedisDependencyManagerTests : RedisCacheTestsBase
         var batch = Substitute.For<IBatch>();
         Database.CreateBatch().Returns(batch);
 
-        var method = _dependencyManager.GetType().GetMethod("GetDependencies", BindingFlags.NonPublic | BindingFlags.Instance);
+        var method = _dependencyManager
+            .GetType()
+            .GetMethod("GetDependencies", BindingFlags.NonPublic | BindingFlags.Instance);
 
         Assert.NotNull(method);
 
-        Assert.ThrowsAny<InvalidOperationException>(() => method.Invoke(_dependencyManager, [testValue]));
+        Assert.ThrowsAny<InvalidOperationException>(() =>
+            method.Invoke(_dependencyManager, [testValue])
+        );
     }
 }

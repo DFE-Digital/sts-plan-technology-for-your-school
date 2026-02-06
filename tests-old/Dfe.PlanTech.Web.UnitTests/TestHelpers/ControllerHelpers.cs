@@ -15,13 +15,12 @@ public static class ControllerHelpers
         httpContext.Session.Returns(session);
         var serviceProvider = Substitute.For<IServiceProvider>();
         serviceProvider
-                .GetService(Arg.Is(typeof(ITempDataDictionaryFactory)))
-                .Returns(Substitute.For<ITempDataDictionaryFactory>());
+            .GetService(Arg.Is(typeof(ITempDataDictionaryFactory)))
+            .Returns(Substitute.For<ITempDataDictionaryFactory>());
         serviceProvider
-                .GetService(Arg.Is(typeof(IUrlHelperFactory)))
-                .Returns(Substitute.For<IUrlHelperFactory>());
+            .GetService(Arg.Is(typeof(IUrlHelperFactory)))
+            .Returns(Substitute.For<IUrlHelperFactory>());
         httpContext.RequestServices.Returns(serviceProvider);
-
 
         return new ControllerContext { HttpContext = httpContext };
     }

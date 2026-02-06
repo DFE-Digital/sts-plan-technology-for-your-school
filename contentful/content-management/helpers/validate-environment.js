@@ -6,11 +6,11 @@
  * @param {ClientAPI | null} client
  */
 module.exports = async function validateEnvironment(client) {
-    const environments = await client.environment.getMany({
-        spaceId: process.env.SPACE_ID,
-    });
-    const validNames = environments.items.map((env) => env.name);
-    if (!validNames.includes(process.env.ENVIRONMENT)) {
-        throw new Error(`Invalid Contentful environment`);
-    }
-}
+  const environments = await client.environment.getMany({
+    spaceId: process.env.SPACE_ID,
+  });
+  const validNames = environments.items.map((env) => env.name);
+  if (!validNames.includes(process.env.ENVIRONMENT)) {
+    throw new Error(`Invalid Contentful environment`);
+  }
+};

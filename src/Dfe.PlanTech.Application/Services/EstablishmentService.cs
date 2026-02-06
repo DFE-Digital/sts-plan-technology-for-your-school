@@ -12,28 +12,45 @@ public class EstablishmentService(
     IUserWorkflow userWorkflow
 ) : IEstablishmentService
 {
-    private readonly IEstablishmentWorkflow _establishmentWorkflow = establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
-    private readonly IRecommendationWorkflow _recommendationWorkflow = recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
-    private readonly IUserWorkflow _userWorkflow = userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
+    private readonly IEstablishmentWorkflow _establishmentWorkflow =
+        establishmentWorkflow ?? throw new ArgumentNullException(nameof(establishmentWorkflow));
+    private readonly IRecommendationWorkflow _recommendationWorkflow =
+        recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
+    private readonly IUserWorkflow _userWorkflow =
+        userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
 
-    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel)
+    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
+        EstablishmentModel establishmentModel
+    )
     {
         return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
-    public async Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(string establishmentReference)
+    public async Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(
+        string establishmentReference
+    )
     {
-        return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(establishmentReference);
+        return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(
+            establishmentReference
+        );
     }
 
-    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(int establishmentId)
+    public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(
+        int establishmentId
+    )
     {
-        var establishmentLinks = await _establishmentWorkflow.GetGroupEstablishments(establishmentId);
+        var establishmentLinks = await _establishmentWorkflow.GetGroupEstablishments(
+            establishmentId
+        );
 
         var linkUrns = establishmentLinks.Select(s => s.Urn);
-        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(linkUrns);
+        var establishments = await _establishmentWorkflow.GetEstablishmentsByReferencesAsync(
+            linkUrns
+        );
 
-        var establishmentLinkMap = establishments.ToDictionary(e => e.EstablishmentRef, e => e.Id);
+        var establishmentLinkMap = establishments
+            .Where(e => e.EstablishmentRef is not null)
+            .ToDictionary(e => e.EstablishmentRef!, e => e.Id);
 
         foreach (var establishmentLink in establishmentLinks)
         {
@@ -44,9 +61,16 @@ public class EstablishmentService(
             }
 
             var schoolEstablishmentId = establishmentLinkMap[establishmentLink.Urn];
-            var recommendations = await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(schoolEstablishmentId);
+            var recommendations =
+                await _recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
+                    schoolEstablishmentId
+                );
 
-            establishmentLink.InProgressOrCompletedRecommendationsCount = recommendations.Values.Count(r => r.NewStatus == nameof(RecommendationStatus.Complete).ToString() || r.NewStatus == nameof(RecommendationStatus.InProgress).ToString());
+            establishmentLink.InProgressOrCompletedRecommendationsCount =
+                recommendations.Values.Count(r =>
+                    r.NewStatus == RecommendationStatus.Complete
+                    || r.NewStatus == RecommendationStatus.InProgress
+                );
         }
 
         return establishmentLinks.ToList();
@@ -57,26 +81,35 @@ public class EstablishmentService(
         int? userEstablishmentId,
         EstablishmentModel userEstablishmentModel,
         string selectedEstablishmentUrn,
-        string selectedEstablishmentName)
+        string selectedEstablishmentName
+    )
     {
-        var user = await _userWorkflow.GetUserBySignInRefAsync(userDsiReference)
+        var user =
+            await _userWorkflow.GetUserBySignInRefAsync(userDsiReference)
             ?? throw new InvalidDataException("User does not exist");
 
         if (userEstablishmentId is null)
         {
-            var userEstablishment = await _establishmentWorkflow.GetOrCreateEstablishmentAsync(userEstablishmentModel);
+            var userEstablishment = await _establishmentWorkflow.GetOrCreateEstablishmentAsync(
+                userEstablishmentModel
+            );
             userEstablishmentId = userEstablishment.Id;
         }
 
-        var selectedEstablishment = await _establishmentWorkflow.GetEstablishmentByReferenceAsync(selectedEstablishmentUrn);
-        selectedEstablishment ??= await _establishmentWorkflow.GetOrCreateEstablishmentAsync(selectedEstablishmentUrn, selectedEstablishmentName);
+        var selectedEstablishment = await _establishmentWorkflow.GetEstablishmentByReferenceAsync(
+            selectedEstablishmentUrn
+        );
+        selectedEstablishment ??= await _establishmentWorkflow.GetOrCreateEstablishmentAsync(
+            selectedEstablishmentUrn,
+            selectedEstablishmentName
+        );
 
         var selectionModel = new UserGroupSelectionModel
         {
             SelectedEstablishmentId = selectedEstablishment.Id,
             SelectedEstablishmentName = selectedEstablishmentName,
             UserEstablishmentId = userEstablishmentId.Value,
-            UserId = user.Id
+            UserId = user.Id,
         };
 
         await _establishmentWorkflow.RecordGroupSelection(selectionModel);

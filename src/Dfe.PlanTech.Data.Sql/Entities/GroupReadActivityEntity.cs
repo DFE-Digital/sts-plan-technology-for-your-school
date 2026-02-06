@@ -27,7 +27,7 @@ public class GroupReadActivityEntity
             UserEstablishmentId = UserEstablishmentId,
             SelectedEstablishmentId = SelectedEstablishmentId,
             SelectedEstablishmentName = SelectedEstablishmentName,
-            DateSelected = DateSelected
+            DateSelected = DateSelected,
         };
     }
 }

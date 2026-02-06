@@ -21,7 +21,7 @@ public class EstablishmentGroupEntityTests
             Uid = expectedUid,
             GroupName = expectedGroupName,
             GroupType = expectedGroupType,
-            GroupStatus = expectedGroupStatus
+            GroupStatus = expectedGroupStatus,
         };
 
         // Act
@@ -42,7 +42,7 @@ public class EstablishmentGroupEntityTests
                 nameof(SqlEstablishmentGroupDto.Uid),
                 nameof(SqlEstablishmentGroupDto.GroupName),
                 nameof(SqlEstablishmentGroupDto.GroupType),
-                nameof(SqlEstablishmentGroupDto.GroupStatus)
+                nameof(SqlEstablishmentGroupDto.GroupStatus),
             }
         );
     }

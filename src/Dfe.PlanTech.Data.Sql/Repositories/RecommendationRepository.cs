@@ -13,11 +13,16 @@ public class RecommendationRepository : IRecommendationRepository
         _db = dbContext;
     }
 
-    public async Task<IEnumerable<RecommendationEntity>> GetRecommendationsByContentfulReferencesAsync(
-        IEnumerable<string> recommendationContentfulReferences)
+    public async Task<
+        IEnumerable<RecommendationEntity>
+    > GetRecommendationsByContentfulReferencesAsync(
+        IEnumerable<string> recommendationContentfulReferences
+    )
     {
-        return await _db.Recommendations
-            .Where(r => recommendationContentfulReferences.Contains(r.ContentfulRef))
+        return await _db
+            .Recommendations.Where(r =>
+                recommendationContentfulReferences.Contains(r.ContentfulRef)
+            )
             .ToListAsync();
     }
 }

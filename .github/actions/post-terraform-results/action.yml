@@ -7,7 +7,7 @@ inputs:
     type: string
   plan_stdout:
     required: true
-    type: string  
+    type: string
   plan_outcome:
     required: true
     type: string
@@ -57,23 +57,23 @@ runs:
           const botComment = comments.find(comment => {
             return comment.user.type === 'Bot' && comment.body.includes('Terraform Format and Style')
           })
-    
+
           // 2. Prepare format of the comment
           const output = `#### Terraform Format and Style 🖌\`${{ inputs.fmt_outcome }}\`
           #### Terraform Initialization ⚙️\`${{ inputs.init_outcome }}\`
           #### Terraform Validation 🤖\`${{ inputs.validate_outcome }}\`
           <details><summary>Validation Output</summary>
-    
+
           \`\`\`\n
           ${{ inputs.validate_stdout }}
           \`\`\`
-    
+
           </details>
-    
+
           #### Terraform Plan 📖\`${{ inputs.plan_outcome }}\`
-    
+
           *Pusher: @${{ github.actor }}, Action: \`${{ github.event_name }}\`, Working Directory: \`${{ env.TF_WORKING_DIRECTORY }}\`, Workflow: \`${{ github.workflow }}\`*`;
-    
+
           // 3. If we have a comment, update it, otherwise create a new one
           if (botComment) {
             github.rest.issues.updateComment({

@@ -8,12 +8,13 @@ namespace Dfe.PlanTech.Web.Controllers;
 [Route("auth")]
 public class AuthController : Controller
 {
-
-    public AuthController()
-    {
-    }
+    public AuthController() { }
 
     [Authorize]
     [HttpGet("sign-out")]
-    public new IActionResult SignOut() => new SignOutResult([OpenIdConnectDefaults.AuthenticationScheme, CookieAuthenticationDefaults.AuthenticationScheme]);
+    public new IActionResult SignOut() =>
+        new SignOutResult([
+            OpenIdConnectDefaults.AuthenticationScheme,
+            CookieAuthenticationDefaults.AuthenticationScheme,
+        ]);
 }

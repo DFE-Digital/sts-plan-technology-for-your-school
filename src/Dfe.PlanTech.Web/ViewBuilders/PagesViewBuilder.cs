@@ -22,29 +22,47 @@ public class PagesViewBuilder(
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
-    public const string CategoryLandingPageView = "~/Views/Recommendations/CategoryLandingPage.cshtml";
-    public const string CategoryLandingPagePrintView = "~/Views/Recommendations/CategoryLandingPrintContent.cshtml";
+    public const string CategoryLandingPageView =
+        "~/Views/Recommendations/CategoryLandingPage.cshtml";
+    public const string CategoryLandingPagePrintView =
+        "~/Views/Recommendations/CategoryLandingPrintContent.cshtml";
 
-    private readonly ContactOptionsConfiguration _contactOptions = contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
-    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly ContactOptionsConfiguration _contactOptions =
+        contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ErrorPagesConfiguration _errorPages =
+        errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
 
-    public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(Controller controller, PageEntry page)
+    public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(
+        Controller controller,
+        PageEntry page
+    )
     {
-        var needsToSelectSchool = page.RequiresAuthorisation && CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is null;
+        var needsToSelectSchool =
+            page.RequiresAuthorisation
+            && CurrentUser.UserOrganisationIsGroup
+            && CurrentUser.GroupSelectedSchoolUrn is null;
         if (needsToSelectSchool)
         {
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
 
         // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
-        var hasSelectedASchool = CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is not null;
+        var hasSelectedASchool =
+            CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is not null;
         if (hasSelectedASchool)
         {
             // Named `establishmentId`, but for a group (e.g. MAT) this is the internal PlanTech synthetic database ID for the group not the selected establishment.
-            var groupId = CurrentUser.UserOrganisationId ?? throw new InvalidDataException("User is a MAT user but does not have an organisation ID (for the group)");
-            var groupSchools = await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
+            var groupId =
+                CurrentUser.UserOrganisationId
+                ?? throw new InvalidDataException(
+                    "User is a MAT user but does not have an organisation ID (for the group)"
+                );
+            var groupSchools =
+                await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
 
-            var selectedSchoolIsValid = groupSchools.Any(s => s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn));
+            var selectedSchoolIsValid = groupSchools.Any(s =>
+                s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn)
+            );
             if (!selectedSchoolIsValid)
             {
                 return controller.Redirect(UrlConstants.SelectASchoolPage);
@@ -56,13 +74,16 @@ public class PagesViewBuilder(
             var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4);
             if (category is null)
             {
-                throw new ContentfulDataUnavailableException($"Could not find category at {controller.Request.Path.Value}");
+                throw new ContentfulDataUnavailableException(
+                    $"Could not find category at {controller.Request.Path.Value}"
+                );
             }
             var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
             return controller.View(CategoryLandingPageView, landingPageViewModel);
         }
 
-        controller.ViewData["Title"] = StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text)
+        controller.ViewData["Title"] =
+            StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text)
             ?? PageTitleConstants.PlanTechnologyForYourSchool;
 
         var viewModel = new PageViewModel(page);
@@ -71,12 +92,17 @@ public class PagesViewBuilder(
         {
             if (!CurrentUser.IsAuthenticated)
             {
-                Logger.LogWarning("Tried to display establishment on {PageTitle} but user is not authenticated", page.Title?.Text ?? page.Id);
+                Logger.LogWarning(
+                    "Tried to display establishment on {PageTitle} but user is not authenticated",
+                    page.Title?.Text ?? page.Id
+                );
             }
             else
             {
-                viewModel.ActiveEstablishmentName = await CurrentUser.GetActiveEstablishmentNameAsync();
-                viewModel.ActiveEstablishmentUrn = await CurrentUser.GetActiveEstablishmentUrnAsync();
+                viewModel.ActiveEstablishmentName =
+                    await CurrentUser.GetActiveEstablishmentNameAsync();
+                viewModel.ActiveEstablishmentUrn =
+                    await CurrentUser.GetActiveEstablishmentUrnAsync();
             }
         }
 
@@ -88,7 +114,10 @@ public class PagesViewBuilder(
         return controller.View("Page", viewModel);
     }
 
-    public async Task<IActionResult> RouteToCategoryLandingPrintPageAsync(Controller controller, string categorySlug)
+    public async Task<IActionResult> RouteToCategoryLandingPrintPageAsync(
+        Controller controller,
+        string categorySlug
+    )
     {
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
         if (category is null)
@@ -96,13 +125,21 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var viewModel = BuildLandingPageViewModelAsync(controller, category);
+        var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
 
-        return controller.View(CategoryLandingPagePrintView, viewModel);
+        return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
 
-    private CategoryLandingPageViewModel BuildLandingPageViewModelAsync(Controller controller, QuestionnaireCategoryEntry category)
+    private static CategoryLandingPageViewModel BuildLandingPageViewModelAsync(
+        Controller controller,
+        QuestionnaireCategoryEntry category
+    )
     {
+        if (category.LandingPage is null)
+        {
+            throw new InvalidDataException("Cannot build a landing page with an empty slug");
+        }
+
         return new CategoryLandingPageViewModel
         {
             Slug = category.LandingPage?.Slug ?? string.Empty,
@@ -110,7 +147,7 @@ public class PagesViewBuilder(
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
-            SortOrder = controller.Request.Query["sort"]
+            SortOrder = controller.Request.Query["sort"],
         };
     }
 

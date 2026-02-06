@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -8,9 +9,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
 {
     private EstablishmentRecommendationHistoryRepository _repository = null!;
 
-    public EstablishmentRecommendationHistoryRepositoryTests(DatabaseFixture fixture) : base(fixture)
-    {
-    }
+    public EstablishmentRecommendationHistoryRepositoryTests(DatabaseFixture fixture)
+        : base(fixture) { }
 
     public override async Task InitializeAsync()
     {
@@ -22,8 +22,16 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetRecommendationHistoryByEstablishmentIdAsync_WhenGivenValidEstablishmentId_ThenReturnsMatchingHistory()
     {
         // Arrange - Create two establishments with history entries, ensuring only the target establishment's history is returned
-        var establishment1 = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School 1" };
-        var establishment2 = new EstablishmentEntity { EstablishmentRef = "EST002", OrgName = "Test School 2" };
+        var establishment1 = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School 1",
+        };
+        var establishment2 = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST002",
+            OrgName = "Test School 2",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -36,7 +44,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -46,9 +54,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment1.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = "InProgress",
-            NewStatus = "Completed",
-            NoteText = "First history entry for establishment 1"
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "First history entry for establishment 1",
         };
 
         var history2 = new EstablishmentRecommendationHistoryEntity
@@ -56,9 +64,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment1.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = "Completed",
+            PreviousStatus = RecommendationStatus.Complete.ToString(),
             NewStatus = "Reviewed",
-            NoteText = "Second history entry for establishment 1"
+            NoteText = "Second history entry for establishment 1",
         };
 
         var history3 = new EstablishmentRecommendationHistoryEntity
@@ -66,16 +74,18 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment2.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = "InProgress",
-            NewStatus = "Completed",
-            NoteText = "History entry for different establishment"
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "History entry for different establishment",
         };
 
         DbContext.EstablishmentRecommendationHistories.AddRange(history1, history2, history3);
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(establishment1.Id);
+        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
+            establishment1.Id
+        );
 
         // Assert
         var histories = result.ToList();
@@ -88,15 +98,31 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync_WhenGivenValidEstablishmentIdAndRecommendationId_ThenReturnsMatchingHistory()
     {
         // Arrange - Create two establishments with history entries, ensuring only the target establishment's history is returned
-        var establishment1 = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School 1" };
-        var establishment2 = new EstablishmentEntity { EstablishmentRef = "EST002", OrgName = "Test School 2" };
+        var establishment1 = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School 1",
+        };
+        var establishment2 = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST002",
+            OrgName = "Test School 2",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
 
         DbContext.Establishments.AddRange(establishment1, establishment2);
         DbContext.Users.Add(user);
 
-        var question2 = new QuestionEntity { QuestionText = "Test Question 2", ContentfulRef = "Q2" };
-        var question1 = new QuestionEntity { QuestionText = "Test Question 1", ContentfulRef = "Q1" };
+        var question2 = new QuestionEntity
+        {
+            QuestionText = "Test Question 2",
+            ContentfulRef = "Q2",
+        };
+        var question1 = new QuestionEntity
+        {
+            QuestionText = "Test Question 1",
+            ContentfulRef = "Q1",
+        };
 
         DbContext.Questions.AddRange(question1, question2);
         await DbContext.SaveChangesAsync();
@@ -105,14 +131,14 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation 1",
             ContentfulRef = "rec-001",
-            QuestionId = question1.Id
+            QuestionId = question1.Id,
         };
 
         var recommendation2 = new RecommendationEntity
         {
             RecommendationText = "Test Recommendation 2",
             ContentfulRef = "rec-002",
-            QuestionId = question2.Id
+            QuestionId = question2.Id,
         };
 
         DbContext.Recommendations.AddRange(recommendation1, recommendation2);
@@ -123,9 +149,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment1.Id,
             RecommendationId = recommendation1.Id,
             UserId = user.Id,
-            PreviousStatus = "InProgress",
-            NewStatus = "Completed",
-            NoteText = "First history entry for establishment 1"
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "First history entry for establishment 1",
         };
 
         var history2 = new EstablishmentRecommendationHistoryEntity
@@ -133,16 +159,20 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment1.Id,
             RecommendationId = recommendation2.Id,
             UserId = user.Id,
-            PreviousStatus = "Completed",
+            PreviousStatus = RecommendationStatus.Complete.ToString(),
             NewStatus = "Reviewed",
-            NoteText = "Second history entry for establishment 1"
+            NoteText = "Second history entry for establishment 1",
         };
 
         DbContext.EstablishmentRecommendationHistories.AddRange(history1, history2);
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(establishment1.Id, recommendation2.Id);
+        var result =
+            await _repository.GetRecommendationHistoryByEstablishmentIdAndRecommendationIdAsync(
+                establishment1.Id,
+                recommendation2.Id
+            );
 
         // Assert
         var histories = result.ToList();
@@ -156,12 +186,18 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetRecommendationHistoryByEstablishmentIdAsync_WhenNoHistoryExists_ThenReturnsEmpty()
     {
         // Arrange - Create an establishment with no history entries
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         DbContext.Establishments.Add(establishment);
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(establishment.Id);
+        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
+            establishment.Id
+        );
 
         // Assert
         Assert.Empty(result);
@@ -171,7 +207,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetRecommendationHistoryByEstablishmentIdAsync_WhenNonExistentEstablishment_ThenReturnsEmpty()
     {
         // Arrange - Create history for one establishment and query for a different non-existent establishment
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -184,7 +224,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -194,9 +234,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = "InProgress",
-            NewStatus = "Completed",
-            NoteText = "Test history entry for existing establishment"
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "Test history entry for existing establishment",
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
@@ -213,7 +253,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetRecommendationHistoryByEstablishmentIdAsync_WhenMultipleRecommendations_ThenReturnsAllHistoryForEstablishment()
     {
         // Arrange - Create one establishment with history for multiple different recommendations
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -226,13 +270,13 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "First Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         var recommendation2 = new RecommendationEntity
         {
             RecommendationText = "Second Recommendation",
             ContentfulRef = "rec-002",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
 
         DbContext.Recommendations.AddRange(recommendation1, recommendation2);
@@ -243,9 +287,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation1.Id,
             UserId = user.Id,
-            PreviousStatus = "InProgress",
-            NewStatus = "Completed",
-            NoteText = "History for first recommendation"
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "History for first recommendation",
         };
 
         var history2 = new EstablishmentRecommendationHistoryEntity
@@ -253,9 +297,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation2.Id,
             UserId = user.Id,
-            PreviousStatus = "InProgress",
-            NewStatus = "Completed",
-            NoteText = "History for second recommendation"
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "History for second recommendation",
         };
 
         var history3 = new EstablishmentRecommendationHistoryEntity
@@ -263,16 +307,18 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation1.Id,
             UserId = user.Id,
-            PreviousStatus = "Completed",
+            PreviousStatus = RecommendationStatus.Complete.ToString(),
             NewStatus = "Reviewed",
-            NoteText = "Second history entry for first recommendation"
+            NoteText = "Second history entry for first recommendation",
         };
 
         DbContext.EstablishmentRecommendationHistories.AddRange(history1, history2, history3);
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(establishment.Id);
+        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
+            establishment.Id
+        );
 
         // Assert
         var histories = result.ToList();
@@ -288,8 +334,16 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetRecommendationHistoryByEstablishmentIdAsync_WhenHistoryHasMatEstablishment_ThenReturnsWithMatReference()
     {
         // Arrange - Create history entry with MAT establishment reference to test optional relationship
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
-        var matEstablishment = new EstablishmentEntity { EstablishmentRef = "MAT001", OrgName = "Test MAT" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
+        var matEstablishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "MAT001",
+            OrgName = "Test MAT",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -302,7 +356,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -313,16 +367,18 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             MatEstablishmentId = matEstablishment.Id,
-            PreviousStatus = "InProgress",
-            NewStatus = "Completed",
-            NoteText = "History entry with MAT establishment reference"
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "History entry with MAT establishment reference",
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(establishment.Id);
+        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
+            establishment.Id
+        );
 
         // Assert
         var historyItem = Assert.Single(result);
@@ -334,7 +390,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetRecommendationHistoryByEstablishmentIdAsync_WhenHistoryOrderingMatters_ThenReturnsInCorrectOrder()
     {
         // Arrange - Create multiple history entries with different DateCreated values to test that all entries are returned
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -347,7 +407,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -358,9 +418,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = "InProgress",
+            NewStatus = RecommendationStatus.InProgress.ToString(),
             NoteText = "Oldest history entry - initial status",
-            DateCreated = DateTime.UtcNow.AddDays(-5)
+            DateCreated = DateTime.UtcNow.AddDays(-5),
         };
 
         var newestHistory = new EstablishmentRecommendationHistoryEntity
@@ -368,10 +428,10 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = "Completed",
+            PreviousStatus = RecommendationStatus.Complete.ToString(),
             NewStatus = "Reviewed",
             NoteText = "Newest history entry - final review",
-            DateCreated = DateTime.UtcNow.AddDays(-1)
+            DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
         var middleHistory = new EstablishmentRecommendationHistoryEntity
@@ -379,17 +439,23 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = "InProgress",
-            NewStatus = "Completed",
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete.ToString(),
             NoteText = "Middle history entry - completion",
-            DateCreated = DateTime.UtcNow.AddDays(-3)
+            DateCreated = DateTime.UtcNow.AddDays(-3),
         };
 
-        DbContext.EstablishmentRecommendationHistories.AddRange(oldestHistory, newestHistory, middleHistory);
+        DbContext.EstablishmentRecommendationHistories.AddRange(
+            oldestHistory,
+            newestHistory,
+            middleHistory
+        );
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(establishment.Id);
+        var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
+            establishment.Id
+        );
 
         // Assert
         var histories = result.ToList();
@@ -410,7 +476,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetLatestRecommendationHistoryAsync_WhenHistoryExists_ThenReturnsLatestEntry()
     {
         // Arrange - Create establishment with multiple history entries at different dates to test latest entry selection
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -423,7 +493,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -435,9 +505,9 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = "InProgress",
+            NewStatus = RecommendationStatus.InProgress.ToString(),
             NoteText = "Initial status",
-            DateCreated = DateTime.UtcNow.AddDays(-5)
+            DateCreated = DateTime.UtcNow.AddDays(-5),
         };
 
         var latestHistory = new EstablishmentRecommendationHistoryEntity
@@ -445,10 +515,10 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = "InProgress",
-            NewStatus = "Completed",
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete.ToString(),
             NoteText = "Latest status - should be returned",
-            DateCreated = DateTime.UtcNow.AddDays(-1)
+            DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
         var middleHistory = new EstablishmentRecommendationHistoryEntity
@@ -456,22 +526,29 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = "InProgress",
+            PreviousStatus = RecommendationStatus.InProgress.ToString(),
             NewStatus = "InReview",
             NoteText = "Middle status",
-            DateCreated = DateTime.UtcNow.AddDays(-3)
+            DateCreated = DateTime.UtcNow.AddDays(-3),
         };
 
-        DbContext.EstablishmentRecommendationHistories.AddRange(oldHistory, latestHistory, middleHistory);
+        DbContext.EstablishmentRecommendationHistories.AddRange(
+            oldHistory,
+            latestHistory,
+            middleHistory
+        );
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetLatestRecommendationHistoryAsync(establishment.Id, recommendation.Id);
+        var result = await _repository.GetLatestRecommendationHistoryAsync(
+            establishment.Id,
+            recommendation.Id
+        );
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal("Latest status - should be returned", result.NoteText);
-        Assert.Equal("Completed", result.NewStatus);
+        Assert.Equal(RecommendationStatus.Complete.ToString(), result.NewStatus);
         Assert.Equal(latestHistory.DateCreated, result.DateCreated);
     }
 
@@ -479,7 +556,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetLatestRecommendationHistoryAsync_WhenNoHistoryExists_ThenReturnsNull()
     {
         // Arrange - Create establishment and recommendation with no history entries
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
         DbContext.Establishments.Add(establishment);
@@ -490,13 +571,16 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetLatestRecommendationHistoryAsync(establishment.Id, recommendation.Id);
+        var result = await _repository.GetLatestRecommendationHistoryAsync(
+            establishment.Id,
+            recommendation.Id
+        );
 
         // Assert
         Assert.Null(result);
@@ -506,7 +590,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetLatestRecommendationHistoryAsync_WhenHistoryExistsForDifferentRecommendation_ThenReturnsNull()
     {
         // Arrange - Create history for one recommendation and query for a different recommendation
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -519,13 +607,13 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "First Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         var recommendation2 = new RecommendationEntity
         {
             RecommendationText = "Second Recommendation",
             ContentfulRef = "rec-002",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
 
         DbContext.Recommendations.AddRange(recommendation1, recommendation2);
@@ -538,15 +626,18 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation1.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = "Completed",
-            NoteText = "History for first recommendation"
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "History for first recommendation",
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
         await DbContext.SaveChangesAsync();
 
         // Act - Query for recommendation2 (which has no history)
-        var result = await _repository.GetLatestRecommendationHistoryAsync(establishment.Id, recommendation2.Id);
+        var result = await _repository.GetLatestRecommendationHistoryAsync(
+            establishment.Id,
+            recommendation2.Id
+        );
 
         // Assert
         Assert.Null(result);
@@ -556,8 +647,16 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetLatestRecommendationHistoryAsync_WhenHistoryExistsForDifferentEstablishment_ThenReturnsNull()
     {
         // Arrange - Create history for one establishment and query for a different establishment
-        var establishment1 = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School 1" };
-        var establishment2 = new EstablishmentEntity { EstablishmentRef = "EST002", OrgName = "Test School 2" };
+        var establishment1 = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School 1",
+        };
+        var establishment2 = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST002",
+            OrgName = "Test School 2",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -570,7 +669,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -582,15 +681,18 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = "Completed",
-            NoteText = "History for first establishment"
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "History for first establishment",
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
         await DbContext.SaveChangesAsync();
 
         // Act - Query for establishment2 (which has no history for this recommendation)
-        var result = await _repository.GetLatestRecommendationHistoryAsync(establishment2.Id, recommendation.Id);
+        var result = await _repository.GetLatestRecommendationHistoryAsync(
+            establishment2.Id,
+            recommendation.Id
+        );
 
         // Assert
         Assert.Null(result);
@@ -600,7 +702,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetLatestRecommendationHistoryAsync_WhenSingleHistoryEntry_ThenReturnsThatEntry()
     {
         // Arrange - Create establishment with a single history entry to verify it returns that entry
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -613,7 +719,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -624,28 +730,35 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = "InProgress",
-            NoteText = "Only history entry"
+            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NoteText = "Only history entry",
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(singleHistory);
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetLatestRecommendationHistoryAsync(establishment.Id, recommendation.Id);
+        var result = await _repository.GetLatestRecommendationHistoryAsync(
+            establishment.Id,
+            recommendation.Id
+        );
 
         // Assert
         Assert.NotNull(result);
         Assert.Equal(singleHistory.Id, result.Id);
         Assert.Equal("Only history entry", result.NoteText);
-        Assert.Equal("InProgress", result.NewStatus);
+        Assert.Equal(RecommendationStatus.InProgress.ToString(), result.NewStatus);
     }
 
     [Fact]
     public async Task GetLatestRecommendationHistoryAsync_WhenInvalidEstablishmentId_ThenReturnsNull()
     {
         // Arrange - Create history for valid establishment and query with non-existent establishment ID
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -658,7 +771,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -669,15 +782,18 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = "Completed",
-            NoteText = "History for valid establishment"
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "History for valid establishment",
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
         await DbContext.SaveChangesAsync();
 
         // Act - Query with invalid establishment ID
-        var result = await _repository.GetLatestRecommendationHistoryAsync(99999, recommendation.Id);
+        var result = await _repository.GetLatestRecommendationHistoryAsync(
+            99999,
+            recommendation.Id
+        );
 
         // Assert
         Assert.Null(result);
@@ -687,7 +803,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task GetLatestRecommendationHistoryAsync_WhenInvalidRecommendationId_ThenReturnsNull()
     {
         // Arrange - Create history for valid recommendation and query with non-existent recommendation ID
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -700,7 +820,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -711,8 +831,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = "Completed",
-            NoteText = "History for valid recommendation"
+            NewStatus = RecommendationStatus.Complete.ToString(),
+            NoteText = "History for valid recommendation",
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
@@ -733,7 +853,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public async Task CreateRecommendationHistoryAsync_WhenGivenValidParameters_ThenCreatesHistoryEntry()
     {
         // Arrange - Create establishment, user, and recommendation to use in history creation
-        var establishment = new EstablishmentEntity { EstablishmentRef = "EST001", OrgName = "Test School" };
+        var establishment = new EstablishmentEntity
+        {
+            EstablishmentRef = "EST001",
+            OrgName = "Test School",
+        };
         var user = new UserEntity { DfeSignInRef = "user123" };
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
 
@@ -746,7 +870,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync();
@@ -760,8 +884,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             recommendation.Id,
             user.Id,
             null,
-            "InProgress",
-            "Completed",
+            RecommendationStatus.InProgress,
+            RecommendationStatus.Complete,
             "Recommendation completed successfully"
         );
 
@@ -771,16 +895,18 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         var finalCount = await CountEntitiesAsync<EstablishmentRecommendationHistoryEntity>();
         Assert.Equal(initialCount + 1, finalCount);
 
-        var createdHistory = await DbContext.EstablishmentRecommendationHistories
-            .FirstOrDefaultAsync(h => h.EstablishmentId == establishment.Id && h.RecommendationId == recommendation.Id);
+        var createdHistory =
+            await DbContext.EstablishmentRecommendationHistories.FirstOrDefaultAsync(h =>
+                h.EstablishmentId == establishment.Id && h.RecommendationId == recommendation.Id
+            );
 
         Assert.NotNull(createdHistory);
         Assert.Equal(establishment.Id, createdHistory.EstablishmentId);
         Assert.Equal(recommendation.Id, createdHistory.RecommendationId);
         Assert.Equal(user.Id, createdHistory.UserId);
         Assert.Null(createdHistory.MatEstablishmentId);
-        Assert.Equal("InProgress", createdHistory.PreviousStatus);
-        Assert.Equal("Completed", createdHistory.NewStatus);
+        Assert.Equal(RecommendationStatus.InProgress.ToString(), createdHistory.PreviousStatus);
+        Assert.Equal(RecommendationStatus.Complete.ToString(), createdHistory.NewStatus);
         Assert.Equal("Recommendation completed successfully", createdHistory.NoteText);
         Assert.True(createdHistory.DateCreated >= beforeCreate);
         Assert.True(createdHistory.DateCreated <= afterCreate);

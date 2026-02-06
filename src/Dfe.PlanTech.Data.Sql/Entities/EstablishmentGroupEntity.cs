@@ -24,7 +24,7 @@ public class EstablishmentGroupEntity
             Uid = Uid,
             GroupName = GroupName,
             GroupType = GroupType,
-            GroupStatus = GroupStatus
+            GroupStatus = GroupStatus,
         };
     }
 }

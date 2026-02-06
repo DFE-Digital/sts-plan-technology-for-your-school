@@ -1,6 +1,6 @@
 # 0012 - Authentication Provider
 
-* **Status**: Accepted
+- **Status**: Accepted
 
 ## Context and Problem Statement
 
@@ -8,15 +8,15 @@ What solution can we use to provide a secure gateway for Schools to sign-in into
 
 ## Decision Drivers
 
-* Within DfE’s Technical Guidance
-* Open source as per Service Standard
-* Compatible with selected hosting platform
-* Easy for Schools e.g. SSO
+- Within DfE’s Technical Guidance
+- Open source as per Service Standard
+- Compatible with selected hosting platform
+- Easy for Schools e.g. SSO
 
 ## Considered Options
 
-* DfE Sign-in
-* GOV.UK Sign-im
+- DfE Sign-in
+- GOV.UK Sign-im
 
 ## Decision Outcome
 

@@ -3,6 +3,4 @@ using System.Diagnostics.CodeAnalysis;
 namespace Dfe.PlanTech.Core.Contentful.Models;
 
 [ExcludeFromCodeCoverage]
-public class ComponentAccordionEntry : RichTextContentDataEntry
-{
-}
+public class ComponentAccordionEntry : RichTextContentDataEntry { }

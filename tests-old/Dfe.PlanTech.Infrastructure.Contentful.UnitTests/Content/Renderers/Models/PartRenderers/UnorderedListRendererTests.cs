@@ -1,6 +1,6 @@
 using System.Text;
-using Dfe.PlanTech.Domain.Content.Models;
 using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
+using Dfe.PlanTech.Domain.Content.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers;
@@ -14,11 +14,7 @@ public class UnorderedListRendererTests
     {
         const string value = "List item one";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = value };
 
         var renderer = new UnorderedListRenderer();
 
@@ -30,11 +26,7 @@ public class UnorderedListRendererTests
     [Fact]
     public void Should_Reject_When_Not_UnorderedList()
     {
-        var content = new RichTextContent()
-        {
-            NodeType = "paragraph",
-            Value = "paragraph text"
-        };
+        var content = new RichTextContent() { NodeType = "paragraph", Value = "paragraph text" };
 
         var renderer = new UnorderedListRenderer();
 
@@ -47,15 +39,14 @@ public class UnorderedListRendererTests
     public void Should_CreateUnorderedList_When_PassedValidData()
     {
         var renderer = new UnorderedListRenderer();
-        var rendererCollection = new RichTextRenderer(new NullLogger<RichTextRenderer>(), new[] { renderer });
+        var rendererCollection = new RichTextRenderer(
+            new NullLogger<RichTextRenderer>(),
+            new[] { renderer }
+        );
 
         const string value = "List item one";
 
-        var content = new RichTextContent()
-        {
-            NodeType = NODE_TYPE,
-            Value = value,
-        };
+        var content = new RichTextContent() { NodeType = NODE_TYPE, Value = value };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 

@@ -1,9 +1,9 @@
-import fs from "fs";
+import fs from 'fs';
 // eslint-disable-next-line no-unused-vars
-import DataMapper from "./data-mapper.js";
-import path from "path";
-import { stringify } from "#src/helpers/json";
-import { log } from "#src/helpers/log";
+import DataMapper from './data-mapper.js';
+import path from 'path';
+import { stringify } from '#src/helpers/json';
+import { log } from '#src/helpers/log';
 
 /**
  * @typedef {import("#src/content-types/section").SectionMinimalOutput} SectionMinimalOutput
@@ -15,24 +15,17 @@ import { log } from "#src/helpers/log";
  * @param {string} args.outputDir - directory to write journey paths to
  * @param {boolean} args.saveAllJourneys - if true saves _all_ user journeys, otherwise writes 1 (or more if needed) to navigate through every question, and 1 per maturity
  */
-export default function writeUserJourneyPaths({
-    dataMapper,
-    outputDir,
-    saveAllJourneys,
-}) {
-    log(`Writing all user journey paths`);
+export default function writeUserJourneyPaths({ dataMapper, outputDir, saveAllJourneys }) {
+  log(`Writing all user journey paths`);
 
-    outputDir = createUserJourneyDirectory(outputDir);
+  outputDir = createUserJourneyDirectory(outputDir);
 
-    const journeys = mapJourneysToMinimalSectionInfo(
-        dataMapper,
-        saveAllJourneys
-    );
+  const journeys = mapJourneysToMinimalSectionInfo(dataMapper, saveAllJourneys);
 
-    saveUserJourneys(journeys, outputDir);
-    saveSubtopicPathsOverview(journeys, outputDir);
+  saveUserJourneys(journeys, outputDir);
+  saveSubtopicPathsOverview(journeys, outputDir);
 
-    log(`Finished writing all user journey paths`);
+  log(`Finished writing all user journey paths`);
 }
 
 /**
@@ -42,9 +35,7 @@ export default function writeUserJourneyPaths({
  * @returns {SectionMinimalOutput[]}
  */
 const mapJourneysToMinimalSectionInfo = (dataMapper, saveAllJourneys) =>
-    dataMapper.mappedSections.map((section) =>
-        section.toMinimalOutput(saveAllJourneys)
-    );
+  dataMapper.mappedSections.map((section) => section.toMinimalOutput(saveAllJourneys));
 
 /**
  *
@@ -52,23 +43,20 @@ const mapJourneysToMinimalSectionInfo = (dataMapper, saveAllJourneys) =>
  * @param {string} outputDir
  */
 const saveSubtopicPathsOverview = (journeys, outputDir) => {
-    log(`Writing all subtopic paths overview`, { addBlankLine: false });
+  log(`Writing all subtopic paths overview`, { addBlankLine: false });
 
-    const combined = journeys.map((journey) => ({
-        subtopic: journey.section,
-        stats: journey.allPathsStats,
-    }));
+  const combined = journeys.map((journey) => ({
+    subtopic: journey.section,
+    stats: journey.allPathsStats,
+  }));
 
-    try {
-        fs.writeFileSync(
-            `${outputDir}subtopic-paths-overview.json`,
-            stringify(combined)
-        );
-    } catch (e) {
-        console.error(`Error saving subtopic paths overview`, e);
-    }
+  try {
+    fs.writeFileSync(`${outputDir}subtopic-paths-overview.json`, stringify(combined));
+  } catch (e) {
+    console.error(`Error saving subtopic paths overview`, e);
+  }
 
-    log(`Wrote all subtopic paths overview`);
+  log(`Wrote all subtopic paths overview`);
 };
 
 /**
@@ -77,15 +65,15 @@ const saveSubtopicPathsOverview = (journeys, outputDir) => {
  * @param {string} outputDir
  */
 const saveUserJourneys = (journeys, outputDir) => {
-    log(`Writing user journey path files`);
-    for (const journey of journeys) {
-        const fileName = journey.section + ".json";
-        const filePath = path.join(outputDir, fileName);
+  log(`Writing user journey path files`);
+  for (const journey of journeys) {
+    const fileName = journey.section + '.json';
+    const filePath = path.join(outputDir, fileName);
 
-        saveUserJourney(journey, filePath);
-    }
+    saveUserJourney(journey, filePath);
+  }
 
-    log(`Wrote all user journey paths`);
+  log(`Wrote all user journey paths`);
 };
 
 /**
@@ -94,27 +82,25 @@ const saveUserJourneys = (journeys, outputDir) => {
  * @param {string} filePath
  */
 const saveUserJourney = (journey, filePath) => {
-    log(`Writing user journey path file for ${journey.section}`);
+  log(`Writing user journey path file for ${journey.section}`);
 
-    try {
-        fs.writeFileSync(filePath, stringify(journey));
-    } catch (e) {
-        console.error(`Error saving user journeys for ${journey.section}`, e);
+  try {
+    fs.writeFileSync(filePath, stringify(journey));
+  } catch (e) {
+    console.error(`Error saving user journeys for ${journey.section}`, e);
 
-        if (!journey.allPossiblePaths || journey.allPossiblePaths.length == 0) {
-            return;
-        }
-        log(
-            `Will clearing all possible paths from subtopic paths and try again`
-        );
-
-        journey.allPossiblePaths = undefined;
-        saveUserJourney(journey, filePath);
+    if (!journey.allPossiblePaths || journey.allPossiblePaths.length == 0) {
+      return;
     }
+    log(`Will clearing all possible paths from subtopic paths and try again`);
 
-    log(`Wrote user journey path file for ${journey.section}`, {
-        addSeperator: true,
-    });
+    journey.allPossiblePaths = undefined;
+    saveUserJourney(journey, filePath);
+  }
+
+  log(`Wrote user journey path file for ${journey.section}`, {
+    addSeperator: true,
+  });
 };
 
 /**
@@ -123,16 +109,13 @@ const saveUserJourney = (journey, filePath) => {
  * @returns
  */
 const createUserJourneyDirectory = (outputDir) => {
-    const userJourneyDirectory = path.join(outputDir, "user-journeys");
+  const userJourneyDirectory = path.join(outputDir, 'user-journeys');
 
-    try {
-        fs.mkdirSync(userJourneyDirectory);
-        return userJourneyDirectory;
-    } catch (e) {
-        console.error(
-            `Error creating user journey directory ${userJourneyDirectory}`,
-            e
-        );
-        return outputDir;
-    }
+  try {
+    fs.mkdirSync(userJourneyDirectory);
+    return userJourneyDirectory;
+  } catch (e) {
+    console.error(`Error creating user journey directory ${userJourneyDirectory}`, e);
+    return outputDir;
+  }
 };

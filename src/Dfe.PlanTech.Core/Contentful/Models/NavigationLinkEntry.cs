@@ -8,5 +8,7 @@ public class NavigationLinkEntry : ContentfulEntry
     public string? Href { get; set; } = null;
     public bool OpenInNewTab { get; set; } = false;
 
-    public bool IsValid => !string.IsNullOrEmpty(DisplayText) && (!string.IsNullOrEmpty(Href) || ContentToLinkTo != null);
+    public bool IsValid =>
+        !string.IsNullOrEmpty(DisplayText)
+        && (!string.IsNullOrEmpty(Href) || ContentToLinkTo != null);
 }

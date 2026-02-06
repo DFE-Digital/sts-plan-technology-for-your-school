@@ -1,16 +1,17 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Extensions;
 
 namespace Dfe.PlanTech.Core.Helpers
 {
     public static class RecommendationStatusHelper
     {
-        public static RecommendationStatus? GetRecommendationStatusEnumValue(this string recommendationStatus)
+        public static RecommendationStatus? GetRecommendationStatusEnumValue(
+            this string? recommendationStatus
+        )
         {
-            return Enum.GetValues<RecommendationStatus>()
-                .Cast<RecommendationStatus?>()
-                .FirstOrDefault(rs => string.Equals(rs!.ToString(), recommendationStatus, StringComparison.InvariantCultureIgnoreCase));
+            return recommendationStatus.GetEnumValue<RecommendationStatus>();
         }
 
         public static RecommendationStatus GetStatus(
@@ -19,10 +20,10 @@ namespace Dfe.PlanTech.Core.Helpers
         )
         {
             var status = history.TryGetValue(chunk.Id, out var recommendationHistory)
-               ? recommendationHistory.NewStatus
-               : RecommendationStatus.NotStarted.ToString();
+                ? recommendationHistory.NewStatus
+                : RecommendationStatus.NotStarted;
 
-            return status.GetRecommendationStatusEnumValue() ?? RecommendationStatus.NotStarted;
+            return status ?? RecommendationStatus.NotStarted;
         }
 
         public static DateTime GetLastUpdatedUtc(

@@ -13,4 +13,3 @@ Feature: Interstitial Page
         And I should see multiple explanatory text blocks
         And I should see a button with the text "Start self-assessment"
         And the page should be accessible
-        

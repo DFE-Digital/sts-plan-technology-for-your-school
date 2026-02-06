@@ -20,7 +20,7 @@ public class AnswerEntityTests
             Id = expectedId,
             AnswerText = expectedAnswerText,
             ContentfulRef = expectedContentfulRef,
-            DateCreated = expectedDateCreated
+            DateCreated = expectedDateCreated,
         };
 
         // Act
@@ -39,7 +39,7 @@ public class AnswerEntityTests
                 nameof(SqlAnswerDto.Id),
                 nameof(SqlAnswerDto.AnswerText),
                 nameof(SqlAnswerDto.ContentfulSysId),
-                nameof(SqlAnswerDto.DateCreated)
+                nameof(SqlAnswerDto.DateCreated),
             }
         );
     }

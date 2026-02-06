@@ -42,7 +42,4 @@ const getValueFromOptionsOrEnv = (options, optionsKey, envKey, defaultValue, isB
   return defaultValue;
 };
 
-export {
-  getValueFromOptionsOrEnv,
-  getArgumentValue
-};
+export { getValueFromOptionsOrEnv, getArgumentValue };

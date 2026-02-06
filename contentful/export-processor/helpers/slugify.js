@@ -6,10 +6,10 @@ const matchWhitespaceCharactersRegex = /\s/g;
  * @param {*} text
  */
 const slugify = (text) =>
-    text
-        .trim()
-        .replace(matchWhitespaceCharactersRegex, "-")
-        .replace(matchNonAlphanumericExceptHyphensRegex, "")
-        .toLowerCase();
+  text
+    .trim()
+    .replace(matchWhitespaceCharactersRegex, '-')
+    .replace(matchNonAlphanumericExceptHyphensRegex, '')
+    .toLowerCase();
 
 export { slugify };

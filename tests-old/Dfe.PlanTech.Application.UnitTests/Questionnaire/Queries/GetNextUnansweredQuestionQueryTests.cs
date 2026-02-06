@@ -12,63 +12,49 @@ public class GetNextUnansweredQuestionQueryTests
 {
     private readonly Section _section = new()
     {
-        Sys = new SystemDetails()
-        {
-            Id = "TestSection"
-        },
-        Questions = [new()
-        {
-            Text = "First question",
-            Sys = new SystemDetails()
+        Sys = new SystemDetails() { Id = "TestSection" },
+        Questions =
+        [
+            new()
             {
-                Id = "FQ"
+                Text = "First question",
+                Sys = new SystemDetails() { Id = "FQ" },
+                Answers = new()
+                {
+                    new()
+                    {
+                        Sys = new SystemDetails() { Id = "FA" },
+                        Text = "First Answer",
+                    },
+                },
             },
-            Answers = new(){
-        new(){
-          Sys = new SystemDetails(){
-            Id = "FA"
-          },
-          Text = "First Answer"
-        }
-      }
-        },
             new()
             {
                 Text = "Second question",
-                Sys = new SystemDetails()
-                {
-                    Id = "SQ",
-                },
-                Answers = [
-              new()
-              {
-                  Sys = new SystemDetails()
-                  {
-                      Id = "FA"
-                  },
-                  Text = "First Answer"
-              }
-            ]
+                Sys = new SystemDetails() { Id = "SQ" },
+                Answers =
+                [
+                    new()
+                    {
+                        Sys = new SystemDetails() { Id = "FA" },
+                        Text = "First Answer",
+                    },
+                ],
             },
             new()
             {
                 Text = "Third Question",
-                Sys = new SystemDetails()
-                {
-                    Id = "TQ"
-                },
-                Answers = [
-              new()
-              {
-                  Sys = new SystemDetails()
-                  {
-                      Id = "FA"
-                  },
-                  Text = "First Answer"
-              }
-            ]
-            }
-        ]
+                Sys = new SystemDetails() { Id = "TQ" },
+                Answers =
+                [
+                    new()
+                    {
+                        Sys = new SystemDetails() { Id = "FA" },
+                        Text = "First Answer",
+                    },
+                ],
+            },
+        ],
     };
 
     [Fact]
@@ -76,10 +62,18 @@ public class GetNextUnansweredQuestionQueryTests
     {
         SubmissionResponsesDto? response = null;
         var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), false, Arg.Any<CancellationToken>())
-        .Returns(Task.FromResult(response));
+        getLatestResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                false,
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(Task.FromResult(response));
 
-        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
+        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(
+            getLatestResponsesQuery
+        );
 
         var result = await getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section);
 
@@ -91,12 +85,22 @@ public class GetNextUnansweredQuestionQueryTests
     {
         SubmissionResponsesDto? response = new() { Responses = new(), SubmissionId = 1 };
         var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), false, Arg.Any<CancellationToken>())
-        .Returns(Task.FromResult(response ?? null));
+        getLatestResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                false,
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(Task.FromResult(response ?? null));
 
-        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
+        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(
+            getLatestResponsesQuery
+        );
 
-        await Assert.ThrowsAsync<DatabaseException>(() => getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section));
+        await Assert.ThrowsAsync<DatabaseException>(() =>
+            getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section)
+        );
     }
 
     [Fact]
@@ -106,20 +110,32 @@ public class GetNextUnansweredQuestionQueryTests
         {
             SubmissionId = 1,
             // skip first question so that ordering responses by question fails
-            Responses = _section.Questions.Select(question => new QuestionWithAnswer()
-            {
-                QuestionSysId = question.Sys.Id,
-                AnswerSysId = question.Answers[0].Sys.Id
-            }).Skip(1)
-            .ToList()
+            Responses = _section
+                .Questions.Select(question => new QuestionWithAnswer()
+                {
+                    QuestionSysId = question.Sys.Id,
+                    AnswerSysId = question.Answers[0].Sys.Id,
+                })
+                .Skip(1)
+                .ToList(),
         };
         var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), false, Arg.Any<CancellationToken>())
-          .Returns(response);
+        getLatestResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                false,
+                Arg.Any<CancellationToken>()
+            )
+            .Returns(response);
 
-        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
+        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(
+            getLatestResponsesQuery
+        );
 
-        await Assert.ThrowsAsync<DatabaseException>(() => getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section));
+        await Assert.ThrowsAsync<DatabaseException>(() =>
+            getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section)
+        );
     }
 
     [Fact]
@@ -138,19 +154,29 @@ public class GetNextUnansweredQuestionQueryTests
         SubmissionResponsesDto response = new()
         {
             SubmissionId = 1,
-            Responses = _section.Questions.Select(question => new QuestionWithAnswer()
-            {
-                QuestionSysId = question.Sys.Id,
-                AnswerSysId = question.Answers[0].Sys.Id
-            }).Take(2)
-            .ToList()
+            Responses = _section
+                .Questions.Select(question => new QuestionWithAnswer()
+                {
+                    QuestionSysId = question.Sys.Id,
+                    AnswerSysId = question.Answers[0].Sys.Id,
+                })
+                .Take(2)
+                .ToList(),
         };
 
         var getLatestResponsesQuery = Substitute.For<IGetLatestResponsesQuery>();
-        getLatestResponsesQuery.GetLatestResponses(Arg.Any<int>(), Arg.Any<string>(), false, Arg.Any<CancellationToken>())
-        .Returns((callinfo) => response);
+        getLatestResponsesQuery
+            .GetLatestResponses(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                false,
+                Arg.Any<CancellationToken>()
+            )
+            .Returns((callinfo) => response);
 
-        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(getLatestResponsesQuery);
+        var getNextUnansweredQuestionQuery = new GetNextUnansweredQuestionQuery(
+            getLatestResponsesQuery
+        );
 
         var result = await getNextUnansweredQuestionQuery.GetNextUnansweredQuestion(3, _section);
 

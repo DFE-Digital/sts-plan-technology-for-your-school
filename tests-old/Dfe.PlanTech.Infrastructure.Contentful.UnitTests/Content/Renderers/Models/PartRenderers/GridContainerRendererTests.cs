@@ -1,13 +1,14 @@
-﻿using System.Text;
-using Dfe.PlanTech.Domain.Content.Interfaces;
+using System.Text;
 using Dfe.PlanTech.Data.Contentful.Content.Renderers.Models.PartRenderers;
+using Dfe.PlanTech.Domain.Content.Interfaces;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Data.Contentful.UnitTests.Content.Renderers.Models.PartRenderers
 {
     public class GridContainerRendererTests : CardTests
     {
-        private readonly ICardContentPartRenderer _cardContentPartRendererSubstitute = Substitute.For<ICardContentPartRenderer>();
+        private readonly ICardContentPartRenderer _cardContentPartRendererSubstitute =
+            Substitute.For<ICardContentPartRenderer>();
 
         [Fact]
         public void CheckNullContentReturnsEmptyString()

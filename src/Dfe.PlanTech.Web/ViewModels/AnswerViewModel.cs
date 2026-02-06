@@ -9,11 +9,7 @@ public class AnswerViewModel
 {
     public AnswerViewModel(QuestionnaireAnswerEntry answer)
     {
-        Answer = new IdWithTextModel
-        {
-            Id = answer.Id!,
-            Text = answer.Text
-        };
+        Answer = new IdWithTextModel { Id = answer.Id!, Text = answer.Text };
     }
 
     public AnswerViewModel()

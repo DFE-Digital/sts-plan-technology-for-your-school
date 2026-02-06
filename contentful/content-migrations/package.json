@@ -1,18 +1,18 @@
 {
-    "name": "content-migrations",
-    "version": "1.0.0",
-    "description": "migration scripts for programmatic contentful changes",
-    "main": "run-migrations.js",
-    "scripts": {
-        "migration": "node run-migration.js",
-        "lint": "eslint"
-    },
-    "keywords": [],
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-        "contentful-migration": "^4.23.2",
-        "dotenv": "^16.4.7",
-        "uuid": "^11.0.3"
-    }
+  "name": "content-migrations",
+  "version": "1.0.0",
+  "description": "migration scripts for programmatic contentful changes",
+  "main": "run-migrations.js",
+  "scripts": {
+    "migration": "node run-migration.js",
+    "lint": "eslint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "contentful-migration": "^4.23.2",
+    "dotenv": "^16.4.7",
+    "uuid": "^11.0.3"
+  }
 }

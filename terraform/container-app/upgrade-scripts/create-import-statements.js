@@ -1,8 +1,8 @@
 /**
- * Extracts existing TF resource errors from the TF apply string, and creates import statements for each one 
+ * Extracts existing TF resource errors from the TF apply string, and creates import statements for each one
  * @param {string} inputString Terraform apply failure error messages
  * @param {string} varFile Var file to be used for the imports
- * @returns 
+ * @returns
  */
 function generateTerraformImports(inputString, varFile) {
   const commands = [];
@@ -37,7 +37,6 @@ const inputString = `
 │   on another_database.networking.tf line 7, in resource "azurerm_private_endpoint" "another_database":
 │    7: resource "azurerm_private_endpoint" "another_database" {
 `;
-
 
 const varFile = '../terraform-stg.tfvars'; //replace with appropriate TF vars file
 const result = generateTerraformImports(inputString, varFile);

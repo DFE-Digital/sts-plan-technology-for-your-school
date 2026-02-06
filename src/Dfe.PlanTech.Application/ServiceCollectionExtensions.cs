@@ -1,4 +1,3 @@
-
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Rendering;
 using Dfe.PlanTech.Application.Services;
@@ -22,7 +21,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ICardContainerContentPartRenderer, GridContainerRenderer>();
         services.AddScoped<ICardContentPartRenderer, CardComponentRenderer>();
 
-        var richTextPartRenderers = contentRendererType.Assembly.GetTypes().Where(IsContentRenderer(contentRendererType));
+        var richTextPartRenderers = contentRendererType
+            .Assembly.GetTypes()
+            .Where(IsContentRenderer(contentRendererType));
         foreach (var partRenderer in richTextPartRenderers)
         {
             services.AddScoped(typeof(IRichTextContentPartRenderer), partRenderer);
@@ -39,8 +40,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<IQuestionService, QuestionService>()
             .AddScoped<IRecommendationService, RecommendationService>()
             .AddScoped<ISubmissionService, SubmissionService>()
-            .AddScoped<IUserService, UserService>()
-            ;
+            .AddScoped<IUserService, UserService>();
     }
 
     public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)
@@ -54,6 +54,6 @@ public static class ServiceCollectionExtensions
             .AddScoped<IUserWorkflow, UserWorkflow>();
     }
 
-    private static Func<Type, bool> IsContentRenderer(Type contentRendererType) => (type) =>
-        type.IsClass && !type.IsAbstract && type.IsSubclassOf(contentRendererType);
+    private static Func<Type, bool> IsContentRenderer(Type contentRendererType) =>
+        (type) => type.IsClass && !type.IsAbstract && type.IsSubclassOf(contentRendererType);
 }

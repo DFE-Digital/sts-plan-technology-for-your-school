@@ -25,5 +25,3 @@ Feature: Check answers page
   Scenario: Check answers page change answer link navigates to the correct question
     Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 1" and I do not click submit recommendations
     And I click the change link on check answers for "Are you able to choose an answer to this first question?" and should see the question heading
-
-

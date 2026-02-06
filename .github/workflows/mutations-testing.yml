@@ -1,16 +1,16 @@
 name: Mutations testing
 on:
   schedule:
-    - cron:  '0 23 * * *'
+    - cron: '0 23 * * *'
   workflow_dispatch:
     inputs:
       branch:
         type: string
-        description: "The branch to run tests against"
-        default: "development"
+        description: 'The branch to run tests against'
+        default: 'development'
       mutations_threshold:
         type: number
-        description: "Minimum % of passing mutations tests"
+        description: 'Minimum % of passing mutations tests'
         default: 70
 
 env:
@@ -86,7 +86,7 @@ jobs:
           MUTATIONS_SCORE=$(grep -E "^## The final mutation score is [0-9]+\.[0-9]+%" $MUTATIONS_FILE | sed -E 's/^## The final mutation score is ([0-9]+\.[0-9]+)%/\1/')
 
           echo "Mutation score $MUTATIONS_SCORE"
-          echo "Threshold $MUTATIONS_THRESHOLD" 
+          echo "Threshold $MUTATIONS_THRESHOLD"
 
           MUTATIONS_PASSED=$(echo "$MUTATIONS_SCORE >= $MUTATIONS_THRESHOLD" | bc -l)
           if (( $MUTATIONS_PASSED )); then

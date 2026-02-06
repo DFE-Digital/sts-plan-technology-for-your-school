@@ -5,11 +5,11 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
     public interface IReviewAnswersViewBuilder
     {
         Task<IActionResult> RouteToCheckAnswers(
-                    Controller controller,
-                    string categorySlug,
-                    string sectionSlug,
-                    string? errorMessage = null
-                );
+            Controller controller,
+            string categorySlug,
+            string sectionSlug,
+            string? errorMessage = null
+        );
 
         Task<IActionResult> RouteToViewAnswers(
             Controller controller,

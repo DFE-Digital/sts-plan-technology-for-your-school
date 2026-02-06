@@ -1,6 +1,5 @@
-import {  Then } from '@cucumber/cucumber';
+import { Then } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
-
 
 Then('I should see a print button', async function () {
   await expect(this.page.locator('#print-page-button')).toBeVisible();
@@ -8,7 +7,7 @@ Then('I should see a print button', async function () {
 
 Then('I should see the following ordered check answer rows:', async function (dataTable) {
   const rows = this.page.locator('div.govuk-summary-list__row');
-  const expectedRows = dataTable.hashes(); 
+  const expectedRows = dataTable.hashes();
 
   const actualCount = await rows.count();
   expect(actualCount).toBe(expectedRows.length);
@@ -44,7 +43,13 @@ Then('I should see a view recommendations button', async function () {
   await expect(form).toHaveAttribute('class', /noprint/);
 
   // check the hidden input fields
-  const hiddenFields = ['submissionId', 'sectionName', 'sectionSlug', 'categorySlug', '__RequestVerificationToken'];
+  const hiddenFields = [
+    'submissionId',
+    'sectionName',
+    'sectionSlug',
+    'categorySlug',
+    '__RequestVerificationToken',
+  ];
   for (const name of hiddenFields) {
     await expect(form.locator(`input[type="hidden"][name="${name}"]`)).toHaveCount(1);
   }
@@ -58,19 +63,21 @@ Then('I should see a view recommendations button', async function () {
   await expect(submitButton).toHaveAttribute('type', 'submit');
   await expect(submitButton).toContainText('Submit and view recommendations');
 
-  await expect(this.page.getByRole('button', { name: 'Submit and view recommendations' })).toBeVisible();
+  await expect(
+    this.page.getByRole('button', { name: 'Submit and view recommendations' }),
+  ).toBeVisible();
 });
 
+Then(
+  'I click the change link on check answers for {string} and should see the question heading',
+  async function (questionText: string) {
+    const changeLink = this.page.locator(`.govuk-summary-list__actions a[title="${questionText}"]`);
+    await expect(changeLink).toHaveCount(1); // ensure it exists
+    await changeLink.click();
 
-Then('I click the change link on check answers for {string} and should see the question heading', async function (questionText: string) {
-  const changeLink = this.page.locator(`.govuk-summary-list__actions a[title="${questionText}"]`);
-  await expect(changeLink).toHaveCount(1); // ensure it exists
-  await changeLink.click();
+    await this.page.waitForLoadState('domcontentloaded');
 
-  await this.page.waitForLoadState('domcontentloaded');
-
-  const questionHeading = this.page.locator('legend h1.govuk-fieldset__heading');
-  await expect(questionHeading).toHaveText(questionText);
-});
-
-
+    const questionHeading = this.page.locator('legend h1.govuk-fieldset__heading');
+    await expect(questionHeading).toHaveText(questionText);
+  },
+);

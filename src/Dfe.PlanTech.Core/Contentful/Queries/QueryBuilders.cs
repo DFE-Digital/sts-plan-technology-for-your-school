@@ -25,15 +25,23 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithQuery<T>(this QueryBuilder<T> queryBuilder, ContentfulQuery query) =>
-    query switch
-    {
-        ContentfulQuerySingleValue equals => equals.AddToQuery(queryBuilder),
-        ContentfulQueryMultipleValues includes => includes.AddToQuery(queryBuilder),
-        _ => throw new ArgumentException($"Could not find correct query builder for ${query.GetType()}")
-    };
+    public static QueryBuilder<T> WithQuery<T>(
+        this QueryBuilder<T> queryBuilder,
+        ContentfulQuery query
+    ) =>
+        query switch
+        {
+            ContentfulQuerySingleValue equals => equals.AddToQuery(queryBuilder),
+            ContentfulQueryMultipleValues includes => includes.AddToQuery(queryBuilder),
+            _ => throw new ArgumentException(
+                $"Could not find correct query builder for ${query.GetType()}"
+            ),
+        };
 
-    public static QueryBuilder<T> WithQueries<T>(this QueryBuilder<T> queryBuilder, IEnumerable<ContentfulQuery> queries)
+    public static QueryBuilder<T> WithQueries<T>(
+        this QueryBuilder<T> queryBuilder,
+        IEnumerable<ContentfulQuery> queries
+    )
     {
         foreach (var query in queries)
         {
@@ -43,7 +51,10 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithQueries<T>(this QueryBuilder<T> queryBuilder, GetEntriesOptions options)
+    public static QueryBuilder<T> WithQueries<T>(
+        this QueryBuilder<T> queryBuilder,
+        GetEntriesOptions options
+    )
     {
         if (options.Queries != null)
         {
@@ -53,7 +64,10 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> BuildQueryBuilder<T>(string contentfulContentTypeId, GetEntriesOptions? options)
+    public static QueryBuilder<T> BuildQueryBuilder<T>(
+        string contentfulContentTypeId,
+        GetEntriesOptions? options
+    )
     {
         var queryBuilder = ByContentType<T>(contentfulContentTypeId);
 
@@ -66,7 +80,10 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithOptions<T>(this QueryBuilder<T> queryBuilder, GetEntriesOptions options)
+    public static QueryBuilder<T> WithOptions<T>(
+        this QueryBuilder<T> queryBuilder,
+        GetEntriesOptions options
+    )
     {
         queryBuilder = queryBuilder.WithInclude(options);
         queryBuilder = queryBuilder.WithQueries(options);
@@ -74,38 +91,63 @@ public static class QueryBuilders
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithInclude<T>(this QueryBuilder<T> queryBuilder, GetEntriesOptions options)
+    public static QueryBuilder<T> WithInclude<T>(
+        this QueryBuilder<T> queryBuilder,
+        GetEntriesOptions options
+    )
     {
         queryBuilder.Include(options.Include);
         return queryBuilder;
     }
 
-    public static QueryBuilder<T> WithSelect<T>(this QueryBuilder<T> queryBuilder, GetEntriesOptions options)
+    public static QueryBuilder<T> WithSelect<T>(
+        this QueryBuilder<T> queryBuilder,
+        GetEntriesOptions options
+    )
     {
         if (options.Select == null)
             return queryBuilder;
 
         var queryStringValues = queryBuilder.QueryStringValues();
 
-        queryStringValues.Add(new KeyValuePair<string, string>("select", string.Join(',', options.Select)));
+        queryStringValues.Add(
+            new KeyValuePair<string, string>("select", string.Join(',', options.Select))
+        );
 
         return queryBuilder;
     }
 
-    public static List<KeyValuePair<string, string>> QueryStringValues<T>(this QueryBuilder<T> queryBuilder)
+    public static List<KeyValuePair<string, string>> QueryStringValues<T>(
+        this QueryBuilder<T> queryBuilder
+    )
     {
-        var fieldInfo = queryBuilder.GetType().GetField(QueryBuilderStringValuesFieldName, BindingFlags.NonPublic | BindingFlags.Instance);
+        // Intentional use of reflection to access internal QueryBuilder state.
+        // Field name is constant and type is trusted.
+        var fieldInfo = queryBuilder
+            .GetType()
+            .GetField(
+                QueryBuilderStringValuesFieldName,
+                BindingFlags.NonPublic | BindingFlags.Instance
+            );
 
         if (fieldInfo == null)
         {
-            throw new MissingFieldException($"Couldn't find field {QueryBuilderStringValuesFieldName}");
+            throw new MissingFieldException(
+                $"Couldn't find field {QueryBuilderStringValuesFieldName}"
+            );
         }
 
-        var value = fieldInfo.GetValue(queryBuilder) ?? throw new InvalidDataException($"{QueryBuilderStringValuesFieldName} is null in QueryBuilder");
+        var value =
+            fieldInfo.GetValue(queryBuilder)
+            ?? throw new InvalidDataException(
+                $"{QueryBuilderStringValuesFieldName} is null in QueryBuilder"
+            );
 
         if (value is not List<KeyValuePair<string, string>> list)
         {
-            throw new InvalidCastException($"Expected {value.GetType()} to be {typeof(List<KeyValuePair<string, string>>)} but is actually {value.GetType()}");
+            throw new InvalidCastException(
+                $"Expected {value.GetType()} to be {typeof(List<KeyValuePair<string, string>>)} but is actually {value.GetType()}"
+            );
         }
 
         return list;

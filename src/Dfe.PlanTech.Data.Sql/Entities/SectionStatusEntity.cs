@@ -1,12 +1,11 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
 public class SectionStatusEntity
 {
     public string SectionId { get; set; } = null!;
-
-    public bool Completed { get; set; }
 
     public string? LastMaturity { get; set; }
 
@@ -16,6 +15,8 @@ public class SectionStatusEntity
 
     public bool? Viewed { get; set; }
 
+    public SubmissionStatus Status { get; set; }
+
     public DateTime? LastCompletionDate { get; set; }
 
     public SqlSectionStatusDto AsDto()
@@ -23,11 +24,11 @@ public class SectionStatusEntity
         return new SqlSectionStatusDto
         {
             SectionId = SectionId,
-            Completed = Completed,
             LastMaturity = LastMaturity,
             DateCreated = DateCreated,
             DateUpdated = DateUpdated,
             HasBeenViewed = Viewed,
+            Status = Status,
             LastCompletionDate = LastCompletionDate,
         };
     }

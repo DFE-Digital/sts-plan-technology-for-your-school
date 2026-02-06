@@ -26,7 +26,7 @@ public class AnswerEntity
             Id = Id,
             AnswerText = AnswerText,
             ContentfulSysId = ContentfulRef,
-            DateCreated = DateCreated
+            DateCreated = DateCreated,
         };
     }
 }

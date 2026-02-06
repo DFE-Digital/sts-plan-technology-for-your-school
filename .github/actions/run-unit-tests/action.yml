@@ -1,5 +1,5 @@
 name: Run Unit Tests
-description: Runs the unit tests and publishes them to the workflow runs 
+description: Runs the unit tests and publishes them to the workflow runs
 
 inputs:
   solution_filename:
@@ -43,7 +43,7 @@ runs:
           echo "$file: $count tests executed"
           total_count=$((total_count + count))
         done < <(find tests -name "*.trx")
-          
+
         if [ $total_count -le 0 ]; then
           echo "Error: No unit tests have been executed."
           exit 1
@@ -56,6 +56,6 @@ runs:
       if: always()
       with:
         name: DotNET Tests
-        path: "**/test-results.trx"                            
+        path: '**/test-results.trx'
         reporter: dotnet-trx
         fail-on-error: true

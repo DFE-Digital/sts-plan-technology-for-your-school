@@ -31,22 +31,24 @@ public class QuestionsViewBuilderTests
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
 
     // Options
-    private readonly IOptions<ContactOptionsConfiguration> _contactOptions =
-        Options.Create(new ContactOptionsConfiguration { LinkId = "contact-link-id" });
+    private readonly IOptions<ContactOptionsConfiguration> _contactOptions = Options.Create(
+        new ContactOptionsConfiguration { LinkId = "contact-link-id" }
+    );
 
-    private readonly IOptions<ErrorMessagesConfiguration> _errorMessages =
-        Options.Create(new ErrorMessagesConfiguration
+    private readonly IOptions<ErrorMessagesConfiguration> _errorMessages = Options.Create(
+        new ErrorMessagesConfiguration
         {
-            ConcurrentUsersOrContentChange = "There was a problem, please contact us."
-        });
+            ConcurrentUsersOrContentChange = "There was a problem, please contact us.",
+        }
+    );
 
     private ContentfulOptionsConfiguration _contentfulOptions = new ContentfulOptionsConfiguration
     {
-        UsePreviewApi = false
+        UsePreviewApi = false,
     };
 
-    private QuestionsViewBuilder CreateServiceUnderTest()
-        => new QuestionsViewBuilder(
+    private QuestionsViewBuilder CreateServiceUnderTest() =>
+        new QuestionsViewBuilder(
             _logger,
             _contactOptions,
             _errorMessages,
@@ -54,38 +56,41 @@ public class QuestionsViewBuilderTests
             _questionSvc,
             _submissionSvc,
             _contentfulOptions,
-            _currentUser);
+            _currentUser
+        );
 
     private static Controller MakeControllerWithTempData()
     {
         var controller = new DummyController();
         var httpContext = new DefaultHttpContext();
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = httpContext
-        };
+        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
         var tempDataProvider = Substitute.For<ITempDataProvider>();
         controller.TempData = new TempDataDictionary(httpContext, tempDataProvider);
         return controller;
     }
 
-    private static QuestionnaireSectionEntry MakeSection(string id, string slug, string name, params QuestionnaireQuestionEntry[] questions)
-        => new QuestionnaireSectionEntry
+    private static QuestionnaireSectionEntry MakeSection(
+        string id,
+        string slug,
+        string name,
+        params QuestionnaireQuestionEntry[] questions
+    ) =>
+        new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails(id),
             Name = name,
             Questions = questions,
-            InterstitialPage = new PageEntry { Slug = slug }
+            InterstitialPage = new PageEntry { Slug = slug },
         };
 
-    private static QuestionnaireQuestionEntry MakeQuestion(string id, string slug, string text)
-        => new QuestionnaireQuestionEntry
+    private static QuestionnaireQuestionEntry MakeQuestion(string id, string slug, string text) =>
+        new QuestionnaireQuestionEntry
         {
             Sys = new SystemDetails(id),
             Slug = slug,
             Text = text,
-            Answers = new List<QuestionnaireAnswerEntry>()
+            Answers = new List<QuestionnaireAnswerEntry>(),
         };
 
     private static SubmissionRoutingDataModel MakeSubmissionRoutingDataModel(
@@ -205,7 +210,9 @@ public class QuestionsViewBuilderTests
         var section = MakeSection("S1", "sec-1", "Section");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        _questionSvc.GetNextUnansweredQuestion(123, section).Returns((QuestionnaireQuestionEntry?)null);
+        _questionSvc
+            .GetNextUnansweredQuestion(123, section)
+            .Returns((QuestionnaireQuestionEntry?)null);
 
         // Act
         var result = await sut.RouteToNextUnansweredQuestion(controller, "cat", "sec-1");
@@ -230,11 +237,14 @@ public class QuestionsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-err").Returns(section);
 
         // Make NextUnanswered throw DatabaseException -> triggers cleanup/redirect path
-        _questionSvc.GetNextUnansweredQuestion(987, section).Returns<Task<QuestionnaireQuestionEntry?>>(_ => throw new DatabaseException("boom"));
+        _questionSvc
+            .GetNextUnansweredQuestion(987, section)
+            .Returns<Task<QuestionnaireQuestionEntry?>>(_ => throw new DatabaseException("boom"));
 
         // BuildErrorMessage needs link
-        _contentful.GetLinkByIdAsync("contact-link-id")
-                   .Returns(new NavigationLinkEntry { Href = "https://example.org/contact" });
+        _contentful
+            .GetLinkByIdAsync("contact-link-id")
+            .Returns(new NavigationLinkEntry { Href = "https://example.org/contact" });
 
         // Act
         var result = await sut.RouteToNextUnansweredQuestion(controller, "cat", "sec-err");
@@ -272,8 +282,9 @@ public class QuestionsViewBuilderTests
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
         // submission routing is fetched but not used on the invalid-path (still harmless to return a simple stub)
-        _submissionSvc.GetSubmissionRoutingDataAsync(22, section, false)
-                      .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
 
         var vm = new SubmitAnswerInputViewModel
         {
@@ -281,7 +292,14 @@ public class QuestionsViewBuilderTests
         };
 
         // Act
-        var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", returnTo: null);
+        var result = await sut.SubmitAnswerAndRedirect(
+            controller,
+            vm,
+            "cat",
+            "sec-1",
+            "q-1",
+            returnTo: null
+        );
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
@@ -306,20 +324,29 @@ public class QuestionsViewBuilderTests
         var section = MakeSection("S1", "sec-1", "Section 1", q);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        _submissionSvc.GetSubmissionRoutingDataAsync(22, section, false)
-                      .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
 
         var vm = new SubmitAnswerInputViewModel
         {
-            ChosenAnswerJson = @"{ ""answer"": { ""id"": ""A1"" } }"
+            ChosenAnswerJson = @"{ ""answer"": { ""id"": ""A1"" } }",
         };
 
         // User logged in directly as a school, therefore activeEstablishmentId == userEstablishmentId
-        _submissionSvc.SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>())
-                      .Returns<Task>(_ => throw new Exception("db down"));
+        _submissionSvc
+            .SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>())
+            .Returns<Task>(_ => throw new Exception("db down"));
 
         // Act
-        var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", returnTo: null);
+        var result = await sut.SubmitAnswerAndRedirect(
+            controller,
+            vm,
+            "cat",
+            "sec-1",
+            "q-1",
+            returnTo: null
+        );
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
@@ -345,12 +372,13 @@ public class QuestionsViewBuilderTests
         var section = MakeSection("S1", "sec-1", "Section 1", q1, q2);
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        _submissionSvc.GetSubmissionRoutingDataAsync(22, section, false)
-                      .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(MakeSubmissionRoutingDataModel(section, SubmissionStatus.InProgress));
 
         var vm = new SubmitAnswerInputViewModel
         {
-            ChosenAnswerJson = @"{""answer"": { ""id"": ""A1"" } }"
+            ChosenAnswerJson = @"{""answer"": { ""id"": ""A1"" } }",
         };
 
         // Submit works
@@ -360,10 +388,19 @@ public class QuestionsViewBuilderTests
         _questionSvc.GetNextUnansweredQuestion(22, section).Returns(q2);
 
         // Act
-        var result = await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", returnTo: null);
+        var result = await sut.SubmitAnswerAndRedirect(
+            controller,
+            vm,
+            "cat",
+            "sec-1",
+            "q-1",
+            returnTo: null
+        );
 
         // Assert
-        await _submissionSvc.Received(1).SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>());
+        await _submissionSvc
+            .Received(1)
+            .SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>());
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
     }
@@ -385,7 +422,9 @@ public class QuestionsViewBuilderTests
         _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
         var empty = new SubmissionResponsesModel(1, new List<QuestionWithAnswerModel>());
-        _submissionSvc.GetLatestSubmissionResponsesModel(123, section, false).Returns(empty);
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(123, section, SubmissionStatus.InProgress)
+            .Returns(empty);
 
         // Act
         var result = await sut.RouteToContinueSelfAssessmentPage(controller, "cat", sectionSlug);
@@ -419,14 +458,19 @@ public class QuestionsViewBuilderTests
             new List<QuestionWithAnswerModel> { new QuestionWithAnswerModel { AnswerSysId = "A1" } }
         )
         {
-            Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" }
+            Establishment = new SqlEstablishmentDto { OrgName = "Test Trust" },
         };
 
-        _submissionSvc.GetLatestSubmissionResponsesModel(123, section, false)
-                      .Returns(submissionWithResponses);
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(123, section, SubmissionStatus.InProgress)
+            .Returns(submissionWithResponses);
 
         // Act
-        var result = await sut.RouteToContinueSelfAssessmentPage(controller, "category-slug", "sec-1");
+        var result = await sut.RouteToContinueSelfAssessmentPage(
+            controller,
+            "category-slug",
+            "sec-1"
+        );
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);

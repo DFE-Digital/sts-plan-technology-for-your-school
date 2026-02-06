@@ -3,11 +3,11 @@ description: Runs mutations testing against a solution and publishes them to the
 
 inputs:
   solution_path:
-    description: "Filepath for the solution to run mutations testing on"
+    description: 'Filepath for the solution to run mutations testing on'
     required: true
   config_path:
-    default: ".github/actions/run-mutations-testing/stryker-config.json"
-    description: "Relative path for the Stryker Config file to use"
+    default: '.github/actions/run-mutations-testing/stryker-config.json'
+    description: 'Relative path for the Stryker Config file to use'
 
 outputs:
   reports_artifact_url:

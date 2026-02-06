@@ -1,4 +1,4 @@
-ALTER PROCEDURE GetSectionStatuses 
+ALTER PROCEDURE GetSectionStatuses
     @splitStringVal nvarchar(255),
     @establishmentId int
     AS
@@ -12,7 +12,7 @@ SELECT * FROM STRING_SPLIT(@splitStringVal, ',')
 DECLARE db_cursor CURSOR FOR
 SELECT val FROM #splitTable
 
-    OPEN db_cursor  
+    OPEN db_cursor
 FETCH NEXT FROM db_cursor INTO @val
 
     WHILE @@FETCH_STATUS = 0

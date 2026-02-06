@@ -17,7 +17,7 @@ inputs:
   environment:
     required: true
     type: string
-    default: "E2E"
+    default: 'E2E'
     description: What environment the App is running under.
   dsi_noorg_username:
     required: true

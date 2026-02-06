@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
+using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Interfaces;
 using Dfe.PlanTech.Domain.Exceptions;
 using Dfe.PlanTech.Domain.Users.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
@@ -28,7 +28,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _user = Substitute.For<IUser>();
             _controller = new ChangeAnswersController(logger, _user)
             {
-                ControllerContext = ControllerHelpers.SubstituteControllerContext()
+                ControllerContext = ControllerHelpers.SubstituteControllerContext(),
             };
 
             _changeAnswersRouter = Substitute.For<IChangeAnswersRouter>();
@@ -39,49 +39,103 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task ChangeAnswersPage_Should_Throw_ArgumentNullException_When_SectionSlug_IsNull()
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.ChangeAnswersPage(_categorySlug, null!, _changeAnswersRouter, _exceptionHandler));
+                _controller.ChangeAnswersPage(
+                    _categorySlug,
+                    null!,
+                    _changeAnswersRouter,
+                    _exceptionHandler
+                )
+            );
         }
 
         [Fact]
         public async Task ChangeAnswersPage_Should_Throw_ArgumentException_When_SectionSlug_IsEmpty()
         {
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _controller.ChangeAnswersPage(_categorySlug, "", _changeAnswersRouter, _exceptionHandler));
+                _controller.ChangeAnswersPage(
+                    _categorySlug,
+                    "",
+                    _changeAnswersRouter,
+                    _exceptionHandler
+                )
+            );
         }
 
         [Fact]
         public async Task ChangeAnswersPage_Should_Throw_ArgumentNullException_When_CategorySlug_IsNull()
         {
             await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.ChangeAnswersPage(null!, _sectionSlug, _changeAnswersRouter, _exceptionHandler));
+                _controller.ChangeAnswersPage(
+                    null!,
+                    _sectionSlug,
+                    _changeAnswersRouter,
+                    _exceptionHandler
+                )
+            );
         }
 
         [Fact]
         public async Task ChangeAnswersPage_Should_Throw_ArgumentException_When_CategorySlug_IsEmpty()
         {
             await Assert.ThrowsAsync<ArgumentException>(() =>
-                _controller.ChangeAnswersPage("", _sectionSlug, _changeAnswersRouter, _exceptionHandler));
+                _controller.ChangeAnswersPage(
+                    "",
+                    _sectionSlug,
+                    _changeAnswersRouter,
+                    _exceptionHandler
+                )
+            );
         }
 
         [Fact]
         public async Task ChangeAnswersPage_Should_Call_ValidateRoute_With_Correct_Parameters()
         {
-            var result = await _controller.ChangeAnswersPage(_categorySlug, _sectionSlug, _changeAnswersRouter, _exceptionHandler);
+            var result = await _controller.ChangeAnswersPage(
+                _categorySlug,
+                _sectionSlug,
+                _changeAnswersRouter,
+                _exceptionHandler
+            );
 
-            await _changeAnswersRouter.Received().ValidateRoute(_categorySlug, _sectionSlug, null, _controller, Arg.Any<CancellationToken>());
+            await _changeAnswersRouter
+                .Received()
+                .ValidateRoute(
+                    _categorySlug,
+                    _sectionSlug,
+                    null,
+                    _controller,
+                    Arg.Any<CancellationToken>()
+                );
         }
 
         [Fact]
         public async Task ChangeAnswersPage_Should_Call_ExceptionHandler_If_UserJourneyException_Thrown()
         {
-            var exception = new UserJourneyMissingContentException("fail", Substitute.For<ISectionComponent>());
+            var exception = new UserJourneyMissingContentException(
+                "fail",
+                Substitute.For<ISectionComponent>()
+            );
 
-            _changeAnswersRouter.ValidateRoute(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), _controller, Arg.Any<CancellationToken>())
+            _changeAnswersRouter
+                .ValidateRoute(
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    Arg.Any<string>(),
+                    _controller,
+                    Arg.Any<CancellationToken>()
+                )
                 .Throws(exception);
 
-            await _controller.ChangeAnswersPage(_categorySlug, _sectionSlug, _changeAnswersRouter, _exceptionHandler);
+            await _controller.ChangeAnswersPage(
+                _categorySlug,
+                _sectionSlug,
+                _changeAnswersRouter,
+                _exceptionHandler
+            );
 
-            await _exceptionHandler.Received().Handle(_controller, exception, Arg.Any<CancellationToken>());
+            await _exceptionHandler
+                .Received()
+                .Handle(_controller, exception, Arg.Any<CancellationToken>());
         }
 
         [Fact]

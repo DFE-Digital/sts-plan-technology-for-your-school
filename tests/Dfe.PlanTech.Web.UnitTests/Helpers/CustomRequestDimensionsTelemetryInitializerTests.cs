@@ -51,7 +51,11 @@ public class CustomRequestDimensionsTelemetryInitializerTests
         public DateTimeOffset Timestamp { get; set; }
         public TelemetryContext Context { get; } = new();
         public string Sequence { get; set; } = "";
-        public IExtension Extension { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public IExtension Extension
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
 
         public ITelemetry DeepClone()
         {

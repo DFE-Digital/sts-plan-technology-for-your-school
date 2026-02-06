@@ -1,87 +1,78 @@
-import PathPart from "./path-part.js";
+import PathPart from './path-part.js';
 
 export class PathBuilder {
-    constructor(questions) {
-        this.questions = questions;
+  constructor(questions) {
+    this.questions = questions;
+  }
+
+  /**
+   * Retrieves all possible paths from the current question.
+   */
+  getPathsForQuestion(question) {
+    const paths = [];
+    const stack = [];
+
+    stack.push({
+      currentPath: [],
+      currentQuestion: question,
+    });
+
+    while (stack.length > 0) {
+      const { currentPath, currentQuestion } = stack.pop();
+
+      if (!currentQuestion) {
+        paths.push(currentPath);
+        continue;
+      }
+
+      const questionPaths = currentQuestion.answers.map((answer) =>
+        this._getPathsForAnswer(currentPath, currentQuestion, answer),
+      );
+      stack.push(...questionPaths);
     }
 
-    /**
-     * Retrieves all possible paths from the current question.
-     */
-    getPathsForQuestion(question) {
-        const paths = [];
-        const stack = [];
+    return paths;
+  }
 
-        stack.push({
-            currentPath: [],
-            currentQuestion: question,
-        });
+  _getPathsForAnswer(currentPath, currentQuestion, answer) {
+    const newPath = [...currentPath, new PathPart({ question: currentQuestion, answer: answer })];
 
-        while (stack.length > 0) {
-            const { currentPath, currentQuestion } = stack.pop();
+    const nextQuestion = this.questions.find((q) => q.id === answer.nextQuestion?.sys.id);
 
-            if (!currentQuestion) {
-                paths.push(currentPath);
-                continue;
-            }
+    return {
+      currentPath: newPath,
+      currentQuestion: nextQuestion,
+    };
+  }
 
-            const questionPaths = currentQuestion.answers.map((answer) =>
-                this._getPathsForAnswer(currentPath, currentQuestion, answer)
-            );
-            stack.push(...questionPaths);
-        }
-
-        return paths;
+  /**
+   * Selects an answer, prioritising shortening the overall path
+   * @param {flattenedAnswer[]} answers
+   * @param {number} index
+   */
+  assignBestAnswer(answers, index) {
+    if (index === this.questions.length - 1) {
+      return answers[0];
     }
 
-    _getPathsForAnswer(currentPath, currentQuestion, answer) {
-        const newPath = [
-            ...currentPath,
-            new PathPart({ question: currentQuestion, answer: answer }),
-        ];
+    const nextQuestionInSection = this.questions[index + 1];
 
-        const nextQuestion = this.questions.find(
-            (q) => q.id === answer.nextQuestion?.sys.id
-        );
+    const pathEnder = answers.find((answer) => !answer.nextQuestion);
+    if (pathEnder) return pathEnder;
 
-        return {
-            currentPath: newPath,
-            currentQuestion: nextQuestion,
-        };
-    }
+    const skipper =
+      nextQuestionInSection &&
+      answers.find(
+        (answer) => answer.nextQuestion && answer.nextQuestion.id !== nextQuestionInSection.id,
+      );
 
-    /**
-     * Selects an answer, prioritising shortening the overall path
-     * @param {flattenedAnswer[]} answers
-     * @param {number} index
-     */
-    assignBestAnswer(answers, index) {
-        if (index === this.questions.length - 1) {
-            return answers[0];
-        }
+    if (skipper) return skipper;
 
-        const nextQuestionInSection = this.questions[index + 1];
-
-        const pathEnder = answers.find((answer) => !answer.nextQuestion);
-        if (pathEnder) return pathEnder;
-
-        const skipper =
-            nextQuestionInSection &&
-            answers.find(
-                (answer) =>
-                    answer.nextQuestion &&
-                    answer.nextQuestion.id !== nextQuestionInSection.id
-            );
-
-        if (skipper) return skipper;
-
-        return answers.find(
-            (answer) =>
-                answer.nextQuestion &&
-                answer.nextQuestion.id === nextQuestionInSection.id
-        );
-    }
-} 
+    return answers.find(
+      (answer) => answer.nextQuestion && answer.nextQuestion.id === nextQuestionInSection.id,
+    );
+  }
+}
 
 /**
  * @typedef {Object} flattenedAnswer

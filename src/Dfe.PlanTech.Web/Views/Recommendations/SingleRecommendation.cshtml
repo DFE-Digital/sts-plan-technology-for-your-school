@@ -18,7 +18,7 @@
 }
 
 @section CSS {
-    <link rel="stylesheet" as="style" href="~/css/step-by-step.css"/>
+    <link rel="stylesheet" as="style" href="~/css/step-by-step.css" />
 }
 
 @section RelatedActions {
@@ -75,26 +75,26 @@
 
                     <table class="govuk-table">
                         <thead class="govuk-table__head">
-                        <tr class="govuk-table__row">
-                            <th scope="col" class="govuk-table__header">Status</th>
-                            <th scope="col" class="govuk-table__header">Updated</th>
-                        </tr>
+                            <tr class="govuk-table__row">
+                                <th scope="col" class="govuk-table__header">Status</th>
+                                <th scope="col" class="govuk-table__header">Updated</th>
+                            </tr>
                         </thead>
                         <tbody class="govuk-table__body">
-                        <tr class="govuk-table__row">
-                            <td class="govuk-table__cell">
-                                <strong class="govuk-tag @Model.StatusTagClass">
-                                    @Model.StatusText
-                                </strong>
-                            </td>
-                            <td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
-                        </tr>
+                            <tr class="govuk-table__row">
+                                <td class="govuk-table__cell">
+                                    <strong class="govuk-tag @Model.StatusTagClass">
+                                        @Model.StatusText
+                                    </strong>
+                                </td>
+                                <td class="govuk-table__cell">@Model.LastUpdatedFormatted</td>
+                            </tr>
                         </tbody>
                     </table>
 
                     @foreach (var content in recommendation.Content)
                     {
-                        <partial name="Components/PageComponentFactory" model="@content"/>
+                        <partial name="Components/PageComponentFactory" model="@content" />
                     }
                 </div>
 
@@ -128,31 +128,90 @@
 
                         @foreach (var option in Model.StatusOptions)
                         {
-                            <govuk-radios-item value="@option.Key" checked="@(Model.SelectedStatusKey == option.Key)">
+                            <govuk-radios-item value="@option.Key.ToString()" checked="@(Model.SelectedStatusKey == option.Key)">
                                 @option.Value
                             </govuk-radios-item>
                         }
                     </govuk-radios-fieldset>
                 </govuk-radios>
 
-                <govuk-button type="submit" prevent-double-click="true">Update status</govuk-button>
+                <govuk-textarea name="Notes" rows="5">
+                    <govuk-textarea-label class="govuk-label--s">
+                        Add a comment
+                    </govuk-textarea-label>
+
+                    <govuk-textarea-hint>
+                        Anyone who uses the service for your school will be able to see comments.
+                        Do not include personal or sensitive information, like email addresses or account details.
+                    </govuk-textarea-hint>
+                </govuk-textarea>
+
+                <govuk-button type="submit" prevent-double-click="true">Save</govuk-button>
             </form>
 
-            <hr class="govuk-section-break govuk-section-break--l" />
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
+
+            <h2 class="govuk-heading--l">Recent activity</h2>
+
+            <govuk-accordion id="accordion-default">
+                @foreach (var (month, historyGroup) in Model.History)
+                {
+                    <govuk-accordion-item expanded="true" heading-level="2">
+                        <govuk-accordion-item-heading>
+                            <h3 class="govuk-!-margin-bottom-0">@month</h3>
+                        </govuk-accordion-item-heading>
+
+                        <govuk-accordion-item-content>
+                            @foreach (var history in historyGroup)
+                            {
+                                <h3 class="govuk-heading-s">@history.DateCreated.ToString("dd MMMM yyyy")</h3>
+
+                                @if (Model.FirstActivity is not null && history.DateCreated.Equals(Model.FirstActivity.StatusChangeDate))
+                                {
+                                    <p>
+                                        Status of '@Model.FirstActivity.Status.GetDisplayName()' added based on self-assessment
+                                        by @(Model.FirstActivity.SchoolName).
+                                    </p>
+
+                                    <p><strong>@Model.FirstActivity.QuestionText</strong></p>
+
+                                    <p>Your answer: @Model.FirstActivity.AnswerText</p>
+                                }
+                                else
+                                {
+                                    @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
+                                    {
+                                        <p>Status changed to <strong>@history.NewStatus.Value.GetDisplayName()</strong>.</p>
+                                    }
+
+                                    @if (!string.IsNullOrWhiteSpace(history.NoteText))
+                                    {
+                                        <p>@history.NoteText</p>
+                                    }
+                                }
+                            }
+                        </govuk-accordion-item-content>
+                    </govuk-accordion-item>
+                }
+            </govuk-accordion>
 
             <div>
                 <govuk-pagination>
                     @if (Model.PreviousChunk != null)
                     {
-                        <govuk-pagination-previous href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug" label-text="@Model.PreviousChunk.LinkText"/>
+                        <govuk-pagination-previous
+                            href="/@categorySlug/@sectionSlug/recommendations/@Model.PreviousChunk.Slug"
+                            label-text="@Model.PreviousChunk.LinkText" />
                     }
+
                     @if (Model.NextChunk != null)
                     {
-                        <govuk-pagination-next href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug" label-text="@Model.NextChunk.LinkText"/>
+                        <govuk-pagination-next
+                            href="/@categorySlug/@sectionSlug/recommendations/@Model.NextChunk.Slug"
+                            label-text="@Model.NextChunk.LinkText" />
                     }
                 </govuk-pagination>
-
             </div>
         </div>
-    </div>}
-
+    </div>
+}

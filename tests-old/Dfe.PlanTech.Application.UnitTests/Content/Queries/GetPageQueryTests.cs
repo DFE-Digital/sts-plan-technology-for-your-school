@@ -21,35 +21,37 @@ public class GetPageQueryTests
     private readonly IContentRepository _repoSubstitute = Substitute.For<IContentRepository>();
     private readonly ILogger<GetPageQuery> _logger = Substitute.For<ILogger<GetPageQuery>>();
 
-    private readonly List<Page> _pages = new() {
-        new Page(){
+    private readonly List<Page> _pages = new()
+    {
+        new Page()
+        {
             Sys = new SystemDetails { Id = "index-page-id" },
-            Slug = "Index"
+            Slug = "Index",
         },
-        new Page(){
+        new Page()
+        {
             Sys = new SystemDetails { Id = LANDING_PAGE_ID },
             Slug = LANDING_PAGE_SLUG,
         },
-        new Page(){
+        new Page()
+        {
             Sys = new SystemDetails { Id = "audit-page-id" },
-            Slug = "AuditStart"
+            Slug = "AuditStart",
         },
-        new Page(){
+        new Page()
+        {
             Sys = new SystemDetails { Id = "section-page-id" },
             Slug = SECTION_SLUG,
             DisplayTopicTitle = true,
-            DisplayHomeButton= false,
+            DisplayHomeButton = false,
             DisplayBackButton = false,
         },
-        new Page(){
+        new Page()
+        {
             Slug = TEST_PAGE_SLUG,
-            Sys = new() {
-                Id = "test-page-id"
-            }
+            Sys = new() { Id = "test-page-id" },
         },
-
     };
-
 
     public GetPageQueryTests()
     {
@@ -58,34 +60,42 @@ public class GetPageQueryTests
 
     private void SetupRepository()
     {
-        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntriesOptions>(), Arg.Any<CancellationToken>())
-        .Returns((callInfo) =>
-        {
-            IGetEntriesOptions options = (IGetEntriesOptions)callInfo[0];
-            if (options.Queries != null)
-            {
-                foreach (var query in options.Queries)
+        _repoSubstitute
+            .GetEntities<Page>(Arg.Any<IGetEntriesOptions>(), Arg.Any<CancellationToken>())
+            .Returns(
+                (callInfo) =>
                 {
-                    if (query is ContentQuerySingleValue equalsQuery && query.Field == "fields.slug")
+                    IGetEntriesOptions options = (IGetEntriesOptions)callInfo[0];
+                    if (options.Queries != null)
                     {
-                        return _pages.Where(page => page.Slug == equalsQuery.Value);
+                        foreach (var query in options.Queries)
+                        {
+                            if (
+                                query is ContentQuerySingleValue equalsQuery
+                                && query.Field == "fields.slug"
+                            )
+                            {
+                                return _pages.Where(page => page.Slug == equalsQuery.Value);
+                            }
+                        }
                     }
-                }
-            }
 
-            return [];
-        });
-        _repoSubstitute.GetEntityById<Page>(Arg.Any<string>(), cancellationToken: Arg.Any<CancellationToken>())
-            .Returns((callInfo) =>
-            {
-                var pageId = (string)callInfo[0];
-                return _pages.FirstOrDefault(page => page.Sys.Id == pageId);
-            });
+                    return [];
+                }
+            );
+        _repoSubstitute
+            .GetEntityById<Page>(Arg.Any<string>(), cancellationToken: Arg.Any<CancellationToken>())
+            .Returns(
+                (callInfo) =>
+                {
+                    var pageId = (string)callInfo[0];
+                    return _pages.FirstOrDefault(page => page.Sys.Id == pageId);
+                }
+            );
     }
 
-    private GetPageQuery CreateGetPageQuery()
-        => new(_repoSubstitute, _logger, new GetPageFromContentfulOptions() { Include = 4 });
-
+    private GetPageQuery CreateGetPageQuery() =>
+        new(_repoSubstitute, _logger, new GetPageFromContentfulOptions() { Include = 4 });
 
     [Fact]
     public async Task Should_Retrieve_Page_By_Slug_From_Contentful()
@@ -97,7 +107,9 @@ public class GetPageQueryTests
         Assert.NotNull(result);
         Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
 
-        await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntities<Page>(Arg.Any<IGetEntriesOptions>(), Arg.Any<CancellationToken>());
+        await _repoSubstitute
+            .ReceivedWithAnyArgs(1)
+            .GetEntities<Page>(Arg.Any<IGetEntriesOptions>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]
@@ -110,7 +122,12 @@ public class GetPageQueryTests
         Assert.NotNull(result);
         Assert.Equal(LANDING_PAGE_SLUG, result.Slug);
 
-        await _repoSubstitute.ReceivedWithAnyArgs(1).GetEntityById<Page>(Arg.Any<string>(), cancellationToken: Arg.Any<CancellationToken>());
+        await _repoSubstitute
+            .ReceivedWithAnyArgs(1)
+            .GetEntityById<Page>(
+                Arg.Any<string>(),
+                cancellationToken: Arg.Any<CancellationToken>()
+            );
     }
 
     [Fact]
@@ -125,11 +142,14 @@ public class GetPageQueryTests
     [Fact]
     public async Task Page_Not_Found_Exception_Is_Thrown_When_There_Is_An_Issue_Retrieving_Data()
     {
-        _repoSubstitute.GetEntities<Page>(Arg.Any<IGetEntriesOptions>(), Arg.Any<CancellationToken>())
+        _repoSubstitute
+            .GetEntities<Page>(Arg.Any<IGetEntriesOptions>(), Arg.Any<CancellationToken>())
             .Throws(new Exception("Test Exception"));
 
         var query = CreateGetPageQuery();
 
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () => await query.GetPageBySlug(SECTION_SLUG));
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () =>
+            await query.GetPageBySlug(SECTION_SLUG)
+        );
     }
 }

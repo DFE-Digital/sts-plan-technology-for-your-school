@@ -15,10 +15,7 @@ public class BaseTaskListTagHelperTests
     {
         string classes = "TestingClasses";
 
-        var tagHelper = new ConcreteTaskListTagHelper()
-        {
-            Classes = classes
-        };
+        var tagHelper = new ConcreteTaskListTagHelper() { Classes = classes };
 
         var attribute = tagHelper.CreateClasses();
 

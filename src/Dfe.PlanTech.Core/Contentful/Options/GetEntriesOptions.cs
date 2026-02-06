@@ -22,9 +22,7 @@ public class GetEntriesOptions
         Queries = queries;
     }
 
-    public GetEntriesOptions()
-    {
-    }
+    public GetEntriesOptions() { }
 
     public int Page { get; init; } = 1;
 

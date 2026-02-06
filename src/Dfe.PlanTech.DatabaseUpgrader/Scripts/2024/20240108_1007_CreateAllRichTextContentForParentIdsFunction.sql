@@ -14,5 +14,5 @@ BEGIN
       SELECT @idColumn = min(Id) FROM @ParentIds WHERE Id > @idColumn
     END
 
-  RETURN 
+  RETURN
 END

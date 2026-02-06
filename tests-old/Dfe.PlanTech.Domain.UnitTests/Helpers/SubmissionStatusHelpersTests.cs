@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Domain.Constants;
+using Dfe.PlanTech.Domain.Constants;
 using Dfe.PlanTech.Domain.ContentfulEntries.Questionnaire.Models;
 using Dfe.PlanTech.Domain.Helpers;
 using Dfe.PlanTech.Domain.Interfaces;
@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Domain.UnitTests;
+
 public class SubmissionStatusHelpersTests
 {
     [Theory]
@@ -15,17 +16,19 @@ public class SubmissionStatusHelpersTests
     [InlineData(false, true, false, "Completed on", "Blue")] // previously completed
     [InlineData(false, false, null, "Not started", "Grey")] // never completed
     public void GetGroupsSubmissionStatusTag_ShouldReturnCorrectTagBasedOnStatus(
-    bool retrievalError, bool? completed, bool? completedToday, string expectedMessageStart, string expectedColour)
+        bool retrievalError,
+        bool? completed,
+        bool? completedToday,
+        string expectedMessageStart,
+        string expectedColour
+    )
     {
         // Arrange
         var systemTime = Substitute.For<ISystemTime>();
         var now = DateTime.UtcNow;
         systemTime.Today.Returns(now.Date);
 
-        var dto = new SectionStatusDto
-        {
-            Completed = completed ?? false,
-        };
+        var dto = new SectionStatusDto { Completed = completed ?? false };
 
         if (completedToday == null)
         {
@@ -38,7 +41,11 @@ public class SubmissionStatusHelpersTests
         }
 
         // Act
-        var tag = SubmissionStatusHelper.GetGroupsSubmissionStatusTag(retrievalError, dto, systemTime);
+        var tag = SubmissionStatusHelper.GetGroupsSubmissionStatusTag(
+            retrievalError,
+            dto,
+            systemTime
+        );
 
         // Assert
         Assert.StartsWith(expectedMessageStart, tag.Text);
@@ -75,12 +82,17 @@ public class SubmissionStatusHelpersTests
         var sectionStatuses = new List<SectionStatusDto>
         {
             new() { Completed = true, LastCompletionDate = new DateTime() },
-            new() { Completed = false }
+            new() { Completed = false },
         };
         query.GetSectionSubmissionStatuses(sections, 123).Returns(sectionStatuses);
 
         // Act
-        var result = await SubmissionStatusHelper.RetrieveSectionStatuses(category, logger, query, 123);
+        var result = await SubmissionStatusHelper.RetrieveSectionStatuses(
+            category,
+            logger,
+            query,
+            123
+        );
 
         // Assert
         Assert.False(result.RetrievalError);
@@ -92,10 +104,13 @@ public class SubmissionStatusHelpersTests
     public void GetTotalSections_ShouldReturnCorrectCount()
     {
         var categories = new List<Category>
-    {
-        new() { Sections = new List<Section> { new(), new() } },
-        new() { Sections = new List<Section> { new() } }
-    };
+        {
+            new()
+            {
+                Sections = new List<Section> { new(), new() },
+            },
+            new() { Sections = new List<Section> { new() } },
+        };
 
         var result = SubmissionStatusHelper.GetTotalSections(categories);
 

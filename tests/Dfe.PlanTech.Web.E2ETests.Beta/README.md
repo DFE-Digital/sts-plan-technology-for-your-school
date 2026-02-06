@@ -15,7 +15,6 @@ Since there is overlap between step definition names, the project has two differ
 
 In VS Code go to file and open workspace and select either smoke or regression. This will align intellisense to the step definitions. You will not be able to run both sets of tests under the same workspace.
 
-
 ### Regression tests
 
 The regression tests have tags with either @parallel or @serial. This is to help speed the tests up. Parallel tests are ones which require no assessments to be done. (e.g. cookies, component page tests etc). Everything else is tagged with @serial
@@ -28,55 +27,63 @@ Run `npm run test:login` - This will create the different session.jsons that the
 
 ### Regression
 
-| Script Name            | Command                                                                                                                                                | Description                                                                 |
-|------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------|
-| test:record:parallel   | cucumber-js -p regression --parallel 4 --retry 4 --format json:reports/cucumber-parallel.json --world-parameters="{\"record\": true}" --tags "not @serial" | Runs regression tests in parallel (4 workers), records run, excludes @serial |
-| test:record:serial     | cucumber-js -p regression --retry 4 --format json:reports/cucumber-serial.json --world-parameters="{\"record\": true}" --tags @serial                  | Runs @serial regression tests sequentially with recording enabled           |
-| test:parallel          | cucumber-js -p regression --retry 4 --parallel 4 --format json:reports/cucumber-parallel.json --world-parameters="{\"record\": false}" --tags "not @serial" | Runs regression tests in parallel (4 workers) without recording              |
-| test:serial            | cucumber-js -p regression --retry 4 --format json:reports/cucumber-serial.json --world-parameters="{\"record\": false}" --tags @serial                 | Runs @serial regression tests sequentially without recording                 |
-| test:record            | npm run test:record:parallel && npm run test:record:serial                                                                                             | Runs all regression tests with recording (parallel first, then serial)      |
-| test:all               | npm run test:parallel && npm run test:serial                                                                                                           | Runs all regression tests without recording                                  |
-| test:record:smoke      | cucumber-js -p smoke --retry 4 --format json:reports/cucumber-smoke.json --world-parameters="{\"record\": true}"                                       | Runs smoke tests with recording enabled                                       |
-| test:smoke             | cucumber-js -p smoke                                                                                                                                   | Runs smoke tests with default settings                                        |
-
+| Script Name          | Command                                                                                                                                                     | Description                                                                  |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| test:record:parallel | cucumber-js -p regression --parallel 4 --retry 4 --format json:reports/cucumber-parallel.json --world-parameters="{\"record\": true}" --tags "not @serial"  | Runs regression tests in parallel (4 workers), records run, excludes @serial |
+| test:record:serial   | cucumber-js -p regression --retry 4 --format json:reports/cucumber-serial.json --world-parameters="{\"record\": true}" --tags @serial                       | Runs @serial regression tests sequentially with recording enabled            |
+| test:parallel        | cucumber-js -p regression --retry 4 --parallel 4 --format json:reports/cucumber-parallel.json --world-parameters="{\"record\": false}" --tags "not @serial" | Runs regression tests in parallel (4 workers) without recording              |
+| test:serial          | cucumber-js -p regression --retry 4 --format json:reports/cucumber-serial.json --world-parameters="{\"record\": false}" --tags @serial                      | Runs @serial regression tests sequentially without recording                 |
+| test:record          | npm run test:record:parallel && npm run test:record:serial                                                                                                  | Runs all regression tests with recording (parallel first, then serial)       |
+| test:all             | npm run test:parallel && npm run test:serial                                                                                                                | Runs all regression tests without recording                                  |
+| test:record:smoke    | cucumber-js -p smoke --retry 4 --format json:reports/cucumber-smoke.json --world-parameters="{\"record\": true}"                                            | Runs smoke tests with recording enabled                                      |
+| test:smoke           | cucumber-js -p smoke                                                                                                                                        | Runs smoke tests with default settings                                       |
+| test:regression           | cucumber-js -p smoke                                                                                                                                        | Runs regression tests with default settings                                       |
 
 Key commands are:
 
 regression:
 
-npm run test:all - runs all regression tests
-npm run test:record - runs all regression tests and records the videos/traces/screenshots
+- npm run test:all - runs all regression tests
+- npm run test:record - runs all regression tests and records the videos/traces/screenshots
+- npm run test:regression - runs all smoke tests
 
 smoke:
 
-npm run test:smoke - runs all smoke tests
-npm run test:record:smoke - runs all smoke test and records the videos/traces/screenshots
+- npm run test:smoke - runs all smoke tests
+- npm run test:record:smoke - runs all smoke test and records the videos/traces/screenshots
+
+
+You can use the below commands to run individual feature files.
+
+smoke + regression:
+
+- npm run test:smoke features/smoke-tests/self-assessment.feature
+- npm run test:regression features/regression/cookies.feature
 
 
 ## Environment Variables
 
-| Variable                           | Value                                              |
-|------------------------------------|----------------------------------------------------|
-| URL                                | URL of the app (end with a /)                           |
-| DSI_SCHOOL_EMAIL                   | DSI School login email                                     |
-| DSI_SCHOOL_PASSWORD                | DSI School login password                                  |
-| DSI_SCHOOL_ESTABLISHMENT_REF       | DSI School establishment ref (used for clearing db)       |
-| DSI_MAT_EMAIL                      | DSI MAT login email                                    |
-| DSI_MAT_PASSWORD                   | DSI MAT login password                                     |
-| DSI_MAT_ESTABLISHMENT_REF          | DSI MAT establishment ref (used for clearing db)     |
-| DSI_NOORG_EMAIL                    | DSI No organisation login email                                 |
-| DSI_NOORG_PASSWORD                 | DSI No organisation login password                                    |
-| HEADLESS                           | false or true - whether you want to run headless or not. This is used in CI.                                              |
-| DB_USER                            | Database User                                               |
-| DB_PASSWORD                        | Database Password                                          |
-| DB_SERVER                          | Database Server (localhost)                                          |
-| DB_PORT                            | Database Port (1433)                                               |
-| DB_DATABASE                        | Database name (plantech-db)                                      |
-| DB_MODE                            | sql or azure (Set to SQL if running db locally, set to azure if using azure db. There are different methods we use to authenticate + clear the db. )                                               |
+| Variable                     | Value                                                                                                                                                |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| URL                          | URL of the app (end with a /)                                                                                                                        |
+| DSI_SCHOOL_EMAIL             | DSI School login email                                                                                                                               |
+| DSI_SCHOOL_PASSWORD          | DSI School login password                                                                                                                            |
+| DSI_SCHOOL_ESTABLISHMENT_REF | DSI School establishment ref (used for clearing db)                                                                                                  |
+| DSI_MAT_EMAIL                | DSI MAT login email                                                                                                                                  |
+| DSI_MAT_PASSWORD             | DSI MAT login password                                                                                                                               |
+| DSI_MAT_ESTABLISHMENT_REF    | DSI MAT establishment ref (used for clearing db)                                                                                                     |
+| DSI_NOORG_EMAIL              | DSI No organisation login email                                                                                                                      |
+| DSI_NOORG_PASSWORD           | DSI No organisation login password                                                                                                                   |
+| HEADLESS                     | false or true - whether you want to run headless or not. This is used in CI.                                                                         |
+| DB_USER                      | Database User                                                                                                                                        |
+| DB_PASSWORD                  | Database Password                                                                                                                                    |
+| DB_SERVER                    | Database Server (localhost)                                                                                                                          |
+| DB_PORT                      | Database Port (1433)                                                                                                                                 |
+| DB_DATABASE                  | Database name (plantech-db)                                                                                                                          |
+| DB_MODE                      | sql or azure (Set to SQL if running db locally, set to azure if using azure db. There are different methods we use to authenticate + clear the db. ) |
 
-DSI_EMAIL* variables can be found in the azure keyvault under "e2e-tests" for the respective environments.
+DSI_EMAIL\* variables can be found in the azure keyvault under "e2e-tests" for the respective environments.
 URL - this is the URL the tests will be running against - e.g. https://localhost:8080/ or https://environment.plan-technology-for-your-school.gov.uk/
-
 
 ## Test tags
 

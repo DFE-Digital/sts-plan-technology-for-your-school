@@ -15,7 +15,10 @@ public class UserSettingsRepository : IUserSettingsRepository
         _db = dbContext;
     }
 
-    public async Task<UserSettingsEntity> UpsertUserSettingsAsync(int userId, RecommendationSortOrder sortOrder)
+    public async Task<UserSettingsEntity> UpsertUserSettingsAsync(
+        int userId,
+        RecommendationSortOrder sortOrder
+    )
     {
         var userSettingsEntity = await GetUserSettingsByAsync(u => u.UserId.Equals(userId));
 
@@ -24,7 +27,7 @@ public class UserSettingsRepository : IUserSettingsRepository
             userSettingsEntity = new UserSettingsEntity
             {
                 UserId = userId,
-                SortOrder = sortOrder.ToString()
+                SortOrder = sortOrder.ToString(),
             };
 
             await _db.UserSettings.AddAsync(userSettingsEntity);
@@ -44,9 +47,10 @@ public class UserSettingsRepository : IUserSettingsRepository
         return GetUserSettingsByAsync(u => u.UserId.Equals(userId));
     }
 
-    private Task<UserSettingsEntity?> GetUserSettingsByAsync(Expression<Func<UserSettingsEntity, bool>> predicate)
+    private Task<UserSettingsEntity?> GetUserSettingsByAsync(
+        Expression<Func<UserSettingsEntity, bool>> predicate
+    )
     {
-        return _db.UserSettings
-            .FirstOrDefaultAsync(predicate);
+        return _db.UserSettings.FirstOrDefaultAsync(predicate);
     }
 }

@@ -1,5 +1,5 @@
-import contentfulExport from "contentful-export";
-import { getArgumentValue } from "./options-helpers.js";
+import contentfulExport from 'contentful-export';
+import { getArgumentValue } from './options-helpers.js';
 
 const DefaultExportOptions = {
   content: true,
@@ -19,13 +19,22 @@ const getBooleanValueFromEnv = (prop) => getArgumentValue(process.env, prop, tru
  *
  * @return {object} The exported Contentful data.
  */
-export default function exportContentfulData({ spaceId, deliveryToken, managementToken, environment, saveFile, usePreview, exportDirectory = "./output", exportOptions = DefaultExportOptions }) {
+export default function exportContentfulData({
+  spaceId,
+  deliveryToken,
+  managementToken,
+  environment,
+  saveFile,
+  usePreview,
+  exportDirectory = './output',
+  exportOptions = DefaultExportOptions,
+}) {
   const options = {
     spaceId: spaceId ?? process.env.SPACE_ID,
     deliveryToken: deliveryToken ?? process.env.DELIVERY_TOKEN,
     managementToken: managementToken ?? process.env.MANAGEMENT_TOKEN,
     environmentId: environment ?? process.env.ENVIRONMENT,
-    host: "api.contentful.com",
+    host: 'api.contentful.com',
     skipEditorInterfaces: !exportOptions.editorinterfaces,
     skipRoles: !exportOptions.roles,
     skipWebhooks: !exportOptions.webhooks,

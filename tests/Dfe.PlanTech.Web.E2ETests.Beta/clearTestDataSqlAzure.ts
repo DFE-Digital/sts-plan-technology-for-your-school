@@ -2,8 +2,7 @@ import sql from 'mssql';
 import { DefaultAzureCredential } from '@azure/identity';
 import 'dotenv/config';
 
-export async function clearTestEstablishmentData(establishmentRef: string) 
-{
+export async function clearTestEstablishmentData(establishmentRef: string) {
   const pool = await connectToDatabase();
 
   await pool.connect();
@@ -14,12 +13,12 @@ export async function clearTestEstablishmentData(establishmentRef: string)
     await createStoredProcRequest(request, {
       establishmentRef: establishmentRef,
     });
+    request.output('establishmentId', sql.BigInt);
 
     const result = await request.execute('deleteDataForEstablishment');
     await pool.close();
     return result;
-  }
-  catch (exception) {
+  } catch (exception) {
     console.error(exception);
   }
 }
@@ -33,13 +32,15 @@ async function createStoredProcRequest(request: sql.Request, inputParams: { [key
 async function connectToDatabase(): Promise<sql.ConnectionPool> {
   const connectionMode = process.env.DB_MODE;
 
-  const pool: sql.ConnectionPool = await (
-    connectionMode === "azure"
-      ? createAzureConnectionPool()
-      : connectionMode === "sql"
-        ? createLocalSqlConnectionPool()
-        : Promise.reject(new Error("No connection mode set. DB_MODE in environment must be set to 'azure' or 'sql'."))
-  );
+  const pool: sql.ConnectionPool = await (connectionMode === 'azure'
+    ? createAzureConnectionPool()
+    : connectionMode === 'sql'
+      ? createLocalSqlConnectionPool()
+      : Promise.reject(
+          new Error(
+            "No connection mode set. DB_MODE in environment must be set to 'azure' or 'sql'.",
+          ),
+        ));
 
   return pool;
 }
@@ -58,11 +59,11 @@ async function createAzureConnectionPool(): Promise<sql.ConnectionPool> {
     options: { encrypt: true, database, trustServerCertificate: false },
     authentication: {
       type: 'azure-active-directory-access-token',
-      options: { token: token!.token }
-    }
+      options: { token: token!.token },
+    },
   });
   return pool;
-};
+}
 
 async function createLocalSqlConnectionPool(): Promise<sql.ConnectionPool> {
   const config: sql.config = {
@@ -71,8 +72,8 @@ async function createLocalSqlConnectionPool(): Promise<sql.ConnectionPool> {
     server: process.env.DB_SERVER as string,
     database: process.env.DB_DATABASE,
     options: {
-      encrypt: true, 
-      trustServerCertificate: true, 
+      encrypt: true,
+      trustServerCertificate: true,
     },
   };
 

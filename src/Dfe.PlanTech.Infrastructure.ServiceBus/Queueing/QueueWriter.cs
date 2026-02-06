@@ -15,8 +15,11 @@ public class QueueWriter(
     IAzureClientFactory<ServiceBusSender> serviceBusSenderFactory
 ) : IQueueWriter
 {
-    private readonly ILogger<QueueWriter> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient("contentfulsender");
+    private readonly ILogger<QueueWriter> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ServiceBusSender _serviceBusSender = serviceBusSenderFactory.CreateClient(
+        "contentfulsender"
+    );
 
     public async Task<QueueWriteResult> WriteMessage(string body, string subject)
     {
@@ -28,7 +31,12 @@ public class QueueWriter(
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error sending service bus message. Body: \"{Body}\". Subject: \"{Subject}\".", body, subject);
+            _logger.LogError(
+                ex,
+                "Error sending service bus message. Body: \"{Body}\". Subject: \"{Subject}\".",
+                body,
+                subject
+            );
             return new QueueWriteResult(ex.Message);
         }
     }

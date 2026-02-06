@@ -28,6 +28,6 @@ BEGIN
       INSERT INTO @ReturnTable SELECT [Id], [Value], [NodeType], [DataId], [ParentId] FROM [Contentful].[SelectAllRichTextContentForParentId](@idColumn)
       SELECT @idColumn = min(Id) FROM @RichTextIds WHERE Id > @idColumn
     END
-  
+
   RETURN
 END

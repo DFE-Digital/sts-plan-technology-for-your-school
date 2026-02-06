@@ -1,10 +1,15 @@
 using System.Data;
+using System.Data.Common;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -38,57 +43,102 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         _db = dbContext;
     }
 
-    public Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId)
+    public async Task<FirstActivityForEstablishmentRecommendationEntity?> GetFirstActivityForEstablishmentRecommendationAsync(
+        int establishmentId,
+        string recommendationContentfulReference
+    )
     {
         // Stored procedure defined in:
-        // - 2023/20230718_168650_GetSectionStatusesSproc.sql (CREATE)
-        // - 2023/20230725_166107_ModifyGetSectionStatusesSproc.sql (ALTER)
-        // - 2023/20230725_166107_ModifyGetSectionStatusesSprocFix.sql (ALTER)
-        // - 2023/20230922_1420_UpdateGetSectionStatusToAcceptEstablishmentId.sql (ALTER)
-        // - 2024/20240524_1730_UpdateGetSectionStatusesSproc.sql (ALTER)
-        // - 2024/20240605_1030_UpdateGetSectionStatusesSproc.sql (ALTER)
-        // - 2024/20240612_1220_CreateGetSectionStatusesForCategory.sql (CREATE related proc)
-        // - 2024/20240702_1700_RenameUpdatedSectionStatusesProc.sql (ALTER)
-        // - 2024/20240717_1510_AlterSectionStatusesProc.sql (ALTER)
-        // - 2024/20241002_0900_CreateDateUpdatedTriggers.sql (ALTER)
-        // - 2024/20241104_1200_RemoveContentfulDependencies.sql (ALTER)
-        // - 2024/20241127_1700_AddSubmissionViewedColumn.sql (ALTER)
-        // - 2024/20241212_1500_DatafixForDateLastUpdated.sql (ALTER)
-        // - 2025/20250404_1500_UpdateGetSectionStatusesSproc.sql (ALTER - LATEST)
-        // Parameters (in order): @sectionIds NVARCHAR(MAX), @establishmentId INT
-        return _db.SectionStatuses
-            .FromSqlInterpolated($"EXEC {DatabaseConstants.SpGetSectionStatuses} {sectionIds}, {establishmentId}")
-            .ToListAsync();
-    }
-
-    public async Task<int> RecordGroupSelection(UserGroupSelectionModel userGroupSelectionModel)
-    {
-        // Stored procedure defined in:
-        // - 2025/20250409_1900_CreateSubmitGroupSelectionProcedure.sql (CREATE)
-        // Parameters (in order): @userId INT, @userEstablishmentId INT, @selectedEstablishmentId INT, @selectedEstablishmentName NVARCHAR(MAX), @selectionId INT OUTPUT
-        var selectionId = new SqlParameter(DatabaseConstants.SelectionIdParam, SqlDbType.Int)
-        {
-            Direction = ParameterDirection.Output
-        };
+        // - 2026/20260122_1720_GetFirstActivityForEstablishmentRecommendation.sql (CREATE)
+        // Parameters (in order): @establishmentId INT, @recommendationContentfulReference NVARCHAR(50)
 
         var parameters = new SqlParameter[]
         {
-            new(DatabaseConstants.UserIdParam, userGroupSelectionModel.UserId),
-            new(DatabaseConstants.EstablishmentIdParam, userGroupSelectionModel.UserEstablishmentId),
-            new(DatabaseConstants.SelectedEstablishmentIdParam, userGroupSelectionModel.SelectedEstablishmentId),
-            new(DatabaseConstants.SelectedEstablishmentNameParam, SqlValueOrDbNull(userGroupSelectionModel.SelectedEstablishmentName)),
-            selectionId
+            new(DatabaseConstants.EstablishmentIdParam, establishmentId),
+            new(
+                DatabaseConstants.RecommendationContentfulReferenceParam,
+                recommendationContentfulReference
+            ),
         };
 
-        var command = BuildCommand(DatabaseConstants.SpSubmitGroupSelection, parameters);
-        await _db.Database.ExecuteSqlRawAsync(command, parameters);
+        var command = BuildCommandString(
+            DatabaseConstants.SpGetFirstActivityForEstablishmentRecommendation,
+            parameters
+        );
 
-        if (selectionId.Value is int id)
+        var results = await _db.Set<FirstActivityForEstablishmentRecommendationEntity>()
+            .FromSqlRaw(command, parameters)
+            .AsNoTracking()
+            .ToListAsync();
+
+        if (results.Count == 0)
         {
-            return id;
+            return null;
         }
 
-        throw new InvalidCastException($"{nameof(selectionId)} is not an integer - value is {selectionId.Value ?? "null"}");
+        return results[0];
+    }
+
+    // Moved GetSectionStatuses sproc into code (need to remove more sprocs when completed column is removed from db)
+    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
+        string sectionIds,
+        int establishmentId
+    )
+    {
+        var sectionIdList = sectionIds
+            .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+            .ToList();
+
+        var currentSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+            )
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
+            .ToListAsync();
+
+        var lastCompleteSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+                && (s.Status == SubmissionStatus.CompleteReviewed)
+            )
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
+            .ToListAsync();
+
+        var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
+        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(
+            s => s.SectionId,
+            s => s
+        );
+
+        var result = sectionIdList
+            .Select(sectionId =>
+            {
+                currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
+                lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
+
+                return new SectionStatusEntity
+                {
+                    SectionId = sectionId,
+                    Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
+                    DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
+                    DateUpdated =
+                        currentSubmission?.DateLastUpdated
+                        ?? currentSubmission?.DateCreated
+                        ?? DateTime.UtcNow,
+                    LastMaturity = lastCompleteSubmission?.Maturity,
+                    LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                    Viewed = lastCompleteSubmission?.Viewed,
+                };
+            })
+            .ToList();
+
+        return result;
     }
 
     public Task<int> SetMaturityForSubmissionAsync(int submissionId)
@@ -100,10 +150,10 @@ public class StoredProcedureRepository : IStoredProcedureRepository
         // Parameters (in order): @submissionId INT
         var parameters = new SqlParameter[]
         {
-            new(DatabaseConstants.SubmissionIdParam, submissionId)
+            new(DatabaseConstants.SubmissionIdParam, submissionId),
         };
 
-        var command = BuildCommand(DatabaseConstants.SpCalculateMaturity, parameters);
+        var command = BuildCommandString(DatabaseConstants.SpCalculateMaturity, parameters);
         return _db.Database.ExecuteSqlRawAsync(command, parameters);
     }
 
@@ -125,12 +175,12 @@ public class StoredProcedureRepository : IStoredProcedureRepository
 
         var responseId = new SqlParameter(DatabaseConstants.ResponseIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var submissionId = new SqlParameter(DatabaseConstants.SubmissionIdParam, SqlDbType.Int)
         {
-            Direction = ParameterDirection.Output
+            Direction = ParameterDirection.Output,
         };
 
         var parameters = new SqlParameter[]
@@ -146,10 +196,10 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             new(DatabaseConstants.EstablishmentIdParam, response.EstablishmentId),
             new(DatabaseConstants.MaturityParam, ""),
             responseId,
-            submissionId
+            submissionId,
         };
 
-        var command = BuildCommand(DatabaseConstants.SpSubmitAnswer, parameters);
+        var command = BuildCommandString(DatabaseConstants.SpSubmitAnswer, parameters);
         await _db.Database.ExecuteSqlRawAsync(command, parameters);
 
         if (responseId.Value is int id)
@@ -157,41 +207,25 @@ public class StoredProcedureRepository : IStoredProcedureRepository
             return id;
         }
 
-        throw new InvalidCastException($"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}");
+        throw new InvalidCastException(
+            $"{nameof(responseId)} is not an integer - value is {responseId.Value ?? "null"}"
+        );
     }
 
-    public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
-    {
-        // Stored procedure defined in:
-        // - 2024/20240524_1635_CreateDeleteCurrentSubmissionProcedure.sql (CREATE)
-        // - 2024/20240827_1102_UpdateDeleteCurrentSubmissionProcedure.sql (ALTER)
-        // - 2024/20241009_1100_DboSchemaImprovements.sql (ALTER - LATEST)
-        // Parameters (in order): @sectionId NVARCHAR(50), @establishmentId INT
-        var parameters = new SqlParameter[]
-        {
-            new(DatabaseConstants.SectionIdParam, sectionId),
-            new(DatabaseConstants.EstablishmentIdParam, establishmentId)
-        };
-
-        var command = BuildCommand(DatabaseConstants.SpDeleteCurrentSubmission, parameters);
-        return _db.Database.ExecuteSqlRawAsync(command, parameters);
-    }
-
-    private static string BuildCommand(string storedProcedureName, SqlParameter[] parameters)
+    private static string BuildCommandString(string storedProcedureName, SqlParameter[] parameters)
     {
         ParameterDirection[] outputParameterTypes =
         {
             ParameterDirection.InputOutput,
-            ParameterDirection.Output
+            ParameterDirection.Output,
         };
 
         var parameterNames = parameters.Select(p =>
             outputParameterTypes.Contains(p.Direction)
                 ? $"{p.ParameterName} OUTPUT"
-                : p.ParameterName);
+                : p.ParameterName
+        );
 
         return $@"EXEC {storedProcedureName} {string.Join(", ", parameterNames)}";
     }
-
-    private static object SqlValueOrDbNull(string? value) => value ?? (object)DBNull.Value;
 }

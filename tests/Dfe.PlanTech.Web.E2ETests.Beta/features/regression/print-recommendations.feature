@@ -40,7 +40,3 @@ Feature: Print recommendations Page
         Then I should see a recommendation with heading "Recommendation Header - C2 - S3 - Q3" and content containing "This is the content for Category Two Section Three Question Three Answer Two" on the print recommendation page
         Then I should see a recommendation with heading "Recommendation Header - C2 - S3 - Q2" and content containing "This is the content for Category Two Section Three Question Two Answer One" on the print recommendation page
         Then I should see a recommendation with heading "Recommendation Header - C2 - S3 - Q1" and content containing "This is the content for Category Two Section Three Question One Answer One" on the print recommendation page
-
-
-
-

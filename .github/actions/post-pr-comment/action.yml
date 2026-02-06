@@ -20,11 +20,11 @@ inputs:
   comment_matcher:
     required: true
     type: string
-    description: "If a comment body is found containing this string, then it will update the found comment instead of creating a new one"
+    description: 'If a comment body is found containing this string, then it will update the found comment instead of creating a new one'
   comment_footer:
     required: false
     type: string
-    description: "Short text to come after content; will contain information on the PR action, owner, etc. by default"
+    description: 'Short text to come after content; will contain information on the PR action, owner, etc. by default'
 
 runs:
   using: composite

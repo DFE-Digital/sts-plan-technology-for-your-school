@@ -7,4 +7,3 @@ public record QuestionnaireCache
 {
     public string? CurrentSectionTitle { get; init; }
 }
-

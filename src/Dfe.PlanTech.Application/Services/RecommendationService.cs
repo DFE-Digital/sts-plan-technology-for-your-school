@@ -1,12 +1,12 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Application.Services;
 
-public class RecommendationService(
-    IRecommendationWorkflow recommendationWorkflow
-) : IRecommendationService
+public class RecommendationService(IRecommendationWorkflow recommendationWorkflow)
+    : IRecommendationService
 {
     public Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
         string recommendationContentfulReference,
@@ -19,10 +19,9 @@ public class RecommendationService(
         );
     }
 
-    public Task<IEnumerable<SqlEstablishmentRecommendationHistoryDto>> GetRecommendationHistoryAsync(
-         string recommendationContentfulReference,
-        int establishmentId
-    )
+    public Task<
+        IEnumerable<SqlEstablishmentRecommendationHistoryDto>
+    > GetRecommendationHistoryAsync(string recommendationContentfulReference, int establishmentId)
     {
         return recommendationWorkflow.GetRecommendationHistoryAsync(
             recommendationContentfulReference,
@@ -30,10 +29,9 @@ public class RecommendationService(
         );
     }
 
-
-    public Task<Dictionary<string, SqlEstablishmentRecommendationHistoryDto>> GetLatestRecommendationStatusesAsync(
-        int establishmentId
-    )
+    public Task<
+        Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+    > GetLatestRecommendationStatusesAsync(int establishmentId)
     {
         return recommendationWorkflow.GetLatestRecommendationStatusesByEstablishmentIdAsync(
             establishmentId
@@ -44,9 +42,10 @@ public class RecommendationService(
         string recommendationContentfulReference,
         int establishmentId,
         int userId,
-        string newStatus,
+        RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null)
+        int? matEstablishmentId = null
+    )
     {
         return recommendationWorkflow.UpdateRecommendationStatusAsync(
             recommendationContentfulReference,
@@ -55,6 +54,17 @@ public class RecommendationService(
             newStatus,
             noteText,
             matEstablishmentId
+        );
+    }
+
+    public Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
+        int establishmentId,
+        string recommendationContentfulReference
+    )
+    {
+        return recommendationWorkflow.GetFirstActivityForEstablishmentRecommendationAsync(
+            establishmentId,
+            recommendationContentfulReference
         );
     }
 }

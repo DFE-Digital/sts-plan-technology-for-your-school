@@ -10,4 +10,3 @@ Feature: Unauthorised access
         And I should see a link to log into DfE Sign-in
         And I should see the GOV.UK footer with expected links
         And I should see the beta header
-

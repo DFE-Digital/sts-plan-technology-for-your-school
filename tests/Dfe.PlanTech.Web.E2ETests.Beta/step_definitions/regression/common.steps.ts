@@ -1,7 +1,7 @@
 import { Given, Then, When } from '@cucumber/cucumber';
 import { expect } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { textToHyphenatedUrl } from '../../helpers/url'
+import { textToHyphenatedUrl } from '../../helpers/url';
 
 Given('I visit the homepage', async function () {
   await this.page.goto(`${process.env.URL}home`);
@@ -45,7 +45,7 @@ Then('the page should be accessible', async function () {
 
   if (results.violations.length > 0) {
     console.warn('\ Accessibility violations found:');
-    results.violations.forEach(v => {
+    results.violations.forEach((v) => {
       console.warn(`- ${v.id}: ${v.description}`);
       console.warn(`  Help: ${v.helpUrl}`);
     });
@@ -59,13 +59,10 @@ Then('I should see a link with text {string}', async function (text: string) {
   await expect(link).toBeVisible();
 });
 
-Then(
-  'I should see {int} links with text {string}',
-  async function (count: number, text: string) {
-    const links = this.page.getByRole('link', { name: text });
-    await expect(links).toHaveCount(count);
-  }
-);
+Then('I should see {int} links with text {string}', async function (count: number, text: string) {
+  const links = this.page.getByRole('link', { name: text });
+  await expect(links).toHaveCount(count);
+});
 
 Then('I should see the main page heading', async function () {
   const heading = this.page.locator('h1.govuk-heading-xl');
@@ -115,16 +112,18 @@ Then('I should see a js-back link to {string}', async function (href: string) {
   expect(actualHref).toContain(href);
 });
 
-
 Then('I should see a h2 section heading with text {string}', async function (heading: string) {
   const headingLocator = this.page.locator(`h2.govuk-heading-l:has-text("${heading}")`);
   await expect(headingLocator).toBeVisible();
 });
 
-Then('I should see a non govuk section heading with text {string}', async function (heading: string) {
-  const headingLocator = this.page.locator(`h2:has-text("${heading}")`);
-  await expect(headingLocator).toBeVisible();
-});
+Then(
+  'I should see a non govuk section heading with text {string}',
+  async function (heading: string) {
+    const headingLocator = this.page.locator(`h2:has-text("${heading}")`);
+    await expect(headingLocator).toBeVisible();
+  },
+);
 
 Given('I am on the {string} page', async function (path: string) {
   await this.page.goto(`${process.env.URL}${path}`);
@@ -135,22 +134,25 @@ Then('I should be on the URL containing {string}', async function (expectedPath:
   await expect(this.page.url()).toContain(expectedPath);
 });
 
-Given('I am on the self-assessment testing page and click on the category {string}', async function (categoryName: string) {
-  await this.page.goto(`${process.env.URL}self-assessment-testing`);
+Given(
+  'I am on the self-assessment testing page and click on the category {string}',
+  async function (categoryName: string) {
+    await this.page.goto(`${process.env.URL}self-assessment-testing`);
 
-  const container = this.page.locator('.dfe-grid-container');
-  const cardLink = container.getByRole('link', {
-    name: new RegExp(`^\\s*${categoryName}\\s*$`, 'i'),
-  });
+    const container = this.page.locator('.dfe-grid-container');
+    const cardLink = container.getByRole('link', {
+      name: new RegExp(`^\\s*${categoryName}\\s*$`, 'i'),
+    });
 
-  await expect(cardLink).toBeVisible();
+    await expect(cardLink).toBeVisible();
 
-  await cardLink.first().click();
+    await cardLink.first().click();
 
-  const expectedPath = textToHyphenatedUrl(categoryName);
+    const expectedPath = textToHyphenatedUrl(categoryName);
 
-  await expect(this.page).toHaveURL(new RegExp(`${expectedPath}(/|$)`));
-});
+    await expect(this.page).toHaveURL(new RegExp(`${expectedPath}(/|$)`));
+  },
+);
 
 Then('I should see a button with the text {string}', async function (linkText: string) {
   const button = this.page.locator('a.govuk-button.govuk-link', { hasText: linkText });
@@ -163,9 +165,10 @@ Then('I should see the GOV.UK footer with expected links', async function () {
   await expect(footer).toBeVisible();
 
   const expectedLinks: Record<string, string> = {
-    'Cookies': '/cookies',
+    Cookies: '/cookies',
     'Privacy notice': '/privacy-notice',
-    'Contact us': 'https://schooltech.support.education.gov.uk/hc/en-gb/requests/new?ticket_form_id=22398112507922',
+    'Contact us':
+      'https://schooltech.support.education.gov.uk/hc/en-gb/requests/new?ticket_form_id=22398112507922',
     'Accessibility statement': '/accessibility-statement',
   };
 
@@ -176,15 +179,13 @@ Then('I should see the GOV.UK footer with expected links', async function () {
   }
 });
 
-Then('I click the go to self-assessment link for {string}',
-  async function (sectionName: string) {
-    const link = this.page.getByRole('link', {
-      name: `Go to self-assessment for ${sectionName}`,
-    });
+Then('I click the go to self-assessment link for {string}', async function (sectionName: string) {
+  const link = this.page.getByRole('link', {
+    name: `Go to self-assessment for ${sectionName}`,
+  });
 
-    await link.click();
-  }
-);
+  await link.click();
+});
 
 When('I refresh the page', async function () {
   await this.page.reload();
@@ -220,10 +221,8 @@ When('I click the non-js back link', async function () {
   await backLink.click();
 });
 
-
 Then('the header should contain all the correct content', async function () {
-
- // wrapper
+  // wrapper
   const header = this.page.locator('header.govuk-header[role="banner"]');
   await expect(header).toBeVisible();
 
@@ -255,7 +254,7 @@ Then('I should see an inset text containing {string}', async function (expectedT
 
 Then('I should not see an inset text containing {string}', async function (unexpectedText: string) {
   const inset = this.page.locator('.govuk-inset-text');
-  if (await inset.count() === 0) {
+  if ((await inset.count()) === 0) {
     return;
   }
   await expect(inset).not.toContainText(unexpectedText);
@@ -277,12 +276,9 @@ Given('I visit the page {string}', async function (path: string) {
   await this.page.goto(`${process.env.URL}${path}`);
 });
 
-Then(
-  'I should see a confirmation panel saying {string}',
-  async function (expectedText: string) {
-    const panelTitle = this.page.locator('.govuk-panel--confirmation .govuk-panel__title');
+Then('I should see a confirmation panel saying {string}', async function (expectedText: string) {
+  const panelTitle = this.page.locator('.govuk-panel--confirmation .govuk-panel__title');
 
-    await expect(panelTitle).toBeVisible();
-    await expect(panelTitle).toHaveText(expectedText);
-  }
-);
+  await expect(panelTitle).toBeVisible();
+  await expect(panelTitle).toHaveText(expectedText);
+});

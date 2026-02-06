@@ -20,6 +20,7 @@
   - In previous versions of C# omitting public was acceptable when this was the only option, however, later versions of C# provide more options as listed above.
 
 ## Frontend Conventions
+
 - All functionality should be accessible for users with javascript disabled.
   - Where it is impossible to do this and the functionality of something on the page is only possible to achieve with javascript, it should:
     - Not be something critical
@@ -29,4 +30,4 @@
     ```html
     <div class="js-only">This element will be hidden by default, but made visible via JS.</div>
     ```
-  - The code that unhides these elements is located in [_BodyEnd.cshtml](src/Dfe.PlanTech.Web/Views/Shared/_BodyEnd.cshtml)
+  - The code that unhides these elements is located in [\_BodyEnd.cshtml](src/Dfe.PlanTech.Web/Views/Shared/_BodyEnd.cshtml)

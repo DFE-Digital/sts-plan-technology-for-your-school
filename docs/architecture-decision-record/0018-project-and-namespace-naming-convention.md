@@ -1,17 +1,20 @@
 # 0018 - Project And Namespace Naming Convention
 
-* **Status**: accepted
+- **Status**: accepted
 
 ## Context and Problem Statement
-What should be the agreed naming convention for the .Net projects?  This also impacts the namespace naming convention.
+
+What should be the agreed naming convention for the .Net projects? This also impacts the namespace naming convention.
 
 ## Decision Drivers
-* SLT Lead Tech (Mamood Suyltan) wanting consistency across DfE projects
-* How projects have been implemented within other DfE projects
+
+- SLT Lead Tech (Mamood Suyltan) wanting consistency across DfE projects
+- How projects have been implemented within other DfE projects
 
 ## Considered Options
-* `Sts.PlanTech.{name}`
-* `Dfe.PlanTech.{name}`
+
+- `Sts.PlanTech.{name}`
+- `Dfe.PlanTech.{name}`
 
 ## Decision Outcome
 

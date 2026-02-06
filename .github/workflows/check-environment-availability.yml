@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       ENVIRONMENT: ${{ inputs.environment }}
-      ENVIRONMENT_URL: ${{ 
+      ENVIRONMENT_URL: ${{
         inputs.environment == 'Dev' && 'https://dev.plan-technology-for-your-school.education.gov.uk/information-asset-register' ||
         inputs.environment == 'Tst' && 'https://test.dev.plan-technology-for-your-school.education.gov.uk/information-asset-register' ||
         inputs.environment == 'StagingUnprotected' && 'https://staging.plan-technology-for-your-school.education.gov.uk/information-asset-register' ||
@@ -34,7 +34,7 @@ jobs:
         run: |
           echo "🌐 Pinging $ENVIRONMENT ($ENVIRONMENT_URL)..."
           status_code=$(curl -s -o /dev/null -w "%{http_code}" "$ENVIRONMENT_URL")
-          
+
           if [[ "$status_code" -ne 200 && "$status_code" -ne 302 ]]; then
             echo "❌ $ENVIRONMENT returned status code $status_code"
             echo "- name: $ENVIRONMENT" >> tmp/env-check-failures.yml

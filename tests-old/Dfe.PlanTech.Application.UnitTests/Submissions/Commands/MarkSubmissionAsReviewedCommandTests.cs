@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Application.Persistence.Interfaces;
+using Dfe.PlanTech.Application.Persistence.Interfaces;
 using Dfe.PlanTech.Application.Submissions.Commands;
 using Dfe.PlanTech.Domain.Submissions.Enums;
 using Dfe.PlanTech.Domain.Submissions.Models;
@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Submissions
             SectionName = "Test Section",
             EstablishmentId = 1,
             Status = SubmissionStatus.CompleteNotReviewed.ToString(),
-            Completed = true
+            Completed = true,
         };
 
         private readonly List<Submission> _otherSubmissions = new()
@@ -30,7 +30,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Submissions
                 SectionName = "Test Section",
                 EstablishmentId = 1,
                 Status = SubmissionStatus.CompleteReviewed.ToString(),
-                Deleted = false
+                Deleted = false,
             },
             new Submission
             {
@@ -39,8 +39,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Submissions
                 SectionName = "Test Section",
                 EstablishmentId = 1,
                 Status = SubmissionStatus.CompleteReviewed.ToString(),
-                Deleted = false
-            }
+                Deleted = false,
+            },
         };
 
         public MarkSubmissionAsReviewedCommandTests()
@@ -52,9 +52,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Submissions
         public async Task Should_Mark_Submission_As_Reviewed_And_Update_Timestamp()
         {
             _db.GetSubmissionById(_submission.Id, Arg.Any<CancellationToken>())
-               .Returns(_submission);
+                .Returns(_submission);
 
-            _db.GetSubmissions.Returns(new AsyncQueryableHelpers.TestAsyncEnumerable<Submission>(_otherSubmissions));
+            _db.GetSubmissions.Returns(
+                new AsyncQueryableHelpers.TestAsyncEnumerable<Submission>(_otherSubmissions)
+            );
 
             _db.ToListAsync(Arg.Any<IQueryable<Submission>>(), Arg.Any<CancellationToken>())
                 .Returns(_otherSubmissions);
@@ -70,9 +72,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Submissions
         public async Task Should_Invalidate_Other_Reviewed_Submissions()
         {
             _db.GetSubmissionById(_submission.Id, Arg.Any<CancellationToken>())
-               .Returns(_submission);
+                .Returns(_submission);
 
-            _db.GetSubmissions.Returns(new AsyncQueryableHelpers.TestAsyncEnumerable<Submission>(_otherSubmissions));
+            _db.GetSubmissions.Returns(
+                new AsyncQueryableHelpers.TestAsyncEnumerable<Submission>(_otherSubmissions)
+            );
 
             _db.ToListAsync(Arg.Any<IQueryable<Submission>>(), Arg.Any<CancellationToken>())
                 .Returns(_otherSubmissions);
@@ -92,7 +96,8 @@ namespace Dfe.PlanTech.Web.UnitTests.Submissions
             _db.GetSubmissionById(4, Arg.Any<CancellationToken>()).Returns((Submission?)null);
 
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                _command.MarkSubmissionAsReviewed(4, CancellationToken.None));
+                _command.MarkSubmissionAsReviewed(4, CancellationToken.None)
+            );
 
             Assert.Contains("Submission not found", ex.Message);
         }

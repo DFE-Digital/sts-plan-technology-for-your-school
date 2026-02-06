@@ -50,7 +50,7 @@ public class ResponseEntity
             Answer = Answer.AsDto(),
             Maturity = Maturity,
             DateCreated = DateCreated,
-            DateLastUpdated = DateLastUpdated
+            DateLastUpdated = DateLastUpdated,
         };
     }
 }

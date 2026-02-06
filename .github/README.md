@@ -3,7 +3,7 @@
 - [PR Checks](#pr-checks)
 - [Deployment pipelines](#deployment-pipelines)
 - [Other workflows](#other-workflows)
-  
+
 ## PR Checks
 
 The following GitHub workflows are used during the PR process to validate the changes being merged into the `main` branch
@@ -16,24 +16,24 @@ The following GitHub workflows are used during the PR process to validate the ch
 
 ### code-pr-check workflow
 
-* Builds the main solution file (`plan-technology-for-your-school.sln`), and runs all its unit tests
-* Builds the database upgrader project
-* Builds and runs the unit tests for the `Dfe.PlanTech.Web.Node` project
-  
+- Builds the main solution file (`plan-technology-for-your-school.sln`), and runs all its unit tests
+- Builds the database upgrader project
+- Builds and runs the unit tests for the `Dfe.PlanTech.Web.Node` project
+
 ### e2e-tests workflow
 
-* Clears out all submissions for a particular testing establishment reference, so that all tests are fresh
-* Runs end-to-end tests using Cypress
+- Clears out all submissions for a particular testing establishment reference, so that all tests are fresh
+- Runs end-to-end tests using Cypress
 
 ### terraform-pr-check workflow
 
 This workflow validates the following:
 
-* Validates the Terraform configuration by running Init/Plan
-* Checks the Terraform format 
-* Runs Terraform Linter
-* Validates that the Terraform configuration doc is upto date
-* Runs a Terraform Security Check
+- Validates the Terraform configuration by running Init/Plan
+- Checks the Terraform format
+- Runs Terraform Linter
+- Validates that the Terraform configuration doc is upto date
+- Runs a Terraform Security Check
 
 And will update the PR with the Plan results so reviews can easily see what changes will be applied to the infrastructure.
 
@@ -67,26 +67,37 @@ To ensure that the process works correctly as expected, you should ensure your c
 | Name                                                | Description                                                                                                      |
 | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | build-web-assets                                    | Builds JS + CSS files (and bundles, minifies, etc. as necessary) on PR, then pushes changes to the source branch |
-| [clear-user-data-from-db](#clear-user-data-from-db) | Clears all user data from a DB on a target environment                                                           |
+| [clear-submission-data-from-db](#clear-user-data-from-db) | Clears all submission-related data from a DB on a target environment for a selected test establishment                                                           |
 
 ### clear-user-data-from-db
 
-This workflow runs an [SQL script](/.github/scripts/clear-user-data-from-db.sql) that clears all user-based data from the database.
+This workflow runs an [SQL script](/.github/scripts/clear-submission-data-from-db.sql) that clears all recommendation histories, responses and submissions from the database. This gives a 'clean slate' for testing, demos etc.
 
-It can only be triggered manually from either the `Actions` tab, or using the GitHub CLI tool. It takes one input; the target `environment` i.e. dev/tst/staging. If `production` is used, it will not run.
+It can only be triggered manually from either the `Actions` tab, or using the GitHub CLI tool. It takes two inputs; the target `environment` and the `establishment` (ie the establishment for which to clear submission data). The `environment` input takes Dev, Tst, StagingUnprotected and ProductionUnprotected, the latter two environments are specifically designed for running actions. The input options for `establishment` are limited to the three main DSI Test establishments: Community School, Foundation School and Miscalleous.
 
-To execute the workflow manually using the GitHub CLI tool, you can execute the following command :
-
-```shell
-gh workflow run 'Clear user data from DB' --ref development -f environment=development
-```
-Which would run the workflow as it exists in the `development` branch, using `development` as the target environment. To execute against tst, you would do
-
-```shell
-gh workflow run 'Clear user data from DB' --ref development -f environment=tst
-```
-etc.
+See below for information on testing manual workflows using GitHub CLI.
 
 ## Workflow Actions
 
 Reusable workflow actions are located within the `.github/actions` directory
+
+## Testing workflows with GitHub CLI
+
+To test a new workflow using GitHub CLI without merging into development/main, the workflow file must first be pushed to the feature branch with `push:` set as a trigger (for a manual workflow, this can be added above `workflow-dispatch:` temporarily). This makes the workflow file discoverable as GitHub Actions will attempt to run it.
+
+Once the file has been discovered, `push:` can be removed (if appropriate) and run manually with GitHub CLI, using the commands below. It is not necessary to add `push:` again once the file has been discovered, any pushed changes will be reflected.
+
+To execute the workflow manually using the GitHub CLI tool, you can execute the following command (if preferred, `'<name of workflow>'` can be replaced with the filename):
+
+```shell
+gh workflow run '<name of workflow>' --ref <branch to run from>
+```
+
+If it is a manual workflow, inputs can be added following the branch name, using a `-f` flag for each, as in the example below:
+
+```shell
+gh workflow run clear-submission-data-from-db.yml --ref development -f environment="Dev" -f establishment="DSI TEST Establishment (001) Community School"
+```
+NB: Input names passed using `-f` must match exactly those declared in the YAML file.
+
+The above run the workflow as it exists on the `development` branch, using `Dev` as the target environment and `DSI TEST Establishment (001) Community School` as the establishment to be cleared.

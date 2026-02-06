@@ -3,20 +3,20 @@ name: Validate SQL Scripts
 on:
   workflow_dispatch:
   push:
-    branches: ["main", "development"]
+    branches: ['main', 'development']
     paths:
-      - "src/Dfe.PlanTech.DatabaseUpgrader/**"
-      - ".github/scripts/**"
-      - ".github/workflows/validate-scripts.yml"
+      - 'src/Dfe.PlanTech.DatabaseUpgrader/**'
+      - '.github/scripts/**'
+      - '.github/workflows/validate-scripts.yml'
   pull_request:
-    branches: ["main", "development"]
+    branches: ['main', 'development']
     paths:
-      - "src/Dfe.PlanTech.DatabaseUpgrader/**"
-      - ".github/scripts/**"
-      - ".github/workflows/validate-scripts.yml"
+      - 'src/Dfe.PlanTech.DatabaseUpgrader/**'
+      - '.github/scripts/**'
+      - '.github/workflows/validate-scripts.yml'
 
 concurrency:
-  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
   cancel-in-progress: true
 
 jobs:
@@ -24,8 +24,8 @@ jobs:
     name: Validate SQL Scripts
     runs-on: ubuntu-22.04
     env:
-      FAKE_USERNAME: "sa" # NB. This is OK to be plaintext as it's a made-up credential to give the locally hosted DB a "user"
-      FAKE_PASSWORD: "LWgqx62jIO2sRek8" # NB. See Above
+      FAKE_USERNAME: 'sa' # NB. This is OK to be plaintext as it's a made-up credential to give the locally hosted DB a "user"
+      FAKE_PASSWORD: 'LWgqx62jIO2sRek8' # NB. See Above
 
     steps:
       - name: Checkout Repository
@@ -35,7 +35,7 @@ jobs:
         uses: ./.github/actions/build-dotnet-app
         with:
           dotnet_version: ${{ vars.DOTNET_VERSION }}
-          solution_filename: Dfe.PlanTech.DatabaseUpgrader.sln
+          solution_filename: ./src/Dfe.PlanTech.DatabaseUpgrader/Dfe.PlanTech.DatabaseUpgrader.sln
 
       - name: Get DB Connection String
         id: connection-string

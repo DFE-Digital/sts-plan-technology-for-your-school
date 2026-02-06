@@ -12,12 +12,16 @@ public class ServiceExceptionHandlerMiddleware(
     IContentfulService contentfulService
 ) : IExceptionHandlerMiddleware
 {
-    private readonly ErrorPagesConfiguration _errorPages = errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
-    private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly ErrorPagesConfiguration _errorPages =
+        errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly IContentfulService _contentfulService =
+        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     public async Task HandleExceptionAsync(HttpContext context)
     {
-        var internalErrorPage = await _contentfulService.GetPageByIdAsync(_errorPages.InternalErrorPageId);
+        var internalErrorPage = await _contentfulService.GetPageByIdAsync(
+            _errorPages.InternalErrorPageId
+        );
         var internalErrorSlug = internalErrorPage?.Slug ?? UrlConstants.Error;
 
         ContextRedirect(internalErrorSlug, context);
@@ -39,14 +43,18 @@ public class ServiceExceptionHandlerMiddleware(
         context.Response.Redirect(redirectUrl);
     }
 
-    private static string GetRedirectUrlForException(string internalErrorSlug, Exception? exception) =>
+    private static string GetRedirectUrlForException(
+        string internalErrorSlug,
+        Exception? exception
+    ) =>
         exception switch
         {
             null => internalErrorSlug,
             ContentfulDataUnavailableException => internalErrorSlug,
             DatabaseException => internalErrorSlug,
             InvalidEstablishmentException => internalErrorSlug,
-            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) => UrlConstants.OrgErrorPage,
+            KeyNotFoundException ex when ex.Message.Contains(ClaimConstants.Organisation) =>
+                UrlConstants.OrgErrorPage,
             _ => GetRedirectUrlForException(internalErrorSlug, exception.InnerException),
         };
 }

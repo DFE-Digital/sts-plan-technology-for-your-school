@@ -3,21 +3,21 @@ export default function mapContent(content) {
     return [];
   }
 
-  return content.map(item => {
+  return content.map((item) => {
     const contentType = item.sys.contentType.sys.id;
 
     switch (contentType) {
-      case "header": {
+      case 'header': {
         return processHeader(item);
       }
 
-      case "textBody": {
+      case 'textBody': {
         return processTextBody(item);
       }
 
       default: {
-        console.log("not mapped content type", contentType);
-        return "";
+        console.log('not mapped content type', contentType);
+        return '';
       }
     }
   });
@@ -28,7 +28,7 @@ function processHeader(header) {
 }
 
 function processTextBody(textBody) {
-  return "Text: \n" + processRichText(textBody.fields.richText);
+  return 'Text: \n' + processRichText(textBody.fields.richText);
 }
 
 function processRichText(richText) {
@@ -42,7 +42,7 @@ function processRichText(richText) {
     values.push(value);
   }
 
-  return values.join("\n");
+  return values.join('\n');
 }
 
 function* yieldValues(richText) {

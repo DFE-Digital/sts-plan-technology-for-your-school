@@ -14,12 +14,15 @@ public class BaseViewBuilder(
 )
 {
     protected readonly ILogger<BaseViewBuilder> Logger = logger;
-    protected IContentfulService ContentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    protected ICurrentUser CurrentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+    protected IContentfulService ContentfulService =
+        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    protected ICurrentUser CurrentUser =
+        currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     protected string GetDsiReferenceOrThrowException()
     {
-        return CurrentUser.DsiReference ?? throw new AuthenticationException("User is not authenticated");
+        return CurrentUser.DsiReference
+            ?? throw new AuthenticationException("User is not authenticated");
     }
 
     protected int GetUserIdOrThrowException()
@@ -34,7 +37,8 @@ public class BaseViewBuilder(
     /// <exception cref="InvalidDataException"></exception>
     protected int GetUserOrganisationIdOrThrowException()
     {
-        return CurrentUser.UserOrganisationId ?? throw new InvalidDataException(nameof(CurrentUser.UserOrganisationId));
+        return CurrentUser.UserOrganisationId
+            ?? throw new InvalidDataException(nameof(CurrentUser.UserOrganisationId));
     }
 
     /// <summary>
@@ -44,7 +48,8 @@ public class BaseViewBuilder(
     /// <exception cref="InvalidDataException"></exception>
     protected async Task<int> GetActiveEstablishmentIdOrThrowException()
     {
-        return await CurrentUser.GetActiveEstablishmentIdAsync() ?? throw new InvalidDataException(nameof(CurrentUser.GetActiveEstablishmentIdAsync));
+        return await CurrentUser.GetActiveEstablishmentIdAsync()
+            ?? throw new InvalidDataException(nameof(CurrentUser.GetActiveEstablishmentIdAsync));
     }
 
     protected CategorySectionRecommendationViewModel BuildCategorySectionRecommendationViewModel(
@@ -58,7 +63,7 @@ public class BaseViewBuilder(
             {
                 SectionSlug = section.InterstitialPage?.Slug,
                 SectionName = section.Name,
-                Viewed = sectionStatus?.HasBeenViewed
+                Viewed = sectionStatus?.HasBeenViewed,
             };
         }
         catch (Exception e)
@@ -71,7 +76,8 @@ public class BaseViewBuilder(
             );
             return new CategorySectionRecommendationViewModel
             {
-                NoRecommendationFoundErrorMessage = $"Unable to retrieve {section.Name} recommendation"
+                NoRecommendationFoundErrorMessage =
+                    $"Unable to retrieve {section.Name} recommendation",
             };
         }
     }

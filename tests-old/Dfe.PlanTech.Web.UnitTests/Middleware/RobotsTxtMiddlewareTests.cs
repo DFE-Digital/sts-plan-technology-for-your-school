@@ -11,7 +11,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Middleware;
 
 public class RobotsTxtMiddlewareTests
 {
-    private IOptions<RobotsConfiguration> _options = Substitute.For<IOptions<RobotsConfiguration>>();
+    private IOptions<RobotsConfiguration> _options = Substitute.For<
+        IOptions<RobotsConfiguration>
+    >();
     private readonly RobotsTxtMiddleware _middleware;
     private readonly HttpContext _httpContext;
 
@@ -59,5 +61,4 @@ public class RobotsTxtMiddlewareTests
         var r = new StreamReader(response.Body);
         return r.ReadToEndAsync();
     }
-
 }

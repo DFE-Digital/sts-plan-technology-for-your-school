@@ -7,9 +7,8 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
 {
     private RecommendationRepository _repository = null!;
 
-    public RecommendationRepositoryTests(DatabaseFixture fixture) : base(fixture)
-    {
-    }
+    public RecommendationRepositoryTests(DatabaseFixture fixture)
+        : base(fixture) { }
 
     public override async Task InitializeAsync()
     {
@@ -29,21 +28,21 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         {
             RecommendationText = "First Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
 
         var recommendation2 = new RecommendationEntity
         {
             RecommendationText = "Second Recommendation",
             ContentfulRef = "rec-002",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
 
         var recommendation3 = new RecommendationEntity
         {
             RecommendationText = "Third Recommendation",
             ContentfulRef = "rec-003",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
 
         DbContext.Recommendations.AddRange(recommendation1, recommendation2, recommendation3);
@@ -52,7 +51,9 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         var targetReferences = new[] { "rec-001", "rec-003" };
 
         // Act
-        var result = await _repository.GetRecommendationsByContentfulReferencesAsync(targetReferences);
+        var result = await _repository.GetRecommendationsByContentfulReferencesAsync(
+            targetReferences
+        );
 
         // Assert
         var recommendations = result.ToList();
@@ -74,7 +75,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
 
         DbContext.Recommendations.Add(recommendation);
@@ -83,7 +84,9 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         var nonMatchingReferences = new[] { "rec-999", "rec-888" };
 
         // Act
-        var result = await _repository.GetRecommendationsByContentfulReferencesAsync(nonMatchingReferences);
+        var result = await _repository.GetRecommendationsByContentfulReferencesAsync(
+            nonMatchingReferences
+        );
 
         // Assert
         Assert.Empty(result);
@@ -101,7 +104,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
 
         DbContext.Recommendations.Add(recommendation);
@@ -110,7 +113,9 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         var emptyReferences = new string[0];
 
         // Act
-        var result = await _repository.GetRecommendationsByContentfulReferencesAsync(emptyReferences);
+        var result = await _repository.GetRecommendationsByContentfulReferencesAsync(
+            emptyReferences
+        );
 
         // Assert
         Assert.Empty(result);
@@ -128,7 +133,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         {
             RecommendationText = "Test Recommendation",
             ContentfulRef = "rec-001",
-            QuestionId = question.Id
+            QuestionId = question.Id,
         };
 
         DbContext.Recommendations.Add(recommendation);
@@ -137,7 +142,9 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         var duplicateReferences = new[] { "rec-001", "rec-001", "rec-001" };
 
         // Act
-        var result = await _repository.GetRecommendationsByContentfulReferencesAsync(duplicateReferences);
+        var result = await _repository.GetRecommendationsByContentfulReferencesAsync(
+            duplicateReferences
+        );
 
         // Assert
         var recommendations = result.ToList();
@@ -158,7 +165,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
             RecommendationText = "Active Recommendation",
             ContentfulRef = "rec-active",
             QuestionId = question.Id,
-            Archived = false
+            Archived = false,
         };
 
         var archivedRecommendation = new RecommendationEntity
@@ -166,7 +173,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
             RecommendationText = "Archived Recommendation",
             ContentfulRef = "rec-archived",
             QuestionId = question.Id,
-            Archived = true
+            Archived = true,
         };
 
         DbContext.Recommendations.AddRange(activeRecommendation, archivedRecommendation);

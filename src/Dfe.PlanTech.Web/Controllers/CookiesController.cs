@@ -17,8 +17,10 @@ public class CookiesController(
 {
     private const string CookiesSlug = "cookies";
 
-    private readonly IContentfulService _contentfulService = contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    private readonly ICookieService _cookieService = cookieService ?? throw new ArgumentNullException(nameof(cookieService));
+    private readonly IContentfulService _contentfulService =
+        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+    private readonly ICookieService _cookieService =
+        cookieService ?? throw new ArgumentNullException(nameof(cookieService));
 
     [HttpGet]
     public async Task<IActionResult> GetCookiesPage()

@@ -46,15 +46,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetSelectASchoolView_CallsViewBuilderAndReturnsResult()
         {
-            _viewBuilder.RouteToSelectASchoolViewModelAsync(_controller)
-                .Returns(new OkResult());
+            _viewBuilder.RouteToSelectASchoolViewModelAsync(_controller).Returns(new OkResult());
 
             var result = await _controller.GetSelectASchoolView();
 
             await _viewBuilder.Received(1).RouteToSelectASchoolViewModelAsync(_controller);
             Assert.IsType<OkResult>(result);
         }
-
 
         [Fact]
         public async Task SelectSchool_RecordsSelectionAndRedirects()

@@ -9,14 +9,17 @@ namespace Dfe.PlanTech.Application.UnitTests.Submissions.Queries;
 
 public class SectionCompleteStatusCheckerTests
 {
-    public readonly ISubmissionStatusChecker StatusChecker = SectionCompleteStatusChecker.SectionComplete;
+    public readonly ISubmissionStatusChecker StatusChecker =
+        SectionCompleteStatusChecker.SectionComplete;
 
     [Fact]
     public void Should_Match_Completed_Status()
     {
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(new Section() { });
-        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.CompleteNotReviewed, Completed = true });
+        processor.SectionStatus.Returns(
+            new SectionStatus() { Status = Status.CompleteNotReviewed, Completed = true }
+        );
 
         var matches = StatusChecker.IsMatchingSubmissionStatus(processor);
 
@@ -43,18 +46,16 @@ public class SectionCompleteStatusCheckerTests
         var section = new Section()
         {
             Questions = new()
-          {
-        new Question(){
-          Slug = "question-one"
-        },
-        new Question(){
-          Slug = "question-two"
-        }
-          }
+            {
+                new Question() { Slug = "question-one" },
+                new Question() { Slug = "question-two" },
+            },
         };
         var processor = Substitute.For<ISubmissionStatusProcessor>();
         processor.Section.Returns(section);
-        processor.SectionStatus.Returns(new SectionStatus() { Status = Status.InProgress, Completed = true });
+        processor.SectionStatus.Returns(
+            new SectionStatus() { Status = Status.InProgress, Completed = true }
+        );
 
         await StatusChecker.ProcessSubmission(processor, default);
         Assert.Equal(Status.CompleteReviewed, processor.Status);

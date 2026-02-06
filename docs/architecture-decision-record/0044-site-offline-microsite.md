@@ -1,4 +1,4 @@
-﻿# 0044 – Removal of Site Offline Microsite
+# 0044 – Removal of Site Offline Microsite
 
 **Status**: accepted
 
@@ -43,7 +43,6 @@ Operational use of the microsite revealed several concrete issues:
 3. Ongoing maintenance and rebranding cost
 
    The microsite is a second web application that must:
-
    - Track framework and dependency updates
 
    - Be rebranded alongside the main service (e.g. GOV.UK rebrand)
@@ -52,10 +51,9 @@ Operational use of the microsite revealed several concrete issues:
 
 This cost is incurred despite the microsite being inactive for the vast majority of the service’s lifetime.
 
-4. Code duplication and tooling friction
+1. Code duplication and tooling friction
 
    The microsite lives in the same repository as the main application but is deployed independently. This has resulted in unavoidable code duplication that:
-
    - Triggers SonarQube duplication rules
 
    - Blocks unrelated changes
@@ -64,14 +62,13 @@ This cost is incurred despite the microsite being inactive for the vast majority
 
    These issues are structural rather than accidental.
 
-5. Mismatch between solution complexity and problem scope
+2. Mismatch between solution complexity and problem scope
 
    The original problem was temporary access restriction during migrations, not long-term service replacement. The microsite solves this by introducing a second full application, which is a materially larger solution than required.
 
-6. Reduced clarity under operational pressure
+3. Reduced clarity under operational pressure
 
    During incidents or migrations, engineers must reason about:
-
    - Which application is live
 
    - Which container is serving traffic
@@ -93,7 +90,7 @@ The service will instead use a feature-level maintenance mode within the main ap
 The replacement solution will:
 
 - Keep the main application deployed at all times
-Gate user access via configuration (e.g. maintenance mode flag)
+  Gate user access via configuration (e.g. maintenance mode flag)
 - Allow allow-listing of specific users (e.g. developers) during maintenance
 - Serve a maintenance page directly from the main application
 - Avoid swapping production traffic between separate applications

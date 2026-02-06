@@ -1,6 +1,6 @@
 # 0009 - Container Registry
 
-* **Status**: Accepted
+- **Status**: Accepted
 
 ## Context and Problem Statement
 
@@ -8,14 +8,14 @@ As the application will be containerised with Docker where is the best place sol
 
 ## Decision Drivers
 
-* Within DfE’s Technical Guidance
-* Compatible with selected hosting platform
-* Simple with minimal configuration
+- Within DfE’s Technical Guidance
+- Compatible with selected hosting platform
+- Simple with minimal configuration
 
 ## Considered Options
 
-* Azure Container Registry
-* Docker Hub
+- Azure Container Registry
+- Docker Hub
 
 ## Decision Outcome
 

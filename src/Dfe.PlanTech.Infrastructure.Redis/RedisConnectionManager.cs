@@ -10,7 +10,10 @@ public class RedisConnectionManager : IRedisConnectionManager
     private ConnectionMultiplexer? _connection;
     private readonly DistributedCachingOptions _options;
 
-    public RedisConnectionManager(ILogger<RedisConnectionManager> logger, DistributedCachingOptions options)
+    public RedisConnectionManager(
+        ILogger<RedisConnectionManager> logger,
+        DistributedCachingOptions options
+    )
     {
         if (string.IsNullOrEmpty(options.ConnectionString))
         {
@@ -24,7 +27,8 @@ public class RedisConnectionManager : IRedisConnectionManager
     /// <inheritdoc/>
     public async Task<IDatabase> GetDatabaseAsync(int databaseId)
     {
-        _connection ??= await ConnectionMultiplexer.ConnectAsync(_options.ConnectionString)
+        _connection ??=
+            await ConnectionMultiplexer.ConnectAsync(_options.ConnectionString)
             ?? throw new InvalidOperationException("Failed to create Redis connection");
 
         return _connection.GetDatabase(databaseId);
@@ -43,7 +47,9 @@ public class RedisConnectionManager : IRedisConnectionManager
             return;
         }
 
-        var tasks = _connection.GetEndPoints().Select(x => _connection.GetServer(x).FlushDatabaseAsync(databaseId));
+        var tasks = _connection
+            .GetEndPoints()
+            .Select(x => _connection.GetServer(x).FlushDatabaseAsync(databaseId));
         await Task.WhenAll(tasks);
     }
 }

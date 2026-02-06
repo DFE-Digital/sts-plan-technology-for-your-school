@@ -9,11 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
-namespace Dfe.PlanTech.Web.Tests.Controllers
+namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
     public class PagesControllerTests
     {
-        private readonly ILogger<PagesController> _logger = Substitute.For<ILogger<PagesController>>();
+        private readonly ILogger<PagesController> _logger = Substitute.For<
+            ILogger<PagesController>
+        >();
         private readonly IPagesViewBuilder _pagesViewBuilder = Substitute.For<IPagesViewBuilder>();
         private readonly PagesController _controller;
 
@@ -22,7 +24,7 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             _controller = new PagesController(_logger, _pagesViewBuilder);
             _controller.ControllerContext = new ControllerContext
             {
-                HttpContext = new DefaultHttpContext()
+                HttpContext = new DefaultHttpContext(),
             };
         }
 
@@ -40,14 +42,14 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         {
             var page = new PageEntry();
             var expectedResult = new OkResult();
-            _pagesViewBuilder.RouteBasedOnOrganisationTypeAsync(_controller, page)
+            _pagesViewBuilder
+                .RouteBasedOnOrganisationTypeAsync(_controller, page)
                 .Returns(Task.FromResult<IActionResult>(expectedResult));
 
             var result = await _controller.GetByRoute(page);
 
             Assert.Equal(expectedResult, result);
         }
-
 
         [Fact]
         public async Task RouteBasedOnOrganisationTypeAsync_ThrowsContentfulDataUnavailableException_WhenPageIsNull()
@@ -66,7 +68,8 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
         {
             var expectedResult = new OkResult();
             var slug = "categorySlug";
-            _pagesViewBuilder.RouteToCategoryLandingPrintPageAsync(_controller, slug)
+            _pagesViewBuilder
+                .RouteToCategoryLandingPrintPageAsync(_controller, slug)
                 .Returns(Task.FromResult<IActionResult>(expectedResult));
 
             var result = await _controller.GetStandardChecklist(slug);
@@ -83,7 +86,10 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
                 _controller.GetStandardChecklist("")
             );
 
-            Assert.Equal("The value cannot be an empty string or composed entirely of whitespace. (Parameter 'categorySlug')", ex.Message);
+            Assert.Equal(
+                "The value cannot be an empty string or composed entirely of whitespace. (Parameter 'categorySlug')",
+                ex.Message
+            );
         }
 
         [Fact]
@@ -142,6 +148,5 @@ namespace Dfe.PlanTech.Web.Tests.Controllers
             activity.Stop();
             Activity.Current = null;
         }
-
     }
 }

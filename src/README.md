@@ -1,7 +1,7 @@
 # Projects
 
 | Project                                                                           | Purpose                                             |
-|-----------------------------------------------------------------------------------|-----------------------------------------------------|
+| --------------------------------------------------------------------------------- | --------------------------------------------------- |
 | [Dfe.PlanTech.Application](Dfe.PlanTech.Application/)                             |                                                     |
 | [Dfe.PlanTech.DatabaseUpgrader](Dfe.PlanTech.DatabaseUpgrader/)                   | Project to run DB migrations using DbUp             |
 | [Dfe.PlanTech.Domain](Dfe.PlanTech.Domain/)                                       |                                                     |

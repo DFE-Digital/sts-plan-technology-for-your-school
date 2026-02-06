@@ -26,7 +26,10 @@ public class UserOrganisationAuthorisationHandlerTests
     {
         var context = new DefaultHttpContext();
         var requirement = new UserOrganisationAuthorisationRequirement();
-        context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(true, new UserAuthorisationStatus(true, true));
+        context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(
+            true,
+            new UserAuthorisationStatus(true, true)
+        );
 
         var authContext = new AuthorizationHandlerContext(
             [requirement],
@@ -44,7 +47,10 @@ public class UserOrganisationAuthorisationHandlerTests
     {
         var context = new DefaultHttpContext();
         var requirement = new UserOrganisationAuthorisationRequirement();
-        context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(false, new UserAuthorisationStatus(true, false));
+        context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(
+            false,
+            new UserAuthorisationStatus(true, false)
+        );
 
         var authContext = new AuthorizationHandlerContext(
             [requirement],
@@ -62,7 +68,10 @@ public class UserOrganisationAuthorisationHandlerTests
     {
         var context = new DefaultHttpContext();
         var requirement = new UserOrganisationAuthorisationRequirement();
-        context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(true, new UserAuthorisationStatus(true, false));
+        context.Items[UserAuthorisationResult.HttpContextKey] = new UserAuthorisationResult(
+            true,
+            new UserAuthorisationStatus(true, false)
+        );
 
         var authContext = new AuthorizationHandlerContext(
             [requirement],
@@ -106,14 +115,22 @@ public class UserOrganisationAuthorisationHandlerTests
 
         await _handler.PublicHandleRequirementAsync(authContext, requirement);
 
-        var matchingCalls = _logger.GetMatchingReceivedMessages($"Expected resource to be HttpContext but received {typeof(object)}", LogLevel.Error);
+        var matchingCalls = _logger.GetMatchingReceivedMessages(
+            $"Expected resource to be HttpContext but received {typeof(object)}",
+            LogLevel.Error
+        );
         Assert.Single(matchingCalls);
     }
 }
 
-public class UserOrganisationAuthorisationHandlerMock(ILogger<UserOrganisationAuthorisationHandler> logger) : UserOrganisationAuthorisationHandler(logger)
+public class UserOrganisationAuthorisationHandlerMock(
+    ILogger<UserOrganisationAuthorisationHandler> logger
+) : UserOrganisationAuthorisationHandler(logger)
 {
-    public Task PublicHandleRequirementAsync(AuthorizationHandlerContext context, UserOrganisationAuthorisationRequirement requirement)
+    public Task PublicHandleRequirementAsync(
+        AuthorizationHandlerContext context,
+        UserOrganisationAuthorisationRequirement requirement
+    )
     {
         return HandleRequirementAsync(context, requirement);
     }

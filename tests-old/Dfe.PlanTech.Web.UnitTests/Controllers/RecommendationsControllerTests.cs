@@ -27,18 +27,35 @@ public class RecommendationsControllerTests
     [Theory]
     [InlineData("")]
     [InlineData(null)]
-    public async Task RecommendationsPagePage_Should_ThrowException_When_SectionSlug_NullOrEmpty(string? section)
+    public async Task RecommendationsPagePage_Should_ThrowException_When_SectionSlug_NullOrEmpty(
+        string? section
+    )
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendation(section!, "recommendation", _recommendationsRouter, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _recommendationsController.GetRecommendation(
+                section!,
+                "recommendation",
+                _recommendationsRouter,
+                default
+            )
+        );
     }
-
 
     [Theory]
     [InlineData("")]
     [InlineData(null)]
-    public async Task RecommendationsPagePage_Should_ThrowException_When_RecommendationSlug_NullOrEmpty(string? recommendation)
+    public async Task RecommendationsPagePage_Should_ThrowException_When_RecommendationSlug_NullOrEmpty(
+        string? recommendation
+    )
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendation("section slug", recommendation!, _recommendationsRouter, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _recommendationsController.GetRecommendation(
+                "section slug",
+                recommendation!,
+                _recommendationsRouter,
+                default
+            )
+        );
     }
 
     [Fact]
@@ -47,22 +64,50 @@ public class RecommendationsControllerTests
         string sectionSlug = "section-slug";
         string recommendationSlug = "recommendation-slug";
 
-        await _recommendationsController.GetRecommendation(sectionSlug, recommendationSlug, _recommendationsRouter, default);
+        await _recommendationsController.GetRecommendation(
+            sectionSlug,
+            recommendationSlug,
+            _recommendationsRouter,
+            default
+        );
 
-        await _recommendationsRouter.Received().ValidateRoute(sectionSlug, recommendationSlug, false, _recommendationsController, Arg.Any<CancellationToken>());
+        await _recommendationsRouter
+            .Received()
+            .ValidateRoute(
+                sectionSlug,
+                recommendationSlug,
+                false,
+                _recommendationsController,
+                Arg.Any<CancellationToken>()
+            );
     }
 
     [Theory]
     [InlineData("low")]
     [InlineData("medium")]
     [InlineData(null)]
-    public async Task RecommendationsPage_Preview_Should_Call_RecommendationsRouter_When_Args_Valid(string? maturity)
+    public async Task RecommendationsPage_Preview_Should_Call_RecommendationsRouter_When_Args_Valid(
+        string? maturity
+    )
     {
         string sectionSlug = "section-slug";
 
-        await _recommendationsController.GetRecommendationPreview(sectionSlug, maturity, new ContentfulOptionsConfiguration(true), _recommendationsRouter, default);
+        await _recommendationsController.GetRecommendationPreview(
+            sectionSlug,
+            maturity,
+            new ContentfulOptionsConfiguration(true),
+            _recommendationsRouter,
+            default
+        );
 
-        await _recommendationsRouter.Received().GetRecommendationPreview(sectionSlug, maturity, _recommendationsController, Arg.Any<CancellationToken>());
+        await _recommendationsRouter
+            .Received()
+            .GetRecommendationPreview(
+                sectionSlug,
+                maturity,
+                _recommendationsController,
+                Arg.Any<CancellationToken>()
+            );
     }
 
     [Fact]
@@ -70,7 +115,13 @@ public class RecommendationsControllerTests
     {
         string sectionSlug = "section-slug";
 
-        var result = await _recommendationsController.GetRecommendationPreview(sectionSlug, null, new ContentfulOptionsConfiguration(false), _recommendationsRouter, default);
+        var result = await _recommendationsController.GetRecommendationPreview(
+            sectionSlug,
+            null,
+            new ContentfulOptionsConfiguration(false),
+            _recommendationsRouter,
+            default
+        );
 
         var redirectResult = result as RedirectResult;
         Assert.NotNull(redirectResult);
@@ -80,9 +131,19 @@ public class RecommendationsControllerTests
     [Theory]
     [InlineData("")]
     [InlineData(null)]
-    public async Task RecommendationsPage_Preview_Should_ThrowException_When_Args_Invalid(string? sectionSlug)
+    public async Task RecommendationsPage_Preview_Should_ThrowException_When_Args_Invalid(
+        string? sectionSlug
+    )
     {
-        await Assert.ThrowsAnyAsync<ArgumentNullException>(() => _recommendationsController.GetRecommendationPreview(sectionSlug!, null, new ContentfulOptionsConfiguration(true), _recommendationsRouter, default));
+        await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
+            _recommendationsController.GetRecommendationPreview(
+                sectionSlug!,
+                null,
+                new ContentfulOptionsConfiguration(true),
+                _recommendationsRouter,
+                default
+            )
+        );
     }
 
     [Fact]
@@ -91,18 +152,38 @@ public class RecommendationsControllerTests
         string sectionSlug = "section-slug";
         string recommendationSlug = "recommendation-slug";
 
-        await _recommendationsController.GetRecommendationChecklist(sectionSlug, recommendationSlug, _recommendationsRouter, default);
+        await _recommendationsController.GetRecommendationChecklist(
+            sectionSlug,
+            recommendationSlug,
+            _recommendationsRouter,
+            default
+        );
 
-        await _recommendationsRouter.Received().ValidateRoute(sectionSlug, recommendationSlug, true, _recommendationsController, Arg.Any<CancellationToken>());
+        await _recommendationsRouter
+            .Received()
+            .ValidateRoute(
+                sectionSlug,
+                recommendationSlug,
+                true,
+                _recommendationsController,
+                Arg.Any<CancellationToken>()
+            );
     }
 
     [Theory]
     [InlineData("")]
     [InlineData(null)]
-    public async Task FromSection_Should_ThrowException_When_SectionSlug_NullOrEmpty(string? sectionSlug)
+    public async Task FromSection_Should_ThrowException_When_SectionSlug_NullOrEmpty(
+        string? sectionSlug
+    )
     {
         await Assert.ThrowsAnyAsync<ArgumentNullException>(() =>
-            _recommendationsController.FromSection(sectionSlug!, _recommendationsRouter, CancellationToken.None));
+            _recommendationsController.FromSection(
+                sectionSlug!,
+                _recommendationsRouter,
+                CancellationToken.None
+            )
+        );
     }
 
     [Fact]
@@ -111,10 +192,15 @@ public class RecommendationsControllerTests
         var sectionSlug = "section-slug";
         var recommendationSlug = "recommendation-slug";
 
-        _recommendationsRouter.GetRecommendationSlugForSection(sectionSlug, Arg.Any<CancellationToken>())
-                              .Returns(recommendationSlug);
+        _recommendationsRouter
+            .GetRecommendationSlugForSection(sectionSlug, Arg.Any<CancellationToken>())
+            .Returns(recommendationSlug);
 
-        var result = await _recommendationsController.FromSection(sectionSlug, _recommendationsRouter, CancellationToken.None);
+        var result = await _recommendationsController.FromSection(
+            sectionSlug,
+            _recommendationsRouter,
+            CancellationToken.None
+        );
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
         Assert.Equal(RecommendationsController.GetRecommendationAction, redirect.ActionName);

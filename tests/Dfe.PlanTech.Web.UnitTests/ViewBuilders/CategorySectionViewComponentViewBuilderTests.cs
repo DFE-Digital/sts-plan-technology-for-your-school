@@ -16,7 +16,8 @@ public class CategorySectionViewComponentViewBuilderTests
         IContentfulService? contentful = null,
         ISubmissionService? submission = null,
         ICurrentUser? currentUser = null,
-        ILogger<BaseViewBuilder>? logger = null)
+        ILogger<BaseViewBuilder>? logger = null
+    )
     {
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
@@ -25,30 +26,35 @@ public class CategorySectionViewComponentViewBuilderTests
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
         return new CategorySectionViewComponentViewBuilder(
-            logger, contentful, submission, currentUser);
+            logger,
+            contentful,
+            submission,
+            currentUser
+        );
     }
 
-    private static QuestionnaireSectionEntry MakeSection(string id, string name, string slug)
-        => new QuestionnaireSectionEntry
+    private static QuestionnaireSectionEntry MakeSection(string id, string name, string slug) =>
+        new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails(id),
             Name = name,
-            InterstitialPage = new PageEntry { Slug = slug }
+            InterstitialPage = new PageEntry { Slug = slug },
         };
 
     private static QuestionnaireCategoryEntry MakeCategory(
         IEnumerable<QuestionnaireSectionEntry>? sections = null,
         string headerText = "Header",
         string? landingSlug = "landing-slug",
-        List<ContentfulEntry>? content = null)
-        => new QuestionnaireCategoryEntry
+        List<ContentfulEntry>? content = null
+    ) =>
+        new QuestionnaireCategoryEntry
         {
             Sys = new SystemDetails("cat-1"),
             InternalName = "Cat Internal",
             Header = new ComponentHeaderEntry { Text = headerText },
             Sections = (sections ?? Array.Empty<QuestionnaireSectionEntry>()).ToList(),
             LandingPage = landingSlug is null ? null : new PageEntry { Slug = landingSlug },
-            Content = content
+            Content = content,
         };
 
     [Fact]
@@ -58,7 +64,8 @@ public class CategorySectionViewComponentViewBuilderTests
         var category = MakeCategory(sections: Array.Empty<QuestionnaireSectionEntry>());
 
         var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.BuildViewModelAsync(category));
+            sut.BuildViewModelAsync(category)
+        );
 
         Assert.Contains("Found no sections", ex.Message);
     }
@@ -68,17 +75,22 @@ public class CategorySectionViewComponentViewBuilderTests
     {
         var sectionA = MakeSection("S1", "Section 1", "s1");
         var sectionB = MakeSection("S2", "Section 2", "s2");
-        var category = MakeCategory(new[] { sectionA, sectionB }, headerText: "Networks", landingSlug: "networks-landing");
+        var category = MakeCategory(
+            new[] { sectionA, sectionB },
+            headerText: "Networks",
+            landingSlug: "networks-landing"
+        );
 
         var statuses = new List<SqlSectionStatusDto>
         {
             new SqlSectionStatusDto { SectionId = "S1", LastCompletionDate = new DateTime() },
-            new SqlSectionStatusDto { SectionId = "S2" }
+            new SqlSectionStatusDto { SectionId = "S2" },
         };
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(statuses);
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
 
         var sut = CreateSut(submission: submission);
 
@@ -99,14 +111,18 @@ public class CategorySectionViewComponentViewBuilderTests
         var category = MakeCategory(new[] { sectionA, sectionB });
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Throws(new Exception("boom"));
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Throws(new Exception("boom"));
 
         var sut = CreateSut(submission: submission);
 
         var vm = await sut.BuildViewModelAsync(category);
 
-        Assert.Equal("Unable to retrieve progress, please refresh your browser.", vm.ProgressRetrievalErrorMessage);
+        Assert.Equal(
+            "Unable to retrieve progress, please refresh your browser.",
+            vm.ProgressRetrievalErrorMessage
+        );
     }
 
     [Fact]
@@ -119,11 +135,13 @@ public class CategorySectionViewComponentViewBuilderTests
         var category = MakeCategory(
             new[] { sectionA },
             headerText: "Title",
-            content: new List<ContentfulEntry> { content0, content1 });
+            content: new List<ContentfulEntry> { content0, content1 }
+        );
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(new List<SqlSectionStatusDto>());
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(new List<SqlSectionStatusDto>());
 
         var sut = CreateSut(submission: submission);
 
@@ -136,11 +154,16 @@ public class CategorySectionViewComponentViewBuilderTests
     public async Task BuildViewModelAsync_Description_Falls_Back_To_MissingComponent_When_No_Content()
     {
         var sectionA = MakeSection("S1", "Section 1", "s1");
-        var category = MakeCategory(new[] { sectionA }, headerText: "Title", content: new List<ContentfulEntry>());
+        var category = MakeCategory(
+            new[] { sectionA },
+            headerText: "Title",
+            content: new List<ContentfulEntry>()
+        );
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(new List<SqlSectionStatusDto>());
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(new List<SqlSectionStatusDto>());
 
         var sut = CreateSut(submission: submission);
 
@@ -156,8 +179,9 @@ public class CategorySectionViewComponentViewBuilderTests
         var category = MakeCategory(new[] { sectionA }, landingSlug: null);
 
         var submission = Substitute.For<ISubmissionService>();
-        submission.GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
-                  .Returns(new List<SqlSectionStatusDto>());
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(new List<SqlSectionStatusDto>());
 
         var sut = CreateSut(submission: submission);
 

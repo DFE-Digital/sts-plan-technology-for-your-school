@@ -17,9 +17,12 @@ public class ReviewAnswersController(
     IReviewAnswersViewBuilder reviewAnswersViewBuilder
 ) : BaseController<ReviewAnswersController>(logger)
 {
-
-    private readonly IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler = userJourneyMissingContentExceptionHandler ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
-    private readonly IReviewAnswersViewBuilder _reviewAnswersViewBuilder = reviewAnswersViewBuilder ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
+    private readonly IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler =
+        userJourneyMissingContentExceptionHandler
+        ?? throw new ArgumentNullException(nameof(userJourneyMissingContentExceptionHandler));
+    private readonly IReviewAnswersViewBuilder _reviewAnswersViewBuilder =
+        reviewAnswersViewBuilder
+        ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
 
     [HttpGet($"{{categorySlug}}/{{sectionSlug}}/{UrlConstants.CheckAnswersSlug}")]
     public async Task<IActionResult> CheckAnswers(string categorySlug, string sectionSlug)
@@ -30,11 +33,19 @@ public class ReviewAnswersController(
         try
         {
             var errorMessage = TempData["ErrorMessage"]?.ToString();
-            return await _reviewAnswersViewBuilder.RouteToCheckAnswers(this, categorySlug, sectionSlug, errorMessage);
+            return await _reviewAnswersViewBuilder.RouteToCheckAnswers(
+                this,
+                categorySlug,
+                sectionSlug,
+                errorMessage
+            );
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {
-            return await _userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException);
+            return await _userJourneyMissingContentExceptionHandler.Handle(
+                this,
+                userJourneyException
+            );
         }
     }
 
@@ -47,11 +58,19 @@ public class ReviewAnswersController(
         try
         {
             var errorMessage = TempData["ErrorMessage"]?.ToString();
-            return await _reviewAnswersViewBuilder.RouteToViewAnswers(this, categorySlug, sectionSlug, errorMessage);
+            return await _reviewAnswersViewBuilder.RouteToViewAnswers(
+                this,
+                categorySlug,
+                sectionSlug,
+                errorMessage
+            );
         }
         catch (UserJourneyMissingContentException userJourneyException)
         {
-            return await _userJourneyMissingContentExceptionHandler.Handle(this, userJourneyException);
+            return await _userJourneyMissingContentExceptionHandler.Handle(
+                this,
+                userJourneyException
+            );
         }
     }
 
@@ -70,6 +89,12 @@ public class ReviewAnswersController(
 
         TempData["SectionName"] = sectionName;
 
-        return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(this, categorySlug, sectionSlug, sectionName, submissionId);
+        return await _reviewAnswersViewBuilder.ConfirmCheckAnswers(
+            this,
+            categorySlug,
+            sectionSlug,
+            sectionName,
+            submissionId
+        );
     }
 }

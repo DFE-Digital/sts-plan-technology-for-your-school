@@ -4,9 +4,7 @@ function ShouldBeAuthorised(page) {
     followRedirect: false,
   }).then((resp) => {
     expect(resp.status).to.eq(302);
-    expect(resp.redirectedToUrl).to.contain(
-      "https://pp-oidc.signin.education.gov.uk/"
-    );
+    expect(resp.redirectedToUrl).to.contain('https://pp-oidc.signin.education.gov.uk/');
   });
 }
 

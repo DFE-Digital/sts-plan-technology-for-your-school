@@ -14,12 +14,12 @@ const isNodeType = (type) => (cell) => cell.nodeType === type;
  */
 const isRowType = (type) => (row) => row.every(isNodeType(type));
 
-const isTableHeaderRow = isRowType("table-header-cell");
-const isTableDataRow = isRowType("table-cell");
+const isTableHeaderRow = isRowType('table-header-cell');
+const isTableDataRow = isRowType('table-cell');
 
 //Constants used for finding specific rows in a table
-const HEADER_ROW = "HEADER";
-const BODY_ROW = "BODY";
+const HEADER_ROW = 'HEADER';
+const BODY_ROW = 'BODY';
 
 class TableValidator {
   constructor() {}
@@ -30,7 +30,7 @@ class TableValidator {
    */
   validateTable(content) {
     const expectedHeaders = content.content.find(
-      (row) => this.getRowType(row.content) == HEADER_ROW
+      (row) => this.getRowType(row.content) == HEADER_ROW,
     );
 
     if (!expectedHeaders) {
@@ -38,14 +38,14 @@ class TableValidator {
     }
 
     const expectedRows = Array.from(
-      content.content.filter((row) => this.getRowType(row.content) == BODY_ROW)
+      content.content.filter((row) => this.getRowType(row.content) == BODY_ROW),
     );
 
-    cy.get("table").then(($table) => {
+    cy.get('table').then(($table) => {
       const mapped = $table.map((i, table) => {
         const jqueryTable = Cypress.$(table);
-        const headerRow = jqueryTable.find("thead tr");
-        const bodyRows = jqueryTable.find("tbody tr");
+        const headerRow = jqueryTable.find('thead tr');
+        const bodyRows = jqueryTable.find('tbody tr');
 
         return {
           header: headerRow,
@@ -53,11 +53,7 @@ class TableValidator {
         };
       });
 
-      const matchingTableFound = this.anyTableMatches(
-        mapped,
-        expectedHeaders,
-        expectedRows
-      );
+      const matchingTableFound = this.anyTableMatches(mapped, expectedHeaders, expectedRows);
 
       expect(matchingTableFound).to.be.true;
     });
@@ -141,7 +137,7 @@ class TableValidator {
     if (isTableHeaderRow(rowCells)) return HEADER_ROW;
     if (isTableDataRow(rowCells)) return BODY_ROW;
 
-    throw new Error("Invalid row type", rowCells);
+    throw new Error('Invalid row type', rowCells);
   }
 
   /**
@@ -150,13 +146,13 @@ class TableValidator {
    * @returns {string} - The text content of the cell.
    */
   getCellText(cell) {
-    let text = "";
+    let text = '';
 
     function traverseCellAndAppendTextContent(cell) {
       if (cell.value) {
         //Strip out HTML tags due to unescaped characters in certain content
         //E.g. cookies -> analytical cookies
-        text += cell.value.replace(/(<([^>]+)>)/gi, "");
+        text += cell.value.replace(/(<([^>]+)>)/gi, '');
       }
 
       if (cell.content) {

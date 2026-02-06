@@ -1,5 +1,5 @@
-import { Then, When } from "@cucumber/cucumber";
-import { expect } from "@playwright/test";
+import { Then, When } from '@cucumber/cucumber';
+import { expect } from '@playwright/test';
 
 Then('I should see the question help text {string}', async function (expectedText: string) {
   const caption = this.page.locator('.govuk-hint');
@@ -29,34 +29,38 @@ Then('no radio option should be selected', async function () {
   }
 });
 
-
 Then('exactly one radio option should be selected', async function () {
   // Count radios that are checked
   const checkedRadios = this.page.locator('.govuk-radios__input:checked');
   await expect(checkedRadios).toHaveCount(1);
 });
 
+Then(
+  'exactly one radio option should be selected and it should be {string}',
+  async function (expectedText: string) {
+    // Ensure exactly one is checked
+    const checkedRadios = this.page.locator('.govuk-radios__input:checked');
+    await expect(checkedRadios).toHaveCount(1);
 
-Then('exactly one radio option should be selected and it should be {string}', async function (expectedText: string) {
-  // Ensure exactly one is checked
-  const checkedRadios = this.page.locator('.govuk-radios__input:checked');
-  await expect(checkedRadios).toHaveCount(1);
+    // Verify the selected one has the expected label (accessible name)
+    const selectedByName = this.page.getByRole('radio', { name: expectedText, checked: true });
+    await expect(selectedByName).toHaveCount(1);
+  },
+);
 
-  // Verify the selected one has the expected label (accessible name)
-  const selectedByName = this.page.getByRole('radio', { name: expectedText, checked: true });
-  await expect(selectedByName).toHaveCount(1);
-});
+Then(
+  'I should see a continue button that submits to {string}',
+  async function (expectedAction: string) {
+    const form = this.page.locator(`form[action="${expectedAction}"]`);
+    await expect(form).toBeVisible();
+    await expect(form).toHaveAttribute('method', /post/i);
 
-Then('I should see a continue button that submits to {string}', async function (expectedAction: string) {
-  const form = this.page.locator(`form[action="${expectedAction}"]`);
-  await expect(form).toBeVisible();
-  await expect(form).toHaveAttribute('method', /post/i);
-
-  // Ensure the button is present and correct
-  const button = form.getByRole('button', { name: 'Continue' });
-  await expect(button).toBeVisible();
-  await expect(button).toHaveAttribute('type', 'submit');
-});
+    // Ensure the button is present and correct
+    const button = form.getByRole('button', { name: 'Continue' });
+    await expect(button).toBeVisible();
+    await expect(button).toHaveAttribute('type', 'submit');
+  },
+);
 
 When('I click the continue button', async function () {
   const button = this.page.getByRole('button', { name: 'Continue' });
@@ -64,7 +68,6 @@ When('I click the continue button', async function () {
 
   await button.click();
 });
-
 
 Then('the question answer radio options should appear in this order:', async function (dataTable) {
   const labels = this.page.locator('.govuk-radios__item .govuk-radios__label');

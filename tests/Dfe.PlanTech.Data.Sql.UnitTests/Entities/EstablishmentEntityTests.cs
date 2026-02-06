@@ -25,7 +25,7 @@ public class EstablishmentEntityTests
             OrgName = expectedOrgName,
             GroupUid = expectedGroupUid,
             DateCreated = expectedDateCreated,
-            DateLastUpdated = expectedDateLastUpdated
+            DateLastUpdated = expectedDateLastUpdated,
         };
 
         // Act
@@ -50,7 +50,7 @@ public class EstablishmentEntityTests
                 nameof(SqlEstablishmentDto.OrgName),
                 nameof(SqlEstablishmentDto.GroupUid),
                 nameof(SqlEstablishmentDto.DateCreated),
-                nameof(SqlEstablishmentDto.DateLastUpdated)
+                nameof(SqlEstablishmentDto.DateLastUpdated),
             }
         );
     }
@@ -66,7 +66,7 @@ public class EstablishmentEntityTests
             Id = 1,
             EstablishmentRef = "Arbitrary string - establishment ref",
             EstablishmentType = "Arbitrary string - establishment type",
-            OrgName = "Arbitrary string - organisation name"
+            OrgName = "Arbitrary string - organisation name",
             // DateCreated is not set explicitly
         };
 
@@ -92,7 +92,7 @@ public class EstablishmentEntityTests
         {
             OrgName = "O",
             EstablishmentRef = "R",
-            EstablishmentType = null
+            EstablishmentType = null,
         };
 
         // Assert

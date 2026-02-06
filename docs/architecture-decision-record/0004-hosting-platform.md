@@ -1,6 +1,6 @@
 # 0004 - Hosting Platform
 
-* **Status**: Accepted
+- **Status**: Accepted
 
 ## Context and Problem Statement
 
@@ -8,15 +8,15 @@ Within the DfE there are a choice of hosting platforms (e.g. Azure, GOV.UK PaaS)
 
 ## Decision Drivers
 
-* Within DfE’s Technical Guidance
-* Cloud first as per Technology Code of Practice
-* Supports Docker for application portability
-* Long term sustainability
+- Within DfE’s Technical Guidance
+- Cloud first as per Technology Code of Practice
+- Supports Docker for application portability
+- Long term sustainability
 
 ## Considered Options
 
-* Azure Cloud Infrastructure Platform (CIP)
-* GOV.UK PaaS
+- Azure Cloud Infrastructure Platform (CIP)
+- GOV.UK PaaS
 
 ## Decision Outcome
 

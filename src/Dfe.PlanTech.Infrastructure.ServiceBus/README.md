@@ -2,7 +2,7 @@
 
 Project that handles concrete implementation of connection/usage of an Azure Service Bus.
 
-Currently used for recieving CMS updates from contentful and invalidating the relevant cache items. 
+Currently used for recieving CMS updates from contentful and invalidating the relevant cache items.
 For more information check out our [Contentful documentation](/docs/cms/README.md)
 
 ## Setup

@@ -22,26 +22,31 @@ To run the qa-visualiser locally:
 2. Install [graphviz](https://graphviz.org/download/)
 3. Setup your .env file by copying .env.example and filling in the required environment variables:
 
-   | Variable         | Description                                            | Example / Location                                 |
-   |------------------|--------------------------------------------------------|----------------------------------------------------|
-   | PLANTECH_API_KEY | The API key the cms controller uses for authentication | Keyvault value for `api--authentication--keyvalue` |
-   | PLANTECH_API_URL | Base url of the cms controller                         | https://localhost:8080/api/cms                     |
-    | DISPLAY_RECOMMENDATIONS | Boolean option to display recommendation header text linked to the answer on the image                    | true/false             |
+   | Variable                | Description                                                                            | Example / Location                                 |
+   | ----------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------- |
+   | PLANTECH_API_KEY        | The API key the cms controller uses for authentication                                 | Keyvault value for `api--authentication--keyvalue` |
+   | PLANTECH_API_URL        | Base url of the cms controller                                                         | <https://localhost:8080/api/cms>                   |
+   | DISPLAY_RECOMMENDATIONS | Boolean option to display recommendation header text linked to the answer on the image | true/false                                         |
 
 4. create and activate a virtual environment with:
-    ```bash
-    cd qa-visualiser
-    uv venv
-    source .venv/bin/activate
-    ```
+
+   ```bash
+   cd qa-visualiser
+   uv venv
+   source .venv/bin/activate
+   ```
+
 5. Install project dependencies with:
-    ```bash
-    uv sync
-    ```
+
+   ```bash
+   uv sync
+   ```
+
 6. Run the tool to generate visualisations with:
-    ```bash
-    uv run main.py
-    ```
+
+   ```bash
+   uv run main.py
+   ```
 
 ## Linting and formatting
 
@@ -67,12 +72,15 @@ By default, the python project may not trust your locally running instance of pl
 You can provide a path to its certificate in your environment variables to fix this.
 
 First from the plan-tech repo run
+
 ```bash
 dotnet dev-certs https --export-path contentful/qa-visualiser/localhost.crt --format PEM
 ```
 
 Then either run
+
 ```bash
 export REQUESTS_CA_BUNDLE=path/to/localhost.crt
 ```
+
 or put `REQUESTS_CA_BUNDLE` in your `.env` file.

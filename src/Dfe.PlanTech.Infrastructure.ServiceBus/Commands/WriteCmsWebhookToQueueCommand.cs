@@ -18,7 +18,8 @@ public class WriteCmsWebhookToQueueCommand(
 {
     public const string ContentfulTopicHeaderKey = "X-Contentful-Topic";
 
-    private readonly IQueueWriter _queueWriter = queueWriter ?? throw new ArgumentNullException(nameof(queueWriter));
+    private readonly IQueueWriter _queueWriter =
+        queueWriter ?? throw new ArgumentNullException(nameof(queueWriter));
 
     public async Task<QueueWriteResult> WriteMessageToQueue(JsonDocument json, HttpRequest request)
     {
@@ -30,7 +31,10 @@ public class WriteCmsWebhookToQueueCommand(
             if (cmsEvent == null)
             {
                 var errorMessage = $"Couldn't find header {ContentfulTopicHeaderKey}";
-                logger.LogError("Couldn't find header {ContentfulTopicHeaderKey}", ContentfulTopicHeaderKey);
+                logger.LogError(
+                    "Couldn't find header {ContentfulTopicHeaderKey}",
+                    ContentfulTopicHeaderKey
+                );
                 return new QueueWriteResult(errorMessage);
             }
 

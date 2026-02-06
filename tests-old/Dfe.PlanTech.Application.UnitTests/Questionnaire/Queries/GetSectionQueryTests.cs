@@ -11,7 +11,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Questionnaire.Queries;
 
 public class GetSectionQueryTests
 {
-    private readonly static Answer FirstAnswer = new()
+    private static readonly Answer FirstAnswer = new()
     {
         Text = "Answer1",
         Sys = new SystemDetails() { Id = "Answer-1" },
@@ -19,58 +19,37 @@ public class GetSectionQueryTests
         {
             Text = "Question 2",
             Sys = new SystemDetails() { Id = "Question-2" },
-            Answers = new List<Answer>()
-            {
-
-            }
-        }
+            Answers = new List<Answer>() { },
+        },
     };
-    private readonly static Section FirstSection = new()
+    private static readonly Section FirstSection = new()
     {
         Name = "First section",
-        InterstitialPage = new Page()
-        {
-            Slug = "/first"
-        },
-        Sys = new SystemDetails()
-        {
-            Id = "1"
-        },
+        InterstitialPage = new Page() { Slug = "/first" },
+        Sys = new SystemDetails() { Id = "1" },
         Questions = new List<Question>()
         {
             new Question()
             {
                 Text = "Question 1",
                 Sys = new SystemDetails() { Id = "Question-1" },
-                Answers = new List<Answer>() { FirstAnswer }
-            }
-        }
+                Answers = new List<Answer>() { FirstAnswer },
+            },
+        },
     };
 
-    private readonly static Section SecondSection = new()
+    private static readonly Section SecondSection = new()
     {
         Name = "Second section",
-        InterstitialPage = new Page()
-        {
-            Slug = "/second"
-        },
-        Sys = new SystemDetails()
-        {
-            Id = "2"
-        }
+        InterstitialPage = new Page() { Slug = "/second" },
+        Sys = new SystemDetails() { Id = "2" },
     };
 
-    private readonly static Section ThirdSection = new()
+    private static readonly Section ThirdSection = new()
     {
         Name = "Thurd section",
-        InterstitialPage = new Page()
-        {
-            Slug = "/third"
-        },
-        Sys = new SystemDetails()
-        {
-            Id = "3"
-        }
+        InterstitialPage = new Page() { Slug = "/third" },
+        Sys = new SystemDetails() { Id = "3" },
     };
 
     private readonly Section[] _sections = new[] { FirstSection, SecondSection, ThirdSection };
@@ -83,28 +62,36 @@ public class GetSectionQueryTests
         var cancellationToken = CancellationToken.None;
 
         var repository = Substitute.For<IContentRepository>();
-        repository.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
-        .Returns((callinfo) =>
-        {
-            var options = callinfo.ArgAt<GetEntitiesOptions>(0);
+        repository
+            .GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+            .Returns(
+                (callinfo) =>
+                {
+                    var options = callinfo.ArgAt<GetEntitiesOptions>(0);
 
-            var slugQuery = (options.Queries?.FirstOrDefault(query => query is ContentQuerySingleValue equalsQuery &&
-                                                            equalsQuery.Field == GetSectionQuery.SlugFieldPath) as ContentQuerySingleValue) ??
-                                            throw new InvalidOperationException("Missing query for slug");
+                    var slugQuery =
+                        (
+                            options.Queries?.FirstOrDefault(query =>
+                                query is ContentQuerySingleValue equalsQuery
+                                && equalsQuery.Field == GetSectionQuery.SlugFieldPath
+                            ) as ContentQuerySingleValue
+                        ) ?? throw new InvalidOperationException("Missing query for slug");
 
-
-            return _sections.Where(section => section.InterstitialPage?.Slug == slugQuery.Value);
-        });
+                    return _sections.Where(section =>
+                        section.InterstitialPage?.Slug == slugQuery.Value
+                    );
+                }
+            );
 
         var getSectionQuery = new GetSectionQuery(repository);
         await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken);
 
         Assert.Equal(FirstSection.InterstitialPage.Slug, sectionSlug);
 
-        await repository.Received(1).GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>());
+        await repository
+            .Received(1)
+            .GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>());
     }
-
-
 
     [Fact]
     public async Task GetSectionBySlug_ThrowsExceptionOnRepositoryError()
@@ -114,13 +101,15 @@ public class GetSectionQueryTests
 
         var repository = Substitute.For<IContentRepository>();
         repository
-            .When(repo => repo.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), cancellationToken))
+            .When(repo =>
+                repo.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), cancellationToken)
+            )
             .Throw(new Exception("Dummy Exception"));
 
         var getSectionQuery = new GetSectionQuery(repository);
 
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
-            async () => await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () =>
+            await getSectionQuery.GetSectionBySlug(sectionSlug, cancellationToken)
         );
     }
 
@@ -129,13 +118,18 @@ public class GetSectionQueryTests
     {
         var repository = Substitute.For<IContentRepository>();
         repository
-            .When(repo => repo.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>()))
+            .When(repo =>
+                repo.GetEntities<Section>(
+                    Arg.Any<GetEntitiesOptions>(),
+                    Arg.Any<CancellationToken>()
+                )
+            )
             .Throw(new Exception("Dummy Exception"));
 
         var getSectionQuery = new GetSectionQuery(repository);
 
-        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(
-            async () => await getSectionQuery.GetAllSections(CancellationToken.None)
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(async () =>
+            await getSectionQuery.GetAllSections(CancellationToken.None)
         );
     }
 
@@ -143,7 +137,8 @@ public class GetSectionQueryTests
     public async Task GetAllSections_Should_Omit_NextQuestion_Answers()
     {
         var repository = Substitute.For<IContentRepository>();
-        repository.GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
+        repository
+            .GetEntities<Section>(Arg.Any<GetEntitiesOptions>(), Arg.Any<CancellationToken>())
             .Returns(_ => _sections);
 
         var getSectionQuery = new GetSectionQuery(repository);
@@ -157,11 +152,13 @@ public class GetSectionQueryTests
             .Select(answer => answer.NextQuestion!)
             .ToList();
 
-        Assert.All(nextQuestions, nextQuestion =>
-        {
-            Assert.NotNull(nextQuestion.Sys);
-            Assert.Empty(nextQuestion.Answers);
-        });
+        Assert.All(
+            nextQuestions,
+            nextQuestion =>
+            {
+                Assert.NotNull(nextQuestion.Sys);
+                Assert.Empty(nextQuestion.Answers);
+            }
+        );
     }
 }
-

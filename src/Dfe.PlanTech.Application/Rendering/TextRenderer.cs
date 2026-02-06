@@ -1,4 +1,3 @@
-
 using System.Text;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
@@ -11,15 +10,20 @@ public class TextRenderer : BaseRichTextContentPartRenderer
 {
     private readonly TextRendererOptions _textRendererOptions;
 
-    public TextRenderer(TextRendererOptions textRendererOptions) : base(RichTextNodeType.Text)
+    public TextRenderer(TextRendererOptions textRendererOptions)
+        : base(RichTextNodeType.Text)
     {
         _textRendererOptions = textRendererOptions;
     }
 
-    public override StringBuilder AddHtml(RichTextContentField content, IRichTextContentPartRendererCollection rendererCollection, StringBuilder stringBuilder)
+    public override StringBuilder AddHtml(
+        RichTextContentField content,
+        IRichTextContentPartRendererCollection rendererCollection,
+        StringBuilder stringBuilder
+    )
     {
-        var markOptions = content.Marks
-            .Select(_textRendererOptions.GetMatchingOptionForMark)
+        var markOptions = content
+            .Marks.Select(_textRendererOptions.GetMatchingOptionForMark)
             .Where(option => option != null)
             .ToArray();
 
@@ -32,7 +36,10 @@ public class TextRenderer : BaseRichTextContentPartRenderer
         return stringBuilder;
     }
 
-    private static void AppendCloseTags(StringBuilder stringBuilder, IEnumerable<MarkOption> markOptions)
+    private static void AppendCloseTags(
+        StringBuilder stringBuilder,
+        IEnumerable<MarkOption> markOptions
+    )
     {
         foreach (var mark in markOptions)
         {
@@ -42,7 +49,10 @@ public class TextRenderer : BaseRichTextContentPartRenderer
         }
     }
 
-    private static void AppendOpenTags(StringBuilder stringBuilder, IEnumerable<MarkOption> markOptions)
+    private static void AppendOpenTags(
+        StringBuilder stringBuilder,
+        IEnumerable<MarkOption> markOptions
+    )
     {
         foreach (var mark in markOptions)
         {
