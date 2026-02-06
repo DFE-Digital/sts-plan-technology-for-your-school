@@ -1,4 +1,6 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.UnitTests.Entities;
@@ -14,8 +16,8 @@ public class EstablishmentRecommendationHistoryEntityTests
         var expectedUserId = 3;
         var expectedMatEstablishmentId = 4;
         var expectedDateCreated = new DateTime(2024, 05, 01, 12, 00, 00, DateTimeKind.Utc);
-        var expectedPreviousStatus = "In progress";
-        var expectedNewStatus = "Complete";
+        var expectedPreviousStatus = RecommendationStatus.InProgress;
+        var expectedNewStatus = RecommendationStatus.Complete;
         var expectedNoteText = "Note text";
 
         var entity = new EstablishmentRecommendationHistoryEntity
@@ -26,8 +28,8 @@ public class EstablishmentRecommendationHistoryEntityTests
             UserId = expectedUserId,
             MatEstablishmentId = expectedMatEstablishmentId,
             DateCreated = expectedDateCreated,
-            PreviousStatus = expectedPreviousStatus,
-            NewStatus = expectedNewStatus,
+            PreviousStatus = expectedPreviousStatus.ToString(),
+            NewStatus = expectedNewStatus.ToString(),
             NoteText = expectedNoteText,
         };
 
@@ -73,7 +75,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             MatEstablishmentId = null, // Optional
             DateCreated = DateTime.UtcNow,
             PreviousStatus = null, // Optional
-            NewStatus = "In progress",
+            NewStatus = RecommendationStatus.InProgress.ToString(),
             NoteText = null, // Optional
         };
 
@@ -84,7 +86,7 @@ public class EstablishmentRecommendationHistoryEntityTests
         Assert.Null(dto.MatEstablishmentId);
         Assert.Null(dto.PreviousStatus);
         Assert.Null(dto.NoteText);
-        Assert.Equal("In progress", dto.NewStatus);
+        Assert.Equal(RecommendationStatus.InProgress, dto.NewStatus);
     }
 
     [Fact]

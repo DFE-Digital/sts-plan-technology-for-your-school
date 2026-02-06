@@ -158,15 +158,15 @@ public class RecommendationWorkflowTests
 
         // Verify rec-001 returns the latest status (Completed from ID 2)
         Assert.True(result.ContainsKey("rec-001"));
-        Assert.Equal("Complete", result["rec-001"].NewStatus);
+        Assert.Equal(RecommendationStatus.Complete, result["rec-001"].NewStatus);
 
         // Verify rec-002 returns the single status (Reviewed from ID 3)
         Assert.True(result.ContainsKey("rec-002"));
-        Assert.Equal("In progress", result["rec-002"].NewStatus);
+        Assert.Equal(RecommendationStatus.InProgress, result["rec-002"].NewStatus);
 
         // Verify rec-003 returns the latest status (Reviewed from ID 6)
         Assert.True(result.ContainsKey("rec-003"));
-        Assert.Equal("Complete", result["rec-003"].NewStatus);
+        Assert.Equal(RecommendationStatus.Complete, result["rec-003"].NewStatus);
     }
 
     [Fact]
@@ -252,7 +252,7 @@ public class RecommendationWorkflowTests
         // Assert - Verify it returns the latest status with correct properties
         Assert.Single(result);
         Assert.True(result.ContainsKey("rec-001"));
-        Assert.Equal("Complete", result["rec-001"].NewStatus);
+        Assert.Equal(RecommendationStatus.Complete, result["rec-001"].NewStatus);
         Assert.Equal(establishmentId, result["rec-001"].EstablishmentId);
         Assert.Equal(1, result["rec-001"].RecommendationId);
     }
@@ -311,8 +311,8 @@ public class RecommendationWorkflowTests
         Assert.Equal(establishmentId, result.EstablishmentId);
         Assert.Equal(1, result.RecommendationId);
         Assert.Equal(42, result.UserId);
-        Assert.Equal("Complete", result.NewStatus);
-        Assert.Equal("In progress", result.PreviousStatus);
+        Assert.Equal(RecommendationStatus.Complete, result.NewStatus);
+        Assert.Equal(RecommendationStatus.InProgress, result.PreviousStatus);
         Assert.Equal("Work completed", result.NoteText);
         Assert.Equal(historyEntity.DateCreated, result.DateCreated);
     }
@@ -483,7 +483,7 @@ public class RecommendationWorkflowTests
         var recommendationContentfulReference = "rec-001";
         var establishmentId = 123;
         var userId = 456;
-        var newStatus = "Completed";
+        var newStatus = RecommendationStatus.Complete;
         var noteText = "Work finished successfully";
         var matEstablishmentId = 789;
 
@@ -504,7 +504,7 @@ public class RecommendationWorkflowTests
             EstablishmentId = establishmentId,
             RecommendationId = 1,
             UserId = 1,
-            NewStatus = "InProgress",
+            NewStatus = RecommendationStatus.InProgress.ToString(),
             DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
@@ -539,7 +539,7 @@ public class RecommendationWorkflowTests
                 1,
                 userId,
                 matEstablishmentId,
-                "In progress", // Should use current status as previous
+                RecommendationStatus.InProgress, // Should use current status as previous
                 newStatus,
                 noteText
             );
@@ -552,7 +552,7 @@ public class RecommendationWorkflowTests
         var recommendationContentfulReference = "rec-001";
         var establishmentId = 123;
         var userId = 456;
-        var newStatus = "InProgress";
+        var newStatus = RecommendationStatus.InProgress;
 
         var recommendations = new[]
         {
@@ -607,7 +607,7 @@ public class RecommendationWorkflowTests
         var recommendationContentfulReference = "non-existent";
         var establishmentId = 123;
         var userId = 456;
-        var newStatus = "Completed";
+        var newStatus = RecommendationStatus.Complete;
 
         _recommendationRepository
             .GetRecommendationsByContentfulReferencesAsync(
@@ -640,7 +640,7 @@ public class RecommendationWorkflowTests
         var recommendationContentfulReference = "rec-001";
         var establishmentId = 123;
         var userId = 456;
-        var newStatus = "Reviewed";
+        var newStatus = RecommendationStatus.InProgress;
 
         var recommendations = new[]
         {
@@ -683,8 +683,8 @@ public class RecommendationWorkflowTests
                 Arg.Any<int>(),
                 Arg.Any<int>(),
                 Arg.Any<int?>(),
-                Arg.Any<string?>(),
-                Arg.Any<string>(),
+                Arg.Any<RecommendationStatus?>(),
+                Arg.Any<RecommendationStatus>(),
                 string.Empty // Confirms null noteText becomes empty string
             );
     }
