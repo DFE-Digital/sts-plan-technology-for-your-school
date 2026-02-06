@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
 
@@ -24,7 +25,7 @@ public class RecommendationServiceTests
             EstablishmentId = establishmentId,
             RecommendationId = 1,
             UserId = 1,
-            NewStatus = "Completed",
+            NewStatus = RecommendationStatus.Complete,
             DateCreated = DateTime.UtcNow,
         };
 
@@ -121,7 +122,7 @@ public class RecommendationServiceTests
             EstablishmentId = establishmentId,
             RecommendationId = 1,
             UserId = 1,
-            NewStatus = "Completed",
+            NewStatus = RecommendationStatus.Complete,
             DateCreated = DateTime.UtcNow,
         };
 
@@ -185,7 +186,7 @@ public class RecommendationServiceTests
                 EstablishmentId = establishmentId,
                 RecommendationId = 1,
                 UserId = 1,
-                NewStatus = "Completed",
+                NewStatus = RecommendationStatus.Complete,
                 DateCreated = DateTime.UtcNow.AddDays(-1),
             },
             ["rec-002"] = new SqlEstablishmentRecommendationHistoryDto
@@ -193,7 +194,7 @@ public class RecommendationServiceTests
                 EstablishmentId = establishmentId,
                 RecommendationId = 2,
                 UserId = 1,
-                NewStatus = "InProgress",
+                NewStatus = RecommendationStatus.InProgress,
                 DateCreated = DateTime.UtcNow.AddDays(-2),
             },
         };
@@ -268,7 +269,7 @@ public class RecommendationServiceTests
         var recommendationContentfulReference = "rec-001";
         var establishmentId = 123;
         var userId = 456;
-        var newStatus = "Completed";
+        var newStatus = RecommendationStatus.Complete;
         var noteText = "Work completed successfully";
         var matEstablishmentId = 789;
 
@@ -304,7 +305,7 @@ public class RecommendationServiceTests
         var recommendationContentfulReference = "rec-002";
         var establishmentId = 987;
         var userId = 654;
-        var newStatus = "InProgress";
+        var newStatus = RecommendationStatus.InProgress;
 
         var service = CreateServiceUnderTest();
 
@@ -336,7 +337,7 @@ public class RecommendationServiceTests
         var recommendationContentfulReference = "rec-error";
         var establishmentId = 111;
         var userId = 222;
-        var newStatus = "Failed";
+        var newStatus = RecommendationStatus.InProgress;
         var expectedException = new InvalidOperationException("Recommendation not found");
 
         _recommendationWorkflow
@@ -382,7 +383,7 @@ public class RecommendationServiceTests
         var recommendationContentfulReference = "rec-003";
         var establishmentId = 333;
         var userId = 444;
-        var newStatus = "Reviewed";
+        var newStatus = RecommendationStatus.InProgress;
         var emptyNoteText = "";
 
         var service = CreateServiceUnderTest();

@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Application.Services;
 
@@ -41,7 +42,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         string recommendationContentfulReference,
         int establishmentId,
         int userId,
-        string newStatus,
+        RecommendationStatus newStatus,
         string? noteText = null,
         int? matEstablishmentId = null
     )
@@ -56,7 +57,7 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         );
     }
 
-    public Task<SqlFirstActivityForEstablishmentRecommendationDto> GetFirstActivityForEstablishmentRecommendationAsync(
+    public Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
         string recommendationContentfulReference
     )

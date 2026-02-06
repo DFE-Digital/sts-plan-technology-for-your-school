@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
@@ -78,7 +79,7 @@ public class RecommendationWorkflow(
         string recommendationContentfulReference,
         int establishmentId,
         int userId,
-        string newStatus,
+        RecommendationStatus newStatus,
         string? noteText = null,
         int? matEstablishmentId = null
     )
@@ -112,7 +113,7 @@ public class RecommendationWorkflow(
         );
     }
 
-    public async Task<SqlFirstActivityForEstablishmentRecommendationDto> GetFirstActivityForEstablishmentRecommendationAsync(
+    public async Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
         string recommendationContentfulReference
     )
@@ -122,6 +123,7 @@ public class RecommendationWorkflow(
                 establishmentId,
                 recommendationContentfulReference
             );
-        return firstActivity.AsDto();
+
+        return firstActivity?.AsDto();
     }
 }

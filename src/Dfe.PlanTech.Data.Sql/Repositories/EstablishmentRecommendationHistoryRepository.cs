@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -56,8 +57,8 @@ public class EstablishmentRecommendationHistoryRepository
         int recommendationId,
         int userId,
         int? matEstablishmentId,
-        string? previousStatus,
-        string newStatus,
+        RecommendationStatus? previousStatus,
+        RecommendationStatus? newStatus,
         string noteText
     )
     {
@@ -67,8 +68,8 @@ public class EstablishmentRecommendationHistoryRepository
             RecommendationId = recommendationId,
             UserId = userId,
             MatEstablishmentId = matEstablishmentId,
-            PreviousStatus = previousStatus,
-            NewStatus = newStatus,
+            PreviousStatus = previousStatus.ToString(),
+            NewStatus = newStatus.ToString(),
             NoteText = noteText,
             DateCreated = DateTime.UtcNow,
         };

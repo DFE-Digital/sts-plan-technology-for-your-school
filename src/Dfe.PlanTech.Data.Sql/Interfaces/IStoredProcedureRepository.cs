@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Data.Sql.Interfaces;
 
 public interface IStoredProcedureRepository
 {
-    Task<FirstActivityForEstablishmentRecommendationEntity> GetFirstActivityForEstablishmentRecommendationAsync(
+    Task<FirstActivityForEstablishmentRecommendationEntity?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
         string recommendationContentfulReference
     );

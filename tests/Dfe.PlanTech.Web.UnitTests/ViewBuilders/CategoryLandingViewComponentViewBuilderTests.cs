@@ -381,8 +381,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
-                    PreviousStatus = "In Progress",
-                    NewStatus = "Complete",
+                    PreviousStatus = RecommendationStatus.InProgress,
+                    NewStatus = RecommendationStatus.Complete,
                     NoteText = "Test note",
                 }
             },
@@ -422,7 +422,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         Assert.Single(recs.Answers);
         Assert.Equal("Yes", recs.Answers.First().AnswerText);
         Assert.Single(recs.Chunks);
-        Assert.Equal("Complete", recs.Chunks.First().Status.GetDisplayName());
+        Assert.Equal(RecommendationStatus.Complete, recs.Chunks.First().Status);
     }
 
     [Fact]
@@ -525,8 +525,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
-                    PreviousStatus = RecommendationStatus.InProgress.ToString(),
-                    NewStatus = RecommendationStatus.Complete.ToString(),
+                    PreviousStatus = RecommendationStatus.InProgress,
+                    NewStatus = RecommendationStatus.Complete,
                     NoteText = "Test note 1",
                 }
             },
@@ -539,8 +539,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
-                    PreviousStatus = RecommendationStatus.NotStarted.ToString(),
-                    NewStatus = RecommendationStatus.InProgress.ToString(),
+                    PreviousStatus = RecommendationStatus.NotStarted,
+                    NewStatus = RecommendationStatus.InProgress,
                     NoteText = "Test note 2",
                 }
             },
@@ -554,7 +554,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
                     PreviousStatus = null,
-                    NewStatus = RecommendationStatus.NotStarted.ToString(),
+                    NewStatus = RecommendationStatus.NotStarted,
                     NoteText = "Test note 3",
                 }
             },
@@ -651,8 +651,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now.AddDays(-2),
-                    PreviousStatus = RecommendationStatus.InProgress.ToString(),
-                    NewStatus = RecommendationStatus.Complete.ToString(),
+                    PreviousStatus = RecommendationStatus.InProgress,
+                    NewStatus = RecommendationStatus.Complete,
                     NoteText = "Test note 1",
                 }
             },
@@ -665,8 +665,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now.AddDays(-1),
-                    PreviousStatus = RecommendationStatus.NotStarted.ToString(),
-                    NewStatus = RecommendationStatus.InProgress.ToString(),
+                    PreviousStatus = RecommendationStatus.NotStarted,
+                    NewStatus = RecommendationStatus.InProgress,
                     NoteText = "Test note 2",
                 }
             },
@@ -680,7 +680,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
                     PreviousStatus = null,
-                    NewStatus = RecommendationStatus.NotStarted.ToString(),
+                    NewStatus = RecommendationStatus.NotStarted,
                     NoteText = "Test note 3",
                 }
             },
