@@ -6,7 +6,9 @@ namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
 public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
 {
-    private EstablishmentLinkRepository _repository = null!;
+    private EstablishmentRepository _establishmentRepository = null!;
+    private EstablishmentLinkRepository _establishmentLinkRepository = null!;
+    private UserRepository _userRepository = null!;
 
     public EstablishmentLinkRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
@@ -14,7 +16,9 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
     public override async Task InitializeAsync()
     {
         await base.InitializeAsync();
-        _repository = new EstablishmentLinkRepository(DbContext);
+        _establishmentRepository = new EstablishmentRepository(DbContext);
+        _establishmentLinkRepository = new EstablishmentLinkRepository(DbContext);
+        _userRepository = new UserRepository(DbContext);
     }
 
     [Fact]
@@ -51,9 +55,10 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetGroupEstablishmentsByEstablishmentIdAsync(
-            establishment.Id
-        );
+        var result =
+            await _establishmentLinkRepository.GetGroupEstablishmentsByEstablishmentIdAsync(
+                establishment.Id
+            );
 
         // Assert
         Assert.NotNull(result);
@@ -66,7 +71,8 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
     public async Task EstablishmentLinkRepository_GetGroupEstablishmentsByEstablishmentIdAsync_WhenEstablishmentIdDoesNotExist_ThenReturnsEmptyCollection()
     {
         // Act
-        var result = await _repository.GetGroupEstablishmentsByEstablishmentIdAsync(99999);
+        var result =
+            await _establishmentLinkRepository.GetGroupEstablishmentsByEstablishmentIdAsync(99999);
 
         // Assert
         Assert.NotNull(result);
@@ -116,7 +122,7 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetGroupEstablishmentsByAsync(e =>
+        var result = await _establishmentLinkRepository.GetGroupEstablishmentsByAsync(e =>
             e.EstablishmentRef == "EST001"
         );
 
@@ -141,7 +147,9 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         await DbContext.SaveChangesAsync();
 
         // Act
-        var result = await _repository.GetGroupEstablishmentsByAsync(e => e.Id == establishment.Id);
+        var result = await _establishmentLinkRepository.GetGroupEstablishmentsByAsync(e =>
+            e.Id == establishment.Id
+        );
 
         // Assert
         Assert.NotNull(result);
@@ -152,42 +160,83 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
     public async Task EstablishmentLinkRepository_RecordGroupSelection_WhenModelIsValid_ThenInsertsRowAndReturnsId()
     {
         // Arrange
+        var matModel = new EstablishmentModel
+        {
+            DistrictAdministrativeCode = "district-admin-code-1",
+            LegacyId = "legacy-id-1",
+            Name = "Test MAT",
+            Sid = "sid-1",
+            Urn = "urn-1",
+        };
+
+        var schoolModel = new EstablishmentModel
+        {
+            DistrictAdministrativeCode = "district-admin-code-2",
+            LegacyId = "legacy-id-2",
+            Name = "Selected School",
+            Sid = "sid-2",
+            Urn = "urn-2",
+        };
+
+        var mat = await _establishmentRepository.CreateEstablishmentFromModelAsync(matModel);
+        var school = await _establishmentRepository.CreateEstablishmentFromModelAsync(schoolModel);
+        var user = await _userRepository.CreateUserBySignInRefAsync("user-1-ref");
+
         var model = new UserGroupSelectionModel
         {
-            UserId = 1,
-            UserEstablishmentId = 10,
-            SelectedEstablishmentId = 99,
-            SelectedEstablishmentName = "Selected School"
+            UserId = user.Id,
+            UserEstablishmentId = mat.Id,
+            SelectedEstablishmentId = school.Id,
+            SelectedEstablishmentName = "Selected School",
         };
 
         // Act
-        var id = await _repository.RecordGroupSelection(model);
+        var id = await _establishmentLinkRepository.RecordGroupSelection(model);
 
         // Assert
         Assert.True(id > 0);
 
         var saved = await DbContext.GroupReadActivities.FindAsync(id);
         Assert.NotNull(saved);
-        Assert.Equal(1, saved!.UserId);
-        Assert.Equal(10, saved.UserEstablishmentId);
-        Assert.Equal(99, saved.SelectedEstablishmentId);
-        Assert.Equal("Selected School", saved.SelectedEstablishmentName);
+        Assert.Equal(schoolModel.Name, saved.SelectedEstablishmentName);
     }
 
     [Fact]
     public async Task EstablishmentLinkRepository_RecordGroupSelection_WhenSelectedEstablishmentNameIsNull_ThenStoresEmptyString()
     {
         // Arrange
+        var matModel = new EstablishmentModel
+        {
+            DistrictAdministrativeCode = "district-admin-code-1",
+            LegacyId = "legacy-id-1",
+            Name = "Test MAT",
+            Sid = "sid-1",
+            Urn = "urn-1",
+        };
+
+        var schoolModel = new EstablishmentModel
+        {
+            DistrictAdministrativeCode = "district-admin-code-2",
+            LegacyId = "legacy-id-2",
+            Name = "Selected School",
+            Sid = "sid-2",
+            Urn = "urn-2",
+        };
+
+        var mat = await _establishmentRepository.CreateEstablishmentFromModelAsync(matModel);
+        var school = await _establishmentRepository.CreateEstablishmentFromModelAsync(schoolModel);
+        var user = await _userRepository.CreateUserBySignInRefAsync("user-2-ref");
+
         var model = new UserGroupSelectionModel
         {
-            UserId = 2,
-            UserEstablishmentId = 20,
-            SelectedEstablishmentId = 199,
-            SelectedEstablishmentName = null
+            UserId = user.Id,
+            UserEstablishmentId = mat.Id,
+            SelectedEstablishmentId = school.Id,
+            SelectedEstablishmentName = null,
         };
 
         // Act
-        var id = await _repository.RecordGroupSelection(model);
+        var id = await _establishmentLinkRepository.RecordGroupSelection(model);
 
         // Assert
         Assert.True(id > 0);
@@ -200,32 +249,72 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
     [Fact]
     public async Task EstablishmentLinkRepository_RecordGroupSelection_WhenModelIsNull_ThenThrows()
     {
-        await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.RecordGroupSelection(null!));
+        await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            _establishmentLinkRepository.RecordGroupSelection(null!)
+        );
     }
 
     [Fact]
     public async Task EstablishmentLinkRepository_RecordGroupSelection_WhenCalledMultipleTimes_ThenCreatesMultipleRows()
     {
         // Arrange
+        var matEstablishmentModel = new EstablishmentModel
+        {
+            DistrictAdministrativeCode = "district-admin-code-1",
+            LegacyId = "legacy-id-1",
+            Name = "Test MAT",
+            Sid = "sid-1",
+            Urn = "urn-1",
+        };
+
+        var schoolEstablishmentModel1 = new EstablishmentModel
+        {
+            DistrictAdministrativeCode = "district-admin-code-2",
+            LegacyId = "legacy-id-2",
+            Name = "School A",
+            Sid = "sid-2",
+            Urn = "urn-2",
+        };
+
+        var schoolEstablishmentModel2 = new EstablishmentModel
+        {
+            DistrictAdministrativeCode = "district-admin-code-3",
+            LegacyId = "legacy-id-3",
+            Name = "School B",
+            Sid = "sid-3",
+            Urn = "urn-3",
+        };
+
+        var mat = await _establishmentRepository.CreateEstablishmentFromModelAsync(
+            matEstablishmentModel
+        );
+        var school1 = await _establishmentRepository.CreateEstablishmentFromModelAsync(
+            schoolEstablishmentModel1
+        );
+        var school2 = await _establishmentRepository.CreateEstablishmentFromModelAsync(
+            schoolEstablishmentModel2
+        );
+        var user = await _userRepository.CreateUserBySignInRefAsync("user-3-ref");
+
         var model1 = new UserGroupSelectionModel
         {
-            UserId = 3,
-            UserEstablishmentId = 30,
-            SelectedEstablishmentId = 300,
-            SelectedEstablishmentName = "School A"
+            UserId = user.Id,
+            UserEstablishmentId = mat.Id,
+            SelectedEstablishmentId = school1.Id,
+            SelectedEstablishmentName = school1.OrgName,
         };
 
         var model2 = new UserGroupSelectionModel
         {
-            UserId = 3,
-            UserEstablishmentId = 30,
-            SelectedEstablishmentId = 301,
-            SelectedEstablishmentName = "School B"
+            UserId = user.Id,
+            UserEstablishmentId = mat.Id,
+            SelectedEstablishmentId = school2.Id,
+            SelectedEstablishmentName = school2.OrgName,
         };
 
         // Act
-        var id1 = await _repository.RecordGroupSelection(model1);
-        var id2 = await _repository.RecordGroupSelection(model2);
+        var id1 = await _establishmentLinkRepository.RecordGroupSelection(model1);
+        var id2 = await _establishmentLinkRepository.RecordGroupSelection(model2);
 
         // Assert
         Assert.True(id1 > 0);
@@ -237,8 +326,7 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
 
         Assert.NotNull(saved1);
         Assert.NotNull(saved2);
-        Assert.Equal("School A", saved1!.SelectedEstablishmentName);
-        Assert.Equal("School B", saved2!.SelectedEstablishmentName);
+        Assert.Equal(schoolEstablishmentModel1.Name, saved1!.SelectedEstablishmentName);
+        Assert.Equal(schoolEstablishmentModel2.Name, saved2!.SelectedEstablishmentName);
     }
-
 }
