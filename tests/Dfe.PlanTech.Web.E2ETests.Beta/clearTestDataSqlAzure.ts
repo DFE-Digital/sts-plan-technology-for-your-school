@@ -13,6 +13,7 @@ export async function clearTestEstablishmentData(establishmentRef: string) {
     await createStoredProcRequest(request, {
       establishmentRef: establishmentRef,
     });
+    request.output('establishmentId', sql.BigInt);
 
     const result = await request.execute('deleteDataForEstablishment');
     await pool.close();
