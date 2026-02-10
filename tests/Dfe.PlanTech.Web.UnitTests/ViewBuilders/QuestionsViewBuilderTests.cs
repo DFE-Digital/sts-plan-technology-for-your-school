@@ -473,17 +473,14 @@ public class QuestionsViewBuilderTests
         );
 
         // Assert
-        var view = Assert.IsType<ViewResult>(result);
-        Assert.Equal("ContinueSelfAssessment", view.ViewName);
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
+        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
 
-        var vm = Assert.IsType<ContinueSelfAssessmentViewModel>(view.Model);
-        Assert.Equal(1, vm.AnsweredCount);
-        Assert.Equal(2, vm.QuestionsCount);
-        Assert.Equal("category-slug", vm.CategorySlug);
-        Assert.Equal("sec-1", vm.SectionSlug);
-        Assert.Equal("Cyber security processes", vm.TopicName);
-        Assert.Same(submissionWithResponses.Responses, vm.Responses);
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal("sec-1", redirect.RouteValues["route"]);
     }
+
 
     // ---------- RestartSelfAssessment ----------
 
