@@ -481,7 +481,6 @@ public class QuestionsViewBuilderTests
         Assert.Equal("sec-1", redirect.RouteValues["route"]);
     }
 
-
     // ---------- RestartSelfAssessment ----------
 
     [Fact]
