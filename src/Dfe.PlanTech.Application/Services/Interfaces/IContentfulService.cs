@@ -15,4 +15,5 @@ public interface IContentfulService
     Task<QuestionnaireQuestionEntry> GetQuestionByIdAsync(string questionId);
     Task<int> GetRecommendationChunkCountAsync(int page);
     Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null);
+    Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync();
 }
