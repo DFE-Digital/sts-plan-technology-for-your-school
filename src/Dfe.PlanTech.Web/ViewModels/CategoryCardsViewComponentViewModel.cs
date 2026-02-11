@@ -13,4 +13,5 @@ public class CategoryCardsViewComponentViewModel
     public string? NoSectionsErrorRedirectUrl { get; set; }
     public string? ProgressRetrievalErrorMessage { get; init; }
     public int TotalSectionCount { get; init; }
+    public List<MicrocopyEntry>? MicrocopyEntries { get; init; }
 }
