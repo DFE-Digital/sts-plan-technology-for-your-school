@@ -30,35 +30,31 @@
 
 @if (!Model.Print)
 {
+    bool singleSectionCategory = Model.CategoryLandingSections.Count == 1;
+    bool anySectionsCompleted = Model.CompletedSectionsCount != 0;
+    bool allSectionsCompleted = Model.CompletedSectionsCount == Model.Sections.Count;
+
     <span class="govuk-caption-xl">How to meet the standard</span>
     <partial name="Components/PageComponentFactory" model="@title" />
 
-    @if (Model.CategoryLandingSections.Count != 1 && !Model.AllSectionsCompleted)
+    if (!singleSectionCategory && !allSectionsCompleted)
     {
         <div class="govuk-inset-text">
             @{
-                if (!Model.AnySectionsCompleted)
-                {
-                    <p>You have not completed any self-assessments for the @Model.CategoryName.ToLower() standard. Complete self-assessments to view all recommendations.</p>
-                }
-                else if (Model.AllSectionsCompleted)
-                {
-                    <p>You have completed all self-assessments for the @Model.CategoryName.ToLower() standard.</p>
-                }
-                else
-                {
-                    <p>Complete the remaining self-assessments to get recommendations for your school's @Model.CategoryName.ToLower().</p>
+                <p>@ContentfulMicrocopyHelper.GetCategoryLandingInsetText(Model.CategoryName.ToLower(), Model.CompletedSectionsCount, Model.MicrocopyEntries)</p>
 
+                if (anySectionsCompleted)
+                {
                     foreach (var topic in Model.CategoryLandingSections)
                     {
-                        <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = @Model.CategorySlug, Section = topic, Context = "Default" }' />
+                        <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = @Model.CategorySlug, Section = topic, Context = "Default", MicrocopyEntries = @Model.MicrocopyEntries }' />
                     }
                 }
             }
         </div>
     }
 
-    @if (Model.AnySectionsCompleted)
+    @if (anySectionsCompleted)
     {
         <form method="get" class="govuk-form-group">
             <label class="govuk-label" for="sort">
