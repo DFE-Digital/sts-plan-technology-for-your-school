@@ -14,7 +14,7 @@ public class PageModelBinder(ILogger<PageModelBinder> logger) : IModelBinder
 
         if (!bindingContext.HttpContext.Items.TryGetValue(nameof(PageEntry), out var pageItem))
         {
-            logger.LogError("Page is not set");
+            logger.LogInformation("Page is not set for path {Path}", bindingContext.HttpContext.Request.Path);
             bindingContext.Result = ModelBindingResult.Failed();
             return Task.CompletedTask;
         }
