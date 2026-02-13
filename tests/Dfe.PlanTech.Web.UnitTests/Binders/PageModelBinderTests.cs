@@ -110,4 +110,23 @@ public class PageModelBinderTests
         Assert.True(isModelSet);
         Assert.Same(page, model);
     }
+
+    [Fact]
+    public async Task BindModelAsync_When_Item_Missing_Does_Not_Log_Error()
+    {
+        var logger = Substitute.For<ILogger<PageModelBinder>>();
+        var binder = new PageModelBinder(logger);
+
+        var http = new DefaultHttpContext();
+        var ctx = NewBindingContext(http);
+
+        await binder.BindModelAsync(ctx);
+
+        logger.DidNotReceive().Log(
+            LogLevel.Error,
+            Arg.Any<EventId>(),
+            Arg.Any<object>(),
+            Arg.Any<Exception?>(),
+            Arg.Any<Func<object, Exception?, string>>());
+    }
 }
