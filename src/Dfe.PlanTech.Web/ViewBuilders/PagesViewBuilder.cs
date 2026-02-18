@@ -88,6 +88,8 @@ public class PagesViewBuilder(
 
         var viewModel = new PageViewModel(page);
 
+        viewModel.MicrocopyEntries = await contentfulService.GetMicrocopyEntriesAsync();
+
         if (page.DisplayOrganisationName)
         {
             if (!CurrentUser.IsAuthenticated)
