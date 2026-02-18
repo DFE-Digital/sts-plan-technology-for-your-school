@@ -46,6 +46,12 @@ public static class ContentfulMicrocopyHelper
             ?? GetFallbackText(intendedText);
     }
 
+    public static string GetMicrocopyTextByKey(string key, List<MicrocopyEntry>? microcopyEntries)
+    {
+        return microcopyEntries?.FirstOrDefault(r => r.Key == key)?.Value
+            ?? GetFallbackText(key);
+    }
+
     public static string GetFallbackText(string intendedText)
     {
         if (ContentfulMicrocopyConstants.EmptyFallback.Contains(intendedText))
