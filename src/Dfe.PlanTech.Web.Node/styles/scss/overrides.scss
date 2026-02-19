@@ -213,6 +213,29 @@ ul.landing-page-list > li {
   vertical-align: middle;
 }
 
+.dfe-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dfe-table-scroll > .govuk-table {
+  width: 100%;
+}
+
+@media (max-width: 40em) {
+  .dfe-table-scroll {
+    overflow-x: auto;
+  }
+}
+
+.govuk-table__cell,
+.govuk-table__header {
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
 @media (min-width: 27.5em) {
   .app-auth-action {
     text-align: right;
