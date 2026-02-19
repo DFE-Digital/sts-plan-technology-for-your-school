@@ -34,7 +34,9 @@
     bool anySectionsCompleted = Model.CompletedSectionsCount != 0;
     bool allSectionsCompleted = Model.CompletedSectionsCount == Model.Sections.Count;
 
-    <span class="govuk-caption-xl">How to meet the standard</span>
+    var landingHeader = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageHeader, Model.MicrocopyEntries);
+
+    <span class="govuk-caption-xl">@landingHeader</span>
     <partial name="Components/PageComponentFactory" model="@title" />
 
     if (!singleSectionCategory && !allSectionsCompleted)

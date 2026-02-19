@@ -1,5 +1,10 @@
 @model CategoryLandingPageViewModel
 
+@{
+    var categoryName = Model.Category.Header.Text.ToLower();
+    var printLinkText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPagePrintLink, Model.MicrocopyEntries, categoryName);
+}
+
 @section NavButton {
     <govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
         Back to choose a standard
@@ -11,7 +16,7 @@
     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
 
     <p class="govuk-body-s">
-        <a class="govuk-link" href="@Model.Slug/print">Print your school's @Model.Category.Header.Text.ToLower() recommendations</a>
+        <a class="govuk-link" href="@Model.Slug/print">@printLinkText</a>
     </p>
 }
 
