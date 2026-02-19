@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using static Dfe.PlanTech.Core.Constants.ContentfulMicrocopyConstants;
 
 namespace Dfe.PlanTech.Core.Helpers;
 
@@ -11,13 +12,13 @@ public static class ContentfulMicrocopyHelper
 
         if (sectionsCompleted == 0)
         {
-            statusText = microcopy?.FirstOrDefault(r => r.Key == ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted)?.Value
-                ?? ContentfulMicrocopyHelper.GetFallbackText(ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted);
+            statusText = microcopy?.FirstOrDefault(r => r.Key == ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted.Key)?.Value
+                ?? ContentfulMicrocopyHelper.GetFallbackText(ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted.Key);
         }
         else
         {
-            statusText = microcopy?.FirstOrDefault(r => r.Key == ContentfulMicrocopyConstants.LandingPageInsetIntroContinue)?.Value
-               ?? ContentfulMicrocopyHelper.GetFallbackText(ContentfulMicrocopyConstants.LandingPageInsetIntroContinue);
+            statusText = microcopy?.FirstOrDefault(r => r.Key == ContentfulMicrocopyConstants.LandingPageInsetIntroContinue.Key)?.Value
+               ?? ContentfulMicrocopyHelper.GetFallbackText(ContentfulMicrocopyConstants.LandingPageInsetIntroContinue.Key);
         }
 
         return statusText?.Replace("{{standard}}", categoryName) ?? string.Empty;
@@ -29,27 +30,46 @@ public static class ContentfulMicrocopyHelper
 
         if (completedSectionCount == 0 && totalSectionCount == 1)
         {
-            intendedText = ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted;
+            intendedText = ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted.Key;
         }
         else if (completedSectionCount == 0)
         {
-            intendedText = ContentfulMicrocopyConstants.HomeCardStatusMultipleNotStarted;
+            intendedText = ContentfulMicrocopyConstants.HomeCardStatusMultipleNotStarted.Key;
         }
         else
         {
             intendedText = completedSectionCount < totalSectionCount
-                ? ContentfulMicrocopyConstants.HomeCardStatusContinue
-                : ContentfulMicrocopyConstants.HomeCardStatusViewRecommendations;
+                ? ContentfulMicrocopyConstants.HomeCardStatusContinue.Key
+                : ContentfulMicrocopyConstants.HomeCardStatusViewRecommendations.Key;
         }
 
         return microcopyEntries?.FirstOrDefault(r => r.Key == intendedText)?.Value
             ?? GetFallbackText(intendedText);
     }
 
-    public static string GetMicrocopyTextByKey(string key, List<MicrocopyEntry>? microcopyEntries)
+    public static string GetMicrocopyTextByKey(MicrocopyRecord record, List<MicrocopyEntry>? microcopyEntries, string dynamicText = "")
     {
-        return microcopyEntries?.FirstOrDefault(r => r.Key == key)?.Value
-            ?? GetFallbackText(key);
+
+        var microcopyText = microcopyEntries?.FirstOrDefault(r => r.Key == record.Key)?.Value
+            ?? GetFallbackText(record.Key);
+
+        if (!String.IsNullOrEmpty(dynamicText))
+        {
+            microcopyText = ReplaceVariables(microcopyText, record, dynamicText);
+        }
+
+        return microcopyText;
+    }
+
+    private static string ReplaceVariables(string microcopyText, MicrocopyRecord record, string dynamicText)
+    {
+        var text = microcopyText;
+        foreach (var variable in record.Variables)
+        {
+             text = text.Replace($"{{{{{variable}}}}}", dynamicText);
+
+        }
+        return text;
     }
 
     public static string GetFallbackText(string intendedText)

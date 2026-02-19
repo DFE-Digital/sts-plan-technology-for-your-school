@@ -5,57 +5,57 @@ namespace Dfe.PlanTech.Core.Constants;
 [ExcludeFromCodeCoverage]
 public static class ContentfulMicrocopyConstants
 {
-    // Organised by view and/or component. Values correspond to Key field on Contentful microcopy entries.
+    public record MicrocopyRecord(string Key, params string[] Variables);
 
     // Home
-    public const string HomeHeader = "homeHeader";
-    public const string HomeCardStatusSingleNotStarted = "cardStatusSingleNotStarted";
-    public const string HomeCardStatusMultipleNotStarted = "cardStatusMultipleNotStarted";
-    public const string HomeCardStatusContinue = "cardStatusContinue";
-    public const string HomeCardStatusViewRecommendations = "cardStatusViewRecommendations";
+    public static readonly MicrocopyRecord HomeHeader = new("homeHeader");
+    public static readonly MicrocopyRecord HomeCardStatusSingleNotStarted = new("cardStatusSingleNotStarted");
+    public static readonly MicrocopyRecord HomeCardStatusMultipleNotStarted = new("cardStatusMultipleNotStarted");
+    public static readonly MicrocopyRecord HomeCardStatusContinue = new("cardStatusContinue");
+    public static readonly MicrocopyRecord HomeCardStatusViewRecommendations = new("cardStatusViewRecommendations");
 
-    // Landing page
-    public const string LandingPageHeader = "landingHeader";
-    public const string LandingPageBackLink = "landingBackLink";
-    public const string LandingPagePrintLink = "landingPrintLink"; // Variable - standard
-    public const string LandingPageInsetIntroNotStarted = "insetIntroNotStarted"; // Variable - standard
-    public const string LandingPageInsetIntroContinue = "insetIntroContinue"; // Variable - standard
-    public const string LandingPageTopicLinkNotStarted = "topicLinkNotStarted"; // Variable - topic
-    public const string LandingPageTopicIntroContinue = "topicIntroContinue"; // Variable - date
-    public const string LandingPageTopicLinkContinue = "topicLinkContinue"; // Variable - topic
-    public const string LandingPageTopicIntroCompleted = "topicIntroCompleted"; // Variables - topic, date
-    public const string LandingPageTopicLinkCompleted = "topicLinkCompleted"; // Variable - topic
-    public const string LandingPageSuccessPanelHeader = "successHeader"; // Variable - topic
-    public const string LandingPageSuccessPanelBody = "successBody";
+    // Landing Page
+    public static readonly MicrocopyRecord LandingPageHeader = new("landingHeader");
+    public static readonly MicrocopyRecord LandingPageBackLink = new("landingBackLink");
+    public static readonly MicrocopyRecord LandingPagePrintLink = new("landingPrintLink", "standard");
+    public static readonly MicrocopyRecord LandingPageInsetIntroNotStarted = new("insetIntroNotStarted", "standard");
+    public static readonly MicrocopyRecord LandingPageInsetIntroContinue = new("insetIntroContinue", "standard");
+    public static readonly MicrocopyRecord LandingPageTopicLinkNotStarted = new("topicLinkNotStarted", "topic");
+    public static readonly MicrocopyRecord LandingPageTopicIntroContinue = new("topicIntroContinue", "dateUpdated");
+    public static readonly MicrocopyRecord LandingPageTopicLinkContinue = new("topicLinkContinue", "topic");
+    public static readonly MicrocopyRecord LandingPageTopicIntroCompleted = new("topicIntroCompleted", "topic", "dateCompleted");
+    public static readonly MicrocopyRecord LandingPageTopicLinkCompleted = new("topicLinkCompleted", "topic");
+    public static readonly MicrocopyRecord LandingPageSuccessPanelHeader = new("successHeader", "topic");
+    public static readonly MicrocopyRecord LandingPageSuccessPanelBody = new("successBody");
 
     public static readonly List<string> EmptyFallback = new()
     {
-        HomeHeader,
-        LandingPageHeader,
-        LandingPageInsetIntroNotStarted,
-        LandingPageInsetIntroContinue,
-        LandingPageTopicIntroContinue,
-        LandingPageTopicIntroCompleted,
-        LandingPageSuccessPanelBody,
+        HomeHeader.Key,
+        LandingPageHeader.Key,
+        LandingPageInsetIntroNotStarted.Key,
+        LandingPageInsetIntroContinue.Key,
+        LandingPageTopicIntroContinue.Key,
+        LandingPageTopicIntroCompleted.Key,
+        LandingPageSuccessPanelBody.Key,
     };
 
     public static readonly List<string> CardsFallback = new()
     {
-        HomeCardStatusSingleNotStarted,
-        HomeCardStatusMultipleNotStarted,
-        HomeCardStatusContinue,
-        HomeCardStatusViewRecommendations,
+        HomeCardStatusSingleNotStarted.Key,
+        HomeCardStatusMultipleNotStarted.Key,
+        HomeCardStatusContinue.Key,
+        HomeCardStatusViewRecommendations.Key,
     };
 
     public static readonly List<string> TopicLinksFallback = new()
     {
-        LandingPageTopicLinkNotStarted,
-        LandingPageTopicLinkContinue,
-        LandingPageTopicLinkCompleted
+        LandingPageTopicLinkNotStarted.Key,
+        LandingPageTopicLinkContinue.Key,
+        LandingPageTopicLinkCompleted.Key
     };
 
     public static readonly List<string> PrintLinksFallback = new()
     {
-        LandingPagePrintLink
+        LandingPagePrintLink.Key
     };
 }
