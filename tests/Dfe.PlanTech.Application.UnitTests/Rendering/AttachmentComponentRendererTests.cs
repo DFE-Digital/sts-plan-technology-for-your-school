@@ -1,6 +1,6 @@
 using System.Text;
 using Contentful.Core.Models;
-using Dfe.PlanTech.Application.Rendering;
+using Dfe.PlanTech.Application.Rendering.Contentful;
 using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Models;
 using ContentfulFile = Contentful.Core.Models.File;

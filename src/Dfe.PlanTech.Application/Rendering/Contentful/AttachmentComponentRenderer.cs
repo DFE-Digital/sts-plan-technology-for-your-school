@@ -1,9 +1,9 @@
 using System.Text;
-using Dfe.PlanTech.Application.Rendering.Models;
+using Dfe.PlanTech.Application.Rendering.Contentful.Models;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.Application.Rendering;
+namespace Dfe.PlanTech.Application.Rendering.Contentful;
 
 public static class AttachmentComponentRenderer
 {

@@ -1,5 +1,5 @@
 using System.Text;
-using Dfe.PlanTech.Application.Rendering;
+using Dfe.PlanTech.Application.Rendering.Contentful;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Microsoft.Extensions.Logging;
@@ -16,11 +16,9 @@ public class TextRendererTests
 
     private const string NODE_TYPE = "text";
 
-    private Application.Rendering.TextRenderer BuildSut(List<MarkOption>? markOptions = null)
+    private TextRenderer BuildSut(List<MarkOption>? markOptions = null)
     {
-        return new Application.Rendering.TextRenderer(
-            new TextRendererOptions(_logger, markOptions ?? [])
-        );
+        return new TextRenderer(new TextRendererOptions(_logger, markOptions ?? []));
     }
 
     [Fact]

@@ -1,8 +1,9 @@
 using System.Text;
 using System.Text.RegularExpressions;
+using Dfe.PlanTech.Application.Rendering.Contentful;
 using Dfe.PlanTech.Core.Contentful.Enums;
-using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Rendering;
 
 namespace Dfe.PlanTech.Application.Rendering;
 

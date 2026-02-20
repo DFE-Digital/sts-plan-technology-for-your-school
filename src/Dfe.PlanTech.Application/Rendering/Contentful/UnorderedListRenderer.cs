@@ -1,14 +1,14 @@
 using System.Text;
 using Dfe.PlanTech.Core.Contentful.Enums;
-using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Rendering;
 
-namespace Dfe.PlanTech.Application.Rendering;
+namespace Dfe.PlanTech.Application.Rendering.Contentful;
 
-public class OrderedListRenderer : BaseRichTextContentPartRenderer
+public class UnorderedListRenderer : BaseRichTextContentPartRenderer
 {
-    public OrderedListRenderer()
-        : base(RichTextNodeType.OrderedList) { }
+    public UnorderedListRenderer()
+        : base(RichTextNodeType.UnorderedList) { }
 
     public override StringBuilder AddHtml(
         RichTextContentField content,
@@ -16,11 +16,11 @@ public class OrderedListRenderer : BaseRichTextContentPartRenderer
         StringBuilder stringBuilder
     )
     {
-        stringBuilder.Append("<ol>");
+        stringBuilder.Append("<ul>");
 
         rendererCollection.RenderChildren(content, stringBuilder);
 
-        stringBuilder.Append("</ol>");
+        stringBuilder.Append("</ul>");
 
         return stringBuilder;
     }

@@ -1,7 +1,7 @@
 using System.Text;
-using Dfe.PlanTech.Application.Rendering;
-using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Application.Rendering.Contentful;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Rendering;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dfe.PlanTech.Application.UnitTests.Rendering;

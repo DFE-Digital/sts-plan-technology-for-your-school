@@ -1,14 +1,14 @@
 using System.Text;
 using Dfe.PlanTech.Core.Contentful.Enums;
-using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Rendering;
 
-namespace Dfe.PlanTech.Application.Rendering;
+namespace Dfe.PlanTech.Application.Rendering.Contentful;
 
-public class ListItemRenderer : BaseRichTextContentPartRenderer
+public class TableRenderer : BaseRichTextContentPartRenderer
 {
-    public ListItemRenderer()
-        : base(RichTextNodeType.ListItem) { }
+    public TableRenderer()
+        : base(RichTextNodeType.Table) { }
 
     public override StringBuilder AddHtml(
         RichTextContentField content,
@@ -16,11 +16,12 @@ public class ListItemRenderer : BaseRichTextContentPartRenderer
         StringBuilder stringBuilder
     )
     {
-        stringBuilder.Append("<li>");
+        stringBuilder.Append("<table class=\"govuk-table\">");
 
         rendererCollection.RenderChildren(content, stringBuilder);
 
-        stringBuilder.Append("</li>");
+        stringBuilder.Append("</tbody>");
+        stringBuilder.Append("</table>");
 
         return stringBuilder;
     }

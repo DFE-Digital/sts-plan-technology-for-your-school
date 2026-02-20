@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.Core.Contentful.Interfaces;
+namespace Dfe.PlanTech.Core.Contentful.Rendering;
 
 /// <summary>
 /// Renders Rich Text content

@@ -1,7 +1,8 @@
 using System.Text;
+using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.Core.Contentful.Interfaces;
+namespace Dfe.PlanTech.Core.Contentful.Rendering;
 
 public interface IRichTextContentPartRenderer
 {

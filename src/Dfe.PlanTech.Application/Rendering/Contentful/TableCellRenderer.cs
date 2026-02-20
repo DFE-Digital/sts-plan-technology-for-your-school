@@ -1,10 +1,10 @@
 using System.Text;
 using Dfe.PlanTech.Core.Contentful.Enums;
-using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Rendering;
 using Dfe.PlanTech.Core.Extensions;
 
-namespace Dfe.PlanTech.Application.Rendering;
+namespace Dfe.PlanTech.Application.Rendering.Contentful;
 
 public class TableCellRenderer : BaseRichTextContentPartRenderer
 {

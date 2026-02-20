@@ -1,4 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Formats.Asn1;
+using System.Text.Json;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
@@ -51,6 +53,22 @@ public class ContentfulRepository : IContentfulRepository
             throw new GetEntriesException($"Found more than 1 entity with id {id}");
 
         return entities.FirstOrDefault();
+    }
+
+    public async Task<string> GetTextBodyEntryByIdAsJsonAsync(string id)
+    {
+        var options = GetEntryByIdOptions(id, 1);
+        var queryBuilder = BuildQueryBuilder<dynamic>("textBody", options);
+        var entries = await _client.GetEntries(queryBuilder);
+        ProcessContentfulErrors(entries);
+
+        var entry = entries.Items?.FirstOrDefault();
+        if (entry == null)
+        {
+            throw new GetEntriesException($"No entity found with id {id}");
+        }
+
+        return JsonSerializer.Serialize(entry);
     }
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>() =>

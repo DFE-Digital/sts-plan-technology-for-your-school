@@ -2,7 +2,7 @@ using System.Text;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Core.Contentful.Interfaces;
+namespace Dfe.PlanTech.Core.Contentful.Rendering;
 
 public interface IRichTextContentPartRendererCollection
 {

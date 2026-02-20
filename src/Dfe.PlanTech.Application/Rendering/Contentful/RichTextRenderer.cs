@@ -1,9 +1,9 @@
 using System.Text;
-using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Contentful.Rendering;
 using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Application.Rendering;
+namespace Dfe.PlanTech.Application.Rendering.Contentful;
 
 /// <summary>
 /// Parent class to render <see chref="IRichTextContent"/> RichTextContent

@@ -1,10 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Application.Rendering;
+using Dfe.PlanTech.Application.Rendering.Contentful;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
+using Dfe.PlanTech.Core.Contentful.Rendering;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dfe.PlanTech.Application;
@@ -37,6 +38,7 @@ public static class ServiceCollectionExtensions
         return services
             .AddScoped<IContentfulService, ContentfulService>()
             .AddScoped<IEstablishmentService, EstablishmentService>()
+            .AddScoped<INotifyService, NotifyService>()
             .AddScoped<IQuestionService, QuestionService>()
             .AddScoped<IRecommendationService, RecommendationService>()
             .AddScoped<ISubmissionService, SubmissionService>()

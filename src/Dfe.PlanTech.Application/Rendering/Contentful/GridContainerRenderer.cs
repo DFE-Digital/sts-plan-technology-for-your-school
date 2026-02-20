@@ -2,7 +2,7 @@ using System.Text;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 
-namespace Dfe.PlanTech.Application.Rendering;
+namespace Dfe.PlanTech.Application.Rendering.Contentful;
 
 public class GridContainerRenderer : ICardContainerContentPartRenderer
 {
