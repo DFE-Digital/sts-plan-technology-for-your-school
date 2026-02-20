@@ -19,6 +19,7 @@ public static class ConfigurationConstants
     public const string GoogleTagManager = "GTM";
     public const string GovUkFrontend = "GovUkFrontend";
     public const string MessageRetryHandlingOptions = "MessageRetryHandlingOptions";
+    public const string NotifyApiKey = "NotifyApiKey";
     public const string Robots = "Robots";
     public const string ServiceBusOptions = "ServiceBusOptions";
 }
