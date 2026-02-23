@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Extensions;

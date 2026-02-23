@@ -11,6 +11,7 @@ public static class ConfigurationConstants
     public const string ContactUs = "ContactUs";
     public const string CAndSSupportedAssetTypes = "cs:supportedAssetTypes";
     public const string Contentful = "Contentful";
+    public const string ContentSecurityPolicy = "CSP";
     public const string Cookies = "Cookies";
     public const string Database = "Database";
     public const string DfeSignIn = "DfeSignIn";
@@ -18,6 +19,7 @@ public static class ConfigurationConstants
     public const string ErrorPages = "ErrorPages";
     public const string GoogleTagManager = "GTM";
     public const string GovUkFrontend = "GovUkFrontend";
+    public const string GovUkNotify = "GovUkNotify";
     public const string MessageRetryHandlingOptions = "MessageRetryHandlingOptions";
     public const string NotifyApiKey = "NotifyApiKey";
     public const string Robots = "Robots";

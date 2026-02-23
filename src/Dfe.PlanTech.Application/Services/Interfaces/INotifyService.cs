@@ -4,9 +4,12 @@ namespace Dfe.PlanTech.Application.Services.Interfaces
     {
         Task SendEmailAsync(
             string recommendationRef,
-            ICollection<string> recipients,
-            string subject,
-            string body
+            ICollection<string> recipientEmailAddresses,
+            string currentUserFullName,
+            string activeSchoolName,
+            string sectionName,
+            string userMessage,
+            string recommendationStatus
         );
     }
 }

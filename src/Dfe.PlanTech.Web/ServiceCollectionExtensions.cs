@@ -1,7 +1,7 @@
+using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
-using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
@@ -9,6 +9,7 @@ using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Options;
 using Dfe.PlanTech.Core.Caching;
 using Dfe.PlanTech.Core.Caching.Interfaces;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models.Options;
 using Dfe.PlanTech.Data.Contentful;
@@ -31,8 +32,11 @@ using GovUk.Frontend.AspNetCore;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
+using Notify.Client;
+using Notify.Interfaces;
 
 namespace Dfe.PlanTech.Web;
 
@@ -270,6 +274,22 @@ public static class ServiceCollectionExtensions
                 return x;
             }
         );
+
+        return services;
+    }
+
+    public static IServiceCollection AddGovUkNotify(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
+    {
+        var options =
+            configuration
+                .GetRequiredSection(ConfigurationConstants.GovUkNotify)
+                .Get<GovUkNotifyConfiguration>()
+            ?? throw new KeyNotFoundException(nameof(GovUkNotifyConfiguration));
+
+        services.AddSingleton<INotificationClient>(sp => new NotificationClient(options.ApiKey));
 
         return services;
     }
