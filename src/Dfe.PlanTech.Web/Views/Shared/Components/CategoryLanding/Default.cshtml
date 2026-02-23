@@ -16,10 +16,10 @@
 {
     <div class="govuk-panel govuk-panel--confirmation govuk-!-margin-bottom-8">
         <h1 class="govuk-panel__title">
-            Your self-assessment for @Model.SectionName.ToLower() is complete
+            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageSuccessPanelHeader, Model.MicrocopyEntries, @Model.SectionName.ToLower())
         </h1>
         <div class="govuk-panel__body">
-            Recommendations are available
+            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageSuccessPanelBody, Model.MicrocopyEntries)
         </div>
     </div>
 }
