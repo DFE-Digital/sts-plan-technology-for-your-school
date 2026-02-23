@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Rendering;
 
-namespace Dfe.PlanTech.Application.UnitTests.Rendering;
+namespace Dfe.PlanTech.Application.UnitTests.Rendering.Contentful;
 
 public class BaseRichTextContentPartRendererTests
 {

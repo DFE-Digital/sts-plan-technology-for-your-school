@@ -24,8 +24,7 @@ public class NotifyService(IContentfulWorkflow contentfulWorkflow) : INotifyServ
             recommendationChunk.Content[0].Id
         );
 
-        var markdownRenderer = new MarkdownRenderer();
-        var markdown = markdownRenderer.Render(textBody.RichText);
+        var markdownRenderer = MarkdownRenderer.Render(textBody.RichText);
 
         // Placeholder for email sending logic
     }

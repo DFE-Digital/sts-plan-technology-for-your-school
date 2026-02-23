@@ -3,20 +3,20 @@ using Dfe.PlanTech.Application.Rendering.Contentful;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Dfe.PlanTech.Application.UnitTests.Rendering;
+namespace Dfe.PlanTech.Application.UnitTests.Rendering.Contentful;
 
-public class ListItemRendererTests
+public class UnorderedListRendererTests
 {
-    private const string NODE_TYPE = "list-item";
+    private const string NODE_TYPE = "unordered-list";
 
     [Fact]
-    public void Should_Accept_When_ContentIsListItem()
+    public void Should_Accept_When_ContentIs_UnorderedList()
     {
-        const string listItemValue = "List item one";
+        const string value = "List item one";
 
-        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = listItemValue };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
-        var renderer = new ListItemRenderer();
+        var renderer = new UnorderedListRenderer();
 
         var accepted = renderer.Accepts(content);
 
@@ -24,7 +24,7 @@ public class ListItemRendererTests
     }
 
     [Fact]
-    public void Should_Reject_When_Not_ListItem()
+    public void Should_Reject_When_Not_UnorderedList()
     {
         var content = new RichTextContentField()
         {
@@ -32,7 +32,7 @@ public class ListItemRendererTests
             Value = "paragraph text",
         };
 
-        var renderer = new ListItemRenderer();
+        var renderer = new UnorderedListRenderer();
 
         var accepted = renderer.Accepts(content);
 
@@ -40,22 +40,22 @@ public class ListItemRendererTests
     }
 
     [Fact]
-    public void Should_CreateListItem_When_PassedValidData()
+    public void Should_CreateUnorderedList_When_PassedValidData()
     {
-        var renderer = new ListItemRenderer();
+        var renderer = new UnorderedListRenderer();
         var rendererCollection = new RichTextRenderer(
             new NullLogger<RichTextRenderer>(),
             new[] { renderer }
         );
 
-        const string listItemValue = "List item one";
+        const string value = "List item one";
 
-        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = listItemValue };
+        var content = new RichTextContentField() { NodeType = NODE_TYPE, Value = value };
 
         var result = renderer.AddHtml(content, rendererCollection, new StringBuilder());
 
         var html = result.ToString();
 
-        Assert.Equal("<li></li>", html);
+        Assert.Equal("<ul></ul>", html);
     }
 }

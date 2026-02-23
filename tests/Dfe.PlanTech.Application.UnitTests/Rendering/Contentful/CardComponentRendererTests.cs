@@ -1,7 +1,7 @@
 using System.Text;
 using Dfe.PlanTech.Application.Rendering.Contentful;
 
-namespace Dfe.PlanTech.Application.UnitTests.Rendering;
+namespace Dfe.PlanTech.Application.UnitTests.Rendering.Contentful;
 
 public class CardComponentRendererTests : CardTests
 {

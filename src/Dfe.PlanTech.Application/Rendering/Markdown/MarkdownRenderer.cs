@@ -1,11 +1,10 @@
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using Dfe.PlanTech.Core.Contentful.Models;
 
 namespace Dfe.PlanTech.Application.Rendering.Markdown;
 
-public class MarkdownRenderer : IMarkdownRenderer
+public class MarkdownRenderer
 {
     // Contentful has some unusual non-breaking space characters
     private static readonly Regex NonBreakingSpaceRegex = new(
@@ -16,7 +15,7 @@ public class MarkdownRenderer : IMarkdownRenderer
 
     // Whitespace could be spaces or tabs
     private static readonly Regex Whitespace = new(
-        "[ \t]+",
+        "(?<!^)(?<!\r?\n)[ \t]{2,}",
         RegexOptions.Compiled,
         TimeSpan.FromMilliseconds(200)
     );
@@ -51,7 +50,12 @@ public class MarkdownRenderer : IMarkdownRenderer
         "text",
     ];
 
-    public string Render(RichTextContentField textBody)
+    public static string Render(RichTextContentField textBody)
+    {
+        return new MarkdownRenderer().RenderText(textBody);
+    }
+
+    public string RenderText(RichTextContentField textBody)
     {
         RenderNode(textBody);
 
@@ -185,13 +189,14 @@ public class MarkdownRenderer : IMarkdownRenderer
 
     private static string CleanText(string s)
     {
+        // NOTE: We intentionally do NOT trim, as whitespace must be preserved.
+
         if (string.IsNullOrEmpty(s))
             return "";
 
         s = NonBreakingSpaceRegex.Replace(s, " ");
         s = Whitespace.Replace(s, " ");
 
-        // NOTE: We intentionally do NOT trim, as whitespace must be preserved.
         return s;
     }
 
@@ -277,7 +282,7 @@ public class MarkdownRenderer : IMarkdownRenderer
             var cleaned = CleanText(block);
             if (string.IsNullOrEmpty(cleaned))
                 continue;
-            lines.Add($"{indent}  {cleaned}");
+            lines.Add($"{indent}{cleaned}");
         }
 
         return lines;
@@ -315,10 +320,23 @@ public class MarkdownRenderer : IMarkdownRenderer
         }
 
         var joined = stringBuilder.ToString();
-        joined = Regex.Replace(joined, "[ \t]+\n", Environment.NewLine);
-        joined = Regex.Replace(joined, "\n[ \t]+", Environment.NewLine);
-        joined = Regex.Replace(joined, "[ \t]{2,}", " ");
 
+        // Trim spaces from ends of lines
+        joined = Regex.Replace(
+            joined,
+            "[ \t]+\\r?\n$",
+            Environment.NewLine,
+            RegexOptions.Compiled,
+            TimeSpan.FromMilliseconds(200)
+        );
+        joined = Regex.Replace(
+            joined,
+            "\\r?\n[ \t]+",
+            Environment.NewLine,
+            RegexOptions.Compiled,
+            TimeSpan.FromMilliseconds(200)
+        );
+        joined = Whitespace.Replace(joined, " ");
         return joined;
     }
 
@@ -327,7 +345,7 @@ public class MarkdownRenderer : IMarkdownRenderer
         var text = CleanText(RenderInlines(field));
         var uri = CleanText(field.Data?.Uri ?? "");
 
-        if (uri.StartsWith("/"))
+        if (uri.StartsWith('/'))
         {
             uri = $"https://plan-technology-for-your-school.education.gov.uk{uri}";
         }
@@ -340,7 +358,7 @@ public class MarkdownRenderer : IMarkdownRenderer
             sb.Append(text);
     }
 
-    private IEnumerable<string> RenderListAsLines(RichTextContentField field)
+    private List<string> RenderListAsLines(RichTextContentField field)
     {
         if (field.NodeType is not ("unordered-list" or "ordered-list"))
             return [];

@@ -3,7 +3,7 @@ using Dfe.PlanTech.Application.Rendering.Contentful;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Dfe.PlanTech.Application.UnitTests.Rendering;
+namespace Dfe.PlanTech.Application.UnitTests.Rendering.Contentful;
 
 public class OrderedListRendererTests
 {

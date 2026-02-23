@@ -5,7 +5,7 @@ using Dfe.PlanTech.Core.Contentful.Enums;
 using Dfe.PlanTech.Core.Contentful.Models;
 using ContentfulFile = Contentful.Core.Models.File;
 
-namespace Dfe.PlanTech.Application.UnitTests.Rendering;
+namespace Dfe.PlanTech.Application.UnitTests.Rendering.Contentful;
 
 public class AttachmentComponentRendererTests
 {
