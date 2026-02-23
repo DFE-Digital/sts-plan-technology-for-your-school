@@ -1,14 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Formats.Asn1;
 using System.Text.Json;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Contentful.Options;
 using Dfe.PlanTech.Core.Contentful.Queries;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -24,13 +23,13 @@ public class ContentfulRepository : IContentfulRepository
     private readonly ILogger<IContentfulRepository> _logger;
     private readonly IContentfulClient _client;
     private readonly IHostEnvironment _hostEnvironment;
-    private readonly AutomatedTestingOptions _automatedTestingOptions;
+    private readonly AutomatedTestingConfiguration _automatedTestingOptions;
 
     public ContentfulRepository(
         ILogger<ContentfulRepository> logger,
         IContentfulClient client,
         IHostEnvironment hostEnvironment,
-        IOptions<AutomatedTestingOptions> automatedTestingOptions
+        IOptions<AutomatedTestingConfiguration> automatedTestingOptions
     )
     {
         _logger = logger;

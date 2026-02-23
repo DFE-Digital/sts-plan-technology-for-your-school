@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -297,10 +297,7 @@ public class PagesViewBuilderTests
         var page = MakePage("missing", isLanding: true);
         var contentful = Substitute.For<IContentfulService>();
 
-        var category = new QuestionnaireCategoryEntry
-        {
-            LandingPage = null
-        };
+        var category = new QuestionnaireCategoryEntry { LandingPage = null };
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         contentful.GetCategoryBySlugAsync("missing", 4).Returns(category);
@@ -308,7 +305,8 @@ public class PagesViewBuilderTests
         var controller = new TestController();
 
         await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.RouteBasedOnOrganisationTypeAsync(controller, page));
+            sut.RouteBasedOnOrganisationTypeAsync(controller, page)
+        );
     }
 
     [Fact]

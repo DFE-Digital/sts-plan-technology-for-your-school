@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
@@ -13,7 +12,6 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
@@ -109,8 +107,7 @@ public class RecommendationsViewBuilder(
             CurrentChunkPosition = currentRecommendationIndex + 1,
             TotalChunks = recommendationChunks.Count,
             SelectedStatusKey =
-                currentRecommendationHistoryStatus?.NewStatus
-                ?? RecommendationStatus.NotStarted,
+                currentRecommendationHistoryStatus?.NewStatus ?? RecommendationStatus.NotStarted,
             LastUpdated = currentRecommendationHistoryStatus?.DateCreated,
             SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
             SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
@@ -354,9 +351,7 @@ public class RecommendationsViewBuilder(
                 Content = cr.Content,
                 Header = cr.HeaderText,
                 LastUpdated = details[cr.Id].DateCreated,
-                Status =
-                    details[cr.Id].NewStatus
-                    ?? RecommendationStatus.NotStarted,
+                Status = details[cr.Id].NewStatus ?? RecommendationStatus.NotStarted,
                 Slug = cr.Slug,
             })
             .ToList();
