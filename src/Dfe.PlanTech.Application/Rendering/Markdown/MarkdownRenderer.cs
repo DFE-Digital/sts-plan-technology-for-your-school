@@ -74,7 +74,7 @@ public class MarkdownRenderer
         return new MarkdownRenderer().RenderText(textBody);
     }
 
-    public string RenderText(RichTextContentField textBody)
+    private string RenderText(RichTextContentField textBody)
     {
         RenderNode(textBody);
 

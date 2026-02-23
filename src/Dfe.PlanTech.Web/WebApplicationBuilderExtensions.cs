@@ -1,6 +1,5 @@
-using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Options;
 using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web
@@ -10,7 +9,7 @@ namespace Dfe.PlanTech.Web
         public static IServiceCollection AddSystemConfiguration(this WebApplicationBuilder builder)
         {
             return builder
-                .Services.Configure<AutomatedTestingOptions>(
+                .Services.Configure<AutomatedTestingConfiguration>(
                     builder.Configuration.GetRequiredSection(
                         ConfigurationConstants.AutomatedTesting
                     )
@@ -31,11 +30,13 @@ namespace Dfe.PlanTech.Web
 
         public static void AddContentAndSupportConfiguration(this WebApplicationBuilder app)
         {
-            app.Services.Configure<TrackingOptionsConfiguration>(
-                    app.Configuration.GetSection("tracking")
+            app.Services.Configure<ContentSecurityPolicyConfiguration>(
+                    app.Configuration.GetRequiredSection(
+                        ConfigurationConstants.ContentSecurityPolicy
+                    )
                 )
                 .AddSingleton(sp =>
-                    sp.GetRequiredService<IOptions<TrackingOptionsConfiguration>>().Value
+                    sp.GetRequiredService<IOptions<ContentSecurityPolicyConfiguration>>().Value
                 );
 
             app.Services.Configure<SupportedAssetTypesConfiguration>(
@@ -47,14 +48,19 @@ namespace Dfe.PlanTech.Web
                     sp.GetRequiredService<IOptions<SupportedAssetTypesConfiguration>>().Value
                 );
 
+            app.Services.Configure<TrackingOptionsConfiguration>(
+                    app.Configuration.GetSection("tracking")
+                )
+                .AddSingleton(sp =>
+                    sp.GetRequiredService<IOptions<TrackingOptionsConfiguration>>().Value
+                );
+
             app.Services.Configure<CookiePolicyOptions>(options =>
             {
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.Strict;
                 options.ConsentCookieValue = "false";
             });
-
-            app.Services.AddTransient<ContentSecurityPolicyConfiguration>();
         }
     }
 }
