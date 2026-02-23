@@ -1,5 +1,9 @@
 @model ReviewAnswersViewModel
 
+@{
+    ViewData["Title"] = "Check your answers";
+}
+
 @section NavButton {
     @{
         await Html.RenderPartialAsync("BackButton");
@@ -11,7 +15,7 @@
 }
 
 <div id="checkYourAnswers-page">
-    <h3 class="govuk-caption-xl">@Model.SectionName</h3>
+    <span class="govuk-caption-xl">@Model.SectionName</span>
     @{
         await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
     }
