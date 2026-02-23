@@ -67,6 +67,8 @@ app.UseCookiePolicy(new CookiePolicyOptions { Secure = CookieSecurePolicy.Always
 
 app.UseForwardedHeaders();
 
+app.UseMiddleware<ExploitPathMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
