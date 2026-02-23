@@ -1,17 +1,17 @@
-namespace Dfe.PlanTech.Core.Options;
+namespace Dfe.PlanTech.Core.Configuration;
 
 /// <summary>
 /// SQL database options; currently only used for retry options.
 /// </summary>
-public readonly record struct DatabaseOptions
+public readonly record struct DatabaseConfiguration
 {
-    public DatabaseOptions(int maxRetryCount, int maxDelayInMilliseconds)
+    public DatabaseConfiguration(int maxRetryCount, int maxDelayInMilliseconds)
     {
         MaxRetryCount = maxRetryCount;
         MaxDelayInMilliseconds = maxDelayInMilliseconds;
     }
 
-    public DatabaseOptions()
+    public DatabaseConfiguration()
         : this(5, 5000) { }
 
     /// <summary>
