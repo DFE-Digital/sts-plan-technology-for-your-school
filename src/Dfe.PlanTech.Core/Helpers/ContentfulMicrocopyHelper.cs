@@ -47,27 +47,34 @@ public static class ContentfulMicrocopyHelper
             ?? GetFallbackText(intendedText);
     }
 
-    public static string GetMicrocopyTextByKey(MicrocopyRecord record, List<MicrocopyEntry>? microcopyEntries, string dynamicText = "")
+    public static string GetMicrocopyTextByKey(
+        MicrocopyRecord record,
+        List<MicrocopyEntry>? microcopyEntries,
+        Dictionary<string, string>? dynamicValues = null)
     {
 
         var microcopyText = microcopyEntries?.FirstOrDefault(r => r.Key == record.Key)?.Value
             ?? GetFallbackText(record.Key);
 
-        if (!String.IsNullOrEmpty(dynamicText))
+        if (dynamicValues != null)
         {
-            microcopyText = ReplaceVariables(microcopyText, record, dynamicText);
+            microcopyText = ReplaceVariables(microcopyText, record, dynamicValues);
         }
 
         return microcopyText;
     }
 
-    private static string ReplaceVariables(string microcopyText, MicrocopyRecord record, string dynamicText)
+    private static string ReplaceVariables(string microcopyText, MicrocopyRecord record, Dictionary<string, string> dynamicValues)
     {
         var text = microcopyText;
         foreach (var variable in record.Variables)
         {
-             text = text.Replace($"{{{{{variable}}}}}", dynamicText);
+            if (!dynamicValues.TryGetValue(variable, out var value) || value is null)
+            {
+                return GetFallbackText(record.Key);
+            }
 
+            text = text.Replace($"{{{{{variable}}}}}", value);
         }
         return text;
     }
