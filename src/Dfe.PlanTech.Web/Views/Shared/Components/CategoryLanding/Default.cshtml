@@ -16,7 +16,10 @@
 {
     <div class="govuk-panel govuk-panel--confirmation govuk-!-margin-bottom-8">
         <h1 class="govuk-panel__title">
-            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageSuccessPanelHeader, Model.MicrocopyEntries, @Model.SectionName.ToLower())
+            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.LandingPageSuccessPanelHeader,
+                Model.MicrocopyEntries,
+                new Dictionary<string, string>{ ["topic"] = Model.SectionName.ToLower()})
         </h1>
         <div class="govuk-panel__body">
             @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageSuccessPanelBody, Model.MicrocopyEntries)

@@ -1,8 +1,15 @@
 @model CategoryLandingPageViewModel
 
 @{
-    var categoryName = Model.Category.Header.Text.ToLower();
-    var printLinkText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPagePrintLink, Model.MicrocopyEntries, categoryName);
+
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["standard"] = Model.Category.Header.Text.ToLower()
+    };
+    var printLinkText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+        ContentfulMicrocopyConstants.LandingPagePrintLink,
+        Model.MicrocopyEntries,
+        dynamicValues);
 }
 
 @section NavButton {
