@@ -64,7 +64,7 @@ public class EmbeddedEntryBlockRendererTests
         Assert.Equal(GetAccordionStringBuilderOutput().ToString(), result.ToString());
     }
 
-    private RichTextContentField GetGenericAttachmentContent()
+    private static RichTextContentField GetGenericAttachmentContent()
     {
         return new RichTextContentField()
         {
@@ -104,7 +104,7 @@ public class EmbeddedEntryBlockRendererTests
         };
     }
 
-    private StringBuilder GetGenericAttachmentStringBuilderOutput()
+    private static StringBuilder GetGenericAttachmentStringBuilderOutput()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append(
@@ -143,7 +143,7 @@ public class EmbeddedEntryBlockRendererTests
         return stringBuilder;
     }
 
-    private RichTextContentField GetCsAccordionContent()
+    private static RichTextContentField GetCsAccordionContent()
     {
         return new RichTextContentField()
         {
@@ -195,7 +195,7 @@ public class EmbeddedEntryBlockRendererTests
         };
     }
 
-    private StringBuilder GetAccordionStringBuilderOutput()
+    private static StringBuilder GetAccordionStringBuilderOutput()
     {
         var accId = "accordion-Internal Name 1";
         var stringBuilder = new StringBuilder();

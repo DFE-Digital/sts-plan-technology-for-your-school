@@ -26,7 +26,7 @@ public class TableCellRendererTests
         Assert.Equal(GetStringBuilderValue().ToString(), result.ToString());
     }
 
-    private StringBuilder GetStringBuilderValue()
+    private static StringBuilder GetStringBuilderValue()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append("<td class=\"govuk-table__cell\">");
@@ -39,7 +39,7 @@ public class TableCellRendererTests
         return stringBuilder;
     }
 
-    private RichTextContentField GetTableData()
+    private static RichTextContentField GetTableData()
     {
         return new RichTextContentField()
         {

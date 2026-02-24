@@ -6,6 +6,25 @@ namespace Dfe.PlanTech.Application.Rendering.Markdown;
 
 public class MarkdownRenderer
 {
+    private const string BlockQuote = "blockquote";
+    private const string Document = "document";
+    private const string Heading1 = "heading-1";
+    private const string Heading2 = "heading-2";
+    private const string Heading3 = "heading-3";
+    private const string Heading4 = "heading-4";
+    private const string Heading5 = "heading-5";
+    private const string Heading6 = "heading-6";
+    private const string HorizontalRule = "hr";
+    private const string ListItem = "list-item";
+    private const string OrderedList = "ordered-list";
+    private const string Paragraph = "paragraph";
+    private const string UnorderedList = "unordered-list";
+    private const string AssetHyperlink = "asset-hyperlink";
+    private const string EntryHyperlink = "entry-hyperlink";
+    private const string Hyperlink = "hyperlink";
+    private const string LineBreak = "line-break";
+    private const string Text = "text";
+
     // Contentful has some unusual non-breaking space characters
     private static readonly Regex NonBreakingSpaceRegex = new(
         "[\u00A0\u2007\u202F]",
@@ -26,28 +45,28 @@ public class MarkdownRenderer
 
     private readonly List<string> _knownLevelNodeTypes =
     [
-        "blockquote",
-        "document",
-        "heading-1",
-        "heading-2",
-        "heading-3",
-        "heading-4",
-        "heading-5",
-        "heading-6",
-        "hr",
-        "list-item",
-        "ordered-list",
-        "paragraph",
-        "unordered-list",
+        BlockQuote,
+        Document,
+        Heading1,
+        Heading2,
+        Heading3,
+        Heading4,
+        Heading5,
+        Heading6,
+        HorizontalRule,
+        ListItem,
+        OrderedList,
+        Paragraph,
+        UnorderedList,
     ];
 
     private readonly List<string> _knownInlineNodeTypes =
     [
-        "asset-hyperlink",
-        "entry-hyperlink",
-        "hyperlink",
-        "line-break",
-        "text",
+        AssetHyperlink,
+        EntryHyperlink,
+        Hyperlink,
+        LineBreak,
+        Text,
     ];
 
     public static string Render(RichTextContentField textBody)
@@ -86,26 +105,25 @@ public class MarkdownRenderer
 
         switch (field.NodeType)
         {
-            case "blockquote":
+            case BlockQuote:
                 RenderBlockQuote(field);
                 break;
-            case "document":
+            case Document:
                 RenderChildren(field);
                 break;
-            case "hr":
+            case HorizontalRule:
                 EmitBlock(["---"]);
                 break;
-            case "ordered-list":
+            case OrderedList:
                 RenderOrderedList(field);
                 break;
-            case "paragraph":
+            case Paragraph:
                 RenderParagraph(field);
                 break;
-            case "unordered-list":
+            case UnorderedList:
                 RenderUnorderedList(field);
                 break;
         }
-        ;
     }
 
     private void RenderBlockQuote(RichTextContentField field)
@@ -134,8 +152,11 @@ public class MarkdownRenderer
         var hyphenIndex = field.NodeType.IndexOf('-', StringComparison.Ordinal);
 
         var hasHyphenatedLevel = hyphenIndex >= 0 && hyphenIndex != field.NodeType.Length - 1;
-        if (hasHyphenatedLevel)
-            int.TryParse(field.NodeType[(hyphenIndex + 1)..], out level);
+        if (
+            hasHyphenatedLevel
+            && int.TryParse(field.NodeType[(hyphenIndex + 1)..], out var parsedLevel)
+        )
+            level = parsedLevel;
 
         var hashes = level == 1 ? "#" : "##";
         var text = CleanText(RenderInlines(field));
@@ -227,63 +248,65 @@ public class MarkdownRenderer
 
     private List<string> RenderListItem(RichTextContentField field, bool ordered)
     {
-        if (field.NodeType != "list-item")
+        if (field.NodeType != ListItem)
             return [];
 
         string bullet;
         if (ordered)
         {
             _renderContext.ListNestingLevels[^1] = _renderContext.ListNestingLevels[^1] + 1;
-            bullet = $"{_renderContext.ListNestingLevels[^1]}.";
         }
-        else
-        {
-            bullet = "*";
-        }
+
+        bullet = ordered ? $"{_renderContext.ListNestingLevels[^1]}." : "*";
 
         var indentLevel = Math.Max(_renderContext.ListStack.Count - 1, 0);
         var indent = new string(' ', indentLevel * 2);
 
         string? firstText = null;
+        var listTypes = new List<string>() { OrderedList, UnorderedList };
         var trailingBlocks = new List<string>();
 
         foreach (var content in field.Content)
         {
-            if (content.NodeType == "paragraph")
+            if (content.NodeType == Paragraph)
             {
                 var text = CleanText(RenderInlines(content));
-                if (!string.IsNullOrEmpty(text))
+
+                if (string.IsNullOrEmpty(text))
                 {
-                    if (firstText == null)
-                        firstText = text;
-                    else
-                        trailingBlocks.Add(text);
+                    continue;
                 }
+
+                if (firstText == null)
+                    firstText = text;
+                else
+                    trailingBlocks.Add(text);
+
+                continue;
             }
-            else if (content.NodeType is "unordered-list" or "ordered-list")
+
+            if (listTypes.Contains(content.NodeType))
             {
                 trailingBlocks.AddRange(RenderListAsLines(content));
+                continue;
             }
-            else
-            {
-                trailingBlocks.AddRange(
-                    RenderBlockChildrenToLines([content])
-                        .Where(x => !string.IsNullOrEmpty(CleanText(x)))
-                );
-            }
+
+            trailingBlocks.AddRange(
+                RenderBlockChildrenToLines([content])
+                    .Where(x => !string.IsNullOrEmpty(CleanText(x)))
+            );
         }
 
         firstText ??= "";
-
         var lines = new List<string> { $"{indent}{bullet} {firstText}" };
 
-        foreach (var block in trailingBlocks)
-        {
-            var cleaned = CleanText(block);
-            if (string.IsNullOrEmpty(cleaned))
-                continue;
-            lines.Add($"{indent}{cleaned}");
-        }
+        var cleanedBlocks = trailingBlocks
+            .Select(CleanText)
+            .Where(text => !string.IsNullOrEmpty(text))
+            .Select(text => $"{indent}{text}")
+            .ToArray();
+
+        lines.AddRange(cleanedBlocks);
 
         return lines;
     }
@@ -303,14 +326,14 @@ public class MarkdownRenderer
 
             switch (content.NodeType)
             {
-                case "text":
+                case Text:
                     stringBuilder.Append(CleanText(content.Value));
                     break;
-                case "hyperlink":
+                case Hyperlink:
                     RenderHyperlink(stringBuilder, content);
                     break;
-                case "asset-hyperlink":
-                case "entry-hyperlink":
+                case AssetHyperlink:
+                case EntryHyperlink:
                     stringBuilder.Append(CleanText(RenderInlines(content)));
                     break;
                 default:
@@ -360,10 +383,10 @@ public class MarkdownRenderer
 
     private List<string> RenderListAsLines(RichTextContentField field)
     {
-        if (field.NodeType is not ("unordered-list" or "ordered-list"))
+        if (field.NodeType is not (UnorderedList or OrderedList))
             return [];
 
-        var ordered = field.NodeType == "ordered-list";
+        var ordered = field.NodeType == OrderedList;
 
         _renderContext.ListStack.Add(ordered ? "ol" : "ul");
         _renderContext.ListNestingLevels.Add(0);

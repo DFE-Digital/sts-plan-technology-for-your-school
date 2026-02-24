@@ -72,7 +72,7 @@ public class AccordionComponentRendererRendererTests
         Assert.Equal(GetStandardStringBuilderOutput().ToString(), result.ToString());
     }
 
-    private StringBuilder GetStandardStringBuilderOutput()
+    private static StringBuilder GetStandardStringBuilderOutput()
     {
         var accId = "accordion-Internal Name 1";
         var stringBuilder = new StringBuilder();

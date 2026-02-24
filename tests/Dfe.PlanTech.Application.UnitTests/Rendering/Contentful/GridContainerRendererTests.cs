@@ -47,7 +47,7 @@ public class GridContainerRendererTests : CardTests
         Assert.Equal(GetCardContainerWithoutCards().ToString(), result);
     }
 
-    private StringBuilder GetCardContainerWithoutCards()
+    private static StringBuilder GetCardContainerWithoutCards()
     {
         var stringBuilder = new StringBuilder();
 

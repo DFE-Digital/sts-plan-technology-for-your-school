@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Application.UnitTests.Rendering.Contentful;
 
 public class CardTests
 {
-    protected ComponentCardEntry GetFirstCard()
+    protected static ComponentCardEntry GetFirstCard()
     {
         return new ComponentCardEntry()
         {
@@ -15,7 +15,7 @@ public class CardTests
         };
     }
 
-    protected ComponentCardEntry GetSecondCard()
+    protected static ComponentCardEntry GetSecondCard()
     {
         return new ComponentCardEntry()
         {
@@ -25,7 +25,7 @@ public class CardTests
         };
     }
 
-    protected ComponentCardEntry GetThirdCard()
+    protected static ComponentCardEntry GetThirdCard()
     {
         return new ComponentCardEntry()
         {
@@ -35,7 +35,7 @@ public class CardTests
         };
     }
 
-    protected ComponentCardEntry GetFourthCard()
+    protected static ComponentCardEntry GetFourthCard()
     {
         return new ComponentCardEntry()
         {
@@ -45,7 +45,7 @@ public class CardTests
         };
     }
 
-    protected StringBuilder GetFirstCardView()
+    protected static StringBuilder GetFirstCardView()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append("<div class=\"dfe-card\">");
@@ -61,7 +61,7 @@ public class CardTests
         return stringBuilder;
     }
 
-    protected StringBuilder GetSecondCardView()
+    protected static StringBuilder GetSecondCardView()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append("<div class=\"dfe-card\">");
@@ -77,7 +77,7 @@ public class CardTests
         return stringBuilder;
     }
 
-    protected StringBuilder GetThirdCardView()
+    protected static StringBuilder GetThirdCardView()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append("<div class=\"dfe-card\">");
@@ -93,7 +93,7 @@ public class CardTests
         return stringBuilder;
     }
 
-    protected StringBuilder GetFourthCardView()
+    protected static StringBuilder GetFourthCardView()
     {
         var stringBuilder = new StringBuilder();
         stringBuilder.Append("<div class=\"dfe-card\">");
@@ -109,12 +109,12 @@ public class CardTests
         return stringBuilder;
     }
 
-    protected List<ComponentCardEntry> GetCards()
+    protected static List<ComponentCardEntry> GetCards()
     {
         return [GetFirstCard(), GetSecondCard(), GetThirdCard(), GetFourthCard()];
     }
 
-    protected StringBuilder GetCardViews(StringBuilder stringBuilder)
+    protected static StringBuilder GetCardViews(StringBuilder stringBuilder)
     {
         stringBuilder.Append(GetFirstCardView());
         stringBuilder.Append(GetSecondCardView());

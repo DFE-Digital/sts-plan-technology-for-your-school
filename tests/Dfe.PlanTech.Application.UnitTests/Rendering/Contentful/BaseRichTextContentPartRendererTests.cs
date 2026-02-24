@@ -32,7 +32,7 @@ public class BaseRichTextContentPartRendererTests
 
     public static IEnumerable<object[]> AllRichTextNodeTypes()
     {
-        foreach (var value in Enum.GetValues(typeof(RichTextNodeType)))
+        foreach (var value in Enum.GetValues<RichTextNodeType>())
         {
             yield return new object[] { value, true };
         }
