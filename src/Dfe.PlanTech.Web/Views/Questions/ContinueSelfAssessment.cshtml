@@ -1,5 +1,9 @@
 @model ContinueSelfAssessmentViewModel
 
+@{
+    ViewData["Title"] = "Continue self-assessment";
+}
+
 @section NavButton {
     @{
         await Html.RenderPartialAsync("BackButton");

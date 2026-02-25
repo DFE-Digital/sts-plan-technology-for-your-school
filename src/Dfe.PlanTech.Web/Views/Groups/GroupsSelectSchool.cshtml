@@ -1,5 +1,9 @@
 @model GroupsSelectorViewModel
 
+@{
+    ViewData["Title"] = "Select a school";
+}
+
 @foreach (var content in Model.BeforeTitleContent)
 {
     await Html.RenderPartialAsync("Components/PageComponentFactory", content);

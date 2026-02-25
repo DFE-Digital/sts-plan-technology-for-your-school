@@ -87,7 +87,7 @@ public class RecommendationsViewBuilder(
         var orderedHistory = recommendationHistory.OrderByDescending(rh => rh.DateCreated).ToList();
 
         var groupedHistory = orderedHistory
-            .GroupBy(rh => $"{rh.DateCreated.Date:MMMM} activity")
+            .GroupBy(rh => $"{rh.DateCreated.Date:MMMM yyyy} activity")
             .ToDictionary(group => group.Key, group => group.Select(g => g));
 
         var firstActivity =
