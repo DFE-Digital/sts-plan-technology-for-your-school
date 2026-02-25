@@ -26,8 +26,7 @@ public class CategoryLandingViewComponentTests
 
         var expectedViewModel = new CategoryLandingViewComponentViewModel
         {
-            AllSectionsCompleted = true,
-            AnySectionsCompleted = true,
+            CompletedSectionsCount = 1,
             CategoryName = "Test Category",
             CategorySlug = slug,
             SectionName = sectionName,
@@ -81,8 +80,7 @@ public class CategoryLandingViewComponentTests
 
         var expectedViewModel = new CategoryLandingViewComponentViewModel
         {
-            AllSectionsCompleted = false,
-            AnySectionsCompleted = false,
+            CompletedSectionsCount = 0,
             CategoryName = "Another Category",
             CategorySlug = slug,
             SectionName = sectionName,
