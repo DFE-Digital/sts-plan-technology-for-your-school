@@ -19,8 +19,8 @@ Feature: Recommendation recent activity
       When I click "Show all sections" on the recent activity accordion
       Then all recent activity accordion sections should be expanded
 
-      When I expand the "February activity" section in recent activity
-      Then the "February activity" section should contain a recent activity entry with status "Complete" and question "Are you able to choose an answer to this first question?" dated today
+      When I expand the most recent recent activity section
+      Then the most recent section should contain a recent activity entry with status "Complete" and question "Are you able to choose an answer to this first question?" dated today
 
     @clear-data-school
     Scenario: Changing status on a recommendation updates the recent activity.
