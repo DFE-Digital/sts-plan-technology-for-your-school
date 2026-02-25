@@ -29,6 +29,7 @@
 
 @{
     var title = new ComponentTitleEntry(Model.CategoryName);
+    var microcopy = Model.MicrocopyEntries;
 }
 
 @if (!Model.Print)
@@ -46,14 +47,22 @@
     {
         <div class="govuk-inset-text">
             @{
-                <p>@ContentfulMicrocopyHelper.GetCategoryLandingInsetText(Model.CategoryName.ToLower(), Model.CompletedSectionsCount, Model.MicrocopyEntries)</p>
+                var insetText = ContentfulMicrocopyHelper.GetCategoryLandingInsetText(Model.CategoryName.ToLower(), Model.CompletedSectionsCount, Model.MicrocopyEntries);
+                <p>@insetText</p>
 
                 if (anySectionsCompleted)
                 {
                     foreach (var topic in Model.CategoryLandingSections)
-                    {
-                        <partial name="Components/CategoryLanding/SectionAssessmentLink" model='new StatusLinkViewModel { CategorySlug = @Model.CategorySlug, Section = topic, Context = "Default", MicrocopyEntries = @Model.MicrocopyEntries }' />
-                    }
+                    { 
+                        var vm = new StatusLinkViewModel
+                        {
+                            CategorySlug = Model.CategorySlug,
+                            Section = topic,
+                            Context = "Default",
+                            MicrocopyEntries = microcopy
+                        };
+                        <partial name="Components/CategoryLanding/SectionAssessmentLink" model='@vm' />
+                    }            
                 }
             }
         </div>
