@@ -98,7 +98,7 @@ When("I click {string} on the recent activity accordion", async function (label:
   await expect(btn).toContainText(label);
   await btn.click();
 
-    // check button is visible after click
+  // check button is visible after click
   await expect(btn).toBeVisible();
 });
 
@@ -162,11 +162,11 @@ Then(
     const now = new Date();
 
     const month = now.toLocaleDateString("en-GB", {
-        month: "long"
+      month: "long"
     });
 
     const year = now.toLocaleDateString("en-GB", {
-        year: "numeric"
+      year: "numeric"
     });
 
     const sectionHeading = `${month} ${year} activity`;
@@ -246,13 +246,17 @@ When(
 
     // submit the form
     const submitButton = page.getByRole("button", { name: /save/i });
-    await submitButton.click();
+
+    await Promise.all([
+      this.page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
+      await submitButton.click()
+    ]);
   }
 );
 
 Then(
   "the section should show a status change to {string} with note {string} dated today",
-  async function ( status: string, note: string) {
+  async function (status: string, note: string) {
     const page = this.page;
 
     // format today's date like the ui as "16 February 2026"
@@ -264,11 +268,11 @@ Then(
     });
 
     const month = now.toLocaleDateString("en-GB", {
-        month: "long"
+      month: "long"
     });
 
     const year = now.toLocaleDateString("en-GB", {
-        year: "numeric"
+      year: "numeric"
     });
 
     const sectionHeading = `${month} ${year} activity`;
