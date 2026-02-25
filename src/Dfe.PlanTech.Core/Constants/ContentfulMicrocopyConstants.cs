@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-
 namespace Dfe.PlanTech.Core.Constants;
 
 [ExcludeFromCodeCoverage]

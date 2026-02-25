@@ -1,4 +1,24 @@
+@using static Dfe.PlanTech.Core.Constants.ContentfulMicrocopyConstants
 @model CategoryCardsViewComponentViewModel
+
+@{
+    MicrocopyRecord cardMicrocopyRecord;
+
+    if (Model.CompletedSectionCount == 0 && Model.TotalSectionCount == 1)
+    {
+        cardMicrocopyRecord = ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted;
+    }
+    else if (Model.CompletedSectionCount == 0)
+    {
+        cardMicrocopyRecord = ContentfulMicrocopyConstants.HomeCardStatusMultipleNotStarted;
+    }
+    else
+    {
+        cardMicrocopyRecord = Model.CompletedSectionCount < Model.TotalSectionCount
+            ? ContentfulMicrocopyConstants.HomeCardStatusContinue
+            : ContentfulMicrocopyConstants.HomeCardStatusViewRecommendations;
+    }
+}
 
 <div class="dfe-card">
     <div class="dfe-card-container">
@@ -9,7 +29,7 @@
         </h3>
 
         <p class="govuk-body-s">
-            @ContentfulMicrocopyHelper.GetCardStatusText(Model.CompletedSectionCount, Model.TotalSectionCount, Model.MicrocopyEntries)
+            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(cardMicrocopyRecord, Model.MicrocopyEntries)
         </p>
     </div>
 </div>

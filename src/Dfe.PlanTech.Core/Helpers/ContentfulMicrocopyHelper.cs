@@ -6,47 +6,6 @@ namespace Dfe.PlanTech.Core.Helpers;
 
 public static class ContentfulMicrocopyHelper
 {
-    public static string GetCategoryLandingInsetText(string categoryName, int sectionsCompleted, List<MicrocopyEntry>? microcopy)
-    {
-        var statusText = string.Empty;
-
-        if (sectionsCompleted == 0)
-        {
-            statusText = microcopy?.FirstOrDefault(r => r.Key == ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted.Key)?.Value
-                ?? ContentfulMicrocopyHelper.GetFallbackText(ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted.Key);
-        }
-        else
-        {
-            statusText = microcopy?.FirstOrDefault(r => r.Key == ContentfulMicrocopyConstants.LandingPageInsetIntroContinue.Key)?.Value
-               ?? ContentfulMicrocopyHelper.GetFallbackText(ContentfulMicrocopyConstants.LandingPageInsetIntroContinue.Key);
-        }
-
-        return statusText?.Replace("{{standard}}", categoryName) ?? string.Empty;
-    }
-
-    public static string GetCardStatusText(int completedSectionCount, int totalSectionCount, List<MicrocopyEntry>? microcopyEntries)
-    {
-        string intendedText;
-
-        if (completedSectionCount == 0 && totalSectionCount == 1)
-        {
-            intendedText = ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted.Key;
-        }
-        else if (completedSectionCount == 0)
-        {
-            intendedText = ContentfulMicrocopyConstants.HomeCardStatusMultipleNotStarted.Key;
-        }
-        else
-        {
-            intendedText = completedSectionCount < totalSectionCount
-                ? ContentfulMicrocopyConstants.HomeCardStatusContinue.Key
-                : ContentfulMicrocopyConstants.HomeCardStatusViewRecommendations.Key;
-        }
-
-        return microcopyEntries?.FirstOrDefault(r => r.Key == intendedText)?.Value
-            ?? GetFallbackText(intendedText);
-    }
-
     public static string GetMicrocopyTextByKey(
         MicrocopyRecord record,
         List<MicrocopyEntry>? microcopyEntries,

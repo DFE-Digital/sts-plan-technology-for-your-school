@@ -1,3 +1,4 @@
+@using static Dfe.PlanTech.Core.Constants.ContentfulMicrocopyConstants
 @model CategoryLandingViewComponentViewModel
 
 @if (Model.NoSectionsErrorRedirectUrl != null)
@@ -38,6 +39,17 @@
     bool anySectionsCompleted = Model.CompletedSectionsCount != 0;
     bool allSectionsCompleted = Model.CompletedSectionsCount == Model.Sections.Count;
 
+    MicrocopyRecord insetMicrocopyRecord;
+
+    if (Model.CompletedSectionsCount == 0)
+    {
+        insetMicrocopyRecord = ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted;
+    }
+    else
+    {
+        insetMicrocopyRecord = ContentfulMicrocopyConstants.LandingPageInsetIntroContinue;
+    }
+
     var landingHeader = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageHeader, Model.MicrocopyEntries);
 
     <span class="govuk-caption-xl">@landingHeader</span>
@@ -47,7 +59,13 @@
     {
         <div class="govuk-inset-text">
             @{
-                var insetText = ContentfulMicrocopyHelper.GetCategoryLandingInsetText(Model.CategoryName.ToLower(), Model.CompletedSectionsCount, Model.MicrocopyEntries);
+                var insetText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                    insetMicrocopyRecord,
+                    Model.MicrocopyEntries,
+                    new Dictionary<string, string>
+                    {
+                        ["standard"] = Model.CategoryName.ToLower().Trim()
+                    });
                 <p>@insetText</p>
 
                 if (anySectionsCompleted)
