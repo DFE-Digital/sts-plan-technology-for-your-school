@@ -47,6 +47,29 @@ public class ContentfulWorkflow(
         }
     }
 
+    public async Task<string> GetTextBodyEntryByIdAsJsonAsync(string id)
+    {
+        try
+        {
+            var entryJson = await _contentfulRepository.GetTextBodyEntryByIdAsJsonAsync(id);
+            if (string.IsNullOrEmpty(entryJson))
+            {
+                throw new ContentfulDataUnavailableException(
+                    $"Could not find entry with ID '{id}'"
+                );
+            }
+            return entryJson;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ExceptionMessageEntityContentful);
+            throw new ContentfulDataUnavailableException(
+                $"Could not find entry with ID '{id}'",
+                ex
+            );
+        }
+    }
+
     public async Task<List<TEntry>> GetEntries<TEntry>()
         where TEntry : ContentfulEntry
     {
