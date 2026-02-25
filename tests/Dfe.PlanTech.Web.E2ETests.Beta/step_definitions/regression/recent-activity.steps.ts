@@ -30,19 +30,36 @@ async function sectionContentByHeading(page: Page, headingText: string) {
   return page.locator(`#${contentId}`);
 }
 
-function monthFromHeading(headingText: string): string {
-  // e.g. "February activity" -> "February"
-  const m = headingText.trim().match(/^([A-Za-z]+)\s+activity$/i);
-  if (!m) throw new Error(`Could not parse month from heading "${headingText}" (expected e.g. "February activity")`);
-  // Keep original case for nicer errors, but normalize comparisons
-  return m[1];
+function mostRecentSectionButton(page: any) {
+  // first section in the accordion = most recent (top of list)
+  return page
+    .locator("#accordion-default .govuk-accordion__section")
+    .first()
+    .locator("button.govuk-accordion__section-button");
 }
 
-function monthFromDate(dateText: string): string {
-  // e.g. "16 February 2026" -> "February"
-  const m = dateText.trim().match(/^\d{1,2}\s+([A-Za-z]+)\s+\d{4}$/);
-  if (!m) throw new Error(`Could not parse month from date "${dateText}" (expected e.g. "16 February 2026")`);
-  return m[1];
+async function mostRecentSectionContent(page: any) {
+  const btn = mostRecentSectionButton(page);
+  await expect(btn).toHaveCount(1);
+
+  const contentId = await btn.getAttribute("aria-controls");
+  if (!contentId) throw new Error("Most recent accordion section button is missing aria-controls");
+
+  return page.locator(`#${contentId}`);
+}
+
+async function ensureMostRecentSectionExpanded(page: any) {
+  const btn = mostRecentSectionButton(page);
+  const expanded = (await btn.getAttribute("aria-expanded")) === "true";
+  if (!expanded) await btn.click();
+  await expect(btn).toHaveAttribute("aria-expanded", "true");
+}
+
+function monthYearFromHeading(headingText: string): { month: string, year: string } {
+  // "February 2026 activity"
+  const m = headingText.trim().match(/^([A-Za-z]+)\s+(\d{4})\s+activity$/i);
+  if (!m) throw new Error(`Could not parse month/year from heading "${headingText}"`);
+  return { month: m[1], year: m[2] };
 }
 
 async function ensureSectionExpanded(page: Page, headingText: string) {
@@ -65,6 +82,11 @@ async function ensureSectionCollapsed(page: Page, headingText: string) {
 
 
 //show/hide all 
+
+When("I expand the most recent recent activity section", async function () {
+  const page = this.page;
+  await ensureMostRecentSectionExpanded(page);
+});
 
 When("I click {string} on the recent activity accordion", async function (label: string) {
   const page = this.page;
@@ -128,23 +150,31 @@ Then("the {string} section in recent activity should be collapsed", async functi
   await expect(btn).toHaveAttribute("aria-expanded", "false");
 });
 
-
-
 Then(
-  "the {string} section should contain a recent activity entry with status {string} and question {string} dated today",
+  "the most recent section should contain a recent activity entry with status {string} and question {string} dated today",
   async function (
-    sectionHeading: string,
     status: string,
     questionText: string
   ) {
     const page = this.page;
 
-    // expand the section
-    await ensureSectionExpanded(page, sectionHeading);
-    const content = await sectionContentByHeading(page, sectionHeading);
-
-    // get today's date
+    // format today's date like the ui as "16 February 2026"
     const now = new Date();
+
+    const month = now.toLocaleDateString("en-GB", {
+        month: "long"
+    });
+
+    const year = now.toLocaleDateString("en-GB", {
+        year: "numeric"
+    });
+
+    const sectionHeading = `${month} ${year} activity`;
+
+
+    // expand the section
+    await ensureMostRecentSectionExpanded(page);
+    const content = await mostRecentSectionContent(page);
 
     const formattedToday = now.toLocaleDateString("en-GB", {
       day: "numeric",
@@ -179,12 +209,20 @@ Then(
     await expect(questionStrong).toBeVisible();
 
     // month check
-    const headingMonth = monthFromHeading(sectionHeading).toLowerCase();
+    const monthYear = monthYearFromHeading(sectionHeading);
+    const headingMonth = monthYear.month.toLowerCase();
     const currentMonth = now.toLocaleDateString("en-GB", {
       month: "long",
     }).toLowerCase();
 
+    const headingYear = monthYear.year.toLowerCase();
+    const currentYear = now.toLocaleDateString("en-GB", {
+      year: "numeric"
+    });
+
     expect(currentMonth).toBe(headingMonth);
+    expect(currentYear).toBe(headingYear);
+
   }
 );
 
@@ -229,7 +267,11 @@ Then(
         month: "long"
     });
 
-    const sectionHeading = `${month} activity`;
+    const year = now.toLocaleDateString("en-GB", {
+        year: "numeric"
+    });
+
+    const sectionHeading = `${month} ${year} activity`;
 
     // expand the section
     await ensureSectionExpanded(page, sectionHeading);
@@ -268,8 +310,18 @@ Then(
     await expect(dateHeadingForEntry).toHaveText(todayText);
 
     // month in accordion matches current month
-    const headingMonth = monthFromHeading(sectionHeading).toLowerCase();
-    const currentMonth = now.toLocaleDateString("en-GB", { month: "long" }).toLowerCase();
+    const monthYear = monthYearFromHeading(sectionHeading);
+    const headingMonth = monthYear.month.toLowerCase();
+    const currentMonth = now.toLocaleDateString("en-GB", {
+      month: "long",
+    }).toLowerCase();
+
+    const headingYear = monthYear.year.toLowerCase();
+    const currentYear = now.toLocaleDateString("en-GB", {
+      year: "numeric"
+    });
+
     expect(currentMonth).toBe(headingMonth);
+    expect(currentYear).toBe(headingYear);
   }
 );
