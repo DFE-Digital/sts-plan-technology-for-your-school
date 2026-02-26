@@ -122,19 +122,6 @@ public class SubmissionRepositoryTests
     }
 
     [Fact]
-    public async Task SetLatestSubmissionViewed_No_Submission_No_Throw()
-    {
-        using var db = BuildPlanTechDbContext(
-            nameof(SetLatestSubmissionViewed_No_Submission_No_Throw)
-        );
-        var repo = new SubmissionRepository(db);
-
-        await repo.SetLatestSubmissionViewedAsync(99, "NA");
-        // nothing to assert beyond “no throw” and SaveChanges called; InMemory SaveChanges is cheap.
-        Assert.Equal(0, await db.Submissions.CountAsync());
-    }
-
-    [Fact]
     public async Task SetSubmissionReviewed_Throws_When_Submission_Not_Found()
     {
         using var db = BuildPlanTechDbContext(

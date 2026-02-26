@@ -27,7 +27,6 @@ public class SubmissionEntityTests
         );
         DateTime? expectedDateCompleted = null;
         var expectedDeleted = false;
-        var expectedViewed = true;
         var expectedStatus = SubmissionStatus.InProgress;
 
         var establishment = new EstablishmentEntity
@@ -55,7 +54,6 @@ public class SubmissionEntityTests
             // TODO: Consider if it is reasonable to redesign this to remove the circular references / risk for infinite recursion when mapping.
             Responses = new List<ResponseEntity>(),
             Deleted = expectedDeleted,
-            Viewed = expectedViewed,
             Status = expectedStatus,
         };
 
@@ -75,7 +73,6 @@ public class SubmissionEntityTests
         Assert.Equal(expectedDateCompleted, dto.DateCompleted);
         Assert.Empty(dto.Responses);
         Assert.Equal(expectedDeleted, dto.Deleted);
-        Assert.Equal(expectedViewed, dto.Viewed);
         Assert.Equal(expectedStatus, dto.Status);
 
         // Assert - ensure all DTO properties are accounted for
@@ -93,7 +90,6 @@ public class SubmissionEntityTests
                 nameof(SqlSubmissionDto.DateCompleted),
                 nameof(SqlSubmissionDto.Responses),
                 nameof(SqlSubmissionDto.Deleted),
-                nameof(SqlSubmissionDto.Viewed),
                 nameof(SqlSubmissionDto.Status),
             }
         );

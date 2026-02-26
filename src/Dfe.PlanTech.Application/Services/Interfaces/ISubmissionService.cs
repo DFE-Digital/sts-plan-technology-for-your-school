@@ -40,7 +40,6 @@ public interface ISubmissionService
         int establishmentId,
         string sectionId
     );
-    Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId);
     Task<int> SubmitAnswerAsync(
         int userId,
         int activeEstablishmentId,
