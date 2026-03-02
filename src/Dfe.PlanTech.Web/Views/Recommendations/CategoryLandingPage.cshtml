@@ -14,7 +14,7 @@
 
 @section NavButton {
     <govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
-        Back to choose a standard
+        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageBackLink, Model.MicrocopyEntries)
     </govuk-back-link>
 }
 
