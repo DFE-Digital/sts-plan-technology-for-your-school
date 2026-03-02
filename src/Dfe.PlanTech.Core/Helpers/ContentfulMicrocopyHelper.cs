@@ -11,9 +11,8 @@ public static class ContentfulMicrocopyHelper
         List<MicrocopyEntry>? microcopyEntries,
         Dictionary<string, string>? dynamicValues = null)
     {
-
         var microcopyText = microcopyEntries?.FirstOrDefault(r => r.Key == record.Key)?.Value
-            ?? GetFallbackText(record.Key);
+            ?? record.FallbackText;
 
         if (dynamicValues != null)
         {
@@ -30,35 +29,11 @@ public static class ContentfulMicrocopyHelper
         {
             if (!dynamicValues.TryGetValue(variable, out var value) || value is null)
             {
-                return GetFallbackText(record.Key);
+                return record.FallbackText;
             }
 
             text = text.Replace($"{{{{{variable}}}}}", value);
         }
         return text;
-    }
-
-    public static string GetFallbackText(string intendedText)
-    {
-        if (ContentfulMicrocopyConstants.EmptyFallback.Contains(intendedText))
-        {
-            return string.Empty;
-        }
-        else if (ContentfulMicrocopyConstants.CardsFallback.Contains(intendedText))
-        {
-            return "Go to standard";
-        }
-        else if (ContentfulMicrocopyConstants.TopicLinksFallback.Contains(intendedText))
-        {
-            return "Start, continue or view answers for this self-assessment";
-        }
-        else if (ContentfulMicrocopyConstants.PrintLinksFallback.Contains(intendedText))
-        {
-            return "Print all recommendations";
-        }
-        else
-        {
-            throw new ArgumentException();
-        }
     }
 }
