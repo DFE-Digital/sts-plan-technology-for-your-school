@@ -14,9 +14,16 @@ public static class ContentfulMicrocopyHelper
         var microcopyText = microcopyEntries?.FirstOrDefault(r => r.Key == record.Key)?.Value
             ?? record.FallbackText;
 
-        if (dynamicValues != null)
+        if (record.Variables != null)
         {
-            microcopyText = ReplaceVariables(microcopyText, record, dynamicValues);
+            if (dynamicValues == null)
+            {
+                return record.FallbackText;
+            }
+            else
+            {
+                microcopyText = ReplaceVariables(microcopyText, record, dynamicValues);
+            }
         }
 
         return microcopyText;
