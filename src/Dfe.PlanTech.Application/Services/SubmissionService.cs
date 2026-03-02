@@ -51,7 +51,7 @@ public class SubmissionService(
     public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
         int establishmentId,
         QuestionnaireSectionEntry section,
-        SubmissionStatus status
+        SubmissionStatus? status
     )
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(

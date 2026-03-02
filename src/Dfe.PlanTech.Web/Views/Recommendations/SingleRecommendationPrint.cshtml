@@ -17,24 +17,26 @@
         <span class="govuk-caption-l">Recommendation @Model.CurrentChunkCount of @Model.TotalChunks</span>
             <h1 class="govuk-heading-l">@chunk.HeaderText</h1>
 
-        <table class="govuk-table">
-            <thead class="govuk-table__head">
-                <tr class="govuk-table__row">
-                    <th scope="col" class="govuk-table__header">Status</th>
-                    <th scope="col" class="govuk-table__header">Updated</th>
-                </tr>
-            </thead>
-            <tbody class="govuk-table__body">
-                <tr class="govuk-table__row">
-                    <td class="govuk-table__cell">
-                            <strong class="govuk-tag @chunk.StatusTagClass">
-                            @chunk.Status.GetDisplayName()
-                        </strong>
-                    </td>
-                        <td class="govuk-table__cell">@chunk.LastUpdatedFormatted</td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="dfe-table-scroll" tabindex="0">
+            <table class="govuk-table">
+                <thead class="govuk-table__head">
+                    <tr class="govuk-table__row">
+                        <th scope="col" class="govuk-table__header">Status</th>
+                        <th scope="col" class="govuk-table__header">Updated</th>
+                    </tr>
+                </thead>
+                <tbody class="govuk-table__body">
+                    <tr class="govuk-table__row">
+                        <td class="govuk-table__cell">
+                                <strong class="govuk-tag @chunk.StatusTagClass">
+                                @chunk.Status.GetDisplayName()
+                            </strong>
+                        </td>
+                            <td class="govuk-table__cell">@chunk.LastUpdatedFormatted</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <hr class="govuk-section-break govuk-section-break--m">
 

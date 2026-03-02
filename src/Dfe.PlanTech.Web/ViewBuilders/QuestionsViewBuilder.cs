@@ -228,7 +228,7 @@ public class QuestionsViewBuilder(
         var submissionModel = await _submissionService.GetLatestSubmissionResponsesModel(
             establishmentId,
             section,
-            status: SubmissionStatus.InProgress
+            status: null
         );
 
         if (submissionModel is null || !submissionModel.HasResponses)
@@ -236,7 +236,7 @@ public class QuestionsViewBuilder(
             return controller.RedirectToInterstitialPage(sectionSlug);
         }
 
-        if (submissionModel.Status.Equals(nameof(SubmissionStatus.Obsolete)))
+        if (submissionModel.Status == SubmissionStatus.Obsolete)
         {
             var restartObsoleteViewModel = new RestartObsoleteAssessmentViewModel
             {

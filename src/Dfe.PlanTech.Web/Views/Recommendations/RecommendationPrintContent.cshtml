@@ -25,8 +25,9 @@
         </p>
     </div>
 
-        <div class="recommendation-action-header">
-        <table class="govuk-table">
+    <div class="recommendation-action-header">
+        <div class="dfe-table-scroll" tabindex="0">
+            <table class="govuk-table">
                 <thead class="govuk-table__head">
                     <tr class="govuk-table__row">
                         <th scope="col" class="govuk-table__header">Recommendation</th>
@@ -34,26 +35,26 @@
                         <th scope="col" class="govuk-table__header govuk-!-text-align-right">Status</th>
                     </tr>
                 </thead>
-            <tbody class="govuk-table__body">
-                @foreach (var chunk in Model.Chunks)
-                {
-
-                    <tr class="govuk-table__row">
-                        <td class="govuk-table__cell table__cell custom-height">
-                            <div>@chunk.HeaderText</div>
-                        </td>
-                        <td class="govuk-table__cell govuk-hint govuk-!-font-size-16 govuk-!-padding-top-3">
-                            @chunk.LastUpdated.ToString("d MMM yyy")
-                        </td>
-                        <td class="govuk-table__cell govuk-!-text-align-right">
-                            <strong class="govuk-tag @((chunk.Status as RecommendationStatus?).GetCssClassOrDefault(RecommendationConstants.DefaultTagClass))">
-                                @chunk.Status.GetDisplayName()
-                            </strong>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                <tbody class="govuk-table__body">
+                    @foreach (var chunk in Model.Chunks)
+                    {
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell table__cell custom-height">
+                                <div>@chunk.HeaderText</div>
+                            </td>
+                            <td class="govuk-table__cell govuk-hint govuk-!-font-size-16 govuk-!-padding-top-3">
+                                @chunk.LastUpdated.ToString("d MMM yyy")
+                            </td>
+                            <td class="govuk-table__cell govuk-!-text-align-right">
+                                <strong class="govuk-tag @((chunk.Status as RecommendationStatus?).GetCssClassOrDefault(RecommendationConstants.DefaultTagClass))">
+                                    @chunk.Status.GetDisplayName()
+                                </strong>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <hr class="govuk-section-break govuk-section-break--l">
@@ -65,24 +66,26 @@
         <div class="recommendation-piece-content">
             <h1 class="govuk-heading-l">@chunk.HeaderText</h1>
 
-            <table class="govuk-table">
-                <thead class="govuk-table__head">
-                    <tr class="govuk-table__row">
-                        <th scope="col" class="govuk-table__header">Status</th>
-                        <th scope="col" class="govuk-table__header">Updated</th>
-                    </tr>
-                </thead>
-                <tbody class="govuk-table__body">
-                    <tr class="govuk-table__row">
-                        <td class="govuk-table__cell">
-                            <strong class="govuk-tag @chunk.StatusTagClass">
-                                @chunk.Status.GetDisplayName()
-                            </strong>
-                        </td>
-                        <td class="govuk-table__cell">@chunk.LastUpdatedFormatted</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="dfe-table-scroll" tabindex="0">
+                <table class="govuk-table">
+                    <thead class="govuk-table__head">
+                        <tr class="govuk-table__row">
+                            <th scope="col" class="govuk-table__header">Status</th>
+                            <th scope="col" class="govuk-table__header">Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody class="govuk-table__body">
+                        <tr class="govuk-table__row">
+                            <td class="govuk-table__cell">
+                                <strong class="govuk-tag @chunk.StatusTagClass">
+                                    @chunk.Status.GetDisplayName()
+                                </strong>
+                            </td>
+                            <td class="govuk-table__cell">@chunk.LastUpdatedFormatted</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             @foreach (var content in chunk.Content)
             {
