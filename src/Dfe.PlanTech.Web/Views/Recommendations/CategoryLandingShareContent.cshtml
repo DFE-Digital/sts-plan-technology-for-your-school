@@ -24,6 +24,12 @@
 
 <hr class="govuk-section-break govuk-section-break--l">
 
+@{
+    var sectionHasError =
+        ViewData.ModelState.TryGetValue(nameof(Model.InputModel.EmailAddresses), out var sectionEntry)
+        && sectionEntry.Errors.Count > 0;
+}
+
 <form class="govuk-form-group"
       asp-controller="Pages"
       asp-action="PostShareStandardChecklist"
@@ -103,7 +109,13 @@
         </div>
     </div>
 
-    <div class="govuk-form-group">
+    @{
+        var nameOfUserMissing =
+            ViewData.ModelState.TryGetValue(nameof(Model.InputModel.NameOfUser), out var nameEntry)
+            && nameEntry.Errors.Count > 0;
+    }
+
+    <div class="govuk-form-group @(nameOfUserMissing ? "govuk-form-group--error" : "")">
         <h1 class="govuk-label-wrapper">
             <label class="govuk-label govuk-label--m" for="name-of-user">
                 Enter your name
@@ -112,7 +124,15 @@
         <div id="name-of-user-hint" class="govuk-hint">
             Your name will be part of the email title. For example, 'James Brown has shared digital leadership and governance recommendations with you'.
         </div>
-        <input class="govuk-input"
+
+        @if (nameOfUserMissing)
+        {
+            <p id="name-of-user-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span> @nameEntry!.Errors[0].ErrorMessage
+            </p>
+        }
+
+        <input class="govuk-input @(nameOfUserMissing ? "govuk-input--error" : "")"
                id="name-of-user"
                name="NameOfUser"
                type="text"
@@ -140,80 +160,9 @@
 
     <div class="govuk-form-group">
         <button type="submit"
-                class="govuk-button govuk-button--primary"
+                class="govuk-button govuk-button--primary js-only"
                 data-module="govuk-button">
             Send email
         </button>
     </div>
 </form>
-
-<style>
-    /* Default: JS button hidden */
-    .js-only {
-        display: none;
-    }
-
-    /* GOV.UK convention: add 'js-enabled' class to <html> when JS runs */
-    .js-enabled .js-only {
-        display: block;
-    }
-</style>
-
-<script>
-    // If your layout already does this, you can remove this line.
-    document.documentElement.classList.add('js-enabled');
-
-    (function () {
-        const rows = Array.from(document.querySelectorAll('[data-email-row]'));
-        const addBtn = document.getElementById('add-another-person');
-        if (!rows.length || !addBtn) return;
-
-        const max = rows.length;
-
-        function setRowVisible(row, visible) {
-            row.style.display = visible ? '' : 'none';
-        }
-
-        // On load: show only "initially visible" rows (first + any with value/error).
-        rows.forEach(row => {
-            const initiallyVisible = row.getAttribute('data-initially-visible') === 'true';
-            setRowVisible(row, initiallyVisible);
-        });
-
-        function visibleCount() {
-            return rows.filter(r => r.style.display !== 'none').length;
-        }
-
-        function updateButtonState() {
-            const count = visibleCount();
-            if (count >= max) {
-                addBtn.disabled = true;
-                addBtn.setAttribute('aria-disabled', 'true');
-                addBtn.textContent = 'You have added 10 people';
-            } else {
-                addBtn.disabled = false;
-                addBtn.removeAttribute('aria-disabled');
-                addBtn.textContent = 'Add another person';
-            }
-        }
-
-        addBtn.addEventListener('click', function () {
-            const count = visibleCount();
-            if (count >= max) return;
-
-            // Reveal the next hidden row (in order)
-            const next = rows.find(r => r.style.display === 'none');
-            if (!next) return;
-
-            setRowVisible(next, true);
-
-            // Focus the input inside it
-            const input = next.querySelector('input');
-            if (input) input.focus();
-
-            updateButtonState();
-        });
-
-        updateButtonState();
-    })();
-</script>

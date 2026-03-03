@@ -151,10 +151,8 @@ public class PagesViewBuilder(
         }
 
         var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
-
         if (model is not null)
         {
-            controller.TryValidateModel(model);
             landingPageViewModel.InputModel = model;
         }
 

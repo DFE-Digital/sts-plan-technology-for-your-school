@@ -12,6 +12,8 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+using Microsoft.Extensions.Options;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
@@ -57,28 +59,18 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
         return await _pagesViewBuilder.RouteToCategoryLandingSharePageAsync(this, categorySlug);
     }
 
-    [LogInvalidModelState]
     [HttpPost("{categorySlug}/share", Name = "ShareStandardChecklist")]
     public async Task<IActionResult> PostShareStandardChecklist(
         string categorySlug,
-        ShareRecommendationInputViewModel test
+        [FromForm] ShareRecommendationInputViewModel model
     )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
 
-        if (!ModelState.IsValid)
-        {
-            return await _pagesViewBuilder.RouteToCategoryLandingSharePageAsync(
-                this,
-                categorySlug,
-                test
-            );
-        }
-
         return await _pagesViewBuilder.RouteToCategoryLandingSharePageAsync(
             this,
             categorySlug,
-            test
+            model
         );
     }
 
