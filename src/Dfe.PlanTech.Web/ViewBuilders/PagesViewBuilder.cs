@@ -8,6 +8,8 @@ using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
+using Dfe.PlanTech.Web.ViewModels.QaVisualiser;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -20,13 +22,14 @@ public class PagesViewBuilder(
     IContentfulService contentfulService,
     IEstablishmentService establishmentService,
     ICurrentUser currentUser
-)
-    : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
+) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView =
         "~/Views/Recommendations/CategoryLandingPage.cshtml";
     public const string CategoryLandingPagePrintView =
         "~/Views/Recommendations/CategoryLandingPrintContent.cshtml";
+    public const string CategoryLandingPageShareView =
+        "~/Views/Recommendations/CategoryLandingShareContent.cshtml";
 
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
@@ -135,6 +138,29 @@ public class PagesViewBuilder(
         return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
 
+    public async Task<IActionResult> RouteToCategoryLandingSharePageAsync(
+        Controller controller,
+        string categorySlug,
+        ShareRecommendationInputViewModel? model = null
+    )
+    {
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
+        if (category is null)
+        {
+            return controller.RedirectToHomePage();
+        }
+
+        var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
+
+        if (model is not null)
+        {
+            controller.TryValidateModel(model);
+            landingPageViewModel.InputModel = model;
+        }
+
+        return controller.View(CategoryLandingPageShareView, landingPageViewModel);
+    }
+
     private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(
         Controller controller,
         QuestionnaireCategoryEntry category
@@ -155,7 +181,7 @@ public class PagesViewBuilder(
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"],
-            MicrocopyEntries = microcopy
+            MicrocopyEntries = microcopy,
         };
     }
 

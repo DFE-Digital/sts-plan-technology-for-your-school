@@ -9,6 +9,7 @@ using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Binders;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -46,6 +47,39 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
 
         return await _pagesViewBuilder.RouteToCategoryLandingPrintPageAsync(this, categorySlug);
+    }
+
+    [HttpGet("{categorySlug}/share", Name = "ShareStandardChecklist")]
+    public async Task<IActionResult> ShareStandardChecklist(string categorySlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToCategoryLandingSharePageAsync(this, categorySlug);
+    }
+
+    [LogInvalidModelState]
+    [HttpPost("{categorySlug}/share", Name = "ShareStandardChecklist")]
+    public async Task<IActionResult> PostShareStandardChecklist(
+        string categorySlug,
+        ShareRecommendationInputViewModel test
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        if (!ModelState.IsValid)
+        {
+            return await _pagesViewBuilder.RouteToCategoryLandingSharePageAsync(
+                this,
+                categorySlug,
+                test
+            );
+        }
+
+        return await _pagesViewBuilder.RouteToCategoryLandingSharePageAsync(
+            this,
+            categorySlug,
+            test
+        );
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
