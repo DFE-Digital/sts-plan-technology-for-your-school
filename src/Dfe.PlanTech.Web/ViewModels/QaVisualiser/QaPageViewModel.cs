@@ -4,7 +4,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 namespace Dfe.PlanTech.Web.ViewModels.QaVisualiser;
 
 [ExcludeFromCodeCoverage]
-public class PageViewModel
+public class QaPageViewModel
 {
     public string InternalName { get; init; } = null!;
     public string Slug { get; init; } = null!;

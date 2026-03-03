@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
@@ -13,6 +14,11 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
         Task<IActionResult> RouteToCategoryLandingPrintPageAsync(
             Controller controller,
             string categorySlug
+        );
+        Task<IActionResult> RouteToCategoryLandingSharePageAsync(
+            Controller controller,
+            string categorySlug,
+            ShareRecommendationInputViewModel? model = null
         );
         Task<NotFoundViewModel> BuildNotFoundViewModel();
     }
