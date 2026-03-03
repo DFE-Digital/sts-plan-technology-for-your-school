@@ -7,29 +7,50 @@
     string? action = null;
 
     var topic = Model.Section;
-    var topicName = topic.Name.ToLower().Trim();
     var topicSlug = topic.Slug ?? string.Empty;
     var topicStatus = topic.ProgressStatus;
     var categorySlug = Model.CategorySlug;
+
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["dateUpdated"] = topic.DateUpdated ?? "",
+        ["topic"] = topic.Name.ToLower().Trim(),
+        ["dateCompleted"] = topic.LastCompletionDate ?? ""
+    };
 
     switch (topicStatus)
     {
         case SubmissionStatus.InProgress:
         case SubmissionStatus.Obsolete:
-            statusText = $"A self-assessment was started on {topic.DateUpdated}.";
-            linkText = $"Continue your self-assessment for {topicName}";
+            statusText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.LandingPageTopicIntroContinue,
+                Model.MicrocopyEntries,
+                dynamicValues);
+            linkText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.LandingPageTopicLinkContinue,
+                Model.MicrocopyEntries,
+                dynamicValues);
             controller = nameof(QuestionsController);
             action = nameof(QuestionsController.GetContinueSelfAssessment);
             break;
         case SubmissionStatus.CompleteReviewed:
-            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
-            linkText = $"View answers for {topicName}";
+            statusText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.LandingPageTopicIntroCompleted,
+                Model.MicrocopyEntries,
+                dynamicValues);
+            linkText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.LandingPageTopicLinkCompleted,
+                Model.MicrocopyEntries,
+                dynamicValues);
             controller = nameof(ReviewAnswersController);
             action = nameof(ReviewAnswersController.ViewAnswers);
             break;
         default:
             statusText = "";
-            linkText = $"Go to self-assessment for {topicName}";
+            linkText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.LandingPageTopicLinkNotStarted,
+                Model.MicrocopyEntries,
+                dynamicValues);
             controller = nameof(QuestionsController);
             action = nameof(QuestionsController.GetInterstitialPage);
             break;
