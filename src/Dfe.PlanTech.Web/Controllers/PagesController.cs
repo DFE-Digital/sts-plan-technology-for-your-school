@@ -51,26 +51,26 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
         return await _pagesViewBuilder.RouteToCategoryLandingPrintPageAsync(this, categorySlug);
     }
 
-    [HttpGet("{categorySlug}/share", Name = "ShareStandardChecklist")]
-    public async Task<IActionResult> ShareStandardChecklist(string categorySlug)
+    [HttpGet("{categorySlug}/share", Name = "ShareStandard")]
+    public async Task<IActionResult> ShareStandard(string categorySlug)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
 
-        return await _pagesViewBuilder.RouteToCategoryLandingSharePageAsync(this, categorySlug);
+        return await _pagesViewBuilder.RouteToShareStandardPageAsync(this, categorySlug);
     }
 
-    [HttpPost("{categorySlug}/share", Name = "ShareStandardChecklist")]
-    public async Task<IActionResult> PostShareStandardChecklist(
+    [HttpPost("{categorySlug}/share", Name = "PostShareStandard")]
+    public async Task<IActionResult> PostShareStandard(
         string categorySlug,
-        [FromForm] ShareRecommendationInputViewModel model
+        [FromForm] ShareByEmailInputViewModel inputModel
     )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
 
-        return await _pagesViewBuilder.RouteToCategoryLandingSharePageAsync(
+        return await _pagesViewBuilder.RouteToShareStandardPageAsync(
             this,
             categorySlug,
-            model
+            inputModel
         );
     }
 

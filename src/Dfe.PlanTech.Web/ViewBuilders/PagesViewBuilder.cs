@@ -5,11 +5,11 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
-using Dfe.PlanTech.Web.ViewModels.QaVisualiser;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -21,6 +21,7 @@ public class PagesViewBuilder(
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
     IEstablishmentService establishmentService,
+    INotifyService notifyService,
     ICurrentUser currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
@@ -28,15 +29,13 @@ public class PagesViewBuilder(
         "~/Views/Recommendations/CategoryLandingPage.cshtml";
     public const string CategoryLandingPagePrintView =
         "~/Views/Recommendations/CategoryLandingPrintContent.cshtml";
-    public const string CategoryLandingPageShareView =
-        "~/Views/Recommendations/CategoryLandingShareContent.cshtml";
 
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorPagesConfiguration _errorPages =
-        errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
-    private readonly IContentfulService _contentfulService =
-        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
+        errorPages.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly INotifyService _notifyService =
+        notifyService ?? throw new ArgumentNullException(nameof(notifyService));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(
         Controller controller,
@@ -84,7 +83,11 @@ public class PagesViewBuilder(
                     $"Could not find category at {controller.Request.Path.Value}"
                 );
             }
-            var landingPageViewModel = await BuildLandingPageViewModelAsync(controller, category);
+            var landingPageViewModel = await BuildLandingPageViewModelAsync(
+                controller,
+                category,
+                page.Slug
+            );
             return controller.View(CategoryLandingPageView, landingPageViewModel);
         }
 
@@ -94,7 +97,7 @@ public class PagesViewBuilder(
 
         var viewModel = new PageViewModel(page);
 
-        viewModel.MicrocopyEntries = await contentfulService.GetMicrocopyEntriesAsync();
+        viewModel.MicrocopyEntries = await ContentfulService.GetMicrocopyEntriesAsync();
 
         if (page.DisplayOrganisationName)
         {
@@ -133,15 +136,19 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
+        var landingPageViewModel = await BuildLandingPageViewModelAsync(
+            controller,
+            category,
+            categorySlug
+        );
 
         return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
 
-    public async Task<IActionResult> RouteToCategoryLandingSharePageAsync(
+    public async Task<IActionResult> RouteToShareStandardPageAsync(
         Controller controller,
         string categorySlug,
-        ShareRecommendationInputViewModel? model = null
+        ShareByEmailInputViewModel? inputModel = null
     )
     {
         var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
@@ -150,30 +157,38 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
-        if (model is not null)
+        var viewModel = BuildShareByEmailViewModel(
+            nameof(PagesController),
+            nameof(PagesController.ShareStandard),
+            category,
+            null,
+            categorySlug,
+            null,
+            null,
+            inputModel
+        );
+
+        if (!controller.ModelState.IsValid)
         {
-            landingPageViewModel.InputModel = model;
+            return controller.View(ShareByEmailViewName, viewModel);
         }
 
-        return controller.View(CategoryLandingPageShareView, landingPageViewModel);
+        //var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        //_notifyService.SendEmailAsync()
+        return controller.View(ShareByEmailViewName, viewModel);
     }
 
     private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(
         Controller controller,
-        QuestionnaireCategoryEntry category
+        QuestionnaireCategoryEntry category,
+        string categorySlug
     )
     {
-        if (category.LandingPage is null)
-        {
-            throw new InvalidDataException("Cannot build a landing page with an empty slug");
-        }
-
-        var microcopy = await _contentfulService.GetMicrocopyEntriesAsync();
+        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
 
         return new CategoryLandingPageViewModel
         {
-            Slug = category.LandingPage?.Slug ?? string.Empty,
+            Slug = categorySlug,
             BeforeTitleContent = category.LandingPage?.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,

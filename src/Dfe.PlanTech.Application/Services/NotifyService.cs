@@ -17,7 +17,7 @@ public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotification
     private readonly INotificationClient _notifyClient =
         notifyClient ?? throw new ArgumentNullException(nameof(notifyClient));
 
-    public async Task SendEmailAsync(
+    public async Task SendSingleRecommendationEmailAsync(
         string recommendationRef,
         ICollection<string> recipientEmailAddresses,
         string userFullName,

@@ -11,6 +11,7 @@ using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
 
@@ -169,11 +170,10 @@ public class RecommendationsViewBuilder(
                 return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
 
             case SubmissionStatus.CompleteReviewed:
-
                 var viewModel = await BuildRecommendationsViewModel(
                     category,
-                    submissionRoutingData,
                     section,
+                    submissionRoutingData,
                     sectionSlug,
                     categorySlug
                 );
@@ -330,15 +330,69 @@ public class RecommendationsViewBuilder(
         );
     }
 
+    public async Task<IActionResult> RouteToShareRecommendationAsync(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug,
+        ShareByEmailInputViewModel? inputModel = null
+    )
+    {
+        var category =
+            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category for slug {categorySlug}"
+            );
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+        var chunk =
+            section.CoreRecommendations.FirstOrDefault(r =>
+                r.Slug.Equals(chunkSlug, StringComparison.OrdinalIgnoreCase)
+            )
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find chunk for slug {chunkSlug}"
+            );
+
+        var viewModel = BuildShareByEmailViewModel(
+            nameof(RecommendationsController),
+            nameof(RecommendationsController.ShareSingleRecommendation),
+            category,
+            chunk,
+            categorySlug,
+            sectionSlug,
+            chunkSlug,
+            inputModel
+        );
+
+        if (inputModel is null || !controller.ModelState.IsValid)
+        {
+            return controller.View(ShareByEmailViewName, viewModel);
+        }
+
+        //var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        //_notifyService.SendEmailAsync()
+        return controller.View(ShareByEmailViewName, viewModel);
+    }
+
     private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(
         QuestionnaireCategoryEntry category,
-        SubmissionRoutingDataModel submissionRoutingData,
         QuestionnaireSectionEntry section,
+        SubmissionRoutingDataModel submissionRoutingData,
         string sectionSlug,
         string categorySlug,
         int? currentRecommendationCount = null
     )
     {
+        if (category.LandingPage is null)
+        {
+            throw new InvalidDataException(
+                "Cannot build a recommendations model with an empty category slug"
+            );
+        }
+
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var contentfulReferences = section.CoreRecommendations.Select(cr => cr.Id);
         var details = await _recommendationService.GetLatestRecommendationStatusesAsync(

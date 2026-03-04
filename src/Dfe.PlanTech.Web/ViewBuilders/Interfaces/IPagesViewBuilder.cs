@@ -15,10 +15,10 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             Controller controller,
             string categorySlug
         );
-        Task<IActionResult> RouteToCategoryLandingSharePageAsync(
+        Task<IActionResult> RouteToShareStandardPageAsync(
             Controller controller,
             string categorySlug,
-            ShareRecommendationInputViewModel? model = null
+            ShareByEmailInputViewModel? inputModel = null
         );
         Task<NotFoundViewModel> BuildNotFoundViewModel();
     }
