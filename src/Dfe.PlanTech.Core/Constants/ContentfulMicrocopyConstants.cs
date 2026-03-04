@@ -1,3 +1,4 @@
+using Contentful.Core.Models.Management;
 using System.Diagnostics.CodeAnalysis;
 namespace Dfe.PlanTech.Core.Constants;
 
@@ -12,6 +13,7 @@ public static class ContentfulMicrocopyConstants
     private const string SuccessHeaderFallback = "Your self-assessment is complete";
     private const string LandingPageBackLinkFallback = "Back to choose a standard";
     private const string GroupsSelectHeaderFallback = "Select a school";
+    private const string PrintSectionIncompleteFallback = "The self-assessment must be completed before recommendations are available.";
 
     public record MicrocopyRecord
     {
@@ -47,6 +49,11 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord LandingPageTopicLinkCompleted = new("topicLinkCompleted", TopicLinksFallback, "topic");
     public static readonly MicrocopyRecord LandingPageSuccessPanelHeader = new("successHeader", SuccessHeaderFallback, "topic");
     public static readonly MicrocopyRecord LandingPageSuccessPanelBody = new("successBody", EmptyFallback);
+
+    // Print page (standard/category)
+    public static readonly MicrocopyRecord CateogoryPrintSectionNotStarted = new("printNotStarted", PrintSectionIncompleteFallback);
+    public static readonly MicrocopyRecord CategoryPrintSectionInProgress = new("printContinue", PrintSectionIncompleteFallback, "dateUpdated");
+    public static readonly MicrocopyRecord CategoryPrintSectionCompleted = new("printCompleted", EmptyFallback, "topic", "dateCompleted");
 
     // Groups - select a school
     public static readonly MicrocopyRecord GroupsSelectHeader = new("matSelect", GroupsSelectHeaderFallback);
