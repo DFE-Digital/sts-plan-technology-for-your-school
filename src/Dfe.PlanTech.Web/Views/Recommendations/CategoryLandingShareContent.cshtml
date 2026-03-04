@@ -7,6 +7,31 @@
     </govuk-back-link>
 }
 
+@if (ViewData.ModelState.ErrorCount > 0)
+{
+    <govuk-error-summary>
+        <govuk-error-summary-title>
+            There is a problem
+        </govuk-error-summary-title>
+        @foreach (var key in ViewData.ModelState.Keys.Order())
+        {
+            var errors = ViewData.ModelState[key]?.Errors;
+            if (errors is null || errors.Count == 0)
+            {
+                continue;
+            }
+
+            var inputId = key
+                .Replace($"{nameof(Model.InputModel.EmailAddresses)}[", "recipient-email-")
+                .Replace(nameof(Model.InputModel.EmailAddresses), "recipient-email-list-group")
+                .Replace(nameof(Model.InputModel.NameOfUser), "name-of-user-group")
+                .Replace("]", "-group");
+
+            <govuk-error-summary-item href="#@inputId">@errors[0].ErrorMessage</govuk-error-summary-item>
+        }
+    </govuk-error-summary>
+}
+
 <span class="govuk-caption-xl">@Model.Category.Header.Text</span>
 <h1 class="govuk-heading-xl">Share list of recommendations by email</h1>
 
@@ -36,7 +61,7 @@
       asp-route-categorySlug="@Model.Slug"
       autocomplete="off">
 
-    <div class="govuk-form-group @(sectionHasError ? "govuk-form-group--error" : "")">
+    <div id="recipient-email-list-group" class="govuk-form-group @(sectionHasError ? "govuk-form-group--error" : "")">
         <h1 class="govuk-label-wrapper">
             <label class="govuk-label govuk-label--m" for="recipient-email-0">
                 Enter recipient email addresses
@@ -44,7 +69,9 @@
         </h1>
 
         <div id="recipient-emails-hint" class="govuk-hint">
-            You can email up to 10 people at a time. They will receive an email from DfE Plan technology for your school. Their email addresses will not be saved or used for anything else.
+            You can email up to 10 people at a time. They will receive an email from
+            DfE Plan technology for your school. Their email addresses will not be saved
+            or used for anything else.
         </div>
 
         @if (sectionHasError)
@@ -61,16 +88,14 @@
                 var inputId = $"recipient-email-{i}";
                 var autoCompleteKey = $"section-recipient-{i}";
 
-                var hasError =
-                ViewData.ModelState.TryGetValue(key, out var entry) &&
-                entry.Errors.Count > 0;
+                var hasError = ViewData.ModelState.TryGetValue(key, out var entry) && entry.Errors.Count > 0;
 
                 // JS will hide empty non-error fields after the first one.
                 // But on a post-back, we want to keep anything the user filled (or errored) visible.
                 var value = Model.InputModel?.EmailAddresses.ElementAtOrDefault(i) ?? "";
                 var shouldBeVisibleOnLoad = i == 0 || hasError || !string.IsNullOrWhiteSpace(value);
 
-                <div class="govuk-form-group @(hasError ? "govuk-form-group--error" : "") govuk-!-margin-bottom-2"
+                <div id="@inputId-group" class="govuk-form-group @(hasError ? "govuk-form-group--error" : "") govuk-!-margin-bottom-2"
                      data-email-row
                      data-index="@i"
                      data-initially-visible="@(shouldBeVisibleOnLoad ? "true" : "false")">
@@ -85,7 +110,7 @@
                         </p>
                     }
 
-                    <input class="govuk-input @(hasError ? "govuk-input--error" : "")"
+                    <input class="govuk-input @((shouldBeVisibleOnLoad && sectionHasError) || hasError ? "govuk-input--error" : "")"
                            id="@inputId"
                            inputmode="email"
                            name="EmailAddresses[@i]"
@@ -99,7 +124,7 @@
         </div>
 
         <!-- Hidden by default; shown only when JS is enabled -->
-        <div class="govuk-!-margin-top-2 js-only">
+        <div class="govuk-!-margin-top-2 js-only" style="display: none">
             <button type="button"
                     class="govuk-button govuk-button--secondary"
                     data-module="govuk-button"
@@ -111,18 +136,19 @@
 
     @{
         var nameOfUserMissing =
-            ViewData.ModelState.TryGetValue(nameof(Model.InputModel.NameOfUser), out var nameEntry)
-            && nameEntry.Errors.Count > 0;
+        ViewData.ModelState.TryGetValue(nameof(Model.InputModel.NameOfUser), out var nameEntry)
+        && nameEntry.Errors.Count > 0;
     }
 
-    <div class="govuk-form-group @(nameOfUserMissing ? "govuk-form-group--error" : "")">
+    <div id="name-of-user-group" class="govuk-form-group @(nameOfUserMissing ? "govuk-form-group--error" : "")">
         <h1 class="govuk-label-wrapper">
             <label class="govuk-label govuk-label--m" for="name-of-user">
                 Enter your name
             </label>
         </h1>
         <div id="name-of-user-hint" class="govuk-hint">
-            Your name will be part of the email title. For example, 'James Brown has shared digital leadership and governance recommendations with you'.
+            Your name will be part of the email title. For example,
+            "James Brown has shared digital leadership and governance recommendations with you".
         </div>
 
         @if (nameOfUserMissing)
@@ -148,7 +174,8 @@
             </label>
         </h1>
         <div id="user-message-hint" class="govuk-hint">
-            Your message will introduce the email. Do not include personal or sensitive information, like email addresses or account details.
+            Your message will introduce the email. Do not include personal or sensitive information,
+            like email addresses or account details.
         </div>
         <textarea class="govuk-textarea"
                   id="user-message"
@@ -160,9 +187,70 @@
 
     <div class="govuk-form-group">
         <button type="submit"
-                class="govuk-button govuk-button--primary js-only"
+                class="govuk-button govuk-button--primary"
                 data-module="govuk-button">
             Send email
         </button>
     </div>
 </form>
+
+@{
+    var nonce = Context.Items["nonce"]?.ToString();
+}
+
+<script nonce="@nonce">
+    (function () {
+      const rows = Array.from(document.querySelectorAll('[data-email-row]'));
+      const addBtn = document.getElementById('add-another-person');
+      if (rows.length && addBtn) {
+
+        const max = rows.length;
+
+        function setRowVisible(row, visible) {
+          row.style.display = visible ? '' : 'none';
+        }
+
+        // On load: show only "initially visible" rows (first + any with value/error).
+        rows.forEach(row => {
+          const initiallyVisible = row.getAttribute('data-initially-visible') === 'true';
+          setRowVisible(row, initiallyVisible);
+        });
+
+        function visibleCount() {
+          return rows.filter(r => r.style.display !== 'none').length;
+        }
+
+        function updateButtonState() {
+          const count = visibleCount();
+          if (count >= max) {
+            addBtn.disabled = true;
+            addBtn.setAttribute('aria-disabled', 'true');
+            addBtn.textContent = 'You have added 10 people';
+          } else {
+            addBtn.disabled = false;
+            addBtn.removeAttribute('aria-disabled');
+            addBtn.textContent = 'Add another person';
+          }
+        }
+
+        addBtn.addEventListener('click', function () {
+          const count = visibleCount();
+          if (count >= max) return;
+
+          // Reveal the next hidden row (in order)
+          const next = rows.find(r => r.style.display === 'none');
+          if (!next) return;
+
+          setRowVisible(next, true);
+
+          // Focus the input inside it
+          const input = next.querySelector('input');
+          if (input) input.focus();
+
+          updateButtonState();
+        });
+
+        updateButtonState();
+      }
+    }());
+</script>

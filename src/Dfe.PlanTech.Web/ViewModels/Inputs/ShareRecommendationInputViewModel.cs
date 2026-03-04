@@ -4,9 +4,9 @@ namespace Dfe.PlanTech.Web.ViewModels.Inputs;
 
 public class ShareRecommendationInputViewModel : IValidatableObject
 {
-    public List<string> EmailAddresses { get; set; } = [];
-
     public string? NameOfUser { get; set; } = string.Empty;
+
+    public List<string> EmailAddresses { get; set; } = [];
 
     public string? UserMessage { get; set; }
 
@@ -19,28 +19,30 @@ public class ShareRecommendationInputViewModel : IValidatableObject
                 "Please enter at least one email address",
                 [nameof(EmailAddresses)]
             );
-
-            yield break;
         }
-
-        var address = new EmailAddressAttribute();
-
-        for (var i = 0; i < EmailAddresses.Count; i++)
+        else
         {
-            var email = EmailAddresses[i];
+            CleanEmails();
 
-            if (string.IsNullOrWhiteSpace(email))
-                continue;
+            var address = new EmailAddressAttribute();
 
-            var at = email.LastIndexOf('@');
-            var domain = at >= 0 ? email[(at + 1)..] : "";
-
-            if (!address.IsValid(email) || !domain.Contains('.'))
+            for (var i = 0; i < EmailAddresses.Count; i++)
             {
-                yield return new ValidationResult(
-                    "Enter an email address in the correct format, like name@example.com",
-                    [$"EmailAddresses[{i}]"]
-                );
+                var email = EmailAddresses[i];
+
+                if (string.IsNullOrWhiteSpace(email))
+                    continue;
+
+                var at = email.LastIndexOf('@');
+                var domain = at >= 0 ? email[(at + 1)..] : "";
+
+                if (!address.IsValid(email) || !domain.Contains('.'))
+                {
+                    yield return new ValidationResult(
+                        "Please enter an email address in the correct format, like name@example.com",
+                        [$"EmailAddresses[{i}]"]
+                    );
+                }
             }
         }
 
@@ -50,5 +52,13 @@ public class ShareRecommendationInputViewModel : IValidatableObject
 
             yield break;
         }
+    }
+
+    private void CleanEmails()
+    {
+        EmailAddresses = EmailAddresses
+            .Where(address => !string.IsNullOrWhiteSpace(address))
+            .Select(address => address.Trim())
+            .ToList();
     }
 }
