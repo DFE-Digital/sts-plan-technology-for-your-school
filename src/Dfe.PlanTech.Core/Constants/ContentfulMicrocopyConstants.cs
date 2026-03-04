@@ -53,6 +53,11 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord LandingPageSuccessPanelHeader = new("successHeader", SuccessHeaderFallback, "topic");
     public static readonly MicrocopyRecord LandingPageSuccessPanelBody = new("successBody", EmptyFallback);
 
+    // Print page (standard/category)
+    public static readonly MicrocopyRecord CateogoryPrintSectionNotStarted = new("printNotStarted", PrintSectionIncompleteFallback);
+    public static readonly MicrocopyRecord CategoryPrintSectionInProgress = new("printContinue", PrintSectionIncompleteFallback, "dateUpdated");
+    public static readonly MicrocopyRecord CategoryPrintSectionCompleted = new("printCompleted", EmptyFallback, "topic", "dateCompleted");
+
     // Groups - select a school
     public static readonly MicrocopyRecord GroupsSelectHeader = new("matSelect", GroupsSelectHeaderFallback);
     public static readonly MicrocopyRecord GroupsSelectRecommendationCount = new("matCount", EmptyFallback, "count", "total");
