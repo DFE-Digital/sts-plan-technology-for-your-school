@@ -130,7 +130,7 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
+        var landingPageViewModel = await BuildLandingPageViewModelAsync(controller, category);
 
         return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
