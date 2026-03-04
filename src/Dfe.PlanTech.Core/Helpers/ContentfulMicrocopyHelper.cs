@@ -34,7 +34,7 @@ public static class ContentfulMicrocopyHelper
         var text = microcopyText;
         foreach (var variable in record.Variables)
         {
-            if (!dynamicValues.TryGetValue(variable, out var value) || value is null)
+            if (!dynamicValues.TryGetValue(variable, out var value) || value is null || value == "")
             {
                 return record.FallbackText;
             }
