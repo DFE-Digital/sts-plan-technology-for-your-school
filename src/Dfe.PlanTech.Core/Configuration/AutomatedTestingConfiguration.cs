@@ -1,9 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 
-namespace Dfe.PlanTech.Core.Options
+namespace Dfe.PlanTech.Core.Configuration
 {
     [ExcludeFromCodeCoverage]
-    public class AutomatedTestingOptions
+    public class AutomatedTestingConfiguration
     {
         public ContentfulOptions? Contentful { get; init; }
 
