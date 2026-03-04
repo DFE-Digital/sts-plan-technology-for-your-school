@@ -433,7 +433,7 @@ public class PagesViewBuilderTests
         // Assert
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal(PagesViewBuilder.CategoryLandingPagePrintView, view.ViewName);
-        var vm = Assert.IsType<Task<CategoryLandingPageViewModel>>(view.Model);
+        var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
     }
 
     // ---------- BuildNotFoundViewModel ----------
