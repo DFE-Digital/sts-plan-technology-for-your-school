@@ -11,7 +11,7 @@ public static class ContentfulMicrocopyConstants
     private const string PrintLinksFallback = "Print all recommendations";
     private const string SuccessHeaderFallback = "Your self-assessment is complete";
     private const string LandingPageBackLinkFallback = "Back to choose a standard";
-
+    private const string GroupsSelectHeaderFallback = "Select a school";
 
     public record MicrocopyRecord
     {
@@ -47,4 +47,9 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord LandingPageTopicLinkCompleted = new("topicLinkCompleted", TopicLinksFallback, "topic");
     public static readonly MicrocopyRecord LandingPageSuccessPanelHeader = new("successHeader", SuccessHeaderFallback, "topic");
     public static readonly MicrocopyRecord LandingPageSuccessPanelBody = new("successBody", EmptyFallback);
+
+    // Groups - select a school
+    public static readonly MicrocopyRecord GroupsSelectHeader = new("matSelect", GroupsSelectHeaderFallback);
+    public static readonly MicrocopyRecord GroupsSelectRecommendationCount = new("matCount", EmptyFallback, "count", "total");
+    public static readonly MicrocopyRecord GroupsSelectContactUs = new("matContact", EmptyFallback, "contactLink");
 }
