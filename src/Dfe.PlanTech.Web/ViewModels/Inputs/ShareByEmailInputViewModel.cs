@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dfe.PlanTech.Web.ViewModels.Inputs;
 
-public class ShareRecommendationInputViewModel : IValidatableObject
+public class ShareByEmailInputViewModel : IValidatableObject
 {
     public string? NameOfUser { get; set; } = string.Empty;
 

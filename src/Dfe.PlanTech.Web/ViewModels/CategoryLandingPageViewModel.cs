@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
@@ -14,7 +13,6 @@ public class CategoryLandingPageViewModel
     public string? SortOrder { get; set; }
     public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
     public required ComponentTitleEntry Title { get; set; }
-    public ShareRecommendationInputViewModel? InputModel { get; set; }
     public bool Print { get; set; }
     public List<MicrocopyEntry>? MicrocopyEntries { get; set; }
 }

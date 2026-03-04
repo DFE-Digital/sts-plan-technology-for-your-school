@@ -47,6 +47,7 @@ public class PagesViewBuilderTests
         ICategoryLandingViewComponentViewBuilder? viewBuilder = null,
         IContentfulService? contentful = null,
         IEstablishmentService? establishmentService = null,
+        INotifyService? notifyService = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null
     )
@@ -56,6 +57,7 @@ public class PagesViewBuilderTests
         viewBuilder ??= Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         contentful ??= Substitute.For<IContentfulService>();
         establishmentService ??= Substitute.For<IEstablishmentService>();
+        notifyService ??= Substitute.For<INotifyService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
@@ -71,6 +73,7 @@ public class PagesViewBuilderTests
             errors,
             contentful,
             establishmentService,
+            notifyService,
             currentUser
         );
     }
@@ -107,6 +110,7 @@ public class PagesViewBuilderTests
         var viewBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         var contentful = Substitute.For<IContentfulService>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var notifyService = Substitute.For<INotifyService>();
         var current = Substitute.For<ICurrentUser>();
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
@@ -115,6 +119,7 @@ public class PagesViewBuilderTests
                 errors,
                 contentful,
                 establishmentService,
+                notifyService,
                 current
             )
         );
@@ -127,6 +132,7 @@ public class PagesViewBuilderTests
         var viewBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         var contentful = Substitute.For<IContentfulService>();
         var establishmentService = Substitute.For<IEstablishmentService>();
+        var notifyService = Substitute.For<INotifyService>();
         var current = Substitute.For<ICurrentUser>();
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
@@ -135,6 +141,7 @@ public class PagesViewBuilderTests
                 null!,
                 contentful,
                 establishmentService,
+                notifyService,
                 current
             )
         );

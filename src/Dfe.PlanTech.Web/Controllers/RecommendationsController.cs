@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Helpers;
+using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -86,6 +88,52 @@ public class RecommendationsController(
             categorySlug,
             sectionSlug,
             chunkSlug
+        );
+    }
+
+    [HttpGet(
+        "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/share",
+        Name = "ShareSingleRecommendation"
+    )]
+    public async Task<IActionResult> ShareSingleRecommendation(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
+
+        return await _recommendationsViewBuilder.RouteToShareRecommendationAsync(
+            this,
+            categorySlug,
+            sectionSlug,
+            chunkSlug
+        );
+    }
+
+    [HttpPost(
+        "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/share",
+        Name = "ShareSingleRecommendation"
+    )]
+    public async Task<IActionResult> PostShareSingleRecommendation(
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug,
+        [FromForm] ShareByEmailInputViewModel inputModel
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
+
+        return await _recommendationsViewBuilder.RouteToShareRecommendationAsync(
+            this,
+            categorySlug,
+            sectionSlug,
+            chunkSlug,
+            inputModel
         );
     }
 

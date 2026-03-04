@@ -1,4 +1,4 @@
-@model CategoryLandingPageViewModel
+@model ShareByEmailViewModel
 @inject ICurrentUser CurrentUser
 
 @section NavButton {
@@ -32,8 +32,8 @@
     </govuk-error-summary>
 }
 
-<span class="govuk-caption-xl">@Model.Category.Header.Text</span>
-<h1 class="govuk-heading-xl">Share list of recommendations by email</h1>
+<span class="govuk-caption-xl">@Model.Caption</span>
+<h1 class="govuk-heading-xl">@Model.Heading</h1>
 
 <p>You can share recommendations by email with colleagues, including those who do not have access to the service.</p>
 
@@ -56,9 +56,11 @@
 }
 
 <form class="govuk-form-group"
-      asp-controller="Pages"
-      asp-action="PostShareStandardChecklist"
-      asp-route-categorySlug="@Model.Slug"
+      asp-controller="@Model.PostController"
+      asp-action="@Model.PostAction"
+      asp-route-categorySlug="@Model.CategorySlug"
+      asp-route-sectionSlug="@Model.SectionSlug"
+      asp-route-chunkSlug="@Model.ChunkSlug"
       autocomplete="off">
 
     <div id="recipient-email-list-group" class="govuk-form-group @(sectionHasError ? "govuk-form-group--error" : "")">

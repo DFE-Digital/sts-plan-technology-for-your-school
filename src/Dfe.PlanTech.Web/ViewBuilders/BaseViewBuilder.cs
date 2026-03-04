@@ -3,7 +3,9 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -18,6 +20,8 @@ public class BaseViewBuilder(
         contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
     protected ICurrentUser CurrentUser =
         currentUser ?? throw new ArgumentNullException(nameof(currentUser));
+
+    protected const string ShareByEmailViewName = "~/Views/Shared/Email/ShareByEmail.cshtml";
 
     protected string GetDsiReferenceOrThrowException()
     {
@@ -79,5 +83,33 @@ public class BaseViewBuilder(
                     $"Unable to retrieve {section.Name} recommendation",
             };
         }
+    }
+
+    protected static ShareByEmailViewModel BuildShareByEmailViewModel(
+        string controllerName,
+        string actionName,
+        QuestionnaireCategoryEntry category,
+        RecommendationChunkEntry? chunk,
+        string categorySlug,
+        string? sectionSlug,
+        string? chunkSlug,
+        ShareByEmailInputViewModel? inputModel
+    )
+    {
+        var heading = chunkSlug is null
+            ? "Share list of recommendations by email"
+            : "Share a recommendation by email";
+
+        return new ShareByEmailViewModel
+        {
+            PostController = controllerName.Replace("Controller", ""),
+            PostAction = actionName,
+            CategorySlug = categorySlug,
+            SectionSlug = sectionSlug,
+            ChunkSlug = chunkSlug,
+            Caption = chunk?.HeaderText ?? category.Header.Text,
+            Heading = heading,
+            InputModel = inputModel,
+        };
     }
 }

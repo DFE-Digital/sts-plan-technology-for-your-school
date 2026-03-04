@@ -2,7 +2,7 @@ namespace Dfe.PlanTech.Application.Services.Interfaces
 {
     public interface INotifyService
     {
-        Task SendEmailAsync(
+        Task SendSingleRecommendationEmailAsync(
             string recommendationRef,
             ICollection<string> recipientEmailAddresses,
             string currentUserFullName,
