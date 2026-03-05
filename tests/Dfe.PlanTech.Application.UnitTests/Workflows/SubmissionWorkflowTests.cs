@@ -409,14 +409,6 @@ public class SubmissionWorkflowTests
     }
 
     [Fact]
-    public async Task SetLatestSubmissionViewed_Delegates()
-    {
-        var sut = CreateServiceUnderTest();
-        await sut.SetLatestSubmissionViewedAsync(9, "SEC");
-        await _repo.Received(1).SetLatestSubmissionViewedAsync(9, "SEC");
-    }
-
-    [Fact]
     public async Task SetSubmissionReviewed_Delegates()
     {
         var sut = CreateServiceUnderTest();

@@ -131,11 +131,6 @@ public class SubmissionService(
         return _submissionWorkflow.GetSectionStatusesAsync(establishmentId, sectionIds);
     }
 
-    public Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
-    {
-        return _submissionWorkflow.SetLatestSubmissionViewedAsync(establishmentId, sectionId);
-    }
-
     public Task<int> SubmitAnswerAsync(
         int userId,
         int activeEstablishmentId,
