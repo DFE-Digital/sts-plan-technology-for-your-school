@@ -4,11 +4,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
+/// Created via: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250905_1200_AddRecommendationTables.sql
+/// Updated via: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250920_1200_FixRecommendationHistoryForAppendOnly.sql
 internal class EstablishmentRecommendationHistoryEntityConfiguration
     : IEntityTypeConfiguration<EstablishmentRecommendationHistoryEntity>
 {
     public void Configure(EntityTypeBuilder<EstablishmentRecommendationHistoryEntity> builder)
     {
+        // Use identity column as primary key (changed from composite key)
         builder.HasKey(history => history.Id);
         builder.Property(history => history.Id).ValueGeneratedOnAdd();
 
@@ -24,10 +27,12 @@ internal class EstablishmentRecommendationHistoryEntityConfiguration
         builder.Property(h => h.ResponseId)
             .HasColumnName("responseId");
 
+        // Create index on the composite key for performance (matches migration script)
         builder
             .HasIndex(h => new { h.EstablishmentId, h.RecommendationId })
             .HasDatabaseName("IX_establishmentRecommendationHistory_EstablishmentRecommendation");
 
+        // Create index on dateCreated for ordering (matches migration script)
         builder
             .HasIndex(h => h.DateCreated)
             .HasDatabaseName("IX_establishmentRecommendationHistory_DateCreated")
