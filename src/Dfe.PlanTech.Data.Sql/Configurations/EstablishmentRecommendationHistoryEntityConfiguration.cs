@@ -4,14 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
-/// Created via: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250905_1200_AddRecommendationTables.sql
-/// Updated via: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250920_1200_FixRecommendationHistoryForAppendOnly.sql
 internal class EstablishmentRecommendationHistoryEntityConfiguration
     : IEntityTypeConfiguration<EstablishmentRecommendationHistoryEntity>
 {
     public void Configure(EntityTypeBuilder<EstablishmentRecommendationHistoryEntity> builder)
     {
-        // Use identity column as primary key (changed from composite key)
         builder.HasKey(history => history.Id);
         builder.Property(history => history.Id).ValueGeneratedOnAdd();
 
@@ -21,21 +18,24 @@ internal class EstablishmentRecommendationHistoryEntityConfiguration
             .HasDefaultValue();
 
         builder.Property(history => history.PreviousStatus).HasMaxLength(50);
-
         builder.Property(history => history.NewStatus).HasMaxLength(50);
-
         builder.Property(history => history.NoteText);
 
-        // Create index on the composite key for performance (matches migration script)
+        builder.Property(h => h.ResponseId)
+            .HasColumnName("responseId");
+
         builder
             .HasIndex(h => new { h.EstablishmentId, h.RecommendationId })
             .HasDatabaseName("IX_establishmentRecommendationHistory_EstablishmentRecommendation");
 
-        // Create index on dateCreated for ordering (matches migration script)
         builder
             .HasIndex(h => h.DateCreated)
             .HasDatabaseName("IX_establishmentRecommendationHistory_DateCreated")
             .IsDescending();
+
+        builder
+            .HasIndex(h => h.ResponseId)
+            .HasDatabaseName("IX_establishmentRecommendationHistory_responseId");
 
         builder
             .HasOne(h => h.Establishment)
@@ -60,5 +60,13 @@ internal class EstablishmentRecommendationHistoryEntityConfiguration
             .WithMany()
             .HasForeignKey(h => h.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(h => h.Response)
+            .WithMany()
+            .HasForeignKey(h => h.ResponseId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+                                               
     }
 }

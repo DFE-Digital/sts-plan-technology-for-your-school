@@ -81,7 +81,8 @@ public class RecommendationWorkflow(
         int userId,
         RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null
+        int? matEstablishmentId = null,
+        int? responseId = null
     )
     {
         // Get the recommendation by ContentfulRef to get its ID
@@ -107,6 +108,7 @@ public class RecommendationWorkflow(
             recommendation.Id,
             userId,
             matEstablishmentId,
+            responseId,
             previousStatus,
             newStatus,
             noteText ?? string.Empty
