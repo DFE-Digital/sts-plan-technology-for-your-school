@@ -8,5 +8,4 @@ public class CategorySectionRecommendationViewModel
     public string? NoRecommendationFoundErrorMessage { get; init; }
     public string? SectionName { get; init; }
     public string? SectionSlug { get; init; }
-    public bool? Viewed { get; init; }
 }
