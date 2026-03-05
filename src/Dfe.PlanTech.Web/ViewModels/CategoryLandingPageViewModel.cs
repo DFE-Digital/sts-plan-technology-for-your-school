@@ -13,4 +13,5 @@ public class CategoryLandingPageViewModel
     public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
     public required ComponentTitleEntry Title { get; set; }
     public bool Print { get; set; }
+    public List<MicrocopyEntry>? MicrocopyEntries { get; set; }
 }
