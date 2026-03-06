@@ -32,8 +32,6 @@ public class PagesViewBuilder(
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorPagesConfiguration _errorPages =
         errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
-    private readonly IContentfulService _contentfulService =
-        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(
         Controller controller,
@@ -130,7 +128,7 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
+        var landingPageViewModel = await BuildLandingPageViewModelAsync(controller, category);
 
         return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
@@ -145,7 +143,7 @@ public class PagesViewBuilder(
             throw new InvalidDataException("Cannot build a landing page with an empty slug");
         }
 
-        var microcopy = await _contentfulService.GetMicrocopyEntriesAsync();
+        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
 
         return new CategoryLandingPageViewModel
         {
