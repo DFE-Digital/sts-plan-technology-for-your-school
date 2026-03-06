@@ -29,8 +29,6 @@ public class SubmissionEntity
 
     public bool Deleted { get; set; }
 
-    public bool Viewed { get; set; }
-
     public SubmissionStatus Status { get; set; }
 
     public SqlSubmissionDto AsDto()
@@ -48,7 +46,6 @@ public class SubmissionEntity
             DateCompleted = DateCompleted,
             Responses = Responses.Select(r => r.AsDto()).ToList(),
             Deleted = Deleted,
-            Viewed = Viewed,
             Status = Status,
         };
     }

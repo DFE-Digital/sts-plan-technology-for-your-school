@@ -67,7 +67,6 @@ public class BaseViewBuilder(
             {
                 SectionSlug = section.InterstitialPage?.Slug,
                 SectionName = section.Name,
-                Viewed = sectionStatus?.HasBeenViewed,
             };
         }
         catch (Exception e)

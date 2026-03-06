@@ -663,40 +663,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task SubmissionRepository_SetLatestSubmissionViewedAsync_WhenSubmissionExists_ThenUpdatesViewedFlag()
-    {
-        // Arrange
-        var establishment = new EstablishmentEntity
-        {
-            EstablishmentRef = "EST001",
-            OrgName = "Test School",
-        };
-        DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
-
-        var submission = new SubmissionEntity
-        {
-            SectionId = "section-1",
-            SectionName = "Test Section",
-            EstablishmentId = establishment.Id,
-            Viewed = false,
-            DateCreated = DateTime.UtcNow,
-            Status = SubmissionStatus.CompleteReviewed,
-        };
-
-        DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
-
-        // Act
-        await _repository.SetLatestSubmissionViewedAsync(establishment.Id, "section-1");
-
-        // Assert
-        var updated = await DbContext.Submissions.FindAsync(submission.Id);
-        Assert.NotNull(updated);
-        Assert.True(updated!.Viewed);
-    }
-
-    [Fact]
     public async Task SubmissionRepository_SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync_WhenCalled_ThenUpdatesStatuses()
     {
         // Arrange
@@ -907,7 +873,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
             Maturity = "developing",
-            Viewed = true,
             DateCreated = DateTime.UtcNow.AddDays(-10),
             DateLastUpdated = DateTime.UtcNow.AddDays(-9),
             DateCompleted = DateTime.UtcNow.AddDays(-8),
@@ -921,7 +886,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.InProgress,
             Maturity = "ignored",
-            Viewed = false,
             DateCreated = DateTime.UtcNow.AddDays(-2),
             DateLastUpdated = DateTime.UtcNow.AddDays(-1),
             DateCompleted = null,
@@ -935,7 +899,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
             Maturity = "secure",
-            Viewed = false,
             DateCreated = DateTime.UtcNow.AddDays(-3),
             DateLastUpdated = DateTime.UtcNow.AddDays(-3),
             DateCompleted = DateTime.UtcNow.AddDays(-3),
@@ -949,7 +912,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
             Maturity = "low",
-            Viewed = true,
             DateCreated = DateTime.UtcNow.AddDays(-4),
             DateLastUpdated = DateTime.UtcNow.AddDays(-4),
             DateCompleted = DateTime.UtcNow.AddDays(-4),
@@ -972,14 +934,12 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(newerCurrent.DateLastUpdated, r1.DateUpdated);
         Assert.Equal("secure", r1.LastMaturity);
         Assert.Equal(latestCompleteReviewed.DateCompleted, r1.LastCompletionDate);
-        Assert.False(r1.Viewed);
 
         Assert.Equal(SubmissionStatus.CompleteReviewed, r2.Status);
         Assert.Equal(s2.DateCreated, r2.DateCreated);
         Assert.Equal(s2.DateLastUpdated, r2.DateUpdated);
         Assert.Equal("low", r2.LastMaturity);
         Assert.Equal(s2.DateCompleted, r2.LastCompletionDate);
-        Assert.True(r2.Viewed);
     }
 
     [Fact]
