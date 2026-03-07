@@ -301,7 +301,7 @@ public class RecommendationWorkflowTests
         var workflow = CreateServiceUnderTest();
 
         // Act
-        var result = await workflow.GetCurrentRecommendationStatusAsync(
+        var result = await workflow.GetLatestRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId
         );
@@ -333,7 +333,7 @@ public class RecommendationWorkflowTests
         var workflow = CreateServiceUnderTest();
 
         // Act
-        var result = await workflow.GetCurrentRecommendationStatusAsync(
+        var result = await workflow.GetLatestRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId
         );
@@ -372,7 +372,7 @@ public class RecommendationWorkflowTests
         var workflow = CreateServiceUnderTest();
 
         // Act
-        var result = await workflow.GetCurrentRecommendationStatusAsync(
+        var result = await workflow.GetLatestRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId
         );

@@ -16,8 +16,8 @@ public class GroupsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IContentfulService contentfulService,
-    IEstablishmentService establishmentService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    IEstablishmentService establishmentService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService =
@@ -67,7 +67,7 @@ public class GroupsViewBuilder(
             ContactLinkHref = contactLink?.Href,
         };
 
-        controller.ViewData["Title"] = "Select a school";
+        controller.ViewData[ViewDataConstants.Title] = "Select a school";
         return controller.View(SelectASchoolViewName, viewModel);
     }
 

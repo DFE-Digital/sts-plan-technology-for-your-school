@@ -87,7 +87,9 @@ public class ContentfulServiceBusProcessorTests
     public async Task StopProcessingAsync_ShouldStopAndDisposeProcessor()
     {
         await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("StopProcessingAsync", []);
-        await _serviceBusProcessor.Received(1).StopProcessingAsync();
+        await _serviceBusProcessor
+            .Received(1)
+            .StopProcessingAsync(TestContext.Current.CancellationToken);
         await _serviceBusProcessor.Received(1).DisposeAsync();
     }
 

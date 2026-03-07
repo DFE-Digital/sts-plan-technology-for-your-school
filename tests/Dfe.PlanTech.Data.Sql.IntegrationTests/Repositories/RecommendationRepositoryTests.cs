@@ -10,7 +10,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
     public RecommendationRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _repository = new RecommendationRepository(DbContext);
@@ -22,7 +22,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         // Arrange - Create multiple recommendations with different ContentfulRef values and search for specific ones
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation1 = new RecommendationEntity
         {
@@ -46,7 +46,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Recommendations.AddRange(recommendation1, recommendation2, recommendation3);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var targetReferences = new[] { "rec-001", "rec-003" };
 
@@ -69,7 +69,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         // Arrange - Create a recommendation with specific ContentfulRef and search for non-matching references
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -79,7 +79,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var nonMatchingReferences = new[] { "rec-999", "rec-888" };
 
@@ -98,7 +98,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         // Arrange - Create a recommendation but search with empty reference array
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -108,7 +108,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var emptyReferences = new string[0];
 
@@ -127,7 +127,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         // Arrange - Create one recommendation and search with duplicate references to test deduplication
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -137,7 +137,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var duplicateReferences = new[] { "rec-001", "rec-001", "rec-001" };
 
@@ -158,7 +158,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         // Arrange - Create both active and archived recommendations to test that both are returned
         var question = new QuestionEntity { QuestionText = "Test Question", ContentfulRef = "Q1" };
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var activeRecommendation = new RecommendationEntity
         {
@@ -177,7 +177,7 @@ public class RecommendationRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Recommendations.AddRange(activeRecommendation, archivedRecommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var references = new[] { "rec-active", "rec-archived" };
 

@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
@@ -24,10 +23,11 @@ public class RecommendationsViewBuilderTests
     // ---- Substitutes (collaborators)
     private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
-    private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
+    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly INotifyService _notifyService = Substitute.For<INotifyService>();
     private readonly IRecommendationService _recommendationService =
         Substitute.For<IRecommendationService>();
-    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
 
     // ---- Options
     private ContentfulOptions _contentfulOptions = new ContentfulOptions { UsePreviewApi = false };
@@ -38,9 +38,10 @@ public class RecommendationsViewBuilderTests
         new RecommendationsViewBuilder(
             _logger,
             _contentful,
-            _submissions,
+            _currentUser,
+            _notifyService,
             _recommendationService,
-            _currentUser
+            _submissions
         );
 
     private static Controller MakeController()
@@ -157,7 +158,7 @@ public class RecommendationsViewBuilderTests
         };
 
         _recommendationService
-            .GetCurrentRecommendationStatusAsync("C2", 123)
+            .GetLatestRecommendationHistoryAsync("C2", 123)
             .Returns(currentRecommendationStatus);
 
         // Setup recommendation service with history
@@ -223,7 +224,7 @@ public class RecommendationsViewBuilderTests
         );
         Assert.Equal("second-chunk-2", vm.OriginatingSlug);
 
-        await _recommendationService.Received(1).GetCurrentRecommendationStatusAsync("C2", 123);
+        await _recommendationService.Received(1).GetLatestRecommendationHistoryAsync("C2", 123);
     }
 
     [Fact]
@@ -622,7 +623,7 @@ public class RecommendationsViewBuilderTests
         };
 
         _recommendationService
-            .GetCurrentRecommendationStatusAsync("C2", establishmentId)
+            .GetLatestRecommendationHistoryAsync("C2", establishmentId)
             .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
 
         _recommendationService
@@ -704,7 +705,7 @@ public class RecommendationsViewBuilderTests
         };
 
         _recommendationService
-            .GetCurrentRecommendationStatusAsync("C2", establishmentId)
+            .GetLatestRecommendationHistoryAsync("C2", establishmentId)
             .Returns(currentRecommendationStatus);
 
         _recommendationService
@@ -782,7 +783,7 @@ public class RecommendationsViewBuilderTests
             .Returns(routing);
 
         _recommendationService
-            .GetCurrentRecommendationStatusAsync("C2", establishmentId)
+            .GetLatestRecommendationHistoryAsync("C2", establishmentId)
             .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
 
         _recommendationService

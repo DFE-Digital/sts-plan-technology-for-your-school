@@ -17,13 +17,13 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class QuestionsViewBuilder(
     ILogger<BaseViewBuilder> logger,
+    IContentfulService contentfulService,
+    ICurrentUser currentUser,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
-    IContentfulService contentfulService,
-    IQuestionService questionService,
-    ISubmissionService submissionService,
     ContentfulOptionsConfiguration contentfulOptions,
-    ICurrentUser currentUser
+    IQuestionService questionService,
+    ISubmissionService submissionService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
     private readonly IQuestionService _questionService =
@@ -435,11 +435,11 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        controller.ViewData["Title"] = question.Text;
+        controller.ViewData[ViewDataConstants.Title] = question.Text;
 
         if (!string.IsNullOrEmpty(returnTo))
         {
-            controller.ViewData["ReturnTo"] = returnTo;
+            controller.ViewData[ViewDataConstants.ReturnTo] = returnTo;
         }
 
         // Workaround, to avoid infinite loop due to bi-directional/circular references:

@@ -6,12 +6,12 @@
 
     if (Model.Category.Header.Text != null)
     {
-        ViewData["Title"] = $"{Model.Category.Header.Text} standard - print view";
+        ViewData[ViewDataConstants.Title] = $"{Model.Category.Header.Text} standard - print view";
     }
     else
     {
         var routeData = Context.GetRouteData();
-        ViewData["Title"] = routeData.GetTitleForPage();
+        ViewData[ViewDataConstants.Title] = routeData.GetTitleForPage();
     }
 }
 

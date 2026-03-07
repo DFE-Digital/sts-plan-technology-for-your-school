@@ -50,13 +50,13 @@ public class QuestionsViewBuilderTests
     private QuestionsViewBuilder CreateServiceUnderTest() =>
         new QuestionsViewBuilder(
             _logger,
+            _contentful,
+            _currentUser,
             _contactOptions,
             _errorMessages,
-            _contentful,
-            _questionSvc,
-            _submissionSvc,
             _contentfulOptions,
-            _currentUser
+            _questionSvc,
+            _submissionSvc
         );
 
     private static Controller MakeControllerWithTempData()
@@ -145,7 +145,7 @@ public class QuestionsViewBuilderTests
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", view.ViewName);
         var vm = Assert.IsType<QuestionViewModel>(view.Model);
-        Assert.Equal("Question text", controller.ViewData["Title"]);
+        Assert.Equal("Question text", controller.ViewData[ViewDataConstants.Title]);
         Assert.Equal(question, vm.Question);
     }
 

@@ -14,7 +14,7 @@ public class DatabaseFixture : IAsyncLifetime
     public MsSqlContainer DbContainer { get; private set; } = null!;
     public string ConnectionString => DbContainer.GetConnectionString();
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         DbContainer = new MsSqlBuilder()
             .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
@@ -60,7 +60,7 @@ public class DatabaseFixture : IAsyncLifetime
         return new PlanTechDbContext(options);
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await DbContainer.DisposeAsync();
     }

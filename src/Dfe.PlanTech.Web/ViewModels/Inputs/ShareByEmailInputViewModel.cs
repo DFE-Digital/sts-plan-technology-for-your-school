@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels.Inputs;
 
 public class ShareByEmailInputViewModel : IValidatableObject
 {
-    public string? NameOfUser { get; set; } = string.Empty;
+    public string NameOfUser { get; set; } = string.Empty;
 
     public List<string> EmailAddresses { get; set; } = [];
 
@@ -52,6 +53,16 @@ public class ShareByEmailInputViewModel : IValidatableObject
 
             yield break;
         }
+    }
+
+    public ShareByEmailModel ToModel()
+    {
+        return new ShareByEmailModel
+        {
+            NameOfUser = NameOfUser,
+            EmailAddresses = EmailAddresses,
+            UserMessage = UserMessage,
+        };
     }
 
     private void CleanEmails()

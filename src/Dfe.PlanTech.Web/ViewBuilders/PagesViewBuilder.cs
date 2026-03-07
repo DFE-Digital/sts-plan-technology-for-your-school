@@ -20,9 +20,9 @@ public class PagesViewBuilder(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
+    ICurrentUser currentUser,
     IEstablishmentService establishmentService,
-    INotifyService notifyService,
-    ICurrentUser currentUser
+    INotifyService notifyService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView =
@@ -91,13 +91,14 @@ public class PagesViewBuilder(
             return controller.View(CategoryLandingPageView, landingPageViewModel);
         }
 
-        controller.ViewData["Title"] =
+        controller.ViewData[ViewDataConstants.Title] =
             StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text)
             ?? PageTitleConstants.PlanTechnologyForYourSchool;
 
-        var viewModel = new PageViewModel(page);
-
-        viewModel.MicrocopyEntries = await ContentfulService.GetMicrocopyEntriesAsync();
+        var viewModel = new PageViewModel(page)
+        {
+            MicrocopyEntries = await ContentfulService.GetMicrocopyEntriesAsync(),
+        };
 
         if (page.DisplayOrganisationName)
         {

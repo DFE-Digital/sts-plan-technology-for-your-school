@@ -1,0 +1,38 @@
+@{
+    var sendResults = ViewData[ViewDataConstants.NotifySendResults] as List<NotifySendResult>;
+}
+
+@if (sendResults is not null)
+{
+    if (sendResults.All(result => result.Errors.Count == 0))
+    {
+        <govuk-panel heading-level="2" class="govuk-!-margin-bottom-4">
+            <govuk-panel-title>
+                Email sent
+            </govuk-panel-title>
+            @*
+            <govuk-panel-body>
+                @foreach (var result in sendResults.Where(result => result.Errors.Count == 0))
+                {
+                    <p>@result.Recipient</p>
+                }
+            </govuk-panel-body>
+            *@
+        </govuk-panel>
+    }
+    else
+    {
+        <govuk-error-summary>
+            <govuk-error-summary-title>
+                Some email could not be sent
+            </govuk-error-summary-title>
+            <govuk-error-summary-description>
+                Sending failed for the email addresses below.
+            </govuk-error-summary-description>
+            @foreach (var result in sendResults.Where(result => result.Errors.Count > 0))
+            {
+                <govuk-error-summary-item>@result.Recipient</govuk-error-summary-item>
+            }
+        </govuk-error-summary>
+    }
+}

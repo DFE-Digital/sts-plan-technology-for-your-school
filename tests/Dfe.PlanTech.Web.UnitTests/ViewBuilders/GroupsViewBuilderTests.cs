@@ -56,7 +56,7 @@ public class GroupsViewBuilderTests
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
         // GroupSelectedSchoolUrn not set
 
-        return new GroupsViewBuilder(logger, contactOpts, contentful, est, currentUser);
+        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est);
     }
 
     private static QuestionnaireCategoryEntry MakeCategory(
@@ -94,8 +94,8 @@ public class GroupsViewBuilderTests
                 NullLogger<BaseViewBuilder>.Instance,
                 null!,
                 contentful,
-                est,
-                current
+                current,
+                est
             )
         );
     }
@@ -113,8 +113,8 @@ public class GroupsViewBuilderTests
                 NullLogger<BaseViewBuilder>.Instance,
                 opts,
                 contentful,
-                null!,
-                current
+                current,
+                null!
             )
         );
     }
@@ -186,7 +186,7 @@ public class GroupsViewBuilderTests
         // Assert
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal("GroupsSelectSchool", view.ViewName);
-        Assert.Equal("Select a school", controller.ViewData["Title"]);
+        Assert.Equal("Select a school", controller.ViewData[ViewDataConstants.Title]);
 
         var vm = Assert.IsType<GroupsSelectorViewModel>(view.Model);
         Assert.Equal("Test Academy Trust", vm.GroupName);

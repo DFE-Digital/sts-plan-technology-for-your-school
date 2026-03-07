@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
@@ -20,15 +21,18 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class RecommendationsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ISubmissionService submissionService,
+    ICurrentUser currentUser,
+    INotifyService notifyService,
     IRecommendationService recommendationService,
-    ICurrentUser currentUser
+    ISubmissionService submissionService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly INotifyService _notifyService =
+        notifyService ?? throw new ArgumentNullException(nameof(notifyService));
     private readonly IRecommendationService _recommendationService =
         recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly ISubmissionService _submissionService =
+        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
     private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
     private const string RecommendationsViewName = "Recommendations";
@@ -62,8 +66,8 @@ public class RecommendationsViewBuilder(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
 
-        var currentRecommendationHistoryStatus =
-            await _recommendationService.GetCurrentRecommendationStatusAsync(
+        var currentRecommendationHistory =
+            await _recommendationService.GetLatestRecommendationHistoryAsync(
                 currentRecommendationChunk.Id,
                 establishmentId
             );
@@ -108,8 +112,8 @@ public class RecommendationsViewBuilder(
             CurrentChunkPosition = currentRecommendationIndex + 1,
             TotalChunks = recommendationChunks.Count,
             SelectedStatusKey =
-                currentRecommendationHistoryStatus?.NewStatus ?? RecommendationStatus.NotStarted,
-            LastUpdated = currentRecommendationHistoryStatus?.DateCreated,
+                currentRecommendationHistory?.NewStatus ?? RecommendationStatus.NotStarted,
+            LastUpdated = currentRecommendationHistory?.DateCreated,
             SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
             SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
             StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
@@ -348,7 +352,7 @@ public class RecommendationsViewBuilder(
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section for slug {sectionSlug}"
             );
-        var chunk =
+        var recommendationChunk =
             section.CoreRecommendations.FirstOrDefault(r =>
                 r.Slug.Equals(chunkSlug, StringComparison.OrdinalIgnoreCase)
             )
@@ -360,7 +364,7 @@ public class RecommendationsViewBuilder(
             nameof(RecommendationsController),
             nameof(RecommendationsController.ShareSingleRecommendation),
             category,
-            chunk,
+            recommendationChunk,
             categorySlug,
             sectionSlug,
             chunkSlug,
@@ -372,9 +376,47 @@ public class RecommendationsViewBuilder(
             return controller.View(ShareByEmailViewName, viewModel);
         }
 
-        //var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        //_notifyService.SendEmailAsync()
-        return controller.View(ShareByEmailViewName, viewModel);
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var latestRecommendationHistory =
+            await _recommendationService.GetLatestRecommendationHistoryAsync(
+                recommendationChunk.Id,
+                establishmentId
+            );
+        if (latestRecommendationHistory?.NewStatus is null)
+        {
+            throw new InvalidDataException("Cannot send an email without a recommendation status");
+        }
+        var textBodyId = recommendationChunk.Content[0].Id;
+        var textBody =
+            await ContentfulService.GetTextBodyByIdAsync(textBodyId)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find text body entry for id {textBodyId}"
+            );
+
+        var establishmentName =
+            await CurrentUser.GetActiveEstablishmentNameAsync()
+            ?? throw new InvalidDataException(
+                "Cannot send an email without an active establishment name"
+            );
+
+        var results = _notifyService.SendSingleRecommendationEmail(
+            inputModel.ToModel(),
+            textBody,
+            establishmentName,
+            recommendationChunk.HeaderText,
+            section.Name,
+            latestRecommendationHistory.NewStatus.Value
+        );
+
+        controller.ViewData[ViewDataConstants.NotifySendResults] = results;
+
+        return await RouteToSingleRecommendation(
+            controller,
+            categorySlug,
+            sectionSlug,
+            chunkSlug,
+            false
+        );
     }
 
     private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(
