@@ -72,9 +72,9 @@ public class PagesViewBuilderTests
             contact,
             errors,
             contentful,
+            currentUser,
             establishmentService,
-            notifyService,
-            currentUser
+            notifyService
         );
     }
 
@@ -118,9 +118,9 @@ public class PagesViewBuilderTests
                 null!,
                 errors,
                 contentful,
+                current,
                 establishmentService,
-                notifyService,
-                current
+                notifyService
             )
         );
     }
@@ -140,9 +140,9 @@ public class PagesViewBuilderTests
                 contact,
                 null!,
                 contentful,
+                current,
                 establishmentService,
-                notifyService,
-                current
+                notifyService
             )
         );
     }
@@ -332,7 +332,7 @@ public class PagesViewBuilderTests
         var vm = Assert.IsType<PageViewModel>(view.Model);
         Assert.Equal("Acme Academy", vm.ActiveEstablishmentName);
         Assert.Equal("123456", vm.ActiveEstablishmentUrn);
-        Assert.Equal("About Us", controller.ViewData["Title"]); // processed title
+        Assert.Equal("About Us", controller.ViewData[ViewDataConstants.Title]); // processed title
         Assert.True(vm.DisplayBlueBanner); // default
     }
 
@@ -347,7 +347,10 @@ public class PagesViewBuilderTests
         var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
 
         var view = Assert.IsType<ViewResult>(action);
-        Assert.Equal(PageTitleConstants.PlanTechnologyForYourSchool, controller.ViewData["Title"]);
+        Assert.Equal(
+            PageTitleConstants.PlanTechnologyForYourSchool,
+            controller.ViewData[ViewDataConstants.Title]
+        );
     }
 
     [Fact]

@@ -22,10 +22,10 @@
             }
 
             var inputId = key
-                .Replace($"{nameof(Model.InputModel.EmailAddresses)}[", "recipient-email-")
-                .Replace(nameof(Model.InputModel.EmailAddresses), "recipient-email-list-group")
-                .Replace(nameof(Model.InputModel.NameOfUser), "name-of-user-group")
-                .Replace("]", "-group");
+            .Replace($"{nameof(Model.InputModel.EmailAddresses)}[", "recipient-email-")
+            .Replace(nameof(Model.InputModel.EmailAddresses), "recipient-email-list-group")
+            .Replace(nameof(Model.InputModel.NameOfUser), "name-of-user-group")
+            .Replace("]", "-group");
 
             <govuk-error-summary-item href="#@inputId">@errors[0].ErrorMessage</govuk-error-summary-item>
         }
@@ -165,6 +165,7 @@
                name="NameOfUser"
                type="text"
                spellcheck="false"
+               autocomplete="name-of-user"
                aria-describedby="name-of-user-hint"
                value="@(Model.InputModel?.NameOfUser ?? "")" />
     </div>

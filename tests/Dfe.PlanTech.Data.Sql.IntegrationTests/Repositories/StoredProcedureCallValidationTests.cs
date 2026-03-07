@@ -18,7 +18,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
     public StoredProcedureCallValidationTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _storedProcRepository = new StoredProcedureRepository(DbContext);
@@ -72,7 +72,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         const string recommendationContentfulRef = "REC-001";
         const string sectionRef = "section-xyz";
@@ -86,7 +86,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.UtcNow.AddDays(-10),
         };
         DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var response = new ResponseEntity
         {
@@ -99,7 +99,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             Maturity = "",
         };
         DbContext.Responses.Add(response);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -111,7 +111,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             Archived = false,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await insertSectionRecommendationAsync(sectionRef, recommendationContentfulRef);
 
@@ -146,7 +146,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             recommendationHistory1,
             recommendationHistory2
         );
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result =
@@ -212,7 +212,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         const string recommendationContentfulRef = "REC-001";
         const string sectionRef = "section-xyz";
@@ -226,7 +226,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.UtcNow.AddDays(-10),
         };
         DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var response = new ResponseEntity
         {
@@ -239,7 +239,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             Maturity = "",
         };
         DbContext.Responses.Add(response);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -251,7 +251,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             Archived = false,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await insertSectionRecommendationAsync(sectionRef, recommendationContentfulRef);
 
@@ -286,7 +286,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             recommendationHistory1,
             recommendationHistory2
         );
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result =
@@ -321,7 +321,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             OrgName = "Test School",
         };
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act & Assert
         var result =
@@ -345,12 +345,12 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             OrgName = "Test School",
         };
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Create test data that should be returned by the stored procedure
         var user = new UserEntity { DfeSignInRef = "test-user" };
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission1 = new SubmissionEntity
         {
@@ -371,7 +371,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.AddRange(submission1, submission2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sectionIds = "section1,section2,section3";
 
@@ -412,7 +412,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             OrgName = "Test School",
         };
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission = new SubmissionEntity
         {
@@ -422,7 +422,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             Status = Core.Enums.SubmissionStatus.InProgress,
         };
         DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act & Assert - Should execute without parameter type errors
         var result = await _storedProcRepository.SetMaturityForSubmissionAsync(submission.Id);
@@ -459,7 +459,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         DbContext.Establishments.Add(establishment);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submitAnswerModel = new SubmitAnswerModel
         {
@@ -484,7 +484,10 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         Assert.True(responseId > 0, "Response ID should be returned from stored procedure");
 
         // Verify the response was actually created
-        var savedResponse = await DbContext.Responses.FindAsync(responseId);
+        var savedResponse = await DbContext.Responses.FindAsync(
+            [responseId],
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(savedResponse);
         Assert.Equal(user.Id, savedResponse!.UserId);
         Assert.Equal(establishment.Id, savedResponse.UserEstablishmentId);
@@ -531,7 +534,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         DbContext.Establishments.Add(establishment);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act & Assert - All stored procedure calls should succeed without parameter errors
 
@@ -562,7 +565,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             Status = Core.Enums.SubmissionStatus.InProgress,
         };
         DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var maturityResult = await _storedProcRepository.SetMaturityForSubmissionAsync(
             submission.Id
