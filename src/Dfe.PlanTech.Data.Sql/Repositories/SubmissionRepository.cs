@@ -458,7 +458,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                         ?? DateTime.UtcNow,
                     LastMaturity = lastCompleteSubmission?.Maturity,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
-                    Viewed = lastCompleteSubmission?.Viewed,
                 };
             })
             .ToList();

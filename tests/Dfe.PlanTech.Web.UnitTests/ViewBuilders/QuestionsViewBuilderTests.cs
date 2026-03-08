@@ -145,7 +145,7 @@ public class QuestionsViewBuilderTests
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", view.ViewName);
         var vm = Assert.IsType<QuestionViewModel>(view.Model);
-        Assert.Equal("Question text", controller.ViewData[ViewDataConstants.Title]);
+        Assert.Equal("Question text", controller.ViewData[StatePassingMechanismConstants.Title]);
         Assert.Equal(question, vm.Question);
     }
 

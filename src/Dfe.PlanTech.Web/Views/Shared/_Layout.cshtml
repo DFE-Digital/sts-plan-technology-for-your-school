@@ -4,10 +4,10 @@
 @{
     Layout = "_GovUkPageTemplate";
 
-    if (ViewData[ViewDataConstants.Title] == null)
+    if (ViewData[StatePassingMechanismConstants.Title] == null)
     {
         var routeData = Context.GetRouteData();
-        ViewData[ViewDataConstants.Title] = routeData.GetTitleForPage();
+        ViewData[StatePassingMechanismConstants.Title] = routeData.GetTitleForPage();
     }
 }
 

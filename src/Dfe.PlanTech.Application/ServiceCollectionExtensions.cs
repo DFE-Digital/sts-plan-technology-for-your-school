@@ -30,6 +30,7 @@ public static class ServiceCollectionExtensions
         return services
             .AddScoped<IContentfulWorkflow, ContentfulWorkflow>()
             .AddScoped<IEstablishmentWorkflow, EstablishmentWorkflow>()
+            .AddScoped<INotifyWorkflow, NotifyWorkflow>()
             .AddScoped<ISignInWorkflow, SignInWorkflow>()
             .AddScoped<IRecommendationWorkflow, RecommendationWorkflow>()
             .AddScoped<ISubmissionWorkflow, SubmissionWorkflow>()

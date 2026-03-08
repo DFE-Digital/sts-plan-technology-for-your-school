@@ -186,7 +186,7 @@ public class GroupsViewBuilderTests
         // Assert
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal("GroupsSelectSchool", view.ViewName);
-        Assert.Equal("Select a school", controller.ViewData[ViewDataConstants.Title]);
+        Assert.Equal("Select a school", controller.ViewData[StatePassingMechanismConstants.Title]);
 
         var vm = Assert.IsType<GroupsSelectorViewModel>(view.Model);
         Assert.Equal("Test Academy Trust", vm.GroupName);
