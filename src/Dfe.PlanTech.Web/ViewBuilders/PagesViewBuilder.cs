@@ -22,7 +22,9 @@ public class PagesViewBuilder(
     IContentfulService contentfulService,
     ICurrentUser currentUser,
     IEstablishmentService establishmentService,
-    INotifyService notifyService
+    INotifyService notifyService,
+    ISubmissionService submissionService,
+    IRecommendationService recommendationService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView =
@@ -36,6 +38,10 @@ public class PagesViewBuilder(
         errorPages.Value ?? throw new ArgumentNullException(nameof(errorPages));
     private readonly INotifyService _notifyService =
         notifyService ?? throw new ArgumentNullException(nameof(notifyService));
+    private readonly ISubmissionService _submissionService =
+        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IRecommendationService _recommendationService =
+        recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(
         Controller controller,
@@ -169,14 +175,41 @@ public class PagesViewBuilder(
             inputModel
         );
 
-        if (!controller.ModelState.IsValid)
+        if (inputModel is null || !controller.ModelState.IsValid)
         {
             return controller.View(ShareByEmailViewName, viewModel);
         }
 
-        //var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        //_notifyService.SendEmailAsync()
-        return controller.View(ShareByEmailViewName, viewModel);
+        var establishmentName =
+            await CurrentUser.GetActiveEstablishmentNameAsync()
+            ?? throw new InvalidDataException(
+                "Cannot send an email without an active establishment name"
+            );
+
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var recommendationStatuses =
+            await _recommendationService.GetLatestRecommendationStatusesAsync(establishmentId);
+
+        var sectionIds = category.Sections.Select(s => s.Id).ToList();
+
+        var sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(
+            establishmentId,
+            sectionIds
+        );
+
+        var results = _notifyService.SendStandardEmail(
+            inputModel.ToModel(),
+            category.Sections,
+            sectionStatuses,
+            recommendationStatuses,
+            category.Header.Text,
+            establishmentName
+        );
+
+        controller.ViewData[ViewDataConstants.NotifySendResults] = results;
+
+        var page = await ContentfulService.GetPageBySlugAsync(categorySlug);
+        return await RouteBasedOnOrganisationTypeAsync(controller, page);
     }
 
     private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(

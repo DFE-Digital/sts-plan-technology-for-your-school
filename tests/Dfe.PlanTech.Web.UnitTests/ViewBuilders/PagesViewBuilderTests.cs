@@ -1,3 +1,4 @@
+using Azure.Messaging.ServiceBus.Administration;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -42,24 +43,28 @@ public class PagesViewBuilderTests
         Options.Create(new ErrorPagesConfiguration { InternalErrorPageId = internalId });
 
     private static PagesViewBuilder CreateServiceUnderTest(
+        ILogger<BaseViewBuilder>? logger = null,
         IOptions<ContactOptionsConfiguration>? contact = null,
         IOptions<ErrorPagesConfiguration>? errors = null,
         ICategoryLandingViewComponentViewBuilder? viewBuilder = null,
         IContentfulService? contentful = null,
+        ICurrentUser? currentUser = null,
         IEstablishmentService? establishmentService = null,
         INotifyService? notifyService = null,
-        ICurrentUser? currentUser = null,
-        ILogger<BaseViewBuilder>? logger = null
+        ISubmissionService? submissionService = null,
+        IRecommendationService? recommendationService = null
     )
     {
+        logger ??= NullLogger<BaseViewBuilder>.Instance;
         contact ??= ContactOpts();
         errors ??= ErrorOpts();
         viewBuilder ??= Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         contentful ??= Substitute.For<IContentfulService>();
+        currentUser ??= Substitute.For<ICurrentUser>();
         establishmentService ??= Substitute.For<IEstablishmentService>();
         notifyService ??= Substitute.For<INotifyService>();
-        currentUser ??= Substitute.For<ICurrentUser>();
-        logger ??= NullLogger<BaseViewBuilder>.Instance;
+        submissionService ??= Substitute.For<ISubmissionService>();
+        recommendationService ??= Substitute.For<IRecommendationService>();
 
         // sensible defaults
         currentUser.IsMat.Returns(false);
@@ -74,7 +79,9 @@ public class PagesViewBuilderTests
             contentful,
             currentUser,
             establishmentService,
-            notifyService
+            notifyService,
+            submissionService,
+            recommendationService
         );
     }
 
@@ -107,20 +114,24 @@ public class PagesViewBuilderTests
     public void Ctor_Null_ContactOptions_Throws()
     {
         var errors = ErrorOpts();
-        var viewBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         var contentful = Substitute.For<IContentfulService>();
+        var currentUser = Substitute.For<ICurrentUser>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var notifyService = Substitute.For<INotifyService>();
-        var current = Substitute.For<ICurrentUser>();
+        var submissionService = Substitute.For<ISubmissionService>();
+        var reocmmendationService = Substitute.For<IRecommendationService>();
+
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
                 NullLogger<BaseViewBuilder>.Instance,
                 null!,
                 errors,
                 contentful,
-                current,
+                currentUser,
                 establishmentService,
-                notifyService
+                notifyService,
+                submissionService,
+                reocmmendationService
             )
         );
     }
@@ -129,20 +140,24 @@ public class PagesViewBuilderTests
     public void Ctor_Null_ErrorOptions_Throws()
     {
         var contact = ContactOpts();
-        var viewBuilder = Substitute.For<ICategoryLandingViewComponentViewBuilder>();
         var contentful = Substitute.For<IContentfulService>();
+        var currentUser = Substitute.For<ICurrentUser>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var notifyService = Substitute.For<INotifyService>();
-        var current = Substitute.For<ICurrentUser>();
+        var submissionService = Substitute.For<ISubmissionService>();
+        var reocmmendationService = Substitute.For<IRecommendationService>();
+
         Assert.Throws<ArgumentNullException>(() =>
             new PagesViewBuilder(
                 NullLogger<BaseViewBuilder>.Instance,
                 contact,
                 null!,
                 contentful,
-                current,
+                currentUser,
                 establishmentService,
-                notifyService
+                notifyService,
+                submissionService,
+                reocmmendationService
             )
         );
     }

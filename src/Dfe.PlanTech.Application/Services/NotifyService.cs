@@ -1,28 +1,27 @@
-using System.Text.Json;
+using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using Dfe.PlanTech.Application.Rendering.Markdown;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Models;
-using Notify.Exceptions;
-using Notify.Interfaces;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Dfe.PlanTech.Application.Services;
 
-public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotificationClient notifyClient)
+public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotifyWorkflow notifyWorkflow)
     : INotifyService
 {
     private readonly IContentfulWorkflow _contentfulWorkflow =
         contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
 
-    private readonly INotificationClient _notifyClient =
-        notifyClient ?? throw new ArgumentNullException(nameof(notifyClient));
-
-    private const string CouldNotSendEmail = "Could not send email";
+    private readonly INotifyWorkflow _notifyWorkflow =
+        notifyWorkflow ?? throw new ArgumentNullException(nameof(notifyWorkflow));
 
     public List<NotifySendResult> SendSingleRecommendationEmail(
         ShareByEmailModel model,
@@ -65,72 +64,142 @@ public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotification
         // TODO: Use active correlation ID once implemented
         var correlationId = Guid.NewGuid().ToString();
 
-        var results = new List<NotifySendResult>();
-
-        foreach (var recipient in model.EmailAddresses)
-        {
-            var errorPrefix = $"{CouldNotSendEmail} to {recipient}";
-
-            try
-            {
-                var response = _notifyClient.SendEmail(
-                    emailAddress: recipient,
-                    templateId: NotifyConstants.ShareSingleRecommendationTemplateId,
-                    personalisation: personalisation,
-                    clientReference: correlationId
-                );
-
-                var result = new NotifySendResult { Recipient = recipient, Response = response };
-
-                results.Add(result);
-            }
-            catch (NotifyClientException clientException)
-            {
-                var errors = ParseNotifyClientException(clientException.Message);
-                var result = new NotifySendResult { Recipient = recipient, Errors = errors };
-
-                results.Add(result);
-            }
-            catch (Exception)
-            {
-                var result = new NotifySendResult
-                {
-                    Recipient = recipient,
-                    Errors = ["GOK.UK Notify failed"],
-                };
-
-                results.Add(result);
-            }
-        }
-
-        return results;
+        return _notifyWorkflow.SendEmails(
+            model,
+            personalisation,
+            correlationId,
+            NotifyConstants.ShareSingleRecommendationTemplateId
+        );
     }
 
-    private List<string> ParseNotifyClientException(string message)
+    public List<NotifySendResult> SendStandardEmail(
+        ShareByEmailModel model,
+        List<QuestionnaireSectionEntry> sections,
+        List<SqlSectionStatusDto> sectionStatuses,
+        Dictionary<string, SqlEstablishmentRecommendationHistoryDto> recommendationStatuses,
+        string categoryName,
+        string establishmentName
+    )
     {
-        // GOV.UK Notify's provided exception class is weird.
-        // It returns a string that combines regular text with JSON, and
-        // puts a very similar message twice. This attempts to untangle it.
-
-        var firstPart = message.Split("\n").Select(x => x.Trim()).FirstOrDefault();
-        if (firstPart is null)
+        var userMessage = model.UserMessage ?? "";
+        if (!string.IsNullOrWhiteSpace(userMessage))
         {
-            return [];
+            var messagePrefix =
+                $"{model.NameOfUser} added a message:" + Environment.NewLine + Environment.NewLine;
+            var lines = Regex
+                .Split(
+                    userMessage,
+                    @"\r\n|\n",
+                    RegexOptions.Compiled,
+                    TimeSpan.FromMilliseconds(200)
+                )
+                .Select(line => $"^ {line}");
+            userMessage = messagePrefix + string.Join(Environment.NewLine, lines);
         }
 
-        var matches = Regex.Match(
-            firstPart,
-            "Status code \\d+. Error: ({.*}).*",
-            RegexOptions.Compiled,
-            TimeSpan.FromMilliseconds(200)
+        var standardMarkdown = BuildStandardMarkdown(
+            sections,
+            sectionStatuses,
+            recommendationStatuses
         );
-        var messageJson = matches.Groups.Values.LastOrDefault()?.ToString();
-        if (string.IsNullOrWhiteSpace(messageJson))
+
+        var personalisation = new Dictionary<string, dynamic>
         {
-            return [];
+            { "name of user", model.NameOfUser },
+            { "school", establishmentName },
+            { "standard lowercase", categoryName.ToLower() },
+            { "user message", userMessage },
+            { "standard", categoryName },
+            { "recommendations", standardMarkdown },
+        };
+
+        // TODO: Use active correlation ID once implemented
+        var correlationId = Guid.NewGuid().ToString();
+
+        return _notifyWorkflow.SendEmails(
+            model,
+            personalisation,
+            correlationId,
+            NotifyConstants.ShareStandardTemplateId
+        );
+    }
+
+    private static string BuildStandardMarkdown(
+        List<QuestionnaireSectionEntry> sections,
+        List<SqlSectionStatusDto> sectionStatuses,
+        Dictionary<string, SqlEstablishmentRecommendationHistoryDto> recommendationStatuses
+    )
+    {
+        var stringBuilder = new StringBuilder();
+
+        foreach (var section in sections)
+        {
+            var sectionStatus = sectionStatuses.FirstOrDefault(ss =>
+                ss.SectionId.Equals(section.Id)
+            );
+            var coreRecommendationIds = section.CoreRecommendations.Select(cr => cr.Id).ToList();
+
+            var sectionRecommendationStatuses = recommendationStatuses
+                .Where(rs => coreRecommendationIds.Contains(rs.Key))
+                .ToDictionary();
+
+            var sectionMarkdown = BuildSectionMarkdown(
+                section.Name,
+                sectionStatus,
+                section.CoreRecommendations.ToList(),
+                sectionRecommendationStatuses
+            );
+
+            stringBuilder.AppendLine(sectionMarkdown);
         }
 
-        var result = JsonSerializer.Deserialize<NotifyClientExceptionMessage>(messageJson);
-        return result?.Errors.Select(e => e.Message).ToList() ?? [];
+        return stringBuilder.ToString();
+    }
+
+    private static string BuildSectionMarkdown(
+        string sectionName,
+        SqlSectionStatusDto? sectionStatus,
+        List<RecommendationChunkEntry> recommendationChunks,
+        Dictionary<string, SqlEstablishmentRecommendationHistoryDto> recommendationStatuses
+    )
+    {
+        var stringBuilder = new StringBuilder();
+
+        stringBuilder.AppendLine($"## Recommendations for {sectionName.ToLower()}");
+        stringBuilder.AppendLine();
+
+        if (sectionStatus?.LastCompletionDate is null)
+        {
+            stringBuilder.AppendLine(
+                $"The self-assessment for roles and responsibilities has not yet been completed."
+            );
+        }
+        else
+        {
+            var completionDate = sectionStatus.LastCompletionDate.Value.ToString("dd MMMM yyyy");
+            stringBuilder.AppendLine(
+                $"The self-assessment for roles and responsibilities was completed on {completionDate}."
+            );
+            stringBuilder.AppendLine();
+
+            for (var i = 0; i < recommendationChunks.Count; i++)
+            {
+                var recommendationEntry = recommendationChunks[i];
+                var recommendationStatus =
+                    recommendationStatuses
+                        .FirstOrDefault(rs => rs.Key.Equals(recommendationEntry.Id))
+                        .Value
+                    ?? throw new InvalidOperationException(
+                        "Cannot prepare markdown a recommendation that does not exist in the database."
+                    );
+
+                var status = recommendationStatus?.NewStatus ?? RecommendationStatus.NotStarted;
+                stringBuilder.AppendLine(
+                    $"{i + 1}. {status.GetDisplayName()}: {recommendationEntry.Header}"
+                );
+            }
+        }
+
+        return stringBuilder.ToString();
     }
 }
