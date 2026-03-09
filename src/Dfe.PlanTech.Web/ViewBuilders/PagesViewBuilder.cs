@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -97,7 +98,7 @@ public class PagesViewBuilder(
             return controller.View(CategoryLandingPageView, landingPageViewModel);
         }
 
-        controller.ViewData[ViewDataConstants.Title] =
+        controller.ViewData[StatePassingMechanismConstants.Title] =
             StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text)
             ?? PageTitleConstants.PlanTechnologyForYourSchool;
 
@@ -206,10 +207,9 @@ public class PagesViewBuilder(
             establishmentName
         );
 
-        controller.ViewData[ViewDataConstants.NotifySendResults] = results;
+        SetTempDataNotifyShareResults(controller, results);
 
-        var page = await ContentfulService.GetPageBySlugAsync(categorySlug);
-        return await RouteBasedOnOrganisationTypeAsync(controller, page);
+        return controller.RedirectToCategoryLandingPage(categorySlug);
     }
 
     private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(

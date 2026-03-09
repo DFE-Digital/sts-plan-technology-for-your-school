@@ -347,7 +347,7 @@ public class PagesViewBuilderTests
         var vm = Assert.IsType<PageViewModel>(view.Model);
         Assert.Equal("Acme Academy", vm.ActiveEstablishmentName);
         Assert.Equal("123456", vm.ActiveEstablishmentUrn);
-        Assert.Equal("About Us", controller.ViewData[ViewDataConstants.Title]); // processed title
+        Assert.Equal("About Us", controller.ViewData[StatePassingMechanismConstants.Title]); // processed title
         Assert.True(vm.DisplayBlueBanner); // default
     }
 
@@ -364,7 +364,7 @@ public class PagesViewBuilderTests
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal(
             PageTitleConstants.PlanTechnologyForYourSchool,
-            controller.ViewData[ViewDataConstants.Title]
+            controller.ViewData[StatePassingMechanismConstants.Title]
         );
     }
 

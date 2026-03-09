@@ -1,10 +1,14 @@
 using System.Security.Authentication;
+using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -110,5 +114,14 @@ public class BaseViewBuilder(
             Heading = heading,
             InputModel = inputModel,
         };
+    }
+
+    protected static void SetTempDataNotifyShareResults(
+        Controller controller,
+        List<NotifySendResult> results
+    )
+    {
+        var resultsJson = JsonSerializer.Serialize(results);
+        controller.TempData[StatePassingMechanismConstants.NotifySendResults] = resultsJson;
     }
 }

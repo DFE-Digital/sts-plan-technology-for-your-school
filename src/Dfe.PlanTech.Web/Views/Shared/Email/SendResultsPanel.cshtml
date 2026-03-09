@@ -1,5 +1,11 @@
 @{
-    var sendResults = ViewData[ViewDataConstants.NotifySendResults] as List<NotifySendResult>;
+    var sendResultsJson = TempData[StatePassingMechanismConstants.NotifySendResults] as string;
+
+    List<NotifySendResult>? sendResults = null;
+    if (sendResultsJson is not null)
+    {
+        sendResults = JsonSerializer.Deserialize<List<NotifySendResult>>(sendResultsJson);
+    }
 }
 
 @if (sendResults is not null)

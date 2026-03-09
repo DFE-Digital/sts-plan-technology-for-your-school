@@ -67,7 +67,7 @@ public class GroupsViewBuilder(
             ContactLinkHref = contactLink?.Href,
         };
 
-        controller.ViewData[ViewDataConstants.Title] = "Select a school";
+        controller.ViewData[StatePassingMechanismConstants.Title] = "Select a school";
         return controller.View(SelectASchoolViewName, viewModel);
     }
 

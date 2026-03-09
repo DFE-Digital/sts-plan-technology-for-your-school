@@ -408,14 +408,13 @@ public class RecommendationsViewBuilder(
             latestRecommendationHistory.NewStatus.Value
         );
 
-        controller.ViewData[ViewDataConstants.NotifySendResults] = results;
+        SetTempDataNotifyShareResults(controller, results);
 
-        return await RouteToSingleRecommendation(
+        return PageRedirecter.RedirectToGetSingleRecommendation(
             controller,
             categorySlug,
             sectionSlug,
-            chunkSlug,
-            false
+            chunkSlug
         );
     }
 
