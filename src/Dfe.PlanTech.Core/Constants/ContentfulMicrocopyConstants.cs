@@ -1,5 +1,6 @@
 using Contentful.Core.Models.Management;
 using System.Diagnostics.CodeAnalysis;
+using System.Net.NetworkInformation;
 namespace Dfe.PlanTech.Core.Constants;
 
 [ExcludeFromCodeCoverage]
@@ -14,6 +15,8 @@ public static class ContentfulMicrocopyConstants
     private const string LandingPageBackLinkFallback = "Back to choose a standard";
     private const string GroupsSelectHeaderFallback = "Select a school";
     private const string PrintSectionIncompleteFallback = "The self-assessment must be completed before recommendations are available.";
+    private const string PrintSingleLinkFallback = "Print this recommendation";
+    private const string StatusUpdatedFallback = "Status updated";
 
     public record MicrocopyRecord
     {
@@ -49,6 +52,12 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord LandingPageTopicLinkCompleted = new("topicLinkCompleted", TopicLinksFallback, "topic");
     public static readonly MicrocopyRecord LandingPageSuccessPanelHeader = new("successHeader", SuccessHeaderFallback, "topic");
     public static readonly MicrocopyRecord LandingPageSuccessPanelBody = new("successBody", EmptyFallback);
+
+    // Single recommendation page
+    public static readonly MicrocopyRecord SingleRecommendationPrintLink = new("printLinkSingle", PrintSingleLinkFallback);
+    public static readonly MicrocopyRecord SingleRecommendationPrintAllLink = new("printLinkTopic", PrintLinksFallback, "topic");
+    public static readonly MicrocopyRecord SingleRecommendationSuccessHeader = new("successStatus", StatusUpdatedFallback, "status");
+    public static readonly MicrocopyRecord SingleRecommendationPosition = new("recommendationPosition", EmptyFallback, "position", "totalRecsForTopic");
 
     // Print page (standard/category)
     public static readonly MicrocopyRecord CateogoryPrintSectionNotStarted = new("printNotStarted", PrintSectionIncompleteFallback);

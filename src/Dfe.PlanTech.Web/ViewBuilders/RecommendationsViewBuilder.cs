@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
@@ -96,6 +97,8 @@ public class RecommendationsViewBuilder(
                 currentRecommendationChunk.Id
             );
 
+        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
+
         var viewModel = new SingleRecommendationViewModel
         {
             CategoryName = categoryHeaderText,
@@ -120,6 +123,7 @@ public class RecommendationsViewBuilder(
             OriginatingSlug = chunkSlug,
             History = groupedHistory,
             FirstActivity = firstActivity,
+            MicrocopyEntries = microcopy,
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
@@ -285,8 +289,13 @@ public class RecommendationsViewBuilder(
         );
 
         // Set success message for the banner
+        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
         controller.TempData["StatusUpdateSuccessTitle"] =
-            $"Status updated to '{selectedStatusEnum.Value.GetDisplayName()}'";
+            ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
+                microcopy,
+                new Dictionary<string, string> { ["status"] = selectedStatusEnum.Value.GetDisplayName() }
+            );
 
         // Redirect back to the single recommendation page
         return PageRedirecter.RedirectToGetSingleRecommendation(

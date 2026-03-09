@@ -24,28 +24,32 @@
 @section RelatedActions {
     <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
-
     <p class="govuk-body-s">
         <a class="govuk-link"
            asp-route="PrintSingleRecommendation"
            asp-route-categorySlug="@Model.CategorySlug"
            asp-route-sectionSlug="@Model.SectionSlug"
            asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-            Print this recommendation
+            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.SingleRecommendationPrintLink,
+                Model.MicrocopyEntries
+            )
         </a>
     </p>
-
     <p class="govuk-body-s">
         <a class="govuk-link"
            asp-route="PrintAllRecommendations"
            asp-route-categorySlug="@Model.CategorySlug"
            asp-route-sectionSlug="@Model.SectionSlug"
            asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-            Print your school's @Model.Section.Name.ToLower() recommendations
+            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.SingleRecommendationPrintAllLink,
+                Model.MicrocopyEntries,
+                new Dictionary<string, string> { ["topic"] = Model.Section.Name.ToLower() }
+            )
         </a>
     </p>
 }
-
 
 @{
     <div class="recommendation-content">
@@ -70,7 +74,17 @@
             <form method="post" action="/@categorySlug/@sectionSlug/recommendations/@recommendation.Slug/update-status">
 
                 <div class="recommendation-piece-content">
-                    <span class="govuk-caption-xl">Recommendation @Model.CurrentChunkPosition of @Model.TotalChunks</span>
+                    <span class="govuk-caption-xl">
+                        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                            ContentfulMicrocopyConstants.SingleRecommendationPosition,
+                            Model.MicrocopyEntries,
+                            new Dictionary<string, string>
+                            {
+                                ["position"] = Model.CurrentChunkPosition.ToString(),
+                                ["totalRecsForTopic"] = Model.TotalChunks.ToString(),
+                            }
+                        )
+                    </span>
                     <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
 
                     <div class="dfe-table-scroll" tabindex="0">
