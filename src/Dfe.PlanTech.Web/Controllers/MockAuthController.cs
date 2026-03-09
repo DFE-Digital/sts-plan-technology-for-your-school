@@ -250,7 +250,8 @@ public class MockAuthController(
         Response.Cookies.Delete(SelectorCookieName);
         Response.Cookies.Delete(SelectorCookieKey);
 
-        var redirect = Url.Content("~/");
+        var redirect = "/";
+
 
         if (!string.IsNullOrEmpty(state))
         {

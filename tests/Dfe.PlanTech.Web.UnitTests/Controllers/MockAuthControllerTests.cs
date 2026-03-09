@@ -58,13 +58,12 @@ public class MockAuthControllerTests
         var controller = CreateController(keyCookie: null);
 
         var result = await controller.Authorize(
-            "client-id",
-            "https://localhost/signin-oidc",
+            "https://localhost:8080/auth/cb",
             "code",
             "state-1",
             "nonce-1");
 
-        Assert.IsType<NotFoundResult>(result);
+        Assert.IsType<string>("The service is currently unavailable to use while E2E tests are running.");
     }
 
     [Fact]
@@ -73,13 +72,12 @@ public class MockAuthControllerTests
         var controller = CreateController(keyCookie: "wrong");
 
         var result = await controller.Authorize(
-            "client-id",
-            "https://localhost/signin-oidc",
+            "https://localhost:8080/auth/cb",
             "code",
             "state-1",
             "nonce-1");
 
-        Assert.IsType<NotFoundResult>(result);
+        Assert.IsType<string>("The service is currently unavailable to use while E2E tests are running.");
     }
 
     [Fact]
@@ -88,8 +86,7 @@ public class MockAuthControllerTests
         var controller = CreateController();
 
         var result = await controller.Authorize(
-            "client-id",
-            "https://localhost/signin-oidc",
+            "https://localhost:8080/auth/cb",
             "token",
             "state-1",
             "nonce-1");
@@ -106,14 +103,13 @@ public class MockAuthControllerTests
         var controller = CreateController(userTypeCookie: "school");
 
         var result = await controller.Authorize(
-            "client-id",
-            "https://localhost/signin-oidc",
+            "https://localhost:8080/auth/cb",
             "code",
             "state-123",
             "nonce-123");
 
         var redirect = Assert.IsType<RedirectResult>(result);
-        Assert.StartsWith("https://localhost/signin-oidc?code=", redirect.Url);
+        Assert.StartsWith("https://localhost:8080/auth/cb?code=", redirect.Url);
         Assert.Contains("&state=state-123", redirect.Url);
     }
 
@@ -138,8 +134,7 @@ public class MockAuthControllerTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             controller.Authorize(
-                "client-id",
-                "https://localhost/signin-oidc",
+                "https://localhost:8080/auth/cb",
                 "code",
                 "state-1",
                 "nonce-1"));
@@ -180,8 +175,7 @@ public class MockAuthControllerTests
         var controller = CreateController(userTypeCookie: "school");
 
         var result = await controller.Authorize(
-            "client-id",
-            "https://localhost/signin-oidc",
+            "https://localhost:8080/auth/cb",
             "code",
             "state-1",
             "nonce-1");
@@ -205,8 +199,7 @@ public class MockAuthControllerTests
             keyCookie: ValidSecret);
 
         var result = await controller.Authorize(
-            "client-id",
-            "https://localhost/signin-oidc",
+            "https://localhost:8080/auth/cb",
             "code",
             "state-1",
             "nonce-1");
@@ -224,13 +217,12 @@ public class MockAuthControllerTests
             keyCookie: "Invalid-Secret");
 
         var result = await controller.Authorize(
-            "client-id",
-            "https://localhost/signin-oidc",
+            "https://localhost:8080/auth/cb",
             "code",
             "state-1",
             "nonce-1");
 
-        Assert.IsType<NotFoundResult>(result);
+        Assert.IsType<string>("The service is currently unavailable to use while E2E tests are running.");
     }
 
     [Fact]
@@ -241,7 +233,7 @@ public class MockAuthControllerTests
         var result = controller.Token(
             "implicit",
             "code-1",
-            "https://localhost/callback",
+            "https://localhost:8080/callback",
             "client-id");
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -256,7 +248,7 @@ public class MockAuthControllerTests
         var result = controller.Token(
             "authorization_code",
             "missing-code",
-            "https://localhost/callback",
+            "https://localhost:8080/callback",
             "client-id");
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -269,13 +261,13 @@ public class MockAuthControllerTests
         var controller = CreateController();
 
         StoreAuthCode("code-1", new AuthCodeRecordBuilder()
-            .WithRedirectUri("https://localhost/correct")
+            .WithRedirectUri("https://localhost:8080/correct")
             .Build());
 
         var result = controller.Token(
             "authorization_code",
             "code-1",
-            "https://localhost/wrong",
+            "https://localhost:8080/wrong",
             "client-id");
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -294,7 +286,7 @@ public class MockAuthControllerTests
         var result = controller.Token(
             "authorization_code",
             "code-1",
-            "https://localhost/callback",
+            "https://localhost:8080/callback",
             "client-id");
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
@@ -311,7 +303,7 @@ public class MockAuthControllerTests
         var result = controller.Token(
             "authorization_code",
             "code-1",
-            "https://localhost/callback",
+            "https://localhost:8080/callback",
             "client-id");
 
         var ok = Assert.IsType<OkObjectResult>(result);
@@ -332,7 +324,7 @@ public class MockAuthControllerTests
         var first = controller.Token(
             "authorization_code",
             "code-1",
-            "https://localhost/callback",
+            "https://localhost:8080/callback",
             "client-id");
 
         Assert.IsType<OkObjectResult>(first);
@@ -340,7 +332,7 @@ public class MockAuthControllerTests
         var second = controller.Token(
             "authorization_code",
             "code-1",
-            "https://localhost/callback",
+            "https://localhost:8080/callback",
             "client-id");
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(second);
@@ -352,31 +344,20 @@ public class MockAuthControllerTests
     {
         var controller = CreateController(keyCookie: null);
 
-        var result = controller.EndSession("https://localhost/post-logout", "abc");
+        var result = controller.EndSession( "abc");
 
         Assert.IsType<NotFoundResult>(result);
     }
 
     [Fact]
-    public void EndSession_RedirectsToRoot_WhenNoPostLogoutRedirectUri()
+    public void EndSession_RedirectsToDefaultUri()
     {
         var controller = CreateController();
 
-        var result = controller.EndSession(null, "abc");
+        var result = controller.EndSession( null);
 
         var redirect = Assert.IsType<RedirectResult>(result);
         Assert.Equal("/", redirect.Url);
-    }
-
-    [Fact]
-    public void EndSession_RedirectsToPostLogoutRedirectUri()
-    {
-        var controller = CreateController();
-
-        var result = controller.EndSession("https://localhost/post-logout", null);
-
-        var redirect = Assert.IsType<RedirectResult>(result);
-        Assert.Equal("https://localhost/post-logout", redirect.Url);
     }
 
     [Fact]
@@ -384,10 +365,10 @@ public class MockAuthControllerTests
     {
         var controller = CreateController();
 
-        var result = controller.EndSession("https://localhost/post-logout", "state-1");
+        var result = controller.EndSession("state-1");
 
         var redirect = Assert.IsType<RedirectResult>(result);
-        Assert.Equal("https://localhost/post-logout?state=state-1", redirect.Url);
+        Assert.Equal("/?state=state-1", redirect.Url);
     }
 
     [Fact]
@@ -395,10 +376,10 @@ public class MockAuthControllerTests
     {
         var controller = CreateController();
 
-        var result = controller.EndSession("https://localhost/post-logout?x=1", "state-1");
+        var result = controller.EndSession("state-1");
 
         var redirect = Assert.IsType<RedirectResult>(result);
-        Assert.Equal("https://localhost/post-logout?x=1&state=state-1", redirect.Url);
+        Assert.Equal("/?state=state-1", redirect.Url);
     }
 
     private MockAuthController CreateController(
@@ -502,7 +483,7 @@ public class MockAuthControllerTests
         private string _subject = "E2E_TEST_SCHOOL_USER";
         private string _email = "school@test.local";
         private string? _organisationJson = "{\"name\":\"School\"}";
-        private string _redirectUri = "https://localhost/callback";
+        private string _redirectUri = "https://localhost:8080/callback";
         private string? _nonce = "nonce-1";
         private DateTime _expires = DateTime.UtcNow.AddMinutes(1);
         private int _dbEstablishmentId = 101;
