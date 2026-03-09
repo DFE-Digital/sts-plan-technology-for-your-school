@@ -47,7 +47,7 @@ public class MessageRetryHandlerTests
 
         await _serviceBusSender
             .Received(1)
-            .SendMessageAsync(Arg.Any<ServiceBusMessage>(), TestContext.Current.CancellationToken);
+            .SendMessageAsync(Arg.Any<ServiceBusMessage>(), CancellationToken.None);
 
         Assert.True(retryRequired);
     }

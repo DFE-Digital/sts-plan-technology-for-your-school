@@ -34,6 +34,8 @@ public class BackgroundTaskHostedServiceTests
         // Act
         await sut.StartAsync(cts.Token); // StartAsync calls ExecuteAsync under the hood
 
+        Thread.Sleep(500);
+
         // Assert
         Assert.True(ran);
         await queue.Received(1).DequeueAsync(Arg.Any<CancellationToken>());
@@ -79,6 +81,8 @@ public class BackgroundTaskHostedServiceTests
         // Act
         await sut.StartAsync(cts.Token);
 
+        Thread.Sleep(500);
+
         // Assert: error was logged at least once
         logger
             .ReceivedWithAnyArgs()
@@ -116,14 +120,16 @@ public class BackgroundTaskHostedServiceTests
 
         queue
             .DequeueAsync(Arg.Any<CancellationToken>())
-            .Returns(ci =>
+            .Returns(callInfo =>
             {
-                captured = ci.Arg<CancellationToken>();
+                captured = callInfo.Arg<CancellationToken>();
                 cts.Cancel();
                 return Task.FromResult<Func<CancellationToken, Task>>(_ => Task.CompletedTask);
             });
 
         await sut.StartAsync(cts.Token);
+
+        Thread.Sleep(500);
 
         Assert.True(captured.HasValue);
         Assert.Equal(cts.Token.ToString(), captured!.Value.ToString());

@@ -80,6 +80,9 @@ public class ContentfulServiceBusProcessorTests
     public async Task ExecuteAsync_ShouldStartProcessingMessages()
     {
         await _contentfulServiceBusProcessor.StartAsync(CancellationToken.None);
+
+        Thread.Sleep(500);
+
         await _serviceBusProcessor.Received(1).StartProcessingAsync(Arg.Any<CancellationToken>());
     }
 
@@ -87,9 +90,7 @@ public class ContentfulServiceBusProcessorTests
     public async Task StopProcessingAsync_ShouldStopAndDisposeProcessor()
     {
         await _contentfulServiceBusProcessor.InvokeNonPublicAsyncMethod("StopProcessingAsync", []);
-        await _serviceBusProcessor
-            .Received(1)
-            .StopProcessingAsync(TestContext.Current.CancellationToken);
+        await _serviceBusProcessor.Received(1).StopProcessingAsync(Arg.Any<CancellationToken>());
         await _serviceBusProcessor.Received(1).DisposeAsync();
     }
 

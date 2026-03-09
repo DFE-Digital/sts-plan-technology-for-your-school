@@ -55,8 +55,23 @@ public class RecommendationsViewBuilderTests
 
     // ---------- Small builders for domain objects used in tests ----------
 
-    private static QuestionnaireCategoryEntry MakeCategory(string headerText) =>
-        new QuestionnaireCategoryEntry { Header = new ComponentHeaderEntry { Text = headerText } };
+    private static QuestionnaireCategoryEntry MakeCategory(
+        string headerText,
+        string? landingPageSlug = null
+    )
+    {
+        var category = new QuestionnaireCategoryEntry
+        {
+            Header = new ComponentHeaderEntry { Text = headerText },
+        };
+
+        if (!string.IsNullOrWhiteSpace(landingPageSlug))
+        {
+            category.LandingPage = new PageEntry { Slug = landingPageSlug };
+        }
+
+        return category;
+    }
 
     private static QuestionnaireSectionEntry MakeSection(
         string id,
@@ -365,7 +380,7 @@ public class RecommendationsViewBuilderTests
         var ctl = MakeController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
-        var category = MakeCategory("Connectivity");
+        var category = MakeCategory("Connectivity", "connectivity");
         var section = MakeSection("S1", "sec-1");
 
         _contentful.GetCategoryBySlugAsync("connectivity").Returns(category);
@@ -436,11 +451,14 @@ public class RecommendationsViewBuilderTests
     public async Task RouteBySectionAndRecommendation_CompleteReviewed_Renders_Checklist_When_Requested()
     {
         // Arrange
+        var categoryTitle = "Connectivity";
+        var slug = categoryTitle.ToLower();
+
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
-        var category = MakeCategory("Connectivity");
+        var category = MakeCategory(categoryTitle, slug);
         var section = MakeSection("S1", "sec-1");
 
         _contentful.GetCategoryBySlugAsync("connectivity").Returns(category);
@@ -480,7 +498,72 @@ public class RecommendationsViewBuilderTests
         // Act
         var result = await sut.RouteBySectionAndRecommendation(
             ctl,
-            "connectivity",
+            slug,
+            "sec-1",
+            useChecklist: true,
+            null,
+            null
+        );
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("RecommendationsChecklist", view.ViewName);
+        var vm = Assert.IsType<RecommendationsViewModel>(view.Model);
+        Assert.Equal(3, vm.Chunks.Count);
+    }
+
+    [Fact]
+    public async Task RouteBySectionAndRecommendation_Throws_If_No_LangingPage()
+    {
+        // Arrange
+        var categoryTitle = "Connectivity";
+        var slug = categoryTitle.ToLower();
+
+        var sut = CreateServiceUnderTest();
+        var ctl = MakeController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
+        var category = MakeCategory(categoryTitle, slug);
+        var section = MakeSection("S1", "sec-1");
+
+        _contentful.GetCategoryBySlugAsync(slug).Returns(category);
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: "C1");
+        _submissions
+            .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed)
+            .Returns(routing);
+
+        _recommendationService
+            .GetLatestRecommendationStatusesAsync(Arg.Any<int>())
+            .Returns(
+                new Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
+                {
+                    ["C1"] = new SqlEstablishmentRecommendationHistoryDto
+                    {
+                        RecommendationId = 1,
+                        DateCreated = DateTime.UtcNow,
+                        NewStatus = RecommendationStatus.InProgress,
+                    },
+                    ["C2"] = new SqlEstablishmentRecommendationHistoryDto
+                    {
+                        RecommendationId = 2,
+                        DateCreated = DateTime.UtcNow,
+                        NewStatus = RecommendationStatus.InProgress,
+                    },
+                    ["C3"] = new SqlEstablishmentRecommendationHistoryDto
+                    {
+                        RecommendationId = 3,
+                        DateCreated = DateTime.UtcNow,
+                        NewStatus = RecommendationStatus.InProgress,
+                    },
+                }
+            );
+
+        // Act
+        var result = await sut.RouteBySectionAndRecommendation(
+            ctl,
+            slug,
             "sec-1",
             useChecklist: true,
             null,
@@ -498,15 +581,16 @@ public class RecommendationsViewBuilderTests
     public async Task RouteBySectionAndRecommendation_WithSingleChunkSlug_Renders_Single_Recommendation()
     {
         // Arrange
+        var categoryTitle = "Connectivity";
+        var categorySlug = categoryTitle.ToLower();
+        var sectionSlug = "sec-1";
+
         var sut = CreateServiceUnderTest();
         var ctl = MakeController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
 
-        var categorySlug = "connectivity";
-        var sectionSlug = "sec-1";
-        var category = MakeCategory("Connectivity");
-
+        var category = MakeCategory(categoryTitle, categorySlug);
         var section = MakeSection("S1", sectionSlug);
 
         _contentful.GetCategoryBySlugAsync(categorySlug).Returns(category);

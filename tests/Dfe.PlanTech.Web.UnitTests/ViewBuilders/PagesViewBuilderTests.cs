@@ -275,11 +275,13 @@ public class PagesViewBuilderTests
     [Fact]
     public async Task RouteBasedOnOrganisationType_LandingPage_Path_Returns_CategoryLanding_View()
     {
-        var page = MakePage("networks", isLanding: true);
-        var category = MakeCategory("Networking");
+        var categoryTitle = "Networking";
+        var slug = categoryTitle.ToLower();
+        var page = MakePage(slug, isLanding: true);
+        var category = MakeCategory(categoryTitle);
 
         var contentful = Substitute.For<IContentfulService>();
-        contentful.GetCategoryBySlugAsync("networks", 4).Returns(category);
+        contentful.GetCategoryBySlugAsync(slug, 4).Returns(category);
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
@@ -290,11 +292,11 @@ public class PagesViewBuilderTests
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
         var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
-        Assert.Equal("networking", vm.Slug);
-        Assert.Equal("Networking", vm.Title.Text);
+        Assert.Equal(categoryTitle, vm.Title.Text);
+        Assert.Equal(slug, vm.Slug);
         Assert.Equal("Some Section", vm.SectionName);
 
-        await contentful.Received(1).GetCategoryBySlugAsync("networks", 4);
+        await contentful.Received(1).GetCategoryBySlugAsync(slug, 4);
     }
 
     [Fact]
@@ -316,13 +318,16 @@ public class PagesViewBuilderTests
     [Fact]
     public async Task RouteBasedOnOrganisationType_LandingPage_Throws_When_Category_Landing_Slug_Null()
     {
-        var page = MakePage("missing", isLanding: true);
+        var page = MakePage(string.Empty, isLanding: true);
+        var category = new QuestionnaireCategoryEntry
+        {
+            Header = new ComponentHeaderEntry { Text = "Missing" },
+            LandingPage = null,
+        };
+
         var contentful = Substitute.For<IContentfulService>();
-
-        var category = new QuestionnaireCategoryEntry { LandingPage = null };
-
         var sut = CreateServiceUnderTest(contentful: contentful);
-        contentful.GetCategoryBySlugAsync("missing", 4).Returns(category);
+        contentful.GetCategoryBySlugAsync(page.Slug, 4).Returns(category);
 
         var controller = new TestController();
 

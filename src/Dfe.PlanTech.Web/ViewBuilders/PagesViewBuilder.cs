@@ -36,7 +36,7 @@ public class PagesViewBuilder(
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorPagesConfiguration _errorPages =
-        errorPages.Value ?? throw new ArgumentNullException(nameof(errorPages));
+        errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
     private readonly INotifyService _notifyService =
         notifyService ?? throw new ArgumentNullException(nameof(notifyService));
     private readonly ISubmissionService _submissionService =
@@ -90,6 +90,11 @@ public class PagesViewBuilder(
                     $"Could not find category at {controller.Request.Path.Value}"
                 );
             }
+            if (string.IsNullOrWhiteSpace(page.Slug))
+            {
+                throw new InvalidDataException("Page Slug cannot be empty");
+            }
+
             var landingPageViewModel = await BuildLandingPageViewModelAsync(
                 controller,
                 category,
