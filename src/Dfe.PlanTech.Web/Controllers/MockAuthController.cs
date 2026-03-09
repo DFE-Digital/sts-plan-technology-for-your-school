@@ -97,7 +97,9 @@ public class MockAuthController(
             return Content("The service is currently unavailable to use while E2E tests are running.", "text/plain");
         }
 
-        if (!IsValidRedirectUri(redirect_uri))
+        var allowedRedirectUri = GetAllowedAuthorizeRedirectUri();
+
+        if (!string.Equals(redirect_uri, allowedRedirectUri, StringComparison.OrdinalIgnoreCase))
             return BadRequest("Invalid redirect_uri");
 
         if (response_type != "code")
@@ -159,7 +161,7 @@ public class MockAuthController(
         });
 
         var redirect =
-            $"{redirect_uri}?code={code}&state={Uri.EscapeDataString(state)}";
+            $"{allowedRedirectUri}?code={code}&state={Uri.EscapeDataString(state)}";
 
         return Redirect(redirect);
     }
@@ -373,9 +375,9 @@ public class MockAuthController(
         return $"{Request.Scheme}://{Request.Host}/api/mock-auth";
     }
 
-    private bool IsValidRedirectUri(string redirectUri)
+    private string GetAllowedAuthorizeRedirectUri()
     {
-        var allowedRedirectUri = $"{Request.Scheme}://{Request.Host}/auth/cb";
-        return string.Equals(redirectUri, allowedRedirectUri, StringComparison.OrdinalIgnoreCase);
+        return $"{Request.Scheme}://{Request.Host}/auth/cb";
     }
+
 }
