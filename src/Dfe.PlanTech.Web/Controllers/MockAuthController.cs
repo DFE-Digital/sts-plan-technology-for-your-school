@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Web.Controllers;
 
+[NonProductionOnly]
 [Route("api/mock-auth")]
 public class MockAuthController(
     IEstablishmentRepository establishmentRepository,
@@ -30,7 +31,7 @@ public class MockAuthController(
     private const string SchoolTestOrgName = "DSI TEST Establishment (001) Miscellanenous (27)";
     private const string MatTestOrgName = "DSI TEST Multi-Academy Trust (010)";
 
-    private static readonly RSA Rsa = CreateRsa();
+    private static readonly RSA Rsa = RSA.Create(2048);
 
     private static readonly RsaSecurityKey SecurityKey =
         new(Rsa) { KeyId = "e2e-auth-test-key" };
@@ -40,7 +41,6 @@ public class MockAuthController(
 
     private static readonly ConcurrentDictionary<string, DateTime> CodeExpiries = new();
 
-    [NonProductionOnly]
     [HttpGet(".well-known/openid-configuration")]
     public IActionResult Discovery()
     {
@@ -60,7 +60,6 @@ public class MockAuthController(
         });
     }
 
-    [NonProductionOnly]
     [HttpGet("jwks")]
     public IActionResult Jwks()
     {
@@ -86,7 +85,6 @@ public class MockAuthController(
         });
     }
 
-    [NonProductionOnly]
     [HttpGet("authorize")]
     public async Task<IActionResult> Authorize(
         [FromQuery] string client_id,
@@ -161,7 +159,6 @@ public class MockAuthController(
         return Redirect(redirect);
     }
 
-    [NonProductionOnly]
     [HttpPost("token")]
     public IActionResult Token(
         [FromForm] string grant_type,
@@ -239,7 +236,6 @@ public class MockAuthController(
         });
     }
 
-    [NonProductionOnly]
     [HttpGet("endsession")]
     public IActionResult EndSession(
         [FromQuery] string? post_logout_redirect_uri,
@@ -361,7 +357,7 @@ public class MockAuthController(
     {
         if (options.Value.MockAuthentication?.ClientSecret is null)
         {
-            throw new NullReferenceException("MockAuthentication.ClientSecret is null");
+            throw new InvalidOperationException("MockAuthentication.ClientSecret is null");
         }
 
         if (!Request.Cookies.TryGetValue(SelectorCookieKey, out var key))
@@ -370,11 +366,6 @@ public class MockAuthController(
         }
 
         return key == options.Value.MockAuthentication?.ClientSecret;
-    }
-
-    private static RSA CreateRsa()
-    {
-        return RSA.Create(2048);
     }
 
     private string GetBaseUrl()
