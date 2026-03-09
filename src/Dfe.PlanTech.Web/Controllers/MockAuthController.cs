@@ -87,13 +87,18 @@ public class MockAuthController(
 
     [HttpGet("authorize")]
     public async Task<IActionResult> Authorize(
-        [FromQuery] string client_id,
         [FromQuery] string redirect_uri,
         [FromQuery] string response_type,
         [FromQuery] string state,
         [FromQuery] string? nonce)
     {
-        if (!IsAllowed()) return NotFound();
+        if (!IsAllowed())
+        {
+            return Content("The service is currently unavailable to use while E2E tests are running.", "text/plain");
+        }
+
+        if (!IsValidRedirectUri(redirect_uri))
+            return BadRequest("Invalid redirect_uri");
 
         if (response_type != "code")
             return BadRequest("Only authorization_code supported");
@@ -238,24 +243,18 @@ public class MockAuthController(
 
     [HttpGet("endsession")]
     public IActionResult EndSession(
-        [FromQuery] string? post_logout_redirect_uri,
         [FromQuery] string? state)
     {
         if (!IsAllowed()) return NotFound();
 
         Response.Cookies.Delete(SelectorCookieName);
+        Response.Cookies.Delete(SelectorCookieKey);
 
-        if (string.IsNullOrEmpty(post_logout_redirect_uri))
-        {
-            return Redirect("/");
-        }
-
-        var redirect = post_logout_redirect_uri;
+        var redirect = Url.Content("~/");
 
         if (!string.IsNullOrEmpty(state))
         {
-            redirect += (redirect.Contains("?") ? "&" : "?") +
-                        $"state={Uri.EscapeDataString(state)}";
+            redirect += $"?state={Uri.EscapeDataString(state)}";
         }
 
         return Redirect(redirect);
@@ -371,5 +370,11 @@ public class MockAuthController(
     private string GetBaseUrl()
     {
         return $"{Request.Scheme}://{Request.Host}/api/mock-auth";
+    }
+
+    private bool IsValidRedirectUri(string redirectUri)
+    {
+        var allowedRedirectUri = $"{Request.Scheme}://{Request.Host}/auth/cb";
+        return string.Equals(redirectUri, allowedRedirectUri, StringComparison.OrdinalIgnoreCase);
     }
 }

@@ -37,5 +37,18 @@ namespace Dfe.PlanTech.Web.SeedTestData
                                 ('900007', 'Foundation School', 'DSI TEST Establishment (001) Foundation School (05)', null),
                                 ('00000046', null, 'DSI TEST Multi-Academy Trust (010)', '99999');
                            ";
+
+         public const string E2EUserSeedData =
+            $@"
+                                            BEGIN TRAN
+
+                                            INSERT INTO [dbo].[user] (dfeSignInRef)
+                                            VALUES ('E2E_TEST_SCHOOL_USER')
+
+                                            INSERT INTO [dbo].[user] (dfeSignInRef)
+                                            VALUES ('E2E_TEST_MAT_USER')
+
+                                            COMMIT TRAN
+                           ";
     }
 }
