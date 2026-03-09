@@ -1,34 +1,35 @@
+@using static Dfe.PlanTech.Core.Constants.ContentfulMicrocopyConstants
 @model CategoryCardsViewComponentViewModel
 
-    <div class="dfe-card">
-        <div class="dfe-card-container">
-            <h3 class="govuk-heading-m">
-                <a href="@Model.CategorySlug" class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
-                    @Model.CategoryHeaderText
-                </a>
-            </h3>
+@{
+    MicrocopyRecord cardMicrocopyRecord;
 
-            <p class="govuk-body-s">
-                @GetStatusText(Model.CompletedSectionCount, Model.TotalSectionCount)
-            </p>
-        </div>
-    </div>
-
-@functions {
-    public static string GetStatusText(int completed, int total)
+    if (Model.CompletedSectionCount == 0 && Model.TotalSectionCount == 1)
     {
-        if (completed == 0 && total == 1)
-        {
-            return "Start self-assessment";
-        }
-
-        if (completed == 0)
-        {
-            return "Start self-assessments";
-        }
-
-        return completed < total
-            ? "Continue self-assessments"
-            : "View recommendations";
+        cardMicrocopyRecord = ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted;
+    }
+    else if (Model.CompletedSectionCount == 0)
+    {
+        cardMicrocopyRecord = ContentfulMicrocopyConstants.HomeCardStatusMultipleNotStarted;
+    }
+    else
+    {
+        cardMicrocopyRecord = Model.CompletedSectionCount < Model.TotalSectionCount
+            ? ContentfulMicrocopyConstants.HomeCardStatusContinue
+            : ContentfulMicrocopyConstants.HomeCardStatusViewRecommendations;
     }
 }
+
+<div class="dfe-card">
+    <div class="dfe-card-container">
+        <h3 class="govuk-heading-m">
+            <a href="@Model.CategorySlug" class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
+                @Model.CategoryHeaderText
+            </a>
+        </h3>
+
+        <p class="govuk-body-s">
+            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(cardMicrocopyRecord, Model.MicrocopyEntries)
+        </p>
+    </div>
+</div>

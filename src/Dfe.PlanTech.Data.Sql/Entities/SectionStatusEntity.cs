@@ -13,8 +13,6 @@ public class SectionStatusEntity
 
     public DateTime DateUpdated { get; set; }
 
-    public bool? Viewed { get; set; }
-
     public SubmissionStatus Status { get; set; }
 
     public DateTime? LastCompletionDate { get; set; }
@@ -27,7 +25,6 @@ public class SectionStatusEntity
             LastMaturity = LastMaturity,
             DateCreated = DateCreated,
             DateUpdated = DateUpdated,
-            HasBeenViewed = Viewed,
             Status = Status,
             LastCompletionDate = LastCompletionDate,
         };

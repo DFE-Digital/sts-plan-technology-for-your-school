@@ -20,7 +20,8 @@ public class PagesViewBuilder(
     IContentfulService contentfulService,
     IEstablishmentService establishmentService,
     ICurrentUser currentUser
-) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
+)
+    : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView =
         "~/Views/Recommendations/CategoryLandingPage.cshtml";
@@ -78,7 +79,7 @@ public class PagesViewBuilder(
                     $"Could not find category at {controller.Request.Path.Value}"
                 );
             }
-            var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
+            var landingPageViewModel = await BuildLandingPageViewModelAsync(controller, category);
             return controller.View(CategoryLandingPageView, landingPageViewModel);
         }
 
@@ -87,6 +88,8 @@ public class PagesViewBuilder(
             ?? PageTitleConstants.PlanTechnologyForYourSchool;
 
         var viewModel = new PageViewModel(page);
+
+        viewModel.MicrocopyEntries = await contentfulService.GetMicrocopyEntriesAsync();
 
         if (page.DisplayOrganisationName)
         {
@@ -125,12 +128,12 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
+        var landingPageViewModel = await BuildLandingPageViewModelAsync(controller, category);
 
         return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
 
-    private static CategoryLandingPageViewModel BuildLandingPageViewModelAsync(
+    private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(
         Controller controller,
         QuestionnaireCategoryEntry category
     )
@@ -140,6 +143,8 @@ public class PagesViewBuilder(
             throw new InvalidDataException("Cannot build a landing page with an empty slug");
         }
 
+        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
+
         return new CategoryLandingPageViewModel
         {
             Slug = category.LandingPage?.Slug ?? string.Empty,
@@ -148,6 +153,7 @@ public class PagesViewBuilder(
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"],
+            MicrocopyEntries = microcopy
         };
     }
 

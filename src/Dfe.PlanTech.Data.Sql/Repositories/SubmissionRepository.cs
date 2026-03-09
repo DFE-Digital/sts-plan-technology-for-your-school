@@ -197,21 +197,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         return submission;
     }
 
-    public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
-    {
-        var currentSubmission = await GetLatestSubmissionAndResponsesAsync(
-            establishmentId,
-            sectionId,
-            status: SubmissionStatus.CompleteReviewed
-        );
-
-        if (currentSubmission is not null)
-        {
-            currentSubmission.Viewed = true;
-            await _db.SaveChangesAsync();
-        }
-    }
-
     public async Task<SubmissionEntity> SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
         int submissionId
     )
@@ -463,7 +448,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 DateUpdated = currentSubmission?.DateLastUpdated ?? currentSubmission?.DateCreated ?? DateTime.UtcNow,
                 LastMaturity = lastCompleteSubmission?.Maturity,
                 LastCompletionDate = lastCompleteSubmission?.DateCompleted,
-                Viewed = lastCompleteSubmission?.Viewed
             };
         }).ToList();
 

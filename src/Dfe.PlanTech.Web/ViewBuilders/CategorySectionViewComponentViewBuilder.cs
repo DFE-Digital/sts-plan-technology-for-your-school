@@ -51,6 +51,8 @@ public class CategorySectionViewComponentViewBuilder(
                 "Unable to retrieve progress, please refresh your browser.";
         }
 
+        var microcopy = await contentfulService.GetMicrocopyEntriesAsync();
+
         var categoryLandingSlug = GetLandingPageSlug(category);
         var description = category.Content is { Count: > 0 } content
             ? content[0]
@@ -64,6 +66,7 @@ public class CategorySectionViewComponentViewBuilder(
             Description = description,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
             TotalSectionCount = category.Sections.Count,
+            MicrocopyEntries = microcopy
         };
     }
 

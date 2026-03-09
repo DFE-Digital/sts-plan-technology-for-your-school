@@ -306,16 +306,6 @@ public class SubmissionServiceTests
     }
 
     [Fact]
-    public async Task SetLatestSubmissionViewedAsync_Calls_Workflow()
-    {
-        var sut = CreateServiceUnderTest();
-
-        await sut.SetLatestSubmissionViewedAsync(123, "sec1");
-
-        await _submissionWorkflow.Received(1).SetLatestSubmissionViewedAsync(123, "sec1");
-    }
-
-    [Fact]
     public async Task SubmitAnswerAsync_Calls_Workflow_And_Returns_Result()
     {
         var sut = CreateServiceUnderTest();
