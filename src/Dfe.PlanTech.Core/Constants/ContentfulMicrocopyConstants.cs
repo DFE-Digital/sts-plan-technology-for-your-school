@@ -53,6 +53,12 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord LandingPageSuccessPanelHeader = new("successHeader", SuccessHeaderFallback, "topic");
     public static readonly MicrocopyRecord LandingPageSuccessPanelBody = new("successBody", EmptyFallback);
 
+    // Single recommendation page
+    public static readonly MicrocopyRecord SingleRecommendationPrintLink = new("printLinkSingle", PrintSingleLinkFallback);
+    public static readonly MicrocopyRecord SingleRecommendationPrintAllLink = new("printLinkTopic", PrintLinksFallback, "topic");
+    public static readonly MicrocopyRecord SingleRecommendationSuccessHeader = new("successStatus", StatusUpdatedFallback, "status");
+    public static readonly MicrocopyRecord SingleRecommendationPosition = new("recommendationPosition", EmptyFallback, "position", "totalRecsForTopic");
+
     // Print page (standard/category)
     public static readonly MicrocopyRecord CateogoryPrintSectionNotStarted = new("printNotStarted", PrintSectionIncompleteFallback);
     public static readonly MicrocopyRecord CategoryPrintSectionInProgress = new("printContinue", PrintSectionIncompleteFallback, "dateUpdated");
