@@ -31,6 +31,10 @@ public class MockAuthController(
     private const string SchoolTestOrgName = "DSI TEST Establishment (001) Miscellanenous (27)";
     private const string MatTestOrgName = "DSI TEST Multi-Academy Trust (010)";
 
+    private static readonly string[] ResponseTypesSupported = ["code"];
+    private static readonly string[] SubjectTypesSupported = ["public"];
+    private static readonly string[] IdTokenAlgValuesSupported = ["RS256"];
+
     private static readonly RSA Rsa = RSA.Create(2048);
 
     private static readonly RsaSecurityKey SecurityKey =
@@ -52,9 +56,9 @@ public class MockAuthController(
             authorization_endpoint = $"{baseUrl}/authorize",
             token_endpoint = $"{baseUrl}/token",
             jwks_uri = $"{baseUrl}/jwks",
-            response_types_supported = new[] { "code" },
-            subject_types_supported = new[] { "public" },
-            id_token_signing_alg_values_supported = new[] { "RS256" },
+            response_types_supported = ResponseTypesSupported,
+            subject_types_supported = SubjectTypesSupported,
+            id_token_signing_alg_values_supported = IdTokenAlgValuesSupported,
             end_session_endpoint = $"{baseUrl}/endsession",
 
         });
@@ -277,7 +281,7 @@ public class MockAuthController(
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    private class AuthCodeRecord
+    private sealed class AuthCodeRecord
     {
         public string Subject { get; init; } = null!;
         public string Email { get; init; } = null!;
@@ -291,7 +295,7 @@ public class MockAuthController(
         public int? DbMatEstablishmentId { get; set; } = null;
     }
 
-    private string GetUserTypeFromCookie(HttpRequest request)
+    private static string GetUserTypeFromCookie(HttpRequest request)
     {
         return request.Cookies.TryGetValue(SelectorCookieName, out var v) ? v : "school";
     }
