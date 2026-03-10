@@ -390,7 +390,7 @@ public class MockAuthControllerTests
     {
         var options = Options.Create(new AutomatedTestingOptions
         {
-            MockAuthentication = new AutomatedTestingOptions.MockAuthenticationOptions
+            MockAuthentication = new MockAuthenticationOptions
             {
                 ClientSecret = ValidSecret
             }
