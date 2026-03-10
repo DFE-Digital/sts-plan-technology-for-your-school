@@ -54,18 +54,12 @@
 @{
     <div class="recommendation-content">
         <div class="recommendation-piece-container" id="@recommendation.Slug">
-            @if (!string.IsNullOrEmpty(Model.SuccessMessageTitle) || !string.IsNullOrEmpty(Model.SuccessMessageBody))
+            @if (!string.IsNullOrEmpty(Model.SuccessMessageTitle))
             {
                 <govuk-panel heading-level="2" class="govuk-!-margin-bottom-4">
                     @if (!string.IsNullOrEmpty(Model.SuccessMessageTitle))
                     {
                         <govuk-panel-title>@Model.SuccessMessageTitle</govuk-panel-title>
-                    }
-                    @if (!string.IsNullOrEmpty(Model.SuccessMessageBody))
-                    {
-                        <govuk-panel-body>
-                            @Model.SuccessMessageBody
-                        </govuk-panel-body>
                     }
                 </govuk-panel>
             }
