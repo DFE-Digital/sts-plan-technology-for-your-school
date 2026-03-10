@@ -121,7 +121,7 @@
                     <govuk-radios-fieldset>
                         <govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
                             <h2 class="govuk-fieldset__heading">
-                                Have you completed this recommendation?
+                                @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationStatusQuestion, Model.MicrocopyEntries)
                             </h2>
                         </govuk-radios-fieldset-legend>
 
@@ -156,12 +156,14 @@
                     </govuk-textarea-hint>
                 </govuk-textarea>
 
-                <govuk-button type="submit" prevent-double-click="true">Save</govuk-button>
+                <govuk-button type="submit" prevent-double-click="true">
+                    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationStatusButton, Model.MicrocopyEntries)
+                </govuk-button>
             </form>
 
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
-            <h2 class="govuk-heading--l">Recent activity</h2>
+            <h2 class="govuk-heading--l">@ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationHistoryHeader, Model.MicrocopyEntries)</h2>
 
             <govuk-accordion id="accordion-default">
                 @foreach (var (month, historyGroup) in Model.History)
