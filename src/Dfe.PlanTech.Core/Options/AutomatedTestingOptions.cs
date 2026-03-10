@@ -13,10 +13,5 @@ namespace Dfe.PlanTech.Core.Options
             public bool IncludeTaggedContent { get; init; }
             public string? Tag { get; init; }
         }
-
-        public class MockAuthenticationOptions
-        {
-            public string? ClientSecret { get; init; }
-        }
     }
 }
