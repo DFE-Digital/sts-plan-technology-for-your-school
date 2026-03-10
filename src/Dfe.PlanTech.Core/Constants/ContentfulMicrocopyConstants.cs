@@ -17,6 +17,9 @@ public static class ContentfulMicrocopyConstants
     private const string PrintSectionIncompleteFallback = "The self-assessment must be completed before recommendations are available.";
     private const string PrintSingleLinkFallback = "Print this recommendation";
     private const string StatusUpdatedFallback = "Status updated";
+    private const string RecommendationStatusQuestionFallback = "Have you completed this recommendation?";
+    private const string RecommendationStatusButtonFallback = "Update status";
+    private const string RecommendationHistoryHeaderFallback = "Recent activity";
 
     public record MicrocopyRecord
     {
@@ -58,6 +61,9 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord SingleRecommendationPrintAllLink = new("printLinkTopic", PrintLinksFallback, "topic");
     public static readonly MicrocopyRecord SingleRecommendationSuccessHeader = new("successStatus", StatusUpdatedFallback, "status");
     public static readonly MicrocopyRecord SingleRecommendationPosition = new("recommendationPosition", EmptyFallback, "position", "totalRecsForTopic");
+    public static readonly MicrocopyRecord SingleRecommendationStatusQuestion = new("recommendationStatusQuestions", RecommendationStatusQuestionFallback);
+    public static readonly MicrocopyRecord SingleRecommendationStatusButton = new("recommendationStatusButton", RecommendationStatusButtonFallback);
+    public static readonly MicrocopyRecord SingleRecommendationHistoryHeader = new("recommendationHistoryHeader", RecommendationHistoryHeaderFallback);
 
     // Print page (standard/category)
     public static readonly MicrocopyRecord CateogoryPrintSectionNotStarted = new("printNotStarted", PrintSectionIncompleteFallback);
