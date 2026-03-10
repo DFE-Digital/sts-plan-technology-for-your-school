@@ -17,7 +17,6 @@ public class SingleRecommendationViewModel
     public string? OriginatingSlug { get; set; }
 
     public string? SuccessMessageTitle { get; set; }
-    public string? SuccessMessageBody { get; set; }
     public string? StatusErrorMessage { get; set; }
 
     public QuestionnaireSectionEntry Section { get; set; } = null!;

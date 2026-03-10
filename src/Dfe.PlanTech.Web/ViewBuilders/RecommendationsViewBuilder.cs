@@ -88,7 +88,7 @@ public class RecommendationsViewBuilder(
         var orderedHistory = recommendationHistory.OrderByDescending(rh => rh.DateCreated).ToList();
 
         var groupedHistory = orderedHistory
-            .GroupBy(rh => $"{rh.DateCreated.Date:MMMM yyyy} activity")
+            .GroupBy(rh => $"{rh.DateCreated.Date:MMMM yyyy}")
             .ToDictionary(group => group.Key, group => group.Select(g => g));
 
         var firstActivity =
@@ -116,7 +116,6 @@ public class RecommendationsViewBuilder(
                 ?? RecommendationStatus.NotStarted,
             LastUpdated = currentRecommendationHistoryStatus?.DateCreated,
             SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
-            SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
             StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
             StatusOptions = Enum.GetValues<RecommendationStatus>()
                 .ToDictionary(key => key, key => key.GetDisplayName()),
