@@ -23,6 +23,8 @@ public static class ContentfulMicrocopyConstants
     private const string RecommendationHistoryHeaderFallback = "Recent activity";
     private const string ViewAnswersHeaderFallback = "View your answers";
     private const string ViewAnswersBackToRecsFallback = "Back to recommendations";
+    private const string CheckAnswersChangeLinkFallback = "Change";
+    private const string CheckAnswersSubmitButtonFallback = "Submit and view recommendations";
 
     public record MicrocopyRecord
     {
@@ -73,6 +75,10 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord ViewAnswersIntroText = new("answersIntroText", EmptyFallback, "dateCompleted");
     public static readonly MicrocopyRecord ViewAnswersIntroMore = new("answersIntroMore", EmptyFallback);
     public static readonly MicrocopyRecord ViewAnswersBackToRecs = new("answersBackButton", ViewAnswersBackToRecsFallback);
+
+    // Check answers (during self-assessment)
+    public static readonly MicrocopyRecord CheckAnswersChangeLink = new("checkAnswersChangeLink", CheckAnswersChangeLinkFallback);
+    public static readonly MicrocopyRecord CheckAnswersSubmitButton = new("checkAnswersSubmitButton", CheckAnswersSubmitButtonFallback);
 
     // Print page (standard/category)
     public static readonly MicrocopyRecord CateogoryPrintSectionNotStarted = new("printNotStarted", PrintSectionIncompleteFallback);
