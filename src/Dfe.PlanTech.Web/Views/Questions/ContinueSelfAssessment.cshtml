@@ -11,13 +11,24 @@
 }
 
 <span class="govuk-caption-xl">@Model.TopicName</span>
-<h1 class="govuk-heading-xl">Continue self-assessment</h1>
+<h1 class="govuk-heading-xl">
+    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueHeader, Model.MicrocopyEntries)
+</h1>
+
+    @{
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["dateUpdated"] = Model.AssessmentUpdatedDate.ToString("dd MMMM yyyy")
+    };
+}
 
 <p>
-    The self-assessment was last updated @Model.AssessmentUpdatedDate.ToString("dd MMMM yyyy").
+    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueIntroText, Model.MicrocopyEntries, dynamicValues)    
 </p>
 
-<h2 class="govuk-heading-l">Your self-assessment answers</h2>
+<h2 class="govuk-heading-l">
+    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueAnswersHeader, Model.MicrocopyEntries)
+</h2>
 <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 @foreach (var response in Model.Responses)
 {
@@ -30,8 +41,8 @@
 
 <hr class="govuk-section-break govuk-section-break--m">
 
-<p>You can continue this self-assessment and answer the remaining questions.</p>
-<p>If you choose to restart the self-assessment, any previous answers will be replaced.</p>
+<p>@ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueInfoText, Model.MicrocopyEntries)</p>
+<p>@ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueInfoMore, Model.MicrocopyEntries)</p>
 
 <div class="govuk-button-group">
     <a href="@Url.Action(
@@ -40,7 +51,7 @@
         new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
        class="govuk-button"
        data-module="govuk-button">
-        Continue self-assessment
+        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueContinueButton, Model.MicrocopyEntries)
     </a>
     <a href="@Url.Action(
         nameof(QuestionsController.RestartSelfAssessment),
@@ -48,6 +59,6 @@
         new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug, isObsoleteSubmissionFlow = false })"
        class="govuk-button govuk-button--secondary"
        data-module="govuk-button">
-        Restart self-assessment
+        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueRestartButton, Model.MicrocopyEntries)
     </a>
 </div>
