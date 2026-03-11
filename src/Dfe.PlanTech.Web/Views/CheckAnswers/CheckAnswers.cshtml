@@ -37,7 +37,7 @@
                        asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
                        asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
                        title="@questionWithAnswer.QuestionText">
-                        Change
+                        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.CheckAnswersChangeLink, Model.MicrocopyEntries)
                         <span class="govuk-visually-hidden">@anchorLabel</span>
                     </a>
                 </dd>
@@ -57,7 +57,9 @@
             }
         }
 
-        <govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">Submit and view recommendations</govuk-button>
+        <govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">
+            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.CheckAnswersSubmitButton, Model.MicrocopyEntries)
+        </govuk-button>
 
         @if (Model.ErrorMessage != null)
         {
