@@ -1,9 +1,11 @@
 using Contentful.Core.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -712,6 +714,17 @@ public class RecommendationsViewBuilderTests
             .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
 
         var selectedStatus = RecommendationStatus.NotStarted;
+
+        var microcopy = new List<MicrocopyEntry>
+        {
+            new MicrocopyEntry
+            {
+                Key = "successStatus",
+                Value = "Status updated to {{status}}"
+            }
+        };
+
+        _contentful.GetMicrocopyEntriesAsync().Returns(microcopy);
 
         // Act
         var result = await sut.UpdateRecommendationStatusAsync(

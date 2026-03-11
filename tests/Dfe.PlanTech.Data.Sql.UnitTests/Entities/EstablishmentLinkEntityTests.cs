@@ -32,7 +32,7 @@ public class EstablishmentLinkEntityTests
         Assert.Equal(expectedUrn, dto.Urn);
 
         // Assert - properties not explicitly set by `AsDto()`:
-        Assert.Null(dto.InProgressOrCompletedRecommendationsCount); // Assigned dynamically within `Dfe.PlanTech.Application.Services.EstablishmentService.GetEstablishmentLinksWithRecommendationCounts`
+        Assert.Equal(0, dto.InProgressOrCompletedRecommendationsCount); // Assigned dynamically within `Dfe.PlanTech.Application.Services.EstablishmentService.GetEstablishmentLinksWithRecommendationCounts`
 
         // Assert - ensure all DTO properties are accounted for
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlEstablishmentLinkDto>(
