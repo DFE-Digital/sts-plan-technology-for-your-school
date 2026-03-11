@@ -25,6 +25,10 @@ public static class ContentfulMicrocopyConstants
     private const string ViewAnswersBackToRecsFallback = "Back to recommendations";
     private const string CheckAnswersChangeLinkFallback = "Change";
     private const string CheckAnswersSubmitButtonFallback = "Submit and view recommendations";
+    private const string ContinueHeaderFallback = "Continue self-assessment";
+    private const string ContinueAnswersHeaderFallback = "Your self-assessment answers";
+    private const string ContinueContinueButtonFallback = "Continue self-assessment";
+    private const string ContinueRestartButtonFallback = "Restart self-assessment";
 
     public record MicrocopyRecord
     {
@@ -75,6 +79,15 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord ViewAnswersIntroText = new("answersIntroText", EmptyFallback, "dateCompleted");
     public static readonly MicrocopyRecord ViewAnswersIntroMore = new("answersIntroMore", EmptyFallback);
     public static readonly MicrocopyRecord ViewAnswersBackToRecs = new("answersBackButton", ViewAnswersBackToRecsFallback);
+
+    // Continue self-assessment
+    public static readonly MicrocopyRecord ContinueHeader = new("continueHeader", ContinueHeaderFallback);
+    public static readonly MicrocopyRecord ContinueIntroText = new("continueIntroText", EmptyFallback, "dateUpdated");
+    public static readonly MicrocopyRecord ContinueAnswersHeader = new("continueAnswersHeader", ContinueAnswersHeaderFallback);
+    public static readonly MicrocopyRecord ContinueInfoText = new("continueInfoText", EmptyFallback);
+    public static readonly MicrocopyRecord ContinueInfoMore = new("continueInfoMore", EmptyFallback);
+    public static readonly MicrocopyRecord ContinueContinueButton = new("continueContinueButton", ContinueContinueButtonFallback);
+    public static readonly MicrocopyRecord ContinueRestartButton = new("continueRestartButton", ContinueRestartButtonFallback);
 
     // Check answers (during self-assessment)
     public static readonly MicrocopyRecord CheckAnswersChangeLink = new("checkAnswersChangeLink", CheckAnswersChangeLinkFallback);
