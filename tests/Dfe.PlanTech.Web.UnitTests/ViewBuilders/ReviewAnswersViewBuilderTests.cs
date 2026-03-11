@@ -564,11 +564,21 @@ public class ReviewAnswersViewBuilderTests
             SubmissionStatus.CompleteReviewed
         );
 
+        var microcopy = new List<MicrocopyEntry>
+        {
+            new MicrocopyEntry
+            {
+                Key = "testEntry",
+                Value = "test microcopy value"
+            }
+        };
+
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
             section,
             submissionModel,
             "category-slug",
-            "section-slug"
+            "section-slug",
+            microcopy
         );
 
         Assert.NotNull(viewModel);
@@ -611,11 +621,22 @@ public class ReviewAnswersViewBuilderTests
             SubmissionStatus.CompleteReviewed
         );
 
+        var microcopy = new List<MicrocopyEntry>
+        {
+            new MicrocopyEntry
+            {
+                Key = "testEntry",
+                Value = "test microcopy value"
+            }
+        };
+
+
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
             section,
             submissionModel,
             "category-slug",
-            "section-slug"
+            "section-slug",
+            microcopy
         );
 
         Assert.NotNull(viewModel);
