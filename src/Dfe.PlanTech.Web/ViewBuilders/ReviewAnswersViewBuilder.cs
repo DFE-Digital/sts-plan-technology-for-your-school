@@ -95,6 +95,8 @@ public class ReviewAnswersViewBuilder(
             status: SubmissionStatus.CompleteReviewed
         );
 
+        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
+
         ViewAnswersViewModel viewModel;
         switch (submissionRoutingData.Status)
         {
@@ -117,7 +119,8 @@ public class ReviewAnswersViewBuilder(
                     section,
                     submissionRoutingData,
                     categorySlug,
-                    sectionSlug
+                    sectionSlug,
+                    microcopy
                 );
                 return controller.View(ViewAnswersViewName, viewModel);
 
@@ -173,7 +176,8 @@ public class ReviewAnswersViewBuilder(
         QuestionnaireSectionEntry section,
         SubmissionRoutingDataModel submissionModel,
         string categorySlug,
-        string sectionSlug
+        string sectionSlug,
+        List<MicrocopyEntry> microcopyEntries
     )
     {
         /*
@@ -223,6 +227,7 @@ public class ReviewAnswersViewBuilder(
             Responses = responses,
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
+            MicrocopyEntries = microcopyEntries
         };
 
         return viewModel;

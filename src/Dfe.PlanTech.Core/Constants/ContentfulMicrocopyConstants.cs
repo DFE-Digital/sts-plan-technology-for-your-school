@@ -1,4 +1,5 @@
 using Contentful.Core.Models.Management;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net.NetworkInformation;
 namespace Dfe.PlanTech.Core.Constants;
@@ -20,6 +21,8 @@ public static class ContentfulMicrocopyConstants
     private const string RecommendationStatusQuestionFallback = "Have you completed this recommendation?";
     private const string RecommendationStatusButtonFallback = "Update status";
     private const string RecommendationHistoryHeaderFallback = "Recent activity";
+    private const string ViewAnswersHeaderFallback = "View your answers";
+    private const string ViewAnswersBackToRecsFallback = "Back to recommendations";
 
     public record MicrocopyRecord
     {
@@ -64,6 +67,12 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord SingleRecommendationStatusQuestion = new("recommendationStatusQuestions", RecommendationStatusQuestionFallback);
     public static readonly MicrocopyRecord SingleRecommendationStatusButton = new("recommendationStatusButton", RecommendationStatusButtonFallback);
     public static readonly MicrocopyRecord SingleRecommendationHistoryHeader = new("recommendationHistoryHeader", RecommendationHistoryHeaderFallback);
+
+    // View your answers
+    public static readonly MicrocopyRecord ViewAnswersHeader = new("answersHeader", ViewAnswersHeaderFallback);
+    public static readonly MicrocopyRecord ViewAnswersIntroText = new("answersIntroText", EmptyFallback, "dateCompleted");
+    public static readonly MicrocopyRecord ViewAnswersIntroMore = new("answersIntroMore", EmptyFallback);
+    public static readonly MicrocopyRecord ViewAnswersBackToRecs = new("answersBackButton", ViewAnswersBackToRecsFallback);
 
     // Print page (standard/category)
     public static readonly MicrocopyRecord CateogoryPrintSectionNotStarted = new("printNotStarted", PrintSectionIncompleteFallback);
