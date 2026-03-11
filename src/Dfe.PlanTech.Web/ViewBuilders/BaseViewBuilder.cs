@@ -6,6 +6,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
@@ -116,12 +117,30 @@ public class BaseViewBuilder(
         };
     }
 
-    protected static void SetTempDataNotifyShareResults(
+    protected static RedirectToActionResult HandleNotifyShareResults(
         Controller controller,
-        List<NotifySendResult> results
+        List<NotifySendResult> notifySendResults,
+        ActionViewModel returnToModel
     )
     {
-        var resultsJson = JsonSerializer.Serialize(results);
-        controller.TempData[StatePassingMechanismConstants.NotifySendResults] = resultsJson;
+        var shareResultsModel = new NotifyShareResultsViewModel
+        {
+            SendResults = notifySendResults,
+            ActionModel = returnToModel,
+        };
+
+        var resultsJson = JsonSerializer.Serialize(shareResultsModel);
+        controller.TempData[StatePassingMechanismConstants.NotifyShareResults] = resultsJson;
+
+        if (notifySendResults.All(r => r.Errors.Count == 0))
+        {
+            return controller.RedirectToAction(
+                returnToModel.ActionName,
+                returnToModel.ControllerName,
+                returnToModel.RouteValues
+            );
+        }
+
+        return PageRedirecter.RedirectToNotifyError(controller);
     }
 }

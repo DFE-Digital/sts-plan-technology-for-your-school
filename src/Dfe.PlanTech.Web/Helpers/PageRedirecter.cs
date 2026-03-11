@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -91,6 +93,12 @@ public static class PageRedirecter
                 sectionSlug,
                 chunkSlug,
             }
+        );
+
+    public static RedirectToActionResult RedirectToNotifyError(this Controller controller) =>
+        controller.RedirectToAction(
+            nameof(PagesController.NotifyError),
+            nameof(PagesController).GetControllerNameSlug()
         );
 
     private static RedirectToActionResult RedirectToPage(

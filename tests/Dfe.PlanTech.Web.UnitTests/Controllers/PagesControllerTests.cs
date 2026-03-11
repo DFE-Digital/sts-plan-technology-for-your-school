@@ -99,7 +99,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var expectedResult = new ViewResult();
             var slug = "categorySlug/sectionSlug/not/a/valid/path";
 
-            _pagesViewBuilder.BuildNotFoundViewModel().Returns(model);
+            _pagesViewBuilder.BuildNotFoundViewModelAsync().Returns(model);
 
             var result = await _controller.HandleUnknownRoutes(slug);
 
@@ -124,7 +124,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task NotFoundError_ReturnsViewWithViewModel()
         {
             var viewModel = new NotFoundViewModel();
-            _pagesViewBuilder.BuildNotFoundViewModel().Returns(Task.FromResult(viewModel));
+            _pagesViewBuilder.BuildNotFoundViewModelAsync().Returns(Task.FromResult(viewModel));
 
             var result = await _controller.NotFoundError();
 

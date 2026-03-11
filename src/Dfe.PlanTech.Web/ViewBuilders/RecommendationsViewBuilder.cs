@@ -6,6 +6,7 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
@@ -399,7 +400,7 @@ public class RecommendationsViewBuilder(
                 "Cannot send an email without an active establishment name"
             );
 
-        var results = _notifyService.SendSingleRecommendationEmail(
+        var notifySendResults = _notifyService.SendSingleRecommendationEmail(
             inputModel.ToModel(),
             textBody,
             establishmentName,
@@ -408,14 +409,19 @@ public class RecommendationsViewBuilder(
             latestRecommendationHistory.NewStatus.Value
         );
 
-        SetTempDataNotifyShareResults(controller, results);
-
-        return PageRedirecter.RedirectToGetSingleRecommendation(
-            controller,
-            categorySlug,
-            sectionSlug,
-            chunkSlug
+        var returnToModel = new ActionViewModel(
+            actionName: nameof(RecommendationsController.GetSingleRecommendation),
+            controllerName: nameof(RecommendationsController).GetControllerNameSlug(),
+            linkText: @$"Back to ""{recommendationChunk.HeaderText}""",
+            routeValues: new Dictionary<string, string>
+            {
+                { nameof(categorySlug), categorySlug },
+                { nameof(sectionSlug), sectionSlug },
+                { nameof(chunkSlug), chunkSlug },
+            }
         );
+
+        return HandleNotifyShareResults(controller, notifySendResults, returnToModel);
     }
 
     private async Task<RecommendationsViewModel> BuildRecommendationsViewModel(

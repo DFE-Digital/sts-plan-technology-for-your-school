@@ -475,7 +475,7 @@ public class PagesViewBuilderTests
 
         var sut = CreateServiceUnderTest(contentful: contentful);
 
-        var vm = await sut.BuildNotFoundViewModel();
+        var vm = await sut.BuildNotFoundViewModelAsync();
 
         Assert.Equal("/contact", vm.ContactLinkHref);
         await contentful.Received(1).GetLinkByIdAsync("contact-1");

@@ -20,6 +20,8 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string categorySlug,
             ShareByEmailInputViewModel? inputModel = null
         );
-        Task<NotFoundViewModel> BuildNotFoundViewModel();
+        Task<NotFoundViewModel> BuildNotFoundViewModelAsync();
+
+        NotifyShareResultsViewModel? BuildNotifyShareResultsViewModel(Controller controller);
     }
 }

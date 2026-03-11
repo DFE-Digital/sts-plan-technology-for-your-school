@@ -1,44 +1,24 @@
 @{
-    var sendResultsJson = TempData[StatePassingMechanismConstants.NotifySendResults] as string;
+    var sendResultsJson = TempData[StatePassingMechanismConstants.NotifyShareResults] as string;
 
-    List<NotifySendResult>? sendResults = null;
+    NotifyShareResultsViewModel? shareResults = null;
     if (sendResultsJson is not null)
     {
-        sendResults = JsonSerializer.Deserialize<List<NotifySendResult>>(sendResultsJson);
+        shareResults = JsonSerializer.Deserialize<NotifyShareResultsViewModel>(sendResultsJson);
     }
 }
 
-@if (sendResults is not null)
+@if (shareResults is not null && shareResults.SendResults.All(result => result.Errors.Count == 0))
 {
-    if (sendResults.All(result => result.Errors.Count == 0))
-    {
-        <govuk-panel heading-level="2" class="govuk-!-margin-bottom-4">
-            <govuk-panel-title>
-                Email sent
-            </govuk-panel-title>
-            @*
-            <govuk-panel-body>
-                @foreach (var result in sendResults.Where(result => result.Errors.Count == 0))
-                {
-                    <p>@result.Recipient</p>
-                }
-            </govuk-panel-body>
-            *@
-        </govuk-panel>
-    }
-    else
-    {
-        <govuk-error-summary>
-            <govuk-error-summary-title>
-                Some email could not be sent
-            </govuk-error-summary-title>
-            <govuk-error-summary-description>
-                Sending failed for the email addresses below.
-            </govuk-error-summary-description>
-            @foreach (var result in sendResults.Where(result => result.Errors.Count > 0))
+    <govuk-panel heading-level="2" class="govuk-!-margin-bottom-4">
+        <govuk-panel-title>
+            Your email has been sent to:
+        </govuk-panel-title>
+        <govuk-panel-body>
+            @foreach (var result in shareResults.SendResults.Where(result => result.Errors.Count == 0))
             {
-                <govuk-error-summary-item>@result.Recipient</govuk-error-summary-item>
+                @result.Recipient<br />
             }
-        </govuk-error-summary>
-    }
+        </govuk-panel-body>
+    </govuk-panel>
 }

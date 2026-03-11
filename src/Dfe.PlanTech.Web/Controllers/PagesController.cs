@@ -1,10 +1,14 @@
 using System.Diagnostics;
+using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Binders;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
@@ -80,7 +84,7 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
     [HttpGet("{categorySlug}/{sectionSlug}/{*path}")]
     public async Task<IActionResult> HandleUnknownRoutes(string? path)
     {
-        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModel();
+        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModelAsync();
 
         return View("NotFoundError", viewModel);
     }
@@ -88,8 +92,16 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
     {
-        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModel();
+        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModelAsync();
 
         return View(viewModel);
+    }
+
+    [HttpGet(UrlConstants.NotifyError, Name = UrlConstants.NotifyError)]
+    public IActionResult NotifyError()
+    {
+        var viewModel = _pagesViewBuilder.BuildNotifyShareResultsViewModel(this);
+
+        return viewModel is null ? PageRedirecter.RedirectToHomePage(this) : View(viewModel);
     }
 }

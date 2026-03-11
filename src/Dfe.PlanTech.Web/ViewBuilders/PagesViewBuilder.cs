@@ -5,6 +5,8 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
@@ -203,7 +205,7 @@ public class PagesViewBuilder(
             sectionIds
         );
 
-        var results = _notifyService.SendStandardEmail(
+        var notifyResults = _notifyService.SendStandardEmail(
             inputModel.ToModel(),
             category.Sections,
             sectionStatuses,
@@ -212,9 +214,14 @@ public class PagesViewBuilder(
             establishmentName
         );
 
-        SetTempDataNotifyShareResults(controller, results);
+        var returnToModel = new ActionViewModel(
+            actionName: nameof(PagesController.GetByRoute),
+            controllerName: nameof(PagesController),
+            linkText: $"Back to {category.Header.Text.ToLower()}",
+            routeValues: new Dictionary<string, string> { { "route", categorySlug } }
+        );
 
-        return controller.RedirectToCategoryLandingPage(categorySlug);
+        return HandleNotifyShareResults(controller, notifyResults, returnToModel);
     }
 
     private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(
@@ -237,9 +244,25 @@ public class PagesViewBuilder(
         };
     }
 
-    public async Task<NotFoundViewModel> BuildNotFoundViewModel()
+    public async Task<NotFoundViewModel> BuildNotFoundViewModelAsync()
     {
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
         return new NotFoundViewModel { ContactLinkHref = contactLink?.Href };
+    }
+
+    public NotifyShareResultsViewModel? BuildNotifyShareResultsViewModel(Controller controller)
+    {
+        var tempData =
+            controller.TempData[StatePassingMechanismConstants.NotifyShareResults] as string;
+
+        NotifyShareResultsViewModel? shareResultsViewModel = null;
+        if (tempData is not null)
+        {
+            shareResultsViewModel = JsonSerializer.Deserialize<NotifyShareResultsViewModel>(
+                tempData
+            );
+        }
+
+        return shareResultsViewModel;
     }
 }
