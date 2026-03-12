@@ -27,12 +27,10 @@
 
     UserAuthorisationResult? userAuthResult = null;
 
-    if (Context.Items.TryGetValue(UserAuthorisationResult.HttpContextKey, out var value))
+    if (Context.Items.TryGetValue(UserAuthorisationResult.HttpContextKey, out var value) &&
+        value is UserAuthorisationResult result)
     {
-        if (value is UserAuthorisationResult result)
-        {
-            userAuthResult = result;
-        }
+        userAuthResult = result;
     }
 
     var isNonAuthorisedPage = true;

@@ -176,7 +176,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
                         "Cannot prepare markdown for a recommendation that does not exist in the database."
                     );
 
-                var status = recommendationStatus?.NewStatus ?? RecommendationStatus.NotStarted;
+                var status = recommendationStatus.NewStatus ?? RecommendationStatus.NotStarted;
                 stringBuilder.AppendLine(
                     $"{i + 1}. {status.GetDisplayName()}: {recommendationEntry.Header}"
                 );

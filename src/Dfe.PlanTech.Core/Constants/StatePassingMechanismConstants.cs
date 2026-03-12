@@ -1,6 +1,6 @@
 namespace Dfe.PlanTech.Core.Constants;
 
-public class StatePassingMechanismConstants
+public static class StatePassingMechanismConstants
 {
     public const string NotifyShareResults = "NotifyShareResults";
     public const string ReturnTo = "ReturnTo";

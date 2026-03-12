@@ -159,7 +159,7 @@ public class ActionViewModelTests
 
     private sealed class ObjectWithThrowingProperty
     {
-        public string ValidProperty => "value";
+        public static string ValidProperty => "value";
 
         public string ExplodingProperty => throw new InvalidOperationException("Nope");
     }

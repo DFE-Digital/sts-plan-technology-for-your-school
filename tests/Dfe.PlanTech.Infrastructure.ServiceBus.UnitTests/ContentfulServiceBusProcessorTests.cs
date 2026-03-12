@@ -79,9 +79,22 @@ public class ContentfulServiceBusProcessorTests
     [Fact]
     public async Task ExecuteAsync_ShouldStartProcessingMessages()
     {
+        var started = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+
+        _serviceBusProcessor
+            .StartProcessingAsync(Arg.Any<CancellationToken>())
+            .Returns(ci =>
+            {
+                started.TrySetResult();
+                return Task.CompletedTask;
+            });
+
         await _contentfulServiceBusProcessor.StartAsync(CancellationToken.None);
 
-        Thread.Sleep(750);
+        await started.Task.WaitAsync(
+            TimeSpan.FromSeconds(2),
+            TestContext.Current.CancellationToken
+        );
 
         await _serviceBusProcessor.Received(1).StartProcessingAsync(Arg.Any<CancellationToken>());
     }

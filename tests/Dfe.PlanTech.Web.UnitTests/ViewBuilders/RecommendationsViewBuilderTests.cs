@@ -46,7 +46,7 @@ public class RecommendationsViewBuilderTests
             _submissions
         );
 
-    private static Controller CreateController() => new TestController();
+    private static TestController CreateController() => new TestController();
 
     // ---------- Small builders for domain objects used in tests ----------
 
@@ -991,8 +991,9 @@ public class RecommendationsViewBuilderTests
             redirect.ControllerName
         );
 
-        var routeValues = Assert.IsAssignableFrom<IDictionary<string, object>>(
-            redirect.RouteValues!
+        var routeValues = Assert.IsType<IDictionary<string, object>>(
+            redirect.RouteValues!,
+            exactMatch: false
         );
         Assert.Equal("category", routeValues["categorySlug"]);
         Assert.Equal("section", routeValues["sectionSlug"]);

@@ -6,8 +6,9 @@ namespace Dfe.PlanTech.Data.Sql.IntegrationTests;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    // TEST CONTAINER ONLY: This password is only for the ephemeral test SQL Server spun up via test containers for integration tests.
-    // It is NOT used in production, development, or any persistent environment.
+    // TEST CONTAINER ONLY: This password is only for the ephemeral test SQL Server
+    // spun up via test containers for integration tests. It is NOT used in production,
+    // development, or any persistent environment.
     // This password is safe to commit and is not a security risk.
     private const string TestContainerPassword = "yourStrong(!)Password";
 
@@ -63,5 +64,6 @@ public class DatabaseFixture : IAsyncLifetime
     public async ValueTask DisposeAsync()
     {
         await DbContainer.DisposeAsync();
+        GC.SuppressFinalize(this);
     }
 }

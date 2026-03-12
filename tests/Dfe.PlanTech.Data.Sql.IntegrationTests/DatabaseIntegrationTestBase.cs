@@ -37,6 +37,8 @@ public abstract class DatabaseIntegrationTestBase(DatabaseFixture fixture) : IAs
         await _transaction.RollbackAsync();
         await _transaction.DisposeAsync();
         await DbContext.DisposeAsync();
+
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>

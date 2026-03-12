@@ -638,8 +638,9 @@ public class PagesViewBuilderTests
         Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
         Assert.Equal(nameof(PagesController).GetControllerNameSlug(), redirect.ControllerName);
 
-        var routeValues = Assert.IsAssignableFrom<IDictionary<string, object>>(
-            redirect.RouteValues!
+        var routeValues = Assert.IsType<IDictionary<string, object>>(
+            redirect.RouteValues!,
+            exactMatch: false
         );
         Assert.Equal("category", routeValues["route"]);
 
