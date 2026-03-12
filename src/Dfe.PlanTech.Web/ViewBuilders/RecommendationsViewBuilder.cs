@@ -277,23 +277,33 @@ public class RecommendationsViewBuilder(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
 
+        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
+        var dynamicValues = new Dictionary<string, string>
+        {
+            ["status"] = selectedStatusEnum.Value.GetDisplayName()
+        };
+
         await _recommendationService.UpdateRecommendationStatusAsync(
             currentRecommendationChunk.Id,
             establishmentId,
             userId,
             selectedStatusEnum.Value,
             notes
-                ?? $"Change reason: Status manually updated to '{selectedStatusEnum.Value.GetDisplayName()}'",
+                ??
+                ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+                ContentfulMicrocopyConstants.SingleRecommendationHistoryChange,
+                microcopy,
+                dynamicValues
+                ),
             CurrentUser.IsMat ? userOrganisationId : null
         );
 
         // Set success message for the banner
-        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
         controller.TempData["StatusUpdateSuccessTitle"] =
             ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
                 ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
                 microcopy,
-                new Dictionary<string, string> { ["status"] = selectedStatusEnum.Value.GetDisplayName() }
+                dynamicValues
             );
 
         // Redirect back to the single recommendation page

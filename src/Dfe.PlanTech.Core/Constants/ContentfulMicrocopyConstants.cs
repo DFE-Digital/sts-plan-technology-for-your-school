@@ -9,22 +9,42 @@ public static class ContentfulMicrocopyConstants
 {
     // Fallback text
     private const string EmptyFallback = "";
+
+    // Home
     private const string CardsFallback = "Go to standard";
+
+    // Landing page
     private const string TopicLinksFallback = "Start, continue or view answers for this self-assessment";
     private const string PrintLinksFallback = "Print all recommendations";
     private const string SuccessHeaderFallback = "Your self-assessment is complete";
     private const string LandingPageBackLinkFallback = "Back to choose a standard";
+
+    // Groups select a school
     private const string GroupsSelectHeaderFallback = "Select a school";
+
+    // Print views
     private const string PrintSectionIncompleteFallback = "The self-assessment must be completed before recommendations are available.";
+
+    // Single recommendation
     private const string PrintSingleLinkFallback = "Print this recommendation";
     private const string StatusUpdatedFallback = "Status updated";
     private const string RecommendationStatusQuestionFallback = "Have you completed this recommendation?";
     private const string RecommendationStatusButtonFallback = "Update status";
     private const string RecommendationHistoryHeaderFallback = "Recent activity";
+    private const string RecommendationCommentLabelFallback = "Add a comment";
+    private const string RecommendationCommentHintFallback = "Anyone who uses the service for your school will be able to see comments. Do not include personal or sensitive information, like email addresses or account details.";
+    private const string RecommendationHistoryInitialFallback = "Status set based on self assessment.";
+    private const string RecommendationHistoryChangeFallback = "Status changed.";
+
+    // View answers
     private const string ViewAnswersHeaderFallback = "View your answers";
     private const string ViewAnswersBackToRecsFallback = "Back to recommendations";
+
+    // Check answers
     private const string CheckAnswersChangeLinkFallback = "Change";
     private const string CheckAnswersSubmitButtonFallback = "Submit and view recommendations";
+
+    // Continue self-assessment
     private const string ContinueHeaderFallback = "Continue self-assessment";
     private const string ContinueAnswersHeaderFallback = "Your self-assessment answers";
     private const string ContinueContinueButtonFallback = "Continue self-assessment";
@@ -73,6 +93,13 @@ public static class ContentfulMicrocopyConstants
     public static readonly MicrocopyRecord SingleRecommendationStatusQuestion = new("recommendationStatusQuestions", RecommendationStatusQuestionFallback);
     public static readonly MicrocopyRecord SingleRecommendationStatusButton = new("recommendationStatusButton", RecommendationStatusButtonFallback);
     public static readonly MicrocopyRecord SingleRecommendationHistoryHeader = new("recommendationHistoryHeader", RecommendationHistoryHeaderFallback);
+    public static readonly MicrocopyRecord SingleRecommendationStatusHint = new("recommendationStatusHint", EmptyFallback);
+    public static readonly MicrocopyRecord SingleRecommendationCommentLabel = new("recommendationCommentLabel", RecommendationCommentLabelFallback);
+    public static readonly MicrocopyRecord SingleRecommendationCommentHint = new("recommendationCommentHint", RecommendationCommentHintFallback);
+    public static readonly MicrocopyRecord SingleRecommendationHistoryInitial = new("recommendationHistoryInitialStatus", RecommendationHistoryInitialFallback, "recStatus", "establishment");
+    public static readonly MicrocopyRecord SingleRecommendationHistoryAnswer = new("recommendationHistoryAnswer", EmptyFallback, "answer");
+    public static readonly MicrocopyRecord SingleRecommendationHistoryChange = new("recommendationHistoryChange", RecommendationHistoryChangeFallback, "recStatus");
+    public static readonly MicrocopyRecord SingleRecommendationHistoryReason = new("recommendationHistoryReason", EmptyFallback, "recStatus");
 
     // View your answers
     public static readonly MicrocopyRecord ViewAnswersHeader = new("answersHeader", ViewAnswersHeaderFallback);
