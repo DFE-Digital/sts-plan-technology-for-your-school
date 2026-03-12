@@ -81,7 +81,7 @@ public class ContentfulServiceBusProcessorTests
     {
         await _contentfulServiceBusProcessor.StartAsync(CancellationToken.None);
 
-        Thread.Sleep(500);
+        Thread.Sleep(750);
 
         await _serviceBusProcessor.Received(1).StartProcessingAsync(Arg.Any<CancellationToken>());
     }

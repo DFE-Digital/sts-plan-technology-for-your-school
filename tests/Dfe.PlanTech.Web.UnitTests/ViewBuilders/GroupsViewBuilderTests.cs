@@ -19,8 +19,6 @@ public class GroupsViewBuilderTests
 {
     // --- helpers ------------------------------------------------------------
 
-    private sealed class TestController : Controller { }
-
     private static IOptions<ContactOptionsConfiguration> Opt(string linkId = "contact-123") =>
         Options.Create(new ContactOptionsConfiguration { LinkId = linkId });
 

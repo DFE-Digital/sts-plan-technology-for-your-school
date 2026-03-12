@@ -21,7 +21,7 @@
         id="js-back-button-link"
         class="noprint js-only"
         href="@Url.RouteUrl(
-            RecommendationsController.GetSingleRecommendationAction,
+            nameof(RecommendationsController.GetSingleRecommendation),
             new {
                 categorySlug = Model.CategorySlug,
                 sectionSlug = Model.SectionSlug,

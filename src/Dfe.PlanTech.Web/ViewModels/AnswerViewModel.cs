@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
@@ -7,27 +6,5 @@ namespace Dfe.PlanTech.Web.ViewModels;
 [ExcludeFromCodeCoverage]
 public class AnswerViewModel
 {
-    public AnswerViewModel(QuestionnaireAnswerEntry answer)
-    {
-        Answer = new IdWithTextModel { Id = answer.Id!, Text = answer.Text };
-    }
-
-    public AnswerViewModel()
-    {
-        Answer = new IdWithTextModel();
-    }
-
-    public string Id
-    {
-        get => Answer.Id;
-        set => Answer.Id = value!;
-    }
-
-    public string Text
-    {
-        get => Answer.Text;
-        set => Answer.Text = value!;
-    }
-
     public IdWithTextModel Answer { get; set; } = null!;
 }

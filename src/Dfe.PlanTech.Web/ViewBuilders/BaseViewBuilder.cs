@@ -3,7 +3,7 @@ using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
@@ -60,35 +60,6 @@ public class BaseViewBuilder(
             ?? throw new InvalidDataException(nameof(CurrentUser.GetActiveEstablishmentIdAsync));
     }
 
-    protected CategorySectionRecommendationViewModel BuildCategorySectionRecommendationViewModel(
-        QuestionnaireSectionEntry section,
-        SqlSectionStatusDto? sectionStatus
-    )
-    {
-        try
-        {
-            return new CategorySectionRecommendationViewModel
-            {
-                SectionSlug = section.InterstitialPage?.Slug,
-                SectionName = section.Name,
-            };
-        }
-        catch (Exception e)
-        {
-            Logger.LogError(
-                e,
-                "An exception has occurred while trying to retrieve the recommendation for Section {sectionName}, with the message {errMessage}",
-                section.Name,
-                e.Message
-            );
-            return new CategorySectionRecommendationViewModel
-            {
-                NoRecommendationFoundErrorMessage =
-                    $"Unable to retrieve {section.Name} recommendation",
-            };
-        }
-    }
-
     protected static ShareByEmailViewModel BuildShareByEmailViewModel(
         string controllerName,
         string actionName,
@@ -106,7 +77,7 @@ public class BaseViewBuilder(
 
         return new ShareByEmailViewModel
         {
-            PostController = controllerName.Replace("Controller", ""),
+            PostController = controllerName.GetControllerNameSlug(),
             PostAction = actionName,
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
@@ -120,13 +91,13 @@ public class BaseViewBuilder(
     protected static RedirectToActionResult HandleNotifyShareResults(
         Controller controller,
         List<NotifySendResult> notifySendResults,
-        ActionViewModel returnToModel
+        ActionViewModel actionViewModel
     )
     {
         var shareResultsModel = new NotifyShareResultsViewModel
         {
             SendResults = notifySendResults,
-            ActionModel = returnToModel,
+            ActionModel = actionViewModel,
         };
 
         var resultsJson = JsonSerializer.Serialize(shareResultsModel);
@@ -135,9 +106,9 @@ public class BaseViewBuilder(
         if (notifySendResults.All(r => r.Errors.Count == 0))
         {
             return controller.RedirectToAction(
-                returnToModel.ActionName,
-                returnToModel.ControllerName,
-                returnToModel.RouteValues
+                actionViewModel.ActionName,
+                actionViewModel.ControllerName,
+                actionViewModel.RouteValues
             );
         }
 

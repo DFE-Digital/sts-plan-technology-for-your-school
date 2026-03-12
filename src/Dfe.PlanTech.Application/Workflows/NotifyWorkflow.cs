@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
-using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Notify.Exceptions;
 using Notify.Interfaces;
@@ -13,11 +12,9 @@ public class NotifyWorkflow(INotificationClient notifyClient) : INotifyWorkflow
     private readonly INotificationClient _notifyClient =
         notifyClient ?? throw new ArgumentNullException(nameof(notifyClient));
 
-    private const string CouldNotSendEmail = "Could not send email";
-
     public List<NotifySendResult> SendEmails(
         ShareByEmailModel model,
-        Dictionary<string, dynamic> personalisation,
+        Dictionary<string, object> personalisation,
         string correlationId,
         string templateId
     )
@@ -26,8 +23,6 @@ public class NotifyWorkflow(INotificationClient notifyClient) : INotifyWorkflow
 
         foreach (var recipient in model.EmailAddresses)
         {
-            var errorPrefix = $"{CouldNotSendEmail} to {recipient}";
-
             try
             {
                 var response = _notifyClient.SendEmail(
@@ -53,7 +48,7 @@ public class NotifyWorkflow(INotificationClient notifyClient) : INotifyWorkflow
                 var result = new NotifySendResult
                 {
                     Recipient = recipient,
-                    Errors = ["GOK.UK Notify failed"],
+                    Errors = ["GOV.UK Notify failed"],
                 };
 
                 results.Add(result);
@@ -63,7 +58,7 @@ public class NotifyWorkflow(INotificationClient notifyClient) : INotifyWorkflow
         return results;
     }
 
-    private List<string> ParseNotifyClientException(string message)
+    private static List<string> ParseNotifyClientException(string message)
     {
         // GOV.UK Notify's provided exception class is weird.
         // It returns a string that combines regular text with JSON, and

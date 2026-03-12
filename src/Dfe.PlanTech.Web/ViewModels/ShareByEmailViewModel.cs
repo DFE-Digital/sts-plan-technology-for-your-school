@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 
 namespace Dfe.PlanTech.Web.ViewModels;

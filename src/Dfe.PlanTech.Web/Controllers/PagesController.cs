@@ -1,10 +1,7 @@
 using System.Diagnostics;
-using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Binders;
@@ -24,9 +21,6 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
 {
     private readonly IPagesViewBuilder _pagesViewBuilder =
         pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
-
-    public const string ControllerName = "Pages";
-    public const string GetPageByRouteAction = nameof(GetByRoute);
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]

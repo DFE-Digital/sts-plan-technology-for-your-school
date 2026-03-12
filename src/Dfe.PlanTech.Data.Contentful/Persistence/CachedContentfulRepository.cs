@@ -27,11 +27,6 @@ public class CachedContentfulRepository(
         return await _contentfulRepository.GetEntriesCountAsync<TEntry>();
     }
 
-    public Task<string> GetTextBodyEntryByIdAsJsonAsync(string id)
-    {
-        return _contentfulRepository.GetTextBodyEntryByIdAsJsonAsync(id);
-    }
-
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>()
     {
         string contentType = ContentfulContentTypeHelper.GetContentTypeName<TEntry>();

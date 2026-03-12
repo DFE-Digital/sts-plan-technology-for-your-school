@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Core.Models;
 
+[ExcludeFromCodeCoverage]
 public class ShareByEmailModel
 {
     public string NameOfUser { get; set; } = null!;

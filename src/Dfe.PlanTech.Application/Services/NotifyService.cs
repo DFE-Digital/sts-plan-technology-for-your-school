@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Dfe.PlanTech.Application.Rendering.Markdown;
@@ -10,16 +9,11 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Models;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Dfe.PlanTech.Application.Services;
 
-public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotifyWorkflow notifyWorkflow)
-    : INotifyService
+public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
 {
-    private readonly IContentfulWorkflow _contentfulWorkflow =
-        contentfulWorkflow ?? throw new ArgumentNullException(nameof(contentfulWorkflow));
-
     private readonly INotifyWorkflow _notifyWorkflow =
         notifyWorkflow ?? throw new ArgumentNullException(nameof(notifyWorkflow));
 
@@ -32,25 +26,9 @@ public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotifyWorkfl
         RecommendationStatus recommendationStatus
     )
     {
-        var userMessage = model.UserMessage ?? "";
-        if (!string.IsNullOrWhiteSpace(userMessage))
-        {
-            var messagePrefix =
-                $"{model.NameOfUser} added a message:" + Environment.NewLine + Environment.NewLine;
-            var lines = Regex
-                .Split(
-                    userMessage,
-                    @"\r\n|\n",
-                    RegexOptions.Compiled,
-                    TimeSpan.FromMilliseconds(200)
-                )
-                .Select(line => $"^ {line}");
-            userMessage = messagePrefix + string.Join(Environment.NewLine, lines);
-        }
-
+        var userMessage = BuildUserMessage(model);
         var recommendationMarkdown = MarkdownRenderer.Render(textBody.RichText);
-
-        var personalisation = new Dictionary<string, dynamic>
+        var personalisation = new Dictionary<string, object>
         {
             { "name of user", model.NameOfUser },
             { "school", establishmentName },
@@ -81,29 +59,13 @@ public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotifyWorkfl
         string establishmentName
     )
     {
-        var userMessage = model.UserMessage ?? "";
-        if (!string.IsNullOrWhiteSpace(userMessage))
-        {
-            var messagePrefix =
-                $"{model.NameOfUser} added a message:" + Environment.NewLine + Environment.NewLine;
-            var lines = Regex
-                .Split(
-                    userMessage,
-                    @"\r\n|\n",
-                    RegexOptions.Compiled,
-                    TimeSpan.FromMilliseconds(200)
-                )
-                .Select(line => $"^ {line}");
-            userMessage = messagePrefix + string.Join(Environment.NewLine, lines);
-        }
-
+        string userMessage = BuildUserMessage(model);
         var standardMarkdown = BuildStandardMarkdown(
             sections,
             sectionStatuses,
             recommendationStatuses
         );
-
-        var personalisation = new Dictionary<string, dynamic>
+        var personalisation = new Dictionary<string, object>
         {
             { "name of user", model.NameOfUser },
             { "school", establishmentName },
@@ -122,6 +84,27 @@ public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotifyWorkfl
             correlationId,
             NotifyConstants.ShareStandardTemplateId
         );
+    }
+
+    private static string BuildUserMessage(ShareByEmailModel model)
+    {
+        var userMessage = model.UserMessage ?? "";
+        if (!string.IsNullOrWhiteSpace(userMessage))
+        {
+            var messagePrefix =
+                $"{model.NameOfUser} added a message:" + Environment.NewLine + Environment.NewLine;
+            var lines = Regex
+                .Split(
+                    userMessage,
+                    @"\r\n|\n",
+                    RegexOptions.Compiled,
+                    TimeSpan.FromMilliseconds(200)
+                )
+                .Select(line => $"^ {line}");
+            userMessage = messagePrefix + string.Join(Environment.NewLine, lines);
+        }
+
+        return userMessage.Trim();
     }
 
     private static string BuildStandardMarkdown(
@@ -171,14 +154,14 @@ public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotifyWorkfl
         if (sectionStatus?.LastCompletionDate is null)
         {
             stringBuilder.AppendLine(
-                $"The self-assessment for roles and responsibilities has not yet been completed."
+                $"The self-assessment for {sectionName.ToLower()} has not yet been completed."
             );
         }
         else
         {
             var completionDate = sectionStatus.LastCompletionDate.Value.ToString("dd MMMM yyyy");
             stringBuilder.AppendLine(
-                $"The self-assessment for roles and responsibilities was completed on {completionDate}."
+                $"The self-assessment for {sectionName.ToLower()} was completed on {completionDate}."
             );
             stringBuilder.AppendLine();
 
@@ -190,7 +173,7 @@ public class NotifyService(IContentfulWorkflow contentfulWorkflow, INotifyWorkfl
                         .FirstOrDefault(rs => rs.Key.Equals(recommendationEntry.Id))
                         .Value
                     ?? throw new InvalidOperationException(
-                        "Cannot prepare markdown a recommendation that does not exist in the database."
+                        "Cannot prepare markdown for a recommendation that does not exist in the database."
                     );
 
                 var status = recommendationStatus?.NewStatus ?? RecommendationStatus.NotStarted;

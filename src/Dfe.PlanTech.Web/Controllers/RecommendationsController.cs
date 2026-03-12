@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Helpers;
-using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Authorization;
@@ -20,13 +19,9 @@ public class RecommendationsController(
         recommendationsViewBuilder
         ?? throw new ArgumentNullException(nameof(recommendationsViewBuilder));
 
-    public const string ControllerName = "Recommendations";
-    public const string GetSingleRecommendationAction = nameof(GetSingleRecommendation);
-    public const string UpdateRecommendationStatusAction = nameof(UpdateRecommendationStatus);
-
     [HttpGet(
         "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}",
-        Name = GetSingleRecommendationAction
+        Name = "GetSingleRecommendation"
     )]
     public async Task<IActionResult> GetSingleRecommendation(
         string categorySlug,

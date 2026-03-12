@@ -6,7 +6,7 @@ public interface INotifyWorkflow
 {
     List<NotifySendResult> SendEmails(
         ShareByEmailModel model,
-        Dictionary<string, dynamic> personalisation,
+        Dictionary<string, object> personalisation,
         string correlationId,
         string templateId
     );

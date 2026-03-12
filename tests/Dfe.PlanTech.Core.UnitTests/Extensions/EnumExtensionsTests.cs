@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
@@ -17,7 +17,7 @@ public class EnumExtensionsTests
         Second = 2,
 
         // No Display attribute on this one
-        Third = 3
+        Third = 3,
     }
 
     [Theory]
@@ -34,11 +34,14 @@ public class EnumExtensionsTests
     }
 
     [Theory]
-    [InlineData("First value", SampleEnum.First)]     // matches DisplayAttribute.Name
-    [InlineData("first value", SampleEnum.First)]     // case-insensitive display name
-    [InlineData("Second", SampleEnum.Second)]         // matches enum name
-    [InlineData("second", SampleEnum.Second)]         // case-insensitive enum name
-    public void GetEnumValue_ReturnsEnum_WhenNameOrDisplayNameMatches(string input, SampleEnum expected)
+    [InlineData("First value", SampleEnum.First)] // matches DisplayAttribute.Name
+    [InlineData("first value", SampleEnum.First)] // case-insensitive display name
+    [InlineData("Second", SampleEnum.Second)] // matches enum name
+    [InlineData("second", SampleEnum.Second)] // case-insensitive enum name
+    public void GetEnumValue_ReturnsEnum_WhenNameOrDisplayNameMatches(
+        string input,
+        SampleEnum expected
+    )
     {
         // Act
         var result = input.GetEnumValue<SampleEnum>();
@@ -124,7 +127,9 @@ public class EnumExtensionsTests
     {
         var status = RecommendationStatus.InProgress;
 
-        var viaDefault = ((RecommendationStatus?)status).GetCssClassOrDefault(RecommendationConstants.DefaultTagClass);
+        var viaDefault = ((RecommendationStatus?)status).GetCssClassOrDefault(
+            RecommendationConstants.DefaultTagClass
+        );
         var viaShortcut = status.GetCssClass();
 
         Assert.Equal(viaDefault, viaShortcut);

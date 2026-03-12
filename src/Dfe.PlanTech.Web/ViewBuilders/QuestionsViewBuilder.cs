@@ -4,6 +4,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
@@ -205,8 +206,8 @@ public class QuestionsViewBuilder(
 
             controller.TempData["SubtopicError"] = await BuildErrorMessage();
             return controller.RedirectToAction(
-                PagesController.GetPageByRouteAction,
-                PagesController.ControllerName,
+                nameof(PagesController.GetByRoute),
+                nameof(PagesController).GetControllerNameSlug(),
                 new { route = UrlConstants.Home }
             );
         }

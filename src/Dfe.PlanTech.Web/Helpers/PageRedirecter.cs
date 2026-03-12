@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Controllers;
@@ -106,7 +105,7 @@ public static class PageRedirecter
         string route
     ) =>
         controller.RedirectToAction(
-            PagesController.GetPageByRouteAction,
+            nameof(PagesController.GetByRoute),
             nameof(PagesController).GetControllerNameSlug(),
             new { route }
         );

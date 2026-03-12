@@ -1,12 +1,12 @@
+using System.Diagnostics.CodeAnalysis;
 using Notify.Models.Responses;
 
-namespace Dfe.PlanTech.Core.Models
+namespace Dfe.PlanTech.Core.Models;
+
+[ExcludeFromCodeCoverage]
+public class NotifySendResult
 {
-    public class NotifySendResult
-    {
-        public required string Recipient { get; set; }
-        public EmailNotificationResponse? Response { get; set; }
-        public List<string> Errors { get; set; } = [];
-        public string ErrorList => string.Join("; ", Errors);
-    }
+    public required string Recipient { get; set; }
+    public EmailNotificationResponse? Response { get; set; }
+    public List<string> Errors { get; set; } = [];
 }

@@ -16,8 +16,6 @@ public interface IContentfulWorkflow
     Task<TEntry> GetEntryById<TEntry>(string entryId)
         where TEntry : ContentfulEntry;
 
-    Task<string> GetTextBodyEntryByIdAsJsonAsync(string id);
-
     Task<PageEntry> GetPageBySlugAsync(string slug);
 
     Task<IEnumerable<RecommendationChunkEntry>> GetPaginatedRecommendationEntriesAsync(int page);

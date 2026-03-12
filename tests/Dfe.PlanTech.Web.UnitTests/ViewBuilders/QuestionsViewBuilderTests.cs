@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -257,8 +258,8 @@ public class QuestionsViewBuilderTests
         Assert.Contains("<a href=\"https://example.org/contact\"", msg);
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
-        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+        Assert.Equal(nameof(PagesController).GetControllerNameSlug(), redirect.ControllerName);
         Assert.NotNull(redirect.RouteValues);
         Assert.Equal(UrlConstants.Home, redirect.RouteValues["route"]);
     }
@@ -431,8 +432,8 @@ public class QuestionsViewBuilderTests
 
         // Assert
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
-        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+        Assert.Equal(nameof(PagesController).GetControllerNameSlug(), redirect.ControllerName);
         Assert.NotNull(redirect.RouteValues);
         Assert.Equal(sectionSlug, redirect.RouteValues["route"]);
     }
@@ -474,8 +475,8 @@ public class QuestionsViewBuilderTests
 
         // Assert
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
-        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+        Assert.Equal(nameof(PagesController).GetControllerNameSlug(), redirect.ControllerName);
 
         Assert.NotNull(redirect.RouteValues);
         Assert.Equal("sec-1", redirect.RouteValues["route"]);

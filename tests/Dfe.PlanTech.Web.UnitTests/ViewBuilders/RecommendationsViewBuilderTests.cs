@@ -4,25 +4,27 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
-using Microsoft.AspNetCore.Http;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
 public class RecommendationsViewBuilderTests
 {
+    private const string DefaultRecipient = "test@test.com";
+
     // ---- Substitutes (collaborators)
-    private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
-    private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
+    private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
     private readonly INotifyService _notifyService = Substitute.For<INotifyService>();
     private readonly IRecommendationService _recommendationService =
@@ -36,26 +38,19 @@ public class RecommendationsViewBuilderTests
 
     private RecommendationsViewBuilder CreateServiceUnderTest() =>
         new RecommendationsViewBuilder(
-            _logger,
-            _contentful,
+            NullLogger<BaseViewBuilder>.Instance,
+            _contentfulService,
             _currentUser,
             _notifyService,
             _recommendationService,
             _submissions
         );
 
-    private static Controller MakeController()
-    {
-        var controller = new DummyController();
-        var http = new DefaultHttpContext();
-        controller.ControllerContext = new ControllerContext { HttpContext = http };
-        controller.TempData = new TempDataDictionary(http, Substitute.For<ITempDataProvider>());
-        return controller;
-    }
+    private static Controller CreateController() => new TestController();
 
     // ---------- Small builders for domain objects used in tests ----------
 
-    private static QuestionnaireCategoryEntry MakeCategory(
+    private static QuestionnaireCategoryEntry CreateCategory(
         string headerText,
         string? landingPageSlug = null
     )
@@ -73,7 +68,7 @@ public class RecommendationsViewBuilderTests
         return category;
     }
 
-    private static QuestionnaireSectionEntry MakeSection(
+    private static QuestionnaireSectionEntry CreateSection(
         string id,
         string slug,
         string name = "Section"
@@ -117,7 +112,7 @@ public class RecommendationsViewBuilderTests
             },
         };
 
-    private static SubmissionRoutingDataModel MakeRouting(
+    private static SubmissionRoutingDataModel CreateRouting(
         SubmissionStatus status,
         QuestionnaireSectionEntry section,
         string? nextQuestionSlug = null,
@@ -147,17 +142,17 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange - Setup recommendation service to return status data for integration testing
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
 
         var categorySlug = "cat-a";
-        var section = MakeSection("S1", "sec-1", "Section One");
-        _contentful.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
-        _contentful.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+        var section = CreateSection("S1", "sec-1", "Section One");
+        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         // Submission has answers that match chunk ids "C1","C2","C3"
-        var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c123);
+        var routing = CreateRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c123);
         _submissions
             .GetSubmissionRoutingDataAsync(123, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
@@ -247,15 +242,15 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
-        var section = MakeSection("S1", "sec-1");
+        var section = CreateSection("S1", "sec-1");
 
-        _contentful.GetCategoryHeaderTextBySlugAsync("cat").Returns("Header");
-        _contentful.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+        _contentfulService.GetCategoryHeaderTextBySlugAsync("cat").Returns("Header");
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
-        var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c1);
+        var routing = CreateRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c1);
         _submissions
             .GetSubmissionRoutingDataAsync(123, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
@@ -273,16 +268,16 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
-        var category = MakeCategory("Cat");
-        var section = MakeSection("S1", "sec-1");
+        var category = CreateCategory("Cat");
+        var section = CreateSection("S1", "sec-1");
 
-        _contentful.GetCategoryBySlugAsync("cat").Returns(category);
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentfulService.GetCategoryBySlugAsync("cat").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        var routing = MakeRouting(SubmissionStatus.NotStarted, section);
+        var routing = CreateRouting(SubmissionStatus.NotStarted, section);
         _submissions
             .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
@@ -306,16 +301,16 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
-        var category = MakeCategory("Cat");
-        var section = MakeSection("S1", "sec-1");
+        var category = CreateCategory("Cat");
+        var section = CreateSection("S1", "sec-1");
 
-        _contentful.GetCategoryBySlugAsync("cat").Returns(category);
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentfulService.GetCategoryBySlugAsync("cat").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        var routing = MakeRouting(SubmissionStatus.InProgress, section, nextQuestionSlug: "q-2");
+        var routing = CreateRouting(SubmissionStatus.InProgress, section, nextQuestionSlug: "q-2");
         _submissions
             .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
@@ -344,16 +339,16 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
-        var category = MakeCategory("Cat");
-        var section = MakeSection("S1", "sec-1");
+        var category = CreateCategory("Cat");
+        var section = CreateSection("S1", "sec-1");
 
-        _contentful.GetCategoryBySlugAsync("cat").Returns(category);
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentfulService.GetCategoryBySlugAsync("cat").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        var routing = MakeRouting(SubmissionStatus.CompleteNotReviewed, section);
+        var routing = CreateRouting(SubmissionStatus.CompleteNotReviewed, section);
         _submissions
             .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
@@ -377,16 +372,16 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
-        var category = MakeCategory("Connectivity", "connectivity");
-        var section = MakeSection("S1", "sec-1");
+        var category = CreateCategory("Connectivity", "connectivity");
+        var section = CreateSection("S1", "sec-1");
 
-        _contentful.GetCategoryBySlugAsync("connectivity").Returns(category);
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentfulService.GetCategoryBySlugAsync("connectivity").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        var routing = MakeRouting(
+        var routing = CreateRouting(
             SubmissionStatus.CompleteReviewed,
             section,
             "nextQuestionSlug",
@@ -455,16 +450,16 @@ public class RecommendationsViewBuilderTests
         var slug = categoryTitle.ToLower();
 
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
-        var category = MakeCategory(categoryTitle, slug);
-        var section = MakeSection("S1", "sec-1");
+        var category = CreateCategory(categoryTitle, slug);
+        var section = CreateSection("S1", "sec-1");
 
-        _contentful.GetCategoryBySlugAsync("connectivity").Returns(category);
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentfulService.GetCategoryBySlugAsync("connectivity").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: "C1");
+        var routing = CreateRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: "C1");
         _submissions
             .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
@@ -520,16 +515,16 @@ public class RecommendationsViewBuilderTests
         var slug = categoryTitle.ToLower();
 
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
-        var category = MakeCategory(categoryTitle, slug);
-        var section = MakeSection("S1", "sec-1");
+        var category = CreateCategory(categoryTitle, slug);
+        var section = CreateSection("S1", "sec-1");
 
-        _contentful.GetCategoryBySlugAsync(slug).Returns(category);
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentfulService.GetCategoryBySlugAsync(slug).Returns(category);
+        _contentfulService.GetSectionBySlugAsync("sec-1").Returns(section);
 
-        var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: "C1");
+        var routing = CreateRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: "C1");
         _submissions
             .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed)
             .Returns(routing);
@@ -586,17 +581,17 @@ public class RecommendationsViewBuilderTests
         var sectionSlug = "sec-1";
 
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
 
-        var category = MakeCategory(categoryTitle, categorySlug);
-        var section = MakeSection("S1", sectionSlug);
+        var category = CreateCategory(categoryTitle, categorySlug);
+        var section = CreateSection("S1", sectionSlug);
 
-        _contentful.GetCategoryBySlugAsync(categorySlug).Returns(category);
-        _contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+        _contentfulService.GetCategoryBySlugAsync(categorySlug).Returns(category);
+        _contentfulService.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
-        var routing = MakeRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c123);
+        var routing = CreateRouting(SubmissionStatus.CompleteReviewed, section, answerSysIds: c123);
 
         _submissions
             .GetSubmissionRoutingDataAsync(1, section, SubmissionStatus.CompleteReviewed)
@@ -657,6 +652,430 @@ public class RecommendationsViewBuilderTests
         Assert.Equal(expectedSlug, vm.OriginatingSlug);
     }
 
+    // ---------- RouteToShareRecommendationAsync ----------
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenInputModelIsNull_ReturnsShareView()
+    {
+        var controller = CreateController();
+        var category = CreateCategory("category");
+        var section = CreateSection(
+            "section",
+            CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id")
+        );
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+
+        var sut = CreateServiceUnderTest();
+
+        var result = await sut.RouteToShareRecommendationAsync(
+            controller,
+            "category",
+            "section",
+            "chunk",
+            null
+        );
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal("~/Views/Shared/Email/ShareByEmail.cshtml", viewResult.ViewName);
+
+        var model = Assert.IsType<ShareByEmailViewModel>(viewResult.Model);
+        Assert.Equal("Recommendations", model.PostController);
+        Assert.Equal(nameof(RecommendationsController.ShareSingleRecommendation), model.PostAction);
+        Assert.Equal("category", model.CategorySlug);
+        Assert.Equal("section", model.SectionSlug);
+        Assert.Equal("chunk", model.ChunkSlug);
+        Assert.Equal("Use MFA", model.Caption);
+        Assert.Equal("Share a recommendation by email", model.Heading);
+        Assert.Null(model.InputModel);
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenModelStateIsInvalid_ReturnsShareViewWithInputModel()
+    {
+        var controller = CreateController();
+        controller.ModelState.AddModelError("EmailAddresses", "Nope");
+
+        var inputModel = new ShareByEmailInputViewModel
+        {
+            NameOfUser = "Drew",
+            EmailAddresses = ["test@example.com"],
+        };
+
+        var category = CreateCategory("category");
+        var section = CreateSection(
+            "section",
+            CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id")
+        );
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+
+        var sut = CreateServiceUnderTest();
+
+        var result = await sut.RouteToShareRecommendationAsync(
+            controller,
+            "category",
+            "section",
+            "chunk",
+            inputModel
+        );
+
+        var viewResult = Assert.IsType<ViewResult>(result);
+        Assert.Equal("~/Views/Shared/Email/ShareByEmail.cshtml", viewResult.ViewName);
+
+        var model = Assert.IsType<ShareByEmailViewModel>(viewResult.Model);
+        Assert.Same(inputModel, model.InputModel);
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenCategoryNotFound_ThrowsContentfulDataUnavailableException()
+    {
+        var controller = CreateController();
+
+        _contentfulService
+            .GetCategoryBySlugAsync("missing-category")
+            .Returns((QuestionnaireCategoryEntry?)null);
+
+        var sut = CreateServiceUnderTest();
+
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.RouteToShareRecommendationAsync(
+                controller,
+                "missing-category",
+                "section",
+                "chunk",
+                new ShareByEmailInputViewModel()
+            )
+        );
+
+        Assert.Equal("Could not find category for slug missing-category", exception.Message);
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenSectionNotFound_ThrowsContentfulDataUnavailableException()
+    {
+        var controller = CreateController();
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(CreateCategory("category"));
+        _contentfulService
+            .GetSectionBySlugAsync("missing-section")
+            .Returns((QuestionnaireSectionEntry)null!);
+
+        var sut = CreateServiceUnderTest();
+
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.RouteToShareRecommendationAsync(
+                controller,
+                "category",
+                "missing-section",
+                "chunk",
+                new ShareByEmailInputViewModel()
+            )
+        );
+
+        Assert.Equal("Could not find section for slug missing-section", exception.Message);
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenChunkNotFound_ThrowsContentfulDataUnavailableException()
+    {
+        var controller = CreateController();
+
+        var category = CreateCategory("category");
+        var section = CreateSection(
+            "section",
+            CreateRecommendationChunk("different-chunk", "chunk-id", "Use MFA", "text-body-id")
+        );
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+
+        var sut = CreateServiceUnderTest();
+
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.RouteToShareRecommendationAsync(
+                controller,
+                "category",
+                "section",
+                "missing-chunk",
+                new ShareByEmailInputViewModel()
+            )
+        );
+
+        Assert.Equal("Could not find chunk for slug missing-chunk", exception.Message);
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenRecommendationStatusMissing_ThrowsInvalidDataException()
+    {
+        var controller = CreateController();
+        var inputModel = CreateInputModel();
+
+        var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
+        var section = CreateSection("section", chunk);
+        var category = CreateCategory("category");
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .Returns(new SqlEstablishmentRecommendationHistoryDto { NewStatus = null });
+
+        var sut = CreateServiceUnderTest();
+
+        var exception = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            sut.RouteToShareRecommendationAsync(
+                controller,
+                "category",
+                "section",
+                "chunk",
+                inputModel
+            )
+        );
+
+        Assert.Equal("Cannot send an email without a recommendation status", exception.Message);
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenTextBodyMissing_ThrowsContentfulDataUnavailableException()
+    {
+        var controller = CreateController();
+        var inputModel = CreateInputModel();
+
+        var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
+        var section = CreateSection("section", chunk);
+        var category = CreateCategory("category");
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.InProgress,
+                }
+            );
+
+        _contentfulService
+            .GetTextBodyByIdAsync("text-body-id")
+            .Returns((ComponentTextBodyEntry)null!);
+
+        var sut = CreateServiceUnderTest();
+
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.RouteToShareRecommendationAsync(
+                controller,
+                "category",
+                "section",
+                "chunk",
+                inputModel
+            )
+        );
+
+        Assert.Equal("Could not find text body entry for id text-body-id", exception.Message);
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenEstablishmentNameMissing_ThrowsInvalidDataException()
+    {
+        var controller = CreateController();
+        var inputModel = CreateInputModel();
+
+        var textBody = new ComponentTextBodyEntry
+        {
+            Sys = new SystemDetails { Id = "text-body-id" },
+        };
+        var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
+        var section = CreateSection("section", chunk);
+        var category = CreateCategory("category");
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+        _currentUser.GetActiveEstablishmentNameAsync().Returns((string?)null);
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.InProgress,
+                }
+            );
+
+        _contentfulService.GetTextBodyByIdAsync("text-body-id").Returns(textBody);
+
+        var sut = CreateServiceUnderTest();
+
+        var exception = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            sut.RouteToShareRecommendationAsync(
+                controller,
+                "category",
+                "section",
+                "chunk",
+                inputModel
+            )
+        );
+
+        Assert.Equal(
+            "Cannot send an email without an active establishment name",
+            exception.Message
+        );
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenNotifySendSucceeds_RedirectsBackToSingleRecommendation()
+    {
+        var controller = CreateController();
+        var inputModel = CreateInputModel();
+
+        var textBody = new ComponentTextBodyEntry
+        {
+            Sys = new SystemDetails { Id = "text-body-id" },
+        };
+        var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
+        var section = CreateSection("section", chunk);
+        var category = CreateCategory("category");
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+        _currentUser.GetActiveEstablishmentNameAsync().Returns("Springfield Primary");
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.InProgress,
+                }
+            );
+
+        _contentfulService.GetTextBodyByIdAsync("text-body-id").Returns(textBody);
+
+        _notifyService
+            .SendSingleRecommendationEmail(
+                Arg.Any<ShareByEmailModel>(),
+                textBody,
+                "Springfield Primary",
+                "Use MFA",
+                "section",
+                RecommendationStatus.InProgress
+            )
+            .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = [] }]);
+
+        var sut = CreateServiceUnderTest();
+
+        var result = await sut.RouteToShareRecommendationAsync(
+            controller,
+            "category",
+            "section",
+            "chunk",
+            inputModel
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(
+            nameof(RecommendationsController.GetSingleRecommendation),
+            redirect.ActionName
+        );
+        Assert.Equal(
+            nameof(RecommendationsController).GetControllerNameSlug(),
+            redirect.ControllerName
+        );
+
+        var routeValues = Assert.IsAssignableFrom<IDictionary<string, object>>(
+            redirect.RouteValues!
+        );
+        Assert.Equal("category", routeValues["categorySlug"]);
+        Assert.Equal("section", routeValues["sectionSlug"]);
+        Assert.Equal("chunk", routeValues["chunkSlug"]);
+
+        await _recommendationService
+            .Received(1)
+            .GetLatestRecommendationHistoryAsync("chunk-id", 123);
+
+        _notifyService
+            .Received(1)
+            .SendSingleRecommendationEmail(
+                Arg.Is<ShareByEmailModel>(m =>
+                    m.NameOfUser == inputModel.NameOfUser
+                    && m.EmailAddresses.SequenceEqual(inputModel.EmailAddresses)
+                    && m.UserMessage == inputModel.UserMessage
+                ),
+                textBody,
+                "Springfield Primary",
+                "Use MFA",
+                "section",
+                RecommendationStatus.InProgress
+            );
+    }
+
+    [Fact]
+    public async Task RouteToShareRecommendationAsync_WhenNotifySendHasErrors_RedirectsToNotifyError()
+    {
+        var controller = CreateController();
+        var inputModel = CreateInputModel();
+
+        var textBody = new ComponentTextBodyEntry
+        {
+            Sys = new SystemDetails { Id = "text-body-id" },
+        };
+        var chunk = CreateRecommendationChunk("chunk", "chunk-id", "Use MFA", "text-body-id");
+        var section = CreateSection("section", chunk);
+        var category = CreateCategory("category");
+
+        _contentfulService.GetCategoryBySlugAsync("category").Returns(category);
+        _contentfulService.GetSectionBySlugAsync("section").Returns(section);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+        _currentUser.GetActiveEstablishmentNameAsync().Returns("Springfield Primary");
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.InProgress,
+                }
+            );
+
+        _contentfulService.GetTextBodyByIdAsync("text-body-id").Returns(textBody);
+
+        _notifyService
+            .SendSingleRecommendationEmail(
+                Arg.Any<ShareByEmailModel>(),
+                Arg.Any<ComponentTextBodyEntry>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<string>(),
+                Arg.Any<RecommendationStatus>()
+            )
+            .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = ["kaboom"] }]);
+
+        var sut = CreateServiceUnderTest();
+
+        var expected = PageRedirecter.RedirectToNotifyError(controller);
+
+        var result = await sut.RouteToShareRecommendationAsync(
+            controller,
+            "category",
+            "section",
+            "chunk",
+            inputModel
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(expected.ActionName, redirect.ActionName);
+        Assert.Equal(expected.ControllerName, redirect.ControllerName);
+    }
+
     // ---------- UpdateRecommendationStatusAsync ----------
 
     [Fact]
@@ -664,7 +1083,7 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         const int establishmentId = 123;
         const string categorySlug = "cat-a";
@@ -674,12 +1093,12 @@ public class RecommendationsViewBuilderTests
         _currentUser.UserId.Returns(123);
         _currentUser.GetActiveEstablishmentIdAsync().Returns(establishmentId);
 
-        var section = MakeSection("S1", sectionSlug, "Section One");
+        var section = CreateSection("S1", sectionSlug, "Section One");
 
-        _contentful.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
-        _contentful.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
+        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
 
-        var routing = MakeRouting(
+        var routing = CreateRouting(
             SubmissionStatus.CompleteReviewed,
             section,
             answerSysIds: ["C1", "C2", "C3"]
@@ -747,7 +1166,7 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         const int establishmentId = 123;
         const int userId = 42;
@@ -759,12 +1178,12 @@ public class RecommendationsViewBuilderTests
         _currentUser.UserId.Returns(userId);
         _currentUser.IsMat.Returns(false);
 
-        var section = MakeSection("S1", sectionSlug, "Section One");
+        var section = CreateSection("S1", sectionSlug, "Section One");
 
-        _contentful.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
-        _contentful.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
+        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
 
-        var routing = MakeRouting(
+        var routing = CreateRouting(
             SubmissionStatus.CompleteReviewed,
             section,
             answerSysIds: ["C1", "C2", "C3"]
@@ -834,7 +1253,7 @@ public class RecommendationsViewBuilderTests
     {
         // Arrange
         var sut = CreateServiceUnderTest();
-        var ctl = MakeController();
+        var ctl = CreateController();
 
         const int establishmentId = 123;
         const int userId = 99;
@@ -847,12 +1266,12 @@ public class RecommendationsViewBuilderTests
         _currentUser.IsMat.Returns(true);
         _currentUser.UserOrganisationId.Returns(555);
 
-        var section = MakeSection("S1", sectionSlug, "Section One");
+        var section = CreateSection("S1", sectionSlug, "Section One");
 
-        _contentful.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
-        _contentful.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
+        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetSectionBySlugAsync(sectionSlug, 2).Returns(section);
 
-        var routing = MakeRouting(
+        var routing = CreateRouting(
             SubmissionStatus.CompleteReviewed,
             section,
             answerSysIds: ["C1", "C2", "C3"]
@@ -899,10 +1318,54 @@ public class RecommendationsViewBuilderTests
                 555
             );
 
-        var view = Assert.IsType<RedirectToActionResult>(result);
+        Assert.IsType<RedirectToActionResult>(result);
     }
 
     // ---------- Support ----------
 
-    private sealed class DummyController : Controller { }
+    private static ShareByEmailInputViewModel CreateInputModel()
+    {
+        return new ShareByEmailInputViewModel
+        {
+            NameOfUser = "Drew",
+            EmailAddresses = ["drew@example.com"],
+            UserMessage = "Hello",
+        };
+    }
+
+    private static QuestionnaireCategoryEntry CreateCategory(string heading)
+    {
+        return new QuestionnaireCategoryEntry
+        {
+            Header = new ComponentHeaderEntry { Text = heading },
+        };
+    }
+
+    private static QuestionnaireSectionEntry CreateSection(
+        string name,
+        RecommendationChunkEntry recommendationChunk
+    )
+    {
+        return new QuestionnaireSectionEntry
+        {
+            Name = name,
+            CoreRecommendations = [recommendationChunk],
+        };
+    }
+
+    private static RecommendationChunkEntry CreateRecommendationChunk(
+        string slug,
+        string id,
+        string headerText,
+        string textBodyId
+    )
+    {
+        return new RecommendationChunkEntry
+        {
+            Slug = slug,
+            Sys = new SystemDetails { Id = id },
+            Header = headerText,
+            Content = [new ComponentTextBodyEntry { Sys = new SystemDetails { Id = textBodyId } }],
+        };
+    }
 }

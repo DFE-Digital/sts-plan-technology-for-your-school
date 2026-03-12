@@ -18,13 +18,6 @@ public interface IContentfulRepository
     Task<TEntry?> GetEntryByIdAsync<TEntry>(string id, int include = 2);
 
     /// <summary>
-    /// Get an entity by Id, returning the raw JSON string from Contentful instead of deserializing into an object
-    /// </summary>
-    /// <param name="id"></param>
-    /// <returns></returns>
-    Task<string> GetTextBodyEntryByIdAsJsonAsync(string id);
-
-    /// <summary>
     /// Get options to use for fetching an Entry by Id
     /// </summary>
     /// <param name="id"></param>
