@@ -1,5 +1,5 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.20.0"
+  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.6.3"
 
   ###########
   # General #
@@ -8,6 +8,22 @@ module "main_hosting" {
   project_name   = local.project_name
   azure_location = local.azure_location
   tags           = local.tags
+
+  ############################################
+  # Networking configuration
+  ############################################
+  #these prevent the public IP issue.
+  # Deploy container apps inside a VNet
+  launch_in_vnet = true
+
+  # Only allow Azure Front Door traffic to the app
+  restrict_container_apps_to_cdn_inbound_only = true
+
+  #ingress point for front door
+  ingress = {
+  external_enabled = true
+  target_port      = 3000
+  }
 
   #################
   # Container App #
