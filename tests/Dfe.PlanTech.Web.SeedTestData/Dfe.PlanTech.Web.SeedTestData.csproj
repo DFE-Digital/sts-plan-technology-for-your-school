@@ -10,9 +10,8 @@
   </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Azure.Identity" Version="1.18.0" />
       <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.8" />
-      <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.3.0" />
     </ItemGroup>
 
     <ItemGroup>
