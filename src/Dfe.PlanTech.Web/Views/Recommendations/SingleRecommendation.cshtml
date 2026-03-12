@@ -1,6 +1,18 @@
 @model SingleRecommendationViewModel
 
 @{
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["position"] = Model.CurrentChunkPosition.ToString(),
+        ["totalRecsForTopic"] = Model.TotalChunks.ToString(),
+        ["topic"] = Model.Section.Name.ToLower(),
+        ["status"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
+        ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty,
+        ["answer"] = Model.FirstActivity?.AnswerText ?? string.Empty,
+    };
+}
+
+@{
     Layout = "_Layout";
 
     var recommendation = Model.CurrentChunk;
@@ -45,7 +57,7 @@
             @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
                 ContentfulMicrocopyConstants.SingleRecommendationPrintAllLink,
                 Model.MicrocopyEntries,
-                new Dictionary<string, string> { ["topic"] = Model.Section.Name.ToLower() }
+                dynamicValues
             )
         </a>
     </p>
@@ -72,11 +84,7 @@
                         @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
                             ContentfulMicrocopyConstants.SingleRecommendationPosition,
                             Model.MicrocopyEntries,
-                            new Dictionary<string, string>
-                            {
-                                ["position"] = Model.CurrentChunkPosition.ToString(),
-                                ["totalRecsForTopic"] = Model.TotalChunks.ToString(),
-                            }
+                            dynamicValues
                         )
                     </span>
                     <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
@@ -147,12 +155,11 @@
 
                 <govuk-textarea name="Notes" rows="5">
                     <govuk-textarea-label class="govuk-label--s">
-                        Add a comment
+                        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationCommentLabel, Model.MicrocopyEntries)
                     </govuk-textarea-label>
 
                     <govuk-textarea-hint>
-                        Anyone who uses the service for your school will be able to see comments.
-                        Do not include personal or sensitive information, like email addresses or account details.
+                        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationCommentHint, Model.MicrocopyEntries)
                     </govuk-textarea-hint>
                 </govuk-textarea>
 
@@ -181,13 +188,22 @@
                                 @if (Model.FirstActivity is not null && history.DateCreated.Equals(Model.FirstActivity.StatusChangeDate))
                                 {
                                     <p>
-                                        Status of '@Model.FirstActivity.Status.GetDisplayName()' added based on self-assessment
-                                        by @(Model.FirstActivity.SchoolName).
+                                        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, Model.MicrocopyEntries, dynamicValues)
                                     </p>
 
                                     <p><strong>@Model.FirstActivity.QuestionText</strong></p>
 
-                                    <p>Your answer: @Model.FirstActivity.AnswerText</p>
+
+
+                                    var answerText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationHistoryAnswer, Model.MicrocopyEntries, dynamicValues);
+                                    if (!String.IsNullOrEmpty(answerText))
+                                    {
+                                        <p>@answerText</p>
+                                    }
+                                    else
+                                    {
+                                        <p>Your answer: @Model.FirstActivity.AnswerText</p>
+                                    }
                                 }
                                 else
                                 {
