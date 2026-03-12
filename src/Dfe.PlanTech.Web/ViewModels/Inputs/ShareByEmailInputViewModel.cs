@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Web.ViewModels.Inputs;
 
 public class ShareByEmailInputViewModel : IValidatableObject
 {
-    public string NameOfUser { get; set; } = string.Empty;
+    public string? NameOfUser { get; set; } = string.Empty;
 
     public List<string> EmailAddresses { get; set; } = [];
 
@@ -57,7 +57,7 @@ public class ShareByEmailInputViewModel : IValidatableObject
     {
         return new ShareByEmailModel
         {
-            NameOfUser = NameOfUser,
+            NameOfUser = NameOfUser ?? string.Empty,
             EmailAddresses = EmailAddresses,
             UserMessage = UserMessage,
         };
@@ -68,6 +68,7 @@ public class ShareByEmailInputViewModel : IValidatableObject
         EmailAddresses = EmailAddresses
             .Where(address => !string.IsNullOrWhiteSpace(address))
             .Select(address => address.Trim())
+            .Distinct()
             .ToList();
     }
 }
