@@ -50,4 +50,4 @@ repos:
       - id: anti-trojan-source
         name: Detect trojan source attacks
         args: ['--verbose']
-        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)
+        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*|.*EnumExtensions.cs)

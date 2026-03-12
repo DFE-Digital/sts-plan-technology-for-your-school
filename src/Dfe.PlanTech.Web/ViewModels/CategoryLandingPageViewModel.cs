@@ -1,6 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Web.ViewModels.Inputs;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 

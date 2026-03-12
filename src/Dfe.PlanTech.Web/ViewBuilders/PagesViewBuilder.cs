@@ -5,8 +5,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
-using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
@@ -85,24 +83,7 @@ public class PagesViewBuilder(
 
         if (page.IsLandingPage == true)
         {
-            var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4);
-            if (category is null)
-            {
-                throw new ContentfulDataUnavailableException(
-                    $"Could not find category at {controller.Request.Path.Value}"
-                );
-            }
-            if (string.IsNullOrWhiteSpace(page.Slug))
-            {
-                throw new InvalidDataException("Page Slug cannot be empty");
-            }
-
-            var landingPageViewModel = await BuildLandingPageViewModelAsync(
-                controller,
-                category,
-                page.Slug
-            );
-            return controller.View(CategoryLandingPageView, landingPageViewModel);
+            return await RouteToLandingPageView(controller, page);
         }
 
         controller.ViewData[StatePassingMechanismConstants.Title] =
@@ -264,5 +245,26 @@ public class PagesViewBuilder(
         }
 
         return shareResultsViewModel;
+    }
+
+    private async Task<IActionResult> RouteToLandingPageView(Controller controller, PageEntry page)
+    {
+        var category =
+            await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category at {controller.Request.Path.Value}"
+            );
+
+        if (string.IsNullOrWhiteSpace(page.Slug))
+        {
+            throw new InvalidDataException("Page Slug cannot be empty");
+        }
+
+        var landingPageViewModel = await BuildLandingPageViewModelAsync(
+            controller,
+            category,
+            page.Slug
+        );
+        return controller.View(CategoryLandingPageView, landingPageViewModel);
     }
 }

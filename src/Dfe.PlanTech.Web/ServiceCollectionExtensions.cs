@@ -1,4 +1,3 @@
-using System.Configuration;
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
@@ -32,7 +31,6 @@ using GovUk.Frontend.AspNetCore;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Notify.Client;
