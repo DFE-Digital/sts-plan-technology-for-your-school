@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model GroupsSelectorViewModel
 
 @{
@@ -20,7 +22,7 @@
 }
 
 @{
-    <h2 class="govuk-heading-l">@ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.GroupsSelectHeader, Model.MicrocopyEntries)</h2>
+    <h2 class="govuk-heading-l">@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectHeader)</h2>
     foreach (var school in @Model.GroupEstablishments)
     {
         var schoolUrn = school.Urn;
@@ -35,7 +37,7 @@
             <button type="submit" class="govuk-button school-button govuk-!-text-align-left" value="@schoolUrn">@schoolName</button>
             <input type="hidden" name="schoolUrn" value="@schoolUrn" />
             <input type="hidden" name="schoolName" value="@schoolName" />
-            <p>@ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.GroupsSelectRecommendationCount, Model.MicrocopyEntries, dynamicValues)</p>
+            <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectRecommendationCount, dynamicValues)</p>
         </form>
     }
 }
@@ -47,4 +49,4 @@
 }
 
 <hr class="govuk-section-break govuk-section-break--m" />
-<p class="govuk-body">@Html.Raw(ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.GroupsSelectContactUs, Model.MicrocopyEntries, contactLink))</p>
+<p class="govuk-body">@Html.Raw(await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectContactUs, contactLink))</p>

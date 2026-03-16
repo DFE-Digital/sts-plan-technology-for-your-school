@@ -231,8 +231,6 @@ public class QuestionsViewBuilder(
             status: null
         );
 
-        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
-
         if (submissionModel is null || !submissionModel.HasResponses)
         {
             return controller.RedirectToInterstitialPage(sectionSlug);
@@ -260,8 +258,7 @@ public class QuestionsViewBuilder(
             TopicName = section.Name,
             Responses = submissionModel.Responses,
             CategorySlug = categorySlug,
-            SectionSlug = sectionSlug,
-            MicrocopyEntries = microcopy
+            SectionSlug = sectionSlug
         };
 
         return controller.View(ContinueSelfAssessmentView, viewModel);

@@ -22,5 +22,4 @@ public class ReviewAnswersViewModel
     public string? SectionSlug { get; init; } = null;
     public string? Slug { get; init; } = null;
     public int? SubmissionId { get; init; }
-    public List<MicrocopyEntry>? MicrocopyEntries { get; set; }
 }

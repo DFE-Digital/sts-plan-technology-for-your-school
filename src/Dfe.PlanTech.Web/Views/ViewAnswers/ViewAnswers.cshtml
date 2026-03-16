@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model ViewAnswersViewModel
 
 @section NavButton {
@@ -19,13 +21,13 @@
 
 <span class="govuk-caption-xl">@Model.TopicName</span>
 <h1 class="govuk-heading-xl">
-    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ViewAnswersHeader, Model.MicrocopyEntries)
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersHeader)
 </h1>
 <p>
-    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ViewAnswersIntroText, Model.MicrocopyEntries, dynamicValues)
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersIntroText, dynamicValues)
 </p>
 
-<p>@ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ViewAnswersIntroMore, Model.MicrocopyEntries)</p>
+<p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersIntroMore)</p>
 
 <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 @foreach (var response in Model.Responses)
@@ -41,5 +43,5 @@
 
 <a href="@($"/{Model.CategorySlug}")" draggable="false"
    class="govuk-button govuk-button--secondary" data-module="govuk-button">
-    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ViewAnswersBackToRecs, Model.MicrocopyEntries)
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersBackToRecs)
 </a>

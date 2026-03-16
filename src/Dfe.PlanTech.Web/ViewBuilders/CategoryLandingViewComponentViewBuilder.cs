@@ -96,8 +96,7 @@ public class CategoryLandingViewComponentViewBuilder(
             Print = print,
             StatusLinkPartialName = print
                 ? CategoryLandingSectionAssessmentLinkPrintContent
-                : CategoryLandingSectionAssessmentLink,
-            MicrocopyEntries = microcopy
+                : CategoryLandingSectionAssessmentLink
         };
 
         return viewModel;

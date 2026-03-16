@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model ContinueSelfAssessmentViewModel
 
 @{
@@ -12,7 +14,7 @@
 
 <span class="govuk-caption-xl">@Model.TopicName</span>
 <h1 class="govuk-heading-xl">
-    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueHeader, Model.MicrocopyEntries)
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueHeader)
 </h1>
 
     @{
@@ -23,11 +25,11 @@
 }
 
 <p>
-    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueIntroText, Model.MicrocopyEntries, dynamicValues)    
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueIntroText, dynamicValues)
 </p>
 
 <h2 class="govuk-heading-l">
-    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueAnswersHeader, Model.MicrocopyEntries)
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueAnswersHeader)
 </h2>
 <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 @foreach (var response in Model.Responses)
@@ -41,8 +43,8 @@
 
 <hr class="govuk-section-break govuk-section-break--m">
 
-<p>@ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueInfoText, Model.MicrocopyEntries)</p>
-<p>@ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueInfoMore, Model.MicrocopyEntries)</p>
+<p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueInfoText)</p>
+<p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueInfoMore)</p>
 
 <div class="govuk-button-group">
     <a href="@Url.Action(
@@ -51,7 +53,7 @@
         new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
        class="govuk-button"
        data-module="govuk-button">
-        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueContinueButton, Model.MicrocopyEntries)
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueContinueButton)
     </a>
     <a href="@Url.Action(
         nameof(QuestionsController.RestartSelfAssessment),
@@ -59,6 +61,6 @@
         new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug, isObsoleteSubmissionFlow = false })"
        class="govuk-button govuk-button--secondary"
        data-module="govuk-button">
-        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.ContinueRestartButton, Model.MicrocopyEntries)
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueRestartButton)
     </a>
 </div>

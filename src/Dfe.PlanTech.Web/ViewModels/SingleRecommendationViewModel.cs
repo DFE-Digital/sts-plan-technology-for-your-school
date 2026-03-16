@@ -46,5 +46,4 @@ public class SingleRecommendationViewModel
     public string StatusTagClass =>
         ((RecommendationStatus?)SelectedStatusKey)
             .GetCssClassOrDefault(RecommendationConstants.DefaultTagClass);
-    public List<MicrocopyEntry>? MicrocopyEntries { get; set; }
 }
