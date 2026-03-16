@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model StatusLinkViewModel
 
 @{
@@ -15,23 +17,20 @@
     switch (topic.ProgressStatus)
     {
         case SubmissionStatus.InProgress:
-            statusText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+            statusText = await Microcopy.GetTextByKeyAsync(
                 ContentfulMicrocopyConstants.CategoryPrintSectionInProgress,
-                Model.MicrocopyEntries,
                 dynamicValues
             );
             break;
         case SubmissionStatus.CompleteReviewed:
-            statusText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+            statusText = await Microcopy.GetTextByKeyAsync(
                 ContentfulMicrocopyConstants.CategoryPrintSectionCompleted,
-                Model.MicrocopyEntries,
                 dynamicValues
             );
             break;
         default:
-            statusText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
-                ContentfulMicrocopyConstants.CateogoryPrintSectionNotStarted,
-                Model.MicrocopyEntries
+            statusText = await Microcopy.GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.CateogoryPrintSectionNotStarted
             );
             break;
     }

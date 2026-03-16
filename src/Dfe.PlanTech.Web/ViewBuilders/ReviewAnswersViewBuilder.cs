@@ -50,8 +50,6 @@ public class ReviewAnswersViewBuilder(
         );
         ReviewAnswersViewModel viewModel;
 
-        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
-
         switch (submissionRoutingData.Status)
         {
             case SubmissionStatus.NotStarted:
@@ -64,8 +62,7 @@ public class ReviewAnswersViewBuilder(
                     submissionRoutingData,
                     categorySlug,
                     sectionSlug,
-                    errorMessage,
-                    microcopy
+                    errorMessage
                 );
                 return controller.View(CheckAnswersViewName, viewModel);
 
@@ -98,8 +95,6 @@ public class ReviewAnswersViewBuilder(
             status: SubmissionStatus.CompleteReviewed
         );
 
-        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
-
         ViewAnswersViewModel viewModel;
         switch (submissionRoutingData.Status)
         {
@@ -122,8 +117,7 @@ public class ReviewAnswersViewBuilder(
                     section,
                     submissionRoutingData,
                     categorySlug,
-                    sectionSlug,
-                    microcopy
+                    sectionSlug
                 );
                 return controller.View(ViewAnswersViewName, viewModel);
 
@@ -179,8 +173,7 @@ public class ReviewAnswersViewBuilder(
         QuestionnaireSectionEntry section,
         SubmissionRoutingDataModel submissionModel,
         string categorySlug,
-        string sectionSlug,
-        List<MicrocopyEntry> microcopyEntries
+        string sectionSlug
     )
     {
         /*
@@ -230,7 +223,6 @@ public class ReviewAnswersViewBuilder(
             Responses = responses,
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
-            MicrocopyEntries = microcopyEntries
         };
 
         return viewModel;
@@ -240,8 +232,7 @@ public class ReviewAnswersViewBuilder(
         SubmissionRoutingDataModel routingData,
         string categorySlug,
         string sectionSlug,
-        string? errorMessage,
-        List<MicrocopyEntry> microcopy
+        string? errorMessage
     )
     {
         return BuildViewModel(
@@ -250,8 +241,7 @@ public class ReviewAnswersViewBuilder(
             sectionSlug,
             PageTitleConstants.CheckAnswers,
             UrlConstants.CheckAnswersSlug,
-            errorMessage,
-            microcopy
+            errorMessage
         );
     }
 
@@ -261,8 +251,7 @@ public class ReviewAnswersViewBuilder(
         string sectionSlug,
         string pageTitle,
         string pageSlug,
-        string? errorMessage,
-        List<MicrocopyEntry> microcopy
+        string? errorMessage
     )
     {
         List<ContentfulEntry> content = [];
@@ -288,7 +277,6 @@ public class ReviewAnswersViewBuilder(
             SubmissionId = routingData.Submission?.SubmissionId,
             SubmissionResponses = submissionResponsesViewModel,
             ErrorMessage = errorMessage,
-            MicrocopyEntries = microcopy
         };
     }
 }

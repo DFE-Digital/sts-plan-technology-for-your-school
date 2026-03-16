@@ -1,5 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
-using Contentful.Core.Configuration;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -14,8 +13,8 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using StackExchange.Redis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -24,13 +23,16 @@ public class RecommendationsViewBuilder(
     IContentfulService contentfulService,
     ISubmissionService submissionService,
     IRecommendationService recommendationService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    IMicrocopyProvider microcopyProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IRecommendationService _recommendationService =
         recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
+    private readonly IMicrocopyProvider _microcopyProvider =
+        microcopyProvider ?? throw new ArgumentNullException(nameof(microcopyProvider));
 
     private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
     private const string RecommendationsViewName = "Recommendations";
@@ -97,8 +99,6 @@ public class RecommendationsViewBuilder(
                 currentRecommendationChunk.Id
             );
 
-        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
-
         var viewModel = new SingleRecommendationViewModel
         {
             CategoryName = categoryHeaderText,
@@ -122,7 +122,6 @@ public class RecommendationsViewBuilder(
             OriginatingSlug = chunkSlug,
             History = groupedHistory,
             FirstActivity = firstActivity,
-            MicrocopyEntries = microcopy,
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
@@ -277,7 +276,6 @@ public class RecommendationsViewBuilder(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
 
-        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
         var dynamicValues = new Dictionary<string, string>
         {
             ["status"] = selectedStatusEnum.Value.GetDisplayName()
@@ -290,21 +288,13 @@ public class RecommendationsViewBuilder(
             selectedStatusEnum.Value,
             notes
                 ??
-                ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
-                ContentfulMicrocopyConstants.SingleRecommendationHistoryChange,
-                microcopy,
-                dynamicValues
-                ),
+                await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, dynamicValues),
             CurrentUser.IsMat ? userOrganisationId : null
         );
 
         // Set success message for the banner
         controller.TempData["StatusUpdateSuccessTitle"] =
-            ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
-                ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
-                microcopy,
-                dynamicValues
-            );
+            await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader, dynamicValues);
 
         // Redirect back to the single recommendation page
         return PageRedirecter.RedirectToGetSingleRecommendation(

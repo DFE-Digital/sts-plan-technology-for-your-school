@@ -13,6 +13,5 @@ namespace Dfe.PlanTech.Web.ViewModels
         public List<QuestionWithAnswerModel> Responses { get; set; } = new();
         public string CategorySlug { get; set; } = string.Empty;
         public string SectionSlug { get; set; } = string.Empty;
-        public List<MicrocopyEntry>? MicrocopyEntries { get; set; }
     }
 }

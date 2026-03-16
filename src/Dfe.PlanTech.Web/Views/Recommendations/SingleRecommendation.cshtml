@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model SingleRecommendationViewModel
 
 @{
@@ -42,10 +44,7 @@
            asp-route-categorySlug="@Model.CategorySlug"
            asp-route-sectionSlug="@Model.SectionSlug"
            asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
-                ContentfulMicrocopyConstants.SingleRecommendationPrintLink,
-                Model.MicrocopyEntries
-            )
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPrintLink)
         </a>
     </p>
     <p class="govuk-body-s">
@@ -54,11 +53,7 @@
            asp-route-categorySlug="@Model.CategorySlug"
            asp-route-sectionSlug="@Model.SectionSlug"
            asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
-                ContentfulMicrocopyConstants.SingleRecommendationPrintAllLink,
-                Model.MicrocopyEntries,
-                dynamicValues
-            )
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPrintAllLink, dynamicValues)
         </a>
     </p>
 }
@@ -81,11 +76,7 @@
 
                 <div class="recommendation-piece-content">
                     <span class="govuk-caption-xl">
-                        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
-                            ContentfulMicrocopyConstants.SingleRecommendationPosition,
-                            Model.MicrocopyEntries,
-                            dynamicValues
-                        )
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPosition, dynamicValues)
                     </span>
                     <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
 
@@ -129,7 +120,7 @@
                     <govuk-radios-fieldset>
                         <govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
                             <h2 class="govuk-fieldset__heading">
-                                @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationStatusQuestion, Model.MicrocopyEntries)
+                                @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusQuestion)
                             </h2>
                         </govuk-radios-fieldset-legend>
 
@@ -155,22 +146,22 @@
 
                 <govuk-textarea name="Notes" rows="5">
                     <govuk-textarea-label class="govuk-label--s">
-                        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationCommentLabel, Model.MicrocopyEntries)
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentLabel)
                     </govuk-textarea-label>
 
                     <govuk-textarea-hint>
-                        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationCommentHint, Model.MicrocopyEntries)
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentHint)
                     </govuk-textarea-hint>
                 </govuk-textarea>
 
                 <govuk-button type="submit" prevent-double-click="true">
-                    @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationStatusButton, Model.MicrocopyEntries)
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusButton)
                 </govuk-button>
             </form>
 
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
-            <h2 class="govuk-heading--l">@ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationHistoryHeader, Model.MicrocopyEntries)</h2>
+            <h2 class="govuk-heading--l">@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryHeader)</h2>
 
             <govuk-accordion id="accordion-default">
                 @foreach (var (month, historyGroup) in Model.History)
@@ -188,14 +179,12 @@
                                 @if (Model.FirstActivity is not null && history.DateCreated.Equals(Model.FirstActivity.StatusChangeDate))
                                 {
                                     <p>
-                                        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, Model.MicrocopyEntries, dynamicValues)
+                                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, dynamicValues)
                                     </p>
 
                                     <p><strong>@Model.FirstActivity.QuestionText</strong></p>
 
-
-
-                                    var answerText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.SingleRecommendationHistoryAnswer, Model.MicrocopyEntries, dynamicValues);
+                                    var answerText = await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryAnswer, dynamicValues);
                                     if (!String.IsNullOrEmpty(answerText))
                                     {
                                         <p>@answerText</p>
