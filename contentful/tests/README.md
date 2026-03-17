@@ -1,11 +1,43 @@
-# Tests for Scripting Content Management
+# Contentful Tests
 
-Tests can be debugged by setting up a 'Run and Debug' configuration in VS Code.
+Shared Jest test suite for the Node.js tools in the `contentful/` directory. Tests live here rather than inside each individual tool to allow a single `npm test` command at the `contentful/` level to run all of them.
 
-1. If it doesn't exist already, create the folder `.vscode` in the project root.
-2. Create a file in `.vscode` named `launch.json` and copy the code below into it.
+## Test coverage
 
+| Directory | What is tested |
+|---|---|
+| `tests/content-management/` | Change scripts, `get-client.js`, `delete-entry.js`, `import-content.js` |
+| `tests/content-migration/` | Content type and main migration runner |
+| `tests/export-processor/` | `DataMapper`, path calculators, user journey, content type models, error logger |
+| `tests/webhook-creator/` | `create-contentful-webhook.ts` upsert logic |
+
+## Helpers
+
+Shared test helpers live in `helpers/`:
+
+| File | Purpose |
+|---|---|
+| `helpers/helpers.js` | `randomRange` — generates a random-length array using `@faker-js/faker` |
+| `helpers/content-generator.js` | Generates fake Contentful entry data from a content type schema |
+| `helpers/content-generators/` | Per-field-type value generators (array, boolean, link, rich text, symbol, text) |
+| `helpers/content-type-cleaner.js` | Strips content type metadata for test assertions |
+| `helpers/content-type-helper.js` | Looks up content type definitions |
+
+The `__mocks__/` directory contains a mock change script used by the `content-management` tests.
+
+## Running tests
+
+From the `contentful/` root:
+
+```bash
+npm run test
 ```
+
+## Debugging in VS Code
+
+1. Create `.vscode/launch.json` in the **repository root** (if it doesn't already exist) with the following configuration, adjusting the `args` path to the test file you want to debug:
+
+```json
 {
   "version": "0.2.0",
   "configurations": [
@@ -29,7 +61,5 @@ Tests can be debugged by setting up a 'Run and Debug' configuration in VS Code.
 }
 ```
 
-4. Add one or more breakpoints to any of the `.test.js` files.
-5. Click the 'Run and Debug' icon in the VSCode navigation menu. ![The 'Run and Debug' icon](run-and-debug.png)
-6. Select 'Debug Jest Test' from the drop down menu.
-7. Click the green 'Play' button.
+2. Add a breakpoint to any `.test.js` file.
+3. Open the **Run and Debug** panel in VS Code, select **Debug Jest Test**, and click the green play button.

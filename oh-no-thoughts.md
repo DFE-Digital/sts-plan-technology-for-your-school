@@ -257,3 +257,31 @@ The project ships Bootstrap and jQuery in `wwwroot/lib`. Neither is needed — t
 ### The existing README referenced two projects that no longer exist
 
 `Dfe.PlanTech.Domain` and `Dfe.PlanTech.Infrastructure.Data` were listed as project references in the README but neither exists in the solution. The README also described the frontend build as using Gulp — it was replaced by esbuild some time ago. Another good example of why this documentation effort is needed.
+
+---
+
+## `contentful/` tooling
+
+### `delete-all-content.js` has no confirmation prompt
+
+`content-management/delete-all-content.js` executes destructive deletions immediately with no "are you sure?" step. The `content-migrations` library correctly requires a `Y/N` confirmation before applying changes; the management scripts have no such guard. One mistyped `ENVIRONMENT` variable and you're wiping production content silently. At minimum this should prompt for confirmation or require a `--confirm` flag.
+
+### CommonJS and ES modules are mixed in `content-management`
+
+`content-management` mixes CommonJS (`require()`/`module.exports`) and ES module (`import`/`export`) syntax across different files. This works in current Node.js but is fragile — `"type": "module"` in `package.json` would break all `require()` calls, and Jest's configuration is already doing non-trivial gymnastics with `--experimental-vm-modules` to handle it. The codebase should be unified on one module format.
+
+### `export-processor` is referenced as a local file path dependency
+
+`broken-link-checker/package.json` declares `"export-processor": "file:../export-processor"` as a dependency. Local path dependencies are brittle in CI: the relative path must be correct from wherever `npm install` is run, `npm ci` may not handle them correctly, and the dependency is not pinned to a version. This should be handled via npm workspaces or a dedicated monorepo tool (e.g. Turborepo) that understands the relationship.
+
+### `export-recommendations-csv` requires a 9 GB heap
+
+`export-processor` runs the recommendations CSV export with `--max-old-space-size=9000`. This strongly suggests a memory efficiency problem in the data processing code rather than a genuine requirement for 9 GB. The `DataMapper` builds an in-memory object graph of the entire Contentful export, and the recommendations CSV code then iterates over it in a memory-intensive way. A streaming or incremental approach would almost certainly reduce this by orders of magnitude.
+
+### `DRY_RUN = true` hardcoded in the most recent change script
+
+`content-management/changes/20260119-1250-remove-underlining-from-richtext.js` has `const DRY_RUN = true` at the top, meaning it logs what it would do but never actually makes any changes. This appears to be the most recently created script, and it has never been run in anger. Leaving a change script in dry-run mode and committing it is confusing — it looks like the change has been applied when it hasn't. The `DRY_RUN` flag should either be removed (and the script actually run) or the script should be deleted if the change is no longer needed.
+
+### `qa-visualiser` is the only Python project in the repository
+
+Every other tool in this repository is Node.js or .NET. `qa-visualiser` uses Python 3.12, `uv`, Pydantic, and Graphviz. This adds an entirely separate runtime, toolchain, and dependency management system that contributors must have set up. In a team that is primarily .NET and Node.js, the Python toolchain will be unknown to most developers, making this tool less likely to be maintained or extended. It would be straightforward to rewrite using a Node.js graph library (e.g. `mermaid` or `d3`) or a .NET library (`Graphviz.NET`, `QuikGraph`).
