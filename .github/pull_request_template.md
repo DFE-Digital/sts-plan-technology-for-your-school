@@ -1,6 +1,6 @@
 ## Overview
 
-Addresses ticket [#TICKET-NUMBER](example.com)
+Addresses ticket [#](https://dfe-ssp.visualstudio.com/s190-schools-technology-services/_workitems/edit/#)
 
 High level overview of changes; one or two sentences.
 
