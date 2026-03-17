@@ -195,3 +195,13 @@ dotnet build /p:buildWebAssets=true
    dotnet run --launch-profile https
    ```
 3. If using a local Redis instance or local database, see the relevant infrastructure READMEs linked above.
+
+## See also
+
+- [Frontend build](../Dfe.PlanTech.Web.Node/README.md) — JS and CSS assets consumed by this project
+- [DfE Sign-in infrastructure](../Dfe.PlanTech.Infrastructure.SignIn/README.md) — authentication services
+- [Contentful data layer](../Dfe.PlanTech.Data.Contentful/README.md) — CMS content retrieval and caching
+- [Authentication overview](../../docs/Authentication.md) — auth flow and page authorisation
+- [Page routing](../../docs/Routers.md) — how URL routing and journey validation work
+- [Coding conventions](../../docs/Conventions.md) — naming and structural conventions
+- [Coding style and formatting](../../coding-style/README.md) — formatter and pre-commit hook setup

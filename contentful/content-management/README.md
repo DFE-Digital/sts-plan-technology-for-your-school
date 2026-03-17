@@ -72,3 +72,9 @@ npm run test
 ```
 
 See [../tests/README.md](../tests/README.md) for how to run tests in debug mode.
+
+## See also
+
+- [Content migrations](../content-migrations/README.md) — prefer this tool for schema changes; it shows a plan before executing
+- [Contentful tests](../tests/README.md) — test suite for this tool
+- [Contentful tooling overview](../README.md)

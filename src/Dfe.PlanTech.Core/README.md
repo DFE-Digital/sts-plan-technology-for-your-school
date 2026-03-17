@@ -134,3 +134,10 @@ graph TD
     DataCF --> Core
     Infra --> Core
 ```
+
+## See also
+
+- [Application layer](../Dfe.PlanTech.Application/README.md) — primary consumer of Core services and interfaces
+- [Contentful data layer](../Dfe.PlanTech.Data.Contentful/README.md) — uses Core entry models
+- [SQL data layer](../Dfe.PlanTech.Data.Sql/README.md) — uses Core DTOs and entities
+- [CMS content types and data usage](../../docs/cms/contentful-content-usage.md) — how Core's Contentful models are used

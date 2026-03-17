@@ -114,3 +114,9 @@ services.AddDbWriterServices(configuration);
 ```
 
 This registers the background service, all processors and handlers, and configures the Service Bus processor and sender for the `contentful` queue (prefetch count: 10).
+
+## See also
+
+- [Contentful data layer](../Dfe.PlanTech.Data.Contentful/README.md) — cache invalidation triggered by messages processed here
+- [Webhook creator](../../contentful/webhook-creator/README.md) — provisions the Contentful webhook that sends messages to Service Bus
+- [Terraform infrastructure](../../terraform/README.md) — Service Bus namespace and queue are provisioned here

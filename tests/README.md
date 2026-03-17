@@ -71,3 +71,9 @@ See [`Dfe.PlanTech.Web.E2ETests.Beta/README.md`](Dfe.PlanTech.Web.E2ETests.Beta/
 `Dfe.PlanTech.Web.SeedTestData` creates a local SQL Server database seeded with the PlanTech schema and initial test data. Useful for running the application locally without needing access to a shared environment database.
 
 See [`Dfe.PlanTech.Web.SeedTestData/README.md`](Dfe.PlanTech.Web.SeedTestData/README.md) for Docker and manual setup instructions.
+
+## See also
+
+- [Source projects](../src/README.md) — the code being tested
+- [GitHub Actions workflows](../.github/README.md) — CI runs tests on every PR
+- [Seed test data](Dfe.PlanTech.Web.SeedTestData/README.md) — create a local database for E2E and integration tests

@@ -54,3 +54,9 @@ Contentful webhooks fire on every content change. Running a migration with the w
 | `20241219-1300-merge-text-body-models.js` | Migrates `CSBodyText` entries to `textBody` |
 | `20241220-1200-amend-cspage-headings.js` | Adds subtitle field to `ContentSupportPage` |
 | `20250108-1400-cspage-title-to-title-component.js` | Converts `CSHeading` entries to `title` content type |
+
+## See also
+
+- [Content management](../content-management/README.md) — fallback for operations the migration library doesn't support
+- [Contentful tests](../tests/README.md) — test suite covering migrations
+- [Contentful tooling overview](../README.md)

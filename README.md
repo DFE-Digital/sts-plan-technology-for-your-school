@@ -70,4 +70,167 @@ The application is an **ASP.NET Core MVC** web app hosted on **Azure Container A
 - [GitHub workflows](`.github/README.md`)
 - [Architecture Decision Records](docs/architecture-decision-record/README.md)
 - [Terraform infrastructure](terraform/README.md)
-- [oh-no-thoughts.md](oh-no-thoughts.md) — running log of code quality concerns
+
+## Full documentation index
+
+Every piece of documentation in the repository is listed below, grouped by topic.
+
+Beneath that is a map showing exactly where each is located.
+
+### Getting started
+
+- [Running the web app locally](src/Dfe.PlanTech.Web/README.md)
+- [Local database setup](tests/Dfe.PlanTech.Web.SeedTestData/README.md)
+- [Coding conventions](docs/Conventions.md)
+- [Coding style and formatting](coding-style/README.md) · [Formatting reference](coding-style/FORMATTING.md) · [Tooling](coding-style/TOOLING.md)
+
+### Application source
+
+- [Source projects overview](src/README.md)
+- [Core shared library](src/Dfe.PlanTech.Core/README.md)
+- [Application layer](src/Dfe.PlanTech.Application/README.md)
+- [SQL data layer](src/Dfe.PlanTech.Data.Sql/README.md)
+- [Contentful data layer](src/Dfe.PlanTech.Data.Contentful/README.md)
+- [Database schema migrations](src/Dfe.PlanTech.DatabaseUpgrader/README.md)
+- [Redis cache infrastructure](src/Dfe.PlanTech.Infrastructure.Redis/README.md)
+- [Service Bus infrastructure](src/Dfe.PlanTech.Infrastructure.ServiceBus/README.md)
+- [DfE Sign-in infrastructure](src/Dfe.PlanTech.Infrastructure.SignIn/README.md)
+- [Node.js frontend build](src/Dfe.PlanTech.Web.Node/README.md)
+- [Web application](src/Dfe.PlanTech.Web/README.md)
+
+### Authentication
+
+- [Authentication overview](docs/Authentication.md)
+- [DfE Sign-in infrastructure](src/Dfe.PlanTech.Infrastructure.SignIn/README.md)
+- [Page routing and authorisation](docs/Routers.md)
+
+### CMS (Contentful)
+
+- [CMS overview](docs/cms/README.md)
+- [Content types and data usage](docs/cms/contentful-content-usage.md)
+- [Redis caching strategy](docs/cms/contentful-redis-caching.md)
+- [Contentful tooling overview](contentful/README.md)
+- [Broken link checker](contentful/broken-link-checker/README.md)
+- [Content management scripts](contentful/content-management/README.md)
+- [Content migrations](contentful/content-migrations/README.md)
+- [Export processor](contentful/export-processor/README.md)
+- [QA visualiser](contentful/qa-visualiser/README.md)
+- [Webhook creator](contentful/webhook-creator/README.md)
+- [Contentful tool tests](contentful/tests/README.md)
+
+### Testing
+
+- [Tests overview](tests/README.md)
+- [Cypress E2E tests](tests/Dfe.PlanTech.Web.E2ETests/README.md)
+- [Dynamic page validator](tests/Dfe.PlanTech.Web.E2ETests/cypress/e2e/dynamic-page-validator/dynamic-page-validator-readme.md)
+- [Playwright E2E tests (Beta)](tests/Dfe.PlanTech.Web.E2ETests.Beta/README.md)
+- [Seed test data](tests/Dfe.PlanTech.Web.SeedTestData/README.md)
+- [Data.Contentful unit tests](tests/Dfe.PlanTech.Data.Contentful.UnitTests/README.md)
+
+### Infrastructure
+
+- [Terraform overview](terraform/README.md)
+- [Container App infrastructure](terraform/container-app/README.md)
+- [Terraform configuration reference](terraform/container-app/terraform-configuration.md)
+- [DNS zones](terraform/dns-zone/README.md)
+- [GitHub Actions workflows](.github/README.md)
+
+### Operational utilities
+
+- [Utils overview](utils/README.md)
+- [Retrieve user data (DSI)](utils/retrieve-user-data/README.md)
+- [Update GIAS data](utils/update-gias-data/README.md)
+- [Bruno API collection](bruno/README.md)
+
+### Architecture decisions
+
+- [Architecture Decision Records index](docs/architecture-decision-record/README.md)
+
+### Code quality
+
+- [oh-no-thoughts.md](oh-no-thoughts.md) — running log of code quality concerns spotted during the documentation update
+
+## README map
+
+Every `README.md` in the repository, showing where to find them:
+
+.
+├── [README.md](README.md)
+├── .github/
+│   └── [README.md](.github/README.md)
+├── bruno/
+│   └── [README.md](bruno/README.md)
+├── coding-style/
+│   └── [README.md](coding-style/README.md)
+├── contentful/
+│   ├── [README.md](contentful/README.md)
+│   ├── broken-link-checker/
+│   │   └── [README.md](contentful/broken-link-checker/README.md)
+│   ├── content-management/
+│   │   └── [README.md](contentful/content-management/README.md)
+│   ├── content-migrations/
+│   │   └── [README.md](contentful/content-migrations/README.md)
+│   ├── export-processor/
+│   │   └── [README.md](contentful/export-processor/README.md)
+│   ├── qa-visualiser/
+│   │   └── [README.md](contentful/qa-visualiser/README.md)
+│   ├── tests/
+│   │   └── [README.md](contentful/tests/README.md)
+│   └── webhook-creator/
+│       └── [README.md](contentful/webhook-creator/README.md)
+├── docs/
+│   ├── [README.md](docs/README.md)
+│   ├── architecture-decision-record/
+│   │   └── [README.md](docs/architecture-decision-record/README.md)
+│   └── cms/
+│       └── [README.md](docs/cms/README.md)
+├── src/
+│   ├── [README.md](src/README.md)
+│   ├── Dfe.PlanTech.Application/
+│   │   └── [README.md](src/Dfe.PlanTech.Application/README.md)
+│   ├── Dfe.PlanTech.Core/
+│   │   └── [README.md](src/Dfe.PlanTech.Core/README.md)
+│   ├── Dfe.PlanTech.Data.Contentful/
+│   │   └── [README.md](src/Dfe.PlanTech.Data.Contentful/README.md)
+│   ├── Dfe.PlanTech.Data.Sql/
+│   │   └── [README.md](src/Dfe.PlanTech.Data.Sql/README.md)
+│   ├── Dfe.PlanTech.DatabaseUpgrader/
+│   │   └── [README.md](src/Dfe.PlanTech.DatabaseUpgrader/README.md)
+│   ├── Dfe.PlanTech.Infrastructure.Redis/
+│   │   └── [README.md](src/Dfe.PlanTech.Infrastructure.Redis/README.md)
+│   ├── Dfe.PlanTech.Infrastructure.ServiceBus/
+│   │   └── [README.md](src/Dfe.PlanTech.Infrastructure.ServiceBus/README.md)
+│   ├── Dfe.PlanTech.Infrastructure.SignIn/
+│   │   └── [README.md](src/Dfe.PlanTech.Infrastructure.SignIn/README.md)
+│   ├── Dfe.PlanTech.Web/
+│   │   └── [README.md](src/Dfe.PlanTech.Web/README.md)
+│   └── Dfe.PlanTech.Web.Node/
+│       └── [README.md](src/Dfe.PlanTech.Web.Node/README.md)
+├── terraform/
+│   ├── [README.md](terraform/README.md)
+│   ├── container-app/
+│   │   ├── [README.md](terraform/container-app/README.md)
+│   │   └── upgrade-scripts/
+│   │       ├── [README.md](terraform/container-app/upgrade-scripts/README.md)
+│   │       └── sprint_33/
+│   │           └── [README.md](terraform/container-app/upgrade-scripts/sprint_33/README.md)
+│   └── dns-zone/
+│       └── [README.md](terraform/dns-zone/README.md)
+├── tests/
+│   ├── [README.md](tests/README.md)
+│   ├── Dfe.PlanTech.Data.Contentful.UnitTests/
+│   │   └── [README.md](tests/Dfe.PlanTech.Data.Contentful.UnitTests/README.md)
+│   ├── Dfe.PlanTech.Web.E2ETests/
+│   │   └── [README.md](tests/Dfe.PlanTech.Web.E2ETests/README.md)
+│   ├── Dfe.PlanTech.Web.E2ETests.Beta/
+│   │   └── [README.md](tests/Dfe.PlanTech.Web.E2ETests.Beta/README.md)
+│   └── Dfe.PlanTech.Web.SeedTestData/
+│       └── [README.md](tests/Dfe.PlanTech.Web.SeedTestData/README.md)
+├── tests-old/
+│   └── [README.md](tests-old/README.md)
+└── utils/
+    ├── [README.md](utils/README.md)
+    ├── retrieve-user-data/
+    │   └── [README.md](utils/retrieve-user-data/README.md)
+    └── update-gias-data/
+        └── [README.md](utils/update-gias-data/README.md)

@@ -42,3 +42,9 @@ This compiles the TypeScript and runs `dist/create-contentful-webhook.js`.
 ## Language and tooling
 
 TypeScript 5, compiled with `tsc`. Runtime: Node.js ES modules (`"type": "module"`). No test suite.
+
+## See also
+
+- [Service Bus infrastructure](../../src/Dfe.PlanTech.Infrastructure.ServiceBus/README.md) — processes the webhook events this tool configures
+- [Terraform infrastructure](../../terraform/README.md) — webhook is also provisioned as part of the container-app module
+- [Contentful tooling overview](../README.md)

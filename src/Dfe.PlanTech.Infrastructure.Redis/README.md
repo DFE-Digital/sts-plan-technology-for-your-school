@@ -134,3 +134,9 @@ docker run -p 6379:6379 --name plantech-redis -d redis
 Then set the connection string to `localhost:6379,abortConnect=false`.
 
 If you use a JetBrains IDE, you can connect a Redis browser using the same connection string to inspect and edit cache entries directly.
+
+## See also
+
+- [Contentful data layer](../Dfe.PlanTech.Data.Contentful/README.md) — `CachedContentfulRepository` uses this infrastructure
+- [Redis caching strategy](../../docs/cms/contentful-redis-caching.md) — architecture and dependency invalidation model
+- [ADR 0041 — Redis cache](../../docs/architecture-decision-record/0041-redis-cache.md) — decision record for adopting Redis

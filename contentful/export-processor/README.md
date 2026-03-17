@@ -119,3 +119,10 @@ Tests for this project live in `../tests/tests/export-processor/`. Run from `/co
 ```bash
 npm run test
 ```
+
+## See also
+
+- [Broken link checker](../broken-link-checker/README.md) — uses this as a local package dependency
+- [QA visualiser](../qa-visualiser/README.md) — consumes exported data to generate flowcharts
+- [Contentful tests](../tests/README.md) — test suite for this library
+- [Contentful tooling overview](../README.md)

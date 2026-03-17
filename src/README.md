@@ -98,3 +98,9 @@ wired up at the Web layer and depend on Application interfaces.
 2. DbUp compares embedded SQL scripts against the `SchemaVersions` table
 3. New scripts are executed in filename order within a single transaction
 4. Web application starts against the up-to-date schema
+
+## See also
+
+- [Tests](../tests/README.md) — all test projects for these source projects
+- [Contentful tooling](../contentful/README.md) — scripts for managing CMS content
+- [Docs](../docs/README.md) — architecture decisions, CMS documentation, conventions

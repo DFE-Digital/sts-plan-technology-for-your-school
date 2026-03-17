@@ -116,3 +116,9 @@ services.AddRepositories();            // registers all 9 repositories as scoped
 ```
 
 `AddDatabase` configures an EF Core SQL Server retry-on-failure policy using `MaxRetryCount` and `MaxRetryDelay` from `DatabaseOptions`.
+
+## See also
+
+- [Database schema migrations](../Dfe.PlanTech.DatabaseUpgrader/README.md) — manages the SQL schema this layer reads and writes
+- [Application layer](../Dfe.PlanTech.Application/README.md) — orchestrates calls to SQL repositories
+- [Seed test data](../../tests/Dfe.PlanTech.Web.SeedTestData/README.md) — creates a local database for development
