@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Options;
 
 namespace Dfe.PlanTech.Core.Configuration
 {
