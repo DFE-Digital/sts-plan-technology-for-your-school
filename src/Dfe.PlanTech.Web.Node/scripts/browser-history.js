@@ -76,7 +76,7 @@ export class BrowserHistory {
       this.clearHistory();
     }
 
-    const fromStorage = localStorage.getItem(STORAGE_KEY);
+    const fromStorage = sessionStorage.getItem(STORAGE_KEY);
 
     if (fromStorage) {
       return JSON.parse(fromStorage);
@@ -87,7 +87,7 @@ export class BrowserHistory {
 
   saveHistory() {
     const stringified = JSON.stringify(this.history);
-    localStorage.setItem(STORAGE_KEY, stringified);
+    sessionStorage.setItem(STORAGE_KEY, stringified);
   }
 
   clearHistory() {

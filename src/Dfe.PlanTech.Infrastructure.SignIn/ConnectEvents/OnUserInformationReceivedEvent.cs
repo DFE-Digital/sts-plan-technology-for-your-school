@@ -29,6 +29,14 @@ public static class OnUserInformationReceivedEvent
         }
 
         var dsiReference = context.Principal.Claims.GetDsiReference();
+
+        if (dsiReference is null)
+        {
+            logger.LogError("Authentication failed: no nameidentifier claim found for user.");
+            context.Fail("No nameidentifier claim present in user principal.");
+            return;
+        }
+
         var establishment = context.Principal.Claims.GetOrganisation();
         var signInWorkflow =
             context.HttpContext.RequestServices.GetRequiredService<ISignInWorkflow>();
