@@ -152,7 +152,7 @@ Beneath that is a map showing exactly where each is located.
 
 ## README map
 
-Every `README.md` in the repository, showing where to find them:
+Every `README.md` in the repository, showing where to find them (best viewed as plain text):
 
 .
 ├── [README.md](README.md)
