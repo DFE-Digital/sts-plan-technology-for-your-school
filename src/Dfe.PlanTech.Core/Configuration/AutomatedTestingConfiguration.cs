@@ -6,6 +6,7 @@ namespace Dfe.PlanTech.Core.Configuration
     public class AutomatedTestingConfiguration
     {
         public ContentfulOptions? Contentful { get; init; }
+        public MockAuthenticationOptions? MockAuthentication { get; init; }
 
         public class ContentfulOptions
         {
