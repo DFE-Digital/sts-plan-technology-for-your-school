@@ -20,7 +20,7 @@ public class RedisLockProvider(
         options ?? throw new ArgumentNullException(nameof(options));
 
     /// <inheritdoc />
-    public async Task<bool> LockReleaseAsync(string key, string lockValue, int databaseId = -1)
+    public async Task<bool> LockReleaseAsync(string key, string lockValue, int databaseId = RedisDb.Default)
     {
         _logger.LogInformation(
             "Releasing lock for key: {Key} with lock value: {LockValue}",
@@ -36,7 +36,7 @@ public class RedisLockProvider(
         string key,
         string lockValue,
         TimeSpan duration,
-        int databaseId = -1
+        int databaseId = RedisDb.Default
     )
     {
         _logger.LogInformation(
@@ -90,7 +90,7 @@ public class RedisLockProvider(
     }
 
     /// <inheritdoc />
-    public async Task LockAndRun(string key, Func<Task> runWithLock, int databaseId = -1)
+    public async Task LockAndRun(string key, Func<Task> runWithLock, int databaseId = RedisDb.Default)
     {
         string? lockValue = await WaitForLockAsync(key, true);
         if (string.IsNullOrEmpty(lockValue))
@@ -111,7 +111,7 @@ public class RedisLockProvider(
     }
 
     /// <inheritdoc />
-    public async Task<T?> LockAndGet<T>(string key, Func<Task<T>> runWithLock, int databaseId = -1)
+    public async Task<T?> LockAndGet<T>(string key, Func<Task<T>> runWithLock, int databaseId = RedisDb.Default)
     {
         string? lockValue = await WaitForLockAsync(key, true);
         if (string.IsNullOrEmpty(lockValue))
@@ -147,7 +147,7 @@ public class RedisLockProvider(
         string key,
         string lockValue,
         TimeSpan duration,
-        int databaseId = -1
+        int databaseId = RedisDb.Default
     )
     {
         _logger.LogInformation(

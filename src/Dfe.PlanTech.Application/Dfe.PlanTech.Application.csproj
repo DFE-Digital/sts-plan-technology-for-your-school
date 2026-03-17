@@ -5,12 +5,6 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Workflows\ContentfulQueries\**" />
-    <EmbeddedResource Remove="Workflows\ContentfulQueries\**" />
-    <None Remove="Workflows\ContentfulQueries\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
   </ItemGroup>
 
