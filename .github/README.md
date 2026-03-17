@@ -109,3 +109,9 @@ gh workflow run clear-submission-data-from-db.yml --ref development \
   -f environment="Dev" \
   -f establishment="DSI TEST Establishment (001) Community School"
 ```
+
+## See also
+
+- [Terraform infrastructure](../terraform/README.md) — infrastructure deployed by these workflows
+- [Tests overview](../tests/README.md) — test suites run by CI
+- [Coding style and formatting](../coding-style/README.md) — pre-commit hooks complement the CI checks

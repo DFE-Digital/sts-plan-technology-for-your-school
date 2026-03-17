@@ -39,3 +39,9 @@ Copy `.env.example` to `.env` and fill in:
 ## CI
 
 This tool runs automatically in GitHub Actions. See `.github/workflows/broken-link-checker.yaml`.
+
+## See also
+
+- [Export processor](../export-processor/README.md) — provides the Contentful export this tool reads
+- [Contentful tooling overview](../README.md)
+- [GitHub Actions workflows](../../.github/README.md) — `broken-link-checker.yml` runs this in CI

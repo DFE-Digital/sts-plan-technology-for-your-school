@@ -99,3 +99,10 @@ URL - this is the URL the tests will be running against - e.g. https://localhost
 @selected-school-miscellaneous - for MAT tests, it will select the miscellaneous school in the select-a-school page. This is generated from the matConstants.ts file - e.g. you can use @selected-school-community, @selected-school-foundation
 
 @smoke - Tests which are for the smoke tests.
+
+## See also
+
+- [Web application](../../src/Dfe.PlanTech.Web/README.md) — the application under test
+- [Seed test data](../Dfe.PlanTech.Web.SeedTestData/README.md) — create a clean local database before running tests
+- [GitHub Actions workflows](../../.github/README.md) — `e2e-test-playwright-environment.yml` and smoke workflows
+- [Tests overview](../README.md)

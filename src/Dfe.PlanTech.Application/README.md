@@ -129,3 +129,10 @@ services.SetupRichTextRenderers();
 services.AddApplicationServices();
 services.AddApplicationWorkflows();
 ```
+
+## See also
+
+- [Core shared library](../Dfe.PlanTech.Core/README.md) — interfaces and models used by Application
+- [SQL data layer](../Dfe.PlanTech.Data.Sql/README.md) — SQL repositories consumed by workflows
+- [Contentful data layer](../Dfe.PlanTech.Data.Contentful/README.md) — Contentful repositories consumed by workflows
+- [Web application](../Dfe.PlanTech.Web/README.md) — presentation layer that calls Application services

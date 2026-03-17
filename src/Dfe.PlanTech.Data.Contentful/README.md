@@ -118,3 +118,11 @@ For local development it is recommended to use [dotnet user-secrets](https://lea
 ```shell
 dotnet user-secrets set Contentful:SpaceId SPACEID
 ```
+
+## See also
+
+- [Redis cache infrastructure](../Dfe.PlanTech.Infrastructure.Redis/README.md) — the caching layer wrapping this repository
+- [Core shared library](../Dfe.PlanTech.Core/README.md) — Contentful entry models and query types
+- [CMS content types and data usage](../../docs/cms/contentful-content-usage.md) — how content is mapped and used
+- [Redis caching strategy](../../docs/cms/contentful-redis-caching.md) — cache dependency and invalidation model
+- [Contentful tooling](../../contentful/README.md) — scripts for managing CMS content

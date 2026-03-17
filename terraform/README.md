@@ -45,3 +45,12 @@ See [`.github/README.md`](../.github/README.md) for workflow details.
 See [`container-app/README.md`](container-app/README.md) for full local setup instructions including authentication, `terraform init`, `plan`, and `apply` commands.
 
 > Do not commit `.tfvars` files — they are git-ignored and contain environment-specific secrets.
+
+## See also
+
+- [Container App infrastructure](container-app/README.md)
+- [Terraform configuration reference](container-app/terraform-configuration.md)
+- [DNS zones](dns-zone/README.md)
+- [GitHub Actions workflows](../.github/README.md) — `terraform-pr-check.yml` and deployment workflows
+- [ADR 0007 — Infrastructure as code](../docs/architecture-decision-record/0007-infrastructure-as-code.md)
+- [ADR 0023 — Executing Terraform within GitHub workflows](../docs/architecture-decision-record/0023-executing-terraform-within-github-workflows.md)

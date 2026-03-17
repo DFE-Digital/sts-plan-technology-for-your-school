@@ -125,3 +125,8 @@ Uses the shared ESLint config at the repository root (`eslint.config.mjs`).
 - **Fonts:** Add WOFF2 files to `fonts/`, declare them in `styles/scss/inter.scss` (or a new font partial)
 
 After any change, re-run `npm run build` to update `wwwroot/`.
+
+## See also
+
+- [Web application](../Dfe.PlanTech.Web/README.md) — consumes the assets built by this project
+- [Coding style and formatting](../../coding-style/README.md) — JS/CSS formatting rules enforced via pre-commit hooks

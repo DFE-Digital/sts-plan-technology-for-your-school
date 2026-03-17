@@ -65,3 +65,9 @@ The test suite covers `content-management`, `content-migrations`, `export-proces
 | Generate QA test cases for a new subtopic | `export-processor` |
 | Check whether links in content are still valid | `broken-link-checker` |
 | Provision or update a webhook for an environment | `webhook-creator` |
+
+## See also
+
+- [Contentful data layer](../src/Dfe.PlanTech.Data.Contentful/README.md) — how the application reads CMS content at runtime
+- [Service Bus infrastructure](../src/Dfe.PlanTech.Infrastructure.ServiceBus/README.md) — processes webhook events fired by Contentful
+- [CMS documentation](../docs/cms/README.md) — content type schema and caching strategy

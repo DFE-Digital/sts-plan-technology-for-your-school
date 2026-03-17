@@ -136,3 +136,9 @@ Then set `DfeSignIn:FrontDoorUrl` to match:
 ```shell
 dotnet user-secrets set DfeSignIn:FrontDoorUrl https://localhost:16251
 ```
+
+## See also
+
+- [Authentication overview](../../docs/Authentication.md) — high-level description of the auth flow
+- [Web application](../Dfe.PlanTech.Web/README.md) — registers and uses SignIn services
+- [ADR 0012 — Authentication provider](../../docs/architecture-decision-record/0012-authentication-provider.md) — decision record for choosing DfE Sign-in

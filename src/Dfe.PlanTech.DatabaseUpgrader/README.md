@@ -118,3 +118,9 @@ The upgrader is safe to run on every deployment — scripts already recorded in 
 ## Transaction limitations
 
 DbUp's single-transaction mode does not support certain T-SQL statements that cannot run inside a transaction, such as `CREATE DATABASE`, `ALTER DATABASE`, or some `CREATE FULLTEXT` operations. If a script requires such statements it must handle its own transaction boundaries. See the [Microsoft documentation on transaction limitations](https://learn.microsoft.com/en-us/sql/t-sql/language-elements/transactions-sql-data-warehouse?view=aps-pdw-2016-au7#limitations-and-restrictions) for details.
+
+## See also
+
+- [SQL data layer](../Dfe.PlanTech.Data.Sql/README.md) — the schema and entities this tool manages
+- [Seed test data](../../tests/Dfe.PlanTech.Web.SeedTestData/README.md) — uses DatabaseUpgrader to initialise a local database
+- [GitHub Actions workflows](../../.github/README.md) — `validate-scripts.yml` and deployment pipeline run this tool

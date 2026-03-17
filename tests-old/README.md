@@ -5,3 +5,7 @@ This directory contains the original test projects from an earlier version of th
 The projects here reference assemblies and project structures that no longer exist (including `Dfe.PlanTech.Domain` and `Dfe.PlanTech.Infrastructure.Contentful`, both of which were removed from the solution). They are retained for historical reference only.
 
 **Do not add new tests here.** All new tests should go in `tests/`.
+
+## See also
+
+- [Current test projects](../tests/README.md)

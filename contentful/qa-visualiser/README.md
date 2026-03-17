@@ -73,3 +73,9 @@ uv run ruff check          # lint
 uv run ruff check --fix    # auto-fix where possible
 uv run ruff format         # format
 ```
+
+## See also
+
+- [Export processor](../export-processor/README.md) — provides the question and answer data this tool visualises
+- [Contentful tooling overview](../README.md)
+- [GitHub Actions workflows](../../.github/README.md) — `qa-viz.yml` runs this tool

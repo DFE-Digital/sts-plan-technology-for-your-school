@@ -95,3 +95,9 @@ Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=Pa5ssw
 ```
 
 and then run Plan Tech as normal.
+
+## See also
+
+- [Database schema migrations](../../src/Dfe.PlanTech.DatabaseUpgrader/README.md) — used in step 2 to initialise the schema
+- [SQL data layer](../../src/Dfe.PlanTech.Data.Sql/README.md) — the entities and schema this tool seeds
+- [Tests overview](../README.md)
