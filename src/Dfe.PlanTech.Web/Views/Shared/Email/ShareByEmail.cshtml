@@ -1,6 +1,10 @@
 @model ShareByEmailViewModel
 @inject ICurrentUser CurrentUser
 
+@{
+    ViewData[StatePassingMechanismConstants.Title] = "Share by email";
+}
+
 @section NavButton {
     <govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
         Back
