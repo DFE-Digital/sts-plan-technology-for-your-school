@@ -250,7 +250,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient(services =>
             services.GetRequiredService<IOptions<GoogleTagManagerConfiguration>>().Value
         );
-        services.AddTransient<GoogleTagManagerServiceConfiguration>();
         return services;
     }
 
