@@ -20,6 +20,9 @@
 }
 
 @{
+    var schoolNameGroups = Model.GroupEstablishments.GroupBy(ge => ge.EstablishmentName);
+    var hasMultipleSchoolsWithSameName = schoolNameGroups.Any(group => group.Count() > 1);
+
     <h2 class="govuk-heading-l">Select a school</h2>
 
     foreach (var school in @Model.GroupEstablishments)
@@ -34,9 +37,9 @@
             }
 
             <button type="submit" class="govuk-button school-button govuk-!-text-align-left @linkClass" value="@schoolUrn">@schoolName</button>
-            @if(hasUrn)
+            @if(hasUrn && hasMultipleSchoolsWithSameName)
             {
-                <p class="govuk-caption-m govuk-!-margin-top-0 govuk-!-margin-bottom-2">Reference: @school.Urn</p>
+                <p class="govuk-caption-m govuk-!-margin-top-0 govuk-!-margin-bottom-2">URN: @school.Urn</p>
             }
             <input type="hidden" name="schoolUrn" value="@schoolUrn" />
             <input type="hidden" name="schoolName" value="@schoolName" />
