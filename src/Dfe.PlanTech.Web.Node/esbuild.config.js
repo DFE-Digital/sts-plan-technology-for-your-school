@@ -3,12 +3,14 @@ import { sassPlugin } from 'esbuild-sass-plugin';
 import { copyFileSync, cpSync, readdirSync } from 'fs';
 import { parse } from 'path';
 
+const isProduction = process.env.NODE_ENV === 'production';
+
 //Build main JS
 await esbuild.build({
   entryPoints: ['scripts/app.js'],
   bundle: true,
   minify: true,
-  sourcemap: true,
+  sourcemap: !isProduction,
   outfile: 'out/js/app.js',
 });
 
@@ -26,7 +28,7 @@ await esbuild.build({
   entryPoints: jsEntryPoints,
   bundle: true,
   minify: true,
-  sourcemap: true,
+  sourcemap: !isProduction,
   outdir: 'out/js/',
 });
 
@@ -34,7 +36,7 @@ await esbuild.build({
   entryPoints: ['styles/scss/application.scss'],
   bundle: true,
   minify: true,
-  sourcemap: true,
+  sourcemap: !isProduction,
   target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
   external: ['/assets/*'],
   plugins: [
@@ -49,7 +51,7 @@ await esbuild.build({
   entryPoints: ['styles/scss/step-by-step.scss'],
   bundle: true,
   minify: true,
-  sourcemap: true,
+  sourcemap: !isProduction,
   target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
   external: ['/assets/*'],
   plugins: [
