@@ -20,8 +20,7 @@ public class PagesViewBuilder(
     IContentfulService contentfulService,
     IEstablishmentService establishmentService,
     ICurrentUser currentUser
-)
-    : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
+) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView =
         "~/Views/Recommendations/CategoryLandingPage.cshtml";
@@ -89,7 +88,7 @@ public class PagesViewBuilder(
 
         var viewModel = new PageViewModel(page);
 
-        viewModel.MicrocopyEntries = await contentfulService.GetMicrocopyEntriesAsync();
+        viewModel.MicrocopyEntries = await ContentfulService.GetMicrocopyEntriesAsync();
 
         if (page.DisplayOrganisationName)
         {
@@ -153,7 +152,7 @@ public class PagesViewBuilder(
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"],
-            MicrocopyEntries = microcopy
+            MicrocopyEntries = microcopy,
         };
     }
 
