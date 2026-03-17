@@ -8,7 +8,12 @@
 
   <ItemGroup>
     <PackageReference Include="contentful.csharp" Version="8.4.3" />
+    <PackageReference Include="GovukNotify" Version="7.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Options\" />
   </ItemGroup>
 
 </Project>

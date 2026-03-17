@@ -54,7 +54,8 @@ public class EstablishmentLinkRepository : IEstablishmentLinkRepository
             UserId = userGroupSelectionModel.UserId,
             UserEstablishmentId = userGroupSelectionModel.UserEstablishmentId,
             SelectedEstablishmentId = userGroupSelectionModel.SelectedEstablishmentId,
-            SelectedEstablishmentName = userGroupSelectionModel.SelectedEstablishmentName ?? string.Empty,
+            SelectedEstablishmentName =
+                userGroupSelectionModel.SelectedEstablishmentName ?? string.Empty,
             DateSelected = now,
         };
 
@@ -63,5 +64,4 @@ public class EstablishmentLinkRepository : IEstablishmentLinkRepository
 
         return entity.Id;
     }
-
 }

@@ -130,8 +130,10 @@ public class OnUserInformationReceivedEventTests
         var (ctx, _, _) = BuildContext(principal: null!);
         var signIn = new SqlSignInDto { UserId = 1, EstablishmentId = 2 };
 
-        var mi = typeof(OnUserInformationReceivedEvent)
-            .GetMethod("AddClaimsToPrincipal", BindingFlags.NonPublic | BindingFlags.Static);
+        var mi = typeof(OnUserInformationReceivedEvent).GetMethod(
+            "AddClaimsToPrincipal",
+            BindingFlags.NonPublic | BindingFlags.Static
+        );
         Assert.NotNull(mi);
 
         // Should not throw

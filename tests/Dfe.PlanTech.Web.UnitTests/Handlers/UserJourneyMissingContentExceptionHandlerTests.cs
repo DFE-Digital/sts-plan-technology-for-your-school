@@ -3,6 +3,7 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Handlers;
@@ -68,8 +69,6 @@ public class UserJourneyMissingContentExceptionHandlerTests
         return new ConfigurationBuilder().AddInMemoryCollection(dict!).Build();
     }
 
-    private sealed class TestController : Controller { }
-
     [Fact]
     public async Task Handle_DeletesSubmission_SetsTempData_And_Redirects()
     {
@@ -108,8 +107,8 @@ public class UserJourneyMissingContentExceptionHandlerTests
 
         // Redirect to PagesController.GetPageByRouteAction with route = UrlConstants.Home
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
-        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+        Assert.Equal(nameof(PagesController).GetControllerNameSlug(), redirect.ControllerName);
         Assert.True(redirect.RouteValues!.ContainsKey("route"));
         Assert.Equal(UrlConstants.Home, redirect.RouteValues["route"]);
     }

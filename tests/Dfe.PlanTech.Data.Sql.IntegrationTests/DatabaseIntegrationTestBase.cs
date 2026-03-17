@@ -16,7 +16,7 @@ public abstract class DatabaseIntegrationTestBase(DatabaseFixture fixture) : IAs
     protected PlanTechDbContext DbContext { get; private set; } = null!;
     private IDbContextTransaction _transaction = null!;
 
-    public virtual async Task InitializeAsync()
+    public virtual async ValueTask InitializeAsync()
     {
         // Create a fresh DbContext for this test to ensure complete isolation
         DbContext = Fixture.CreateDbContext();
@@ -31,12 +31,14 @@ public abstract class DatabaseIntegrationTestBase(DatabaseFixture fixture) : IAs
         _transaction = await DbContext.Database.BeginTransactionAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         // Roll back the transaction to clean up any changes made during the test
         await _transaction.RollbackAsync();
         await _transaction.DisposeAsync();
         await DbContext.DisposeAsync();
+
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -46,7 +48,7 @@ public abstract class DatabaseIntegrationTestBase(DatabaseFixture fixture) : IAs
     protected async Task<int> CountEntitiesAsync<T>()
         where T : class
     {
-        return await DbContext.Set<T>().CountAsync();
+        return await DbContext.Set<T>().CountAsync(TestContext.Current.CancellationToken);
     }
 
     private async Task EnsureSubmissionCompletedHasDefaultAsync()

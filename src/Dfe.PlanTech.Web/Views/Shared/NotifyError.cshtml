@@ -1,0 +1,33 @@
+@model NotifyShareResultsViewModel
+
+@{
+    ViewData[StatePassingMechanismConstants.Title] = "Notify error";
+    var actionModel = Model.ActionModel;
+}
+
+<h1 class="govuk-heading-xl">Sorry, there was a problem</h1>
+
+<p class="govuk-body">
+    Emails have only been sent to some recipients. Check email addresses and try again.
+</p>
+<p class="govuk-body">
+    Emails failed to send to:
+    <ul>
+         @foreach (var result in Model.SendResults.Where(result => result.Errors.Count > 0))
+        {
+            <li>@result.Recipient</li>
+        }
+    </ul>
+</p>
+<p class="govuk-body">
+    Emails were successfully sent to:
+    <ul>
+         @foreach (var result in Model.SendResults.Where(result => result.Errors.Count == 0))
+        {
+            <li>@result.Recipient</li>
+        }
+    </ul>
+</p>
+<p>
+    @Html.ActionLink(actionModel.LinkText, actionModel.ActionName, actionModel.ControllerName, actionModel.RouteValues)
+</p>

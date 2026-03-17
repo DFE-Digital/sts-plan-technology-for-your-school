@@ -14,9 +14,9 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class CategoryLandingViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
+    ICurrentUser currentUser,
     ISubmissionService submissionService,
-    IUserService userService,
-    ICurrentUser currentUser
+    IUserService userService
 )
     : BaseViewBuilder(logger, contentfulService, currentUser),
         ICategoryLandingViewComponentViewBuilder
@@ -97,7 +97,7 @@ public class CategoryLandingViewComponentViewBuilder(
             StatusLinkPartialName = print
                 ? CategoryLandingSectionAssessmentLinkPrintContent
                 : CategoryLandingSectionAssessmentLink,
-            MicrocopyEntries = microcopy
+            MicrocopyEntries = microcopy,
         };
 
         return viewModel;
@@ -150,7 +150,8 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             return new CategoryLandingSectionRecommendationsViewModel
             {
-                NoRecommendationFoundErrorMessage = $"Section '{section.Name}' has no recommendations"
+                NoRecommendationFoundErrorMessage =
+                    $"Section '{section.Name}' has no recommendations",
             };
         }
 

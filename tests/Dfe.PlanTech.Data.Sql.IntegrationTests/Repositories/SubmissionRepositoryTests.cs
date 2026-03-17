@@ -14,7 +14,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     public SubmissionRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _repository = new SubmissionRepository(DbContext);
@@ -137,7 +137,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission = CreateSubmission(
             501,
@@ -146,7 +146,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Submissions.Add(submission);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var response = CreateResponse(
             601,
@@ -158,7 +158,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Responses.Add(response);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var beforeClone = DateTime.UtcNow;
 
@@ -222,7 +222,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission = CreateSubmission(
             501,
@@ -231,7 +231,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Submissions.Add(submission);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var response = CreateResponse(
             601,
@@ -243,7 +243,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Responses.Add(response);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var coreRecommendation = CreateRecommendationChunkEntry("R1", "Q99999");
         var sectionQuestions = new List<QuestionnaireQuestionEntry>
@@ -291,7 +291,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission = CreateSubmission(
             501,
@@ -300,7 +300,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Submissions.Add(submission);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var response = CreateResponse(
             601,
@@ -312,7 +312,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Responses.Add(response);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var coreRecommendation = CreateRecommendationChunkEntry("R1", question.ContentfulRef);
         var sectionQuestions = new List<QuestionnaireQuestionEntry>
@@ -363,7 +363,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Answers.Add(answer);
         DbContext.Questions.Add(question);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission = CreateSubmission(
             501,
@@ -372,7 +372,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Submissions.Add(submission);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var response = CreateResponse(
             601,
@@ -384,7 +384,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Responses.Add(response);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var coreRecommendation = CreateRecommendationChunkEntry(
             "R1",
@@ -446,7 +446,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Answers.Add(answer);
         DbContext.Questions.Add(question);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var oldSubmission = CreateSubmission(
             501,
@@ -460,7 +460,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Submissions.AddRange([oldSubmission, newSubmission]);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var response = CreateResponse(
             601,
@@ -472,7 +472,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         );
         DbContext.Responses.Add(response);
 
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var coreRecommendation = CreateRecommendationChunkEntry(
             "R1",
@@ -528,7 +528,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Users.Add(user);
         DbContext.Questions.AddRange(question1, question2);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Create older submission
         var olderSubmission = new SubmissionEntity
@@ -584,7 +584,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.AddRange(olderSubmission, newerSubmission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetLatestSubmissionAndResponsesAsync(
@@ -620,7 +620,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission = new SubmissionEntity
         {
@@ -642,7 +642,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetSubmissionByIdAsync(submission.Id);
@@ -672,7 +672,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             OrgName = "Test School",
         };
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission1 = new SubmissionEntity
         {
@@ -693,7 +693,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.AddRange(submission1, submission2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var beforeUpdate = DateTime.UtcNow;
 
@@ -709,7 +709,10 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.True(result.DateCompleted >= beforeUpdate);
 
         // Check that the other submission was marked inaccessible
-        var otherSubmission = await DbContext.Submissions.FindAsync(submission1.Id);
+        var otherSubmission = await DbContext.Submissions.FindAsync(
+            [submission1.Id],
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(otherSubmission);
         Assert.Equal(SubmissionStatus.Inaccessible, otherSubmission!.Status);
         Assert.True(otherSubmission.Deleted);
@@ -723,7 +726,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         var question2 = new QuestionEntity { ContentfulRef = "ref-102" };
 
         DbContext.Questions.AddRange(question1, question2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var sectionQuestions = new List<QuestionnaireQuestionEntry>
         {
@@ -748,7 +751,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         var question = new QuestionEntity { ContentfulRef = "ref-201" };
 
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var section = new QuestionnaireSectionEntry
         {
@@ -775,7 +778,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         var question = new QuestionEntity { ContentfulRef = "ref-301" };
 
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var section = new QuestionnaireSectionEntry
         {
@@ -808,7 +811,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission = new SubmissionEntity
         {
@@ -830,7 +833,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var result = await _repository.SetSubmissionInProgressAsync(submission.Id);
 
@@ -864,7 +867,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     {
         var establishment = CreateEstablishment(1001);
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var older = new SubmissionEntity
         {
@@ -876,7 +879,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.UtcNow.AddDays(-10),
             DateLastUpdated = DateTime.UtcNow.AddDays(-9),
             DateCompleted = DateTime.UtcNow.AddDays(-8),
-            Deleted = false
+            Deleted = false,
         };
 
         var newerCurrent = new SubmissionEntity
@@ -889,7 +892,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.UtcNow.AddDays(-2),
             DateLastUpdated = DateTime.UtcNow.AddDays(-1),
             DateCompleted = null,
-            Deleted = false
+            Deleted = false,
         };
 
         var latestCompleteReviewed = new SubmissionEntity
@@ -902,7 +905,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.UtcNow.AddDays(-3),
             DateLastUpdated = DateTime.UtcNow.AddDays(-3),
             DateCompleted = DateTime.UtcNow.AddDays(-3),
-            Deleted = false
+            Deleted = false,
         };
 
         var s2 = new SubmissionEntity
@@ -915,11 +918,11 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.UtcNow.AddDays(-4),
             DateLastUpdated = DateTime.UtcNow.AddDays(-4),
             DateCompleted = DateTime.UtcNow.AddDays(-4),
-            Deleted = false
+            Deleted = false,
         };
 
         DbContext.Submissions.AddRange(older, newerCurrent, latestCompleteReviewed, s2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var result = await _repository.GetSectionStatusesAsync("S1,S2", establishment.Id);
 
@@ -947,7 +950,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     {
         var establishment = CreateEstablishment(2001);
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var deleted = new SubmissionEntity
         {
@@ -959,11 +962,11 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.UtcNow.AddDays(-2),
             DateLastUpdated = DateTime.UtcNow.AddDays(-2),
             DateCompleted = DateTime.UtcNow.AddDays(-2),
-            Deleted = true
+            Deleted = true,
         };
 
         DbContext.Submissions.Add(deleted);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var result = await _repository.GetSectionStatusesAsync("S1", establishment.Id);
 
@@ -978,7 +981,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     {
         var establishment = CreateEstablishment(3001);
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var older = new SubmissionEntity
         {
@@ -987,7 +990,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.InProgress,
             Deleted = false,
-            DateCreated = DateTime.UtcNow.AddDays(-10)
+            DateCreated = DateTime.UtcNow.AddDays(-10),
         };
 
         var latest = new SubmissionEntity
@@ -997,7 +1000,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
             Deleted = false,
-            DateCreated = DateTime.UtcNow.AddDays(-1)
+            DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
         var inaccessibleLatestById = new SubmissionEntity
@@ -1007,27 +1010,29 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.Inaccessible,
             Deleted = false,
-            DateCreated = DateTime.UtcNow
+            DateCreated = DateTime.UtcNow,
         };
 
         DbContext.Submissions.AddRange(older, latest, inaccessibleLatestById);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await _repository.SetSubmissionDeletedAsync(establishment.Id, "SEC");
 
         // I had to add .AsNoTracking() for this to work, non-test code works fine still
-        var refreshedOlder = await DbContext.Submissions
-            .AsNoTracking()
-            .SingleAsync(s => s.Id == older.Id);
+        var refreshedOlder = await DbContext
+            .Submissions.AsNoTracking()
+            .SingleAsync(s => s.Id == older.Id, TestContext.Current.CancellationToken);
 
-        var refreshedLatest = await DbContext.Submissions
-            .AsNoTracking()
-            .SingleAsync(s => s.Id == latest.Id);
+        var refreshedLatest = await DbContext
+            .Submissions.AsNoTracking()
+            .SingleAsync(s => s.Id == latest.Id, TestContext.Current.CancellationToken);
 
-        var refreshedInaccessible = await DbContext.Submissions
-            .AsNoTracking()
-            .SingleAsync(s => s.Id == inaccessibleLatestById.Id);
-
+        var refreshedInaccessible = await DbContext
+            .Submissions.AsNoTracking()
+            .SingleAsync(
+                s => s.Id == inaccessibleLatestById.Id,
+                TestContext.Current.CancellationToken
+            );
 
         Assert.NotNull(refreshedOlder);
         Assert.NotNull(refreshedLatest);
@@ -1043,7 +1048,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     {
         var establishment = CreateEstablishment(4001);
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await _repository.SetSubmissionDeletedAsync(establishment.Id, "SEC");
 
@@ -1053,7 +1058,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     [Fact]
     public async Task SubmissionRepository_SetSubmissionDeletedAsync_WhenSectionIdIsNullOrWhitespace_ThenThrows()
     {
-        await Assert.ThrowsAsync<ArgumentException>(() => _repository.SetSubmissionDeletedAsync(1, ""));
+        await Assert.ThrowsAsync<ArgumentException>(() =>
+            _repository.SetSubmissionDeletedAsync(1, "")
+        );
     }
-
 }
