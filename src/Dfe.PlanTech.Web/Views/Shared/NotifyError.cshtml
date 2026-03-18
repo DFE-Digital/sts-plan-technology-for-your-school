@@ -3,31 +3,45 @@
 @{
     ViewData[StatePassingMechanismConstants.Title] = "Notify error";
     var actionModel = Model.ActionModel;
+
+    var errorResults = Model.SendResults.Where(result => result.Errors.Count > 0).ToList();
+    var successResults = Model.SendResults.Where(result => result.Errors.Count == 0).ToList();
+
+    var statusMessage = errorResults.Count > 0 && successResults.Count == 0
+        ? "have not been sent to any"
+        : "have only been sent to some";
 }
 
 <h1 class="govuk-heading-xl">Sorry, there was a problem</h1>
 
-<p class="govuk-body">
-    Emails have only been sent to some recipients. Check email addresses and try again.
+<p class="govuk-body govuk-!-margin-bottom-6">
+    Emails have @statusMessage recipients. Check email addresses and try again.
 </p>
-<p class="govuk-body">
-    Emails failed to send to:
-    <ul>
-         @foreach (var result in Model.SendResults.Where(result => result.Errors.Count > 0))
-        {
-            <li>@result.Recipient</li>
-        }
-    </ul>
-</p>
-<p class="govuk-body">
-    Emails were successfully sent to:
-    <ul>
-         @foreach (var result in Model.SendResults.Where(result => result.Errors.Count == 0))
-        {
-            <li>@result.Recipient</li>
-        }
-    </ul>
-</p>
+@if (errorResults.Any())
+{
+    <p class="govuk-body">
+        Emails failed to send to:
+        <ul>
+            @foreach (var result in errorResults)
+            {
+                <li>@result.Recipient</li>
+            }
+        </ul>
+    </p>
+}
+
+@if (successResults.Any())
+{
+    <p class="govuk-body">
+        Emails were successfully sent to:
+        <ul>
+            @foreach (var result in successResults)
+            {
+                <li>@result.Recipient</li>
+            }
+        </ul>
+    </p>
+}
 <p>
     @Html.ActionLink(actionModel.LinkText, actionModel.ActionName, actionModel.ControllerName, actionModel.RouteValues)
 </p>
