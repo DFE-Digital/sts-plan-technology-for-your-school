@@ -1,21 +1,21 @@
 @model NotifyShareResultsViewModel
 
 @{
-    ViewData[StatePassingMechanismConstants.Title] = "Notify error";
+    ViewData[StatePassingMechanismConstants.Title] = "Sorry, there was a problem";
     var actionModel = Model.ActionModel;
 
     var errorResults = Model.SendResults.Where(result => result.Errors.Count > 0).ToList();
     var successResults = Model.SendResults.Where(result => result.Errors.Count == 0).ToList();
 
     var statusMessage = errorResults.Count > 0 && successResults.Count == 0
-        ? "have not been sent to any"
-        : "have only been sent to some";
+        ? "Emails have not been sent to any recipients."
+        : "Emails have only been sent to some recipients.";
 }
 
 <h1 class="govuk-heading-xl">Sorry, there was a problem</h1>
 
 <p class="govuk-body govuk-!-margin-bottom-6">
-    Emails have @statusMessage recipients. Check email addresses and try again.
+    @statusMessage Check email addresses and try again.
 </p>
 @if (errorResults.Any())
 {
