@@ -577,8 +577,7 @@ public class ReviewAnswersViewBuilderTests
             section,
             submissionModel,
             "category-slug",
-            "section-slug",
-            microcopy
+            "section-slug"
         );
 
         Assert.NotNull(viewModel);
@@ -635,8 +634,7 @@ public class ReviewAnswersViewBuilderTests
             section,
             submissionModel,
             "category-slug",
-            "section-slug",
-            microcopy
+            "section-slug"
         );
 
         Assert.NotNull(viewModel);

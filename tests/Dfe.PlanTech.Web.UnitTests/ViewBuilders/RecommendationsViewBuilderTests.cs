@@ -1,11 +1,12 @@
 using Contentful.Core.Configuration;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -16,7 +17,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
@@ -30,6 +30,7 @@ public class RecommendationsViewBuilderTests
     private readonly IRecommendationService _recommendationService =
         Substitute.For<IRecommendationService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly IMicrocopyProvider _microcopyProvider = Substitute.For<IMicrocopyProvider>();
 
     // ---- Options
     private ContentfulOptions _contentfulOptions = new ContentfulOptions { UsePreviewApi = false };
@@ -42,7 +43,8 @@ public class RecommendationsViewBuilderTests
             _contentful,
             _submissions,
             _recommendationService,
-            _currentUser
+            _currentUser,
+            _microcopyProvider
         );
 
     private static Controller MakeController()
@@ -714,17 +716,30 @@ public class RecommendationsViewBuilderTests
             .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
 
         var selectedStatus = RecommendationStatus.NotStarted;
+        var statusDisplayName = selectedStatus.GetDisplayName();
+        var notesEntry = "Status manually updated to Not started";
+        var successHeader = "Status updated to 'Not started'";
 
-        var microcopy = new List<MicrocopyEntry>
-        {
-            new MicrocopyEntry
-            {
-                Key = "successStatus",
-                Value = "Status updated to {{status}}"
-            }
-        };
+        _microcopyProvider
+            .GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.SingleRecommendationHistoryChange,
+                Arg.Is<Dictionary<string, string>>(d =>
+                    d.ContainsKey("status") &&
+                    d["status"] == statusDisplayName
+                    )
+                )
+            .Returns(notesEntry);
 
-        _contentful.GetMicrocopyEntriesAsync().Returns(microcopy);
+        _microcopyProvider
+            .GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
+                Arg.Is<Dictionary<string, string>>(d =>
+                    d != null &&
+                    d.ContainsKey("status") &&
+                    d["status"] == statusDisplayName
+                )
+            )
+            .Returns(successHeader);
 
         // Act
         var result = await sut.UpdateRecommendationStatusAsync(
@@ -739,8 +754,8 @@ public class RecommendationsViewBuilderTests
         // Assert
 
         // TempData success banner should be set
-        var successTitle = Assert.IsType<string>(ctl.TempData["StatusUpdateSuccessTitle"]);
-        Assert.Contains("Status updated to", successTitle);
+        var successResult = Assert.IsType<string>(ctl.TempData["StatusUpdateSuccessTitle"]);
+        Assert.Equal(successHeader, successResult);
 
         // Service is called with the correct ids and a default note containing our literal text
         await _recommendationService
@@ -750,7 +765,7 @@ public class RecommendationsViewBuilderTests
                 establishmentId,
                 userId,
                 selectedStatus,
-                Arg.Is<string>(n => n.Contains("Status manually updated")),
+                Arg.Is<string>(n => n == notesEntry),
                 Arg.Any<int?>()
             );
 

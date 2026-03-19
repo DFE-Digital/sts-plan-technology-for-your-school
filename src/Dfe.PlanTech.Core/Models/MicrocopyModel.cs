@@ -29,7 +29,6 @@ public class MicrocopyModel(
     private string ReplaceVariables(Dictionary<string, string> dynamicValues)
     {
         var text = ValueOrFallback;
-        // Fallback text wouldn't have any variables? Or would/could it?
 
         foreach (var variable in Variables)
         {
