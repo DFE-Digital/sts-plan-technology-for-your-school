@@ -47,6 +47,8 @@
 
     string insetMicrocopyKey = string.Empty;
 
+    <partial name="Email/SendResultsPanel" />
+
     if (Model.CompletedSectionsCount == 0)
     {
         insetMicrocopyKey = ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted;
@@ -72,7 +74,7 @@
                 if (anySectionsCompleted)
                 {
                     foreach (var topic in Model.CategoryLandingSections)
-                    { 
+                    {
                         var vm = new StatusLinkViewModel
                         {
                             CategorySlug = Model.CategorySlug,
@@ -80,7 +82,7 @@
                             Context = "Default",
                         };
                         <partial name="Components/CategoryLanding/SectionAssessmentLink" model='@vm' />
-                    }            
+                    }
                 }
             }
         </div>

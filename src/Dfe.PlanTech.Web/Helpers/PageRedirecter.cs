@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
 
@@ -93,12 +94,18 @@ public static class PageRedirecter
             }
         );
 
+    public static RedirectToActionResult RedirectToNotifyError(this Controller controller) =>
+        controller.RedirectToAction(
+            nameof(PagesController.NotifyError),
+            nameof(PagesController).GetControllerNameSlug()
+        );
+
     private static RedirectToActionResult RedirectToPage(
         this Controller controller,
         string route
     ) =>
         controller.RedirectToAction(
-            PagesController.GetPageByRouteAction,
+            nameof(PagesController.GetByRoute),
             nameof(PagesController).GetControllerNameSlug(),
             new { route }
         );

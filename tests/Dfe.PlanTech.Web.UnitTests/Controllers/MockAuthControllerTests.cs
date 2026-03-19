@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -388,7 +389,7 @@ public class MockAuthControllerTests
         string scheme = "https",
         string host = "localhost:8080")
     {
-        var options = Options.Create(new AutomatedTestingOptions
+        var options = Options.Create(new AutomatedTestingConfiguration()
         {
             MockAuthentication = new MockAuthenticationOptions
             {

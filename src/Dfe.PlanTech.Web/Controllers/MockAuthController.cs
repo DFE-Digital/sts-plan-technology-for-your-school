@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -19,7 +20,7 @@ public class MockAuthController(
     IEstablishmentRepository establishmentRepository,
     IUserRepository userRepository,
     IMemoryCache cache,
-    IOptions<AutomatedTestingOptions> options)
+    IOptions<AutomatedTestingConfiguration> options)
     : Controller
 {
     private const string SelectorCookieName = "e2e_user";
@@ -327,7 +328,7 @@ public class MockAuthController(
         string? OrganisationJson
     );
 
-    public FixtureUser FromSelector(string? selector)
+    private static FixtureUser FromSelector(string? selector)
     {
         selector = (selector ?? "school").Trim().ToLowerInvariant();
 

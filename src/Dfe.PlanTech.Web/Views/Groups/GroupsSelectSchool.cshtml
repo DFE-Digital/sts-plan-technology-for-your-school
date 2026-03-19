@@ -3,7 +3,7 @@
 @model GroupsSelectorViewModel
 
 @{
-    ViewData["Title"] = "Select a school";
+    ViewData[StatePassingMechanismConstants.Title] = "Select a school";
 }
 
 @foreach (var content in Model.BeforeTitleContent)
@@ -22,7 +22,11 @@
 }
 
 @{
+    var schoolNameGroups = Model.GroupEstablishments.GroupBy(ge => ge.EstablishmentName);
+    var hasMultipleSchoolsWithSameName = schoolNameGroups.Any(group => group.Count() > 1);
+
     <h2 class="govuk-heading-l">@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectHeader)</h2>
+
     foreach (var school in @Model.GroupEstablishments)
     {
         var schoolUrn = school.Urn;
@@ -34,7 +38,16 @@
         };
 
         <form asp-action="SelectSchool" method="post">
-            <button type="submit" class="govuk-button school-button govuk-!-text-align-left" value="@schoolUrn">@schoolName</button>
+            @{
+                var hasUrn = !string.IsNullOrWhiteSpace(school.Urn);
+                var linkClass = hasUrn ? "govuk-!-margin-bottom-0" : "";
+            }
+
+            <button type="submit" class="govuk-button school-button govuk-!-text-align-left @linkClass" value="@schoolUrn">@schoolName</button>
+            @if(hasUrn && hasMultipleSchoolsWithSameName)
+            {
+                <p class="govuk-caption-m govuk-!-margin-top-0 govuk-!-margin-bottom-2">URN: @school.Urn</p>
+            }
             <input type="hidden" name="schoolUrn" value="@schoolUrn" />
             <input type="hidden" name="schoolName" value="@schoolName" />
             <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectRecommendationCount, dynamicValues)</p>
