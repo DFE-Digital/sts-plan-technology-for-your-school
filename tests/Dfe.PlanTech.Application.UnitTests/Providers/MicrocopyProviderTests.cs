@@ -20,7 +20,6 @@ public class MicrocopyProviderTests
     {
         // Arrange
         var entry = new MicrocopyEntry { Key = "Key 1", Value = "Value 1" };
-        ContentfulMicrocopyConstants.FallbackText["Key 1"] = "Fallback 1";
         _contentful.GetMicrocopyEntriesAsync().Returns(new List<MicrocopyEntry> { entry });
 
         var sut = CreateServiceUnderTest();
@@ -34,7 +33,6 @@ public class MicrocopyProviderTests
 
         Assert.Equal("Key 1", record.Key);
         Assert.Equal("Value 1", record.Value);
-        Assert.Equal("Fallback 1", record.FallbackText);
     }
 
     [Fact]
@@ -53,7 +51,6 @@ public class MicrocopyProviderTests
         // Assert
         Assert.Null(result);
 
-        _logger.Received(1);
         var logMessage = _logger.ReceivedLogMessages().FirstOrDefault();
         Assert.NotNull(logMessage);
         Assert.Equal("Microcopy record with key 'Missing key 1' was not found", logMessage.Message);
@@ -64,9 +61,8 @@ public class MicrocopyProviderTests
     {
         // Arrange
         var entry = new MicrocopyEntry { Key = "Key 2", Value = "Value 2" };
-        ContentfulMicrocopyConstants.FallbackText["Key 2"] = null!;
         _contentful.GetMicrocopyEntriesAsync()
-            .Returns(new List<MicrocopyEntry>{ entry});
+            .Returns(new List<MicrocopyEntry>{ entry });
 
         var sut = CreateServiceUnderTest();
 
@@ -76,7 +72,6 @@ public class MicrocopyProviderTests
         // Assert
         Assert.Equal(result?.Key, entry.Key);
 
-        _logger.Received(1);
         var logMessage = _logger.ReceivedLogMessages().FirstOrDefault();
         Assert.NotNull(logMessage);
         Assert.Equal("Cannot find fallback text for microcopy with key 'Key 2'", logMessage.Message);
@@ -86,7 +81,6 @@ public class MicrocopyProviderTests
     public async Task GetTextByKeyAsync_WhenRecordMissing_UsesFallbackText()
     {
         // Arrange
-        ContentfulMicrocopyConstants.FallbackText["Missing key 2"] = "Fallback text";
         var noMicrocopyEntries = new List<MicrocopyEntry>();
         _contentful.GetMicrocopyEntriesAsync()
             .Returns(noMicrocopyEntries);
@@ -94,10 +88,10 @@ public class MicrocopyProviderTests
         var sut = CreateServiceUnderTest();
 
         // Act
-        var result = await sut.GetTextByKeyAsync("Missing key 2");
+        var result = await sut.GetTextByKeyAsync(ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted);
 
         // Assert
-        Assert.Equal("Fallback text", result);
+        Assert.Equal("Go to standard", result);
     }
 
     [Fact]

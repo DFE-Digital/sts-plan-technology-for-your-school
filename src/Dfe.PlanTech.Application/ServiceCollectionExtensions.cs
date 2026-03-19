@@ -1,7 +1,5 @@
 using Dfe.PlanTech.Application.Providers;
 using Dfe.PlanTech.Application.Providers.Interfaces;
-using Dfe.PlanTech.Application.Rendering;
-using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Rendering.Contentful;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;

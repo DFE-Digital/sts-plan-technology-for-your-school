@@ -32,12 +32,12 @@ public class MicrocopyModel(
 
         foreach (var variable in Variables)
         {
-            if (!dynamicValues.TryGetValue(variable, out var value) || string.IsNullOrWhiteSpace(value))
+            if (!dynamicValues.TryGetValue(variable, out var actualValue) || string.IsNullOrWhiteSpace(actualValue))
             {
                 return FallbackText;
             }
 
-            text = text.Replace($"{{{{{ variable}}}}}", value);
+            text = text.Replace($"{{{{{variable}}}}}", actualValue);
         }
         return text;
     }

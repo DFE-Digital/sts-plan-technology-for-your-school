@@ -52,7 +52,6 @@ public class GroupsViewBuilder(
             );
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
-        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
 
         var viewModel = new GroupsSelectorViewModel
         {
@@ -66,7 +65,6 @@ public class GroupsViewBuilder(
                 ? "Unable to retrieve progress"
                 : null,
             ContactLinkHref = contactLink?.Href,
-            MicrocopyEntries = microcopy,
         };
 
         controller.ViewData[StatePassingMechanismConstants.Title] = "Select a school";

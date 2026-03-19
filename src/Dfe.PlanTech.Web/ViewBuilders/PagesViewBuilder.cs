@@ -129,7 +129,7 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = await BuildLandingPageViewModelAsync(
+        var landingPageViewModel = BuildLandingPageViewModel(
             controller,
             category,
             categorySlug
@@ -202,7 +202,7 @@ public class PagesViewBuilder(
         return HandleNotifyShareResults(controller, notifyResults, returnToModel);
     }
 
-    private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(
+    private static CategoryLandingPageViewModel BuildLandingPageViewModel(
         Controller controller,
         QuestionnaireCategoryEntry category,
         string categorySlug
@@ -254,7 +254,7 @@ public class PagesViewBuilder(
             throw new InvalidDataException("Page Slug cannot be empty");
         }
 
-        var landingPageViewModel = await BuildLandingPageViewModelAsync(
+        var landingPageViewModel = BuildLandingPageViewModel(
             controller,
             category,
             page.Slug

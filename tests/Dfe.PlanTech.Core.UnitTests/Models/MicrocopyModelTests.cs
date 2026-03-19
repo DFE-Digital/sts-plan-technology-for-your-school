@@ -47,7 +47,8 @@ public class MicrocopyModelTests
     public void GetText_Replaces_All_Placeholders_And_Returns_Value()
     {
         // Arrange
-        var model = new MicrocopyModel("Key 4", "Value with {{first}} and {{second}}", "Fallback 4", new[] { "first", "second" });
+        string[] VarsFirstSecond = { "first", "second" };
+        var model = new MicrocopyModel("Key 4", "Value with {{first}} and {{second}}", "Fallback 4", VarsFirstSecond);
         var dynamicValues = new Dictionary<string, string>
         {
             ["first"] = "value 4a",

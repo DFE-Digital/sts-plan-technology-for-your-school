@@ -71,8 +71,6 @@ public class CategoryLandingViewComponentViewBuilder(
 
         var sortType = await GetUserSortType(sortOrder);
 
-        var microcopy = await _contentfulService.GetMicrocopyEntriesAsync();
-
         var categoryLandingSections = await BuildCategoryLandingSectionViewModels(
                 establishmentId,
                 category,

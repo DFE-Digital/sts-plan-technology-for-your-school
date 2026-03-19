@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Core.Constants;
@@ -99,7 +100,7 @@ public static class ContentfulMicrocopyConstants
     private const string ContinueContinueButtonFallback = "Continue self-assessment";
     private const string ContinueRestartButtonFallback = "Restart self-assessment";
 
-    public static readonly Dictionary<string, string> FallbackText = new()
+    public static readonly IReadOnlyDictionary<string, string> FallbackText = new Dictionary<string, string>
     {
         { HomeHeader, EmptyFallback },
         { HomeCardStatusSingleNotStarted, CardsFallback },
@@ -153,29 +154,46 @@ public static class ContentfulMicrocopyConstants
         { GroupsSelectContactUs, EmptyFallback },
     };
 
-    public static readonly Dictionary<string, List<string>> Variables = new()
+    internal static class VariableNames
     {
-        { LandingPagePrintLink, ["standard"] },
-        { LandingPageInsetIntroNotStarted, ["standard"] },
-        { LandingPageInsetIntroContinue, ["standard"] },
-        { LandingPageTopicLinkNotStarted, ["topic"] },
-        { LandingPageTopicIntroContinue, ["dateUpdated"] },
-        { LandingPageTopicLinkContinue, ["topic"] },
-        { LandingPageTopicIntroCompleted, ["topic", "dateCompleted"] },
-        { LandingPageTopicLinkCompleted, ["topic"] },
-        { LandingPageSuccessPanelHeader, ["topic"] },
-        { SingleRecommendationPrintAllLink, ["topic"] },
-        { SingleRecommendationSuccessHeader, ["status"] },
-        { SingleRecommendationPosition, ["position", "totalRecsForTopic"] },
-        { SingleRecommendationHistoryInitial, ["recStatus", "establishment"] },
-        { SingleRecommendationHistoryAnswer, ["answer"] },
-        { SingleRecommendationHistoryChange, ["recStatus"] },
-        { SingleRecommendationHistoryReason, ["recStatus"] },
-        { ViewAnswersIntroText, ["dateCompleted"] },
-        { ContinueIntroText, ["dateUpdated"] },
-        { CategoryPrintSectionInProgress, ["dateUpdated"] },
-        { CategoryPrintSectionCompleted, ["topic", "dateCompleted"] },
-        { GroupsSelectRecommendationCount, ["count", "total"] },
-        { GroupsSelectContactUs, ["contactLink"] },
+        public const string Standard = "standard";
+        public const string Topic = "topic";
+        public const string DateUpdated = "dateUpdated";
+        public const string DateCompleted = "dateCompleted";
+        public const string Status = "status";
+        public const string Position = "position";
+        public const string TotalRecsForTopic = "totalRecsForTopic";
+        public const string RecStatus = "recStatus";
+        public const string Establishment = "establishment";
+        public const string Answer = "answer";
+        public const string Count = "count";
+        public const string Total = "total";
+        public const string ContactLink = "contactLink";
+    }
+
+    public static readonly IReadOnlyDictionary<string, List<string>> Variables = new Dictionary<string, List<string>>
+    {
+        { LandingPagePrintLink, [VariableNames.Standard] },
+        { LandingPageInsetIntroNotStarted, [VariableNames.Standard] },
+        { LandingPageInsetIntroContinue, [VariableNames.Standard] },
+        { LandingPageTopicLinkNotStarted, [VariableNames.Topic] },
+        { LandingPageTopicIntroContinue, [VariableNames.DateUpdated] },
+        { LandingPageTopicLinkContinue, [VariableNames.Topic] },
+        { LandingPageTopicIntroCompleted, [VariableNames.Topic, VariableNames.DateCompleted] },
+        { LandingPageTopicLinkCompleted, [VariableNames.Topic] },
+        { LandingPageSuccessPanelHeader, [VariableNames.Topic] },
+        { SingleRecommendationPrintAllLink, [VariableNames.Topic] },
+        { SingleRecommendationSuccessHeader, [VariableNames.Status] },
+        { SingleRecommendationPosition, [VariableNames.Position, VariableNames.TotalRecsForTopic] },
+        { SingleRecommendationHistoryInitial, [VariableNames.RecStatus, VariableNames.Establishment] },
+        { SingleRecommendationHistoryAnswer, [VariableNames.Answer] },
+        { SingleRecommendationHistoryChange, [VariableNames.RecStatus] },
+        { SingleRecommendationHistoryReason, [VariableNames.RecStatus] },
+        { ViewAnswersIntroText, [VariableNames.DateCompleted] },
+        { ContinueIntroText, [VariableNames.DateUpdated] },
+        { CategoryPrintSectionInProgress, [VariableNames.DateUpdated] },
+        { CategoryPrintSectionCompleted, [VariableNames.Topic, VariableNames.DateCompleted] },
+        { GroupsSelectRecommendationCount, [VariableNames.Count, VariableNames.Total] },
+        { GroupsSelectContactUs, [VariableNames.ContactLink] },
     };
 }
