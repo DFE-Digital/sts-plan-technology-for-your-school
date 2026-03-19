@@ -328,7 +328,7 @@ public class MockAuthController(
         string? OrganisationJson
     );
 
-    public FixtureUser FromSelector(string? selector)
+    private FixtureUser FromSelector(string? selector)
     {
         selector = (selector ?? "school").Trim().ToLowerInvariant();
 
