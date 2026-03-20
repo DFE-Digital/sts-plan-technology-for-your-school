@@ -12,18 +12,10 @@ module "main_hosting" {
   ############################################
   # Networking configuration
   ############################################
-  #these prevent the public IP issue.
+  #these prevent the public IP issuby forcing creation of internal load balancer (both vars needed by the shared module)
   # Deploy container apps inside a VNet
   launch_in_vnet = true
-
-  # Only allow Azure Front Door traffic to the app
-  restrict_container_apps_to_cdn_inbound_only = true
-
-  #ingress point for front door
-  ingress = {
-  external_enabled = true
-  target_port      = 3000
-  }
+  container_app_environment_internal_load_balancer_enabled = true
 
   #################
   # Container App #
