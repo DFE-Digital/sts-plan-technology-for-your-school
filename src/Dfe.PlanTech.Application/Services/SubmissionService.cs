@@ -146,11 +146,6 @@ public class SubmissionService(
         );
     }
 
-    public Task ConfirmCheckAnswersAsync(int submissionId)
-    {
-        return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
-    }
-
     public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
         int establishmentId,
         int? matEstablishmentId,

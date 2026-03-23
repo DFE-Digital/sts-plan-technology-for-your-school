@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
-using System.Threading.Tasks;
 
 namespace Dfe.PlanTech.Data.Sql.Interfaces;
 
@@ -30,4 +30,5 @@ public interface ISubmissionRepository
     );
     Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId);
     Task SetSubmissionDeletedAsync(int establishmentId, string sectionId);
+    Task<int> SubmitResponse(AssessmentResponseModel response);
 }
