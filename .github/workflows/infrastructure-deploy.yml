@@ -8,6 +8,10 @@ on:
         description: 'The environment to run infrastructure deployment on:'
         required: true
         options: ['Dev', 'Tst', 'Staging', 'Production']
+      is_dr:
+        type: boolean
+        default: false
+        description: 'flag for using disaster recovery: adds -dr to all resource names'
 
 env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}

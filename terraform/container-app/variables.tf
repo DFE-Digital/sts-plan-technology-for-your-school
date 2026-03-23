@@ -11,6 +11,11 @@ variable "environment" {
   type        = string
 }
 
+variable "is_dr" {
+  description = "flag for using disaster recovery: adds -dr to all resource names"
+  type        = bool
+}
+
 variable "azure_location" {
   description = "Recourse location"
   type        = string

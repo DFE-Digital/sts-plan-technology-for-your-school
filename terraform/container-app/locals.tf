@@ -6,7 +6,7 @@ locals {
   project_name        = var.project_name
   environment         = var.environment
   azure_location      = var.azure_location
-  resource_prefix     = "${local.environment}${local.project_name}"
+  resource_prefix     = var.is_dr ? "${local.environment}${local.project_name}-dr" : "${local.environment}${local.project_name}"
   resource_group_name = module.main_hosting.azurerm_resource_group_default.name
   registry_server     = var.registry_server
   registry_username   = var.registry_username
@@ -80,7 +80,7 @@ locals {
   ##################
   # Azure KeyVault #
   ##################
-  kv_name = "${local.environment}${local.project_name}-kv"
+  kv_name = "${local.resource_prefix}-kv"
 
   kv_secrets_csp_connectsrc = "${local.csp_google_tag_manager_domain} region1.google-analytics.com ${local.csp_clarity_domains}"
   kv_secrets_csp_defaultsrc = local.csp_clarity_domains
