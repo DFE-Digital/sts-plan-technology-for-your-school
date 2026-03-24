@@ -105,8 +105,8 @@ public class SubmissionRepositoryTests
         Assert.InRange(r.DateCreated, before, after);
 
         // persisted
-        Assert.Equal(1, await db.Submissions.CountAsync());
-        Assert.Equal(1, await db.Responses.CountAsync());
+        Assert.Equal(1, await db.Submissions.CountAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, await db.Responses.CountAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]

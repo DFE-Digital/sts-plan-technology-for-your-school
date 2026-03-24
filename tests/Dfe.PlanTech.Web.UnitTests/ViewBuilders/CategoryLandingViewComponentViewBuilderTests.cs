@@ -37,9 +37,9 @@ public class CategoryLandingViewComponentViewBuilderTests
         return new CategoryLandingViewComponentViewBuilder(
             logger,
             contentful,
+            currentUser,
             submission,
-            user,
-            currentUser
+            user
         );
     }
 
@@ -126,9 +126,7 @@ public class CategoryLandingViewComponentViewBuilderTests
     [InlineData(0)]
     [InlineData(1)]
     [InlineData(2)]
-    public async Task BuildViewModelAsync_Computed_Completion_Count_Correct(
-        int completedCount
-    )
+    public async Task BuildViewModelAsync_Computed_Completion_Count_Correct(int completedCount)
     {
         // Arrange
         var s1 = MakeSection("A", "A", "a");

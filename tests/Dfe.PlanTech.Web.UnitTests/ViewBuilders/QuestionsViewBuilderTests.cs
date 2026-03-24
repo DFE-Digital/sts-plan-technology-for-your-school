@@ -1,10 +1,11 @@
-using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -50,13 +51,13 @@ public class QuestionsViewBuilderTests
     private QuestionsViewBuilder CreateServiceUnderTest() =>
         new QuestionsViewBuilder(
             _logger,
+            _contentful,
+            _currentUser,
             _contactOptions,
             _errorMessages,
-            _contentful,
-            _questionSvc,
-            _submissionSvc,
             _contentfulOptions,
-            _currentUser
+            _questionSvc,
+            _submissionSvc
         );
 
     private static Controller MakeControllerWithTempData()
@@ -145,7 +146,7 @@ public class QuestionsViewBuilderTests
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("Question", view.ViewName);
         var vm = Assert.IsType<QuestionViewModel>(view.Model);
-        Assert.Equal("Question text", controller.ViewData["Title"]);
+        Assert.Equal("Question text", controller.ViewData[StatePassingMechanismConstants.Title]);
         Assert.Equal(question, vm.Question);
     }
 
@@ -257,8 +258,8 @@ public class QuestionsViewBuilderTests
         Assert.Contains("<a href=\"https://example.org/contact\"", msg);
 
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
-        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+        Assert.Equal(nameof(PagesController).GetControllerNameSlug(), redirect.ControllerName);
         Assert.NotNull(redirect.RouteValues);
         Assert.Equal(UrlConstants.Home, redirect.RouteValues["route"]);
     }
@@ -431,8 +432,8 @@ public class QuestionsViewBuilderTests
 
         // Assert
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
-        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+        Assert.Equal(nameof(PagesController).GetControllerNameSlug(), redirect.ControllerName);
         Assert.NotNull(redirect.RouteValues);
         Assert.Equal(sectionSlug, redirect.RouteValues["route"]);
     }
@@ -474,8 +475,8 @@ public class QuestionsViewBuilderTests
 
         // Assert
         var redirect = Assert.IsType<RedirectToActionResult>(result);
-        Assert.Equal(PagesController.GetPageByRouteAction, redirect.ActionName);
-        Assert.Equal(PagesController.ControllerName, redirect.ControllerName);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+        Assert.Equal(nameof(PagesController).GetControllerNameSlug(), redirect.ControllerName);
 
         Assert.NotNull(redirect.RouteValues);
         Assert.Equal("sec-1", redirect.RouteValues["route"]);

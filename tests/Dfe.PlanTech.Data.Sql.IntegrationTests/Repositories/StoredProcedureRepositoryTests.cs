@@ -12,7 +12,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     public StoredProcedureRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _repository = new StoredProcedureRepository(DbContext);

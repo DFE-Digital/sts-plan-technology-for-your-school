@@ -13,7 +13,7 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
     public EstablishmentLinkRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _establishmentRepository = new EstablishmentRepository(DbContext);
@@ -52,7 +52,7 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Establishments.Add(establishment);
         DbContext.EstablishmentGroups.Add(group);
         DbContext.EstablishmentLinks.AddRange(link1, link2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result =
@@ -119,7 +119,7 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Establishments.AddRange(establishment1, establishment2);
         DbContext.EstablishmentGroups.AddRange(group1, group2);
         DbContext.EstablishmentLinks.AddRange(link1, link2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _establishmentLinkRepository.GetGroupEstablishmentsByAsync(e =>
@@ -144,7 +144,7 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _establishmentLinkRepository.GetGroupEstablishmentsByAsync(e =>
@@ -196,7 +196,10 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         // Assert
         Assert.True(id > 0);
 
-        var saved = await DbContext.GroupReadActivities.FindAsync(id);
+        var saved = await DbContext.GroupReadActivities.FindAsync(
+            [id],
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(saved);
         Assert.Equal(schoolModel.Name, saved.SelectedEstablishmentName);
     }
@@ -241,7 +244,10 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         // Assert
         Assert.True(id > 0);
 
-        var saved = await DbContext.GroupReadActivities.FindAsync(id);
+        var saved = await DbContext.GroupReadActivities.FindAsync(
+            [id],
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(saved);
         Assert.Equal(string.Empty, saved!.SelectedEstablishmentName);
     }
@@ -321,8 +327,14 @@ public class EstablishmentLinkRepositoryTests : DatabaseIntegrationTestBase
         Assert.True(id2 > 0);
         Assert.NotEqual(id1, id2);
 
-        var saved1 = await DbContext.GroupReadActivities.FindAsync(id1);
-        var saved2 = await DbContext.GroupReadActivities.FindAsync(id2);
+        var saved1 = await DbContext.GroupReadActivities.FindAsync(
+            [id1],
+            TestContext.Current.CancellationToken
+        );
+        var saved2 = await DbContext.GroupReadActivities.FindAsync(
+            [id2],
+            TestContext.Current.CancellationToken
+        );
 
         Assert.NotNull(saved1);
         Assert.NotNull(saved2);

@@ -86,6 +86,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                     RecommendationText = r.Header,
                     ContentfulSysId = r.Id,
                     QuestionId = question.Id,
+                    QuestionContentfulRef = question.ContentfulRef,
                 };
             });
 
@@ -404,53 +405,63 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             .Recommendations.Where(r => contentfulRefs.Contains(r.ContentfulRef))
             .ToListAsync();
     }
-    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId)
+
+    public async Task<List<SectionStatusEntity>> GetSectionStatusesAsync(
+        string sectionIds,
+        int establishmentId
+    )
     {
         var sectionIdList = sectionIds
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
 
-        var currentSubmissions = await _db.Submissions
-            .Where(s =>
-                !s.Deleted &&
-                s.EstablishmentId == establishmentId &&
-                sectionIdList.Contains(s.SectionId))
+        var currentSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+            )
             .GroupBy(s => s.SectionId)
-            .Select(g => g
-                .OrderByDescending(s => s.DateCreated)
-                .First())
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
 
-        var lastCompleteSubmissions = await _db.Submissions
-            .Where(s =>
-                !s.Deleted &&
-                s.EstablishmentId == establishmentId &&
-                sectionIdList.Contains(s.SectionId) &&
-                (s.Status == SubmissionStatus.CompleteReviewed))
+        var lastCompleteSubmissions = await _db
+            .Submissions.Where(s =>
+                !s.Deleted
+                && s.EstablishmentId == establishmentId
+                && sectionIdList.Contains(s.SectionId)
+                && (s.Status == SubmissionStatus.CompleteReviewed)
+            )
             .GroupBy(s => s.SectionId)
-            .Select(g => g
-                .OrderByDescending(s => s.DateCreated)
-                .First())
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
 
         var currentBySectionId = currentSubmissions.ToDictionary(s => s.SectionId, s => s);
-        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(s => s.SectionId, s => s);
+        var lastCompleteBySectionId = lastCompleteSubmissions.ToDictionary(
+            s => s.SectionId,
+            s => s
+        );
 
-        var result = sectionIdList.Select(sectionId =>
-        {
-            currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
-            lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
-
-            return new SectionStatusEntity
+        var result = sectionIdList
+            .Select(sectionId =>
             {
-                SectionId = sectionId,
-                Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
-                DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
-                DateUpdated = currentSubmission?.DateLastUpdated ?? currentSubmission?.DateCreated ?? DateTime.UtcNow,
-                LastMaturity = lastCompleteSubmission?.Maturity,
-                LastCompletionDate = lastCompleteSubmission?.DateCompleted,
-            };
-        }).ToList();
+                currentBySectionId.TryGetValue(sectionId, out var currentSubmission);
+                lastCompleteBySectionId.TryGetValue(sectionId, out var lastCompleteSubmission);
+
+                return new SectionStatusEntity
+                {
+                    SectionId = sectionId,
+                    Status = currentSubmission?.Status ?? SubmissionStatus.NotStarted,
+                    DateCreated = currentSubmission?.DateCreated ?? DateTime.UtcNow,
+                    DateUpdated =
+                        currentSubmission?.DateLastUpdated
+                        ?? currentSubmission?.DateCreated
+                        ?? DateTime.UtcNow,
+                    LastMaturity = lastCompleteSubmission?.Maturity,
+                    LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                };
+            })
+            .ToList();
 
         return result;
     }
@@ -459,10 +470,12 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(sectionId);
 
-        var submissionId = await _db.Submissions
-            .Where(s => s.SectionId == sectionId
-                     && s.EstablishmentId == establishmentId
-                     && s.Status != SubmissionStatus.Inaccessible)
+        var submissionId = await _db
+            .Submissions.Where(s =>
+                s.SectionId == sectionId
+                && s.EstablishmentId == establishmentId
+                && s.Status != SubmissionStatus.Inaccessible
+            )
             .OrderByDescending(s => s.Id)
             .Select(s => (int?)s.Id)
             .FirstOrDefaultAsync();
@@ -470,10 +483,9 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         if (submissionId is null)
             return;
 
-        await _db.Submissions
-            .Where(s => s.Id == submissionId.Value)
-            .ExecuteUpdateAsync(setters =>
-                setters.SetProperty(s => s.Deleted, true));
+        await _db
+            .Submissions.Where(s => s.Id == submissionId.Value)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.Deleted, true));
     }
 
     public async Task<int> SubmitResponse(AssessmentResponseModel response)
@@ -629,6 +641,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             ContentfulRef = recommendationDto.ContentfulSysId,
             RecommendationText = recommendationDto.RecommendationText,
             QuestionId = recommendationDto.QuestionId,
+            QuestionContentfulRef = recommendationDto.QuestionContentfulRef,
         };
     }
 }

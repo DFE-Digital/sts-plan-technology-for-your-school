@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using static Dfe.PlanTech.Core.Constants.ContentfulMicrocopyConstants;
 
@@ -9,9 +8,11 @@ public static class ContentfulMicrocopyHelper
     public static string GetMicrocopyTextByKey(
         MicrocopyRecord record,
         List<MicrocopyEntry>? microcopyEntries,
-        Dictionary<string, string>? dynamicValues = null)
+        Dictionary<string, string>? dynamicValues = null
+    )
     {
-        var microcopyText = microcopyEntries?.FirstOrDefault(r => r.Key == record.Key)?.Value
+        var microcopyText =
+            microcopyEntries?.FirstOrDefault(r => r.Key == record.Key)?.Value
             ?? record.FallbackText;
 
         if (record.Variables is not [])
@@ -29,7 +30,11 @@ public static class ContentfulMicrocopyHelper
         return microcopyText;
     }
 
-    private static string ReplaceVariables(string microcopyText, MicrocopyRecord record, Dictionary<string, string> dynamicValues)
+    private static string ReplaceVariables(
+        string microcopyText,
+        MicrocopyRecord record,
+        Dictionary<string, string> dynamicValues
+    )
     {
         var text = microcopyText;
         foreach (var variable in record.Variables)

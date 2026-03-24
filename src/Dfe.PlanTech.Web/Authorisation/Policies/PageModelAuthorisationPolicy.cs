@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Dfe.PlanTech.Infrastructure.SignIn.Models;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
@@ -166,6 +167,6 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
         var controllerName = httpContext.Request.RouteValues[RouteValuesControllerNameKey];
 
         return controllerName is string controllerString
-            && controllerString == PagesController.ControllerName;
+            && controllerString == nameof(PagesController).GetControllerNameSlug();
     }
 }
