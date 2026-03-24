@@ -1,0 +1,58 @@
+terraform-platform:
+  name: Terraform Platform
+  runs-on: ubuntu-22.04
+  defaults:
+      run:
+        working-directory: terraform/platform
+  inputs:
+    environment:
+      required: true
+    tf_backend_resource_group:
+      required: true
+    az_location:
+      required: true
+  secrets:
+    az_tenant_id:
+      required: true
+    az_subscription_id:
+      required: true
+    az_client_id:
+      required: true
+    az_acr_url:
+      required: true
+  outputs:
+    acr_login_server: ${{ steps.outputs.outputs.acr_login_server }}
+
+  steps:
+    - uses: actions/checkout@v4
+
+    - uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.7
+
+    - name: Login to Azure
+      uses: ./.github/actions/azure-login
+      with:
+        az_tenant_id: ${{ secrets.az_tenant_id }}
+        az_subscription_id: ${{ secrets.az_subscription_id }}
+        az_client_id: ${{ secrets.az_client_id }}
+
+    - name: Terraform Init
+      working-directory: terraform/platform
+      run: terraform init
+
+    - name: Terraform Apply (platform)
+      working-directory: terraform/platform
+      run: |
+        terraform apply -auto-approve \
+          -var="resource_group_name=${{ input.tf_backend_resource_group }}" \
+          -var="location=${{ input.az_location }}" \
+          -var="acr_name=${{ secrets.az_acr_url }}" \
+          -var="environment=${{ inputs.environment }}" \
+          -var="product=plan-tech"
+
+    - name: Get ACR login server
+      id: outputs
+      working-directory: terraform/platform
+      run: |
+        echo "acr_login_server=$(terraform output -raw acr_login_server)" >> $GITHUB_OUTPUT

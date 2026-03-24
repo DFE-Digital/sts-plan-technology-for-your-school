@@ -1,0 +1,203 @@
+name: Infrastructure Deploy - Full
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'The environment to run infrastructure deployment on:'
+        required: true
+        options: ['Dev', 'Tst', 'Staging', 'Production']
+      is_dr:
+        type: boolean
+        default: false
+        description: 'flag for using disaster recovery: adds -dr to resource group name'
+
+env:
+  DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
+
+  ARM_USE_OIDC: true
+
+  AZ_ACA_RESOURCE_GROUP: ${{ inputs.is_dr && format('{0}-dr', secrets.AZ_ACA_RESOURCE_GROUP) || secrets.AZ_ACA_RESOURCE_GROUP }}
+  AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}-kv
+  AZ_SA_COSTING_NAME: ${{ env.AZ_ACA_RESOURCE_GROUP }}costing
+
+  TF_BACKEND_STORAGE_ACCOUNT_NAME: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+  TF_BACKEND_CONTAINER_NAME: ${{ secrets.TF_BACKEND_CONTAINER_NAME }}
+  TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
+  TF_BACKEND_RESOURCE_GROUP: ${{ inputs.is_dr && format('{0}-dr', secrets.TF_BACKEND_RESOURCE_GROUP) || secrets.TF_BACKEND_RESOURCE_GROUP }}
+
+jobs:
+
+  # 🔹 1. Bootstrap TF backend
+  bootstrap: 
+    uses: ./.github/workflows/bootstrap.yml
+    with:
+      environment: ${{ inputs.environment }}
+      tf_backend_resource_group: ${{ env.TF_BACKEND_RESOURCE_GROUP }}
+      az_location: ${{ var.AZ_LOCATION }}
+    secrets:
+      az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+      az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+      az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+      az_object_id: ${{ secrets.AZ_OBJECT_ID }} #object id of the object getting assigned the access policy? unsure if this is the right secret.,
+
+  # 🔹 2. Platform infra (RG + ACR via Terraform)
+  terraform-platform:
+    needs: bootstrap
+    uses: ./.github/workflows/terraform-platform.yml
+    with:
+      environment: ${{ inputs.environment }}
+      tf_backend_resource_group: ${{ env.TF_BACKEND_RESOURCE_GROUP }}
+      az_location: ${{ var.AZ_LOCATION }}
+    secrets:
+      az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+      az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+      az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+      az_acr_url: ${{ secrets.AZ_ACR_URL }}
+
+  # 🔹 3. Promote image (GHCR → ACR)
+  promote-image:
+    needs: terraform-platform
+    uses: ./.github/workflows/promote-image.yml
+    secrets:
+      az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+      az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+      az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+      az_acr_url: ${{ secrets.AZ_ACR_URL }}
+
+  # 🔹 4. Plan container app infra
+  terraform-plan:
+    needs: [bootstrap, terraform-platform, promote-image]
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    name: Terraform plan
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: terraform/container-app
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.7
+
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Set GitHub Runner IP to TF Var
+        run: echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Replace in secret environment variable
+        run: |
+          AZ_SA_COSTING_NAME="${{ env.AZ_SA_COSTING_NAME }}"
+          SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
+          echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
+
+      - name: Initialise Terraform state resources
+        run: ${{ env.BOOTSTRAP_CMD }}
+
+      - name: Whitelist Runner
+        uses: ./.github/actions/whitelisting-for-runner
+        with:
+          runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
+          sa-costing-name: ${{ env.SA_COSTING_NAME }}
+          sa-costing-resource-group: ${{ env.AZ_ACA_RESOURCE_GROUP }}
+          az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
+          az-aca-resource-group: ${{ env.AZ_ACA_RESOURCE_GROUP }}
+          tf-backend-resource-group: ${{ env.TF_BACKEND_RESOURCE_GROUP }}
+          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          removeRules: 'false'
+
+      - name: Set image tag
+        run: echo "TF_VAR_image_tag=${{ needs.promote-image.outputs.image_tag }}" >> $GITHUB_ENV
+
+      - name: Terraform init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+
+      - name: Get tfvars
+        shell: pwsh
+        run: |
+          ./scripts-workflow/get-and-normalise-tfvars.ps1 `
+            -SecretName "${{ secrets.TF_SECRET_NAME }}" `
+            -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
+
+      - name: Plan Terraform changes
+        run: terraform plan -var-file="normalisedTerraformVars.tfvars"
+
+      - name: Cleanup
+        shell: pwsh
+        run: ./scripts-workflow/remove-generated-files.ps1
+
+  # 🔹 5. Apply container app infra
+  deploy-terraform:
+    needs: terraform-plan
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    name: Deploy Terraform
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: terraform/container-app
+
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.7
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Set image tag
+        run: echo "TF_VAR_image_tag=${{ needs.promote-image.outputs.image_tag }}" >> $GITHUB_ENV
+
+      - name: Terraform init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}" \
+            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+
+      - name: Get tfvars
+        shell: pwsh
+        run: |
+          ./scripts-workflow/get-and-normalise-tfvars.ps1 `
+            -SecretName "${{ secrets.TF_SECRET_NAME }}" `
+            -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
+
+      - name: Apply Terraform
+        run: terraform apply -auto-approve -var-file="normalisedTerraformVars.tfvars"
+
+      - name: Cleanup
+        shell: pwsh
+        run: ./scripts-workflow/remove-generated-files.ps1

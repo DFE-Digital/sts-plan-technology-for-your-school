@@ -1,0 +1,41 @@
+promote-image:
+  name: Promote image to ACR
+  runs-on: ubuntu-22.04
+  secrets:
+    az_tenant_id:
+      required: true
+    az_subscription_id:
+      required: true
+    az_client_id:
+      required: true
+    az_acr_url:
+      required: true
+
+  outputs:
+    image_tag: ${{ steps.image.outputs.image_tag }}
+
+  steps:
+    - name: Login to Azure
+      uses: ./.github/actions/azure-login
+      with:
+        az_tenant_id: ${{ secrets.az_tenant_id }}
+        az_subscription_id: ${{ secrets.az_subscription_id }}
+        az_client_id: ${{ secrets.az_client_id }}
+
+    - name: Import image
+      run: |
+        az acr import \
+          --name ${{ secrets.az_acr_url }} \
+          --source ghcr.io/<org>/plan-tech-app:latest \
+          --image plan-tech-app:latest \
+          || true
+
+    - name: Get latest image tag + build full image
+      id: image
+      run: |
+        IMAGE_TAG=$(az acr repository show-tags \
+          -n ${{ secrets.az_acr_url }} \
+          --repository plan-tech-app \
+          --top 1 --orderby time_desc | jq -r '.[0]')
+
+        echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT

@@ -3,10 +3,10 @@ locals {
   # General #
   ###########
   current_user_id     = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
-  project_name        = var.project_name
+  project_name        = var.is_dr ? "${local.project_name}-dr" : "${local.project_name}"
   environment         = var.environment
   azure_location      = var.azure_location
-  resource_prefix     = var.is_dr ? "${local.environment}${local.project_name}-dr" : "${local.environment}${local.project_name}"
+  resource_prefix     = "${local.environment}${local.project_name}"
   resource_group_name = module.main_hosting.azurerm_resource_group_default.name
   registry_server     = var.registry_server
   registry_username   = var.registry_username
