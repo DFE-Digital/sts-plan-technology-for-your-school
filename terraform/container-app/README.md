@@ -9,7 +9,7 @@ The following article discusses developer tools and how to run the **Terraform**
   - [Developer tools](#developer-tools)
   - [When Updating The Terraform Config](#when-updating-the-terraform-config)
   - [Running Terraform locally](#running-terraform-locally)
-    - [Authenticating using Service Principle](#authenticating-using-service-principle)
+    - [Authenticating using Service Principal](#authenticating-using-service-principle)
     - [Terraform Init](#terraform-init)
     - [Terraform Plan](#terraform-plan)
     - [Terraform Apply](#terraform-apply)
@@ -64,11 +64,11 @@ When you make changes to the Terraform Config, ensure you run the following as t
 
 This section discusses how to set-up and run Terraform locally on a development machine.
 
-⚠️ Avoid committing any updates to the repository that include sensitive information in the example Terraform configuration files ⚠️
+> Avoid committing any updates to the repository that include sensitive information in the example Terraform configuration files.
 
-### Authenticating using Service Principle
+### Authenticating using Service Principal
 
-The Terraform configuration can be executed using an Azure Service Principle. To do this you'll need to set the following environment variables:
+The Terraform configuration can be executed using an Azure Service Principal. To do this you'll need to set the following environment variables:
 
 MacOS:
 
@@ -100,7 +100,7 @@ Run the following command to initialise Terraform.
 
 `terraform init -backend-config=backend.tfvars -upgrade -reconfigure`
 
-⚠️ tfvars files are ignored by git, but please ensure they do not get committed to the repo by accident ⚠️
+> tfvars files are ignored by git, but please ensure they do not get committed to the repo by accident.
 
 ### Terraform Plan
 
@@ -199,4 +199,4 @@ Another useful tip for debugging Terraform is to utilise output variables, refer
 
 The values of output variables are included within the log file so they can be reviewed.
 
-⚠️ Avoid committing any updates to the Terraform configuration files that include output variables for debugging purposes ⚠️
+> Avoid committing any updates to the Terraform configuration files that include output variables for debugging purposes.

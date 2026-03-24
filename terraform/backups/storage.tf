@@ -37,8 +37,7 @@ resource "azurerm_storage_container" "bacpacs" {
 resource "azurerm_storage_container_immutability_policy" "bacpacs" {
   count = var.immutability_enabled ? 1 : 0
 
-  storage_container_resource_manager_id = azurerm_storage_container.bacpacs.resource_manager_id
+  storage_container_resource_manager_id = azurerm_storage_container.bacpacs.id
   immutability_period_in_days           = var.immutability_period_days
   protected_append_writes_all_enabled   = false
-  allow_protected_append_writes         = false
 }
