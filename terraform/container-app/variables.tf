@@ -1,8 +1,14 @@
 ###########
 # General #
 ###########
+
+variable "subscription_id" {
+  description = "The subscription ID for the environment against which Terraform is running"
+  type        = string
+}
+
 variable "project_name" {
-  description = "project name, used along with `environment` as a prefix for all resources"
+  description = "Project name, used along with `environment` as a prefix for all resources"
   type        = string
 }
 
@@ -12,7 +18,7 @@ variable "environment" {
 }
 
 variable "azure_location" {
-  description = "Recourse location"
+  description = "Resource location"
   type        = string
 }
 
