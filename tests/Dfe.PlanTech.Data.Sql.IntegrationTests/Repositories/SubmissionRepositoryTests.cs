@@ -1072,7 +1072,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submitAnswer = new SubmitAnswerModel
         {
@@ -1099,10 +1099,10 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId);
-        var createdSubmission = await DbContext.Submissions.SingleAsync(s => s.Id == createdResponse.SubmissionId);
-        var createdQuestion = await DbContext.Questions.SingleAsync(q => q.Id == createdResponse.QuestionId);
-        var createdAnswer = await DbContext.Answers.SingleAsync(a => a.Id == createdResponse.AnswerId);
+        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
+        var createdSubmission = await DbContext.Submissions.SingleAsync(s => s.Id == createdResponse.SubmissionId, cancellationToken: TestContext.Current.CancellationToken);
+        var createdQuestion = await DbContext.Questions.SingleAsync(q => q.Id == createdResponse.QuestionId, cancellationToken: TestContext.Current.CancellationToken);
+        var createdAnswer = await DbContext.Answers.SingleAsync(a => a.Id == createdResponse.AnswerId, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotEqual(0, responseId);
         Assert.Equal(establishment.Id, createdSubmission.EstablishmentId);
@@ -1129,7 +1129,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var firstSubmission = new SubmissionEntity
         {
@@ -1141,7 +1141,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.Add(firstSubmission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var secondSubmission = new SubmissionEntity
         {
@@ -1153,7 +1153,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.Add(secondSubmission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submitAnswer = new SubmitAnswerModel
         {
@@ -1180,7 +1180,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId);
+        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(secondSubmission.Id, createdResponse.SubmissionId);
     }
@@ -1205,7 +1205,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submitAnswer = new SubmitAnswerModel
         {
@@ -1232,12 +1232,12 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId);
+        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(question.Id, createdResponse.QuestionId);
         Assert.Equal(answer.Id, createdResponse.AnswerId);
-        Assert.Equal(1, await DbContext.Questions.CountAsync(q => q.ContentfulRef == "Q920"));
-        Assert.Equal(1, await DbContext.Answers.CountAsync(a => a.ContentfulRef == "A920"));
+        Assert.Equal(1, await DbContext.Questions.CountAsync(q => q.ContentfulRef == "Q920", cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(1, await DbContext.Answers.CountAsync(a => a.ContentfulRef == "A920", cancellationToken: TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -1248,7 +1248,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var activeSubmission = new SubmissionEntity
         {
@@ -1260,7 +1260,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.Add(activeSubmission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var deletedSubmission = new SubmissionEntity
         {
@@ -1272,7 +1272,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.Add(deletedSubmission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submitAnswer = new SubmitAnswerModel
         {
@@ -1299,7 +1299,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId);
+        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(deletedSubmission.Id, createdResponse.SubmissionId);
     }
