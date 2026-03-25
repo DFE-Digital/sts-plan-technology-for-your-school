@@ -55,7 +55,7 @@ builder
     .AddRepositories()
     .AddViewComponents();
 
-builder.Services.AddApplicationServices().AddApplicationWorkflows();
+builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicationWorkflows();
 
 var app = builder.Build();
 

@@ -90,10 +90,7 @@ public class PagesViewBuilder(
             StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text)
             ?? PageTitleConstants.PlanTechnologyForYourSchool;
 
-        var viewModel = new PageViewModel(page)
-        {
-            MicrocopyEntries = await ContentfulService.GetMicrocopyEntriesAsync(),
-        };
+        var viewModel = new PageViewModel(page);
 
         if (page.DisplayOrganisationName)
         {
@@ -132,7 +129,7 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = await BuildLandingPageViewModelAsync(
+        var landingPageViewModel = BuildLandingPageViewModel(
             controller,
             category,
             categorySlug
@@ -205,14 +202,12 @@ public class PagesViewBuilder(
         return HandleNotifyShareResults(controller, notifyResults, returnToModel);
     }
 
-    private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(
+    private static CategoryLandingPageViewModel BuildLandingPageViewModel(
         Controller controller,
         QuestionnaireCategoryEntry category,
         string categorySlug
     )
     {
-        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
-
         return new CategoryLandingPageViewModel
         {
             Slug = categorySlug,
@@ -221,7 +216,6 @@ public class PagesViewBuilder(
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"],
-            MicrocopyEntries = microcopy,
         };
     }
 
@@ -260,7 +254,7 @@ public class PagesViewBuilder(
             throw new InvalidDataException("Page Slug cannot be empty");
         }
 
-        var landingPageViewModel = await BuildLandingPageViewModelAsync(
+        var landingPageViewModel = BuildLandingPageViewModel(
             controller,
             category,
             page.Slug

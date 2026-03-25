@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model PageViewModel
 
 @section NavButton {
@@ -52,7 +54,7 @@
     @if ((isHomeCategoryPage || isAutomatedTestingHomePage) && categories is not null && categories.Any())
     {
         await Html.RenderPartialAsync("Components/Page", Model.Page);
-        var homeHeader = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.HomeHeader, Model.MicrocopyEntries);
+        var homeHeader = await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.HomeHeader);
 
         <h2 class="govuk-heading-l">@homeHeader</h2>
         <div class="dfe-grid-container">

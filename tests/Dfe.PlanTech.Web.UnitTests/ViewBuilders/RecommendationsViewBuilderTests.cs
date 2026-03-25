@@ -1,9 +1,12 @@
 using Contentful.Core.Configuration;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
@@ -29,6 +32,7 @@ public class RecommendationsViewBuilderTests
     private readonly INotifyService _notifyService = Substitute.For<INotifyService>();
     private readonly IRecommendationService _recommendationService =
         Substitute.For<IRecommendationService>();
+    private readonly IMicrocopyProvider _microcopyProvider = Substitute.For<IMicrocopyProvider>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
 
     // ---- Options
@@ -43,7 +47,8 @@ public class RecommendationsViewBuilderTests
             _currentUser,
             _notifyService,
             _recommendationService,
-            _submissions
+            _submissions,
+            _microcopyProvider
         );
 
     private static TestController CreateController() => new TestController();
@@ -1217,6 +1222,30 @@ public class RecommendationsViewBuilderTests
             .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
 
         var selectedStatus = RecommendationStatus.NotStarted;
+        var statusDisplayName = selectedStatus.GetDisplayName();
+        var notesEntry = "Status manually updated to Not started";
+        var successHeader = "Status updated to 'Not started'";
+
+        _microcopyProvider
+            .GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.SingleRecommendationHistoryChange,
+                Arg.Is<Dictionary<string, string>>(d =>
+                    d.ContainsKey("status") &&
+                    d["status"] == statusDisplayName
+                    )
+                )
+            .Returns(notesEntry);
+
+        _microcopyProvider
+            .GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
+                Arg.Is<Dictionary<string, string>>(d =>
+                    d != null &&
+                    d.ContainsKey("status") &&
+                    d["status"] == statusDisplayName
+                )
+            )
+            .Returns(successHeader);
 
         // Act
         var result = await sut.UpdateRecommendationStatusAsync(
@@ -1231,8 +1260,8 @@ public class RecommendationsViewBuilderTests
         // Assert
 
         // TempData success banner should be set
-        var successTitle = Assert.IsType<string>(ctl.TempData["StatusUpdateSuccessTitle"]);
-        Assert.Contains("Status updated to", successTitle);
+        var successResult = Assert.IsType<string>(ctl.TempData["StatusUpdateSuccessTitle"]);
+        Assert.Equal(successHeader, successResult);
 
         // Service is called with the correct ids and a default note containing our literal text
         await _recommendationService
@@ -1242,7 +1271,7 @@ public class RecommendationsViewBuilderTests
                 establishmentId,
                 userId,
                 selectedStatus,
-                Arg.Is<string>(n => n.Contains("Status manually updated")),
+                Arg.Is<string>(n => n == notesEntry),
                 Arg.Any<int?>()
             );
 

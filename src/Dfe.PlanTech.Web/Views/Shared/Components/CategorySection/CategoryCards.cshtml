@@ -1,20 +1,22 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
 @using static Dfe.PlanTech.Core.Constants.ContentfulMicrocopyConstants
+@inject IMicrocopyProvider Microcopy
 @model CategoryCardsViewComponentViewModel
 
 @{
-    MicrocopyRecord cardMicrocopyRecord;
+    string cardMicrocopyKey = string.Empty;
 
     if (Model.CompletedSectionCount == 0 && Model.TotalSectionCount == 1)
     {
-        cardMicrocopyRecord = ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted;
+        cardMicrocopyKey = ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted;
     }
     else if (Model.CompletedSectionCount == 0)
     {
-        cardMicrocopyRecord = ContentfulMicrocopyConstants.HomeCardStatusMultipleNotStarted;
+        cardMicrocopyKey = ContentfulMicrocopyConstants.HomeCardStatusMultipleNotStarted;
     }
     else
     {
-        cardMicrocopyRecord = Model.CompletedSectionCount < Model.TotalSectionCount
+        cardMicrocopyKey = Model.CompletedSectionCount < Model.TotalSectionCount
             ? ContentfulMicrocopyConstants.HomeCardStatusContinue
             : ContentfulMicrocopyConstants.HomeCardStatusViewRecommendations;
     }
@@ -27,9 +29,8 @@
                 @Model.CategoryHeaderText
             </a>
         </h3>
-
         <p class="govuk-body-s">
-            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(cardMicrocopyRecord, Model.MicrocopyEntries)
+            @await Microcopy.GetTextByKeyAsync(cardMicrocopyKey)
         </p>
     </div>
 </div>
