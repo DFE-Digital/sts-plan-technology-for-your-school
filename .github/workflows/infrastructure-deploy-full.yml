@@ -19,7 +19,6 @@ env:
   TF_BACKEND_CONTAINER_NAME: tfstate
   TF_BACKEND_KEY: terraform.tfstate
   TF_SECRETS_KEYVAULT_NAME: ${{secrets.TF_BACKEND_RESOURCE_GROUP}}-kv
-  COSTING_STORAGE_ACCOUNT_NAME: s190d01plantechcosting
 
 jobs:
   setup:
@@ -29,6 +28,10 @@ jobs:
       contents: read
     name: Pipeline Setup
     runs-on: ubuntu-22.04
+    outputs:
+      az_sa_costing_name: ${{ steps.set-vars.outputs.az_sa_costing_name }}
+      tf_backend_storage_account_name: ${{ steps.set-vars.outputs.tf_backend_storage_account_name }}
+      acr_name: ${{ steps.set-vars.outputs.acr_name }}
     steps:
     - name: Clone repo
       uses: actions/checkout@v4
@@ -57,22 +60,31 @@ jobs:
     - name: Prepare env vars using removed hyphen
       shell: bash
       run: |
-        CLEAN_VAR=${AZ_ACA_RESOURCE_GROUP//-/}
-        echo "CLEAN_VAR=$CLEAN_VAR" >> $GITHUB_ENV
-        echo "AZ_SA_COSTING_NAME=${CLEAN_VAR}costing" >> $GITHUB_ENV
-        echo "TF_BACKEND_STORAGE_ACCOUNT_NAME=${CLEAN_VAR}tfstate" >> $GITHUB_ENV
-        echo "ACR_NAME=${CLEAN_VAR}" >> $GITHUB_ENV
+          # Remove hyphens from base resource group
+          CLEAN_VAR=${AZ_ACA_RESOURCE_GROUP//-/}
+
+          # Compute derived variables
+          AZ_SA_COSTING_NAME="${CLEAN_VAR}costing"
+          TF_BACKEND_STORAGE_ACCOUNT_NAME="${CLEAN_VAR}tfstate"
+          ACR_NAME="${CLEAN_VAR}"
+          COSTING_STORAGE_ACCOUNT_NAME="${CLEAN_VAR}costing"
+
+          # Export as step outputs for downstream jobs
+          echo "az_sa_costing_name=$AZ_SA_COSTING_NAME" >> $GITHUB_OUTPUT
+          echo "tf_backend_storage_account_name=$TF_BACKEND_STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
+          echo "acr_name=$ACR_NAME" >> $GITHUB_OUTPUT
+          echo "costings_name=COSTING_STORAGE_ACCOUNT_NAME" >> $GITHUB_OUTPUT
   
   bootstrap:
+    needs: setup
     uses: ./.github/jobs/bootstrap.yml
     with:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
-      tf_backend_resource_group: ${{ TF_BACKEND_RESOURCE_GROUP }}
-      tf_container_name: ${{ TF_BACKEND_CONTAINER_NAME }}
-      tf_storage_acc_name: ${{ TF_BACKEND_STORAGE_ACCOUNT_NAME }}
-      tf_keyvault_name: ${{ TF_SECRETS_KEYVAULT_NAME }}
-    secrets: inherit
+      tf_backend_resource_group: ${{ needs.setup.outputs.tf_backend_storage_account_name }}
+      tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
+      tf_storage_acc_name: ${{ needs.setup.outputs.tf_backend_storage_account_name }}
+      tf_keyvault_name: ${{ env.TF_SECRETS_KEYVAULT_NAME }}
 
   terraform-platform:
     needs: bootstrap
@@ -80,22 +92,21 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
-      workflow_runner_ip: ${{ TF_VAR_github_ip }}
-      az_resource_group: ${{ AZ_ACA_RESOURCE_GROUP }}
-      tf_backend_resource_group: ${{ TF_BACKEND_RESOURCE_GROUP }}
-      tf_container_name: ${{ TF_BACKEND_CONTAINER_NAME }}
-      tf_storage_acc_name: ${{ TF_BACKEND_STORAGE_ACCOUNT_NAME }}
-      tf_keyfile_name: ${{ TF_BACKEND_KEY }}
-      az_acr_name: ${{ ACR_NAME }}
-      costings_name: ${{ AZ_SA_COSTING_NAME }}
-    secrets: inherit
+      workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
+      az_resource_group: ${{ env.AZ_ACA_RESOURCE_GROUP }}
+      tf_backend_resource_group: ${{ needs.setup.outputs.tf_backend_storage_account_name }}
+      tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
+      tf_storage_acc_name: ${{ needs.setup.outputs.tf_backend_storage_account_name  }}
+      tf_keyfile_name: ${{ env.TF_BACKEND_KEY }}
+      az_acr_name: ${{ needs.setup.outputs.acr_name }}
+      costings_name: ${{ needs.setup.outputs.costings_name }}
 
   promote-image:
-    needs: terraform-platform
+    needs: [setup, terraform-platform]
     uses: ./.github/jobs/promote-image.yml
     with:
       image_branch: ${{ inputs.environment == 'Production' && 'main' || 'development' }}
-      acr_name: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+      acr_name: ${{ needs.setup.outputs.acr_name }}
     secrets: inherit
 
 
@@ -115,4 +126,3 @@ jobs:
       environment: ${{ inputs.environment }}
       image_tag: ${{ needs.promote-image.outputs.image_tag }}
       workflow_runner_ip: ${{ TF_VAR_github_ip }}
-    secrets: inherit
