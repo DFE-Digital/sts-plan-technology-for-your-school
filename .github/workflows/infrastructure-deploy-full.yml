@@ -1,102 +1,119 @@
-# name: Infrastructure Deploy - Full
+name: Infrastructure Deploy - Full
 
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       environment:
-#         type: choice
-#         required: true
-#         options: ['Dev', 'Tst', 'Staging', 'Production']
-#       is_dr:
-#         type: boolean
-#         default: false
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        required: true
+        options: ['Dev', 'Tst', 'Staging', 'Production']
+      is_dr:
+        type: boolean
+        default: true
 
-# env:
-#   ARM_USE_OIDC: true
-#   AZ_ACA_RESOURCE_GROUP: ${{ inputs.is_dr && format('{0}-dr', secrets.AZ_ACA_RESOURCE_GROUP) || secrets.AZ_ACA_RESOURCE_GROUP }}
-#   AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}-kv
-#   AZ_SA_COSTING_NAME: ${{ env.AZ_ACA_RESOURCE_GROUP }}costing
-#   TF_BACKEND_RESOURCE_GROUP: ${{ inputs.is_dr && format('{0}-dr', secrets.TF_BACKEND_RESOURCE_GROUP) || secrets.TF_BACKEND_RESOURCE_GROUP }}
-#   TF_BACKEND_STORAGE_ACCOUNT_NAME: s190d01plantechtfstate
-#   TF_BACKEND_CONTAINER_NAME: tfstate
-#   TF_BACKEND_KEY: terraform.tfstate
-#   TF_SECRETS_KEYVAULT_NAME: ${{secrets.TF_BACKEND_RESOURCE_GROUP}}-kv
+env:
+  ARM_USE_OIDC: true
+  AZ_ACA_RESOURCE_GROUP: ${{ inputs.is_dr && format('{0}-dr', secrets.AZ_ACA_RESOURCE_GROUP) || secrets.AZ_ACA_RESOURCE_GROUP }}
+  AZ_KEYVAULT_NAME: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}-kv
+  TF_BACKEND_RESOURCE_GROUP: ${{ inputs.is_dr && format('{0}-dr', secrets.TF_BACKEND_RESOURCE_GROUP) || secrets.TF_BACKEND_RESOURCE_GROUP }}
+  TF_BACKEND_CONTAINER_NAME: tfstate
+  TF_BACKEND_KEY: terraform.tfstate
+  TF_SECRETS_KEYVAULT_NAME: ${{secrets.TF_BACKEND_RESOURCE_GROUP}}-kv
+  COSTING_STORAGE_ACCOUNT_NAME: s190d01plantechcosting
+  ACR_NAME: ${{ env.AZ_ACA_RESOURCE_GROUP }}
 
+jobs:
+  setup:
+    environment: ${{ inputs.environment }}
+    permissions:
+      id-token: write
+      contents: read
+    name: Pipeline Setup
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Clone repo
+      uses: actions/checkout@v4
 
-# jobs:
-#   setup:
-#     environment: ${{ inputs.environment }}
-#     permissions:
-#       id-token: write
-#       contents: read
-#     name: Pipeline Setup
-#     runs-on: ubuntu-22.04
-#     steps:
-#     - name: Clone repo
-#       uses: actions/checkout@v4
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v3
+      with:
+        terraform_version: 1.9.7
 
-#     - name: Setup Terraform
-#       uses: hashicorp/setup-terraform@v3
-#       with:
-#         terraform_version: 1.9.7
+    - name: Login with AZ
+      uses: ./actions/azure-login
+      with:
+        az_tenant_id: ${{ secrets.az_tenant_id }}
+        az_subscription_id: ${{ secrets.az_subscription_id }}
+        az_client_id: ${{ secrets.az_client_id }}
 
-#     - name: Get GitHub Runner IP
-#       id: whats-my-ip
-#       uses: ./.github/actions/whats-my-ip-address
+    - name: Get GitHub Runner IP
+      id: whats-my-ip
+      uses: ./.github/actions/whats-my-ip-address
 
-#     - name: Set GitHub Runner IP to TF Var
-#       shell: bash
-#       run: |
-#         echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
+    - name: Set GitHub Runner IP to TF Var
+      shell: bash
+      run: |
+        echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
+
+    - name: Prepare env vars using removed hyphen
+      shell: bash
+      run: |
+        CLEAN_VAR=${env.AZ_ACA_RESOURCE_GROUP//-/}
+        echo "CLEAN_VAR=$CLEAN_VAR" >> $GITHUB_ENV
+        echo "AZ_SA_COSTING_NAME=${CLEAN_VAR}costing" >> $GITHUB_ENV
+        echo "TF_BACKEND_STORAGE_ACCOUNT_NAME=${CLEAN_VAR}tfstate" >> $GITHUB_ENV
+        echo "ACR_NAME=${CLEAN_VAR}" >> $GITHUB_ENV
   
-#   bootstrap:
-#     uses: ./.github/jobs/bootstrap.yml
-#     with:
-#       environment: ${{ inputs.environment }}
-#       az_location: ${{ vars.AZ_LOCATION }}
-#       tf_backend_resource_group: ${{ env.TF_BACKEND_RESOURCE_GROUP }}
-#       tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
-#       tf_storage_acc_name: ${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
-#       tf_keyvault_name: ${{ env.TF_SECRETS_KEYVAULT_NAME }}
-#     secrets: inherit
+  bootstrap:
+    uses: ./.github/jobs/bootstrap.yml
+    with:
+      environment: ${{ inputs.environment }}
+      az_location: ${{ vars.AZ_LOCATION }}
+      tf_backend_resource_group: ${{ env.TF_BACKEND_RESOURCE_GROUP }}
+      tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
+      tf_storage_acc_name: ${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+      tf_keyvault_name: ${{ env.TF_SECRETS_KEYVAULT_NAME }}
+    secrets: inherit
 
-#   terraform-platform:
-#     needs: bootstrap
-#     uses: ./.github/jobs/tf-platform.yml
-#     with:
-#       environment: ${{ inputs.environment }}
-#       az_location: ${{ vars.AZ_LOCATION }}
-#       workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
-#       az_resource_group: ${{ env.AZ_ACA_RESOURCE_GROUP }}
-#       tf_backend_resource_group: ${{ env.TF_BACKEND_RESOURCE_GROUP }}
-#       tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
-#       tf_storage_acc_name: ${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
-#       tf_keyfile_name: ${{ env.TF_BACKEND_KEY }}
-#       az_acr_name: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-#     secrets: inherit
+  terraform-platform:
+    needs: bootstrap
+    uses: ./.github/jobs/tf-platform.yml
+    with:
+      environment: ${{ inputs.environment }}
+      az_location: ${{ vars.AZ_LOCATION }}
+      workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
+      az_resource_group: ${{ env.AZ_ACA_RESOURCE_GROUP }}
+      tf_backend_resource_group: ${{ env.TF_BACKEND_RESOURCE_GROUP }}
+      tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
+      tf_storage_acc_name: ${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+      tf_keyfile_name: ${{ env.TF_BACKEND_KEY }}
+      az_acr_name: ${{ env.ACR_NAME }}
+      costings_name: ${{ AZ_SA_COSTING_NAME }}
+    secrets: inherit
 
-#   promote-image:
-#     needs: terraform-platform
-#     uses: ./.github/jobs/promote-image.yml
-#     with:
-#       environment: ${{ inputs.environment }}
-#       acr_name: ${{ needs.terraform-platform.outputs.acr_login_server }}
-#     secrets: inherit
+  promote-image:
+    needs: terraform-platform
+    uses: ./.github/jobs/promote-image.yml
+    with:
+      image_branch: ${{ inputs.environment == 'Production' && 'main' || 'development' }}
+      acr_name: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+    secrets: inherit
 
-#   terraform-plan:
-#     needs: [bootstrap, terraform-platform, promote-image]
-#     uses: ./.github/jobs/tf-app-plan.yml
-#     with:
-#       environment: ${{ inputs.environment }}
-#       image_tag: ${{ needs.promote-image.outputs.image_tag }}
-#       workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
-#     secrets: inherit
 
-#   deploy-terraform:
-#     needs: terraform-plan
-#     uses: ./.github/jobs/tf-app-apply.yml
-#     with:
-#       environment: ${{ inputs.environment }}
-#       image_tag: ${{ needs.promote-image.outputs.image_tag }}
-#       workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
-#     secrets: inherit
+  terraform-plan:
+    needs: [bootstrap, terraform-platform, promote-image]
+    uses: ./.github/jobs/tf-app-plan.yml
+    with:
+      environment: ${{ inputs.environment }}
+      image_tag: ${{ needs.promote-image.outputs.image_tag }}
+      workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
+    secrets: inherit
+
+  deploy-terraform:
+    needs: terraform-plan
+    uses: ./.github/jobs/tf-app-apply.yml
+    with:
+      environment: ${{ inputs.environment }}
+      image_tag: ${{ needs.promote-image.outputs.image_tag }}
+      workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
+    secrets: inherit

@@ -1,4 +1,4 @@
-name: Infrastructure Deploy - Full
+name: Infrastructure Deploy - Platform
 
 on:
   workflow_dispatch:
