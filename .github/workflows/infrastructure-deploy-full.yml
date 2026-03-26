@@ -112,7 +112,7 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       image_tag: ${{ needs.promote-image.outputs.image_tag }}
-      workflow_runner_ip: ${{ TF_VAR_github_ip }}
+      workflow_runner_ip: ${{ needs.setup.outputs.github_ip }}
     secrets: inherit
 
   deploy-terraform:
@@ -121,4 +121,4 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       image_tag: ${{ needs.promote-image.outputs.image_tag }}
-      workflow_runner_ip: ${{ TF_VAR_github_ip }}
+      workflow_runner_ip: ${{ needs.setup.outputs.github_ip }}
