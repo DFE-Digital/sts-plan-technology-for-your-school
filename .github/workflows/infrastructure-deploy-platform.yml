@@ -32,6 +32,7 @@ jobs:
       az_sa_costing_name: ${{ steps.set-vars.outputs.az_sa_costing_name }}
       tf_backend_storage_account_name: ${{ steps.set-vars.outputs.tf_backend_storage_account_name }}
       acr_name: ${{ steps.set-vars.outputs.acr_name }}
+      github_ip: ${{ steps.whats-my-ip.outputs.ip }}
     steps:
     - name: Clone repo
       uses: actions/checkout@v4
@@ -51,11 +52,6 @@ jobs:
     - name: Get GitHub Runner IP
       id: whats-my-ip
       uses: ./.github/actions/whats-my-ip-address
-
-    - name: Set GitHub Runner IP to TF Var
-      shell: bash
-      run: |
-        echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
 
     - name: Prepare env vars using removed hyphen
       shell: bash
@@ -92,7 +88,7 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
-      workflow_runner_ip: ${{ vars.TF_VAR_github_ip }}
+      workflow_runner_ip: ${{ vars.github_ip }}
       az_resource_group: ${{ vars.AZ_ACA_RESOURCE_GROUP }}
       tf_backend_resource_group: ${{ needs.setup.outputs.tf_backend_storage_account_name }}
       tf_container_name: ${{ vars.TF_BACKEND_CONTAINER_NAME }}

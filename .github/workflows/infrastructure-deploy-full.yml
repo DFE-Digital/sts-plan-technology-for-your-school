@@ -47,15 +47,11 @@ jobs:
         az_tenant_id: ${{ secrets.az_tenant_id }}
         az_subscription_id: ${{ secrets.az_subscription_id }}
         az_client_id: ${{ secrets.az_client_id }}
+        github_ip: ${{ steps.whats-my-ip.outputs.ip }}
 
     - name: Get GitHub Runner IP
       id: whats-my-ip
       uses: ./.github/actions/whats-my-ip-address
-
-    - name: Set GitHub Runner IP to TF Var
-      shell: bash
-      run: |
-        echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
 
     - name: Prepare env vars using removed hyphen
       shell: bash
@@ -92,7 +88,7 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
-      workflow_runner_ip: ${{ vars.TF_VAR_github_ip }}
+      workflow_runner_ip: ${{ vars.github_ip }}
       az_resource_group: ${{ vars.AZ_ACA_RESOURCE_GROUP }}
       tf_backend_resource_group: ${{ needs.setup.outputs.tf_backend_storage_account_name }}
       tf_container_name: ${{ vars.TF_BACKEND_CONTAINER_NAME }}
