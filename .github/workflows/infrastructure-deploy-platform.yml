@@ -82,9 +82,9 @@ jobs:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
       tf_backend_resource_group: ${{ needs.setup.outputs.tf_backend_storage_account_name }}
-      tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
+      tf_container_name: ${{ vars.TF_BACKEND_CONTAINER_NAME }}
       tf_storage_acc_name: ${{ needs.setup.outputs.tf_backend_storage_account_name }}
-      tf_keyvault_name: ${{ env.TF_SECRETS_KEYVAULT_NAME }}
+      tf_keyvault_name: ${{ vars.TF_SECRETS_KEYVAULT_NAME }}
 
   terraform-platform:
     needs: bootstrap
@@ -92,12 +92,12 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
-      workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
-      az_resource_group: ${{ env.AZ_ACA_RESOURCE_GROUP }}
+      workflow_runner_ip: ${{ vars.TF_VAR_github_ip }}
+      az_resource_group: ${{ vars.AZ_ACA_RESOURCE_GROUP }}
       tf_backend_resource_group: ${{ needs.setup.outputs.tf_backend_storage_account_name }}
-      tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
+      tf_container_name: ${{ vars.TF_BACKEND_CONTAINER_NAME }}
       tf_storage_acc_name: ${{ needs.setup.outputs.tf_backend_storage_account_name  }}
-      tf_keyfile_name: ${{ env.TF_BACKEND_KEY }}
+      tf_keyfile_name: ${{ vars.TF_BACKEND_KEY }}
       az_acr_name: ${{ needs.setup.outputs.acr_name }}
       costings_name: ${{ needs.setup.outputs.costings_name }}
 
