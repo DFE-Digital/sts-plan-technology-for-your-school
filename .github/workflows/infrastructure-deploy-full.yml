@@ -20,7 +20,6 @@ env:
   TF_BACKEND_KEY: terraform.tfstate
   TF_SECRETS_KEYVAULT_NAME: ${{secrets.TF_BACKEND_RESOURCE_GROUP}}-kv
   COSTING_STORAGE_ACCOUNT_NAME: s190d01plantechcosting
-  ACR_NAME: ${{ env.AZ_ACA_RESOURCE_GROUP }}
 
 jobs:
   setup:
