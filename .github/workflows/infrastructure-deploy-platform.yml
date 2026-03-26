@@ -83,7 +83,7 @@ jobs:
         with:
           environment: ${{ inputs.environment }}
           az_location: ${{ vars.AZ_LOCATION }}
-          tf_backend_resource_group: ${{ steps.set-vars.outputs..tf_backend_rg_name }}
+          tf_backend_resource_group: ${{ steps.set-vars.outputs.tf_backend_rg_name }}
           tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
           tf_storage_acc_name: ${{ steps.set-vars.outputs.tf_backend_storage_account_name }}
           tf_keyvault_name: ${{ steps.set-vars.outputs.tf_kv_name }}
