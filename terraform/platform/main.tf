@@ -30,12 +30,30 @@ resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-
+  admin_enabled = true
   sku           = "Standard"
-  admin_enabled = false
 
   tags = {
     Product     = var.product
     Environment = var.environment
+  }
+}
+
+#costings storage acc
+resource "azurerm_resource_group" "costings" {
+  name     = "example-resources"
+  location = "West Europe"
+}
+
+resource "azurerm_storage_account" "example" {
+  name                     = var.costings_name
+  resource_group_name      = azurerm_resource_group.main.name
+  location                 = azurerm_resource_group.main.location
+  account_tier             = "Standard"
+
+  tags = {
+    Product            = var.product
+    Environment        = var.environment
+    "Service Offering" = var.product
   }
 }

@@ -22,3 +22,8 @@ variable "product" {
   description = "Product tag"
   type        = string
 }
+
+variable "costings_name" {
+  description = "Name of the Azure Storage Acc for costings"
+  type        = string
+}

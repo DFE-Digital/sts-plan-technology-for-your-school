@@ -1,41 +1,64 @@
-promote-image:
-  name: Promote image to ACR
-  runs-on: ubuntu-22.04
-  secrets:
-    az_tenant_id:
-      required: true
-    az_subscription_id:
-      required: true
-    az_client_id:
-      required: true
-    az_acr_url:
-      required: true
+name: Promote image
 
-  outputs:
-    image_tag: ${{ steps.image.outputs.image_tag }}
+on:
+  workflow_call:
+    inputs:
+      image_branch:
+        required: true
+        type: string
+      acr_name:
+        required: true
+        type: string
+    outputs:
+      image_tag:
+        value: ${{ jobs.promote.outputs.image_tag }}
 
-  steps:
-    - name: Login to Azure
-      uses: ./.github/actions/azure-login
-      with:
-        az_tenant_id: ${{ secrets.az_tenant_id }}
-        az_subscription_id: ${{ secrets.az_subscription_id }}
-        az_client_id: ${{ secrets.az_client_id }}
+jobs:
+  promote:
+    runs-on: ubuntu-22.04
 
-    - name: Import image
-      run: |
-        az acr import \
-          --name ${{ secrets.az_acr_url }} \
-          --source ghcr.io/<org>/plan-tech-app:latest \
-          --image plan-tech-app:latest \
-          || true
+    outputs:
+      image_tag: ${{ steps.image.outputs.image_tag }}
 
-    - name: Get latest image tag + build full image
-      id: image
-      run: |
-        IMAGE_TAG=$(az acr repository show-tags \
-          -n ${{ secrets.az_acr_url }} \
-          --repository plan-tech-app \
-          --top 1 --orderby time_desc | jq -r '.[0]')
+    steps:
+      - name: Get latest matching tag
+        id: get_tag
+        run: |
+          SEARCH="${{ inputs.image_branch }}"
 
-        echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          TAG=$(curl -s https://ghcr.io/v2/dfe-digital/plan-technology-for-your-school/tags/list \
+            | jq -r '.tags[]' \
+            | grep "$SEARCH" \
+            | sort -r \
+            | head -n 1)
+
+          if [ -z "$TAG" ]; then
+            echo "No matching tag found"
+            exit 1
+          fi
+
+          echo "Found tag: $TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Import image into ACR
+        run: |
+          az acr import \
+            --name ${{ inputs.acr_name }} \
+            --source ghcr.io/dfe-digital/plan-technology-for-your-school:${{ steps.get_tag.outputs.tag }} \
+            --image plan-technology-for-your-school:${{ steps.get_tag.outputs.tag }}
+            - name: Import image
+              run: |
+                az acr import \
+                  --name ${{ inputs.acr_name }} \
+                  --source ghcr.io/dfe-digital/plan-technology-for-your-school:latest \
+                  --image plan-technology-for-your-school:latest || true
+
+      - name: Get latest image tag
+        id: image
+        run: |
+          IMAGE_TAG=$(az acr repository show-tags \
+            --name ${{ inputs.acr_name }} \
+            --repository plan-tech-app \
+            --top 1 --orderby time_desc | jq -r '.[0]')
+
+          echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT

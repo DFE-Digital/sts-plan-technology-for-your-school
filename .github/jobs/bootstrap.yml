@@ -11,6 +11,12 @@ bootstrap:
       required: true
     az_location:
       required: true
+    tf_container_name:
+      required: true
+    tf_storage_acc_name:
+      required: true
+    tf_keyvault_name:
+      required: true
   secrets:
     az_tenant_id:
       required: true
@@ -22,15 +28,6 @@ bootstrap:
       required: true
     
   steps:
-    - uses: actions/checkout@v4
-
-    - name: Login with AZ
-      uses: ./.github/actions/azure-login
-      with:
-        az_tenant_id: ${{ secrets.az_tenant_id }}
-        az_subscription_id: ${{ secrets.az_subscription_id }}
-        az_client_id: ${{ secrets.az_client_id }}
-
     - name: Initialise Terraform backend
       run:  |
         chmod +x ./scripts/initialise-terraform-state-resources.sh
@@ -39,4 +36,7 @@ bootstrap:
           -l "${{ inputs.az_location }}" \
           -s "${{ secrets.az_object_id }}" \
           -p "plan-tech" \
-          -e "${{ inputs.environment }}"
+          -e "${{ inputs.environment }}" \
+          -k "${{ inputs.tf_keyvault_name }}"
+          -c "${{ inputs.tf_container_name }}""
+          -a "${{ inputs.tf_storage_acc_name }}"
