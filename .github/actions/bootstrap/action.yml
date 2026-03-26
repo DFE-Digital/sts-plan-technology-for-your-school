@@ -1,28 +1,29 @@
 name: Bootstrap
-
-on:
-  workflow_call:
-  inputs:
-    environment:
-      required: true
-    tf_backend_resource_group:
-      required: true
-    az_location:
-      required: true
-    tf_container_name:
-      required: true
-    tf_storage_acc_name:
-      required: true
-    tf_keyvault_name:
-      required: true
-jobs:
-  bootstrap:
-    runs-on: ubuntu-22.04
-
-    steps:
-      - uses: actions/checkout@v4
-  
+description: Create the terraform backend resources
+inputs:
+  environment:
+    required: true
+    description: which env
+  tf_backend_resource_group:
+    required: true
+    description: name of tf rg
+  az_location:
+    required: true
+    description: location for azure
+  tf_container_name:
+    required: true
+    description: name for tf sa container
+  tf_storage_acc_name:
+    required: true
+    description: name for tf sa
+  tf_keyvault_name:
+    required: true
+    description: name for tf kv
+runs:
+  using: composite
+  steps:  
       - name: Initialise Terraform backend
+        shell: bash
         run:  |
           chmod +x ./scripts/initialise-terraform-state-resources.sh
           ./scripts/initialise-terraform-state-resources.sh \

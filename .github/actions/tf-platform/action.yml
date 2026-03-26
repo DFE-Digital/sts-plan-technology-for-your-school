@@ -1,48 +1,38 @@
 name: Terraform Platform
+description: create the platform resources for app rg, acr and costing sa using terraform
+inputs:
+  environment:
+    required: true
+    description: x
+  az_resource_group:
+    required: true
+    description: x
+  tf_backend_resource_group:
+    required: true
+    description: x
+  az_location:
+    required: true
+    description: x
+  tf_container_name:
+    required: true
+    description: x
+  tf_storage_acc_name:
+    required: true
+    description: x
+  tf_keyfile_name:
+    required: true
+    description: x
+  costings_name:
+    required: true
+    description: x
 
-on:
-  workflow_call:
-    inputs:
-      environment:
-        required: true
-        type: string
-      az_resource_group:
-        required: true
-        type: string
-      tf_backend_resource_group:
-        required: true
-        type: string
-      az_location:
-        required: true
-        type: string
-      tf_container_name:
-        required: true
-      tf_storage_acc_name:
-        required: true
-      tf_keyfile_name:
-        required: true
-        type: string
-      costings_name:
-        required: true
-        type: string
 
-
-jobs:
-  terraform-platform:
-    name: Terraform Platform
-    runs-on: ubuntu-22.04
-
-    defaults:
-      run:
-        working-directory: terraform/platform
-
-    outputs:
-      acr_login_server: ${{ steps.outputs.outputs.acr_login_server }}
-      resource_group_name: ${{ steps.outputs.outputs.resource_group_name }}
-
-    steps:
+runs:
+  using: composite
+  steps: 
       - name: Terraform init
         id: init
+        shell: bash
         run: |
           terraform init \
             -backend-config="resource_group_name=${{ inputs.tf_backend_resource_group }}"  \
@@ -51,6 +41,7 @@ jobs:
             -backend-config="key=${{ inputs.tf_keyfile_name }}"
 
       - name: Terraform Apply (platform)
+        shell: bash
         run: |
           terraform apply -auto-approve \
             -var="resource_group_name=${{ inputs.az_resource_group }}" \

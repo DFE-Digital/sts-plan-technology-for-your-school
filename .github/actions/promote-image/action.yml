@@ -1,0 +1,55 @@
+name: Promote image
+description: Find the latest appropriate image on GCR and push to ACR
+inputs:
+  image_branch:
+    required: true
+    description: branch to search for in image tag
+  acr_name:
+    required: true
+    description: name of the acr resource
+outputs:
+  image_tag:
+    value: ${{ steps.image.outputs.image_tag }}
+    description: the image tag put onto acr
+runs:
+  using: composite
+  steps:
+    - name: Get latest matching tag
+      id: get_tag
+      shell: bash
+      run: |
+        SEARCH="${{ inputs.image_branch }}"
+
+        TAG=$(curl -s https://ghcr.io/v2/dfe-digital/plan-technology-for-your-school/tags/list \
+          | jq -r '.tags[]' \
+          | grep "$SEARCH" \
+          | sort -r \
+          | head -n 1)
+
+        if [ -z "$TAG" ]; then
+          echo "No matching tag found"
+          exit 1
+        fi
+
+        echo "Found tag: $TAG"
+        echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+    - name: Import image into ACR
+      id: import
+      shell: bash
+      run: |
+        az acr import \
+          --name ${{ inputs.acr_name }} \
+          --source ghcr.io/dfe-digital/plan-technology-for-your-school:${{ steps.get_tag.outputs.tag }} \
+          --image plan-technology-for-your-school:${{ steps.get_tag.outputs.tag }} || true
+
+    - name: Get latest image tag
+      id: image
+      shell: bash
+      run: |
+        IMAGE_TAG=$(az acr repository show-tags \
+          --name ${{ inputs.acr_name }} \
+          --repository plan-tech-app \
+          --top 1 --orderby time_desc | jq -r '.[0]')
+
+        echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
