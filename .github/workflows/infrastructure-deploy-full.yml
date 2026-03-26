@@ -68,10 +68,10 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
-      tf_backend_resource_group: ${{ env.TF_BACKEND_RESOURCE_GROUP }}
-      tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
-      tf_storage_acc_name: ${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
-      tf_keyvault_name: ${{ env.TF_SECRETS_KEYVAULT_NAME }}
+      tf_backend_resource_group: ${{ TF_BACKEND_RESOURCE_GROUP }}
+      tf_container_name: ${{ TF_BACKEND_CONTAINER_NAME }}
+      tf_storage_acc_name: ${{ TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+      tf_keyvault_name: ${{ TF_SECRETS_KEYVAULT_NAME }}
     secrets: inherit
 
   terraform-platform:
@@ -80,13 +80,13 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
-      workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
-      az_resource_group: ${{ env.AZ_ACA_RESOURCE_GROUP }}
-      tf_backend_resource_group: ${{ env.TF_BACKEND_RESOURCE_GROUP }}
-      tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
-      tf_storage_acc_name: ${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
-      tf_keyfile_name: ${{ env.TF_BACKEND_KEY }}
-      az_acr_name: ${{ env.ACR_NAME }}
+      workflow_runner_ip: ${{ TF_VAR_github_ip }}
+      az_resource_group: ${{ AZ_ACA_RESOURCE_GROUP }}
+      tf_backend_resource_group: ${{ TF_BACKEND_RESOURCE_GROUP }}
+      tf_container_name: ${{ TF_BACKEND_CONTAINER_NAME }}
+      tf_storage_acc_name: ${{ TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+      tf_keyfile_name: ${{ TF_BACKEND_KEY }}
+      az_acr_name: ${{ ACR_NAME }}
       costings_name: ${{ AZ_SA_COSTING_NAME }}
     secrets: inherit
 
@@ -105,7 +105,7 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       image_tag: ${{ needs.promote-image.outputs.image_tag }}
-      workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
+      workflow_runner_ip: ${{ TF_VAR_github_ip }}
     secrets: inherit
 
   deploy-terraform:
@@ -114,5 +114,5 @@ jobs:
     with:
       environment: ${{ inputs.environment }}
       image_tag: ${{ needs.promote-image.outputs.image_tag }}
-      workflow_runner_ip: ${{ env.TF_VAR_github_ip }}
+      workflow_runner_ip: ${{ TF_VAR_github_ip }}
     secrets: inherit
