@@ -57,11 +57,11 @@ jobs:
     - name: Prepare env vars using removed hyphen
       shell: bash
       run: |
-        CLEAN_VAR=${{env.AZ_ACA_RESOURCE_GROUP//-/}}
+        CLEAN_VAR=${AZ_ACA_RESOURCE_GROUP//-/}
         echo "CLEAN_VAR=$CLEAN_VAR" >> $GITHUB_ENV
-        echo "AZ_SA_COSTING_NAME=${{CLEAN_VAR}}costing" >> $GITHUB_ENV
-        echo "TF_BACKEND_STORAGE_ACCOUNT_NAME=${{CLEAN_VAR}}tfstate" >> $GITHUB_ENV
-        echo "ACR_NAME=${{CLEAN_VAR}}" >> $GITHUB_ENV
+        echo "AZ_SA_COSTING_NAME=${CLEAN_VAR}costing" >> $GITHUB_ENV
+        echo "TF_BACKEND_STORAGE_ACCOUNT_NAME=${CLEAN_VAR}tfstate" >> $GITHUB_ENV
+        echo "ACR_NAME=${CLEAN_VAR}" >> $GITHUB_ENV
   
   bootstrap:
     uses: ./.github/jobs/bootstrap.yml
