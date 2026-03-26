@@ -73,7 +73,7 @@ jobs:
   
   bootstrap:
     needs: setup
-    uses: ./.github/jobs/bootstrap.yml
+    uses: ./.github/workflows/jobs/platform/bootstrap.yml
     with:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
@@ -84,7 +84,7 @@ jobs:
 
   terraform-platform:
     needs: bootstrap
-    uses: ./.github/jobs/tf-platform.yml
+    uses: ./.github/workflows/jobs/platform/tf-platform.yml
     with:
       environment: ${{ inputs.environment }}
       az_location: ${{ vars.AZ_LOCATION }}
@@ -99,8 +99,4 @@ jobs:
 
   promote-image:
     needs: [setup, terraform-platform]
-    uses: ./.github/jobs/promote-image.yml
-    with:
-      image_branch: ${{ inputs.environment == 'Production' && 'main' || 'development' }}
-      acr_name: ${{ needs.setup.outputs.acr_name }}
-    secrets: inherit
+    uses: ./.github/workflows/jobs/platform/promote-image.yml

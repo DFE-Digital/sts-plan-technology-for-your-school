@@ -45,13 +45,7 @@ jobs:
           az acr import \
             --name ${{ inputs.acr_name }} \
             --source ghcr.io/dfe-digital/plan-technology-for-your-school:${{ steps.get_tag.outputs.tag }} \
-            --image plan-technology-for-your-school:${{ steps.get_tag.outputs.tag }}
-            - name: Import image
-              run: |
-                az acr import \
-                  --name ${{ inputs.acr_name }} \
-                  --source ghcr.io/dfe-digital/plan-technology-for-your-school:latest \
-                  --image plan-technology-for-your-school:latest || true
+            --image plan-technology-for-your-school:${{ steps.get_tag.outputs.tag }} || true
 
       - name: Get latest image tag
         id: image
