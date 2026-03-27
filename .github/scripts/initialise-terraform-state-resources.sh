@@ -66,7 +66,7 @@ az storage account create \
   --sku Standard_LRS \
   --kind StorageV2 \
   --allow-blob-public-access false \
-  >/dev/null
+  >/dev/null || true
 
 #############################################
 # Container (Terraform state)
@@ -75,7 +75,7 @@ az storage container create \
   --name "$CONTAINER_NAME" \
   --account-name "$STORAGE_ACCOUNT_NAME" \
   --auth-mode login \
-  >/dev/null
+  >/dev/null || true
 
 #############################################
 # Key Vault (for tfvars secrets)
@@ -85,7 +85,7 @@ az keyvault create \
   --resource-group "$RESOURCE_GROUP_NAME" \
   --location "$AZ_LOCATION" \
   --enable-rbac-authorization true \
-  >/dev/null
+  >/dev/null || true
 
 #############################################
 # RBAC Assignments

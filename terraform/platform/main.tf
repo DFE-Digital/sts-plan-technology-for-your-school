@@ -21,7 +21,7 @@ resource "azurerm_resource_group" "main" {
   tags = {
     Product            = var.product
     Environment        = var.environment
-    "Service Offering" = var.product
+    Service Offering = var.product
   }
 }
 
@@ -36,6 +36,7 @@ resource "azurerm_container_registry" "acr" {
   tags = {
     Product     = var.product
     Environment = var.environment
+    Service Offering = var.product
   }
 }
 
@@ -54,6 +55,6 @@ resource "azurerm_storage_account" "example" {
   tags = {
     Product            = var.product
     Environment        = var.environment
-    "Service Offering" = var.product
+    Service Offering = var.product
   }
 }

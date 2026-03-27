@@ -1,96 +1,178 @@
 name: Whitelisting for Runner
 description: Adds the runner's IP to storage and key vault network rules
+
 inputs:
   runner-ip:
     description: Public IP of the runner
     required: true
+    default: ""
+
   sa-costing-name:
     description: Name of the storage account
-    required: true
+    required: false
+    default: ""
+
   sa-costing-resource-group:
     description: Resource group of the storage account
-    required: true
+    required: false
+    default: ""
+
   az-keyvault-name:
     description: Name of the application key vault
-    required: true
+    required: false
+    default: ""
+
   az-aca-resource-group:
     description: Resource group for the application key vault
-    required: true
+    required: false
+    default: ""
+
   tf-backend-resource-group:
     description: Resource group for the Terraform key vault
-    required: true
+    required: false
+    default: ""
+
   tf-secrets-keyvault-name:
     description: Name of the Terraform secrets key vault
-    required: true
+    required: false
+    default: ""
+
   removeRules:
     description: Remove the IPs from the firewall
-    required: true
+    required: false
+    default: "false"
+
 runs:
-  using: 'composite'
+  using: "composite"
   steps:
-    - name: Whitelist IP in storage and key vaults
-      if: ${{ inputs.removeRules == 'false' }}
+    - name: Add or remove runner IP on selected resources
       shell: bash
       run: |
         set -euo pipefail
 
-        check_purge_protection_or_die () {
-            local rg="$1"
-            local name="$2"
-            local label="$3"
+        RUNNER_IP="${{ inputs.runner-ip }}"
+        REMOVE_RULES="${{ inputs.removeRules }}"
 
-            echo "Checking purge protection for $label KeyVault ($rg / $name)..."
+        SA_NAME="${{ inputs.sa-costing-name }}"
+        SA_RG="${{ inputs.sa-costing-resource-group }}"
 
-            local pp=""
-            pp="$(az resource show \
-                --resource-group "$rg" \
-                --name "$name" \
-                --resource-type "Microsoft.KeyVault/vaults" \
-                --query "properties.enablePurgeProtection" -o tsv || true)"
+        SERVICE_KV_NAME="${{ inputs.az-keyvault-name }}"
+        SERVICE_KV_RG="${{ inputs.az-aca-resource-group }}"
 
-            if [ "$pp" != "true" ]; then
-                echo "$label Key Vault purge protection is not enabled (enablePurgeProtection='$pp'). Azure Policy will deny updates." >&2
-                exit 1
-            fi
+        TF_KV_NAME="${{ inputs.tf-secrets-keyvault-name }}"
+        TF_KV_RG="${{ inputs.tf-backend-resource-group }}"
+
+        has_value_pair () {
+          local a="$1"
+          local b="$2"
+          [[ -n "$a" && -n "$b" ]]
         }
 
-        echo "Adding network rule to costing storage account..."
-        az storage account network-rule add \
-        --resource-group "${{ inputs.sa-costing-resource-group }}" \
-        --account-name "${{ inputs.sa-costing-name }}" \
-        --ip-address "${{ inputs.runner-ip }}" > /dev/null
+        validate_value_pair () {
+          local a="$1"
+          local b="$2"
+          local label="$3"
 
-        check_purge_protection_or_die "${{ inputs.az-aca-resource-group }}" "${{ inputs.az-keyvault-name }}" "service"
-        echo "Adding network rule to service KeyVault..."
-        az keyvault network-rule add \
-        --resource-group "${{ inputs.az-aca-resource-group }}" \
-        --name "${{ inputs.az-keyvault-name }}" \
-        --ip-address "${{ inputs.runner-ip }}" > /dev/null
+          if [[ -n "$a" && -z "$b" ]] || [[ -z "$a" && -n "$b" ]]; then
+            echo "Input error for $label: both values must be provided or both omitted." >&2
+            exit 1
+          fi
+        }
 
-        check_purge_protection_or_die "${{ inputs.tf-backend-resource-group }}" "${{ inputs.tf-secrets-keyvault-name }}" "terraform"
-        echo "Adding network rule to Terraform KeyVault..."
-        az keyvault network-rule add \
-        --resource-group "${{ inputs.tf-backend-resource-group }}" \
-        --name "${{ inputs.tf-secrets-keyvault-name }}" \
-        --ip-address "${{ inputs.runner-ip }}" > /dev/null
+        check_purge_protection_or_die () {
+          local rg="$1"
+          local name="$2"
+          local label="$3"
 
-    - name: Remove IP in storage and key vaults
-      if: ${{ inputs.removeRules == 'true' }}
-      shell: bash
-      run: |
-        set -euo pipefail
+          echo "Checking purge protection for $label KeyVault ($rg / $name)..."
 
-        az storage account network-rule remove \
-          --resource-group "${{ inputs.sa-costing-resource-group }}" \
-          --account-name "${{ inputs.sa-costing-name }}" \
-          --ip-address "${{ inputs.runner-ip }}" > /dev/null
+          local pp=""
+          pp="$(az resource show \
+            --resource-group "$rg" \
+            --name "$name" \
+            --resource-type "Microsoft.KeyVault/vaults" \
+            --query "properties.enablePurgeProtection" -o tsv || true)"
 
-        az keyvault network-rule remove \
-          --resource-group "${{ inputs.az-aca-resource-group }}" \
-          --name "${{ inputs.az-keyvault-name }}" \
-          --ip-address "${{ inputs.runner-ip }}" > /dev/null
+          if [[ "$pp" != "true" ]]; then
+            echo "$label Key Vault purge protection is not enabled (enablePurgeProtection='$pp'). Azure Policy will deny updates." >&2
+            exit 1
+          fi
+        }
 
-        az keyvault network-rule remove \
-          --resource-group "${{ inputs.tf-backend-resource-group }}" \
-          --name "${{ inputs.tf-secrets-keyvault-name }}" \
-          --ip-address "${{ inputs.runner-ip }}" > /dev/null
+        add_storage_rule () {
+          local rg="$1"
+          local name="$2"
+
+          echo "Adding network rule to storage account $name..."
+          az storage account network-rule add \
+            --resource-group "$rg" \
+            --account-name "$name" \
+            --ip-address "$RUNNER_IP" > /dev/null
+        }
+
+        remove_storage_rule () {
+          local rg="$1"
+          local name="$2"
+
+          echo "Removing network rule from storage account $name..."
+          az storage account network-rule remove \
+            --resource-group "$rg" \
+            --account-name "$name" \
+            --ip-address "$RUNNER_IP" > /dev/null
+        }
+
+        add_keyvault_rule () {
+          local rg="$1"
+          local name="$2"
+          local label="$3"
+
+          check_purge_protection_or_die "$rg" "$name" "$label"
+          echo "Adding network rule to $label KeyVault $name..."
+          az keyvault network-rule add \
+            --resource-group "$rg" \
+            --name "$name" \
+            --ip-address "$RUNNER_IP" > /dev/null
+        }
+
+        remove_keyvault_rule () {
+          local rg="$1"
+          local name="$2"
+          local label="$3"
+
+          echo "Removing network rule from $label KeyVault $name..."
+          az keyvault network-rule remove \
+            --resource-group "$rg" \
+            --name "$name" \
+            --ip-address "$RUNNER_IP" > /dev/null
+        }
+
+        # Validate that paired inputs are either both set or both empty
+        validate_value_pair "$SA_NAME" "$SA_RG" "costing storage account"
+        validate_value_pair "$SERVICE_KV_NAME" "$SERVICE_KV_RG" "service key vault"
+        validate_value_pair "$TF_KV_NAME" "$TF_KV_RG" "terraform key vault"
+
+        if [[ "$REMOVE_RULES" == "true" ]]; then
+          if has_value_pair "$SA_NAME" "$SA_RG"; then
+            remove_storage_rule "$SA_RG" "$SA_NAME"
+          fi
+
+          if has_value_pair "$SERVICE_KV_NAME" "$SERVICE_KV_RG"; then
+            remove_keyvault_rule "$SERVICE_KV_RG" "$SERVICE_KV_NAME" "service"
+          fi
+
+          if has_value_pair "$TF_KV_NAME" "$TF_KV_RG"; then
+            remove_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "terraform"
+          fi
+        else
+          if has_value_pair "$SA_NAME" "$SA_RG"; then
+            add_storage_rule "$SA_RG" "$SA_NAME"
+          fi
+
+          if has_value_pair "$SERVICE_KV_NAME" "$SERVICE_KV_RG"; then
+            add_keyvault_rule "$SERVICE_KV_RG" "$SERVICE_KV_NAME" "service"
+          fi
+
+          if has_value_pair "$TF_KV_NAME" "$TF_KV_RG"; then
+            add_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "terraform"
+          fi
+        fi
