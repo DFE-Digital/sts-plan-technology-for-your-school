@@ -1,0 +1,52 @@
+name: Back up database
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+
+jobs:
+  backup:
+    environment: ${{ inputs.environment }}
+    name: Back up database
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZURE_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZURE_CLIENT_ID }}
+
+      - name: Export database
+        run: |
+          SqlPackage /Action:Export \
+          /SourceServerName:"tcp:${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net" \
+          /SourceDatabaseName:"${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
+          /TargetFile:"db-$(date +%F).bacpac" \
+          /Authentication:ActiveDirectoryServicePrincipal \
+          /TenantId:"${{ secrets.AZURE_TENANT_ID }}" \
+          /ClientId:"${{ secrets.AZURE_CLIENT_ID }}" \
+          /ClientSecret:"${{ secrets.AZURE_CLIENT_SECRET }}"
+
+          az storage blob upload \
+          --account-name plantechsqlbackups \
+          --container-name sqlbackups \
+          --name db-$(date +%F).bacpac \
+          --file db-$(date +%F).bacpac \
+          --auth-mode login
