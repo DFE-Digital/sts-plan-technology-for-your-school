@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model GroupsSelectorViewModel
 
 @{
@@ -23,12 +25,17 @@
     var schoolNameGroups = Model.GroupEstablishments.GroupBy(ge => ge.EstablishmentName);
     var hasMultipleSchoolsWithSameName = schoolNameGroups.Any(group => group.Count() > 1);
 
-    <h2 class="govuk-heading-l">Select a school</h2>
+    <h2 class="govuk-heading-l">@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectHeader)</h2>
 
     foreach (var school in @Model.GroupEstablishments)
     {
         var schoolUrn = school.Urn;
         var schoolName = school.EstablishmentName;
+        var dynamicValues = new Dictionary<string, string>
+        {
+            ["count"] = school.InProgressOrCompletedRecommendationsCount.ToString(),
+            ["total"] = Model.TotalRecommendations,
+        };
 
         <form asp-action="SelectSchool" method="post">
             @{
@@ -43,9 +50,16 @@
             }
             <input type="hidden" name="schoolUrn" value="@schoolUrn" />
             <input type="hidden" name="schoolName" value="@schoolName" />
-            <p>@school.InProgressOrCompletedRecommendationsCount out of @Model.TotalRecommendations recommendations completed or in progress</p>
+            <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectRecommendationCount, dynamicValues)</p>
         </form>
     }
 }
+@{
+    var contactLink = new Dictionary<string, string>
+    {
+        ["contactLink"] = $"<a href=\"{Model.ContactLinkHref}\" target=\"_blank\" class=\"govuk-link\">Contact us (opens in new tab)</a>"
+    };
+}
+
 <hr class="govuk-section-break govuk-section-break--m" />
-<p class="govuk-body"><a href="@Model.ContactLinkHref" target="_blank" class="govuk-link">Contact us (opens in new tab)</a> if any school information is missing or incorrect.</p>
+<p class="govuk-body">@Html.Raw(await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectContactUs, contactLink))</p>

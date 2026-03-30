@@ -1,5 +1,6 @@
-using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
@@ -14,6 +15,7 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -23,7 +25,8 @@ public class RecommendationsViewBuilder(
     ICurrentUser currentUser,
     INotifyService notifyService,
     IRecommendationService recommendationService,
-    ISubmissionService submissionService
+    ISubmissionService submissionService,
+    IMicrocopyProvider microcopyProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IRecommendationsViewBuilder
 {
     private readonly INotifyService _notifyService =
@@ -32,6 +35,8 @@ public class RecommendationsViewBuilder(
         recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IMicrocopyProvider _microcopyProvider =
+        microcopyProvider ?? throw new ArgumentNullException(nameof(microcopyProvider));
 
     private const string RecommendationsChecklistViewName = "RecommendationsChecklist";
     private const string RecommendationsViewName = "Recommendations";
@@ -89,7 +94,7 @@ public class RecommendationsViewBuilder(
         var orderedHistory = recommendationHistory.OrderByDescending(rh => rh.DateCreated).ToList();
 
         var groupedHistory = orderedHistory
-            .GroupBy(rh => $"{rh.DateCreated.Date:MMMM yyyy} activity")
+            .GroupBy(rh => $"{rh.DateCreated.Date:MMMM yyyy}")
             .ToDictionary(group => group.Key, group => group.Select(g => g));
 
         var firstActivity =
@@ -114,7 +119,6 @@ public class RecommendationsViewBuilder(
                 currentRecommendationHistory?.NewStatus ?? RecommendationStatus.NotStarted,
             LastUpdated = currentRecommendationHistory?.DateCreated,
             SuccessMessageTitle = controller.TempData["StatusUpdateSuccessTitle"] as string,
-            SuccessMessageBody = controller.TempData["StatusUpdateSuccessBody"] as string,
             StatusErrorMessage = controller.TempData["StatusUpdateError"] as string,
             StatusOptions = Enum.GetValues<RecommendationStatus>()
                 .ToDictionary(key => key, key => key.GetDisplayName()),
@@ -274,19 +278,25 @@ public class RecommendationsViewBuilder(
                 $"No recommendation chunk found with slug matching: {chunkSlug}"
             );
 
+        var dynamicValues = new Dictionary<string, string>
+        {
+            ["status"] = selectedStatusEnum.Value.GetDisplayName()
+        };
+
         await _recommendationService.UpdateRecommendationStatusAsync(
             currentRecommendationChunk.Id,
             establishmentId,
             userId,
             selectedStatusEnum.Value,
             notes
-                ?? $"Change reason: Status manually updated to '{selectedStatusEnum.Value.GetDisplayName()}'",
+                ??
+                await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, dynamicValues),
             CurrentUser.IsMat ? userOrganisationId : null
         );
 
         // Set success message for the banner
         controller.TempData["StatusUpdateSuccessTitle"] =
-            $"Status updated to '{selectedStatusEnum.Value.GetDisplayName()}'";
+            await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader, dynamicValues);
 
         // Redirect back to the single recommendation page
         return PageRedirecter.RedirectToGetSingleRecommendation(

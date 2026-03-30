@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model ReviewAnswersViewModel
 
 @{
@@ -37,7 +39,7 @@
                        asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
                        asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
                        title="@questionWithAnswer.QuestionText">
-                        Change
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.CheckAnswersChangeLink)
                         <span class="govuk-visually-hidden">@anchorLabel</span>
                     </a>
                 </dd>
@@ -57,7 +59,9 @@
             }
         }
 
-        <govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">Submit and view recommendations</govuk-button>
+        <govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.CheckAnswersSubmitButton)
+        </govuk-button>
 
         @if (Model.ErrorMessage != null)
         {
