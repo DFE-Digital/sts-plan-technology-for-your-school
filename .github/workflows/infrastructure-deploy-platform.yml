@@ -78,6 +78,18 @@ jobs:
           echo "tf_kv_name=$TF_SECRETS_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
           echo "app_kv_name=$AZ_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
 
+      - name: Debug obj id in use
+        shell: bash
+        run: |
+          if [ -z "$AZ_OBJECT_ID" ]; then
+            echo "AZ_OBJECT_ID secret is missing or unavailable in this run." >&2
+            exit 1
+          else
+            echo "Using obj id ending: ${AZ_OBJECT_ID: -6}"
+          fi
+        env:
+          AZ_OBJECT_ID: ${{ secrets.AZ_OBJECT_ID }}
+
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
