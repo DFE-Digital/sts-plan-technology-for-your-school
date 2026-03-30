@@ -58,16 +58,16 @@ jobs:
         id: set-vars
         shell: bash
         run: |
-          AZ_ACA_RESOURCE_GROUP= ${{ env.IS_DR && format('{0}-dr', secrets.AZ_ACA_RESOURCE_GROUP) || secrets.AZ_ACA_RESOURCE_GROUP }}
-          CLEAN_VAR=${{AZ_ACA_RESOURCE_GROUP//-/}}
+          AZ_ACA_RESOURCE_GROUP="${{ env.IS_DR == 'true' && format('{0}-dr', secrets.AZ_ACA_RESOURCE_GROUP) || secrets.AZ_ACA_RESOURCE_GROUP }}"
+          CLEAN_VAR="${AZ_ACA_RESOURCE_GROUP//-/}"
           AZ_SA_COSTING_NAME="${CLEAN_VAR}costing"
           TF_BACKEND_STORAGE_ACCOUNT_NAME="${CLEAN_VAR}tfstate"
           ACR_NAME="${CLEAN_VAR}"
           COSTINGS_NAME="${CLEAN_VAR}costing"
-          
-          TF_BACKEND_RESOURCE_GROUP= ${{ env.IS_DR && format('{0}-dr', secrets.TF_BACKEND_RESOURCE_GROUP) || secrets.TF_BACKEND_RESOURCE_GROUP }}
-          TF_SECRETS_KEYVAULT_NAME= ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}-kv
-          AZ_KEYVAULT_NAME= ${{ secrets.AZ_ACA_RESOURCE_GROUP }}-kv
+
+          TF_BACKEND_RESOURCE_GROUP="${{ env.IS_DR == 'true' && format('{0}-dr', secrets.TF_BACKEND_RESOURCE_GROUP) || secrets.TF_BACKEND_RESOURCE_GROUP }}"
+          TF_SECRETS_KEYVAULT_NAME="${TF_BACKEND_RESOURCE_GROUP}-kv"
+          AZ_KEYVAULT_NAME="${AZ_ACA_RESOURCE_GROUP}-kv"
 
           echo "az_sa_costing_name=$AZ_SA_COSTING_NAME" >> "$GITHUB_OUTPUT"
           echo "tf_backend_storage_account_name=$TF_BACKEND_STORAGE_ACCOUNT_NAME" >> "$GITHUB_OUTPUT"
