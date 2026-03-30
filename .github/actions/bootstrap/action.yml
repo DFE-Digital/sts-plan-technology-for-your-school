@@ -1,5 +1,6 @@
 name: Bootstrap
 description: Create the terraform backend resources
+
 inputs:
   environment:
     required: true
@@ -19,19 +20,25 @@ inputs:
   tf_keyvault_name:
     required: true
     description: name for tf kv
+  az_object_id:
+    required: true
+    description: object id for azure principal
+
 runs:
   using: composite
-  steps:  
-      - name: Initialise Terraform backend
-        shell: bash
-        run:  |
-          chmod +x ./scripts/initialise-terraform-state-resources.sh
-          ./scripts/initialise-terraform-state-resources.sh \
-            -g "${{ inputs.tf_backend_resource_group }}" \
-            -l "${{ inputs.az_location }}" \
-            -s "${{ secrets.az_object_id }}" \
-            -p "plan-tech" \
-            -e "${{ inputs.environment }}" \
-            -k "${{ inputs.tf_keyvault_name }}"
-            -c "${{ inputs.tf_container_name }}""
-            -a "${{ inputs.tf_storage_acc_name }}"
+  steps:
+    - name: Initialise Terraform backend
+      shell: bash
+      run: |
+        echo "::add-mask::${{ inputs.az_object_id }}"
+
+        chmod +x ./scripts/initialise-terraform-state-resources.sh
+        ./scripts/initialise-terraform-state-resources.sh \
+          -g "${{ inputs.tf_backend_resource_group }}" \
+          -l "${{ inputs.az_location }}" \
+          -s "${{ inputs.az_object_id }}" \
+          -p "plan-tech" \
+          -e "${{ inputs.environment }}" \
+          -k "${{ inputs.tf_keyvault_name }}" \
+          -c "${{ inputs.tf_container_name }}" \
+          -a "${{ inputs.tf_storage_acc_name }}"
