@@ -58,13 +58,6 @@ jobs:
         with:
           terraform_version: 1.9.7
 
-      - name: Debug client id in use
-        shell: bash
-        run: |
-          echo "Using client id ending: ${AZ_CLIENT_ID: -6}"
-        env:
-           AZ_CLIENT_ID: ${{ secrets.az_client_id }}
-
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:

@@ -58,13 +58,13 @@ jobs:
         id: set-vars
         shell: bash
         run: |
+          AZ_ACA_RESOURCE_GROUP= ${{ env.IS_DR && format('{0}-dr', secrets.AZ_ACA_RESOURCE_GROUP) || secrets.AZ_ACA_RESOURCE_GROUP }}
           CLEAN_VAR=${AZ_ACA_RESOURCE_GROUP//-/}
-
           AZ_SA_COSTING_NAME="${CLEAN_VAR}costing"
           TF_BACKEND_STORAGE_ACCOUNT_NAME="${CLEAN_VAR}tfstate"
           ACR_NAME="${CLEAN_VAR}"
           COSTINGS_NAME="${CLEAN_VAR}costing"
-          AZ_ACA_RESOURCE_GROUP= ${{ env.IS_DR && format('{0}-dr', secrets.AZ_ACA_RESOURCE_GROUP) || secrets.AZ_ACA_RESOURCE_GROUP }}
+          
           TF_BACKEND_RESOURCE_GROUP= ${{ env.IS_DR && format('{0}-dr', secrets.TF_BACKEND_RESOURCE_GROUP) || secrets.TF_BACKEND_RESOURCE_GROUP }}
           TF_SECRETS_KEYVAULT_NAME= ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}-kv
           AZ_KEYVAULT_NAME= ${{ secrets.AZ_ACA_RESOURCE_GROUP }}-kv
@@ -88,29 +88,3 @@ jobs:
           tf_storage_acc_name: ${{ steps.set-vars.outputs.tf_backend_storage_account_name }}
           tf_keyvault_name: ${{ steps.set-vars.outputs.tf_kv_name }}
           az_object_id: ${{ secrets.az_object_id }}
-
-      - name: Terraform platform
-        uses: ./.github/actions/tf-platform
-        with:
-          environment: ${{ inputs.environment }}
-          az_location: ${{ vars.AZ_LOCATION }}
-          workflow_runner_ip: ${{ steps.whats-my-ip.outputs.ip }}
-          az_resource_group: ${{ steps.set-vars.outputs.app_rg_name }}
-          tf_backend_resource_group: ${{ steps.set-vars.outputs.tf_backend_rg_name }}
-          tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
-          tf_storage_acc_name: ${{ steps.set-vars.outputs.tf_backend_storage_account_name }}
-          tf_keyfile_name: ${{ env.TF_BACKEND_KEY }}
-          az_acr_name: ${{ steps.set-vars.outputs.acr_name }}
-          costings_name: ${{ steps.set-vars.outputs.costings_name }}
-
-      - name: Promote image
-        id: promote-image
-        uses: ./.github/actions/promote-image
-        with:
-          image_branch: ${{ github.ref_name }}
-          acr_name: ${{ steps.set-vars.outputs.acr_name }}
-
-      - name: Show promoted image tag
-        shell: bash
-        run: |
-          echo "Promoted image tag: ${{ steps.promote-image.outputs.image_tag }}"
