@@ -87,4 +87,4 @@ jobs:
           tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
           tf_storage_acc_name: ${{ steps.set-vars.outputs.tf_backend_storage_account_name }}
           tf_keyvault_name: ${{ steps.set-vars.outputs.tf_kv_name }}
-          az_object_id: ${{ secrets.az_object_id }}
+          az_object_id: ${{ secrets.AZ_OBJECT_ID }}
