@@ -183,7 +183,7 @@ public static class ContentfulMicrocopyConstants
         { LandingPageTopicLinkCompleted, [VariableNames.Topic] },
         { LandingPageSuccessPanelHeader, [VariableNames.Topic] },
         { SingleRecommendationPrintAllLink, [VariableNames.Topic] },
-        { SingleRecommendationSuccessHeader, [VariableNames.Status] },
+        { SingleRecommendationSuccessHeader, [VariableNames.RecStatus] },
         { SingleRecommendationPosition, [VariableNames.Position, VariableNames.TotalRecsForTopic] },
         { SingleRecommendationHistoryInitial, [VariableNames.RecStatus, VariableNames.Establishment] },
         { SingleRecommendationHistoryAnswer, [VariableNames.Answer] },
