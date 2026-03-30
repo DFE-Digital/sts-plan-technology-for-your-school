@@ -33,7 +33,7 @@ runs:
         echo "::add-mask::${{ inputs.az_object_id }}"
 
         chmod +x .github/scripts/initialise-terraform-state-resources.sh
-        ./scripts/initialise-terraform-state-resources.sh \
+        .github/scripts/initialise-terraform-state-resources.sh \
           -g "${{ inputs.tf_backend_resource_group }}" \
           -l "${{ inputs.az_location }}" \
           -s "${{ inputs.az_object_id }}" \
