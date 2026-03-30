@@ -20,7 +20,6 @@ on:
 
 env:
   IS_DR: ${{ github.event_name == 'workflow_dispatch' && inputs.is_dr || true }}
-  ENVIRONMENT_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
   ARM_USE_OIDC: true
   TF_BACKEND_CONTAINER_NAME: tfstate
   TF_BACKEND_KEY: terraform.tfstate
@@ -28,7 +27,8 @@ env:
 jobs:
   platform-deploy:
     name: Platform deploy
-    environment: ${{ env.ENVIRONMENT_NAME }}
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
@@ -37,6 +37,13 @@ jobs:
     steps:
       - name: Clone repo
         uses: actions/checkout@v4
+
+      - name: Debug environment + secret presence
+        shell: bash
+        run: |
+          echo "event=${{ github.event_name }}"
+          echo "resolved environment=${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}"
+          echo "AZ_OBJECT_ID available=${{ secrets.AZ_OBJECT_ID != '' }}"
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
@@ -93,7 +100,7 @@ jobs:
       - name: Bootstrap
         uses: ./.github/actions/bootstrap
         with:
-          environment: ${{ inputs.environment }}
+          environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
           az_location: ${{ vars.AZ_LOCATION }}
           tf_backend_resource_group: ${{ steps.set-vars.outputs.tf_backend_rg_name }}
           tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
