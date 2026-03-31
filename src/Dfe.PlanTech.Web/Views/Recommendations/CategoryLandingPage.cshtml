@@ -21,15 +21,27 @@
 }
 
 @section RelatedActions {
-    <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
-    <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+    @if (Model.RelatedActions.Any(x =>
+            !string.IsNullOrWhiteSpace(x.Text) &&
+            !string.IsNullOrWhiteSpace(x.Url)))
+    {
+        <hr class="govuk-section-break govuk-section-break--visible custom-hr-blue">
 
-    <p class="govuk-body-s">
-        <a class="govuk-link" href="@Model.Slug/share">Share this list of recommendations</a>
-    </p>
-    <p class="govuk-body-s">
-        <a class="govuk-link" href="@Model.Slug/print">@printLinkText</a>
-    </p>
+        <h2 class="govuk-heading-m govuk-!-padding-top-4">
+            Related actions
+        </h2>
+
+        @foreach (var action in Model.RelatedActions.Where(x =>
+                    !string.IsNullOrWhiteSpace(x.Text) &&
+                    !string.IsNullOrWhiteSpace(x.Url)))
+        {
+            <p class="govuk-body-s">
+                <a class="govuk-link" href="@action.Url">
+                    @action.Text
+                </a>
+            </p>
+        }
+    }
 }
 
 @foreach (var content in Model.BeforeTitleContent)

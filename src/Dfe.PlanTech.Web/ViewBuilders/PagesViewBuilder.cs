@@ -205,7 +205,8 @@ public class PagesViewBuilder(
     private static CategoryLandingPageViewModel BuildLandingPageViewModel(
         Controller controller,
         QuestionnaireCategoryEntry category,
-        string categorySlug
+        string categorySlug,
+        PageEntry? page = null
     )
     {
         return new CategoryLandingPageViewModel
@@ -216,6 +217,14 @@ public class PagesViewBuilder(
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"],
+            RelatedActions = page?.RelatedActions?
+                .Where(x => x is not null)
+                .Select(x => new RelatedActionViewModel
+                {
+                    Text = x.Title ?? string.Empty,
+                    Url = x.Url ?? string.Empty,
+                })
+                .ToList() ?? [],
         };
     }
 
@@ -255,10 +264,11 @@ public class PagesViewBuilder(
         }
 
         var landingPageViewModel = BuildLandingPageViewModel(
-            controller,
-            category,
-            page.Slug
-        );
+        controller,
+        category,
+        page.Slug,
+        page
+    );
         return controller.View(CategoryLandingPageView, landingPageViewModel);
     }
 }
