@@ -87,6 +87,8 @@ az keyvault create \
   --resource-group "$RESOURCE_GROUP_NAME" \
   --location "$AZ_LOCATION" \
   --enable-rbac-authorization true \
+  --enable-purge-protection true \
+  --retention-days 90 \
   >/dev/null || true
 
 #############################################
