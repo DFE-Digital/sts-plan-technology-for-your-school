@@ -17,9 +17,11 @@ public class GroupsSelectorViewModel
 
     public List<ContentfulEntry> Content { get; init; } = [];
 
-    public string? TotalRecommendations { get; set; }
+    public string TotalRecommendations { get; set; } = null!;
 
     public string? ProgressRetrievalErrorMessage { get; init; }
 
     public string? ContactLinkHref { get; set; }
+
+    public List<MicrocopyEntry>? MicrocopyEntries { get; set; }
 }

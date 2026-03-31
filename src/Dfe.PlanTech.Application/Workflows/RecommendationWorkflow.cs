@@ -11,7 +11,7 @@ public class RecommendationWorkflow(
     IStoredProcedureRepository storedProcedureRepository
 ) : IRecommendationWorkflow
 {
-    public async Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+    public async Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationStatusAsync(
         string recommendationContentfulReference,
         int establishmentId
     )
@@ -96,7 +96,7 @@ public class RecommendationWorkflow(
             );
 
         // Get current status, to use it as the new previous status
-        var currentStatus = await GetCurrentRecommendationStatusAsync(
+        var currentStatus = await GetLatestRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId
         );

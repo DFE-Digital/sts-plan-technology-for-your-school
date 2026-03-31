@@ -10,6 +10,7 @@ public static class UrlConstants
     public const string HomePage = "/home";
     public const string Error = "/error";
     public const string NotFound = "/not-found";
+    public const string NotifyError = "/email-sharing-error";
     public const string OrgErrorPage = "/dsi-error-not-associated-organisation";
     public const string RecommendationsPage = "/recommendations";
     public const string SelectASchoolPage = "/groups/select-a-school";

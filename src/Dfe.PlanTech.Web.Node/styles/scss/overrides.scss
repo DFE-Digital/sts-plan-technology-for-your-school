@@ -110,8 +110,13 @@ button.govuk-button--white {
 }
 
 .js-only {
-  display: none !important;
-  visibility: hidden !important;
+  display: none;
+  visibility: hidden;
+}
+
+.js-enabled .js-only {
+  display: block;
+  visibility: visible;
 }
 
 .school-button {

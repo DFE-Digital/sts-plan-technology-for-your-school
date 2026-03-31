@@ -9,7 +9,7 @@ Feature: home page
 
     Then I should see the page heading "Plan technology for your school"
 
-    Then I should see a subheading with the text "How to meet the digital and technology standards"
+    Then I should see a subheading with the text "How to meet the digital technology standards"
 
     Then I should see multiple section cards on the page
 

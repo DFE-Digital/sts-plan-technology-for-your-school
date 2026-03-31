@@ -1,15 +1,11 @@
 using System.Data;
-using System.Data.Common;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -133,7 +129,6 @@ public class StoredProcedureRepository : IStoredProcedureRepository
                         ?? DateTime.UtcNow,
                     LastMaturity = lastCompleteSubmission?.Maturity,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
-                    Viewed = lastCompleteSubmission?.Viewed,
                 };
             })
             .ToList();

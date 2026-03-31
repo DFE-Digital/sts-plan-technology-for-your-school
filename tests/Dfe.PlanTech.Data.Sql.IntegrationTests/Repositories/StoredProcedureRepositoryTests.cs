@@ -13,7 +13,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     public StoredProcedureRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _repository = new StoredProcedureRepository(DbContext);
@@ -46,7 +46,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Establishments.Add(establishment);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submitAnswerModel = new SubmitAnswerModel
         {
@@ -68,7 +68,10 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         Assert.True(result > 0);
 
         // Verify the response was actually created in the database
-        var savedResponse = await DbContext.Responses.FirstOrDefaultAsync(r => r.Id == result);
+        var savedResponse = await DbContext.Responses.FirstOrDefaultAsync(
+            r => r.Id == result,
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(savedResponse);
         Assert.Equal(user.Id, savedResponse!.UserId);
         Assert.Equal(establishment.Id, savedResponse.UserEstablishmentId);
@@ -110,7 +113,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Establishments.Add(establishment);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submitAnswerModel = new SubmitAnswerModel
         {
@@ -140,7 +143,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         var savedResponse = await DbContext
             .Responses.AsNoTracking()
             .Include(r => r.Submission)
-            .FirstOrDefaultAsync(r => r.Id == responseId);
+            .FirstOrDefaultAsync(r => r.Id == responseId, TestContext.Current.CancellationToken);
         Assert.NotNull(savedResponse);
         Assert.NotNull(savedResponse!.Submission);
         Assert.Equal(SubmissionStatus.InProgress, savedResponse.Submission!.Status);
@@ -185,7 +188,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Establishments.AddRange(groupEstablishment, activeSchoolEstablishment);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submitAnswerModel = new SubmitAnswerModel
         {
@@ -206,8 +209,13 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
 
         // Assert
         // The submission created by submitting a response should be linked to the active establishment, not the user's establishment
-        Assert.Equal(1, await DbContext.Submissions.CountAsync());
-        var savedSubmission = await DbContext.Submissions.FirstOrDefaultAsync();
+        Assert.Equal(
+            1,
+            await DbContext.Submissions.CountAsync(TestContext.Current.CancellationToken)
+        );
+        var savedSubmission = await DbContext.Submissions.FirstOrDefaultAsync(
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(savedSubmission);
         Assert.Equal(activeSchoolEstablishment.Id, savedSubmission!.EstablishmentId);
         Assert.NotEqual(groupEstablishment.Id, savedSubmission.EstablishmentId);
@@ -252,7 +260,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Establishments.AddRange(groupEstablishment, activeSchoolEstablishment);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act & Assert (1) - Group user submits first response (creating the "submission"),
         // the "response" establishment ID is the active establishment ID
@@ -271,11 +279,19 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         );
         _ = await _repository.SubmitResponse(assessmentResponse1);
 
-        Assert.Equal(1, await DbContext.Responses.CountAsync());
+        Assert.Equal(
+            1,
+            await DbContext.Responses.CountAsync(TestContext.Current.CancellationToken)
+        );
 
         // The submission created by submitting a response should be linked to the active establishment, not the user's establishment
-        Assert.Equal(1, await DbContext.Submissions.CountAsync());
-        var savedSubmission = await DbContext.Submissions.FirstOrDefaultAsync();
+        Assert.Equal(
+            1,
+            await DbContext.Submissions.CountAsync(TestContext.Current.CancellationToken)
+        );
+        var savedSubmission = await DbContext.Submissions.FirstOrDefaultAsync(
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(savedSubmission);
         Assert.Equal(activeSchoolEstablishment.Id, savedSubmission!.EstablishmentId);
         Assert.NotEqual(groupEstablishment.Id, savedSubmission.EstablishmentId);
@@ -297,12 +313,20 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         );
         _ = await _repository.SubmitResponse(assessmentResponse2);
 
-        Assert.Equal(2, await DbContext.Responses.CountAsync());
+        Assert.Equal(
+            2,
+            await DbContext.Responses.CountAsync(TestContext.Current.CancellationToken)
+        );
 
         // The previous submission should be re-used/continued
         // The establishment ID should remain linked to the school and not the group user's establishment
-        Assert.Equal(1, await DbContext.Submissions.CountAsync());
-        var savedSubmission2 = await DbContext.Submissions.FirstOrDefaultAsync();
+        Assert.Equal(
+            1,
+            await DbContext.Submissions.CountAsync(TestContext.Current.CancellationToken)
+        );
+        var savedSubmission2 = await DbContext.Submissions.FirstOrDefaultAsync(
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(savedSubmission2);
         Assert.Equal(savedSubmission!.Id, savedSubmission2!.Id);
         Assert.Equal(activeSchoolEstablishment.Id, savedSubmission2.EstablishmentId);
@@ -325,12 +349,20 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         );
         _ = await _repository.SubmitResponse(assessmentResponse3);
 
-        Assert.Equal(3, await DbContext.Responses.CountAsync());
+        Assert.Equal(
+            3,
+            await DbContext.Responses.CountAsync(TestContext.Current.CancellationToken)
+        );
 
         // The previous submission should be re-used/continued
         // The establishment ID should remain linked to the school and not the group user's establishment
-        Assert.Equal(1, await DbContext.Submissions.CountAsync());
-        var savedSubmission3 = await DbContext.Submissions.FirstOrDefaultAsync();
+        Assert.Equal(
+            1,
+            await DbContext.Submissions.CountAsync(TestContext.Current.CancellationToken)
+        );
+        var savedSubmission3 = await DbContext.Submissions.FirstOrDefaultAsync(
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(savedSubmission3);
         Assert.Equal(savedSubmission!.Id, savedSubmission3!.Id);
         Assert.Equal(activeSchoolEstablishment.Id, savedSubmission3.EstablishmentId);
@@ -350,7 +382,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
 
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var submission = new SubmissionEntity
         {
@@ -361,7 +393,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act & Assert - Should not throw
         var result = await _repository.SetMaturityForSubmissionAsync(submission.Id);

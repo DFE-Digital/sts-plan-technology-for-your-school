@@ -4,7 +4,6 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
-using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -17,7 +16,6 @@ public class SingleRecommendationViewModel
     public string? OriginatingSlug { get; set; }
 
     public string? SuccessMessageTitle { get; set; }
-    public string? SuccessMessageBody { get; set; }
     public string? StatusErrorMessage { get; set; }
 
     public QuestionnaireSectionEntry Section { get; set; } = null!;
@@ -42,9 +40,9 @@ public class SingleRecommendationViewModel
     public string LastUpdatedFormatted =>
         LastUpdated?.ToString("d MMMM yyyy") ?? RecommendationConstants.DefaultLastUpdatedText;
 
-    public string StatusText =>
-        SelectedStatusKey.GetDisplayName();
+    public string StatusText => SelectedStatusKey.GetDisplayName();
     public string StatusTagClass =>
-        ((RecommendationStatus?)SelectedStatusKey)
-            .GetCssClassOrDefault(RecommendationConstants.DefaultTagClass);
+        ((RecommendationStatus?)SelectedStatusKey).GetCssClassOrDefault(
+            RecommendationConstants.DefaultTagClass
+        );
 }

@@ -1,34 +1,36 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@using static Dfe.PlanTech.Core.Constants.ContentfulMicrocopyConstants
+@inject IMicrocopyProvider Microcopy
 @model CategoryCardsViewComponentViewModel
 
-    <div class="dfe-card">
-        <div class="dfe-card-container">
-            <h3 class="govuk-heading-m">
-                <a href="@Model.CategorySlug" class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
-                    @Model.CategoryHeaderText
-                </a>
-            </h3>
+@{
+    string cardMicrocopyKey = string.Empty;
 
-            <p class="govuk-body-s">
-                @GetStatusText(Model.CompletedSectionCount, Model.TotalSectionCount)
-            </p>
-        </div>
-    </div>
-
-@functions {
-    public static string GetStatusText(int completed, int total)
+    if (Model.CompletedSectionCount == 0 && Model.TotalSectionCount == 1)
     {
-        if (completed == 0 && total == 1)
-        {
-            return "Start self-assessment";
-        }
-
-        if (completed == 0)
-        {
-            return "Start self-assessments";
-        }
-
-        return completed < total
-            ? "Continue self-assessments"
-            : "View recommendations";
+        cardMicrocopyKey = ContentfulMicrocopyConstants.HomeCardStatusSingleNotStarted;
+    }
+    else if (Model.CompletedSectionCount == 0)
+    {
+        cardMicrocopyKey = ContentfulMicrocopyConstants.HomeCardStatusMultipleNotStarted;
+    }
+    else
+    {
+        cardMicrocopyKey = Model.CompletedSectionCount < Model.TotalSectionCount
+            ? ContentfulMicrocopyConstants.HomeCardStatusContinue
+            : ContentfulMicrocopyConstants.HomeCardStatusViewRecommendations;
     }
 }
+
+<div class="dfe-card">
+    <div class="dfe-card-container">
+        <h3 class="govuk-heading-m">
+            <a href="@Model.CategorySlug" class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
+                @Model.CategoryHeaderText
+            </a>
+        </h3>
+        <p class="govuk-body-s">
+            @await Microcopy.GetTextByKeyAsync(cardMicrocopyKey)
+        </p>
+    </div>
+</div>

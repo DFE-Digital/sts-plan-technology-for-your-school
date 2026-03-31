@@ -1,14 +1,15 @@
+using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
 
-namespace Dfe.PlanTech.Web.ViewModels
-{
-    public class ViewAnswersViewModel
-    {
-        public DateTime AssessmentCompletedDate { get; set; }
-        public string TopicName { get; set; } = string.Empty;
-        public List<QuestionWithAnswerModel> Responses { get; set; } = new();
+namespace Dfe.PlanTech.Web.ViewModels;
 
-        public string CategorySlug { get; set; } = string.Empty;
-        public string SectionSlug { get; set; } = string.Empty;
-    }
+[ExcludeFromCodeCoverage]
+public class ViewAnswersViewModel
+{
+    public DateTime AssessmentCompletedDate { get; set; }
+    public string TopicName { get; set; } = string.Empty;
+    public List<QuestionWithAnswerModel> Responses { get; set; } = [];
+    public string CategorySlug { get; set; } = string.Empty;
+    public string SectionSlug { get; set; } = string.Empty;
 }

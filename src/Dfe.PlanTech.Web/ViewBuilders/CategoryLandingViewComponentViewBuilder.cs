@@ -14,9 +14,9 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class CategoryLandingViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
+    ICurrentUser currentUser,
     ISubmissionService submissionService,
-    IUserService userService,
-    ICurrentUser currentUser
+    IUserService userService
 )
     : BaseViewBuilder(logger, contentfulService, currentUser),
         ICategoryLandingViewComponentViewBuilder
@@ -81,8 +81,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
         var viewModel = new CategoryLandingViewComponentViewModel
         {
-            AllSectionsCompleted = completedSectionCount.Equals(category.Sections.Count),
-            AnySectionsCompleted = completedSectionCount > 0,
+            CompletedSectionsCount = completedSectionCount,
             CategoryLandingSections = categoryLandingSections,
             CategoryName = category.Header.Text,
             CategorySlug = slug,
@@ -93,7 +92,7 @@ public class CategoryLandingViewComponentViewBuilder(
             Print = print,
             StatusLinkPartialName = print
                 ? CategoryLandingSectionAssessmentLinkPrintContent
-                : CategoryLandingSectionAssessmentLink,
+                : CategoryLandingSectionAssessmentLink
         };
 
         return viewModel;
@@ -146,7 +145,8 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             return new CategoryLandingSectionRecommendationsViewModel
             {
-                NoRecommendationFoundErrorMessage = $"Section '{section.Name}' has no recommendations"
+                NoRecommendationFoundErrorMessage =
+                    $"Section '{section.Name}' has no recommendations",
             };
         }
 

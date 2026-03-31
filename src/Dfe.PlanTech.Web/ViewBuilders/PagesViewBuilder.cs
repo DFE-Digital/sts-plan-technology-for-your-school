@@ -1,13 +1,16 @@
-using Dfe.PlanTech.Application.Configuration;
+using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -18,8 +21,11 @@ public class PagesViewBuilder(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
+    ICurrentUser currentUser,
     IEstablishmentService establishmentService,
-    ICurrentUser currentUser
+    INotifyService notifyService,
+    ISubmissionService submissionService,
+    IRecommendationService recommendationService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IPagesViewBuilder
 {
     public const string CategoryLandingPageView =
@@ -31,6 +37,12 @@ public class PagesViewBuilder(
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorPagesConfiguration _errorPages =
         errorPages?.Value ?? throw new ArgumentNullException(nameof(errorPages));
+    private readonly INotifyService _notifyService =
+        notifyService ?? throw new ArgumentNullException(nameof(notifyService));
+    private readonly ISubmissionService _submissionService =
+        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IRecommendationService _recommendationService =
+        recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
 
     public async Task<IActionResult> RouteBasedOnOrganisationTypeAsync(
         Controller controller,
@@ -71,18 +83,10 @@ public class PagesViewBuilder(
 
         if (page.IsLandingPage == true)
         {
-            var category = await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4);
-            if (category is null)
-            {
-                throw new ContentfulDataUnavailableException(
-                    $"Could not find category at {controller.Request.Path.Value}"
-                );
-            }
-            var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
-            return controller.View(CategoryLandingPageView, landingPageViewModel);
+            return await RouteToLandingPageView(controller, page);
         }
 
-        controller.ViewData["Title"] =
+        controller.ViewData[StatePassingMechanismConstants.Title] =
             StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text)
             ?? PageTitleConstants.PlanTechnologyForYourSchool;
 
@@ -125,24 +129,88 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = BuildLandingPageViewModelAsync(controller, category);
+        var landingPageViewModel = BuildLandingPageViewModel(
+            controller,
+            category,
+            categorySlug
+        );
 
         return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
 
-    private static CategoryLandingPageViewModel BuildLandingPageViewModelAsync(
+    public async Task<IActionResult> RouteToShareStandardPageAsync(
         Controller controller,
-        QuestionnaireCategoryEntry category
+        string categorySlug,
+        ShareByEmailInputViewModel? inputModel = null
     )
     {
-        if (category.LandingPage is null)
+        var category = await ContentfulService.GetCategoryBySlugAsync(categorySlug, 4);
+        if (category is null)
         {
-            throw new InvalidDataException("Cannot build a landing page with an empty slug");
+            return controller.RedirectToHomePage();
         }
 
+        var viewModel = BuildShareByEmailViewModel(
+            nameof(PagesController),
+            nameof(PagesController.ShareStandard),
+            category,
+            null,
+            categorySlug,
+            null,
+            null,
+            inputModel
+        );
+
+        if (inputModel is null || !controller.ModelState.IsValid)
+        {
+            return controller.View(ShareByEmailViewName, viewModel);
+        }
+
+        var establishmentName =
+            await CurrentUser.GetActiveEstablishmentNameAsync()
+            ?? throw new InvalidDataException(
+                "Cannot send an email without an active establishment name"
+            );
+
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var recommendationStatuses =
+            await _recommendationService.GetLatestRecommendationStatusesAsync(establishmentId);
+
+        var sectionIds = category.Sections.Select(s => s.Id).ToList();
+
+        var sectionStatuses = await _submissionService.GetSectionStatusesForSchoolAsync(
+            establishmentId,
+            sectionIds
+        );
+
+        var notifyResults = _notifyService.SendStandardEmail(
+            inputModel.ToModel(),
+            category.Sections,
+            sectionStatuses,
+            recommendationStatuses,
+            category.Header.Text,
+            establishmentName
+        );
+
+        var returnToModel = new ActionViewModel(
+            actionName: nameof(PagesController.GetByRoute),
+            controllerName: nameof(PagesController),
+            linkText: $"Back to {category.Header.Text.ToLower()}",
+            routeValues: new Dictionary<string, string> { { "route", categorySlug } }
+        );
+
+        return HandleNotifyShareResults(controller, notifyResults, returnToModel);
+    }
+
+    private static CategoryLandingPageViewModel BuildLandingPageViewModel(
+        Controller controller,
+        QuestionnaireCategoryEntry category,
+        string categorySlug
+    )
+    {
         return new CategoryLandingPageViewModel
         {
-            Slug = category.LandingPage?.Slug ?? string.Empty,
+            Slug = categorySlug,
             BeforeTitleContent = category.LandingPage?.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(category.Header.Text),
             Category = category,
@@ -151,9 +219,46 @@ public class PagesViewBuilder(
         };
     }
 
-    public async Task<NotFoundViewModel> BuildNotFoundViewModel()
+    public async Task<NotFoundViewModel> BuildNotFoundViewModelAsync()
     {
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
         return new NotFoundViewModel { ContactLinkHref = contactLink?.Href };
+    }
+
+    public NotifyShareResultsViewModel? BuildNotifyShareResultsViewModel(Controller controller)
+    {
+        var tempData =
+            controller.TempData[StatePassingMechanismConstants.NotifyShareResults] as string;
+
+        NotifyShareResultsViewModel? shareResultsViewModel = null;
+        if (tempData is not null)
+        {
+            shareResultsViewModel = JsonSerializer.Deserialize<NotifyShareResultsViewModel>(
+                tempData
+            );
+        }
+
+        return shareResultsViewModel;
+    }
+
+    private async Task<IActionResult> RouteToLandingPageView(Controller controller, PageEntry page)
+    {
+        var category =
+            await ContentfulService.GetCategoryBySlugAsync(page.Slug, 4)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category at {controller.Request.Path.Value}"
+            );
+
+        if (string.IsNullOrWhiteSpace(page.Slug))
+        {
+            throw new InvalidDataException("Page Slug cannot be empty");
+        }
+
+        var landingPageViewModel = BuildLandingPageViewModel(
+            controller,
+            category,
+            page.Slug
+        );
+        return controller.View(CategoryLandingPageView, landingPageViewModel);
     }
 }

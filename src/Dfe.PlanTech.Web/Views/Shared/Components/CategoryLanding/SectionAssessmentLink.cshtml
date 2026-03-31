@@ -1,35 +1,44 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model StatusLinkViewModel
 
 @{
-    string statusText;
-    string linkText;
+
+    string statusTextKey;
+    string linkTextKey;
     string? controller = null;
     string? action = null;
 
     var topic = Model.Section;
-    var topicName = topic.Name.ToLower().Trim();
     var topicSlug = topic.Slug ?? string.Empty;
     var topicStatus = topic.ProgressStatus;
     var categorySlug = Model.CategorySlug;
+
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["dateUpdated"] = topic.DateUpdated ?? "",
+        ["topic"] = topic.Name.ToLower().Trim(),
+        ["dateCompleted"] = topic.LastCompletionDate ?? ""
+    };
 
     switch (topicStatus)
     {
         case SubmissionStatus.InProgress:
         case SubmissionStatus.Obsolete:
-            statusText = $"A self-assessment was started on {topic.DateUpdated}.";
-            linkText = $"Continue your self-assessment for {topicName}";
+            statusTextKey = ContentfulMicrocopyConstants.LandingPageTopicIntroContinue;
+            linkTextKey = ContentfulMicrocopyConstants.LandingPageTopicLinkContinue;
             controller = nameof(QuestionsController);
             action = nameof(QuestionsController.GetContinueSelfAssessment);
             break;
         case SubmissionStatus.CompleteReviewed:
-            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
-            linkText = $"View answers for {topicName}";
+            statusTextKey = ContentfulMicrocopyConstants.LandingPageTopicIntroCompleted;
+            linkTextKey = ContentfulMicrocopyConstants.LandingPageTopicLinkCompleted;
             controller = nameof(ReviewAnswersController);
             action = nameof(ReviewAnswersController.ViewAnswers);
             break;
         default:
-            statusText = "";
-            linkText = $"Go to self-assessment for {topicName}";
+            statusTextKey = "";
+            linkTextKey = ContentfulMicrocopyConstants.LandingPageTopicLinkNotStarted;
             controller = nameof(QuestionsController);
             action = nameof(QuestionsController.GetInterstitialPage);
             break;
@@ -55,12 +64,14 @@
         topicStatus == SubmissionStatus.Obsolete ||
         topicStatus == SubmissionStatus.InProgress;
 
+    var linkText = await Microcopy.GetTextByKeyAsync(linkTextKey, dynamicValues);
+
     if (Model.Context == "Sections")
     {
         if (noDescriptionFormat)
         {
             <p>
-                @statusText
+                @await Microcopy.GetTextByKeyAsync(statusTextKey, dynamicValues)
             </p>
             <p>
                 <a asp-controller="@controller" asp-action="@action" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@topicSlug"

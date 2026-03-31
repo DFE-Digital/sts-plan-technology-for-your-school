@@ -15,6 +15,5 @@ public class SqlSubmissionDto : ISqlDto
     public DateTime? DateCompleted { get; set; }
     public IEnumerable<SqlResponseDto> Responses { get; set; } = [];
     public bool Deleted { get; set; }
-    public bool Viewed { get; set; }
     public SubmissionStatus Status { get; set; }
 }
