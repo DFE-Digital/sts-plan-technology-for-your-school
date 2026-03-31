@@ -221,13 +221,7 @@
 
                                     @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
                                     {
-                                        <p>
-                                            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange,
-                                                new Dictionary<string, string>
-                                                { 
-                                                    ["recStatus"] = history.NewStatus.Value.GetDisplayName() ?? string.Empty 
-                                                }
-                                        </p>
+                                        <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, new Dictionary<string, string>{ ["recStatus"] = history.NewStatus.Value.GetDisplayName() ?? string.Empty })</p>
                                     }
                                 }
                             }
