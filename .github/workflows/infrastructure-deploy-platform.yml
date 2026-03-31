@@ -72,10 +72,10 @@ jobs:
           CLEAN_TF="${TF_BACKEND_RESOURCE_GROUP//-/}"
 
           AZ_SA_COSTING_NAME="${CLEAN_ACA}costing"
-          TF_BACKEND_STORAGE_ACCOUNT_NAME="${CLEAN_TF}tfstate"
+          TF_BACKEND_STORAGE_ACCOUNT_NAME="${CLEAN_ACA}tfstate"
           ACR_NAME="${CLEAN_ACA}"
           COSTINGS_NAME="${CLEAN_ACA}costing"
-          TF_SECRETS_KEYVAULT_NAME="${CLEAN_TF}kv"
+          TF_SECRETS_KEYVAULT_NAME="${CLEAN_ACA}kv"
           AZ_KEYVAULT_NAME="${CLEAN_ACA}kv"
 
           echo "az_sa_costing_name=$AZ_SA_COSTING_NAME" >> "$GITHUB_OUTPUT"
