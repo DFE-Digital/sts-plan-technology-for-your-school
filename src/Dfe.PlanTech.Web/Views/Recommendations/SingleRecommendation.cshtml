@@ -8,7 +8,6 @@
         ["position"] = Model.CurrentChunkPosition.ToString(),
         ["totalRecsForTopic"] = Model.TotalChunks.ToString(),
         ["topic"] = Model.Section.Name.ToLower(),
-        ["recStatus"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
         ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty,
         ["answer"] = Model.FirstActivity?.AnswerText ?? string.Empty,
     };
@@ -194,7 +193,11 @@
                                 @if (Model.FirstActivity is not null && history.DateCreated.Equals(Model.FirstActivity.StatusChangeDate))
                                 {
                                     <p>
-                                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, dynamicValues)
+                                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, new Dictionary<string, string>
+                                            { 
+                                                ["recStatus"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
+                                                ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty 
+                                            })
                                     </p>
 
                                 <p><strong>@Model.FirstActivity.QuestionText</strong></p>
@@ -218,7 +221,13 @@
 
                                     @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
                                     {
-                                        <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, dynamicValues)</p>
+                                        <p>
+                                            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange,
+                                                new Dictionary<string, string>
+                                                { 
+                                                    ["recStatus"] = history.NewStatus.Value.GetDisplayName() ?? string.Empty 
+                                                }
+                                        </p>
                                     }
                                 }
                             }
