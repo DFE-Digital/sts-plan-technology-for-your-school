@@ -66,6 +66,8 @@ az storage account create \
   --sku Standard_LRS \
   --kind StorageV2 \
   --allow-blob-public-access false \
+  --https-only true \
+  --min-tls-version TLS1_2 \
   >/dev/null || true
 
 #############################################
