@@ -160,7 +160,6 @@ public static class ContentfulMicrocopyConstants
         public const string Topic = "topic";
         public const string DateUpdated = "dateUpdated";
         public const string DateCompleted = "dateCompleted";
-        public const string Status = "status";
         public const string Position = "position";
         public const string TotalRecsForTopic = "totalRecsForTopic";
         public const string RecStatus = "recStatus";
@@ -183,7 +182,7 @@ public static class ContentfulMicrocopyConstants
         { LandingPageTopicLinkCompleted, [VariableNames.Topic] },
         { LandingPageSuccessPanelHeader, [VariableNames.Topic] },
         { SingleRecommendationPrintAllLink, [VariableNames.Topic] },
-        { SingleRecommendationSuccessHeader, [VariableNames.Status] },
+        { SingleRecommendationSuccessHeader, [VariableNames.RecStatus] },
         { SingleRecommendationPosition, [VariableNames.Position, VariableNames.TotalRecsForTopic] },
         { SingleRecommendationHistoryInitial, [VariableNames.RecStatus, VariableNames.Establishment] },
         { SingleRecommendationHistoryAnswer, [VariableNames.Answer] },
