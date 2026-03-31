@@ -82,13 +82,30 @@ az storage container create \
 #############################################
 # Key Vault (for tfvars secrets)
 #############################################
-az keyvault create \
-  --name "$KEYVAULT_NAME" \
+TENANT_ID="$(az account show --query tenantId -o tsv)"
+
+az resource create \
   --resource-group "$RESOURCE_GROUP_NAME" \
-  --location "$AZ_LOCATION" \
-  --enable-rbac-authorization true \
-  --enable-purge-protection true \
-  --retention-days 90 \
+  --resource-type "Microsoft.KeyVault/vaults" \
+  --name "$KEYVAULT_NAME" \
+  --api-version "2025-05-01" \
+  --is-full-object \
+  --properties "{
+    \"location\": \"$AZ_LOCATION\",
+    \"type\": \"Microsoft.KeyVault/vaults\",
+    \"name\": \"$KEYVAULT_NAME\",
+    \"properties\": {
+      \"tenantId\": \"$TENANT_ID\",
+      \"sku\": {
+        \"family\": \"A\",
+        \"name\": \"standard\"
+      },
+      \"enableRbacAuthorization\": true,
+      \"enableSoftDelete\": true,
+      \"enablePurgeProtection\": true,
+      \"softDeleteRetentionInDays\": 90
+    }
+  }" \
   >/dev/null || true
 
 #############################################
