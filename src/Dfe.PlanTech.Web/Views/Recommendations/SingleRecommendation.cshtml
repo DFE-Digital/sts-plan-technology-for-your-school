@@ -211,17 +211,17 @@
                                 }
                                 else
                                 {
-                                    @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
-                                    {
-                                        <p>@ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, dynamicValues)</p>
-                                    }
-
                                     @if (!string.IsNullOrWhiteSpace(history.NoteText))
                                     {
                                         <p>@history.NoteText</p>
                                     }
+
+                                    @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
+                                    {
+                                        <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, dynamicValues)</p>
+                                    }
+                                }
                             }
-                        }
                     </govuk-accordion-item-content>
                 </govuk-accordion-item>
             }
