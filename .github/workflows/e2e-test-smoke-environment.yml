@@ -85,7 +85,7 @@ jobs:
 
           echo "::add-mask::$secret_value"
           echo "MOCK_AUTH_CLIENT_SECRET=$secret_value" >> "$GITHUB_ENV"
-          
+
       - name: Set environment-specific variables
         shell: bash
         run: |
@@ -110,12 +110,19 @@ jobs:
       - name: Turn on Automated Testing Content on environment
         if: always()
         uses: azure/cli@v2
+        env:
+          MOCK_AUTH_MODE: ${{ env.MOCK_AUTH_MODE }}
+          MOCK_AUTH_CLIENT_SECRET: ${{ env.MOCK_AUTH_CLIENT_SECRET }}
         with:
           inlineScript: |
             az containerapp update \
               --name ${{ secrets.AZ_ACA_NAME }} \
               --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
-              --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=true
+              --set-env-vars \
+              AutomatedTesting__Contentful__IncludeTaggedContent=true \
+              AutomatedTesting__MockAuthentication__ClientSecret="${MOCK_AUTH_CLIENT_SECRET}" \
+              DfeSignIn__Authority="${APP_URL}/api/mock-auth/token" \
+              DfeSignIn__MetadataUrl="${APP_URL}/api/mock-auth/.well-known/openid-configuration"
 
       - name: Install NPM dependencies
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
