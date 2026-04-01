@@ -14,6 +14,10 @@ on:
       environment:
         required: true
         type: string
+      use_mock_auth:
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: '${{ github.workflow }}'
@@ -35,7 +39,8 @@ jobs:
       KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: e2e-tests-pr
-
+      MOCK_AUTH_MODE: ${{ inputs.use_mock_auth && 'true' || 'false' }}
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v4
