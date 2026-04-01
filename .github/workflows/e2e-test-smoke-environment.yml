@@ -79,7 +79,7 @@ jobs:
         run: |
           secret_value="$(az keyvault secret show \
             --vault-name "${KEYVAULT_NAME}" \
-            --name "e2e_mock_auth_client_secret" \
+            --name "e2e-mock-auth-client-secret" \
             --query value \
             --output tsv)"
 
