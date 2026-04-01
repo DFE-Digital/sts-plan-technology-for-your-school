@@ -9,7 +9,11 @@ on:
         type: choice
         options: ['Dev', 'Tst', 'Staging', 'StagingUnprotected']
         default: 'Dev'
-
+      use_mock_auth:
+        description: Use mock auth
+        required: false
+        type: boolean
+        default: false
   # pull_request:
   #   branches: ['main', 'development']
   #   paths:
@@ -40,6 +44,7 @@ jobs:
       SQL_IP_NAME: e2e-tests-pr
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      MOCK_AUTH_MODE: ${{ inputs.use_mock_auth && 'true' || 'false' }}
 
     steps:
       - name: Checkout
@@ -122,6 +127,19 @@ jobs:
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
+      - name: Get mock auth client secret from Key Vault
+        if: ${{ env.MOCK_AUTH_MODE == 'true' }}
+        shell: bash
+        run: |
+          secret_value="$(az keyvault secret show \
+            --vault-name "${KEYVAULT_NAME}" \
+            --name "e2e-mock-auth-client-secret" \
+            --query value \
+            --output tsv)"
+
+          echo "::add-mask::$secret_value"
+          echo "MOCK_AUTH_CLIENT_SECRET=$secret_value" >> "$GITHUB_ENV"
+
       - name: Start Redis cache
         shell: bash
         run: |
@@ -132,6 +150,8 @@ jobs:
         working-directory: ./build
         env:
           SA_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
+          MOCK_AUTH_MODE: ${{ env.MOCK_AUTH_MODE }}
+          MOCK_AUTH_CLIENT_SECRET: ${{ env.MOCK_AUTH_CLIENT_SECRET }}
         run: |
           export ASPNETCORE_ENVIRONMENT=E2E
           export KeyVaultName=${{ env.KEYVAULT_NAME }}
@@ -141,8 +161,15 @@ jobs:
           export GTM__SiteVerificationId=testing_site_verification_id
           export AutomatedTesting__Contentful__Tag=e2e
           export AutomatedTesting__Contentful__IncludeTaggedContent=true
-          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 --ConnectionStrings:Redis="localhost:6379,abortConnect=false" --ConnectionStrings:Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db" &
 
+          if [ "${MOCK_AUTH_MODE,,}" = "true" ]; then
+            export AutomatedTesting__MockAuthentication__ClientSecret="$MOCK_AUTH_CLIENT_SECRET"
+            export DfeSignIn__Authority=https://localhost:8081/api/mock-auth/token
+            export DfeSignIn__MetadataUrl=https://localhost:8081/api/mock-auth/.well-known/openid-configuration
+          fi
+
+          dotnet ./Dfe.PlanTech.Web.dll --DfeSignIn:FrontDoorUrl=https://localhost:8081 --ConnectionStrings:Redis="localhost:6379,abortConnect=false" --ConnectionStrings:Database="Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=$SA_PASSWORD;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;Max Pool Size=1000;Database=plantech-mock-db" &
+      
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
