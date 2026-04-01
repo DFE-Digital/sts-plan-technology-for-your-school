@@ -384,11 +384,11 @@ public class MockAuthController(
             case "Development":
                 break;
             case "Dev":
-                return $"https://dev.plan-technology-for-your-school.education.gov.uk/";
+                return $"https://dev.plan-technology-for-your-school.education.gov.uk/api/mock-auth";
             case "Test":
-                return $"https://test.dev.plan-technology-for-your-school.education.gov.uk/";
+                return $"https://test.dev.plan-technology-for-your-school.education.gov.uk/api/mock-auth";
             case "Staging":
-                return $"https://staging.plan-technology-for-your-school.education.gov.uk/";
+                return $"https://staging.plan-technology-for-your-school.education.gov.uk/api/mock-auth";
 
         }
         return $"{Request.Scheme}://{Request.Host}/api/mock-auth";
