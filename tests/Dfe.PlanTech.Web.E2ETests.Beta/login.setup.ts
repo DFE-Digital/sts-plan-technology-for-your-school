@@ -85,6 +85,8 @@ async function loginAndSaveSession(
 (async () => {
   const loginUrl = buildUrl(process.env.URL, 'home');
 
+  console.log('MOCK_AUTH_MODE:', process.env.MOCK_AUTH_MODE);
+  
   const isMockAuth = process.env.MOCK_AUTH_MODE == 'true';
 
   if (!isMockAuth) {
