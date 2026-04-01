@@ -74,39 +74,39 @@ jobs:
           az_resource_group: ${{ env.RESOURCE_GROUP }}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
-    - name: Get mock auth client secret from Key Vault
-      if: ${{ env.MOCK_AUTH_MODE == 'true' }}
-      shell: bash
-      run: |
-        secret_value="$(az keyvault secret show \
-          --vault-name "${KEYVAULT_NAME}" \
-          --name "e2e_mock_auth_client_secret" \
-          --query value \
-          --output tsv)"
+      - name: Get mock auth client secret from Key Vault
+        if: ${{ env.MOCK_AUTH_MODE == 'true' }}
+        shell: bash
+        run: |
+          secret_value="$(az keyvault secret show \
+            --vault-name "${KEYVAULT_NAME}" \
+            --name "e2e_mock_auth_client_secret" \
+            --query value \
+            --output tsv)"
 
-        echo "::add-mask::$secret_value"
-        echo "MOCK_AUTH_CLIENT_SECRET=$secret_value" >> "$GITHUB_ENV"
+          echo "::add-mask::$secret_value"
+          echo "MOCK_AUTH_CLIENT_SECRET=$secret_value" >> "$GITHUB_ENV"
 
-    - name: Set environment-specific variables
-      shell: bash
-      run: |
-        SELECTED_ENV="${{ inputs.environment || github.event.inputs.environment || 'Tst' }}"
+      - name: Set environment-specific variables
+        shell: bash
+        run: |
+          SELECTED_ENV="${{ inputs.environment || github.event.inputs.environment || 'Tst' }}"
 
-        case "$SELECTED_ENV" in
-          Dev)
-            echo "APP_URL=https://dev.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
-            ;;
-          Tst)
-            echo "APP_URL=https://test.dev.plan-technology-for-your-school.education.gov.uk >> "$GITHUB_ENV"
-            ;;
-          Staging)
-            echo "APP_URL=https://staging.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
-            ;;
-          *)
-            echo "Unknown environment: $SELECTED_ENV"
-            exit 1
-            ;;
-        esac
+          case "$SELECTED_ENV" in
+            Dev)
+              echo "APP_URL=https://dev.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
+              ;;
+            Tst)
+              echo "APP_URL=https://test.dev.plan-technology-for-your-school.education.gov.uk >> "$GITHUB_ENV"
+              ;;
+            Staging)
+              echo "APP_URL=https://staging.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "Unknown environment: $SELECTED_ENV"
+              exit 1
+              ;;
+          esac
 
       - name: Turn on Automated Testing Content on environment
         if: always()
