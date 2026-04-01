@@ -30,7 +30,7 @@ if (builder.Environment.EnvironmentName != "E2E")
 {
     builder.Services.AddDbWriterServices(builder.Configuration);
 }
-
+builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddCommandLine(args);
 
 builder.AddSystemConfiguration();
