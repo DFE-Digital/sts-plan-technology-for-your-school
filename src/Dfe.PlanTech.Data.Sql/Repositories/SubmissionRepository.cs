@@ -269,7 +269,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            status: SubmissionStatus.InProgress
+            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
         );
 
         var submission =
@@ -300,7 +300,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            status: SubmissionStatus.InProgress
+            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
         );
 
         var submission = await query.FirstOrDefaultAsync();
