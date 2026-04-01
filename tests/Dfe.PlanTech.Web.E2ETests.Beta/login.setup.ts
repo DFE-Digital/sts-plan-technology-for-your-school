@@ -25,6 +25,7 @@ async function loginAndSaveSession(
   const headless = process.env.HEADLESS ? process.env.HEADLESS === 'true' : isCI; // CI => headless
   const slowMo = process.env.SLOWMO ? Number(process.env.SLOWMO) : isCI ? 0 : 100;
 
+
   const browser = await chromium.launch({ headless, slowMo });
 
   const ignoreHTTPSErrors = process.env.CI === 'true';
@@ -69,36 +70,127 @@ async function loginAndSaveSession(
     await passwordSubmit.click();
 
     // Settle the app
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => { });
 
     // Persist storage state
     const outputPath = path.resolve(storageDir, outputFilename);
     await context.storageState({ path: outputPath });
     console.log(`Saved storage state for ${outputFilename}`);
   } finally {
-    await context.close().catch(() => {});
-    await browser.close().catch(() => {});
+    await context.close().catch(() => { });
+    await browser.close().catch(() => { });
   }
 }
 
 (async () => {
   const loginUrl = buildUrl(process.env.URL, 'home');
 
-  const users = [
-    { envEmail: 'DSI_SCHOOL_EMAIL', envPassword: 'DSI_SCHOOL_PASSWORD', output: 'school.json' },
-    { envEmail: 'DSI_MAT_EMAIL', envPassword: 'DSI_MAT_PASSWORD', output: 'mat.json' },
-    { envEmail: 'DSI_NOORG_EMAIL', envPassword: 'DSI_NOORG_PASSWORD', output: 'no-org.json' },
-  ] as const;
+  const isMockAuth = process.env.MOCK_AUTH_MODE == 'true';
 
-  for (const user of users) {
-    const email = process.env[user.envEmail];
-    const password = process.env[user.envPassword];
+  if (!isMockAuth) {
+    const users = [
+      { envEmail: 'DSI_SCHOOL_EMAIL', envPassword: 'DSI_SCHOOL_PASSWORD', output: 'school.json' },
+      { envEmail: 'DSI_MAT_EMAIL', envPassword: 'DSI_MAT_PASSWORD', output: 'mat.json' },
+      { envEmail: 'DSI_NOORG_EMAIL', envPassword: 'DSI_NOORG_PASSWORD', output: 'no-org.json' },
+    ] as const;
 
-    if (!email || !password) {
-      console.warn(`Missing credentials for ${user.output} – skipped`);
-      continue;
+    for (const user of users) {
+      const email = process.env[user.envEmail];
+      const password = process.env[user.envPassword];
+
+      if (!email || !password) {
+        console.warn(`Missing credentials for ${user.output} – skipped`);
+        continue;
+      }
+
+      await loginAndSaveSession(email, password, loginUrl, user.output);
     }
 
-    await loginAndSaveSession(email, password, loginUrl, user.output);
   }
+  else {
+
+    await loginAndSaveMockSession('school', process.env.URL as string, 'school.json');
+    await loginAndSaveMockSession('mat', process.env.URL as string, 'mat.json');
+    await loginAndSaveMockSession('noorg', process.env.URL as string, 'no-org.json');
+  }
+
+
 })();
+
+
+async function loginAndSaveMockSession(
+  organisationType: string,
+  loginUrl: string,
+  outputFilename: string,
+) {
+  const isCI = !!process.env.CI;
+  const headless = process.env.HEADLESS ? process.env.HEADLESS === 'true' : isCI; // CI => headless
+  const slowMo = process.env.SLOWMO ? Number(process.env.SLOWMO) : isCI ? 0 : 100;
+
+  const browser = await chromium.launch({ headless, slowMo });
+
+  const ignoreHTTPSErrors = process.env.CI === 'true';
+  const context = await browser.newContext({ ignoreHTTPSErrors });
+
+  await context.addCookies([
+    {
+      name: 'e2e_user',
+      value: organisationType,
+      domain: 'localhost',
+      path: '/',
+      httpOnly: false,
+      secure: false,
+      sameSite: 'Lax',
+    },
+    {
+      name: 'e2e_key',
+      value: process.env.MOCK_AUTH_CLIENT_SECRET as string,
+      domain: 'localhost',
+      path: '/',
+      httpOnly: false,
+      secure: false,
+      sameSite: 'Lax',
+    },
+    {
+      name: 'user_cookie_preferences',
+      value: JSON.stringify({
+        IsVisible: false,
+        UserAcceptsCookies: true,
+      }),
+      domain: 'localhost',
+      path: '/',
+      httpOnly: false,
+      secure: false,
+      sameSite: 'Lax',
+    },
+  ]);
+
+  const page = await context.newPage();
+
+  try {
+    await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
+
+    try {
+      await page.locator('.govuk-heading-xl').waitFor({ timeout: 10000 });
+    } catch (err) {
+      console.error('Timeout waiting for h1 header');
+      console.error('Final URL:', page.url());
+
+      throw err;
+    }
+
+    const submit = page.getByRole('button', { name: 'Go to DfE Sign-in' });
+    await submit.click();
+
+    // Settle the app
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => { });
+
+    // Persist storage state
+    const outputPath = path.resolve(storageDir, outputFilename);
+    await context.storageState({ path: outputPath });
+    console.log(`Saved storage state for ${outputFilename}`);
+  } finally {
+    await context.close().catch(() => { });
+    await browser.close().catch(() => { });
+  }
+}
