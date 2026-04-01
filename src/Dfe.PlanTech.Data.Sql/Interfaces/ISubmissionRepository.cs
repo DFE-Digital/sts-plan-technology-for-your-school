@@ -20,6 +20,11 @@ public interface ISubmissionRepository
         string sectionId,
         SubmissionStatus? status
     );
+    Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    );
     Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId);
     Task<SubmissionEntity> SetSubmissionInaccessibleAsync(int submissionId);
     Task<SubmissionEntity> SetSubmissionInProgressAsync(int submissionId);

@@ -176,6 +176,38 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         return submission;
     }
 
+    // Overload that allows for multiple statuses to be returned from the query
+    public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        // Get latest submission
+        var submission = await GetPreviousSubmissionsInDescendingOrder(
+                establishmentId,
+                sectionId,
+                statuses
+            )
+            .FirstOrDefaultAsync();
+
+        if (submission is null)
+            return null;
+
+        submission.Responses = submission
+            .Responses.OrderByDescending(response => response.DateLastUpdated)
+            .GroupBy(response => response.QuestionId)
+            .Select(group =>
+                group
+                    .OrderByDescending(response => response.DateLastUpdated)
+                    .ThenByDescending(response => response.Id)
+                    .First()
+            )
+            .ToList();
+
+        return submission;
+    }
+
     public Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId)
     {
         return GetSubmissionsBy(s => s.Id == submissionId).FirstOrDefaultAsync();
@@ -310,6 +342,30 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 && submission.EstablishmentId == establishmentId
                 && submission.SectionId == sectionId
                 && (status == null || submission.Status == status)
+            )
+            .OrderByDescending(submission => submission.DateCreated);
+    }
+
+    // Overload that returns submissions with any of the specified statuses
+    private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        if (statuses == null)
+            throw new ArgumentNullException(nameof(statuses));
+
+        var statusOptions = statuses.ToList();
+
+        if (statusOptions.Count == 0)
+            throw new ArgumentException("At least one submission status must be provided", nameof(statuses));
+
+        return GetSubmissionsBy(submission =>
+                !submission.Deleted
+                && submission.EstablishmentId == establishmentId
+                && submission.SectionId == sectionId
+                && statusOptions.Contains(submission.Status)
             )
             .OrderByDescending(submission => submission.DateCreated);
     }

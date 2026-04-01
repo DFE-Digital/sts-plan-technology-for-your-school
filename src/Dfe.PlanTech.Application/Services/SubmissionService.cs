@@ -62,6 +62,21 @@ public class SubmissionService(
         return submission is null ? null : new SubmissionResponsesModel(submission, section);
     }
 
+    // Overload to take multiple statuses to include in query
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        IEnumerable<SubmissionStatus> statuses
+)
+    {
+        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+            establishmentId,
+            section.Id,
+            statuses
+        );
+        return submission is null ? null : new SubmissionResponsesModel(submission, section);
+    }
+
     public Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId)
     {
         return _submissionWorkflow.GetSubmissionByIdAsync(submissionId);

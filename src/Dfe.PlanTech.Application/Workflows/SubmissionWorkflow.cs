@@ -81,6 +81,27 @@ public class SubmissionWorkflow(
         return latestSubmission.AsDto();
     }
 
+    // Overload to take multiple statuses to include in query
+    public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
+            establishmentId,
+            sectionId,
+            statuses
+        );
+        if (latestSubmission is null)
+        {
+            return null;
+        }
+
+        latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses).ToList();
+        return latestSubmission.AsDto();
+    }
+
     // On the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
     // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
     public async Task<int> SubmitAnswer(
