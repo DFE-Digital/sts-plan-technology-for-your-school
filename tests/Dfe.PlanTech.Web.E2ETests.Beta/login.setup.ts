@@ -30,6 +30,7 @@ async function loginAndSaveSession(
 
   const ignoreHTTPSErrors = process.env.CI === 'true';
   const context = await browser.newContext({ ignoreHTTPSErrors });
+  const cookieUrl = new URL(loginUrl).origin;
 
   await context.addCookies([
     {
@@ -38,10 +39,9 @@ async function loginAndSaveSession(
         IsVisible: false,
         UserAcceptsCookies: true,
       }),
-      domain: 'localhost',
-      path: '/',
+      url: cookieUrl,
       httpOnly: false,
-      secure: false,
+      secure: cookieUrl.startsWith('https://'),
       sameSite: 'Lax',
     },
   ]);
@@ -86,7 +86,7 @@ async function loginAndSaveSession(
   const loginUrl = buildUrl(process.env.URL, 'home');
 
   console.log('MOCK_AUTH_MODE:', process.env.MOCK_AUTH_MODE);
-  
+
   const isMockAuth = process.env.MOCK_AUTH_MODE == 'true';
 
   if (!isMockAuth) {
@@ -134,23 +134,23 @@ async function loginAndSaveMockSession(
   const ignoreHTTPSErrors = process.env.CI === 'true';
   const context = await browser.newContext({ ignoreHTTPSErrors });
 
+  const cookieUrl = new URL(loginUrl).origin;
+
   await context.addCookies([
     {
       name: 'e2e_user',
       value: organisationType,
-      domain: 'localhost',
-      path: '/',
+      url: cookieUrl,
       httpOnly: false,
-      secure: false,
+      secure: cookieUrl.startsWith('https://'),
       sameSite: 'Lax',
     },
     {
       name: 'e2e_key',
       value: process.env.MOCK_AUTH_CLIENT_SECRET as string,
-      domain: 'localhost',
-      path: '/',
+      url: cookieUrl,
       httpOnly: false,
-      secure: false,
+      secure: cookieUrl.startsWith('https://'),
       sameSite: 'Lax',
     },
     {
@@ -159,10 +159,9 @@ async function loginAndSaveMockSession(
         IsVisible: false,
         UserAcceptsCookies: true,
       }),
-      domain: 'localhost',
-      path: '/',
+      url: cookieUrl,
       httpOnly: false,
-      secure: false,
+      secure: cookieUrl.startsWith('https://'),
       sameSite: 'Lax',
     },
   ]);
@@ -170,6 +169,7 @@ async function loginAndSaveMockSession(
   const page = await context.newPage();
 
   try {
+
     await page.goto(loginUrl, { waitUntil: 'domcontentloaded' });
 
     try {
