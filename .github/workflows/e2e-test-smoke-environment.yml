@@ -146,6 +146,8 @@ jobs:
       - name: Run Playwright + Cucumber tests (with recording)
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
         env:
+          MOCK_AUTH_MODE: ${{ env.MOCK_AUTH_MODE }}
+          MOCK_AUTH_CLIENT_SECRET: ${{ env.MOCK_AUTH_CLIENT_SECRET }}
           URL: ${{ secrets.APP_URL }}
           DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
           DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
