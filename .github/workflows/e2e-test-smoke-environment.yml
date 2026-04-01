@@ -9,6 +9,11 @@ on:
         type: choice
         options: ['Dev', 'Tst', 'StagingUnprotected', 'Staging']
         default: 'Tst'
+      use_mock_auth:
+        description: Use mock auth
+        required: false
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       environment:
@@ -40,7 +45,7 @@ jobs:
       RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: e2e-tests-pr
       MOCK_AUTH_MODE: ${{ inputs.use_mock_auth && 'true' || 'false' }}
-      
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
