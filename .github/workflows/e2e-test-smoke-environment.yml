@@ -115,14 +115,19 @@ jobs:
           MOCK_AUTH_CLIENT_SECRET: ${{ env.MOCK_AUTH_CLIENT_SECRET }}
         with:
           inlineScript: |
+            EXTRA_SET_VARS=""
+
+            if [ "$MOCK_AUTH_MODE" = "true" ]; then
+              EXTRA_SET_VARS="DfeSignIn__Authority=${APP_URL}/api/mock-auth/token DfeSignIn__MetadataUrl=${APP_URL}/api/mock-auth/.well-known/openid-configuration"
+            fi
+
             az containerapp update \
               --name ${{ secrets.AZ_ACA_NAME }} \
               --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
               --set-env-vars \
               AutomatedTesting__Contentful__IncludeTaggedContent=true \
               AutomatedTesting__MockAuthentication__ClientSecret="${MOCK_AUTH_CLIENT_SECRET}" \
-              DfeSignIn__Authority="${APP_URL}/api/mock-auth/token" \
-              DfeSignIn__MetadataUrl="${APP_URL}/api/mock-auth/.well-known/openid-configuration"
+              $EXTRA_SET_VARS
 
       - name: Install NPM dependencies
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
@@ -227,12 +232,21 @@ jobs:
       - name: Turn off Automated Testing Content on environment
         if: always()
         uses: azure/cli@v2
+        env:
+          MOCK_AUTH_MODE: ${{ env.MOCK_AUTH_MODE }}
         with:
           inlineScript: |
+            REMOVE_VARS=""
+
+            if [ "${MOCK_AUTH_MODE,,}" = "true" ]; then
+              REMOVE_VARS="--remove-env-vars AutomatedTesting__MockAuthentication__ClientSecret DfeSignIn__Authority DfeSignIn__MetadataUrl"
+            fi
+
             az containerapp update \
               --name ${{ secrets.AZ_ACA_NAME }} \
               --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
-              --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=false
+              --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=false \
+              $REMOVE_VARS
 
       - name: Flush Redis Cache
         uses: azure/CLI@v1
