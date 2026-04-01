@@ -97,7 +97,7 @@ jobs:
               echo "APP_URL=https://dev.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
               ;;
             Tst)
-              echo "APP_URL=https://test.dev.plan-technology-for-your-school.education.gov.uk >> "$GITHUB_ENV"
+              echo "APP_URL=https://test.dev.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
               ;;
             Staging)
               echo "APP_URL=https://staging.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
@@ -112,7 +112,6 @@ jobs:
         if: always()
         uses: azure/cli@v2
         env:
-          APP_URL: ${{ vars.APP_URL }}
           MOCK_AUTH_MODE: ${{ env.MOCK_AUTH_MODE }}
           MOCK_AUTH_CLIENT_SECRET: ${{ env.MOCK_AUTH_CLIENT_SECRET }}
         with:
@@ -124,7 +123,7 @@ jobs:
               AutomatedTesting__Contentful__IncludeTaggedContent=true \
               AutomatedTesting__MockAuthentication__ClientSecret="${MOCK_AUTH_CLIENT_SECRET}" \
               DfeSignIn__Authority="${APP_URL}/api/mock-auth/token" \
-              DfeSignIn__MetadataUrl="${APP_URL}/api/mock-auth/api/mock-auth/.well-known/openid-configuration" \
+              DfeSignIn__MetadataUrl="${APP_URL}/api/mock-auth/.well-known/openid-configuration"
 
       - name: Install NPM dependencies
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
