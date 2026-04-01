@@ -377,6 +377,20 @@ public class MockAuthController(
 
     private string GetBaseUrl()
     {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+        switch (environment)
+        {
+            case "Development":
+                break;
+            case "Dev":
+                return $"https://dev.plan-technology-for-your-school.education.gov.uk/";
+            case "Test":
+                return $"https://test.dev.plan-technology-for-your-school.education.gov.uk/";
+            case "Staging":
+                return $"https://staging.plan-technology-for-your-school.education.gov.uk/";
+
+        }
         return $"{Request.Scheme}://{Request.Host}/api/mock-auth";
     }
 
