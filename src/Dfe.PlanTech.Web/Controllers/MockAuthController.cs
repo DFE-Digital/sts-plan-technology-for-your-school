@@ -126,7 +126,7 @@ public class MockAuthController(
         }
 
         var schoolTestEstablishments =
-            await establishmentRepository.GetEstablishmentsByAsync(e => e.OrgName == SchoolTestOrgName);
+            await establishmentRepository.GetEstablishmentsByAsync(e => e.OrgName != null && e.OrgName.Contains(SchoolTestOrgName));
         var schoolTestEstablishment = schoolTestEstablishments.FirstOrDefault();
 
         var matTestEstablishments =
