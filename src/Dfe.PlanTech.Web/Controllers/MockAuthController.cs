@@ -375,28 +375,26 @@ public class MockAuthController(
         return key == options.Value.MockAuthentication?.ClientSecret;
     }
 
-    private string GetBaseUrl()
+    private string GetEnvironmentBaseDomain()
     {
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
 
-        switch (environment)
+        return environment switch
         {
-            case "Development":
-                break;
-            case "Dev":
-                return $"https://dev.plan-technology-for-your-school.education.gov.uk/api/mock-auth";
-            case "Test":
-                return $"https://test.dev.plan-technology-for-your-school.education.gov.uk/api/mock-auth";
-            case "Staging":
-                return $"https://staging.plan-technology-for-your-school.education.gov.uk/api/mock-auth";
+            "Dev" => "https://dev.plan-technology-for-your-school.education.gov.uk",
+            "Test" => "https://test.dev.plan-technology-for-your-school.education.gov.uk",
+            "Staging" => "https://staging.plan-technology-for-your-school.education.gov.uk",
+            _ => $"{Request.Scheme}://{Request.Host}"
+        };
+    }
 
-        }
-        return $"{Request.Scheme}://{Request.Host}/api/mock-auth";
+    private string GetBaseUrl()
+    {
+        return $"{GetEnvironmentBaseDomain()}/api/mock-auth";
     }
 
     private string GetAllowedAuthorizeRedirectUri()
     {
-        return $"{Request.Scheme}://{Request.Host}/auth/cb";
+        return $"{GetEnvironmentBaseDomain()}/auth/cb";
     }
-
 }
