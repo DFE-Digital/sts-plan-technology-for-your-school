@@ -332,7 +332,7 @@ public class NotifyServiceTests
                         "## Recommendations for digital technology registers"
                     )
                     && ((string)d["recommendations"]).Contains(
-                        "The self-assessment for digital technology registers has not yet been completed."
+                        "The self-assessment hasn't been completed."
                     )
                     && !((string)d["recommendations"]).Contains("1.")
                 ),
