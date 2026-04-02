@@ -1,4 +1,6 @@
 data "azurerm_route_table" "default" {
+  depends_on = [module.main_hosting]
+  count = local.has_route_table ? 1 : 0
   name                = "${local.resource_prefix}default"
   resource_group_name = local.resource_group_name
 }
@@ -11,8 +13,9 @@ resource "azurerm_subnet" "keyvault" {
 }
 
 resource "azurerm_subnet_route_table_association" "keyvault" {
+  count = local.has_route_table ? 1 : 0
   subnet_id      = azurerm_subnet.keyvault.id
-  route_table_id = data.azurerm_route_table.default.id
+  route_table_id = data.azurerm_route_table.default[0].id
 }
 
 resource "azurerm_private_dns_zone" "keyvault" {

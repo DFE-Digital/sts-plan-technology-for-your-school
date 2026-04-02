@@ -1,7 +1,7 @@
 resource "azurerm_key_vault" "vault" {
   name                       = local.kv_name
   location                   = local.azure_location
-  resource_group_name        = module.main_hosting.azurerm_resource_group_default.name
+  resource_group_name        = local.resource_group_name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 90

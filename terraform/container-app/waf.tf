@@ -19,9 +19,9 @@ module "waf" {
       domain                    = module.main_hosting.container_fqdn
       create_custom_domain      = local.cdn_create_custom_domain
       custom_fqdn               = module.main_hosting.container_fqdn
-      create_private            = true
-      private_link_target_id    = module.main_hosting.container_app_environment_id
-      private_link_location     = local.azure_location
+      #create_private            = true
+      #private_link_target_id    = module.main_hosting.container_app_environment_id
+      #private_link_location     = local.azure_location
     }
   }
 

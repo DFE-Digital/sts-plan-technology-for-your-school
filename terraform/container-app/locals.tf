@@ -2,15 +2,12 @@ locals {
   ###########
   # General #
   ###########
+  is_dr               = var.is_dr
   current_user_id     = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
-  project_name        = var.is_dr ? "${local.project_name}-dr" : "${local.project_name}"
+  project_name        = var.project_name
   environment         = var.environment
   azure_location      = var.azure_location
   resource_prefix     = "${local.environment}${local.project_name}"
-  resource_group_name = module.main_hosting.azurerm_resource_group_default.name
-  registry_server     = var.registry_server
-  registry_username   = var.registry_username
-  registry_password   = var.registry_password
 
   tags = {
     "Environment"      = var.az_tag_environment,
@@ -18,13 +15,32 @@ locals {
     "Product"          = var.az_tag_product
   }
 
+  ########################
+  # App Resource Group #
+  ########################
+  # this will be the existing one if exists otherwise what main-hosting creates.
+  resource_group_name = try(azurerm_resource_group.app_rg[0].name, module.main_hosting.azurerm_resource_group_default.name)
+  # what we create directly in app-rg in order to control the name
+  existing_resource_group = try(azurerm_resource_group.app_rg[0].name, "")
+  enable_resource_group_lock = var.enable_resource_group_lock
+
+  #######################
+  # Container Registry #
+  #######################
+  enable_container_registry = var.enable_container_registry
+  registry_server           = var.registry_server
+  registry_username         = var.registry_username
+  registry_password         = var.registry_password
+  image_tag                 = var.image_tag
+
   #################
   # Container App #
   #################
+  launch_in_vnet                 = var.launch_in_vnet
+  container_app_environment_internal_load_balancer_enabled = var.container_app_environment_internal_load_balancer_enabled
   container_app_image_name       = "plan-tech-app"
   kestrel_endpoint               = var.az_app_kestrel_endpoint
   container_port                 = var.az_container_port
-  image_tag                      = var.image_tag
   container_app_min_replicas     = var.container_app_min_replicas
   container_app_max_replicas     = var.container_app_max_replicas
   container_app_http_concurrency = var.container_app_http_concurrency
@@ -102,6 +118,7 @@ locals {
   }
 
   kv_firewall_cidr_rules = var.key_vault_cidr_rules
+  has_route_table = var.container_app_environment_workload_profile_type != "Consumption"
 
   ##################
   # CDN/Front Door #

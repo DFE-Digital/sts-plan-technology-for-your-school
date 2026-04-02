@@ -1,6 +1,8 @@
 module "main_hosting" {
   source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.6.3"
-
+  depends_on = [
+    azurerm_resource_group.app_rg
+  ]
   ###########
   # General #
   ###########
@@ -8,19 +10,20 @@ module "main_hosting" {
   project_name   = local.project_name
   azure_location = local.azure_location
   tags           = local.tags
+  existing_resource_group = local.existing_resource_group
 
   ############################################
   # Networking configuration
   ############################################
-  #these prevent the public IP issuby forcing creation of internal load balancer (both vars needed by the shared module)
+  #having both true prevents the public IP issue by forcing creation of internal load balancer
   # Deploy container apps inside a VNet
-  launch_in_vnet = true
-  container_app_environment_internal_load_balancer_enabled = true
+  launch_in_vnet = local.launch_in_vnet
+  container_app_environment_internal_load_balancer_enabled = local.container_app_environment_internal_load_balancer_enabled
 
   #################
   # Container App #
   #################
-  enable_container_registry = true
+  enable_container_registry = local.enable_container_registry
   image_name                = local.container_app_image_name
   container_port            = local.container_port
   container_secret_environment_variables = {
@@ -36,6 +39,7 @@ module "main_hosting" {
   container_max_replicas           = local.container_app_max_replicas
   container_min_replicas           = local.container_app_min_replicas
   container_scale_http_concurrency = local.container_app_http_concurrency
+  container_app_environment_workload_profile_type = var.container_app_environment_workload_profile_type
 
   #############
   # Azure SQL #
