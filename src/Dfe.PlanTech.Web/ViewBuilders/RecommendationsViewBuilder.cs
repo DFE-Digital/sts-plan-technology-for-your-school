@@ -288,7 +288,7 @@ public class RecommendationsViewBuilder(
 
         var dynamicValues = new Dictionary<string, string>
         {
-            ["status"] = selectedStatusEnum.Value.GetDisplayName()
+            ["recStatus"] = selectedStatusEnum.Value.GetDisplayName()
         };
 
         await _recommendationService.UpdateRecommendationStatusAsync(
@@ -298,7 +298,7 @@ public class RecommendationsViewBuilder(
             selectedStatusEnum.Value,
             notes
                 ??
-                await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, dynamicValues),
+                await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryReason, dynamicValues),
             CurrentUser.IsMat ? userOrganisationId : null
         );
 

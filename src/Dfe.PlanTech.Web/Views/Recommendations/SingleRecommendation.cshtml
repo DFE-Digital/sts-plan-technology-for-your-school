@@ -8,7 +8,7 @@
         ["position"] = Model.CurrentChunkPosition.ToString(),
         ["totalRecsForTopic"] = Model.TotalChunks.ToString(),
         ["topic"] = Model.Section.Name.ToLower(),
-        ["status"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
+        ["recStatus"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
         ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty,
         ["answer"] = Model.FirstActivity?.AnswerText ?? string.Empty,
     };
@@ -233,13 +233,13 @@
                                 {
                                     @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
                                     {
-                                        <p>Status changed to <strong>@history.NewStatus.Value.GetDisplayName()</strong>.</p>
+                                        <p>@ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, dynamicValues)</p>
                                     }
 
-                                @if (!string.IsNullOrWhiteSpace(history.NoteText))
-                                {
-                                    <p>@history.NoteText</p>
-                                }
+                                    @if (!string.IsNullOrWhiteSpace(history.NoteText))
+                                    {
+                                        <p>@history.NoteText</p>
+                                    }
                             }
                         }
                     </govuk-accordion-item-content>
