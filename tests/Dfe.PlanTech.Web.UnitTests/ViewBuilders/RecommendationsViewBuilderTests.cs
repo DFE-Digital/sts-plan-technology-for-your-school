@@ -1351,6 +1351,110 @@ public class RecommendationsViewBuilderTests
         Assert.IsType<RedirectToActionResult>(result);
     }
 
+    [Fact]
+    public async Task RouteToSingleRecommendation_WhenChunkHasRelatedActions_PopulatesViewModel()
+    {
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+
+        var categorySlug = "cat-a";
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        var secondChunk = section.CoreRecommendations.First(c => c.Slug == "second-chunk-2");
+        secondChunk.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Share this recommendation",
+                Url = "/recommendations/share"
+            }
+        );
+        secondChunk.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Print this recommendation",
+                Url = "/recommendations/print"
+            }
+        );
+
+        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync("C2", 123)
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.Complete,
+                    DateCreated = DateTime.UtcNow.AddDays(-1),
+                }
+            );
+
+        _recommendationService
+            .GetRecommendationHistoryAsync("C2", 123)
+            .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
+
+        var result = await sut.RouteToSingleRecommendation(
+            ctl,
+            categorySlug,
+            "sec-1",
+            "second-chunk-2",
+            useChecklist: false
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
+
+        Assert.Equal(2, vm.RelatedActions.Count);
+        Assert.Equal("Share this recommendation", vm.RelatedActions[0].Text);
+        Assert.Equal("/recommendations/share", vm.RelatedActions[0].Url);
+        Assert.Equal("Print this recommendation", vm.RelatedActions[1].Text);
+        Assert.Equal("/recommendations/print", vm.RelatedActions[1].Url);
+    }
+
+    [Fact]
+    public async Task RouteToSingleRecommendation_WhenChunkHasNoRelatedActions_ReturnsEmptyRelatedActions()
+    {
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+
+        var categorySlug = "cat-a";
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync("C2", 123)
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.Complete,
+                    DateCreated = DateTime.UtcNow.AddDays(-1),
+                }
+            );
+
+        _recommendationService
+            .GetRecommendationHistoryAsync("C2", 123)
+            .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
+
+        var result = await sut.RouteToSingleRecommendation(
+            ctl,
+            categorySlug,
+            "sec-1",
+            "second-chunk-2",
+            useChecklist: false
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
+
+        Assert.Empty(vm.RelatedActions);
+    }
+
     // ---------- Support ----------
 
     private static ShareByEmailInputViewModel CreateInputModel()
