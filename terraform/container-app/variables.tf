@@ -3,7 +3,7 @@
 ###########
 
 variable "subscription_id" {
-  description = "The subscription ID for the environment against which Terraform is running"
+  description = "Azure subscription ID to use for deploying resources"
   type        = string
 }
 
