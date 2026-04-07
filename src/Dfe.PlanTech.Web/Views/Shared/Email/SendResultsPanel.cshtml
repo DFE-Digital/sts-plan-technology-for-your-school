@@ -1,0 +1,24 @@
+@{
+    var sendResultsJson = TempData[StatePassingMechanismConstants.NotifyShareResults] as string;
+
+    NotifyShareResultsViewModel? shareResults = null;
+    if (sendResultsJson is not null)
+    {
+        shareResults = JsonSerializer.Deserialize<NotifyShareResultsViewModel>(sendResultsJson);
+    }
+}
+
+@if (shareResults is not null && shareResults.SendResults.All(result => result.Errors.Count == 0))
+{
+    <govuk-panel heading-level="2" class="govuk-!-margin-bottom-4">
+        <govuk-panel-title>
+            Your email has been sent to:
+        </govuk-panel-title>
+        <govuk-panel-body>
+            @foreach (var result in shareResults.SendResults.Where(result => result.Errors.Count == 0))
+            {
+                @result.Recipient<br />
+            }
+        </govuk-panel-body>
+    </govuk-panel>
+}

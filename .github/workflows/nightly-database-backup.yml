@@ -1,0 +1,25 @@
+name: Nightly Database Backup
+
+on:
+  schedule:
+    - cron: '0 3 * * *' # 3am UTC
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which environment to back up
+        required: true
+        type: choice
+        options: ['Dev', 'ProductionUnprotected']
+        default: 'Dev'
+
+jobs:
+  backup_database:
+    name: Back up database
+    strategy:
+      max-parallel: 1
+      fail-fast: true
+      matrix:
+        target: ${{ inputs.environment }}
+    uses: ./.github/workflows/back-up-database.yml
+    with:
+      environment: ${{ inputs.environment || 'Dev' }}

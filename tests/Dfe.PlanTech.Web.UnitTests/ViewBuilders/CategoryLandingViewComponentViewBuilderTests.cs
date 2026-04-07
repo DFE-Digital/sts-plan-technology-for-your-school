@@ -37,9 +37,9 @@ public class CategoryLandingViewComponentViewBuilderTests
         return new CategoryLandingViewComponentViewBuilder(
             logger,
             contentful,
+            currentUser,
             submission,
-            user,
-            currentUser
+            user
         );
     }
 
@@ -123,14 +123,10 @@ public class CategoryLandingViewComponentViewBuilderTests
     }
 
     [Theory]
-    [InlineData(0, false, false)]
-    [InlineData(1, true, false)]
-    [InlineData(2, true, true)]
-    public async Task BuildViewModelAsync_Computed_Completion_Flags_Are_Correct(
-        int completedCount,
-        bool anyCompleted,
-        bool allCompleted
-    )
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public async Task BuildViewModelAsync_Computed_Completion_Count_Correct(int completedCount)
     {
         // Arrange
         var s1 = MakeSection("A", "A", "a");
@@ -167,8 +163,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         );
 
         // Assert
-        Assert.Equal(anyCompleted, vm.AnySectionsCompleted);
-        Assert.Equal(allCompleted, vm.AllSectionsCompleted);
+        Assert.Equal(completedCount, vm.CompletedSectionsCount);
     }
 
     [Theory]

@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Mvc;
@@ -49,8 +50,8 @@ public class UserJourneyMissingContentExceptionHandler(
         controller.TempData[ErrorMessageTempDataKey] = _configuration[ErrorMessageConfigKey];
 
         return controller.RedirectToAction(
-            PagesController.GetPageByRouteAction,
-            PagesController.ControllerName,
+            nameof(PagesController.GetByRoute),
+            nameof(PagesController).GetControllerNameSlug(),
             new { route = UrlConstants.Home }
         );
     }

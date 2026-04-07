@@ -10,8 +10,8 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class CategorySectionViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ISubmissionService submissionService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ISubmissionService submissionService
 )
     : BaseViewBuilder(logger, contentfulService, currentUser),
         ICategorySectionViewComponentViewBuilder
@@ -51,6 +51,8 @@ public class CategorySectionViewComponentViewBuilder(
                 "Unable to retrieve progress, please refresh your browser.";
         }
 
+        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
+
         var categoryLandingSlug = GetLandingPageSlug(category);
         var description = category.Content is { Count: > 0 } content
             ? content[0]
@@ -64,6 +66,7 @@ public class CategorySectionViewComponentViewBuilder(
             Description = description,
             ProgressRetrievalErrorMessage = progressRetrievalErrorMessage,
             TotalSectionCount = category.Sections.Count,
+            MicrocopyEntries = microcopy,
         };
     }
 

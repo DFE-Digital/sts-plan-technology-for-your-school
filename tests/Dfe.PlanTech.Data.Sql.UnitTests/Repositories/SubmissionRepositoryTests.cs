@@ -105,8 +105,8 @@ public class SubmissionRepositoryTests
         Assert.InRange(r.DateCreated, before, after);
 
         // persisted
-        Assert.Equal(1, await db.Submissions.CountAsync());
-        Assert.Equal(1, await db.Responses.CountAsync());
+        Assert.Equal(1, await db.Submissions.CountAsync(TestContext.Current.CancellationToken));
+        Assert.Equal(1, await db.Responses.CountAsync(TestContext.Current.CancellationToken));
     }
 
     [Fact]
@@ -119,19 +119,6 @@ public class SubmissionRepositoryTests
 
         var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", null);
         Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task SetLatestSubmissionViewed_No_Submission_No_Throw()
-    {
-        using var db = BuildPlanTechDbContext(
-            nameof(SetLatestSubmissionViewed_No_Submission_No_Throw)
-        );
-        var repo = new SubmissionRepository(db);
-
-        await repo.SetLatestSubmissionViewedAsync(99, "NA");
-        // nothing to assert beyond “no throw” and SaveChanges called; InMemory SaveChanges is cheap.
-        Assert.Equal(0, await db.Submissions.CountAsync());
     }
 
     [Fact]

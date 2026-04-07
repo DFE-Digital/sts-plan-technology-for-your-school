@@ -49,6 +49,7 @@ builder
     .AddDfeSignIn(builder.Configuration)
     .AddExceptionHandlingServices()
     .AddGoogleTagManager()
+    .AddGovUkNotify(builder.Configuration)
     .AddRoutingServices()
     .AddRedisServices(builder.Configuration)
     .AddRepositories()

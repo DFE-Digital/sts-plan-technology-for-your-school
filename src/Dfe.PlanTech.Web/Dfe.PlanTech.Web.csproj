@@ -19,6 +19,9 @@
         <Content Update="Properties\launchSettings.json">
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </Content>
+        <Content Update="Views\Shared\NotifyError.cshtml">
+          <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
         <Content Update="Views\Shared\NotFoundError.cshtml">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>

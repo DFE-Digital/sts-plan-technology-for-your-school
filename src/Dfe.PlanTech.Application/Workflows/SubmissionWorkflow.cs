@@ -156,11 +156,6 @@ public class SubmissionWorkflow(
         );
     }
 
-    public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
-    {
-        await _submissionRepository.SetLatestSubmissionViewedAsync(establishmentId, sectionId);
-    }
-
     public async Task SetSubmissionReviewedAsync(int submissionId)
     {
         await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(

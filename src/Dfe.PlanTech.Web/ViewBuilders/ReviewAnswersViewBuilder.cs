@@ -16,8 +16,8 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class ReviewAnswersViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ISubmissionService submissionService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ISubmissionService submissionService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
     private readonly ISubmissionService _submissionService =

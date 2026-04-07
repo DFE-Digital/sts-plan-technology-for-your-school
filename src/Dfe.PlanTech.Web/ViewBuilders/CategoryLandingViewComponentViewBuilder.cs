@@ -14,9 +14,9 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class CategoryLandingViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
+    ICurrentUser currentUser,
     ISubmissionService submissionService,
-    IUserService userService,
-    ICurrentUser currentUser
+    IUserService userService
 )
     : BaseViewBuilder(logger, contentfulService, currentUser),
         ICategoryLandingViewComponentViewBuilder
@@ -25,6 +25,8 @@ public class CategoryLandingViewComponentViewBuilder(
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IUserService _userService =
         userService ?? throw new ArgumentNullException(nameof(userService));
+    private readonly IContentfulService _contentfulService =
+        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     private const string CategoryLandingSectionAssessmentLink =
         "Components/CategoryLanding/SectionAssessmentLink";
@@ -69,6 +71,8 @@ public class CategoryLandingViewComponentViewBuilder(
 
         var sortType = await GetUserSortType(sortOrder);
 
+        var microcopy = await _contentfulService.GetMicrocopyEntriesAsync();
+
         var categoryLandingSections = await BuildCategoryLandingSectionViewModels(
                 establishmentId,
                 category,
@@ -81,8 +85,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
         var viewModel = new CategoryLandingViewComponentViewModel
         {
-            AllSectionsCompleted = completedSectionCount.Equals(category.Sections.Count),
-            AnySectionsCompleted = completedSectionCount > 0,
+            CompletedSectionsCount = completedSectionCount,
             CategoryLandingSections = categoryLandingSections,
             CategoryName = category.Header.Text,
             CategorySlug = slug,
@@ -94,6 +97,7 @@ public class CategoryLandingViewComponentViewBuilder(
             StatusLinkPartialName = print
                 ? CategoryLandingSectionAssessmentLinkPrintContent
                 : CategoryLandingSectionAssessmentLink,
+            MicrocopyEntries = microcopy,
         };
 
         return viewModel;
@@ -146,7 +150,8 @@ public class CategoryLandingViewComponentViewBuilder(
         {
             return new CategoryLandingSectionRecommendationsViewModel
             {
-                NoRecommendationFoundErrorMessage = $"Section '{section.Name}' has no recommendations"
+                NoRecommendationFoundErrorMessage =
+                    $"Section '{section.Name}' has no recommendations",
             };
         }
 

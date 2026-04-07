@@ -3,7 +3,7 @@
 ###########
 
 variable "subscription_id" {
-  description = "The subscription ID for the environment against which Terraform is running"
+  description = "Azure subscription ID to use for deploying resources"
   type        = string
 }
 
@@ -15,12 +15,6 @@ variable "project_name" {
 variable "environment" {
   description = "Environment name, used along with `project_name` as a prefix for all resources"
   type        = string
-}
-
-variable "is_dr" {
-  description = "flag for using disaster recovery: adds -dr to all resource names"
-  type        = bool
-  default     = false
 }
 
 variable "azure_location" {
@@ -36,16 +30,6 @@ variable "az_tag_environment" {
 variable "az_tag_product" {
   description = "Product tag to be applied to all resources"
   type        = string
-}
-
-########################
-# App Resource Group #
-########################
-
-variable "enable_resource_group_lock" {
-  description = "Enabling this will add a Resource Lock to the Resource Group preventing any resources from being deleted."
-  type        = bool
-  default     = false
 }
 
 ############
@@ -166,12 +150,6 @@ variable "key_vault_cidr_rules" {
 #######################
 # Azure App Container #
 #######################
-variable "container_app_environment_workload_profile_type" {
-  type    = string
-  default = "Consumption"
-  description = "Matches that used in Main Hosting"
-}
-
 variable "az_app_kestrel_endpoint" {
   description = "Endpoint for Kestrel setup"
   type        = string
@@ -216,24 +194,6 @@ variable "container_environment_variables" {
   description = "Additional environment variables to set on the Azure Container App"
   type        = map(string)
   default     = {}
-}
-
-variable "enable_container_registry" {
-  description = "Flag to tell the shared module to create the container registry"
-  type        = bool
-  default     = true
-}
-
-variable "launch_in_vnet" {
-  description = "Flag to tell the shared module to launch the container app in a vnet. Needed for internal load balancer"
-  type        = bool
-  default     = true
-}
-
-variable "container_app_environment_internal_load_balancer_enabled" {
-  description = "Flag to tell the shared module to launch the container app with an internal load balancer"
-  type        = bool
-  default     = true
 }
 
 ##################

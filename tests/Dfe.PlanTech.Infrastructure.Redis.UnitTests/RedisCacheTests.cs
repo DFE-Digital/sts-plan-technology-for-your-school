@@ -235,7 +235,7 @@ public class RedisCacheTests : RedisCacheTestsBase
 
         Assert.NotNull(QueuedFunc);
 
-        await QueuedFunc(default);
+        await QueuedFunc(TestContext.Current.CancellationToken);
         await Database
             .Received(1)
             .SetRemoveAsync(

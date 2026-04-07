@@ -12,9 +12,9 @@
     <input id="QuestionId" type="hidden" value=@Model.Question.Id name="QuestionId" />
     <input id="SectionId" type="hidden" value="@Model.SectionId" name="SectionId" />
     <input id="SectionName" type="hidden" value="@Model.SectionName" name="SectionName" />
-    @if (!string.IsNullOrEmpty(ViewData["ReturnTo"]?.ToString()))
+    @if (!string.IsNullOrEmpty(ViewData[StatePassingMechanismConstants.ReturnTo]?.ToString()))
     {
-        <input type="hidden" name="returnTo" value="@ViewData["ReturnTo"]" />
+        <input type="hidden" name="returnTo" value="@ViewData[StatePassingMechanismConstants.ReturnTo]" />
     }
 
     <govuk-radios name="ChosenAnswerJson">
@@ -51,5 +51,4 @@
         var disabled = Model.SectionSlug == null;
         <govuk-button type="submit" disabled="disabled" prevent-double-click="true">Continue</govuk-button>
     }
-
 </form>
