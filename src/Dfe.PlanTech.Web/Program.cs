@@ -31,6 +31,7 @@ if (builder.Environment.EnvironmentName != "E2E")
     builder.Services.AddDbWriterServices(builder.Configuration);
 }
 
+builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddCommandLine(args);
 
 builder.AddSystemConfiguration();
@@ -49,12 +50,13 @@ builder
     .AddDfeSignIn(builder.Configuration)
     .AddExceptionHandlingServices()
     .AddGoogleTagManager()
+    .AddGovUkNotify(builder.Configuration)
     .AddRoutingServices()
     .AddRedisServices(builder.Configuration)
     .AddRepositories()
     .AddViewComponents();
 
-builder.Services.AddApplicationServices().AddApplicationWorkflows();
+builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicationWorkflows();
 
 var app = builder.Build();
 

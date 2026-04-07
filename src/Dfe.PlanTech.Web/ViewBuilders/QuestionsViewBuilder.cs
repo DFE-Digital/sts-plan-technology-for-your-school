@@ -1,9 +1,10 @@
-using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
@@ -17,13 +18,13 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class QuestionsViewBuilder(
     ILogger<BaseViewBuilder> logger,
+    IContentfulService contentfulService,
+    ICurrentUser currentUser,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
-    IContentfulService contentfulService,
-    IQuestionService questionService,
-    ISubmissionService submissionService,
     ContentfulOptionsConfiguration contentfulOptions,
-    ICurrentUser currentUser
+    IQuestionService questionService,
+    ISubmissionService submissionService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
     private readonly IQuestionService _questionService =
@@ -205,8 +206,8 @@ public class QuestionsViewBuilder(
 
             controller.TempData["SubtopicError"] = await BuildErrorMessage();
             return controller.RedirectToAction(
-                PagesController.GetPageByRouteAction,
-                PagesController.ControllerName,
+                nameof(PagesController.GetByRoute),
+                nameof(PagesController).GetControllerNameSlug(),
                 new { route = UrlConstants.Home }
             );
         }
@@ -258,7 +259,7 @@ public class QuestionsViewBuilder(
             TopicName = section.Name,
             Responses = submissionModel.Responses,
             CategorySlug = categorySlug,
-            SectionSlug = sectionSlug,
+            SectionSlug = sectionSlug
         };
 
         return controller.View(ContinueSelfAssessmentView, viewModel);
@@ -435,11 +436,11 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        controller.ViewData["Title"] = question.Text;
+        controller.ViewData[StatePassingMechanismConstants.Title] = question.Text;
 
         if (!string.IsNullOrEmpty(returnTo))
         {
-            controller.ViewData["ReturnTo"] = returnTo;
+            controller.ViewData[StatePassingMechanismConstants.ReturnTo] = returnTo;
         }
 
         // Workaround, to avoid infinite loop due to bi-directional/circular references:

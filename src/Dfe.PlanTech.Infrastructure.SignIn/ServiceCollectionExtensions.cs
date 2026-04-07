@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;

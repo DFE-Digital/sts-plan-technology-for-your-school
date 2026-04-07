@@ -30,13 +30,13 @@ public class RecommendationServiceTests
         };
 
         _recommendationWorkflow
-            .GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
+            .GetLatestRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
             .Returns(expectedResult);
 
         var service = CreateServiceUnderTest();
 
         // Act
-        var result = await service.GetCurrentRecommendationStatusAsync(
+        var result = await service.GetLatestRecommendationHistoryAsync(
             recommendationContentfulReference,
             establishmentId
         );
@@ -45,10 +45,7 @@ public class RecommendationServiceTests
         Assert.Equal(expectedResult, result);
         await _recommendationWorkflow
             .Received(1)
-            .GetCurrentRecommendationStatusAsync(
-                recommendationContentfulReference,
-                establishmentId
-            );
+            .GetLatestRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
     }
 
     [Fact]
@@ -59,13 +56,13 @@ public class RecommendationServiceTests
         var establishmentId = 456;
 
         _recommendationWorkflow
-            .GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
+            .GetLatestRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
             .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
 
         var service = CreateServiceUnderTest();
 
         // Act
-        var result = await service.GetCurrentRecommendationStatusAsync(
+        var result = await service.GetLatestRecommendationHistoryAsync(
             recommendationContentfulReference,
             establishmentId
         );
@@ -74,10 +71,7 @@ public class RecommendationServiceTests
         Assert.Null(result);
         await _recommendationWorkflow
             .Received(1)
-            .GetCurrentRecommendationStatusAsync(
-                recommendationContentfulReference,
-                establishmentId
-            );
+            .GetLatestRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
     }
 
     [Fact]
@@ -89,14 +83,14 @@ public class RecommendationServiceTests
         var expectedException = new InvalidOperationException("Test exception from workflow");
 
         _recommendationWorkflow
-            .GetCurrentRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
+            .GetLatestRecommendationStatusAsync(recommendationContentfulReference, establishmentId)
             .ThrowsAsync(expectedException);
 
         var service = CreateServiceUnderTest();
 
         // Act & Assert
         var actualException = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.GetCurrentRecommendationStatusAsync(
+            service.GetLatestRecommendationHistoryAsync(
                 recommendationContentfulReference,
                 establishmentId
             )
@@ -105,10 +99,7 @@ public class RecommendationServiceTests
         Assert.Equal(expectedException.Message, actualException.Message);
         await _recommendationWorkflow
             .Received(1)
-            .GetCurrentRecommendationStatusAsync(
-                recommendationContentfulReference,
-                establishmentId
-            );
+            .GetLatestRecommendationStatusAsync(recommendationContentfulReference, establishmentId);
     }
 
     [Fact]

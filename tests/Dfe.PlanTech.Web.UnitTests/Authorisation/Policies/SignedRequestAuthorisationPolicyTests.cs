@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using System.Text;
-using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Microsoft.AspNetCore.Authorization;

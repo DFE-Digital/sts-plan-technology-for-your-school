@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Core.Models;
 
+[ExcludeFromCodeCoverage]
 public class UserGroupSelectionModel
 {
     public int UserEstablishmentId { get; set; }

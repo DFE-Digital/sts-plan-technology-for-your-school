@@ -2,6 +2,7 @@ using System.Collections.Concurrent;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -19,7 +20,7 @@ public class MockAuthController(
     IEstablishmentRepository establishmentRepository,
     IUserRepository userRepository,
     IMemoryCache cache,
-    IOptions<AutomatedTestingOptions> options)
+    IOptions<AutomatedTestingConfiguration> options)
     : Controller
 {
     private const string SelectorCookieName = "e2e_user";
@@ -327,7 +328,7 @@ public class MockAuthController(
         string? OrganisationJson
     );
 
-    public FixtureUser FromSelector(string? selector)
+    private static FixtureUser FromSelector(string? selector)
     {
         selector = (selector ?? "school").Trim().ToLowerInvariant();
 
@@ -374,14 +375,26 @@ public class MockAuthController(
         return key == options.Value.MockAuthentication?.ClientSecret;
     }
 
+    private string GetEnvironmentBaseDomain()
+    {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+        return environment switch
+        {
+            "Dev" => "https://dev.plan-technology-for-your-school.education.gov.uk",
+            "Test" => "https://test.dev.plan-technology-for-your-school.education.gov.uk",
+            "Staging" => "https://staging.plan-technology-for-your-school.education.gov.uk",
+            _ => $"{Request.Scheme}://{Request.Host}"
+        };
+    }
+
     private string GetBaseUrl()
     {
-        return $"{Request.Scheme}://{Request.Host}/api/mock-auth";
+        return $"{GetEnvironmentBaseDomain()}/api/mock-auth";
     }
 
     private string GetAllowedAuthorizeRedirectUri()
     {
-        return $"{Request.Scheme}://{Request.Host}/auth/cb";
+        return $"{GetEnvironmentBaseDomain()}/auth/cb";
     }
-
 }

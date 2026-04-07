@@ -321,16 +321,6 @@ public class SubmissionServiceTests
     }
 
     [Fact]
-    public async Task ConfirmCheckAnswersAsync_Calls_Workflow()
-    {
-        var sut = CreateServiceUnderTest();
-
-        await sut.ConfirmCheckAnswersAsync(999);
-
-        await _submissionWorkflow.Received(1).SetMaturityAndMarkAsReviewedAsync(999);
-    }
-
-    [Fact]
     public async Task ConfirmCheckAnswersAndUpdateRecommendationsAsync_Calls_Workflow()
     {
         var sut = CreateServiceUnderTest();

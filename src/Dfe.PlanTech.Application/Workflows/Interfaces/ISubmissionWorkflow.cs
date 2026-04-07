@@ -35,7 +35,6 @@ public interface ISubmissionWorkflow
         SubmissionStatus status
     );
     Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId);
-    Task SetMaturityAndMarkAsReviewedAsync(int submissionId);
     Task SetSubmissionReviewedAsync(int submissionId);
     Task<int> SubmitAnswer(
         int userId,

@@ -2,10 +2,10 @@ using System.Web;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Contentful.Options;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Contentful.Persistence;
 using Dfe.PlanTech.Data.Contentful.UnitTests.Entities;
 using Microsoft.Extensions.Hosting;
@@ -26,9 +26,8 @@ public class ContentfulRepositoryTests
         QueryBuilder<TestClass>
     >();
 
-    private readonly IOptions<AutomatedTestingOptions> _automatedTestingOptions = Substitute.For<
-        IOptions<AutomatedTestingOptions>
-    >();
+    private readonly IOptions<AutomatedTestingConfiguration> _automatedTestingOptions =
+        Substitute.For<IOptions<AutomatedTestingConfiguration>>();
 
     private readonly List<TestClass> _substituteData = new()
     {
@@ -109,7 +108,7 @@ public class ContentfulRepositoryTests
             );
 
         _automatedTestingOptions.Value.Returns(
-            new AutomatedTestingOptions
+            new AutomatedTestingConfiguration
             {
                 Contentful = new() { IncludeTaggedContent = false, Tag = "e2e" },
             }

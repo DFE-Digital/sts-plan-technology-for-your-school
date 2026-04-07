@@ -1,0 +1,265 @@
+@model ShareByEmailViewModel
+@inject ICurrentUser CurrentUser
+
+@{
+    ViewData[StatePassingMechanismConstants.Title] = "Share by email";
+}
+
+@section NavButton {
+    <govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
+        Back
+    </govuk-back-link>
+}
+
+@if (ViewData.ModelState.ErrorCount > 0)
+{
+    <govuk-error-summary>
+        <govuk-error-summary-title>
+            There is a problem
+        </govuk-error-summary-title>
+        @foreach (var key in ViewData.ModelState.Keys.Order())
+        {
+            var errors = ViewData.ModelState[key]?.Errors;
+            if (errors is null || errors.Count == 0)
+            {
+                continue;
+            }
+
+            var inputId = key
+            .Replace($"{nameof(Model.InputModel.EmailAddresses)}[", "recipient-email-")
+            .Replace(nameof(Model.InputModel.EmailAddresses), "recipient-email-list-group")
+            .Replace(nameof(Model.InputModel.NameOfUser), "name-of-user-group")
+            .Replace("]", "-group");
+
+            <govuk-error-summary-item href="#@inputId">@errors[0].ErrorMessage</govuk-error-summary-item>
+        }
+    </govuk-error-summary>
+}
+
+<span class="govuk-caption-xl">@Model.Caption</span>
+<h1 class="govuk-heading-xl">@Model.Heading</h1>
+
+<p>You can share recommendations by email with colleagues, including those who do not have access to the service.</p>
+
+<p>The email will include:</p>
+
+<ul class="govuk-list govuk-list--bullet">
+    <li>your name and message</li>
+    <li>the name of your school</li>
+    <li>the list of recommendations for your chosen standard and their current status</li>
+    <li>a link to sign into the service, or register for a DfE Sign-in</li>
+</ul>
+<p>Email addresses and messages will not be saved.</p>
+
+<hr class="govuk-section-break govuk-section-break--l">
+
+@{
+    var sectionHasError =
+        ViewData.ModelState.TryGetValue(nameof(Model.InputModel.EmailAddresses), out var sectionEntry)
+        && sectionEntry.Errors.Count > 0;
+}
+
+<form class="govuk-form-group"
+      asp-controller="@Model.PostController"
+      asp-action="@Model.PostAction"
+      asp-route-categorySlug="@Model.CategorySlug"
+      asp-route-sectionSlug="@Model.SectionSlug"
+      asp-route-chunkSlug="@Model.ChunkSlug"
+      autocomplete="off">
+
+    <div id="recipient-email-list-group" class="govuk-form-group @(sectionHasError ? "govuk-form-group--error" : "")">
+        <h1 class="govuk-label-wrapper">
+            <label class="govuk-label govuk-label--m" for="recipient-email-0">
+                Enter recipient email addresses
+            </label>
+        </h1>
+
+        <div id="recipient-emails-hint" class="govuk-hint">
+            You can email up to 10 people at a time. They will receive an email from
+            DfE Plan technology for your school. Their email addresses will not be saved
+            or used for anything else.
+        </div>
+
+        @if (sectionHasError)
+        {
+            <p id="emails-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span> @sectionEntry!.Errors[0].ErrorMessage
+            </p>
+        }
+
+        <div id="recipient-emails-list">
+            @for (var i = 0; i < 10; i++)
+            {
+                var key = $"EmailAddresses[{i}]";
+                var inputId = $"recipient-email-{i}";
+                var autoCompleteKey = $"section-recipient-{i}";
+
+                var hasError = ViewData.ModelState.TryGetValue(key, out var entry) && entry.Errors.Count > 0;
+
+                // JS will hide empty non-error fields after the first one.
+                // But on a post-back, we want to keep anything the user filled (or errored) visible.
+                var value = Model.InputModel?.EmailAddresses.ElementAtOrDefault(i) ?? "";
+                var shouldBeVisibleOnLoad = i == 0 || hasError || !string.IsNullOrWhiteSpace(value);
+
+                <div id="@inputId-group" class="govuk-form-group @(hasError ? "govuk-form-group--error" : "") govuk-!-margin-bottom-2"
+                     data-email-row
+                     data-index="@i"
+                     data-initially-visible="@(shouldBeVisibleOnLoad ? "true" : "false")">
+                    <label class="govuk-label govuk-visually-hidden" for="@inputId">
+                        Recipient email address @(i + 1)
+                    </label>
+
+                    @if (hasError)
+                    {
+                        <p id="@inputId-error" class="govuk-error-message">
+                            <span class="govuk-visually-hidden">Error:</span> @entry!.Errors[0].ErrorMessage
+                        </p>
+                    }
+
+                    <input class="govuk-input @((shouldBeVisibleOnLoad && sectionHasError) || hasError ? "govuk-input--error" : "")"
+                           id="@inputId"
+                           inputmode="email"
+                           name="EmailAddresses[@i]"
+                           type="email"
+                           value="@value"
+                           spellcheck="false"
+                           autocomplete="@autoCompleteKey"
+                           aria-describedby="recipient-emails-hint" />
+                </div>
+            }
+        </div>
+
+        <!-- Hidden by default; shown only when JS is enabled -->
+        <div class="govuk-!-margin-top-2 js-only" style="display: none">
+            <button type="button"
+                    class="govuk-button govuk-button--secondary"
+                    data-module="govuk-button"
+                    id="add-another-person">
+                Add another person
+            </button>
+        </div>
+    </div>
+
+    @{
+        var nameOfUserMissing =
+        ViewData.ModelState.TryGetValue(nameof(Model.InputModel.NameOfUser), out var nameEntry)
+        && nameEntry.Errors.Count > 0;
+    }
+
+    <div id="name-of-user-group" class="govuk-form-group @(nameOfUserMissing ? "govuk-form-group--error" : "")">
+        <h1 class="govuk-label-wrapper">
+            <label class="govuk-label govuk-label--m" for="name-of-user">
+                Enter your name
+            </label>
+        </h1>
+        <div id="name-of-user-hint" class="govuk-hint">
+            Your name will be part of the email title. For example,
+            "James Brown has shared digital leadership and governance recommendations with you".
+        </div>
+
+        @if (nameOfUserMissing)
+        {
+            <p id="name-of-user-error" class="govuk-error-message">
+                <span class="govuk-visually-hidden">Error:</span> @nameEntry!.Errors[0].ErrorMessage
+            </p>
+        }
+
+        <input class="govuk-input @(nameOfUserMissing ? "govuk-input--error" : "")"
+               id="name-of-user"
+               name="NameOfUser"
+               type="text"
+               spellcheck="false"
+               autocomplete="name-of-user"
+               aria-describedby="name-of-user-hint"
+               value="@(Model.InputModel?.NameOfUser ?? "")" />
+    </div>
+
+    <div class="govuk-form-group">
+        <h1 class="govuk-label-wrapper">
+            <label class="govuk-label govuk-label--m" for="user-message">
+                Add a message (optional)
+            </label>
+        </h1>
+        <div id="user-message-hint" class="govuk-hint">
+            Your message will introduce the email. Do not include personal or sensitive information,
+            like email addresses or account details.
+        </div>
+        <textarea class="govuk-textarea"
+                  id="user-message"
+                  name="UserMessage"
+                  spellcheck="true"
+                  rows="5"
+                  aria-describedby="user-message-hint">@Model.InputModel?.UserMessage</textarea>
+    </div>
+
+    <div class="govuk-form-group">
+        <govuk-button
+            type="submit"
+            prevent-double-click="true"
+            class="govuk-button govuk-button--primary"
+            data-module="govuk-button">
+            Send email
+        </govuk-button>
+    </div>
+</form>
+
+@{
+    var nonce = Context.Items["nonce"]?.ToString();
+}
+
+<script nonce="@nonce">
+    (function () {
+      const rows = Array.from(document.querySelectorAll('[data-email-row]'));
+      const addBtn = document.getElementById('add-another-person');
+      if (rows.length && addBtn) {
+
+        const max = rows.length;
+
+        function setRowVisible(row, visible) {
+          row.style.display = visible ? '' : 'none';
+        }
+
+        // On load: show only "initially visible" rows (first + any with value/error).
+        rows.forEach(row => {
+          const initiallyVisible = row.getAttribute('data-initially-visible') === 'true';
+          setRowVisible(row, initiallyVisible);
+        });
+
+        function visibleCount() {
+          return rows.filter(r => r.style.display !== 'none').length;
+        }
+
+        function updateButtonState() {
+          const count = visibleCount();
+          if (count >= max) {
+            addBtn.disabled = true;
+            addBtn.setAttribute('aria-disabled', 'true');
+            addBtn.textContent = 'You have added 10 people';
+          } else {
+            addBtn.disabled = false;
+            addBtn.removeAttribute('aria-disabled');
+            addBtn.textContent = 'Add another person';
+          }
+        }
+
+        addBtn.addEventListener('click', function () {
+          const count = visibleCount();
+          if (count >= max) return;
+
+          // Reveal the next hidden row (in order)
+          const next = rows.find(r => r.style.display === 'none');
+          if (!next) return;
+
+          setRowVisible(next, true);
+
+          // Focus the input inside it
+          const input = next.querySelector('input');
+          if (input) input.focus();
+
+          updateButtonState();
+        });
+
+        updateButtonState();
+      }
+    }());
+</script>

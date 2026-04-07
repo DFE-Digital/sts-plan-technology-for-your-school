@@ -28,8 +28,8 @@ public class CategorySectionViewComponentViewBuilderTests
         return new CategorySectionViewComponentViewBuilder(
             logger,
             contentful,
-            submission,
-            currentUser
+            currentUser,
+            submission
         );
     }
 

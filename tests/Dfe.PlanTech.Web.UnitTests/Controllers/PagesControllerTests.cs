@@ -4,6 +4,7 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -16,12 +17,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly ILogger<PagesController> _logger = Substitute.For<
             ILogger<PagesController>
         >();
-        private readonly IPagesViewBuilder _pagesViewBuilder = Substitute.For<IPagesViewBuilder>();
+        private readonly IPagesViewBuilder _viewBuilder = Substitute.For<IPagesViewBuilder>();
         private readonly PagesController _controller;
 
         public PagesControllerTests()
         {
-            _controller = new PagesController(_logger, _pagesViewBuilder);
+            _controller = new PagesController(_logger, _viewBuilder);
             _controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext(),
@@ -42,7 +43,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var page = new PageEntry();
             var expectedResult = new OkResult();
-            _pagesViewBuilder
+            _viewBuilder
                 .RouteBasedOnOrganisationTypeAsync(_controller, page)
                 .Returns(Task.FromResult<IActionResult>(expectedResult));
 
@@ -68,7 +69,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var expectedResult = new OkResult();
             var slug = "categorySlug";
-            _pagesViewBuilder
+            _viewBuilder
                 .RouteToCategoryLandingPrintPageAsync(_controller, slug)
                 .Returns(Task.FromResult<IActionResult>(expectedResult));
 
@@ -93,13 +94,49 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
+        public async Task ShareStandard_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cat";
+
+            _viewBuilder
+                .RouteToShareStandardPageAsync(_controller, categorySlug)
+                .Returns(new OkResult());
+
+            var result = await _controller.ShareStandard(categorySlug);
+
+            await _viewBuilder.Received(1).RouteToShareStandardPageAsync(_controller, categorySlug);
+        }
+
+        [Fact]
+        public async Task PostShareStandard_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cat";
+            var inputModel = new ShareByEmailInputViewModel
+            {
+                EmailAddresses = new List<string> { "test@test.com", "hello@hello.com" },
+                NameOfUser = "Drew",
+                UserMessage = "Hello",
+            };
+
+            _viewBuilder
+                .RouteToShareStandardPageAsync(_controller, categorySlug, inputModel)
+                .Returns(new OkResult());
+
+            var result = await _controller.PostShareStandard(categorySlug, inputModel);
+
+            await _viewBuilder
+                .Received(1)
+                .RouteToShareStandardPageAsync(_controller, categorySlug, inputModel);
+        }
+
+        [Fact]
         public async Task HandleUnknownRoutes_ReturnsNotFoundPage_WhenCalled()
         {
             var model = new NotFoundViewModel { ContactLinkHref = "contactLinkHref" };
             var expectedResult = new ViewResult();
             var slug = "categorySlug/sectionSlug/not/a/valid/path";
 
-            _pagesViewBuilder.BuildNotFoundViewModel().Returns(model);
+            _viewBuilder.BuildNotFoundViewModelAsync().Returns(model);
 
             var result = await _controller.HandleUnknownRoutes(slug);
 
@@ -124,9 +161,31 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public async Task NotFoundError_ReturnsViewWithViewModel()
         {
             var viewModel = new NotFoundViewModel();
-            _pagesViewBuilder.BuildNotFoundViewModel().Returns(Task.FromResult(viewModel));
+            _viewBuilder.BuildNotFoundViewModelAsync().Returns(Task.FromResult(viewModel));
 
             var result = await _controller.NotFoundError();
+
+            var viewResult = Assert.IsType<ViewResult>(result);
+            Assert.Equal(viewModel, viewResult.Model);
+        }
+
+        [Fact]
+        public void NotifyError_ReturnsViewWithViewModel()
+        {
+            var viewModel = new NotifyShareResultsViewModel
+            {
+                ActionModel = new ActionViewModel
+                {
+                    ActionName = "Index",
+                    ControllerName = "Home",
+                    LinkText = "Home",
+                },
+                SendResults = [],
+            };
+
+            _viewBuilder.BuildNotifyShareResultsViewModel(_controller).Returns(viewModel);
+
+            var result = _controller.NotifyError();
 
             var viewResult = Assert.IsType<ViewResult>(result);
             Assert.Equal(viewModel, viewResult.Model);
