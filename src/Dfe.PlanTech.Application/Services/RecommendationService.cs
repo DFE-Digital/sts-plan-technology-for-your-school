@@ -8,12 +8,12 @@ namespace Dfe.PlanTech.Application.Services;
 public class RecommendationService(IRecommendationWorkflow recommendationWorkflow)
     : IRecommendationService
 {
-    public Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+    public Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationHistoryAsync(
         string recommendationContentfulReference,
         int establishmentId
     )
     {
-        return recommendationWorkflow.GetCurrentRecommendationStatusAsync(
+        return recommendationWorkflow.GetLatestRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId
         );

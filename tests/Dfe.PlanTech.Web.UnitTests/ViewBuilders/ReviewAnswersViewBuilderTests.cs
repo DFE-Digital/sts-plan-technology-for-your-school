@@ -30,7 +30,7 @@ public class ReviewAnswersViewBuilderTests
         _currentUser.UserOrganisationId.Returns((int?)null); // non-MAT user by default
         _currentUser.UserId.Returns(1);
 
-        return new ReviewAnswersViewBuilder(_logger, _contentful, _submissions, _currentUser);
+        return new ReviewAnswersViewBuilder(_logger, _contentful, _currentUser, _submissions);
     }
 
     private static DummyController MakeController()
@@ -564,6 +564,15 @@ public class ReviewAnswersViewBuilderTests
             SubmissionStatus.CompleteReviewed
         );
 
+        var microcopy = new List<MicrocopyEntry>
+        {
+            new MicrocopyEntry
+            {
+                Key = "testEntry",
+                Value = "test microcopy value"
+            }
+        };
+
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
             section,
             submissionModel,
@@ -610,6 +619,16 @@ public class ReviewAnswersViewBuilderTests
             submission,
             SubmissionStatus.CompleteReviewed
         );
+
+        var microcopy = new List<MicrocopyEntry>
+        {
+            new MicrocopyEntry
+            {
+                Key = "testEntry",
+                Value = "test microcopy value"
+            }
+        };
+
 
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
             section,

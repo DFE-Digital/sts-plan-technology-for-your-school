@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model CategoryLandingPageViewModel
 
 @{
@@ -6,15 +8,15 @@
     {
         ["standard"] = Model.Category.Header.Text.ToLower()
     };
-    var printLinkText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
+    var printLinkText = await Microcopy.GetTextByKeyAsync(
         ContentfulMicrocopyConstants.LandingPagePrintLink,
-        Model.MicrocopyEntries,
-        dynamicValues);
+        dynamicValues
+    );
 }
 
 @section NavButton {
     <govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
-        @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageBackLink, Model.MicrocopyEntries)
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.LandingPageBackLink)
     </govuk-back-link>
 }
 
@@ -22,6 +24,9 @@
     <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
 
+    <p class="govuk-body-s">
+        <a class="govuk-link" href="@Model.Slug/share">Share this list of recommendations</a>
+    </p>
     <p class="govuk-body-s">
         <a class="govuk-link" href="@Model.Slug/print">@printLinkText</a>
     </p>

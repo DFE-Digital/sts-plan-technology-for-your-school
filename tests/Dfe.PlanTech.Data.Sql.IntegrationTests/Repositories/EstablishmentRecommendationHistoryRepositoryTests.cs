@@ -12,7 +12,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
     public EstablishmentRecommendationHistoryRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _repository = new EstablishmentRecommendationHistoryRepository(DbContext);
@@ -38,7 +38,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.AddRange(establishment1, establishment2);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -47,7 +47,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var history1 = new EstablishmentRecommendationHistoryEntity
         {
@@ -80,7 +80,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.AddRange(history1, history2, history3);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
@@ -125,7 +125,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.Questions.AddRange(question1, question2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation1 = new RecommendationEntity
         {
@@ -142,7 +142,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.Recommendations.AddRange(recommendation1, recommendation2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var history1 = new EstablishmentRecommendationHistoryEntity
         {
@@ -165,7 +165,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.AddRange(history1, history2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result =
@@ -192,7 +192,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             OrgName = "Test School",
         };
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
@@ -218,7 +218,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -227,7 +227,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var history = new EstablishmentRecommendationHistoryEntity
         {
@@ -240,7 +240,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act - Query for non-existent establishment ID
         var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(99999);
@@ -264,7 +264,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation1 = new RecommendationEntity
         {
@@ -280,7 +280,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.Recommendations.AddRange(recommendation1, recommendation2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var history1 = new EstablishmentRecommendationHistoryEntity
         {
@@ -313,7 +313,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.AddRange(history1, history2, history3);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
@@ -350,7 +350,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.AddRange(establishment, matEstablishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -359,7 +359,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var history = new EstablishmentRecommendationHistoryEntity
         {
@@ -373,7 +373,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
@@ -401,7 +401,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -410,7 +410,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var oldestHistory = new EstablishmentRecommendationHistoryEntity
         {
@@ -450,7 +450,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             newestHistory,
             middleHistory
         );
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetRecommendationHistoryByEstablishmentIdAsync(
@@ -487,7 +487,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -496,7 +496,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Create multiple history entries with different dates
         var oldHistory = new EstablishmentRecommendationHistoryEntity
@@ -537,7 +537,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             latestHistory,
             middleHistory
         );
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetLatestRecommendationHistoryAsync(
@@ -565,7 +565,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
 
         DbContext.Establishments.Add(establishment);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -574,7 +574,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetLatestRecommendationHistoryAsync(
@@ -601,7 +601,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation1 = new RecommendationEntity
         {
@@ -617,7 +617,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.Recommendations.AddRange(recommendation1, recommendation2);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Create history for recommendation1 only
         var history = new EstablishmentRecommendationHistoryEntity
@@ -631,7 +631,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act - Query for recommendation2 (which has no history)
         var result = await _repository.GetLatestRecommendationHistoryAsync(
@@ -663,7 +663,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.AddRange(establishment1, establishment2);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -672,7 +672,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Create history for establishment1 only
         var history = new EstablishmentRecommendationHistoryEntity
@@ -686,7 +686,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act - Query for establishment2 (which has no history for this recommendation)
         var result = await _repository.GetLatestRecommendationHistoryAsync(
@@ -713,7 +713,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -722,7 +722,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var singleHistory = new EstablishmentRecommendationHistoryEntity
         {
@@ -735,7 +735,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(singleHistory);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetLatestRecommendationHistoryAsync(
@@ -765,7 +765,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -774,7 +774,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var history = new EstablishmentRecommendationHistoryEntity
         {
@@ -787,7 +787,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act - Query with invalid establishment ID
         var result = await _repository.GetLatestRecommendationHistoryAsync(
@@ -814,7 +814,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -823,7 +823,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var history = new EstablishmentRecommendationHistoryEntity
         {
@@ -836,7 +836,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act - Query with invalid recommendation ID
         var result = await _repository.GetLatestRecommendationHistoryAsync(establishment.Id, 99999);
@@ -864,7 +864,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -873,7 +873,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             QuestionId = question.Id,
         };
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var initialCount = await CountEntitiesAsync<EstablishmentRecommendationHistoryEntity>();
         var beforeCreate = DateTime.UtcNow;
@@ -897,8 +897,11 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         Assert.Equal(initialCount + 1, finalCount);
 
         var createdHistory =
-            await DbContext.EstablishmentRecommendationHistories.FirstOrDefaultAsync(h =>
-                h.EstablishmentId == establishment.Id && h.RecommendationId == recommendation.Id
+            await DbContext.EstablishmentRecommendationHistories.FirstOrDefaultAsync(
+                h =>
+                    h.EstablishmentId == establishment.Id
+                    && h.RecommendationId == recommendation.Id,
+                TestContext.Current.CancellationToken
             );
 
         Assert.NotNull(createdHistory);

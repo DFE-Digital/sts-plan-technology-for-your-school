@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Application.Services.Interfaces;
 
 public interface IRecommendationService
 {
-    Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+    Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationHistoryAsync(
         string recommendationContentfulReference,
         int establishmentId
     );

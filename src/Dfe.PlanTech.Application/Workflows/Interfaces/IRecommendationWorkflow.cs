@@ -5,7 +5,7 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 
 public interface IRecommendationWorkflow
 {
-    Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+    Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationStatusAsync(
         string recommendationContentfulReference,
         int establishmentId
     );

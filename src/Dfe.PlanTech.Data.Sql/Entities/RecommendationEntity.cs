@@ -20,6 +20,8 @@ public class RecommendationEntity
 
     public bool Archived { get; set; } = false;
 
+    public string? QuestionContentfulRef { get; init; }
+
     public SqlRecommendationDto AsDto()
     {
         return new SqlRecommendationDto
@@ -31,6 +33,7 @@ public class RecommendationEntity
             QuestionId = QuestionId,
             Question = Question.AsDto(),
             Archived = Archived,
+            QuestionContentfulRef = QuestionContentfulRef,
         };
     }
 }

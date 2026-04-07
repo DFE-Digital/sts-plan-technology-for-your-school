@@ -1,6 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
                 {
                     var databaseRetryOptions = configuration
                         .GetRequiredSection(ConfigurationConstants.Database)
-                        .Get<DatabaseOptions>();
+                        .Get<DatabaseConfiguration>();
                     opts.EnableRetryOnFailure(
                         databaseRetryOptions.MaxRetryCount,
                         TimeSpan.FromMilliseconds(databaseRetryOptions.MaxDelayInMilliseconds),

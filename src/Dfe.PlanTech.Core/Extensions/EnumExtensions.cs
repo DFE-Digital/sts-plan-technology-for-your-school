@@ -26,8 +26,12 @@ public static class EnumExtensions
             // There are downstream assumptions that rely on this not happening.
             // We do not question the magic. We merely contain it.
             .FirstOrDefault(s =>
-                string.Equals(value, s!.ToString(), StringComparison.InvariantCultureIgnoreCase) ||
-                string.Equals(value, s!.GetDisplayName(), StringComparison.InvariantCultureIgnoreCase)
+                string.Equals(value, s!.ToString(), StringComparison.InvariantCultureIgnoreCase)
+                || string.Equals(
+                    value,
+                    s!.GetDisplayName(),
+                    StringComparison.InvariantCultureIgnoreCase
+                )
             );
 
         return result;
