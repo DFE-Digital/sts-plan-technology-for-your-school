@@ -1,0 +1,152 @@
+name: Restore Azure SQL DB from BACPAC
+
+on:
+  workflow_call:
+    inputs:
+      resource_group:
+        required: true
+        type: string
+      sql_server_name:
+        required: true
+        type: string
+      target_database:
+        required: true
+        type: string
+      storage_account:
+        required: true
+        type: string
+      container_name:
+        required: true
+        type: string
+      bacpac_file:
+        required: false
+        type: string
+        default: ""
+      bacpac_prefix:
+        required: false
+        type: string
+        default: ""
+      use_latest_if_not_specified:
+        required: false
+        type: boolean
+        default: true
+
+    secrets:
+      az_tenant_id:
+        required: true
+      az_subscription_id:
+        required: true
+      az_client_id:
+        required: true
+      sql_admin_user:
+        required: true
+      sql_admin_password:
+        required: true
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.az_tenant_id }}
+          az_subscription_id: ${{ secrets.az_subscription_id }}
+          az_client_id: ${{ secrets.az_client_id }}
+
+      - name: Install SqlPackage
+        run: |
+          wget https://aka.ms/sqlpackage-linux -O sqlpackage.zip
+          unzip sqlpackage.zip -d sqlpackage
+          chmod +x sqlpackage/sqlpackage
+
+      - name: Resolve BACPAC blob name
+        id: resolve-bacpac
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          INPUT_BACPAC_FILE="${{ inputs.bacpac_file }}"
+          PREFIX="${{ inputs.bacpac_prefix }}"
+          USE_LATEST="${{ inputs.use_latest_if_not_specified }}"
+          ACCOUNT="${{ inputs.storage_account }}"
+          CONTAINER="${{ inputs.container_name }}"
+
+          if [ -n "$INPUT_BACPAC_FILE" ]; then
+            BACPAC_FILE="$INPUT_BACPAC_FILE"
+            echo "Using explicit BACPAC file: $BACPAC_FILE"
+          else
+            if [ "$USE_LATEST" != "true" ]; then
+              echo "No bacpac_file provided and use_latest_if_not_specified is false."
+              exit 1
+            fi
+
+            echo "Finding latest .bacpac blob in container $CONTAINER..."
+
+            if [ -n "$PREFIX" ]; then
+              QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac') && starts_with(name, '$PREFIX')] | sort_by(@, &properties.lastModified) | [-1].name"
+            else
+              QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac')] | sort_by(@, &properties.lastModified) | [-1].name"
+            fi
+
+            BACPAC_FILE=$(az storage blob list \
+              --account-name "$ACCOUNT" \
+              --container-name "$CONTAINER" \
+              --auth-mode login \
+              --query "$QUERY" \
+              -o tsv)
+
+            if [ -z "$BACPAC_FILE" ]; then
+              echo "No matching .bacpac blob found."
+              exit 1
+            fi
+
+            echo "Resolved latest BACPAC file: $BACPAC_FILE"
+          fi
+
+          echo "bacpac_file=$BACPAC_FILE" >> "$GITHUB_OUTPUT"
+          echo "bacpac_uri=https://${ACCOUNT}.blob.core.windows.net/${CONTAINER}/${BACPAC_FILE}" >> "$GITHUB_OUTPUT"
+
+      - name: Download resolved BACPAC
+        id: download
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ACCOUNT="${{ inputs.storage_account }}"
+          CONTAINER="${{ inputs.container_name }}"
+          BLOB_NAME="${{ steps.resolve-bacpac.outputs.bacpac_file }}"
+
+          echo "Downloading resolved bacpac: $BLOB_NAME"
+
+          az storage blob download \
+            --account-name "$ACCOUNT" \
+            --container-name "$CONTAINER" \
+            --name "$BLOB_NAME" \
+            --file "$BLOB_NAME" \
+            --auth-mode login
+
+          echo "bacpac_file=$BLOB_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Import BACPAC with SqlPackage
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ./sqlpackage/sqlpackage \
+            /Action:Import \
+            /SourceFile:"${{ steps.download.outputs.bacpac_file }}" \
+            /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \
+            /TargetDatabaseName:"${{ inputs.target_database }}" \
+            /Authentication:ActiveDirectoryServicePrincipal \
+            /TenantId:"${{ secrets.az_tenant_id }}" \
+            /ClientId:"${{ secrets.az_client_id }}" \
+            /ClientSecret:"${{ secrets.az_client_secret }}"

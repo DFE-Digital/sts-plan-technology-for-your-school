@@ -38,13 +38,6 @@ jobs:
       - name: Clone repo
         uses: actions/checkout@v4
 
-      - name: Debug environment + secret presence
-        shell: bash
-        run: |
-          echo "event=${{ github.event_name }}"
-          echo "resolved environment=${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}"
-          echo "AZ_OBJECT_ID available=${{ secrets.AZ_OBJECT_ID != '' }}"
-
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:

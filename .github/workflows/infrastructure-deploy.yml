@@ -29,62 +29,54 @@ env:
   TF_WORKING_DIRECTORY: terraform/container-app
 
 jobs:
-  terraform-platforming:
-    name: Create tf backend
+  setup:
+    name: Init derived variables
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
       contents: read
+    outputs:
+      github_ip: ${{ steps.set-vars.outputs.github_ip }}
+      app_rg_name: ${{ steps.set-vars.outputs.app_rg_name }}
+      tf_backend_rg_name: ${{ steps.set-vars.outputs.tf_backend_rg_name }}
+      tf_backend_storage_account_name: ${{ steps.set-vars.outputs.tf_backend_storage_account_name }}
+      tf_kv_name: ${{ steps.set-vars.outputs.tf_kv_name }}
 
     steps:
-      - name: Clone repo
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.7
-
-      - name: Login with AZ
-        uses: ./.github/actions/azure-login
-        with:
-          az_tenant_id: ${{ secrets.az_tenant_id }}
-          az_subscription_id: ${{ secrets.az_subscription_id }}
-          az_client_id: ${{ secrets.az_client_id }}
-
       - name: Get GitHub Runner IP
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
 
-  - name: Prepare derived variables
-          id: set-vars
-          shell: bash
-          run: |
-            AZ_ACA_RESOURCE_GROUP="${{ env.IS_DR == 'true' && format('{0}-dr', secrets.AZ_ACA_RESOURCE_GROUP) || secrets.AZ_ACA_RESOURCE_GROUP }}"
-            TF_BACKEND_RESOURCE_GROUP="${{ env.IS_DR == 'true' && format('{0}-dr', secrets.TF_BACKEND_RESOURCE_GROUP) || secrets.TF_BACKEND_RESOURCE_GROUP }}"
+      - name: Prepare derived variables
+        id: set-vars
+        shell: bash
+        run: |
+          AZ_ACA_RESOURCE_GROUP="${{ env.IS_DR == 'true' && format('{0}-dr', secrets.AZ_ACA_RESOURCE_GROUP) || secrets.AZ_ACA_RESOURCE_GROUP }}"
+          TF_BACKEND_RESOURCE_GROUP="${{ env.IS_DR == 'true' && format('{0}-dr', secrets.TF_BACKEND_RESOURCE_GROUP) || secrets.TF_BACKEND_RESOURCE_GROUP }}"
 
-            CLEAN_ACA="${AZ_ACA_RESOURCE_GROUP//-/}"
-            CLEAN_TF="${TF_BACKEND_RESOURCE_GROUP//-/}"
+          CLEAN_ACA="${AZ_ACA_RESOURCE_GROUP//-/}"
+          CLEAN_TF="${TF_BACKEND_RESOURCE_GROUP//-/}"
 
-            AZ_SA_COSTING_NAME="${CLEAN_ACA}costing"
-            TF_BACKEND_STORAGE_ACCOUNT_NAME="${CLEAN_ACA}tfstate"
-            ACR_NAME="${CLEAN_ACA}"
-            COSTINGS_NAME="${CLEAN_ACA}costing"
-            TF_SECRETS_KEYVAULT_NAME="${CLEAN_ACA}kv"
-            AZ_KEYVAULT_NAME="${CLEAN_ACA}kv"
+          AZ_SA_COSTING_NAME="${CLEAN_ACA}costing"
+          TF_BACKEND_STORAGE_ACCOUNT_NAME="${CLEAN_ACA}tfstate"
+          ACR_NAME="${CLEAN_ACA}"
+          COSTINGS_NAME="${CLEAN_ACA}costing"
+          TF_SECRETS_KEYVAULT_NAME="${CLEAN_ACA}kv"
+          AZ_KEYVAULT_NAME="${CLEAN_ACA}kv"
 
-            echo "az_sa_costing_name=$AZ_SA_COSTING_NAME" >> "$GITHUB_OUTPUT"
-            echo "tf_backend_storage_account_name=$TF_BACKEND_STORAGE_ACCOUNT_NAME" >> "$GITHUB_OUTPUT"
-            echo "acr_name=$ACR_NAME" >> "$GITHUB_OUTPUT"
-            echo "costings_name=$COSTINGS_NAME" >> "$GITHUB_OUTPUT"
-            echo "app_rg_name=$AZ_ACA_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
-            echo "tf_backend_rg_name=$TF_BACKEND_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
-            echo "tf_kv_name=$TF_SECRETS_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
-            echo "app_kv_name=$AZ_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
+          echo "az_sa_costing_name=$AZ_SA_COSTING_NAME" >> "$GITHUB_OUTPUT"
+          echo "tf_backend_storage_account_name=$TF_BACKEND_STORAGE_ACCOUNT_NAME" >> "$GITHUB_OUTPUT"
+          echo "acr_name=$ACR_NAME" >> "$GITHUB_OUTPUT"
+          echo "costings_name=$COSTINGS_NAME" >> "$GITHUB_OUTPUT"
+          echo "app_rg_name=$AZ_ACA_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
+          echo "tf_backend_rg_name=$TF_BACKEND_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
+          echo "tf_kv_name=$TF_SECRETS_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
+          echo "app_kv_name=$AZ_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
+          echo "github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_OUTPUT
 
   terraform-plan:
-    needs: terraform-platforming
+    needs: setup
     environment: ${{ inputs.environment }}
     permissions:
       id-token: write
@@ -103,14 +95,6 @@ jobs:
         with:
           terraform_version: 1.9.7
 
-      - name: Get GitHub Runner IP
-        id: whats-my-ip
-        uses: ./.github/actions/whats-my-ip-address
-
-      - name: Set GitHub Runner IP to TF Var
-        shell: bash
-        run: |
-          echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
 
       - name: Login with AZ
         uses: ./.github/actions/azure-login
@@ -124,8 +108,8 @@ jobs:
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          tf-backend-resource-group: ${{ needs.setup.outputs.tf_backend_rg_name }}
+          tf-secrets-keyvault-name: ${{ needs.setup.outputs.tf_kv_name }}
           removeRules: 'false'
 
       - name: Set container app image_tag env variables
@@ -137,8 +121,8 @@ jobs:
         id: init
         run: |
           terraform init \
-            -backend-config="resource_group_name=${{ env.TF_BACKEND_RESOURCE_GROUP }}"  \
-            -backend-config="storage_account_name=${{ env.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
+            -backend-config="resource_group_name=${{ needs.setup.outputs.tf_backend_rg_name }}"  \
+            -backend-config="storage_account_name=${{ needs.setup.outputs.tf_backend_storage_account_name }}"  \
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"
 
       - name: Get secret and clean tfvars file (PowerShell)
@@ -146,7 +130,7 @@ jobs:
         run: |
           ./scripts-workflow/get-and-normalise-tfvars.ps1 `
             -SecretName "${{ secrets.TF_SECRET_NAME }}" `
-            -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
+            -KeyVaultName "${{ needs.setup.outputs.tf_kv_name }}"
 
       - name: Plan Terraform changes
         run: terraform plan -var-file="normalisedTerraformVars.tfvars" -var="is_dr=$env.IS_DR" -var="image_tag=$TF_VAR_image_tag" -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
@@ -160,15 +144,15 @@ jobs:
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          tf-backend-resource-group: ${{ needs.setup.outputs.tf_backend_rg_name }}
+          tf-secrets-keyvault-name: ${{ needs.setup.outputs.tf_kv_name }}
           removeRules: 'true'
 
   deploy-terraform:
     permissions:
       id-token: write
       contents: read
-    needs: terraform-plan
+    needs: [setup, terraform-plan]
     name: Deploy Terraform
     runs-on: ubuntu-22.04
     defaults:
@@ -184,15 +168,6 @@ jobs:
         with:
           terraform_version: 1.9.7
 
-      - name: Get GitHub Runner IP
-        id: whats-my-ip
-        uses: ./.github/actions/whats-my-ip-address
-
-      - name: Set GitHub Runner IP to TF Var
-        shell: bash
-        run: |
-          echo "TF_VAR_github_ip=${{ steps.whats-my-ip.outputs.ip}}" >> $GITHUB_ENV
-
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
@@ -206,16 +181,12 @@ jobs:
           SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
           echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
 
-      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
+      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault Remove
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          sa-costing-name: ${{ env.SA_COSTING_NAME }}
-          sa-costing-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
-          az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          tf-backend-resource-group: ${{ needs.setup.outputs.tf_backend_rg_name }}
+          tf-secrets-keyvault-name: ${{ needs.setup.outputs.tf_kv_name }}
           removeRules: 'false'
 
       - name: Set container app image_tag env variables
@@ -227,17 +198,16 @@ jobs:
         id: init
         run: |
           terraform init \
-            -backend-config="resource_group_name=${{ secrets.TF_BACKEND_RESOURCE_GROUP }}"  \
-            -backend-config="storage_account_name=${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}"  \
-            -backend-config="container_name=${{ secrets.TF_BACKEND_CONTAINER_NAME }}"  \
-            -backend-config="key=${{ secrets.TF_BACKEND_KEY }}"
+            -backend-config="resource_group_name=${{ needs.setup.outputs.tf_backend_rg_name }}"  \
+            -backend-config="storage_account_name=${{ needs.setup.outputs.tf_backend_storage_account_name }}"  \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"
 
       - name: Get secret and clean tfvars file (PowerShell)
         shell: pwsh
         run: |
           ./scripts-workflow/get-and-normalise-tfvars.ps1 `
             -SecretName "${{ secrets.TF_SECRET_NAME }}" `
-            -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
+            -KeyVaultName "${{ needs.setup.outputs.tf_kv_name }}"
 
       - name: Apply Terraform changes
         id: apply
@@ -252,10 +222,23 @@ jobs:
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          sa-costing-name: ${{ env.SA_COSTING_NAME }}
-          sa-costing-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
-          az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          tf-backend-resource-group: ${{ needs.setup.outputs.tf_backend_rg_name }}
+          tf-secrets-keyvault-name: ${{ needs.setup.outputs.tf_kv_name }}
           removeRules: 'true'
+
+  # ensure storage details match those from the backup process in back-up-database.yml
+  restore-db:
+    needs: [setup, terraform-deploy]
+    uses: ./.github/workflows/restore-azure-sql-from-bacpac.yml
+    with:
+      resource_group: ${{ needs.prepare.outputs.app_rg_name }}
+      sql_server_name: ${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net
+      target_database: ${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}-sqldb
+      storage_account: plantechsqlbackups
+      container_name: sqlbackups
+    secrets:
+      az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+      az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+      az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+      sql_admin_user: ${{ secrets.SQL_ADMIN_USER }}
+      sql_admin_password: ${{ secrets.SQL_ADMIN_PASSWORD }}
