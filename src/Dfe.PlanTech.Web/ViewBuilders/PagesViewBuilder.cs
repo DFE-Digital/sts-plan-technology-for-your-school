@@ -129,11 +129,7 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = BuildLandingPageViewModel(
-            controller,
-            category,
-            categorySlug
-        );
+        var landingPageViewModel = BuildLandingPageViewModel(controller, category, categorySlug);
 
         return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
@@ -206,9 +202,20 @@ public class PagesViewBuilder(
         Controller controller,
         QuestionnaireCategoryEntry category,
         string categorySlug,
-        PageEntry? page = null
+        List<RelatedActionEntry>? relatedActions = null
     )
     {
+        var relatedActionsViewModels =
+            relatedActions
+                ?.Where(x => x is not null)
+                .Select(x => new RelatedActionViewModel
+                {
+                    Text = x.Title ?? string.Empty,
+                    Url = x.Url ?? string.Empty,
+                })
+                .ToList()
+            ?? [];
+
         return new CategoryLandingPageViewModel
         {
             Slug = categorySlug,
@@ -217,14 +224,7 @@ public class PagesViewBuilder(
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"],
-            RelatedActions = page?.RelatedActions?
-                .Where(x => x is not null)
-                .Select(x => new RelatedActionViewModel
-                {
-                    Text = x.Title ?? string.Empty,
-                    Url = x.Url ?? string.Empty,
-                })
-                .ToList() ?? [],
+            RelatedActions = BuildRelatedActionsViewModels(relatedActions),
         };
     }
 
@@ -264,11 +264,32 @@ public class PagesViewBuilder(
         }
 
         var landingPageViewModel = BuildLandingPageViewModel(
-        controller,
-        category,
-        page.Slug,
-        page
-    );
+            controller,
+            category,
+            page.Slug,
+            page.RelatedActions
+        );
+
         return controller.View(CategoryLandingPageView, landingPageViewModel);
+    }
+
+    private static List<RelatedActionViewModel> BuildRelatedActionsViewModels(
+        List<RelatedActionEntry>? relatedActions
+    )
+    {
+        if (relatedActions is null)
+        {
+            return [];
+        }
+
+        return relatedActions
+            .Where(x => x is not null)
+            .Select(x => new RelatedActionViewModel
+            {
+                Text = x.Title ?? string.Empty,
+                Url = x.Url ?? string.Empty,
+            })
+            .Where(x => !string.IsNullOrWhiteSpace(x.Text) && !string.IsNullOrWhiteSpace(x.Url))
+            .ToList();
     }
 }
