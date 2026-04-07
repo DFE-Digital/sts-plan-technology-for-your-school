@@ -117,7 +117,6 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SubmissionId = submission.Id,
             QuestionId = question.Id,
             AnswerId = answer.Id,
-            Maturity = string.Empty,
         };
 
         DbContext.Responses.Add(response);
@@ -205,7 +204,6 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             SubmissionId = submission.Id,
             QuestionId = question.Id,
             AnswerId = answer.Id,
-            Maturity = string.Empty,
         };
 
         DbContext.Responses.Add(response);

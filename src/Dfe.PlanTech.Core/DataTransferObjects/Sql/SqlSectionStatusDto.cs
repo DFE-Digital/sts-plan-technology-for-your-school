@@ -9,7 +9,6 @@ public class SqlSectionStatusDto : ISqlDto
 {
     public string SectionId { get; set; } = null!;
     public DateTime? LastCompletionDate { get; set; }
-    public string? LastMaturity { get; set; }
     public DateTime DateCreated { get; set; }
     public DateTime DateUpdated { get; set; }
     public SubmissionStatus Status { get; set; }

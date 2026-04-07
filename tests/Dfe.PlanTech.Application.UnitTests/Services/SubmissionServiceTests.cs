@@ -50,14 +50,12 @@ public class SubmissionServiceTests
 
     private static SqlSubmissionDto SubmissionWithResponses(
         bool completed,
-        string? maturity,
         params (string qId, string aId)[] responses
     )
     {
         return new SqlSubmissionDto
         {
             Id = 1,
-            Maturity = maturity,
             Status = SubmissionStatus.None,
             Responses = responses
                 .Select(r => new SqlResponseDto
@@ -169,7 +167,7 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, _) = BuildSectionGraph();
 
-        var sub = SubmissionWithResponses(completed: false, maturity: "medium", ("1", "1"));
+        var sub = SubmissionWithResponses(completed: false, ("1", "1"));
         _submissionWorkflow
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 1,
@@ -185,7 +183,6 @@ public class SubmissionServiceTests
         );
 
         Assert.NotNull(model);
-        Assert.Equal("medium", model!.Maturity);
         Assert.Equal("1", model.Responses.Last().QuestionSysId);
         Assert.Equal("1", model.Responses.Last().AnswerSysId);
     }
@@ -214,7 +211,7 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var (section, _, q2, a1_to_q2, _) = BuildSectionGraph();
 
-        var sub = SubmissionWithResponses(completed: false, maturity: "medium", ("1", a1_to_q2.Id));
+        var sub = SubmissionWithResponses(completed: false, ("1", a1_to_q2.Id));
 
         _submissionWorkflow
             .GetLatestSubmissionWithOrderedResponsesAsync(22, section.Id, status: null)
@@ -239,7 +236,6 @@ public class SubmissionServiceTests
 
         var sub = SubmissionWithResponses(
             completed: true,
-            maturity: "secure",
             ("1", a2_to_null.Id)
         );
 
@@ -260,7 +256,7 @@ public class SubmissionServiceTests
         var sut = CreateServiceUnderTest();
         var (section, _, _, _, _) = BuildSectionGraph();
 
-        var sub = SubmissionWithResponses(completed: false, maturity: "medium", ("1", "1"));
+        var sub = SubmissionWithResponses(completed: false, ("1", "1"));
         sub.Status = SubmissionStatus.InProgress;
 
         _submissionWorkflow

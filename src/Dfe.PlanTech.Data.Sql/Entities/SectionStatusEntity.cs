@@ -7,8 +7,6 @@ public class SectionStatusEntity
 {
     public string SectionId { get; set; } = null!;
 
-    public string? LastMaturity { get; set; }
-
     public DateTime DateCreated { get; set; }
 
     public DateTime DateUpdated { get; set; }
@@ -22,7 +20,6 @@ public class SectionStatusEntity
         return new SqlSectionStatusDto
         {
             SectionId = SectionId,
-            LastMaturity = LastMaturity,
             DateCreated = DateCreated,
             DateUpdated = DateUpdated,
             Status = Status,

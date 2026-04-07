@@ -220,7 +220,6 @@ public class SubmissionWorkflowTests
             Id = 55,
             SectionId = section.Id,
             SectionName = "testName",
-            Maturity = "developing",
             EstablishmentId = 1,
             Establishment = BuildEstablishment(),
             Status = SubmissionStatus.InProgress,
@@ -245,7 +244,6 @@ public class SubmissionWorkflowTests
         Assert.Equal(2, dto!.Responses.Count());
         // Should start at Q1 then go to Q2 per chain
         Assert.Equal(q1q2, dto.Responses.Select(r => r.Question.ContentfulSysId).ToArray());
-        Assert.Equal("developing", dto.Maturity);
     }
 
     // ---------- SubmitAnswer ----------
@@ -267,13 +265,11 @@ public class SubmissionWorkflowTests
             {
                 SectionId = "S1",
                 Status = SubmissionStatus.CompleteReviewed,
-                LastMaturity = "developing",
             },
             new()
             {
                 SectionId = "S2",
                 Status = SubmissionStatus.NotStarted,
-                LastMaturity = null,
             },
         };
 
@@ -287,13 +283,11 @@ public class SubmissionWorkflowTests
             {
                 Assert.Equal("S1", s.SectionId);
                 Assert.Equal(SubmissionStatus.CompleteReviewed, s.Status);
-                Assert.Equal("developing", s.LastMaturity);
             },
             s =>
             {
                 Assert.Equal("S2", s.SectionId);
                 Assert.Equal(SubmissionStatus.NotStarted, s.Status);
-                Assert.Null(s.LastMaturity);
             }
         );
 
@@ -309,7 +303,6 @@ public class SubmissionWorkflowTests
         {
             SectionId = "S1",
             SectionName = "testName",
-            Maturity = "high",
             EstablishmentId = 1,
             Establishment = BuildEstablishment(),
             Status = SubmissionStatus.CompleteReviewed,
@@ -325,7 +318,6 @@ public class SubmissionWorkflowTests
             SubmissionStatus.CompleteReviewed
         );
 
-        Assert.Equal("high", dto.LastMaturity);
         Assert.Equal(SubmissionStatus.CompleteReviewed, dto.Status);
     }
 
@@ -337,7 +329,6 @@ public class SubmissionWorkflowTests
         {
             SectionId = "S1",
             SectionName = "testName",
-            Maturity = "high",
             EstablishmentId = 1,
             Establishment = BuildEstablishment(),
             Status = SubmissionStatus.InProgress,
@@ -349,7 +340,6 @@ public class SubmissionWorkflowTests
 
         var dto = await sut.GetSectionSubmissionStatusAsync(1, "SEC", SubmissionStatus.InProgress);
 
-        Assert.Equal("high", dto.LastMaturity);
         Assert.Equal(SubmissionStatus.InProgress, dto.Status);
     }
 

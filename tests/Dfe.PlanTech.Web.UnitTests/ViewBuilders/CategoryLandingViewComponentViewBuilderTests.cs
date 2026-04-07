@@ -210,7 +210,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "developing" },
+            new SqlSectionStatusDto { SectionId = "S1" },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -247,7 +247,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "established" },
+            new SqlSectionStatusDto { SectionId = "S1" },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -292,7 +292,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "exemplary" },
+            new SqlSectionStatusDto { SectionId = "S1" },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -347,7 +347,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S4", LastMaturity = "developing" },
+            new() { SectionId = "S4" },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -430,7 +430,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6", LastMaturity = "exemplary" },
+            new() { SectionId = "S6" },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -491,7 +491,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6", LastMaturity = "developing" },
+            new() { SectionId = "S6" },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -617,7 +617,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6", LastMaturity = "developing" },
+            new() { SectionId = "S6" },
         };
 
         var responses = new SubmissionResponsesModel(
