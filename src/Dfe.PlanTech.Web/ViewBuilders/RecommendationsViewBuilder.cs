@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
@@ -15,7 +16,6 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -288,7 +288,7 @@ public class RecommendationsViewBuilder(
 
         var dynamicValues = new Dictionary<string, string>
         {
-            ["recStatus"] = selectedStatusEnum.Value.GetDisplayName()
+            ["recStatus"] = selectedStatusEnum.Value.GetDisplayName(),
         };
 
         await _recommendationService.UpdateRecommendationStatusAsync(
@@ -297,14 +297,19 @@ public class RecommendationsViewBuilder(
             userId,
             selectedStatusEnum.Value,
             notes
-                ??
-                await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryReason, dynamicValues),
+                ?? await _microcopyProvider.GetTextByKeyAsync(
+                    ContentfulMicrocopyConstants.SingleRecommendationHistoryReason,
+                    dynamicValues
+                ),
             CurrentUser.IsMat ? userOrganisationId : null
         );
 
         // Set success message for the banner
         controller.TempData["StatusUpdateSuccessTitle"] =
-            await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader, dynamicValues);
+            await _microcopyProvider.GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
+                dynamicValues
+            );
 
         // Redirect back to the single recommendation page
         return PageRedirecter.RedirectToGetSingleRecommendation(
@@ -421,7 +426,7 @@ public class RecommendationsViewBuilder(
             textBody,
             establishmentName,
             recommendationChunk.HeaderText,
-            section.Name,
+            category.Header.Text,
             latestRecommendationHistory.NewStatus.Value
         );
 
