@@ -33,10 +33,7 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
       - name: Install SqlPackage
-        run: |
-          wget https://aka.ms/sqlpackage-linux -O sqlpackage.zip
-          unzip sqlpackage.zip -d sqlpackage
-          chmod +x sqlpackage/sqlpackage
+        run: dotnet tool install --global Microsoft.SqlPackage
 
       - name: Export database
         run: |

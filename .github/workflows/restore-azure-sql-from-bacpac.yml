@@ -59,10 +59,7 @@ jobs:
           az_client_id: ${{ secrets.az_client_id }}
 
       - name: Install SqlPackage
-        run: |
-          wget https://aka.ms/sqlpackage-linux -O sqlpackage.zip
-          unzip sqlpackage.zip -d sqlpackage
-          chmod +x sqlpackage/sqlpackage
+        run: dotnet tool install --global Microsoft.SqlPackage
 
       - name: Resolve BACPAC blob name
         id: resolve-bacpac
