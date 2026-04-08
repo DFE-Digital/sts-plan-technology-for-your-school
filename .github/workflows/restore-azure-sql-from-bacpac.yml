@@ -134,7 +134,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          ./sqlpackage/sqlpackage \
+          sqlpackage \
             /Action:Import \
             /SourceFile:"${{ steps.download.outputs.bacpac_file }}" \
             /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \

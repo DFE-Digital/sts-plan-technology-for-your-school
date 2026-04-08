@@ -37,7 +37,7 @@ jobs:
 
       - name: Export database
         run: |
-          SqlPackage /Action:Export \
+          sqlpackage /Action:Export \
           /SourceServerName:"tcp:${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net" \
           /SourceDatabaseName:"${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
           /TargetFile:"db-$(date +%F).bacpac" \
