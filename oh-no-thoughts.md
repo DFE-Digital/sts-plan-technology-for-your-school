@@ -34,17 +34,9 @@ A running log of code quality concerns spotted during the documentation update. 
 
 There is both a `Services/` layer and a `Workflows/` layer, and the services are almost entirely thin pass-through facades over the workflows — they add a layer of indirection with no logic of their own. This doubles the number of classes and interfaces a developer must read to understand any operation (14 interfaces for what is effectively 7 things). Pick one: either services call repositories directly, or you have workflows and expose them directly to the presentation layer. Having both without clear differentiation is a common organic-growth anti-pattern that makes onboarding significantly harder.
 
-### `Workflows/ContentfulQueries/` is compiled out of the project
-
-The folder `Workflows/ContentfulQueries/` is explicitly excluded in the `.csproj`. This means there is dead code sitting in the repository that doesn't build and isn't tested. It should either be restored and used, or deleted. Excluded source folders are a maintenance hazard — they're invisible to the compiler but visible to confused developers.
-
 ### `ApiAuthenticationConfiguration` contains business logic
 
 Configuration objects should be plain data carriers. `ApiAuthenticationConfiguration` has a `HasApiKey` computed property and an `ApiKeyMatches()` method. Business logic in a configuration class is a mixing of concerns — it makes the logic harder to test in isolation and breaks the single-responsibility principle.
-
-### `GoogleTagManagerServiceServiceConfiguration` — naming error
-
-The class is named `GoogleTagManagerServiceServiceConfiguration` (double "Service"). This is clearly a typo that has been compiled and shipped. It's a small thing but it suggests the class wasn't reviewed carefully.
 
 ### Hardcoded "(opens in new tab)" string in `HyperlinkRenderer`
 
@@ -102,25 +94,9 @@ The cache key for `GetEntriesAsync<TEntry>(options)` is `{contentTypeName}{optio
 
 ## `src/Dfe.PlanTech.DatabaseUpgrader`
 
-### Target framework is .NET 8.0 while the rest of the solution is .NET 9.0
-
-The upgrader targets `net8.0` while every other project in the solution targets `net9.0`. This means it has a separate support lifecycle and will need its own upgrade pass. It should be brought in line with the rest of the solution.
-
 ### Connection string passed as a plain CLI argument
 
 The database connection string is passed via `-c` on the command line. Command-line arguments are visible in the OS process list (`ps aux`, Task Manager, deployment logs) and persist in shell history. Credentials should be passed via environment variable or a secrets manager (Azure Key Vault, Key Vault references in App Service config), not as a process argument.
-
-### Retry policy catches all exceptions indiscriminately
-
-`Policy.Handle<Exception>()` in `DatabaseExecutor` retries on any exception — including `NullReferenceException`, `ArgumentException`, and other programmer errors that will never succeed on retry. The policy should be scoped to transient failures (e.g. `SqlException` with specific error codes for timeouts and connection failures) so that genuine bugs fail fast rather than wasting 6 minutes retrying.
-
-### `FormattedSqlParameters` silently truncates values containing `=`
-
-`Options.FormattedSqlParameters` splits each `KEY=VALUE` string with `.Split('=')` and takes `[0]` and `[1]`. If a value legitimately contains `=` (base64 strings, connection string fragments, signed URLs), everything from the second `=` onwards is silently discarded. The split should use `Split('=', 2)` to limit to two parts.
-
-### `Azure.Identity` and `System.IdentityModel.Tokens.Jwt` referenced but not used
-
-Both packages appear in the `.csproj` but there is no code in the project that uses them. Dead dependencies add to the supply chain attack surface, slow down builds, and create false signals for security scanning tools. They should be removed, or the intended usage documented if this is planned future work.
 
 ### A solution file (`.sln`) lives inside the project folder
 
@@ -154,37 +130,13 @@ Both methods catch all exceptions, log them, and return `default`. The caller re
 
 ## `src/Dfe.PlanTech.Infrastructure.ServiceBus`
 
-### `CmsWebHookPayload.ContentType` likely returns the wrong value
-
-`CmsWebHookPayload.ContentType` is defined as `Sys.Type`, which in the Contentful webhook payload is always the system type — `"Entry"` or `"Asset"` — not the content type ID (e.g. `"page"`, `"category"`). The actual content type ID lives at `sys.contentType.sys.id`. If `ICmsCache.InvalidateCacheAsync` uses the content type to target which cache keys to invalidate, it would always receive `"Entry"` or `"Asset"` and never correctly scope the invalidation to the right content type. This is worth verifying urgently as it could mean cache invalidation is silently broken.
-
 ### Retry is implemented by creating a new message rather than using Service Bus's native mechanisms
 
 `MessageRetryHandler` completes the original message and enqueues a brand-new `ServiceBusMessage` with an incremented `DeliveryAttempts` custom property. Azure Service Bus has first-class support for this via `AbandonMessageAsync` (which increments the built-in `DeliveryCount` and re-queues automatically) and `DeferMessageAsync` (for delayed retry). The hand-rolled approach loses the original `MessageId`, `EnqueuedTime`, and other metadata, and duplicates functionality the platform provides for free. The `MaxDeliveryCount` setting on the queue itself would handle dead-lettering without custom logic.
 
-### Unhandled exceptions in `ContentfulServiceBusProcessor` dead-letter immediately with no retry
-
-If an exception escapes the `MessageHandler` method (i.e. is not caught by `CmsWebHookMessageProcessor`), the message is immediately dead-lettered. This means a single transient error — a momentary Redis unavailability, a network timeout — permanently removes a cache invalidation event from the queue. The handler should call `AbandonMessageAsync` for unexpected exceptions so Service Bus's built-in retry policy applies.
-
-### `Newtonsoft.Json` used here while the rest of the solution uses `System.Text.Json`
-
-This is the only project in the solution that references `Newtonsoft.Json`. Everything else, including the Redis serialisation layer, uses `System.Text.Json`. Two JSON libraries in the same application is unnecessary complexity — the serialisation behaviour is subtly different between them and it doubles the attack surface for deserialization vulnerabilities.
-
-### `ServiceBusAction` enum is defined but never used
-
-`ServiceBusAction` (`NotSet`, `DeadLetter`, `Complete`) exists in the codebase but is not referenced anywhere. It is dead code and should be removed.
-
 ---
 
 ## `src/Dfe.PlanTech.Infrastructure.SignIn`
-
-### `services.BuildServiceProvider()` called during service registration
-
-`ServiceCollectionExtensions.ConfigureOpenIdConnect` calls `services.BuildServiceProvider()` to resolve an `ILogger` instance. This is a well-known anti-pattern explicitly warned against in the ASP.NET Core docs — it creates a second root `IServiceProvider`, causing singleton services to be instantiated twice and scoped services to resolve incorrectly. The logger should instead be resolved lazily inside the event handler via `context.HttpContext.RequestServices`.
-
-### `GetDsiReference` uses `.Single()` with no error handling
-
-`UserClaimsExtensions.GetDsiReference` calls `.Single()` on the claims enumerable filtered by `nameidentifier`. If no matching claim exists, or if there are multiple, this throws an `InvalidOperationException` during the authentication callback — giving the user a generic error with no actionable message and no logged context about which user was affected. At minimum this should use `.SingleOrDefault()` with a guard that calls `context.Fail()` with a descriptive message, consistent with how the rest of `OnUserInformationReceivedEvent` handles failures.
 
 ### `UserClaimsExtensions` entirely excluded from code coverage
 
@@ -197,26 +149,6 @@ This is the only project in the solution that references `Newtonsoft.Json`. Ever
 ### The old README referenced `DfeSignInSetup.cs` which no longer exists
 
 The file was renamed to `ServiceCollectionExtensions.cs` at some point but the README was never updated. A good example of why this documentation effort is needed.
-
----
-
-## `src/Dfe.PlanTech.Web.Node`
-
-### Source maps shipped to production
-
-`esbuild.config.js` enables `sourcemap: true` for all JS and CSS builds with no environment check. Source maps in production expose the original source structure, variable names, and logic to anyone who opens browser dev tools or inspects network traffic. They should either be disabled in production builds or uploaded to an error tracking service (e.g. Sentry) and excluded from the public deployment.
-
-### `BrowserHistory` uses `localStorage` — shared across tabs
-
-`browser-history.js` stores navigation history in `localStorage` under the key `BrowserHistory`. `localStorage` is shared across all tabs and windows for the same origin. If a user has two tabs open, back button navigation in one tab will reflect URLs visited in the other. `sessionStorage` (scoped to a single tab) would be the correct choice here.
-
-### Browser targets are from 2017
-
-The esbuild CSS target is `['chrome58', 'firefox57', 'safari11', 'edge16']` — all from late 2017. These are now 7+ years old. Using outdated targets means esbuild emits unnecessary polyfill code and cannot apply modern CSS/JS optimisations that would reduce output size. GDS service standards require supporting the last two major versions of popular browsers; the targets should be updated to reflect current browser support requirements.
-
-### `"gulp": "gulp"` script with no Gulp installation
-
-`package.json` defines a `"gulp": "gulp"` npm script but Gulp is not listed as a dependency and there is no `gulpfile.js`. Running `npm run gulp` will fail. This is leftover from a previous build setup and should be removed.
 
 ---
 
@@ -246,10 +178,6 @@ The auth policy puts the resolved `PageEntry` into `HttpContext.Items` using a s
 
 `ComponentViewsFactory.TryGetViewForType` scans compiled assembly types at runtime to find the Razor view corresponding to a component model type. This is slow (unindexed linear scan), fragile (naming conventions must be exactly right), and fails silently at render time if a view doesn't match. A static dictionary of `Type → viewPath` registered at startup would be faster, more reliable, and immediately obvious to anyone reading the code.
 
-### `ViewModels/Interfaces/` is excluded from compilation
-
-The `.csproj` explicitly excludes `ViewModels\Interfaces\**` from compilation. There is a folder of interface files in the repository that is never built and never used. This is dead code that should either be restored (if it was excluded by mistake) or deleted.
-
 ### Bootstrap and jQuery in `wwwroot/lib`
 
 The project ships Bootstrap and jQuery in `wwwroot/lib`. Neither is needed — the application uses GOV.UK Frontend, which has no dependency on either. These are legacy inclusions that add unnecessary weight to every page load and represent unused third-party code that needs to be kept patched for security. They should be removed.
@@ -261,10 +189,6 @@ The project ships Bootstrap and jQuery in `wwwroot/lib`. Neither is needed — t
 ---
 
 ## `contentful/` tooling
-
-### `delete-all-content.js` has no confirmation prompt
-
-`content-management/delete-all-content.js` executes destructive deletions immediately with no "are you sure?" step. The `content-migrations` library correctly requires a `Y/N` confirmation before applying changes; the management scripts have no such guard. One mistyped `ENVIRONMENT` variable and you're wiping production content silently. At minimum this should prompt for confirmation or require a `--confirm` flag.
 
 ### CommonJS and ES modules are mixed in `content-management`
 
