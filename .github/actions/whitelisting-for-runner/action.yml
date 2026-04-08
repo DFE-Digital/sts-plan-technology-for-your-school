@@ -1,48 +1,48 @@
 name: Whitelisting for Runner
-description: Adds the runner's IP to storage and key vault network rules
+description: Adds the runner's IP to storage, key vault, and SQL firewall rules
 
 inputs:
-  runner-ip:
+  runner_ip:
     description: Public IP of the runner
     required: true
     default: ""
 
-  sa-costing-name:
+  sa_costing_name:
     description: Name of the storage account
     required: false
     default: ""
 
-  sa-costing-resource-group:
+  sa_costing_resource_group:
     description: Resource group of the storage account
     required: false
     default: ""
 
-  az-keyvault-name:
+  az_keyvault_name:
     description: Name of the application key vault
     required: false
     default: ""
 
-  az-aca-resource-group:
-    description: Resource group for the application key vault
+  az_aca_resource_group:
+    description: Resource group for the application key vault / SQL server
     required: false
     default: ""
 
-  tf-backend-resource-group:
+  tf_backend_resource_group:
     description: Resource group for the Terraform key vault
     required: false
     default: ""
 
-  tf-secrets-keyvault-name:
+  tf_secrets_keyvault_name:
     description: Name of the Terraform secrets key vault
     required: false
     default: ""
 
-  sql-server-name:
-    description: Name of the SQL Server resource
+  sql_server_name:
+    description: Name of the SQL Server resource (logical server name only)
     required: false
     default: ""
 
-  removeRules:
+  remove_rules:
     description: Remove the IPs from the firewall
     required: false
     default: "false"
@@ -55,19 +55,19 @@ runs:
       run: |
         set -euo pipefail
 
-        RUNNER_IP="${{ inputs.runner-ip }}"
-        REMOVE_RULES="${{ inputs.removeRules }}"
+        RUNNER_IP="${{ inputs.runner_ip }}"
+        REMOVE_RULES="${{ inputs.remove_rules }}"
 
-        SA_NAME="${{ inputs.sa-costing-name }}"
-        SA_RG="${{ inputs.sa-costing-resource-group }}"
+        SA_NAME="${{ inputs.sa_costing_name }}"
+        SA_RG="${{ inputs.sa_costing_resource_group }}"
 
-        SERVICE_KV_NAME="${{ inputs.az-keyvault-name }}"
-        SERVICE_RG="${{ inputs.az-aca-resource-group }}"
+        SERVICE_KV_NAME="${{ inputs.az_keyvault_name }}"
+        SERVICE_RG="${{ inputs.az_aca_resource_group }}"
 
-        TF_KV_NAME="${{ inputs.tf-secrets-keyvault-name }}"
-        TF_KV_RG="${{ inputs.tf-backend-resource-group }}"
+        TF_KV_NAME="${{ inputs.tf_secrets_keyvault_name }}"
+        TF_KV_RG="${{ inputs.tf_backend_resource_group }}"
 
-        SQL_NAME = "${{inputs.sql-server-name}}"
+        SQL_NAME="${{ inputs.sql_server_name }}"
 
         has_value_pair () {
           local a="$1"
@@ -158,7 +158,7 @@ runs:
           local sql_server_name="$2"
           local label="$3"
 
-          echo "Adding firewall rule $label to SQL Server $name..."
+          echo "Adding firewall rule $label to SQL Server $sql_server_name..."
           az sql server firewall-rule create \
             --resource-group "$rg" \
             --server "$sql_server_name" \
@@ -172,18 +172,18 @@ runs:
           local sql_server_name="$2"
           local label="$3"
 
-          echo "Removing firewall rule $label from SQL Server $name..."
+          echo "Removing firewall rule $label from SQL Server $sql_server_name..."
           az sql server firewall-rule delete \
-                --resource-group "$rg" \
-                --server "$sql_server_name" \
-                --name "$label"
+            --resource-group "$rg" \
+            --server "$sql_server_name" \
+            --name "$label"
         }
 
-        # Validate that paired inputs are either both set or both empty
+        # Validate inputs
         validate_value_pair "$SA_NAME" "$SA_RG" "costing storage account"
         validate_value_pair "$SERVICE_KV_NAME" "$SERVICE_RG" "service key vault"
         validate_value_pair "$TF_KV_NAME" "$TF_KV_RG" "terraform key vault"
-        validate_value_pair "$SERVICE_RG" "$SQL_NAME" "rg sql_server_name"
+        validate_value_pair "$SERVICE_RG" "$SQL_NAME" "SQL server"
 
         if [[ "$REMOVE_RULES" == "true" ]]; then
           if has_value_pair "$SA_NAME" "$SA_RG"; then

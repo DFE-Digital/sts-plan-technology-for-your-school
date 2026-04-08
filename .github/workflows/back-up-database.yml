@@ -43,8 +43,8 @@ jobs:
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          az-aca-resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          sql-server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          az_aca_resource_group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          sql_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
           removeRules: 'false'
 
       - name: Export database

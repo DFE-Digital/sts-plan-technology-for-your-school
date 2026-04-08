@@ -47,10 +47,6 @@ jobs:
           az_subscription_id: ${{ secrets.az_subscription_id }}
           az_client_id: ${{ secrets.az_client_id }}
 
-      - name: Get GitHub Runner IP
-        id: whats-my-ip
-        uses: ./.github/actions/whats-my-ip-address
-
       - name: Prepare derived variables
         id: set-vars
         shell: bash
