@@ -41,10 +41,8 @@ jobs:
           /SourceServerName:"tcp:${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net" \
           /SourceDatabaseName:"${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
           /TargetFile:"db-$(date +%F).bacpac" \
-          /Authentication:ActiveDirectoryServicePrincipal \
-          /TenantId:"${{ secrets.AZURE_TENANT_ID }}" \
-          /ClientId:"${{ secrets.AZURE_CLIENT_ID }}" \
-          /ClientSecret:"${{ secrets.AZURE_CLIENT_SECRET }}"
+          /TenantId:"${{ secrets.AZ_TENANT_ID }}" \
+          /ClientId:"${{ secrets.AZ_CLIENT_ID }}" \
 
           az storage blob upload \
           --account-name plantechsqlbackups \
