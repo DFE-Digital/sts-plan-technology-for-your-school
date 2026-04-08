@@ -37,7 +37,7 @@ await esbuild.build({
   bundle: true,
   minify: true,
   sourcemap: !isProduction,
-  target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
+  target: ['chrome130', 'firefox131', 'safari18', 'edge130'],
   external: ['/assets/*'],
   plugins: [
     sassPlugin({
@@ -52,7 +52,7 @@ await esbuild.build({
   bundle: true,
   minify: true,
   sourcemap: !isProduction,
-  target: ['chrome58', 'firefox57', 'safari11', 'edge16'],
+  target: ['chrome130', 'firefox131', 'safari18', 'edge130'],
   external: ['/assets/*'],
   plugins: [
     sassPlugin({

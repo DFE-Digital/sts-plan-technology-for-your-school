@@ -105,7 +105,8 @@ public class DatabaseExecutor
 
     private static RetryPolicy SetupRetryPolicy() =>
         Policy
-            .Handle<Exception>()
+            .Handle<System.Data.Common.DbException>()
+            .Or<TimeoutException>()
             .WaitAndRetry(
                 new[] { TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(3) }
             );
