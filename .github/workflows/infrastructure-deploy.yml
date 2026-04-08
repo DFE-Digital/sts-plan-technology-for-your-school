@@ -111,7 +111,7 @@ jobs:
       - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
         uses: ./.github/actions/whitelisting-for-runner
         with:
-          runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
+          runner_ip: ${{ steps.whats-my-ip.outputs.ip }}
           tf_backend_resource_group: ${{ needs.setup.outputs.tf_backend_rg_name }}
           tf_secrets_keyvault_name: ${{ needs.setup.outputs.tf_kv_name }}
           removeRules: 'false'
