@@ -232,7 +232,7 @@ jobs:
     uses: ./.github/workflows/restore-azure-sql-from-bacpac.yml
     with:
       resource_group: ${{ needs.prepare.outputs.app_rg_name }}
-      sql_server_name: ${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net
+      sql_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net
       target_database: ${{ needs.prepare.outputs.app_rg_name }}-sqldb
       storage_account: plantechsqlbackups
       container_name: sqlbackups

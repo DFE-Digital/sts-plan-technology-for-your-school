@@ -42,11 +42,13 @@ jobs:
             --query accessToken -o tsv)"
 
           sqlpackage /Action:Export \
-            /SourceServerName:"tcp:${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net,1433" \
-            /SourceDatabaseName:"${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
+            /SourceServerName:"tcp:${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net,1433" \
+            /SourceDatabaseName:"${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
             /TargetFile:"db-$(date +%F).bacpac" \
             /AccessToken:"$ACCESS_TOKEN"
 
+      - name: Save bacpac
+        run: |
           az storage blob upload \
           --account-name plantechsqlbackups \
           --container-name sqlbackups \
