@@ -183,7 +183,7 @@ runs:
         validate_value_pair "$SA_NAME" "$SA_RG" "costing storage account"
         validate_value_pair "$SERVICE_KV_NAME" "$SERVICE_RG" "service key vault"
         validate_value_pair "$TF_KV_NAME" "$TF_KV_RG" "terraform key vault"
-        validate_value_pair "$SERVICE_RG" "SQL_NAME" "rg sql_server_name"
+        validate_value_pair "$SERVICE_RG" "$SQL_NAME" "rg sql_server_name"
 
         if [[ "$REMOVE_RULES" == "true" ]]; then
           if has_value_pair "$SA_NAME" "$SA_RG"; then
@@ -198,8 +198,8 @@ runs:
             remove_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "terraform"
           fi
 
-          if has_value_pair "SQL_NAME" "$SERVICE_RG"; then
-            remove_sql_rule "$SERVICE_RG" "SQL_NAME" "github-runner"
+          if has_value_pair "$SQL_NAME" "$SERVICE_RG"; then
+            remove_sql_rule "$SERVICE_RG" "$SQL_NAME" "github-runner"
           fi
         else
           if has_value_pair "$SA_NAME" "$SA_RG"; then
@@ -214,7 +214,7 @@ runs:
             add_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "terraform"
           fi
 
-          if has_value_pair "SQL_NAME" "$SERVICE_RG"; then
-            add_sql_rule "$SERVICE_RG" "SQL_NAME" "github-runner"
+          if has_value_pair "$SQL_NAME" "$SERVICE_RG"; then
+            add_sql_rule "$SERVICE_RG" "$SQL_NAME" "github-runner"
           fi
         fi
