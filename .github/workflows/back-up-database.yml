@@ -37,12 +37,15 @@ jobs:
 
       - name: Export database
         run: |
+          ACCESS_TOKEN="$(az account get-access-token \
+            --resource https://database.windows.net/ \
+            --query accessToken -o tsv)"
+
           sqlpackage /Action:Export \
-          /SourceServerName:"tcp:${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net" \
-          /SourceDatabaseName:"${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
-          /TargetFile:"db-$(date +%F).bacpac" \
-          /TenantId:"${{ secrets.AZ_TENANT_ID }}" \
-          /ClientId:"${{ secrets.AZ_CLIENT_ID }}" \
+            /SourceServerName:"tcp:${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net,1433" \
+            /SourceDatabaseName:"${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
+            /TargetFile:"db-$(date +%F).bacpac" \
+            /AccessToken:"$ACCESS_TOKEN"
 
           az storage blob upload \
           --account-name plantechsqlbackups \
