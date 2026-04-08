@@ -101,7 +101,7 @@ public class SubmissionWorkflow(
             userEstablishmentId,
             answerModel
         );
-        var responseId = await _storedProcedureRepository.SubmitResponse(model);
+        var responseId = await _submissionRepository.SubmitResponse(model);
 
         return responseId;
     }
@@ -146,14 +146,6 @@ public class SubmissionWorkflow(
             SectionId = sectionId,
             Status = SubmissionStatus.NotStarted,
         };
-    }
-
-    public async Task SetMaturityAndMarkAsReviewedAsync(int submissionId)
-    {
-        await _storedProcedureRepository.SetMaturityForSubmissionAsync(submissionId);
-        await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
-            submissionId
-        );
     }
 
     public async Task SetSubmissionReviewedAsync(int submissionId)

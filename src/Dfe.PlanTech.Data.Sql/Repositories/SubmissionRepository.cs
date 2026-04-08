@@ -1,10 +1,11 @@
-using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
@@ -485,6 +486,152 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         await _db
             .Submissions.Where(s => s.Id == submissionId.Value)
             .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.Deleted, true));
+    }
+
+    public async Task<int> SubmitResponse(AssessmentResponseModel response)
+    {
+        ArgumentNullException.ThrowIfNull(response);
+
+        if (response.Answer is null)
+        {
+            throw new InvalidDataException($"{nameof(response.Answer)} cannot be null");
+        }
+
+        if (response.Question is null)
+        {
+            throw new InvalidDataException($"{nameof(response.Question)} cannot be null");
+        }
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.SectionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.SectionName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.Question.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.Question.Text);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.Answer.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.Answer.Text);
+
+        var submissionId = await SelectOrInsertSubmissionIdAsync(
+            response.SectionId,
+            response.SectionName,
+            response.EstablishmentId);
+
+        var answerId = await GetOrCreateAnswerIdAsync(
+            response.Answer.Id,
+            response.Answer.Text);
+
+        var questionId = await GetOrCreateQuestionIdAsync(
+            response.Question.Id,
+            response.Question.Text);
+
+        var responseEntity = new ResponseEntity
+        {
+            UserId = response.UserId,
+            UserEstablishmentId = response.UserEstablishmentId,
+            SubmissionId = submissionId,
+            QuestionId = questionId,
+            AnswerId = answerId,
+            Maturity = string.Empty,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        await _db.Responses.AddAsync(responseEntity);
+        await _db.SaveChangesAsync();
+
+        return responseEntity.Id;
+    }
+
+    private async Task<int> SelectOrInsertSubmissionIdAsync(
+        string sectionId,
+        string sectionName,
+        int establishmentId)
+    {
+        var submissionId = await GetCurrentSubmissionIdAsync(sectionId, establishmentId);
+
+        if (submissionId.HasValue)
+        {
+            return submissionId.Value;
+        }
+
+        var submission = new SubmissionEntity
+        {
+            EstablishmentId = establishmentId,
+            SectionId = sectionId,
+            SectionName = sectionName,
+            Status = SubmissionStatus.InProgress,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        await _db.Submissions.AddAsync(submission);
+        await _db.SaveChangesAsync();
+
+        return submission.Id;
+    }
+
+    private async Task<int?> GetCurrentSubmissionIdAsync(string sectionId, int establishmentId)
+    {
+        return await _db.Submissions
+            .Where(s =>
+                s.SectionId == sectionId &&
+                s.EstablishmentId == establishmentId &&
+                s.Status == SubmissionStatus.InProgress)
+            .OrderByDescending(s => s.Id)
+            .Select(s => (int?)s.Id)
+            .FirstOrDefaultAsync();
+    }
+
+    private async Task<int> GetOrCreateAnswerIdAsync(
+        string answerContentfulId,
+        string answerText)
+    {
+        var answerId = await _db.Answers
+            .Where(a =>
+                a.AnswerText == answerText &&
+                a.ContentfulRef == answerContentfulId)
+            .Select(a => (int?)a.Id)
+            .FirstOrDefaultAsync();
+
+        if (answerId.HasValue)
+        {
+            return answerId.Value;
+        }
+
+        var answer = new AnswerEntity
+        {
+            AnswerText = answerText,
+            ContentfulRef = answerContentfulId,
+        };
+
+        await _db.Answers.AddAsync(answer);
+        await _db.SaveChangesAsync();
+
+        return answer.Id;
+    }
+
+    private async Task<int> GetOrCreateQuestionIdAsync(
+        string questionContentfulId,
+        string questionText)
+    {
+        var questionId = await _db.Questions
+            .Where(q =>
+                q.QuestionText == questionText &&
+                q.ContentfulRef == questionContentfulId)
+            .Select(q => (int?)q.Id)
+            .FirstOrDefaultAsync();
+
+        if (questionId.HasValue)
+        {
+            return questionId.Value;
+        }
+
+        var question = new QuestionEntity
+        {
+            QuestionText = questionText,
+            ContentfulRef = questionContentfulId,
+        };
+
+        await _db.Questions.AddAsync(question);
+        await _db.SaveChangesAsync();
+
+        return question.Id;
     }
 
     private RecommendationEntity BuildRecommendationEntity(SqlRecommendationDto recommendationDto)

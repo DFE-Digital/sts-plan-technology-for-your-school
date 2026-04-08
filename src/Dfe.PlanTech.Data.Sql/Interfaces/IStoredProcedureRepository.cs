@@ -9,6 +9,4 @@ public interface IStoredProcedureRepository
         int establishmentId,
         string recommendationContentfulReference
     );
-    Task<int> SetMaturityForSubmissionAsync(int submissionId);
-    Task<int> SubmitResponse(AssessmentResponseModel response);
 }

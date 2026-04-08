@@ -256,31 +256,6 @@ public class SubmissionWorkflowTests
         await Assert.ThrowsAsync<InvalidDataException>(() => sut.SubmitAnswer(1, 2, 2, null!));
     }
 
-    [Fact]
-    public async Task SubmitAnswer_Calls_SP_With_AssessmentResponseModel_And_Returns_Id()
-    {
-        var sut = CreateServiceUnderTest();
-        var questionModel = new IdWithTextModel { Id = "Q1", Text = "Question 1 text" };
-        var answerModel = new IdWithTextModel { Id = "A1", Text = "Answer 1 text" };
-        var model = new SubmitAnswerModel { Question = questionModel, ChosenAnswer = answerModel };
-
-        _sp.SubmitResponse(
-                Arg.Is<AssessmentResponseModel>(m =>
-                    m.UserId == 9
-                    && m.EstablishmentId == 8
-                    && m.UserEstablishmentId == 7
-                    && m.Question.Id == "Q1"
-                    && m.Answer!.Id == "A1"
-                )
-            )
-            .Returns(777);
-
-        // activeEstablishmentId = 8, userEstablishmentId = 7 (simulating MAT user selecting a school)
-        var id = await sut.SubmitAnswer(9, 8, 7, model);
-
-        Assert.Equal(777, id);
-    }
-
     // ---------- GetSectionStatusesAsync ----------
     [Fact]
     public async Task GetSectionStatuses_Joins_Ids_And_Maps_Dtos()
@@ -397,17 +372,6 @@ public class SubmissionWorkflowTests
     }
 
     // ---------- Set / Delete delegations ----------
-    [Fact]
-    public async Task SetMaturityAndMarkAsReviewed_Calls_SP_Then_Repo()
-    {
-        var sut = CreateServiceUnderTest();
-        await sut.SetMaturityAndMarkAsReviewedAsync(42);
-        await _sp.Received(1).SetMaturityForSubmissionAsync(42);
-        await _repo
-            .Received(1)
-            .SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(42);
-    }
-
     [Fact]
     public async Task SetSubmissionReviewed_Delegates()
     {

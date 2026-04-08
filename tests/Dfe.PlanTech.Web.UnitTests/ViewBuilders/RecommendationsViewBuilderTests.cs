@@ -971,7 +971,7 @@ public class RecommendationsViewBuilderTests
                 textBody,
                 "Springfield Primary",
                 "Use MFA",
-                "section",
+                "category",
                 RecommendationStatus.InProgress
             )
             .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = [] }]);
@@ -1019,7 +1019,7 @@ public class RecommendationsViewBuilderTests
                 textBody,
                 "Springfield Primary",
                 "Use MFA",
-                "section",
+                "category",
                 RecommendationStatus.InProgress
             );
     }
@@ -1228,21 +1228,18 @@ public class RecommendationsViewBuilderTests
 
         _microcopyProvider
             .GetTextByKeyAsync(
-                ContentfulMicrocopyConstants.SingleRecommendationHistoryChange,
+                ContentfulMicrocopyConstants.SingleRecommendationHistoryReason,
                 Arg.Is<Dictionary<string, string>>(d =>
-                    d.ContainsKey("status") &&
-                    d["status"] == statusDisplayName
-                    )
+                    d.ContainsKey("recStatus") && d["recStatus"] == statusDisplayName
                 )
+            )
             .Returns(notesEntry);
 
         _microcopyProvider
             .GetTextByKeyAsync(
                 ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
                 Arg.Is<Dictionary<string, string>>(d =>
-                    d != null &&
-                    d.ContainsKey("status") &&
-                    d["status"] == statusDisplayName
+                    d != null && d.ContainsKey("recStatus") && d["recStatus"] == statusDisplayName
                 )
             )
             .Returns(successHeader);

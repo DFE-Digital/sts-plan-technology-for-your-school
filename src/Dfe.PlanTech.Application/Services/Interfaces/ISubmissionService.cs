@@ -15,7 +15,6 @@ public interface ISubmissionService
         int userId,
         QuestionnaireSectionEntry section
     );
-    Task ConfirmCheckAnswersAsync(int submissionId);
     Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId);
     Task<
         Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
