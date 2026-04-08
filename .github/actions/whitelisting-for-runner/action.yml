@@ -67,7 +67,7 @@ runs:
         TF_KV_NAME="${{ inputs.tf-secrets-keyvault-name }}"
         TF_KV_RG="${{ inputs.tf-backend-resource-group }}"
 
-        SQL_NAME = "${{inputs.sql-server-name}}""
+        SQL_NAME = "${{inputs.sql-server-name}}"
 
         has_value_pair () {
           local a="$1"
@@ -196,6 +196,10 @@ runs:
 
           if has_value_pair "$TF_KV_NAME" "$TF_KV_RG"; then
             remove_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "terraform"
+          fi
+
+          if has_value_pair "SQL_NAME" "$SERVICE_RG"; then
+            remove_sql_rule "$SERVICE_RG" "SQL_NAME" "github-runner"
           fi
         else
           if has_value_pair "$SA_NAME" "$SA_RG"; then
