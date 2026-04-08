@@ -6,6 +6,9 @@ on:
       environment:
         required: true
         type: string
+  push:
+    branches:
+      - disaster-recovery-e2e-terraform
 
 jobs:
   backup:

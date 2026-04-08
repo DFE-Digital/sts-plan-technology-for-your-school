@@ -38,10 +38,6 @@ on:
         required: true
       az_client_id:
         required: true
-      sql_admin_user:
-        required: true
-      sql_admin_password:
-        required: true
 
 jobs:
   restore:

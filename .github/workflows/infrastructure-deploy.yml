@@ -226,19 +226,17 @@ jobs:
           tf-secrets-keyvault-name: ${{ needs.setup.outputs.tf_kv_name }}
           removeRules: 'true'
 
-  # ensure storage details match those from the backup process in back-up-database.yml
+  # ensure storage details match those from the backup process in back-up-database.yml and db/server name match
   restore-db:
     needs: [setup, terraform-deploy]
     uses: ./.github/workflows/restore-azure-sql-from-bacpac.yml
     with:
       resource_group: ${{ needs.prepare.outputs.app_rg_name }}
       sql_server_name: ${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net
-      target_database: ${{ inputs.environment }}${{ secrets.DFE_PROJECT_NAME }}-sqldb
+      target_database: ${{ needs.prepare.outputs.app_rg_name }}-sqldb
       storage_account: plantechsqlbackups
       container_name: sqlbackups
     secrets:
       az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
       az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
       az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-      sql_admin_user: ${{ secrets.SQL_ADMIN_USER }}
-      sql_admin_password: ${{ secrets.SQL_ADMIN_PASSWORD }}
