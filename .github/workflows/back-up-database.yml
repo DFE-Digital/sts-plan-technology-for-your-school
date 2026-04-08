@@ -35,6 +35,18 @@ jobs:
       - name: Install SqlPackage
         run: dotnet tool install --global Microsoft.SqlPackage
 
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Whitelist Runner for SQL Server
+        uses: ./.github/actions/whitelisting-for-runner
+        with:
+          runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
+          az-aca-resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          sql-server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          removeRules: 'false'
+
       - name: Export database
         run: |
           ACCESS_TOKEN="$(az account get-access-token \
@@ -55,3 +67,11 @@ jobs:
           --name db-$(date +%F).bacpac \
           --file db-$(date +%F).bacpac \
           --auth-mode login
+
+      - name: De-Whitelist Runner for SQL Server
+        uses: ./.github/actions/whitelisting-for-runner
+        with:
+          runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
+          az-aca-resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          sql-server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          removeRules: 'true'

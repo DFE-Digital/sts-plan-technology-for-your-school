@@ -37,6 +37,11 @@ inputs:
     required: false
     default: ""
 
+  sql-server-name:
+    description: Name of the SQL Server resource
+    required: false
+    default: ""
+
   removeRules:
     description: Remove the IPs from the firewall
     required: false
@@ -57,10 +62,12 @@ runs:
         SA_RG="${{ inputs.sa-costing-resource-group }}"
 
         SERVICE_KV_NAME="${{ inputs.az-keyvault-name }}"
-        SERVICE_KV_RG="${{ inputs.az-aca-resource-group }}"
+        SERVICE_RG="${{ inputs.az-aca-resource-group }}"
 
         TF_KV_NAME="${{ inputs.tf-secrets-keyvault-name }}"
         TF_KV_RG="${{ inputs.tf-backend-resource-group }}"
+
+        SQL_NAME = "${{inputs.sql-server-name}}""
 
         has_value_pair () {
           local a="$1"
@@ -146,18 +153,45 @@ runs:
             --ip-address "$RUNNER_IP" > /dev/null
         }
 
+        add_sql_rule () {
+          local rg="$1"
+          local sql_server_name="$2"
+          local label="$3"
+
+          echo "Adding firewall rule $label to SQL Server $name..."
+          az sql server firewall-rule create \
+            --resource-group "$rg" \
+            --server "$sql_server_name" \
+            --name "$label" \
+            --start-ip-address "$RUNNER_IP" \
+            --end-ip-address "$RUNNER_IP" > /dev/null
+        }
+
+        remove_sql_rule () {
+          local rg="$1"
+          local sql_server_name="$2"
+          local label="$3"
+
+          echo "Removing firewall rule $label from SQL Server $name..."
+          az sql server firewall-rule delete \
+                --resource-group "$rg" \
+                --server "$sql_server_name" \
+                --name "$label"
+        }
+
         # Validate that paired inputs are either both set or both empty
         validate_value_pair "$SA_NAME" "$SA_RG" "costing storage account"
-        validate_value_pair "$SERVICE_KV_NAME" "$SERVICE_KV_RG" "service key vault"
+        validate_value_pair "$SERVICE_KV_NAME" "$SERVICE_RG" "service key vault"
         validate_value_pair "$TF_KV_NAME" "$TF_KV_RG" "terraform key vault"
+        validate_value_pair "$SERVICE_RG" "SQL_NAME" "rg sql_server_name"
 
         if [[ "$REMOVE_RULES" == "true" ]]; then
           if has_value_pair "$SA_NAME" "$SA_RG"; then
             remove_storage_rule "$SA_RG" "$SA_NAME"
           fi
 
-          if has_value_pair "$SERVICE_KV_NAME" "$SERVICE_KV_RG"; then
-            remove_keyvault_rule "$SERVICE_KV_RG" "$SERVICE_KV_NAME" "service"
+          if has_value_pair "$SERVICE_KV_NAME" "$SERVICE_RG"; then
+            remove_keyvault_rule "$SERVICE_RG" "$SERVICE_KV_NAME" "service"
           fi
 
           if has_value_pair "$TF_KV_NAME" "$TF_KV_RG"; then
@@ -168,11 +202,15 @@ runs:
             add_storage_rule "$SA_RG" "$SA_NAME"
           fi
 
-          if has_value_pair "$SERVICE_KV_NAME" "$SERVICE_KV_RG"; then
-            add_keyvault_rule "$SERVICE_KV_RG" "$SERVICE_KV_NAME" "service"
+          if has_value_pair "$SERVICE_KV_NAME" "$SERVICE_RG"; then
+            add_keyvault_rule "$SERVICE_RG" "$SERVICE_KV_NAME" "service"
           fi
 
           if has_value_pair "$TF_KV_NAME" "$TF_KV_RG"; then
             add_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "terraform"
+          fi
+
+          if has_value_pair "SQL_NAME" "$SERVICE_RG"; then
+            add_sql_rule "$SERVICE_RG" "SQL_NAME" "github-runner"
           fi
         fi

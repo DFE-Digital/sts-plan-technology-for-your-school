@@ -103,6 +103,10 @@ jobs:
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
           #at this point, only kv resources exist so do not check the others
       - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
         uses: ./.github/actions/whitelisting-for-runner
