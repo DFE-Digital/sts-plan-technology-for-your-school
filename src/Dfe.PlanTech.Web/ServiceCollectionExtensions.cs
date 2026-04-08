@@ -184,7 +184,7 @@ public static class ServiceCollectionExtensions
             (services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value
         );
 
-        services.AddScoped<ComponentViewsFactory>();
+        services.AddSingleton<ComponentViewsFactory>();
 
         return services;
     }

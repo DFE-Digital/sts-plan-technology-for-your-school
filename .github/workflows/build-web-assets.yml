@@ -34,7 +34,7 @@ jobs:
 
       - name: Build
         env:
-          NODE_ENV: production
+          NODE_ENV: ${{ github.base_ref == 'main' && 'production' || 'development' }}
         run: npm run build
 
       - name: Commit and push changes
