@@ -18,10 +18,6 @@ A running log of code quality concerns spotted during the documentation update. 
 
 `DsiConstants` contains a large number of numeric/string IDs for DfE Sign-in organisation categories and establishment types. These are government reference data values that can and do change. Hardcoding them as `const` strings in a compiled assembly means a code change and redeployment is required every time the reference data changes. These should live in configuration or a seeded database table.
 
-### `ReflectionHelper` used for type discovery at runtime
-
-`ReflectionHelper.GetAllConcreteInheritingTypes<T>()` scans loaded assemblies at runtime to find subtypes. In a web application this is called per-request (or at least per-startup) and is expensive — reflection over all loaded types is slow and allocation-heavy. The Contentful content type mapping (`ContentfulContentTypeConstants`) already exists as a static dictionary; that pattern should be used consistently instead of runtime reflection.
-
 ### 30+ Contentful entry models in a single flat folder
 
 `Contentful/Models/` contains over 30 `*Entry` classes in one directory with no further grouping. As the content model grows this becomes very hard to navigate. Grouping by concern (questionnaire, recommendations, page components, navigation) would help significantly.
@@ -78,18 +74,6 @@ Each of the 15 entities has a hand-written `AsDto()` method mapping it to its co
 
 `ContentfulRepository.ProcessContentfulErrors` logs errors from `ContentfulCollection.Errors` but never throws or signals failure to the caller. When Contentful returns partial results (e.g. an unresolvable reference), the application silently receives incomplete content and continues. This can cause subtle, hard-to-diagnose issues — pages rendering with missing sections, recommendations not showing — with no visible error. At minimum, callers should be able to opt into strict mode.
 
-### Duplicated logic between static and explicit interface implementation in `ContentfulRepository`
-
-`GetEntryByIdOptions` appears twice: once as a `public static` method and once as an explicit `IContentfulRepository` interface implementation (marked `[ExcludeFromCodeCoverage]`). The two implementations contain identical logic rather than the interface method delegating to the static one. This is dead duplication that will eventually diverge.
-
-### `EntryResolver` has two overlapping type-resolution mechanisms
-
-`EntryResolver` first checks `ContentfulContentTypeConstants.ContentTypeToEntryClassTypeMap` (the explicit, maintained dictionary in Core), then falls back to a reflection-built dictionary of all `ContentfulEntry` subtypes. If the explicit map is authoritative, the reflection fallback is unnecessary noise. If reflection is needed, the explicit map is redundant. The two approaches should be unified — whichever is chosen, the other should be removed.
-
-### Cache key stability is not guaranteed for filtered queries
-
-The cache key for `GetEntriesAsync<TEntry>(options)` is `{contentTypeName}{options.SerializeToRedisFormat()}`. If the serialisation of `GetEntriesOptions` is not deterministic (e.g., if it serialises a dictionary or collection whose ordering is not guaranteed), two logically identical queries could produce different cache keys and both miss the cache. The serialisation format should be verified to be stable and order-independent.
-
 ---
 
 ## `src/Dfe.PlanTech.DatabaseUpgrader`
@@ -98,33 +82,13 @@ The cache key for `GetEntriesAsync<TEntry>(options)` is `{contentTypeName}{optio
 
 The database connection string is passed via `-c` on the command line. Command-line arguments are visible in the OS process list (`ps aux`, Task Manager, deployment logs) and persist in shell history. Credentials should be passed via environment variable or a secrets manager (Azure Key Vault, Key Vault references in App Service config), not as a process argument.
 
-### A solution file (`.sln`) lives inside the project folder
-
-`Dfe.PlanTech.DatabaseUpgrader.sln` sits inside `src/Dfe.PlanTech.DatabaseUpgrader/` alongside the `.csproj`. Solution files belong at the repository root (where `plan-technology-for-your-school.sln` already lives). This stray file will confuse IDEs and CI tooling that discover solution files by scanning.
-
 ---
 
 ## `src/Dfe.PlanTech.Infrastructure.Redis`
 
-### `RedisConnectionManager` is almost certainly registered as scoped, not singleton
-
-`ConnectionMultiplexer` is StackExchange.Redis's own recommendation to keep as a long-lived singleton shared across all requests — the [official docs](https://stackexchange.github.io/StackExchange.Redis/Basics) are emphatic about this. If `RedisConnectionManager` is registered as scoped, a new `ConnectionMultiplexer` is created on every request, which is extremely expensive (each connection involves a TCP handshake, AUTH, and SELECT). Even with the lazy `??=` initialisation, scoped lifetime means the field is discarded at the end of each request scope. This needs to be verified and almost certainly fixed to singleton.
-
-### `LockAndRun` and `LockAndGet` silently swallow exceptions from the locked operation
-
-Both methods catch all exceptions, log them, and return `default`. The caller receives `null` with no indication that the operation failed. Any business logic relying on the return value of `LockAndGet` will silently produce wrong results if an exception is thrown inside the lock. These methods should either re-throw or use a result wrapper type so callers can handle failure explicitly.
-
 ### Lock acquisition uses a polling spin-wait rather than Pub/Sub
 
 `WaitForLockAsync` loops with `Task.Delay(random 50–600ms)` until the lock is acquired or the timeout is reached. Under contention, multiple instances are each polling Redis independently. A more efficient approach is to subscribe to a Redis Pub/Sub channel and receive a notification when the lock is released, eliminating the polling overhead entirely.
-
-### `RedisDependencyManager` reflects over content properties on every cache write
-
-`GetContentDependenciesAsync` calls `GetType().GetProperties()` and recursively reflects over all nested `ContentfulEntry` properties to discover dependencies — at cache-write time, per entry. This reflection is unbounded in depth, uncached, and runs on the hot path (albeit queued to the background). The type structure of `ContentfulEntry` subclasses is fixed at compile time; the dependency graph should be computed once at startup and cached in a static dictionary.
-
-### Magic value `databaseId = -1` used as a convention throughout `RedisLockProvider`
-
-`-1` is used as a sentinel meaning "use the default database" in all lock methods. This is not documented anywhere except through familiarity with StackExchange.Redis internals. A named constant (`RedisDb.Default`) or simply defaulting to `RedisDb.General` would make intent explicit.
 
 ---
 

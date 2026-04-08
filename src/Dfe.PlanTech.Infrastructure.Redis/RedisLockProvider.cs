@@ -103,6 +103,7 @@ public class RedisLockProvider(
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while executing locked operation for key: {Key}", key);
+            throw;
         }
         finally
         {
@@ -126,6 +127,7 @@ public class RedisLockProvider(
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error while executing locked operation for key: {Key}", key);
+            throw;
         }
         finally
         {
