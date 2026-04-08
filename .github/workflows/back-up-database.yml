@@ -32,6 +32,12 @@ jobs:
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
+      - name: Install SqlPackage
+        run: |
+          wget https://aka.ms/sqlpackage-linux -O sqlpackage.zip
+          unzip sqlpackage.zip -d sqlpackage
+          chmod +x sqlpackage/sqlpackage
+
       - name: Export database
         run: |
           SqlPackage /Action:Export \
