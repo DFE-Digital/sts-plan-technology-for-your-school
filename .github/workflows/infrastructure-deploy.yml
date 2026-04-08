@@ -112,8 +112,8 @@ jobs:
         uses: ./.github/actions/whitelisting-for-runner
         with:
           runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          tf-backend-resource-group: ${{ needs.setup.outputs.tf_backend_rg_name }}
-          tf-secrets-keyvault-name: ${{ needs.setup.outputs.tf_kv_name }}
+          tf_backend_resource_group: ${{ needs.setup.outputs.tf_backend_rg_name }}
+          tf_secrets_keyvault_name: ${{ needs.setup.outputs.tf_kv_name }}
           removeRules: 'false'
 
       - name: Set container app image_tag env variables
