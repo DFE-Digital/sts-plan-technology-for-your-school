@@ -12,6 +12,7 @@ public class RecommendationChunkEntry : ContentfulEntry
     public List<QuestionnaireAnswerEntry> CompletingAnswers { get; init; } = [];
     public List<QuestionnaireAnswerEntry> InProgressAnswers { get; init; } = [];
     public CAndSLinkEntry? CSLink { get; init; }
+    public List<RelatedActionEntry> RelatedActions { get; init; } = [];
     public string HeaderText => Header;
     public string LinkText => HeaderText;
     public string Slug { get; set; } = null!;

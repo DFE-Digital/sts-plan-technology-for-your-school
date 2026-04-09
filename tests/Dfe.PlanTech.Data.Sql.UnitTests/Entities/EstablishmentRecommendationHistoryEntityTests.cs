@@ -14,6 +14,7 @@ public class EstablishmentRecommendationHistoryEntityTests
         var expectedRecommendationId = 2;
         var expectedUserId = 3;
         var expectedMatEstablishmentId = 4;
+        var expectedResponseId = 5;
         var expectedDateCreated = new DateTime(2024, 05, 01, 12, 00, 00, DateTimeKind.Utc);
         var expectedPreviousStatus = RecommendationStatus.InProgress;
         var expectedNewStatus = RecommendationStatus.Complete;
@@ -26,6 +27,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             RecommendationId = expectedRecommendationId,
             UserId = expectedUserId,
             MatEstablishmentId = expectedMatEstablishmentId,
+            ResponseId = expectedResponseId,
             DateCreated = expectedDateCreated,
             PreviousStatus = expectedPreviousStatus.ToString(),
             NewStatus = expectedNewStatus.ToString(),
@@ -40,6 +42,7 @@ public class EstablishmentRecommendationHistoryEntityTests
         Assert.Equal(expectedRecommendationId, dto.RecommendationId);
         Assert.Equal(expectedUserId, dto.UserId);
         Assert.Equal(expectedMatEstablishmentId, dto.MatEstablishmentId);
+        Assert.Equal(expectedResponseId, dto.ResponseId);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedPreviousStatus, dto.PreviousStatus);
         Assert.Equal(expectedNewStatus, dto.NewStatus);
@@ -49,14 +52,15 @@ public class EstablishmentRecommendationHistoryEntityTests
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlEstablishmentRecommendationHistoryDto>(
             new[]
             {
-                nameof(SqlEstablishmentRecommendationHistoryDto.EstablishmentId),
-                nameof(SqlEstablishmentRecommendationHistoryDto.RecommendationId),
-                nameof(SqlEstablishmentRecommendationHistoryDto.UserId),
-                nameof(SqlEstablishmentRecommendationHistoryDto.MatEstablishmentId),
-                nameof(SqlEstablishmentRecommendationHistoryDto.DateCreated),
-                nameof(SqlEstablishmentRecommendationHistoryDto.PreviousStatus),
-                nameof(SqlEstablishmentRecommendationHistoryDto.NewStatus),
-                nameof(SqlEstablishmentRecommendationHistoryDto.NoteText),
+            nameof(SqlEstablishmentRecommendationHistoryDto.EstablishmentId),
+            nameof(SqlEstablishmentRecommendationHistoryDto.RecommendationId),
+            nameof(SqlEstablishmentRecommendationHistoryDto.UserId),
+            nameof(SqlEstablishmentRecommendationHistoryDto.MatEstablishmentId),
+            nameof(SqlEstablishmentRecommendationHistoryDto.ResponseId),
+            nameof(SqlEstablishmentRecommendationHistoryDto.DateCreated),
+            nameof(SqlEstablishmentRecommendationHistoryDto.PreviousStatus),
+            nameof(SqlEstablishmentRecommendationHistoryDto.NewStatus),
+            nameof(SqlEstablishmentRecommendationHistoryDto.NoteText),
             }
         );
     }
@@ -72,6 +76,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             RecommendationId = 2,
             UserId = 3,
             MatEstablishmentId = null, // Optional
+            ResponseId = null,
             DateCreated = DateTime.UtcNow,
             PreviousStatus = null, // Optional
             NewStatus = RecommendationStatus.InProgress.ToString(),
@@ -83,6 +88,7 @@ public class EstablishmentRecommendationHistoryEntityTests
 
         // Assert
         Assert.Null(dto.MatEstablishmentId);
+        Assert.Null(dto.ResponseId);
         Assert.Null(dto.PreviousStatus);
         Assert.Null(dto.NoteText);
         Assert.Equal(RecommendationStatus.InProgress, dto.NewStatus);

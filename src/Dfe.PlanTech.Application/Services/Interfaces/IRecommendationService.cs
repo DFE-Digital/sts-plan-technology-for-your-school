@@ -25,7 +25,8 @@ public interface IRecommendationService
         int userId,
         RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null
+        int? matEstablishmentId = null,
+        int? responseId = null
     );
     Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
         int establishmentId,
