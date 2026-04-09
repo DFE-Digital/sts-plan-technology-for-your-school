@@ -22,7 +22,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         ComponentTextBodyEntry textBody,
         string establishmentName,
         string recommendationHeader,
-        string sectionName,
+        string categoryName,
         RecommendationStatus recommendationStatus
     )
     {
@@ -32,7 +32,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
         {
             { "name of user", model.NameOfUser },
             { "school", establishmentName },
-            { "standard", sectionName.ToLower() },
+            { "standard", categoryName.ToLower() },
             { "user message", userMessage },
             { "recommendation name", recommendationHeader },
             { "status", recommendationStatus.GetDisplayName() },
@@ -153,9 +153,7 @@ public class NotifyService(INotifyWorkflow notifyWorkflow) : INotifyService
 
         if (sectionStatus?.LastCompletionDate is null)
         {
-            stringBuilder.AppendLine(
-                $"The self-assessment for {sectionName.ToLower()} has not yet been completed."
-            );
+            stringBuilder.AppendLine($"The self-assessment hasn't been completed.");
         }
         else
         {

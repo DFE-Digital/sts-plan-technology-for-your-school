@@ -46,7 +46,14 @@
 <ul class="govuk-list govuk-list--bullet">
     <li>your name and message</li>
     <li>the name of your school</li>
-    <li>the list of recommendations for your chosen standard and their current status</li>
+    @if (Model.ChunkSlug is null)
+    {
+        <li>the list of recommendations for your chosen standard and their current status</li>
+    }
+    else
+    {
+        <li>the chosen recommendation and its current status</li>
+    }
     <li>a link to sign into the service, or register for a DfE Sign-in</li>
 </ul>
 <p>Email addresses and messages will not be saved.</p>
@@ -193,11 +200,10 @@
     </div>
 
     <div class="govuk-form-group">
-        <govuk-button
-            type="submit"
-            prevent-double-click="true"
-            class="govuk-button govuk-button--primary"
-            data-module="govuk-button">
+        <govuk-button type="submit"
+                      prevent-double-click="true"
+                      class="govuk-button govuk-button--primary"
+                      data-module="govuk-button">
             Send email
         </govuk-button>
     </div>
