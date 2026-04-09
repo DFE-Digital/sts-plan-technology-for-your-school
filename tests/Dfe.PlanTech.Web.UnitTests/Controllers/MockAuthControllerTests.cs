@@ -18,7 +18,8 @@ public class MockAuthControllerTests
     private const string SelectorCookieName = "e2e_user";
     private const string SelectorCookieKey = "e2e_key";
 
-    private readonly IEstablishmentRepository _establishmentRepository = Substitute.For<IEstablishmentRepository>();
+    private readonly IEstablishmentRepository _establishmentRepository =
+        Substitute.For<IEstablishmentRepository>();
     private readonly IUserRepository _userRepository = Substitute.For<IUserRepository>();
     private readonly IMemoryCache _cache = new MemoryCache(new MemoryCacheOptions());
 
@@ -33,10 +34,22 @@ public class MockAuthControllerTests
         var value = ok.Value!;
 
         Assert.Equal("https://localhost:8080/api/mock-auth", GetProperty<string>(value, "issuer"));
-        Assert.Equal("https://localhost:8080/api/mock-auth/authorize", GetProperty<string>(value, "authorization_endpoint"));
-        Assert.Equal("https://localhost:8080/api/mock-auth/token", GetProperty<string>(value, "token_endpoint"));
-        Assert.Equal("https://localhost:8080/api/mock-auth/jwks", GetProperty<string>(value, "jwks_uri"));
-        Assert.Equal("https://localhost:8080/api/mock-auth/endsession", GetProperty<string>(value, "end_session_endpoint"));
+        Assert.Equal(
+            "https://localhost:8080/api/mock-auth/authorize",
+            GetProperty<string>(value, "authorization_endpoint")
+        );
+        Assert.Equal(
+            "https://localhost:8080/api/mock-auth/token",
+            GetProperty<string>(value, "token_endpoint")
+        );
+        Assert.Equal(
+            "https://localhost:8080/api/mock-auth/jwks",
+            GetProperty<string>(value, "jwks_uri")
+        );
+        Assert.Equal(
+            "https://localhost:8080/api/mock-auth/endsession",
+            GetProperty<string>(value, "end_session_endpoint")
+        );
     }
 
     [Fact]
@@ -62,9 +75,12 @@ public class MockAuthControllerTests
             "https://localhost:8080/auth/cb",
             "code",
             "state-1",
-            "nonce-1");
+            "nonce-1"
+        );
 
-        Assert.IsType<string>("The service is currently unavailable to use while E2E tests are running.");
+        Assert.IsType<string>(
+            "The service is currently unavailable to use while E2E tests are running."
+        );
     }
 
     [Fact]
@@ -76,9 +92,12 @@ public class MockAuthControllerTests
             "https://localhost:8080/auth/cb",
             "code",
             "state-1",
-            "nonce-1");
+            "nonce-1"
+        );
 
-        Assert.IsType<string>("The service is currently unavailable to use while E2E tests are running.");
+        Assert.IsType<string>(
+            "The service is currently unavailable to use while E2E tests are running."
+        );
     }
 
     [Fact]
@@ -90,7 +109,8 @@ public class MockAuthControllerTests
             "https://localhost:8080/auth/cb",
             "token",
             "state-1",
-            "nonce-1");
+            "nonce-1"
+        );
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal("Only authorization_code supported", badRequest.Value);
@@ -107,7 +127,8 @@ public class MockAuthControllerTests
             "https://localhost:8080/auth/cb",
             "code",
             "state-123",
-            "nonce-123");
+            "nonce-123"
+        );
 
         var redirect = Assert.IsType<RedirectResult>(result);
         Assert.StartsWith("https://localhost:8080/auth/cb?code=", redirect.Url);
@@ -125,20 +146,19 @@ public class MockAuthControllerTests
                 return Task.FromResult(result);
             });
 
-        _userRepository.GetUserBySignInRefAsync("E2E_TEST_SCHOOL_USER")
+        _userRepository
+            .GetUserBySignInRefAsync("E2E_TEST_SCHOOL_USER")
             .Returns(Task.FromResult<UserEntity?>(new UserEntity { Id = 11 }));
 
-        _userRepository.GetUserBySignInRefAsync("E2E_TEST_MAT_USER")
+        _userRepository
+            .GetUserBySignInRefAsync("E2E_TEST_MAT_USER")
             .Returns(Task.FromResult<UserEntity?>(new UserEntity { Id = 22 }));
 
         var controller = CreateController();
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            controller.Authorize(
-                "https://localhost:8080/auth/cb",
-                "code",
-                "state-1",
-                "nonce-1"));
+            controller.Authorize("https://localhost:8080/auth/cb", "code", "state-1", "nonce-1")
+        );
     }
 
     [Fact]
@@ -148,29 +168,30 @@ public class MockAuthControllerTests
         [
             new() { Id = 100, OrgName = "Other Org" },
             new() { Id = 101, OrgName = "DSI TEST Establishment (001) Miscellanenous (27)" },
-            new() { Id = 201, OrgName = "DSI TEST Multi-Academy Trust (010)" }
+            new() { Id = 201, OrgName = "DSI TEST Multi-Academy Trust (010)" },
         ];
 
         _establishmentRepository
             .GetEstablishmentsByAsync(Arg.Any<Expression<Func<EstablishmentEntity, bool>>>())
             .Returns(callInfo =>
             {
-                Expression<Func<EstablishmentEntity, bool>> expression =
-                    callInfo.Arg<Expression<Func<EstablishmentEntity, bool>>>();
+                Expression<Func<EstablishmentEntity, bool>> expression = callInfo.Arg<
+                    Expression<Func<EstablishmentEntity, bool>>
+                >();
 
                 Func<EstablishmentEntity, bool> predicate = expression.Compile();
 
-                List<EstablishmentEntity> result = establishments
-                    .Where(predicate)
-                    .ToList();
+                List<EstablishmentEntity> result = establishments.Where(predicate).ToList();
 
                 return Task.FromResult(result);
             });
 
-        _userRepository.GetUserBySignInRefAsync("E2E_TEST_SCHOOL_USER")
+        _userRepository
+            .GetUserBySignInRefAsync("E2E_TEST_SCHOOL_USER")
             .Returns(Task.FromResult<UserEntity?>(new UserEntity() { Id = 11 }));
 
-        _userRepository.GetUserBySignInRefAsync("E2E_TEST_MAT_USER")
+        _userRepository
+            .GetUserBySignInRefAsync("E2E_TEST_MAT_USER")
             .Returns(Task.FromResult<UserEntity?>(new UserEntity { Id = 22 }));
 
         var controller = CreateController(userTypeCookie: "school");
@@ -179,11 +200,13 @@ public class MockAuthControllerTests
             "https://localhost:8080/auth/cb",
             "code",
             "state-1",
-            "nonce-1");
+            "nonce-1"
+        );
 
         Assert.IsType<RedirectResult>(result);
 
-        await _establishmentRepository.Received(2)
+        await _establishmentRepository
+            .Received(2)
             .GetEstablishmentsByAsync(Arg.Any<Expression<Func<EstablishmentEntity, bool>>>());
 
         await _userRepository.Received(1).GetUserBySignInRefAsync("E2E_TEST_SCHOOL_USER");
@@ -195,15 +218,14 @@ public class MockAuthControllerTests
     {
         SetupSchoolAndMatData();
 
-        var controller = CreateController(
-            userTypeCookie: "school",
-            keyCookie: ValidSecret);
+        var controller = CreateController(userTypeCookie: "school", keyCookie: ValidSecret);
 
         var result = await controller.Authorize(
             "https://localhost:8080/auth/cb",
             "code",
             "state-1",
-            "nonce-1");
+            "nonce-1"
+        );
 
         Assert.IsType<RedirectResult>(result);
     }
@@ -213,17 +235,18 @@ public class MockAuthControllerTests
     {
         SetupSchoolAndMatData();
 
-        var controller = CreateController(
-            userTypeCookie: "school",
-            keyCookie: "Invalid-Secret");
+        var controller = CreateController(userTypeCookie: "school", keyCookie: "Invalid-Secret");
 
         var result = await controller.Authorize(
             "https://localhost:8080/auth/cb",
             "code",
             "state-1",
-            "nonce-1");
+            "nonce-1"
+        );
 
-        Assert.IsType<string>("The service is currently unavailable to use while E2E tests are running.");
+        Assert.IsType<string>(
+            "The service is currently unavailable to use while E2E tests are running."
+        );
     }
 
     [Fact]
@@ -235,7 +258,8 @@ public class MockAuthControllerTests
             "implicit",
             "code-1",
             "https://localhost:8080/callback",
-            "client-id");
+            "client-id"
+        );
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal("unsupported_grant_type", GetProperty<string>(badRequest.Value!, "error"));
@@ -250,7 +274,8 @@ public class MockAuthControllerTests
             "authorization_code",
             "missing-code",
             "https://localhost:8080/callback",
-            "client-id");
+            "client-id"
+        );
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal("invalid_grant", GetProperty<string>(badRequest.Value!, "error"));
@@ -261,15 +286,17 @@ public class MockAuthControllerTests
     {
         var controller = CreateController();
 
-        StoreAuthCode("code-1", new AuthCodeRecordBuilder()
-            .WithRedirectUri("https://localhost:8080/correct")
-            .Build());
+        StoreAuthCode(
+            "code-1",
+            new AuthCodeRecordBuilder().WithRedirectUri("https://localhost:8080/correct").Build()
+        );
 
         var result = controller.Token(
             "authorization_code",
             "code-1",
             "https://localhost:8080/wrong",
-            "client-id");
+            "client-id"
+        );
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal("redirect_mismatch", GetProperty<string>(badRequest.Value!, "error"));
@@ -280,15 +307,17 @@ public class MockAuthControllerTests
     {
         var controller = CreateController();
 
-        StoreAuthCode("code-1", new AuthCodeRecordBuilder()
-            .WithExpires(DateTime.UtcNow.AddMinutes(-1))
-            .Build());
+        StoreAuthCode(
+            "code-1",
+            new AuthCodeRecordBuilder().WithExpires(DateTime.UtcNow.AddMinutes(-1)).Build()
+        );
 
         var result = controller.Token(
             "authorization_code",
             "code-1",
             "https://localhost:8080/callback",
-            "client-id");
+            "client-id"
+        );
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(result);
         Assert.Equal("expired_code", GetProperty<string>(badRequest.Value!, "error"));
@@ -305,7 +334,8 @@ public class MockAuthControllerTests
             "authorization_code",
             "code-1",
             "https://localhost:8080/callback",
-            "client-id");
+            "client-id"
+        );
 
         var ok = Assert.IsType<OkObjectResult>(result);
 
@@ -326,7 +356,8 @@ public class MockAuthControllerTests
             "authorization_code",
             "code-1",
             "https://localhost:8080/callback",
-            "client-id");
+            "client-id"
+        );
 
         Assert.IsType<OkObjectResult>(first);
 
@@ -334,7 +365,8 @@ public class MockAuthControllerTests
             "authorization_code",
             "code-1",
             "https://localhost:8080/callback",
-            "client-id");
+            "client-id"
+        );
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(second);
         Assert.Equal("invalid_grant", GetProperty<string>(badRequest.Value!, "error"));
@@ -345,7 +377,7 @@ public class MockAuthControllerTests
     {
         var controller = CreateController(keyCookie: null);
 
-        var result = controller.EndSession( "abc");
+        var result = controller.EndSession("abc");
 
         Assert.IsType<NotFoundResult>(result);
     }
@@ -355,7 +387,7 @@ public class MockAuthControllerTests
     {
         var controller = CreateController();
 
-        var result = controller.EndSession( null);
+        var result = controller.EndSession(null);
 
         var redirect = Assert.IsType<RedirectResult>(result);
         Assert.Equal("/", redirect.Url);
@@ -387,21 +419,22 @@ public class MockAuthControllerTests
         string? userTypeCookie = "school",
         string? keyCookie = ValidSecret,
         string scheme = "https",
-        string host = "localhost:8080")
+        string host = "localhost:8080"
+    )
     {
-        var options = Options.Create(new AutomatedTestingConfiguration()
-        {
-            MockAuthentication = new MockAuthenticationOptions
+        var options = Options.Create(
+            new AutomatedTestingConfiguration()
             {
-                ClientSecret = ValidSecret
+                MockAuthentication = new MockAuthenticationOptions { ClientSecret = ValidSecret },
             }
-        });
+        );
 
         var controller = new MockAuthController(
             _establishmentRepository,
             _userRepository,
             _cache,
-            options);
+            options
+        );
 
         var httpContext = new DefaultHttpContext();
         httpContext.Request.Scheme = scheme;
@@ -424,10 +457,7 @@ public class MockAuthControllerTests
             httpContext.Request.Headers.Cookie = string.Join("; ", cookies);
         }
 
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = httpContext
-        };
+        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
         return controller;
     }
@@ -436,40 +466,46 @@ public class MockAuthControllerTests
     {
         EstablishmentEntity[] establishments =
         [
-            new EstablishmentEntity { Id = 101, OrgName = "DSI TEST Establishment (001) Miscellanenous (27)" },
+            new EstablishmentEntity
+            {
+                Id = 101,
+                OrgName = "DSI TEST Establishment (001) Miscellanenous (27)",
+            },
             new EstablishmentEntity { Id = 201, OrgName = "DSI TEST Multi-Academy Trust (010)" },
-            new EstablishmentEntity { Id = 999, OrgName = "Other Org" }
+            new EstablishmentEntity { Id = 999, OrgName = "Other Org" },
         ];
 
         _establishmentRepository
             .GetEstablishmentsByAsync(Arg.Any<Expression<Func<EstablishmentEntity, bool>>>())
             .Returns(callInfo =>
             {
-                Expression<Func<EstablishmentEntity, bool>> expression =
-                    callInfo.Arg<Expression<Func<EstablishmentEntity, bool>>>();
+                Expression<Func<EstablishmentEntity, bool>> expression = callInfo.Arg<
+                    Expression<Func<EstablishmentEntity, bool>>
+                >();
 
                 Func<EstablishmentEntity, bool> predicate = expression.Compile();
 
-                List<EstablishmentEntity> result = establishments
-                    .Where(predicate)
-                    .ToList();
+                List<EstablishmentEntity> result = establishments.Where(predicate).ToList();
 
                 return Task.FromResult(result);
             });
 
-        _userRepository.GetUserBySignInRefAsync("E2E_TEST_SCHOOL_USER")
+        _userRepository
+            .GetUserBySignInRefAsync("E2E_TEST_SCHOOL_USER")
             .Returns(Task.FromResult<UserEntity?>(new UserEntity { Id = 11 }));
 
-        _userRepository.GetUserBySignInRefAsync("E2E_TEST_MAT_USER")
+        _userRepository
+            .GetUserBySignInRefAsync("E2E_TEST_MAT_USER")
             .Returns(Task.FromResult<UserEntity?>(new UserEntity { Id = 22 }));
     }
 
     private void StoreAuthCode(string code, object record)
     {
-        _cache.Set(code, record, new MemoryCacheEntryOptions
-        {
-            AbsoluteExpiration = DateTime.UtcNow.AddMinutes(2)
-        });
+        _cache.Set(
+            code,
+            record,
+            new MemoryCacheEntryOptions { AbsoluteExpiration = DateTime.UtcNow.AddMinutes(2) }
+        );
     }
 
     private static T GetProperty<T>(object obj, string propertyName)
@@ -481,15 +517,16 @@ public class MockAuthControllerTests
 
     private class AuthCodeRecordBuilder
     {
-        private string _subject = "E2E_TEST_SCHOOL_USER";
-        private string _email = "school@test.local";
-        private string? _organisationJson = "{\"name\":\"School\"}";
-        private string _redirectUri = "https://localhost:8080/callback";
-        private string? _nonce = "nonce-1";
         private DateTime _expires = DateTime.UtcNow.AddMinutes(1);
-        private int _dbEstablishmentId = 101;
-        private int _dbUserId = 11;
-        private int? _dbMatEstablishmentId;
+        private string _redirectUri = "https://localhost:8080/callback";
+
+        private readonly string _subject = "E2E_TEST_SCHOOL_USER";
+        private readonly string _email = "school@test.local";
+        private readonly string? _organisationJson = "{\"name\":\"School\"}";
+        private readonly string? _nonce = "nonce-1";
+        private readonly int _dbEstablishmentId = 101;
+        private readonly int _dbUserId = 11;
+        private readonly int? _dbMatEstablishmentId = null;
 
         public AuthCodeRecordBuilder WithRedirectUri(string redirectUri)
         {
@@ -505,8 +542,10 @@ public class MockAuthControllerTests
 
         public object Build()
         {
-            var type = typeof(MockAuthController)
-                .GetNestedType("AuthCodeRecord", System.Reflection.BindingFlags.NonPublic)!;
+            var type = typeof(MockAuthController).GetNestedType(
+                "AuthCodeRecord",
+                System.Reflection.BindingFlags.NonPublic
+            )!;
 
             var instance = Activator.CreateInstance(type)!;
 

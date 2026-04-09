@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
+using Contentful.Core.Models;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Helpers;
@@ -46,8 +47,15 @@ public static class ContentComponentJsonExtensions
     /// </summary>
     public static void ValidateContentfulTypeMapping()
     {
-        var reflectedTypes = ReflectionHelper
-            .GetTypesInheritingFrom<ContentfulEntry>()
+        var contentfulEntryTypes = ReflectionHelper.GetTypesInheritingFrom<ContentfulEntry>();
+        var entryContentfulEntryTypes = ReflectionHelper.GetTypesInheritingFrom<
+            Entry<ContentfulEntry>
+        >();
+        var contentfulFieldTypes = ReflectionHelper.GetTypesInheritingFrom<ContentfulField>();
+
+        var reflectedTypes = contentfulEntryTypes
+            .Union(entryContentfulEntryTypes)
+            .Union(contentfulFieldTypes)
             .Where(t => t.IsConcreteClass() && t.HasParameterlessConstructor())
             .ToHashSet();
 
@@ -80,8 +88,8 @@ public static class ContentComponentJsonExtensions
     /// </summary>
     private static List<JsonDerivedType> GetInheritingTypes(Type type) =>
         [
-            .. ContentfulContentTypeConstants.EntryTypeToContentTypeMap
-                .Where(kvp =>
+            .. ContentfulContentTypeConstants
+                .EntryTypeToContentTypeMap.Where(kvp =>
                     type.IsAssignableFrom(kvp.Key)
                     && kvp.Key.IsConcreteClass()
                     && kvp.Key.HasParameterlessConstructor()
