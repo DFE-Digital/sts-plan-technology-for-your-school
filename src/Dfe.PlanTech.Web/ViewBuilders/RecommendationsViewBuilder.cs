@@ -125,6 +125,14 @@ public class RecommendationsViewBuilder(
             OriginatingSlug = chunkSlug,
             History = groupedHistory,
             FirstActivity = firstActivity,
+            RelatedActions = currentRecommendationChunk.RelatedActions?
+                .Where(x => x is not null)
+                .Select(x => new RelatedActionViewModel
+                {
+                    Text = x.Title ?? string.Empty,
+                    Url = x.Url ?? string.Empty,
+                })
+                .ToList() ?? [],
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
