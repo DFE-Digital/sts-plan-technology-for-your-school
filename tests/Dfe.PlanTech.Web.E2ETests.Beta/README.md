@@ -81,6 +81,8 @@ smoke + regression:
 | DB_PORT                      | Database Port (1433)                                                                                                                                 |
 | DB_DATABASE                  | Database name (plantech-db)                                                                                                                          |
 | DB_MODE                      | sql or azure (Set to SQL if running db locally, set to azure if using azure db. There are different methods we use to authenticate + clear the db. ) |
+| MOCK_AUTH_MODE               | Change this to what the service is running on e.g. mock or dsi                                                                                       |
+| MOCK_AUTH_CLIENT_SECRET      | Change this to the client secret set in the plan-tech secrets (AutomatedTesting__MockAuthentication__ClientSecret)                                                                                                                                  |
 
 DSI_EMAIL\* variables can be found in the azure keyvault under "e2e-tests" for the respective environments.
 URL - this is the URL the tests will be running against - e.g. https://localhost:8080/ or https://environment.plan-technology-for-your-school.gov.uk/
