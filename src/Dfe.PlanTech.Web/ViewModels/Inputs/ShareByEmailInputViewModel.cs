@@ -40,7 +40,7 @@ public class ShareByEmailInputViewModel : IValidatableObject
                 if (!address.IsValid(email) || !domain.Contains('.'))
                 {
                     yield return new ValidationResult(
-                        "Please enter a valid email address",
+                        "Enter a valid email address",
                         [$"EmailAddresses[{i}]"]
                     );
                 }

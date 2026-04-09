@@ -67,6 +67,7 @@ public static class ContentfulContentTypeConstants
         { typeof(RecommendationPageEntry), RecommendationPageContentfulContentTypeId },
         { typeof(RichTextContentDataEntry), RichTextContentDataContentfulContentTypeId },
         { typeof(RichTextContentField), RichTextContentContentfulContentTypeId },
+        { typeof(RelatedActionEntry), RelatedActionContentfulContentTypeId },
         {
             typeof(RichTextContentSupportDataField),
             RichTextContentSupportDataContentfulContentTypeId
@@ -112,6 +113,7 @@ public static class ContentfulContentTypeConstants
     public const string RecommendationPageContentfulContentTypeId = "recommendationPage";
     public const string RichTextContentContentfulContentTypeId = "richTextContent";
     public const string RichTextContentDataContentfulContentTypeId = "richTextContentData";
+    public const string RelatedActionContentfulContentTypeId = "relatedAction";
     public const string RichTextContentSupportDataContentfulContentTypeId =
         "richTextContentSupportData";
     public const string RichTextMarkContentfulContentTypeId = "richTextMark";
