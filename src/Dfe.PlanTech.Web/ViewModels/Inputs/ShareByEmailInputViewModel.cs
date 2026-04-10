@@ -49,7 +49,7 @@ public class ShareByEmailInputViewModel : IValidatableObject
 
         if (string.IsNullOrWhiteSpace(NameOfUser))
         {
-            yield return new ValidationResult("Please enter your name", [nameof(NameOfUser)]);
+            yield return new ValidationResult("Enter your name", [nameof(NameOfUser)]);
         }
     }
 
