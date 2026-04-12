@@ -30,6 +30,14 @@ resource "azurerm_storage_account" "contentful_backup_storage" {
   public_network_access_enabled = false
   shared_access_key_enabled     = false
 
+  public_network_access_enabled   = false
+  allow_nested_items_to_be_public = false
+  shared_access_key_enabled       = false
+
+  sas_policy {
+    expiration_period = "00.01:00:00"
+  }
+
   blob_properties {
     container_delete_retention_policy {
       days = 30
@@ -62,6 +70,32 @@ resource "azapi_update_resource" "contentful_backup_storage_key_rotation_reminde
   })
 
   depends_on = [azurerm_storage_account.contentful_backup_storage]
+}
+
+resource "azurerm_storage_account_network_rules" "contentful_backup_storage" {
+  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
+  default_action     = "Deny"
+  bypass             = ["AzureServices"]
+  ip_rules           = []
+}
+
+resource "azapi_update_resource" "contentful_backup_storage_key_rotation_reminder" {
+  type        = "Microsoft.Storage/storageAccounts@2023-01-01"
+  resource_id = azurerm_storage_account.contentful_backup_storage.id
+  body = jsonencode({
+    properties = {
+      keyPolicy = {
+        keyExpirationPeriodInDays = 90
+      }
+    }
+  })
+  depends_on = [azurerm_storage_account.contentful_backup_storage]
+}
+
+resource "azurerm_role_assignment" "contentful_backup_storage_blob_contributor" {
+  scope                = azurerm_storage_account.contentful_backup_storage.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = data.azurerm_client_config.current.object_id
 }
 
 resource "azurerm_storage_container" "backups_container" {
