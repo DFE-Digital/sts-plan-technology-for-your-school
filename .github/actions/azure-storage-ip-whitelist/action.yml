@@ -3,20 +3,17 @@ description: Add or remove an IP address from an Azure Storage Account network r
 
 inputs:
   ip_address:
+    description: The IP address to add or remove from the whitelist
     required: true
-    type: string
   verb:
+    description: The action to perform on the IP address (add or remove)
     required: true
-    type: choice
-    options:
-      - 'add'
-      - 'remove'
   az_storage_account_name:
+    description: The name of the Azure Storage Account
     required: true
-    type: string
   az_resource_group:
+    description: The name of the resource group containing the Azure Storage Account
     required: true
-    type: string
 
 runs:
   using: composite
