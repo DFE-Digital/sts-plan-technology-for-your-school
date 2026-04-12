@@ -72,19 +72,6 @@ resource "azurerm_storage_account_network_rules" "contentful_backup_storage" {
   ip_rules           = []
 }
 
-resource "azapi_update_resource" "contentful_backup_storage_key_rotation_reminder" {
-  type        = "Microsoft.Storage/storageAccounts@2023-01-01"
-  resource_id = azurerm_storage_account.contentful_backup_storage.id
-  body = jsonencode({
-    properties = {
-      keyPolicy = {
-        keyExpirationPeriodInDays = 90
-      }
-    }
-  })
-  depends_on = [azurerm_storage_account.contentful_backup_storage]
-}
-
 resource "azurerm_role_assignment" "contentful_backup_storage_blob_contributor" {
   scope                = azurerm_storage_account.contentful_backup_storage.id
   role_definition_name = "Storage Blob Data Contributor"
