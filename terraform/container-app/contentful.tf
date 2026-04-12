@@ -21,22 +21,15 @@ resource "null_resource" "upsert_contentful_webhook" {
 }
 
 resource "azurerm_storage_account" "contentful_backup_storage" {
-  name                          = replace("${local.resource_prefix}content", "-", "")
-  resource_group_name           = local.resource_prefix
-  location                      = local.azure_location
-  account_tier                  = "Standard"
-  account_replication_type      = "LRS"
-  tags                          = local.tags
-  public_network_access_enabled = false
-  shared_access_key_enabled     = false
-
+  name                            = replace("${local.resource_prefix}content", "-", "")
+  resource_group_name             = local.resource_prefix
+  location                        = local.azure_location
+  account_tier                    = "Standard"
+  account_replication_type        = "LRS"
+  tags                            = local.tags
   public_network_access_enabled   = false
-  allow_nested_items_to_be_public = false
   shared_access_key_enabled       = false
-
-  sas_policy {
-    expiration_period = "00.01:00:00"
-  }
+  allow_nested_items_to_be_public = false
 
   blob_properties {
     container_delete_retention_policy {
