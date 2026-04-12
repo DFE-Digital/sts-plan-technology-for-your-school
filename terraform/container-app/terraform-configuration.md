@@ -39,6 +39,7 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Version |
 |------|---------|
+| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 1.15.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.26.0 |
 | <a name="provider_null"></a> [null](#provider\_null) | 3.2.3 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
@@ -54,6 +55,8 @@ We use two external modules to create the majority of the resources required:
 
 | Name | Type |
 |------|------|
+| [azapi_update_resource.contentful_backup_storage_key_rotation_reminder](https://registry.terraform.io/providers/Azure/azapi/1.15.0/docs/resources/update_resource) | resource |
+| [azapi_update_resource.costing_storage_key_rotation_reminder](https://registry.terraform.io/providers/Azure/azapi/1.15.0/docs/resources/update_resource) | resource |
 | [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault) | resource |
 | [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_access_policy) | resource |
 | [azurerm_key_vault_access_policy.vault_access_policy_tf](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/key_vault_access_policy) | resource |
@@ -78,11 +81,13 @@ We use two external modules to create the majority of the resources required:
 | [azurerm_private_endpoint.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_endpoint) | resource |
 | [azurerm_private_endpoint.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/private_endpoint) | resource |
 | [azurerm_redis_cache.redis](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/redis_cache) | resource |
+| [azurerm_role_assignment.contentful_backup_storage_blob_contributor](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/role_assignment) | resource |
 | [azurerm_servicebus_namespace.service_bus](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/servicebus_namespace) | resource |
 | [azurerm_servicebus_queue.contentful_queue](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/servicebus_queue) | resource |
 | [azurerm_servicebus_queue_authorization_rule.azurefunction](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/servicebus_queue_authorization_rule) | resource |
 | [azurerm_storage_account.contentful_backup_storage](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_account) | resource |
 | [azurerm_storage_account.costing_storage](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_account) | resource |
+| [azurerm_storage_account_network_rules.contentful_backup_storage](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_account_network_rules) | resource |
 | [azurerm_storage_container.backups_container](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_container) | resource |
 | [azurerm_storage_container.blobforcost](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_container) | resource |
 | [azurerm_storage_management_policy.lifecycle_policy](https://registry.terraform.io/providers/hashicorp/azurerm/4.26/docs/resources/storage_management_policy) | resource |
