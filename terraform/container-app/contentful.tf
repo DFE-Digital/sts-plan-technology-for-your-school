@@ -21,20 +21,15 @@ resource "null_resource" "upsert_contentful_webhook" {
 }
 
 resource "azurerm_storage_account" "contentful_backup_storage" {
-  name                     = replace("${local.resource_prefix}content", "-", "")
-  resource_group_name      = local.resource_prefix
-  location                 = local.azure_location
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  tags                     = local.tags
-
+  name                            = replace("${local.resource_prefix}content", "-", "")
+  resource_group_name             = local.resource_prefix
+  location                        = local.azure_location
+  account_tier                    = "Standard"
+  account_replication_type        = "LRS"
+  tags                            = local.tags
   public_network_access_enabled   = false
-  allow_nested_items_to_be_public = false
   shared_access_key_enabled       = false
-
-  sas_policy {
-    expiration_period = "00.01:00:00"
-  }
+  allow_nested_items_to_be_public = false
 
   blob_properties {
     container_delete_retention_policy {
@@ -45,13 +40,15 @@ resource "azurerm_storage_account" "contentful_backup_storage" {
       days = 30
     }
   }
-}
 
-resource "azurerm_storage_account_network_rules" "contentful_backup_storage" {
-  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
-  default_action     = "Deny"
-  bypass             = ["AzureServices"]
-  ip_rules           = []
+  network_rules {
+    default_action = "Deny"
+    bypass         = ["AzureServices"]
+  }
+
+  sas_policy {
+    expiration_period = local.storage_account_expiration_period
+  }
 }
 
 resource "azapi_update_resource" "contentful_backup_storage_key_rotation_reminder" {
@@ -64,7 +61,15 @@ resource "azapi_update_resource" "contentful_backup_storage_key_rotation_reminde
       }
     }
   })
+
   depends_on = [azurerm_storage_account.contentful_backup_storage]
+}
+
+resource "azurerm_storage_account_network_rules" "contentful_backup_storage" {
+  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
+  default_action     = "Deny"
+  bypass             = ["AzureServices"]
+  ip_rules           = []
 }
 
 resource "azurerm_role_assignment" "contentful_backup_storage_blob_contributor" {

@@ -60,5 +60,6 @@ module "main_hosting" {
   ###########
   # Storage #
   ###########
-  storage_account_sas_expiration_period = local.storage_account_expiration_period
+  storage_account_sas_expiration_period           = local.storage_account_expiration_period
+  mssql_storage_account_shared_access_key_enabled = false
 }
