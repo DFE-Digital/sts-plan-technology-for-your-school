@@ -18,7 +18,7 @@ on:
 jobs:
   print-secret:
     runs-on: ubuntu-latest
-    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Tst' }}
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
 
     steps:
       - name: Print last 6 digits of az_client_id
