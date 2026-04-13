@@ -195,7 +195,7 @@ public class SubmissionWorkflowTests
             .GetLatestSubmissionAndResponsesAsync(1, section.Id, status: (SubmissionStatus?)null)
             .Returns((SubmissionEntity?)null);
 
-        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, null);
+        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, (SubmissionStatus?)null);
         Assert.Null(dto);
     }
 

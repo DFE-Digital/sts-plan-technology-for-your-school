@@ -197,7 +197,7 @@ public class SubmissionServiceTests
         var (section, q1, _, _, _) = BuildSectionGraph();
 
         _submissionWorkflow
-            .GetLatestSubmissionWithOrderedResponsesAsync(10, section.Id, status: null)
+            .GetLatestSubmissionWithOrderedResponsesAsync(10, section.Id, status: (SubmissionStatus?)null)
             .Returns((SqlSubmissionDto?)null);
 
         var rd = await sut.GetSubmissionRoutingDataAsync(10, section, status: null);
@@ -217,7 +217,7 @@ public class SubmissionServiceTests
         var sub = SubmissionWithResponses(completed: false, maturity: "medium", ("1", a1_to_q2.Id));
 
         _submissionWorkflow
-            .GetLatestSubmissionWithOrderedResponsesAsync(22, section.Id, status: null)
+            .GetLatestSubmissionWithOrderedResponsesAsync(22, section.Id, status: (SubmissionStatus?)null)
             .Returns(sub);
 
         var rd = await sut.GetSubmissionRoutingDataAsync(22, section, status: null);
@@ -228,7 +228,7 @@ public class SubmissionServiceTests
         // also verify pass-through arg:
         await _submissionWorkflow
             .Received(1)
-            .GetLatestSubmissionWithOrderedResponsesAsync(22, section.Id, status: null);
+            .GetLatestSubmissionWithOrderedResponsesAsync(22, section.Id, status: (SubmissionStatus?)null);
     }
 
     [Fact]
@@ -244,7 +244,7 @@ public class SubmissionServiceTests
         );
 
         _submissionWorkflow
-            .GetLatestSubmissionWithOrderedResponsesAsync(33, section.Id, status: null)
+            .GetLatestSubmissionWithOrderedResponsesAsync(33, section.Id, status: (SubmissionStatus?)null)
             .Returns(sub);
 
         var rd = await sut.GetSubmissionRoutingDataAsync(33, section, status: null);

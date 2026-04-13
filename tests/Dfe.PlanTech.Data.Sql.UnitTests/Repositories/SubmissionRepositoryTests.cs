@@ -117,7 +117,7 @@ public class SubmissionRepositoryTests
         );
         var repo = new SubmissionRepository(db);
 
-        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", null);
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", (SubmissionStatus?)null);
         Assert.Null(result);
     }
 
