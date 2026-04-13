@@ -1,0 +1,34 @@
+name: Test Client
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        required: true
+        options:
+          - Dev
+          - Tst
+          - Staging
+          - Production
+  push:
+    branches:
+      - disaster-recovery-e2e-terraform
+
+jobs:
+  print-secret:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Tst' }}
+
+    steps:
+      - name: Print last 6 digits of az_client_id
+        shell: bash
+        run: |
+          # Store the secret in a variable
+          CLIENT_ID="${{ secrets.az_client_id }}"
+
+          # Extract last 6 characters
+          LAST_SIX="${CLIENT_ID: -6}"
+
+          # Print result
+          echo "Last 6 digits: $LAST_SIX"
