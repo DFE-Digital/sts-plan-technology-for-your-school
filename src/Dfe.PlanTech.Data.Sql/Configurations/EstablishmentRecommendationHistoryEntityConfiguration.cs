@@ -21,10 +21,11 @@ internal class EstablishmentRecommendationHistoryEntityConfiguration
             .HasDefaultValue();
 
         builder.Property(history => history.PreviousStatus).HasMaxLength(50);
-
         builder.Property(history => history.NewStatus).HasMaxLength(50);
-
         builder.Property(history => history.NoteText);
+
+        builder.Property(h => h.ResponseId)
+            .HasColumnName("responseId");
 
         // Create index on the composite key for performance (matches migration script)
         builder
@@ -36,6 +37,10 @@ internal class EstablishmentRecommendationHistoryEntityConfiguration
             .HasIndex(h => h.DateCreated)
             .HasDatabaseName("IX_establishmentRecommendationHistory_DateCreated")
             .IsDescending();
+
+        builder
+            .HasIndex(h => h.ResponseId)
+            .HasDatabaseName("IX_establishmentRecommendationHistory_responseId");
 
         builder
             .HasOne(h => h.Establishment)
@@ -60,5 +65,13 @@ internal class EstablishmentRecommendationHistoryEntityConfiguration
             .WithMany()
             .HasForeignKey(h => h.UserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .HasOne(h => h.Response)
+            .WithMany()
+            .HasForeignKey(h => h.ResponseId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
+                                               
     }
 }

@@ -33,7 +33,7 @@ public class ShareByEmailInputViewModelTests
         var results = Validate(sut);
 
         var error = Assert.Single(results);
-        Assert.Equal("Please enter your name", error.ErrorMessage);
+        Assert.Equal("Enter your name", error.ErrorMessage);
         Assert.Contains(nameof(ShareByEmailInputViewModel.NameOfUser), error.MemberNames);
     }
 
@@ -49,7 +49,7 @@ public class ShareByEmailInputViewModelTests
         var results = Validate(sut);
 
         var error = Assert.Single(results);
-        Assert.Equal("Please enter a valid email address", error.ErrorMessage);
+        Assert.Equal("Enter a valid email address", error.ErrorMessage);
         Assert.Contains("EmailAddresses[0]", error.MemberNames);
     }
 
@@ -65,7 +65,7 @@ public class ShareByEmailInputViewModelTests
         var results = Validate(sut);
 
         var error = Assert.Single(results);
-        Assert.Equal("Please enter a valid email address", error.ErrorMessage);
+        Assert.Equal("Enter a valid email address", error.ErrorMessage);
         Assert.Contains("EmailAddresses[0]", error.MemberNames);
     }
 
