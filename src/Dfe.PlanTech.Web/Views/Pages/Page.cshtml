@@ -68,4 +68,14 @@
     {
         await Html.RenderPartialAsync("Components/Page", Model.Page);
     }
+
+    @foreach (var content in Model.Page.AfterContentContent)
+    {
+        // if (!Model.Page.HasBanner && content.GetType() == typeof(ComponentBannerEntry))If flag == false && label == banner
+        // {
+        //     return;
+        // }
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+    }
+
 }

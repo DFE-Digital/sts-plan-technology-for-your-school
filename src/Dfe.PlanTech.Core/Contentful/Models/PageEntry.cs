@@ -14,8 +14,10 @@ public class PageEntry : ContentfulEntry, IHasSlug
     public bool DisplayTopicTitle { get; init; }
     public bool? IsLandingPage { get; set; }
     public bool RequiresAuthorisation { get; init; } = true;
+    public bool HasBanner { get; init; } = false;
     public string? SectionTitle { get; init; }
     public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
+    public List<ContentfulEntry> AfterContentContent { get; init; } = []; //How does it convert from ContentfulEntry to 
     public ComponentTitleEntry? Title { get; init; }
     public List<ContentfulEntry>? Content { get; set; }
 }
