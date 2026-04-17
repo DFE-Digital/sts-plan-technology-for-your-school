@@ -29,7 +29,7 @@ public class MockAuthController(
     private const string TestSchoolUserId = "E2E_TEST_SCHOOL_USER";
     private const string TestMatUserId = "E2E_TEST_MAT_USER";
 
-    private const string SchoolTestOrgName = "DSI TEST Establishment (001) Miscellanenous (27)";
+    private const string SchoolTestOrgName = "DSI TEST Establishment (001) Miscell";
     private const string MatTestOrgName = "DSI TEST Multi-Academy Trust (010)";
 
     private static readonly string[] ResponseTypesSupported = ["code"];
@@ -126,7 +126,7 @@ public class MockAuthController(
         }
 
         var schoolTestEstablishments =
-            await establishmentRepository.GetEstablishmentsByAsync(e => e.OrgName == SchoolTestOrgName);
+            await establishmentRepository.GetEstablishmentsByAsync(e => e.OrgName != null && e.OrgName.Contains(SchoolTestOrgName));
         var schoolTestEstablishment = schoolTestEstablishments.FirstOrDefault();
 
         var matTestEstablishments =

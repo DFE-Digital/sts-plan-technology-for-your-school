@@ -26,6 +26,7 @@ public interface IEstablishmentRecommendationHistoryRepository
         int recommendationId,
         int userId,
         int? matEstablishmentId,
+        int? responseId,
         RecommendationStatus? previousStatus,
         RecommendationStatus? newStatus,
         string noteText

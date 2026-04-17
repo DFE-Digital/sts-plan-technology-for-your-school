@@ -8,7 +8,6 @@
         ["position"] = Model.CurrentChunkPosition.ToString(),
         ["totalRecsForTopic"] = Model.TotalChunks.ToString(),
         ["topic"] = Model.Section.Name.ToLower(),
-        ["recStatus"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
         ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty,
         ["answer"] = Model.FirstActivity?.AnswerText ?? string.Empty,
     };
@@ -39,53 +38,42 @@
     <hr class="govuk-section-break govuk-section-break--visible custom-hr-blue">
     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
 
-    @if (Model.RelatedActions.Any(x =>
-            !string.IsNullOrWhiteSpace(x.Text) &&
-            !string.IsNullOrWhiteSpace(x.Url)))
-    {
-        @foreach (var action in Model.RelatedActions.Where(x =>
-                    !string.IsNullOrWhiteSpace(x.Text) &&
-                    !string.IsNullOrWhiteSpace(x.Url)))
-        {
-            <p class="govuk-body-s">
-                <a class="govuk-link" href="@action.Url">@action.Text</a>
-            </p>
-        }
-    }
-    else
+    @foreach (var action in Model.RelatedActions)
     {
         <p class="govuk-body-s">
-            <a class="govuk-link"
-               asp-route="@nameof(RecommendationsController.ShareSingleRecommendation)"
-               asp-route-categorySlug="@Model.CategorySlug"
-               asp-route-sectionSlug="@Model.SectionSlug"
-               asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-                Share this recommendation
-            </a>
+            <a class="govuk-link" href="@action.Url">@action.Text</a>
         </p>
-
-        <p class="govuk-body-s">
-            <a class="govuk-link"
-               asp-route="@nameof(RecommendationsController.PrintSingleRecommendation)"
-               asp-route-categorySlug="@Model.CategorySlug"
-               asp-route-sectionSlug="@Model.SectionSlug"
-               asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-                @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPrintLink)
-            </a>
-        </p>
-
-        <p class="govuk-body-s">
-            <a class="govuk-link"
-               asp-route="@nameof(RecommendationsController.PrintAllRecommendations)"
-               asp-route-categorySlug="@Model.CategorySlug"
-               asp-route-sectionSlug="@Model.SectionSlug"
-               asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-                @await Microcopy.GetTextByKeyAsync(
-                ContentfulMicrocopyConstants.SingleRecommendationPrintAllLink,
-                dynamicValues)
-    </a>
-</p>
     }
+
+    <p class="govuk-body-s">
+        <a class="govuk-link"
+           asp-route="@nameof(RecommendationsController.ShareSingleRecommendation)"
+           asp-route-categorySlug="@Model.CategorySlug"
+           asp-route-sectionSlug="@Model.SectionSlug"
+           asp-route-chunkSlug="@Model.CurrentChunk.Slug">
+            Share this recommendation
+        </a>
+    </p>
+
+    <p class="govuk-body-s">
+        <a class="govuk-link"
+           asp-route="@nameof(RecommendationsController.PrintSingleRecommendation)"
+           asp-route-categorySlug="@Model.CategorySlug"
+           asp-route-sectionSlug="@Model.SectionSlug"
+           asp-route-chunkSlug="@Model.CurrentChunk.Slug">
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPrintLink)
+        </a>
+    </p>
+
+    <p class="govuk-body-s">
+        <a class="govuk-link"
+           asp-route="@nameof(RecommendationsController.PrintAllRecommendations)"
+           asp-route-categorySlug="@Model.CategorySlug"
+           asp-route-sectionSlug="@Model.SectionSlug"
+           asp-route-chunkSlug="@Model.CurrentChunk.Slug">
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPrintAllLink, dynamicValues)
+        </a>
+    </p>
 }
 
 <div class="recommendation-content">
@@ -214,7 +202,11 @@
                                 @if (Model.FirstActivity is not null && history.DateCreated.Equals(Model.FirstActivity.StatusChangeDate))
                                 {
                                     <p>
-                                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, dynamicValues)
+                                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, new Dictionary<string, string>
+                                            {
+                                                ["recStatus"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
+                                                ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty
+                                            })
                                     </p>
 
                                 <p><strong>@Model.FirstActivity.QuestionText</strong></p>
@@ -231,17 +223,17 @@
                                 }
                                 else
                                 {
-                                    @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
-                                    {
-                                        <p>@ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, dynamicValues)</p>
-                                    }
-
                                     @if (!string.IsNullOrWhiteSpace(history.NoteText))
                                     {
                                         <p>@history.NoteText</p>
                                     }
+
+                                    @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
+                                    {
+                                        <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, new Dictionary<string, string>{ ["recStatus"] = history.NewStatus.Value.GetDisplayName() ?? string.Empty })</p>
+                                    }
+                                }
                             }
-                        }
                     </govuk-accordion-item-content>
                 </govuk-accordion-item>
             }
