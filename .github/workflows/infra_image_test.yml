@@ -53,7 +53,7 @@ jobs:
         shell: bash
         run: |
           BASE_PREFIX = ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          BASE_PREFIX_FULL="${{ env.IS_DR == 'true' && format('{0}-dr', BASE_PREFIX) || BASE_PREFIX }}"
+          BASE_PREFIX_FULL="${{ env.IS_DR == 'true' && format('{0}-dr', $BASE_PREFIX) || $BASE_PREFIX }}"
 
           echo "resource-prefix=$BASE_PREFIX_FULL" >> "$GITHUB_OUTPUT"
 
