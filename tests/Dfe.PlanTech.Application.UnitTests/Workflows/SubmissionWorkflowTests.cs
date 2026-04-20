@@ -19,7 +19,7 @@ public class SubmissionWorkflowTests
     private static readonly string[] q1q2 = new[] { "Q1", "Q2" };
     private static readonly string[] a1a2 = new[] { "A1", "A2" };
 
-    private SubmissionWorkflow CreateServiceUnderTest() => new(_sp, _repo);
+    private SubmissionWorkflow CreateServiceUnderTest() => new(_repo);
 
     // ---------- Helpers: minimal Contentful section graph ----------
     private static EstablishmentEntity BuildEstablishment(int? id = 1)

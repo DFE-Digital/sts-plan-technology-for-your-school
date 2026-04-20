@@ -353,8 +353,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         IEnumerable<SubmissionStatus> statuses
     )
     {
-        if (statuses == null)
-            throw new ArgumentNullException(nameof(statuses));
+        ArgumentNullException.ThrowIfNull(statuses);
 
         var statusOptions = statuses.ToList();
 

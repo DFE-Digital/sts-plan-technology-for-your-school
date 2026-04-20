@@ -9,13 +9,9 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubmissionWorkflow(
-    IStoredProcedureRepository storedProcedureRepository,
     ISubmissionRepository submissionRepository
 ) : ISubmissionWorkflow
 {
-    private readonly IStoredProcedureRepository _storedProcedureRepository =
-        storedProcedureRepository
-        ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 

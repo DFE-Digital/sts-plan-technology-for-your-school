@@ -28,7 +28,7 @@ public interface ISubmissionWorkflow
     Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
         int establishmentId,
         string sectionId,
-        IEnumerable<SubmissionStatus> status
+        IEnumerable<SubmissionStatus> statuses
     );
     Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(
         int establishmentId,
