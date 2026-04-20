@@ -44,8 +44,8 @@ runs:
       run: |
         az acr import \
           --name ${{ inputs.acr_name }} \
-          --source ghcr.io/dfe-digital/${{image_name}}:${{ steps.get_tag.outputs.tag }} \
-          --image ${{image_name}}:${{ steps.get_tag.outputs.tag }} || true
+          --source ghcr.io/dfe-digital/${{inputs.github_repo}}:${{ steps.get_tag.outputs.tag }} \
+          --image ${{inputs.github_repo}}:${{ steps.get_tag.outputs.tag }} || true
 
     - name: Get latest image tag
       id: image
