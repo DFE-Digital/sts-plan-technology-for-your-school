@@ -248,6 +248,40 @@ public class SubmissionWorkflowTests
         Assert.Equal("developing", dto.Maturity);
     }
 
+    [Fact]
+    public async Task GetLatestSubmissionWithOrderedResponses_MultipleStatuses_Calls_GetLatestSubmissionAndResponsesAsync_MultipleStatusOverload()
+    {
+        var sut = CreateServiceUnderTest();
+        var section = BuildSection(out _, out _, out _, out _, out _, out _);
+
+        _repo
+            .GetLatestSubmissionAndResponsesAsync(1, section.Id, [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress])
+            .Returns((SubmissionEntity?)null);
+
+        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]);
+
+
+        await _repo.Received(1)
+            .GetLatestSubmissionAndResponsesAsync(
+                1,
+                section.Id,
+                Arg.Is<IEnumerable<SubmissionStatus>>(s =>
+                    s.SequenceEqual(new[]
+                    {
+                        SubmissionStatus.Inaccessible,
+                        SubmissionStatus.InProgress
+                    })
+                )
+            );
+
+        await _repo.DidNotReceive()
+            .GetLatestSubmissionAndResponsesAsync(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<SubmissionStatus?>()
+            );
+    }
+
     // ---------- SubmitAnswer ----------
     [Fact]
     public async Task SubmitAnswer_Throws_When_Model_Null()

@@ -191,6 +191,47 @@ public class SubmissionServiceTests
     }
 
     [Fact]
+    public async Task GetLatestSubmissionResponsesModel_Calls_GetLatestSubmissionWithOrderedResponsesAsync_MultipleStatusOverload()
+    {
+        var sut = CreateServiceUnderTest();
+        var (section, _, _, _, _) = BuildSectionGraph();
+
+        _submissionWorkflow
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                1,
+                section.Id,
+                [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
+            )
+            .Returns((SqlSubmissionDto?)null);
+
+        var model = await sut.GetLatestSubmissionResponsesModel(
+            1,
+            section,
+            [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible]
+        );
+
+        await _submissionWorkflow.Received(1)
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                1,
+                section.Id,
+                Arg.Is<IEnumerable<SubmissionStatus>>(s =>
+                    s.SequenceEqual(new[]
+                    {
+                        SubmissionStatus.InProgress,
+                        SubmissionStatus.Inaccessible
+                    })
+                )
+            );
+
+        await _submissionWorkflow.DidNotReceive()
+            .GetLatestSubmissionWithOrderedResponsesAsync(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<SubmissionStatus?>()
+            );
+    }
+
+    [Fact]
     public async Task Routing_NotStarted_When_No_Submission()
     {
         var sut = CreateServiceUnderTest();
