@@ -54,13 +54,13 @@ runs:
       run: |
         set -euo pipefail
 
-        ="${{ inputs.github_repo }}"
+        IMAGE_REPO="${{ inputs.github_repo }}"
         IMAGE_TAG="${{ steps.get_tag.outputs.image_tag }}"
 
         az acr import \
           --name "${{ inputs.acr_name }}" \
           --source "ghcr.io/dfe-digital/${IMAGE_REPO}:${IMAGE_TAG}" \
-          --image "${inputs.github_repo}:${IMAGE_TAG}" \
+          --image "${IMAGE_REPO}:${IMAGE_TAG}" \
           --username "${{ github.actor }}" \
           --password "${{ github.token }}"
 
