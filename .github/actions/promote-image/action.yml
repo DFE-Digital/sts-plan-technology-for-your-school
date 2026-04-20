@@ -1,82 +1,89 @@
 name: Promote image
-description: Find the latest appropriate image on GHCR and push to ACR
+description: Find the latest matching image in GHCR and push it to ACR
 
 inputs:
   image_branch:
     required: true
-    description: branch to search for in image tag (main or development)
+    description: branch string to match in the image tag, e.g. main or development
   acr_name:
     required: true
-    description: name of the acr resource
-  github_repo:
+    description: Azure Container Registry name
+  acr_login_server:
     required: true
-    description: image repo name in GHCR
+    description: Azure Container Registry login server, e.g. myacr.azurecr.io
+  image_name:
+    required: true
+    description: GHCR package/image name, e.g. plan-technology-for-your-school
+  ghcr_token:
+    required: true
+    description: Token able to read package versions and pull the package
 
 outputs:
   image_tag:
-    value: ${{ steps.image.outputs.image_tag }}
-    description: the image tag put onto acr
+    value: ${{ steps.pick_tag.outputs.image_tag }}
+    description: Selected image tag
 
 runs:
   using: composite
   steps:
-    - name: Get latest matching tag
-      id: get_tag
+    - name: Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ inputs.ghcr_token }}
+
+    - name: Find latest matching tag
+      id: pick_tag
       shell: bash
       run: |
         set -euo pipefail
 
         SEARCH="${{ inputs.image_branch }}"
-        IMAGE_REPO="${{ inputs.github_repo }}"
+        PACKAGE="${{ inputs.image_name }}"
 
-        RESPONSE=$(curl -fsSL \
-          -u "${{ github.actor }}:${{ github.token }}" \
-          "https://ghcr.io/v2/dfe-digital/${IMAGE_REPO}/tags/list")
-
-        TAG=$(echo "$RESPONSE" \
-          | jq -r '.tags[]?' \
+        TAG=$(
+          curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ inputs.ghcr_token }}" \
+            "https://api.github.com/orgs/DFE-Digital/packages/container/${PACKAGE}/versions?per_page=100" \
+          | jq -r '
+              .[]
+              | .metadata.container.tags[]
+            ' \
           | grep "$SEARCH" \
           | sort -r \
-          | head -n 1)
+          | head -n 1
+        )
 
         if [ -z "$TAG" ]; then
           echo "No matching tag found for search: $SEARCH"
-          echo "$RESPONSE" | jq .
           exit 1
         fi
 
         echo "Found tag: $TAG"
         echo "image_tag=$TAG" >> "$GITHUB_OUTPUT"
 
-    - name: Import image into ACR
-      id: import
+    - name: Pull image from GHCR
+      shell: bash
+      run: |
+        set -euo pipefail
+        docker pull "ghcr.io/dfe-digital/${{ inputs.image_name }}:${{ steps.pick_tag.outputs.image_tag }}"
+
+    - name: Log in to ACR
+      shell: bash
+      run: |
+        set -euo pipefail
+        az acr login --name "${{ inputs.acr_name }}"
+
+    - name: Tag and push image to ACR
       shell: bash
       run: |
         set -euo pipefail
 
-        IMAGE_REPO="${{ inputs.github_repo }}"
-        IMAGE_TAG="${{ steps.get_tag.outputs.image_tag }}"
+        IMAGE_NAME="${{ inputs.image_name }}"
+        IMAGE_TAG="${{ steps.pick_tag.outputs.image_tag }}"
+        ACR_IMAGE="${{ inputs.acr_login_server }}/${IMAGE_NAME}:${IMAGE_TAG}"
 
-        az acr import \
-          --name "${{ inputs.acr_name }}" \
-          --source "ghcr.io/dfe-digital/${IMAGE_REPO}:${IMAGE_TAG}" \
-          --image "${IMAGE_REPO}:${IMAGE_TAG}" \
-          --username "${{ github.actor }}" \
-          --password "${{ github.token }}"
-
-    - name: Get latest image tag
-      id: image
-      shell: bash
-      run: |
-        set -euo pipefail
-
-        IMAGE_REPO="${{ inputs.github_repo }}"
-
-        IMAGE_TAG=$(az acr repository show-tags \
-          --name "${{ inputs.acr_name }}" \
-          --repository "${IMAGE_REPO}" \
-          --top 1 \
-          --orderby time_desc \
-          --output tsv)
-
-        echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
+        docker tag "ghcr.io/dfe-digital/${IMAGE_NAME}:${IMAGE_TAG}" "$ACR_IMAGE"
+        docker push "$ACR_IMAGE"
