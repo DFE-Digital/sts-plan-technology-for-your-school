@@ -52,8 +52,13 @@ jobs:
         id: set-vars
         shell: bash
         run: |
-          BASE_PREFIX = ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          BASE_PREFIX_FULL="${{ env.IS_DR == 'true' && format('{0}-dr', $BASE_PREFIX) || $BASE_PREFIX }}"
+          BASE_PREFIX="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}"
+
+          if [ "${{ env.IS_DR }}" = "true" ]; then
+            BASE_PREFIX_FULL="${BASE_PREFIX}-dr"
+          else
+            BASE_PREFIX_FULL="$BASE_PREFIX"
+          fi
 
           echo "resource-prefix=$BASE_PREFIX_FULL" >> "$GITHUB_OUTPUT"
 
