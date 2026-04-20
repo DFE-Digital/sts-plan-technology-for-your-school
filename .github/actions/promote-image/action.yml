@@ -14,9 +14,6 @@ inputs:
   image_name:
     required: true
     description: GHCR package/image name, e.g. plan-technology-for-your-school
-  ghcr_token:
-    required: true
-    description: Token able to read package versions and pull the package
 
 outputs:
   image_tag:
@@ -31,7 +28,7 @@ runs:
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
-        password: ${{ inputs.ghcr_token }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Find latest matching tag
       id: pick_tag
@@ -45,7 +42,7 @@ runs:
         TAG=$(
           curl -fsSL \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ inputs.ghcr_token }}" \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             "https://api.github.com/orgs/DFE-Digital/packages/container/${PACKAGE}/versions?per_page=100" \
           | jq -r '
               .[]

@@ -73,5 +73,4 @@ jobs:
           image_branch: ${{ inputs.environment == 'ProductionUnprotected' && 'main' || 'development' }}
           acr_name: ${{ steps.set-vars.outputs.resource-prefix }}
           image_name: ${{ env.GHR }}
-          ghcr_token: ${{ secrets.GHCR_READ_TOKEN }}
 #output ${{ steps.promote_image.outputs.image_tag }}
