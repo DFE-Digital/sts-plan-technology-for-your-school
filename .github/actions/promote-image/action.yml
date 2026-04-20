@@ -30,7 +30,7 @@ runs:
         IMAGE_REPO="${{ inputs.github_repo }}"
 
         RESPONSE=$(curl -fsSL \
-          -H "Authorization: Bearer ${{ github.token }}" \
+          -u "${{ github.actor }}:${{ github.token }}" \
           "https://ghcr.io/v2/dfe-digital/${IMAGE_REPO}/tags/list")
 
         TAG=$(echo "$RESPONSE" \
