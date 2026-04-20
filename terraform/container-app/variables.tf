@@ -32,6 +32,12 @@ variable "az_tag_product" {
   type        = string
 }
 
+variable "is_dr" {
+  description = "Append dr to certain resources to build disaster recovery in new resource group"
+  type        = bool
+  default     = false
+}
+
 ############
 # Identity #
 ############
@@ -196,6 +202,71 @@ variable "container_environment_variables" {
   default     = {}
 }
 
+variable "container_app_environment_workload_profile_type"  {
+  description = "Container app environment type"
+  type        = string
+  default     = "Consumption"
+}
+
+variable "launch_in_vnet" {
+  description = "Needed to force container app to be made with internal load balancer to avoid Public IP within shared module"
+  type        = bool
+  default     = true
+}
+
+variable "container_app_environment_internal_load_balancer_enabled" {
+  description = "Force container app to be made with internal load balancer to avoid Public IP within shared module"
+  type        = bool
+  default     = true
+}
+
+##############################################################
+# Azure Container Registry creation - settings to match shared module #
+##############################################################
+variable "enable_container_registry" {
+  description = "Create registry within shared module"
+  type        = bool
+  default     = true
+}
+
+variable "registry_sku" {
+  description = "Container registry sku level"
+  type        = string
+  default = "Standard"
+}
+
+variable "registry_admin_enabled"  {
+  description = "Create admin logon on ACR"
+  type        = bool
+  default     = true
+}
+
+variable "registry_public_access_enabled"  {
+  description = "Create public access on ACR"
+  type        = bool
+  default     = true
+}
+
+variable "enable_registry_retention_policy"  {
+  description = "Create public access on ACR"
+  type        = bool
+  default     = false
+}
+
+variable "registry_retention_days"  {
+  description = "registry retention days"
+  type        = number
+  default     = null
+}
+
+variable "registry_ipv4_allow_list" {
+  description = "IPv4 allow list for ACR"
+  type = map(object({
+    start_ip_range : string,
+    end_ip_range : optional(string, "")
+  }))
+  default = {}
+}
 ##################
 # CDN/Front Door #
 ##################
@@ -228,29 +299,33 @@ variable "cdn_frontdoor_url_path_redirects" {
 }
 
 ###################
-# Github Registry #
+# Azure Registry - existing #
 ###################
 
 variable "registry_server" {
   description = "Container registry server"
   type        = string
+  default     = null
 }
 
 variable "registry_username" {
   description = "Container registry username"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "registry_password" {
   description = "Container registry password"
   type        = string
   sensitive   = true
+  default     = null
 }
 
 variable "image_tag" {
   description = "Image tag"
   type        = string
+  default     = null
 }
 
 ####################

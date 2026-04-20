@@ -1,0 +1,32 @@
+resource "azurerm_container_registry" "acr_notshared" {
+  depends_on = [azurerm_resource_group.app_rg]
+  count = !local.enable_container_registry ? 1 : 0
+  #enable_container_registry being true refers to the shared module making it instead
+
+  name                          = replace(local.resource_prefix, "-", "")
+  resource_group_name           = azurerm_resource_group.app_rg[0].name
+  location                      = azurerm_resource_group.app_rg[0].location
+  sku                           = local.registry_sku
+  admin_enabled                 = local.registry_admin_enabled
+  public_network_access_enabled = local.registry_public_access_enabled
+  tags                          = local.tags
+  retention_policy_in_days      = local.registry_sku == "Premium" && local.enable_registry_retention_policy ? local.registry_retention_days : null
+  network_rule_bypass_option    = "None"
+
+  dynamic "network_rule_set" {
+    for_each = local.registry_sku == "Premium" && length(local.registry_ipv4_allow_list) > 0 ? { ip_rules : local.registry_ipv4_allow_list } : {}
+
+    content {
+      default_action = "Deny"
+
+      dynamic "ip_rule" {
+        for_each = network_rule_set.value
+
+        content {
+          action   = "Allow"
+          ip_range = ip_rule.value
+        }
+      }
+    }
+  }
+}

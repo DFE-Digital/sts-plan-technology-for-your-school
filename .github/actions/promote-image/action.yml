@@ -3,14 +3,18 @@ description: Find the latest appropriate image on GCR and push to ACR
 inputs:
   image_branch:
     required: true
-    description: branch to search for in image tag
+    description: branch to search for in image tag (main or development)
   acr_name:
     required: true
     description: name of the acr resource
+  github_repo:
+    required: true
+    description: name of the ghr
 outputs:
   image_tag:
     value: ${{ steps.image.outputs.image_tag }}
     description: the image tag put onto acr
+
 runs:
   using: composite
   steps:
@@ -40,8 +44,8 @@ runs:
       run: |
         az acr import \
           --name ${{ inputs.acr_name }} \
-          --source ghcr.io/dfe-digital/plan-technology-for-your-school:${{ steps.get_tag.outputs.tag }} \
-          --image plan-technology-for-your-school:${{ steps.get_tag.outputs.tag }} || true
+          --source ghcr.io/dfe-digital/${{image_name}}:${{ steps.get_tag.outputs.tag }} \
+          --image ${{image_name}}:${{ steps.get_tag.outputs.tag }} || true
 
     - name: Get latest image tag
       id: image

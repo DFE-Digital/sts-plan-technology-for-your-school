@@ -1,8 +1,6 @@
 module "main_hosting" {
   source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.6.3"
-  depends_on = [
-    azurerm_resource_group.app_rg
-  ]
+  depends_on = [azurerm_resource_group.app_rg, azurerm_container_registry.acr_notshared]
   ###########
   # General #
   ###########
@@ -62,11 +60,22 @@ module "main_hosting" {
   container_apps_infra_subnet_service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
 
   #############################
-  # Github Container Registry #
+  # Azure Container Registry #
   #############################
-  registry_server   = local.registry_server
-  registry_username = local.registry_username
-  registry_password = local.registry_password
+  registry_server = coalesce(
+    var.registry_server,
+    azurerm_container_registry.acr_notshared[0].login_server
+  )
+
+  registry_username = coalesce(
+    var.registry_username,
+    azurerm_container_registry.acr_notshared[0].admin_username
+  )
+
+  registry_password = coalesce(
+    var.registry_password,
+    azurerm_container_registry.acr_notshared[0].admin_password
+  )
   image_tag         = local.image_tag
 
   ###########

@@ -4,16 +4,7 @@
 resource "azurerm_resource_group" "app_rg" {
   count = local.is_dr ? 1 : 0
 
-  name     = "${local.resource_prefix}-dr"
+  name     = "${local.resource_prefix}"
   location = local.azure_location
   tags     = local.tags
-}
-
-resource "azurerm_management_lock" "app_rg" {
-  count = local.enable_resource_group_lock && local.is_dr ? 1 : 0
-
-  name       = "${local.resource_prefix}-drlock"
-  scope      = azurerm_resource_group.app_rg[0].id
-  lock_level = "CanNotDelete"
-  notes      = "Resources in this Resource Group cannot be deleted. Please remove the lock first."
 }

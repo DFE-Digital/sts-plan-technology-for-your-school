@@ -6,9 +6,15 @@ on:
       environment:
         required: true
         type: string
-  push:
-    branches:
-      - disaster-recovery-e2e-terraform
+        default: 'Dev'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which environment to back up
+        required: true
+        type: choice
+        options: ['Dev', 'Test', 'StagingUnprotected', 'ProductionUnprotected']
+        default: 'Dev'
 
 jobs:
   backup:

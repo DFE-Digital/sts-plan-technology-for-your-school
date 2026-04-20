@@ -18,12 +18,11 @@ locals {
   ########################
   # App Resource Group #
   ########################
-  # this will be the existing one if exists otherwise what main-hosting creates.
-  resource_group_name = try(azurerm_resource_group.app_rg[0].name, module.main_hosting.azurerm_resource_group_default.name)
   # what we create directly in app-rg in order to control the name
   existing_resource_group = try(azurerm_resource_group.app_rg[0].name, "")
-  enable_resource_group_lock = var.enable_resource_group_lock
-
+  # this will be the existing one if exists otherwise what main-hosting creates.
+  resource_group = try(azurerm_resource_group.app_rg[0], module.main_hosting.azurerm_resource_group_default)
+  resource_group_name = local.resource_group.name
   #######################
   # Container Registry #
   #######################
@@ -32,7 +31,12 @@ locals {
   registry_username         = var.registry_username
   registry_password         = var.registry_password
   image_tag                 = var.image_tag
-
+  registry_sku              = var.registry_sku
+  registry_admin_enabled    = var.registry_admin_enabled
+  registry_public_access_enabled = var.registry_public_access_enabled
+  enable_registry_retention_policy = var.enable_registry_retention_policy
+  registry_retention_days  = var.registry_retention_days
+  registry_ipv4_allow_list = var.registry_ipv4_allow_list
   #################
   # Container App #
   #################
