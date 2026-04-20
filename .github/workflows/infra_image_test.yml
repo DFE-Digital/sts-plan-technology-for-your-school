@@ -41,6 +41,9 @@ jobs:
       contents: read
 
     steps:
+      - name: Clone repo
+        uses: actions/checkout@v4
+
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
