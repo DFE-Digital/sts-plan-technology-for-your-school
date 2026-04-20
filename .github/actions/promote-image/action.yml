@@ -1,5 +1,6 @@
 name: Promote image
-description: Find the latest appropriate image on GCR and push to ACR
+description: Find the latest appropriate image on GHCR and push to ACR
+
 inputs:
   image_branch:
     required: true
@@ -9,7 +10,8 @@ inputs:
     description: name of the acr resource
   github_repo:
     required: true
-    description: name of the ghr
+    description: image repo name in GHCR
+
 outputs:
   image_tag:
     value: ${{ steps.image.outputs.image_tag }}
@@ -25,11 +27,11 @@ runs:
         set -euo pipefail
 
         SEARCH="${{ inputs.image_branch }}"
-        IMAGE="dfe-digital/plan-technology-for-your-school"
+        IMAGE_REPO="${{ inputs.github_repo }}"
 
         RESPONSE=$(curl -fsSL \
           -H "Authorization: Bearer ${{ github.token }}" \
-          "https://ghcr.io/v2/${IMAGE}/tags/list")
+          "https://ghcr.io/v2/dfe-digital/${IMAGE_REPO}/tags/list")
 
         TAG=$(echo "$RESPONSE" \
           | jq -r '.tags[]?' \
@@ -44,24 +46,37 @@ runs:
         fi
 
         echo "Found tag: $TAG"
-        echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+        echo "image_tag=$TAG" >> "$GITHUB_OUTPUT"
 
     - name: Import image into ACR
       id: import
       shell: bash
       run: |
+        set -euo pipefail
+
+        ="${{ inputs.github_repo }}"
+        IMAGE_TAG="${{ steps.get_tag.outputs.image_tag }}"
+
         az acr import \
-          --name ${{ inputs.acr_name }} \
-          --source ghcr.io/dfe-digital/${{inputs.github_repo}}:${{ steps.get_tag.outputs.tag }} \
-          --image ${{inputs.github_repo}}:${{ steps.get_tag.outputs.tag }} || true
+          --name "${{ inputs.acr_name }}" \
+          --source "ghcr.io/dfe-digital/${IMAGE_REPO}:${IMAGE_TAG}" \
+          --image "${inputs.github_repo}:${IMAGE_TAG}" \
+          --username "${{ github.actor }}" \
+          --password "${{ github.token }}"
 
     - name: Get latest image tag
       id: image
       shell: bash
       run: |
-        IMAGE_TAG=$(az acr repository show-tags \
-          --name ${{ inputs.acr_name }} \
-          --repository plan-tech-app \
-          --top 1 --orderby time_desc | jq -r '.[0]')
+        set -euo pipefail
 
-        echo "image_tag=$IMAGE_TAG" >> $GITHUB_OUTPUT
+        IMAGE_REPO="${{ inputs.github_repo }}"
+
+        IMAGE_TAG=$(az acr repository show-tags \
+          --name "${{ inputs.acr_name }}" \
+          --repository "${IMAGE_REPO}" \
+          --top 1 \
+          --orderby time_desc \
+          --output tsv)
+
+        echo "image_tag=$IMAGE_TAG" >> "$GITHUB_OUTPUT"
