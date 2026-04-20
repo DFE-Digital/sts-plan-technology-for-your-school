@@ -22,21 +22,29 @@ runs:
       id: get_tag
       shell: bash
       run: |
-        SEARCH="${{ inputs.image_branch }}"
+        set -euo pipefail
 
-        TAG=$(curl -s https://ghcr.io/v2/dfe-digital/plan-technology-for-your-school/tags/list \
-          | jq -r '.tags[]' \
+        SEARCH="${{ inputs.image_branch }}"
+        IMAGE="dfe-digital/plan-technology-for-your-school"
+
+        RESPONSE=$(curl -fsSL \
+          -H "Authorization: Bearer ${{ github.token }}" \
+          "https://ghcr.io/v2/${IMAGE}/tags/list")
+
+        TAG=$(echo "$RESPONSE" \
+          | jq -r '.tags[]?' \
           | grep "$SEARCH" \
           | sort -r \
           | head -n 1)
 
         if [ -z "$TAG" ]; then
-          echo "No matching tag found"
+          echo "No matching tag found for search: $SEARCH"
+          echo "$RESPONSE" | jq .
           exit 1
         fi
 
         echo "Found tag: $TAG"
-        echo "tag=$TAG" >> $GITHUB_OUTPUT
+        echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
     - name: Import image into ACR
       id: import
