@@ -74,7 +74,7 @@ jobs:
         uses: ./.github/actions/promote-image
         with:
           image_branch: ${{ inputs.environment == 'ProductionUnprotected' && 'main' || 'development' }}
-          acr_name: ${{ steps.set-vars.outputs.resource_prefix }}
+          acr_name: ${{ steps.set-vars.outputs.resource_prefix_reduced }}
           acr_login_server: ${{ steps.set-vars.outputs.resource_prefix_reduced }}.azurecr.io
           package_name: ${{ env.PACKAGE_NAME }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
