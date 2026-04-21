@@ -77,4 +77,5 @@ runs:
         IMAGE_TAG="${{ steps.pick_tag.outputs.image_tag }}"
         ACR_IMAGE="${{ inputs.acr_login_server }}/${IMAGE_NAME}:${IMAGE_TAG}"
 
+        docker tag "ghcr.io/dfe-digital/${IMAGE_NAME}:${IMAGE_TAG}" "$ACR_IMAGE"
         docker push "$ACR_IMAGE"
