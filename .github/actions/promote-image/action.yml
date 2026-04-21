@@ -32,6 +32,7 @@ runs:
         password: ${{ inputs.github_token }}
 
     - name: Login to ACR via OIDC
+      shell: bash
       run: az acr login --name ${{ inputs.acr_name }}
 
     - name: Find latest matching tag
