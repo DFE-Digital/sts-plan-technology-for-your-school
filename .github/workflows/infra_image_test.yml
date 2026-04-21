@@ -63,15 +63,19 @@ jobs:
           else
             BASE_PREFIX_FULL="$BASE_PREFIX"
           fi
+          
+          $BASE_PREFIX_REDUCED="${$BASE_PREFIX_FULL//-/}"
 
-          echo "resource-prefix=$BASE_PREFIX_FULL" >> "$GITHUB_OUTPUT"
+          echo "resource_prefix=$BASE_PREFIX_FULL" >> "$GITHUB_OUTPUT"
+          echo "resource_prefix_reduced=$BASE_PREFIX_REDUCED" >> "$GITHUB_OUTPUT"
 
       - name: Promote Image
         id: promote_image
         uses: ./.github/actions/promote-image
         with:
           image_branch: ${{ inputs.environment == 'ProductionUnprotected' && 'main' || 'development' }}
-          acr_name: ${{ steps.set-vars.outputs.resource-prefix }}
+          acr_name: ${{ steps.set-vars.outputs.resource_prefix }}
+          acr_login_server: ${{ steps.set-vars.outputs.resource_prefix_reduced }}.azurecr.io
           package_name: ${{ env.PACKAGE_NAME }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 #output ${{ steps.promote_image.outputs.image_tag }}
