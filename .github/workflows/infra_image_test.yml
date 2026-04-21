@@ -64,7 +64,7 @@ jobs:
             BASE_PREFIX_FULL="$BASE_PREFIX"
           fi
           
-          $BASE_PREFIX_REDUCED="${$BASE_PREFIX_FULL//-/}"
+          $BASE_PREFIX_REDUCED="${BASE_PREFIX_FULL//-/}"
 
           echo "resource_prefix=$BASE_PREFIX_FULL" >> "$GITHUB_OUTPUT"
           echo "resource_prefix_reduced=$BASE_PREFIX_REDUCED" >> "$GITHUB_OUTPUT"
