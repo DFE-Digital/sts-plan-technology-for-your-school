@@ -11,15 +11,16 @@ inputs:
   acr_login_server:
     required: true
     description: Azure Container Registry login server, e.g. myacr.azurecr.io
-  image_name:
+  package_name:
     required: true
     description: GHCR package/image name, e.g. plan-technology-for-your-school
-
+  github_token:
+    required: true
+    description: access token for github api
 outputs:
   image_tag:
     value: ${{ steps.pick_tag.outputs.image_tag }}
     description: Selected image tag
-
 runs:
   using: composite
   steps:
@@ -28,7 +29,7 @@ runs:
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.github_token }}
 
     - name: Find latest matching tag
       id: pick_tag
@@ -37,12 +38,12 @@ runs:
         set -euo pipefail
 
         SEARCH="${{ inputs.image_branch }}"
-        PACKAGE="${{ inputs.image_name }}"
+        PACKAGE="${{ inputs.package_name }}"
 
         TAG=$(
           curl -fsSL \
             -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Authorization: Bearer ${{ inputs.github_token }}" \
             "https://api.github.com/orgs/DFE-Digital/packages/container/${PACKAGE}/versions?per_page=100" \
           | jq -r '
               .[]
@@ -65,22 +66,15 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        docker pull "ghcr.io/dfe-digital/${{ inputs.image_name }}:${{ steps.pick_tag.outputs.image_tag }}"
-
-    - name: Log in to ACR
-      shell: bash
-      run: |
-        set -euo pipefail
-        az acr login --name "${{ inputs.acr_name }}"
+        docker pull "ghcr.io/dfe-digital/${{ inputs.package_name }}:${{ steps.pick_tag.outputs.image_tag }}"
 
     - name: Tag and push image to ACR
       shell: bash
       run: |
         set -euo pipefail
 
-        IMAGE_NAME="${{ inputs.image_name }}"
+        IMAGE_NAME="${{ inputs.package_name }}"
         IMAGE_TAG="${{ steps.pick_tag.outputs.image_tag }}"
         ACR_IMAGE="${{ inputs.acr_login_server }}/${IMAGE_NAME}:${IMAGE_TAG}"
 
-        docker tag "ghcr.io/dfe-digital/${IMAGE_NAME}:${IMAGE_TAG}" "$ACR_IMAGE"
         docker push "$ACR_IMAGE"

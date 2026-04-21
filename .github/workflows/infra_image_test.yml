@@ -28,7 +28,7 @@ env:
   ARM_TENANT_ID: ${{ secrets.AZ_TENANT_ID }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.AZ_SUBSCRIPTION_ID }}
   ARM_CLIENT_ID: ${{ secrets.AZ_CLIENT_ID }}
-  GHR: plan-technology-for-your-school
+  PACKAGE_NAME: plan-technology-for-your-school
 
 jobs:
   image:
@@ -38,8 +38,8 @@ jobs:
     runs-on: ubuntu-22.04
     permissions:
       id-token: write
-      contents: read
-      packages: read
+      contents: write
+      packages: write
 
     steps:
       - name: Clone repo
@@ -72,5 +72,6 @@ jobs:
         with:
           image_branch: ${{ inputs.environment == 'ProductionUnprotected' && 'main' || 'development' }}
           acr_name: ${{ steps.set-vars.outputs.resource-prefix }}
-          image_name: ${{ env.GHR }}
+          package_name: ${{ env.PACKAGE_NAME }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 #output ${{ steps.promote_image.outputs.image_tag }}
