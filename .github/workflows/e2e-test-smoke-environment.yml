@@ -7,8 +7,8 @@ on:
         description: Which app environment to run against?
         required: true
         type: choice
-        options: ['Dev', 'Tst', 'StagingUnprotected', 'Staging']
-        default: 'Tst'
+        options: [ "Dev", "Tst", "StagingUnprotected", "Staging" ]
+        default: "Tst"
       use_mock_auth:
         description: Use mock auth
         required: false
@@ -25,7 +25,7 @@ on:
         default: false
 
 concurrency:
-  group: '${{ github.workflow }}'
+  group: "${{ github.workflow }}"
   cancel-in-progress: false
 
 env:
@@ -67,7 +67,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: 'add'
+          verb: "add"
           az_keyvault_name: ${{ env.KEYVAULT_NAME }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}
@@ -108,7 +108,7 @@ jobs:
           esac
 
       - name: Turn on Automated Testing Content on environment
-        if: always()
+        if: success()
         uses: azure/cli@v2
         env:
           MOCK_AUTH_MODE: ${{ env.MOCK_AUTH_MODE }}
@@ -151,10 +151,10 @@ jobs:
           URL: ${{ secrets.APP_URL }}
           DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
           DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
-          DSI_SCHOOL_ESTABLISHMENT_REF: '900008'
+          DSI_SCHOOL_ESTABLISHMENT_REF: "900008"
           DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
           DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
-          DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '900007'
+          DSI_MAT_SCHOOL_ESTABLISHMENT_REF: "900007"
           DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
           DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
           DB_SERVER: ${{ secrets.AZ_DB_SERVER }}
@@ -225,7 +225,7 @@ jobs:
         uses: ./.github/actions/azure-ip-whitelist
         with:
           ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: 'remove'
+          verb: "remove"
           az_keyvault_name: ${{ env.KEYVAULT_NAME }}
           az_ip_name: ${{ env.SQL_IP_NAME }}
           az_resource_group: ${{ env.RESOURCE_GROUP}}

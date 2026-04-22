@@ -511,3 +511,10 @@ StrykerOutput/
 # Linting
 coding-style/output/
 coding-style/output/tracked-files.txt
+
+# Drew's temporary working file
+.claude
+.gitnexus
+AGENTS.md
+CLAUDE.md
+TODO.md
