@@ -1,0 +1,50 @@
+name: Whitelist IP on Key Vault
+description: Add or remove an IP firewall rule on an Azure Key Vault. On add, checks purge protection is enabled first — Azure Policy will otherwise deny updates.
+
+inputs:
+  ip-address:
+    description: The IP address to add or remove.
+    required: true
+  resource-group:
+    description: The Key Vault's resource group.
+    required: true
+  keyvault-name:
+    description: The Key Vault name.
+    required: true
+  verb:
+    description: '`add` or `remove`.'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Add Key Vault network rule
+      if: ${{ inputs.verb == 'add' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        purge_protection="$(az resource show \
+          --resource-group "${{ inputs.resource-group }}" \
+          --name "${{ inputs.keyvault-name }}" \
+          --resource-type "Microsoft.KeyVault/vaults" \
+          --query "properties.enablePurgeProtection" -o tsv || true)"
+
+        if [ "$purge_protection" != "true" ]; then
+          echo "Key Vault ${{ inputs.keyvault-name }} does not have purge protection enabled (enablePurgeProtection='$purge_protection'). Azure Policy will deny updates." >&2
+          exit 1
+        fi
+
+        az keyvault network-rule add \
+          --resource-group "${{ inputs.resource-group }}" \
+          --name "${{ inputs.keyvault-name }}" \
+          --ip-address "${{ inputs.ip-address }}" > /dev/null
+
+    - name: Remove Key Vault network rule
+      if: ${{ inputs.verb == 'remove' }}
+      shell: bash
+      run: |
+        az keyvault network-rule remove \
+          --resource-group "${{ inputs.resource-group }}" \
+          --name "${{ inputs.keyvault-name }}" \
+          --ip-address "${{ inputs.ip-address }}" > /dev/null

@@ -193,18 +193,25 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
       - name: Get Workflow IP Address
-        id: what-is-my-ip
+        id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
 
-      - name: Add Azure Firewall Rules
-        uses: ./.github/actions/azure-ip-whitelist
+      - name: Whitelist IP on Key Vault
+        uses: ./.github/actions/whitelist-kv
         with:
-          ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
-          verb: 'add'
-          az_keyvault_name: ${{ env.az_keyvault_name }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.az_resource_group_name}}
-          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_keyvault_name }}
+          verb: add
+
+      - name: Whitelist IP on SQL server
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          server-name: ${{ env.az_sql_database_server_name }}
+          rule-name: ${{ env.SQL_IP_NAME }}
+          verb: add
 
       - name: Get Connection string
         id: get-connection-string
@@ -235,13 +242,21 @@ jobs:
           dsi_noorg_username: ${{ secrets.DSI_NOORG_USERNAME }}
           dsi_noorg_password: ${{ secrets.DSI_NOORG_PASSWORD }}
 
-      - name: Remove Azure Firewall Rules
+      - name: Remove IP from Key Vault
         if: always()
-        uses: ./.github/actions/azure-ip-whitelist
+        uses: ./.github/actions/whitelist-kv
         with:
-          ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
-          verb: 'remove'
-          az_keyvault_name: ${{ env.az_keyvault_name }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.az_resource_group_name}}
-          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_keyvault_name }}
+          verb: remove
+
+      - name: Remove IP from SQL server
+        if: always()
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          server-name: ${{ env.az_sql_database_server_name }}
+          rule-name: ${{ env.SQL_IP_NAME }}
+          verb: remove

@@ -1,0 +1,43 @@
+name: Whitelist IP on SQL Server
+description: Create or delete a firewall rule on an Azure SQL server for a single IP address.
+
+inputs:
+  ip-address:
+    description: The IP address to whitelist or remove.
+    required: true
+  resource-group:
+    description: The SQL server's resource group.
+    required: true
+  server-name:
+    description: The SQL server name.
+    required: true
+  rule-name:
+    description: Name of the firewall rule.
+    required: false
+    default: github-action
+  verb:
+    description: '`add` or `remove`.'
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Create SQL firewall rule
+      if: ${{ inputs.verb == 'add' }}
+      shell: bash
+      run: |
+        az sql server firewall-rule create \
+          --resource-group "${{ inputs.resource-group }}" \
+          --server "${{ inputs.server-name }}" \
+          --name "${{ inputs.rule-name }}" \
+          --start-ip-address "${{ inputs.ip-address }}" \
+          --end-ip-address "${{ inputs.ip-address }}" > /dev/null
+
+    - name: Delete SQL firewall rule
+      if: ${{ inputs.verb == 'remove' }}
+      shell: bash
+      run: |
+        az sql server firewall-rule delete \
+          --resource-group "${{ inputs.resource-group }}" \
+          --server "${{ inputs.server-name }}" \
+          --name "${{ inputs.rule-name }}" > /dev/null

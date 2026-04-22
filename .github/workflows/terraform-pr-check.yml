@@ -93,17 +93,29 @@ jobs:
           SA_COSTING_NAME="${AZ_SA_COSTING_NAME//-/}"
           echo "SA_COSTING_NAME=$SA_COSTING_NAME" >> $GITHUB_ENV
 
-      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
-        uses: ./.github/actions/whitelisting-for-runner
+      - name: Whitelist IP on costing storage account
+        uses: ./.github/actions/whitelist-storage
         with:
-          runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          sa-costing-name: ${{ env.SA_COSTING_NAME }}
-          sa-costing-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
-          az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
-          removeRules: 'false'
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          account-name: ${{ env.SA_COSTING_NAME }}
+          verb: add
+
+      - name: Whitelist IP on service Key Vault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
+          verb: add
+
+      - name: Whitelist IP on Terraform Key Vault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+          keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          verb: add
 
       - name: Terraform init
         id: init
@@ -163,17 +175,29 @@ jobs:
           tf_working_directory: ${{ env.TF_WORKING_DIRECTORY }}
           github_workflow: ${{ github.workflow }}
 
-      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault Remove
-        uses: ./.github/actions/whitelisting-for-runner
+      - name: Remove IP from costing storage account
+        uses: ./.github/actions/whitelist-storage
         with:
-          runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          sa-costing-name: ${{ env.SA_COSTING_NAME }}
-          sa-costing-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          az-keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
-          az-aca-resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
-          tf-backend-resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
-          tf-secrets-keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
-          removeRules: 'true'
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          account-name: ${{ env.SA_COSTING_NAME }}
+          verb: remove
+
+      - name: Remove IP from service Key Vault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
+          verb: remove
+
+      - name: Remove IP from Terraform Key Vault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
+          keyvault-name: ${{ secrets.TF_SECRETS_KEYVAULT_NAME }}
+          verb: remove
 
   terraform-lint:
     name: Terraform Lint
