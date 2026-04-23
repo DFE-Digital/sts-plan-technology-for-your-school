@@ -1,14 +1,75 @@
-name: Verify Checks Running
-
+name: PR Gatekeeper – checks started
 on:
-  pull_request:
+  pull_request_target:
     branches: ['main', 'development']
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  checks: read
+  pull-requests: read
+  contents: read
 
 jobs:
-  verify-checks-running:
-    name: Verify Checks Running
+  verify-checks-started:
     runs-on: ubuntu-22.04
-
     steps:
-      - name: Echo to console
-        run: echo "checks are running"
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const pr = context.payload.pull_request;
+            const base = pr.base.sha;
+            const head = pr.head.sha;
+
+            // 1) Figure out what changed
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: pr.number, per_page: 100
+            });
+            const changed = files.map(f => f.filename);
+
+            // 2) Decide which checks are expected, mirroring your PR workflow logic
+            const touchedSrc       = changed.some(p => p.startsWith('src/'));
+            const touchedTests     = changed.some(p => p.startsWith('tests/'));
+            const touchedContentful= changed.some(p => p.startsWith('contentful/'));
+
+            // sentinel always runs in the PR workflow
+            const expected = new Set(['PR Sentinel (always runs)']);
+            if (touchedSrc || touchedTests) {
+              expected.add('Lint & Commit');
+              expected.add('Build and run unit tests');
+              expected.add('JEST Tests'); // created by dorny/test-reporter
+              expected.add('Build database upgrader'); // if you only want this on src, drop the tests condition above
+            }
+            if (touchedContentful) {
+              expected.add('Contentful Jest Tests'); // name from dorny/test-reporter in that job
+            }
+
+            // 3) Poll for checks + statuses on the PR head SHA
+            const sleep = ms => new Promise(r => setTimeout(r, ms));
+            async function seenNames() {
+              const a = await github.rest.checks.listForRef({ owner, repo, ref: head, per_page: 100 });
+              const b = await github.rest.repos.getCombinedStatusForRef({ owner, repo, ref: head });
+              const names = new Set(a.data.check_runs.map(c => c.name));
+              b.data.statuses.forEach(s => names.add(s.context));
+              return names;
+            }
+
+            let names = new Set();
+            let ok = false;
+            for (let i = 0; i < 18; i++) { // ~3 minutes
+              names = await seenNames();
+              const missing = [...expected].filter(n => !names.has(n));
+              core.info(`Observed checks: ${[...names].join(', ') || '(none yet)'}`);
+              if (missing.length === 0) { ok = true; break; }
+              await sleep(10000);
+            }
+
+            if (!ok) {
+              const missing = [...expected].filter(n => !names.has(n));
+              core.setFailed(
+                `Required checks did not start for ${head.slice(0,7)}.\n` +
+                `Expected (based on changed files): ${[...expected].join(', ')}\n` +
+                `Seen: ${[...names].join(', ') || '(none)'}\n` +
+                `Changed files: ${changed.slice(0,50).join(', ')}${changed.length>50?' …':''}`
+              );
+            }
