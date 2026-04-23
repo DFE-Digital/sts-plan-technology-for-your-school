@@ -169,7 +169,7 @@ Then(
       year: "numeric"
     });
 
-    const sectionHeading = `${month} ${year} activity`;
+    const sectionHeading = `${month} ${year}`;
 
 
     // expand the section
