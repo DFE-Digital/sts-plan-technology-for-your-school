@@ -207,6 +207,7 @@ async function main() {
   fs.writeFileSync(OUTPUT_PATH, JSON.stringify(links, null, 2), 'utf8');
 
   console.log(`Extracted ${links.length} links from ${entries.length} entries`);
+  console.log();
 }
 
 main();
