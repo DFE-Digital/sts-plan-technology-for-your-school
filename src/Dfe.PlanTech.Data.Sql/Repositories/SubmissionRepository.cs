@@ -22,7 +22,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             SectionId = existingSubmission.SectionId,
             SectionName = existingSubmission.SectionName,
             EstablishmentId = existingSubmission.EstablishmentId,
-            Maturity = existingSubmission.Maturity,
             DateCreated = DateTime.UtcNow,
             Status = SubmissionStatus.InProgress,
             Responses = existingSubmission
@@ -32,7 +31,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                     AnswerId = r.AnswerId,
                     UserId = r.UserId,
                     UserEstablishmentId = r.UserEstablishmentId,
-                    Maturity = r.Maturity,
                     Question = r.Question,
                     Answer = r.Answer,
                     DateCreated = DateTime.UtcNow,
@@ -457,7 +455,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                         currentSubmission?.DateLastUpdated
                         ?? currentSubmission?.DateCreated
                         ?? DateTime.UtcNow,
-                    LastMaturity = lastCompleteSubmission?.Maturity,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
                 };
             })
@@ -529,7 +526,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             SubmissionId = submissionId,
             QuestionId = questionId,
             AnswerId = answerId,
-            Maturity = string.Empty,
             DateCreated = DateTime.UtcNow,
         };
 

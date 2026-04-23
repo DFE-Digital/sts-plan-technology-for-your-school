@@ -95,7 +95,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             QuestionId = question.Id,
             AnswerId = answer.Id,
             DateCreated = DateTime.UtcNow.AddDays(-9),
-            Maturity = "",
         };
         DbContext.Responses.Add(response);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
@@ -235,7 +234,6 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             QuestionId = question.Id,
             AnswerId = answer.Id,
             DateCreated = DateTime.UtcNow.AddDays(-9),
-            Maturity = "",
         };
         DbContext.Responses.Add(response);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);

@@ -135,7 +135,6 @@ public class SubmissionWorkflow(
         {
             return new SqlSectionStatusDto
             {
-                LastMaturity = latestSubmission.Maturity,
                 SectionId = latestSubmission.SectionId,
                 Status = latestSubmission.Status,
             };
