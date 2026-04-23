@@ -118,14 +118,14 @@ jobs:
       - name: Restore 
         uses: ./.github/actions/restore-db-from-bacpac
         with:
-          resource_group: ${{ inputs.backup_resource_group }}
-          sql_server_name: ${{ inputs.sql_server_name }}
-          target_database: ${{ inputs.target_database }}
-          storage_account: ${{ inputs.storage_account }}
-          container_name: ${{ inputs.container_name }}
-          bacpac_file: ${{ inputs.bacpac_file }}
-          bacpac_prefix: ${{ inputs.bacpac_prefix }}
-          use_latest_if_not_specified: ${{ inputs.use_latest_if_not_specified }}
+          resource_group: ${{ env.BACKUP_RESOURCE_GROUP }}
+          sql_server_name: ${{ env.SQL_SERVER_NAME }}
+          target_database: ${{ env.TARGET_DATABASE }}
+          storage_account: ${{ env.BACKUP_STORAGE_ACCOUNT }}
+          container_name: ${{ env.CONTAINER_NAME }}
+          bacpac_file: ${{ env.BACPAC_FILE }}
+          bacpac_prefix: ${{ env.BACPAC_PREFIX }}
+          use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
 
       - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
         uses: ./.github/actions/whitelisting-for-runner
