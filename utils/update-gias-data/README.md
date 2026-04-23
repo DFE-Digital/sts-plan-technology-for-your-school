@@ -73,3 +73,10 @@ For windows setup this would be:
    uv run ruff check --fix
    uv run ruff format
    ```
+
+## See also
+
+- [Utils overview](../README.md)
+- [GitHub Actions workflows](../../.github/README.md) — `update-gias-data-scheduled.yml`, `update-gias-data-manual.yml`
+- [SQL data layer](../../src/Dfe.PlanTech.Data.Sql/README.md) — `dbo.establishmentGroup` and `dbo.establishmentLink` tables
+- [ADR 0042 — GIAS data refresh](../../docs/architecture-decision-record/0042-gias-data-refresh.md)
