@@ -1,9 +1,45 @@
 name: Restore Azure SQL DB from BACPAC
 
+#todo: consider auto generating naming from project and env vars? less flexible tho
 on:
   workflow_call:
     inputs:
       resource_group:
+        required: true
+        type: string
+      backup_resource_group:
+        required: true
+        type: string
+      sql_server_name:
+        required: true
+        type: string
+      target_database:
+        required: true
+        type: string
+      storage_account:
+        required: true
+        type: string
+      container_name:
+        required: true
+        type: string
+      bacpac_file:
+        required: false
+        type: string
+        default: ""
+      bacpac_prefix:
+        required: false
+        type: string
+        default: ""
+      use_latest_if_not_specified:
+        required: false
+        type: boolean
+        default: true
+  workflow_dispatch:
+    inputs:
+      resource_group:
+        required: true
+        type: string
+      backup_resource_group:
         required: true
         type: string
       sql_server_name:
@@ -31,13 +67,9 @@ on:
         type: boolean
         default: true
 
-    secrets:
-      az_tenant_id:
-        required: true
-      az_subscription_id:
-        required: true
-      az_client_id:
-        required: true
+  push:
+    branches:
+       - disaster-recovery-e2e-terraform
 
 jobs:
   restore:
@@ -47,6 +79,17 @@ jobs:
       id-token: write
       contents: read
 
+    env:
+      BACKUP_RESOURCE_GROUP: ${{ github.event_name == 'push' && 's190d01-plantech-backups' || inputs.resource_group }}
+      RESOURCE_GROUP: ${{ github.event_name == 'push' && 's190d01-plantech-dr' || inputs.resource_group }}
+      SQL_SERVER_NAME: ${{ github.event_name == 'push' && 's190d01plantechdr' || inputs.sql_server_name }}
+      TARGET_DATABASE: ${{ github.event_name == 'push' && 's190d01-plantechdr-sqldb' || inputs.target_database }}
+      BACKUP_STORAGE_ACCOUNT: ${{ github.event_name == 'push' && 'plantechsqlbackups' || inputs.storage_account }}
+      CONTAINER_NAME: ${{ github.event_name == 'push' && 'sqlbackups' || inputs.container_name }}
+      BACPAC_FILE: ${{ github.event_name == 'push' && '' || inputs.bacpac_file }}
+      BACPAC_PREFIX: ${{ github.event_name == 'push' && '' || inputs.bacpac_prefix }}
+      USE_LATEST_IF_NOT_SPECIFIED: ${{ github.event_name == 'push' && 'true' || inputs.use_latest_if_not_specified }}
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -54,92 +97,42 @@ jobs:
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
-          az_tenant_id: ${{ secrets.az_tenant_id }}
-          az_subscription_id: ${{ secrets.az_subscription_id }}
-          az_client_id: ${{ secrets.az_client_id }}
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
-      - name: Install SqlPackage
-        run: dotnet tool install --global Microsoft.SqlPackage
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
 
-      - name: Resolve BACPAC blob name
-        id: resolve-bacpac
-        shell: bash
-        run: |
-          set -euo pipefail
+      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
+        uses: ./.github/actions/whitelisting-for-runner
+        with:
+          runner_ip: ${{ steps.whats-my-ip.outputs.ip }}
+          az_aca_resource_group: ${{ env.RESOURCE_GROUP }}
+          sql_server_name: ${{ env.SQL_SERVER_NAME }}
+          sa_resource_group: ${{ env.BACKUP_RESOURCE_GROUP }}
+          sa_name: ${{ env.BACKUP_STORAGE_ACCOUNT }}
+          removeRules: 'false'
 
-          INPUT_BACPAC_FILE="${{ inputs.bacpac_file }}"
-          PREFIX="${{ inputs.bacpac_prefix }}"
-          USE_LATEST="${{ inputs.use_latest_if_not_specified }}"
-          ACCOUNT="${{ inputs.storage_account }}"
-          CONTAINER="${{ inputs.container_name }}"
+      - name: Restore 
+        uses: ./.github/actions/restore-db-from-bacpac
+        with:
+          resource_group: ${{ inputs.backup_resource_group }}
+          sql_server_name: ${{ inputs.sql_server_name }}
+          target_database: ${{ inputs.target_database }}
+          storage_account: ${{ inputs.storage_account }}
+          container_name: ${{ inputs.container_name }}
+          bacpac_file: ${{ inputs.bacpac_file }}
+          bacpac_prefix: ${{ inputs.bacpac_prefix }}
+          use_latest_if_not_specified: ${{ inputs.use_latest_if_not_specified }}
 
-          if [ -n "$INPUT_BACPAC_FILE" ]; then
-            BACPAC_FILE="$INPUT_BACPAC_FILE"
-            echo "Using explicit BACPAC file: $BACPAC_FILE"
-          else
-            if [ "$USE_LATEST" != "true" ]; then
-              echo "No bacpac_file provided and use_latest_if_not_specified is false."
-              exit 1
-            fi
-
-            echo "Finding latest .bacpac blob in container $CONTAINER..."
-
-            if [ -n "$PREFIX" ]; then
-              QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac') && starts_with(name, '$PREFIX')] | sort_by(@, &properties.lastModified) | [-1].name"
-            else
-              QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac')] | sort_by(@, &properties.lastModified) | [-1].name"
-            fi
-
-            BACPAC_FILE=$(az storage blob list \
-              --account-name "$ACCOUNT" \
-              --container-name "$CONTAINER" \
-              --auth-mode login \
-              --query "$QUERY" \
-              -o tsv)
-
-            if [ -z "$BACPAC_FILE" ]; then
-              echo "No matching .bacpac blob found."
-              exit 1
-            fi
-
-            echo "Resolved latest BACPAC file: $BACPAC_FILE"
-          fi
-
-          echo "bacpac_file=$BACPAC_FILE" >> "$GITHUB_OUTPUT"
-          echo "bacpac_uri=https://${ACCOUNT}.blob.core.windows.net/${CONTAINER}/${BACPAC_FILE}" >> "$GITHUB_OUTPUT"
-
-      - name: Download resolved BACPAC
-        id: download
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          ACCOUNT="${{ inputs.storage_account }}"
-          CONTAINER="${{ inputs.container_name }}"
-          BLOB_NAME="${{ steps.resolve-bacpac.outputs.bacpac_file }}"
-
-          echo "Downloading resolved bacpac: $BLOB_NAME"
-
-          az storage blob download \
-            --account-name "$ACCOUNT" \
-            --container-name "$CONTAINER" \
-            --name "$BLOB_NAME" \
-            --file "$BLOB_NAME" \
-            --auth-mode login
-
-          echo "bacpac_file=$BLOB_NAME" >> "$GITHUB_OUTPUT"
-
-      - name: Import BACPAC with SqlPackage
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          sqlpackage \
-            /Action:Import \
-            /SourceFile:"${{ steps.download.outputs.bacpac_file }}" \
-            /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \
-            /TargetDatabaseName:"${{ inputs.target_database }}" \
-            /Authentication:ActiveDirectoryServicePrincipal \
-            /TenantId:"${{ secrets.az_tenant_id }}" \
-            /ClientId:"${{ secrets.az_client_id }}" \
-            /ClientSecret:"${{ secrets.az_client_secret }}"
+      - name: Whitelist Runner for Storage account, KeyVault, and TF KeyVault
+        uses: ./.github/actions/whitelisting-for-runner
+        with:
+          runner_ip: ${{ steps.whats-my-ip.outputs.ip }}
+          az_aca_resource_group: ${{ env.RESOURCE_GROUP }}
+          sql_server_name: ${{ env.SQL_SERVER_NAME }}
+          sa_resource_group: ${{ env.BACKUP_RESOURCE_GROUP }}
+          sa_name: ${{ env.BACKUP_STORAGE_ACCOUNT }}
+          removeRules: 'true'

@@ -7,12 +7,12 @@ inputs:
     required: true
     default: ""
 
-  sa_costing_name:
+  sa_name:
     description: Name of the storage account
     required: false
     default: ""
 
-  sa_costing_resource_group:
+  sa_resource_group:
     description: Resource group of the storage account
     required: false
     default: ""
@@ -181,15 +181,15 @@ runs:
 
         if [[ "$REMOVE_RULES" == "true" ]]; then
           if has_value_pair "$SA_NAME" "$SA_RG"; then
-            remove_storage_rule "$SA_RG" "$SA_NAME"
+            remove_storage_rule "$SA_RG" "$SA_NAME" "github-runner"
           fi
 
           if has_value_pair "$SERVICE_KV_NAME" "$SERVICE_RG"; then
-            remove_keyvault_rule "$SERVICE_RG" "$SERVICE_KV_NAME" "service"
+            remove_keyvault_rule "$SERVICE_RG" "$SERVICE_KV_NAME" "github-runner"
           fi
 
           if has_value_pair "$TF_KV_NAME" "$TF_KV_RG"; then
-            remove_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "terraform"
+            remove_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "github-runner"
           fi
 
           if has_value_pair "$SQL_NAME" "$SERVICE_RG"; then
@@ -197,15 +197,15 @@ runs:
           fi
         else
           if has_value_pair "$SA_NAME" "$SA_RG"; then
-            add_storage_rule "$SA_RG" "$SA_NAME"
+            add_storage_rule "$SA_RG" "$SA_NAME" "storage"
           fi
 
           if has_value_pair "$SERVICE_KV_NAME" "$SERVICE_RG"; then
-            add_keyvault_rule "$SERVICE_RG" "$SERVICE_KV_NAME" "service"
+            add_keyvault_rule "$SERVICE_RG" "$SERVICE_KV_NAME" "github-runner"
           fi
 
           if has_value_pair "$TF_KV_NAME" "$TF_KV_RG"; then
-            add_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "terraform"
+            add_keyvault_rule "$TF_KV_RG" "$TF_KV_NAME" "github-runner"
           fi
 
           if has_value_pair "$SQL_NAME" "$SERVICE_RG"; then
