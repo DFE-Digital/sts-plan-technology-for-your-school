@@ -63,15 +63,22 @@ jobs:
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
 
-      - name: Add Azure firewall rules
-        uses: ./.github/actions/azure-ip-whitelist
+      - name: Whitelist IP on Key Vault
+        uses: ./.github/actions/whitelist-kv
         with:
-          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: 'add'
-          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.RESOURCE_GROUP}}
-          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          keyvault-name: ${{ env.KEYVAULT_NAME }}
+          verb: add
+
+      - name: Whitelist IP on SQL server
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          server-name: ${{ env.RESOURCE_GROUP }}
+          rule-name: ${{ env.SQL_IP_NAME }}
+          verb: add
 
       - name: Get mock auth client secret from Key Vault
         if: ${{ env.MOCK_AUTH_MODE == 'true' }}
@@ -222,16 +229,24 @@ jobs:
           if-no-files-found: ignore
           compression-level: 1
 
-      - name: Remove Azure firewall rules
+      - name: Remove IP from Key Vault
         if: always()
-        uses: ./.github/actions/azure-ip-whitelist
+        uses: ./.github/actions/whitelist-kv
         with:
-          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: 'remove'
-          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.RESOURCE_GROUP}}
-          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          keyvault-name: ${{ env.KEYVAULT_NAME }}
+          verb: remove
+
+      - name: Remove IP from SQL server
+        if: always()
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          server-name: ${{ env.RESOURCE_GROUP }}
+          rule-name: ${{ env.SQL_IP_NAME }}
+          verb: remove
 
       - name: Turn off Automated Testing Content on environment
         if: always()
@@ -253,9 +268,7 @@ jobs:
               $REMOVE_VARS
 
       - name: Flush Redis Cache
-        uses: azure/CLI@v1
-        id: azure
+        uses: ./.github/actions/flush-redis-cache
         with:
-          azcliversion: 2.73.0
-          inlineScript: |
-            az redis flush --name ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --yes
+          az_redis_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          az_resource_group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}

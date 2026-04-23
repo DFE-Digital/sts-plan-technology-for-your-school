@@ -32,9 +32,7 @@ jobs:
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
       - name: Flush Redis Cache
-        uses: azure/CLI@v1
-        id: azure
+        uses: ./.github/actions/flush-redis-cache
         with:
-          azcliversion: 2.73.0
-          inlineScript: |
-            az redis flush --name ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} --yes
+          az_redis_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          az_resource_group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}

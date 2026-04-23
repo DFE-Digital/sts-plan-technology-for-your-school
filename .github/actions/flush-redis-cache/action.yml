@@ -1,0 +1,22 @@
+name: Flush Redis Cache
+description: Flushes an Azure Redis cache by resource ID. Requires the caller to have already authenticated via `azure/login`.
+
+inputs:
+  az_redis_name:
+    description: Name of the Redis cache resource.
+    required: true
+  az_resource_group:
+    description: Resource group containing the Redis cache.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    # Flushing by resource ID (rather than by name + resource-group) guards against
+    # ARM-resolution conflicts — see commit 3e124a52.
+    - name: Flush Redis Cache
+      uses: azure/cli@v2
+      with:
+        azcliversion: 2.73.0
+        inlineScript: |
+          az redis flush --ids $(az redis list --resource-group ${{ inputs.az_resource_group }} --query "[?name=='${{ inputs.az_redis_name }}'].id" -o tsv) --yes

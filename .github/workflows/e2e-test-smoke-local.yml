@@ -112,15 +112,22 @@ jobs:
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
 
-      - name: Add Azure firewall rules
-        uses: ./.github/actions/azure-ip-whitelist
+      - name: Whitelist IP on Key Vault
+        uses: ./.github/actions/whitelist-kv
         with:
-          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: 'add'
-          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.RESOURCE_GROUP}}
-          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          keyvault-name: ${{ env.KEYVAULT_NAME }}
+          verb: add
+
+      - name: Whitelist IP on SQL server
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          server-name: ${{ env.RESOURCE_GROUP }}
+          rule-name: ${{ env.SQL_IP_NAME }}
+          verb: add
 
       - name: Start Redis cache
         shell: bash
@@ -267,13 +274,21 @@ jobs:
           docker stop plantech-redis || true
           docker rm plantech-redis || true
 
-      - name: Remove Azure firewall rules
+      - name: Remove IP from Key Vault
         if: always()
-        uses: ./.github/actions/azure-ip-whitelist
+        uses: ./.github/actions/whitelist-kv
         with:
-          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: 'remove'
-          az_keyvault_name: ${{ env.KEYVAULT_NAME }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.RESOURCE_GROUP}}
-          az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          keyvault-name: ${{ env.KEYVAULT_NAME }}
+          verb: remove
+
+      - name: Remove IP from SQL server
+        if: always()
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          server-name: ${{ env.RESOURCE_GROUP }}
+          rule-name: ${{ env.SQL_IP_NAME }}
+          verb: remove
