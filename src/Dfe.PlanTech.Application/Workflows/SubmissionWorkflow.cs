@@ -9,13 +9,9 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubmissionWorkflow(
-    IStoredProcedureRepository storedProcedureRepository,
     ISubmissionRepository submissionRepository
 ) : ISubmissionWorkflow
 {
-    private readonly IStoredProcedureRepository _storedProcedureRepository =
-        storedProcedureRepository
-        ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
@@ -71,6 +67,27 @@ public class SubmissionWorkflow(
             establishmentId,
             sectionId,
             status
+        );
+        if (latestSubmission is null)
+        {
+            return null;
+        }
+
+        latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses).ToList();
+        return latestSubmission.AsDto();
+    }
+
+    // Overload to take multiple statuses to include in query
+    public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
+            establishmentId,
+            sectionId,
+            statuses
         );
         if (latestSubmission is null)
         {

@@ -1,3 +1,4 @@
+using Contentful.Core.Models.Management;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
@@ -117,8 +118,93 @@ public class SubmissionRepositoryTests
         );
         var repo = new SubmissionRepository(db);
 
-        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", null);
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", (SubmissionStatus?)null);
         Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Null_When_None()
+    {
+        using var db = BuildPlanTechDbContext(
+            nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Null_When_None)
+        );
+        var repo = new SubmissionRepository(db);
+
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [ SubmissionStatus.CompleteReviewed ]);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetLatestSubmissionAndResponses_MultipleStatuses_Throws_When_Empty_Status_Enumerable()
+    {
+        using var db = BuildPlanTechDbContext(
+            nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Throws_When_Empty_Status_Enumerable)
+        );
+        var repo = new SubmissionRepository(db);
+
+        var result = await Assert.ThrowsAsync<ArgumentException>(() => repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [])
+        );
+       
+        Assert.Contains("At least one submission status must be provided", result.Message);
+    }
+
+    [Fact]
+    public async Task GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Latest_Of_Included_Statuses()
+    {
+        using var db = BuildPlanTechDbContext(
+            nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Latest_Of_Included_Statuses)
+        );
+        var repo = new SubmissionRepository(db);
+
+        db.Establishments.Add(
+            new EstablishmentEntity
+            {
+                Id = 1
+            }
+        );
+
+        db.Submissions.AddRange(
+            new SubmissionEntity
+            {
+                Id = 1,
+                EstablishmentId = 1,
+                SectionId = "SEC",
+                SectionName = "Section name",
+                Status = SubmissionStatus.InProgress,
+                DateCreated = new DateTime(2024, 1, 1),
+                DateCompleted = new DateTime(2024, 1, 1),
+                DateLastUpdated = new DateTime(2024, 1, 1),
+            },
+            new SubmissionEntity
+            {
+                Id = 2,
+                EstablishmentId = 1,
+                SectionId = "SEC",
+                SectionName = "Section name",
+                Status = SubmissionStatus.Inaccessible,
+                DateCreated = new DateTime(2025, 1, 1),
+                DateLastUpdated = new DateTime(2025, 1, 1),
+            },
+            new SubmissionEntity
+            {
+                Id = 3,
+                EstablishmentId = 1,
+                SectionId = "SEC",
+                SectionName = "Section name",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2026, 1, 1),
+                DateCompleted = new DateTime(2026, 1, 1),
+                DateLastUpdated = new DateTime(2026, 1, 1),
+            }
+        );
+
+        db.SaveChanges();
+
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Id);
+        Assert.Equal(SubmissionStatus.Inaccessible, result.Status);
     }
 
     [Fact]

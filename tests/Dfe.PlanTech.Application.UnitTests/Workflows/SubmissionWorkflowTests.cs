@@ -19,7 +19,7 @@ public class SubmissionWorkflowTests
     private static readonly string[] q1q2 = new[] { "Q1", "Q2" };
     private static readonly string[] a1a2 = new[] { "A1", "A2" };
 
-    private SubmissionWorkflow CreateServiceUnderTest() => new(_sp, _repo);
+    private SubmissionWorkflow CreateServiceUnderTest() => new(_repo);
 
     // ---------- Helpers: minimal Contentful section graph ----------
     private static EstablishmentEntity BuildEstablishment(int? id = 1)
@@ -195,7 +195,7 @@ public class SubmissionWorkflowTests
             .GetLatestSubmissionAndResponsesAsync(1, section.Id, status: (SubmissionStatus?)null)
             .Returns((SubmissionEntity?)null);
 
-        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, null);
+        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, (SubmissionStatus?)null);
         Assert.Null(dto);
     }
 
@@ -246,6 +246,40 @@ public class SubmissionWorkflowTests
         // Should start at Q1 then go to Q2 per chain
         Assert.Equal(q1q2, dto.Responses.Select(r => r.Question.ContentfulSysId).ToArray());
         Assert.Equal("developing", dto.Maturity);
+    }
+
+    [Fact]
+    public async Task GetLatestSubmissionWithOrderedResponses_MultipleStatuses_Calls_GetLatestSubmissionAndResponsesAsync_MultipleStatusOverload()
+    {
+        var sut = CreateServiceUnderTest();
+        var section = BuildSection(out _, out _, out _, out _, out _, out _);
+
+        _repo
+            .GetLatestSubmissionAndResponsesAsync(1, section.Id, [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress])
+            .Returns((SubmissionEntity?)null);
+
+        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]);
+
+
+        await _repo.Received(1)
+            .GetLatestSubmissionAndResponsesAsync(
+                1,
+                section.Id,
+                Arg.Is<IEnumerable<SubmissionStatus>>(s =>
+                    s.SequenceEqual(new[]
+                    {
+                        SubmissionStatus.Inaccessible,
+                        SubmissionStatus.InProgress
+                    })
+                )
+            );
+
+        await _repo.DidNotReceive()
+            .GetLatestSubmissionAndResponsesAsync(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<SubmissionStatus?>()
+            );
     }
 
     // ---------- SubmitAnswer ----------

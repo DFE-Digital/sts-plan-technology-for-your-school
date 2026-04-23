@@ -12,13 +12,13 @@ public class CategoryLandingSectionViewModel
     public string? LastCompletionDate { get; init; } = null;
     public string Name { get; init; }
     public SubmissionStatus ProgressStatus { get; init; }
-    public CategoryLandingSectionRecommendationsViewModel Recommendations { get; init; } = null!;
+    public CategoryLandingSectionRecommendationsViewModel? Recommendations { get; init; } = null!;
     public string ShortDescription { get; init; }
     public string? Slug { get; init; }
 
     public CategoryLandingSectionViewModel(
         QuestionnaireSectionEntry section,
-        CategoryLandingSectionRecommendationsViewModel recommendations,
+        CategoryLandingSectionRecommendationsViewModel? recommendations,
         SqlSectionStatusDto? sectionStatus,
         bool hadRetrievalError
     )
