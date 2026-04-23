@@ -94,6 +94,7 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
             ContentfulContentTypeConstants.RichTextContentSupportDataContentfulContentTypeId
         )]
         [InlineData(ContentfulContentTypeConstants.RichTextMarkContentfulContentTypeId)]
+        [InlineData(ContentfulContentTypeConstants.RelatedActionContentfulContentTypeId)]
         public void ContentfulContentId_KnownContentfulId_ReturnsMatchingCsharpType_ForAllMappings(
             string contentfulTypeId
         )

@@ -15,4 +15,5 @@ public class CategoryLandingPageViewModel
     public bool Print { get; set; }
     public bool HasBanner { get; init; } = false;
     public List<ContentfulEntry> AfterContentContent { get; init; } = [];
+    public List<RelatedActionViewModel> RelatedActions { get; init; } = [];
 }

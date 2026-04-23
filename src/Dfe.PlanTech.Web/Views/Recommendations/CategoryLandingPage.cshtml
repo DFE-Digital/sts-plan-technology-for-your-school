@@ -1,18 +1,5 @@
-@using Dfe.PlanTech.Application.Providers.Interfaces
 @inject IMicrocopyProvider Microcopy
 @model CategoryLandingPageViewModel
-
-@{
-
-    var dynamicValues = new Dictionary<string, string>
-    {
-        ["standard"] = Model.Category.Header.Text.ToLower()
-    };
-    var printLinkText = await Microcopy.GetTextByKeyAsync(
-        ContentfulMicrocopyConstants.LandingPagePrintLink,
-        dynamicValues
-    );
-}
 
 @section NavButton {
     <govuk-back-link id="category-back-link" href="@UrlConstants.HomePage" class="noprint js-only">
@@ -21,15 +8,23 @@
 }
 
 @section RelatedActions {
-    <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
-    <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+    @if (Model.RelatedActions.Any())
+    {
+        <hr class="govuk-section-break govuk-section-break--visible custom-hr-blue">
 
-    <p class="govuk-body-s">
-        <a class="govuk-link" href="@Model.Slug/share">Share this list of recommendations</a>
-    </p>
-    <p class="govuk-body-s">
-        <a class="govuk-link" href="@Model.Slug/print">@printLinkText</a>
-    </p>
+        <h2 class="govuk-heading-m govuk-!-padding-top-4">
+            Related actions
+        </h2>
+
+        @foreach (var action in Model.RelatedActions)
+        {
+            <p class="govuk-body-s">
+                <a class="govuk-link" href="@action.Url">
+                    @action.Text
+                </a>
+            </p>
+        }
+    }
 }
 
 @foreach (var content in Model.BeforeTitleContent)

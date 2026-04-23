@@ -9,11 +9,20 @@ on:
         type: choice
         options: ['Dev', 'Tst', 'StagingUnprotected', 'Staging']
         default: 'Tst'
+      use_mock_auth:
+        description: Use mock auth
+        required: false
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       environment:
         required: true
         type: string
+      use_mock_auth:
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: '${{ github.workflow }}'
@@ -35,6 +44,7 @@ jobs:
       KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
       RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
       SQL_IP_NAME: e2e-tests-pr
+      MOCK_AUTH_MODE: ${{ inputs.use_mock_auth && 'true' || 'false' }}
 
     steps:
       - name: Checkout
@@ -63,15 +73,61 @@ jobs:
           az_resource_group: ${{ env.RESOURCE_GROUP}}
           az_sql_database_server_name: ${{ env.RESOURCE_GROUP }}
 
+      - name: Get mock auth client secret from Key Vault
+        if: ${{ env.MOCK_AUTH_MODE == 'true' }}
+        shell: bash
+        run: |
+          secret_value="$(az keyvault secret show \
+            --vault-name "${KEYVAULT_NAME}" \
+            --name "e2e-mock-auth-client-secret" \
+            --query value \
+            --output tsv)"
+
+          echo "::add-mask::$secret_value"
+          echo "MOCK_AUTH_CLIENT_SECRET=$secret_value" >> "$GITHUB_ENV"
+
+      - name: Set environment-specific variables
+        shell: bash
+        run: |
+          SELECTED_ENV="${{ inputs.environment || github.event.inputs.environment || 'Tst' }}"
+
+          case "$SELECTED_ENV" in
+            Dev)
+              echo "APP_URL=https://dev.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
+              ;;
+            Tst)
+              echo "APP_URL=https://test.dev.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
+              ;;
+            Staging)
+              echo "APP_URL=https://staging.plan-technology-for-your-school.education.gov.uk" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "Unknown environment: $SELECTED_ENV"
+              exit 1
+              ;;
+          esac
+
       - name: Turn on Automated Testing Content on environment
         if: always()
         uses: azure/cli@v2
+        env:
+          MOCK_AUTH_MODE: ${{ env.MOCK_AUTH_MODE }}
+          MOCK_AUTH_CLIENT_SECRET: ${{ env.MOCK_AUTH_CLIENT_SECRET }}
         with:
           inlineScript: |
+            EXTRA_SET_VARS=""
+
+            if [ "$MOCK_AUTH_MODE" = "true" ]; then
+              EXTRA_SET_VARS="DfeSignIn__Authority=${APP_URL}/api/mock-auth/token DfeSignIn__MetadataUrl=${APP_URL}/api/mock-auth/.well-known/openid-configuration"
+            fi
+
             az containerapp update \
               --name ${{ secrets.AZ_ACA_NAME }} \
               --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
-              --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=true
+              --set-env-vars \
+              AutomatedTesting__Contentful__IncludeTaggedContent=true \
+              AutomatedTesting__MockAuthentication__ClientSecret="${MOCK_AUTH_CLIENT_SECRET}" \
+              $EXTRA_SET_VARS
 
       - name: Install NPM dependencies
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
@@ -90,6 +146,8 @@ jobs:
       - name: Run Playwright + Cucumber tests (with recording)
         working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
         env:
+          MOCK_AUTH_MODE: ${{ env.MOCK_AUTH_MODE }}
+          MOCK_AUTH_CLIENT_SECRET: ${{ env.MOCK_AUTH_CLIENT_SECRET }}
           URL: ${{ secrets.APP_URL }}
           DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
           DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
@@ -176,12 +234,21 @@ jobs:
       - name: Turn off Automated Testing Content on environment
         if: always()
         uses: azure/cli@v2
+        env:
+          MOCK_AUTH_MODE: ${{ env.MOCK_AUTH_MODE }}
         with:
           inlineScript: |
+            REMOVE_VARS=""
+
+            if [ "${MOCK_AUTH_MODE,,}" = "true" ]; then
+              REMOVE_VARS="--remove-env-vars AutomatedTesting__MockAuthentication__ClientSecret DfeSignIn__Authority DfeSignIn__MetadataUrl"
+            fi
+
             az containerapp update \
               --name ${{ secrets.AZ_ACA_NAME }} \
               --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
-              --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=false
+              --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=false \
+              $REMOVE_VARS
 
       - name: Flush Redis Cache
         uses: azure/CLI@v1

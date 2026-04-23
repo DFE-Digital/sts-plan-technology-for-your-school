@@ -68,6 +68,30 @@
     {
         await Html.RenderPartialAsync("Components/Page", Model.Page);
     }
+
+    @section RelatedActions {
+        @if (Model.Page.RelatedActions.Any(x =>
+                    !string.IsNullOrWhiteSpace(x.Title) &&
+                    !string.IsNullOrWhiteSpace(x.Url)))
+        {
+            <hr class="govuk-section-break govuk-section-break--visible custom-hr-blue">
+
+            <h2 class="govuk-heading-m govuk-!-padding-top-4">
+                Related actions
+            </h2>
+
+            @foreach (var action in Model.Page.RelatedActions.Where(x =>
+                                !string.IsNullOrWhiteSpace(x.Title) &&
+                                !string.IsNullOrWhiteSpace(x.Url)))
+            {
+                <p class="govuk-body-s">
+                    <a class="govuk-link" href="@action.Url">
+                        @action.Title
+                    </a>
+                </p>
+            }
+        }
+    }
 }
 
 @section AfterContent {
