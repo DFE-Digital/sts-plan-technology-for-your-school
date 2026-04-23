@@ -34,12 +34,12 @@ module "main_hosting" {
   #############
   enable_mssql_database              = true
   mssql_database_name                = "${local.resource_prefix}-sqldb"
-  mssql_server_public_access_enabled = true
+  mssql_server_public_access_enabled = false
   mssql_server_admin_password        = local.az_sql_admin_password
   mssql_azuread_admin_username       = local.az_sql_azuread_admin_username
   mssql_azuread_admin_object_id      = local.az_sql_azuread_admin_objectid
   mssql_azuread_auth_only            = local.az_use_azure_ad_auth_only
-  mssql_managed_identity_assign_role = false
+  mssql_managed_identity_assign_role = true
   mssql_sku_name                     = local.az_sql_sku
   mssql_max_size_gb                  = local.az_sql_max_size_gb
   mssql_firewall_ipv4_allow_list     = local.az_mssql_ipv4_allow_list
@@ -60,5 +60,6 @@ module "main_hosting" {
   ###########
   # Storage #
   ###########
-  storage_account_sas_expiration_period = local.storage_account_expiration_period
+  storage_account_sas_expiration_period           = local.storage_account_expiration_period
+  mssql_storage_account_shared_access_key_enabled = false
 }

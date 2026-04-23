@@ -1,0 +1,31 @@
+name: Azure Storage IP Whitelist
+description: Add or remove an IP address from an Azure Storage Account network rule
+
+inputs:
+  ip_address:
+    description: The IP address to add or remove from the whitelist
+    required: true
+  verb:
+    description: The action to perform on the IP address (add or remove)
+    required: true
+  az_storage_account_name:
+    description: The name of the Azure Storage Account
+    required: true
+  az_resource_group:
+    description: The name of the resource group containing the Azure Storage Account
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Add to whitelist
+      if: ${{ inputs.verb == 'add' }}
+      shell: bash
+      run: |
+        az storage account network-rule add --resource-group ${{ inputs.az_resource_group }} --account-name ${{ inputs.az_storage_account_name }} --ip-address ${{ inputs.ip_address }} &> /dev/null
+
+    - name: Remove from whitelist
+      if: ${{ inputs.verb == 'remove' }}
+      shell: bash
+      run: |
+        az storage account network-rule remove --resource-group ${{ inputs.az_resource_group }} --account-name ${{ inputs.az_storage_account_name }} --ip-address ${{ inputs.ip_address }} &> /dev/null
