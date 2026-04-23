@@ -56,8 +56,8 @@ async function ensureMostRecentSectionExpanded(page: any) {
 }
 
 function monthYearFromHeading(headingText: string): { month: string, year: string } {
-  // "February 2026 activity"
-  const m = headingText.trim().match(/^([A-Za-z]+)\s+(\d{4})\s+activity$/i);
+  // "February 2026"
+  const m = headingText.trim().match(/^([A-Za-z]+)\s+(\d{4})$/i);
   if (!m) throw new Error(`Could not parse month/year from heading "${headingText}"`);
   return { month: m[1], year: m[2] };
 }
@@ -169,7 +169,7 @@ Then(
       year: "numeric"
     });
 
-    const sectionHeading = `${month} ${year} activity`;
+    const sectionHeading = `${month} ${year}`;
 
 
     // expand the section
@@ -283,31 +283,26 @@ Then(
 
     // Find the *first* "Status changed to ..." entry (usually the latest at the top),
     // but we'll assert it matches the status+note you pass in.
-    const statusChangedP = content
+
+    const noteP = content
       .locator("p")
-      .filter({ hasText: /Status changed to/i })
+      .filter({ hasText: note })
       .first();
 
-    await expect(statusChangedP).toBeVisible();
-
-    // strong contains the status
-    const strong = statusChangedP.locator("strong");
-    await expect(strong).toBeVisible();
-
-    const actualStatusRaw = await strong.innerText();
-    const actualStatus = normalizeSpaces(actualStatusRaw);
-    expect(actualStatus).toBe(normalizeSpaces(status));
-
     // note is the next paragraph after the status line
-    const noteP = statusChangedP.locator("xpath=following-sibling::p[1]");
+    const statusChangeP = noteP.locator("xpath=following-sibling::p[1]");
+
     await expect(noteP).toBeVisible();
+
+    await expect(statusChangeP).toHaveText(`Status changed to ${status}.`);
+    await expect(statusChangeP).toBeVisible();
 
     const actualNoteRaw = await noteP.innerText();
     const actualNote = normalizeSpaces(actualNoteRaw);
     expect(actualNote).toBe(normalizeSpaces(note));
 
     // the date for this entry is 
-    const dateHeadingForEntry = statusChangedP.locator(
+    const dateHeadingForEntry = noteP.locator(
       "xpath=preceding::h3[contains(@class,'govuk-heading-s')][1]"
     );
 
