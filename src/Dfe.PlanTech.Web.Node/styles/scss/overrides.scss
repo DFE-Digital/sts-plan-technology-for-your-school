@@ -109,6 +109,16 @@ button.govuk-button--white {
   background-color: white;
 }
 
+a.govuk-button--blue {
+  color: white;
+  background-color: #003a68;
+}
+
+a.govuk-button--blue:hover {
+  color: white;
+  background-color: #003a68;
+}
+
 .js-only {
   display: none;
   visibility: hidden;

@@ -112,6 +112,7 @@
 </div>
 
 @section Footer {
+    @await RenderSectionAsync("AfterContent", required: false)
     <partial name="_Footer" />
 }
 
