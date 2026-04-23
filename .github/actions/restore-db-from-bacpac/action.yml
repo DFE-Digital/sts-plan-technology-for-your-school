@@ -32,10 +32,8 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-
     - name: Install SqlPackage
+      shell: bash
       run: dotnet tool install --global Microsoft.SqlPackage
 
     - name: Resolve BACPAC blob name
