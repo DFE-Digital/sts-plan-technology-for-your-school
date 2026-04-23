@@ -43,3 +43,18 @@
     sectionName = Model.SectionName,
     sortOrder = Model.SortOrder,
 })
+
+@section AfterContent {
+    @foreach (var content in Model.AfterContentContent)
+    {
+        if (Model.HasBanner && content.GetType() == typeof(ComponentBannerEntry))
+        {
+            await Html.RenderPartialAsync("Banner", content);
+        }
+        else
+        {
+            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+        }
+        
+    }
+}

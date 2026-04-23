@@ -13,4 +13,6 @@ public class CategoryLandingPageViewModel
     public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];
     public required ComponentTitleEntry Title { get; set; }
     public bool Print { get; set; }
+    public bool HasBanner { get; init; } = false;
+    public List<ContentfulEntry> AfterContentContent { get; init; } = [];
 }
