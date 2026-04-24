@@ -109,8 +109,14 @@ runs:
       run: |
         set -euo pipefail
 
+        ACCESS_TOKEN="$(az account get-access-token \
+          --resource https://database.windows.net/ \
+          --query accessToken \
+          -o tsv)"
+
         sqlpackage \
           /Action:Import \
           /SourceFile:"${{ steps.download.outputs.bacpac_file }}" \
           /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \
           /TargetDatabaseName:"${{ inputs.target_database }}" \
+          /AccessToken:"$ACCESS_TOKEN"
