@@ -19,6 +19,7 @@ public class RecommendationsController(
         recommendationsViewBuilder
         ?? throw new ArgumentNullException(nameof(recommendationsViewBuilder));
 
+    [ValidateMatSelected]
     [HttpGet(
         "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}",
         Name = "GetSingleRecommendation"
@@ -42,6 +43,7 @@ public class RecommendationsController(
         );
     }
 
+    [ValidateMatSelected]
     [HttpGet(
         "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print",
         Name = "PrintSingleRecommendation"
@@ -64,6 +66,7 @@ public class RecommendationsController(
         );
     }
 
+    [ValidateMatSelected]
     [HttpGet(
         "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print-all",
         Name = "PrintAllRecommendations"
@@ -86,6 +89,7 @@ public class RecommendationsController(
         );
     }
 
+    [ValidateMatSelected]
     [HttpGet(
         "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/share",
         Name = "ShareSingleRecommendation"
