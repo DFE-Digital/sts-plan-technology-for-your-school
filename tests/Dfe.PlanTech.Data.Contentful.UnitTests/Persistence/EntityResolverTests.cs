@@ -68,6 +68,9 @@ public class EntityResolverTests
             ContentfulContentTypeConstants.ComponentNotificationBannerContentfulContentTypeId
         )]
         [InlineData(ContentfulContentTypeConstants.ComponentTextBodyContentfulContentTypeId)]
+        [InlineData(
+            ContentfulContentTypeConstants.ComponentTextBodyWithMaturityContentfulContentTypeId
+        )]
         [InlineData(ContentfulContentTypeConstants.ComponentTitleContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentWarningContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ContentSupportPageContentfulContentTypeId)]
@@ -162,6 +165,7 @@ public class EntityResolverTests
     [InlineData(ContentfulContentTypeConstants.RichTextContentDataContentfulContentTypeId)]
     [InlineData(ContentfulContentTypeConstants.RichTextContentSupportDataContentfulContentTypeId)]
     [InlineData(ContentfulContentTypeConstants.RichTextMarkContentfulContentTypeId)]
+    [InlineData(ContentfulContentTypeConstants.RelatedActionContentfulContentTypeId)]
     public void ContentfulContentId_KnownContentfulId_ReturnsMatchingCsharpType_ForAllMappings(
         string contentfulTypeId
     )
@@ -174,5 +178,21 @@ public class EntityResolverTests
 
         // Assert
         Assert.NotEqual(typeof(MissingComponentEntry), foundType);
+    }
+
+    [Fact]
+    public void ContentfulContentId_UnknownContentfulId_ReturnMissingComponentEntry()
+    {
+        // Arrange
+        var expectedType = typeof(MissingComponentEntry);
+        var contentfulTypeId = "not a real type";
+
+        var entityResolver = new EntryResolver();
+
+        // Act
+        var foundType = entityResolver.Resolve(contentfulTypeId);
+
+        // Assert
+        Assert.Equal(expectedType, foundType);
     }
 }
