@@ -8,4 +8,5 @@ public class SqlGroupReadActivityDto : ISqlDto
     public int SelectedEstablishmentId { get; set; }
     public string SelectedEstablishmentName { get; set; } = string.Empty;
     public DateTime DateSelected { get; set; }
+    public Guid? UserActionId { get; set; }
 }

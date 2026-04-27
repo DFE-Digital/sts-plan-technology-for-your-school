@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
 [Table("question")]
-public class QuestionEntity
+public class QuestionEntity : IUserActionEntity
 {
     public int Id { get; init; }
 
@@ -15,6 +16,8 @@ public class QuestionEntity
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public int? Order { get; set; }
+
+    public Guid? UserActionId { get; set; }
 
     public SqlQuestionDto AsDto()
     {

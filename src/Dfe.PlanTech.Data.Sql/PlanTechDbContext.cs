@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -24,10 +26,19 @@ public class PlanTechDbContext : DbContext
     public virtual DbSet<EstablishmentRecommendationHistoryEntity> EstablishmentRecommendationHistories { get; set; } =
         null!;
 
+    public virtual DbSet<UserActionEntity> UserActions { get; set; } = null!;
+
+    private readonly IUserActionIdAccessor? _userActionIdAccessor;
+
     public PlanTechDbContext() { }
 
-    public PlanTechDbContext(DbContextOptions<PlanTechDbContext> options)
-        : base(options) { }
+    public PlanTechDbContext(
+        DbContextOptions<PlanTechDbContext> options,
+        IUserActionIdAccessor? correlationIdAccessor = null)
+        : base(options)
+    {
+        _userActionIdAccessor = correlationIdAccessor;
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -44,5 +55,23 @@ public class PlanTechDbContext : DbContext
             .HasConversion(submissionStatusConverter);
 
         base.OnModelCreating(modelBuilder);
+    }
+
+    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        if (_userActionIdAccessor is not null)
+        {
+            var userActionId = _userActionIdAccessor.GetUserActionId();
+
+            foreach (var entry in ChangeTracker.Entries<IUserActionEntity>())
+            {
+                if (entry.State is EntityState.Added or EntityState.Modified)
+                {
+                    entry.Entity.UserActionId = userActionId;
+                }
+            }
+        }
+
+        return await base.SaveChangesAsync(cancellationToken);
     }
 }

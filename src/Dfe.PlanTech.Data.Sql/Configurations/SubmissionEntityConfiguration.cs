@@ -19,5 +19,9 @@ internal class SubmissionEntityConfiguration : IEntityTypeConfiguration<Submissi
             .HasColumnType("datetime")
             .HasDefaultValue();
         builder.Property(submission => submission.Status).HasMaxLength(50);
+        builder
+            .Property(b => b.UserActionId)
+            .HasColumnName("userActionId")
+            .IsRequired(false);
     }
 }
