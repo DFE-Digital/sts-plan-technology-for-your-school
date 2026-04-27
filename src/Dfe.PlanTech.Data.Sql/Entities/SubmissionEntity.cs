@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
 [Table("submission")]
-public class SubmissionEntity
+public class SubmissionEntity : IUserActionEntity
 {
     public int Id { get; set; }
 
@@ -30,6 +31,8 @@ public class SubmissionEntity
     public bool Deleted { get; set; }
 
     public SubmissionStatus Status { get; set; }
+
+    public Guid? UserActionId { get; set; }
 
     public SqlSubmissionDto AsDto()
     {

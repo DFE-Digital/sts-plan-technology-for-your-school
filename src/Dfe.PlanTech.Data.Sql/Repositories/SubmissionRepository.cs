@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -9,9 +10,12 @@ using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepository
+public class SubmissionRepository(
+    PlanTechDbContext dbContext,
+    IUserActionIdAccessor userActionIdAccessor) : ISubmissionRepository
 {
     protected readonly PlanTechDbContext _db = dbContext;
+    private readonly IUserActionIdAccessor _userActionIdAccessor = userActionIdAccessor;
 
     public async Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission)
     {
@@ -65,7 +69,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
         var sectionQuestions = await GetQuestionsForSection(section);
 
-        // Create recommendation dtos each of the core recs
         var recommendationDtos = section
             .CoreRecommendations.Where(r => r.Question is not null)
             .Select(r =>
@@ -142,7 +145,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
             submissionId
         );
-        // No need to save changes as this is done in the call above
     }
 
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
@@ -151,7 +153,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         SubmissionStatus? status
     )
     {
-        // Get latest submission
         var submission = await GetPreviousSubmissionsInDescendingOrder(
                 establishmentId,
                 sectionId,
@@ -483,9 +484,13 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         if (submissionId is null)
             return;
 
+        var userActionId = _userActionIdAccessor.GetUserActionId();
+
         await _db
             .Submissions.Where(s => s.Id == submissionId.Value)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.Deleted, true));
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(s => s.Deleted, true)
+                .SetProperty(s => s.UserActionId, userActionId));
     }
 
     public async Task<int> SubmitResponse(AssessmentResponseModel response)

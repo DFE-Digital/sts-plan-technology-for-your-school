@@ -6,4 +6,5 @@ public class SqlAnswerDto : ISqlDto
     public string? AnswerText { get; init; } = null!;
     public string ContentfulSysId { get; init; } = null!;
     public DateTime DateCreated { get; init; } = DateTime.UtcNow;
+    public Guid? UserActionId { get; set; }
 }

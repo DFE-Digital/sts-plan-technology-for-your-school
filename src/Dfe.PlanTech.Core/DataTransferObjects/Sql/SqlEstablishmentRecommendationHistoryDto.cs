@@ -13,4 +13,5 @@ public class SqlEstablishmentRecommendationHistoryDto : ISqlDto
     public RecommendationStatus? PreviousStatus { get; init; }
     public RecommendationStatus? NewStatus { get; init; }
     public string? NoteText { get; init; }
+    public Guid? UserActionId { get; set; }
 }

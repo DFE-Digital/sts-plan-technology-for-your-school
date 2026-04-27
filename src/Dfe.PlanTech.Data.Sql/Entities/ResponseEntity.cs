@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
 [Table("response")]
-public class ResponseEntity
+public class ResponseEntity : IUserActionEntity
 {
     public int Id { get; set; }
 
@@ -34,6 +35,8 @@ public class ResponseEntity
 
     public DateTime? DateLastUpdated { get; set; }
 
+    public Guid? UserActionId { get; set; }
+
     public SqlResponseDto AsDto()
     {
         return new SqlResponseDto
@@ -51,6 +54,7 @@ public class ResponseEntity
             Maturity = Maturity,
             DateCreated = DateCreated,
             DateLastUpdated = DateLastUpdated,
+            UserActionId = UserActionId,
         };
     }
 }

@@ -16,4 +16,5 @@ public class SqlResponseDto : ISqlDto
     public string Maturity { get; set; } = null!;
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
     public DateTime? DateLastUpdated { get; set; }
+    public Guid? UserActionId { get; set; }
 }

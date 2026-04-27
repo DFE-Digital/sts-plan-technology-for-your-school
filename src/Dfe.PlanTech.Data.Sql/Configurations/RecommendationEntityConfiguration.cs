@@ -22,5 +22,10 @@ internal class RecommendationEntityConfiguration : IEntityTypeConfiguration<Reco
             .WithMany()
             .HasForeignKey(r => r.QuestionId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder
+            .Property(b => b.UserActionId)
+            .HasColumnName("userActionId")
+            .IsRequired(false);
     }
 }

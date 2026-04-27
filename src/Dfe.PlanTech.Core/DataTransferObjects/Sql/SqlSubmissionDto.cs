@@ -16,4 +16,5 @@ public class SqlSubmissionDto : ISqlDto
     public IEnumerable<SqlResponseDto> Responses { get; set; } = [];
     public bool Deleted { get; set; }
     public SubmissionStatus Status { get; set; }
+    public Guid? UserActionId { get; set; }
 }

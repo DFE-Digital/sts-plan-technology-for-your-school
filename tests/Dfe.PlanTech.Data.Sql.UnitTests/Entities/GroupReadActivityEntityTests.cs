@@ -36,6 +36,7 @@ public class GroupReadActivityEntityTests
         Assert.Equal(expectedSelectedEstablishmentId, dto.SelectedEstablishmentId);
         Assert.Equal(expectedSelectedEstablishmentName, dto.SelectedEstablishmentName);
         Assert.Equal(expectedDateSelected, dto.DateSelected);
+        Assert.Equal(expectedDateSelected, dto.DateSelected);
 
         // Assert - ensure all DTO properties are accounted for
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlGroupReadActivityDto>(

@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
@@ -18,7 +19,10 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
-        _repository = new SubmissionRepository(DbContext);
+        _repository = new SubmissionRepository(
+            DbContext,
+            new TestUserActionIdAccessor(Guid.NewGuid())
+        );
     }
 
     private AnswerEntity CreateAnswer(int id)
@@ -1366,5 +1370,10 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         var response = new AssessmentResponseModel(1, 1, 1, submitAnswer);
 
         await Assert.ThrowsAsync<ArgumentException>(() => _repository.SubmitResponse(response));
+    }
+
+    private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdAccessor
+    {
+        public Guid GetUserActionId() => userActionId;
     }
 }
