@@ -10,5 +10,5 @@ public class CmsWebHookPayload
     public Dictionary<string, JsonNode> Fields { get; init; } = [];
     public CmsWebHookSystemDetails Sys { get; init; } = null!;
 
-    public string ContentType => Sys.Type;
+    public string ContentType => Sys.ContentType.Sys.Id;
 }

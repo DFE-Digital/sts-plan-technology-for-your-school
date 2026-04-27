@@ -24,17 +24,6 @@ public class UserClaimsExtensionsTests
     }
 
     [Fact]
-    public void GetDsiReference_Should_Throw_When_Claim_Is_Missing()
-    {
-        var identity = new ClaimsIdentity(Array.Empty<Claim>());
-        var claimsPrincipal = new ClaimsPrincipal(identity);
-
-        Assert.ThrowsAny<Exception>(() =>
-            UserClaimsExtensions.GetDsiReference(claimsPrincipal.Claims)
-        );
-    }
-
-    [Fact]
     public void GetDsiReference_Should_Throw_When_ClaimsPrincipal_Is_Null()
     {
         Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsExtensions.GetDsiReference(null!));

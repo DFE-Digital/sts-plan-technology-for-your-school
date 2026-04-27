@@ -33,23 +33,34 @@ public class CmsWebHookMessageProcessorTests
     public async Task ProcessMessage_ValidJson_InvokesCache_And_ReturnsSuccess()
     {
         // Arrange
-        var sut = SUT();
+        var id = "id-1";
         var payload = new CmsWebHookPayload
         {
-            Sys = new CmsWebHookSystemDetails { Id = "abc123", Type = "page" },
+            Sys = new CmsWebHookSystemDetails
+            {
+                Id = id,
+                ContentType = new CmsWebHookSystemDetailsInnerContainer
+                {
+                    Sys = new CmsWebHookSystemDetailsInner { Id = id },
+                },
+                Type = "page",
+            },
         };
+
         var body = JsonSerializer.Serialize(payload, _jsonOpts);
+
+        var sut = SUT();
 
         // Act
         var result = await sut.ProcessMessage(
             subject: "ignored",
             body,
-            id: "msg-1",
+            id: id,
             CancellationToken.None
         );
 
         // Assert
-        await _cache.Received(1).InvalidateCacheAsync("abc123", "page");
+        await _cache.Received(1).InvalidateCacheAsync(id, payload.ContentType);
         Assert.IsType<ServiceBusSuccessResult>(result);
 
         // We logged at least once while mapping
@@ -98,19 +109,31 @@ public class CmsWebHookMessageProcessorTests
     public async Task ProcessMessage_CacheThrows_ReturnsRetryableError()
     {
         // Arrange
-        var sut = SUT();
+        var id = "id-9";
+
         var payload = new CmsWebHookPayload
         {
-            Sys = new CmsWebHookSystemDetails { Id = "id-9", Type = "asset" },
+            Sys = new CmsWebHookSystemDetails
+            {
+                Id = id,
+                ContentType = new CmsWebHookSystemDetailsInnerContainer
+                {
+                    Sys = new CmsWebHookSystemDetailsInner { Id = id },
+                },
+                Type = "asset",
+            },
         };
+
         var body = JsonSerializer.Serialize(payload, _jsonOpts);
 
         _cache
-            .InvalidateCacheAsync("id-9", "asset")
+            .InvalidateCacheAsync(id, payload.ContentType)
             .Returns(_ => throw new InvalidOperationException("boom"));
 
+        var sut = SUT();
+
         // Act
-        var result = await sut.ProcessMessage("ignored", body, "msg-3", CancellationToken.None);
+        var result = await sut.ProcessMessage("ignored", body, id, CancellationToken.None);
 
         // Assert
         var err = Assert.IsType<ServiceBusErrorResult>(result);

@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIn;
@@ -59,6 +60,8 @@ builder
 builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicationWorkflows();
 
 var app = builder.Build();
+
+ContentComponentJsonExtensions.ValidateContentfulTypeMapping();
 
 app.UseRobotsTxtMiddleware();
 

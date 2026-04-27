@@ -1,3 +1,5 @@
+using System.Collections.Concurrent;
+using System.Reflection;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Core.Contentful.Models;
 using StackExchange.Redis;
@@ -9,6 +11,8 @@ namespace Dfe.PlanTech.Infrastructure.Redis;
 public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue)
     : IRedisDependencyManager
 {
+    private static readonly ConcurrentDictionary<Type, PropertyInfo[]> _contentPropertyCache = new();
+
     public string EmptyCollectionDependencyKey => "Missing";
 
     /// <inheritdoc cref="IRedisDependencyManager"/>
@@ -88,13 +92,12 @@ public class RedisDependencyManager(IBackgroundTaskQueue backgroundTaskQueue)
 
         yield return value.Id;
 
-        var properties = value
-            .GetType()
-            .GetProperties()
-            .Where(property =>
-                typeof(ContentfulEntry).IsAssignableFrom(property.PropertyType)
-                || typeof(IEnumerable<ContentfulEntry>).IsAssignableFrom(property.PropertyType)
-            );
+        var properties = _contentPropertyCache.GetOrAdd(value.GetType(), static t =>
+            t.GetProperties()
+                .Where(property =>
+                    typeof(ContentfulEntry).IsAssignableFrom(property.PropertyType)
+                    || typeof(IEnumerable<ContentfulEntry>).IsAssignableFrom(property.PropertyType))
+                .ToArray());
 
         foreach (var property in properties)
         {

@@ -9,13 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="ViewModels\Interfaces\**" />
-      <Content Remove="ViewModels\Interfaces\**" />
-      <EmbeddedResource Remove="ViewModels\Interfaces\**" />
-      <None Remove="ViewModels\Interfaces\**" />
-    </ItemGroup>
-
-    <ItemGroup>
         <Content Update="Properties\launchSettings.json">
             <CopyToPublishDirectory>Never</CopyToPublishDirectory>
         </Content>

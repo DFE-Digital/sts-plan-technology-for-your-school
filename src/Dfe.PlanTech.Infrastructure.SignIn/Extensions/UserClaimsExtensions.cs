@@ -21,14 +21,14 @@ public static class UserClaimsExtensions
             claimsPrincipal.Claims.GetOrganisation() != null
         );
 
-    public static string GetDsiReference(this IEnumerable<Claim> claims)
+    public static string? GetDsiReference(this IEnumerable<Claim> claims)
     {
         ArgumentNullException.ThrowIfNull(claims);
 
         return claims
             .Where(c => c.Type.Contains(ClaimConstants.NameIdentifier))
             .Select(c => c.Value)
-            .Single();
+            .SingleOrDefault();
     }
 
     /// <summary>

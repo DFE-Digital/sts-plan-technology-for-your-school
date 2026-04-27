@@ -184,7 +184,7 @@ public static class ServiceCollectionExtensions
             (services) => services.GetRequiredService<IOptions<SigningSecretConfiguration>>().Value
         );
 
-        services.AddScoped<ComponentViewsFactory>();
+        services.AddSingleton<ComponentViewsFactory>();
 
         return services;
     }
@@ -250,7 +250,6 @@ public static class ServiceCollectionExtensions
         services.AddTransient(services =>
             services.GetRequiredService<IOptions<GoogleTagManagerConfiguration>>().Value
         );
-
         return services;
     }
 
