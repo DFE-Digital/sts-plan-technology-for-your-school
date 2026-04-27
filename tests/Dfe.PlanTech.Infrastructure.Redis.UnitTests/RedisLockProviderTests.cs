@@ -173,7 +173,9 @@ public class RedisLockProviderUnitTests
             )
             .Returns(true);
 
-        await _provider.LockAndRun(key, () => throw new Exception(thrownErrorMessage));
+        await Assert.ThrowsAsync<Exception>(() =>
+            _provider.LockAndRun(key, () => throw new Exception(thrownErrorMessage))
+        );
 
         var loggedMessage = _logger
             .ReceivedLogMessages()
@@ -254,7 +256,9 @@ public class RedisLockProviderUnitTests
             )
             .Returns(true);
 
-        await _provider.LockAndGet(key, () => Task.FromResult(func()));
+        await Assert.ThrowsAsync<Exception>(() =>
+            _provider.LockAndGet(key, () => Task.FromResult(func()))
+        );
 
         var loggedMessage = _logger
             .ReceivedLogMessages()
