@@ -210,7 +210,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1" },
+            new SqlSectionStatusDto { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -247,7 +247,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1" },
+            new SqlSectionStatusDto { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -292,7 +292,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1" },
+            new SqlSectionStatusDto { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -347,7 +347,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S4" },
+            new() { SectionId = "S4", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -431,7 +431,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6" },
+            new() { SectionId = "S6", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -492,7 +492,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6" },
+            new() { SectionId = "S6", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -619,7 +619,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6" },
+            new() { SectionId = "S6", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var responses = new SubmissionResponsesModel(
