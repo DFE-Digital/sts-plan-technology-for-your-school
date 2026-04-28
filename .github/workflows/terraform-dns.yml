@@ -70,12 +70,13 @@ jobs:
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
-      - name: Add Runner to KV whitelist
-        uses: azure/CLI@v1
+      - name: Whitelist IP on Key Vault
+        uses: ./.github/actions/whitelist-kv
         with:
-          azcliversion: 2.45.0
-          inlineScript: |
-            az keyvault network-rule add --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
+          verb: add
 
       - name: Terraform init
         id: init
@@ -90,10 +91,11 @@ jobs:
         id: plan
         run: terraform plan
 
-      - name: Remove Runner to KV whitelist
-        uses: azure/CLI@v1
+      - name: Remove IP from Key Vault
         if: always()
+        uses: ./.github/actions/whitelist-kv
         with:
-          azcliversion: 2.45.0
-          inlineScript: |
-            az keyvault network-rule remove --name ${{ env.AZ_KEYVAULT_NAME }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.AZ_ACA_RESOURCE_GROUP }}
+          keyvault-name: ${{ env.AZ_KEYVAULT_NAME }}
+          verb: remove

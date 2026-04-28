@@ -40,11 +40,22 @@ runs:
       id: whats-my-ip
       uses: ./.github/actions/whats-my-ip-address
 
-    - name: Add Azure firewall rules
-      shell: bash
-      run: |
-        az sql server firewall-rule create --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader --start-ip-address ${{ steps.whats-my-ip.outputs.ip }} --end-ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
-        az keyvault network-rule add --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+    - name: Whitelist IP on Key Vault
+      uses: ./.github/actions/whitelist-kv
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.az_resource_group_name }}
+        keyvault-name: ${{ inputs.az_keyvault_name }}
+        verb: add
+
+    - name: Whitelist IP on SQL server
+      uses: ./.github/actions/whitelist-sql
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.az_resource_group_name }}
+        server-name: ${{ inputs.az_sql_database_server_name }}
+        rule-name: db-upgrader
+        verb: add
 
     - name: Get connection string
       id: get-db-connection-string
@@ -57,9 +68,21 @@ runs:
       shell: bash
       run: dotnet ./build/Dfe.PlanTech.DatabaseUpgrader.dll -c "${{ steps.get-db-connection-string.outputs.secret_value }}" --env ${{ inputs.environment }} -p Analytics_Username=${{ inputs.sql_analytics_username }} Analytics_Password=${{ inputs.sql_analytics_password }}
 
-    - name: Remove Azure firewall rules
-      shell: bash
+    - name: Remove IP from Key Vault
       if: always()
-      run: |
-        az sql server firewall-rule delete --resource-group ${{ inputs.az_resource_group_name }} --server ${{ inputs.az_sql_database_server_name }} --name db-upgrader &> /dev/null
-        az keyvault network-rule remove --resource-group ${{ inputs.az_resource_group_name }} --name ${{ inputs.az_keyvault_name }} --ip-address ${{ steps.whats-my-ip.outputs.ip }} &> /dev/null
+      uses: ./.github/actions/whitelist-kv
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.az_resource_group_name }}
+        keyvault-name: ${{ inputs.az_keyvault_name }}
+        verb: remove
+
+    - name: Remove IP from SQL server
+      if: always()
+      uses: ./.github/actions/whitelist-sql
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.az_resource_group_name }}
+        server-name: ${{ inputs.az_sql_database_server_name }}
+        rule-name: db-upgrader
+        verb: remove
