@@ -22,8 +22,8 @@ public class ValidateMatSelectedAttributeTests
 
         var result = Assert.IsType<RedirectToRouteResult>(context.Result);
 
-        Assert.Equal("Groups", result.RouteValues["controller"]);
-        Assert.Equal("GetSelectASchoolView", result.RouteValues["action"]);
+        Assert.Equal("Groups", result.RouteValues?["controller"]);
+        Assert.Equal("GetSelectASchoolView", result.RouteValues?["action"]);
     }
 
     [Theory]
@@ -65,8 +65,8 @@ public class ValidateMatSelectedAttributeTests
 
         var redirect = Assert.IsType<RedirectToRouteResult>(context.Result);
 
-        Assert.Equal("Groups", redirect.RouteValues["controller"]);
-        Assert.Equal("GetSelectASchoolView", redirect.RouteValues["action"]);
+        Assert.Equal("Groups", redirect.RouteValues?["controller"]);
+        Assert.Equal("GetSelectASchoolView", redirect.RouteValues?["action"]);
     }
 
     private static ICurrentUser CreateCurrentUser(
