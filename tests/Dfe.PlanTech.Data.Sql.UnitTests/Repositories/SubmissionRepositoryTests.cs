@@ -137,7 +137,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Null_When_None)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [ SubmissionStatus.CompleteReviewed ]);
         Assert.Null(result);
@@ -149,7 +149,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Throws_When_Empty_Status_Enumerable)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         var result = await Assert.ThrowsAsync<ArgumentException>(() => repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [])
         );
@@ -163,7 +163,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Latest_Of_Included_Statuses)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         db.Establishments.Add(
             new EstablishmentEntity
