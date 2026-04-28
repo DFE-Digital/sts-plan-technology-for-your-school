@@ -27,6 +27,12 @@ builder.Services.AddControllersWithViews(options =>
 if (!builder.Environment.IsDevelopment())
 {
     builder.Services.AddReleaseServices(builder.Configuration);
+    builder.Services.AddHsts(options =>
+    {
+        options.MaxAge = TimeSpan.FromDays(365);
+        options.IncludeSubDomains = true;
+        options.Preload = true;
+    });
 }
 
 if (builder.Environment.EnvironmentName != "E2E")
