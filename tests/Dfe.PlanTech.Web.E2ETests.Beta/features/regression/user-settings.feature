@@ -42,6 +42,8 @@ Feature: Recommendation recent activity
       Then the recommendations table should list recommendations in this order:
         | Recommendation Header - C1 - S1 - Q1 |
         | Recommendation Header - C1 - S1 - Q2 |  
+      Then I sort recommendations by "Default" and apply
+
 
 
       
