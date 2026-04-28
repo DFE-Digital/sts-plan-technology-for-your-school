@@ -33,7 +33,7 @@ public class ShareByEmailInputViewModelTests
         var results = Validate(sut);
 
         var error = Assert.Single(results);
-        Assert.Equal("Please enter your name", error.ErrorMessage);
+        Assert.Equal("Enter your name", error.ErrorMessage);
         Assert.Contains(nameof(ShareByEmailInputViewModel.NameOfUser), error.MemberNames);
     }
 

@@ -226,15 +226,15 @@ public class CategoryLandingViewComponentViewBuilderTests
         var vm = await sut.BuildViewModelAsync(
             category,
             "cat",
-            null,
+            section.Name,
             RecommendationConstants.DefaultSortOrder
         );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Section 'Networking' has no recommendations",
-            secVm.Recommendations.NoRecommendationFoundErrorMessage
+            $"Section '{section.Name}' has no recommendations",
+            secVm.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
@@ -271,15 +271,15 @@ public class CategoryLandingViewComponentViewBuilderTests
         var vm = await sut.BuildViewModelAsync(
             category,
             "cat",
-            null,
+            section.Name,
             RecommendationConstants.DefaultSortOrder
         );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Section 'Security' has no recommendations",
-            secVm.Recommendations.NoRecommendationFoundErrorMessage
+            $"Section '{section.Name}' has no recommendations",
+            secVm.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
@@ -317,15 +317,15 @@ public class CategoryLandingViewComponentViewBuilderTests
         var vm = await sut.BuildViewModelAsync(
             category,
             "cat",
-            null,
+            section.Name,
             RecommendationConstants.DefaultSortOrder
         );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Section 'Devices' has no recommendations",
-            secVm.Recommendations.NoRecommendationFoundErrorMessage
+            $"Section '{section.Name}' has no recommendations",
+            secVm.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
@@ -411,6 +411,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         var recs = secVm.Recommendations;
+        Assert.NotNull(recs);
         Assert.Null(recs.NoRecommendationFoundErrorMessage);
         Assert.Equal("Broadband", recs.SectionName);
         Assert.Equal("broadband-connection", recs.SectionSlug);
@@ -451,15 +452,15 @@ public class CategoryLandingViewComponentViewBuilderTests
         var vm = await sut.BuildViewModelAsync(
             category,
             "cat",
-            null,
+            section.Name,
             RecommendationConstants.DefaultSortOrder
         );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Section 'Devices' has no recommendations",
-            secVm.Recommendations.NoRecommendationFoundErrorMessage
+            $"Section '{section.Name}' has no recommendations",
+            secVm.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
@@ -582,6 +583,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.NotNull(secVm.Recommendations);
         var chunks = secVm.Recommendations.Chunks;
         Assert.NotEmpty(chunks);
         Assert.Equal(RecommendationStatus.NotStarted, chunks[0].Status);
@@ -708,6 +710,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.NotNull(secVm.Recommendations);
         var chunks = secVm.Recommendations.Chunks;
         Assert.NotEmpty(chunks);
         Assert.True(

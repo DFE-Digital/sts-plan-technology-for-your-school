@@ -25,6 +25,11 @@ public interface ISubmissionService
         QuestionnaireSectionEntry section,
         SubmissionStatus? status
     );
+    Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        IEnumerable<SubmissionStatus> statuses
+    );
     Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(
         int establishmentId,
         IEnumerable<string> sectionIds

@@ -8,7 +8,6 @@
         ["position"] = Model.CurrentChunkPosition.ToString(),
         ["totalRecsForTopic"] = Model.TotalChunks.ToString(),
         ["topic"] = Model.Section.Name.ToLower(),
-        ["recStatus"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
         ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty,
         ["answer"] = Model.FirstActivity?.AnswerText ?? string.Empty,
     };
@@ -72,10 +71,7 @@
            asp-route-categorySlug="@Model.CategorySlug"
            asp-route-sectionSlug="@Model.SectionSlug"
            asp-route-chunkSlug="@Model.CurrentChunk.Slug">
-            @await Microcopy.GetTextByKeyAsync(
-                ContentfulMicrocopyConstants.SingleRecommendationPrintAllLink,
-                dynamicValues
-            )
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPrintAllLink, dynamicValues)
         </a>
     </p>
 }
@@ -101,11 +97,11 @@
               asp-route-sectionSlug="@sectionSlug"
               asp-route-chunkSlug="@recommendation.Slug">
 
-            <div class="recommendation-piece-content">
-                <span class="govuk-caption-xl">
-                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPosition, dynamicValues)
-                </span>
-                <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
+                <div class="recommendation-piece-content">
+                    <span class="govuk-caption-xl">
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPosition, dynamicValues)
+                    </span>
+                    <h1 class="govuk-heading-xl">@recommendation.HeaderText</h1>
 
                 <div class="dfe-table-scroll" tabindex="0">
                     <table class="govuk-table">
@@ -143,13 +139,13 @@
 
             <hr class="govuk-section-break govuk-section-break--l" />
 
-            <govuk-radios name="SelectedStatus">
-                <govuk-radios-fieldset>
-                    <govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
-                        <h2 class="govuk-fieldset__heading">
-                            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusQuestion)
-                        </h2>
-                    </govuk-radios-fieldset-legend>
+                <govuk-radios name="SelectedStatus">
+                    <govuk-radios-fieldset>
+                        <govuk-radios-fieldset-legend class="govuk-fieldset__legend--l">
+                            <h2 class="govuk-fieldset__heading">
+                                @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusQuestion)
+                            </h2>
+                        </govuk-radios-fieldset-legend>
 
                     <govuk-radios-hint>
                         Select the current status of this recommendation.
@@ -171,24 +167,24 @@
                 </govuk-radios-fieldset>
             </govuk-radios>
 
-            <govuk-textarea name="Notes" rows="5">
-                <govuk-textarea-label class="govuk-label--s">
-                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentLabel)
-                </govuk-textarea-label>
+                <govuk-textarea name="Notes" rows="5">
+                    <govuk-textarea-label class="govuk-label--s">
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentLabel)
+                    </govuk-textarea-label>
 
-                <govuk-textarea-hint>
-                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentHint)
-                </govuk-textarea-hint>
-            </govuk-textarea>
+                    <govuk-textarea-hint>
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationCommentHint)
+                    </govuk-textarea-hint>
+                </govuk-textarea>
 
-            <govuk-button type="submit" prevent-double-click="true">
-                @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusButton)
-            </govuk-button>
-        </form>
+                <govuk-button type="submit" prevent-double-click="true">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationStatusButton)
+                </govuk-button>
+            </form>
 
         <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible" />
 
-        <h2 class="govuk-heading--l">@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryHeader)</h2>
+            <h2 class="govuk-heading--l">@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryHeader)</h2>
 
         <govuk-accordion id="accordion-default">
             @foreach (var (month, historyGroup) in Model.History)
@@ -203,37 +199,41 @@
                         {
                             <h3 class="govuk-heading-s">@history.DateCreated.ToString("dd MMMM yyyy")</h3>
 
-                            @if (Model.FirstActivity is not null && history.DateCreated.Equals(Model.FirstActivity.StatusChangeDate))
-                            {
-                                <p>
-                                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, dynamicValues)
-                                </p>
+                                @if (Model.FirstActivity is not null && history.DateCreated.Equals(Model.FirstActivity.StatusChangeDate))
+                                {
+                                    <p>
+                                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, new Dictionary<string, string>
+                                            {
+                                                ["recStatus"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
+                                                ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty
+                                            })
+                                    </p>
 
                                 <p><strong>@Model.FirstActivity.QuestionText</strong></p>
 
-                                var answerText = await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryAnswer, dynamicValues);
-                                if (!String.IsNullOrEmpty(answerText))
-                                {
-                                    <p>@answerText</p>
+                                    var answerText = await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryAnswer, dynamicValues);
+                                    if (!String.IsNullOrEmpty(answerText))
+                                    {
+                                        <p>@answerText</p>
+                                    }
+                                    else
+                                    {
+                                        <p>Your answer: @Model.FirstActivity.AnswerText</p>
+                                    }
                                 }
                                 else
                                 {
-                                    <p>Your answer: @Model.FirstActivity.AnswerText</p>
-                                }
-                            }
-                            else
-                            {
-                                @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
-                                {
-                                    <p>@ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, dynamicValues)</p>
-                                }
+                                    @if (!string.IsNullOrWhiteSpace(history.NoteText))
+                                    {
+                                        <p>@history.NoteText</p>
+                                    }
 
-                                @if (!string.IsNullOrWhiteSpace(history.NoteText))
-                                {
-                                    <p>@history.NoteText</p>
+                                    @if (history.NewStatus != null && !string.Equals(history.PreviousStatus, history.NewStatus))
+                                    {
+                                        <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryChange, new Dictionary<string, string>{ ["recStatus"] = history.NewStatus.Value.GetDisplayName() ?? string.Empty })</p>
+                                    }
                                 }
                             }
-                        }
                     </govuk-accordion-item-content>
                 </govuk-accordion-item>
             }
