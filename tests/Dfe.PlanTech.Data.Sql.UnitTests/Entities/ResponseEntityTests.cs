@@ -14,6 +14,7 @@ public class ResponseEntityTests
         var expectedSubmissionId = 101;
         var expectedQuestionId = 111;
         var expectedAnswerId = 121;
+        var expectedUserActionId = Guid.NewGuid();
         var expectedMaturity = "Arbitrary string - maturity";
         var expectedDateCreated = new DateTime(2024, 09, 01, 15, 00, 00, DateTimeKind.Utc);
         DateTime? expectedDateLastUpdated = new DateTime(
@@ -52,6 +53,7 @@ public class ResponseEntityTests
             SectionName = "Arbitrary string - section name",
             DateCreated = new DateTime(2024, 02, 01, 00, 00, 00, DateTimeKind.Utc),
             Responses = new List<ResponseEntity>(),
+            UserActionId = expectedUserActionId,
         };
 
         var question = new QuestionEntity
@@ -59,6 +61,7 @@ public class ResponseEntityTests
             Id = expectedQuestionId,
             QuestionText = "Arbitrary string - question text",
             ContentfulRef = "Arbitrary string - question contentful ref",
+            UserActionId = expectedUserActionId,
         };
 
         var answer = new AnswerEntity
@@ -67,6 +70,7 @@ public class ResponseEntityTests
             AnswerText = "Arbitrary string - answer text",
             ContentfulRef = "Arbitrary string - answer contentful ref",
             DateCreated = new DateTime(2024, 03, 01, 00, 00, 00, DateTimeKind.Utc),
+            UserActionId = expectedUserActionId,
         };
 
         var entity = new ResponseEntity
@@ -79,6 +83,7 @@ public class ResponseEntityTests
             QuestionId = expectedQuestionId,
             Question = question,
             AnswerId = expectedAnswerId,
+            UserActionId= expectedUserActionId,
             Answer = answer,
             Maturity = expectedMaturity,
             DateCreated = expectedDateCreated,
@@ -103,6 +108,7 @@ public class ResponseEntityTests
         Assert.Equal(expectedMaturity, dto.Maturity);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedDateLastUpdated, dto.DateLastUpdated);
+        Assert.Equal(expectedUserActionId, dto.UserActionId);
 
         // Assert - ensure all DTO properties are accounted for
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlResponseDto>(
@@ -122,6 +128,7 @@ public class ResponseEntityTests
                 nameof(SqlResponseDto.Maturity),
                 nameof(SqlResponseDto.DateCreated),
                 nameof(SqlResponseDto.DateLastUpdated),
+                nameof(SqlResponseDto.UserActionId),
             }
         );
     }

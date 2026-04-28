@@ -50,6 +50,7 @@ public class SubmissionEntity : IUserActionEntity
             Responses = Responses.Select(r => r.AsDto()).ToList(),
             Deleted = Deleted,
             Status = Status,
+            UserActionId = UserActionId
         };
     }
 }

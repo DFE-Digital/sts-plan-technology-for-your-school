@@ -13,6 +13,7 @@ public class GroupReadActivityEntityTests
         var expectedUserId = 2;
         var expectedUserEstablishmentId = 3;
         var expectedSelectedEstablishmentId = 4;
+        var expectedUserActionId = Guid.NewGuid();
         var expectedSelectedEstablishmentName = "Arbitrary string - selected establishment name";
         var expectedDateSelected = new DateTime(2024, 06, 01, 08, 30, 00, DateTimeKind.Utc);
 
@@ -22,6 +23,7 @@ public class GroupReadActivityEntityTests
             UserId = expectedUserId,
             UserEstablishmentId = expectedUserEstablishmentId,
             SelectedEstablishmentId = expectedSelectedEstablishmentId,
+            UserActionId = expectedUserActionId,
             SelectedEstablishmentName = expectedSelectedEstablishmentName,
             DateSelected = expectedDateSelected,
         };
@@ -34,6 +36,7 @@ public class GroupReadActivityEntityTests
         Assert.Equal(expectedUserId, dto.UserId);
         Assert.Equal(expectedUserEstablishmentId, dto.UserEstablishmentId);
         Assert.Equal(expectedSelectedEstablishmentId, dto.SelectedEstablishmentId);
+        Assert.Equal(expectedUserActionId, dto.UserActionId);
         Assert.Equal(expectedSelectedEstablishmentName, dto.SelectedEstablishmentName);
         Assert.Equal(expectedDateSelected, dto.DateSelected);
         Assert.Equal(expectedDateSelected, dto.DateSelected);
@@ -46,6 +49,7 @@ public class GroupReadActivityEntityTests
                 nameof(SqlGroupReadActivityDto.UserId),
                 nameof(SqlGroupReadActivityDto.UserEstablishmentId),
                 nameof(SqlGroupReadActivityDto.SelectedEstablishmentId),
+                nameof(SqlGroupReadActivityDto.UserActionId),
                 nameof(SqlGroupReadActivityDto.SelectedEstablishmentName),
                 nameof(SqlGroupReadActivityDto.DateSelected),
             }

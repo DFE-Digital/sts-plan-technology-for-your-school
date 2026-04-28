@@ -28,6 +28,7 @@ public class QuestionEntity : IUserActionEntity
             ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated,
             Order = Order,
+            UserActionId = UserActionId
         };
     }
 }
