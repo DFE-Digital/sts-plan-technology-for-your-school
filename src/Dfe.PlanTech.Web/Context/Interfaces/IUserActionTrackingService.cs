@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Application.Services.Interfaces;
+namespace Dfe.PlanTech.Web.Services.Interfaces;
 
 public interface IUserActionTrackingService
 {

@@ -7,6 +7,7 @@ using Dfe.PlanTech.Infrastructure.SignIn.Models;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Dfe.PlanTech.Web.Binders;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Dfe.PlanTech.Web.Authorisation.Policies;

@@ -1,8 +1,7 @@
 CREATE TABLE dbo.userAction
 (
     Id UNIQUEIDENTIFIER NOT NULL
-        CONSTRAINT PK_userAction PRIMARY KEY
-        CONSTRAINT DF_userAction_Id DEFAULT NEWID(),
+        CONSTRAINT PK_userAction PRIMARY KEY,
 
     UserId INT NOT NULL,
     EstablishmentId INT NULL,
