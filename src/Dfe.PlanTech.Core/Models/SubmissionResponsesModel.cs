@@ -16,8 +16,6 @@ public class SubmissionResponsesModel
 
     public SqlEstablishmentDto? Establishment { get; init; }
 
-    public string? Maturity { get; set; }
-
     public List<QuestionWithAnswerModel> Responses { get; set; }
 
     public bool HasResponses => Responses is not null && Responses.Count != 0;
@@ -36,7 +34,6 @@ public class SubmissionResponsesModel
         DateCompleted = submission.DateCompleted;
         DateCreated = submission.DateCreated;
         DateLastUpdated = submission.DateLastUpdated;
-        Maturity = submission.Maturity;
         Establishment = submission.Establishment;
         Responses = submission
             .Responses.Select(response => new QuestionWithAnswerModel(response, section))
