@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
 [Table("submission")]
-public class SubmissionEntity
+public class SubmissionEntity : IUserActionEntity
 {
     public int Id { get; set; }
 
@@ -29,6 +30,8 @@ public class SubmissionEntity
 
     public SubmissionStatus Status { get; set; }
 
+    public Guid? UserActionId { get; set; }
+
     public SqlSubmissionDto AsDto()
     {
         return new SqlSubmissionDto
@@ -44,6 +47,7 @@ public class SubmissionEntity
             Responses = Responses.Select(r => r.AsDto()).ToList(),
             Deleted = Deleted,
             Status = Status,
+            UserActionId = UserActionId
         };
     }
 }

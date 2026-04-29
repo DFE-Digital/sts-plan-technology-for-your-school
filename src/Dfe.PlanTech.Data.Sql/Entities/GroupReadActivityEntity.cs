@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
 [Table("groupReadActivity")]
-public class GroupReadActivityEntity
+public class GroupReadActivityEntity : IUserActionEntity
 {
     public int Id { get; set; }
 
@@ -18,6 +19,8 @@ public class GroupReadActivityEntity
 
     public DateTime DateSelected { get; set; }
 
+    public Guid? UserActionId { get; set; }
+
     public SqlGroupReadActivityDto AsDto()
     {
         return new SqlGroupReadActivityDto
@@ -28,6 +31,7 @@ public class GroupReadActivityEntity
             SelectedEstablishmentId = SelectedEstablishmentId,
             SelectedEstablishmentName = SelectedEstablishmentName,
             DateSelected = DateSelected,
+            UserActionId = UserActionId
         };
     }
 }

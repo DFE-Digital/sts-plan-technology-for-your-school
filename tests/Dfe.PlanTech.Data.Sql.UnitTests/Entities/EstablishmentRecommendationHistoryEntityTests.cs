@@ -15,6 +15,7 @@ public class EstablishmentRecommendationHistoryEntityTests
         var expectedUserId = 3;
         var expectedMatEstablishmentId = 4;
         var expectedResponseId = 5;
+        var expectedUserActionId = Guid.NewGuid();
         var expectedDateCreated = new DateTime(2024, 05, 01, 12, 00, 00, DateTimeKind.Utc);
         var expectedPreviousStatus = RecommendationStatus.InProgress;
         var expectedNewStatus = RecommendationStatus.Complete;
@@ -28,6 +29,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             UserId = expectedUserId,
             MatEstablishmentId = expectedMatEstablishmentId,
             ResponseId = expectedResponseId,
+            UserActionId = expectedUserActionId,
             DateCreated = expectedDateCreated,
             PreviousStatus = expectedPreviousStatus.ToString(),
             NewStatus = expectedNewStatus.ToString(),
@@ -43,6 +45,7 @@ public class EstablishmentRecommendationHistoryEntityTests
         Assert.Equal(expectedUserId, dto.UserId);
         Assert.Equal(expectedMatEstablishmentId, dto.MatEstablishmentId);
         Assert.Equal(expectedResponseId, dto.ResponseId);
+        Assert.Equal(expectedUserActionId, dto.UserActionId);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedPreviousStatus, dto.PreviousStatus);
         Assert.Equal(expectedNewStatus, dto.NewStatus);
@@ -57,6 +60,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             nameof(SqlEstablishmentRecommendationHistoryDto.UserId),
             nameof(SqlEstablishmentRecommendationHistoryDto.MatEstablishmentId),
             nameof(SqlEstablishmentRecommendationHistoryDto.ResponseId),
+             nameof(SqlEstablishmentRecommendationHistoryDto.UserActionId),
             nameof(SqlEstablishmentRecommendationHistoryDto.DateCreated),
             nameof(SqlEstablishmentRecommendationHistoryDto.PreviousStatus),
             nameof(SqlEstablishmentRecommendationHistoryDto.NewStatus),

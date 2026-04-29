@@ -15,4 +15,5 @@ public class SqlResponseDto : ISqlDto
     public SqlAnswerDto Answer { get; set; } = null!;
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
     public DateTime? DateLastUpdated { get; set; }
+    public Guid? UserActionId { get; set; }
 }

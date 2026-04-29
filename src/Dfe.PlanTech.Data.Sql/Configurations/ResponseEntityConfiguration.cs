@@ -18,5 +18,8 @@ internal class ResponseEntityConfiguration : IEntityTypeConfiguration<ResponseEn
             .Property(submission => submission.DateLastUpdated)
             .HasColumnType("datetime")
             .HasDefaultValue();
+        builder.Property(b => b.UserActionId)
+               .HasColumnName("userActionId")
+               .IsRequired(false);
     }
 }

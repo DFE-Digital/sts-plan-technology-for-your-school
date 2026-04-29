@@ -1,11 +1,12 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
 [Table("establishmentRecommendationHistory")]
-public class EstablishmentRecommendationHistoryEntity
+public class EstablishmentRecommendationHistoryEntity : IUserActionEntity
 {
     public int Id { get; init; } // New identity primary key
 
@@ -32,6 +33,8 @@ public class EstablishmentRecommendationHistoryEntity
 
     public string? NoteText { get; set; }
 
+    public Guid? UserActionId { get; set; }
+
     public SqlEstablishmentRecommendationHistoryDto AsDto()
     {
         return new SqlEstablishmentRecommendationHistoryDto
@@ -47,6 +50,7 @@ public class EstablishmentRecommendationHistoryEntity
                 : PreviousStatus.GetRecommendationStatusEnumValue()!,
             NewStatus = NewStatus.GetRecommendationStatusEnumValue()!,
             NoteText = NoteText,
+            UserActionId = UserActionId,
         };
     }
 }

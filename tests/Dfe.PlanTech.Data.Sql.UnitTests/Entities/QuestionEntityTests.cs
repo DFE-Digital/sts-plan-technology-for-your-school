@@ -12,12 +12,14 @@ public class QuestionEntityTests
         var expectedId = 5;
         var expectedQuestionText = "Arbitrary string - question text";
         var expectedContentfulRef = "Arbitrary string - contentful ref";
+        var expectedUserActionId = Guid.NewGuid();
 
         var entity = new QuestionEntity
         {
             Id = expectedId,
             QuestionText = expectedQuestionText,
             ContentfulRef = expectedContentfulRef,
+            UserActionId = expectedUserActionId
         };
 
         // Act
@@ -27,6 +29,7 @@ public class QuestionEntityTests
         Assert.Equal(expectedId, dto.Id);
         Assert.Equal(expectedQuestionText, dto.QuestionText);
         Assert.Equal(expectedContentfulRef, dto.ContentfulSysId);
+        Assert.Equal(expectedUserActionId, dto.UserActionId);
 
         // Assert - ensure all DTO properties are accounted for
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlQuestionDto>(
@@ -37,6 +40,7 @@ public class QuestionEntityTests
                 nameof(SqlQuestionDto.ContentfulSysId),
                 nameof(SqlQuestionDto.DateCreated),
                 nameof(SqlQuestionDto.Order),
+                nameof(SqlQuestionDto.UserActionId),
             }
         );
     }

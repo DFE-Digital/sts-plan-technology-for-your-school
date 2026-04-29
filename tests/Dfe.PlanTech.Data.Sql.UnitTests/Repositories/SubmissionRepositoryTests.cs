@@ -1,8 +1,10 @@
 using Contentful.Core.Models.Management;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 
 namespace Dfe.PlanTech.Data.Sql.UnitTests.Repositories;
 
@@ -16,6 +18,13 @@ public class SubmissionRepositoryTests
             .Options;
         var ctx = new PlanTechDbContext(options);
         return ctx;
+    }
+
+    private static IUserActionIdAccessor BuildUserActionIdAccessor()
+    {
+        var accessor = Substitute.For<IUserActionIdAccessor>();
+        accessor.GetUserActionId().Returns(Guid.NewGuid());
+        return accessor;
     }
 
     private static QuestionEntity BuildQuestion(int id)
@@ -44,7 +53,7 @@ public class SubmissionRepositoryTests
     public async Task CloneSubmission_Throws_When_Null()
     {
         using var db = BuildPlanTechDbContext(nameof(CloneSubmission_Throws_When_Null));
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         await Assert.ThrowsAsync<ArgumentNullException>(() => repo.CloneSubmission(null));
     }
@@ -55,7 +64,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(CloneSubmission_Copies_Fields_Resets_State_And_Persists)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         var q = BuildQuestion(1);
         var a = BuildAnswer(2);
@@ -112,7 +121,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(GetLatestSubmissionAndResponses_Returns_Null_When_None)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", (SubmissionStatus?)null);
         Assert.Null(result);
@@ -124,7 +133,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Null_When_None)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [ SubmissionStatus.CompleteReviewed ]);
         Assert.Null(result);
@@ -136,7 +145,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Throws_When_Empty_Status_Enumerable)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         var result = await Assert.ThrowsAsync<ArgumentException>(() => repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [])
         );
@@ -150,7 +159,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Latest_Of_Included_Statuses)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         db.Establishments.Add(
             new EstablishmentEntity
@@ -209,7 +218,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(SetSubmissionReviewed_Throws_When_Submission_Not_Found)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             repo.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(999)
@@ -222,7 +231,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(SetSubmissionInaccessible_ById_Throws_When_NotFound)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             repo.SetSubmissionInaccessibleAsync(12345)
@@ -235,7 +244,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(SetSubmissionInaccessible_ByScope_Throws_When_NotFound)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             repo.SetSubmissionInaccessibleAsync(establishmentId: 99, sectionId: "NA")
@@ -248,7 +257,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(SetSubmissionInProgress_ById_Throws_When_NotFound)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             repo.SetSubmissionInProgressAsync(12345)
@@ -261,7 +270,7 @@ public class SubmissionRepositoryTests
         using var db = BuildPlanTechDbContext(
             nameof(SetSubmissionInProgress_ByScope_Throws_When_NotFound)
         );
-        var repo = new SubmissionRepository(db);
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             repo.SetSubmissionInProgressAsync(establishmentId: 99, sectionId: "NA")

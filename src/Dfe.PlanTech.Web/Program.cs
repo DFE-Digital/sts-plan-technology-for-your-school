@@ -1,9 +1,14 @@
 using Dfe.PlanTech.Application;
+using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Extensions;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 
@@ -64,6 +69,10 @@ builder
 
 builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicationWorkflows();
 
+builder.Services.AddScoped<IUserActionIdAccessor, UserActionIdAccessor>();
+
+builder.Services.AddScoped<IUserActionTrackingService, UserActionTrackingService>();
+
 var app = builder.Build();
 
 app.UseRobotsTxtMiddleware();
@@ -97,6 +106,8 @@ app.UseExceptionHandler(exceptionHandlerApp =>
 app.UseStaticFiles();
 
 app.UseRouting();
+
+app.UseCorrelationId();
 
 app.UseAuthentication();
 app.UseAuthorization();
