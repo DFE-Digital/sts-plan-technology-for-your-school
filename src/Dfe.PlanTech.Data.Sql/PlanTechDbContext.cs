@@ -61,13 +61,25 @@ public class PlanTechDbContext : DbContext
     {
         if (_userActionIdAccessor is not null)
         {
-            var userActionId = _userActionIdAccessor.GetUserActionId();
+            Guid? userActionId = null;
 
-            foreach (var entry in ChangeTracker.Entries<IUserActionEntity>())
+            try
             {
-                if (entry.State is EntityState.Added or EntityState.Modified)
+                userActionId = _userActionIdAccessor.GetUserActionId();
+            }
+            catch (InvalidOperationException)
+            {
+                userActionId = null;
+            }
+
+            if (userActionId is not null)
+            {
+                foreach (var entry in ChangeTracker.Entries<IUserActionEntity>())
                 {
-                    entry.Entity.UserActionId = userActionId;
+                    if (entry.State is EntityState.Added or EntityState.Modified)
+                    {
+                        entry.Entity.UserActionId = userActionId;
+                    }
                 }
             }
         }
