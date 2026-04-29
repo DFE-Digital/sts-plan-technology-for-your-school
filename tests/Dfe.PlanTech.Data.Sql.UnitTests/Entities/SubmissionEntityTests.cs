@@ -14,7 +14,6 @@ public class SubmissionEntityTests
         var expectedEstablishmentId = 71;
         var expectedSectionId = "Arbitrary string - section id";
         var expectedSectionName = "Arbitrary string - section name";
-        var expectedMaturity = "Arbitrary string - maturity";
         var expectedDateCreated = new DateTime(2024, 08, 01, 10, 00, 00, DateTimeKind.Utc);
         DateTime? expectedDateLastUpdated = new DateTime(
             2024,
@@ -45,7 +44,6 @@ public class SubmissionEntityTests
             Establishment = establishment,
             SectionId = expectedSectionId,
             SectionName = expectedSectionName,
-            Maturity = expectedMaturity,
             DateCreated = expectedDateCreated,
             DateLastUpdated = expectedDateLastUpdated,
             DateCompleted = expectedDateCompleted,
@@ -67,7 +65,6 @@ public class SubmissionEntityTests
         Assert.Equal(expectedEstablishmentId, dto.Establishment.Id);
         Assert.Equal(expectedSectionId, dto.SectionId);
         Assert.Equal(expectedSectionName, dto.SectionName);
-        Assert.Equal(expectedMaturity, dto.Maturity);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedDateLastUpdated, dto.DateLastUpdated);
         Assert.Equal(expectedDateCompleted, dto.DateCompleted);
@@ -84,7 +81,6 @@ public class SubmissionEntityTests
                 nameof(SqlSubmissionDto.Establishment),
                 nameof(SqlSubmissionDto.SectionId),
                 nameof(SqlSubmissionDto.SectionName),
-                nameof(SqlSubmissionDto.Maturity),
                 nameof(SqlSubmissionDto.DateCreated),
                 nameof(SqlSubmissionDto.DateLastUpdated),
                 nameof(SqlSubmissionDto.DateCompleted),

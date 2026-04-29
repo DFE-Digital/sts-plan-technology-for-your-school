@@ -14,7 +14,6 @@ public class ResponseEntityTests
         var expectedSubmissionId = 101;
         var expectedQuestionId = 111;
         var expectedAnswerId = 121;
-        var expectedMaturity = "Arbitrary string - maturity";
         var expectedDateCreated = new DateTime(2024, 09, 01, 15, 00, 00, DateTimeKind.Utc);
         DateTime? expectedDateLastUpdated = new DateTime(
             2024,
@@ -80,7 +79,6 @@ public class ResponseEntityTests
             Question = question,
             AnswerId = expectedAnswerId,
             Answer = answer,
-            Maturity = expectedMaturity,
             DateCreated = expectedDateCreated,
             DateLastUpdated = expectedDateLastUpdated,
         };
@@ -100,7 +98,6 @@ public class ResponseEntityTests
         Assert.Equal(expectedAnswerId, dto.AnswerId);
         Assert.NotNull(dto.Answer);
         Assert.Equal(expectedAnswerId, dto.Answer!.Id);
-        Assert.Equal(expectedMaturity, dto.Maturity);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedDateLastUpdated, dto.DateLastUpdated);
 
@@ -119,7 +116,6 @@ public class ResponseEntityTests
                 nameof(SqlResponseDto.Question),
                 nameof(SqlResponseDto.AnswerId),
                 nameof(SqlResponseDto.Answer),
-                nameof(SqlResponseDto.Maturity),
                 nameof(SqlResponseDto.DateCreated),
                 nameof(SqlResponseDto.DateLastUpdated),
             }
@@ -168,7 +164,6 @@ public class ResponseEntityTests
                 AnswerText = "Arbitrary string - answer text",
                 ContentfulRef = "Arbitrary string - answer contentful ref",
             },
-            Maturity = "Arbitrary string - maturity",
             // DateCreated not set explicitly
         };
 

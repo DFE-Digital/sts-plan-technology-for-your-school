@@ -100,7 +100,7 @@ jobs:
           echo "MUTATIONS_THRESHOLD=$(echo $MUTATIONS_THRESHOLD)" >> $GITHUB_ENV
 
       - name: Create issue
-        if: ${{ env.MUTATIONS_PASSED }}
+        if: ${{ env.MUTATIONS_PASSED == '0' }}
         run: |
           export INPUT_PATH=$(find artifacts -type f -name "mutation-report.md")
           export OUTPUT_PATH=filtered_report_table.md
