@@ -15,7 +15,6 @@ public class ResponseEntityTests
         var expectedQuestionId = 111;
         var expectedAnswerId = 121;
         var expectedUserActionId = Guid.NewGuid();
-        var expectedMaturity = "Arbitrary string - maturity";
         var expectedDateCreated = new DateTime(2024, 09, 01, 15, 00, 00, DateTimeKind.Utc);
         DateTime? expectedDateLastUpdated = new DateTime(
             2024,

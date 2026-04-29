@@ -14,7 +14,6 @@ public class SubmissionEntityTests
         var expectedEstablishmentId = 71;
         var expectedSectionId = "Arbitrary string - section id";
         var expectedSectionName = "Arbitrary string - section name";
-        var expectedMaturity = "Arbitrary string - maturity";
         var expectedUserActionId = Guid.NewGuid();
         var expectedDateCreated = new DateTime(2024, 08, 01, 10, 00, 00, DateTimeKind.Utc);
         DateTime? expectedDateLastUpdated = new DateTime(

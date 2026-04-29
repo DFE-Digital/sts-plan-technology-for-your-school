@@ -74,12 +74,11 @@ public class PlanTechDbContext : DbContext
 
             if (userActionId is not null)
             {
-                foreach (var entry in ChangeTracker.Entries<IUserActionEntity>())
+                foreach (var entry in ChangeTracker
+                    .Entries<IUserActionEntity>()
+                    .Where(e => e.State is EntityState.Added or EntityState.Modified))
                 {
-                    if (entry.State is EntityState.Added or EntityState.Modified)
-                    {
-                        entry.Entity.UserActionId = userActionId;
-                    }
+                    entry.Entity.UserActionId = userActionId;
                 }
             }
         }
