@@ -224,6 +224,8 @@ public class PagesViewBuilder(
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"],
+            HasBanner = category.HasBanner,
+            AfterContentContent = category.AfterContentContent,
             RelatedActions = BuildRelatedActionsViewModels(relatedActions),
         };
     }
