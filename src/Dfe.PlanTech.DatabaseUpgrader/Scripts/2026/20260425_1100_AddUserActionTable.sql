@@ -1,15 +1,15 @@
 CREATE TABLE dbo.userAction
 (
-    Id UNIQUEIDENTIFIER NOT NULL
+    id UNIQUEIDENTIFIER NOT NULL
         CONSTRAINT PK_userAction PRIMARY KEY,
 
-    UserId INT NOT NULL,
-    EstablishmentId INT NULL,
-    MatEstablishmentId INT NULL,
+    userId INT NOT NULL,
+    establishmentId INT NULL,
+    matEstablishmentId INT NULL,
 
-    RequestedUrl NVARCHAR(2048) NOT NULL,
+    requestedUrl NVARCHAR(2048) NOT NULL,
 
-    DateCreated DATETIME2(7) NOT NULL
-        CONSTRAINT DF_userAction_DateCreated DEFAULT SYSUTCDATETIME()
+    dateCreated DATETIME2(7) NOT NULL
+        CONSTRAINT DF_userAction_dateCreated DEFAULT SYSUTCDATETIME()
 );
 GO
