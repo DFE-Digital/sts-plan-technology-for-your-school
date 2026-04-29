@@ -1,22 +1,20 @@
-using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Web.Context.Interfaces;
-using Dfe.PlanTech.Web.Services.Interfaces;
-using Microsoft.AspNetCore.Http;
 
 namespace Dfe.PlanTech.Web.Context;
 
 public class UserActionTrackingService(
     IUserActionRepository userActionRepository,
     IHttpContextAccessor httpContextAccessor,
-    ICurrentUser currentUser) : IUserActionTrackingService
+    ICurrentUser currentUser
+) : IUserActionTrackingService
 {
     public async Task RecordAsync()
     {
-        var httpContext = httpContextAccessor.HttpContext
+        var httpContext =
+            httpContextAccessor.HttpContext
             ?? throw new InvalidOperationException("No active HttpContext found.");
 
         if (httpContext.Items.ContainsKey(UserActionIdConstants.HttpContextItemKey))
