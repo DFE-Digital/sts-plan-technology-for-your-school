@@ -100,7 +100,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SubmissionId = submissionId,
             QuestionId = questionId,
             AnswerId = answerId,
-            Maturity = "",
         };
     }
 
@@ -176,7 +175,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(submission.SectionId, clonedSubmission.SectionId);
         Assert.Equal(submission.SectionName, clonedSubmission.SectionName);
         Assert.Equal(submission.EstablishmentId, clonedSubmission.EstablishmentId);
-        Assert.Equal(submission.Maturity, clonedSubmission.Maturity);
 
         // Should have different timestamps and status
         Assert.Equal(SubmissionStatus.InProgress, clonedSubmission.Status);
@@ -562,7 +560,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
                     AnswerId = answer.Id,
                     UserId = user.Id,
                     UserEstablishmentId = establishment.Id,
-                    Maturity = "Low",
                     DateCreated = DateTime.UtcNow.AddHours(-2),
                 },
                 // Newer response for Q1 (should be selected)
@@ -572,7 +569,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
                     AnswerId = answer.Id,
                     UserId = user.Id,
                     UserEstablishmentId = establishment.Id,
-                    Maturity = "Medium",
                     DateCreated = DateTime.UtcNow.AddHours(-1),
                 },
                 // Response for Q2
@@ -582,7 +578,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
                     AnswerId = answer.Id,
                     UserId = user.Id,
                     UserEstablishmentId = establishment.Id,
-                    Maturity = "High",
                     DateCreated = DateTime.UtcNow.AddHours(-1),
                 },
             },
@@ -641,7 +636,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
                     AnswerId = answer.Id,
                     UserId = user.Id,
                     UserEstablishmentId = establishment.Id,
-                    Maturity = "Medium",
                 },
             },
         };
@@ -832,7 +826,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
                     AnswerId = answer.Id,
                     UserId = user.Id,
                     UserEstablishmentId = establishment.Id,
-                    Maturity = "Medium",
                 },
             },
         };
@@ -861,14 +854,12 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         Assert.Equal(SubmissionStatus.NotStarted, s1.Status);
         Assert.Equal(SubmissionStatus.NotStarted, s2.Status);
-        Assert.Null(s1.LastMaturity);
-        Assert.Null(s2.LastMaturity);
         Assert.Null(s1.LastCompletionDate);
         Assert.Null(s2.LastCompletionDate);
     }
 
     [Fact]
-    public async Task SubmissionRepository_GetSectionStatusesAsync_WhenMultipleSubmissionsExist_ThenUsesLatestCurrentAndLatestCompleteReviewedForMaturity()
+    public async Task SubmissionRepository_GetSectionStatusesAsync_WhenMultipleSubmissionsExist()
     {
         var establishment = CreateEstablishment(1001);
         DbContext.Establishments.Add(establishment);
@@ -880,7 +871,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
-            Maturity = "developing",
             DateCreated = DateTime.UtcNow.AddDays(-10),
             DateLastUpdated = DateTime.UtcNow.AddDays(-9),
             DateCompleted = DateTime.UtcNow.AddDays(-8),
@@ -893,7 +883,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.InProgress,
-            Maturity = "ignored",
             DateCreated = DateTime.UtcNow.AddDays(-2),
             DateLastUpdated = DateTime.UtcNow.AddDays(-1),
             DateCompleted = null,
@@ -906,7 +895,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
-            Maturity = "secure",
             DateCreated = DateTime.UtcNow.AddDays(-3),
             DateLastUpdated = DateTime.UtcNow.AddDays(-3),
             DateCompleted = DateTime.UtcNow.AddDays(-3),
@@ -919,7 +907,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Section 2",
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
-            Maturity = "low",
             DateCreated = DateTime.UtcNow.AddDays(-4),
             DateLastUpdated = DateTime.UtcNow.AddDays(-4),
             DateCompleted = DateTime.UtcNow.AddDays(-4),
@@ -940,13 +927,11 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(SubmissionStatus.InProgress, r1.Status);
         Assert.Equal(newerCurrent.DateCreated, r1.DateCreated);
         Assert.Equal(newerCurrent.DateLastUpdated, r1.DateUpdated);
-        Assert.Equal("secure", r1.LastMaturity);
         Assert.Equal(latestCompleteReviewed.DateCompleted, r1.LastCompletionDate);
 
         Assert.Equal(SubmissionStatus.CompleteReviewed, r2.Status);
         Assert.Equal(s2.DateCreated, r2.DateCreated);
         Assert.Equal(s2.DateLastUpdated, r2.DateUpdated);
-        Assert.Equal("low", r2.LastMaturity);
         Assert.Equal(s2.DateCompleted, r2.LastCompletionDate);
     }
 
@@ -963,7 +948,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionName = "Section 1",
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.CompleteReviewed,
-            Maturity = "should-not-appear",
             DateCreated = DateTime.UtcNow.AddDays(-2),
             DateLastUpdated = DateTime.UtcNow.AddDays(-2),
             DateCompleted = DateTime.UtcNow.AddDays(-2),
@@ -977,7 +961,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var r1 = result.Single(r => r.SectionId == "S1");
         Assert.Equal(SubmissionStatus.NotStarted, r1.Status);
-        Assert.Null(r1.LastMaturity);
         Assert.Null(r1.LastCompletionDate);
     }
 
@@ -1116,7 +1099,6 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         Assert.Equal(user.Id, createdResponse.UserId);
         Assert.Equal(establishment.Id, createdResponse.UserEstablishmentId);
-        Assert.Equal(string.Empty, createdResponse.Maturity);
 
         Assert.Equal("Q900", createdQuestion.ContentfulRef);
         Assert.Equal("Question 900", createdQuestion.QuestionText);

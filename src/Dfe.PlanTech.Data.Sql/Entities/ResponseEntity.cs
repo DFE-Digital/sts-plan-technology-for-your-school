@@ -29,8 +29,6 @@ public class ResponseEntity : IUserActionEntity
 
     public AnswerEntity Answer { get; set; } = null!;
 
-    public string Maturity { get; set; } = null!;
-
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
     public DateTime? DateLastUpdated { get; set; }
@@ -51,7 +49,6 @@ public class ResponseEntity : IUserActionEntity
             Question = Question.AsDto(),
             AnswerId = AnswerId,
             Answer = Answer.AsDto(),
-            Maturity = Maturity,
             DateCreated = DateCreated,
             DateLastUpdated = DateLastUpdated,
             UserActionId = UserActionId,

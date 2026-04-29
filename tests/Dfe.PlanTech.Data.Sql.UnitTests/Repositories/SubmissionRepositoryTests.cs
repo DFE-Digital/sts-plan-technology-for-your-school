@@ -77,7 +77,6 @@ public class SubmissionRepositoryTests
             SectionId = "SEC",
             SectionName = "Section Name",
             EstablishmentId = 123,
-            Maturity = "developing",
             DateCreated = DateTime.UtcNow.AddDays(-1),
             Status = SubmissionStatus.CompleteReviewed,
             Responses = new List<ResponseEntity>
@@ -87,7 +86,6 @@ public class SubmissionRepositoryTests
                     QuestionId = 1,
                     AnswerId = 2,
                     UserId = 999,
-                    Maturity = "developing",
                     DateCreated = DateTime.UtcNow.AddMinutes(-10),
                 },
             },
@@ -101,7 +99,6 @@ public class SubmissionRepositoryTests
         Assert.Equal("SEC", clone.SectionId);
         Assert.Equal("Section Name", clone.SectionName);
         Assert.Equal(123, clone.EstablishmentId);
-        Assert.Equal("developing", clone.Maturity);
         Assert.Equal(SubmissionStatus.InProgress, clone.Status);
         Assert.InRange(clone.DateCreated, before, after);
 
@@ -109,7 +106,6 @@ public class SubmissionRepositoryTests
         Assert.Equal(1, r.QuestionId);
         Assert.Equal(2, r.AnswerId);
         Assert.Equal(999, r.UserId);
-        Assert.Equal("developing", r.Maturity);
         Assert.Same(q, r.Question); // same navs copied
         Assert.Same(a, r.Answer);
         Assert.InRange(r.DateCreated, before, after);

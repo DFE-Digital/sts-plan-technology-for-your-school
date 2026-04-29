@@ -71,9 +71,6 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
             ContentfulContentTypeConstants.ComponentNotificationBannerContentfulContentTypeId
         )]
         [InlineData(ContentfulContentTypeConstants.ComponentTextBodyContentfulContentTypeId)]
-        [InlineData(
-            ContentfulContentTypeConstants.ComponentTextBodyWithMaturityContentfulContentTypeId
-        )]
         [InlineData(ContentfulContentTypeConstants.ComponentTitleContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentWarningContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ContentSupportPageContentfulContentTypeId)]

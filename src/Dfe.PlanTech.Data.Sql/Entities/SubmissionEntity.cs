@@ -18,8 +18,6 @@ public class SubmissionEntity : IUserActionEntity
 
     public required string SectionName { get; set; }
 
-    public string? Maturity { get; set; }
-
     public DateTime DateCreated { get; set; }
 
     public DateTime? DateLastUpdated { get; set; }
@@ -43,7 +41,6 @@ public class SubmissionEntity : IUserActionEntity
             Establishment = Establishment.AsDto(),
             SectionId = SectionId,
             SectionName = SectionName,
-            Maturity = Maturity,
             DateCreated = DateCreated,
             DateLastUpdated = DateLastUpdated,
             DateCompleted = DateCompleted,
