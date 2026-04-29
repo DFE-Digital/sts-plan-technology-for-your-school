@@ -73,6 +73,7 @@ public static class ContentfulContentTypeConstants
             RichTextContentSupportDataContentfulContentTypeId
         },
         { typeof(RichTextMarkField), RichTextMarkContentfulContentTypeId },
+        { typeof(ComponentBannerEntry), ComponentBannerEntryId }
     };
 
     // Contentful content type IDs are managed in Contentful.
@@ -117,4 +118,5 @@ public static class ContentfulContentTypeConstants
     public const string RichTextContentSupportDataContentfulContentTypeId =
         "richTextContentSupportData";
     public const string RichTextMarkContentfulContentTypeId = "richTextMark";
+    public const string ComponentBannerEntryId = "componentBanner";
 }
