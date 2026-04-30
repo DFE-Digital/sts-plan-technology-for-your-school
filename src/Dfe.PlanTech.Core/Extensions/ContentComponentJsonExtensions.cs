@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -5,6 +6,8 @@ using Contentful.Core.Models;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Helpers;
+
+[assembly: InternalsVisibleTo("Dfe.PlanTech.Core.UnitTests")]
 
 namespace Dfe.PlanTech.Core.Extensions;
 
@@ -47,39 +50,52 @@ public static class ContentComponentJsonExtensions
     /// </summary>
     public static void ValidateContentfulTypeMapping()
     {
+        var reflectedTypes = GetConcreteContentfulTypes();
+        var mappedTypes = ContentfulContentTypeConstants.EntryTypeToContentTypeMap.Keys.ToHashSet();
+        ValidateTypeMapping(reflectedTypes, mappedTypes);
+    }
+
+    internal static void ValidateTypeMapping(
+        HashSet<Type> reflectedTypes,
+        HashSet<Type> mappedTypes
+    )
+    {
+        var inReflectionNotInMap = reflectedTypes.Except(mappedTypes).ToList();
+        var inMapNotInReflection = mappedTypes.Except(reflectedTypes).ToList();
+
+        if (inReflectionNotInMap.Count + inMapNotInReflection.Count == 0)
+            return;
+
+        var sb = new StringBuilder(
+            "ContentfulContentTypeConstants is out of sync with concrete ContentfulEntry subtypes."
+        );
+
+        if (inReflectionNotInMap.Count > 0)
+            sb.Append(
+                $"\nClasses exist which do not have a corresponding entry in ContentfulContentTypeConstants: {string.Join(", ", inReflectionNotInMap.Select(t => t.Name))}"
+            );
+
+        if (inMapNotInReflection.Count > 0)
+            sb.Append(
+                $"\nEntries exist in ContentfulContentTypeConstants which do not have a corresponding class: {string.Join(", ", inMapNotInReflection.Select(t => t.Name))}"
+            );
+
+        throw new InvalidOperationException(sb.ToString());
+    }
+
+    private static HashSet<Type> GetConcreteContentfulTypes()
+    {
         var contentfulEntryTypes = ReflectionHelper.GetTypesInheritingFrom<ContentfulEntry>();
         var entryContentfulEntryTypes = ReflectionHelper.GetTypesInheritingFrom<
             Entry<ContentfulEntry>
         >();
         var contentfulFieldTypes = ReflectionHelper.GetTypesInheritingFrom<ContentfulField>();
 
-        var reflectedTypes = contentfulEntryTypes
+        return contentfulEntryTypes
             .Union(entryContentfulEntryTypes)
             .Union(contentfulFieldTypes)
             .Where(t => t.IsConcreteClass() && t.HasParameterlessConstructor())
             .ToHashSet();
-
-        var mappedTypes = ContentfulContentTypeConstants.EntryTypeToContentTypeMap.Keys.ToHashSet();
-
-        var inReflectionNotInMap = reflectedTypes.Except(mappedTypes).ToList();
-        var inMapNotInReflection = mappedTypes.Except(reflectedTypes).ToList();
-
-        if (inReflectionNotInMap.Count == 0 && inMapNotInReflection.Count == 0)
-            return;
-
-        var sb = new StringBuilder(
-            "ContentfulContentTypeConstants is out of sync with concrete ContentfulEntry subtypes."
-        );
-        if (inReflectionNotInMap.Count > 0)
-            sb.Append(
-                $"\nIn code but missing from ContentfulContentTypeConstants: {string.Join(", ", inReflectionNotInMap.Select(t => t.Name))}"
-            );
-        if (inMapNotInReflection.Count > 0)
-            sb.Append(
-                $"\nIn ContentfulContentTypeConstants but not found as concrete subtypes: {string.Join(", ", inMapNotInReflection.Select(t => t.Name))}"
-            );
-
-        throw new InvalidOperationException(sb.ToString());
     }
 
     /// <summary>

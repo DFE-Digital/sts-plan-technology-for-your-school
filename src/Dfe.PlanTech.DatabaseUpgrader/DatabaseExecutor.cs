@@ -34,17 +34,17 @@ public class DatabaseExecutor
 
     private UpgradeEngine CreateUpgradeEngine()
     {
-        var executingAssembley = Assembly.GetExecutingAssembly();
+        var executingAssembly = Assembly.GetExecutingAssembly();
 
         var engine = DeployChanges
             .To.SqlDatabase(_options.DatabaseConnectionString)
             .WithScriptsEmbeddedInAssembly(
-                executingAssembley,
+                executingAssembly,
                 ScriptNamespaceMatches(SCRIPTS_NAMESPACE)
             );
 
         AddSqlParameters(engine);
-        AddEnvironmentSpecificScripts(executingAssembley, engine);
+        AddEnvironmentSpecificScripts(executingAssembly, engine);
 
         return engine
             .LogToConsole()
@@ -107,7 +107,9 @@ public class DatabaseExecutor
         Policy
             .Handle<System.Data.Common.DbException>()
             .Or<TimeoutException>()
-            .WaitAndRetry(
-                new[] { TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(3) }
-            );
+            .WaitAndRetry([
+                TimeSpan.FromMinutes(1),
+                TimeSpan.FromMinutes(2),
+                TimeSpan.FromMinutes(3),
+            ]);
 }
