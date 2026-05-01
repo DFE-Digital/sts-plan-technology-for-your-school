@@ -9,13 +9,9 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubmissionWorkflow(
-    IStoredProcedureRepository storedProcedureRepository,
     ISubmissionRepository submissionRepository
 ) : ISubmissionWorkflow
 {
-    private readonly IStoredProcedureRepository _storedProcedureRepository =
-        storedProcedureRepository
-        ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
@@ -81,6 +77,27 @@ public class SubmissionWorkflow(
         return latestSubmission.AsDto();
     }
 
+    // Overload to take multiple statuses to include in query
+    public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
+            establishmentId,
+            sectionId,
+            statuses
+        );
+        if (latestSubmission is null)
+        {
+            return null;
+        }
+
+        latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses).ToList();
+        return latestSubmission.AsDto();
+    }
+
     // On the action on the controller, we should redirect to a new route called "GetNextUnansweredQuestionForSection"
     // which will then either redirect to the "GetQuestionBySlug" route or "Check Answers" route
     public async Task<int> SubmitAnswer(
@@ -101,7 +118,7 @@ public class SubmissionWorkflow(
             userEstablishmentId,
             answerModel
         );
-        var responseId = await _storedProcedureRepository.SubmitResponse(model);
+        var responseId = await _submissionRepository.SubmitResponse(model);
 
         return responseId;
     }
@@ -135,7 +152,6 @@ public class SubmissionWorkflow(
         {
             return new SqlSectionStatusDto
             {
-                LastMaturity = latestSubmission.Maturity,
                 SectionId = latestSubmission.SectionId,
                 Status = latestSubmission.Status,
             };
@@ -146,14 +162,6 @@ public class SubmissionWorkflow(
             SectionId = sectionId,
             Status = SubmissionStatus.NotStarted,
         };
-    }
-
-    public async Task SetMaturityAndMarkAsReviewedAsync(int submissionId)
-    {
-        await _storedProcedureRepository.SetMaturityForSubmissionAsync(submissionId);
-        await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
-            submissionId
-        );
     }
 
     public async Task SetSubmissionReviewedAsync(int submissionId)

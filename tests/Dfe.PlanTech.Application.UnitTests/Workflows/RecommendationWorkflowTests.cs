@@ -537,8 +537,9 @@ public class RecommendationWorkflowTests
             .CreateRecommendationHistoryAsync(
                 establishmentId,
                 1,
-                userId,
+                userId,               
                 matEstablishmentId,
+                null,
                 RecommendationStatus.InProgress, // Should use current status as previous
                 newStatus,
                 noteText
@@ -593,6 +594,7 @@ public class RecommendationWorkflowTests
                 establishmentId,
                 1,
                 userId,
+                null,
                 null,
                 null, // Should be null for initial entry
                 newStatus,
@@ -682,6 +684,7 @@ public class RecommendationWorkflowTests
                 Arg.Any<int>(),
                 Arg.Any<int>(),
                 Arg.Any<int>(),
+                Arg.Any<int?>(),
                 Arg.Any<int?>(),
                 Arg.Any<RecommendationStatus?>(),
                 Arg.Any<RecommendationStatus>(),

@@ -33,7 +33,7 @@ runs:
       uses: ./.github/actions/whats-my-ip-address
 
     - name: Add Runner to KV whitelist
-      uses: azure/CLI@v1
+      uses: azure/cli@v2
       with:
         azcliversion: 2.73.0
         inlineScript: |
@@ -47,7 +47,7 @@ runs:
       shell: bash
 
     - name: Remove Runner from KV whitelist
-      uses: azure/CLI@v1
+      uses: azure/cli@v2
       if: always()
       with:
         azcliversion: 2.73.0

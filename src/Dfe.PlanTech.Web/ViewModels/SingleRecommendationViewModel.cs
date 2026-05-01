@@ -23,6 +23,7 @@ public class SingleRecommendationViewModel
     public RecommendationChunkEntry CurrentChunk { get; set; } = null!;
     public RecommendationChunkEntry? PreviousChunk { get; set; } = null!;
     public RecommendationChunkEntry? NextChunk { get; set; } = null!;
+    public List<RelatedActionViewModel> RelatedActions { get; init; } = [];
     public int CurrentChunkPosition { get; set; }
     public int TotalChunks { get; set; }
 

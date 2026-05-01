@@ -120,11 +120,14 @@ public class CategoryLandingViewComponentViewBuilder(
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus =>
                 sectionStatus.SectionId.Equals(section.Id)
             );
-            var recommendations = await GetCategoryLandingSectionRecommendations(
-                establishmentId,
-                section,
-                sortType
-            );
+
+            var recommendations = sectionStatus?.Status == SubmissionStatus.CompleteReviewed
+                ? await GetCategoryLandingSectionRecommendations(
+                    establishmentId,
+                    section,
+                    sortType
+                    )
+                : null;
 
             yield return new CategoryLandingSectionViewModel(
                 section,

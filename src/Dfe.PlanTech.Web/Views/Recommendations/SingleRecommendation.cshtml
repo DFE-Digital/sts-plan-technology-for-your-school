@@ -35,8 +35,16 @@
 }
 
 @section RelatedActions {
-    <hr class="govuk-section-break govuk-section-break--visible govuk-section-break govuk-section-break--visible custom-hr-blue">
+    <hr class="govuk-section-break govuk-section-break--visible custom-hr-blue">
     <h2 class="govuk-heading-m govuk-!-padding-top-4">Related actions</h2>
+
+    @foreach (var action in Model.RelatedActions)
+    {
+        <p class="govuk-body-s">
+            <a class="govuk-link" href="@action.Url">@action.Text</a>
+        </p>
+    }
+
     <p class="govuk-body-s">
         <a class="govuk-link"
            asp-route="@nameof(RecommendationsController.ShareSingleRecommendation)"
@@ -56,6 +64,7 @@
             @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationPrintLink)
         </a>
     </p>
+
     <p class="govuk-body-s">
         <a class="govuk-link"
            asp-route="@nameof(RecommendationsController.PrintAllRecommendations)"
@@ -194,9 +203,9 @@
                                 {
                                     <p>
                                         @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryInitial, new Dictionary<string, string>
-                                            { 
+                                            {
                                                 ["recStatus"] = Model.FirstActivity?.Status.GetDisplayName() ?? string.Empty,
-                                                ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty 
+                                                ["establishment"] = Model.FirstActivity?.SchoolName ?? string.Empty
                                             })
                                     </p>
 

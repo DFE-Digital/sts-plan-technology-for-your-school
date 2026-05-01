@@ -28,5 +28,9 @@ internal class GroupReadActivityEntityConfiguration
             .HasColumnName("dateSelected")
             .HasColumnType("datetime")
             .IsRequired();
+
+        builder.Property(b => b.UserActionId)
+            .HasColumnName("userActionId")
+            .IsRequired(false);
     }
 }

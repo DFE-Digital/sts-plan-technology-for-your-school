@@ -15,7 +15,6 @@ public interface ISubmissionService
         int userId,
         QuestionnaireSectionEntry section
     );
-    Task ConfirmCheckAnswersAsync(int submissionId);
     Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId);
     Task<
         Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
@@ -25,6 +24,11 @@ public interface ISubmissionService
         int establishmentId,
         QuestionnaireSectionEntry section,
         SubmissionStatus? status
+    );
+    Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        IEnumerable<SubmissionStatus> statuses
     );
     Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(
         int establishmentId,

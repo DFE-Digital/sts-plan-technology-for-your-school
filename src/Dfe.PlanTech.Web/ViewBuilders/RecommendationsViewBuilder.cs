@@ -125,6 +125,16 @@ public class RecommendationsViewBuilder(
             OriginatingSlug = chunkSlug,
             History = groupedHistory,
             FirstActivity = firstActivity,
+            RelatedActions =
+                currentRecommendationChunk
+                    .RelatedActions?.Where(x => x is not null)
+                    .Select(x => new RelatedActionViewModel
+                    {
+                        Text = x.Title ?? string.Empty,
+                        Url = x.Url ?? string.Empty,
+                    })
+                    .ToList()
+                ?? [],
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
@@ -283,16 +293,19 @@ public class RecommendationsViewBuilder(
             ["recStatus"] = selectedStatusEnum.Value.GetDisplayName(),
         };
 
+        string? defaultNoteText = await _microcopyProvider.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.SingleRecommendationHistoryReason,
+            dynamicValues
+        );
+
+        defaultNoteText = string.IsNullOrWhiteSpace(defaultNoteText) ? null : defaultNoteText;
+
         await _recommendationService.UpdateRecommendationStatusAsync(
             currentRecommendationChunk.Id,
             establishmentId,
             userId,
             selectedStatusEnum.Value,
-            notes
-                ?? await _microcopyProvider.GetTextByKeyAsync(
-                    ContentfulMicrocopyConstants.SingleRecommendationHistoryReason,
-                    dynamicValues
-                ),
+            notes ?? defaultNoteText,
             CurrentUser.IsMat ? userOrganisationId : null
         );
 

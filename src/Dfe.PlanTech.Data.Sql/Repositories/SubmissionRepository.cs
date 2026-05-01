@@ -1,16 +1,21 @@
-using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Interfaces;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepository
+public class SubmissionRepository(
+    PlanTechDbContext dbContext,
+    IUserActionIdAccessor userActionIdAccessor) : ISubmissionRepository
 {
     protected readonly PlanTechDbContext _db = dbContext;
+    private readonly IUserActionIdAccessor _userActionIdAccessor = userActionIdAccessor;
 
     public async Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission)
     {
@@ -21,7 +26,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             SectionId = existingSubmission.SectionId,
             SectionName = existingSubmission.SectionName,
             EstablishmentId = existingSubmission.EstablishmentId,
-            Maturity = existingSubmission.Maturity,
             DateCreated = DateTime.UtcNow,
             Status = SubmissionStatus.InProgress,
             Responses = existingSubmission
@@ -31,7 +35,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                     AnswerId = r.AnswerId,
                     UserId = r.UserId,
                     UserEstablishmentId = r.UserEstablishmentId,
-                    Maturity = r.Maturity,
                     Question = r.Question,
                     Answer = r.Answer,
                     DateCreated = DateTime.UtcNow,
@@ -64,7 +67,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
         var sectionQuestions = await GetQuestionsForSection(section);
 
-        // Create recommendation dtos each of the core recs
         var recommendationDtos = section
             .CoreRecommendations.Where(r => r.Question is not null)
             .Select(r =>
@@ -141,7 +143,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
             submissionId
         );
-        // No need to save changes as this is done in the call above
     }
 
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
@@ -150,11 +151,42 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         SubmissionStatus? status
     )
     {
-        // Get latest submission
         var submission = await GetPreviousSubmissionsInDescendingOrder(
                 establishmentId,
                 sectionId,
                 status
+            )
+            .FirstOrDefaultAsync();
+
+        if (submission is null)
+            return null;
+
+        submission.Responses = submission
+            .Responses.OrderByDescending(response => response.DateLastUpdated)
+            .GroupBy(response => response.QuestionId)
+            .Select(group =>
+                group
+                    .OrderByDescending(response => response.DateLastUpdated)
+                    .ThenByDescending(response => response.Id)
+                    .First()
+            )
+            .ToList();
+
+        return submission;
+    }
+
+    // Overload that allows for multiple statuses to be returned from the query
+    public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        // Get latest submission
+        var submission = await GetPreviousSubmissionsInDescendingOrder(
+                establishmentId,
+                sectionId,
+                statuses
             )
             .FirstOrDefaultAsync();
 
@@ -236,7 +268,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            status: SubmissionStatus.InProgress
+            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
         );
 
         var submission =
@@ -267,7 +299,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            status: SubmissionStatus.InProgress
+            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
         );
 
         var submission = await query.FirstOrDefaultAsync();
@@ -309,6 +341,29 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 && submission.EstablishmentId == establishmentId
                 && submission.SectionId == sectionId
                 && (status == null || submission.Status == status)
+            )
+            .OrderByDescending(submission => submission.DateCreated);
+    }
+
+    // Overload that returns submissions with any of the specified statuses
+    private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        ArgumentNullException.ThrowIfNull(statuses);
+
+        var statusOptions = statuses.ToList();
+
+        if (statusOptions.Count == 0)
+            throw new ArgumentException("At least one submission status must be provided", nameof(statuses));
+
+        return GetSubmissionsBy(submission =>
+                !submission.Deleted
+                && submission.EstablishmentId == establishmentId
+                && submission.SectionId == sectionId
+                && statusOptions.Contains(submission.Status)
             )
             .OrderByDescending(submission => submission.DateCreated);
     }
@@ -456,7 +511,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                         currentSubmission?.DateLastUpdated
                         ?? currentSubmission?.DateCreated
                         ?? DateTime.UtcNow,
-                    LastMaturity = lastCompleteSubmission?.Maturity,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
                 };
             })
@@ -482,9 +536,158 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         if (submissionId is null)
             return;
 
+        var userActionId = _userActionIdAccessor.GetUserActionId();
+
         await _db
             .Submissions.Where(s => s.Id == submissionId.Value)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.Deleted, true));
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(s => s.Deleted, true)
+                .SetProperty(s => s.UserActionId, userActionId));
+    }
+
+    public async Task<int> SubmitResponse(AssessmentResponseModel response)
+    {
+        ArgumentNullException.ThrowIfNull(response);
+
+        if (response.Answer is null)
+        {
+            throw new InvalidDataException($"{nameof(response.Answer)} cannot be null");
+        }
+
+        if (response.Question is null)
+        {
+            throw new InvalidDataException($"{nameof(response.Question)} cannot be null");
+        }
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.SectionId);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.SectionName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.Question.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.Question.Text);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.Answer.Id);
+        ArgumentException.ThrowIfNullOrWhiteSpace(response.Answer.Text);
+
+        var submissionId = await SelectOrInsertSubmissionIdAsync(
+            response.SectionId,
+            response.SectionName,
+            response.EstablishmentId);
+
+        var answerId = await GetOrCreateAnswerIdAsync(
+            response.Answer.Id,
+            response.Answer.Text);
+
+        var questionId = await GetOrCreateQuestionIdAsync(
+            response.Question.Id,
+            response.Question.Text);
+
+        var responseEntity = new ResponseEntity
+        {
+            UserId = response.UserId,
+            UserEstablishmentId = response.UserEstablishmentId,
+            SubmissionId = submissionId,
+            QuestionId = questionId,
+            AnswerId = answerId,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        await _db.Responses.AddAsync(responseEntity);
+        await _db.SaveChangesAsync();
+
+        return responseEntity.Id;
+    }
+
+    private async Task<int> SelectOrInsertSubmissionIdAsync(
+        string sectionId,
+        string sectionName,
+        int establishmentId)
+    {
+        var submissionId = await GetCurrentSubmissionIdAsync(sectionId, establishmentId);
+
+        if (submissionId.HasValue)
+        {
+            return submissionId.Value;
+        }
+
+        var submission = new SubmissionEntity
+        {
+            EstablishmentId = establishmentId,
+            SectionId = sectionId,
+            SectionName = sectionName,
+            Status = SubmissionStatus.InProgress,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        await _db.Submissions.AddAsync(submission);
+        await _db.SaveChangesAsync();
+
+        return submission.Id;
+    }
+
+    private async Task<int?> GetCurrentSubmissionIdAsync(string sectionId, int establishmentId)
+    {
+        return await _db.Submissions
+            .Where(s =>
+                s.SectionId == sectionId &&
+                s.EstablishmentId == establishmentId &&
+                s.Status == SubmissionStatus.InProgress)
+            .OrderByDescending(s => s.Id)
+            .Select(s => (int?)s.Id)
+            .FirstOrDefaultAsync();
+    }
+
+    private async Task<int> GetOrCreateAnswerIdAsync(
+        string answerContentfulId,
+        string answerText)
+    {
+        var answerId = await _db.Answers
+            .Where(a =>
+                a.AnswerText == answerText &&
+                a.ContentfulRef == answerContentfulId)
+            .Select(a => (int?)a.Id)
+            .FirstOrDefaultAsync();
+
+        if (answerId.HasValue)
+        {
+            return answerId.Value;
+        }
+
+        var answer = new AnswerEntity
+        {
+            AnswerText = answerText,
+            ContentfulRef = answerContentfulId,
+        };
+
+        await _db.Answers.AddAsync(answer);
+        await _db.SaveChangesAsync();
+
+        return answer.Id;
+    }
+
+    private async Task<int> GetOrCreateQuestionIdAsync(
+        string questionContentfulId,
+        string questionText)
+    {
+        var questionId = await _db.Questions
+            .Where(q =>
+                q.QuestionText == questionText &&
+                q.ContentfulRef == questionContentfulId)
+            .Select(q => (int?)q.Id)
+            .FirstOrDefaultAsync();
+
+        if (questionId.HasValue)
+        {
+            return questionId.Value;
+        }
+
+        var question = new QuestionEntity
+        {
+            QuestionText = questionText,
+            ContentfulRef = questionContentfulId,
+        };
+
+        await _db.Questions.AddAsync(question);
+        await _db.SaveChangesAsync();
+
+        return question.Id;
     }
 
     private RecommendationEntity BuildRecommendationEntity(SqlRecommendationDto recommendationDto)
