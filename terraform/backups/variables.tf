@@ -54,12 +54,17 @@ variable "backup_storage_account_name" {
   sensitive   = false
 }
 
-variable "backup_container_name" {
-  description = "Backup container name"
+variable "backup_container_name_sql" {
+  description = "Backup container name for sql bacpacs"
   type        = string
   sensitive   = false
 }
 
+variable "backup_container_name_tf" {
+  description = "Backup container name for terraform key vault (tfvars)"
+  type        = string
+  sensitive   = false
+}
 
 variable "blob_delete_retention_days" {
   description = "Soft delete retention period for blobs (days)"

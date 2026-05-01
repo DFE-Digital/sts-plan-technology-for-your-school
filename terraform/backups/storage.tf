@@ -1,4 +1,4 @@
-resource "azurerm_storage_account" "sql_backups" {
+resource "azurerm_storage_account" "backups" {
   name                     = var.backup_storage_account_name
   resource_group_name      = azurerm_resource_group.sql_backups.name
   location                 = azurerm_resource_group.sql_backups.location
@@ -25,8 +25,8 @@ resource "azurerm_storage_account" "sql_backups" {
 }
 
 resource "azurerm_storage_container" "bacpacs" {
-  name                  = var.backup_container_name
-  storage_account_id    = azurerm_storage_account.sql_backups.id
+  name                  = var.backup_container_name_sql
+  storage_account_id    = azurerm_storage_account.backups.id
   container_access_type = "private"
 
   lifecycle {
@@ -38,6 +38,24 @@ resource "azurerm_storage_container_immutability_policy" "bacpacs" {
   count = var.immutability_enabled ? 1 : 0
 
   storage_container_resource_manager_id = azurerm_storage_container.bacpacs.id
+  immutability_period_in_days           = var.immutability_period_days
+  protected_append_writes_all_enabled   = false
+}
+
+resource "azurerm_storage_container" "terraform" {
+  name                  = var.backup_container_name_tf
+  storage_account_id    = azurerm_storage_account.backups.id
+  container_access_type = "private"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "azurerm_storage_container_immutability_policy" "terraform" {
+  count = var.immutability_enabled ? 1 : 0
+
+  storage_container_resource_manager_id = azurerm_storage_container.terraform.id
   immutability_period_in_days           = var.immutability_period_days
   protected_append_writes_all_enabled   = false
 }
