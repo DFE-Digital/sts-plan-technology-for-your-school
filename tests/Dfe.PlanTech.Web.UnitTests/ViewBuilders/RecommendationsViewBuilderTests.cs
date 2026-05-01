@@ -1139,21 +1139,24 @@ public class RecommendationsViewBuilderTests
             .GetRecommendationHistoryAsync("C2", establishmentId)
             .Returns([history1, history2]);
 
+        var inputModel = new SingleRecommendationInputViewModel
+        {
+            SelectedStatus = invalidStatus,
+            Notes = null,
+        };
+
         // Act
         var result = await sut.UpdateRecommendationStatusAsync(
             ctl,
             categorySlug,
             sectionSlug,
             chunkSlug,
-            invalidStatus,
-            notes: null
+            inputModel
         );
 
         // Assert
         var view = Assert.IsType<ViewResult>(result);
         Assert.Equal("SingleRecommendation", view.ViewName);
-
-        Assert.Equal("Select a valid status", ctl.TempData["StatusUpdateError"]);
 
         await _recommendationService
             .DidNotReceiveWithAnyArgs()
@@ -1244,14 +1247,19 @@ public class RecommendationsViewBuilderTests
             )
             .Returns(successHeader);
 
+        var inputModel = new SingleRecommendationInputViewModel
+        {
+            SelectedStatus = selectedStatus.ToString(),
+            Notes = null,
+        };
+
         // Act
         var result = await sut.UpdateRecommendationStatusAsync(
             ctl,
             categorySlug,
             sectionSlug,
             chunkSlug,
-            selectedStatus.ToString(),
-            notes: null
+            inputModel
         );
 
         // Assert
@@ -1323,14 +1331,19 @@ public class RecommendationsViewBuilderTests
         var selectedStatus = RecommendationStatus.NotStarted;
         const string customNotes = "This is a custom reason";
 
+        var inputModel = new SingleRecommendationInputViewModel
+        {
+            SelectedStatus = selectedStatus.ToString(),
+            Notes = customNotes,
+        };
+
         // Act
         var result = await sut.UpdateRecommendationStatusAsync(
             ctl,
             categorySlug,
             sectionSlug,
             chunkSlug,
-            selectedStatus.ToString(),
-            notes: customNotes
+            inputModel
         );
 
         // Assert
@@ -1364,14 +1377,14 @@ public class RecommendationsViewBuilderTests
             new RelatedActionEntry
             {
                 Title = "Share this recommendation",
-                Url = "/recommendations/share"
+                Url = "/recommendations/share",
             }
         );
         secondChunk.RelatedActions.Add(
             new RelatedActionEntry
             {
                 Title = "Print this recommendation",
-                Url = "/recommendations/print"
+                Url = "/recommendations/print",
             }
         );
 
