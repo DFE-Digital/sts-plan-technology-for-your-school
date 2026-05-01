@@ -209,7 +209,7 @@
                                             })
                                     </p>
 
-                                <p><strong>@Model.FirstActivity.QuestionText</strong></p>
+                                    <p><strong>@Model.FirstActivity!.QuestionText</strong></p>
 
                                     var answerText = await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryAnswer, dynamicValues);
                                     if (!String.IsNullOrEmpty(answerText))
