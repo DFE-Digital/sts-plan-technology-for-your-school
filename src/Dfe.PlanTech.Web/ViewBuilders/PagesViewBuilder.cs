@@ -90,10 +90,7 @@ public class PagesViewBuilder(
             StringExtensions.UseNonBreakingHyphenAndHtmlDecode(page.Title?.Text)
             ?? PageTitleConstants.PlanTechnologyForYourSchool;
 
-        var viewModel = new PageViewModel(page)
-        {
-            MicrocopyEntries = await ContentfulService.GetMicrocopyEntriesAsync(),
-        };
+        var viewModel = new PageViewModel(page);
 
         if (page.DisplayOrganisationName)
         {
@@ -132,11 +129,7 @@ public class PagesViewBuilder(
             return controller.RedirectToHomePage();
         }
 
-        var landingPageViewModel = await BuildLandingPageViewModelAsync(
-            controller,
-            category,
-            categorySlug
-        );
+        var landingPageViewModel = BuildLandingPageViewModel(controller, category, categorySlug);
 
         return controller.View(CategoryLandingPagePrintView, landingPageViewModel);
     }
@@ -205,13 +198,23 @@ public class PagesViewBuilder(
         return HandleNotifyShareResults(controller, notifyResults, returnToModel);
     }
 
-    private async Task<CategoryLandingPageViewModel> BuildLandingPageViewModelAsync(
+    private static CategoryLandingPageViewModel BuildLandingPageViewModel(
         Controller controller,
         QuestionnaireCategoryEntry category,
-        string categorySlug
+        string categorySlug,
+        List<RelatedActionEntry>? relatedActions = null
     )
     {
-        var microcopy = await ContentfulService.GetMicrocopyEntriesAsync();
+        var relatedActionsViewModels =
+            relatedActions
+                ?.Where(x => x is not null)
+                .Select(x => new RelatedActionViewModel
+                {
+                    Text = x.Title ?? string.Empty,
+                    Url = x.Url ?? string.Empty,
+                })
+                .ToList()
+            ?? [];
 
         return new CategoryLandingPageViewModel
         {
@@ -221,7 +224,9 @@ public class PagesViewBuilder(
             Category = category,
             SectionName = controller.TempData["SectionName"] as string,
             SortOrder = controller.Request.Query["sort"],
-            MicrocopyEntries = microcopy,
+            HasBanner = category.HasBanner,
+            AfterContentContent = category.AfterContentContent,
+            RelatedActions = BuildRelatedActionsViewModels(relatedActions),
         };
     }
 
@@ -260,11 +265,33 @@ public class PagesViewBuilder(
             throw new InvalidDataException("Page Slug cannot be empty");
         }
 
-        var landingPageViewModel = await BuildLandingPageViewModelAsync(
+        var landingPageViewModel = BuildLandingPageViewModel(
             controller,
             category,
-            page.Slug
+            page.Slug,
+            page.RelatedActions
         );
+
         return controller.View(CategoryLandingPageView, landingPageViewModel);
+    }
+
+    private static List<RelatedActionViewModel> BuildRelatedActionsViewModels(
+        List<RelatedActionEntry>? relatedActions
+    )
+    {
+        if (relatedActions is null)
+        {
+            return [];
+        }
+
+        return relatedActions
+            .Where(x => x is not null)
+            .Select(x => new RelatedActionViewModel
+            {
+                Text = x.Title ?? string.Empty,
+                Url = x.Url ?? string.Empty,
+            })
+            .Where(x => !string.IsNullOrWhiteSpace(x.Text) && !string.IsNullOrWhiteSpace(x.Url))
+            .ToList();
     }
 }

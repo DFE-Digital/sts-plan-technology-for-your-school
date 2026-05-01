@@ -25,8 +25,6 @@ public class CategoryLandingViewComponentViewBuilder(
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IUserService _userService =
         userService ?? throw new ArgumentNullException(nameof(userService));
-    private readonly IContentfulService _contentfulService =
-        contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
 
     private const string CategoryLandingSectionAssessmentLink =
         "Components/CategoryLanding/SectionAssessmentLink";
@@ -71,8 +69,6 @@ public class CategoryLandingViewComponentViewBuilder(
 
         var sortType = await GetUserSortType(sortOrder);
 
-        var microcopy = await _contentfulService.GetMicrocopyEntriesAsync();
-
         var categoryLandingSections = await BuildCategoryLandingSectionViewModels(
                 establishmentId,
                 category,
@@ -96,8 +92,7 @@ public class CategoryLandingViewComponentViewBuilder(
             Print = print,
             StatusLinkPartialName = print
                 ? CategoryLandingSectionAssessmentLinkPrintContent
-                : CategoryLandingSectionAssessmentLink,
-            MicrocopyEntries = microcopy,
+                : CategoryLandingSectionAssessmentLink
         };
 
         return viewModel;
@@ -125,11 +120,14 @@ public class CategoryLandingViewComponentViewBuilder(
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus =>
                 sectionStatus.SectionId.Equals(section.Id)
             );
-            var recommendations = await GetCategoryLandingSectionRecommendations(
-                establishmentId,
-                section,
-                sortType
-            );
+
+            var recommendations = sectionStatus?.Status == SubmissionStatus.CompleteReviewed
+                ? await GetCategoryLandingSectionRecommendations(
+                    establishmentId,
+                    section,
+                    sortType
+                    )
+                : null;
 
             yield return new CategoryLandingSectionViewModel(
                 section,

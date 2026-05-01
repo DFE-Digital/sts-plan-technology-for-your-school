@@ -29,7 +29,7 @@ public class MockAuthController(
     private const string TestSchoolUserId = "E2E_TEST_SCHOOL_USER";
     private const string TestMatUserId = "E2E_TEST_MAT_USER";
 
-    private const string SchoolTestOrgName = "DSI TEST Establishment (001) Miscellanenous (27)";
+    private const string SchoolTestOrgName = "DSI TEST Establishment (001) Miscell";
     private const string MatTestOrgName = "DSI TEST Multi-Academy Trust (010)";
 
     private static readonly string[] ResponseTypesSupported = ["code"];
@@ -126,7 +126,7 @@ public class MockAuthController(
         }
 
         var schoolTestEstablishments =
-            await establishmentRepository.GetEstablishmentsByAsync(e => e.OrgName == SchoolTestOrgName);
+            await establishmentRepository.GetEstablishmentsByAsync(e => e.OrgName != null && e.OrgName.Contains(SchoolTestOrgName));
         var schoolTestEstablishment = schoolTestEstablishments.FirstOrDefault();
 
         var matTestEstablishments =
@@ -375,14 +375,26 @@ public class MockAuthController(
         return key == options.Value.MockAuthentication?.ClientSecret;
     }
 
+    private string GetEnvironmentBaseDomain()
+    {
+        var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+        return environment switch
+        {
+            "Dev" => "https://dev.plan-technology-for-your-school.education.gov.uk",
+            "Test" => "https://test.dev.plan-technology-for-your-school.education.gov.uk",
+            "Staging" => "https://staging.plan-technology-for-your-school.education.gov.uk",
+            _ => $"{Request.Scheme}://{Request.Host}"
+        };
+    }
+
     private string GetBaseUrl()
     {
-        return $"{Request.Scheme}://{Request.Host}/api/mock-auth";
+        return $"{GetEnvironmentBaseDomain()}/api/mock-auth";
     }
 
     private string GetAllowedAuthorizeRedirectUri()
     {
-        return $"{Request.Scheme}://{Request.Host}/auth/cb";
+        return $"{GetEnvironmentBaseDomain()}/auth/cb";
     }
-
 }

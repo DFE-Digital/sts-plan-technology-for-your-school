@@ -259,7 +259,7 @@ public class QuestionsViewBuilder(
             TopicName = section.Name,
             Responses = submissionModel.Responses,
             CategorySlug = categorySlug,
-            SectionSlug = sectionSlug,
+            SectionSlug = sectionSlug
         };
 
         return controller.View(ContinueSelfAssessmentView, viewModel);

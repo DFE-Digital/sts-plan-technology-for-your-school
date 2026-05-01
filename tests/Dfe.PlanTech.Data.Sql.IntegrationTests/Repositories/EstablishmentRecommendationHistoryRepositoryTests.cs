@@ -884,6 +884,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             recommendation.Id,
             user.Id,
             null,
+            null,
             RecommendationStatus.InProgress,
             RecommendationStatus.Complete,
             "Recommendation completed successfully"

@@ -14,6 +14,7 @@ public class AnswerEntityTests
         var expectedAnswerText = "Arbitrary string - answer text";
         var expectedContentfulRef = "Arbitrary string - contentful ref";
         var expectedDateCreated = new DateTime(2023, 01, 01, 12, 00, 00, DateTimeKind.Utc);
+        var expectedUserActionId = Guid.NewGuid();
 
         AnswerEntity answerEntity = new()
         {
@@ -21,6 +22,7 @@ public class AnswerEntityTests
             AnswerText = expectedAnswerText,
             ContentfulRef = expectedContentfulRef,
             DateCreated = expectedDateCreated,
+            UserActionId = expectedUserActionId
         };
 
         // Act
@@ -31,6 +33,8 @@ public class AnswerEntityTests
         Assert.Equal(expectedAnswerText, sqlAnswerDto.AnswerText);
         Assert.Equal(expectedContentfulRef, sqlAnswerDto.ContentfulSysId);
         Assert.Equal(expectedDateCreated, sqlAnswerDto.DateCreated);
+        Assert.Equal(expectedUserActionId, sqlAnswerDto.UserActionId);
+
 
         // Assert - ensure all DTO properties are accounted for
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlAnswerDto>(
@@ -40,6 +44,7 @@ public class AnswerEntityTests
                 nameof(SqlAnswerDto.AnswerText),
                 nameof(SqlAnswerDto.ContentfulSysId),
                 nameof(SqlAnswerDto.DateCreated),
+                nameof(SqlAnswerDto.UserActionId)
             }
         );
     }

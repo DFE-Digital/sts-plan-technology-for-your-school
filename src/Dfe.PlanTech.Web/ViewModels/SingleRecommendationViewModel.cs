@@ -16,7 +16,6 @@ public class SingleRecommendationViewModel
     public string? OriginatingSlug { get; set; }
 
     public string? SuccessMessageTitle { get; set; }
-    public string? SuccessMessageBody { get; set; }
     public string? StatusErrorMessage { get; set; }
 
     public QuestionnaireSectionEntry Section { get; set; } = null!;
@@ -24,6 +23,7 @@ public class SingleRecommendationViewModel
     public RecommendationChunkEntry CurrentChunk { get; set; } = null!;
     public RecommendationChunkEntry? PreviousChunk { get; set; } = null!;
     public RecommendationChunkEntry? NextChunk { get; set; } = null!;
+    public List<RelatedActionViewModel> RelatedActions { get; init; } = [];
     public int CurrentChunkPosition { get; set; }
     public int TotalChunks { get; set; }
 

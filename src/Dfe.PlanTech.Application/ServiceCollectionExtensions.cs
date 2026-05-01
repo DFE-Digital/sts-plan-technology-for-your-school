@@ -1,4 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
+using Dfe.PlanTech.Application.Providers;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Rendering.Contentful;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
@@ -7,6 +8,7 @@ using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Rendering;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Application;
 
@@ -23,6 +25,11 @@ public static class ServiceCollectionExtensions
             .AddScoped<IRecommendationService, RecommendationService>()
             .AddScoped<ISubmissionService, SubmissionService>()
             .AddScoped<IUserService, UserService>();
+    }
+
+    public static IServiceCollection AddApplicationProviders(this IServiceCollection services)
+    {
+        return services.AddScoped<IMicrocopyProvider, MicrocopyProvider>();
     }
 
     public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)

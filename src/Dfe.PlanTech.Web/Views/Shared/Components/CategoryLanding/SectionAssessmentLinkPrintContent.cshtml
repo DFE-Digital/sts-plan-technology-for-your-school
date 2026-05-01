@@ -1,22 +1,37 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model StatusLinkViewModel
 
 @{
     string statusText;
-
     var description = Model.Section.ShortDescription;
     var topic = Model.Section;
-    var topicName = topic.Name.ToLower().Trim();
+
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["topic"] = topic.Name.ToLower().Trim(),
+        ["dateUpdated"] = topic.DateUpdated ?? "",
+        ["dateCompleted"] = topic.LastCompletionDate ?? ""
+    };
 
     switch (topic.ProgressStatus)
     {
         case SubmissionStatus.InProgress:
-            statusText = $"A self-assessment was started on {topic.DateUpdated}. This must be completed before recommendations are available.";
+            statusText = await Microcopy.GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.CategoryPrintSectionInProgress,
+                dynamicValues
+            );
             break;
         case SubmissionStatus.CompleteReviewed:
-            statusText = $"The self-assessment for {topicName} was completed on {topic.LastCompletionDate}.";
+            statusText = await Microcopy.GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.CategoryPrintSectionCompleted,
+                dynamicValues
+            );
             break;
         default:
-            statusText = "Self-assessment not started.";
+            statusText = await Microcopy.GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.CateogoryPrintSectionNotStarted
+            );
             break;
     }
 

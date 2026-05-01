@@ -13,6 +13,7 @@ public class SecurityHeadersMiddleware(RequestDelegate next)
     {
         AddFramejackingPreventHeaders(context);
         AddContentSecurityPolicy(context);
+        context.Response.Headers.CacheControl = "no-store";
 
         await _next(context);
     }

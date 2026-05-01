@@ -51,6 +51,7 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [LogInvalidModelState]
+    [ValidateMatSelected]
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment", Name = "GetInterstitialPage")]
     public async Task<IActionResult> GetInterstitialPage(string categorySlug, string sectionSlug)
     {

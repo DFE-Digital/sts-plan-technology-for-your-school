@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model ContinueSelfAssessmentViewModel
 
 @{
@@ -11,13 +13,24 @@
 }
 
 <span class="govuk-caption-xl">@Model.TopicName</span>
-<h1 class="govuk-heading-xl">Continue self-assessment</h1>
+<h1 class="govuk-heading-xl">
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueHeader)
+</h1>
+
+    @{
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["dateUpdated"] = Model.AssessmentUpdatedDate.ToString("dd MMMM yyyy")
+    };
+}
 
 <p>
-    The self-assessment was last updated @Model.AssessmentUpdatedDate.ToString("dd MMMM yyyy").
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueIntroText, dynamicValues)
 </p>
 
-<h2 class="govuk-heading-l">Your self-assessment answers</h2>
+<h2 class="govuk-heading-l">
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueAnswersHeader)
+</h2>
 <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 @foreach (var response in Model.Responses)
 {
@@ -30,8 +43,8 @@
 
 <hr class="govuk-section-break govuk-section-break--m">
 
-<p>You can continue this self-assessment and answer the remaining questions.</p>
-<p>If you choose to restart the self-assessment, any previous answers will be replaced.</p>
+<p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueInfoText)</p>
+<p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueInfoMore)</p>
 
 <div class="govuk-button-group">
     <a href="@Url.Action(
@@ -40,7 +53,7 @@
         new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug })"
        class="govuk-button"
        data-module="govuk-button">
-        Continue self-assessment
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueContinueButton)
     </a>
     <a href="@Url.Action(
         nameof(QuestionsController.RestartSelfAssessment),
@@ -48,6 +61,6 @@
         new { categorySlug = Model.CategorySlug, sectionSlug = Model.SectionSlug, isObsoleteSubmissionFlow = false })"
        class="govuk-button govuk-button--secondary"
        data-module="govuk-button">
-        Restart self-assessment
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueRestartButton)
     </a>
 </div>

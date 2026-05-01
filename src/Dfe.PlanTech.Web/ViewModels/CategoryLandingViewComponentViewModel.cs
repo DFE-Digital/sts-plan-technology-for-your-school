@@ -18,5 +18,4 @@ public class CategoryLandingViewComponentViewModel
     public RecommendationSortOrder? SortType { get; set; }
     public bool Print { get; set; }
     public required string StatusLinkPartialName { get; set; }
-    public List<MicrocopyEntry>? MicrocopyEntries { get; set; }
 }

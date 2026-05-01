@@ -71,9 +71,6 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
             ContentfulContentTypeConstants.ComponentNotificationBannerContentfulContentTypeId
         )]
         [InlineData(ContentfulContentTypeConstants.ComponentTextBodyContentfulContentTypeId)]
-        [InlineData(
-            ContentfulContentTypeConstants.ComponentTextBodyWithMaturityContentfulContentTypeId
-        )]
         [InlineData(ContentfulContentTypeConstants.ComponentTitleContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ComponentWarningContentfulContentTypeId)]
         [InlineData(ContentfulContentTypeConstants.ContentSupportPageContentfulContentTypeId)]
@@ -94,6 +91,7 @@ namespace Dfe.PlanTech.Data.Contentful.UnitTests.Persistence
             ContentfulContentTypeConstants.RichTextContentSupportDataContentfulContentTypeId
         )]
         [InlineData(ContentfulContentTypeConstants.RichTextMarkContentfulContentTypeId)]
+        [InlineData(ContentfulContentTypeConstants.RelatedActionContentfulContentTypeId)]
         public void ContentfulContentId_KnownContentfulId_ReturnsMatchingCsharpType_ForAllMappings(
             string contentfulTypeId
         )

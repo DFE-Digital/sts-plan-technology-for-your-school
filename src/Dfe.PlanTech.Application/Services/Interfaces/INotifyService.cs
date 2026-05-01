@@ -12,7 +12,7 @@ public interface INotifyService
         ComponentTextBodyEntry textBody,
         string establishmentName,
         string recommendationHeader,
-        string sectionName,
+        string categoryName,
         RecommendationStatus recommendationStatus
     );
 

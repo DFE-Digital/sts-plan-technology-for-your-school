@@ -10,4 +10,6 @@ public class QuestionnaireCategoryEntry : ContentfulEntry
     public List<ContentfulEntry>? Content { get; set; }
     public List<QuestionnaireSectionEntry> Sections { get; set; } = [];
     public PageEntry? LandingPage { get; set; }
+    public bool HasBanner { get; init; } = false;
+    public List<ContentfulEntry> AfterContentContent { get; init; } = [];
 }

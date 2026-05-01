@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 
 namespace Dfe.PlanTech.Data.Sql.Interfaces;
@@ -19,6 +20,11 @@ public interface ISubmissionRepository
         string sectionId,
         SubmissionStatus? status
     );
+    Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    );
     Task<SubmissionEntity?> GetSubmissionByIdAsync(int submissionId);
     Task<SubmissionEntity> SetSubmissionInaccessibleAsync(int submissionId);
     Task<SubmissionEntity> SetSubmissionInProgressAsync(int submissionId);
@@ -29,4 +35,5 @@ public interface ISubmissionRepository
     );
     Task<List<SectionStatusEntity>> GetSectionStatusesAsync(string sectionIds, int establishmentId);
     Task SetSubmissionDeletedAsync(int establishmentId, string sectionId);
+    Task<int> SubmitResponse(AssessmentResponseModel response);
 }

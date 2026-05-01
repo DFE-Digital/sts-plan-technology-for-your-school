@@ -1,9 +1,12 @@
 using Contentful.Core.Configuration;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
@@ -29,6 +32,7 @@ public class RecommendationsViewBuilderTests
     private readonly INotifyService _notifyService = Substitute.For<INotifyService>();
     private readonly IRecommendationService _recommendationService =
         Substitute.For<IRecommendationService>();
+    private readonly IMicrocopyProvider _microcopyProvider = Substitute.For<IMicrocopyProvider>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
 
     // ---- Options
@@ -43,7 +47,8 @@ public class RecommendationsViewBuilderTests
             _currentUser,
             _notifyService,
             _recommendationService,
-            _submissions
+            _submissions,
+            _microcopyProvider
         );
 
     private static TestController CreateController() => new TestController();
@@ -966,7 +971,7 @@ public class RecommendationsViewBuilderTests
                 textBody,
                 "Springfield Primary",
                 "Use MFA",
-                "section",
+                "category",
                 RecommendationStatus.InProgress
             )
             .Returns([new NotifySendResult { Recipient = DefaultRecipient, Errors = [] }]);
@@ -1014,7 +1019,7 @@ public class RecommendationsViewBuilderTests
                 textBody,
                 "Springfield Primary",
                 "Use MFA",
-                "section",
+                "category",
                 RecommendationStatus.InProgress
             );
     }
@@ -1217,6 +1222,27 @@ public class RecommendationsViewBuilderTests
             .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
 
         var selectedStatus = RecommendationStatus.NotStarted;
+        var statusDisplayName = selectedStatus.GetDisplayName();
+        var notesEntry = "Status manually updated to Not started";
+        var successHeader = "Status updated to 'Not started'";
+
+        _microcopyProvider
+            .GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.SingleRecommendationHistoryReason,
+                Arg.Is<Dictionary<string, string>>(d =>
+                    d.ContainsKey("recStatus") && d["recStatus"] == statusDisplayName
+                )
+            )
+            .Returns(notesEntry);
+
+        _microcopyProvider
+            .GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
+                Arg.Is<Dictionary<string, string>>(d =>
+                    d != null && d.ContainsKey("recStatus") && d["recStatus"] == statusDisplayName
+                )
+            )
+            .Returns(successHeader);
 
         // Act
         var result = await sut.UpdateRecommendationStatusAsync(
@@ -1231,8 +1257,8 @@ public class RecommendationsViewBuilderTests
         // Assert
 
         // TempData success banner should be set
-        var successTitle = Assert.IsType<string>(ctl.TempData["StatusUpdateSuccessTitle"]);
-        Assert.Contains("Status updated to", successTitle);
+        var successResult = Assert.IsType<string>(ctl.TempData["StatusUpdateSuccessTitle"]);
+        Assert.Equal(successHeader, successResult);
 
         // Service is called with the correct ids and a default note containing our literal text
         await _recommendationService
@@ -1242,7 +1268,7 @@ public class RecommendationsViewBuilderTests
                 establishmentId,
                 userId,
                 selectedStatus,
-                Arg.Is<string>(n => n.Contains("Status manually updated")),
+                Arg.Is<string>(n => n == notesEntry),
                 Arg.Any<int?>()
             );
 
@@ -1320,6 +1346,110 @@ public class RecommendationsViewBuilderTests
             );
 
         Assert.IsType<RedirectToActionResult>(result);
+    }
+
+    [Fact]
+    public async Task RouteToSingleRecommendation_WhenChunkHasRelatedActions_PopulatesViewModel()
+    {
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+
+        var categorySlug = "cat-a";
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        var secondChunk = section.CoreRecommendations.First(c => c.Slug == "second-chunk-2");
+        secondChunk.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Share this recommendation",
+                Url = "/recommendations/share"
+            }
+        );
+        secondChunk.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Print this recommendation",
+                Url = "/recommendations/print"
+            }
+        );
+
+        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync("C2", 123)
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.Complete,
+                    DateCreated = DateTime.UtcNow.AddDays(-1),
+                }
+            );
+
+        _recommendationService
+            .GetRecommendationHistoryAsync("C2", 123)
+            .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
+
+        var result = await sut.RouteToSingleRecommendation(
+            ctl,
+            categorySlug,
+            "sec-1",
+            "second-chunk-2",
+            useChecklist: false
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
+
+        Assert.Equal(2, vm.RelatedActions.Count);
+        Assert.Equal("Share this recommendation", vm.RelatedActions[0].Text);
+        Assert.Equal("/recommendations/share", vm.RelatedActions[0].Url);
+        Assert.Equal("Print this recommendation", vm.RelatedActions[1].Text);
+        Assert.Equal("/recommendations/print", vm.RelatedActions[1].Url);
+    }
+
+    [Fact]
+    public async Task RouteToSingleRecommendation_WhenChunkHasNoRelatedActions_ReturnsEmptyRelatedActions()
+    {
+        var sut = CreateServiceUnderTest();
+        var ctl = CreateController();
+
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+
+        var categorySlug = "cat-a";
+        var section = CreateSection("S1", "sec-1", "Section One");
+
+        _contentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug).Returns("Networking");
+        _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync("C2", 123)
+            .Returns(
+                new SqlEstablishmentRecommendationHistoryDto
+                {
+                    NewStatus = RecommendationStatus.Complete,
+                    DateCreated = DateTime.UtcNow.AddDays(-1),
+                }
+            );
+
+        _recommendationService
+            .GetRecommendationHistoryAsync("C2", 123)
+            .Returns(Array.Empty<SqlEstablishmentRecommendationHistoryDto>());
+
+        var result = await sut.RouteToSingleRecommendation(
+            ctl,
+            categorySlug,
+            "sec-1",
+            "second-chunk-2",
+            useChecklist: false
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var vm = Assert.IsType<SingleRecommendationViewModel>(view.Model);
+
+        Assert.Empty(vm.RelatedActions);
     }
 
     // ---------- Support ----------

@@ -564,6 +564,15 @@ public class ReviewAnswersViewBuilderTests
             SubmissionStatus.CompleteReviewed
         );
 
+        var microcopy = new List<MicrocopyEntry>
+        {
+            new MicrocopyEntry
+            {
+                Key = "testEntry",
+                Value = "test microcopy value"
+            }
+        };
+
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
             section,
             submissionModel,
@@ -610,6 +619,16 @@ public class ReviewAnswersViewBuilderTests
             submission,
             SubmissionStatus.CompleteReviewed
         );
+
+        var microcopy = new List<MicrocopyEntry>
+        {
+            new MicrocopyEntry
+            {
+                Key = "testEntry",
+                Value = "test microcopy value"
+            }
+        };
+
 
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
             section,

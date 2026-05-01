@@ -1,5 +1,15 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
 @using static Dfe.PlanTech.Core.Constants.ContentfulMicrocopyConstants
+@inject IMicrocopyProvider Microcopy
 @model CategoryLandingViewComponentViewModel
+
+@{
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["topic"] = Model.SectionName?.ToLower() ?? "",
+        ["standard"] = Model.CategoryName.ToLower().Trim()
+    };
+}
 
 @if (Model.NoSectionsErrorRedirectUrl != null)
 {
@@ -17,20 +27,16 @@
 {
     <div class="govuk-panel govuk-panel--confirmation govuk-!-margin-bottom-8">
         <h1 class="govuk-panel__title">
-            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
-                ContentfulMicrocopyConstants.LandingPageSuccessPanelHeader,
-                Model.MicrocopyEntries,
-                new Dictionary<string, string>{ ["topic"] = Model.SectionName.ToLower()})
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.LandingPageSuccessPanelHeader, dynamicValues)
         </h1>
         <div class="govuk-panel__body">
-            @ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageSuccessPanelBody, Model.MicrocopyEntries)
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.LandingPageSuccessPanelBody)
         </div>
     </div>
 }
 
 @{
     var title = new ComponentTitleEntry(Model.CategoryName);
-    var microcopy = Model.MicrocopyEntries;
 }
 
 @if (!Model.Print)
@@ -39,20 +45,20 @@
     bool anySectionsCompleted = Model.CompletedSectionsCount != 0;
     bool allSectionsCompleted = Model.CompletedSectionsCount == Model.Sections.Count;
 
-    MicrocopyRecord insetMicrocopyRecord;
+    string insetMicrocopyKey = string.Empty;
 
     <partial name="Email/SendResultsPanel" />
 
     if (Model.CompletedSectionsCount == 0)
     {
-        insetMicrocopyRecord = ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted;
+        insetMicrocopyKey = ContentfulMicrocopyConstants.LandingPageInsetIntroNotStarted;
     }
     else
     {
-        insetMicrocopyRecord = ContentfulMicrocopyConstants.LandingPageInsetIntroContinue;
+        insetMicrocopyKey = ContentfulMicrocopyConstants.LandingPageInsetIntroContinue;
     }
 
-    var landingHeader = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.LandingPageHeader, Model.MicrocopyEntries);
+    var landingHeader = await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.LandingPageHeader);
 
     <span class="govuk-caption-xl">@landingHeader</span>
     <partial name="Components/PageComponentFactory" model="@title" />
@@ -61,13 +67,8 @@
     {
         <div class="govuk-inset-text">
             @{
-                var insetText = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(
-                    insetMicrocopyRecord,
-                    Model.MicrocopyEntries,
-                    new Dictionary<string, string>
-                    {
-                        ["standard"] = Model.CategoryName.ToLower().Trim()
-                    });
+                var insetText = await Microcopy.GetTextByKeyAsync(insetMicrocopyKey, dynamicValues);
+
                 <p>@insetText</p>
 
                 if (anySectionsCompleted)
@@ -79,7 +80,6 @@
                             CategorySlug = Model.CategorySlug,
                             Section = topic,
                             Context = "Default",
-                            MicrocopyEntries = microcopy
                         };
                         <partial name="Components/CategoryLanding/SectionAssessmentLink" model='@vm' />
                     }

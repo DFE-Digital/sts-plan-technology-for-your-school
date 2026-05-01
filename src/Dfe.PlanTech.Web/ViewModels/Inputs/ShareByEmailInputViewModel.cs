@@ -40,7 +40,7 @@ public class ShareByEmailInputViewModel : IValidatableObject
                 if (!address.IsValid(email) || !domain.Contains('.'))
                 {
                     yield return new ValidationResult(
-                        "Please enter a valid email address",
+                        "Enter a valid email address",
                         [$"EmailAddresses[{i}]"]
                     );
                 }
@@ -49,7 +49,7 @@ public class ShareByEmailInputViewModel : IValidatableObject
 
         if (string.IsNullOrWhiteSpace(NameOfUser))
         {
-            yield return new ValidationResult("Please enter your name", [nameof(NameOfUser)]);
+            yield return new ValidationResult("Enter your name", [nameof(NameOfUser)]);
         }
     }
 

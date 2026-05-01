@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model PageViewModel
 
 @section NavButton {
@@ -52,7 +54,7 @@
     @if ((isHomeCategoryPage || isAutomatedTestingHomePage) && categories is not null && categories.Any())
     {
         await Html.RenderPartialAsync("Components/Page", Model.Page);
-        var homeHeader = ContentfulMicrocopyHelper.GetMicrocopyTextByKey(ContentfulMicrocopyConstants.HomeHeader, Model.MicrocopyEntries);
+        var homeHeader = await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.HomeHeader);
 
         <h2 class="govuk-heading-l">@homeHeader</h2>
         <div class="dfe-grid-container">
@@ -65,5 +67,43 @@
     else
     {
         await Html.RenderPartialAsync("Components/Page", Model.Page);
+    }
+
+    @section RelatedActions {
+        @if (Model.Page.RelatedActions.Any(x =>
+                    !string.IsNullOrWhiteSpace(x.Title) &&
+                    !string.IsNullOrWhiteSpace(x.Url)))
+        {
+            <hr class="govuk-section-break govuk-section-break--visible custom-hr-blue">
+
+            <h2 class="govuk-heading-m govuk-!-padding-top-4">
+                Related actions
+            </h2>
+
+            @foreach (var action in Model.Page.RelatedActions.Where(x =>
+                                !string.IsNullOrWhiteSpace(x.Title) &&
+                                !string.IsNullOrWhiteSpace(x.Url)))
+            {
+                <p class="govuk-body-s">
+                    <a class="govuk-link" href="@action.Url">
+                        @action.Title
+                    </a>
+                </p>
+            }
+        }
+    }
+}
+
+@section AfterContent {
+    @foreach (var content in Model.Page.AfterContentContent)
+    {
+        if (Model.Page.HasBanner && content.GetType() == typeof(ComponentBannerEntry))
+        {
+            await Html.RenderPartialAsync("Banner", content);
+        }
+        else
+        {
+            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+        }
     }
 }

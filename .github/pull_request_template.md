@@ -62,6 +62,7 @@ Delete any rows that do not apply to the PR.
 - [ ] Title uses [Angular commit convention](https://www.conventionalcommits.org/en/v1.0.0/)
 - [ ] PR targets development branch
 - [ ] Unit tests have been added/updated
+- [ ] Unit tests pass
 - [ ] E2E tests have been added/updated
 - [ ] GitHub workflows/actions have been added/updated
 - [ ] Terraform has been updated

@@ -14,5 +14,8 @@ internal class QuestionEntityConfiguration : IEntityTypeConfiguration<QuestionEn
         builder.Property(question => question.QuestionText).HasMaxLength(4000); // NVARCHAR max length
         builder.Property(question => question.ContentfulRef).HasMaxLength(50);
         builder.Property(question => question.DateCreated).ValueGeneratedOnAdd();
+        builder.Property(b => b.UserActionId)
+               .HasColumnName("userActionId")
+               .IsRequired(false);
     }
 }
