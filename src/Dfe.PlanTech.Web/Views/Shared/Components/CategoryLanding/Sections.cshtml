@@ -9,7 +9,7 @@
 
     <partial name="@Model.StatusLinkPartialName" model='new StatusLinkViewModel { CategorySlug = Model.CategorySlug, Section = topic, Context = "Sections" }' />
 
-    @if (!string.IsNullOrEmpty(topic.LastCompletionDate))
+    @if (topic.Recommendations is not null && !string.IsNullOrEmpty(topic.LastCompletionDate))
     {
         <div class="recommendation-action-header">
             <div class="dfe-table-scroll" tabindex="0">
