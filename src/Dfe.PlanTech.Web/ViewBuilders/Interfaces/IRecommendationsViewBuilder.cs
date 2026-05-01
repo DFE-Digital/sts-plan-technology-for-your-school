@@ -27,8 +27,7 @@ public interface IRecommendationsViewBuilder
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        string selectedStatus,
-        string? notes
+        SingleRecommendationInputViewModel inputModel
     );
 
     Task<IActionResult> RouteToPrintSingle(
