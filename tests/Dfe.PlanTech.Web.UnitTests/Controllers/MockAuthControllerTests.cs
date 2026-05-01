@@ -557,7 +557,7 @@ public class MockAuthControllerTests
             type.GetProperty("Expires")!.SetValue(instance, _expires);
             type.GetProperty("DbEstablishmentId")!.SetValue(instance, _dbEstablishmentId);
             type.GetProperty("DbUserId")!.SetValue(instance, _dbUserId);
-            type.GetProperty("DbMatEstablishmentId")!.SetValue(instance, _dbMatEstablishmentId);
+            type.GetProperty("DbMatEstablishmentId")!.SetValue(instance, default(int?));
 
             return instance;
         }
