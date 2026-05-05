@@ -72,6 +72,11 @@ internal class EstablishmentRecommendationHistoryEntityConfiguration
             .HasForeignKey(h => h.ResponseId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);
-                                               
+
+        builder
+            .Property(b => b.UserActionId)
+            .HasColumnName("userActionId")
+            .IsRequired(false);
+
     }
 }

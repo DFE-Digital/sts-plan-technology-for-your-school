@@ -172,41 +172,46 @@ public class RecommendationsControllerTests
     [Fact]
     public async Task UpdateRecommendationStatus_ThrowsIfCategorySlugNull()
     {
+        var inputModel = new SingleRecommendationInputViewModel
+        {
+            SelectedStatus = RecommendationStatus.Complete.ToString(),
+            Notes = null,
+        };
+
         var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            _controller.UpdateRecommendationStatus(
-                null!,
-                "section-slug",
-                "chunk-slug",
-                RecommendationStatus.Complete.ToString(),
-                null
-            )
+            _controller.UpdateRecommendationStatus(null!, "section-slug", "chunk-slug", inputModel)
         );
     }
 
     [Fact]
     public async Task UpdateRecommendationStatus_ThrowsIfSectionSlugNull()
     {
+        var inputModel = new SingleRecommendationInputViewModel
+        {
+            SelectedStatus = RecommendationStatus.Complete.ToString(),
+            Notes = null,
+        };
+
         var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-            _controller.UpdateRecommendationStatus(
-                "category-slug",
-                null!,
-                "chunk-slug",
-                RecommendationStatus.Complete.ToString(),
-                null
-            )
+            _controller.UpdateRecommendationStatus("category-slug", null!, "chunk-slug", inputModel)
         );
     }
 
     [Fact]
     public async Task UpdateRecommendationStatus_ThrowsIfChunkSlugNull()
     {
+        var inputModel = new SingleRecommendationInputViewModel
+        {
+            SelectedStatus = RecommendationStatus.Complete.ToString(),
+            Notes = null,
+        };
+
         var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
             _controller.UpdateRecommendationStatus(
                 "category-slug",
                 "section-slug",
                 null!,
-                RecommendationStatus.Complete.ToString(),
-                null
+                inputModel
             )
         );
     }

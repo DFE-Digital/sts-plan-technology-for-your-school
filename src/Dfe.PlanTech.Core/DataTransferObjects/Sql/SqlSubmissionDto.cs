@@ -9,11 +9,11 @@ public class SqlSubmissionDto : ISqlDto
     public SqlEstablishmentDto Establishment { get; set; } = null!;
     public string SectionId { get; set; } = null!;
     public string SectionName { get; set; } = null!;
-    public string? Maturity { get; set; }
     public DateTime DateCreated { get; set; }
     public DateTime? DateLastUpdated { get; set; }
     public DateTime? DateCompleted { get; set; }
     public IEnumerable<SqlResponseDto> Responses { get; set; } = [];
     public bool Deleted { get; set; }
     public SubmissionStatus Status { get; set; }
+    public Guid? UserActionId { get; set; }
 }

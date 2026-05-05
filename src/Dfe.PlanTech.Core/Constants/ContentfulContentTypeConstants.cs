@@ -50,10 +50,6 @@ public static class ContentfulContentTypeConstants
             ComponentNotificationBannerContentfulContentTypeId
         },
         { typeof(ComponentTextBodyEntry), ComponentTextBodyContentfulContentTypeId },
-        {
-            typeof(ComponentTextBodyWithMaturityEntry),
-            ComponentTextBodyWithMaturityContentfulContentTypeId
-        },
         { typeof(ComponentTitleEntry), ComponentTitleContentfulContentTypeId },
         { typeof(ComponentWarningEntry), ComponentWarningContentfulContentTypeId },
         { typeof(ContentSupportPageEntry), ContentSupportPageContentfulContentTypeId },
@@ -77,6 +73,7 @@ public static class ContentfulContentTypeConstants
             RichTextContentSupportDataContentfulContentTypeId
         },
         { typeof(RichTextMarkField), RichTextMarkContentfulContentTypeId },
+        { typeof(ComponentBannerEntry), ComponentBannerEntryId }
     };
 
     // Contentful content type IDs are managed in Contentful.
@@ -100,8 +97,6 @@ public static class ContentfulContentTypeConstants
     public const string ComponentJumpLinkContentfulContentTypeId = "csJumpLinkComponent";
     public const string ComponentNotificationBannerContentfulContentTypeId = "notificationBanner";
     public const string ComponentTextBodyContentfulContentTypeId = "textBody";
-    public const string ComponentTextBodyWithMaturityContentfulContentTypeId =
-        "componentTextBodyWithMaturity";
     public const string ComponentTitleContentfulContentTypeId = "title";
     public const string ComponentWarningContentfulContentTypeId = "warningComponent";
     public const string ContentSupportPageContentfulContentTypeId = "contentSupportPage";
@@ -123,4 +118,5 @@ public static class ContentfulContentTypeConstants
     public const string RichTextContentSupportDataContentfulContentTypeId =
         "richTextContentSupportData";
     public const string RichTextMarkContentfulContentTypeId = "richTextMark";
+    public const string ComponentBannerEntryId = "componentBanner";
 }

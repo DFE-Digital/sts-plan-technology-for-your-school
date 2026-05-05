@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -9,9 +10,12 @@ using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
-public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepository
+public class SubmissionRepository(
+    PlanTechDbContext dbContext,
+    IUserActionIdAccessor userActionIdAccessor) : ISubmissionRepository
 {
     protected readonly PlanTechDbContext _db = dbContext;
+    private readonly IUserActionIdAccessor _userActionIdAccessor = userActionIdAccessor;
 
     public async Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission)
     {
@@ -22,7 +26,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             SectionId = existingSubmission.SectionId,
             SectionName = existingSubmission.SectionName,
             EstablishmentId = existingSubmission.EstablishmentId,
-            Maturity = existingSubmission.Maturity,
             DateCreated = DateTime.UtcNow,
             Status = SubmissionStatus.InProgress,
             Responses = existingSubmission
@@ -32,7 +35,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                     AnswerId = r.AnswerId,
                     UserId = r.UserId,
                     UserEstablishmentId = r.UserEstablishmentId,
-                    Maturity = r.Maturity,
                     Question = r.Question,
                     Answer = r.Answer,
                     DateCreated = DateTime.UtcNow,
@@ -65,7 +67,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
 
         var sectionQuestions = await GetQuestionsForSection(section);
 
-        // Create recommendation dtos each of the core recs
         var recommendationDtos = section
             .CoreRecommendations.Where(r => r.Question is not null)
             .Select(r =>
@@ -142,7 +143,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
             submissionId
         );
-        // No need to save changes as this is done in the call above
     }
 
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
@@ -151,11 +151,42 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         SubmissionStatus? status
     )
     {
-        // Get latest submission
         var submission = await GetPreviousSubmissionsInDescendingOrder(
                 establishmentId,
                 sectionId,
                 status
+            )
+            .FirstOrDefaultAsync();
+
+        if (submission is null)
+            return null;
+
+        submission.Responses = submission
+            .Responses.OrderByDescending(response => response.DateLastUpdated)
+            .GroupBy(response => response.QuestionId)
+            .Select(group =>
+                group
+                    .OrderByDescending(response => response.DateLastUpdated)
+                    .ThenByDescending(response => response.Id)
+                    .First()
+            )
+            .ToList();
+
+        return submission;
+    }
+
+    // Overload that allows for multiple statuses to be returned from the query
+    public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        // Get latest submission
+        var submission = await GetPreviousSubmissionsInDescendingOrder(
+                establishmentId,
+                sectionId,
+                statuses
             )
             .FirstOrDefaultAsync();
 
@@ -237,7 +268,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            status: SubmissionStatus.InProgress
+            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
         );
 
         var submission =
@@ -268,7 +299,7 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            status: SubmissionStatus.InProgress
+            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
         );
 
         var submission = await query.FirstOrDefaultAsync();
@@ -310,6 +341,29 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                 && submission.EstablishmentId == establishmentId
                 && submission.SectionId == sectionId
                 && (status == null || submission.Status == status)
+            )
+            .OrderByDescending(submission => submission.DateCreated);
+    }
+
+    // Overload that returns submissions with any of the specified statuses
+    private IQueryable<SubmissionEntity> GetPreviousSubmissionsInDescendingOrder(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        ArgumentNullException.ThrowIfNull(statuses);
+
+        var statusOptions = statuses.ToList();
+
+        if (statusOptions.Count == 0)
+            throw new ArgumentException("At least one submission status must be provided", nameof(statuses));
+
+        return GetSubmissionsBy(submission =>
+                !submission.Deleted
+                && submission.EstablishmentId == establishmentId
+                && submission.SectionId == sectionId
+                && statusOptions.Contains(submission.Status)
             )
             .OrderByDescending(submission => submission.DateCreated);
     }
@@ -457,7 +511,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
                         currentSubmission?.DateLastUpdated
                         ?? currentSubmission?.DateCreated
                         ?? DateTime.UtcNow,
-                    LastMaturity = lastCompleteSubmission?.Maturity,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
                 };
             })
@@ -483,9 +536,13 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
         if (submissionId is null)
             return;
 
+        var userActionId = _userActionIdAccessor.GetUserActionId();
+
         await _db
             .Submissions.Where(s => s.Id == submissionId.Value)
-            .ExecuteUpdateAsync(setters => setters.SetProperty(s => s.Deleted, true));
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(s => s.Deleted, true)
+                .SetProperty(s => s.UserActionId, userActionId));
     }
 
     public async Task<int> SubmitResponse(AssessmentResponseModel response)
@@ -529,7 +586,6 @@ public class SubmissionRepository(PlanTechDbContext dbContext) : ISubmissionRepo
             SubmissionId = submissionId,
             QuestionId = questionId,
             AnswerId = answerId,
-            Maturity = string.Empty,
             DateCreated = DateTime.UtcNow,
         };
 
