@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Core.Constants;
@@ -6,7 +5,7 @@ namespace Dfe.PlanTech.Core.Constants;
 [ExcludeFromCodeCoverage]
 public static class ContentfulMicrocopyConstants
 {
-    // Keys    
+    // Keys
     public const string HomeHeader = "homeHeader";
     public const string HomeCardStatusSingleNotStarted = "cardStatusSingleNotStarted";
     public const string HomeCardStatusMultipleNotStarted = "cardStatusMultipleNotStarted";
@@ -70,23 +69,28 @@ public static class ContentfulMicrocopyConstants
 
     private const string CardsFallback = "Go to standard";
 
-    private const string TopicLinksFallback = "Start, continue or view answers for this self-assessment";
+    private const string TopicLinksFallback =
+        "Start, continue or view answers for this self-assessment";
     private const string PrintLinksFallback = "Print all recommendations";
     private const string SuccessHeaderFallback = "Your self-assessment is complete";
     private const string LandingPageBackLinkFallback = "Back to choose a standard";
 
     private const string GroupsSelectHeaderFallback = "Select a school";
 
-    private const string PrintSectionIncompleteFallback = "The self-assessment must be completed before recommendations are available.";
+    private const string PrintSectionIncompleteFallback =
+        "The self-assessment must be completed before recommendations are available.";
 
     private const string PrintSingleLinkFallback = "Print this recommendation";
-    private const string StatusUpdatedFallback = "Status updated";
-    private const string RecommendationStatusQuestionFallback = "Have you completed this recommendation?";
+    private const string StatusUpdatedFallback = "Recommendation updated";
+    private const string RecommendationStatusQuestionFallback =
+        "Have you completed this recommendation?";
     private const string RecommendationStatusButtonFallback = "Update status";
     private const string RecommendationHistoryHeaderFallback = "Recent activity";
     private const string RecommendationCommentLabelFallback = "Add a comment";
-    private const string RecommendationCommentHintFallback = "Anyone who uses the service for your school will be able to see comments. Do not include personal or sensitive information, like email addresses or account details.";
-    private const string RecommendationHistoryInitialFallback = "Status set based on self assessment.";
+    private const string RecommendationCommentHintFallback =
+        "Anyone who uses the service for your school will be able to see comments. Do not include personal or sensitive information, like email addresses or account details.";
+    private const string RecommendationHistoryInitialFallback =
+        "Status set based on self assessment.";
     private const string RecommendationHistoryChangeFallback = "Status changed.";
 
     private const string ViewAnswersHeaderFallback = "View your answers";
@@ -100,7 +104,10 @@ public static class ContentfulMicrocopyConstants
     private const string ContinueContinueButtonFallback = "Continue self-assessment";
     private const string ContinueRestartButtonFallback = "Restart self-assessment";
 
-    public static readonly IReadOnlyDictionary<string, string> FallbackText = new Dictionary<string, string>
+    public static readonly IReadOnlyDictionary<string, string> FallbackText = new Dictionary<
+        string,
+        string
+    >
     {
         { HomeHeader, EmptyFallback },
         { HomeCardStatusSingleNotStarted, CardsFallback },
@@ -170,7 +177,10 @@ public static class ContentfulMicrocopyConstants
         public const string ContactLink = "contactLink";
     }
 
-    public static readonly IReadOnlyDictionary<string, List<string>> Variables = new Dictionary<string, List<string>>
+    public static readonly IReadOnlyDictionary<string, List<string>> Variables = new Dictionary<
+        string,
+        List<string>
+    >
     {
         { LandingPagePrintLink, [VariableNames.Standard] },
         { LandingPageInsetIntroNotStarted, [VariableNames.Standard] },
@@ -184,7 +194,10 @@ public static class ContentfulMicrocopyConstants
         { SingleRecommendationPrintAllLink, [VariableNames.Topic] },
         { SingleRecommendationSuccessHeader, [VariableNames.RecStatus] },
         { SingleRecommendationPosition, [VariableNames.Position, VariableNames.TotalRecsForTopic] },
-        { SingleRecommendationHistoryInitial, [VariableNames.RecStatus, VariableNames.Establishment] },
+        {
+            SingleRecommendationHistoryInitial,
+            [VariableNames.RecStatus, VariableNames.Establishment]
+        },
         { SingleRecommendationHistoryAnswer, [VariableNames.Answer] },
         { SingleRecommendationHistoryChange, [VariableNames.RecStatus] },
         { SingleRecommendationHistoryReason, [VariableNames.RecStatus] },

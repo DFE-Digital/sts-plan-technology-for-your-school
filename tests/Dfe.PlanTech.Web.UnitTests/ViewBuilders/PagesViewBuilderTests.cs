@@ -711,6 +711,71 @@ public class PagesViewBuilderTests
         Assert.Equal(expected.ControllerName, redirect.ControllerName);
     }
 
+    [Fact]
+    public async Task RouteBasedOnOrganisationType_LandingPage_Path_Populates_RelatedActions_From_Page()
+    {
+        var categoryTitle = "Networking";
+        var slug = categoryTitle.ToLower();
+        var page = CreatePage(slug, isLanding: true);
+        page.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Share this list of recommendations",
+                Url = "/networking/share",
+            }
+        );
+        page.RelatedActions.Add(
+            new RelatedActionEntry
+            {
+                Title = "Print recommendations",
+                Url = "/networking/print",
+            }
+        );
+
+        var category = CreateCategory(categoryTitle);
+
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetCategoryBySlugAsync(slug, 4).Returns(category);
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        var controller = new TestController();
+        controller.TempData["SectionName"] = "Some Section";
+
+        var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
+        var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
+        Assert.Equal(2, vm.RelatedActions.Count);
+        Assert.Equal("Share this list of recommendations", vm.RelatedActions[0].Text);
+        Assert.Equal("/networking/share", vm.RelatedActions[0].Url);
+        Assert.Equal("Print recommendations", vm.RelatedActions[1].Text);
+        Assert.Equal("/networking/print", vm.RelatedActions[1].Url);
+    }
+
+    [Fact]
+    public async Task RouteBasedOnOrganisationType_LandingPage_Path_With_No_RelatedActions_Returns_Empty_RelatedActions()
+    {
+        var categoryTitle = "Networking";
+        var slug = categoryTitle.ToLower();
+        var page = CreatePage(slug, isLanding: true);
+        var category = CreateCategory(categoryTitle);
+
+        var contentful = Substitute.For<IContentfulService>();
+        contentful.GetCategoryBySlugAsync(slug, 4).Returns(category);
+
+        var sut = CreateServiceUnderTest(contentful: contentful);
+        var controller = new TestController();
+        controller.TempData["SectionName"] = "Some Section";
+
+        var action = await sut.RouteBasedOnOrganisationTypeAsync(controller, page);
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal(PagesViewBuilder.CategoryLandingPageView, view.ViewName);
+        var vm = Assert.IsType<CategoryLandingPageViewModel>(view.Model);
+        Assert.Empty(vm.RelatedActions);
+    }
+
     // ---------- BuildNotFoundViewModel ----------
 
     [Fact]

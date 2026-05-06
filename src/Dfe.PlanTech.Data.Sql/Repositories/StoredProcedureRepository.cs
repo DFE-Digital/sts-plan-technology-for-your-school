@@ -126,7 +126,6 @@ public class StoredProcedureRepository : IStoredProcedureRepository
                         currentSubmission?.DateLastUpdated
                         ?? currentSubmission?.DateCreated
                         ?? DateTime.UtcNow,
-                    LastMaturity = lastCompleteSubmission?.Maturity,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
                 };
             })

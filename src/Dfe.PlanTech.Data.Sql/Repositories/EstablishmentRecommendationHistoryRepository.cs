@@ -57,6 +57,7 @@ public class EstablishmentRecommendationHistoryRepository
         int recommendationId,
         int userId,
         int? matEstablishmentId,
+        int? responseId,
         RecommendationStatus? previousStatus,
         RecommendationStatus? newStatus,
         string noteText
@@ -68,6 +69,7 @@ public class EstablishmentRecommendationHistoryRepository
             RecommendationId = recommendationId,
             UserId = userId,
             MatEstablishmentId = matEstablishmentId,
+            ResponseId = responseId,
             PreviousStatus = previousStatus.ToString(),
             NewStatus = newStatus.ToString(),
             NoteText = noteText,

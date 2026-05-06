@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
@@ -15,7 +16,6 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using StackExchange.Redis;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -125,6 +125,16 @@ public class RecommendationsViewBuilder(
             OriginatingSlug = chunkSlug,
             History = groupedHistory,
             FirstActivity = firstActivity,
+            RelatedActions =
+                currentRecommendationChunk
+                    .RelatedActions?.Where(x => x is not null)
+                    .Select(x => new RelatedActionViewModel
+                    {
+                        Text = x.Title ?? string.Empty,
+                        Url = x.Url ?? string.Empty,
+                    })
+                    .ToList()
+                ?? [],
         };
 
         return controller.View(SingleRecommendationViewName, viewModel);
@@ -230,21 +240,37 @@ public class RecommendationsViewBuilder(
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        string? selectedStatus,
-        string? notes
+        SingleRecommendationInputViewModel inputModel
     )
     {
-        var selectedStatusEnum = selectedStatus.GetRecommendationStatusEnumValue();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
-        // Allow only specific statuses
-        if (selectedStatusEnum is null)
-        {
-            Logger.LogWarning(
-                "Invalid / unrecognised status value received: {SelectedStatus}: {SelectedStatusDisplayName}",
-                selectedStatus,
-                selectedStatusEnum
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
             );
-            controller.TempData["StatusUpdateError"] = "Select a valid status";
+
+        var recommendationChunks = section.CoreRecommendations.ToList();
+
+        var currentRecommendationChunk =
+            recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"No recommendation chunk found with slug matching: {chunkSlug}"
+            );
+
+        var recommendationHistory = await _recommendationService.GetRecommendationHistoryAsync(
+            currentRecommendationChunk.Id,
+            establishmentId
+        );
+
+        var currentStatus = recommendationHistory
+            .OrderByDescending(rh => rh.DateCreated)
+            .FirstOrDefault();
+
+        var validationResults = inputModel.ValidateForWorkflow(currentStatus?.NewStatus);
+        if (validationResults.Any())
+        {
             return await RouteToSingleRecommendation(
                 controller,
                 categorySlug,
@@ -254,49 +280,44 @@ public class RecommendationsViewBuilder(
             );
         }
 
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var userId = GetUserIdOrThrowException();
-        var userOrganisationId = CurrentUser.UserOrganisationId;
-
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
-            ?? throw new ContentfulDataUnavailableException(
-                $"Could not find section for slug {sectionSlug}"
-            );
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
             establishmentId,
             section,
             status: SubmissionStatus.CompleteReviewed
         );
 
-        var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var recommendationChunks = section.CoreRecommendations.ToList();
+        var dynamicValues =
+            currentStatus?.NewStatus != inputModel.SelectedStatusEnum
+                ? new Dictionary<string, string>
+                {
+                    ["recStatus"] = inputModel.SelectedStatusEnum!.Value.GetDisplayName(),
+                }
+                : null;
 
-        var currentRecommendationChunk =
-            recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
-            ?? throw new ContentfulDataUnavailableException(
-                $"No recommendation chunk found with slug matching: {chunkSlug}"
-            );
+        string? defaultNoteText = await _microcopyProvider.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.SingleRecommendationHistoryReason,
+            dynamicValues
+        );
 
-        var dynamicValues = new Dictionary<string, string>
-        {
-            ["recStatus"] = selectedStatusEnum.Value.GetDisplayName()
-        };
+        defaultNoteText = string.IsNullOrWhiteSpace(defaultNoteText) ? null : defaultNoteText;
+        var userId = GetUserIdOrThrowException();
+        var userOrganisationId = CurrentUser.UserOrganisationId;
 
         await _recommendationService.UpdateRecommendationStatusAsync(
             currentRecommendationChunk.Id,
             establishmentId,
             userId,
-            selectedStatusEnum.Value,
-            notes
-                ??
-                await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationHistoryReason, dynamicValues),
+            inputModel.SelectedStatusEnum!.Value,
+            inputModel.Notes ?? defaultNoteText,
             CurrentUser.IsMat ? userOrganisationId : null
         );
 
         // Set success message for the banner
         controller.TempData["StatusUpdateSuccessTitle"] =
-            await _microcopyProvider.GetTextByKeyAsync(ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader, dynamicValues);
+            await _microcopyProvider.GetTextByKeyAsync(
+                ContentfulMicrocopyConstants.SingleRecommendationSuccessHeader,
+                dynamicValues
+            );
 
         // Redirect back to the single recommendation page
         return PageRedirecter.RedirectToGetSingleRecommendation(
@@ -413,7 +434,7 @@ public class RecommendationsViewBuilder(
             textBody,
             establishmentName,
             recommendationChunk.HeaderText,
-            section.Name,
+            category.Header.Text,
             latestRecommendationHistory.NewStatus.Value
         );
 

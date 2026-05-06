@@ -13,7 +13,7 @@ public class SqlResponseDto : ISqlDto
     public SqlQuestionDto Question { get; set; } = null!;
     public int AnswerId { get; set; }
     public SqlAnswerDto Answer { get; set; } = null!;
-    public string Maturity { get; set; } = null!;
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
     public DateTime? DateLastUpdated { get; set; }
+    public Guid? UserActionId { get; set; }
 }

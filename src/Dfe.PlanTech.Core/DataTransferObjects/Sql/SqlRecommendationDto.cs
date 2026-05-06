@@ -10,4 +10,5 @@ public class SqlRecommendationDto : ISqlDto
     public SqlQuestionDto Question { get; init; } = null!;
     public bool Archived { get; init; } = false;
     public string? QuestionContentfulRef { get; init; }
+    public Guid? UserActionId { get; set; }
 }
