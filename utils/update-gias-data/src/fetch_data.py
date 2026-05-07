@@ -1,5 +1,9 @@
 from logging import getLogger
-from playwright.sync_api import Playwright, sync_playwright, TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import (
+    Playwright,
+    sync_playwright,
+    TimeoutError as PlaywrightTimeoutError,
+)
 
 from src.constants import DOWNLOAD_PATH, GIAS_DATA_URL
 
@@ -28,13 +32,17 @@ def _fetch_gias_data(play: Playwright) -> None:
     # Click "Download selected files"
     page.get_by_role("button", name="Download selected files").click()
 
+    # Wait for page to load
+    page.wait_for_load_state("networkidle")  # wait for navigation to complete
+
     # Wait for the dynamically generated Results.zip button to appear and be clickable
     results_btn = page.locator('input#download-button[value="Results.zip"]')
-    logger.info("Waiting for Results.zip button to appear")
-    results_btn.wait_for(state="visible")
-    expect_enabled_timeout_ms = DEFAULT_TIMEOUT_MS
 
     # Sometimes it appears disabled briefly while server-side job runs
+    logger.info("Waiting for Results.zip button to appear")
+    results_btn.wait_for(state="visible")
+
+    expect_enabled_timeout_ms = DEFAULT_TIMEOUT_MS
     page.wait_for_function(
         "btn => !btn.disabled",
         arg=results_btn.element_handle(),
