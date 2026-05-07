@@ -16,7 +16,18 @@ def _fetch_gias_data(play: Playwright) -> None:
     """Use playwright to download the dynamically generated GIAS data file"""
     browser = play.webkit.launch(headless=True)
 
-    context = browser.new_context(accept_downloads=True)
+    context = browser.new_context(
+        accept_downloads=True,
+        user_agent=(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0 Safari/537.36"
+        ),
+        extra_http_headers={
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-GB,en;q=0.9",
+        },
+    )
     context.set_default_timeout(DEFAULT_TIMEOUT_MS)
 
     page = context.new_page()
