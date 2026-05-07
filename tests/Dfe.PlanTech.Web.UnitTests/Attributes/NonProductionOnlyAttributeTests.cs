@@ -50,18 +50,16 @@ public class NonProductionOnlyAttributeTests
 
         var httpContext = new DefaultHttpContext
         {
-            RequestServices = services.BuildServiceProvider()
+            RequestServices = services.BuildServiceProvider(),
         };
 
-        var actionContext = new ActionContext(
-            httpContext,
-            new RouteData(),
-            new ActionDescriptor());
+        var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
 
         return new ActionExecutingContext(
             actionContext,
             new List<IFilterMetadata>(),
             new Dictionary<string, object?>(),
-            controller: null);
+            controller: null!
+        );
     }
 }
