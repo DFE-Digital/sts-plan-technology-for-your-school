@@ -35,6 +35,9 @@ def _fetch_gias_data(play: Playwright) -> None:
     # Wait for page to load
     page.wait_for_load_state("networkidle")  # wait for navigation to complete
 
+    page.screenshot(path=DOWNLOAD_PATH / "after_click.png")
+    logger.info("Current URL after click: %s", page.url)
+
     # Wait for the dynamically generated Results.zip button to appear and be clickable
     results_btn = page.locator('input#download-button[value="Results.zip"]')
 
