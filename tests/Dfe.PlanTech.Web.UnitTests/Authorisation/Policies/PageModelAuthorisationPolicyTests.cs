@@ -1,7 +1,8 @@
-using System.Security.Claims;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
@@ -14,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Policies;
 
@@ -231,10 +234,44 @@ public class PageModelAuthorisationPolicyTests
     {
         _contentfulService
             .GetPageBySlugAsync(Arg.Any<string>())
-            .Returns(callInfo => AuthNotRequiredPage);
+            .Returns(callInfo => AuthRequiredPage);
+
+        var org = new EstablishmentModel
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test School",
+            Urn = "123456",
+            Ukprn = "00000018",
+            Category = new IdWithNameModel
+            {
+                Id = "001",
+                Name = "Establishment",
+            },
+        };
+
+        var claimsIdentity = new ClaimsIdentity(
+        [
+            new Claim(ClaimConstants.NameIdentifier, "dsi-ref"),
+            new Claim(ClaimConstants.DB_USER_ID, "101"),
+            new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, "201"),
+            new Claim(ClaimConstants.Organisation, JsonSerializer.Serialize(org)),
+        ],
+            CookieAuthenticationDefaults.AuthenticationScheme
+        );
+
+        var principal = new ClaimsPrincipal(claimsIdentity);
+
+        _httpContext.User.Returns(principal);
+
+        _authContext = new AuthorizationHandlerContext(
+            [new PageAuthorisationRequirement()],
+            principal,
+            _httpContext
+        );
 
         await _policy.HandleAsync(_authContext);
 
+        Assert.True(_authContext.HasSucceeded);
         await _userActionTrackingService.Received(1).RecordAsync();
     }
 
