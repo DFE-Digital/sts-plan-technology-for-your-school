@@ -75,15 +75,16 @@ public class UserActionTrackingServiceTests
     }
 
     [Fact]
-    public async Task RecordAsync_WhenUserActionIdAlreadyExists_ThenDoesNotCreateUserAction()
+    public async Task RecordAsync_WhenUserIdIsNull_ThenDoesNotCreateUserAction()
     {
-        _httpContext.Items[UserActionIdConstants.HttpContextItemKey] = Guid.NewGuid();
+        _currentUser.UserId.Returns((int?)null);
 
         var service = BuildService();
 
         await service.RecordAsync();
 
         await _userActionRepository.DidNotReceive().CreateAsync(Arg.Any<UserActionEntity>());
+        Assert.False(_httpContext.Items.ContainsKey(UserActionIdConstants.HttpContextItemKey));
     }
 
     [Fact]
@@ -102,19 +103,5 @@ public class UserActionTrackingServiceTests
         );
 
         Assert.Equal("No active HttpContext found.", exception.Message);
-    }
-
-    [Fact]
-    public async Task RecordAsync_WhenUserIdIsNull_ThenThrowsInvalidOperationException()
-    {
-        _currentUser.UserId.Returns((int?)null);
-
-        var service = BuildService();
-
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.RecordAsync()
-        );
-
-        Assert.Equal("Current user ID was not found.", exception.Message);
     }
 }

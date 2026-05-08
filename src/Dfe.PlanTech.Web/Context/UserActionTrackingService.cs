@@ -23,9 +23,10 @@ public class UserActionTrackingService(
         }
 
         var userId = currentUser.UserId;
+
         if (userId is null)
         {
-            throw new InvalidOperationException("Current user ID was not found.");
+            return;
         }
 
         var userActionId = Guid.NewGuid();
