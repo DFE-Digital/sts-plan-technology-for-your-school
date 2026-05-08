@@ -33,6 +33,7 @@ public class UserActionTrackingService(
         var userAction = new UserActionEntity
         {
             Id = userActionId,
+            SessionId = currentUser.SessionId,
             UserId = userId.Value,
             EstablishmentId = await currentUser.GetActiveEstablishmentIdAsync(),
             MatEstablishmentId = currentUser.IsMat ? currentUser.UserOrganisationId : null,
