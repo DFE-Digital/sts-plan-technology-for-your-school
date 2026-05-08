@@ -3,6 +3,7 @@ namespace Dfe.PlanTech.Data.Sql.Entities;
 public class UserActionEntity
 {
     public Guid Id { get; set; }
+    public Guid? SessionId { get; set; }
     public int UserId { get; set; }
     public int? EstablishmentId { get; set; }
     public int? MatEstablishmentId { get; set; }
