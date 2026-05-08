@@ -2,13 +2,15 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Middleware;
 
 namespace Dfe.PlanTech.Web.Context;
 
 public class UserActionTrackingService(
     IUserActionRepository userActionRepository,
     IHttpContextAccessor httpContextAccessor,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UserActionTrackingService> logger
 ) : IUserActionTrackingService
 {
     public async Task RecordAsync()
@@ -26,6 +28,7 @@ public class UserActionTrackingService(
 
         if (userId is null)
         {
+            logger.LogInformation("No current user id found");
             return;
         }
 
