@@ -1,9 +1,11 @@
+using Castle.Core.Logging;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
@@ -13,6 +15,7 @@ public class UserActionTrackingServiceTests
     private readonly IUserActionRepository _userActionRepository = Substitute.For<IUserActionRepository>();
     private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ILogger<UserActionTrackingService> _logger = Substitute.For<ILogger<UserActionTrackingService>>();
     private readonly DefaultHttpContext _httpContext = new();
 
     private UserActionTrackingService BuildService()
@@ -22,7 +25,8 @@ public class UserActionTrackingServiceTests
         return new UserActionTrackingService(
             _userActionRepository,
             _httpContextAccessor,
-            _currentUser
+            _currentUser,
+            _logger
         );
     }
 
@@ -95,7 +99,8 @@ public class UserActionTrackingServiceTests
         var service = new UserActionTrackingService(
             _userActionRepository,
             _httpContextAccessor,
-            _currentUser
+            _currentUser,
+            _logger
         );
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
