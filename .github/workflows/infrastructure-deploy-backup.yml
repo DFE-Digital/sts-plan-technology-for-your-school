@@ -43,6 +43,7 @@ jobs:
           TF_SA_FULL="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tfstate"
           echo "TF_SA_FULL = $TF_SA_FULL"
           TF_SA="${TF_SA_FULL//-/}"
+          echo "TF_SA = $TF_SA"
           B_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
           B_SA="${B_RG//-/}"
 
