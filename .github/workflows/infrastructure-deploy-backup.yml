@@ -55,17 +55,45 @@ jobs:
           echo "B_RG=$B_RG" >> "$GITHUB_ENV"
           echo "B_SA=$B_SA" >> "$GITHUB_ENV"
 
-      - name: Debug vars
-        run: |
-          echo "TF_RG=$TF_RG"
-          echo "TF_SA=$TF_SA"
-
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
           az_tenant_id: ${{ secrets.az_tenant_id }}
           az_subscription_id: ${{ secrets.az_subscription_id }}
           az_client_id: ${{ secrets.az_client_id }}
+
+      - name: Ensure Terraform state blob role
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SCOPE=$(az storage account show \
+            --name "$TF_SA" \
+            --resource-group "$TF_RG" \
+            --query id \
+            -o tsv)
+
+          ASSIGNEE_OBJECT_ID=$(az ad sp show \
+            --id "${{ secrets.az_client_id }}" \
+            --query id \
+            -o tsv)
+
+          EXISTING_ASSIGNMENT=$(az role assignment list \
+            --assignee "$ASSIGNEE_OBJECT_ID" \
+            --role "Storage Blob Data Contributor" \
+            --scope "$SCOPE" \
+            --query "[0].id" \
+            -o tsv)
+
+          if [ -z "$EXISTING_ASSIGNMENT" ]; then
+            az role assignment create \
+              --assignee-object-id "$ASSIGNEE_OBJECT_ID" \
+              --assignee-principal-type ServicePrincipal \
+              --role "Storage Blob Data Contributor" \
+              --scope "$SCOPE"
+          else
+            echo "Storage Blob Data Contributor already assigned."
+          fi
 
       - name: Terraform init
         id: init
