@@ -36,6 +36,7 @@ variable "az_tag_environment" {
 variable "az_tag_product" {
   description = "Product tag applied to all resources"
   type        = string
+  default     = "Plan Technology for your School"
 }
 
 ####################

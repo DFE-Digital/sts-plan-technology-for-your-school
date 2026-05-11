@@ -49,6 +49,8 @@ jobs:
           RESOURCE_PREFIX_BACKUP_SHORT = "${RESOURCE_PREFIX_BACKUP//-/}"
           RESOURCE_PREFIX_TF_SHORT = "${RESOURCE_PREFIX_TF//-/}"
 
+          TF_RG = 
+
           echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
           echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
           echo "RESOURCE_PREFIX_BACKUP_SHORT=$RESOURCE_PREFIX_BACKUP_SHORT" >> "$GITHUB_OUTPUT"
@@ -86,6 +88,6 @@ jobs:
           az_location: ${{ vars.AZ_LOCATION }}
           tf_backend_resource_group: ${{ needs.set-vars.outputs.RESOURCE_PREFIX_TF }}
           tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }} 
-          tf_storage_acc_name: "${{ needs.set-vars.outputs.RESOURCE_PREFIX_TF_SHORT }}state"
+          tf_storage_acc_name: ${{ needs.set-vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
           tf_keyvault_name: "${{ needs.set-vars.outputs.RESOURCE_PREFIX_TF }}-kv"
           az_object_id: ${{ secrets.AZ_OBJECT_ID }}

@@ -106,7 +106,13 @@ jobs:
 
       - name: Terraform Apply
         run: |
-          terraform apply -auto-approve \
+          terraform apply -auto-approve -input=false \
+            -var="subscription_id=${{ secrets.az_subscription_id }}" \
+            -var="project_name=${{ secrets.DFE_PROJECT_NAME }}" \
+            -var="github_actions_principal_id=${{ secrets.az_client_id }}" \
+            -var="environment=${{ secrets.AZ_ENVIRONMENT }}" \
+            -var="az_tag_environment=${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}" \
+            -var="az_tag_product=Plan Technology for your School" \
             -var="backup_resource_group_name=$B_RG" \
             -var="backup_storage_account_name=$B_SA" \
             -var="backup_container_name_sql=${{ env.BACKUP_CONTAINER_NAME_SQL }}" \
