@@ -13,7 +13,8 @@ on:
         default: false
         description: 'flag for using disaster recovery: adds -dr to all resource names'
   push:
-    branches: [disaster-recover-e2e-terraform]
+    branches:
+      - disaster-recovery-e2e-terraform
 
 env:
   TF_BACKEND_CONTAINER_NAME: tfstate
