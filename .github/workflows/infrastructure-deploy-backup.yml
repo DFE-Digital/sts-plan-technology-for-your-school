@@ -25,25 +25,21 @@ jobs:
     environment:
       name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
     outputs:
-      TF_RG: ${{ steps.set-vars.outputs.TF_RG }}
-      TF_KV: ${{ steps.set-vars.outputs.TF_KV }}
-      TF_SA: ${{ steps.set-vars.outputs.TF_SA }}
-      B_RG: ${{ steps.set-vars.outputs.B_RG }}
-      B_SA: ${{ steps.set-vars.outputs.B_SA }}
+        TF_RG: ${{ steps.vars.outputs.TF_RG }}
+        TF_KV: ${{ steps.vars.outputs.TF_KV }}
+        TF_SA: ${{ steps.vars.outputs.TF_SA }}
+        B_RG: ${{ steps.vars.outputs.B_RG }}
+        B_SA: ${{ steps.vars.outputs.B_SA }}
 
     steps:
       - name: Prepare derived variables
-        id: set-vars
+        id: vars
         shell: bash
         run: |
-          echo "AZ_ENVIRONMENT secret exists? ${{ secrets.AZ_ENVIRONMENT != '' }}"
-          echo "DFE_PROJECT_NAME secret exists? ${{ secrets.DFE_PROJECT_NAME != '' }}"
           TF_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf"
           TF_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf-kv"
           TF_SA_FULL="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tfstate"
-          echo "TF_SA_FULL = $TF_SA_FULL"
           TF_SA="${TF_SA_FULL//-/}"
-          echo "TF_SA = $TF_SA"
           B_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
           B_SA="${B_RG//-/}"
 
@@ -83,6 +79,8 @@ jobs:
       - name: Terraform init
         id: init
         run: |
+          echo "TF_RG='${{ needs.set-vars.outputs.TF_RG }}'"
+          echo "TF_SA='${{ needs.set-vars.outputs.TF_SA }}'"
           terraform init \
             -backend-config="resource_group_name=${{ needs.set-vars.outputs.TF_RG }}" \
             -backend-config="storage_account_name=${{ needs.set-vars.outputs.TF_SA }}" \
