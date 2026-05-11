@@ -36,9 +36,12 @@ jobs:
         id: set-vars
         shell: bash
         run: |
+          echo "AZ_ENVIRONMENT secret exists? ${{ secrets.AZ_ENVIRONMENT != '' }}"
+          echo "DFE_PROJECT_NAME secret exists? ${{ secrets.DFE_PROJECT_NAME != '' }}"
           TF_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf"
           TF_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf-kv"
           TF_SA_FULL="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tfstate"
+          echo "TF_SA_FULL = $TF_SA_FULL"
           TF_SA="${TF_SA_FULL//-/}"
           B_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
           B_SA="${B_RG//-/}"
