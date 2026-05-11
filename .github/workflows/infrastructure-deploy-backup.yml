@@ -81,7 +81,7 @@ jobs:
         run: |
           terraform init \
             -backend-config="resource_group_name=${{ needs.set-vars.outputs.TF_RG }}" \
-            -backend-config="storage_account_name="${{ needs.set-vars.outputs.TF_SA }}" \
+            -backend-config="storage_account_name=${{ needs.set-vars.outputs.TF_SA }}" \
 
       - name: Terraform Apply
         run: |
