@@ -45,11 +45,11 @@ jobs:
           B_RG: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-backup"
           B_SA: "${B_RG//-/}"
 
-          echo "TF_RG=TF_RG" >> "$GITHUB_OUTPUT"
-          echo "TF_KV=TF_KV" >> "$GITHUB_OUTPUT"
-          echo "TF_SA=TF_SA" >> "$GITHUB_OUTPUT"
-          echo "B_RG=B_RG" >> "$GITHUB_OUTPUT"
-          echo "B_SA=B_SA" >> "$GITHUB_OUTPUT"
+          echo "TF_RG=$TF_RG" >> "$GITHUB_OUTPUT"
+          echo "TF_KV=$TF_KV" >> "$GITHUB_OUTPUT"
+          echo "TF_SA=$TF_SA" >> "$GITHUB_OUTPUT"
+          echo "B_RG=$B_RG" >> "$GITHUB_OUTPUT"
+          echo "B_SA=$B_SA" >> "$GITHUB_OUTPUT"
 
   terraform:
     name: Terraform Apply
