@@ -102,11 +102,11 @@ jobs:
               echo "Terraform init attempt $attempt..."
           if terraform init \
             -backend-config="resource_group_name=$TF_RG" \
-            -backend-config="storage_account_name=$TF_SA" \
+            -backend-config="storage_account_name=$TF_SA"; then
             echo "Terraform init succeeded."
             exit 0
           fi
-          cho "Terraform init failed. Waiting before retry..."
+          echo "Terraform init failed. Waiting before retry..."
             sleep 30
           done
 
