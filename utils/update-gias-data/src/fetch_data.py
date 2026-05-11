@@ -1,5 +1,9 @@
 from logging import getLogger
-from playwright.sync_api import Playwright, sync_playwright, TimeoutError as PlaywrightTimeoutError
+from playwright.sync_api import (
+    Playwright,
+    sync_playwright,
+    TimeoutError as PlaywrightTimeoutError,
+)
 
 from src.constants import DOWNLOAD_PATH, GIAS_DATA_URL
 
@@ -12,7 +16,18 @@ def _fetch_gias_data(play: Playwright) -> None:
     """Use playwright to download the dynamically generated GIAS data file"""
     browser = play.webkit.launch(headless=True)
 
-    context = browser.new_context(accept_downloads=True)
+    context = browser.new_context(
+        accept_downloads=True,
+        user_agent=(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0 Safari/537.36"
+        ),
+        extra_http_headers={
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-GB,en;q=0.9",
+        },
+    )
     context.set_default_timeout(DEFAULT_TIMEOUT_MS)
 
     page = context.new_page()
@@ -28,13 +43,20 @@ def _fetch_gias_data(play: Playwright) -> None:
     # Click "Download selected files"
     page.get_by_role("button", name="Download selected files").click()
 
+    # Wait for page to load
+    page.wait_for_load_state("networkidle")  # wait for navigation to complete
+
+    page.screenshot(path=DOWNLOAD_PATH / "after_click.png")
+    logger.info("Current URL after click: %s", page.url)
+
     # Wait for the dynamically generated Results.zip button to appear and be clickable
     results_btn = page.locator('input#download-button[value="Results.zip"]')
-    logger.info("Waiting for Results.zip button to appear")
-    results_btn.wait_for(state="visible")
-    expect_enabled_timeout_ms = DEFAULT_TIMEOUT_MS
 
     # Sometimes it appears disabled briefly while server-side job runs
+    logger.info("Waiting for Results.zip button to appear")
+    results_btn.wait_for(state="visible")
+
+    expect_enabled_timeout_ms = DEFAULT_TIMEOUT_MS
     page.wait_for_function(
         "btn => !btn.disabled",
         arg=results_btn.element_handle(),

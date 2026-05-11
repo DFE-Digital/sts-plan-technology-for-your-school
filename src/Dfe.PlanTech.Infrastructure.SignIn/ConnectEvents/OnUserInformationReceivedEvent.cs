@@ -75,6 +75,7 @@ public static class OnUserInformationReceivedEvent
         ClaimsIdentity claimsIdentity = new([
             new Claim(ClaimConstants.DB_USER_ID, signin.UserId.ToString()),
             new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, establishmentId),
+            new Claim(ClaimConstants.SessionId, Guid.NewGuid().ToString()),
         ]);
 
         principal.AddIdentity(claimsIdentity);
