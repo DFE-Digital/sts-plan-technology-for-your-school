@@ -19,45 +19,15 @@ env:
   TF_WORKING_DIRECTORY: terraform/backups
 
 jobs:
-  set-vars:
-    name: Prepare derived variables
-    runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-    outputs:
-        TF_RG: ${{ steps.vars.outputs.TF_RG }}
-        TF_KV: ${{ steps.vars.outputs.TF_KV }}
-        TF_SA: ${{ steps.vars.outputs.TF_SA }}
-        B_RG: ${{ steps.vars.outputs.B_RG }}
-        B_SA: ${{ steps.vars.outputs.B_SA }}
-
-    steps:
-      - name: Prepare derived variables
-        id: vars
-        shell: bash
-        run: |
-          TF_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf"
-          TF_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf-kv"
-          TF_SA_FULL="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tfstate"
-          TF_SA="${TF_SA_FULL//-/}"
-          B_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-          B_SA="${B_RG//-/}"
-
-          echo "TF_RG=$TF_RG" >> "$GITHUB_OUTPUT"
-          echo "TF_KV=$TF_KV" >> "$GITHUB_OUTPUT"
-          echo "TF_SA=$TF_SA" >> "$GITHUB_OUTPUT"
-          echo "B_RG=$B_RG" >> "$GITHUB_OUTPUT"
-          echo "B_SA=$B_SA" >> "$GITHUB_OUTPUT"
-
   terraform:
     name: Terraform Apply
-    needs: set-vars
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
     permissions:
       id-token: write
       contents: read
+
     defaults:
       run:
         working-directory: ${{ env.TF_WORKING_DIRECTORY }}
@@ -69,6 +39,27 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
 
+      - name: Prepare derived variables
+        shell: bash
+        run: |
+          TF_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf"
+          TF_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf-kv"
+          TF_SA_FULL="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tfstate"
+          TF_SA="${TF_SA_FULL//-/}"
+          B_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+          B_SA="${B_RG//-/}"
+
+          echo "TF_RG=$TF_RG" >> "$GITHUB_ENV"
+          echo "TF_KV=$TF_KV" >> "$GITHUB_ENV"
+          echo "TF_SA=$TF_SA" >> "$GITHUB_ENV"
+          echo "B_RG=$B_RG" >> "$GITHUB_ENV"
+          echo "B_SA=$B_SA" >> "$GITHUB_ENV"
+
+      - name: Debug vars
+        run: |
+          echo "TF_RG=$TF_RG"
+          echo "TF_SA=$TF_SA"
+
       - name: Login with AZ
         uses: ./.github/actions/azure-login
         with:
@@ -79,17 +70,17 @@ jobs:
       - name: Terraform init
         id: init
         run: |
-          echo "TF_RG='${{ needs.set-vars.outputs.TF_RG }}'"
-          echo "TF_SA='${{ needs.set-vars.outputs.TF_SA }}'"
           terraform init \
-            -backend-config="resource_group_name=${{ needs.set-vars.outputs.TF_RG }}" \
-            -backend-config="storage_account_name=${{ needs.set-vars.outputs.TF_SA }}" \
+            -backend-config="resource_group_name=$TF_RG" \
+            -backend-config="storage_account_name=$TF_SA" \
+            -backend-config="container_name=tfstate" \
+            -backend-config="key=backup.tfstate"
 
       - name: Terraform Apply
         run: |
           terraform apply -auto-approve \
-            -var="backup_resource_group_name=${{ needs.set-vars.outputs.B_RG }}" \
-            -var="backup_storage_account_name=${{ needs.set-vars.outputs.B_SA }}" \
+            -var="backup_resource_group_name=$B_RG" \
+            -var="backup_storage_account_name=$B_SA" \
             -var="backup_container_name_sql=${{ env.BACKUP_CONTAINER_NAME_SQL }}" \
             -var="backup_container_name_contentful=${{ env.BACKUP_CONTAINER_NAME_CONTENTFUL }}" \
             -var="backup_container_name_tf=${{ env.BACKUP_CONTAINER_NAME_TF }}"
