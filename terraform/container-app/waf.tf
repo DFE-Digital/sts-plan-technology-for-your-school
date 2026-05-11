@@ -1,5 +1,6 @@
 module "waf" {
-  source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=f0ca7eb"
+  #source = "github.com/dfe-digital/terraform-azurerm-front-door-app-gateway-waf?ref=f0ca7eb"
+  source = "./modules/shared_waf"
 
   depends_on = [module.main_hosting]
 
@@ -19,9 +20,10 @@ module "waf" {
       domain                    = module.main_hosting.container_fqdn
       create_custom_domain      = local.cdn_create_custom_domain
       custom_fqdn               = module.main_hosting.container_fqdn
-      #create_private            = true
-      #private_link_target_id    = module.main_hosting.container_app_environment_id
-      #private_link_location     = local.azure_location
+      create_private            = true
+      private_link_target_id    = data.azurerm_container_app_environment.env.id
+      #private_link_target_id    = module.main_hosting.container_app_environment_id #if output PR added to shared container module
+      private_link_location     = local.azure_location
     }
   }
 

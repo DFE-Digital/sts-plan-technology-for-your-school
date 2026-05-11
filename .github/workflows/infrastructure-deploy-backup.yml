@@ -1,0 +1,99 @@
+name: Infrastructure - Backup Resources Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'The environment to run infrastructure deployment on:'
+        required: true
+        options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
+      is_dr:
+        type: boolean
+        default: false
+        description: 'flag for using disaster recovery: adds -dr to all resource names'
+  push:
+    branches: [disaster-recover-e2e-terraform]
+
+env:
+  IS_DR: ${{ github.event_name == 'workflow_dispatch' && inputs.is_dr || false }}
+  ENVIRONMENT_NAME: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+  #containers in the TF storage acc
+  TF_BACKEND_CONTAINER_NAME: tfstate
+  #tf state files in the TF storage acc
+  TF_BACKEND_KEY_APP: backups.tfstate
+  #containers in the backup storage acc
+  BACKUP_CONTAINER_NAME_SQL: sqlbackups
+  BACKUP_CONTAINER_NAME_TF: terraform
+  BACKUP_CONTAINER_NAME_CONTENTFUL: contentful
+  #solution folders for terraform files
+  TF_WORKING_DIRECTORY: terraform/backups
+
+jobs:
+  set-vars:
+      name: Prepare derived variables
+      environment:
+        name: ${{ env.ENVIRONMENT_NAME }}
+      runs-on: ubuntu-latest
+      outputs:
+        RESOURCE_PREFIX_BACKUP: ${{ steps.set-vars.outputs.RESOURCE_PREFIX_BACKUP }}
+        RESOURCE_PREFIX_TF: ${{ steps.set-vars.outputs.RESOURCE_PREFIX_TF }}
+        RESOURCE_PREFIX_BACKUP_SHORT: ${{ steps.set-vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
+        RESOURCE_PREFIX_TF_SHORT: ${{ steps.set-vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
+      
+      steps:
+        - name: Prepare derived variables
+          id: set-vars
+          shell: bash
+          run: |
+            #'plantech' plus 'dr' makes some other resource names too long particularly the sql security SA so shorten to 'pt'
+            DFE_PROJECT_NAME = "${{ env.IS_DR == 'true' && format('{0}-dr', 'pt') || secrets.DFE_PROJECT_NAME }}"
+            RESOURCE_PREFIX_BACKUP = "${secrets.AZ_ENVIRONMENT}${DFE_PROJECT_NAME}-backup"
+            RESOURCE_PREFIX_TF = "${secrets.AZ_ENVIRONMENT}${DFE_PROJECT_NAME}-tf"
+
+            RESOURCE_PREFIX_BACKUP = "${{ env.IS_DR == 'true' && format('{0}-dr', RESOURCE_PREFIX_BACKUP) || $RESOURCE_PREFIX_BACKUP }}"
+            RESOURCE_PREFIX_TF = "${{ env.IS_DR == 'true' && format('{0}-dr', RESOURCE_PREFIX_TF) || $RESOURCE_PREFIX_TF }}"
+
+            RESOURCE_PREFIX_BACKUP_SHORT = "${RESOURCE_PREFIX_BACKUP//-/}"
+            RESOURCE_PREFIX_TF_SHORT = "${RESOURCE_PREFIX_TF//-/}"
+
+            echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
+            echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
+            echo "RESOURCE_PREFIX_BACKUP_SHORT=$RESOURCE_PREFIX_BACKUP_SHORT" >> "$GITHUB_OUTPUT"
+            echo "RESOURCE_PREFIX_TF_SHORT=$RESOURCE_PREFIX_TF_SHORT" >> "$GITHUB_OUTPUT"
+  terraform:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: terraform/backup
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.az_tenant_id }}
+          az_subscription_id: ${{ secrets.az_subscription_id }}
+          az_client_id: ${{ secrets.az_client_id }}
+
+      - name: Terraform init
+        id: init
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ needs.setup.outputs.RESOURCE_PREFIX_TF }}"  \
+            -backend-config="storage_account_name=${{ needs.setup.outputs.RESOURCE_PREFIX_TF_SHORT }}"  \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
+              -var="backup_resource_group_name=${{ needs.setup.outputs.RESOURCE_PREFIX_BACKUP }}
+              -var="backup_storage_account_name=${{ needs.setup.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
+              -var="backup_container_name_sql=${{ env.BACKUP_CONTAINER_NAME_SQL }}
+              -var="backup_container_name_contentful=${{ env.BACKUP_CONTAINER_NAME_CONTENTFUL }}
+              -var="backup_container_name_tf=${{ env.BACKUP_CONTAINER_NAME_TF }}

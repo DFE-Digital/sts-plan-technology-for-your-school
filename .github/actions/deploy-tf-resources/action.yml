@@ -1,4 +1,4 @@
-name: Bootstrap
+name: Deploy Terraform Backend Resources
 description: Create the terraform backend resources
 
 inputs:

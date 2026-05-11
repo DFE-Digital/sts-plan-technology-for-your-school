@@ -12,6 +12,16 @@ on:
         type: boolean
         default: false
         description: 'flag for using disaster recovery: adds -dr to all resource names'
+  workflow_call:
+      inputs:
+        environment:
+          type: string
+          description: 'The environment to run infrastructure deployment on:'
+          required: true
+      is_dr:
+        type: boolean
+        default: false
+        description: 'flag for using disaster recovery: adds -dr to all resource names'
   # push:
   #    branches:
   #      - disaster-recovery-e2e-terraform
@@ -34,8 +44,8 @@ jobs:
   image:
     name: Promote image from GHR to ACR based on branch name
     environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-    runs-on: ubuntu-22.04
+      name: ${{ env.ENVIRONMENT_NAME }}
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: write

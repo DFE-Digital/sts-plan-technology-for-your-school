@@ -125,16 +125,18 @@ KEYVAULT_ID=$(az keyvault show \
 
 # Terraform backend access
 az role assignment create \
-  --assignee "$OBJ_ID" \
+  --assignee-object-id "$OBJ_ID" \
   --role "Storage Blob Data Contributor" \
   --scope "$STORAGE_ID" \
+  --assignee-principal-type "ServicePrincipal" \
   >/dev/null || true
 
 # Read secrets for tfvars generation
 az role assignment create \
-  --assignee "$OBJ_ID" \
+  --assignee-object-id "$OBJ_ID" \
   --role "Key Vault Secrets User" \
   --scope "$KEYVAULT_ID" \
+  --assignee-principal-type "ServicePrincipal" \
   >/dev/null || true
 
 echo "✅ Bootstrap complete"

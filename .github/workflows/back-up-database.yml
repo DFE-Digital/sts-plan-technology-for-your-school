@@ -15,6 +15,8 @@ on:
         type: choice
         options: ['Dev', 'Test', 'StagingUnprotected', 'ProductionUnprotected']
         default: 'Dev'
+env:
+  BACKUP_CONTAINER_NAME: sqlbackups
 
 jobs:
   backup:
@@ -46,12 +48,12 @@ jobs:
         uses: ./.github/actions/whats-my-ip-address
 
       - name: Whitelist Runner for SQL Server
-        uses: ./.github/actions/whitelisting-for-runner
+        uses: ./.github/actions/whitelist-sql
         with:
-          runner_ip: ${{ steps.whats-my-ip.outputs.ip }}
-          az_aca_resource_group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          sql_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          removeRules: 'false'
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource_group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          verb: 'add'
 
       - name: Export database
         run: |
@@ -68,16 +70,16 @@ jobs:
       - name: Save bacpac
         run: |
           az storage blob upload \
-          --account-name plantechsqlbackups \
-          --container-name sqlbackups \
+          --account-name ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup \
+          --container-name ${{ env.BACKUP_CONTAINER_NAME }} \
           --name db-$(date +%F).bacpac \
           --file db-$(date +%F).bacpac \
           --auth-mode login
 
       - name: De-Whitelist Runner for SQL Server
-        uses: ./.github/actions/whitelisting-for-runner
+        uses: ./.github/actions/whitelist-sql
         with:
-          runner-ip: ${{ steps.whats-my-ip.outputs.ip }}
-          az-aca-resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          sql-server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          removeRules: 'true'
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          verb: 'remove'
