@@ -13,8 +13,6 @@ on:
       - disaster-recovery-e2e-terraform
 
 env:
-  TF_BACKEND_CONTAINER_NAME: tfstate
-  TF_BACKEND_KEY_APP: backups.tfstate
   BACKUP_CONTAINER_NAME_SQL: sqlbackups
   BACKUP_CONTAINER_NAME_TF: terraform
   BACKUP_CONTAINER_NAME_CONTENTFUL: contentful
@@ -79,6 +77,8 @@ jobs:
       - name: Terraform init
         id: init
         run: |
+          echo "TF_RG='${{ needs.set-vars.outputs.TF_RG }}'"
+          echo "TF_SA='${{ needs.set-vars.outputs.TF_SA }}'"
           terraform init \
             -backend-config="resource_group_name=${{ needs.set-vars.outputs.TF_RG }}" \
             -backend-config="storage_account_name=${{ needs.set-vars.outputs.TF_SA }}" \
