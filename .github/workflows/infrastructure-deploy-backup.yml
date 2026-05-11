@@ -38,12 +38,12 @@ jobs:
         id: set-vars
         shell: bash
         run: |
-          TF_RG: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
-          TF_KV: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf-kv"
-          TF_SA_FULL: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tfstate"
-          TF_SA="${TF_SA_FULL//-/}"
-          B_RG: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-backup"
-          B_SA: "${B_RG//-/}"
+          TF_RG = "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+          TF_KV = "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf-kv"
+          TF_SA_FULL = "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tfstate"
+          TF_SA = "${TF_SA_FULL//-/}"
+          B_RG = "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-backup"
+          B_SA = "${B_RG//-/}"
 
           echo "TF_RG=$TF_RG" >> "$GITHUB_OUTPUT"
           echo "TF_KV=$TF_KV" >> "$GITHUB_OUTPUT"
