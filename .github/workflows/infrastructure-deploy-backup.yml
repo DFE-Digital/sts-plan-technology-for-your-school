@@ -53,6 +53,8 @@ jobs:
     name: Terraform Apply
     needs: set-vars
     runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
     permissions:
       id-token: write
       contents: read
@@ -77,8 +79,6 @@ jobs:
       - name: Terraform init
         id: init
         run: |
-          echo "TF_RG='${{ needs.set-vars.outputs.TF_RG }}'"
-          echo "TF_SA='${{ needs.set-vars.outputs.TF_SA }}'"
           terraform init \
             -backend-config="resource_group_name=${{ needs.set-vars.outputs.TF_RG }}" \
             -backend-config="storage_account_name=${{ needs.set-vars.outputs.TF_SA }}" \
