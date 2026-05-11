@@ -98,11 +98,20 @@ jobs:
       - name: Terraform init
         id: init
         run: |
-          terraform init \
+          for attempt in {1..3}; do
+              echo "Terraform init attempt $attempt..."
+          if terraform init \
             -backend-config="resource_group_name=$TF_RG" \
             -backend-config="storage_account_name=$TF_SA" \
-            -backend-config="container_name=tfstate" \
-            -backend-config="key=backup.tfstate"
+            echo "Terraform init succeeded."
+            exit 0
+          fi
+          cho "Terraform init failed. Waiting before retry..."
+            sleep 30
+          done
+
+          echo "Terraform init failed after retries."
+          exit 1
 
       - name: Terraform Apply
         run: |
@@ -118,3 +127,4 @@ jobs:
             -var="backup_container_name_sql=${{ env.BACKUP_CONTAINER_NAME_SQL }}" \
             -var="backup_container_name_contentful=${{ env.BACKUP_CONTAINER_NAME_CONTENTFUL }}" \
             -var="backup_container_name_tf=${{ env.BACKUP_CONTAINER_NAME_TF }}"
+            -lock-timeout=20m
