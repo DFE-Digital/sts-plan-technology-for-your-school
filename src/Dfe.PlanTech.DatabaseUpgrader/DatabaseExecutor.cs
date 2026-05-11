@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using DbUp;
 using DbUp.Builder;
@@ -7,6 +8,7 @@ using Polly.Retry;
 
 namespace Dfe.PlanTech.DatabaseUpgrader;
 
+[ExcludeFromCodeCoverage]
 public class DatabaseExecutor
 {
     private readonly Logger _logger;

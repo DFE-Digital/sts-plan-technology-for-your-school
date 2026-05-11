@@ -11,9 +11,7 @@ public static class LoggingHelpers
             .Select(call =>
             {
                 var args = call.GetArguments();
-
                 var msg = args[2]?.ToString() ?? "";
-
                 var level = Enum.Parse<LogLevel>(args[0]?.ToString() ?? "");
 
                 return new ReceivedLoggerCall(level, msg);
