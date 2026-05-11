@@ -115,6 +115,9 @@ jobs:
     environment:
       name: ${{ env.ENVIRONMENT_NAME }}
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     defaults:
       run:
         working-directory: ${{env.TF_WORKING_DIRECTORY_APP}}
