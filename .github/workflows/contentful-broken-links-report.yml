@@ -81,6 +81,10 @@ jobs:
         working-directory: ./contentful/broken-link-checker/
         run: npm ci
 
+      - name: Create output directory
+        working-directory: ./contentful/broken-link-checker/
+        run: mkdir -p output
+        
       - name: Run get-links.js && checker.js
         working-directory: ./contentful/broken-link-checker/
         env:
