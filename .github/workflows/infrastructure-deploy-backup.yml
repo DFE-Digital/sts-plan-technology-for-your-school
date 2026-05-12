@@ -62,39 +62,6 @@ jobs:
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
-      - name: Ensure Terraform state blob role
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          SCOPE=$(az storage account show \
-            --name "$TF_SA" \
-            --resource-group "$TF_RG" \
-            --query id \
-            -o tsv)
-
-          ASSIGNEE_OBJECT_ID=$(az ad sp show \
-            --id "${{ secrets.az_client_id }}" \
-            --query id \
-            -o tsv)
-
-          EXISTING_ASSIGNMENT=$(az role assignment list \
-            --assignee "$ASSIGNEE_OBJECT_ID" \
-            --role "Storage Blob Data Contributor" \
-            --scope "$SCOPE" \
-            --query "[0].id" \
-            -o tsv)
-
-          if [ -z "$EXISTING_ASSIGNMENT" ]; then
-            az role assignment create \
-              --assignee-object-id "$ASSIGNEE_OBJECT_ID" \
-              --assignee-principal-type ServicePrincipal \
-              --role "Storage Blob Data Contributor" \
-              --scope "$SCOPE"
-          else
-            echo "Storage Blob Data Contributor already assigned."
-          fi
-
       - name: Terraform init
         id: init
         run: |
@@ -115,10 +82,16 @@ jobs:
 
       - name: Terraform Apply
         run: |
+
+          ASSIGNEE_OBJECT_ID=$(az ad sp show \
+            --id "${{ secrets.az_client_id }}" \
+            --query id \
+            -o tsv)
+
           terraform apply -auto-approve -input=false -lock-timeout=20m \
             -var="subscription_id=${{ secrets.az_subscription_id }}" \
             -var="project_name=${{ secrets.DFE_PROJECT_NAME }}" \
-            -var="github_actions_principal_id=${{ secrets.AZ_CLIENT_ID }}" \
+            -var="github_actions_principal_id=${ ASSIGNEE_OBJECT_ID }" \
             -var="environment=${{ secrets.AZ_ENVIRONMENT }}" \
             -var="az_tag_environment=${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}" \
             -var="az_tag_product=Plan Technology for your School" \
