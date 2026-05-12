@@ -91,7 +91,7 @@ jobs:
           terraform apply -auto-approve -input=false -lock-timeout=20m \
             -var="subscription_id=${{ secrets.az_subscription_id }}" \
             -var="project_name=${{ secrets.DFE_PROJECT_NAME }}" \
-            -var="github_actions_principal_id=${ ASSIGNEE_OBJECT_ID }" \
+            -var="github_actions_principal_id=$ASSIGNEE_OBJECT_ID" \
             -var="environment=${{ secrets.AZ_ENVIRONMENT }}" \
             -var="az_tag_environment=${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}" \
             -var="az_tag_product=Plan Technology for your School" \
