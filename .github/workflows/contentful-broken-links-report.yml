@@ -84,7 +84,7 @@ jobs:
       - name: Create output directory
         working-directory: ./contentful/broken-link-checker/
         run: mkdir -p output
-        
+
       - name: Run get-links.js && checker.js
         working-directory: ./contentful/broken-link-checker/
         env:
@@ -97,7 +97,7 @@ jobs:
       - name: Upload export to Azure storage container
         working-directory: ./contentful/broken-link-checker
         run: |
-          html_files=(report/**/*.html)
+          html_files=(report/*.html)
           backup="${html_files[0]}"
           account_name=$(echo "${az_resource_group_name}content" | sed 's/-//g')
           az storage blob upload \
