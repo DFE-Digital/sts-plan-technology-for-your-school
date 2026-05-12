@@ -55,7 +55,7 @@ jobs:
         uses: ./.github/actions/whitelist-sql
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource_group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
           server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
           verb: 'add'
 
