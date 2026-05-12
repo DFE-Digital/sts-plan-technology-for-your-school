@@ -84,10 +84,10 @@ jobs:
       - name: Run get-links.js && checker.js
         working-directory: ./contentful/broken-link-checker/
         env:
-          MANAGEMENT_TOKEN: $MANAGEMENT_TOKEN
           USE_PREVIEW: false
-          SPACE_ID: $SPACE_ID
-          CONTENTFUL_ENVIRONMENT: $CONTENTFUL_ENVIRONMENT
+          MANAGEMENT_TOKEN: ${{ env.MANAGEMENT_TOKEN }}
+          SPACE_ID: ${{ env.SPACE_ID }}
+          CONTENTFUL_ENVIRONMENT: ${{ env.CONTENTFUL_ENVIRONMENT }}
         run: npm run checker
 
       - name: Upload export to Azure storage container
