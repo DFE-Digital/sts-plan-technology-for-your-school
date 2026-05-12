@@ -73,12 +73,21 @@ jobs:
           echo "MANAGEMENT_TOKEN=$management_token" >> $GITHUB_ENV
           echo "BACKUP_STORAGE_KEY=$backup_storage_key" >> $GITHUB_ENV
 
-      - name: Install broken-link-checker
-        working-directory: ./contentful/broken-link-checker
-        run: npm i
+      - name: Install export-processor deps
+        working-directory: ./contentful/export-processor/
+        run: npm ci
 
-      - name: Check for broken links
-        working-directory: ./contentful/broken-link-checker
+      - name: Install broken-link-checker dependencies
+        working-directory: ./contentful/broken-link-checker/
+        run: npm ci
+
+      - name: Run get-links.js && checker.js
+        working-directory: ./contentful/broken-link-checker/
+        env:
+          MANAGEMENT_TOKEN: $MANAGEMENT_TOKEN
+          USE_PREVIEW: false
+          SPACE_ID: $SPACE_ID
+          CONTENTFUL_ENVIRONMENT: $CONTENTFUL_ENVIRONMENT
         run: npm run checker
 
       - name: Upload export to Azure storage container
