@@ -105,6 +105,7 @@ jobs:
             --account-key "$BACKUP_STORAGE_KEY" \
             --container-name backups-container \
             --file "$backup"
+            --overwrite
 
       - name: Remove IP from Key Vault
         if: always()
