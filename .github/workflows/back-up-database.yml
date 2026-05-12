@@ -15,9 +15,9 @@ on:
         type: choice
         options: ['Dev', 'Test', 'StagingUnprotected', 'ProductionUnprotected']
         default: 'Dev'
-  push:
-     branches:
-       - disaster-recovery-e2e-terraform
+  # push:
+  #    branches:
+  #      - disaster-recovery-e2e-terraform
 env:
   BACKUP_CONTAINER_NAME: sqlbackups
 
