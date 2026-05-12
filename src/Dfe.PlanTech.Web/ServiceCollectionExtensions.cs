@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Services;
@@ -348,6 +349,24 @@ public static class ServiceCollectionExtensions
             ICategoryLandingViewComponentViewBuilder,
             CategoryLandingViewComponentViewBuilder
         >();
+
+        return services;
+    }
+
+    public static IServiceCollection AddHealthCheckServices(
+        this IServiceCollection services,
+        IConfiguration configuration,
+        IHostEnvironment environment
+    )
+    {
+        var healthChecks = services.AddHealthChecks();
+
+        if (!environment.IsDevelopment())
+        {
+            healthChecks.AddSqlServer(
+                configuration.GetConnectionString("Database") ?? ""
+            );
+        };
 
         return services;
     }
