@@ -8,9 +8,9 @@ on:
         description: 'The environment to run infrastructure deployment on:'
         required: true
         options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
-  push:
-    branches:
-      - disaster-recovery-e2e-terraform
+  # push:
+  #   branches:
+  #     - disaster-recovery-e2e-terraform
 
 env:
   BACKUP_CONTAINER_NAME_SQL: sqlbackups
@@ -115,7 +115,7 @@ jobs:
 
       - name: Terraform Apply
         run: |
-          terraform apply -auto-approve -input=false \
+          terraform apply -auto-approve -input=false -lock-timeout=20m \
             -var="subscription_id=${{ secrets.az_subscription_id }}" \
             -var="project_name=${{ secrets.DFE_PROJECT_NAME }}" \
             -var="github_actions_principal_id=${{ secrets.az_client_id }}" \
@@ -127,4 +127,4 @@ jobs:
             -var="backup_container_name_sql=${{ env.BACKUP_CONTAINER_NAME_SQL }}" \
             -var="backup_container_name_contentful=${{ env.BACKUP_CONTAINER_NAME_CONTENTFUL }}" \
             -var="backup_container_name_tf=${{ env.BACKUP_CONTAINER_NAME_TF }}"
-            -lock-timeout=20m
+            

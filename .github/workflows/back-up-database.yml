@@ -15,12 +15,16 @@ on:
         type: choice
         options: ['Dev', 'Test', 'StagingUnprotected', 'ProductionUnprotected']
         default: 'Dev'
+  push:
+     branches:
+       - disaster-recovery-e2e-terraform
 env:
   BACKUP_CONTAINER_NAME: sqlbackups
 
 jobs:
   backup:
-    environment: ${{ inputs.environment }}
+    environment:
+      name: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call')  && inputs.environment || 'Dev' }}
     name: Back up database
     runs-on: ubuntu-22.04
     permissions:
