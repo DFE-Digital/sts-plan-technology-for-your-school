@@ -6,5 +6,4 @@ locals {
     "Purpose"          = "sql-backups"
     "ManagedBy"        = "terraform"
   }
-  keyvaultname = "${var.backup_resource_group_name}-kv"
 }

@@ -49,6 +49,12 @@ variable "backup_resource_group_name" {
   sensitive   = false
 }
 
+variable "backup_keyvault_name" {
+  description = "Backups keyvault name"
+  type        = string
+  sensitive   = false
+}
+
 variable "backup_storage_account_name" {
   description = "Backups storage account name"
   type        = string

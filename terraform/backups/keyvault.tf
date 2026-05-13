@@ -2,7 +2,7 @@ resource "azurerm_key_vault" "backup" {
   tenant_id    = data.azurerm_client_config.current.tenant_id
 
   location                        = var.azure_location
-  name                            = local.keyvaultname
+  name                            = var.backup_keyvault_name
   enable_rbac_authorization       = true
   resource_group_name             = var.backup_resource_group_name
   sku_name                        = "standard"
