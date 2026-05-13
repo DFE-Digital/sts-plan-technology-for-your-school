@@ -126,7 +126,7 @@ Then(
       hasText: `Print your school's ${topic.toLowerCase()} recommendations`,
     });
     await expect(printLink).toBeVisible();
-    printLink.click();
+    await printLink.click();
   },
 );
 
@@ -264,3 +264,17 @@ Then('status last updated date is {string}', async function (expectedDate: strin
 
   await expect(lastUpdatedCell).toHaveText(expectedDate);
 });
+
+Then(
+  'I click the print recommendations link in the related action',
+  async function () {
+    const container = this.page.locator(
+      '.govuk-grid-column-one-third-from-desktop.govuk-float-right',
+    );
+    const printLink = container.locator('a', {
+      hasText: `Print this recommendation`,
+    });
+    await expect(printLink).toBeVisible();
+    printLink.click();
+  },
+);
