@@ -1,14 +1,3 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "azurerm"
-      version = "4.66.0"
-    }
-  }
-}
-provider "azurerm" {
-  features {}
-}
 resource "azurerm_key_vault" "backup" {
   enable_rbac_authorization       = true
   enabled_for_deployment          = false
