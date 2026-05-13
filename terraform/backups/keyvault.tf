@@ -4,7 +4,7 @@ resource "azurerm_key_vault" "backup" {
   enabled_for_disk_encryption     = false
   enabled_for_template_deployment = false
   location                        = var.azure_location
-  name                            = locals.keyvaultname
+  name                            = local.keyvaultname
   public_network_access_enabled   = true
   purge_protection_enabled        = true
   rbac_authorization_enabled      = true
