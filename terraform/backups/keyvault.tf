@@ -3,7 +3,7 @@ resource "azurerm_key_vault" "backup" {
 
   location                        = var.azure_location
   name                            = local.keyvaultname
-  rbac_authorization_enabled      = true
+  enable_rbac_authorization       = true
   resource_group_name             = var.backup_resource_group_name
   sku_name                        = "standard"
   soft_delete_retention_days      = var.blob_delete_retention_days
