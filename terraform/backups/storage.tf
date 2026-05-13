@@ -42,8 +42,8 @@ resource "azurerm_storage_container_immutability_policy" "bacpacs" {
   protected_append_writes_all_enabled   = false
 }
 
-resource "azurerm_storage_container" "terraform" {
-  name                  = var.backup_container_name_tf
+resource "azurerm_storage_container" "contentful" {
+  name                  = var.backup_container_name_contentful
   storage_account_id    = azurerm_storage_account.backups.id
   container_access_type = "private"
 
