@@ -45,16 +45,19 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
         {
             context.Succeed(requirement);
 
-            try
+            if (userAuthorisationResult.UserAuthorisationStatus.IsAuthenticated)
             {
-                var userActionTrackingService =
-                    httpContext.RequestServices.GetRequiredService<IUserActionTrackingService>();
+                try
+                {
+                    var userActionTrackingService =
+                        httpContext.RequestServices.GetRequiredService<IUserActionTrackingService>();
 
-                await userActionTrackingService.RecordAsync();
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to record user action for authorised request.");
+                    await userActionTrackingService.RecordAsync();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to record user action for authorised request.");
+                }
             }
         }
         else
