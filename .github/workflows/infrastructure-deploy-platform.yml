@@ -14,9 +14,9 @@ on:
       is_dr:
         type: boolean
         default: false
-  push:
-    branches:
-      - disaster-recovery-e2e-terraform
+  # push:
+  #   branches:
+  #     - disaster-recovery-e2e-terraform
 
 env:
   ARM_USE_OIDC: true
