@@ -1,9 +1,11 @@
+using Castle.Core.Logging;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
@@ -13,6 +15,7 @@ public class UserActionTrackingServiceTests
     private readonly IUserActionRepository _userActionRepository = Substitute.For<IUserActionRepository>();
     private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ILogger<UserActionTrackingService> _logger = Substitute.For<ILogger<UserActionTrackingService>>();
     private readonly DefaultHttpContext _httpContext = new();
 
     private UserActionTrackingService BuildService()
@@ -22,7 +25,8 @@ public class UserActionTrackingServiceTests
         return new UserActionTrackingService(
             _userActionRepository,
             _httpContextAccessor,
-            _currentUser
+            _currentUser,
+            _logger
         );
     }
 
@@ -75,15 +79,16 @@ public class UserActionTrackingServiceTests
     }
 
     [Fact]
-    public async Task RecordAsync_WhenUserActionIdAlreadyExists_ThenDoesNotCreateUserAction()
+    public async Task RecordAsync_WhenUserIdIsNull_ThenDoesNotCreateUserAction()
     {
-        _httpContext.Items[UserActionIdConstants.HttpContextItemKey] = Guid.NewGuid();
+        _currentUser.UserId.Returns((int?)null);
 
         var service = BuildService();
 
         await service.RecordAsync();
 
         await _userActionRepository.DidNotReceive().CreateAsync(Arg.Any<UserActionEntity>());
+        Assert.False(_httpContext.Items.ContainsKey(UserActionIdConstants.HttpContextItemKey));
     }
 
     [Fact]
@@ -94,7 +99,8 @@ public class UserActionTrackingServiceTests
         var service = new UserActionTrackingService(
             _userActionRepository,
             _httpContextAccessor,
-            _currentUser
+            _currentUser,
+            _logger
         );
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
@@ -102,19 +108,5 @@ public class UserActionTrackingServiceTests
         );
 
         Assert.Equal("No active HttpContext found.", exception.Message);
-    }
-
-    [Fact]
-    public async Task RecordAsync_WhenUserIdIsNull_ThenThrowsInvalidOperationException()
-    {
-        _currentUser.UserId.Returns((int?)null);
-
-        var service = BuildService();
-
-        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            service.RecordAsync()
-        );
-
-        Assert.Equal("Current user ID was not found.", exception.Message);
     }
 }
