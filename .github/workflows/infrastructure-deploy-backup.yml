@@ -99,5 +99,4 @@ jobs:
             -var="backup_storage_account_name=$B_SA" \
             -var="backup_container_name_sql=${{ env.BACKUP_CONTAINER_NAME_SQL }}" \
             -var="backup_container_name_contentful=${{ env.BACKUP_CONTAINER_NAME_CONTENTFUL }}" \
-            -var="backup_container_name_tf=${{ env.BACKUP_CONTAINER_NAME_TF }}"
             

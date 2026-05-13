@@ -61,12 +61,6 @@ variable "backup_container_name_sql" {
   sensitive   = false
 }
 
-variable "backup_container_name_tf" {
-  description = "Backup container name for terraform key vault (tfvars)"
-  type        = string
-  sensitive   = false
-}
-
 variable "backup_container_name_contentful" {
   description = "Backup container name for terraform key vault (tfvars)"
   type        = string
