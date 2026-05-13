@@ -14,12 +14,7 @@ Then('I click the view all recommendations answers link for {string}',
 
 Then('I should see the question {string} with the answer {string}',
    async function (question: string, answer: string) { 
-
-    // const contentBlock = this.page.locator(
-    //   // `div:has(p.govuk-!-font-weight-bold:has-text("${question}"))`
-    //   `div:has-text("${question}")`
-    // );
-
+    
     const content = this.page.locator('p.govuk-\\!-font-weight-bold').filter({
       hasText: question
     })
