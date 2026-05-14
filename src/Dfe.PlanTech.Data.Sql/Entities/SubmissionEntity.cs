@@ -32,6 +32,12 @@ public class SubmissionEntity : IUserActionEntity
 
     public Guid? UserActionId { get; set; }
 
+    public Guid? CreatedUserActionId { get; set; }
+
+    public Guid? LastUpdatedUserActionId { get; set; }
+
+    public Guid? CompletedUserActionId { get; set; }
+
     public SqlSubmissionDto AsDto()
     {
         return new SqlSubmissionDto
@@ -47,7 +53,10 @@ public class SubmissionEntity : IUserActionEntity
             Responses = Responses.Select(r => r.AsDto()).ToList(),
             Deleted = Deleted,
             Status = Status,
-            UserActionId = UserActionId
+            UserActionId = UserActionId,
+            CreatedUserActionId = CreatedUserActionId,
+            LastUpdatedUserActionId = LastUpdatedUserActionId,
+            CompletedUserActionId = CompletedUserActionId
         };
     }
 }
