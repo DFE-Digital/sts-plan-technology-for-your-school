@@ -14,9 +14,9 @@ on:
       is_dr:
         type: boolean
         default: false
-  # push:
-  #   branches:
-  #     - disaster-recovery-e2e-terraform
+  push:
+    branches:
+      - disaster-recovery-e2e-terraform
 
 env:
   ARM_USE_OIDC: true
@@ -89,4 +89,4 @@ jobs:
           tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
           tf_storage_acc_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
           tf_keyvault_name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
-          az_object_id: ${{ secrets.AZ_OBJECT_ID }}
+          az_client_id: ${{ secrets.az_client_id }}
