@@ -45,3 +45,8 @@ Where "guid" is the relevant folder GUID from the generated tests. Alternatively
 ### Further Reading
 
 - [Microsoft's "Use Code Coverage for unit testing"](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-code-coverage)
+
+## See also
+
+- [Contentful data layer](../../src/Dfe.PlanTech.Data.Contentful/README.md) — the project under test
+- [Tests overview](../README.md)
