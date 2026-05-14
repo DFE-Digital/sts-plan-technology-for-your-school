@@ -102,15 +102,17 @@ public class SubmissionRepositoryTests
         Assert.Equal(SubmissionStatus.InProgress, clone.Status);
         Assert.InRange(clone.DateCreated, before, after);
 
+        Assert.NotNull(clone.CreatedUserActionId);
+        Assert.NotNull(clone.LastUpdatedUserActionId);
+
         var r = Assert.Single(clone.Responses);
         Assert.Equal(1, r.QuestionId);
         Assert.Equal(2, r.AnswerId);
         Assert.Equal(999, r.UserId);
-        Assert.Same(q, r.Question); // same navs copied
+        Assert.Same(q, r.Question);
         Assert.Same(a, r.Answer);
         Assert.InRange(r.DateCreated, before, after);
 
-        // persisted
         Assert.Equal(1, await db.Submissions.CountAsync(TestContext.Current.CancellationToken));
         Assert.Equal(1, await db.Responses.CountAsync(TestContext.Current.CancellationToken));
     }
@@ -135,7 +137,7 @@ public class SubmissionRepositoryTests
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
-        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [ SubmissionStatus.CompleteReviewed ]);
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [SubmissionStatus.CompleteReviewed]);
         Assert.Null(result);
     }
 
@@ -149,7 +151,7 @@ public class SubmissionRepositoryTests
 
         var result = await Assert.ThrowsAsync<ArgumentException>(() => repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [])
         );
-       
+
         Assert.Contains("At least one submission status must be provided", result.Message);
     }
 
