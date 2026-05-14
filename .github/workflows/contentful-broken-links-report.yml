@@ -48,15 +48,13 @@ jobs:
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
 
-      - name: Add Azure firewall rules
-        uses: ./.github/actions/azure-ip-whitelist
+      - name: Whitelist IP on Key Vault
+        uses: ./.github/actions/whitelist-kv
         with:
-          ip_address: ${{ steps.whats-my-ip.outputs.ip }}
-          verb: 'add'
-          az_keyvault_name: ${{ env.az_keyvault_name }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.az_resource_group_name}}
-          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_keyvault_name }}
+          verb: add
 
       - name: Get secrets
         id: get-contentful-export-secrets
@@ -75,33 +73,45 @@ jobs:
           echo "MANAGEMENT_TOKEN=$management_token" >> $GITHUB_ENV
           echo "BACKUP_STORAGE_KEY=$backup_storage_key" >> $GITHUB_ENV
 
-      - name: Install broken-link-checker
-        working-directory: ./contentful/broken-link-checker
-        run: npm i
+      - name: Install export-processor deps
+        working-directory: ./contentful/export-processor/
+        run: npm ci
 
-      - name: Check for broken links
-        working-directory: ./contentful/broken-link-checker
+      - name: Install broken-link-checker dependencies
+        working-directory: ./contentful/broken-link-checker/
+        run: npm ci
+
+      - name: Create output directory
+        working-directory: ./contentful/broken-link-checker/
+        run: mkdir -p output
+
+      - name: Run get-links.js && checker.js
+        working-directory: ./contentful/broken-link-checker/
+        env:
+          USE_PREVIEW: false
+          MANAGEMENT_TOKEN: ${{ env.MANAGEMENT_TOKEN }}
+          SPACE_ID: ${{ env.SPACE_ID }}
+          CONTENTFUL_ENVIRONMENT: ${{ env.CONTENTFUL_ENVIRONMENT }}
         run: npm run checker
 
       - name: Upload export to Azure storage container
         working-directory: ./contentful/broken-link-checker
         run: |
-          html_files=(report/**/*.html)
+          html_files=(report/*.html)
           backup="${html_files[0]}"
           account_name=$(echo "${az_resource_group_name}content" | sed 's/-//g')
           az storage blob upload \
             --account-name "$account_name" \
             --account-key "$BACKUP_STORAGE_KEY" \
             --container-name backups-container \
-            --file "$backup"
+            --file "$backup" \
+            --overwrite
 
-      - name: Remove Azure Firewall Rules
+      - name: Remove IP from Key Vault
         if: always()
-        uses: ./.github/actions/azure-ip-whitelist
+        uses: ./.github/actions/whitelist-kv
         with:
-          ip_address: ${{ steps.what-is-my-ip.outputs.ip }}
-          verb: 'remove'
-          az_keyvault_name: ${{ env.az_keyvault_name }}
-          az_ip_name: ${{ env.SQL_IP_NAME }}
-          az_resource_group: ${{ env.az_resource_group_name}}
-          az_sql_database_server_name: ${{ env.az_sql_database_server_name }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_keyvault_name }}
+          verb: remove
