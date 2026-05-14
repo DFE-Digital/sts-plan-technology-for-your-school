@@ -98,7 +98,7 @@ jobs:
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
           resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
-          keyvault-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
+          keyvault-name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
           verb: add
 
       - name: Whitelist Runner for TF storage
@@ -106,7 +106,7 @@ jobs:
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
           resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
-          account-name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
+          account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
           verb: add
 
       - name: Get secret and clean tfvars file
