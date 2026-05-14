@@ -5,8 +5,10 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Web.Attributes;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Binders;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,9 +21,6 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
 {
     private readonly IPagesViewBuilder _pagesViewBuilder =
         pagesViewBuilder ?? throw new ArgumentNullException(nameof(pagesViewBuilder));
-
-    public const string ControllerName = "Pages";
-    public const string GetPageByRouteAction = nameof(GetByRoute);
 
     [Authorize(Policy = PageModelAuthorisationPolicy.PolicyName)]
     [HttpGet("{route?}", Name = "GetPage")]
@@ -37,13 +36,38 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
 
         return _pagesViewBuilder.RouteBasedOnOrganisationTypeAsync(this, page);
     }
-
+        
+    [ValidateMatSelected]
     [HttpGet("{categorySlug}/print", Name = "GetStandardChecklist")]
     public async Task<IActionResult> GetStandardChecklist(string categorySlug)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
 
         return await _pagesViewBuilder.RouteToCategoryLandingPrintPageAsync(this, categorySlug);
+    }
+        
+    [ValidateMatSelected]
+    [HttpGet("{categorySlug}/share", Name = "ShareStandard")]
+    public async Task<IActionResult> ShareStandard(string categorySlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToShareStandardPageAsync(this, categorySlug);
+    }
+
+    [HttpPost("{categorySlug}/share", Name = "PostShareStandard")]
+    public async Task<IActionResult> PostShareStandard(
+        string categorySlug,
+        [FromForm] ShareByEmailInputViewModel inputModel
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        return await _pagesViewBuilder.RouteToShareStandardPageAsync(
+            this,
+            categorySlug,
+            inputModel
+        );
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
@@ -56,7 +80,7 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
     [HttpGet("{categorySlug}/{sectionSlug}/{*path}")]
     public async Task<IActionResult> HandleUnknownRoutes(string? path)
     {
-        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModel();
+        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModelAsync();
 
         return View("NotFoundError", viewModel);
     }
@@ -64,8 +88,16 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
     [HttpGet(UrlConstants.NotFound, Name = UrlConstants.NotFound)]
     public async Task<IActionResult> NotFoundError()
     {
-        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModel();
+        var viewModel = await _pagesViewBuilder.BuildNotFoundViewModelAsync();
 
         return View(viewModel);
+    }
+
+    [HttpGet(UrlConstants.NotifyError, Name = UrlConstants.NotifyError)]
+    public IActionResult NotifyError()
+    {
+        var viewModel = _pagesViewBuilder.BuildNotifyShareResultsViewModel(this);
+
+        return viewModel is null ? PageRedirecter.RedirectToHomePage(this) : View(viewModel);
     }
 }

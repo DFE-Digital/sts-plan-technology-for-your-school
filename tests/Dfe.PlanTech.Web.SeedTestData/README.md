@@ -42,23 +42,36 @@ npm install -g sql-cli
 Then run `./scripts/setup-sql-cli.sh` from the project root and pass a server name and password as arguments. For example:
 
 - Mac/Linux
+
   ```bash
   ./scripts/setup-sql-cli.sh azuresqledge Pa5ssw0rd@G0esH3r3
   ```
+
 - Windows
+
   ```bash
   sh scripts/setup-sql-cli.sh azuresqledge Pa5ssw0rd@G0esH3r3
   ```
 
 #### Standard Setup
 
-If your machine does support `sqlcmd` you can skip installing `sql-cli` and just run `scripts/setup.sh` with a server name and admin password as arguments. For example:
+If your machine does support `sqlcmd` you can skip installing `sql-cli` and just run `scripts/setup.sh` with a server name and admin password as arguments. The password must be at least 8 characters long and contain characters from three of the following four sets:
+
+- Uppercase letters
+- Lowercase letters
+- Base 10 digits
+- Symbols
+
+For example:
 
 - Mac/Linux
+
   ```bash
   ./scripts/setup.sh azuresqledge Pa5ssw0rd@G0esH3r3
   ```
+
 - Windows
+
   ```bash
   sh scripts/setup.sh azuresqledge Pa5ssw0rd@G0esH3r3
   ```
@@ -78,9 +91,11 @@ If you don't have docker and have an MSSQL instance to use instead, you need to
 1. Create a new database
 2. Follow the instructions in the [Database Upgrader Readme](../../src/Dfe.PlanTech.DatabaseUpgrader/README.md) to run the database upgrader against your database
 3. Set the connection string to the database in the dotnet secrets for this project using the command
+
    ```bash
    dotnet user-secrets set "ConnectionStrings:Database" <connection_string>
    ```
+
 4. Run this project to populate the database with the test data
 
 ### Using Plan Tech With Local Test Database
@@ -95,3 +110,9 @@ Server=tcp:localhost,1433;Persist Security Info=False;User ID=sa;Password=Pa5ssw
 ```
 
 and then run Plan Tech as normal.
+
+## See also
+
+- [Database schema migrations](../../src/Dfe.PlanTech.DatabaseUpgrader/README.md) — used in step 2 to initialise the schema
+- [SQL data layer](../../src/Dfe.PlanTech.Data.Sql/README.md) — the entities and schema this tool seeds
+- [Tests overview](../README.md)

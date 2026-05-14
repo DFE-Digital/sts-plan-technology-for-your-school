@@ -1,10 +1,11 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 
 public interface IRecommendationWorkflow
 {
-    Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+    Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationStatusAsync(
         string recommendationContentfulReference,
         int establishmentId
     );
@@ -22,8 +23,13 @@ public interface IRecommendationWorkflow
         string recommendationContentfulReference,
         int establishmentId,
         int userId,
-        string newStatus,
+        RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null
+        int? matEstablishmentId = null,
+        int? responseId = null
+    );
+    Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
+        int establishmentId,
+        string recommendationContentfulReference
     );
 }

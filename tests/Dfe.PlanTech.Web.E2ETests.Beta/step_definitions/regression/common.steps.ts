@@ -24,7 +24,7 @@ Then('I should see the section heading {string}', async function (expectedHeadin
 });
 
 Then('I should see the caption heading {string}', async function (expectedHeading: string) {
-  const heading = this.page.locator('h3.govuk-caption-xl:visible');
+  const heading = this.page.locator('.govuk-caption-xl:visible');
   await expect(heading).toBeVisible();
   await expect(heading).toHaveText(expectedHeading);
 });

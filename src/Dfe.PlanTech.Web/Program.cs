@@ -1,9 +1,14 @@
 using Dfe.PlanTech.Application;
+using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Attributes;
+using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Extensions;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
 
@@ -24,6 +29,12 @@ builder.Services.AddControllersWithViews(options =>
 if (!builder.Environment.IsDevelopment())
 {
     builder.Services.AddReleaseServices(builder.Configuration);
+    builder.Services.AddHsts(options =>
+    {
+        options.MaxAge = TimeSpan.FromDays(365);
+        options.IncludeSubDomains = true;
+        options.Preload = true;
+    });
 }
 
 if (builder.Environment.EnvironmentName != "E2E")
@@ -31,6 +42,7 @@ if (builder.Environment.EnvironmentName != "E2E")
     builder.Services.AddDbWriterServices(builder.Configuration);
 }
 
+builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddCommandLine(args);
 
 builder.AddSystemConfiguration();
@@ -49,12 +61,19 @@ builder
     .AddDfeSignIn(builder.Configuration)
     .AddExceptionHandlingServices()
     .AddGoogleTagManager()
+    .AddGovUkNotify(builder.Configuration)
     .AddRoutingServices()
     .AddRedisServices(builder.Configuration)
     .AddRepositories()
     .AddViewComponents();
 
-builder.Services.AddApplicationServices().AddApplicationWorkflows();
+builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicationWorkflows();
+
+builder.Services.AddHealthCheckServices(builder.Configuration, builder.Environment);
+
+builder.Services.AddScoped<IUserActionIdAccessor, UserActionIdAccessor>();
+
+builder.Services.AddScoped<IUserActionTrackingService, UserActionTrackingService>();
 
 var app = builder.Build();
 
@@ -66,6 +85,8 @@ app.UseMiddleware<HeadRequestMiddleware>();
 app.UseCookiePolicy(new CookiePolicyOptions { Secure = CookieSecurePolicy.Always });
 
 app.UseForwardedHeaders();
+
+app.UseMiddleware<ExploitPathMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -88,9 +109,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseCorrelationId();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health");
 app.MapControllerRoute(pattern: "{controller=Pages}/{action=GetByRoute}/{id?}", name: "default");
 
 await app.RunAsync();

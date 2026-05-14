@@ -14,12 +14,12 @@ All scripts are designed to be run from anywhere inside the repo.
 
 This script writes the tracked files list to:
 
-- `linting/output/tracked-files.txt`
+- `coding-style/output/tracked-files.txt`
 
 and then prints reports.
 
 ```bash
-./linting/scripts/list-file-extensions.sh
+./coding-style/scripts/list-file-extensions.sh
 ```
 
 #### Outputs

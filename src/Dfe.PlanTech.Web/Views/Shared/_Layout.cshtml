@@ -1,53 +1,80 @@
+@using Dfe.PlanTech.Infrastructure.SignIn.Models
 @inject ICurrentUser CurrentUser
+
+@{
+    Layout = "_GovUkPageTemplate";
+
+    if (ViewData[StatePassingMechanismConstants.Title] == null)
+    {
+        var routeData = Context.GetRouteData();
+        ViewData[StatePassingMechanismConstants.Title] = routeData.GetTitleForPage();
+    }
+}
 
 @section Head {
     <partial name="_Head" />
     @await RenderSectionAsync("CSS", required: false)
     <partial name="GoogleTagManager/_Head" />
-
     @await RenderSectionAsync("Head", required: false)
-}
-
-@{
-    Layout = "_GovUkPageTemplate";
-
-    if (ViewData["Title"] == null)
-    {
-        var routeData = Context.GetRouteData();
-        ViewData["Title"] = routeData.GetTitleForPage();
-    }
 }
 
 @{
     var showChangeSchool = false;
 
-    @* Conditionally show the change school partial on all pages except for specific pages in the exclusion list for MAT's*@
-    if (CurrentUser.IsAuthenticated && CurrentUser.IsMat)
+    var selectedSchool = CurrentUser.GroupSelectedSchoolName;
+    var controller = ViewContext.RouteData.Values["controller"] as string ?? "";
+    var action = ViewContext.RouteData.Values["action"] as string ?? "";
+
+    UserAuthorisationResult? userAuthResult = null;
+
+    if (Context.Items.TryGetValue(UserAuthorisationResult.HttpContextKey, out var value) &&
+        value is UserAuthorisationResult result)
     {
-        var controller = (string?)ViewContext.RouteData.Values["controller"] ?? "";
-        var action = (string?)ViewContext.RouteData.Values["action"] ?? "";
+        userAuthResult = result;
+    }
 
-        @* Controller actions where change-school option won't be shown *@
-        var excluded = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
-{
-{
-"ReviewAnswers", new HashSet<string>(
-[nameof(ReviewAnswersController.CheckAnswers)],
-StringComparer.OrdinalIgnoreCase)
-},
-{
-"Questions", new HashSet<string>(
-[QuestionsController.GetQuestionBySlugAction, nameof(QuestionsController.SubmitAnswer)],
-StringComparer.OrdinalIgnoreCase)
-},
-{
-"Groups", new HashSet<string>(
-[GroupsController.GetSelectASchoolAction],
-StringComparer.OrdinalIgnoreCase)
-},
-};
+    var isNonAuthorisedPage = true;
 
-        showChangeSchool = !(excluded.TryGetValue(controller, out var actions) && actions.Contains(action));
+    if (userAuthResult == null || userAuthResult.PageRequiresAuthorisation)
+    {
+        isNonAuthorisedPage = false;
+    }
+
+    if (!string.IsNullOrWhiteSpace(selectedSchool)
+        && CurrentUser.IsAuthenticated
+        && CurrentUser.IsMat)
+    {
+        if (isNonAuthorisedPage)
+        {
+            showChangeSchool = true;
+        }
+        else
+        {
+            var excluded = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase)
+            {
+                {
+                    "ReviewAnswers", new HashSet<string>(
+                        [nameof(ReviewAnswersController.CheckAnswers)],
+                        StringComparer.OrdinalIgnoreCase)
+                },
+                {
+                    "Questions", new HashSet<string>(
+                        [
+                            QuestionsController.GetQuestionBySlugAction,
+                            nameof(QuestionsController.SubmitAnswer)
+                        ],
+                        StringComparer.OrdinalIgnoreCase)
+                },
+                {
+                    "Groups", new HashSet<string>(
+                        [GroupsController.GetSelectASchoolAction],
+                        StringComparer.OrdinalIgnoreCase)
+                },
+            };
+
+            showChangeSchool =
+                !(excluded.TryGetValue(controller, out var actions) && actions.Contains(action));
+        }
     }
 }
 
@@ -55,26 +82,27 @@ StringComparer.OrdinalIgnoreCase)
     <partial name="GoogleTagManager/_Body" />
     <partial name="CookiesBanner/_CookieBanner" />
     <partial name="_Header" />
-
-    <div class="govuk-width-container">
-        <partial name="BetaHeader" />
-        @await RenderSectionAsync("NavButton", required: false)
-    </div>
 }
 
 @section BeforeContent {
-    <partial name="_BeforeContent" />
+    <partial name="BetaHeader" />
+
+    @if (IsSectionDefined("NavButton"))
+    {
+        <nav aria-label="Back">
+            @await RenderSectionAsync("NavButton", required: false)
+        </nav>
+    }
 
     @if (showChangeSchool)
     {
-        <partial name="ChangeSchool" model="CurrentUser.GroupSelectedSchoolName" />
+        <partial name="ChangeSchool" model="selectedSchool" />
     }
 }
 
 <div class="govuk-grid-row">
     <div class="govuk-grid-column-two-thirds-from-desktop">
         @await RenderSectionAsync("Panel", required: false)
-
         @RenderBody()
     </div>
 
@@ -84,6 +112,7 @@ StringComparer.OrdinalIgnoreCase)
 </div>
 
 @section Footer {
+    @await RenderSectionAsync("AfterContent", required: false)
     <partial name="_Footer" />
 }
 

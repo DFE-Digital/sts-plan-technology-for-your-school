@@ -1,0 +1,27 @@
+ALTER TABLE dbo.answer
+ADD userActionId UNIQUEIDENTIFIER NULL;
+GO
+
+ALTER TABLE dbo.establishmentRecommendationHistory
+ADD userActionId UNIQUEIDENTIFIER NULL;
+GO
+
+ALTER TABLE dbo.groupReadActivity
+ADD userActionId UNIQUEIDENTIFIER NULL;
+GO
+
+ALTER TABLE dbo.question
+ADD userActionId UNIQUEIDENTIFIER NULL;
+GO
+
+ALTER TABLE dbo.recommendation
+ADD userActionId UNIQUEIDENTIFIER NULL;
+GO
+
+ALTER TABLE dbo.response
+ADD userActionId UNIQUEIDENTIFIER NULL;
+GO
+
+ALTER TABLE dbo.submission
+ADD userActionId UNIQUEIDENTIFIER NULL;
+GO

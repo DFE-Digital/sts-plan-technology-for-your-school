@@ -1,10 +1,12 @@
-using System.Security.Claims;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
+using Dfe.PlanTech.Web.Context.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -13,6 +15,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Policies;
 
@@ -23,6 +27,7 @@ public class PageModelAuthorisationPolicyTests
     private AuthorizationHandlerContext _authContext;
     private readonly ILogger<PageModelAuthorisationPolicy> _logger;
     private readonly HttpContext _httpContext;
+    private readonly IUserActionTrackingService _userActionTrackingService;
 
     private static PageEntry AuthNotRequiredPage = new PageEntry { RequiresAuthorisation = false };
     private static PageEntry AuthRequiredPage = new PageEntry { RequiresAuthorisation = true };
@@ -36,6 +41,8 @@ public class PageModelAuthorisationPolicyTests
 
         _httpContext = Substitute.For<HttpContext>();
 
+        _userActionTrackingService = Substitute.For<IUserActionTrackingService>();
+
         var serviceScopeFactory = Substitute.For<IServiceScopeFactory>();
         _httpContext
             .RequestServices.GetService(typeof(IServiceScopeFactory))
@@ -44,6 +51,14 @@ public class PageModelAuthorisationPolicyTests
         var serviceScope = Substitute.For<IServiceScope>();
         serviceScope.ServiceProvider.Returns(serviceProvider);
         serviceProvider.GetService(typeof(IContentfulService)).Returns(_contentfulService);
+
+        serviceProvider
+            .GetService(typeof(IUserActionTrackingService))
+            .Returns(_userActionTrackingService);
+
+        _httpContext
+            .RequestServices.GetService(typeof(IUserActionTrackingService))
+            .Returns(_userActionTrackingService);
 
         var asyncServiceScope = new AsyncServiceScope(serviceScope);
         serviceScopeFactory.CreateAsyncScope().Returns(asyncServiceScope);
@@ -212,5 +227,63 @@ public class PageModelAuthorisationPolicyTests
         await _policy.HandleAsync(_authContext);
 
         Assert.False(_authContext.HasSucceeded);
+    }
+
+    [Fact]
+    public async Task Should_Record_UserAction_When_Authorisation_Succeeds()
+    {
+        _contentfulService
+            .GetPageBySlugAsync(Arg.Any<string>())
+            .Returns(callInfo => AuthRequiredPage);
+
+        var org = new EstablishmentModel
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test School",
+            Urn = "123456",
+            Ukprn = "00000018",
+            Category = new IdWithNameModel
+            {
+                Id = "001",
+                Name = "Establishment",
+            },
+        };
+
+        var claimsIdentity = new ClaimsIdentity(
+        [
+            new Claim(ClaimConstants.NameIdentifier, "dsi-ref"),
+            new Claim(ClaimConstants.DB_USER_ID, "101"),
+            new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, "201"),
+            new Claim(ClaimConstants.Organisation, JsonSerializer.Serialize(org)),
+        ],
+            CookieAuthenticationDefaults.AuthenticationScheme
+        );
+
+        var principal = new ClaimsPrincipal(claimsIdentity);
+
+        _httpContext.User.Returns(principal);
+
+        _authContext = new AuthorizationHandlerContext(
+            [new PageAuthorisationRequirement()],
+            principal,
+            _httpContext
+        );
+
+        await _policy.HandleAsync(_authContext);
+
+        Assert.True(_authContext.HasSucceeded);
+        await _userActionTrackingService.Received(1).RecordAsync();
+    }
+
+    [Fact]
+    public async Task Should_Not_Record_UserAction_When_Authorisation_Fails()
+    {
+        _contentfulService
+            .GetPageBySlugAsync(Arg.Any<string>())
+            .Returns(callInfo => AuthRequiredPage);
+
+        await _policy.HandleAsync(_authContext);
+
+        await _userActionTrackingService.DidNotReceive().RecordAsync();
     }
 }

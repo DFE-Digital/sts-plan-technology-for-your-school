@@ -7,7 +7,7 @@ Feature: MAT Multi Category Landing Page
     Then I should see the select a school heading
     And I should see the following schools:
       | DSI TEST Establishment (001) Community School (01) |
-      | DSI TEST Establishment (001) Miscellaneous (27)    |
+      | DSI TEST Establishment (001) Miscellanenous (27)    |
       | DSI TEST Establishment (001) Foundation School (05)|
 
   Scenario: MAT sees progress for each school
@@ -15,7 +15,7 @@ Feature: MAT Multi Category Landing Page
     Then I should see the following school progress:
       | School name                                            |
       | DSI TEST Establishment (001) Community School (01)     |
-      | DSI TEST Establishment (001) Miscellaneous (27)        |
+      | DSI TEST Establishment (001) Miscellanenous (27)        |
       | DSI TEST Establishment (001) Foundation School (05)    |
 
   Scenario: MAT selects a school and is taken to that school’s dashboard

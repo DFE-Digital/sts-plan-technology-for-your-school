@@ -1,10 +1,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
 [Table("recommendation")]
-public class RecommendationEntity
+public class RecommendationEntity : IUserActionEntity
 {
     public int Id { get; init; }
 
@@ -20,6 +21,10 @@ public class RecommendationEntity
 
     public bool Archived { get; set; } = false;
 
+    public string? QuestionContentfulRef { get; init; }
+
+    public Guid? UserActionId { get; set; }
+
     public SqlRecommendationDto AsDto()
     {
         return new SqlRecommendationDto
@@ -31,6 +36,8 @@ public class RecommendationEntity
             QuestionId = QuestionId,
             Question = Question.AsDto(),
             Archived = Archived,
+            QuestionContentfulRef = QuestionContentfulRef,
+            UserActionId = UserActionId
         };
     }
 }

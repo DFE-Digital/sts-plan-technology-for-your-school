@@ -68,8 +68,8 @@ public class EstablishmentService(
 
             establishmentLink.InProgressOrCompletedRecommendationsCount =
                 recommendations.Values.Count(r =>
-                    r.NewStatus == nameof(RecommendationStatus.Complete).ToString()
-                    || r.NewStatus == nameof(RecommendationStatus.InProgress).ToString()
+                    r.NewStatus == RecommendationStatus.Complete
+                    || r.NewStatus == RecommendationStatus.InProgress
                 );
         }
 

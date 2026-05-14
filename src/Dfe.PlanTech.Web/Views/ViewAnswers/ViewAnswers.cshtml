@@ -1,3 +1,5 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model ViewAnswersViewModel
 
 @section NavButton {
@@ -10,14 +12,22 @@
     await Html.RenderPartialAsync("PrintButton");
 }
 
+@{
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["dateCompleted"] = Model.AssessmentCompletedDate.ToString("dd MMMM yyyy")
+    };
+}
+
 <span class="govuk-caption-xl">@Model.TopicName</span>
-<h1 class="govuk-heading-xl">View your answers</h1>
+<h1 class="govuk-heading-xl">
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersHeader)
+</h1>
 <p>
-    The self-assessment was completed @Model.AssessmentCompletedDate.ToString("dd MMMM yyyy").
-    We used these answers to set the initial status of your recommendations.
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersIntroText, dynamicValues)
 </p>
 
-<p>You can view more recent activity on recommendations pages.</p>
+<p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersIntroMore)</p>
 
 <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
 @foreach (var response in Model.Responses)
@@ -33,5 +43,5 @@
 
 <a href="@($"/{Model.CategorySlug}")" draggable="false"
    class="govuk-button govuk-button--secondary" data-module="govuk-button">
-    Back to recommendations
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersBackToRecs)
 </a>

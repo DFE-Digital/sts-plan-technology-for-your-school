@@ -109,9 +109,24 @@ button.govuk-button--white {
   background-color: white;
 }
 
+a.govuk-button--blue {
+  color: white;
+  background-color: #003a68;
+}
+
+a.govuk-button--blue:hover {
+  color: white;
+  background-color: #003a68;
+}
+
 .js-only {
-  display: none !important;
-  visibility: hidden !important;
+  display: none;
+  visibility: hidden;
+}
+
+.js-enabled .js-only {
+  display: block;
+  visibility: visible;
 }
 
 .school-button {
@@ -211,6 +226,29 @@ ul.landing-page-list > li {
 .recommendation-action-header .govuk-table__cell,
 .recommendation-action-header .govuk-table__header {
   vertical-align: middle;
+}
+
+.dfe-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dfe-table-scroll > .govuk-table {
+  width: 100%;
+}
+
+@media (max-width: 40em) {
+  .dfe-table-scroll {
+    overflow-x: auto;
+  }
+}
+
+.govuk-table__cell,
+.govuk-table__header {
+  overflow-wrap: break-word;
+  word-break: normal;
 }
 
 @media (min-width: 27.5em) {

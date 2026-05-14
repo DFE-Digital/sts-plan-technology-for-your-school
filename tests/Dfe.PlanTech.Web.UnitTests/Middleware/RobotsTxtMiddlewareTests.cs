@@ -1,5 +1,5 @@
 using System.Text;
-using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;

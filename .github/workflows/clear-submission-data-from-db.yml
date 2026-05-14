@@ -1,0 +1,121 @@
+name: Clear submission data from DB
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'What environment to clear'
+        required: true
+        type: choice
+        options:
+          - Dev
+          - Tst
+          - StagingUnprotected
+          - ProductionUnprotected
+      establishment:
+        description: 'Which establishment to clear'
+        required: true
+        type: choice
+        options:
+          - DSI TEST Establishment (001) Community School
+          - DSI TEST Establishment (001) Foundation School
+          - DSI TEST Establishment (001) Miscellanenous
+
+jobs:
+  clear-db:
+    permissions:
+      id-token: write
+      contents: read
+    environment: ${{ inputs.environment }}
+    name: Clear submission data from DB
+    runs-on: ubuntu-latest
+    env:
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      az_keyvault_database_connectionstring_name: ${{ secrets.AZ_KEYVAULT_DATABASE_CONNECTIONSTRING_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      SQL_IP_NAME: github-action-clear-submission-data
+      establishment_name: ${{ inputs.establishment }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log Environment
+        run: |
+          echo "Environment: ${{ inputs.environment }}"
+
+      - name: Get establishment ref
+        id: get-establishment-ref
+        run: |
+          INPUT="${{ env.establishment_name }}"
+          ESTABLISHMENT_REF=$(jq -r --arg key "$INPUT" '.[$key] // empty' .github/mappings/dsi-test-accounts.json)
+          if [ -z "$ESTABLISHMENT_REF" ]; then
+            echo "No mapping found for: $INPUT" >&2
+            exit 1
+          fi
+          echo "ref=$ESTABLISHMENT_REF" >> "$GITHUB_OUTPUT"
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Whitelist IP on Key Vault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_keyvault_name }}
+          verb: add
+
+      - name: Whitelist IP on SQL server
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          server-name: ${{ env.az_sql_database_server_name }}
+          rule-name: ${{ env.SQL_IP_NAME }}
+          verb: add
+
+      - name: Get connection string
+        id: get-connection-string
+        uses: ./.github/actions/azure-get-keyvault-secret
+        with:
+          az_keyvault_name: ${{ env.az_keyvault_name }}
+          az_keyvault_secret_name: ${{ env.az_keyvault_database_connectionstring_name }}
+
+      - name: Run clear DB SQL script
+        uses: azure/sql-action@v2.2
+        with:
+          connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
+          path: './.github/scripts/clear-submission-data-from-db.sql'
+          arguments: >
+            --headers="-1"
+            --variables "ESTABLISHMENT_REF=${{ steps.get-establishment-ref.outputs.ref }}"
+            --error-level=1
+
+      - name: Remove IP from Key Vault
+        if: always()
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_keyvault_name }}
+          verb: remove
+
+      - name: Remove IP from SQL server
+        if: always()
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          server-name: ${{ env.az_sql_database_server_name }}
+          rule-name: ${{ env.SQL_IP_NAME }}
+          verb: remove

@@ -10,18 +10,13 @@ namespace Dfe.PlanTech.Data.Sql.IntegrationTests;
 /// </summary>
 [Collection("Database collection")]
 [Trait("Category", "Integration")]
-public abstract class DatabaseIntegrationTestBase : IAsyncLifetime
+public abstract class DatabaseIntegrationTestBase(DatabaseFixture fixture) : IAsyncLifetime
 {
-    protected readonly DatabaseFixture Fixture;
+    protected readonly DatabaseFixture Fixture = fixture;
     protected PlanTechDbContext DbContext { get; private set; } = null!;
     private IDbContextTransaction _transaction = null!;
 
-    protected DatabaseIntegrationTestBase(DatabaseFixture fixture)
-    {
-        Fixture = fixture;
-    }
-
-    public virtual async Task InitializeAsync()
+    public virtual async ValueTask InitializeAsync()
     {
         // Create a fresh DbContext for this test to ensure complete isolation
         DbContext = Fixture.CreateDbContext();
@@ -36,12 +31,14 @@ public abstract class DatabaseIntegrationTestBase : IAsyncLifetime
         _transaction = await DbContext.Database.BeginTransactionAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         // Roll back the transaction to clean up any changes made during the test
         await _transaction.RollbackAsync();
         await _transaction.DisposeAsync();
         await DbContext.DisposeAsync();
+
+        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -51,32 +48,32 @@ public abstract class DatabaseIntegrationTestBase : IAsyncLifetime
     protected async Task<int> CountEntitiesAsync<T>()
         where T : class
     {
-        return await DbContext.Set<T>().CountAsync();
+        return await DbContext.Set<T>().CountAsync(TestContext.Current.CancellationToken);
     }
 
     private async Task EnsureSubmissionCompletedHasDefaultAsync()
     {
         const string sql =
             @"
-                            DECLARE @tblId int = OBJECT_ID(N'dbo.submission');
+            DECLARE @tblId int = OBJECT_ID(N'dbo.submission');
 
-                            IF @tblId IS NOT NULL AND COL_LENGTH('dbo.submission', 'completed') IS NOT NULL
-                            BEGIN
-                                IF NOT EXISTS (
-                                    SELECT 1
-                                    FROM sys.default_constraints dc
-                                    INNER JOIN sys.columns c
-                                        ON c.object_id = dc.parent_object_id
-                                       AND c.column_id = dc.parent_column_id
-                                    WHERE dc.parent_object_id = @tblId
-                                      AND c.name = 'completed'
-                                )
-                                BEGIN
-                                    ALTER TABLE dbo.submission
-                                    ADD CONSTRAINT DF_submission_completed DEFAULT (0) FOR completed;
-                                END
-                            END
-                            ";
+            IF @tblId IS NOT NULL AND COL_LENGTH('dbo.submission', 'completed') IS NOT NULL
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1
+                    FROM sys.default_constraints dc
+                    INNER JOIN sys.columns c
+                        ON c.object_id = dc.parent_object_id
+                        AND c.column_id = dc.parent_column_id
+                    WHERE dc.parent_object_id = @tblId
+                        AND c.name = 'completed'
+                )
+                BEGIN
+                    ALTER TABLE dbo.submission
+                    ADD CONSTRAINT DF_submission_completed DEFAULT (0) FOR completed;
+                END
+            END
+            ";
         await DbContext.Database.ExecuteSqlRawAsync(sql);
     }
 }

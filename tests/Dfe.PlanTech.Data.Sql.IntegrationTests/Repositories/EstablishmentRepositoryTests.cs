@@ -11,7 +11,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
     public EstablishmentRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _repository = new EstablishmentRepository(DbContext);
@@ -41,7 +41,10 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal("group-123", result.GroupUid);
 
         // Verify it was saved to database
-        var saved = await DbContext.Establishments.FindAsync(result.Id);
+        var saved = await DbContext.Establishments.FindAsync(
+            [result.Id],
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(saved);
         Assert.Equal(model.Reference, saved!.EstablishmentRef);
     }
@@ -86,7 +89,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
             OrgName = "Existing School",
         };
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetEstablishmentByReferenceAsync("EXIST123");
@@ -128,7 +131,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Establishments.AddRange(establishment1, establishment2, establishment3);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var references = new[] { "REF001", "REF003", "NONEXISTENT" };
 
@@ -153,7 +156,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
             OrgName = "School",
         };
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var references = new[] { "NONEXISTENT1", "NONEXISTENT2" };
 
@@ -189,7 +192,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Establishments.AddRange(establishment1, establishment2, establishment3);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetEstablishmentsByAsync(e =>
@@ -212,7 +215,7 @@ public class EstablishmentRepositoryTests : DatabaseIntegrationTestBase
             OrgName = "School",
         };
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetEstablishmentsByAsync(e =>

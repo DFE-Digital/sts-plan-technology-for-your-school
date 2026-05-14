@@ -37,7 +37,7 @@ public class ServiceBusResultProcessorTests
         await _processor.ProcessMessageResult(
             _eventArgs,
             new ServiceBusSuccessResult() { },
-            default
+            TestContext.Current.CancellationToken
         );
 
         await _eventArgs.Received(1).CompleteMessageAsync(_message, Arg.Any<CancellationToken>());
@@ -51,7 +51,11 @@ public class ServiceBusResultProcessorTests
 
         var result = new ServiceBusErrorResult(failureReason, failureDescription, false);
 
-        await _processor.ProcessMessageResult(_eventArgs, result, default);
+        await _processor.ProcessMessageResult(
+            _eventArgs,
+            result,
+            TestContext.Current.CancellationToken
+        );
 
         await _eventArgs
             .Received(1)
@@ -72,7 +76,11 @@ public class ServiceBusResultProcessorTests
         var result = new ServiceBusErrorResult(failureReason, failureDescription, true);
         _retryHandler.RetryRequired(_message, Arg.Any<CancellationToken>()).Returns(true);
 
-        await _processor.ProcessMessageResult(_eventArgs, result, default);
+        await _processor.ProcessMessageResult(
+            _eventArgs,
+            result,
+            TestContext.Current.CancellationToken
+        );
 
         await _eventArgs.Received(1).CompleteMessageAsync(_message, Arg.Any<CancellationToken>());
     }
@@ -85,7 +93,11 @@ public class ServiceBusResultProcessorTests
         var result = new ServiceBusErrorResult(failureReason, failureDescription, true);
         _retryHandler.RetryRequired(_message, Arg.Any<CancellationToken>()).Returns(false);
 
-        await _processor.ProcessMessageResult(_eventArgs, result, default);
+        await _processor.ProcessMessageResult(
+            _eventArgs,
+            result,
+            TestContext.Current.CancellationToken
+        );
 
         await _eventArgs
             .Received(1)
@@ -102,7 +114,11 @@ public class ServiceBusResultProcessorTests
     public async Task Should_LogError_When_Unknown_ServiceBusResultType()
     {
         var result = new MockServiceBusResult();
-        await _processor.ProcessMessageResult(_eventArgs, result, default);
+        await _processor.ProcessMessageResult(
+            _eventArgs,
+            result,
+            TestContext.Current.CancellationToken
+        );
 
         var expectedLogMessage = $"Unexpected service bus result type: {result.GetType().Name}";
         var matchingLogMessages = _logger.GetMatchingReceivedMessages(
@@ -127,7 +143,7 @@ public class ServiceBusResultProcessorTests
         await _processor.ProcessMessageResult(
             _eventArgs,
             new ServiceBusSuccessResult() { },
-            default
+            TestContext.Current.CancellationToken
         );
 
         var expectedLogMessage = $"Error processing message result: {exception.Message}";

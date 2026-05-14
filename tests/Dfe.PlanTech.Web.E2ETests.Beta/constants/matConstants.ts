@@ -5,7 +5,7 @@ export const MAT_SCHOOLS = {
   },
   MISCELLANEOUS: {
     URN: '900008',
-    NAME: 'DSI TEST Establishment (001) Miscellaneous (27)',
+    NAME: 'DSI TEST Establishment (001) Miscellanenous (27)',
   },
   FOUNDATION: {
     URN: '900007',

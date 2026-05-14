@@ -1,15 +1,17 @@
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class RecommendationWorkflow(
     IEstablishmentRecommendationHistoryRepository establishmentRecommendationHistoryRepository,
-    IRecommendationRepository recommendationRepository
+    IRecommendationRepository recommendationRepository,
+    IStoredProcedureRepository storedProcedureRepository
 ) : IRecommendationWorkflow
 {
-    public async Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+    public async Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationStatusAsync(
         string recommendationContentfulReference,
         int establishmentId
     )
@@ -77,9 +79,10 @@ public class RecommendationWorkflow(
         string recommendationContentfulReference,
         int establishmentId,
         int userId,
-        string newStatus,
+        RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null
+        int? matEstablishmentId = null,
+        int? responseId = null
     )
     {
         // Get the recommendation by ContentfulRef to get its ID
@@ -94,7 +97,7 @@ public class RecommendationWorkflow(
             );
 
         // Get current status, to use it as the new previous status
-        var currentStatus = await GetCurrentRecommendationStatusAsync(
+        var currentStatus = await GetLatestRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId
         );
@@ -105,9 +108,24 @@ public class RecommendationWorkflow(
             recommendation.Id,
             userId,
             matEstablishmentId,
+            responseId,
             previousStatus,
             newStatus,
             noteText ?? string.Empty
         );
+    }
+
+    public async Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
+        int establishmentId,
+        string recommendationContentfulReference
+    )
+    {
+        var firstActivity =
+            await storedProcedureRepository.GetFirstActivityForEstablishmentRecommendationAsync(
+                establishmentId,
+                recommendationContentfulReference
+            );
+
+        return firstActivity?.AsDto();
     }
 }

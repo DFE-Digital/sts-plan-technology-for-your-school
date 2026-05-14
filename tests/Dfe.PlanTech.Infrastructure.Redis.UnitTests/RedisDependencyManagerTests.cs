@@ -22,12 +22,13 @@ public class RedisDependencyManagerTests : RedisCacheTestsBase
         await _dependencyManager.RegisterDependenciesAsync(
             Database,
             Key,
-            RedisCacheTestHelpers.Question
+            RedisCacheTestHelpers.Question,
+            TestContext.Current.CancellationToken
         );
 
         Assert.NotNull(QueuedFunc);
 
-        await QueuedFunc(default);
+        await QueuedFunc(TestContext.Current.CancellationToken);
 
         await batch
             .Received(1)
@@ -61,12 +62,13 @@ public class RedisDependencyManagerTests : RedisCacheTestsBase
         await _dependencyManager.RegisterDependenciesAsync(
             Database,
             Key,
-            RedisCacheTestHelpers.EmptyQuestionCollection
+            RedisCacheTestHelpers.EmptyQuestionCollection,
+            TestContext.Current.CancellationToken
         );
 
         Assert.NotNull(QueuedFunc);
 
-        await QueuedFunc(default);
+        await QueuedFunc(TestContext.Current.CancellationToken);
 
         await batch
             .Received(1)

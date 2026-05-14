@@ -14,9 +14,9 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class CategoryLandingViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
+    ICurrentUser currentUser,
     ISubmissionService submissionService,
-    IUserService userService,
-    ICurrentUser currentUser
+    IUserService userService
 )
     : BaseViewBuilder(logger, contentfulService, currentUser),
         ICategoryLandingViewComponentViewBuilder
@@ -81,8 +81,7 @@ public class CategoryLandingViewComponentViewBuilder(
 
         var viewModel = new CategoryLandingViewComponentViewModel
         {
-            AllSectionsCompleted = completedSectionCount.Equals(category.Sections.Count),
-            AnySectionsCompleted = completedSectionCount > 0,
+            CompletedSectionsCount = completedSectionCount,
             CategoryLandingSections = categoryLandingSections,
             CategoryName = category.Header.Text,
             CategorySlug = slug,
@@ -93,7 +92,7 @@ public class CategoryLandingViewComponentViewBuilder(
             Print = print,
             StatusLinkPartialName = print
                 ? CategoryLandingSectionAssessmentLinkPrintContent
-                : CategoryLandingSectionAssessmentLink,
+                : CategoryLandingSectionAssessmentLink
         };
 
         return viewModel;
@@ -121,11 +120,14 @@ public class CategoryLandingViewComponentViewBuilder(
             var sectionStatus = sectionStatuses.FirstOrDefault(sectionStatus =>
                 sectionStatus.SectionId.Equals(section.Id)
             );
-            var recommendations = await GetCategoryLandingSectionRecommendations(
-                establishmentId,
-                section,
-                sortType
-            );
+
+            var recommendations = sectionStatus?.Status == SubmissionStatus.CompleteReviewed
+                ? await GetCategoryLandingSectionRecommendations(
+                    establishmentId,
+                    section,
+                    sortType
+                    )
+                : null;
 
             yield return new CategoryLandingSectionViewModel(
                 section,
@@ -142,6 +144,15 @@ public class CategoryLandingViewComponentViewBuilder(
         RecommendationSortOrder sortType
     )
     {
+        if (!section.CoreRecommendations.Any())
+        {
+            return new CategoryLandingSectionRecommendationsViewModel
+            {
+                NoRecommendationFoundErrorMessage =
+                    $"Section '{section.Name}' has no recommendations",
+            };
+        }
+
         try
         {
             if (section.InterstitialPage is null)

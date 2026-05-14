@@ -14,7 +14,7 @@ public class SubmissionEntityTests
         var expectedEstablishmentId = 71;
         var expectedSectionId = "Arbitrary string - section id";
         var expectedSectionName = "Arbitrary string - section name";
-        var expectedMaturity = "Arbitrary string - maturity";
+        var expectedUserActionId = Guid.NewGuid();
         var expectedDateCreated = new DateTime(2024, 08, 01, 10, 00, 00, DateTimeKind.Utc);
         DateTime? expectedDateLastUpdated = new DateTime(
             2024,
@@ -27,7 +27,6 @@ public class SubmissionEntityTests
         );
         DateTime? expectedDateCompleted = null;
         var expectedDeleted = false;
-        var expectedViewed = true;
         var expectedStatus = SubmissionStatus.InProgress;
 
         var establishment = new EstablishmentEntity
@@ -46,7 +45,6 @@ public class SubmissionEntityTests
             Establishment = establishment,
             SectionId = expectedSectionId,
             SectionName = expectedSectionName,
-            Maturity = expectedMaturity,
             DateCreated = expectedDateCreated,
             DateLastUpdated = expectedDateLastUpdated,
             DateCompleted = expectedDateCompleted,
@@ -55,8 +53,8 @@ public class SubmissionEntityTests
             // TODO: Consider if it is reasonable to redesign this to remove the circular references / risk for infinite recursion when mapping.
             Responses = new List<ResponseEntity>(),
             Deleted = expectedDeleted,
-            Viewed = expectedViewed,
             Status = expectedStatus,
+            UserActionId = expectedUserActionId,
         };
 
         // Act
@@ -69,14 +67,13 @@ public class SubmissionEntityTests
         Assert.Equal(expectedEstablishmentId, dto.Establishment.Id);
         Assert.Equal(expectedSectionId, dto.SectionId);
         Assert.Equal(expectedSectionName, dto.SectionName);
-        Assert.Equal(expectedMaturity, dto.Maturity);
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedDateLastUpdated, dto.DateLastUpdated);
         Assert.Equal(expectedDateCompleted, dto.DateCompleted);
         Assert.Empty(dto.Responses);
         Assert.Equal(expectedDeleted, dto.Deleted);
-        Assert.Equal(expectedViewed, dto.Viewed);
         Assert.Equal(expectedStatus, dto.Status);
+        Assert.Equal(expectedUserActionId, dto.UserActionId);
 
         // Assert - ensure all DTO properties are accounted for
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlSubmissionDto>(
@@ -87,14 +84,13 @@ public class SubmissionEntityTests
                 nameof(SqlSubmissionDto.Establishment),
                 nameof(SqlSubmissionDto.SectionId),
                 nameof(SqlSubmissionDto.SectionName),
-                nameof(SqlSubmissionDto.Maturity),
                 nameof(SqlSubmissionDto.DateCreated),
                 nameof(SqlSubmissionDto.DateLastUpdated),
                 nameof(SqlSubmissionDto.DateCompleted),
                 nameof(SqlSubmissionDto.Responses),
                 nameof(SqlSubmissionDto.Deleted),
-                nameof(SqlSubmissionDto.Viewed),
                 nameof(SqlSubmissionDto.Status),
+                nameof(SqlSubmissionDto.UserActionId),
             }
         );
     }

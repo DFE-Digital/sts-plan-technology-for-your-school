@@ -1,7 +1,8 @@
-@inject GoogleTagManagerServiceServiceConfiguration GtmService
+@inject GoogleTagManagerConfiguration GtmConfiguration
+@inject ICookieService CookieService
 @inject ICurrentUser CurrentUser
 
-@if (!GtmService.CookieService.Cookie.UseCookies)
+@if (!CookieService.Cookie.UseCookies)
 {
     // No consent: bail (or init Consent Mode here if you use it)
     return;
@@ -32,9 +33,9 @@
     var nonce = Context.Items["nonce"]?.ToString();
 }
 
-@if (!string.IsNullOrEmpty(GtmService.Config.SiteVerificationId))
+@if (!string.IsNullOrEmpty(GtmConfiguration.SiteVerificationId))
 {
-    <meta name="google-site-verification" content="@GtmService.Config.SiteVerificationId" />
+    <meta name="google-site-verification" content="@GtmConfiguration.SiteVerificationId" />
 }
 
 <!-- Google Tag Manager -->
@@ -65,6 +66,6 @@
         j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
         f.parentNode.insertBefore(j, f);
     })
-    (window, document, 'script', 'dataLayer', '@GtmService.Config.Id');
+    (window, document, 'script', 'dataLayer', '@GtmConfiguration.Id');
 </script>
 <!-- End Google Tag Manager -->

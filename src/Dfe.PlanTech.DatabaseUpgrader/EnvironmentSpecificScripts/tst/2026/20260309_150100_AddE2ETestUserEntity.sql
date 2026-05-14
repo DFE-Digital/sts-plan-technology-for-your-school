@@ -1,0 +1,9 @@
+BEGIN TRAN
+
+INSERT INTO [dbo].[user] (dfeSignInRef)
+VALUES ('E2E_TEST_SCHOOL_USER')
+
+INSERT INTO [dbo].[user] (dfeSignInRef)
+VALUES ('E2E_TEST_MAT_USER')
+
+COMMIT TRAN

@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -18,8 +18,6 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 public class GroupsViewBuilderTests
 {
     // --- helpers ------------------------------------------------------------
-
-    private sealed class TestController : Controller { }
 
     private static IOptions<ContactOptionsConfiguration> Opt(string linkId = "contact-123") =>
         Options.Create(new ContactOptionsConfiguration { LinkId = linkId });
@@ -56,7 +54,7 @@ public class GroupsViewBuilderTests
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
         // GroupSelectedSchoolUrn not set
 
-        return new GroupsViewBuilder(logger, contactOpts, contentful, est, currentUser);
+        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est);
     }
 
     private static QuestionnaireCategoryEntry MakeCategory(
@@ -94,8 +92,8 @@ public class GroupsViewBuilderTests
                 NullLogger<BaseViewBuilder>.Instance,
                 null!,
                 contentful,
-                est,
-                current
+                current,
+                est
             )
         );
     }
@@ -113,8 +111,8 @@ public class GroupsViewBuilderTests
                 NullLogger<BaseViewBuilder>.Instance,
                 opts,
                 contentful,
-                null!,
-                current
+                current,
+                null!
             )
         );
     }
@@ -186,7 +184,7 @@ public class GroupsViewBuilderTests
         // Assert
         var view = Assert.IsType<ViewResult>(action);
         Assert.Equal("GroupsSelectSchool", view.ViewName);
-        Assert.Equal("Select a school", controller.ViewData["Title"]);
+        Assert.Equal("Select a school", controller.ViewData[StatePassingMechanismConstants.Title]);
 
         var vm = Assert.IsType<GroupsSelectorViewModel>(view.Model);
         Assert.Equal("Test Academy Trust", vm.GroupName);

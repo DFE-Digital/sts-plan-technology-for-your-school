@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Contentful.Models;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web.ViewModels;

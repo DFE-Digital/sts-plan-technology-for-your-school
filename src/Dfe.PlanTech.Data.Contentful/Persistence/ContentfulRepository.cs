@@ -1,12 +1,13 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json;
 using Contentful.Core;
 using Contentful.Core.Models;
 using Contentful.Core.Search;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Contentful.Options;
 using Dfe.PlanTech.Core.Contentful.Queries;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Contentful.Interfaces;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -22,13 +23,13 @@ public class ContentfulRepository : IContentfulRepository
     private readonly ILogger<IContentfulRepository> _logger;
     private readonly IContentfulClient _client;
     private readonly IHostEnvironment _hostEnvironment;
-    private readonly AutomatedTestingOptions _automatedTestingOptions;
+    private readonly AutomatedTestingConfiguration _automatedTestingOptions;
 
     public ContentfulRepository(
         ILogger<ContentfulRepository> logger,
         IContentfulClient client,
         IHostEnvironment hostEnvironment,
-        IOptions<AutomatedTestingOptions> automatedTestingOptions
+        IOptions<AutomatedTestingConfiguration> automatedTestingOptions
     )
     {
         _logger = logger;
@@ -51,6 +52,22 @@ public class ContentfulRepository : IContentfulRepository
             throw new GetEntriesException($"Found more than 1 entity with id {id}");
 
         return entities.FirstOrDefault();
+    }
+
+    public async Task<string> GetTextBodyEntryByIdAsJsonAsync(string id)
+    {
+        var options = GetEntryByIdOptions(id, 1);
+        var queryBuilder = BuildQueryBuilder<dynamic>("textBody", options);
+        var entries = await _client.GetEntries(queryBuilder);
+        ProcessContentfulErrors(entries);
+
+        var entry = entries.Items?.FirstOrDefault();
+        if (entry == null)
+        {
+            throw new GetEntriesException($"No entity found with id {id}");
+        }
+
+        return JsonSerializer.Serialize(entry);
     }
 
     public async Task<IEnumerable<TEntry>> GetEntriesAsync<TEntry>() =>

@@ -1,18 +1,19 @@
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Application.Services;
 
 public class RecommendationService(IRecommendationWorkflow recommendationWorkflow)
     : IRecommendationService
 {
-    public Task<SqlEstablishmentRecommendationHistoryDto?> GetCurrentRecommendationStatusAsync(
+    public Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationHistoryAsync(
         string recommendationContentfulReference,
         int establishmentId
     )
     {
-        return recommendationWorkflow.GetCurrentRecommendationStatusAsync(
+        return recommendationWorkflow.GetLatestRecommendationStatusAsync(
             recommendationContentfulReference,
             establishmentId
         );
@@ -41,9 +42,10 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
         string recommendationContentfulReference,
         int establishmentId,
         int userId,
-        string newStatus,
+        RecommendationStatus newStatus,
         string? noteText = null,
-        int? matEstablishmentId = null
+        int? matEstablishmentId = null,
+        int? responseId = null
     )
     {
         return recommendationWorkflow.UpdateRecommendationStatusAsync(
@@ -52,7 +54,19 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
             userId,
             newStatus,
             noteText,
-            matEstablishmentId
+            matEstablishmentId,
+            responseId
+        );
+    }
+
+    public Task<SqlFirstActivityForEstablishmentRecommendationDto?> GetFirstActivityForEstablishmentRecommendationAsync(
+        int establishmentId,
+        string recommendationContentfulReference
+    )
+    {
+        return recommendationWorkflow.GetFirstActivityForEstablishmentRecommendationAsync(
+            establishmentId,
+            recommendationContentfulReference
         );
     }
 }

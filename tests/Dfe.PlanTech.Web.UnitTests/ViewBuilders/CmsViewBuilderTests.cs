@@ -12,8 +12,6 @@ public class CmsViewBuilderTests
 {
     // --- Helpers ------------------------------------------------------------
 
-    private sealed class TestController : Controller { }
-
     private static CmsViewBuilder CreateSut(IContentfulService? contentful = null)
     {
         contentful ??= Substitute.For<IContentfulService>();

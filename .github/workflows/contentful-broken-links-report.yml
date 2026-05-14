@@ -1,0 +1,117 @@
+name: Broken Links Report
+on:
+  schedule:
+    - cron: 0 1 * * 2
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Which Contentful environment to check for broken links
+        required: true
+        type: choice
+        options:
+          ['Dev', 'Tst', 'Staging', 'Production', 'StagingUnprotected', 'ProductionUnprotected']
+        default: 'Staging'
+
+jobs:
+  check_broken_links:
+    permissions:
+      id-token: write
+      contents: read
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment || 'StagingUnprotected' }}
+    name: Check broken links for ${{ inputs.environment || 'Staging' }}
+    env:
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_keyvault_contentful_space_id: contentful--spaceid
+      az_keyvault_contentful_environment: contentful--environment
+      az_keyvault_contentful_management_token: contentful--managementtoken
+      az_keyvault_contentful_backup_storage_key: contentful--backupstoragekey
+      SQL_IP_NAME: export-processor
+      USE_PREVIEW: true
+      SAVE_FILE: true
+      OUTPUT_FILE_DIR: './output/'
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Get workflow IP address
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Whitelist IP on Key Vault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_keyvault_name }}
+          verb: add
+
+      - name: Get secrets
+        id: get-contentful-export-secrets
+        shell: bash
+        run: |
+          space_id=$(az keyvault secret show --name ${{ env.az_keyvault_contentful_space_id }} --vault-name ${{ env.az_keyvault_name }} --query value -o tsv)
+          environment=$(az keyvault secret show --name ${{ env.az_keyvault_contentful_environment }} --vault-name ${{ env.az_keyvault_name }} --query value -o tsv)
+          management_token=$(az keyvault secret show --name ${{ env.az_keyvault_contentful_management_token }} --vault-name ${{ env.az_keyvault_name }} --query value -o tsv)
+          backup_storage_key=$(az keyvault secret show --name ${{ env.az_keyvault_contentful_backup_storage_key }} --vault-name ${{ env.az_keyvault_name }} --query value -o tsv)
+          echo "::add-mask::$space_id"
+          echo "::add-mask::$environment"
+          echo "::add-mask::$management_token"
+          echo "::add-mask::$backup_storage_key"
+          echo "SPACE_ID=$space_id" >> $GITHUB_ENV
+          echo "CONTENTFUL_ENVIRONMENT=$environment" >> $GITHUB_ENV
+          echo "MANAGEMENT_TOKEN=$management_token" >> $GITHUB_ENV
+          echo "BACKUP_STORAGE_KEY=$backup_storage_key" >> $GITHUB_ENV
+
+      - name: Install export-processor deps
+        working-directory: ./contentful/export-processor/
+        run: npm ci
+
+      - name: Install broken-link-checker dependencies
+        working-directory: ./contentful/broken-link-checker/
+        run: npm ci
+
+      - name: Create output directory
+        working-directory: ./contentful/broken-link-checker/
+        run: mkdir -p output
+
+      - name: Run get-links.js && checker.js
+        working-directory: ./contentful/broken-link-checker/
+        env:
+          USE_PREVIEW: false
+          MANAGEMENT_TOKEN: ${{ env.MANAGEMENT_TOKEN }}
+          SPACE_ID: ${{ env.SPACE_ID }}
+          CONTENTFUL_ENVIRONMENT: ${{ env.CONTENTFUL_ENVIRONMENT }}
+        run: npm run checker
+
+      - name: Upload export to Azure storage container
+        working-directory: ./contentful/broken-link-checker
+        run: |
+          html_files=(report/*.html)
+          backup="${html_files[0]}"
+          account_name=$(echo "${az_resource_group_name}content" | sed 's/-//g')
+          az storage blob upload \
+            --account-name "$account_name" \
+            --account-key "$BACKUP_STORAGE_KEY" \
+            --container-name backups-container \
+            --file "$backup" \
+            --overwrite
+
+      - name: Remove IP from Key Vault
+        if: always()
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_keyvault_name }}
+          verb: remove

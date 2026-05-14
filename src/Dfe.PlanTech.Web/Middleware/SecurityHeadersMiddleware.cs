@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Application.Configuration;
+using Dfe.PlanTech.Core.Configuration;
 
 namespace Dfe.PlanTech.Web.Middleware;
 
@@ -13,6 +13,7 @@ public class SecurityHeadersMiddleware(RequestDelegate next)
     {
         AddFramejackingPreventHeaders(context);
         AddContentSecurityPolicy(context);
+        context.Response.Headers.CacheControl = "no-store";
 
         await _next(context);
     }

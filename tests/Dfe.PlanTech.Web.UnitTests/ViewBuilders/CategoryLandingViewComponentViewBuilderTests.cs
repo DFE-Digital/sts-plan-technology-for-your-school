@@ -37,9 +37,9 @@ public class CategoryLandingViewComponentViewBuilderTests
         return new CategoryLandingViewComponentViewBuilder(
             logger,
             contentful,
+            currentUser,
             submission,
-            user,
-            currentUser
+            user
         );
     }
 
@@ -123,14 +123,10 @@ public class CategoryLandingViewComponentViewBuilderTests
     }
 
     [Theory]
-    [InlineData(0, false, false)]
-    [InlineData(1, true, false)]
-    [InlineData(2, true, true)]
-    public async Task BuildViewModelAsync_Computed_Completion_Flags_Are_Correct(
-        int completedCount,
-        bool anyCompleted,
-        bool allCompleted
-    )
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public async Task BuildViewModelAsync_Computed_Completion_Count_Correct(int completedCount)
     {
         // Arrange
         var s1 = MakeSection("A", "A", "a");
@@ -167,8 +163,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         );
 
         // Assert
-        Assert.Equal(anyCompleted, vm.AnySectionsCompleted);
-        Assert.Equal(allCompleted, vm.AllSectionsCompleted);
+        Assert.Equal(completedCount, vm.CompletedSectionsCount);
     }
 
     [Theory]
@@ -215,7 +210,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "developing" },
+            new SqlSectionStatusDto { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -231,15 +226,15 @@ public class CategoryLandingViewComponentViewBuilderTests
         var vm = await sut.BuildViewModelAsync(
             category,
             "cat",
-            null,
+            section.Name,
             RecommendationConstants.DefaultSortOrder
         );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Unable to retrieve Networking recommendation",
-            secVm.Recommendations.NoRecommendationFoundErrorMessage
+            $"Section '{section.Name}' has no recommendations",
+            secVm.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
@@ -252,7 +247,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "established" },
+            new SqlSectionStatusDto { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -276,15 +271,15 @@ public class CategoryLandingViewComponentViewBuilderTests
         var vm = await sut.BuildViewModelAsync(
             category,
             "cat",
-            null,
+            section.Name,
             RecommendationConstants.DefaultSortOrder
         );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Unable to retrieve Security recommendation",
-            secVm.Recommendations.NoRecommendationFoundErrorMessage
+            $"Section '{section.Name}' has no recommendations",
+            secVm.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
@@ -297,7 +292,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", LastMaturity = "exemplary" },
+            new SqlSectionStatusDto { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -322,15 +317,15 @@ public class CategoryLandingViewComponentViewBuilderTests
         var vm = await sut.BuildViewModelAsync(
             category,
             "cat",
-            null,
+            section.Name,
             RecommendationConstants.DefaultSortOrder
         );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Unable to retrieve Devices recommendation",
-            secVm.Recommendations.NoRecommendationFoundErrorMessage
+            $"Section '{section.Name}' has no recommendations",
+            secVm.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
@@ -352,7 +347,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S4", LastMaturity = "developing" },
+            new() { SectionId = "S4", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -381,8 +376,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
-                    PreviousStatus = "In Progress",
-                    NewStatus = "Complete",
+                    PreviousStatus = RecommendationStatus.InProgress,
+                    NewStatus = RecommendationStatus.Complete,
                     NoteText = "Test note",
                 }
             },
@@ -416,13 +411,14 @@ public class CategoryLandingViewComponentViewBuilderTests
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         var recs = secVm.Recommendations;
+        Assert.NotNull(recs);
         Assert.Null(recs.NoRecommendationFoundErrorMessage);
         Assert.Equal("Broadband", recs.SectionName);
         Assert.Equal("broadband-connection", recs.SectionSlug);
         Assert.Single(recs.Answers);
         Assert.Equal("Yes", recs.Answers.First().AnswerText);
         Assert.Single(recs.Chunks);
-        Assert.Equal("Complete", recs.Chunks.First().Status.GetDisplayName());
+        Assert.Equal(RecommendationStatus.Complete, recs.Chunks.First().Status);
     }
 
     [Fact]
@@ -430,12 +426,12 @@ public class CategoryLandingViewComponentViewBuilderTests
     {
         // Arrange
         var section = MakeSection("S6", "Devices", "devices", "devices-interstitial");
-        section.CoreRecommendations = null!;
+        section.CoreRecommendations = [];
         var category = MakeCategory(section);
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6", LastMaturity = "exemplary" },
+            new() { SectionId = "S6", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -448,7 +444,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                 section,
                 SubmissionStatus.CompleteReviewed
             )
-            .Returns(new SubmissionResponsesModel(1, new()));
+            .Returns(new SubmissionResponsesModel(1, []));
 
         var sut = CreateSut(submission: submission);
 
@@ -456,15 +452,15 @@ public class CategoryLandingViewComponentViewBuilderTests
         var vm = await sut.BuildViewModelAsync(
             category,
             "cat",
-            null,
+            section.Name,
             RecommendationConstants.DefaultSortOrder
         );
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal(
-            "Unable to retrieve Devices recommendation",
-            secVm.Recommendations.NoRecommendationFoundErrorMessage
+            $"Section '{section.Name}' has no recommendations",
+            secVm.Recommendations?.NoRecommendationFoundErrorMessage
         );
     }
 
@@ -496,7 +492,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6", LastMaturity = "developing" },
+            new() { SectionId = "S6", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -525,8 +521,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
-                    PreviousStatus = RecommendationStatus.InProgress.ToString(),
-                    NewStatus = RecommendationStatus.Complete.ToString(),
+                    PreviousStatus = RecommendationStatus.InProgress,
+                    NewStatus = RecommendationStatus.Complete,
                     NoteText = "Test note 1",
                 }
             },
@@ -539,8 +535,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
-                    PreviousStatus = RecommendationStatus.NotStarted.ToString(),
-                    NewStatus = RecommendationStatus.InProgress.ToString(),
+                    PreviousStatus = RecommendationStatus.NotStarted,
+                    NewStatus = RecommendationStatus.InProgress,
                     NoteText = "Test note 2",
                 }
             },
@@ -554,7 +550,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
                     PreviousStatus = null,
-                    NewStatus = RecommendationStatus.NotStarted.ToString(),
+                    NewStatus = RecommendationStatus.NotStarted,
                     NoteText = "Test note 3",
                 }
             },
@@ -587,6 +583,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.NotNull(secVm.Recommendations);
         var chunks = secVm.Recommendations.Chunks;
         Assert.NotEmpty(chunks);
         Assert.Equal(RecommendationStatus.NotStarted, chunks[0].Status);
@@ -622,7 +619,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new() { SectionId = "S6", LastMaturity = "developing" },
+            new() { SectionId = "S6", Status = SubmissionStatus.CompleteReviewed },
         };
 
         var responses = new SubmissionResponsesModel(
@@ -651,8 +648,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now.AddDays(-2),
-                    PreviousStatus = RecommendationStatus.InProgress.ToString(),
-                    NewStatus = RecommendationStatus.Complete.ToString(),
+                    PreviousStatus = RecommendationStatus.InProgress,
+                    NewStatus = RecommendationStatus.Complete,
                     NoteText = "Test note 1",
                 }
             },
@@ -665,8 +662,8 @@ public class CategoryLandingViewComponentViewBuilderTests
                     UserId = 301,
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now.AddDays(-1),
-                    PreviousStatus = RecommendationStatus.NotStarted.ToString(),
-                    NewStatus = RecommendationStatus.InProgress.ToString(),
+                    PreviousStatus = RecommendationStatus.NotStarted,
+                    NewStatus = RecommendationStatus.InProgress,
                     NoteText = "Test note 2",
                 }
             },
@@ -680,7 +677,7 @@ public class CategoryLandingViewComponentViewBuilderTests
                     MatEstablishmentId = 401,
                     DateCreated = DateTime.Now,
                     PreviousStatus = null,
-                    NewStatus = RecommendationStatus.NotStarted.ToString(),
+                    NewStatus = RecommendationStatus.NotStarted,
                     NoteText = "Test note 3",
                 }
             },
@@ -713,6 +710,7 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         // Assert
         var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.NotNull(secVm.Recommendations);
         var chunks = secVm.Recommendations.Chunks;
         Assert.NotEmpty(chunks);
         Assert.True(

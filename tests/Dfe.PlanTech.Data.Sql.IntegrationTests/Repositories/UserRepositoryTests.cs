@@ -10,7 +10,7 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
     public UserRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _repository = new UserRepository(DbContext);
@@ -34,7 +34,10 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
         Assert.True(result.DateCreated <= DateTime.UtcNow);
 
         // Verify it was saved to database
-        var saved = await DbContext.Users.FindAsync(result.Id);
+        var saved = await DbContext.Users.FindAsync(
+            [result.Id],
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(saved);
         Assert.Equal(dfeSignInRef, saved!.DfeSignInRef);
     }
@@ -49,7 +52,7 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.UtcNow,
         };
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetUserBySignInRefAsync("existing-user-456");
@@ -87,7 +90,7 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
         var user3 = new UserEntity { DfeSignInRef = "user-gamma", DateCreated = DateTime.UtcNow };
 
         DbContext.Users.AddRange(user1, user2, user3);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act - Find user created more than 2 days ago
         var result = await _repository.GetUserByAsync(u =>
@@ -105,7 +108,7 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
         // Arrange
         var user = new UserEntity { DfeSignInRef = "existing-user", DateCreated = DateTime.UtcNow };
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var result = await _repository.GetUserByAsync(u => u.DfeSignInRef == "nonexistent");
@@ -141,7 +144,7 @@ public class UserRepositoryTests : DatabaseIntegrationTestBase
             DateCreated = DateTime.UtcNow,
         };
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act
         var resultExact = await _repository.GetUserBySignInRefAsync("CaseSensitiveUser");

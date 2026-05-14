@@ -21,7 +21,7 @@ When(
   async function (newStatus: string) {
     await this.page.getByRole('radio', { name: newStatus }).check();
 
-    await this.page.getByRole('button', { name: 'Update status' }).click();
+    await this.page.getByRole('button', { name: 'Save' }).click();
 
     await this.page.waitForLoadState('networkidle');
   },

@@ -1,4 +1,4 @@
-﻿using Dfe.PlanTech.Web.UnitTests.Models;
+using Dfe.PlanTech.Web.UnitTests.Models;
 using Xunit;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewComponents

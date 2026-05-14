@@ -1,4 +1,10 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
 @model ReviewAnswersViewModel
+
+@{
+    ViewData[StatePassingMechanismConstants.Title] = "Check your answers";
+}
 
 @section NavButton {
     @{
@@ -11,7 +17,7 @@
 }
 
 <div id="checkYourAnswers-page">
-    <h3 class="govuk-caption-xl">@Model.SectionName</h3>
+    <span class="govuk-caption-xl">@Model.SectionName</span>
     @{
         await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
     }
@@ -33,7 +39,7 @@
                        asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
                        asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
                        title="@questionWithAnswer.QuestionText">
-                        Change
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.CheckAnswersChangeLink)
                         <span class="govuk-visually-hidden">@anchorLabel</span>
                     </a>
                 </dd>
@@ -53,7 +59,9 @@
             }
         }
 
-        <govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">Submit and view recommendations</govuk-button>
+        <govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.CheckAnswersSubmitButton)
+        </govuk-button>
 
         @if (Model.ErrorMessage != null)
         {

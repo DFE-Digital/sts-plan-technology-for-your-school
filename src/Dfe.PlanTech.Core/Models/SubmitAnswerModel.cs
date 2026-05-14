@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Dfe.PlanTech.Core.Models;
 
+[ExcludeFromCodeCoverage]
 public class SubmitAnswerModel
 {
     public string SectionId { get; init; } = null!;

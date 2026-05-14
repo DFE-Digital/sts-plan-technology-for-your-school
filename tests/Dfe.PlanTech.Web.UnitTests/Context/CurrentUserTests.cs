@@ -1,6 +1,3 @@
-using System.Security.Authentication;
-using System.Security.Claims;
-using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -10,6 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using NSubstitute;
+using System.Security.Authentication;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
 
@@ -65,7 +65,7 @@ public class CurrentUserTests
     [Fact]
     public void DsiReference_Returns_Value_When_Claim_Present()
     {
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.NameIdentifier, "dsi-123") });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.NameIdentifier, "dsi-123")]);
         Assert.Equal("dsi-123", sut.DsiReference);
     }
 
@@ -82,9 +82,7 @@ public class CurrentUserTests
     [Fact]
     public void Email_Returns_Value_When_Claim_Present()
     {
-        var (sut, _) = Build(
-            new[] { BuildClaim(ClaimConstants.VerifiedEmail, "user@example.com") }
-        );
+        var (sut, _) = Build([BuildClaim(ClaimConstants.VerifiedEmail, "user@example.com")]);
         Assert.Equal("user@example.com", sut.Email);
     }
 
@@ -102,7 +100,7 @@ public class CurrentUserTests
     public async Task GetActiveEstablishmentIdAsync_ForDirectEstablishmentUser_ReturnsIdFromClaim()
     {
         // Arrange - Direct establishment user (no selected school)
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "42") });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "42")]);
 
         // Act
         var result = await sut.GetActiveEstablishmentIdAsync();
@@ -126,11 +124,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
-                },
+                ],
                 "test"
             )
         );
@@ -193,9 +190,7 @@ public class CurrentUserTests
     [Fact]
     public async Task GetActiveEstablishmentIdAsync_WhenClaimIsNonNumeric_ReturnsNull()
     {
-        var (sut2, _) = Build(
-            new[] { BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "not-an-int") }
-        );
+        var (sut2, _) = Build([BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "not-an-int")]);
         Assert.Null(await sut2.GetActiveEstablishmentIdAsync());
     }
 
@@ -204,7 +199,7 @@ public class CurrentUserTests
     [Fact]
     public void UserId_Parses_Int_When_Present()
     {
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.DB_USER_ID, "7") });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.DB_USER_ID, "7")]);
         Assert.Equal(7, sut.UserId);
     }
 
@@ -213,6 +208,38 @@ public class CurrentUserTests
     {
         var (sut, _) = Build();
         Assert.Null(sut.UserId);
+    }
+
+    // ---------- SessionId ----------
+
+    [Fact]
+    public void SessionId_Returns_SessionId_When_Claim_Exists()
+    {
+        var expectedSessionId = Guid.NewGuid();
+
+        var (sut, _) = Build([
+            BuildClaim(ClaimConstants.SessionId, expectedSessionId.ToString())
+        ]);
+
+        Assert.Equal(expectedSessionId, sut.SessionId);
+    }
+
+    [Fact]
+    public void SessionId_ReturnsNull_When_Claim_Is_Missing()
+    {
+        var (sut, _) = Build();
+
+        Assert.Null(sut.SessionId);
+    }
+
+    [Fact]
+    public void SessionId_ReturnsNull_When_Claim_Is_Not_Guid()
+    {
+        var (sut, _) = Build([
+            BuildClaim(ClaimConstants.SessionId, "not-a-guid")
+        ]);
+
+        Assert.Null(sut.SessionId);
     }
 
     // ---------- IsAuthenticated ----------
@@ -256,7 +283,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act / Assert - verify all UserOrganisation properties are mapped correctly
         Assert.Equal(Guid.Parse("CC1185B8-3142-4B6C-887C-ADC413CD3891"), sut.UserOrganisationDsiId);
@@ -288,7 +315,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act / Assert - verify all UserOrganisation properties are mapped correctly
         Assert.Equal(Guid.Parse("D9011C85-F851-4746-B4A2-D732536717F8"), sut.UserOrganisationDsiId);
@@ -312,7 +339,7 @@ public class CurrentUserTests
             Uid = "99999",
         };
         var json1 = JsonSerializer.Serialize(orgWithUrn);
-        var (sut1, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, json1) });
+        var (sut1, _) = Build([BuildClaim(ClaimConstants.Organisation, json1)]);
         Assert.Equal("12345", sut1.UserOrganisationReference);
 
         // Test UKPRN as fallback reference when URN is null
@@ -324,7 +351,7 @@ public class CurrentUserTests
             Uid = "99999",
         };
         var json2 = JsonSerializer.Serialize(orgWithUkprn);
-        var (sut2, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, json2) });
+        var (sut2, _) = Build([BuildClaim(ClaimConstants.Organisation, json2)]);
         Assert.Equal("67890", sut2.UserOrganisationReference);
 
         // Test UID as fallback reference when URN and UKPRN are null
@@ -336,7 +363,7 @@ public class CurrentUserTests
             Uid = "99999",
         };
         var json3 = JsonSerializer.Serialize(orgWithUid);
-        var (sut3, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, json3) });
+        var (sut3, _) = Build([BuildClaim(ClaimConstants.Organisation, json3)]);
         Assert.Equal("99999", sut3.UserOrganisationReference);
 
         // Test DSI ID as fallback reference when URN, UKPRN, and UID are null
@@ -348,7 +375,7 @@ public class CurrentUserTests
             Uid = null,
         };
         var json4 = JsonSerializer.Serialize(orgWithDsiId);
-        var (sut4, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, json4) });
+        var (sut4, _) = Build([BuildClaim(ClaimConstants.Organisation, json4)]);
         Assert.Equal(orgWithDsiId.Id.ToString(), sut4.UserOrganisationReference);
     }
 
@@ -460,6 +487,7 @@ public class CurrentUserTests
         var setCookies = ctx.Response.Headers[HeaderNames.SetCookie];
 
         Assert.True(setCookies.Count > 0);
+        Assert.True(setCookies.Count > 0);
 
         var cookie = setCookies.LastOrDefault(v =>
             v != null
@@ -511,7 +539,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = await sut.GetActiveEstablishmentNameAsync();
@@ -532,7 +560,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = await sut.GetActiveEstablishmentNameAsync();
@@ -556,11 +584,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
-                },
+                ],
                 "test"
             )
         );
@@ -627,7 +654,7 @@ public class CurrentUserTests
 
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
-            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+            new ClaimsIdentity([BuildClaim(ClaimConstants.Organisation, orgJson)], "test")
         );
         context.User = principal;
 
@@ -674,7 +701,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = await sut.GetActiveEstablishmentUrnAsync();
@@ -697,7 +724,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = await sut.GetActiveEstablishmentUrnAsync();
@@ -721,11 +748,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's ID
-                },
+                ],
                 "test"
             )
         );
@@ -745,22 +771,19 @@ public class CurrentUserTests
         // Mock the validation - confirm the school is in the MAT's group
         establishmentService
             .GetEstablishmentLinksWithRecommendationCounts(100)
-            .Returns(
-                new List<Core.DataTransferObjects.Sql.SqlEstablishmentLinkDto>
+            .Returns([
+                new()
                 {
-                    new()
-                    {
-                        Urn = "999888",
-                        EstablishmentName = "Selected Academy",
-                        Id = 42,
-                    },
-                }
-            );
+                    Urn = "999888",
+                    EstablishmentName = "Selected Academy",
+                    Id = 42,
+                },
+            ]);
 
         establishmentService
             .GetEstablishmentByReferenceAsync("999888")
             .Returns(
-                new Core.DataTransferObjects.Sql.SqlEstablishmentDto
+                new SqlEstablishmentDto
                 {
                     Id = 42,
                     OrgName = "Selected Academy",
@@ -781,7 +804,7 @@ public class CurrentUserTests
     // ---------- GetActiveEstablishmentUkprnAsync ----------
 
     [Fact]
-    public void GetActiveEstablishmentUkprnAsync_ForDirectSchoolUser_ReturnsSchoolUkprn()
+    public void GetActiveEstablishmentUkprn_ForDirectSchoolUser_ReturnsSchoolUkprn()
     {
         // Arrange - Direct school user (logged in directly as a school)
         var orgJson = """
@@ -794,7 +817,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = sut.GetActiveEstablishmentUkprn();
@@ -804,7 +827,7 @@ public class CurrentUserTests
     }
 
     [Fact]
-    public void GetActiveEstablishmentUkprnAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupUkprn()
+    public void GetActiveEstablishmentUkprn_ForGroupUserWithNoSchoolSelected_ReturnsGroupUkprn()
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
@@ -816,7 +839,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = sut.GetActiveEstablishmentUkprn();
@@ -826,7 +849,7 @@ public class CurrentUserTests
     }
 
     [Fact]
-    public void GetActiveEstablishmentUkprnAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
+    public void GetActiveEstablishmentUkprn_ForGroupUserWithSelectedSchool_ReturnsNull()
     {
         // Arrange - MAT user who has selected a school from their group
         // Business Rule: Schools do (sometimes) have an UKPRN on DSI, but we do not store it in our database,
@@ -842,7 +865,7 @@ public class CurrentUserTests
 
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
-            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+            new ClaimsIdentity([BuildClaim(ClaimConstants.Organisation, orgJson)], "test")
         );
         context.User = principal;
 
@@ -866,10 +889,10 @@ public class CurrentUserTests
         Assert.Null(result);
     }
 
-    // ---------- GetActiveEstablishmentUidAsync ----------
+    // ---------- GetActiveEstablishmentUid ----------
 
     [Fact]
-    public void GetActiveEstablishmentUidAsync_ForDirectSchoolUser_ReturnsNull()
+    public void GetActiveEstablishmentUid_ForDirectSchoolUser_ReturnsNull()
     {
         // Arrange - Direct school user (logged in directly as a school)
         // Note: Schools don't have UID (only groups like MATs and SATs have a UID)
@@ -882,7 +905,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = sut.GetActiveEstablishmentUid();
@@ -892,7 +915,7 @@ public class CurrentUserTests
     }
 
     [Fact]
-    public void GetActiveEstablishmentUidAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupUid()
+    public void GetActiveEstablishmentUid_ForGroupUserWithNoSchoolSelected_ReturnsGroupUid()
     {
         // Arrange - MAT user (logged in as MAT, no school selected) - MATs have UID
         var orgJson = """
@@ -904,7 +927,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = sut.GetActiveEstablishmentUid();
@@ -914,7 +937,7 @@ public class CurrentUserTests
     }
 
     [Fact]
-    public void GetActiveEstablishmentUidAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
+    public void GetActiveEstablishmentUid_ForGroupUserWithSelectedSchool_ReturnsNull()
     {
         // Arrange - MAT user who has selected a school from their group
         // Note: Schools do not have a UID (UIDs are for establishment groups only),
@@ -930,7 +953,7 @@ public class CurrentUserTests
 
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
-            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+            new ClaimsIdentity([BuildClaim(ClaimConstants.Organisation, orgJson)], "test")
         );
         context.User = principal;
 
@@ -954,10 +977,10 @@ public class CurrentUserTests
         Assert.Null(result);
     }
 
-    // ---------- GetActiveEstablishmentDsiIdAsync ----------
+    // ---------- GetActiveEstablishmentDsiId ----------
 
     [Fact]
-    public void GetActiveEstablishmentDsiIdAsync_ForDirectSchoolUser_ReturnsSchoolDsiId()
+    public void GetActiveEstablishmentDsiId_ForDirectSchoolUser_ReturnsSchoolDsiId()
     {
         // Arrange - Direct school user (logged in directly as a school)
         var orgJson = """
@@ -968,7 +991,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = sut.GetActiveEstablishmentDsiId();
@@ -978,7 +1001,7 @@ public class CurrentUserTests
     }
 
     [Fact]
-    public void GetActiveEstablishmentDsiIdAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupDsiId()
+    public void GetActiveEstablishmentDsiId_ForGroupUserWithNoSchoolSelected_ReturnsGroupDsiId()
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
@@ -989,7 +1012,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = sut.GetActiveEstablishmentDsiId();
@@ -999,7 +1022,7 @@ public class CurrentUserTests
     }
 
     [Fact]
-    public void GetActiveEstablishmentDsiIdAsync_ForGroupUserWithSelectedSchool_ReturnsNull()
+    public void GetActiveEstablishmentDsiId_ForGroupUserWithSelectedSchool_ReturnsNull()
     {
         // Arrange - MAT user who has selected a school from their group
         // Note: Schools do have an organisation ID on DSI, but we do not store it in our database,
@@ -1014,7 +1037,7 @@ public class CurrentUserTests
 
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
-            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+            new ClaimsIdentity([BuildClaim(ClaimConstants.Organisation, orgJson)], "test")
         );
         context.User = principal;
 
@@ -1038,10 +1061,10 @@ public class CurrentUserTests
         Assert.Null(result);
     }
 
-    // ---------- GetActiveEstablishmentReferenceAsync ----------
+    // ---------- GetActiveEstablishmentReference ----------
 
     [Fact]
-    public void GetActiveEstablishmentReferenceAsync_ForDirectSchoolUser_ReturnsSchoolUrn()
+    public void GetActiveEstablishmentReference_ForDirectSchoolUser_ReturnsSchoolUrn()
     {
         // Arrange - Direct school user (logged in directly as a school with URN)
         var orgJson = """
@@ -1053,7 +1076,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = sut.GetActiveEstablishmentReference();
@@ -1063,7 +1086,7 @@ public class CurrentUserTests
     }
 
     [Fact]
-    public void GetActiveEstablishmentReferenceAsync_ForGroupUserWithNoSchoolSelected_ReturnsGroupReference()
+    public void GetActiveEstablishmentReference_ForGroupUserWithNoSchoolSelected_ReturnsGroupReference()
     {
         // Arrange - MAT user who has not yet selected a school (will be prompted to select)
         var orgJson = """
@@ -1075,7 +1098,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act
         var result = sut.GetActiveEstablishmentReference();
@@ -1085,7 +1108,7 @@ public class CurrentUserTests
     }
 
     [Fact]
-    public void GetActiveEstablishmentReferenceAsync_ForGroupUserWithSelectedSchool_ReturnsSelectedSchoolUrn()
+    public void GetActiveEstablishmentReference_ForGroupUserWithSelectedSchool_ReturnsSelectedSchoolUrn()
     {
         // Arrange - MAT user who has selected a school from their group
         var orgJson = """
@@ -1099,7 +1122,7 @@ public class CurrentUserTests
 
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
-            new ClaimsIdentity(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) }, "test")
+            new ClaimsIdentity([BuildClaim(ClaimConstants.Organisation, orgJson)], "test")
         );
         context.User = principal;
 
@@ -1137,7 +1160,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act / Assert
         Assert.True(sut.UserOrganisationIsGroup);
@@ -1155,7 +1178,7 @@ public class CurrentUserTests
     //     }
     //     """;
     //
-    //     var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+    //     var (sut, _) = Build([{ BuildClaim(ClaimConstants.Organisation, orgJson) }]);
     //
     //     // Act / Assert
     //     Assert.True(sut.UserOrganisationIsGroup);
@@ -1173,7 +1196,7 @@ public class CurrentUserTests
     //     }
     //     """;
     //
-    //     var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+    //     var (sut, _) = Build([{ BuildClaim(ClaimConstants.Organisation, orgJson) }]);
     //
     //     // Act / Assert
     //     Assert.True(sut.UserOrganisationIsGroup);
@@ -1192,7 +1215,7 @@ public class CurrentUserTests
             }
             """;
 
-        var (sut, _) = Build(new[] { BuildClaim(ClaimConstants.Organisation, orgJson) });
+        var (sut, _) = Build([BuildClaim(ClaimConstants.Organisation, orgJson)]);
 
         // Act / Assert
         Assert.False(sut.UserOrganisationIsGroup);
@@ -1226,11 +1249,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
-                },
+                ],
                 "test"
             )
         );
@@ -1294,11 +1316,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's DB ID
-                },
+                ],
                 "test"
             )
         );
@@ -1421,11 +1442,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"), // MAT's DB ID
-                },
+                ],
                 "test"
             )
         );
@@ -1521,11 +1541,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
-                },
+                ],
                 "test"
             )
         );
@@ -1595,11 +1614,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     // Note: No DB_ESTABLISHMENT_ID claim
-                },
+                ],
                 "test"
             )
         );
@@ -1661,11 +1679,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
-                },
+                ],
                 "test"
             )
         );
@@ -1730,11 +1747,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
-                },
+                ],
                 "test"
             )
         );
@@ -1800,11 +1816,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
-                },
+                ],
                 "test"
             )
         );
@@ -1862,11 +1877,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
-                },
+                ],
                 "test"
             )
         );
@@ -1923,11 +1937,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
-                },
+                ],
                 "test"
             )
         );
@@ -1985,11 +1998,10 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var principal = new ClaimsPrincipal(
             new ClaimsIdentity(
-                new[]
-                {
+                [
                     BuildClaim(ClaimConstants.Organisation, orgJson),
                     BuildClaim(ClaimConstants.DB_ESTABLISHMENT_ID, "100"),
-                },
+                ],
                 "test"
             )
         );

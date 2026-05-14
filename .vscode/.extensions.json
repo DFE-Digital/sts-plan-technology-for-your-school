@@ -13,6 +13,7 @@
     "ms-dotnettools.csdevkit",
     "ms-dotnettools.csharp",
     "ms-dotnettools.vscode-dotnet-runtime",
+    "ms-python.black-formatter",
     "ms-vscode.powershell",
     "pkief.material-icon-theme",
     "redhat.vscode-yaml",

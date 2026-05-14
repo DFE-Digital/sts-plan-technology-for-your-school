@@ -15,6 +15,8 @@ public class RecommendationEntityTests
         var expectedDateCreated = new DateTime(2024, 05, 01, 12, 00, 00, DateTimeKind.Utc);
         var expectedQuestionId = 123;
         var expectedArchived = true;
+        var expectedQuestionContentfulRef = "ArbitraryContentfulRef";
+        var expectedUserActionId = Guid.NewGuid();
 
         var questionEntity = new QuestionEntity
         {
@@ -22,6 +24,7 @@ public class RecommendationEntityTests
             QuestionText = "Arbitrary string - question text",
             ContentfulRef = "Arbitrary string - question contentful ref",
             DateCreated = DateTime.UtcNow,
+            UserActionId = expectedUserActionId,
         };
 
         var entity = new RecommendationEntity
@@ -32,7 +35,9 @@ public class RecommendationEntityTests
             DateCreated = expectedDateCreated,
             QuestionId = expectedQuestionId,
             Question = questionEntity,
+            QuestionContentfulRef = expectedQuestionContentfulRef,
             Archived = expectedArchived,
+            UserActionId= expectedUserActionId,
         };
 
         // Act
@@ -46,6 +51,8 @@ public class RecommendationEntityTests
         Assert.Equal(expectedQuestionId, dto.QuestionId);
         Assert.Equal(expectedQuestionId, dto.Question.Id);
         Assert.Equal(expectedArchived, dto.Archived);
+        Assert.Equal(expectedQuestionContentfulRef, dto.QuestionContentfulRef);
+        Assert.Equal(expectedUserActionId, dto.UserActionId);
 
         // Assert - ensure all DTO properties are accounted for
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlRecommendationDto>(
@@ -58,6 +65,8 @@ public class RecommendationEntityTests
                 nameof(SqlRecommendationDto.QuestionId),
                 nameof(SqlRecommendationDto.Question),
                 nameof(SqlRecommendationDto.Archived),
+                nameof(SqlRecommendationDto.QuestionContentfulRef),
+                nameof(SqlRecommendationDto.UserActionId),
             }
         );
     }

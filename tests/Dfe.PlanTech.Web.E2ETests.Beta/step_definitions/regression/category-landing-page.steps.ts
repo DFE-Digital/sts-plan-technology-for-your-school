@@ -52,7 +52,10 @@ When(
       .locator('.recommendation-action-header')
       .getByRole('link', { name: linkText });
 
-    await link.click();
+    await Promise.all([
+      this.page.waitForNavigation({ waitUntil: 'domcontentloaded' }),
+      link.click(),
+    ]);
   },
 );
 

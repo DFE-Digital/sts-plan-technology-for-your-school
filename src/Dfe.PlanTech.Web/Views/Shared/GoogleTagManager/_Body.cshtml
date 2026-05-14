@@ -1,9 +1,10 @@
-@inject GoogleTagManagerServiceServiceConfiguration GtmService
+@inject GoogleTagManagerConfiguration GtmConfiguration
+@inject ICookieService CookieService
 
-@if(!GtmService.CookieService.Cookie.UseCookies){
+@if(!CookieService.Cookie.UseCookies){
   return;
 }
 
 <noscript>
-    <iframe title="google-tag-manager" src="https://www.googletagmanager.com/ns.html?id=@GtmService.Config.Id" height="0" width="0" style="display:none;visibility:hidden"></iframe>
+    <iframe title="google-tag-manager" src="https://www.googletagmanager.com/ns.html?id=@GtmConfiguration.Id" height="0" width="0" style="display:none;visibility:hidden"></iframe>
 </noscript>

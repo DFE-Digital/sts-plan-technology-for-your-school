@@ -1,4 +1,4 @@
-﻿using System.Linq.Expressions;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore.Query;
 
 namespace Dfe.PlanTech.Web.UnitTests

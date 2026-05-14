@@ -1,8 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using Dfe.PlanTech.Core.Exceptions;
 
 namespace Dfe.PlanTech.Core.Models;
 
+[ExcludeFromCodeCoverage]
 public sealed class EstablishmentModel
 {
     public const string InvalidEstablishmentErrorMessage =

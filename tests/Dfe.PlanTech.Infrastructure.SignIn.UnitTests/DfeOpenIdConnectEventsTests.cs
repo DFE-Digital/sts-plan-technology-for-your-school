@@ -1,8 +1,8 @@
 using System.Security.Claims;
 using System.Text.RegularExpressions;
-using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;

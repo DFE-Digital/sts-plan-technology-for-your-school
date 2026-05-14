@@ -20,14 +20,14 @@ public class SubmissionService(
 
     public async Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(
         int establishmentId,
-        QuestionnaireSectionEntry section
+        string sectionId
     )
     {
         // Check if an in-progress submission already exists
         var inProgressSubmission =
             await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                sectionId,
                 status: SubmissionStatus.InProgress
             );
 
@@ -36,7 +36,7 @@ public class SubmissionService(
             await _submissionWorkflow.SetSubmissionInaccessibleAsync(inProgressSubmission.Id);
         }
 
-        return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, section);
+        return await _submissionWorkflow.CloneLatestCompletedSubmission(establishmentId, sectionId);
     }
 
     public Task<
@@ -51,13 +51,28 @@ public class SubmissionService(
     public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
         int establishmentId,
         QuestionnaireSectionEntry section,
-        SubmissionStatus status
+        SubmissionStatus? status
     )
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
-            section,
+            section.Id,
             status
+        );
+        return submission is null ? null : new SubmissionResponsesModel(submission, section);
+    }
+
+    // Overload to take multiple statuses to include in query
+    public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
+        int establishmentId,
+        QuestionnaireSectionEntry section,
+        IEnumerable<SubmissionStatus> statuses
+)
+    {
+        var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
+            establishmentId,
+            section.Id,
+            statuses
         );
         return submission is null ? null : new SubmissionResponsesModel(submission, section);
     }
@@ -76,7 +91,7 @@ public class SubmissionService(
         var latestSubmission =
             await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                section.Id,
                 status
             );
 
@@ -97,7 +112,7 @@ public class SubmissionService(
 
         var submissionResponsesModel = new SubmissionResponsesModel(latestSubmission!, section);
 
-        var lastResponse = submissionResponsesModel.Responses.Last();
+        var lastResponse = submissionResponsesModel.Responses[submissionResponsesModel.Responses.Count - 1];
         var cmsLastAnswer = section
             .Questions.FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))
             ?.Answers.FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));
@@ -131,11 +146,6 @@ public class SubmissionService(
         return _submissionWorkflow.GetSectionStatusesAsync(establishmentId, sectionIds);
     }
 
-    public Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
-    {
-        return _submissionWorkflow.SetLatestSubmissionViewedAsync(establishmentId, sectionId);
-    }
-
     public Task<int> SubmitAnswerAsync(
         int userId,
         int activeEstablishmentId,
@@ -149,11 +159,6 @@ public class SubmissionService(
             userEstablishmentId,
             answerModel
         );
-    }
-
-    public Task ConfirmCheckAnswersAsync(int submissionId)
-    {
-        return _submissionWorkflow.SetMaturityAndMarkAsReviewedAsync(submissionId);
     }
 
     public Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(

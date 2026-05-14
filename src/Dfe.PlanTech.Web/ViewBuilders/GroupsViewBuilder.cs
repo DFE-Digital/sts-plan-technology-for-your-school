@@ -1,5 +1,5 @@
-using Dfe.PlanTech.Application.Configuration;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
@@ -16,8 +16,8 @@ public class GroupsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IContentfulService contentfulService,
-    IEstablishmentService establishmentService,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    IEstablishmentService establishmentService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService =
@@ -39,8 +39,7 @@ public class GroupsViewBuilder(
                 $"Could not find contentful page for slug '{UrlConstants.GroupsSelectionPageSlug}'"
             );
 
-        var groupName = CurrentUser.UserOrganisationName;
-        var title = groupName ?? "Your organisation";
+        var groupName = CurrentUser.UserOrganisationName ?? "Your organisation";
         List<ContentfulEntry> content = selectASchoolPageContent.Content ?? [];
 
         var sections = await ContentfulService.GetAllSectionsAsync();
@@ -56,19 +55,19 @@ public class GroupsViewBuilder(
 
         var viewModel = new GroupsSelectorViewModel
         {
-            GroupName = groupName ?? string.Empty,
+            GroupName = groupName,
             GroupEstablishments = groupSchools,
             BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent ?? [],
-            Title = new ComponentTitleEntry(title),
+            Title = new ComponentTitleEntry(groupName),
             Content = content,
             TotalRecommendations = totalRecommendations,
-            ProgressRetrievalErrorMessage = String.IsNullOrEmpty(totalRecommendations)
+            ProgressRetrievalErrorMessage = string.IsNullOrEmpty(totalRecommendations)
                 ? "Unable to retrieve progress"
                 : null,
             ContactLinkHref = contactLink?.Href,
         };
 
-        controller.ViewData["Title"] = "Select a school";
+        controller.ViewData[StatePassingMechanismConstants.Title] = "Select a school";
         return controller.View(SelectASchoolViewName, viewModel);
     }
 

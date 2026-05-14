@@ -7,8 +7,7 @@ namespace Dfe.PlanTech.Web.ViewModels;
 [ExcludeFromCodeCoverage]
 public class CategoryLandingViewComponentViewModel
 {
-    public bool AllSectionsCompleted { get; init; }
-    public bool AnySectionsCompleted { get; init; }
+    public int CompletedSectionsCount { get; set; }
     public required string CategoryName { get; set; }
     public ICollection<CategoryLandingSectionViewModel> CategoryLandingSections { get; init; } = [];
     public required string CategorySlug { get; set; }

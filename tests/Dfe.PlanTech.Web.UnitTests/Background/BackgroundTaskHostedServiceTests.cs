@@ -10,35 +10,42 @@ public class BackgroundTaskHostedServiceTests
     [Fact]
     public async Task ExecuteAsync_Runs_One_WorkItem_And_Logs()
     {
-        // Arrange
         var logger = Substitute.For<ILogger<BackgroundTaskHostedService>>();
         var queue = Substitute.For<IBackgroundTaskQueue>();
 
-        var ran = false;
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
+        var workItemCompleted = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
 
-        // Dequeue once, then cancel so the loop exits
         queue
             .DequeueAsync(Arg.Any<CancellationToken>())
             .Returns(
-                Task.FromResult<Func<CancellationToken, Task>>(ct =>
+                Task.FromResult<Func<CancellationToken, Task>>(async ct =>
                 {
-                    ran = true;
-                    cts.Cancel(); // stop the loop after this item
-                    return Task.CompletedTask;
+                    try
+                    {
+                        await Task.CompletedTask;
+                    }
+                    finally
+                    {
+                        cts.Cancel();
+                        workItemCompleted.TrySetResult();
+                    }
                 })
             );
 
         var sut = new BackgroundTaskHostedService(logger, queue);
 
-        // Act
-        await sut.StartAsync(cts.Token); // StartAsync calls ExecuteAsync under the hood
+        await sut.StartAsync(cts.Token);
 
-        // Assert
-        Assert.True(ran);
+        await workItemCompleted.Task.WaitAsync(
+            TimeSpan.FromSeconds(2),
+            TestContext.Current.CancellationToken
+        );
+
         await queue.Received(1).DequeueAsync(Arg.Any<CancellationToken>());
 
-        // At least two info logs: starting + read item
         var infoLogs = logger
             .ReceivedCalls()
             .Where(c => c.GetMethodInfo().Name == nameof(ILogger.Log))
@@ -58,9 +65,12 @@ public class BackgroundTaskHostedServiceTests
         // Arrange
         var logger = Substitute.For<ILogger<BackgroundTaskHostedService>>();
         var queue = Substitute.For<IBackgroundTaskQueue>();
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
 
-        // First dequeued item throws
+        var secondItemRan = new TaskCompletionSource(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+
         queue
             .DequeueAsync(Arg.Any<CancellationToken>())
             .Returns(
@@ -70,6 +80,7 @@ public class BackgroundTaskHostedServiceTests
                 Task.FromResult<Func<CancellationToken, Task>>(ct =>
                 {
                     cts.Cancel(); // stop after processing the second item
+                    secondItemRan.TrySetResult();
                     return Task.CompletedTask;
                 })
             );
@@ -79,13 +90,26 @@ public class BackgroundTaskHostedServiceTests
         // Act
         await sut.StartAsync(cts.Token);
 
-        // Assert: error was logged at least once
-        logger
-            .ReceivedWithAnyArgs()
-            .Log(LogLevel.Error, 0, default, Arg.Any<Exception>(), default!);
+        await secondItemRan.Task.WaitAsync(
+            TimeSpan.FromSeconds(2),
+            TestContext.Current.CancellationToken
+        );
 
-        // Both dequeues happened (first threw, second cancelled the loop)
+        // Assert: both dequeues happened
         await queue.Received(2).DequeueAsync(Arg.Any<CancellationToken>());
+
+        // Assert: an error log was written
+        var errorLogs = logger
+            .ReceivedCalls()
+            .Where(c => c.GetMethodInfo().Name == nameof(ILogger.Log))
+            .Where(c =>
+                c.GetArguments().Length > 0
+                && c.GetArguments()[0] is LogLevel lvl
+                && lvl == LogLevel.Error
+            )
+            .ToList();
+
+        Assert.NotEmpty(errorLogs);
     }
 
     [Fact]
@@ -110,23 +134,40 @@ public class BackgroundTaskHostedServiceTests
         var queue = Substitute.For<IBackgroundTaskQueue>();
         var sut = new BackgroundTaskHostedService(logger, queue);
 
-        var cts = new CancellationTokenSource();
+        using var cts = new CancellationTokenSource();
 
-        CancellationToken? captured = null;
+        var dequeueCalled = new TaskCompletionSource<bool>(
+            TaskCreationOptions.RunContinuationsAsynchronously
+        );
+
+        CancellationToken captured = default;
+        var wasCancelledBeforeSourceCancel = false;
 
         queue
             .DequeueAsync(Arg.Any<CancellationToken>())
-            .Returns(ci =>
+            .Returns(callInfo =>
             {
-                captured = ci.Arg<CancellationToken>();
+                captured = callInfo.Arg<CancellationToken>();
+                wasCancelledBeforeSourceCancel = captured.IsCancellationRequested;
+
                 cts.Cancel();
+
+                dequeueCalled.TrySetResult(true);
+
                 return Task.FromResult<Func<CancellationToken, Task>>(_ => Task.CompletedTask);
             });
 
         await sut.StartAsync(cts.Token);
 
-        Assert.True(captured.HasValue);
-        Assert.Equal(cts.Token.ToString(), captured!.Value.ToString());
+        await dequeueCalled.Task.WaitAsync(
+            TimeSpan.FromSeconds(2),
+            TestContext.Current.CancellationToken
+        );
+
+        Assert.False(wasCancelledBeforeSourceCancel);
+        Assert.True(captured.CanBeCanceled);
+        Assert.True(captured.IsCancellationRequested);
+        Assert.Equal(cts.Token.IsCancellationRequested, captured.IsCancellationRequested);
     }
 
     [Fact]

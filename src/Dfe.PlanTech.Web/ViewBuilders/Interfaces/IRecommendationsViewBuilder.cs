@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -26,8 +27,7 @@ public interface IRecommendationsViewBuilder
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        string selectedStatus,
-        string? notes
+        SingleRecommendationInputViewModel inputModel
     );
 
     Task<IActionResult> RouteToPrintSingle(
@@ -42,5 +42,13 @@ public interface IRecommendationsViewBuilder
         string categorySlug,
         string sectionSlug,
         string chunkSlug
+    );
+
+    Task<IActionResult> RouteToShareRecommendationAsync(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug,
+        string chunkSlug,
+        ShareByEmailInputViewModel? inputModel = null
     );
 }

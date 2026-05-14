@@ -44,7 +44,9 @@ public class HeadRequestMiddlewareTests
         Assert.NotEqual(0, context.Response.Body.Length);
 
         context.Response.Body.Seek(0, SeekOrigin.Begin);
-        var response = await new StreamReader(context.Response.Body).ReadToEndAsync();
+        var response = await new StreamReader(context.Response.Body).ReadToEndAsync(
+            TestContext.Current.CancellationToken
+        );
 
         Assert.Equal("Response Body", response);
     }

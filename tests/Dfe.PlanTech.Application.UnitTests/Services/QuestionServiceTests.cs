@@ -53,7 +53,7 @@ public class QuestionServiceTests
         _mockSubmissionWorkflow
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                section.Id,
                 status: SubmissionStatus.InProgress
             )
             .Returns((SqlSubmissionDto?)null);
@@ -71,7 +71,7 @@ public class QuestionServiceTests
             .Received(1)
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                section.Id,
                 status: SubmissionStatus.InProgress
             );
     }
@@ -87,7 +87,7 @@ public class QuestionServiceTests
         _mockSubmissionWorkflow
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                section.Id,
                 status: SubmissionStatus.InProgress
             )
             .Returns(submission);
@@ -105,7 +105,7 @@ public class QuestionServiceTests
             .Received(1)
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                section.Id,
                 status: SubmissionStatus.InProgress
             );
     }
@@ -122,7 +122,7 @@ public class QuestionServiceTests
         _mockSubmissionWorkflow
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                section.Id,
                 status: SubmissionStatus.InProgress
             )
             .Returns(submission);
@@ -169,7 +169,7 @@ public class QuestionServiceTests
         _mockSubmissionWorkflow
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                section.Id,
                 status: SubmissionStatus.InProgress
             )
             .Returns(submission);
@@ -208,7 +208,7 @@ public class QuestionServiceTests
         _mockSubmissionWorkflow
             .GetLatestSubmissionWithOrderedResponsesAsync(
                 establishmentId,
-                section,
+                section.Id,
                 status: SubmissionStatus.InProgress
             )
             .Returns(submission);

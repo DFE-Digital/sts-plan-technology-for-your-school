@@ -2,6 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import 'dotenv/config';
 
+import { generateHtmlReport } from './html-report.js';
+
 const PLANTECH_BASE_URL = 'https://www.plan-technology-for-your-school.education.gov.uk';
 const LINKS_FILE_PATH = path.resolve('./result/links.json');
 const REQUEST_TIMEOUT = 15000;
@@ -9,6 +11,11 @@ const REQUEST_TIMEOUT = 15000;
 const CSV_REPORT_DIR = path.resolve('./report');
 const EXTERNAL_LINK_CSV_PATH = path.join(CSV_REPORT_DIR, 'failed-external-links.csv');
 const INTERNAL_LINK_CSV_PATH = path.join(CSV_REPORT_DIR, 'internal-links-to-check.csv');
+
+const HTML_REPORT_PATH = path.join(CSV_REPORT_DIR, 'report.html');
+
+const CONTENTFUL_SPACE_ID = process.env.SPACE_ID || null;
+const CONTENTFUL_ENVIRONMENT = process.env.CONTENTFUL_ENVIRONMENT || 'master';
 
 function isValidUrl(uri) {
   try {
@@ -38,6 +45,7 @@ function categoriseLinks(data) {
   const externalLinks = [];
 
   for (const link of data) {
+    link.uri = link.uri.startsWith('/') ? PLANTECH_BASE_URL + link.uri : link.uri;
     const uri = link.uri;
     const isHttp = uri.startsWith('http');
     const isEmail = uri.startsWith('mailto:');
@@ -110,11 +118,14 @@ async function checkExternalLink(url) {
 async function validateExternalLinks(groupedLinks) {
   const failedLinks = [];
   const failedExternalRows = [];
+  const allExternalRows = []; // every instance, with its check result attached
 
   for (const [url, links] of groupedLinks.entries()) {
     if (!isValidUrl(url)) {
       // all instances of this invalid URL fail
       for (const link of links) {
+        const result = { valid: false, reason: 'Invalid URL format' };
+
         failedLinks.push({
           id: link.entryId,
           uri: link.uri,
@@ -128,14 +139,17 @@ async function validateExternalLinks(groupedLinks) {
           status: '',
           redirected: '',
         });
+
+        allExternalRows.push({ ...link, result });
       }
       continue;
     }
-
     const result = await checkExternalLink(url);
 
-    if (!result.valid) {
-      for (const link of links) {
+    for (const link of links) {
+      allExternalRows.push({ ...link, result });
+
+      if (!result.valid) {
         failedLinks.push({
           id: link.entryId,
           uri: link.uri,
@@ -154,18 +168,17 @@ async function validateExternalLinks(groupedLinks) {
     }
   }
 
-  return { failedLinks, failedExternalRows };
+  return { failedLinks, failedExternalRows, allExternalRows };
 }
 
 function buildMarkdownReport(failedLinks, groupedExternal) {
-  let md = `## Contentful Broken Link Check Summary\n\n`;
+  let md = `## Contentful Broken Link Check Summary\n`;
   // summary stats
   md += `\n### Summary\n`;
   md += `- Total external links checked: ${groupedExternal.size}\n`;
   md += `- Total link instances: ${Array.from(groupedExternal.values()).reduce((sum, arr) => sum + arr.length, 0)}\n`;
   md += `- Failed URLs: ${new Set(failedLinks.map((l) => l.uri)).size}\n`;
   md += `- Failed instances: ${failedLinks.length}\n`;
-  md += `\n`;
   md += `\n`;
   md += `Download the CSVs to view the results\n`;
 
@@ -214,13 +227,33 @@ function exportLinkReportsToCsv(failedExternalRows, internalLinks) {
   const internalRows = internalLinks.map((l) => ({
     link: l.uri,
     entryId: l.entryId,
-    internalName: l.internalName
+    internalName: l.internalName,
   }));
 
   writeCsv(INTERNAL_LINK_CSV_PATH, ['link', 'entryId', 'internalName'], internalRows);
 
   console.log(`Wrote CSV: ${EXTERNAL_LINK_CSV_PATH}`);
   console.log(`Wrote CSV: ${INTERNAL_LINK_CSV_PATH}`);
+}
+
+function writeHtmlReport(allExternalRows, internalLinks) {
+  const html = generateHtmlReport({
+    externalRows: allExternalRows,
+    internalRows: internalLinks,
+    spaceId: CONTENTFUL_SPACE_ID,
+    environment: CONTENTFUL_ENVIRONMENT,
+    runAt: new Date(),
+  });
+
+  fs.mkdirSync(path.dirname(HTML_REPORT_PATH), { recursive: true });
+  fs.writeFileSync(HTML_REPORT_PATH, html, 'utf8');
+
+  if (!CONTENTFUL_SPACE_ID) {
+    console.warn(
+      'CONTENTFUL_SPACE_ID is not set — "Open in Contentful" buttons will be disabled in the HTML report.',
+    );
+  }
+  console.log(`Wrote HTML report: ${HTML_REPORT_PATH}`);
 }
 
 async function main() {
@@ -231,8 +264,10 @@ async function main() {
   console.log(
     `Checking ${groupedExternal.size} unique external URLs (${externalLinks.length} total instances)...`,
   );
+  console.log();
 
-  const { failedLinks, failedExternalRows } = await validateExternalLinks(groupedExternal);
+  const { failedLinks, failedExternalRows, allExternalRows } =
+    await validateExternalLinks(groupedExternal);
 
   const markdown = buildMarkdownReport(failedLinks, groupedExternal);
 
@@ -245,6 +280,8 @@ async function main() {
   }
 
   exportLinkReportsToCsv(failedExternalRows, internalLinks);
+
+  writeHtmlReport(allExternalRows, internalLinks);
 
   process.exit(0);
 }

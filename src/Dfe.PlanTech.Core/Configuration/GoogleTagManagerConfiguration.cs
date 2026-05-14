@@ -1,0 +1,10 @@
+using System.Diagnostics.CodeAnalysis;
+
+namespace Dfe.PlanTech.Core.Configuration;
+
+[ExcludeFromCodeCoverage]
+public record GoogleTagManagerConfiguration
+{
+    public string Id { get; set; } = "";
+    public string SiteVerificationId { get; init; } = "";
+}

@@ -19,7 +19,7 @@ public class SubmissionWorkflowTests
     private static readonly string[] q1q2 = new[] { "Q1", "Q2" };
     private static readonly string[] a1a2 = new[] { "A1", "A2" };
 
-    private SubmissionWorkflow CreateServiceUnderTest() => new(_sp, _repo);
+    private SubmissionWorkflow CreateServiceUnderTest() => new(_repo);
 
     // ---------- Helpers: minimal Contentful section graph ----------
     private static EstablishmentEntity BuildEstablishment(int? id = 1)
@@ -175,7 +175,7 @@ public class SubmissionWorkflowTests
             .Returns(latestCompleted);
         _repo.CloneSubmission(latestCompleted).Returns(clone);
 
-        var dto = await sut.CloneLatestCompletedSubmission(123, section);
+        var dto = await sut.CloneLatestCompletedSubmission(123, section.Id);
 
         // Expect path: Q1 (latest) -> Q2 -> Q3 (no response for Q3 so stop after Q2)
         Assert.Equal(q1q2, dto.Responses.Select(r => r.Question.ContentfulSysId).ToArray());
@@ -195,7 +195,7 @@ public class SubmissionWorkflowTests
             .GetLatestSubmissionAndResponsesAsync(1, section.Id, status: (SubmissionStatus?)null)
             .Returns((SubmissionEntity?)null);
 
-        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section, null);
+        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, (SubmissionStatus?)null);
         Assert.Null(dto);
     }
 
@@ -220,7 +220,6 @@ public class SubmissionWorkflowTests
             Id = 55,
             SectionId = section.Id,
             SectionName = "testName",
-            Maturity = "developing",
             EstablishmentId = 1,
             Establishment = BuildEstablishment(),
             Status = SubmissionStatus.InProgress,
@@ -237,7 +236,7 @@ public class SubmissionWorkflowTests
 
         var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(
             5,
-            section,
+            section.Id,
             SubmissionStatus.InProgress
         );
 
@@ -245,7 +244,40 @@ public class SubmissionWorkflowTests
         Assert.Equal(2, dto!.Responses.Count());
         // Should start at Q1 then go to Q2 per chain
         Assert.Equal(q1q2, dto.Responses.Select(r => r.Question.ContentfulSysId).ToArray());
-        Assert.Equal("developing", dto.Maturity);
+    }
+
+    [Fact]
+    public async Task GetLatestSubmissionWithOrderedResponses_MultipleStatuses_Calls_GetLatestSubmissionAndResponsesAsync_MultipleStatusOverload()
+    {
+        var sut = CreateServiceUnderTest();
+        var section = BuildSection(out _, out _, out _, out _, out _, out _);
+
+        _repo
+            .GetLatestSubmissionAndResponsesAsync(1, section.Id, [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress])
+            .Returns((SubmissionEntity?)null);
+
+        var dto = await sut.GetLatestSubmissionWithOrderedResponsesAsync(1, section.Id, [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]);
+
+
+        await _repo.Received(1)
+            .GetLatestSubmissionAndResponsesAsync(
+                1,
+                section.Id,
+                Arg.Is<IEnumerable<SubmissionStatus>>(s =>
+                    s.SequenceEqual(new[]
+                    {
+                        SubmissionStatus.Inaccessible,
+                        SubmissionStatus.InProgress
+                    })
+                )
+            );
+
+        await _repo.DidNotReceive()
+            .GetLatestSubmissionAndResponsesAsync(
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<SubmissionStatus?>()
+            );
     }
 
     // ---------- SubmitAnswer ----------
@@ -254,31 +286,6 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await Assert.ThrowsAsync<InvalidDataException>(() => sut.SubmitAnswer(1, 2, 2, null!));
-    }
-
-    [Fact]
-    public async Task SubmitAnswer_Calls_SP_With_AssessmentResponseModel_And_Returns_Id()
-    {
-        var sut = CreateServiceUnderTest();
-        var questionModel = new IdWithTextModel { Id = "Q1", Text = "Question 1 text" };
-        var answerModel = new IdWithTextModel { Id = "A1", Text = "Answer 1 text" };
-        var model = new SubmitAnswerModel { Question = questionModel, ChosenAnswer = answerModel };
-
-        _sp.SubmitResponse(
-                Arg.Is<AssessmentResponseModel>(m =>
-                    m.UserId == 9
-                    && m.EstablishmentId == 8
-                    && m.UserEstablishmentId == 7
-                    && m.Question.Id == "Q1"
-                    && m.Answer!.Id == "A1"
-                )
-            )
-            .Returns(777);
-
-        // activeEstablishmentId = 8, userEstablishmentId = 7 (simulating MAT user selecting a school)
-        var id = await sut.SubmitAnswer(9, 8, 7, model);
-
-        Assert.Equal(777, id);
     }
 
     // ---------- GetSectionStatusesAsync ----------
@@ -292,17 +299,15 @@ public class SubmissionWorkflowTests
             {
                 SectionId = "S1",
                 Status = SubmissionStatus.CompleteReviewed,
-                LastMaturity = "developing",
             },
             new()
             {
                 SectionId = "S2",
                 Status = SubmissionStatus.NotStarted,
-                LastMaturity = null,
             },
         };
 
-        _sp.GetSectionStatusesAsync("S1,S2", 123).Returns(entities);
+        _repo.GetSectionStatusesAsync("S1,S2", 123).Returns(entities);
 
         var result = await sut.GetSectionStatusesAsync(123, ["S1", "S2"]);
 
@@ -312,17 +317,15 @@ public class SubmissionWorkflowTests
             {
                 Assert.Equal("S1", s.SectionId);
                 Assert.Equal(SubmissionStatus.CompleteReviewed, s.Status);
-                Assert.Equal("developing", s.LastMaturity);
             },
             s =>
             {
                 Assert.Equal("S2", s.SectionId);
                 Assert.Equal(SubmissionStatus.NotStarted, s.Status);
-                Assert.Null(s.LastMaturity);
             }
         );
 
-        await _sp.Received(1).GetSectionStatusesAsync("S1,S2", 123);
+        await _repo.Received(1).GetSectionStatusesAsync("S1,S2", 123);
     }
 
     // ---------- GetSectionSubmissionStatusAsync ----------
@@ -334,7 +337,6 @@ public class SubmissionWorkflowTests
         {
             SectionId = "S1",
             SectionName = "testName",
-            Maturity = "high",
             EstablishmentId = 1,
             Establishment = BuildEstablishment(),
             Status = SubmissionStatus.CompleteReviewed,
@@ -350,7 +352,6 @@ public class SubmissionWorkflowTests
             SubmissionStatus.CompleteReviewed
         );
 
-        Assert.Equal("high", dto.LastMaturity);
         Assert.Equal(SubmissionStatus.CompleteReviewed, dto.Status);
     }
 
@@ -362,7 +363,6 @@ public class SubmissionWorkflowTests
         {
             SectionId = "S1",
             SectionName = "testName",
-            Maturity = "high",
             EstablishmentId = 1,
             Establishment = BuildEstablishment(),
             Status = SubmissionStatus.InProgress,
@@ -374,7 +374,6 @@ public class SubmissionWorkflowTests
 
         var dto = await sut.GetSectionSubmissionStatusAsync(1, "SEC", SubmissionStatus.InProgress);
 
-        Assert.Equal("high", dto.LastMaturity);
         Assert.Equal(SubmissionStatus.InProgress, dto.Status);
     }
 
@@ -397,25 +396,6 @@ public class SubmissionWorkflowTests
     }
 
     // ---------- Set / Delete delegations ----------
-    [Fact]
-    public async Task SetMaturityAndMarkAsReviewed_Calls_SP_Then_Repo()
-    {
-        var sut = CreateServiceUnderTest();
-        await sut.SetMaturityAndMarkAsReviewedAsync(42);
-        await _sp.Received(1).SetMaturityForSubmissionAsync(42);
-        await _repo
-            .Received(1)
-            .SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(42);
-    }
-
-    [Fact]
-    public async Task SetLatestSubmissionViewed_Delegates()
-    {
-        var sut = CreateServiceUnderTest();
-        await sut.SetLatestSubmissionViewedAsync(9, "SEC");
-        await _repo.Received(1).SetLatestSubmissionViewedAsync(9, "SEC");
-    }
-
     [Fact]
     public async Task SetSubmissionReviewed_Delegates()
     {
@@ -463,7 +443,7 @@ public class SubmissionWorkflowTests
     {
         var sut = CreateServiceUnderTest();
         await sut.SetSubmissionDeletedAsync(1, "SEC");
-        await _sp.Received(1).SetSubmissionDeletedAsync(1, "SEC");
+        await _repo.Received(1).SetSubmissionDeletedAsync(1, "SEC");
     }
 
     [Fact]

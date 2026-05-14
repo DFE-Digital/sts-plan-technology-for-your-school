@@ -1,7 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace Dfe.PlanTech.Core.Models;
 
+[ExcludeFromCodeCoverage]
 public readonly record struct DfeCookieModel
 {
     public DfeCookieModel() { }

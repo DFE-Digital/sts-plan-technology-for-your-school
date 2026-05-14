@@ -9,25 +9,21 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 namespace Dfe.PlanTech.Application.Workflows;
 
 public class SubmissionWorkflow(
-    IStoredProcedureRepository storedProcedureRepository,
     ISubmissionRepository submissionRepository
 ) : ISubmissionWorkflow
 {
-    private readonly IStoredProcedureRepository _storedProcedureRepository =
-        storedProcedureRepository
-        ?? throw new ArgumentNullException(nameof(storedProcedureRepository));
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
 
     public async Task<SqlSubmissionDto> CloneLatestCompletedSubmission(
         int establishmentId,
-        QuestionnaireSectionEntry section
+        string sectionId
     )
     {
         var submissionWithResponses =
             await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
                 establishmentId,
-                section.Id,
+                sectionId,
                 status: SubmissionStatus.CompleteReviewed
             );
         var newSubmission = await _submissionRepository.CloneSubmission(submissionWithResponses);
@@ -63,14 +59,35 @@ public class SubmissionWorkflow(
 
     public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
         int establishmentId,
-        QuestionnaireSectionEntry section,
+        string sectionId,
         SubmissionStatus? status
     )
     {
         var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
             establishmentId,
-            section.Id,
+            sectionId,
             status
+        );
+        if (latestSubmission is null)
+        {
+            return null;
+        }
+
+        latestSubmission.Responses = GetOrderedResponses(latestSubmission.Responses).ToList();
+        return latestSubmission.AsDto();
+    }
+
+    // Overload to take multiple statuses to include in query
+    public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
+    )
+    {
+        var latestSubmission = await _submissionRepository.GetLatestSubmissionAndResponsesAsync(
+            establishmentId,
+            sectionId,
+            statuses
         );
         if (latestSubmission is null)
         {
@@ -101,7 +118,7 @@ public class SubmissionWorkflow(
             userEstablishmentId,
             answerModel
         );
-        var responseId = await _storedProcedureRepository.SubmitResponse(model);
+        var responseId = await _submissionRepository.SubmitResponse(model);
 
         return responseId;
     }
@@ -112,7 +129,7 @@ public class SubmissionWorkflow(
     )
     {
         var sectionIdsInput = string.Join(',', sectionIds);
-        var statuses = await _storedProcedureRepository.GetSectionStatusesAsync(
+        var statuses = await _submissionRepository.GetSectionStatusesAsync(
             sectionIdsInput,
             establishmentId
         );
@@ -135,7 +152,6 @@ public class SubmissionWorkflow(
         {
             return new SqlSectionStatusDto
             {
-                LastMaturity = latestSubmission.Maturity,
                 SectionId = latestSubmission.SectionId,
                 Status = latestSubmission.Status,
             };
@@ -146,19 +162,6 @@ public class SubmissionWorkflow(
             SectionId = sectionId,
             Status = SubmissionStatus.NotStarted,
         };
-    }
-
-    public async Task SetMaturityAndMarkAsReviewedAsync(int submissionId)
-    {
-        await _storedProcedureRepository.SetMaturityForSubmissionAsync(submissionId);
-        await _submissionRepository.SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
-            submissionId
-        );
-    }
-
-    public async Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId)
-    {
-        await _submissionRepository.SetLatestSubmissionViewedAsync(establishmentId, sectionId);
     }
 
     public async Task SetSubmissionReviewedAsync(int submissionId)
@@ -190,7 +193,7 @@ public class SubmissionWorkflow(
 
     public Task SetSubmissionDeletedAsync(int establishmentId, string sectionId)
     {
-        return _storedProcedureRepository.SetSubmissionDeletedAsync(establishmentId, sectionId);
+        return _submissionRepository.SetSubmissionDeletedAsync(establishmentId, sectionId);
     }
 
     private static Dictionary<string, ResponseEntity>.ValueCollection GetOrderedResponses(

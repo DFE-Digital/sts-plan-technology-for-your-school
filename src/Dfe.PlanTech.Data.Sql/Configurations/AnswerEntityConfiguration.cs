@@ -14,5 +14,8 @@ internal class AnswerEntityConfiguration : IEntityTypeConfiguration<AnswerEntity
         builder.Property(answer => answer.AnswerText).HasMaxLength(4000); // NVARCHAR Max Length
         builder.Property(answer => answer.ContentfulRef).HasMaxLength(50);
         builder.Property(answer => answer.DateCreated).ValueGeneratedOnAdd();
+        builder.Property(answer => answer.UserActionId)
+               .HasColumnName("userActionId")
+               .IsRequired(false);
     }
 }

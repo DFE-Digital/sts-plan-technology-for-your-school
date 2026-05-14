@@ -30,5 +30,8 @@ Select CONCAT('Test Ref ', n), 'Test School', CONCAT('Test Establishment ', n) f
 
         // Seed test MAT group + links
         db.Database.ExecuteSqlRaw(SqlConstants.DsiSeedData);
+
+        // Seed User accounts for Mock Authentication
+        db.Database.ExecuteSqlRaw(SqlConstants.E2EUserSeedData);
     }
 }

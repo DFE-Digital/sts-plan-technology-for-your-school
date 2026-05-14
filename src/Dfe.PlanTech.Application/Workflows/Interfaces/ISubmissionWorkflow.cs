@@ -7,10 +7,7 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 
 public interface ISubmissionWorkflow
 {
-    Task<SqlSubmissionDto> CloneLatestCompletedSubmission(
-        int establishmentId,
-        QuestionnaireSectionEntry section
-    );
+    Task<SqlSubmissionDto> CloneLatestCompletedSubmission(int establishmentId, string sectionId);
     Task ConfirmCheckAnswersAndUpdateRecommendationsAsync(
         int establishmentId,
         int? matEstablishmentId,
@@ -25,8 +22,13 @@ public interface ISubmissionWorkflow
     Task SetSubmissionInProgressAsync(int establishmentId, string sectionId);
     Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
         int establishmentId,
-        QuestionnaireSectionEntry section,
+        string sectionId,
         SubmissionStatus? status
+    );
+    Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
+        int establishmentId,
+        string sectionId,
+        IEnumerable<SubmissionStatus> statuses
     );
     Task<List<SqlSectionStatusDto>> GetSectionStatusesAsync(
         int establishmentId,
@@ -38,8 +40,6 @@ public interface ISubmissionWorkflow
         SubmissionStatus status
     );
     Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId);
-    Task SetLatestSubmissionViewedAsync(int establishmentId, string sectionId);
-    Task SetMaturityAndMarkAsReviewedAsync(int submissionId);
     Task SetSubmissionReviewedAsync(int submissionId);
     Task<int> SubmitAnswer(
         int userId,

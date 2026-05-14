@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Web.ViewModels;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
@@ -14,6 +15,13 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             Controller controller,
             string categorySlug
         );
-        Task<NotFoundViewModel> BuildNotFoundViewModel();
+        Task<IActionResult> RouteToShareStandardPageAsync(
+            Controller controller,
+            string categorySlug,
+            ShareByEmailInputViewModel? inputModel = null
+        );
+        Task<NotFoundViewModel> BuildNotFoundViewModelAsync();
+
+        NotifyShareResultsViewModel? BuildNotifyShareResultsViewModel(Controller controller);
     }
 }

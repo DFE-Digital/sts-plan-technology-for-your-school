@@ -20,7 +20,7 @@ internal class GroupReadActivityEntityConfiguration
         builder
             .Property(b => b.SelectedEstablishmentName)
             .HasColumnName("selectedEstablishmentName")
-            .HasColumnType("nvarchar(50)")
+            .HasColumnType("nvarchar(200)")
             .IsRequired();
 
         builder
@@ -28,5 +28,9 @@ internal class GroupReadActivityEntityConfiguration
             .HasColumnName("dateSelected")
             .HasColumnType("datetime")
             .IsRequired();
+
+        builder.Property(b => b.UserActionId)
+            .HasColumnName("userActionId")
+            .IsRequired(false);
     }
 }

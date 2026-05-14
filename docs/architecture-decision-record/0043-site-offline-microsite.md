@@ -1,4 +1,4 @@
-﻿# 0043 - Site Offline Microsite for Maintenance Windows
+# 0043 - Site Offline Microsite for Maintenance Windows
 
 - **Status**: accepted
 
@@ -94,6 +94,7 @@ We will implement a standalone ASP.NET Core MVC microsite that:
 
 2. **Health Check Design**
    - `/health` endpoint returns 200 OK with JSON indicating maintenance mode:
+
      ```json
      {
        "status": "maintenance",
@@ -103,6 +104,7 @@ We will implement a standalone ASP.NET Core MVC microsite that:
        "timestamp": "2024-11-04T10:30:00Z"
      }
      ```
+
    - This keeps Azure Container Apps from removing the container / redirecting traffic away from what it percieves as an unhealthy container
    - Monitoring systems can parse the response to detect maintenance mode (i.e. intentional unavailability)
 
@@ -248,6 +250,7 @@ The microsite supports configurable maintenance messages via environment variabl
    - Each array element becomes a separate paragraph
    - Enables specific timing and context without code changes
    - Example configuration:
+
      ```
      Maintenance__MessageParagraphs__0 = "The service will be unavailable from 5pm on Monday 4th November."
      Maintenance__MessageParagraphs__1 = "You will be able to use the service from 9am on Tuesday 5th November."

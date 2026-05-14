@@ -10,7 +10,7 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
     public SignInRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
 
-    public override async Task InitializeAsync()
+    public override async ValueTask InitializeAsync()
     {
         await base.InitializeAsync();
         _repository = new SignInRepository(DbContext);
@@ -29,7 +29,7 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
 
         DbContext.Users.Add(user);
         DbContext.Establishments.Add(establishment);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var beforeSignIn = DateTime.UtcNow;
 
@@ -45,7 +45,10 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
         Assert.True(result.SignInDateTime <= DateTime.UtcNow);
 
         // Verify it was saved to database
-        var saved = await DbContext.SignIns.FindAsync(result.Id);
+        var saved = await DbContext.SignIns.FindAsync(
+            [result.Id],
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(saved);
         Assert.Equal(user.Id, saved!.UserId);
     }
@@ -56,7 +59,7 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
         // Arrange
         var user = new UserEntity { DfeSignInRef = "user456" };
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var beforeSignIn = DateTime.UtcNow;
 
@@ -90,7 +93,7 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
         // Arrange
         var user = new UserEntity { DfeSignInRef = "existing-user" };
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var beforeSignIn = DateTime.UtcNow;
 
@@ -106,7 +109,10 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
         Assert.True(result.SignInDateTime <= DateTime.UtcNow);
 
         // Verify it was saved to database
-        var saved = await DbContext.SignIns.FindAsync(result.Id);
+        var saved = await DbContext.SignIns.FindAsync(
+            [result.Id],
+            TestContext.Current.CancellationToken
+        );
         Assert.NotNull(saved);
         Assert.Equal(user.Id, saved!.UserId);
     }
@@ -129,7 +135,7 @@ public class SignInRepositoryTests : DatabaseIntegrationTestBase
         // Arrange
         var user = new UserEntity { DfeSignInRef = "frequent-user" };
         DbContext.Users.Add(user);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         // Act - Create multiple sign-ins
         var signIn1 = await _repository.CreateSignInAsync(user.Id);
