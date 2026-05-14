@@ -11,11 +11,15 @@ on:
       is_dr:
         type: boolean
         default: false
-        description: 'flag for using disaster recovery: adds -dr to all resource names'
-      deploy-tf-backend:
+      deploy-image:
+        type: boolean
+        default: true
+      apply-terraform:
+        type: boolean
+        default: true
+      restore-db:
         type: boolean
         default: false
-        description: 'flag to deploy the tf backend resources in this workflow'
   push:
     branches:
       - disaster-recovery-e2e-terraform
@@ -26,88 +30,27 @@ env:
   TF_BACKEND_KEY: terraform.tfstate
   BACKUP_CONTAINER_NAME: sqlbackups
   TF_WORKING_DIRECTORY_APP: terraform/container-app
-  TF_WORKING_DIRECTORY_DNS: terraform/dns-zone
   SQL_BACKUP_FILE_NAME: ''
   SQL_BACKUP_FILE_NAME_SEARCH: ''
   USE_LATEST_IF_NOT_SPECIFIED: true
 
 jobs:
-  deploy-tf-resources:
-    name: Deploy TF backend resources
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.deploy-tf-backend }}
+  image-and-acr:
+    name: Apply ACR and promote image
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.deploy-image) }}
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
     permissions:
       id-token: write
       contents: read
+    outputs:
+      image_tag: ${{ steps.promote_image.outputs.image_tag }}
 
     steps:
-      - name: Clone repo
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: 1.9.7
-
-      - name: Prepare derived variables
-        id: vars
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          IS_DR="${{ github.event_name == 'workflow_dispatch' && inputs.is_dr || false }}"
-
-          if [ "$IS_DR" = "true" ]; then
-            DFE_PROJECT_NAME="pt-dr"
-          else
-            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-          fi
-
-          RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
-          RESOURCE_PREFIX_TF_SHORT="${RESOURCE_PREFIX_TF//-/}"
-          TF_KEYVAULT_NAME="${RESOURCE_PREFIX_TF}-kv"
-
-          echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_TF_SHORT=$RESOURCE_PREFIX_TF_SHORT" >> "$GITHUB_OUTPUT"
-          echo "TF_KEYVAULT_NAME=$TF_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
-
-      - name: Login with AZ
-        uses: ./.github/actions/azure-login
-        with:
-          az_tenant_id: ${{ secrets.az_tenant_id }}
-          az_subscription_id: ${{ secrets.az_subscription_id }}
-          az_client_id: ${{ secrets.az_client_id }}
-
-      - name: Deploy TF Resources
-        uses: ./.github/actions/deploy-tf-resources
-        with:
-          environment: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-          az_location: ${{ vars.AZ_LOCATION }}
-          tf_backend_resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
-          tf_container_name: ${{ env.TF_BACKEND_CONTAINER_NAME }}
-          tf_storage_acc_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
-          tf_keyvault_name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
-          az_object_id: ${{ secrets.AZ_OBJECT_ID }}
-
-  deploy-app:
-    name: Deploy app infrastructure
-    needs: deploy-tf-resources
-    if: ${{ always() && !failure() && !cancelled() }}
-    runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Clone repo
-        uses: actions/checkout@v4
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v3
 
       - name: Prepare derived variables
         id: vars
@@ -124,26 +67,17 @@ jobs:
             DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
           fi
 
-          RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-backup"
           RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
           RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
 
-          RESOURCE_PREFIX_BACKUP_SHORT="${RESOURCE_PREFIX_BACKUP//-/}"
-          RESOURCE_PREFIX_TF_SHORT="${RESOURCE_PREFIX_TF//-/}"
-          RESOURCE_PREFIX_APP_SHORT="${RESOURCE_PREFIX_APP//-/}"
-
           echo "ENVIRONMENT_NAME=$ENVIRONMENT_NAME" >> "$GITHUB_OUTPUT"
-          echo "PROJECT_PREFIX_APP=$DFE_PROJECT_NAME" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
           echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_BACKUP_SHORT=$RESOURCE_PREFIX_BACKUP_SHORT" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_TF_SHORT=$RESOURCE_PREFIX_TF_SHORT" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_APP_SHORT=$RESOURCE_PREFIX_APP_SHORT" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_TF_SHORT=${RESOURCE_PREFIX_TF//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+          echo "PROJECT_PREFIX_APP=$DFE_PROJECT_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Get runner public IP
         id: whats-my-ip
-        shell: bash
         run: |
           IP=$(curl -s https://api.ipify.org)
           echo "ip=$IP" >> "$GITHUB_OUTPUT"
@@ -157,7 +91,7 @@ jobs:
           az_client_id: ${{ secrets.az_client_id }}
 
       - name: Whitelist Runner for TF keyvault
-        uses: ./.github/actions/whitelisting-kv
+        uses: ./.github/actions/whitelist-kv
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
           resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
@@ -165,19 +99,11 @@ jobs:
           verb: add
 
       - name: Whitelist Runner for TF storage
-        uses: ./.github/actions/whitelisting-storage
+        uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
           resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
           account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
-          verb: add
-
-      - name: Whitelist Runner for backup storage
-        uses: ./.github/actions/whitelisting-storage
-        with:
-          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
-          account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
           verb: add
 
       - name: Get secret and clean tfvars file
@@ -185,10 +111,9 @@ jobs:
         run: |
           ./scripts-workflow/get-and-normalise-tfvars.ps1 `
             -SecretName "${{ secrets.TF_SECRET_NAME }}" `
-            -KeyVaultName "${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}"
+            -KeyVaultName "${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}"
 
       - name: Terraform init
-        id: init
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
           terraform init \
@@ -198,12 +123,12 @@ jobs:
             -backend-config="key=${{ env.TF_BACKEND_KEY }}"
 
       - name: Apply Terraform changes - container registry only
-        id: apply-acr
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
           terraform apply -auto-approve -input=false \
             -target=azurerm_resource_group.app_rg \
             -target=azurerm_container_registry.acr_notshared \
+            -var="project_name="${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var-file="../../normalisedTerraformVars.tfvars"
 
       - name: Promote Image
@@ -216,15 +141,140 @@ jobs:
           package_name: ${{ env.PACKAGE_NAME }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
+  apply-terraform:
+    name: Apply Terraform changes
+    needs: [deploy-tf-resources, image-and-acr]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.apply-terraform) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: hashicorp/setup-terraform@v3
+
+      - name: Prepare derived variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          IS_DR="${{ github.event_name == 'workflow_dispatch' && inputs.is_dr || false }}"
+
+          if [ "$IS_DR" = "true" ]; then
+            DFE_PROJECT_NAME="pt-dr"
+          else
+            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+          fi
+
+          RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+
+          echo "PROJECT_PREFIX_APP=$DFE_PROJECT_NAME" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_TF_SHORT=${RESOURCE_PREFIX_TF//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+
+      - name: Get runner public IP
+        id: whats-my-ip
+        run: |
+          IP=$(curl -s https://api.ipify.org)
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+          echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.az_tenant_id }}
+          az_subscription_id: ${{ secrets.az_subscription_id }}
+          az_client_id: ${{ secrets.az_client_id }}
+
+      - name: Whitelist Runner for TF keyvault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
+          keyvault-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
+          verb: add
+
+      - name: Whitelist Runner for TF storage
+        uses: ./.github/actions/whitelist-storage
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
+          account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
+          verb: add
+
+      - name: Get secret and clean tfvars file
+        shell: pwsh
+        run: |
+          ./scripts-workflow/get-and-normalise-tfvars.ps1 `
+            -SecretName "${{ secrets.TF_SECRET_NAME }}" `
+            -KeyVaultName "${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}"
+
+      - name: Terraform init
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+
       - name: Apply Terraform changes
-        id: apply
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
           terraform apply -auto-approve -input=false \
             -var-file="../../normalisedTerraformVars.tfvars" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-            -var="image_tag=${{ steps.promote_image.outputs.image_tag }}" \
+            -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
             -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
+
+  restore-db:
+    name: Restore DB from BACPAC
+    needs: [deploy-tf-resources, apply-terraform]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare derived variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          IS_DR="${{ github.event_name == 'workflow_dispatch' && inputs.is_dr || false }}"
+
+          if [ "$IS_DR" = "true" ]; then
+            DFE_PROJECT_NAME="pt-dr"
+          else
+            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+          fi
+
+          RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-backup"
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+
+          echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.az_tenant_id }}
+          az_subscription_id: ${{ secrets.az_subscription_id }}
+          az_client_id: ${{ secrets.az_client_id }}
 
       - name: Restore DB from BACPAC
         uses: ./.github/actions/restore-db-from-bacpac
