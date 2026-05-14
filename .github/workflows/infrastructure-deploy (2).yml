@@ -143,7 +143,7 @@ jobs:
 
   apply-terraform:
     name: Apply Terraform changes
-    needs: [deploy-tf-resources, image-and-acr]
+    needs: [image-and-acr]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.apply-terraform) }}
     runs-on: ubuntu-latest
     environment:
@@ -236,7 +236,7 @@ jobs:
 
   restore-db:
     name: Restore DB from BACPAC
-    needs: [deploy-tf-resources, apply-terraform]
+    needs: [apply-terraform]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
     runs-on: ubuntu-latest
     environment:
