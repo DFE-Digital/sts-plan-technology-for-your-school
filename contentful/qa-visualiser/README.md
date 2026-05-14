@@ -1,86 +1,81 @@
-# QA visualiser
+# QA Visualiser
 
-Python project for creating visualisations of the different question pathways for each topic, to support QA testing.
+A Python tool that generates visual flowcharts of every possible question pathway through each questionnaire section. Used to support QA testing by making the branching logic of the questionnaire easy to inspect visually.
 
-## Overview
+## What it produces
 
-The tool makes a call to a cms endpoint within the plan-tech web app that returns all sections from Contentful.
-Then for each section, it generates a graph of all possible pathways through the section by making every question a
-node, and every link between an answer and its next question an edge.
+PNG flowcharts saved to `visualisations/`, one per section. Each chart shows:
 
-The `models.py` file uses Pydantic to ensure the data coming back from the cms endpoint has the fields required for the
-visualisation generator to work.
-The models do not contain all the fields that will be present within the json content but just those that are essential
-for the generator.
-Extra fields are allowed but missing fields raise a validation error.
+- Question nodes (grey boxes)
+- Answer nodes (grey ellipses) with edges to the next question
+- A "Check Answers" endpoint
+- Optionally: recommendation nodes (yellow) with colour-coded edges — green for completing recommendations, orange for in-progress
+
+## Language and tooling
+
+Python 3.12+, managed with [uv](https://github.com/astral-sh/uv). Uses [Pydantic](https://docs.pydantic.dev/) for data validation and [Graphviz](https://graphviz.org/) for rendering.
 
 ## Local setup
 
-To run the qa-visualiser locally:
-
 1. Install [uv](https://github.com/astral-sh/uv)
-2. Install [graphviz](https://graphviz.org/download/)
-3. Setup your .env file by copying .env.example and filling in the required environment variables:
+2. Install [Graphviz](https://graphviz.org/download/) (must be on your PATH)
+3. Copy `.env.example` to `.env` and fill in the values:
 
-   | Variable                | Description                                                                            | Example / Location                                 |
-   | ----------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------- |
-   | PLANTECH_API_KEY        | The API key the cms controller uses for authentication                                 | Keyvault value for `api--authentication--keyvalue` |
-   | PLANTECH_API_URL        | Base url of the cms controller                                                         | <https://localhost:8080/api/cms>                   |
-   | DISPLAY_RECOMMENDATIONS | Boolean option to display recommendation header text linked to the answer on the image | true/false                                         |
+| Variable | Description | Example |
+|---|---|---|
+| `PLANTECH_API_KEY` | API key for the CMS controller | From Key Vault: `api--authentication--keyvalue` |
+| `PLANTECH_API_URL` | Base URL of the CMS controller | `https://localhost:8080/api/cms` |
+| `DISPLAY_RECOMMENDATIONS` | Show recommendation headers on the chart | `true` / `false` |
+| `REQUESTS_CA_BUNDLE` | Path to SSL certificate (local dev only) | `./localhost.crt` |
 
-4. create and activate a virtual environment with:
-
-   ```bash
-   cd qa-visualiser
-   uv venv
-   source .venv/bin/activate
-   ```
-
-5. Install project dependencies with:
-
-   ```bash
-   uv sync
-   ```
-
-6. Run the tool to generate visualisations with:
-
-   ```bash
-   uv run main.py
-   ```
-
-## Linting and formatting
-
-Linting and formatting can be done with:
+4. Create and activate a virtual environment:
 
 ```bash
-uv run ruff check
-uv run ruff check --fix # fix linting errors automatically where possible
-uv run ruff format
+cd contentful/qa-visualiser
+uv venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
 ```
 
-## Tests
-
-The tests use pytest and can be run with:
+5. Install dependencies:
 
 ```bash
-uv run pytest
+uv sync
 ```
 
-## Certificates
+6. Run the tool:
 
-By default, the python project may not trust your locally running instance of plan-tech.
-You can provide a path to its certificate in your environment variables to fix this.
+```bash
+uv run main.py
+```
 
-First from the plan-tech repo run
+Flowcharts are saved to `visualisations/`.
+
+## Trusting the local dev certificate
+
+By default Python does not trust the ASP.NET Core development certificate. Export it first:
 
 ```bash
 dotnet dev-certs https --export-path contentful/qa-visualiser/localhost.crt --format PEM
 ```
 
-Then either run
+Then set `REQUESTS_CA_BUNDLE=./localhost.crt` in `.env`.
+
+## Tests
 
 ```bash
-export REQUESTS_CA_BUNDLE=path/to/localhost.crt
+uv run pytest
 ```
 
-or put `REQUESTS_CA_BUNDLE` in your `.env` file.
+## Linting and formatting
+
+```bash
+uv run ruff check          # lint
+uv run ruff check --fix    # auto-fix where possible
+uv run ruff format         # format
+```
+
+## See also
+
+- [Export processor](../export-processor/README.md) — provides the question and answer data this tool visualises
+- [Contentful tooling overview](../README.md)
+- [GitHub Actions workflows](../../.github/README.md) — `qa-viz.yml` runs this tool

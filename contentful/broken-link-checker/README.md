@@ -1,25 +1,47 @@
 # Broken Link Checker
 
-The broken link checker pulls down the Contentful data and isolates any links. It will check any external links within the content and then produce a list of internal links (e.g. /contact-us or https://plan-tech...) to check manually.
+Validates all hyperlinks found in Contentful content. Exports the space data, extracts every link, checks external URLs with HTTP requests, and produces CSV reports of broken or suspicious links.
 
-These are written to the console as well as outputted into two .csv files inside the /report/ directory.
+## How it works
 
-### Environment Variables
+```mermaid
+flowchart LR
+    A[Export Contentful data\ncontentful-data-loader.js] --> B[Extract all links\nget-links.js]
+    B --> C[Validate external links\nchecker.js]
+    C --> D[CSV reports\n+ GitHub summary]
+```
 
-- MANAGEMENT_TOKEN - This is the contentful management token
-- SPACE_ID - Contentful space ID
-- CONTENTFUL_ENVIRONMENT - Contentful environment to target e.g. (work_in_progress/master/development)
+1. **`contentful-data-loader.js`** — uses `export-processor` to fetch the full Contentful export and caches it to `export/contentful-data.json`. Delete this file to force a fresh export.
+2. **`get-links.js`** — walks all rich text fields in entries tagged `e2e`, extracts every `hyperlink`, `entry-hyperlink`, and `asset-hyperlink` node, and writes them to `result/links.json`.
+3. **`checker.js`** — reads `links.json`, fetches each external URL (15-second timeout), and splits results into:
+   - `report/failed-external-links.csv` — external links that returned an error (403, 406, and 429 are treated as valid)
+   - `report/internal-links-to-check.csv` — internal links (e.g. `/contact-us`) for manual review
+   - A markdown summary posted to `GITHUB_STEP_SUMMARY` when running in GitHub Actions
 
-### Running the script.
+## Running
 
-Navigate to the root broken-link-checker folder and type the command `npm run checker`
+```bash
+cd contentful/broken-link-checker
+npm install
+npm run checker
+```
 
-The pipeline for this script is in `.github/workflows/broken-link-checker.yaml`
+## Configuration
 
-Delete the export/contentful-data.json file if you require a fresh import.
+Copy `.env.example` to `.env` and fill in:
 
-### Scripts
+| Variable | Description |
+|---|---|
+| `MANAGEMENT_TOKEN` | Contentful management API token |
+| `SPACE_ID` | Contentful space ID |
+| `CONTENTFUL_ENVIRONMENT` | Target environment (e.g. `master`, `work_in_progress`) |
 
-`contentful-data-loader.js` - This script uses the export-processor to obtain the full contentful-data-json. It outputs the json to the /export directory.
-`get-links.js` - This script isolates the links from the contentful-export.json and creates a new json file with those links inside the directory /result.
-`checker.js` - This script uses the links.json from above and does a fetch on each link and outputs the results to the console/csv files.
+## CI
+
+This tool runs automatically in GitHub Actions. See `.github/workflows/broken-link-checker.yaml`.
+
+## See also
+
+- [Export processor](../export-processor/README.md) — provides the Contentful export this tool reads
+- [Contentful tooling overview](../README.md)
+- [GitHub Actions workflows](../../.github/README.md) — `broken-link-checker.yml` runs this in CI

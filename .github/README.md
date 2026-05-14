@@ -1,103 +1,117 @@
 # GitHub Workflows
 
-- [PR Checks](#pr-checks)
-- [Deployment pipelines](#deployment-pipelines)
-- [Other workflows](#other-workflows)
+All CI/CD automation for the service lives in `.github/workflows/`. Reusable actions are in `.github/actions/`.
 
-## PR Checks
+## PR checks
 
-The following GitHub workflows are used during the PR process to validate the changes being merged into the `main` branch
+These workflows run automatically on pull requests:
 
-| Workflow           | Description                                                                         |
-| ------------------ | ----------------------------------------------------------------------------------- |
-| code-pr-check      | Builds projects, runs unit tests, runs E2E tests, pushes test results to SonarCloud |
-| terraform-pr-check | Validates the Terraform configuration                                               |
-| e2e-tests          | Runs E2E tests (using Cypress)                                                      |
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `code-pr-check.yml` | PR | Builds solution, runs unit tests, pushes results to SonarCloud |
+| `terraform-pr-check.yml` | PR / push | Init, plan, format check, lint, security scan, posts plan to PR |
+| `build-web-assets.yml` | PR | Builds JS + CSS assets and commits any changes back to the branch |
+| `e2e-tests.yml` | PR / manual | Runs Cypress E2E tests |
+| `qa-viz-tests.yml` | PR / manual | Runs qa-visualiser lint and unit tests |
+| `validate-scripts.yml` | PR / push / manual | Validates SQL migration scripts |
+| `verify-checks-running.yml` | PR | Confirms that required status checks are executing |
 
-### code-pr-check workflow
+## Deployment pipeline
 
-- Builds the main solution file (`plan-technology-for-your-school.sln`), and runs all its unit tests
-- Builds the database upgrader project
-- Builds and runs the unit tests for the `Dfe.PlanTech.Web.Node` project
+```mermaid
+flowchart LR
+    push[Push to main] --> matrix[matrix-deploy]
+    matrix --> build[build-image]
+    build --> deploy[deploy-image]
+    deploy --> release[create-tag-release]
+    matrix --> fn[build-azure-function]
+```
 
-### e2e-tests workflow
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `matrix-deploy.yml` | Push to main / manual | Orchestrates the full build-and-deploy sequence for each environment |
+| `build-image.yml` | Called by matrix-deploy | Builds the Docker image and pushes it to the container registry |
+| `build-azure-function.yml` | Called by matrix-deploy | Builds the .NET Azure Function app |
+| `deploy-image.yml` | Called by matrix-deploy | Deploys the built image to a target Azure Container App environment |
+| `infrastructure-deploy.yml` | Manual | Deploys Terraform infrastructure changes to a named environment |
+| `terraform-dns.yml` | Manual / called | Plans and applies DNS zone Terraform changes |
+| `create-tag-release.yml` | Called by matrix-deploy | Creates a GitHub release and semver tag using Semantic Release |
 
-- Clears out all submissions for a particular testing establishment reference, so that all tests are fresh
-- Runs end-to-end tests using Cypress
+Environments: **Dev**, **Test**, **Staging**, **Production**. Dev and Test deploy automatically on merge to `main`; Staging and Production require manual trigger.
 
-### terraform-pr-check workflow
+## E2E tests
 
-This workflow validates the following:
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `e2e-tests.yml` | PR / manual | Cypress E2E tests (original suite) |
+| `e2e-test-playwright.yml` | Manual | Playwright E2E regression tests against a local instance |
+| `e2e-test-playwright-environment.yml` | Manual / called | Playwright E2E regression tests against a named environment |
+| `e2e-test-smoke-local.yml` | Manual | Playwright smoke tests against a local instance |
+| `e2e-test-smoke-environment.yml` | Manual / called | Playwright smoke tests against a named environment |
 
-- Validates the Terraform configuration by running Init/Plan
-- Checks the Terraform format
-- Runs Terraform Linter
-- Validates that the Terraform configuration doc is upto date
-- Runs a Terraform Security Check
+## Scheduled / maintenance workflows
 
-And will update the PR with the Plan results so reviews can easily see what changes will be applied to the infrastructure.
+| Workflow | Schedule | What it does |
+|---|---|---|
+| `contentful-backup.yml` | Weekly (Tue 00:00) | Backs up the Contentful space |
+| `broken-link-checker.yml` | Manual | Validates all hyperlinks in Contentful content |
+| `mutations-testing.yml` | Nightly (23:00) | Runs mutation tests against the unit test suite |
+| `check-secret-expiry-all-environments.yml` | Scheduled | Checks Azure Key Vault secrets are not near expiry across all environments |
+| `check-environment-availability-all-environments.yml` | Scheduled | Checks that all environments are responding |
+| `update-gias-data-scheduled.yml` | Scheduled | Refreshes GIAS (school register) data automatically |
+| `qa-viz.yml` | Manual / called | Runs the `qa-visualiser` to generate question flowcharts |
 
-## Deployment pipelines
+## Operational / manual workflows
 
-The following GitHub workflows are used when a PR is merged into the `main` branch
+| Workflow | What it does |
+|---|---|
+| `flush-redis-cache.yml` | Flushes the Redis cache for a named environment |
+| `clear-submission-data-from-db.yml` | Clears all submission data for a test establishment (for E2E test resets and demos) |
+| `update-gias-data-manual.yml` | Manually triggers a GIAS data refresh for a named environment |
 
-| Workflow                                  | Description                                                                                                                                                      |
-| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| matrix-deploy                             | Automatically runs when code is merged into main to kick off build and deploy job for dev and test environments (Can be manually triggered for Staging and Prod) |
-| [create-tag-release](#create-tag-release) | Tag and create GitHub releases based on the commits/merges into `main` and `development` branches                                                                |
-| build-and-deploy                          | Builds and deploys application for passed in environment                                                                                                         |
-| terraform-deploy                          | Deploys Terraform to Azure environments                                                                                                                          |
+## Reusable workflows (called by others)
 
-### create-tag-release
+| Workflow | Purpose |
+|---|---|
+| `build-image.yml` | Build Docker image |
+| `build-azure-function.yml` | Build Azure Function |
+| `deploy-image.yml` | Deploy to a Container App environment |
+| `check-environment-availability.yml` | Single-environment availability check |
+| `check-secret-expiry.yml` | Single-environment secret expiry check |
+| `create-tag-release.yml` | Semantic versioning and GitHub release |
+| `update-gias-data-common.yml` | GIAS data refresh logic shared by manual and scheduled variants |
+| `terraform-dns.yml` | DNS Terraform plan/apply |
+| `e2e-test-playwright-environment.yml` | Playwright regression tests |
+| `e2e-test-smoke-environment.yml` | Playwright smoke tests |
+| `qa-viz.yml` | QA visualiser run |
 
-This workflow is called by the `Multi stage build & deploy` workflow, and is therefore triggered on commits/merges to the `development` and `main` branches.
+## Versioning and conventional commits
 
-It uses [Semantic Release](https://github.com/semantic-release/semantic-release) to:
+The `create-tag-release` workflow uses [Semantic Release](https://github.com/semantic-release/semantic-release) with [Conventional Commits](https://www.conventionalcommits.org/). Commit messages determine the semver bump:
 
-1. Find out which commit(s) are have been added to the branch since the last tagged release
-2. Look through those commits and, based on the commit title, figure out whether the release is a major, minor, or patch release
-3. If necessary, i.e. there is a major/minor/patch release change, create the new release and tag it with the new appropriate version.
-
-The process uses [semantic versioning](https://semver.org/) for the release numbers, and expects [conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) for the commit details. As a result, it will only process commits that have an expected conventional commit title (e.g. `feat: ` or `test:`).
-
-To ensure that the process works correctly as expected, you should ensure your commits follow the conventional commits specification.
-
-## Other Workflows
-
-| Name                                                | Description                                                                                                      |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| build-web-assets                                    | Builds JS + CSS files (and bundles, minifies, etc. as necessary) on PR, then pushes changes to the source branch |
-| [clear-submission-data-from-db](#clear-user-data-from-db) | Clears all submission-related data from a DB on a target environment for a selected test establishment                                                           |
-
-### clear-user-data-from-db
-
-This workflow runs an [SQL script](/.github/scripts/clear-submission-data-from-db.sql) that clears all recommendation histories, responses and submissions from the database. This gives a 'clean slate' for testing, demos etc.
-
-It can only be triggered manually from either the `Actions` tab, or using the GitHub CLI tool. It takes two inputs; the target `environment` and the `establishment` (ie the establishment for which to clear submission data). The `environment` input takes Dev, Tst, StagingUnprotected and ProductionUnprotected, the latter two environments are specifically designed for running actions. The input options for `establishment` are limited to the three main DSI Test establishments: Community School, Foundation School and Miscalleous.
-
-See below for information on testing manual workflows using GitHub CLI.
-
-## Workflow Actions
-
-Reusable workflow actions are located within the `.github/actions` directory
+- `feat:` → minor
+- `fix:` → patch
+- `BREAKING CHANGE:` → major
+- Other prefixes (`chore:`, `docs:`, `test:`, etc.) → no release
 
 ## Testing workflows with GitHub CLI
 
-To test a new workflow using GitHub CLI without merging into development/main, the workflow file must first be pushed to the feature branch with `push:` set as a trigger (for a manual workflow, this can be added above `workflow-dispatch:` temporarily). This makes the workflow file discoverable as GitHub Actions will attempt to run it.
+Push the workflow file to the feature branch first (with `push:` added as a trigger temporarily so GitHub discovers it), then run:
 
-Once the file has been discovered, `push:` can be removed (if appropriate) and run manually with GitHub CLI, using the commands below. It is not necessary to add `push:` again once the file has been discovered, any pushed changes will be reflected.
-
-To execute the workflow manually using the GitHub CLI tool, you can execute the following command (if preferred, `'<name of workflow>'` can be replaced with the filename):
-
-```shell
-gh workflow run '<name of workflow>' --ref <branch to run from>
+```bash
+gh workflow run '<workflow name>' --ref <branch>
 ```
 
-If it is a manual workflow, inputs can be added following the branch name, using a `-f` flag for each, as in the example below:
+For workflows with inputs:
 
-```shell
-gh workflow run clear-submission-data-from-db.yml --ref development -f environment="Dev" -f establishment="DSI TEST Establishment (001) Community School"
+```bash
+gh workflow run clear-submission-data-from-db.yml --ref development \
+  -f environment="Dev" \
+  -f establishment="DSI TEST Establishment (001) Community School"
 ```
-NB: Input names passed using `-f` must match exactly those declared in the YAML file.
 
-The above run the workflow as it exists on the `development` branch, using `Dev` as the target environment and `DSI TEST Establishment (001) Community School` as the establishment to be cleared.
+## See also
+
+- [Terraform infrastructure](../terraform/README.md) — infrastructure deployed by these workflows
+- [Tests overview](../tests/README.md) — test suites run by CI
+- [Coding style and formatting](../coding-style/README.md) — pre-commit hooks complement the CI checks
