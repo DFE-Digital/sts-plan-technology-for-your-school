@@ -112,7 +112,7 @@ jobs:
       - name: Get secret and clean tfvars file
         shell: pwsh
         run: |
-          ./scripts-workflow/get-and-normalise-tfvars.ps1 `
+          ./.github/scripts/get-and-normalise-tfvars.ps1 `
             -SecretName "${{ secrets.TF_SECRET_NAME }}" `
             -KeyVaultName "${{ steps.vars.outputs.TF_KEYVAULT_NAME }}"
 
