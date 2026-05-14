@@ -131,7 +131,7 @@ jobs:
           terraform apply -auto-approve -input=false \
             -target=azurerm_resource_group.app_rg \
             -target=azurerm_container_registry.acr_notshared \
-            -var="project_name="${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var-file="../../normalisedTerraformVars.tfvars"
 
       - name: Promote Image
