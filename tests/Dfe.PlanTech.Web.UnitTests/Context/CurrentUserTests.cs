@@ -1,6 +1,3 @@
-using System.Security.Authentication;
-using System.Security.Claims;
-using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -10,6 +7,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using NSubstitute;
+using System.Security.Authentication;
+using System.Security.Claims;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
 
@@ -208,6 +208,38 @@ public class CurrentUserTests
     {
         var (sut, _) = Build();
         Assert.Null(sut.UserId);
+    }
+
+    // ---------- SessionId ----------
+
+    [Fact]
+    public void SessionId_Returns_SessionId_When_Claim_Exists()
+    {
+        var expectedSessionId = Guid.NewGuid();
+
+        var (sut, _) = Build([
+            BuildClaim(ClaimConstants.SessionId, expectedSessionId.ToString())
+        ]);
+
+        Assert.Equal(expectedSessionId, sut.SessionId);
+    }
+
+    [Fact]
+    public void SessionId_ReturnsNull_When_Claim_Is_Missing()
+    {
+        var (sut, _) = Build();
+
+        Assert.Null(sut.SessionId);
+    }
+
+    [Fact]
+    public void SessionId_ReturnsNull_When_Claim_Is_Not_Guid()
+    {
+        var (sut, _) = Build([
+            BuildClaim(ClaimConstants.SessionId, "not-a-guid")
+        ]);
+
+        Assert.Null(sut.SessionId);
     }
 
     // ---------- IsAuthenticated ----------

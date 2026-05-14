@@ -142,6 +142,11 @@ public class CurrentUser : ICurrentUser
 
     public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 
+    public Guid? SessionId =>
+        Guid.TryParse(GetNameIdentifierFromClaim(ClaimConstants.SessionId), out var sessionId)
+        ? sessionId
+        : null;
+
     public bool IsInRole(string role) => _contextAccessor.HttpContext?.User.IsInRole(role) ?? false;
 
     public void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName)
