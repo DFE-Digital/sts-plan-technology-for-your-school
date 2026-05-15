@@ -59,6 +59,11 @@ jobs:
           account-name: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}
           verb: add
 
+          #as they were created directly in Azure, we import them into TF state the first time. Remove this after.
+      - name: Add prod import blocks
+        if: env.ENVIRONMENT == 'ProductionUnprotected'
+        run: cp imports/prodimports.tf ./prod.import.tf
+
       - name: Terraform init
         shell: bash
         run: |
@@ -67,11 +72,6 @@ jobs:
             terraform init \
                 -backend-config="resource_group_name=${RESOURCE_GROUP_NAME}"  \
                 -backend-config="storage_account_name=${{secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}"  \
-
-#as they were created directly in Azure, we import them into TF state the first time. Remove this after.
-      - name: Add prod import blocks
-        if: env.ENVIRONMENT == 'ProductionUnprotected'
-        run: cp imports/prodimports.tf ./prod.import.tf
 
 # none of the variables are secret, so they can be stored in a checked-in json file. if that changes, move to key vault as per other infra pipeline.
       - name: Terraform plan
