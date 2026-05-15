@@ -24,7 +24,7 @@ jobs:
     name: Terraform Apply
     runs-on: ubuntu-latest
     environment:
-      name: ${{env.ENVIRONMENT}}
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
     permissions:
       id-token: write
       contents: read
