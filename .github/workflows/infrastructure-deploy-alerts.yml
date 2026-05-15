@@ -78,7 +78,7 @@ jobs:
         shell: bash
         run: |
             RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
-            terraform plan -auto-approve \
+            terraform plan \
             -var-file="terraform.tfvars.json" \
             -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
             -var="environment_github=${{env.ENVIRONMENT}}"
