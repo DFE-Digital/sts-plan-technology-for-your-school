@@ -51,12 +51,12 @@ jobs:
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
 
-      - name: Whitelist Runner for TF keyvault
-        uses: ./.github/actions/whitelist-kv
+      - name: Whitelist Runner for TF storage
+        uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: "${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
-          keyvault-name: "${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf-kv"
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf
+          account-name: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}
           verb: add
 
       - name: Terraform init
@@ -92,10 +92,10 @@ jobs:
       #       -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
       #       -var="environment_github=${{env.ENVIRONMENT}}"
 
-      - name: Whitelist Runner for TF keyvault
-        uses: ./.github/actions/whitelist-kv
+      - name: Whitelist Runner for TF storage
+        uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: "${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
-          keyvault-name: "${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf-kv"
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf
+          account-name: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}
           verb: remove
