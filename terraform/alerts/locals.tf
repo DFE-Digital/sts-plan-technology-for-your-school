@@ -13,5 +13,5 @@ locals {
     dev  = "${var.resource_group_name}-actiongroup"
   }
 
-  action_group_name = local.action_group_name_by_environment[lower(var.environment)]
+  action_group_name = local.action_group_name_by_environment[lower(var.environment_github)]
 }
