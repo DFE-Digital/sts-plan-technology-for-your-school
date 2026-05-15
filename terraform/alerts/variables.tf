@@ -6,9 +6,6 @@ variable "environment_github" {
   type = string
   default = "Dev"
 }
-variable "subscription_id" {
-  type = string
-}
 
 variable "enabled" {
   type    = bool
