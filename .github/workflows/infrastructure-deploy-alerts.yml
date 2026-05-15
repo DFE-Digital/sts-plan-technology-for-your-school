@@ -7,12 +7,13 @@ on:
         type: choice
         description: 'The environment to run infrastructure deployment on:'
         required: true
-        options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
+        options: ['Dev', 'ProductionUnprotected']
   push:
     branches:
       - 300872-email-alerts-terraform
 env:
   TF_WORKING_DIRECTORY: terraform/alerts
+  ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
 
 permissions:
   id-token: write
@@ -23,7 +24,7 @@ jobs:
     name: Terraform Apply
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+      name: ${{env.ENVIRONMENT}}
     permissions:
       id-token: write
       contents: read
@@ -72,10 +73,11 @@ jobs:
       - name: Terraform apply
         shell: bash
         run: |
-            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
+            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
             terraform apply -auto-approve \
             -var-file="terraform.tfvars.json" \
             -var="resource_group_name=${RESOURCE_GROUP_NAME}"
+            -var="environment_github=${{env.ENVIRONMENT}}"
 
       - name: Whitelist Runner for TF keyvault
         uses: ./.github/actions/whitelist-kv
