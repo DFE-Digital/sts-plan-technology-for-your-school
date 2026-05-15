@@ -13,7 +13,7 @@ on:
       - 300872-email-alerts-terraform
 env:
   TF_WORKING_DIRECTORY: terraform/alerts
-  ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+  ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
 
 permissions:
   id-token: write
@@ -24,7 +24,7 @@ jobs:
     name: Terraform Apply
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
     permissions:
       id-token: write
       contents: read
@@ -68,15 +68,29 @@ jobs:
                 -backend-config="resource_group_name=${RESOURCE_GROUP_NAME}"  \
                 -backend-config="storage_account_name=${{secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}"  \
 
+#as they were created directly in Azure, we import them into TF state the first time. Remove this after.
+      - name: Add prod import blocks
+        if: env.ENVIRONMENT == 'ProductionUnprotected'
+        run: cp imports/prodimports.tf ./prod.import.tf
+
 # none of the variables are secret, so they can be stored in a checked-in json file. if that changes, move to key vault as per other infra pipeline.
-      - name: Terraform apply
+      - name: Terraform plan
         shell: bash
         run: |
             RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
-            terraform apply -auto-approve \
+            terraform plan -auto-approve \
             -var-file="terraform.tfvars.json" \
-            -var="resource_group_name=${RESOURCE_GROUP_NAME}"
+            -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
             -var="environment_github=${{env.ENVIRONMENT}}"
+
+      # - name: Terraform apply
+      #   shell: bash
+      #   run: |
+      #       RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
+      #       terraform apply -auto-approve \
+      #       -var-file="terraform.tfvars.json" \
+      #       -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
+      #       -var="environment_github=${{env.ENVIRONMENT}}"
 
       - name: Whitelist Runner for TF keyvault
         uses: ./.github/actions/whitelist-kv
