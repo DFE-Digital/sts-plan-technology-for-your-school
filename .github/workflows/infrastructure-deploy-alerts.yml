@@ -1,0 +1,84 @@
+name: Apply Terraform Alerts
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'The environment to run infrastructure deployment on:'
+        required: true
+        options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
+  push:
+    branches:
+      - 300872-email-alerts-terraform
+env:
+  TF_WORKING_DIRECTORY: terraform/alerts
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Whitelist Runner for TF keyvault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+          keyvault-name: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf-kv"
+          verb: add
+
+      - name: Terraform init
+        run:
+            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+            STORAGE_ACCOUNT_NAME="${RESOURCE_GROUP_NAME//-/}"
+
+            terraform init \
+                -backend-config="resource_group_name=${RESOURCE_GROUP_NAME}"  \
+                -backend-config="storage_account_name=${STORAGE_ACCOUNT_NAME}"  \
+                -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"
+# none of the variables are secret, so they can be stored in a checked-in json file. if that changes, move to key vault as per other infra pipeline.
+      - name: Terraform apply
+        run:
+            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+            terraform apply -auto-approve \
+            -var-file="terraform.tfvars.json" \
+            -var="resource_group_name=${RESOURCE_GROUP_NAME}"
+
+      - name: Whitelist Runner for TF keyvault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+          keyvault-name: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf-kv"
+          verb: remove

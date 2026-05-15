@@ -1,0 +1,46 @@
+az_tag_environment = "Prod"
+az_tag_product = "Plan Technology for your School"
+az_tag_product = "Plan Technology for your School"
+
+action_group_name       = "Contributor Group"
+action_group_short_name = "Contributor"
+
+activity_log_alerts = {
+  container_app_environment_change = {
+    name           = "Container App Environment Change"
+    description    = "There was a change to the container app environment"
+    category       = "Administrative"
+    operation_name = "microsoft.app/managedenvironments/write"
+  }
+
+  container_app_image_pushed = {
+    name           = "Container App Image Pushed"
+    description    = "New container image has been pushed"
+    category       = "Administrative"
+    operation_name = "Microsoft.ContainerRegistry/registries/push/write"
+  }
+
+  container_app_revision_active = {
+    name           = "Container App Revision Active"
+    description    = "The container app revision is successfully active"
+    category       = "Administrative"
+    operation_name = "microsoft.app/containerapps/revisions/activate/action"
+    statuses       = ["succeeded"]
+  }
+
+  container_app_revision_deactivation_succeeded = {
+    name           = "Container App Revision Deactivation Succeeded"
+    description    = "The container apps revision was deactivated successfully"
+    category       = "Administrative"
+    operation_name = "microsoft.app/containerapps/revisions/deactivate/action"
+    statuses       = ["succeeded"]
+  }
+
+  container_app_update_succeeded = {
+    name           = "Container App Update Succeeded"
+    description    = "The container App was successfully updated"
+    category       = "Administrative"
+    operation_name = "microsoft.app/containerapps/write"
+    statuses       = ["succeeded"]
+  }
+}
