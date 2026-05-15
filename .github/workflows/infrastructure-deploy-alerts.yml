@@ -62,7 +62,7 @@ jobs:
           #as they were created directly in Azure, we import them into TF state the first time. Remove this after.
       - name: Add prod import blocks
         if: env.ENVIRONMENT == 'ProductionUnprotected'
-        run: cp prodimports.tf 
+        run: cp imports/prodimports.tf ./prod.import.tf
 
       - name: Terraform init
         shell: bash
