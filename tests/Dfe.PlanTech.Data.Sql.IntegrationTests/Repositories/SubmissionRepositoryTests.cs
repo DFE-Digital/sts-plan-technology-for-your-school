@@ -12,6 +12,7 @@ namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 {
     private SubmissionRepository _repository = null!;
+    private readonly Guid _userActionId = Guid.NewGuid();
 
     public SubmissionRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
@@ -21,7 +22,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await base.InitializeAsync();
         _repository = new SubmissionRepository(
             DbContext,
-            new TestUserActionIdAccessor(Guid.NewGuid())
+            new TestUserActionIdAccessor(_userActionId)
         );
     }
 
@@ -707,6 +708,9 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(SubmissionStatus.CompleteReviewed, result.Status);
         Assert.True(result.DateCompleted >= beforeUpdate);
 
+        Assert.Equal(_userActionId, result.CompletedUserActionId);
+        Assert.Equal(_userActionId, result.LastUpdatedUserActionId);
+
         // Check that the other submission was marked inaccessible
         var otherSubmission = await DbContext.Submissions.FindAsync(
             [submission1.Id],
@@ -819,15 +823,15 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             EstablishmentId = establishment.Id,
             Status = SubmissionStatus.Inaccessible,
             Responses = new List<ResponseEntity>
+        {
+            new ResponseEntity
             {
-                new ResponseEntity
-                {
-                    QuestionId = question.Id,
-                    AnswerId = answer.Id,
-                    UserId = user.Id,
-                    UserEstablishmentId = establishment.Id,
-                },
+                QuestionId = question.Id,
+                AnswerId = answer.Id,
+                UserId = user.Id,
+                UserEstablishmentId = establishment.Id,
             },
+        },
         };
 
         DbContext.Submissions.Add(submission);
@@ -837,6 +841,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         Assert.NotNull(result);
         Assert.Equal(SubmissionStatus.InProgress, result.Status);
+        Assert.Equal(_userActionId, result.LastUpdatedUserActionId);
     }
 
     [Fact]
@@ -1029,6 +1034,9 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.False(refreshedOlder!.Deleted);
         Assert.True(refreshedLatest!.Deleted);
         Assert.False(refreshedInaccessible!.Deleted);
+
+        Assert.Equal(_userActionId, refreshedLatest.LastUpdatedUserActionId);
+        Assert.NotNull(refreshedLatest.DateLastUpdated);
     }
 
     [Fact]
@@ -1086,16 +1094,32 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
-        var createdSubmission = await DbContext.Submissions.SingleAsync(s => s.Id == createdResponse.SubmissionId, cancellationToken: TestContext.Current.CancellationToken);
-        var createdQuestion = await DbContext.Questions.SingleAsync(q => q.Id == createdResponse.QuestionId, cancellationToken: TestContext.Current.CancellationToken);
-        var createdAnswer = await DbContext.Answers.SingleAsync(a => a.Id == createdResponse.AnswerId, cancellationToken: TestContext.Current.CancellationToken);
+        var createdResponse = await DbContext.Responses.SingleAsync(
+            r => r.Id == responseId,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var createdSubmission = await DbContext.Submissions.SingleAsync(
+            s => s.Id == createdResponse.SubmissionId,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var createdQuestion = await DbContext.Questions.SingleAsync(
+            q => q.Id == createdResponse.QuestionId,
+            cancellationToken: TestContext.Current.CancellationToken);
+
+        var createdAnswer = await DbContext.Answers.SingleAsync(
+            a => a.Id == createdResponse.AnswerId,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.NotEqual(0, responseId);
+
         Assert.Equal(establishment.Id, createdSubmission.EstablishmentId);
         Assert.Equal("S001", createdSubmission.SectionId);
         Assert.Equal("Test Section 1", createdSubmission.SectionName);
         Assert.Equal(SubmissionStatus.InProgress, createdSubmission.Status);
+
+        Assert.Equal(_userActionId, createdSubmission.CreatedUserActionId);
+        Assert.Equal(_userActionId, createdSubmission.LastUpdatedUserActionId);
+        Assert.NotNull(createdSubmission.DateLastUpdated);
 
         Assert.Equal(user.Id, createdResponse.UserId);
         Assert.Equal(establishment.Id, createdResponse.UserEstablishmentId);
@@ -1166,9 +1190,21 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
+        var createdResponse = await DbContext.Responses.SingleAsync(
+            r => r.Id == responseId,
+            cancellationToken: TestContext.Current.CancellationToken);
 
         Assert.Equal(secondSubmission.Id, createdResponse.SubmissionId);
+
+        var updatedSubmission = await DbContext
+            .Submissions
+            .AsNoTracking()
+            .SingleAsync(
+                s => s.Id == secondSubmission.Id,
+                cancellationToken: TestContext.Current.CancellationToken);
+
+        Assert.NotNull(updatedSubmission.DateLastUpdated);
+        Assert.Equal(_userActionId, updatedSubmission.LastUpdatedUserActionId);
     }
 
     [Fact]
