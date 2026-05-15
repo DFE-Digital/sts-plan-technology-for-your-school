@@ -6,10 +6,10 @@ resource "azurerm_monitor_activity_log_alert" "this" {
   name                = each.value.name
   description         = each.value.description
   resource_group_name = var.resource_group_name
-  location            = "global"
+  location            = var.azure_location
   scopes              = local.scopes
   enabled             = var.enabled
-  tags                = var.tags
+  tags                = local.tags
 
   action {
     action_group_id = data.azurerm_monitor_action_group.existing.id
