@@ -1,7 +1,7 @@
 az_tag_environment = "Prod"
 az_tag_product = "Plan Technology for your School"
 az_tag_product = "Plan Technology for your School"
-
+azure_location = "westeurope",
 action_group_name       = "Contributor Group"
 action_group_short_name = "Contributor"
 
