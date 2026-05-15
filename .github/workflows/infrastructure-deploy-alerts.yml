@@ -59,7 +59,8 @@ jobs:
           verb: add
 
       - name: Terraform init
-        run:
+        shell: bash
+        run: |
             RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
             STORAGE_ACCOUNT_NAME="${RESOURCE_GROUP_NAME//-/}"
 
@@ -69,7 +70,8 @@ jobs:
                 -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}"
 # none of the variables are secret, so they can be stored in a checked-in json file. if that changes, move to key vault as per other infra pipeline.
       - name: Terraform apply
-        run:
+        shell: bash
+        run: |
             RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
             terraform apply -auto-approve \
             -var-file="terraform.tfvars.json" \
