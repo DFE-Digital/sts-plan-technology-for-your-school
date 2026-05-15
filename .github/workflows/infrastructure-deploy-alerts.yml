@@ -54,13 +54,13 @@ jobs:
         uses: ./.github/actions/whitelist-kv
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
-          keyvault-name: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf-kv"
+          resource-group: "${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
+          keyvault-name: "${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf-kv"
           verb: add
 
       - name: Terraform init
         run:
-            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
             STORAGE_ACCOUNT_NAME="${RESOURCE_GROUP_NAME//-/}"
 
             terraform init \
@@ -70,7 +70,7 @@ jobs:
 # none of the variables are secret, so they can be stored in a checked-in json file. if that changes, move to key vault as per other infra pipeline.
       - name: Terraform apply
         run:
-            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
             terraform apply -auto-approve \
             -var-file="terraform.tfvars.json" \
             -var="resource_group_name=${RESOURCE_GROUP_NAME}"
@@ -79,6 +79,6 @@ jobs:
         uses: ./.github/actions/whitelist-kv
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
-          keyvault-name: "${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf-kv"
+          resource-group: "${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
+          keyvault-name: "${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf-kv"
           verb: remove
