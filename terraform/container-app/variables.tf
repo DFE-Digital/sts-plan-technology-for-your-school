@@ -1,12 +1,6 @@
 ###########
 # General #
 ###########
-
-variable "subscription_id" {
-  description = "Azure subscription ID to use for deploying resources"
-  type        = string
-}
-
 variable "project_name" {
   description = "Project name, used along with `environment` as a prefix for all resources"
   type        = string

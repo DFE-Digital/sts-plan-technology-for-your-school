@@ -179,8 +179,9 @@ create_role_assignment_if_missing \
   "Storage Blob Data Contributor" \
   "$STORAGE_ID"
 
+  #better than user incase adding tfvars file via CLI
 create_role_assignment_if_missing \
-  "Key Vault Secrets User" \
+  "Key Vault Secrets Officer" \
   "$KEYVAULT_ID"
 
 create_role_assignment_if_missing \
