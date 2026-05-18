@@ -1,64 +1,41 @@
-from logging import getLogger
-from playwright.sync_api import Playwright, sync_playwright, TimeoutError as PlaywrightTimeoutError
+import requests
 
-from src.constants import DOWNLOAD_PATH, GIAS_DATA_URL
+from datetime import date
+from pathlib import Path
+from tqdm import tqdm
 
-logger = getLogger(__name__)
+from src.constants import EDUBASE_DOWNLOADS_BASE_URL, CSV_STEMS
+from src.utils import get_file_path, get_logger
 
-DEFAULT_TIMEOUT_MS = 120_000
+logger = get_logger(__name__)
+
+CHUNK_SIZE = 65_536
+DEFAULT_TIMEOUT_SECONDS = 60
 
 
-def _fetch_gias_data(play: Playwright) -> None:
-    """Use playwright to download the dynamically generated GIAS data file"""
-    browser = play.webkit.launch(headless=True)
+def _download(url: str, dest: Path) -> None:
+    logger.info("Downloading %s", url)
+    with requests.get(url, stream=True, timeout=DEFAULT_TIMEOUT_SECONDS) as request:
+        request.raise_for_status()
+        total = int(request.headers.get("content-length", 0))
+        with (
+            dest.open("wb") as f,
+            tqdm(total=total, unit="B", unit_scale=True, desc=dest.name) as bar,
+        ):
+            for chunk in request.iter_content(CHUNK_SIZE):
+                f.write(chunk)
+                bar.update(len(chunk))
 
-    context = browser.new_context(accept_downloads=True)
-    context.set_default_timeout(DEFAULT_TIMEOUT_MS)
-
-    page = context.new_page()
-
-    logger.info("Navigating to %s", GIAS_DATA_URL)
-    page.goto(GIAS_DATA_URL, wait_until="domcontentloaded")
-    page.wait_for_load_state("networkidle")
-
-    # Ensure checkbox is present then tick it
-    page.locator("#all-group-records-with-linkszip-checkbox").wait_for(state="visible")
-    page.locator("#all-group-records-with-linkszip-checkbox").check()
-
-    # Click "Download selected files"
-    page.get_by_role("button", name="Download selected files").click()
-
-    # Wait for the dynamically generated Results.zip button to appear and be clickable
-    results_btn = page.locator('input#download-button[value="Results.zip"]')
-    logger.info("Waiting for Results.zip button to appear")
-    results_btn.wait_for(state="visible")
-    expect_enabled_timeout_ms = DEFAULT_TIMEOUT_MS
-
-    # Sometimes it appears disabled briefly while server-side job runs
-    page.wait_for_function(
-        "btn => !btn.disabled",
-        arg=results_btn.element_handle(),
-        timeout=expect_enabled_timeout_ms,
-    )
-
-    logger.info("Requesting download")
-
-    # IMPORTANT: expect_download must wrap the click that triggers the download
-    with page.expect_download(timeout=DEFAULT_TIMEOUT_MS) as download_info:
-        results_btn.click()
-
-    download = download_info.value
-
-    logger.info("Downloading results")
-    download.save_as(DOWNLOAD_PATH / "extract.zip")
-
-    logger.info("Finished downloading file")
-
-    context.close()
-    browser.close()
+    logger.info("Saved %s", dest)
 
 
 def fetch_and_save_gias_data() -> None:
-    """Fetch and save GIAS data in zip format"""
-    with sync_playwright() as playwright:
-        _fetch_gias_data(playwright)
+    """Download the four GIAS CSV files for today's date into DATA_PATH."""
+    for stem in CSV_STEMS:
+        file_path = get_file_path(stem, date.today())
+        if file_path.exists():
+            logger.info("%s already exists, skipping download", file_path.name)
+            continue
+
+        url = f"{EDUBASE_DOWNLOADS_BASE_URL}/{file_path.name}"
+        _download(url, file_path)

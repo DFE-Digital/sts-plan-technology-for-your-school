@@ -3,10 +3,14 @@ import logging
 import os
 import os.path
 
+from dotenv import load_dotenv
+
 from src.constants import CONNECTION_STRING_ENV_VAR
-from src.extract_data import extract_groups_and_links_from_csv
+from src.extract_data import extract_gias_data
 from src.fetch_data import fetch_and_save_gias_data
 from src.update_database import update_database
+
+load_dotenv()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,10 +32,10 @@ def main(connection_string: str, skip_gias_validation: bool = False):
         logger.info("Starting GIAS data update process with validation checks enabled.")
 
     fetch_and_save_gias_data()
-    groups, links = extract_groups_and_links_from_csv()
-    update_database(groups, links, connection_string, skip_gias_validation)
+    data = extract_gias_data()
+    update_database(data, connection_string)
 
-    logger.info("GIAS data update process completed.")
+    logger.info("\nGIAS update complete")
 
 
 if __name__ == "__main__":
@@ -48,17 +52,19 @@ if __name__ == "__main__":
     connection_string = os.getenv(CONNECTION_STRING_ENV_VAR)
     if not connection_string:
         env_file_path = os.path.join(os.getcwd(), ".env")
+
         if not os.path.exists(env_file_path):
             logger.error(
-                f"Environment variable `{CONNECTION_STRING_ENV_VAR}` is not set, and the `.env` file is missing."
-            )
-            logger.error(
-                "Please create a `.env` file in the project root. You can use `.env.template` as a starting point."
+                "Environment variable `%s` is not set, and the `.env` file is missing. "
+                "Copy `.env.example` to `.env` and fill in the connection string.",
+                CONNECTION_STRING_ENV_VAR,
             )
             exit(101)
         else:
             logger.error(
-                f"Environment variable `{CONNECTION_STRING_ENV_VAR}` is not set. Please ensure it is defined in the `.env` file (or set via OS environment variables)."
+                "Environment variable `%s` is not set. Please ensure it is defined in "
+                "the `.env` file or set via OS environment variables.",
+                CONNECTION_STRING_ENV_VAR,
             )
             exit(100)
 
