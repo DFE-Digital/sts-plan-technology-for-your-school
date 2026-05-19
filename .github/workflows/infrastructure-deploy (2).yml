@@ -147,7 +147,7 @@ jobs:
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -out=tfplan
 
-          terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg"
+          terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
 
           terraform apply -auto-approve -input=false tfplan
 
