@@ -109,3 +109,4 @@ For Windows setup:
 - [GitHub Actions workflows](../../.github/README.md) — `update-gias-data-scheduled.yml`, `update-gias-data-manual.yml`
 - [SQL data layer](../../src/Dfe.PlanTech.Data.Sql/README.md) — `dbo.establishmentGroup` and `dbo.establishmentLink` tables
 - [ADR 0042 — GIAS data refresh](../../docs/architecture-decision-record/0042-gias-data-refresh.md)
+- [ADR 0045 — GIAS data API improvements](../../docs/architecture-decision-record/0045-gias-data-api-improvements.md)
