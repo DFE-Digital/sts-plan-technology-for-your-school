@@ -23,5 +23,14 @@ internal class SubmissionEntityConfiguration : IEntityTypeConfiguration<Submissi
             .Property(b => b.UserActionId)
             .HasColumnName("userActionId")
             .IsRequired(false);
+        builder.Property(s => s.CreatedUserActionId)
+            .HasColumnName("createdUserActionId")
+            .IsRequired(false);
+        builder.Property(s => s.LastUpdatedUserActionId)
+            .HasColumnName("lastUpdatedUserActionId")
+            .IsRequired(false);
+        builder.Property(s => s.CompletedUserActionId)
+            .HasColumnName("completedUserActionId")
+            .IsRequired(false);
     }
 }

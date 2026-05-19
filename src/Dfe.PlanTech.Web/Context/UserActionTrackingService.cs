@@ -2,13 +2,15 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Middleware;
 
 namespace Dfe.PlanTech.Web.Context;
 
 public class UserActionTrackingService(
     IUserActionRepository userActionRepository,
     IHttpContextAccessor httpContextAccessor,
-    ICurrentUser currentUser
+    ICurrentUser currentUser,
+    ILogger<UserActionTrackingService> logger
 ) : IUserActionTrackingService
 {
     public async Task RecordAsync()
@@ -23,9 +25,11 @@ public class UserActionTrackingService(
         }
 
         var userId = currentUser.UserId;
+
         if (userId is null)
         {
-            throw new InvalidOperationException("Current user ID was not found.");
+            logger.LogInformation("No current user id found");
+            return;
         }
 
         var userActionId = Guid.NewGuid();
@@ -33,6 +37,7 @@ public class UserActionTrackingService(
         var userAction = new UserActionEntity
         {
             Id = userActionId,
+            SessionId = currentUser.SessionId,
             UserId = userId.Value,
             EstablishmentId = await currentUser.GetActiveEstablishmentIdAsync(),
             MatEstablishmentId = currentUser.IsMat ? currentUser.UserOrganisationId : null,

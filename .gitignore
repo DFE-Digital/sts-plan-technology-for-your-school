@@ -512,3 +512,6 @@ StrykerOutput/
 # Linting
 coding-style/output/
 coding-style/output/tracked-files.txt
+
+# AI
+.claude/

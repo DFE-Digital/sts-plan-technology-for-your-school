@@ -262,7 +262,7 @@ Then(
     // format today's date like the ui as "16 February 2026"
     const now = new Date();
     const todayText = now.toLocaleDateString("en-GB", {
-      day: "numeric",
+      day: "2-digit",
       month: "long",
       year: "numeric",
     });
@@ -294,7 +294,7 @@ Then(
 
     await expect(noteP).toBeVisible();
 
-    await expect(statusChangeP).toHaveText(`Status changed to ${status}.`);
+    await expect(statusChangeP).toHaveText(`Status changed to '${status}'.`);
     await expect(statusChangeP).toBeVisible();
 
     const actualNoteRaw = await noteP.innerText();

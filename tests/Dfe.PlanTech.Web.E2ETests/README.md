@@ -42,3 +42,11 @@ To populate MANAGEMENT_TOKEN, select 'CMA tokens', also found in 'Settings' and 
 ## Packages Used
 
 - [Cypress-Axe]() - Used for accessibility testing
+
+## See also
+
+- [Web application](../../src/Dfe.PlanTech.Web/README.md) — the application under test
+- [Seed test data](../Dfe.PlanTech.Web.SeedTestData/README.md) — create a clean local database before running tests
+- [Dynamic page validator](cypress/e2e/dynamic-page-validator/dynamic-page-validator-readme.md) — validates rendered content against the CMS
+- [GitHub Actions workflows](../../.github/README.md) — `e2e-tests.yml` runs this suite in CI
+- [Tests overview](../README.md)

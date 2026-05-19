@@ -21,6 +21,8 @@ public class SubmissionRepository(
     {
         ArgumentNullException.ThrowIfNull(existingSubmission);
 
+        var userActionId = _userActionIdAccessor.GetUserActionId();
+
         var newSubmission = new SubmissionEntity
         {
             SectionId = existingSubmission.SectionId,
@@ -28,6 +30,8 @@ public class SubmissionRepository(
             EstablishmentId = existingSubmission.EstablishmentId,
             DateCreated = DateTime.UtcNow,
             Status = SubmissionStatus.InProgress,
+            CreatedUserActionId = userActionId,
+            LastUpdatedUserActionId = userActionId,
             Responses = existingSubmission
                 .Responses.Select(r => new ResponseEntity
                 {
@@ -240,7 +244,11 @@ public class SubmissionRepository(
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
+        var userActionId = _userActionIdAccessor.GetUserActionId();
+
         submission.DateCompleted = DateTime.UtcNow;
+        submission.CompletedUserActionId = userActionId;
+        submission.LastUpdatedUserActionId = userActionId;
         submission.Status = SubmissionStatus.CompleteReviewed;
 
         var otherSubmissions = await _db
@@ -289,6 +297,8 @@ public class SubmissionRepository(
         }
 
         submission.Status = SubmissionStatus.Inaccessible;
+        submission.LastUpdatedUserActionId = _userActionIdAccessor.GetUserActionId();
+
         await _db.SaveChangesAsync();
 
         return submission;
@@ -324,6 +334,8 @@ public class SubmissionRepository(
         if (submission.Status.Equals(SubmissionStatus.Inaccessible))
         {
             submission.Status = SubmissionStatus.InProgress;
+            submission.LastUpdatedUserActionId = _userActionIdAccessor.GetUserActionId();
+
             await _db.SaveChangesAsync();
         }
 
@@ -542,7 +554,8 @@ public class SubmissionRepository(
             .Submissions.Where(s => s.Id == submissionId.Value)
             .ExecuteUpdateAsync(setters => setters
                 .SetProperty(s => s.Deleted, true)
-                .SetProperty(s => s.UserActionId, userActionId));
+                .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
+                .SetProperty(s => s.LastUpdatedUserActionId, userActionId));
     }
 
     public async Task<int> SubmitResponse(AssessmentResponseModel response)
@@ -589,7 +602,16 @@ public class SubmissionRepository(
             DateCreated = DateTime.UtcNow,
         };
 
+        var userActionId = _userActionIdAccessor.GetUserActionId();
+
         await _db.Responses.AddAsync(responseEntity);
+
+        await _db.Submissions
+            .Where(s => s.Id == submissionId)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
+                .SetProperty(s => s.LastUpdatedUserActionId, userActionId));
+
         await _db.SaveChangesAsync();
 
         return responseEntity.Id;
@@ -607,6 +629,8 @@ public class SubmissionRepository(
             return submissionId.Value;
         }
 
+        var userActionId = _userActionIdAccessor.GetUserActionId();
+
         var submission = new SubmissionEntity
         {
             EstablishmentId = establishmentId,
@@ -614,6 +638,8 @@ public class SubmissionRepository(
             SectionName = sectionName,
             Status = SubmissionStatus.InProgress,
             DateCreated = DateTime.UtcNow,
+            CreatedUserActionId = userActionId,
+            LastUpdatedUserActionId = userActionId,
         };
 
         await _db.Submissions.AddAsync(submission);
