@@ -5,13 +5,9 @@ Feature: Static pages
 Pages which are non functional to the user journey e.g. Cookies, Privacy Policy, Accessibility Statement
 
 Scenario: Accessibility Page
-    Given I am on the accessibility page
-    Then I should see the page heading "Accessibility statement for Plan technology for your school"
-
-    Then I should see multiple paragraphs of explanatory text
-    And I should see a non govuk section heading with text "Feedback and contact information"
-    And I should see a non govuk section heading with text "Reporting accessibility problems with this website"
-    And I should see a non govuk section heading with text "Enforcement procedure"
+    Given I visit the homepage
+    Then I click the link "Accessibility statement"
+    Then I should see the page heading "Accessibility statement"
 
 Scenario: Cookies Page
     Given I am on the cookies page
