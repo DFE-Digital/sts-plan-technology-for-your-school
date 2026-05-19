@@ -130,28 +130,33 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
           terraform init \
-            -backend-config="resource_group_name=$RESOURCE_PREFIX_TF" \
-            -backend-config="storage_account_name=$RESOURCE_PREFIX_TF_SHORT" \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
             -backend-config="key=${{ env.TF_BACKEND_KEY }}"
 
-      - name: Apply Terraform changes - container registry only
+      - name: Apply Terraform changes - RG & container registry only
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
-          terraform apply -auto-approve -input=false \
+          terraform plan -input=false \
             -target=azurerm_resource_group.app_rg \
             -target=azurerm_container_registry.acr_notshared \
-            -var="is_dr=$IS_DR" \
-            -var="project_name=$PROJECT_PREFIX_APP" \
-            -var-file="../../normalisedTerraformVars.tfvars"
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -out=tfplan
+
+          terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg"
+
+          terraform apply -auto-approve -input=false tfplan
 
       - name: Promote Image
         id: promote_image
         uses: ./.github/actions/promote-image
         with:
-          image_branch: ${{ $ENVIRONMENT_NAME == 'ProductionUnprotected' && 'main' || 'development' }}
-          acr_name: $RESOURCE_PREFIX_APP_SHORT
-          acr_login_server: ${RESOURCE_PREFIX_APP_SHORT}.azurecr.io
+          image_branch: ${{ steps.vars.outputs.ENVIRONMENT_NAME == 'ProductionUnprotected' && 'main' || 'development' }}
+          acr_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}
+          acr_login_server: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}.azurecr.io
           package_name: ${{ env.PACKAGE_NAME }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -237,8 +242,8 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
           terraform init \
-            -backend-config="resource_group_name=$RESOURCE_PREFIX_TF" \
-            -backend-config="storage_account_name=$RESOURCE_PREFIX_TF_SHORT" \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
             -backend-config="key=${{ env.TF_BACKEND_KEY }}"
 
@@ -247,8 +252,8 @@ jobs:
         run: |
           terraform apply -auto-approve -input=false \
             -var-file="../../normalisedTerraformVars.tfvars" \
-            -var="is_dr=$IS_DR" \
-            -var="project_name=$PROJECT_PREFIX_APP" \
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
             -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
 
@@ -297,10 +302,10 @@ jobs:
       - name: Restore DB from BACPAC
         uses: ./.github/actions/restore-db-from-bacpac
         with:
-          resource_group: $RESOURCE_PREFIX_BACKUP
-          sql_server_name: $RESOURCE_PREFIX_APP_SHORT
-          target_database: "${RESOURCE_PREFIX_APP_SHORT}-sqldb"
-          storage_account: $RESOURCE_PREFIX_BACKUP_SHORT
+          resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
+          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}
+          target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}-sqldb
+          storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
           container_name: ${{ env.BACKUP_CONTAINER_NAME }}
           bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
           bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
