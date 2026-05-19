@@ -10,7 +10,7 @@ Then(
       '.govuk-grid-column-one-third-from-desktop.govuk-float-right',
     );
     const printLink = container.locator('a', {
-      hasText: `Print your school's ${topic.toLowerCase()} recommendations`,
+      hasText: `Print these recommendations`,
     });
     await expect(printLink).toBeVisible();
     printLink.click();
