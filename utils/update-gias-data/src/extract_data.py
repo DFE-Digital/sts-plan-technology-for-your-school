@@ -1,11 +1,9 @@
 import pandas as pd
 
-from logging import getLogger
-
 from src.classes import GiasData
-from src.utils import get_latest_file_path, read_dataframe
+from src.utils import get_latest_file_path, get_logger, read_dataframe
 
-logger = getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def _coerce_int(series: pd.Series) -> pd.Series:
@@ -19,9 +17,11 @@ def _coerce_int(series: pd.Series) -> pd.Series:
 
 def _lookup(
     df: pd.DataFrame,
-    code_col: str,
-    *name_cols: str,
-    required: list[str] | None = None,
+    input_code_col: str,
+    output_code_col: str,
+    coerce_code_to_int: bool,
+    input_name_col: str,
+    output_name_col: str,
     blank_replacement: str | None = None,
 ) -> pd.DataFrame:
     """Extract a de-duplicated lookup DataFrame.
@@ -34,45 +34,52 @@ def _lookup(
     This is useful for lookups where the name column is nullable but the code column isn't,
     so blank name is effectively a separate "unknown" category rather than just missing data.
     """
-    cols = [code_col, *name_cols]
+    cols = [input_code_col, input_name_col]
 
-    if required is not None and not set(required).issubset(cols):
+    if not set([input_code_col, input_name_col]).issubset(cols):
         raise ValueError(
             "Required columns %s must exist in the dataframe",
-            required,
+            [input_code_col, input_name_col],
         )
 
     out = df[cols].copy()
-    null_mask = out[list(name_cols)].isna().any(axis=1)
-    unique_codes = out.loc[null_mask, code_col].unique()
+    null_mask = out[list([input_name_col])].isna().any(axis=1)
+    unique_codes = out.loc[null_mask, input_code_col].unique()
 
     if len(unique_codes) > 1:
         raise ValueError(
-            "NA values found in name columns %s with multiple different codes: %s. Cannot proceed.",
-            name_cols,
-            sorted(unique_codes),
+            f"NA values found in name columns {input_name_col} "
+            f"with multiple different codes: {sorted(unique_codes)}. Cannot proceed."
         )
 
-    if len(unique_codes) == 1 and len(name_cols) == 1:
+    if len(unique_codes) == 1:
         logger.info(
-            "NA values found in column %s, but all have the same code %s. Name value will be replaced with '%s'.",
-            name_cols[0],
-            unique_codes[0],
-            blank_replacement,
+            f"NA values found in column {input_name_col}, "
+            f"but all have the same code {unique_codes[0]}. "
+            f"Name value will be replaced with '{blank_replacement}'."
         )
 
-        out[name_cols[0]] = out[name_cols[0]].fillna(blank_replacement)
+        out[input_name_col] = out[input_name_col].fillna(blank_replacement)
 
     # Get rows where required columns contain NA values, if any
-    if required is not None:
-        required_null_mask = out[required].isna().any(axis=1)
-        if required_null_mask.any():
-            null_rows = out[required][required_null_mask]
-            raise ValueError(
-                f"NA values found in required lookup columns {required}. Cannot proceed."
-            )
+    number_of_nulls = out[input_name_col].isna().sum()
+    if number_of_nulls > 0:
+        raise ValueError(
+            f"{number_of_nulls} rows in {input_name_col} have NA names "
+            f"that fillna('{blank_replacement}') didn't resolve. "
+            f"First 5: {out.loc[out[input_name_col].isna()].head(5).to_dict('records')}"
+        )
 
-    return out.drop_duplicates(subset=[code_col]).reset_index(drop=True)
+    if coerce_code_to_int:
+        out[input_code_col] = _coerce_int(out[input_code_col])
+
+    out.columns = [output_code_col, output_name_col]
+
+    return (
+        out.dropna(subset=[output_name_col])
+        .drop_duplicates(subset=[output_code_col])
+        .reset_index(drop=True)
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -170,55 +177,51 @@ def extract_gias_data() -> GiasData:
 
 
 def _establishment_statuses(edu: pd.DataFrame) -> pd.DataFrame:
-    out = _lookup(
+    return _lookup(
         edu,
         "EstablishmentStatus (code)",
+        "establishmentStatusCode",
+        True,
         "EstablishmentStatus (name)",
-        required=["EstablishmentStatus (name)"],
+        "establishmentStatusName",
         blank_replacement="Unknown",
     )
-    out.columns = ["establishmentStatusCode", "establishmentStatusName"]
-    out["establishmentStatusCode"] = _coerce_int(out["establishmentStatusCode"])
-    return out.dropna(subset=["establishmentStatusCode"]).reset_index(drop=True)
 
 
 def _genders(edu: pd.DataFrame) -> pd.DataFrame:
-    out = _lookup(
+    return _lookup(
         edu,
         "Gender (code)",
+        "genderCode",
+        True,
         "Gender (name)",
-        required=["Gender (name)"],
+        "genderName",
         blank_replacement="Unknown",
     )
-    out.columns = ["genderCode", "genderName"]
-    out["genderCode"] = _coerce_int(out["genderCode"])
-    return out.dropna(subset=["genderCode"]).reset_index(drop=True)
 
 
 def _local_authorities(edu: pd.DataFrame) -> pd.DataFrame:
-    out = _lookup(
+    return _lookup(
         edu,
         "LA (code)",
+        "localAuthorityCode",
+        True,
         "LA (name)",
-        required=["LA (name)"],
+        "localAuthorityName",
         blank_replacement="Unknown",
     )
-    out.columns = ["localAuthorityCode", "localAuthorityName"]
-    out["localAuthorityCode"] = _coerce_int(out["localAuthorityCode"])
-    return out.dropna(subset=["localAuthorityCode"]).reset_index(drop=True)
 
 
 def _phases(edu: pd.DataFrame) -> pd.DataFrame:
-    out = _lookup(
+    return _lookup(
         edu,
         "PhaseOfEducation (code)",
+        "phaseCode",
+        True,
         "PhaseOfEducation (name)",
-        required=["PhaseOfEducation (name)"],
+        "phaseName",
         blank_replacement="Unknown",
     )
-    out.columns = ["phaseCode", "phaseName"]
-    out["phaseCode"] = _coerce_int(out["phaseCode"])
-    return out.dropna(subset=["phaseCode"]).reset_index(drop=True)
 
 
 # ---------------------------------------------------------------------------
@@ -227,27 +230,27 @@ def _phases(edu: pd.DataFrame) -> pd.DataFrame:
 
 
 def _group_statuses(grp: pd.DataFrame) -> pd.DataFrame:
-    out = _lookup(
+    return _lookup(
         grp,
         "Group Status (code)",
+        "groupStatusCode",
+        False,
         "Group Status",
-        required=["Group Status"],
+        "groupStatusName",
         blank_replacement="Unknown",
     )
-    out.columns = ["groupStatusCode", "groupStatusName"]
-    return out.dropna(subset=["groupStatusCode"]).reset_index(drop=True)
 
 
 def _group_types(grp: pd.DataFrame) -> pd.DataFrame:
-    out = _lookup(
+    return _lookup(
         grp,
         "Group Type (code)",
+        "groupTypeCode",
+        True,
         "Group Type",
-        required=["Group Type"],
+        "groupTypeName",
         blank_replacement="Unknown",
     )
-    out.columns = ["groupTypeCode", "groupTypeName"]
-    return out.dropna(subset=["groupTypeCode"]).reset_index(drop=True)
 
 
 # ---------------------------------------------------------------------------
@@ -285,8 +288,7 @@ def _establishments(edu: pd.DataFrame) -> pd.DataFrame:
     blank_name_count = (out["establishmentName"].str.strip() == "").sum()
     if blank_name_count > 0:
         raise ValueError(
-            "Found %d rows with blank establishment name. Cannot proceed.",
-            blank_name_count,
+            f"Found {blank_name_count} rows with blank establishment name. Cannot proceed."
         )
 
     # Zero → None for non-URN numeric columns

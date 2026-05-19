@@ -6,14 +6,14 @@ import numpy as np
 import pandas as pd
 import pyodbc
 
-from contextlib import contextmanager
-from logging import getLogger
-
 from azure import identity
+from contextlib import contextmanager
 
 from src.classes import GiasData
+from src.utils import get_logger
+from src.validation import validate_before_db, validate_against_db
 
-logger = getLogger(__name__)
+logger = get_logger(__name__)
 
 SQL_COPT_SS_ACCESS_TOKEN = 1256
 
@@ -130,7 +130,10 @@ def _db_cursor(connection_string: str):
 
 
 def _coerce(v):
-    """Convert a single value to a pyodbc-safe Python type."""
+    """
+    Convert a single value to a pyodbc-safe Python type.
+    Without this, the DataFrame leaks NumPy/Pandas types into pyodbc parameters.
+    """
     try:
         if pd.isna(v):
             return None
@@ -156,7 +159,7 @@ def _params(df: pd.DataFrame) -> list[tuple]:
 # ---------------------------------------------------------------------------
 
 
-def _review_changes(data: GiasData, row_counts_before: dict[str, int]):
+def _log_proposed_changes(data: GiasData, row_counts_before: dict[str, int]):
     n_est = len(data.establishments)
     n_grp = len(data.establishment_groups)
     n_mem = len(data.group_membership)
@@ -171,17 +174,14 @@ def _review_changes(data: GiasData, row_counts_before: dict[str, int]):
 
 
 def _row_count(cur: pyodbc.Cursor, table: str) -> int:
-    try:
-        cur.execute(f"SELECT COUNT(*) FROM {table}")  # noqa: S608 (internal table name)
-        results = cur.fetchone()
+    cur.execute(f"SELECT COUNT(*) FROM {table}")  # noqa: S608 (internal table name)
+    results = cur.fetchone()
 
-        if (results is None) or (len(results) == 0):
-            return 0
-
-        row_count = results[0]
-        return row_count
-    except Exception:
+    if (results is None) or (len(results) == 0):
         return 0
+
+    row_count = results[0]
+    return row_count
 
 
 def _row_counts(cur: pyodbc.Cursor) -> dict[str, int]:
@@ -203,30 +203,16 @@ def _bulk_insert(cur: pyodbc.Cursor, sql: str, rows: list[tuple], label: str) ->
     cur.executemany(sql, rows)
 
 
-def _merge_lookup_int(
-    cur, temp: str, target: str, pk: str, cols: list[str], df: pd.DataFrame
+def _merge_lookup(
+    cur,
+    temp: str,
+    target: str,
+    pk: str,
+    pk_type: str,
+    cols: list[str],
+    df: pd.DataFrame,
 ) -> None:
-    col_defs = f"{pk} INT, " + ", ".join(f"{c} NVARCHAR(200)" for c in cols)
-    set_clause = ", ".join(f"{c} = src.{c}" for c in cols)
-    insert_cols = ", ".join([pk] + cols)
-    insert_vals = ", ".join([f"src.{pk}"] + [f"src.{c}" for c in cols])
-    placeholders = ", ".join(["?"] * (1 + len(cols)))
-
-    cur.execute(f"CREATE TABLE {temp} ({col_defs})")
-    _bulk_insert(cur, f"INSERT INTO {temp} VALUES ({placeholders})", _params(df), temp)
-    cur.execute(f"""
-        MERGE {target} AS tgt
-        USING {temp} AS src ON tgt.{pk} = src.{pk}
-        WHEN MATCHED THEN UPDATE SET {set_clause}
-        WHEN NOT MATCHED THEN INSERT ({insert_cols}) VALUES ({insert_vals});
-    """)
-    cur.execute(f"DROP TABLE {temp}")
-
-
-def _merge_lookup_str(
-    cur, temp: str, target: str, pk: str, cols: list[str], df: pd.DataFrame
-) -> None:
-    col_defs = f"{pk} NVARCHAR(200), " + ", ".join(f"{c} NVARCHAR(200)" for c in cols)
+    col_defs = f"{pk} {pk_type}, " + ", ".join(f"{c} NVARCHAR(200)" for c in cols)
     set_clause = ", ".join(f"{c} = src.{c}" for c in cols)
     insert_cols = ", ".join([pk] + cols)
     insert_vals = ", ".join([f"src.{pk}"] + [f"src.{c}" for c in cols])
@@ -247,20 +233,15 @@ def _merge_lookup_str(
 # Per-table merge functions
 # ---------------------------------------------------------------------------
 
-"""
-_establishment_statuses(edu)
-_group_statuses(grp)
-_local_authorities(edu)
-"""
-
 
 def _merge_establishment_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merging establishment status lookup")
-    _merge_lookup_int(
+    _merge_lookup(
         cur,
         "#EstStatus",
         "gias.establishmentStatus",
         "establishmentStatusCode",
+        "INT",
         ["establishmentStatusName"],
         df,
     )
@@ -269,17 +250,20 @@ def _merge_establishment_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
 
 def _merge_genders(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merging gender lookup")
-    _merge_lookup_int(cur, "#Gender", "gias.gender", "genderCode", ["genderName"], df)
+    _merge_lookup(
+        cur, "#Gender", "gias.gender", "genderCode", "INT", ["genderName"], df
+    )
     logger.info("Merged gender")
 
 
 def _merge_group_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merging group status lookup")
-    _merge_lookup_str(
+    _merge_lookup(
         cur,
         "#GrpStatus",
         "gias.groupStatus",
         "groupStatusCode",
+        "NVARCHAR(100)",
         ["groupStatusName"],
         df,
     )
@@ -288,19 +272,20 @@ def _merge_group_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
 
 def _merge_group_types(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merging group type lookup")
-    _merge_lookup_int(
-        cur, "#GT", "gias.groupType", "groupTypeCode", ["groupTypeName"], df
+    _merge_lookup(
+        cur, "#GT", "gias.groupType", "groupTypeCode", "INT", ["groupTypeName"], df
     )
     logger.info("Merged groupType")
 
 
 def _merge_local_authorities(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merging local authority lookup")
-    _merge_lookup_int(
+    _merge_lookup(
         cur,
         "#LA",
         "gias.localAuthority",
         "localAuthorityCode",
+        "INT",
         ["localAuthorityName"],
         df,
     )
@@ -309,7 +294,7 @@ def _merge_local_authorities(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
 
 def _merge_phases(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merging phase lookup")
-    _merge_lookup_int(cur, "#Phase", "gias.phase", "phaseCode", ["phaseName"], df)
+    _merge_lookup(cur, "#Phase", "gias.phase", "phaseCode", "INT", ["phaseName"], df)
     logger.info("Merged phase")
 
 
@@ -446,11 +431,12 @@ def _inject_test_data(data: GiasData) -> GiasData:
     # Establishments - only add if not already present in real GIAS data
     real_urns = set(data.establishments["urn"].dropna().astype(int))
     missing = _TEST_ESTABLISHMENTS[~_TEST_ESTABLISHMENTS["urn"].isin(real_urns)]
+    missing = missing.copy()
+
     if not missing.empty:
         # Pad missing columns with None so concat works
         for col in data.establishments.columns:
             if col not in missing.columns:
-                missing = missing.copy()
                 missing[col] = None
         data.establishments = pd.concat(
             [data.establishments, missing[data.establishments.columns]],
@@ -458,6 +444,12 @@ def _inject_test_data(data: GiasData) -> GiasData:
         )
 
     # Groups - always upsert (test group may change name)
+    #
+    # Note:
+    # If a real GIAS group has the same UID as the test group, the test group will not be added,
+    # but the real group will be updated with the test group's name and type.
+    # This is an acceptable edge case for simplicity of implementation.
+
     real_guids = set(data.establishment_groups["groupUid"].dropna().astype(int))
     if 99999 not in real_guids:
         data.establishment_groups = pd.concat(
@@ -476,22 +468,19 @@ def _inject_test_data(data: GiasData) -> GiasData:
 # Public entry point
 # ---------------------------------------------------------------------------
 
-"""
-_establishment_statuses(edu)
-_group_statuses(grp)
-_local_authorities(edu)
-"""
-
 
 def update_database(
     data: GiasData,
     connection_string: str,
+    skip_validation: bool = False,
 ) -> None:
+    validate_before_db(data, skip_validation)
     data = _inject_test_data(data)
 
     with _db_cursor(connection_string) as cur:
         counts_before = _row_counts(cur)
-        _review_changes(data, counts_before)
+        validate_against_db(cur, data, counts_before, skip_validation)
+        _log_proposed_changes(data, counts_before)
 
         # Lookups
 

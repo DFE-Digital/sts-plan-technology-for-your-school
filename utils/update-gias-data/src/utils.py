@@ -14,15 +14,6 @@ logging.basicConfig(
 )
 
 
-def get_file_date(file_path: Path) -> date:
-    DOWNLOAD_PATH.mkdir(exist_ok=True)
-    matches = re.search(r"\d{8}", file_path.stem)
-    if not matches:
-        raise ValueError(f"No date found in filename {file_path.name}")
-    file_date = matches.group()
-    return date(int(file_date[:4]), int(file_date[4:6]), int(file_date[6:8]))
-
-
 def get_file_path(csv_stem: str, specific_date: date | None = None) -> Path:
     DOWNLOAD_PATH.mkdir(exist_ok=True)
 
@@ -36,11 +27,11 @@ def get_file_path(csv_stem: str, specific_date: date | None = None) -> Path:
 
 
 def get_latest_file_path(csv_stem: str) -> Path:
-    matches = sorted(DOWNLOAD_PATH.glob(f"{csv_stem}*.csv"))
-    if not matches:
+    existing_files = sorted(DOWNLOAD_PATH.glob(f"{csv_stem}*.csv"), reverse=True)
+    if not existing_files:
         raise FileNotFoundError(f"No CSV matching {csv_stem}*.csv in {DOWNLOAD_PATH}")
 
-    return DOWNLOAD_PATH / matches[0].name
+    return existing_files[0]
 
 
 def get_logger(name: str) -> Logger:

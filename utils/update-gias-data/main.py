@@ -9,19 +9,15 @@ from src.constants import CONNECTION_STRING_ENV_VAR
 from src.extract_data import extract_gias_data
 from src.fetch_data import fetch_and_save_gias_data
 from src.update_database import update_database
+from src.utils import get_logger
 
 load_dotenv()
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(message)s",
-)
-
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
-def main(connection_string: str, skip_gias_validation: bool = False):
-    if skip_gias_validation:
+def main(connection_string: str, skip_validation: bool = False):
+    if skip_validation:
         logger.info(
             "Starting GIAS data update process with validation checks disabled."
         )
@@ -33,7 +29,7 @@ def main(connection_string: str, skip_gias_validation: bool = False):
 
     fetch_and_save_gias_data()
     data = extract_gias_data()
-    update_database(data, connection_string)
+    update_database(data, connection_string, skip_validation)
 
     logger.info("\nGIAS update complete")
 
@@ -68,4 +64,4 @@ if __name__ == "__main__":
             )
             exit(100)
 
-    main(connection_string=connection_string, skip_gias_validation=args.skip_validation)
+    main(connection_string=connection_string, skip_validation=args.skip_validation)

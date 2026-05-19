@@ -1,5 +1,3 @@
-from turtle import pd
-
 from pandas import DataFrame
 
 from dataclasses import dataclass
