@@ -119,18 +119,17 @@ Before(async function (scenario: ITestCaseHookParameter) {
           name: this.selectedSchool.NAME,
         }).click();
       } catch {
-        if (this.selectedSchool.NAME.includes('Miscellaneous')) {
+        if (this.selectedSchool.NAME.includes('Miscellanenous')) {
           await this.page.getByRole('button', {
             name: this.selectedSchool.NAME.replace(
-              'Miscellaneous',
               'Miscellanenous',
+              'Miscellaneous'
             ),
           }).click();
         } else {
           throw new Error(`Could not find school button: ${this.selectedSchool.NAME}`);
         }
       }
-
       console.log(`Navigated to dashboard for: ${this.selectedSchool.NAME}`);
     }
 
