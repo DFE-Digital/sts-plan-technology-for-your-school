@@ -1,0 +1,67 @@
+version: 2
+updates:
+  # npm — all directories
+  - package-ecosystem: 'npm'
+    directories:
+      - '/'
+      - '/contentful'
+      - '/contentful/*'
+      - '/src/Dfe.PlanTech.Web.Node'
+      - '/tests/*'
+      - '/utils/retrieve-user-data'
+      - '/.github/semver-release'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '02:00'
+    open-pull-requests-limit: 15
+    labels:
+      - 'dependencies'
+      - 'npm'
+
+  # pip
+  - package-ecosystem: 'pip'
+    directories:
+      - '/contentful/qa-visualiser'
+      - '/utils/update-gias-data'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '03:00'
+    open-pull-requests-limit: 5
+    labels:
+      - 'dependencies'
+      - 'python'
+
+  # terraform
+  - package-ecosystem: 'terraform'
+    directories:
+      - '/terraform/container-app'
+      - '/terraform/dns-zone'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '04:00'
+    open-pull-requests-limit: 5
+    labels:
+      - 'dependencies'
+      - 'terraform'
+
+  # nuget, docker, github-actions — single directories, no change needed
+  - package-ecosystem: 'nuget'
+    directory: '/'
+    schedule: { interval: 'weekly', day: 'monday', time: '05:00' }
+    open-pull-requests-limit: 5
+    labels: ['dependencies', '.net']
+
+  - package-ecosystem: 'docker'
+    directory: '/src/Dfe.PlanTech.Web'
+    schedule: { interval: 'weekly', day: 'monday', time: '06:00' }
+    open-pull-requests-limit: 3
+    labels: ['dependencies', 'docker']
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule: { interval: 'weekly', day: 'monday', time: '07:00' }
+    open-pull-requests-limit: 5
+    labels: ['dependencies', 'github-actions']
