@@ -31,6 +31,7 @@ env:
   BACKUP_CONTAINER_NAME: sqlbackups
   TF_WORKING_DIRECTORY_ACR: terraform/acr
   TF_WORKING_DIRECTORY_APP: terraform/container-app
+  PACKAGE_NAME: plan-technology-for-your-school
   SQL_BACKUP_FILE_NAME: ''
   SQL_BACKUP_FILE_NAME_SEARCH: ''
   USE_LATEST_IF_NOT_SPECIFIED: true

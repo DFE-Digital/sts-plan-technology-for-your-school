@@ -14,6 +14,7 @@ inputs:
   package_name:
     required: true
     description: GHCR package/image name, e.g. plan-technology-for-your-school
+    default: 'plan-technology-for-your-school'
   github_token:
     required: true
     description: access token for github api
