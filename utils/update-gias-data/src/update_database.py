@@ -1,57 +1,85 @@
-import os
+import math
+import re
 import struct
-from contextlib import contextmanager
-from logging import getLogger
 
+import numpy as np
 import pandas as pd
 import pyodbc
+
 from azure import identity
-from dotenv import load_dotenv
-from pyodbc import Cursor
+from contextlib import contextmanager
 
-load_dotenv()
-logger = getLogger(__name__)
+from src.classes import GiasData
+from src.utils import get_logger
+from src.validation import validate_before_db, validate_against_db
 
-CONNECTION_STRING = os.getenv("CONNECTION_STRING")
+logger = get_logger(__name__)
+
 SQL_COPT_SS_ACCESS_TOKEN = 1256
 
-THRESHOLD_MIN_RECORDS = 1000
-THRESHOLD_SUBSTANTIAL_CHANGE = 1000
-
-test_links = pd.DataFrame(
+# DSI test data - must survive every sync
+_TEST_GROUP = pd.DataFrame(
     [
         {
-            "groupUid": "99999",
-            "establishmentName": "DSI TEST Establishment (001) Community School (01)",
-            "urn": 900006,
-        },
-        {
-            "groupUid": "99999",
-            "establishmentName": "DSI TEST Establishment (001) Miscellaneous (27)",
-            "urn": 900008,
-        },
-        {
-            "groupUid": "99999",
-            "establishmentName": "DSI TEST Establishment (001) Foundation School (05)",
-            "urn": 900007,
-        },
-    ]
-)
-
-test_groups = pd.DataFrame(
-    [
-        {
-            "uid": "99999",
+            "groupUid": 99999,
+            "groupId": None,
+            "ukprn": None,
             "groupName": "DSI TEST Multi-Academy Trust (010)",
-            "groupType": "Multi-academy trust",
-            "groupStatus": "Open",
+            "groupStatusCode": "OPEN",
+            "groupTypeCode": 6,
         }
     ]
 )
 
+_TEST_ESTABLISHMENTS = pd.DataFrame(
+    [
+        {
+            "urn": 900006,
+            "establishmentName": "DSI TEST Establishment (001) Community School (01)",
+            "establishmentStatusCode": 1,
+            "genderCode": 3,
+            "localAuthorityCode": 352,
+            "phaseCode": 7,
+        },
+        {
+            "urn": 900007,
+            "establishmentName": "DSI TEST Establishment (001) Foundation School (05)",
+            "establishmentStatusCode": 1,
+            "genderCode": 3,
+            "localAuthorityCode": 352,
+            "phaseCode": 7,
+        },
+        {
+            "urn": 900008,
+            "establishmentName": "DSI TEST Establishment (001) Miscellaneous (27)",
+            "establishmentStatusCode": 1,
+            "genderCode": 3,
+            "localAuthorityCode": 352,
+            "phaseCode": 7,
+        },
+    ]
+)
+
+_TEST_MEMBERSHIP = pd.DataFrame(
+    [
+        {"urn": 900006, "groupUid": 99999},
+        {"urn": 900007, "groupUid": 99999},
+        {"urn": 900008, "groupUid": 99999},
+    ]
+)
+
+
+# ---------------------------------------------------------------------------
+# Connection helpers
+# ---------------------------------------------------------------------------
+
 
 def _get_connection(connection_string: str):
-    """Fetch a token for accessing the database and connect"""
+    if re.search(r"(UID=|User ID=)", connection_string, re.IGNORECASE):
+        logger.info("Using standard SQL auth")
+        return pyodbc.connect(connection_string)
+
+    logger.info("Using Azure AD token auth")
     try:
         credential = identity.DefaultAzureCredential(
             exclude_interactive_browser_credential=True
@@ -75,12 +103,17 @@ def _get_connection(connection_string: str):
 def _db_cursor(connection_string: str):
     connection = _get_connection(connection_string)
     cursor = connection.cursor()
+    cursor.fast_executemany = True
+
     try:
         logger.info("Beginning transaction")
         yield cursor
     except Exception as ex:
-        logger.error("Error while executing query, rolling back", exc_info=ex)
+        logger.error(
+            "Error while executing query, rolling back transaction", exc_info=ex
+        )
         connection.rollback()
+        raise
     else:
         logger.info("Committing transaction")
         connection.commit()
@@ -88,258 +121,388 @@ def _db_cursor(connection_string: str):
         logger.info("Closing connection")
         cursor.close()
         connection.close()
+        logger.info("Connection closed")
 
 
-def _create_temp_groups(cursor: Cursor, groups: pd.DataFrame) -> None:
-    """Create temp table for holding establishment groups"""
-    logger.info(
-        "Creating #EstablishmentGroup staging table with %s records", len(groups)
-    )
-    cursor.execute("""CREATE TABLE #EstablishmentGroup (
-        uid NVARCHAR(50),
-        groupName NVARCHAR(200),
-        groupType NVARCHAR(200),
-        groupStatus NVARCHAR(200)
-    )""")
-    cursor.executemany(
-        "INSERT INTO #EstablishmentGroup (uid, groupName, groupType, groupStatus) VALUES(?, ?, ?, ?)",
-        [
-            (row.uid, row.groupName, row.groupType, row.groupStatus)
-            for _, row in groups.iterrows()
-        ],
-    )
+# ---------------------------------------------------------------------------
+# Parameter conversion helpers
+# ---------------------------------------------------------------------------
 
 
-def _create_temp_links(cursor: Cursor, links: pd.DataFrame) -> None:
-    """Create temp table for holding links between establishment groups and establishments"""
-    logger.info("Creating #EstablishmentLink staging table with %s records", len(links))
-    cursor.execute(
-        "CREATE TABLE #EstablishmentLink(groupUid NVARCHAR(50), establishmentName NVARCHAR(200), urn INT NOT NULL)"
-    )
-    cursor.executemany(
-        "INSERT INTO #EstablishmentLink (groupUid, establishmentName, urn) VALUES(?, ?, ?)",
-        [(row.groupUid, row.establishmentName, row.urn) for _, row in links.iterrows()],
-    )
-
-
-def _validate_required_tables_exist(cursor: Cursor) -> bool:
+def _coerce(v):
     """
-    Check if the required tables exist in the database.
-    Returns True if both tables exist, False otherwise.
+    Convert a single value to a pyodbc-safe Python type.
+    Without this, the DataFrame leaks NumPy/Pandas types into pyodbc parameters.
     """
-    cursor.execute("""
-        SELECT COUNT(*) AS table_count
-        FROM INFORMATION_SCHEMA.TABLES
-        WHERE TABLE_TYPE = 'BASE TABLE'
-        AND TABLE_NAME IN ('establishmentLink', 'establishmentGroup')
-        AND TABLE_SCHEMA = 'dbo'
-    """)
-    table_count = cursor.fetchone()[0]
-
-    if table_count < 2:
-        logger.error(
-            "Required tables (establishmentLink and/or establishmentGroup) not found in the database"
-        )
-        logger.error("This is likely not the correct database for this operation")
-        logger.error("No data will be updated")
-        return False
-    else:
-        logger.info("Required tables found in the database, proceeding with update")
-        return True
-
-
-def _get_table_row_counts(cursor: Cursor, tables: list[str]) -> dict[str, int]:
-    """
-    Get the row counts for the specified tables.
-    Returns a dictionary with table names as keys and row counts as values.
-    """
-    counts = {}
-    for table in tables:
-        try:
-            cursor.execute(f"SELECT COUNT(*) FROM {table}")
-            count = cursor.fetchone()[0]
-            counts[table] = count
-        except Exception as ex:
-            logger.error(f"Error getting row count for {table}: {str(ex)}")
-            counts[table] = -1
-    return counts
-
-
-def _get_database_name(cursor: Cursor) -> str:
-    """Get the name of the current database"""
-    cursor.execute("SELECT DB_NAME() AS current_database")
-    return cursor.fetchone()[0]
-
-
-def _execute_stored_procedure(cursor: Cursor, procedure_name: str) -> bool:
-    """Execute a stored procedure and return success status"""
     try:
-        logger.info(f"Executing stored procedure: {procedure_name}")
-        cursor.execute(f"EXEC {procedure_name}")
-        logger.info("Successfully executed stored procedure")
-        return True
-    except Exception as ex:
-        logger.error(f"Error executing stored procedure: {str(ex)}")
-        raise
+        if pd.isna(v):
+            return None
+    except (TypeError, ValueError):
+        pass
+    if isinstance(v, float) and math.isnan(v):
+        return None
+    if isinstance(v, pd.Timestamp):
+        return v.date()
+    if isinstance(v, np.generic):  # numpy scalar
+        return v.item()
+    return v
 
 
-def _prepare_combined_test_and_real_data(
-    groups: pd.DataFrame, links: pd.DataFrame
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Combine the provided data with test data"""
-    combined_links = pd.concat([links, test_links], ignore_index=True)
-    combined_groups = pd.concat([groups, test_groups], ignore_index=True)
-    return combined_groups, combined_links
+def _params(df: pd.DataFrame) -> list[tuple]:
+    return [
+        tuple(_coerce(v) for v in row) for row in df.itertuples(index=False, name=None)
+    ]
 
 
-def _validate_data_for_update(
-    combined_groups: pd.DataFrame,
-    combined_links: pd.DataFrame,
-    row_counts_before: dict[str, int],
-    skip_gias_validation: bool = False,
-) -> bool:
-    """
-    Validate that the data to be updated meets all requirements.
-    Returns True if data is valid, False otherwise.
+# ---------------------------------------------------------------------------
+# Validation
+# ---------------------------------------------------------------------------
 
-    Args:
-        combined_groups: DataFrame containing establishment group data
-        combined_links: DataFrame containing establishment link data
-        row_counts_before: Dictionary with current row counts
-        skip_gias_validation: If True, bypasses GIAS data validation checks for abnormal data
-    """
-    # If skip validation is enabled, bypass validation
-    if skip_gias_validation:
-        logger.warning(
-            "GIAS data validation checks bypassed. Proceeding regardless of data quality concerns."
-        )
-        return True
 
-    # Check for empty dataframes
-    if combined_groups.empty or combined_links.empty:
-        logger.warning("No data to update. Skipping database update.")
-        return False
+def _log_proposed_changes(data: GiasData, row_counts_before: dict[str, int]):
+    n_est = len(data.establishments)
+    n_grp = len(data.establishment_groups)
+    n_mem = len(data.group_membership)
 
-    # Validate there are not a suspicious number of records
-    if (
-        len(combined_groups) < THRESHOLD_MIN_RECORDS
-        or len(combined_links) < THRESHOLD_MIN_RECORDS
-    ):
-        logger.warning(
-            f"Exiting early due to suspiciously low number of group and/or link records: "
-            f"{len(combined_groups)} groups, {len(combined_links)} links"
-        )
-        return False
+    for key, proposed in [
+        ("gias.establishment", n_est),
+        ("gias.establishmentGroup", n_grp),
+        ("gias.groupMembership", n_mem),
+    ]:
+        before = row_counts_before.get(key, 0)
+        logger.info("%s: %d → %d (%+d)", key, before, proposed, proposed - before)
 
-    # If there is a significant _change_ in the number of records, log a warning and exit
-    current_establishment_group_count = row_counts_before.get(
-        "dbo.establishmentGroup", 0
+
+def _row_count(cur: pyodbc.Cursor, table: str) -> int:
+    cur.execute(f"SELECT COUNT(*) FROM {table}")  # noqa: S608 (internal table name)
+    results = cur.fetchone()
+
+    if (results is None) or (len(results) == 0):
+        return 0
+
+    row_count = results[0]
+    return row_count
+
+
+def _row_counts(cur: pyodbc.Cursor) -> dict[str, int]:
+    tables = [
+        "gias.establishment",
+        "gias.establishmentGroup",
+        "gias.groupMembership",
+    ]
+    return {t: _row_count(cur, t) for t in tables}
+
+
+# ---------------------------------------------------------------------------
+# Merge helpers
+# ---------------------------------------------------------------------------
+
+
+def _bulk_insert(cur: pyodbc.Cursor, sql: str, rows: list[tuple], label: str) -> None:
+    logger.info("Inserting %d rows into %s", len(rows), label)
+    cur.executemany(sql, rows)
+
+
+def _merge_lookup(
+    cur,
+    temp: str,
+    target: str,
+    pk: str,
+    pk_type: str,
+    cols: list[str],
+    df: pd.DataFrame,
+) -> None:
+    col_defs = f"{pk} {pk_type}, " + ", ".join(f"{c} NVARCHAR(200)" for c in cols)
+    set_clause = ", ".join(f"{c} = src.{c}" for c in cols)
+    insert_cols = ", ".join([pk] + cols)
+    insert_vals = ", ".join([f"src.{pk}"] + [f"src.{c}" for c in cols])
+    placeholders = ", ".join(["?"] * (1 + len(cols)))
+
+    cur.execute(f"CREATE TABLE {temp} ({col_defs})")
+    _bulk_insert(cur, f"INSERT INTO {temp} VALUES ({placeholders})", _params(df), temp)
+    cur.execute(f"""
+        MERGE {target} AS tgt
+        USING {temp} AS src ON tgt.{pk} = src.{pk}
+        WHEN MATCHED THEN UPDATE SET {set_clause}
+        WHEN NOT MATCHED THEN INSERT ({insert_cols}) VALUES ({insert_vals});
+    """)
+    cur.execute(f"DROP TABLE {temp}")
+
+
+# ---------------------------------------------------------------------------
+# Per-table merge functions
+# ---------------------------------------------------------------------------
+
+
+def _merge_establishment_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging establishment status lookup")
+    _merge_lookup(
+        cur,
+        "#EstStatus",
+        "gias.establishmentStatus",
+        "establishmentStatusCode",
+        "INT",
+        ["establishmentStatusName"],
+        df,
     )
-    proposed_establishment_group_count = len(combined_groups)
-    current_establishment_link_count = row_counts_before.get("dbo.establishmentLink", 0)
-    proposed_establishment_link_count = len(combined_links)
+    logger.info("Merged establishment status")
 
-    # Log the proposed changes
-    logger.info(
-        f"Current counts: "
-        f"{current_establishment_group_count} groups, {current_establishment_link_count} links"
-    )
-    logger.info(
-        f"Proposed counts: "
-        f"{proposed_establishment_group_count} groups ({proposed_establishment_group_count - current_establishment_group_count:+}), "
-        f"{proposed_establishment_link_count} links ({proposed_establishment_link_count - current_establishment_link_count:+})"
-    )
 
-    if (
-        abs(proposed_establishment_group_count - current_establishment_group_count) > THRESHOLD_SUBSTANTIAL_CHANGE
-        or abs(proposed_establishment_link_count - current_establishment_link_count) > THRESHOLD_SUBSTANTIAL_CHANGE
-    ):
-        logger.warning(
-            f"Exiting early due to a suspiciously large change in establishment group ({current_establishment_group_count} -> {proposed_establishment_group_count}) and/or link ({current_establishment_link_count} -> {proposed_establishment_link_count}) counts."
+def _merge_genders(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging gender lookup")
+    _merge_lookup(
+        cur, "#Gender", "gias.gender", "genderCode", "INT", ["genderName"], df
+    )
+    logger.info("Merged gender")
+
+
+def _merge_group_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging group status lookup")
+    _merge_lookup(
+        cur,
+        "#GrpStatus",
+        "gias.groupStatus",
+        "groupStatusCode",
+        "NVARCHAR(100)",
+        ["groupStatusName"],
+        df,
+    )
+    logger.info("Merged group status")
+
+
+def _merge_group_types(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging group type lookup")
+    _merge_lookup(
+        cur, "#GT", "gias.groupType", "groupTypeCode", "INT", ["groupTypeName"], df
+    )
+    logger.info("Merged groupType")
+
+
+def _merge_local_authorities(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging local authority lookup")
+    _merge_lookup(
+        cur,
+        "#LA",
+        "gias.localAuthority",
+        "localAuthorityCode",
+        "INT",
+        ["localAuthorityName"],
+        df,
+    )
+    logger.info("Merged local authority")
+
+
+def _merge_phases(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging phase lookup")
+    _merge_lookup(cur, "#Phase", "gias.phase", "phaseCode", "INT", ["phaseName"], df)
+    logger.info("Merged phase")
+
+
+def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    cur.execute("""
+        CREATE TABLE #Est (
+            urn INT,
+            uprn BIGINT,
+            ukprn INT,
+            establishmentNumber INT,
+            establishmentName NVARCHAR(255),
+            establishmentStatusCode INT NOT NULL,
+            genderCode INT NOT NULL,
+            localAuthorityCode INT NOT NULL,
+            phaseCode INT NOT NULL
         )
-        return False
+    """)
+    _bulk_insert(
+        cur,
+        "INSERT INTO #Est VALUES (" + ",".join(["?"] * 9) + ")",
+        _params(df),
+        "#Est",
+    )
+    cur.execute("""
+        MERGE gias.establishment AS tgt
+        USING #Est AS src ON tgt.urn = src.urn
+        WHEN MATCHED THEN UPDATE SET
+            uprn = src.uprn,
+            ukprn = src.ukprn,
+            establishmentNumber = src.establishmentNumber,
+            establishmentName = src.establishmentName,
+            establishmentStatusCode = src.establishmentStatusCode,
+            genderCode = src.genderCode,
+            localAuthorityCode = src.localAuthorityCode,
+            phaseCode = src.phaseCode,
+            syncedAt = SYSUTCDATETIME()
+        WHEN NOT MATCHED THEN INSERT (
+            urn,
+            uprn,
+            ukprn,
+            establishmentNumber,
+            establishmentName,
+            establishmentStatusCode,
+            genderCode,
+            localAuthorityCode,
+            phaseCode
+        ) VALUES (
+            src.urn,
+            src.uprn,
+            src.ukprn,
+            src.establishmentNumber,
+            src.establishmentName,
+            src.establishmentStatusCode,
+            src.genderCode,
+            src.localAuthorityCode,
+            src.phaseCode
+        );
+    """)
+    cur.execute("DROP TABLE #Est")
+    logger.info("Merged establishments")
 
-    # All validations passed
-    logger.info("GIAS data validation passed, proceeding with update.")
-    return True
+
+def _merge_establishment_groups(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    cur.execute("""
+        CREATE TABLE #Grp (
+            groupUid INT,
+            groupId NVARCHAR(100),
+            ukprn INT,
+            groupName NVARCHAR(255),
+            groupStatusCode NVARCHAR(100),
+            groupTypeCode INT
+        )
+    """)
+    _bulk_insert(
+        cur,
+        "INSERT INTO #Grp VALUES (" + ",".join(["?"] * 6) + ")",
+        _params(df),
+        "#Grp",
+    )
+    cur.execute("""
+        MERGE gias.establishmentGroup AS tgt
+        USING #Grp AS src ON tgt.groupUid = src.groupUid
+        WHEN MATCHED THEN UPDATE SET
+            groupId = src.groupId,
+            ukprn = src.ukprn,
+            groupName = src.groupName,
+            groupStatusCode = src.groupStatusCode,
+            groupTypeCode = src.groupTypeCode,
+            syncedAt = SYSUTCDATETIME()
+        WHEN NOT MATCHED THEN INSERT (
+            groupUid,
+            groupId,
+            ukprn,
+            groupName,
+            groupStatusCode,
+            groupTypeCode
+        ) VALUES (
+            src.groupUid,
+            src.groupId,
+            src.ukprn,
+            src.groupName,
+            src.groupStatusCode,
+            src.groupTypeCode
+        );
+    """)
+    cur.execute("DROP TABLE #Grp")
+    logger.info("Merged establishment_groups")
+
+
+def _replace_group_membership(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    """DELETE current memberships and re-insert from the latest snapshot."""
+    cur.execute("""
+        CREATE TABLE #Mem (
+            urn INT, groupUid INT
+        )
+    """)
+    _bulk_insert(cur, "INSERT INTO #Mem VALUES (?, ?)", _params(df), "#Mem")
+    cur.execute("TRUNCATE TABLE gias.groupMembership")
+    cur.execute("""
+        INSERT INTO gias.groupMembership (urn, groupUid)
+        SELECT urn, groupUid FROM #Mem
+    """)
+    cur.execute("DROP TABLE #Mem")
+    logger.info("Replaced group_membership")
+
+
+# ---------------------------------------------------------------------------
+# Test-data injection
+# ---------------------------------------------------------------------------
+
+
+def _inject_test_data(data: GiasData) -> GiasData:
+    """Merge DSI test rows into the DataFrames before syncing to the DB."""
+    # Establishments - only add if not already present in real GIAS data
+    real_urns = set(data.establishments["urn"].dropna().astype(int))
+    missing = _TEST_ESTABLISHMENTS[~_TEST_ESTABLISHMENTS["urn"].isin(real_urns)]
+    missing = missing.copy()
+
+    if not missing.empty:
+        # Pad missing columns with None so concat works
+        for col in data.establishments.columns:
+            if col not in missing.columns:
+                missing[col] = None
+        data.establishments = pd.concat(
+            [data.establishments, missing[data.establishments.columns]],
+            ignore_index=True,
+        )
+
+    # Groups - always upsert (test group may change name)
+    #
+    # Note:
+    # If a real GIAS group has the same UID as the test group, the test group will not be added,
+    # but the real group will be updated with the test group's name and type.
+    # This is an acceptable edge case for simplicity of implementation.
+
+    real_guids = set(data.establishment_groups["groupUid"].dropna().astype(int))
+    if 99999 not in real_guids:
+        data.establishment_groups = pd.concat(
+            [data.establishment_groups, _TEST_GROUP], ignore_index=True
+        )
+
+    # Membership - always include
+    data.group_membership = pd.concat(
+        [data.group_membership, _TEST_MEMBERSHIP], ignore_index=True
+    ).drop_duplicates(subset=["urn", "groupUid"])
+
+    return data
+
+
+# ---------------------------------------------------------------------------
+# Public entry point
+# ---------------------------------------------------------------------------
 
 
 def update_database(
-    groups: pd.DataFrame,
-    links: pd.DataFrame,
+    data: GiasData,
     connection_string: str,
-    skip_gias_validation: bool = False,
-):
-    """
-    Use a single transaction to update establishment groups and relationships, commit on success
+    skip_validation: bool = False,
+) -> None:
+    validate_before_db(data, skip_validation)
+    data = _inject_test_data(data)
 
-    Args:
-        groups: DataFrame containing establishment group data
-        links: DataFrame containing establishment link data
-        connection_string: Database connection string
-        skip_gias_validation: If True, bypasses GIAS data validation checks for abnormal or suspicious data
-    """
-    with _db_cursor(connection_string) as cursor:
-        cursor.fast_executemany = True
+    with _db_cursor(connection_string) as cur:
+        counts_before = _row_counts(cur)
+        validate_against_db(cur, data, counts_before, skip_validation)
+        _log_proposed_changes(data, counts_before)
 
-        try:
-            # Validate required tables exist
-            if not _validate_required_tables_exist(cursor):
-                return
+        # Lookups
 
-            # Get row counts before update
-            tables_to_check = ["dbo.establishmentGroup", "dbo.establishmentLink"]
-            row_counts_before = _get_table_row_counts(cursor, tables_to_check)
-            logger.info("Row counts before update:")
-            for table, count in row_counts_before.items():
-                logger.info(f"  - {table}: {count}")
+        _merge_establishment_statuses(cur, data.establishment_statuses)
+        _merge_genders(cur, data.genders)
+        _merge_group_statuses(cur, data.group_statuses)
+        _merge_group_types(cur, data.group_types)
+        _merge_local_authorities(cur, data.local_authorities)
+        _merge_phases(cur, data.phases)
 
-            # Prepare and load data into temp tables
-            combined_groups, combined_links = _prepare_combined_test_and_real_data(
-                groups, links
-            )
+        # Core entities
+        _merge_establishments(cur, data.establishments)
+        _merge_establishment_groups(cur, data.establishment_groups)
 
-            # Validate the proposed data updates prior to execution
-            if not _validate_data_for_update(
-                combined_groups, combined_links, row_counts_before, skip_gias_validation
-            ):
-                return
+        # Child tables
+        _replace_group_membership(cur, data.group_membership)
 
-            # Create temporary tables for staging data
-            _create_temp_groups(cursor, combined_groups)
-            _create_temp_links(cursor, combined_links)
-
+        counts_after = _row_counts(cur)
+        for table in counts_after:
             logger.info(
-                "Updating dbo.establishmentLink and dbo.establishmentGroup with staging tables"
+                "%s: %d → %d",
+                table,
+                counts_before.get(table, 0),
+                counts_after[table],
             )
-
-            # Execute the stored procedure to update the data
-            # Note the sproc appears to handle inserts, updates, and deletes
-            # (e.g. it will delete records that are no longer present GIAS data)
-            # ref: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250403_1100_AddEstablishmentGroupTable.sql
-            # Given this, it is not required to do so within python code.
-            stored_procedure_name = "dbo.UpdateEstablishmentData"
-            if not _execute_stored_procedure(cursor, stored_procedure_name):
-                logger.error(
-                    f"Stored procedure {stored_procedure_name} failed to execute"
-                )
-                return
-
-            # Get row counts after update
-            row_counts_after = _get_table_row_counts(cursor, tables_to_check)
-            logger.info("Row counts after update:")
-            for table, count in row_counts_after.items():
-                logger.info(f"  - {table}: {count}")
-
-            # Log the changes
-            for table in tables_to_check:
-                before = row_counts_before.get(table, 0)
-                after = row_counts_after.get(table, 0)
-                logger.info(f"Net change in {table}: {after - before}")
-
-        except Exception as ex:
-            if "row_counts_before" not in locals():
-                logger.error(f"Error during database validation: {str(ex)}")
-            else:
-                logger.error(f"Error during data update: {str(ex)}")
-            raise
