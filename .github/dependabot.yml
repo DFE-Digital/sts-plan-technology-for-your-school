@@ -1,0 +1,91 @@
+version: 2
+updates:
+
+  # npm — all directories
+  - package-ecosystem: 'npm'
+    directories:
+      - '/'
+      - '/contentful'
+      - '/contentful/*'
+      - '/src/Dfe.PlanTech.Web.Node'
+      - '/tests/*'
+      - '/utils/retrieve-user-data'
+      - '/.github/semver-release'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '02:00'
+    open-pull-requests-limit: 15
+    target-branch: "development"
+    labels:
+      - 'dependencies'
+      - 'npm'
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "lodash"
+        versions: ["4.17.15"]
+
+  # pip
+  - package-ecosystem: 'pip'
+    directories:
+      - '/contentful/qa-visualiser'
+      - '/utils/update-gias-data'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '03:00'
+    open-pull-requests-limit: 5
+    target-branch: "development"
+    labels:
+      - 'dependencies'
+      - 'python'
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  # terraform
+  - package-ecosystem: 'terraform'
+    directories:
+      - '/terraform/container-app'
+      - '/terraform/dns-zone'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '04:00'
+    open-pull-requests-limit: 5
+    target-branch: "development"
+    labels:
+      - 'dependencies'
+      - 'terraform'
+
+  # nuget, docker, github-actions — single directories, no change needed
+  - package-ecosystem: 'nuget'
+    directory: '/'
+    schedule: { interval: 'weekly', day: 'monday', time: '05:00' }
+    open-pull-requests-limit: 5
+    target-branch: "development"
+    labels: ['dependencies', '.net']
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: 'docker'
+    directory: '/src/Dfe.PlanTech.Web'
+    schedule: { interval: 'weekly', day: 'monday', time: '06:00' }
+    open-pull-requests-limit: 3
+    target-branch: "development"
+    labels: ['dependencies', 'docker']
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule: { interval: 'weekly', day: 'monday', time: '07:00' }
+    open-pull-requests-limit: 5
+    target-branch: "development"
+    labels: ['dependencies', 'github-actions']
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
