@@ -23,6 +23,8 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "lodash"
+        versions: ["4.17.15"]
 
   # pip
   - package-ecosystem: 'pip'
