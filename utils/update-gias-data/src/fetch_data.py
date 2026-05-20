@@ -1,86 +1,66 @@
-from logging import getLogger
-from playwright.sync_api import (
-    Playwright,
-    sync_playwright,
-    TimeoutError as PlaywrightTimeoutError,
-)
+import requests
 
-from src.constants import DOWNLOAD_PATH, GIAS_DATA_URL
+from datetime import date
+from pandas import Timedelta
+from pathlib import Path
+from tqdm import tqdm
 
-logger = getLogger(__name__)
+from src.constants import EDUBASE_DOWNLOADS_BASE_URL, CSV_STEMS
+from src.utils import get_file_path, get_logger
 
-DEFAULT_TIMEOUT_MS = 120_000
+logger = get_logger(__name__)
+
+CHUNK_SIZE = 65_536
+DEFAULT_TIMEOUT_SECONDS = 60
 
 
-def _fetch_gias_data(play: Playwright) -> None:
-    """Use playwright to download the dynamically generated GIAS data file"""
-    browser = play.webkit.launch(headless=True)
+def _download(url: str, dest: Path, is_test_download: bool = False) -> None:
+    logger.info("Downloading %s", url)
+    with requests.get(url, stream=True, timeout=DEFAULT_TIMEOUT_SECONDS) as request:
+        request.raise_for_status()
 
-    context = browser.new_context(
-        accept_downloads=True,
-        user_agent=(
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-            "AppleWebKit/537.36 (KHTML, like Gecko) "
-            "Chrome/120.0 Safari/537.36"
-        ),
-        extra_http_headers={
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-GB,en;q=0.9",
-        },
-    )
-    context.set_default_timeout(DEFAULT_TIMEOUT_MS)
+        if is_test_download:
+            logger.info("Test download successful, skipping saving")
+            return
 
-    page = context.new_page()
+        total = int(request.headers.get("content-length", 0))
+        with (
+            dest.open("wb") as f,
+            tqdm(total=total, unit="B", unit_scale=True, desc=dest.name) as bar,
+        ):
+            for chunk in request.iter_content(CHUNK_SIZE):
+                f.write(chunk)
+                bar.update(len(chunk))
 
-    logger.info("Navigating to %s", GIAS_DATA_URL)
-    page.goto(GIAS_DATA_URL, wait_until="domcontentloaded")
-    page.wait_for_load_state("networkidle")
-
-    # Ensure checkbox is present then tick it
-    page.locator("#all-group-records-with-linkszip-checkbox").wait_for(state="visible")
-    page.locator("#all-group-records-with-linkszip-checkbox").check()
-
-    # Click "Download selected files"
-    page.get_by_role("button", name="Download selected files").click()
-
-    # Wait for page to load
-    page.wait_for_load_state("networkidle")  # wait for navigation to complete
-
-    page.screenshot(path=DOWNLOAD_PATH / "after_click.png")
-    logger.info("Current URL after click: %s", page.url)
-
-    # Wait for the dynamically generated Results.zip button to appear and be clickable
-    results_btn = page.locator('input#download-button[value="Results.zip"]')
-
-    # Sometimes it appears disabled briefly while server-side job runs
-    logger.info("Waiting for Results.zip button to appear")
-    results_btn.wait_for(state="visible")
-
-    expect_enabled_timeout_ms = DEFAULT_TIMEOUT_MS
-    page.wait_for_function(
-        "btn => !btn.disabled",
-        arg=results_btn.element_handle(),
-        timeout=expect_enabled_timeout_ms,
-    )
-
-    logger.info("Requesting download")
-
-    # IMPORTANT: expect_download must wrap the click that triggers the download
-    with page.expect_download(timeout=DEFAULT_TIMEOUT_MS) as download_info:
-        results_btn.click()
-
-    download = download_info.value
-
-    logger.info("Downloading results")
-    download.save_as(DOWNLOAD_PATH / "extract.zip")
-
-    logger.info("Finished downloading file")
-
-    context.close()
-    browser.close()
+    logger.info("Saved %s", dest)
 
 
 def fetch_and_save_gias_data() -> None:
-    """Fetch and save GIAS data in zip format"""
-    with sync_playwright() as playwright:
-        _fetch_gias_data(playwright)
+    """Download the four GIAS CSV files for today's date into DATA_PATH."""
+
+    file_date = date.today()
+    files_available = True
+
+    for stem in CSV_STEMS:
+        file_path = get_file_path(stem, file_date)
+        url = f"{EDUBASE_DOWNLOADS_BASE_URL}/{file_path.name}"
+        try:
+            _download(url, file_path, is_test_download=True)
+        except requests.HTTPError as e:
+            if e.response.status_code == 404:
+                logger.warning(
+                    "No data available for %s, will use yesterday's date", file_date
+                )
+                file_date -= Timedelta(days=1)
+                break
+            else:
+                raise
+
+    for stem in CSV_STEMS:
+        file_path = get_file_path(stem, file_date)
+        if file_path.exists():
+            logger.info("%s already exists, skipping download", file_path.name)
+            continue
+
+        url = f"{EDUBASE_DOWNLOADS_BASE_URL}/{file_path.name}"
+        _download(url, file_path)
