@@ -1,5 +1,6 @@
 version: 2
 updates:
+
   # npm — all directories
   - package-ecosystem: 'npm'
     directories:
@@ -15,9 +16,13 @@ updates:
       day: 'monday'
       time: '02:00'
     open-pull-requests-limit: 15
+    target-branch: "development"
     labels:
       - 'dependencies'
       - 'npm'
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # pip
   - package-ecosystem: 'pip'
@@ -29,9 +34,13 @@ updates:
       day: 'monday'
       time: '03:00'
     open-pull-requests-limit: 5
+    target-branch: "development"
     labels:
       - 'dependencies'
       - 'python'
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   # terraform
   - package-ecosystem: 'terraform'
@@ -43,6 +52,7 @@ updates:
       day: 'monday'
       time: '04:00'
     open-pull-requests-limit: 5
+    target-branch: "development"
     labels:
       - 'dependencies'
       - 'terraform'
@@ -52,16 +62,108 @@ updates:
     directory: '/'
     schedule: { interval: 'weekly', day: 'monday', time: '05:00' }
     open-pull-requests-limit: 5
+    target-branch: "development"
     labels: ['dependencies', '.net']
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: 'docker'
     directory: '/src/Dfe.PlanTech.Web'
     schedule: { interval: 'weekly', day: 'monday', time: '06:00' }
     open-pull-requests-limit: 3
+    target-branch: "development"
     labels: ['dependencies', 'docker']
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule: { interval: 'weekly', day: 'monday', time: '07:00' }
     open-pull-requests-limit: 5
+    target-branch: "development"
     labels: ['dependencies', 'github-actions']
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+
+#   # C# / .NET (Nuget)
+#   - package-ecosystem: "nuget"
+#     directory: "/src/Dfe.PlanTech.Application/Dfe.PlanTech.Application.csproj"
+#     schedule:
+#     interval: "daily"
+#     open-pull-requests-limit: 10
+#     groups:
+#       microsoft:
+#         patterns:
+#           - "Microsoft.*"
+#           - "System.*"
+
+#   - package-ecosystem: "nuget"
+#     directory: "/src/Dfe.PlanTech.Application"
+#     schedule:
+#     interval: "daily"
+#     open-pull-requests-limit: 10
+#     groups:
+#       microsoft:
+#         patterns:
+#           - "Microsoft.*"
+#           - "System.*"
+
+#   - package-ecosystem: "nuget"
+#     directory: "/src/Dfe.PlanTech.Core"
+#     schedule:
+#     interval: "daily"
+#     open-pull-requests-limit: 10
+#     groups:
+#       microsoft:
+#         patterns:
+#           - "Microsoft.*"
+#           - "System.*"
+
+
+
+
+#   # React / TypeScript front end
+#   - package-ecosystem: "npm"
+#     directory: "/" # or wherever your package.json lives
+#     schedule:
+#     interval: "daily"
+#     open-pull-requests-limit: 10
+#     groups:
+#       mui:
+#         patterns:
+#           - "@mui/*"
+#           - "@emotion/*"
+#       react:
+#         patterns:
+#           - "react"
+#           - "react-dom"
+#           - "@types/react*"
+#       dev-dependencies:
+#         dependency-type: "development"
+#     ignore:
+#       - dependency-name: "*"
+#         update-types: ["version-update:semver-major"]
+#       - dependency-name: "lodash"
+#         versions: ["4.17.15"]
+
+#   # Terraform
+#   - package-ecosystem: "terraform"
+#     directory: "/infra"
+#     schedule:
+#       interval: "daily"
+
+#   # GitHub Actions workflows themselves
+#   - package-ecosystem: "github-actions"
+#     directory: "/"
+#     schedule:
+#       interval: "daily"
+
+#   # Python (if relevant)
+#   - package-ecosystem: "pip"
+#     directory: "/scripts"
+#     schedule:
+#       interval: "daily"
