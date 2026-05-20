@@ -12,7 +12,7 @@
   "dependencies": {
     "axios": "^1.9.0",
     "csv-parser": "^3.2.0",
-    "dotenv": "^16.5.0",
+    "dotenv": "^16.6.1",
     "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.2"
   }
