@@ -42,4 +42,22 @@ public class GroupsController : BaseController<GroupsController>
 
         return Redirect(UrlConstants.HomePage);
     }
+
+    [HttpGet(
+        $"school/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.ViewAnswersSlug}"
+    )]
+    public async Task<IActionResult> ViewInProgressAnswers(
+        string categorySlug,
+        string sectionSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+
+        return await _groupsViewBuilder.RouteToViewInProgressAnswers(
+            this,
+            categorySlug,
+            sectionSlug
+        );
+    }
 }

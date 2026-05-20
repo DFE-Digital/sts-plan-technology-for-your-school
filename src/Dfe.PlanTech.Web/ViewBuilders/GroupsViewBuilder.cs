@@ -2,9 +2,11 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +19,16 @@ public class GroupsViewBuilder(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IContentfulService contentfulService,
     ICurrentUser currentUser,
-    IEstablishmentService establishmentService
+    IEstablishmentService establishmentService,
+    ISubmissionService submissionService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+
+    private readonly ISubmissionService _submissionService =
+        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
 
@@ -69,6 +76,56 @@ public class GroupsViewBuilder(
 
         controller.ViewData[StatePassingMechanismConstants.Title] = "Select a school";
         return controller.View(SelectASchoolViewName, viewModel);
+    }
+
+    public async Task<IActionResult> RouteToViewInProgressAnswers(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug
+    )
+    {
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
+            establishmentId,
+            section,
+            status: SubmissionStatus.InProgress
+        );
+
+        switch (submissionRoutingData.Status)
+        {
+            case SubmissionStatus.NotStarted:
+                return controller.RedirectToHomePage();
+
+            case SubmissionStatus.InProgress:
+            case SubmissionStatus.CompleteNotReviewed:
+
+                var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
+                section,
+                submissionRoutingData,
+                categorySlug,
+                sectionSlug,
+                isMatInProgressView: true,
+                schoolName: CurrentUser.GroupSelectedSchoolName
+                );
+
+                viewModel.IsMatInProgressView = true;
+                viewModel.BackLinkHref = $"/{categorySlug}";
+
+                return controller.View(
+                    ReviewAnswersViewBuilder.ViewAnswersViewName,
+                    viewModel
+                );
+
+            default:
+                return controller.RedirectToHomePage();
+        }
     }
 
     public async Task RecordGroupSelectionAsync(

@@ -1,4 +1,5 @@
 @using Dfe.PlanTech.Application.Providers.Interfaces
+@using Dfe.PlanTech.Core.Constants
 @inject IMicrocopyProvider Microcopy
 @model ViewAnswersViewModel
 
@@ -13,23 +14,41 @@
 }
 
 @{
-    var dynamicValues = new Dictionary<string, string>
+    var dynamicValues = new Dictionary<string, string>();
+
+    if (!Model.IsMatInProgressView)
     {
-        ["dateCompleted"] = Model.AssessmentCompletedDate.ToString("dd MMMM yyyy")
-    };
+        dynamicValues["dateCompleted"] = Model.AssessmentCompletedDate.ToString("dd MMMM yyyy");
+    }
 }
 
 <span class="govuk-caption-xl">@Model.TopicName</span>
-<h1 class="govuk-heading-xl">
-    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersHeader)
-</h1>
-<p>
-    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersIntroText, dynamicValues)
-</p>
 
-<p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersIntroMore)</p>
+@if (Model.IsMatInProgressView)
+{
+    <h1 class="govuk-heading-xl">@Model.SchoolName</h1>
+
+    <p>
+        The self-assessment was started by @Model.StartedBySchoolName on @Model.DateStarted?.ToString("d MMMM yyyy"). They answered @Model.QuestionsAnswered questions out of @Model.TotalQuestions.
+    </p>
+
+    <h2 class="govuk-heading-l">Self-assessment answers</h2>
+}
+else
+{
+    <h1 class="govuk-heading-xl">
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersHeader)
+    </h1>
+
+    <p>
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersIntroText, dynamicValues)
+    </p>
+
+    <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersIntroMore)</p>
+}
 
 <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+
 @foreach (var response in Model.Responses)
 {
     <div>
@@ -39,9 +58,31 @@
     </div>
 }
 
+@if (Model.ShowInProgressDisclaimer)
+{
+    <p>Starting a new self-assessment will replace any previous answers.</p>
+}
+
+@{
+    string backButtonText;
+
+    if (Model.IsMatInProgressView)
+    {
+        backButtonText = Model.BackButtonText;
+    }
+    else
+    {
+        backButtonText = await Microcopy.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.ViewAnswersBackToRecs
+        );
+    }
+}
+
 <hr class="govuk-section-break govuk-section-break--l">
 
-<a href="@($"/{Model.CategorySlug}")" draggable="false"
-   class="govuk-button govuk-button--secondary" data-module="govuk-button">
-    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ViewAnswersBackToRecs)
+<a href="@Model.BackLinkHref"
+   draggable="false"
+   class="govuk-button govuk-button--secondary"
+   data-module="govuk-button">
+    @backButtonText
 </a>

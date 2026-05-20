@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -27,7 +28,8 @@ public class GroupsViewBuilderTests
         IContentfulService? contentful = null,
         IEstablishmentService? est = null,
         ICurrentUser? currentUser = null,
-        ILogger<BaseViewBuilder>? logger = null
+        ILogger<BaseViewBuilder>? logger = null,
+        ISubmissionService? submissionService = null
     )
     {
         contactOpts ??= Opt();
@@ -35,6 +37,7 @@ public class GroupsViewBuilderTests
         est ??= Substitute.For<IEstablishmentService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         logger ??= NullLogger<BaseViewBuilder>.Instance;
+        submissionService ??= Substitute.For<ISubmissionService>();
 
         // Set up test scenario: A MAT/Group user who needs to select a school
         // User Organisation (the MAT/Group they belong to)
@@ -54,7 +57,7 @@ public class GroupsViewBuilderTests
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
         // GroupSelectedSchoolUrn not set
 
-        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est);
+        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est, submissionService);
     }
 
     private static QuestionnaireCategoryEntry MakeCategory(
@@ -86,6 +89,7 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
         var current = Substitute.For<ICurrentUser>();
+        var submissionService = Substitute.For<ISubmissionService>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
@@ -93,7 +97,8 @@ public class GroupsViewBuilderTests
                 null!,
                 contentful,
                 current,
-                est
+                est,
+                submissionService
             )
         );
     }
@@ -105,6 +110,7 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var current = Substitute.For<ICurrentUser>();
         var est = Substitute.For<IEstablishmentService>();
+        var submissionService = Substitute.For<ISubmissionService>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
@@ -112,7 +118,8 @@ public class GroupsViewBuilderTests
                 opts,
                 contentful,
                 current,
-                null!
+                null!,
+                submissionService
             )
         );
     }

@@ -173,7 +173,9 @@ public class ReviewAnswersViewBuilder(
         QuestionnaireSectionEntry section,
         SubmissionRoutingDataModel submissionModel,
         string categorySlug,
-        string sectionSlug
+        string sectionSlug,
+        bool isMatInProgressView = false,
+        string? schoolName = null
     )
     {
         /*
@@ -211,10 +213,10 @@ public class ReviewAnswersViewBuilder(
         List<QuestionWithAnswerModel> responses =
         [
             .. orderedCoreResponses
-                .Union(orderedRetiredResponses)
-                .Where(r => r != null)
-                .Cast<QuestionWithAnswerModel>(),
-        ];
+            .Union(orderedRetiredResponses)
+            .Where(r => r != null)
+            .Cast<QuestionWithAnswerModel>(),
+    ];
 
         var viewModel = new ViewAnswersViewModel
         {
@@ -223,6 +225,19 @@ public class ReviewAnswersViewBuilder(
             Responses = responses,
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
+            IsMatInProgressView = isMatInProgressView,
+            SchoolName = schoolName,
+            StartedBySchoolName = schoolName,
+            DateStarted = submissionModel.Submission?.DateCreated,
+            QuestionsAnswered = responses.Count,
+            TotalQuestions = section.Questions.Count(),
+            ShowInProgressDisclaimer = isMatInProgressView,
+            BackLinkHref = isMatInProgressView
+                ? $"/school/{categorySlug}"
+                : $"/{categorySlug}",
+            BackButtonText = isMatInProgressView
+                ? $"Back to {section.Name.ToLower()}"
+                : "Back to recommendations",
         };
 
         return viewModel;
