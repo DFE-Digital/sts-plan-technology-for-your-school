@@ -113,22 +113,23 @@ Before(async function (scenario: ITestCaseHookParameter) {
       console.log(`Auto-selecting school: ${this.selectedSchool.NAME}`);
 
       await this.page.goto(`${process.env.URL}home`);
-
+      
       try {
         await this.page.getByRole('button', {
           name: this.selectedSchool.NAME,
         }).click();
       } catch {
-        if (this.selectedSchool.NAME.includes('Miscellanenous')) {
-          await this.page.getByRole('button', {
-            name: this.selectedSchool.NAME.replace(
-              'Miscellanenous',
-              'Miscellaneous'
-            ),
-          }).click();
-        } else {
+        const alternateSchoolName = this.selectedSchool.NAME.includes('Miscellanenous')
+          ? this.selectedSchool.NAME.replace('Miscellanenous', 'Miscellaneous')
+          : this.selectedSchool.NAME.replace('Miscellaneous', 'Miscellanenous');
+
+        if (alternateSchoolName === this.selectedSchool.NAME) {
           throw new Error(`Could not find school button: ${this.selectedSchool.NAME}`);
         }
+
+        await this.page.getByRole('button', {
+          name: alternateSchoolName,
+        }).click();
       }
       console.log(`Navigated to dashboard for: ${this.selectedSchool.NAME}`);
     }
