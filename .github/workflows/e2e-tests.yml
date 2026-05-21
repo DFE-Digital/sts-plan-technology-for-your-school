@@ -71,7 +71,7 @@ jobs:
           az_keyvault_secret_name: ${{ env.az_keyvault_database_connectionstring_name }}
 
       - name: Execute stored procedure
-        uses: azure/sql-action@v2.2
+        uses: azure/sql-action@v2.3
         with:
           connection-string: ${{ steps.get-connection-string.outputs.secret_value }}
           path: './.github/scripts/clear-submission-data-from-db.sql'
