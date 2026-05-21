@@ -28,6 +28,10 @@ Given('I visit the homepage', async function () {
   await this.page.goto(`${process.env.URL}home`);
 });
 
+Then('I click the link {string}', async function (linkName: string) {
+  await this.page.getByRole('link', { name: linkName }).first().click();
+});
+
 Given('I visit the self-assessment-testing page', async function () {
   await this.page.goto(`${process.env.URL}self-assessment-testing`);
 });
