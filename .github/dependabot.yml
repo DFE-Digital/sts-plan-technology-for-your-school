@@ -97,7 +97,7 @@ updates:
     groups:
       nuget-dependencies:
         patterns:
-          -"*"
+          - "*"
         update-types:
           - "minor"
           - "patch"
@@ -115,7 +115,7 @@ updates:
     groups:
       docker-dependencies:
         patterns:
-          -"*"
+          - "*"
         update-types:
           - "minor"
           - "patch"
@@ -133,7 +133,7 @@ updates:
     groups:
       actions-dependencies:
         patterns:
-          -"*"
+          - "*"
         update-types:
           - "minor"
           - "patch"
