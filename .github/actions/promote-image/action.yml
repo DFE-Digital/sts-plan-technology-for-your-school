@@ -81,6 +81,21 @@ runs:
         IMAGE_NAME="${{ inputs.package_name }}"
         IMAGE_TAG="${{ steps.pick_tag.outputs.image_tag }}"
         ACR_IMAGE="${{ inputs.acr_login_server }}/${IMAGE_NAME}:${IMAGE_TAG}"
+        ACR_NAME="${{inputs.acr_name}}"
+
+        echo "Checking if image already exists in ACR..."
+
+        if az acr repository show-tags \
+          --name "$ACR_NAME" \
+          --repository "$IMAGE_NAME" \
+          --query "contains(@, '$IMAGE_TAG')" \
+          -o tsv | grep -q true; then
+
+          echo "Image already exists in ACR: $ACR_IMAGE"
+          exit 0
+        fi
+
+        echo "Image not found in ACR. Pushing..."
 
         docker tag "ghcr.io/dfe-digital/${IMAGE_NAME}:${IMAGE_TAG}" "$ACR_IMAGE"
         docker push "$ACR_IMAGE"

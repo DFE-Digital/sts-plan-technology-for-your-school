@@ -248,7 +248,21 @@ jobs:
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
             -backend-config="key=${{ env.TF_BACKEND_KEY }}"
 
-      - name: Apply Terraform changes
+
+            #because the shared module for container app does not output the container env, and the azure front door private link in the shared waf module needs it
+            #we must make it first so we can reference with a data block.
+      - name: Apply Terraform changes - main hosting only
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform apply -auto-approve -input=false \
+            -target=module.main_hosting \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
+            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
+
+      - name: Apply Terraform changes - rest of app
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
           terraform apply -auto-approve -input=false \
