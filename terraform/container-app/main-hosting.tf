@@ -78,7 +78,6 @@ module "main_hosting" {
   )
   image_tag         = local.image_tag
   #this should be Consumption, but the shared module has some logic that then doesn't work...
-  container_app_environment_workload_profile_type  = "D4"
 
   ###########
   # Storage #
