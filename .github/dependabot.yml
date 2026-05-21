@@ -25,6 +25,17 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "lodash"
         versions: ["4.17.15"]
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
 
   # pip
   - package-ecosystem: 'pip'
@@ -43,6 +54,13 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
   # terraform
   - package-ecosystem: 'terraform'
@@ -58,8 +76,15 @@ updates:
     labels:
       - 'dependencies'
       - 'terraform'
+    groups:
+      terraform-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
 
-  # nuget, docker, github-actions — single directories, no change needed
+  # nuget
   - package-ecosystem: 'nuget'
     directory: '/'
     schedule: { interval: 'weekly', day: 'monday', time: '05:00' }
@@ -69,7 +94,15 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+    groups:
+      nuget-dependencies:
+        patterns:
+          -"*"
+        update-types:
+          - "minor"
+          - "patch"
 
+  #docker
   - package-ecosystem: 'docker'
     directory: '/src/Dfe.PlanTech.Web'
     schedule: { interval: 'weekly', day: 'monday', time: '06:00' }
@@ -79,7 +112,15 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+    groups:
+      docker-dependencies:
+        patterns:
+          -"*"
+        update-types:
+          - "minor"
+          - "patch"
 
+  #actions
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule: { interval: 'weekly', day: 'monday', time: '07:00' }
@@ -89,3 +130,10 @@ updates:
     ignore:
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
+    groups:
+      actions-dependencies:
+        patterns:
+          -"*"
+        update-types:
+          - "minor"
+          - "patch"
