@@ -77,6 +77,8 @@ module "main_hosting" {
     azurerm_container_registry.acr_notshared[0].admin_password
   )
   image_tag         = local.image_tag
+  #this should be Consumption, but the shared module has some logic that then doesn't work...
+  container_app_environment_workload_profile_type  = 'D4'
 
   ###########
   # Storage #
