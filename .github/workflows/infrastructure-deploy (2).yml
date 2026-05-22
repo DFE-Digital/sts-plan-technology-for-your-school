@@ -261,7 +261,7 @@ jobs:
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
            # -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
-            -var="image_tag=development-fcbd108f2ea4351c1b75077816151a4a9f75daa4"
+            -var="image_tag=development-fcbd108f2ea4351c1b75077816151a4a9f75daa4" \
             -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
             -var="azure_location=northeurope" \
             -out=tfplanmh
