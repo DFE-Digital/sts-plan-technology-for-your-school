@@ -145,6 +145,7 @@ jobs:
             -var-file="../../normalisedTerraformVars.tfvars" \
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="azure_location=northeurope"
             -out=tfplan
 
           terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
@@ -261,6 +262,7 @@ jobs:
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
             -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
+            -var="azure_location=northeurope"
 
       - name: Apply Terraform changes - rest of app
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
@@ -271,6 +273,7 @@ jobs:
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
             -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
+            -var="azure_location=northeurope"
 
   restore-db:
     name: Restore DB from BACPAC
