@@ -145,7 +145,7 @@ jobs:
             -var-file="../../normalisedTerraformVars.tfvars" \
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-            -var="azure_location=northeurope"
+            -var="azure_location=northeurope" \
             -out=tfplan
 
           terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
