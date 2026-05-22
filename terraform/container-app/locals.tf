@@ -42,7 +42,7 @@ locals {
   #################
   launch_in_vnet                 = var.launch_in_vnet
   container_app_environment_internal_load_balancer_enabled = var.container_app_environment_internal_load_balancer_enabled
-  container_app_image_name       = "plan-tech-app"
+  container_app_image_name       = "plan-technology-for-your-school"
   kestrel_endpoint               = var.az_app_kestrel_endpoint
   container_port                 = var.az_container_port
   container_app_min_replicas     = var.container_app_min_replicas
