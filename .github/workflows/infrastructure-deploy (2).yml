@@ -255,7 +255,7 @@ jobs:
       - name: Apply Terraform changes - main hosting only
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
-          terraform plan -auto-approve -input=false \
+          terraform plan -input=false \
             -target=module.main_hosting \
             -var-file="../../normalisedTerraformVars.tfvars" \
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
@@ -272,7 +272,7 @@ jobs:
   #     - name: Apply Terraform changes - rest of app
   #       working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
   #       run: |
-  #         terraform plan -auto-approve -input=false \
+  #         terraform plan -input=false \
   #           -var-file="../../normalisedTerraformVars.tfvars" \
   #           -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
   #           -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
