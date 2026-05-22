@@ -142,10 +142,10 @@ jobs:
           terraform plan -input=false \
             -target=azurerm_resource_group.app_rg \
             -target=azurerm_container_registry.acr_notshared \
-            -var-file="../../normalisedTerraformVars.tfvars" \
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="azure_location=northeurope" \
+            -var-file="../../normalisedTerraformVars.tfvars" \
             -out=tfplan
 
           terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
@@ -255,25 +255,35 @@ jobs:
       - name: Apply Terraform changes - main hosting only
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
-          terraform apply -auto-approve -input=false \
+          terraform plan -auto-approve -input=false \
             -target=module.main_hosting \
-            -var-file="../../normalisedTerraformVars.tfvars" \
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
             -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
-            -var="azure_location=northeurope"
+            -var="azure_location=northeurope" \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -out=tfplanmh
+
+            terraform show -no-color tfplanmh || true
+
+            terraform apply -auto-approve -input=false tfplanmh
 
       - name: Apply Terraform changes - rest of app
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
-          terraform apply -auto-approve -input=false \
-            -var-file="../../normalisedTerraformVars.tfvars" \
+          terraform plan -auto-approve -input=false \
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
-            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
-            -var="azure_location=northeurope"
+            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
+            -var="azure_location=northeurope" \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -out=tfplanapp
+
+            terraform show -no-color tfplanapp || true
+
+            terraform apply -auto-approve -input=false tfplanapp
 
   restore-db:
     name: Restore DB from BACPAC
