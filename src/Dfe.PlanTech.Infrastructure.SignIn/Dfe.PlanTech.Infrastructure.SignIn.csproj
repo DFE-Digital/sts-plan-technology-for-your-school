@@ -14,8 +14,4 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.18.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
-  </ItemGroup>
-
 </Project>

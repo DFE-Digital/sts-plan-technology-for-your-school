@@ -31,7 +31,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.UnitTests.Shared\Dfe.PlanTech.UnitTests.Shared.csproj" />
     </ItemGroup>
 
