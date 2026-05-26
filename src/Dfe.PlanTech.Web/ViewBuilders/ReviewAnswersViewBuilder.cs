@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class ReviewAnswersViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<ReviewAnswersViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUser currentUser,
     ISubmissionService submissionService
