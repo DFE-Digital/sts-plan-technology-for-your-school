@@ -49,7 +49,7 @@ locals {
   container_app_max_replicas     = var.container_app_max_replicas
   container_app_http_concurrency = var.container_app_http_concurrency
   #otherwise it includes the image name and is too long
-  container_app_name_override    = "test"
+  container_app_name_override    = local.resource_prefix
   container_environment_variables_default = {
     "Kestrel__Endpoints__Http__Url"       = local.kestrel_endpoint,
     "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true",

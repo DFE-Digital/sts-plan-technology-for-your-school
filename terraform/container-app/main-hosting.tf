@@ -23,6 +23,8 @@ module "main_hosting" {
   #################
   enable_container_registry = local.enable_container_registry
   image_name                = local.container_app_image_name
+
+  container_app_name_override = local.container_app_name_override
   container_port            = local.container_port
   container_secret_environment_variables = {
     "KeyVaultName"    = local.kv_name,
