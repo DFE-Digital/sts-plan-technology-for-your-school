@@ -164,7 +164,7 @@ jobs:
 
   apply-terraform:
     name: Apply Terraform changes
- #   needs: [image-and-acr]
+    needs: [image-and-acr]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.apply-terraform) }}
     runs-on: ubuntu-latest
     environment:
