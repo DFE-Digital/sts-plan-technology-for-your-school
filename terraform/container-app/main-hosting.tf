@@ -1,5 +1,6 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.6.3"
+  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.20.0"
+  #source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.6.3"
   depends_on = [azurerm_resource_group.app_rg, azurerm_container_registry.acr_notshared]
   ###########
   # General #
@@ -51,7 +52,11 @@ module "main_hosting" {
   mssql_azuread_admin_username       = local.az_sql_azuread_admin_username
   mssql_azuread_admin_object_id      = local.az_sql_azuread_admin_objectid
   mssql_azuread_auth_only            = local.az_use_azure_ad_auth_only
-  mssql_managed_identity_assign_role = true
+
+  #this would be true, but there's an issue with their code assigning the right Principal id so we do it instead
+  mssql_managed_identity_assign_role = false
+  enable_mssql_extended_auditing_policy = false
+
   mssql_sku_name                     = local.az_sql_sku
   mssql_max_size_gb                  = local.az_sql_max_size_gb
   mssql_firewall_ipv4_allow_list     = local.az_mssql_ipv4_allow_list
