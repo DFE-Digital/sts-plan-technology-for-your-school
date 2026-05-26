@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class GroupsViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<GroupsViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IContentfulService contentfulService,
     ICurrentUser currentUser,

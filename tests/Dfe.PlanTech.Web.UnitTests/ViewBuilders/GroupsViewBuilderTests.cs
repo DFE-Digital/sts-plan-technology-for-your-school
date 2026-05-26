@@ -15,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
@@ -30,7 +31,7 @@ public class GroupsViewBuilderTests
         IContentfulService? contentful = null,
         IEstablishmentService? est = null,
         ICurrentUser? currentUser = null,
-        ILogger<BaseViewBuilder>? logger = null,
+        ILogger<GroupsViewBuilder>? logger = null,
         ISubmissionService? submissionService = null
     )
     {
@@ -38,7 +39,7 @@ public class GroupsViewBuilderTests
         contentful ??= Substitute.For<IContentfulService>();
         est ??= Substitute.For<IEstablishmentService>();
         currentUser ??= Substitute.For<ICurrentUser>();
-        logger ??= NullLogger<BaseViewBuilder>.Instance;
+        logger ??= NullLogger<GroupsViewBuilder>.Instance;
         submissionService ??= Substitute.For<ISubmissionService>();
 
         // Set up test scenario: A MAT/Group user who needs to select a school
@@ -95,7 +96,7 @@ public class GroupsViewBuilderTests
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<GroupsViewBuilder>.Instance,
                 null!,
                 contentful,
                 current,
@@ -116,7 +117,7 @@ public class GroupsViewBuilderTests
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<GroupsViewBuilder>.Instance,
                 opts,
                 contentful,
                 current,
