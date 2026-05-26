@@ -4,7 +4,9 @@ using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
@@ -241,5 +243,82 @@ public class GroupsViewBuilderTests
                 "URN-007",
                 "Bond Primary"
             );
+    }
+
+    [Fact]
+    public async Task RouteToViewInProgressAnswers_WhenSubmissionInProgress_ReturnsView()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var submissionService = Substitute.For<ISubmissionService>();
+        var currentUser = Substitute.For<ICurrentUser>();
+
+        currentUser.GetActiveEstablishmentIdAsync().Returns(100);
+        currentUser.GroupSelectedSchoolName.Returns("Test School");
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Name = "Cyber security processes",
+            Questions =
+            [
+                new QuestionnaireQuestionEntry
+            {
+                Sys = new SystemDetails("question-1")
+            }
+            ]
+        };
+
+        contentful.GetSectionBySlugAsync("cyber-security-processes").Returns(section);
+
+        var submission = new SubmissionResponsesModel(
+           1,
+           [
+               new QuestionWithAnswerModel
+               {
+                    QuestionSysId = "question-1",
+                    QuestionText = "Question 1",
+                    AnswerText = "Answer 1",
+                    Order = 1
+               }
+           ])
+        {
+            DateCreated = new DateTime(2026, 1, 1)
+        };
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: submission,
+            status: SubmissionStatus.InProgress
+        );
+
+        submissionService
+            .GetSubmissionRoutingDataAsync(100, section, SubmissionStatus.InProgress)
+            .Returns(routingData);
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            currentUser: currentUser,
+            submissionService: submissionService
+        );
+
+        var controller = new TestController();
+
+        var result = await sut.RouteToViewInProgressAnswers(
+            controller,
+            "cyber-security-standard",
+            "cyber-security-processes"
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+
+        Assert.Equal(ReviewAnswersViewBuilder.ViewAnswersViewName, view.ViewName);
+
+        var model = Assert.IsType<ViewAnswersViewModel>(view.Model);
+
+        Assert.True(model.IsMatInProgressView);
+        Assert.Equal("Test School", model.SchoolName);
+        Assert.Equal(1, model.QuestionsAnswered);
+        Assert.Equal(1, model.TotalQuestions);
+        Assert.True(model.ShowInProgressDisclaimer);
     }
 }

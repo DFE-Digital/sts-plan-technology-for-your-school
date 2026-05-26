@@ -10,10 +10,6 @@
 }
 
 @{
-    await Html.RenderPartialAsync("PrintButton");
-}
-
-@{
     var dynamicValues = new Dictionary<string, string>();
 
     if (!Model.IsMatInProgressView)
