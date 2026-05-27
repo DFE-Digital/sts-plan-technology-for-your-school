@@ -85,4 +85,3 @@ resource "azurerm_eventhub_authorization_rule" "listen_only" {
   send                = false
   manage              = false
 }
-}
