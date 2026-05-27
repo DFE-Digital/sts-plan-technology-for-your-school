@@ -130,7 +130,7 @@ jobs:
       - name: Terraform init
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
-          terraform init \
+          terraform init -upgrade -reconfigure \
             -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
             -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
@@ -139,7 +139,7 @@ jobs:
       - name: Apply Terraform changes - RG & container registry only
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
-          terraform plan -upgrade -reconfigure -input=false \
+          terraform plan -input=false \
             -target=azurerm_resource_group.app_rg \
             -target=azurerm_container_registry.acr_notshared \
             -var-file="../../normalisedTerraformVars.tfvars" \
