@@ -199,7 +199,7 @@ variable "container_environment_variables" {
 variable "container_app_environment_workload_profile_type"  {
   description = "Container app environment type"
   type        = string
-  default     = "D4"
+  default     = "Consumption"
 }
 
 variable "launch_in_vnet" {
