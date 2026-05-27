@@ -359,7 +359,7 @@ public class GroupsViewBuilderTests
         var controller = new TestController();
 
         // Act
-        var exception = await Assert.ThrowsAsync<NullReferenceException>(() =>
+        var exception = await Assert.ThrowsAsync<Exception>(() =>
             sut.RouteToSelectASelfAssessmentViewModelAsync(controller)
         );
 
