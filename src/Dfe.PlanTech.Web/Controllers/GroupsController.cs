@@ -36,7 +36,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"trust/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
+        $"{UrlConstants.GroupsSlug}/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
         Name = GetSelectASelfAssessmentAction
     )]
     public async Task<IActionResult> GetSelectASelfAssessment()
