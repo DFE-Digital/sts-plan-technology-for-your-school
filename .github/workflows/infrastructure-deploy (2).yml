@@ -139,7 +139,7 @@ jobs:
       - name: Apply Terraform changes - RG & container registry only
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
-          terraform plan -input=false \
+          terraform plan -upgrade -reconfigure -input=false \
             -target=azurerm_resource_group.app_rg \
             -target=azurerm_container_registry.acr_notshared \
             -var-file="../../normalisedTerraformVars.tfvars" \

@@ -1,5 +1,5 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.20.0"
+  source = "./modules/shared_containerapp"
 
   #source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.6.3"
   depends_on = [azurerm_resource_group.app_rg, azurerm_container_registry.acr_notshared]
