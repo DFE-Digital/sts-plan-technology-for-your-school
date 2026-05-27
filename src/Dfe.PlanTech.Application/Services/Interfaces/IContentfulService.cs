@@ -7,6 +7,7 @@ public interface IContentfulService
     Task<QuestionnaireCategoryEntry?> GetCategoryBySlugAsync(string slug, int? includeLevel = null);
     Task<string?> GetCategoryHeaderTextBySlugAsync(string slug);
     Task<IEnumerable<QuestionnaireSectionEntry>> GetAllSectionsAsync();
+    Task<IEnumerable<QuestionnaireCategoryEntry>> GetAllCategoriesAsync();
     Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(string slug, int? includeLevel = null);
     Task<NavigationLinkEntry> GetLinkByIdAsync(string contentId);
     Task<List<MicrocopyEntry>> GetMicrocopyEntriesAsync();

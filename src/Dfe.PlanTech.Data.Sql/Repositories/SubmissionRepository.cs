@@ -716,6 +716,34 @@ public class SubmissionRepository(
         return question.Id;
     }
 
+    public async Task<List<SubmissionEntity>> GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+        IEnumerable<int> establishmentIds)
+    {
+        var establishmentIdList = establishmentIds
+            .Distinct()
+            .ToList();
+
+        var results = await dbContext.Submissions
+            .Where(s =>
+                establishmentIdList.Contains(s.EstablishmentId) &&
+                s.Status == SubmissionStatus.CompleteReviewed &&
+                !s.Deleted &&
+                s.DateCompleted != null)
+            .Where(s => !dbContext.Submissions.Any(s2 =>
+                s2.EstablishmentId == s.EstablishmentId &&
+                s2.SectionName == s.SectionName &&
+                s2.SectionId == s.SectionId &&
+                s2.Status == SubmissionStatus.CompleteReviewed &&
+                !s2.Deleted &&
+                s2.DateCompleted != null &&
+                s2.DateCompleted > s.DateCompleted))
+            .OrderBy(s => s.EstablishmentId)
+            .ThenBy(s => s.SectionName)
+            .ToListAsync();
+
+        return results;
+    }
+
     private RecommendationEntity BuildRecommendationEntity(SqlRecommendationDto recommendationDto)
     {
         return new RecommendationEntity

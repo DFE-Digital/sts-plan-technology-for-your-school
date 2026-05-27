@@ -26,6 +26,7 @@ public class GroupsViewBuilderTests
         IOptions<ContactOptionsConfiguration>? contactOpts = null,
         IContentfulService? contentful = null,
         IEstablishmentService? est = null,
+        IGroupService? group = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null
     )
@@ -33,6 +34,7 @@ public class GroupsViewBuilderTests
         contactOpts ??= Opt();
         contentful ??= Substitute.For<IContentfulService>();
         est ??= Substitute.For<IEstablishmentService>();
+        group ??= Substitute.For<IGroupService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
@@ -54,7 +56,7 @@ public class GroupsViewBuilderTests
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
         // GroupSelectedSchoolUrn not set
 
-        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est);
+        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est, group);
     }
 
     private static QuestionnaireCategoryEntry MakeCategory(
@@ -85,6 +87,7 @@ public class GroupsViewBuilderTests
     {
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
         var current = Substitute.For<ICurrentUser>();
 
         Assert.Throws<ArgumentNullException>(() =>
@@ -93,7 +96,8 @@ public class GroupsViewBuilderTests
                 null!,
                 contentful,
                 current,
-                est
+                est,
+                group
             )
         );
     }
@@ -105,6 +109,7 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var current = Substitute.For<ICurrentUser>();
         var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
@@ -112,7 +117,8 @@ public class GroupsViewBuilderTests
                 opts,
                 contentful,
                 current,
-                null!
+                null!,
+                group
             )
         );
     }

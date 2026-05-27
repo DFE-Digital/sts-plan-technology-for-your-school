@@ -11,10 +11,12 @@ public class EstablishmentWorkflowTests
     private readonly IEstablishmentRepository _estRepo = Substitute.For<IEstablishmentRepository>();
     private readonly IEstablishmentLinkRepository _linkRepo =
         Substitute.For<IEstablishmentLinkRepository>();
+    private readonly ISubmissionRepository _subRepo =
+        Substitute.For<ISubmissionRepository>();
     private static readonly string[] abString = new[] { "A", "B" };
 
     private EstablishmentWorkflow CreateServiceUnderTest() =>
-        new EstablishmentWorkflow(_estRepo, _linkRepo);
+        new EstablishmentWorkflow(_estRepo, _linkRepo, _subRepo);
 
     // ── Helpers: create minimal entities that map via AsDto() in YOUR codebase ──
     // Replace these types with your real entity classes (what the repos return),
@@ -253,13 +255,13 @@ public class EstablishmentWorkflowTests
     public void Ctor_Null_Repos_Throw()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(null!, _linkRepo)
+            new EstablishmentWorkflow(null!, _linkRepo, _subRepo)
         );
         Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(_estRepo, null!)
+            new EstablishmentWorkflow(_estRepo, null!, _subRepo)
         );
         Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(null!, null!)
+            new EstablishmentWorkflow(null!, null!, _subRepo)
         );
     }
 }
