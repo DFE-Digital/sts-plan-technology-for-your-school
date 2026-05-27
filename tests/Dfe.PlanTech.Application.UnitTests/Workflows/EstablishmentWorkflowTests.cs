@@ -16,7 +16,7 @@ public class EstablishmentWorkflowTests
     private static readonly string[] abString = new[] { "A", "B" };
 
     private EstablishmentWorkflow CreateServiceUnderTest() =>
-        new EstablishmentWorkflow(_estRepo, _linkRepo, _subRepo);
+        new EstablishmentWorkflow(_estRepo, _linkRepo);
 
     // ── Helpers: create minimal entities that map via AsDto() in YOUR codebase ──
     // Replace these types with your real entity classes (what the repos return),
@@ -255,13 +255,13 @@ public class EstablishmentWorkflowTests
     public void Ctor_Null_Repos_Throw()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(null!, _linkRepo, _subRepo)
+            new EstablishmentWorkflow(null!, _linkRepo)
         );
         Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(_estRepo, null!, _subRepo)
+            new EstablishmentWorkflow(_estRepo, null!)
         );
         Assert.Throws<ArgumentNullException>(() =>
-            new EstablishmentWorkflow(null!, null!, _subRepo)
+            new EstablishmentWorkflow(null!, null!)
         );
     }
 }
