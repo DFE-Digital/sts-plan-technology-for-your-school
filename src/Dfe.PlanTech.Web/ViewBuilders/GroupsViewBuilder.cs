@@ -83,9 +83,9 @@ public class GroupsViewBuilder(
 
         var categories = (await ContentfulService.GetAllCategoriesAsync() ?? []).ToList();
 
-        if (!categories.Any())
+        if (categories.Count() == 0)
         {
-            throw new NullReferenceException("No categories found on groups assessment selection page.");
+            throw new Exception("No categories found on groups assessment selection page.");
         }
 
         // establishments for the MAT

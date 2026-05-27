@@ -7,8 +7,7 @@ namespace Dfe.PlanTech.Application.Workflows;
 
 public class EstablishmentWorkflow(
     IEstablishmentRepository establishmentRepository,
-    IEstablishmentLinkRepository establishmentLinkRepository,
-    ISubmissionRepository submissionsRepository
+    IEstablishmentLinkRepository establishmentLinkRepository
 ) : IEstablishmentWorkflow
 {
     private readonly IEstablishmentRepository _establishmentRepository =
@@ -16,8 +15,6 @@ public class EstablishmentWorkflow(
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository =
         establishmentLinkRepository
         ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
-    private readonly ISubmissionRepository _submissionRespository =
-        submissionsRepository ?? throw new ArgumentNullException(nameof(submissionsRepository));
     public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
     )
