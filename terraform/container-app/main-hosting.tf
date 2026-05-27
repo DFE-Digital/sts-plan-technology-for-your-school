@@ -41,7 +41,7 @@ module "main_hosting" {
   container_max_replicas           = local.container_app_max_replicas
   container_min_replicas           = local.container_app_min_replicas
   container_scale_http_concurrency = local.container_app_http_concurrency
-  not in v1.2
+  #not in v1.2
   #container_app_environment_workload_profile_type = var.container_app_environment_workload_profile_type
 
   #############
@@ -57,7 +57,7 @@ module "main_hosting" {
 
   #this would be true, but there's an issue with their code assigning the right Principal id so we do it instead
   #mssql_managed_identity_assign_role = false
-  not in v1.2
+  #not in v1.2
   #enable_mssql_extended_auditing_policy = false
 
   mssql_sku_name                     = local.az_sql_sku
