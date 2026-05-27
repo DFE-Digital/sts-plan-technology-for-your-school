@@ -24,3 +24,18 @@
 #  to = azurerm_monitor_activity_log_alert.this["container_app_update_succeeded"]
 #  id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Insights/activityLogAlerts/Container App Update Succeeded"
 #}
+
+import {
+  to = azurerm_monitor_activity_log_alert.this["dependency_calls_failed"]
+  id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Insights/activityLogAlerts/Dependency calls failed"
+}
+
+import {
+  to = azurerm_monitor_activity_log_alert.this["http_requests_failed"]
+  id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Insights/activityLogAlerts/HTTP Requests Failed"
+}
+
+import {
+  to = azurerm_monitor_activity_log_alert.this["unhandled_exceptions_thrown"]
+  id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.resource_group_name}/providers/Microsoft.Insights/activityLogAlerts/Unhandled exceptions thrown"
+}
