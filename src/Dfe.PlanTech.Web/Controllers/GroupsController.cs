@@ -9,7 +9,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class GroupsController : BaseController<GroupsController>
 {
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
-    public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessmentView";
+    public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
 
     private readonly ICurrentUser _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;

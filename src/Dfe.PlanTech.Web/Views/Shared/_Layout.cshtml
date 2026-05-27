@@ -67,12 +67,7 @@
                 },
                 {
                     "Groups", new HashSet<string>(
-                        [GroupsController.GetSelectASchoolAction],
-                        StringComparer.OrdinalIgnoreCase)
-                },
-                {
-                    "Groups", new HashSet<string>(
-                        [GroupsController.GetSelectASelfAssessmentAction],
+                        [GroupsController.GetSelectASchoolAction, GroupsController.GetSelectASelfAssessmentAction],
                         StringComparer.OrdinalIgnoreCase)
                 },
             };
