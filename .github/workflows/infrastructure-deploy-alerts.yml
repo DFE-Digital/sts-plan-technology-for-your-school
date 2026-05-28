@@ -8,9 +8,9 @@ on:
         description: 'The environment to run infrastructure deployment on:'
         required: true
         options: ['Dev', 'ProductionUnprotected']
-  push:
-    branches:
-      - feature/300874/Azure-Monitoring-errors-exceptions-tf
+  # push:
+  #   branches:
+  #     - feature/300874/Azure-Monitoring-errors-exceptions-tf
 env:
   TF_WORKING_DIRECTORY: terraform/alerts
   ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
