@@ -111,7 +111,7 @@ locals {
   private_endpoints = merge(
     local.private_endpoint_redis,
     local.private_endpoint_mssql,
-    local.private_endpoint_postgres,
+ #   local.private_endpoint_postgres,
     local.private_endpoint_registry,
     local.private_endpoint_storage_blob,
     local.private_endpoint_storage_file,
@@ -533,9 +533,9 @@ container_apps_allow_ips_inbound                = var.container_apps_allow_ips_i
   monitor_containers = merge(
     local.monitor_default_container,
     local.monitor_worker_container,
-    {
-      for name, container in local.custom_container_apps : name => azurerm_container_app.custom_container_apps[name]
-    }
+ #   {
+ #     for name, container in local.custom_container_apps : name => azurerm_container_app.custom_container_apps[name]
+ #   }
   )
   monitor_logic_app_receiver = {
     name         = local.logic_app_workflow_name
