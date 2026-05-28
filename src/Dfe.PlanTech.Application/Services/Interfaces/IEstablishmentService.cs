@@ -8,8 +8,14 @@ public interface IEstablishmentService
     Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(
         int establishmentId
     );
+    Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(
+        int establishmentId
+    );
+    Task<IEnumerable<SqlEstablishmentDto>> GetEstablishmentsByReferencesAsync(
+        IEnumerable<string> establishmentReferences
+    );
+
     Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(string establishmentReference);
-    Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(EstablishmentModel establishmentModel);
     Task RecordGroupSelection(
         string userDsiReference,
         int? userEstablishmentId,

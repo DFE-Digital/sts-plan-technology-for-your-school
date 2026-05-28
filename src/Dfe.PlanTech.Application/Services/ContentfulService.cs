@@ -27,6 +27,11 @@ public class ContentfulService(IContentfulWorkflow contentfulWorkflow) : IConten
         return _contentfulWorkflow.GetAllSectionsAsync();
     }
 
+    public Task<IEnumerable<QuestionnaireCategoryEntry>> GetAllCategoriesAsync()
+    {
+        return _contentfulWorkflow.GetAllCategoriesAsync();
+    }
+
     public Task<QuestionnaireSectionEntry> GetSectionBySlugAsync(
         string slug,
         int? includeLevel = null
