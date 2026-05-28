@@ -731,7 +731,7 @@ public class SubmissionRepository(
                 s.DateCompleted != null)
             .Where(s => !dbContext.Submissions.Any(s2 =>
                 s2.EstablishmentId == s.EstablishmentId &&
-                s2.SectionName == s.SectionName &&
+                s2.SectionId == s.SectionId &&
                 s2.SectionId == s.SectionId &&
                 s2.Status == SubmissionStatus.CompleteReviewed &&
                 !s2.Deleted &&
