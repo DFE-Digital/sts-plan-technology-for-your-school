@@ -82,8 +82,8 @@ jobs:
             terraform plan \
             -var-file="terraform.tfvars.json" \
             -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
-            -var="environment_github=${{env.ENVIRONMENT}}"
-              -var="az_tag_environment=${{env.ENVIRONMENT}}"
+            -var="environment_github=${{env.ENVIRONMENT}}" \
+            -var="az_tag_environment=${{env.ENVIRONMENT}}"
 
       # - name: Terraform apply
       #   shell: bash
@@ -92,7 +92,7 @@ jobs:
       #       terraform apply -auto-approve \
       #       -var-file="terraform.tfvars.json" \
       #       -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
-      #       -var="environment_github=${{env.ENVIRONMENT}}"
+      #       -var="environment_github=${{env.ENVIRONMENT}}" \
       #       -var="az_tag_environment=${{env.ENVIRONMENT}}"
 
       - name: Whitelist Runner for TF storage
