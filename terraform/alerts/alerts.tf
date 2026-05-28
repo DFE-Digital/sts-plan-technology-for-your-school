@@ -7,7 +7,7 @@ resource "azurerm_monitor_activity_log_alert" "this" {
   description         = each.value.description
   resource_group_name = var.resource_group_name
   location            = var.azure_location
-  scopes              = local.scopes
+  scopes              = [local.resource_group_scope]
   enabled             = var.enabled
   tags                = local.tags
   
@@ -31,10 +31,11 @@ resource "azurerm_monitor_metric_alert" "this" {
   description         = each.value.description
   resource_group_name = var.resource_group_name
   target_resource_location            = var.azure_location
-  scopes              = local.scopes
   enabled             = var.enabled
   tags                = local.tags
   severity            = each.value.severity
+  scopes = ["${local.resource_group_scope}${local.scope_insights}"]
+  window_size = each.value.dynamic_criteria == null ? "PT15M" : "PT5M"
 
   action {
     action_group_id = data.azurerm_monitor_action_group.existing.id
