@@ -8,12 +8,12 @@ on:
         description: 'The environment to run infrastructure deployment on:'
         required: true
         options: ['Dev', 'ProductionUnprotected']
-  # push:
-  #   branches:
-  #     - 300872-email-alerts-terraform
+  push:
+    branches:
+      - feature/300874/Azure-Monitoring-errors-exceptions-tf
 env:
   TF_WORKING_DIRECTORY: terraform/alerts
-  ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+  ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
 
 permissions:
   id-token: write
@@ -24,7 +24,7 @@ jobs:
     name: Terraform Apply
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
     permissions:
       id-token: write
       contents: read
@@ -75,24 +75,25 @@ jobs:
 
 # none of the variables are secret, so they can be stored in a checked-in json file. if that changes, move to key vault as per other infra pipeline.
 #Use plan instead of apply for testing.
-      # - name: Terraform plan
-      #   shell: bash
-      #   run: |
-      #       RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
-      #       terraform plan \
-      #       -var-file="terraform.tfvars.json" \
-      #       -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
-      #       -var="environment_github=${{env.ENVIRONMENT}}"
-
-      - name: Terraform apply
+      - name: Terraform plan
         shell: bash
         run: |
             RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
-            terraform apply -auto-approve \
+            terraform plan \
             -var-file="terraform.tfvars.json" \
             -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
             -var="environment_github=${{env.ENVIRONMENT}}"
-            -var="az_tag_environment=${{env.ENVIRONMENT}}"
+              -var="az_tag_environment=${{env.ENVIRONMENT}}"
+
+      # - name: Terraform apply
+      #   shell: bash
+      #   run: |
+      #       RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
+      #       terraform apply -auto-approve \
+      #       -var-file="terraform.tfvars.json" \
+      #       -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
+      #       -var="environment_github=${{env.ENVIRONMENT}}"
+      #       -var="az_tag_environment=${{env.ENVIRONMENT}}"
 
       - name: Whitelist Runner for TF storage
         uses: ./.github/actions/whitelist-storage
