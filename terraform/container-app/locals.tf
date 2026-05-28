@@ -22,7 +22,7 @@ locals {
   existing_resource_group = local.is_dr ? local.resource_prefix : ""
   # this will be the existing one if exists otherwise what main-hosting creates.
   resource_group = try(azurerm_resource_group.app_rg[0], module.main_hosting.azurerm_resource_group_default)
-  resource_group_name = local.resource_group.name
+  resource_group_name = azurerm_resource_group.app_rg[0].resource_group.name
   #######################
   # Container Registry #
   #######################
