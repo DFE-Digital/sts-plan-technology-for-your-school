@@ -395,11 +395,11 @@ locals {
   worker_container_min_replicas = var.worker_container_min_replicas
   worker_container_max_replicas = var.worker_container_max_replicas
   # Container app / Custom
-  custom_container_apps = var.custom_container_apps
-  custom_container_apps_cdn_frontdoor_custom_domain_dns_names = local.enable_cdn_frontdoor ? {
-    for name, container in local.custom_container_apps : name => replace(container.ingress.cdn_frontdoor_custom_domain, local.dns_zone_domain_name, "")
-    if container.ingress.external_enabled && container.ingress.cdn_frontdoor_custom_domain != "" && endswith(container.ingress.cdn_frontdoor_custom_domain, local.dns_zone_domain_name)
-  } : {}
+  #custom_container_apps = var.custom_container_apps
+  #custom_container_apps_cdn_frontdoor_custom_domain_dns_names = local.enable_cdn_frontdoor ? {
+  #  for name, container in local.custom_container_apps : name => replace(container.ingress.cdn_frontdoor_custom_domain, local.dns_zone_domain_name, "")
+  #  if container.ingress.external_enabled && container.ingress.cdn_frontdoor_custom_domain != "" && endswith(container.ingress.cdn_frontdoor_custom_domain, local.dns_zone_domain_name)
+  #} : {}
 
   # Storage Account
   enable_storage_account = local.enable_container_app_blob_storage || local.enable_container_app_file_share
@@ -466,55 +466,55 @@ locals {
 
   # Azure Front Door
   enable_cdn_frontdoor                   = var.enable_cdn_frontdoor
-  cdn_frontdoor_sku                      = var.cdn_frontdoor_sku
-  cdn_frontdoor_response_timeout         = var.cdn_frontdoor_response_timeout
-  cdn_frontdoor_custom_domains           = var.cdn_frontdoor_custom_domains
-  cdn_frontdoor_enable_waf_logs          = var.cdn_frontdoor_enable_waf_logs
-  cdn_frontdoor_enable_access_logs       = var.cdn_frontdoor_enable_access_logs
-  cdn_frontdoor_enable_health_probe_logs = var.cdn_frontdoor_enable_health_probe_logs
-  cdn_frontdoor_custom_domain_dns_names = local.enable_cdn_frontdoor && local.enable_dns_zone ? toset([
-    for domain in local.cdn_frontdoor_custom_domains : replace(domain, local.dns_zone_domain_name, "") if endswith(domain, local.dns_zone_domain_name)
-  ]) : []
-  cdn_frontdoor_custom_domains_create_dns_records = var.cdn_frontdoor_custom_domains_create_dns_records
-  cdn_frontdoor_origin_fqdn_override              = var.cdn_frontdoor_origin_fqdn_override != "" ? var.cdn_frontdoor_origin_fqdn_override : local.container_fqdn
-  cdn_frontdoor_origin_host_header_override       = var.cdn_frontdoor_origin_host_header_override != "" ? var.cdn_frontdoor_origin_host_header_override : null
-  cdn_frontdoor_origin_http_port                  = var.cdn_frontdoor_origin_http_port
-  cdn_frontdoor_origin_https_port                 = var.cdn_frontdoor_origin_https_port
-  cdn_frontdoor_forwarding_protocol               = var.cdn_frontdoor_forwarding_protocol
-  enable_cdn_frontdoor_health_probe               = var.enable_cdn_frontdoor_health_probe
-  cdn_frontdoor_health_probe_protocol             = var.cdn_frontdoor_health_probe_protocol
-  cdn_frontdoor_health_probe_interval             = var.cdn_frontdoor_health_probe_interval
-  cdn_frontdoor_health_probe_path                 = var.cdn_frontdoor_health_probe_path
-  cdn_frontdoor_health_probe_request_type         = var.cdn_frontdoor_health_probe_request_type
-  restrict_container_apps_to_cdn_inbound_only     = var.restrict_container_apps_to_cdn_inbound_only
-  restrict_container_apps_to_agw_inbound_only     = var.restrict_container_apps_to_agw_inbound_only
-  container_apps_allow_agw_resource               = var.container_apps_allow_agw_resource
-  container_apps_allow_agw_pip_resource_id        = length(data.azurerm_application_gateway.existing_agw) > 0 ? split("/", data.azurerm_application_gateway.existing_agw[0].frontend_ip_configuration[0].public_ip_address_id) : null
-  container_apps_allow_agw_ip                     = length(data.azurerm_application_gateway.existing_agw) > 0 ? data.azurerm_public_ip.existing_agw_ip[0].ip_address : ""
-  container_apps_allow_ips_inbound                = var.container_apps_allow_ips_inbound
-  cdn_frontdoor_host_redirects                    = var.cdn_frontdoor_host_redirects
-  cdn_frontdoor_host_add_response_headers         = var.cdn_frontdoor_host_add_response_headers
-  cdn_frontdoor_remove_response_headers           = var.cdn_frontdoor_remove_response_headers
-  ruleset_redirects_id                            = length(local.cdn_frontdoor_host_redirects) > 0 ? [azurerm_cdn_frontdoor_rule_set.redirects[0].id] : []
-  ruleset_add_response_headers_id                 = length(local.cdn_frontdoor_host_add_response_headers) > 0 ? [azurerm_cdn_frontdoor_rule_set.add_response_headers[0].id] : []
-  ruleset_remove_response_headers_id              = length(local.cdn_frontdoor_remove_response_headers) > 0 ? [azurerm_cdn_frontdoor_rule_set.remove_response_headers[0].id] : []
-  ruleset_vdp_id                                  = local.enable_cdn_frontdoor_vdp_redirects ? [azurerm_cdn_frontdoor_rule_set.vdp[0].id] : []
-  ruleset_ids = concat(
-    local.ruleset_redirects_id,
-    local.ruleset_add_response_headers_id,
-    local.ruleset_remove_response_headers_id,
-    local.ruleset_vdp_id
-  )
-  cdn_frontdoor_enable_rate_limiting              = var.cdn_frontdoor_enable_rate_limiting
-  cdn_frontdoor_rate_limiting_duration_in_minutes = var.cdn_frontdoor_rate_limiting_duration_in_minutes
-  cdn_frontdoor_rate_limiting_threshold           = var.cdn_frontdoor_rate_limiting_threshold
-  cdn_frontdoor_enable_waf                        = local.enable_cdn_frontdoor && local.cdn_frontdoor_enable_rate_limiting
-  cdn_frontdoor_waf_mode                          = var.cdn_frontdoor_waf_mode
-  cdn_frontdoor_waf_custom_rules                  = var.cdn_frontdoor_waf_custom_rules
-  cdn_frontdoor_waf_managed_rulesets              = var.cdn_frontdoor_waf_managed_rulesets
-  cdn_frontdoor_rate_limiting_bypass_ip_list      = var.cdn_frontdoor_rate_limiting_bypass_ip_list
-  enable_cdn_frontdoor_vdp_redirects              = var.enable_cdn_frontdoor_vdp_redirects
-  cdn_frontdoor_vdp_destination_hostname          = var.cdn_frontdoor_vdp_destination_hostname
+  #  cdn_frontdoor_sku                      = var.cdn_frontdoor_sku
+  #  cdn_frontdoor_response_timeout         = var.cdn_frontdoor_response_timeout
+  #  cdn_frontdoor_custom_domains           = var.cdn_frontdoor_custom_domains
+  #  cdn_frontdoor_enable_waf_logs          = var.cdn_frontdoor_enable_waf_logs
+  #  cdn_frontdoor_enable_access_logs       = var.cdn_frontdoor_enable_access_logs
+  #  cdn_frontdoor_enable_health_probe_logs = var.cdn_frontdoor_enable_health_probe_logs
+  #  cdn_frontdoor_custom_domain_dns_names = local.enable_cdn_frontdoor && local.enable_dns_zone ? toset([
+  #    for domain in local.cdn_frontdoor_custom_domains : replace(domain, local.dns_zone_domain_name, "") if endswith(domain, local.dns_zone_domain_name)
+  #  ]) : []
+  #  cdn_frontdoor_custom_domains_create_dns_records = var.cdn_frontdoor_custom_domains_create_dns_records
+  #  cdn_frontdoor_origin_fqdn_override              = var.cdn_frontdoor_origin_fqdn_override != "" ? var.cdn_frontdoor_origin_fqdn_override : local.container_fqdn
+  #  cdn_frontdoor_origin_host_header_override       = var.cdn_frontdoor_origin_host_header_override != "" ? var.cdn_frontdoor_origin_host_header_override : null
+  #  cdn_frontdoor_origin_http_port                  = var.cdn_frontdoor_origin_http_port
+  #  cdn_frontdoor_origin_https_port                 = var.cdn_frontdoor_origin_https_port
+  #  cdn_frontdoor_forwarding_protocol               = var.cdn_frontdoor_forwarding_protocol
+  #  enable_cdn_frontdoor_health_probe               = var.enable_cdn_frontdoor_health_probe
+  #  cdn_frontdoor_health_probe_protocol             = var.cdn_frontdoor_health_probe_protocol
+  #  cdn_frontdoor_health_probe_interval             = var.cdn_frontdoor_health_probe_interval
+  #  cdn_frontdoor_health_probe_path                 = var.cdn_frontdoor_health_probe_path
+  #  cdn_frontdoor_health_probe_request_type         = var.cdn_frontdoor_health_probe_request_type
+  #  restrict_container_apps_to_cdn_inbound_only     = var.restrict_container_apps_to_cdn_inbound_only
+  #  restrict_container_apps_to_agw_inbound_only     = var.restrict_container_apps_to_agw_inbound_only
+  #  container_apps_allow_agw_resource               = var.container_apps_allow_agw_resource
+  #  container_apps_allow_agw_pip_resource_id        = length(data.azurerm_application_gateway.existing_agw) > 0 ? split("/", data.azurerm_application_gateway.existing_agw[0].frontend_ip_configuration[0].public_ip_address_id) : null
+  #  container_apps_allow_agw_ip                     = length(data.azurerm_application_gateway.existing_agw) > 0 ? data.azurerm_public_ip.existing_agw_ip[0].ip_address : ""
+  #  container_apps_allow_ips_inbound                = var.container_apps_allow_ips_inbound
+  #  cdn_frontdoor_host_redirects                    = var.cdn_frontdoor_host_redirects
+  #  cdn_frontdoor_host_add_response_headers         = var.cdn_frontdoor_host_add_response_headers
+  #  cdn_frontdoor_remove_response_headers           = var.cdn_frontdoor_remove_response_headers
+  #  ruleset_redirects_id                            = length(local.cdn_frontdoor_host_redirects) > 0 ? [azurerm_cdn_frontdoor_rule_set.redirects[0].id] : []
+  #  ruleset_add_response_headers_id                 = length(local.cdn_frontdoor_host_add_response_headers) > 0 ? [azurerm_cdn_frontdoor_rule_set.add_response_headers[0].id] : []
+  #  ruleset_remove_response_headers_id              = length(local.cdn_frontdoor_remove_response_headers) > 0 ? [azurerm_cdn_frontdoor_rule_set.remove_response_headers[0].id] : []
+  #  ruleset_vdp_id                                  = local.enable_cdn_frontdoor_vdp_redirects ? [azurerm_cdn_frontdoor_rule_set.vdp[0].id] : []
+  #  ruleset_ids = concat(
+  #    local.ruleset_redirects_id,
+  #    local.ruleset_add_response_headers_id,
+  #    local.ruleset_remove_response_headers_id,
+  #    local.ruleset_vdp_id
+  #  )
+  #  cdn_frontdoor_enable_rate_limiting              = var.cdn_frontdoor_enable_rate_limiting
+  #  cdn_frontdoor_rate_limiting_duration_in_minutes = var.cdn_frontdoor_rate_limiting_duration_in_minutes
+  #  cdn_frontdoor_rate_limiting_threshold           = var.cdn_frontdoor_rate_limiting_threshold
+  #  cdn_frontdoor_enable_waf                        = local.enable_cdn_frontdoor && local.cdn_frontdoor_enable_rate_limiting
+  #  cdn_frontdoor_waf_mode                          = var.cdn_frontdoor_waf_mode
+  #  cdn_frontdoor_waf_custom_rules                  = var.cdn_frontdoor_waf_custom_rules
+  #  cdn_frontdoor_waazurerm_cdn_frontdoorf_managed_rulesets              = var.cdn_frontdoor_waf_managed_rulesets
+  #  cdn_frontdoor_rate_limiting_bypass_ip_list      = var.cdn_frontdoor_rate_limiting_bypass_ip_list
+  #  enable_cdn_frontdoor_vdp_redirects              = var.enable_cdn_frontdoor_vdp_redirects
+  #  cdn_frontdoor_vdp_destination_hostname          = var.cdn_frontdoor_vdp_destination_hostname
 
   # Event Hub
   enable_event_hub                          = var.enable_event_hub
@@ -535,9 +535,7 @@ locals {
   logic_app_workflow_callback_url = local.existing_logic_app_workflow.name == "" ? "" : data.azapi_resource_action.existing_logic_app_workflow_callback_url[0].output.value
   monitor_email_receivers         = var.monitor_email_receivers
   monitor_endpoint_healthcheck    = var.monitor_endpoint_healthcheck
-  monitor_http_availability_fqdn = var.monitor_http_availability_fqdn == "" ? local.enable_cdn_frontdoor ? (
-    length(local.cdn_frontdoor_custom_domains) >= 1 ? local.cdn_frontdoor_custom_domains[0] : azurerm_cdn_frontdoor_endpoint.endpoint[0].host_name
-  ) : local.container_fqdn : var.monitor_http_availability_fqdn
+  monitor_http_availability_fqdn = var.monitor_http_availability_fqdn == "" ? local.container_fqdn : var.monitor_http_availability_fqdn
   monitor_http_availability_url  = "https://${local.monitor_http_availability_fqdn}${local.monitor_endpoint_healthcheck}"
   monitor_http_availability_verb = var.monitor_http_availability_verb
   monitor_default_container      = { "default" = azurerm_container_app.container_apps["main"] }

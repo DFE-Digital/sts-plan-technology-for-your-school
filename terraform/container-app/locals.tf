@@ -21,8 +21,8 @@ locals {
   # what we create directly in app-rg in order to control the name. we assume if DR we have already made one. using a try breaks the pipeline.
   existing_resource_group = local.is_dr ? local.resource_prefix : ""
   # this will be the existing one if exists otherwise what main-hosting creates.
-  #resource_group = try(azurerm_resource_group.app_rg[0], module.main_hosting.azurerm_resource_group_default)
-  #resource_group_name = resource_group.name
+  resource_group = try(azurerm_resource_group.app_rg[0], module.main_hosting.azurerm_resource_group_default)
+  resource_group_name = resource_group.name
   #######################
   # Container Registry #
   #######################
