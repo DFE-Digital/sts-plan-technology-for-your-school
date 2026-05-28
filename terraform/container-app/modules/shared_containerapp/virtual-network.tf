@@ -39,22 +39,15 @@ resource "azurerm_subnet" "container_apps_infra_subnet" {
   service_endpoints    = local.container_apps_infra_subnet_service_endpoints
 
   delegation {
+    name = "AzureContainerAppEnvironments"
 
-    content {
-      name = "AzureContainerAppEnvironments"
-
-      service_delegation {
-        name = "Microsoft.App/environments"
-        actions = [
-          "Microsoft.Network/virtualNetworks/subnets/join/action"
-        ]
-      }
+    service_delegation {
+      name = "Microsoft.App/environments"
+      actions = [
+        "Microsoft.Network/virtualNetworks/subnets/join/action"
+      ]
     }
   }
-
-  depends_on = [
-    local.virtual_network
-  ]
 }
 
 resource "azurerm_subnet_route_table_association" "container_apps_infra_subnet" {

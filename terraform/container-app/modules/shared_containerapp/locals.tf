@@ -71,16 +71,6 @@ locals {
       private_zone_id : azurerm_private_dns_zone.mssql_private_link[0].id,
     }
   } : {}
-  enable_private_endpoint_postgres = local.enable_postgresql_database && local.launch_in_vnet && local.postgresql_network_connectivity_method == "private" ? true : false
-  private_endpoint_postgres = local.enable_private_endpoint_postgres ? {
-    "postgres" : {
-      resource_group : local.resource_group,
-      subnet_id : azurerm_subnet.postgresql_subnet[0].id,
-      resource_id : azurerm_postgresql_flexible_server.default[0].id,
-      subresource_names : ["postgresqlServer"],
-      private_zone_id : azurerm_private_dns_zone.postgresql_private_link[0].id,
-    }
-  } : {}
   enable_private_endpoint_registry = local.registry_sku == "Premium" ? true : false
   private_endpoint_registry = local.enable_private_endpoint_registry ? {
     "registry" : {
@@ -486,12 +476,12 @@ locals {
   #  cdn_frontdoor_health_probe_interval             = var.cdn_frontdoor_health_probe_interval
   #  cdn_frontdoor_health_probe_path                 = var.cdn_frontdoor_health_probe_path
   #  cdn_frontdoor_health_probe_request_type         = var.cdn_frontdoor_health_probe_request_type
-  #  restrict_container_apps_to_cdn_inbound_only     = var.restrict_container_apps_to_cdn_inbound_only
-  #  restrict_container_apps_to_agw_inbound_only     = var.restrict_container_apps_to_agw_inbound_only
-  #  container_apps_allow_agw_resource               = var.container_apps_allow_agw_resource
-  #  container_apps_allow_agw_pip_resource_id        = length(data.azurerm_application_gateway.existing_agw) > 0 ? split("/", data.azurerm_application_gateway.existing_agw[0].frontend_ip_configuration[0].public_ip_address_id) : null
-  #  container_apps_allow_agw_ip                     = length(data.azurerm_application_gateway.existing_agw) > 0 ? data.azurerm_public_ip.existing_agw_ip[0].ip_address : ""
-  #  container_apps_allow_ips_inbound                = var.container_apps_allow_ips_inbound
+restrict_container_apps_to_cdn_inbound_only     = var.restrict_container_apps_to_cdn_inbound_only
+restrict_container_apps_to_agw_inbound_only     = var.restrict_container_apps_to_agw_inbound_only
+container_apps_allow_agw_resource               = var.container_apps_allow_agw_resource
+container_apps_allow_agw_pip_resource_id        = length(data.azurerm_application_gateway.existing_agw) > 0 ? split("/", data.azurerm_application_gateway.existing_agw[0].frontend_ip_configuration[0].public_ip_address_id) : null
+container_apps_allow_agw_ip                     = length(data.azurerm_application_gateway.existing_agw) > 0 ? data.azurerm_public_ip.existing_agw_ip[0].ip_address : ""
+container_apps_allow_ips_inbound                = var.container_apps_allow_ips_inbound
   #  cdn_frontdoor_host_redirects                    = var.cdn_frontdoor_host_redirects
   #  cdn_frontdoor_host_add_response_headers         = var.cdn_frontdoor_host_add_response_headers
   #  cdn_frontdoor_remove_response_headers           = var.cdn_frontdoor_remove_response_headers
