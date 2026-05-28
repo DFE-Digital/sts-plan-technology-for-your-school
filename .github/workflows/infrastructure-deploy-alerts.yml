@@ -13,7 +13,7 @@ on:
   #     - 300872-email-alerts-terraform
 env:
   TF_WORKING_DIRECTORY: terraform/alerts
-  ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
+  ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
 
 permissions:
   id-token: write
@@ -24,7 +24,7 @@ jobs:
     name: Terraform Apply
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
     permissions:
       id-token: write
       contents: read
@@ -92,6 +92,7 @@ jobs:
             -var-file="terraform.tfvars.json" \
             -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
             -var="environment_github=${{env.ENVIRONMENT}}"
+            -var="az_tag_environment=${{env.ENVIRONMENT}}"
 
       - name: Whitelist Runner for TF storage
         uses: ./.github/actions/whitelist-storage
