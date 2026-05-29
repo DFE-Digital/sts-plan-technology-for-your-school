@@ -1,9 +1,12 @@
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
@@ -12,6 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
@@ -28,7 +32,8 @@ public class GroupsViewBuilderTests
         IEstablishmentService? est = null,
         IGroupService? group = null,
         ICurrentUser? currentUser = null,
-        ILogger<BaseViewBuilder>? logger = null
+        ILogger<GroupsViewBuilder>? logger = null,
+        ISubmissionService? submissionService = null
     )
     {
         contactOpts ??= Opt();
@@ -36,7 +41,8 @@ public class GroupsViewBuilderTests
         est ??= Substitute.For<IEstablishmentService>();
         group ??= Substitute.For<IGroupService>();
         currentUser ??= Substitute.For<ICurrentUser>();
-        logger ??= NullLogger<BaseViewBuilder>.Instance;
+        logger ??= NullLogger<GroupsViewBuilder>.Instance;
+        submissionService ??= Substitute.For<ISubmissionService>();
 
         // Set up test scenario: A MAT/Group user who needs to select a school
         // User Organisation (the MAT/Group they belong to)
@@ -56,7 +62,7 @@ public class GroupsViewBuilderTests
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
         // GroupSelectedSchoolUrn not set
 
-        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est, group);
+        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est, group, submissionService);
     }
 
     private static QuestionnaireCategoryEntry MakeCategory(
@@ -89,15 +95,17 @@ public class GroupsViewBuilderTests
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
         var current = Substitute.For<ICurrentUser>();
+        var submissionService = Substitute.For<ISubmissionService>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<GroupsViewBuilder>.Instance,
                 null!,
                 contentful,
                 current,
                 est,
-                group
+                group,
+                submissionService
             )
         );
     }
@@ -110,15 +118,17 @@ public class GroupsViewBuilderTests
         var current = Substitute.For<ICurrentUser>();
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
+        var submissionService = Substitute.For<ISubmissionService>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
-                NullLogger<BaseViewBuilder>.Instance,
+                NullLogger<GroupsViewBuilder>.Instance,
                 opts,
                 contentful,
                 current,
                 null!,
-                group
+                group,
+                submissionService
             )
         );
     }
@@ -343,6 +353,83 @@ public class GroupsViewBuilderTests
                     ids.SequenceEqual(new[] { 10, 20 })
                 )
             );
+    }
+
+    [Fact]
+    public async Task RouteToViewInProgressAnswers_WhenSubmissionInProgress_ReturnsView()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var submissionService = Substitute.For<ISubmissionService>();
+        var currentUser = Substitute.For<ICurrentUser>();
+
+        currentUser.GetActiveEstablishmentIdAsync().Returns(100);
+        currentUser.GroupSelectedSchoolName.Returns("Test School");
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Name = "Cyber security processes",
+            Questions =
+            [
+                new QuestionnaireQuestionEntry
+            {
+                Sys = new SystemDetails("question-1")
+            }
+            ]
+        };
+
+        contentful.GetSectionBySlugAsync("cyber-security-processes").Returns(section);
+
+        var submission = new SubmissionResponsesModel(
+           1,
+           [
+               new QuestionWithAnswerModel
+               {
+                    QuestionSysId = "question-1",
+                    QuestionText = "Question 1",
+                    AnswerText = "Answer 1",
+                    Order = 1
+               }
+           ])
+        {
+            DateCreated = new DateTime(2026, 1, 1)
+        };
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: submission,
+            status: SubmissionStatus.InProgress
+        );
+
+        submissionService
+            .GetSubmissionRoutingDataAsync(100, section, SubmissionStatus.InProgress)
+            .Returns(routingData);
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            currentUser: currentUser,
+            submissionService: submissionService
+        );
+
+        var controller = new TestController();
+
+        var result = await sut.RouteToViewInProgressAnswers(
+            controller,
+            "cyber-security-standard",
+            "cyber-security-processes"
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+
+        Assert.Equal(ReviewAnswersViewBuilder.ViewAnswersViewName, view.ViewName);
+
+        var model = Assert.IsType<ViewAnswersViewModel>(view.Model);
+
+        Assert.True(model.IsMatInProgressView);
+        Assert.Equal("Test School", model.SchoolName);
+        Assert.Equal(1, model.QuestionsAnswered);
+        Assert.Equal(1, model.TotalQuestions);
+        Assert.True(model.ShowInProgressDisclaimer);
     }
 
     [Fact]

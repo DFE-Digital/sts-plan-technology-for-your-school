@@ -10,5 +10,11 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string selectedEstablishmentUrn,
             string selectedEstablishmentName
         );
+
+        Task<IActionResult> RouteToViewInProgressAnswers(
+            Controller controller,
+            string categorySlug,
+            string sectionSlug
+        );
     }
 }
