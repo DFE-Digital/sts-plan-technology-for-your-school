@@ -5,9 +5,16 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
     public interface IGroupsViewBuilder
     {
         Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller);
+        Task<IActionResult> RouteToSelectASelfAssessmentViewModelAsync(Controller controller);
         Task RecordGroupSelectionAsync(
             string selectedEstablishmentUrn,
             string selectedEstablishmentName
+        );
+
+        Task<IActionResult> RouteToViewInProgressAnswers(
+            Controller controller,
+            string categorySlug,
+            string sectionSlug
         );
     }
 }
