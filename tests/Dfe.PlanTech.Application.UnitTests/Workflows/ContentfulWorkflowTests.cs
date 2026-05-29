@@ -14,6 +14,7 @@ public class ContentfulWorkflowTests
     private readonly ILogger<ContentfulWorkflow> _logger = Substitute.For<
         ILogger<ContentfulWorkflow>
     >();
+
     private readonly IContentfulRepository _repo = Substitute.For<IContentfulRepository>();
     private readonly GetPageFromContentfulOptions _pageOpts = new() { Include = 4 };
 
@@ -144,6 +145,36 @@ public class ContentfulWorkflowTests
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
             sut.GetAllSectionsAsync()
+        );
+    }
+
+    // ---------- GetAllCategoriesAsync ----------
+    [Fact]
+    public async Task GetAllCategories_Returns()
+    {
+        var sut = CreateServiceUnderTest();
+        var secs = new List<QuestionnaireCategoryEntry> { new() { Sys = new SystemDetails("S1") } };
+        _repo
+            .GetEntriesAsync<QuestionnaireCategoryEntry>(Arg.Any<GetEntriesOptions>())
+            .Returns(secs);
+
+        var result = await sut.GetAllCategoriesAsync();
+
+        Assert.Equal(secs, result);
+    }
+
+    [Fact]
+    public async Task GetAllCategories_When_RepoThrows_Wraps()
+    {
+        var sut = CreateServiceUnderTest();
+        _repo
+            .GetEntriesAsync<QuestionnaireCategoryEntry>(Arg.Any<GetEntriesOptions>())
+            .Returns<Task<IEnumerable<QuestionnaireCategoryEntry>>>(_ =>
+                throw new Exception("boom")
+            );
+
+        await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.GetAllCategoriesAsync()
         );
     }
 

@@ -70,5 +70,33 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             var redirect = Assert.IsType<RedirectResult>(result);
             Assert.Equal(UrlConstants.HomePage, redirect.Url);
         }
+
+        [Theory]
+        [InlineData(null, "cyber-security-processes")]
+        [InlineData("cyber-security-standard", null)]
+        public async Task ViewInProgressAnswers_WithNullSlugs_ThrowsArgumentNullException(
+        string? categorySlug,
+        string? sectionSlug
+        )
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.ViewInProgressAnswers(categorySlug!, sectionSlug!)
+            );
+        }
+
+        [Theory]
+        [InlineData("", "cyber-security-processes")]
+        [InlineData(" ", "cyber-security-processes")]
+        [InlineData("cyber-security-standard", "")]
+        [InlineData("cyber-security-standard", " ")]
+        public async Task ViewInProgressAnswers_WithEmptySlugs_ThrowsArgumentException(
+            string? categorySlug,
+            string? sectionSlug
+        )
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _controller.ViewInProgressAnswers(categorySlug!, sectionSlug!)
+            );
+        }
     }
 }
