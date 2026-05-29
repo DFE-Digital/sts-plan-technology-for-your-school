@@ -44,7 +44,7 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"trust/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.ViewAnswersSlug}"
+        $"school/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.ViewAnswersSlug}"
     )]
     public async Task<IActionResult> ViewInProgressAnswers(
         string categorySlug,
