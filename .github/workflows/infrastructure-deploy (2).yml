@@ -25,6 +25,9 @@ on:
       - disaster-recovery-e2e-terraform
 
 env:
+  ARM_CLIENT_ID: ${{ secrets.az_client_id }}
+  ARM_TENANT_ID: ${{ secrets.az_tenant_id }}
+  ARM_SUBSCRIPTION_ID: ${{ secrets.az_subscription_id }}
   ARM_USE_OIDC: true
   TF_BACKEND_CONTAINER_NAME: tfstate
   TF_BACKEND_KEY: terraform.tfstate
