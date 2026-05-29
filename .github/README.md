@@ -11,7 +11,7 @@ These workflows run automatically on pull requests:
 | `code-pr-check.yml` | PR | Builds solution, runs unit tests, pushes results to SonarCloud |
 | `terraform-pr-check.yml` | PR / push | Init, plan, format check, lint, security scan, posts plan to PR |
 | `build-web-assets.yml` | PR | Builds JS + CSS assets and commits any changes back to the branch |
-| `e2e-tests.yml` | PR / manual | Runs Cypress E2E tests |
+| `e2e-test-smoke-local.yml` | Manual | Playwright smoke tests against a local instance |
 | `qa-viz-tests.yml` | PR / manual | Runs qa-visualiser lint and unit tests |
 | `validate-scripts.yml` | PR / push / manual | Validates SQL migration scripts |
 | `verify-checks-running.yml` | PR | Confirms that required status checks are executing |
@@ -43,7 +43,6 @@ Environments: **Dev**, **Test**, **Staging**, **Production**. Dev and Test deplo
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `e2e-tests.yml` | PR / manual | Cypress E2E tests (original suite) |
 | `e2e-test-playwright.yml` | Manual | Playwright E2E regression tests against a local instance |
 | `e2e-test-playwright-environment.yml` | Manual / called | Playwright E2E regression tests against a named environment |
 | `e2e-test-smoke-local.yml` | Manual | Playwright smoke tests against a local instance |
