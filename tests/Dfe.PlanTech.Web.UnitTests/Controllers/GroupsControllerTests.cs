@@ -55,6 +55,20 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
+        public async Task GetSelectSchoolsToAssessViewModelAsync_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "some-category";
+            var sectionSlug = "some-section";
+
+            _viewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(_controller, categorySlug, sectionSlug).Returns(new OkResult());
+
+            var result = await _controller.GetSelectSchoolsToAssessView(categorySlug, sectionSlug);
+
+            await _viewBuilder.Received(1).RouteToSelectSchoolsToAssessViewModelAsync(_controller, categorySlug, sectionSlug);
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
         public async Task SelectSchool_RecordsSelectionAndRedirects()
         {
             var schoolUrn = "123456";
