@@ -12,4 +12,13 @@ public class ViewAnswersViewModel
     public List<QuestionWithAnswerModel> Responses { get; set; } = [];
     public string CategorySlug { get; set; } = string.Empty;
     public string SectionSlug { get; set; } = string.Empty;
+    public bool IsMatInProgressView { get; set; }
+    public string BackLinkHref { get; set; } = "/";
+    public string? SchoolName { get; set; }
+    public string? StartedBySchoolName { get; set; }
+    public DateTime? DateStarted { get; set; }
+    public int QuestionsAnswered { get; set; }
+    public int TotalQuestions { get; set; }
+    public bool ShowInProgressDisclaimer { get; set; }
+    public string BackButtonText { get; set; } = string.Empty;
 }

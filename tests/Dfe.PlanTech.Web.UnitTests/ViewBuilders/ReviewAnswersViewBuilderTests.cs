@@ -19,7 +19,7 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
 public class ReviewAnswersViewBuilderTests
 {
-    private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
+    private readonly ILogger<ReviewAnswersViewBuilder> _logger = Substitute.For<ILogger<ReviewAnswersViewBuilder>>();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
