@@ -9,6 +9,7 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class GroupsController : BaseController<GroupsController>
 {
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
+    public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
 
     private readonly ICurrentUser _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;
@@ -32,6 +33,15 @@ public class GroupsController : BaseController<GroupsController>
     public async Task<IActionResult> GetSelectASchoolView()
     {
         return await _groupsViewBuilder.RouteToSelectASchoolViewModelAsync(this);
+    }
+
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{UrlConstants.GroupSelfAssessmentSelectionSlug}",
+        Name = GetSelectASelfAssessmentAction
+    )]
+    public async Task<IActionResult> GetSelectASelfAssessment()
+    {
+        return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
     }
 
     [HttpPost($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}")]

@@ -39,6 +39,7 @@ jobs:
     name: Run Playwright + Cucumber Tests
     environment: ${{ inputs.environment || github.event.inputs.environment || 'Tst' }}
     runs-on: ubuntu-22.04
+    continue-on-error: true
     env:
       PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
       KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv

@@ -82,20 +82,10 @@ jobs:
       - name: Install requirements
         run: uv sync
 
-      - name: Install playwright with webkit
-        run: uv run playwright install --with-deps webkit
-
       - name: Fetch data and update database
         run: uv run python main.py ${{ inputs.skip_gias_validation && '--skip-validation' || '' }}
         env:
           CONNECTION_STRING_PLANTECH_GIAS_UPDATE: ${{ steps.get-connection-string.outputs.secret_value }}
-
-      - name: Upload debug screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-screenshots
-          path: ./utils/update-gias-data/downloads/*.png
 
         ## Always run this step to ensure cleanup, even if previous steps fail
       - name: Remove IP from Key Vault

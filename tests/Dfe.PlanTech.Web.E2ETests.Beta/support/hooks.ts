@@ -103,7 +103,7 @@ Before(async function (scenario: ITestCaseHookParameter) {
     if (!(keyFromTag in MAT_SCHOOLS)) {
       throw new Error(
         `Unknown school key "${keyFromTag}" in tag ${schoolTag.name}. ` +
-          `Expected one of: ${Object.keys(MAT_SCHOOLS).join(', ')}`,
+        `Expected one of: ${Object.keys(MAT_SCHOOLS).join(', ')}`,
       );
     }
 
@@ -113,9 +113,24 @@ Before(async function (scenario: ITestCaseHookParameter) {
       console.log(`Auto-selecting school: ${this.selectedSchool.NAME}`);
 
       await this.page.goto(`${process.env.URL}home`);
+      
+      try {
+        await this.page.getByRole('button', {
+          name: this.selectedSchool.NAME,
+        }).click();
+      } catch {
+        const alternateSchoolName = this.selectedSchool.NAME.includes('Miscellanenous')
+          ? this.selectedSchool.NAME.replace('Miscellanenous', 'Miscellaneous')
+          : this.selectedSchool.NAME.replace('Miscellaneous', 'Miscellanenous');
 
-      await this.page.getByRole('button', { name: this.selectedSchool.NAME }).click();
+        if (alternateSchoolName === this.selectedSchool.NAME) {
+          throw new Error(`Could not find school button: ${this.selectedSchool.NAME}`);
+        }
 
+        await this.page.getByRole('button', {
+          name: alternateSchoolName,
+        }).click();
+      }
       console.log(`Navigated to dashboard for: ${this.selectedSchool.NAME}`);
     }
 
@@ -187,7 +202,7 @@ After(async function (scenario: ITestCaseHookParameter) {
 AfterAll(async () => {
   try {
     if (browser) {
-      await Promise.all(browser.contexts().map((c) => c.close().catch(() => {})));
+      await Promise.all(browser.contexts().map((c) => c.close().catch(() => { })));
       await browser.close();
     }
   } catch (e) {

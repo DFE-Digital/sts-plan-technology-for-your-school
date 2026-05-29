@@ -24,6 +24,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<IQuestionService, QuestionService>()
             .AddScoped<IRecommendationService, RecommendationService>()
             .AddScoped<ISubmissionService, SubmissionService>()
+            .AddScoped<IGroupService, GroupService>()
             .AddScoped<IUserService, UserService>();
     }
 
@@ -41,6 +42,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<ISignInWorkflow, SignInWorkflow>()
             .AddScoped<IRecommendationWorkflow, RecommendationWorkflow>()
             .AddScoped<ISubmissionWorkflow, SubmissionWorkflow>()
+            .AddScoped<IGroupWorkflow, GroupWorkflow>()
             .AddScoped<IUserWorkflow, UserWorkflow>();
     }
 

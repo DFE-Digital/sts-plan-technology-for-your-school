@@ -24,6 +24,7 @@ public static class UrlConstants
     public const string ViewAnswersSlug = "view-answers";
 
     public const string GroupsSelectionPageSlug = "select-a-school";
+    public const string GroupSelfAssessmentSelectionSlug = "select-a-self-assessment";
     public const string GroupsSlug = "groups";
 
     public const string Home = "home";
