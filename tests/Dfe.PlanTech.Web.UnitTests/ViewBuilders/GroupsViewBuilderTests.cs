@@ -104,7 +104,7 @@ public class GroupsViewBuilderTests
                 contentful,
                 current,
                 est,
-                group
+                group,
                 submissionService
             )
         );
@@ -127,7 +127,7 @@ public class GroupsViewBuilderTests
                 contentful,
                 current,
                 null!,
-                group
+                group,
                 submissionService
             )
         );

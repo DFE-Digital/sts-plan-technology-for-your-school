@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -20,7 +21,8 @@ public class GroupsViewBuilder(
     IContentfulService contentfulService,
     ICurrentUser currentUser,
     IEstablishmentService establishmentService,
-    ISubmissionService submissionService
+    IGroupService groupService,
+    ISubmissionService submissionService   
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService =
@@ -28,6 +30,9 @@ public class GroupsViewBuilder(
 
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+
+    private readonly IGroupService _groupService =
+        groupService ?? throw new ArgumentNullException(nameof(groupService));
 
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
