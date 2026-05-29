@@ -10,6 +10,7 @@ public class GroupsController : BaseController<GroupsController>
 {
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
     public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
+    public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssess";
 
     private readonly ICurrentUser _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;
@@ -51,5 +52,17 @@ public class GroupsController : BaseController<GroupsController>
         _currentUser.SetGroupSelectedSchool(schoolUrn, schoolName);
 
         return Redirect(UrlConstants.HomePage);
+    }
+
+    [HttpGet(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
+        Name = GetSelectSchoolsToAssessAction
+    )]
+    public async Task<IActionResult> GetSelectSchoolsToAssessView(string categorySlug, string sectionSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+
+        return await _groupsViewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(this, categorySlug, sectionSlug);
     }
 }
