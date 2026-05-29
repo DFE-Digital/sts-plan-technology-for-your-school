@@ -10,5 +10,10 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string selectedEstablishmentUrn,
             string selectedEstablishmentName
         );
+        Task<IActionResult> RouteToSelectSchoolsToAssessViewModelAsync(
+            Controller controller,
+            string categorySlug,
+            string sectionSlug
+        );
     }
 }

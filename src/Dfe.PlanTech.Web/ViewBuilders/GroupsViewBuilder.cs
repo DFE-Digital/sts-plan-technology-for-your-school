@@ -30,6 +30,7 @@ public class GroupsViewBuilder(
 
     private const string SelectASchoolViewName = "GroupsSelectSchool";
     private const string SelectASelfAssessmentViewName = "GroupsSelectSelfAssessment";
+    private const string SelectSchoolsToAssessViewName = "GroupSelectSchoolsToAssess";
 
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
@@ -140,6 +141,28 @@ public class GroupsViewBuilder(
         };
 
         return controller.View(SelectASelfAssessmentViewName, viewModel);
+    }
+
+    public async Task<IActionResult> RouteToSelectSchoolsToAssessViewModelAsync(
+        Controller controller,
+        string categorySlug,
+        string sectionSlug
+    )
+    {
+        var establishmentId = GetUserOrganisationIdOrThrowException();
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find topic for slug '{UrlConstants.GroupsSelectionPageSlug}'"
+            );
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel
+        {
+
+        };
+
+        return controller.View(SelectSchoolsToAssessViewName, viewModel);
     }
 
     public async Task RecordGroupSelectionAsync(
