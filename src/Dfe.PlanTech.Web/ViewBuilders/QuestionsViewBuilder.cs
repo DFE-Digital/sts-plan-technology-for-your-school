@@ -247,7 +247,7 @@ public class QuestionsViewBuilder(
     string categorySlug,
     string sectionSlug,
     QuestionnaireSectionEntry section
-)
+    )
     {
         var groupId = CurrentUser.UserOrganisationId
             ?? throw new InvalidDataException(
@@ -255,7 +255,8 @@ public class QuestionsViewBuilder(
             );
 
         var schools =
-            await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
+                await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId)
+                ?? [];
 
         var rows = new List<TrustSchoolAssessmentRowViewModel>();
 
@@ -272,14 +273,17 @@ public class QuestionsViewBuilder(
                     [SubmissionStatus.InProgress]
                 );
 
+            var hasSubmission = submission is not null;
+
             rows.Add(new TrustSchoolAssessmentRowViewModel
             {
                 SchoolName = school.EstablishmentName,
-                Status = submission is null
-                    ? SubmissionStatus.NotStarted
-                    : SubmissionStatus.InProgress,
-                ViewAnswersHref =
-                        $"/school/{categorySlug}/{sectionSlug}/self-assessment/view-answers?schoolUrn={school.Urn}"
+                Status = hasSubmission
+                ? SubmissionStatus.InProgress
+                : SubmissionStatus.NotStarted,
+                ViewAnswersHref = hasSubmission
+                ? $"/school/{categorySlug}/{sectionSlug}/self-assessment/view-answers?schoolUrn={school.Urn}"
+                : null
             });
         }
 

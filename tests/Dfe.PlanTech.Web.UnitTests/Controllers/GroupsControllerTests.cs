@@ -103,5 +103,36 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 _controller.ViewInProgressAnswers(categorySlug!, sectionSlug!, schoolUrn!)
             );
         }
+
+        [Fact]
+        public async Task GetSelectASelfAssessment_CallsViewBuilderAndReturnsResult()
+        {
+            _viewBuilder.RouteToSelectASelfAssessmentViewModelAsync(_controller).Returns(new OkResult());
+
+            var result = await _controller.GetSelectASelfAssessment();
+
+            await _viewBuilder.Received(1).RouteToSelectASelfAssessmentViewModelAsync(_controller);
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task ViewInProgressAnswers_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cyber-security-standard";
+            var sectionSlug = "cyber-security-processes";
+            var schoolUrn = "900006";
+
+            _viewBuilder
+                .RouteToViewInProgressAnswers(_controller, categorySlug, sectionSlug, schoolUrn)
+                .Returns(new OkResult());
+
+            var result = await _controller.ViewInProgressAnswers(categorySlug, sectionSlug, schoolUrn);
+
+            await _viewBuilder
+                .Received(1)
+                .RouteToViewInProgressAnswers(_controller, categorySlug, sectionSlug, schoolUrn);
+
+            Assert.IsType<OkResult>(result);
+        }
     }
 }
