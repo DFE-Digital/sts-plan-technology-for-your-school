@@ -29,6 +29,7 @@ public class QuestionsViewBuilderTests
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly IQuestionService _questionSvc = Substitute.For<IQuestionService>();
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
+    private readonly IEstablishmentService _establishmentSvc = Substitute.For<IEstablishmentService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
 
     // Options
@@ -57,7 +58,8 @@ public class QuestionsViewBuilderTests
             _errorMessages,
             _contentfulOptions,
             _questionSvc,
-            _submissionSvc
+            _submissionSvc,
+            _establishmentSvc
         );
 
     private static Controller MakeControllerWithTempData()
@@ -159,7 +161,15 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
         var page = new PageEntry { Slug = "section-slug", SectionTitle = "Interstitial" };
+        var section = new QuestionnaireSectionEntry
+        {
+            InternalName = "Section name",
+            Name = "Section name",
+            ShortDescription = "Short description",
+            Questions = []
+        };
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
+        _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
         // Act
         var result = await sut.RouteToInterstitialPage(controller, "cat", "section-slug");

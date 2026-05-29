@@ -170,10 +170,10 @@ public class QuestionsViewBuilder(
         };
 
         var section =
-                await ContentfulService.GetSectionBySlugAsync(sectionSlug)
-                ?? throw new ContentfulDataUnavailableException(
-                    $"Could not find section for slug {sectionSlug}"
-    );
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
 
         if (CurrentUser.IsMat)
         {

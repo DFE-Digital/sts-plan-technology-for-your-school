@@ -361,9 +361,15 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var submissionService = Substitute.For<ISubmissionService>();
         var currentUser = Substitute.For<ICurrentUser>();
+        var est = Substitute.For<IEstablishmentService>();
 
-        currentUser.GetActiveEstablishmentIdAsync().Returns(100);
-        currentUser.GroupSelectedSchoolName.Returns("Test School");
+        est.GetEstablishmentByReferenceAsync("900006")
+            .Returns(new SqlEstablishmentDto
+            {
+                Id = 100,
+                OrgName = "Test School",
+                EstablishmentRef = "900006"
+            });
 
         var section = new QuestionnaireSectionEntry
         {
@@ -406,17 +412,19 @@ public class GroupsViewBuilderTests
             .Returns(routingData);
 
         var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            currentUser: currentUser,
-            submissionService: submissionService
-        );
+          contentful: contentful,
+          est: est,
+          currentUser: currentUser,
+          submissionService: submissionService
+      );
 
         var controller = new TestController();
 
         var result = await sut.RouteToViewInProgressAnswers(
             controller,
             "cyber-security-standard",
-            "cyber-security-processes"
+            "cyber-security-processes",
+            "900006"
         );
 
         var view = Assert.IsType<ViewResult>(result);
