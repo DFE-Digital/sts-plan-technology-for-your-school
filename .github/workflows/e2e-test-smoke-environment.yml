@@ -7,8 +7,8 @@ on:
         description: Which app environment to run against?
         required: true
         type: choice
-        options: [ "Dev", "Tst", "StagingUnprotected", "Staging" ]
-        default: "Tst"
+        options: ['Dev', 'Tst', 'StagingUnprotected', 'Staging']
+        default: 'Tst'
       use_mock_auth:
         description: Use mock auth
         required: false
@@ -25,7 +25,7 @@ on:
         default: false
 
 concurrency:
-  group: "${{ github.workflow }}"
+  group: '${{ github.workflow }}'
   cancel-in-progress: false
 
 env:
@@ -41,8 +41,8 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
-      KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
-      RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv
+      RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
       SQL_IP_NAME: e2e-tests-pr
       MOCK_AUTH_MODE: ${{ inputs.use_mock_auth && 'true' || 'false' }}
 
@@ -130,7 +130,7 @@ jobs:
 
             az containerapp update \
               --name ${{ secrets.AZ_ACA_NAME }} \
-              --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
+              --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }} \
               --set-env-vars \
               AutomatedTesting__Contentful__IncludeTaggedContent=true \
               AutomatedTesting__MockAuthentication__ClientSecret="${MOCK_AUTH_CLIENT_SECRET}" \
@@ -158,16 +158,16 @@ jobs:
           URL: ${{ secrets.APP_URL }}
           DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
           DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
-          DSI_SCHOOL_ESTABLISHMENT_REF: "900008"
+          DSI_SCHOOL_ESTABLISHMENT_REF: '900008'
           DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
           DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
-          DSI_MAT_SCHOOL_ESTABLISHMENT_REF: "900007"
+          DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '900007'
           DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
           DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
           DB_SERVER: ${{ secrets.AZ_DB_SERVER }}
           DB_MODE: azure
           DB_USER: sa
-          DB_DATABASE: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-sqldb
+          DB_DATABASE: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-sqldb
           HEADLESS: true
           NODE_ICU_DATA: ./node_modules/full-icu
           LANG: en_GB.UTF-8
@@ -261,12 +261,12 @@ jobs:
 
             az containerapp update \
               --name ${{ secrets.AZ_ACA_NAME }} \
-              --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }} \
+              --resource-group ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }} \
               --set-env-vars AutomatedTesting__Contentful__IncludeTaggedContent=false \
               $REMOVE_VARS
 
       - name: Flush Redis Cache
         uses: ./.github/actions/flush-redis-cache
         with:
-          az_redis_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          az_resource_group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          az_redis_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
+          az_resource_group: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
