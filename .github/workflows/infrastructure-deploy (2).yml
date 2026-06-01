@@ -272,72 +272,72 @@ jobs:
 
             terraform apply -auto-approve -input=false tfplanmh
 
-  #     - name: Apply Terraform changes - rest of app
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-  #       run: |
-  #         terraform plan -input=false \
-  #           -var-file="../../normalisedTerraformVars.tfvars" \
-  #           -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-  #           -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-  #           -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
-  #           -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
-  #           -var="azure_location=northeurope" \
-  #           -out=tfplanapp
+      - name: Apply Terraform changes - rest of app
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform plan -input=false \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
+            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
+            -var="azure_location=northeurope" \
+            -out=tfplanapp
 
-  #           terraform show -no-color tfplanapp || true
+            terraform show -no-color tfplanapp || true
 
-  #           terraform apply -auto-approve -input=false tfplanapp
+            terraform apply -auto-approve -input=false tfplanapp
 
-  # restore-db:
-  #   name: Restore DB from BACPAC
-  #   needs: [apply-terraform]
-  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-  #   permissions:
-  #     id-token: write
-  #     contents: read
+  restore-db:
+    name: Restore DB from BACPAC
+    needs: [apply-terraform]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Prepare derived variables
-  #       id: vars
-  #       shell: bash
-  #       run: |
-  #         set -euo pipefail
+      - name: Prepare derived variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
 
-  #         IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
+          IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
 
-  #         if [ "$IS_DR" = "true" ]; then
-  #           DFE_PROJECT_NAME="pt-dr"
-  #         else
-  #           DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-  #         fi
+          if [ "$IS_DR" = "true" ]; then
+            DFE_PROJECT_NAME="pt-dr"
+          else
+            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+          fi
 
-  #         RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-backup"
-  #         RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+          RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-backup"
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
 
-  #         echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
 
-  #     - name: Login with AZ
-  #       uses: ./.github/actions/azure-login
-  #       with:
-  #         az_tenant_id: ${{ secrets.az_tenant_id }}
-  #         az_subscription_id: ${{ secrets.az_subscription_id }}
-  #         az_client_id: ${{ secrets.az_client_id }}
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.az_tenant_id }}
+          az_subscription_id: ${{ secrets.az_subscription_id }}
+          az_client_id: ${{ secrets.az_client_id }}
 
-  #     - name: Restore DB from BACPAC
-  #       uses: ./.github/actions/restore-db-from-bacpac
-  #       with:
-  #         resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
-  #         sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}
-  #         target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}-sqldb
-  #         storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
-  #         container_name: ${{ env.BACKUP_CONTAINER_NAME }}
-  #         bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
-  #         bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
-  #         use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
+      - name: Restore DB from BACPAC
+        uses: ./.github/actions/restore-db-from-bacpac
+        with:
+          resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
+          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}
+          target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}-sqldb
+          storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
+          container_name: ${{ env.BACKUP_CONTAINER_NAME }}
+          bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
+          bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
+          use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
