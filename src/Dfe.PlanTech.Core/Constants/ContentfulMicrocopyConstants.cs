@@ -64,6 +64,14 @@ public static class ContentfulMicrocopyConstants
     public const string GroupsSelectRecommendationCount = "matCount";
     public const string GroupsSelectContactUs = "matContact";
 
+    public const string GroupsSelectSchoolsToAssessHeader = "msmSelectHeader";
+    public const string GroupsSelectSchoolsToAssessBackLink = "msmSelectBack";
+    public const string GroupsSelectSchoolsToAssessHint = "msmSelectHint";
+    public const string GroupsSelectSchoolsToAssessSchoolHint = "msmSelectSchoolHint";
+    public const string GroupsSelectSchoolsToAssessCheckboxAll = "msmSelectCheckboxAll";
+    public const string GroupsSelectSchoolsToAssessWarning = "msmSelectWarning";
+    public const string GroupsSelectSchoolsToAssessContinue = "msmSelectSchoolContinue";
+
     // Fallback text
     private const string EmptyFallback = "";
 
@@ -103,6 +111,12 @@ public static class ContentfulMicrocopyConstants
     private const string ContinueAnswersHeaderFallback = "Your self-assessment answers";
     private const string ContinueContinueButtonFallback = "Continue self-assessment";
     private const string ContinueRestartButtonFallback = "Restart self-assessment";
+
+    private const string GroupsSelectSchoolsToAssessBackLinkFallback = "Back";
+    private const string GroupsSelectSchoolsToAssessHeaderFallback = "Which schools do you want to submit the self-assessment for?";
+    private const string GroupsSelectSchoolsToAssessCheckboxAllFallback = "Submit self-assessment for all schools without a submission";
+    private const string GroupsSelectSchoolsToAssessWarningFallback = "Starting a new self-assessment will replace any previous answers.";
+    private const string GroupsSelectSchoolsToAssessContinueFallback = "Continue";
 
     public static readonly IReadOnlyDictionary<string, string> FallbackText = new Dictionary<
         string,
@@ -159,6 +173,13 @@ public static class ContentfulMicrocopyConstants
         { GroupsSelectHeader, GroupsSelectHeaderFallback },
         { GroupsSelectRecommendationCount, EmptyFallback },
         { GroupsSelectContactUs, EmptyFallback },
+        { GroupsSelectSchoolsToAssessBackLink, GroupsSelectSchoolsToAssessBackLinkFallback },
+        { GroupsSelectSchoolsToAssessHeader, GroupsSelectSchoolsToAssessHeaderFallback },
+        { GroupsSelectSchoolsToAssessHint, EmptyFallback },
+        { GroupsSelectSchoolsToAssessSchoolHint, EmptyFallback },
+        { GroupsSelectSchoolsToAssessCheckboxAll, GroupsSelectSchoolsToAssessCheckboxAllFallback },
+        { GroupsSelectSchoolsToAssessWarning, GroupsSelectSchoolsToAssessWarningFallback },
+        { GroupsSelectSchoolsToAssessContinue, GroupsSelectSchoolsToAssessContinueFallback }
     };
 
     internal static class VariableNames
@@ -207,5 +228,7 @@ public static class ContentfulMicrocopyConstants
         { CategoryPrintSectionCompleted, [VariableNames.Topic, VariableNames.DateCompleted] },
         { GroupsSelectRecommendationCount, [VariableNames.Count, VariableNames.Total] },
         { GroupsSelectContactUs, [VariableNames.ContactLink] },
+        { GroupsSelectSchoolsToAssessBackLink, [VariableNames.Topic] },
+        { GroupsSelectSchoolsToAssessSchoolHint, [VariableNames.DateUpdated] }
     };
 }
