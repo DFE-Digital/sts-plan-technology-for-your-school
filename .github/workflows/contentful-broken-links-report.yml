@@ -21,9 +21,9 @@ jobs:
     environment: ${{ inputs.environment || 'StagingUnprotected' }}
     name: Check broken links for ${{ inputs.environment || 'Staging' }}
     env:
-      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
-      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
       az_keyvault_contentful_space_id: contentful--spaceid
       az_keyvault_contentful_environment: contentful--environment
       az_keyvault_contentful_management_token: contentful--managementtoken
