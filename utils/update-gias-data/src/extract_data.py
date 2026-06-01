@@ -36,7 +36,7 @@ def _lookup(
     """
     cols = [input_code_col, input_name_col]
 
-    if not set([input_code_col, input_name_col]).issubset(cols):
+    if not set([input_code_col, input_name_col]).issubset(df.columns):
         raise ValueError(
             "Required columns %s must exist in the dataframe",
             [input_code_col, input_name_col],
@@ -93,18 +93,21 @@ def extract_gias_data() -> GiasData:
     edu = read_dataframe(get_latest_file_path("edubasealldata"))
     grp = read_dataframe(get_latest_file_path("allgroupsdata"))
     lnk = read_dataframe(get_latest_file_path("alllinksdata"))
+    map = read_dataframe(get_latest_file_path("links_edubasealldata"))
 
     logger.info(
-        "Loaded CSVs - alldata:%d groupsdata:%d linksdata:%d\n",
+        "Loaded CSVs - alldata:%d allgroups:%d alllinks:%d links:%d\n",
         len(edu),
         len(grp),
         len(lnk),
+        len(map),
     )
 
     logger.info("Extracting data")
     establishments = _establishments(edu)
     establishment_groups = _establishment_groups(grp)
     group_membership = _group_membership(lnk)
+    links = _links(map)
 
     establishment_statuses = _establishment_statuses(edu)
     genders = _genders(edu)
@@ -116,6 +119,7 @@ def extract_gias_data() -> GiasData:
     logger.info("Extracted data - establishments:%d", len(establishments))
     logger.info("Extracted data - establishmentGroups:%d", len(establishment_groups))
     logger.info("Extracted data - groupMembership:%d", len(group_membership))
+    logger.info("Extracted data - links:%d", len(links))
 
     logger.info(
         "Extracted data - establishmentStatuses:%d", len(establishment_statuses)
@@ -158,6 +162,19 @@ def extract_gias_data() -> GiasData:
         drop=True
     )
 
+    # Remove linkedUrns in links that aren't in establishments, as these would fail FK constraints
+    # and aren't useful without a corresponding establishment record.
+    # Log how many are dropped but don't raise an error.
+    orphaned_linked_urn = links["linkedUrn"].notna() & ~links["linkedUrn"].isin(
+        valid_urns
+    )
+    if orphaned_linked_urn.any():
+        logger.warning(
+            "Dropping %d linkedUrns not present in establishments from links",
+            int(orphaned_linked_urn.sum()),
+        )
+        links = links[~orphaned_linked_urn].reset_index(drop=True)
+
     return GiasData(
         establishments=establishments,
         establishment_groups=establishment_groups,
@@ -165,6 +182,7 @@ def extract_gias_data() -> GiasData:
         establishment_statuses=establishment_statuses,
         group_statuses=group_statuses,
         group_types=group_types,
+        links=links,
         genders=genders,
         local_authorities=local_authorities,
         phases=phases,
@@ -325,3 +343,28 @@ def _group_membership(lnk: pd.DataFrame) -> pd.DataFrame:
 
     logger.info("Group memberships: %d rows", len(memberships))
     return memberships.reset_index(drop=True)
+
+
+def _links(map: pd.DataFrame) -> pd.DataFrame:
+    cols = {
+        "URN": "urn",
+        "LinkURN": "linkedUrn",
+        "LinkType": "linkType",
+        "LinkEstablishedDate": "dateLinked",
+    }
+    out = map[list(cols)].rename(columns=cols).copy()
+
+    for col in (
+        "urn",
+        "linkedUrn",
+    ):
+        out[col] = _coerce_int(out[col])
+
+    out["dateLinked"] = pd.to_datetime(
+        out["dateLinked"], format="%d-%m-%Y", errors="coerce"
+    ).dt.date
+
+    # Blank → None for non-date dateLinked column
+    out["dateLinked"] = out["dateLinked"].where(out["dateLinked"].notnull(), None)
+
+    return out.dropna(subset=["urn"]).reset_index(drop=True)
