@@ -19,3 +19,4 @@ class GiasData:
 
     # Child tables
     group_membership: DataFrame
+    links: DataFrame
