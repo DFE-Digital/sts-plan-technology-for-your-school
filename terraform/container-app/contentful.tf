@@ -8,7 +8,7 @@
 resource "null_resource" "upsert_contentful_webhook" {
   triggers = {
     api_key_change         = azurerm_key_vault_secret.api_key.value
-    url_change             = azurerm_cdn_frontdoor_endpoint.app["container-app-url"].host_name
+    url_change             = local.cdn_hostname
     management_token       = var.contentful_management_token
     contentful_environment = azurerm_key_vault_secret.vault_secret_contentful_environment.value
     contentful_space       = azurerm_key_vault_secret.vault_secret_contentful_spaceid.value
