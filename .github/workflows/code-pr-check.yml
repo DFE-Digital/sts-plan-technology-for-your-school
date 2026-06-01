@@ -22,6 +22,10 @@ jobs:
   build-test-web-app:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
+    permissions:
+      checks: write
+      contents: read
+
     if: always()
 
     steps:
@@ -137,6 +141,9 @@ jobs:
   run-contentful-jest-tests:
     name: Run Jest Tests for Contentful
     runs-on: ubuntu-22.04
+    permissions:
+      checks: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
         with:
