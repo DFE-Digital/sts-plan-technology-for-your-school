@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.10" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
