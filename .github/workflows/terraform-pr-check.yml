@@ -151,7 +151,7 @@ jobs:
         run: terraform fmt -check -diff
 
       - name: Validate Terraform docs
-        uses: terraform-docs/gh-actions@v1.0.0
+        uses: terraform-docs/gh-actions@v1.4.1
         with:
           working-dir: ${{ env.TF_WORKING_DIRECTORY }}
           config-file: .terraform-docs.yml
@@ -225,6 +225,6 @@ jobs:
         uses: actions/checkout@v4
 
       - name: tfsec
-        uses: aquasecurity/tfsec-pr-commenter-action@v1.2.0
+        uses: aquasecurity/tfsec-pr-commenter-action@v1.3.1
         with:
           github_token: ${{ github.token }}
