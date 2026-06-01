@@ -35,7 +35,7 @@ env:
   TF_BACKEND_KEY: ${{ secrets.TF_BACKEND_KEY }}
   TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
 
-  TF_VAR_project_name: ${{ secrets.DFE_PROJECT_NAME }}
+  TF_VAR_project_name: ${{ vars.DFE_PROJECT_NAME }}
   TF_VAR_environment: ${{ secrets.AZ_ENVIRONMENT }}
   TF_VAR_azure_location: ${{ vars.AZ_LOCATION }}
   TF_VAR_az_app_kestrel_endpoint: ${{ vars.KESTRELENDPOINT }}
@@ -45,7 +45,7 @@ env:
   TF_VAR_az_sql_azuread_admin_username: ${{ secrets.AZ_SERVICE_PRINCIPAL }}
   TF_VAR_az_sql_admin_password: ${{secrets.AZ_SQL_ADMIN_PASSWORD}}
   TF_VAR_az_sql_azuread_admin_objectid: ${{ secrets.AZ_CLIENT_ID }}
-  TF_VAR_registry_server: 'ghcr.io/dfe-digital'
+  TF_VAR_registry_server: ${{ vars.CONTAINER_REGISTRY_GITHUB }}
   TF_VAR_image_tag: 'latest'
   TF_VAR_registry_username: ${{ github.repository_owner }}
   TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
