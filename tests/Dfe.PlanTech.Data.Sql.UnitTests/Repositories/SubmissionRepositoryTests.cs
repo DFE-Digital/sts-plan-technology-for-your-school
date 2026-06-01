@@ -102,15 +102,17 @@ public class SubmissionRepositoryTests
         Assert.Equal(SubmissionStatus.InProgress, clone.Status);
         Assert.InRange(clone.DateCreated, before, after);
 
+        Assert.NotNull(clone.CreatedUserActionId);
+        Assert.NotNull(clone.LastUpdatedUserActionId);
+
         var r = Assert.Single(clone.Responses);
         Assert.Equal(1, r.QuestionId);
         Assert.Equal(2, r.AnswerId);
         Assert.Equal(999, r.UserId);
-        Assert.Same(q, r.Question); // same navs copied
+        Assert.Same(q, r.Question);
         Assert.Same(a, r.Answer);
         Assert.InRange(r.DateCreated, before, after);
 
-        // persisted
         Assert.Equal(1, await db.Submissions.CountAsync(TestContext.Current.CancellationToken));
         Assert.Equal(1, await db.Responses.CountAsync(TestContext.Current.CancellationToken));
     }
@@ -135,7 +137,7 @@ public class SubmissionRepositoryTests
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
-        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [ SubmissionStatus.CompleteReviewed ]);
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [SubmissionStatus.CompleteReviewed]);
         Assert.Null(result);
     }
 
@@ -147,9 +149,10 @@ public class SubmissionRepositoryTests
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
-        var result = await Assert.ThrowsAsync<ArgumentException>(() => repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [])
-        );
-       
+        var result =
+            await Assert.ThrowsAsync<ArgumentException>(() => repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [])
+            );
+
         Assert.Contains("At least one submission status must be provided", result.Message);
     }
 
@@ -205,7 +208,8 @@ public class SubmissionRepositoryTests
 
         db.SaveChanges();
 
-        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]);
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC",
+            [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]);
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Id);
@@ -274,6 +278,168 @@ public class SubmissionRepositoryTests
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             repo.SetSubmissionInProgressAsync(establishmentId: 99, sectionId: "NA")
+        );
+    }
+
+    [Fact]
+    public async Task
+        GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync_Returns_Latest_Completed_NotDeleted_Submissions_Per_Establishment_And_Section()
+    {
+        using var db = BuildPlanTechDbContext(
+            nameof(
+                GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync_Returns_Latest_Completed_NotDeleted_Submissions_Per_Establishment_And_Section)
+        );
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
+
+        db.Establishments.AddRange(
+            new EstablishmentEntity { Id = 1 },
+            new EstablishmentEntity { Id = 2 },
+            new EstablishmentEntity { Id = 3 }
+        );
+
+        db.Submissions.AddRange(
+            // Establishment 1, Section B - older completed submission, should be excluded
+            new SubmissionEntity
+            {
+                Id = 1,
+                EstablishmentId = 1,
+                SectionId = "SEC-B",
+                SectionName = "Section B",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 1, 1),
+                DateCompleted = new DateTime(2024, 1, 1),
+                DateLastUpdated = new DateTime(2024, 1, 1),
+                Deleted = false,
+            },
+
+            // Establishment 1, Section B - latest valid completed submission, should be returned
+            new SubmissionEntity
+            {
+                Id = 2,
+                EstablishmentId = 1,
+                SectionId = "SEC-B",
+                SectionName = "Section B",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 2, 1),
+                DateCompleted = new DateTime(2024, 2, 1),
+                DateLastUpdated = new DateTime(2024, 2, 1),
+                Deleted = false,
+            },
+
+            // Establishment 1, Section A - different section, should also be returned
+            new SubmissionEntity
+            {
+                Id = 3,
+                EstablishmentId = 1,
+                SectionId = "SEC-A",
+                SectionName = "Section A",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 3, 1),
+                DateCompleted = new DateTime(2024, 3, 1),
+                DateLastUpdated = new DateTime(2024, 3, 1),
+                Deleted = false,
+            },
+
+            // Newer but deleted, should be excluded and should not replace Id 2
+            new SubmissionEntity
+            {
+                Id = 4,
+                EstablishmentId = 1,
+                SectionId = "SEC-B",
+                SectionName = "Section B",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 4, 1),
+                DateCompleted = new DateTime(2024, 4, 1),
+                DateLastUpdated = new DateTime(2024, 4, 1),
+                Deleted = true,
+            },
+
+            // CompleteReviewed but no DateCompleted, should be excluded
+            new SubmissionEntity
+            {
+                Id = 5,
+                EstablishmentId = 1,
+                SectionId = "SEC-C",
+                SectionName = "Section C",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 5, 1),
+                DateCompleted = null,
+                DateLastUpdated = new DateTime(2024, 5, 1),
+                Deleted = false,
+            },
+
+            // Not CompleteReviewed, should be excluded
+            new SubmissionEntity
+            {
+                Id = 6,
+                EstablishmentId = 1,
+                SectionId = "SEC-D",
+                SectionName = "Section D",
+                Status = SubmissionStatus.InProgress,
+                DateCreated = new DateTime(2024, 6, 1),
+                DateCompleted = new DateTime(2024, 6, 1),
+                DateLastUpdated = new DateTime(2024, 6, 1),
+                Deleted = false,
+            },
+
+            // Establishment 2, should be returned
+            new SubmissionEntity
+            {
+                Id = 7,
+                EstablishmentId = 2,
+                SectionId = "SEC-A",
+                SectionName = "Section A",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 7, 1),
+                DateCompleted = new DateTime(2024, 7, 1),
+                DateLastUpdated = new DateTime(2024, 7, 1),
+                Deleted = false,
+            },
+
+            // Establishment 3 is not requested, should be excluded
+            new SubmissionEntity
+            {
+                Id = 8,
+                EstablishmentId = 3,
+                SectionId = "SEC-A",
+                SectionName = "Section A",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 8, 1),
+                DateCompleted = new DateTime(2024, 8, 1),
+                DateLastUpdated = new DateTime(2024, 8, 1),
+                Deleted = false,
+            }
+        );
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var result = await repo.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+            [1, 1, 2]
+        );
+
+        Assert.Collection(
+            result,
+            submission =>
+            {
+                Assert.Equal(3, submission.Id);
+                Assert.Equal(1, submission.EstablishmentId);
+                Assert.Equal("SEC-A", submission.SectionId);
+                Assert.Equal("Section A", submission.SectionName);
+            },
+            submission =>
+            {
+                Assert.Equal(2, submission.Id);
+                Assert.Equal(1, submission.EstablishmentId);
+                Assert.Equal("SEC-B", submission.SectionId);
+                Assert.Equal("Section B", submission.SectionName);
+            },
+            submission =>
+            {
+                Assert.Equal(7, submission.Id);
+                Assert.Equal(2, submission.EstablishmentId);
+                Assert.Equal("SEC-A", submission.SectionId);
+                Assert.Equal("Section A", submission.SectionName);
+            }
         );
     }
 }

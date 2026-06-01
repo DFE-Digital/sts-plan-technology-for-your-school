@@ -12,26 +12,62 @@ Then('I should see the select a school heading', async function () {
 });
 
 Then('I should see the following schools:', async function (dataTable: DataTable) {
-  const schoolNames = dataTable.raw().flat(); // single column
+  const schoolRows = dataTable.raw().flat();
 
-  for (const schoolName of schoolNames) {
-    const button = this.page.getByRole('button', { name: schoolName });
-    await expect(button, `School button not visible: ${schoolName}`).toBeVisible();
+  for (const schoolRow of schoolRows) {
+    const possibleSchoolNames = schoolRow
+      .split(' OR ')
+      .map(name => name.trim());
+
+    let schoolFound = false;
+
+    for (const schoolName of possibleSchoolNames) {
+      const button = this.page.getByRole('button', { name: schoolName });
+
+      if (await button.isVisible().catch(() => false)) {
+        schoolFound = true;
+        break;
+      }
+    }
+
+    expect(
+      schoolFound,
+      `None of the expected school names were visible: ${possibleSchoolNames.join(', ')}`
+    ).toBe(true);
   }
 });
 
 Then('I should see the following school progress:', async function (dataTable: DataTable) {
   const rows = dataTable.hashes();
+
   for (const row of rows) {
-    const schoolName = row['School name'];
+    const possibleSchoolNames = row['School name']
+      .split(' OR ')
+      .map(name => name.trim());
 
-    const form = this.page.locator('form').filter({
-      has: this.page.getByRole('button', { name: schoolName }),
-    });
+    let matchingForm = null;
 
-    const progress = form.locator('p');
+    for (const schoolName of possibleSchoolNames) {
+      const form = this.page.locator('form').filter({
+        has: this.page.getByRole('button', { name: schoolName }),
+      });
 
-    await expect(progress).toContainText('recommendations completed or in progress');
+      if (await form.count() > 0) {
+        matchingForm = form;
+        break;
+      }
+    }
+
+    expect(
+      matchingForm,
+      `No matching school form found for: ${possibleSchoolNames.join(', ')}`
+    ).toBeTruthy();
+
+    const progress = matchingForm!.locator('p');
+
+    await expect(progress).toContainText(
+      'recommendations completed or in progress'
+    );
   }
 });
 

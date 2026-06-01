@@ -10,13 +10,13 @@ on:
         options: ['Dev', 'Tst', 'Staging', 'StagingUnprotected']
         default: 'Dev'
 
-  # pull_request:
-  #   branches: ['main', 'development']
-  #   paths:
-  #     - 'src/**'
-  #     - 'tests/Dfe.PlanTech.Web.E2ETests.Beta/**'
-  #     - '.github/workflows/e2e-tests-playwright.yml'
-  #     - '.gitmodules'
+  pull_request:
+    branches: ['main', 'development']
+    paths:
+      - 'src/**'
+      - 'tests/Dfe.PlanTech.Web.E2ETests.Beta/**'
+      - '.github/workflows/e2e-test-smoke-local.yml'
+      - '.gitmodules'
 
 concurrency:
   group: '${{ github.workflow }}'
@@ -35,8 +35,8 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       PROJECT_PATH: ./src/Dfe.PlanTech.Web/Dfe.PlanTech.Web.csproj
-      KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
-      RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      KEYVAULT_NAME: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv
+      RESOURCE_GROUP: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
       SQL_IP_NAME: e2e-tests-pr
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
@@ -187,30 +187,30 @@ jobs:
           echo "Web app did not become ready in time"
           exit 1
 
-            - name: Run Playwright + Cucumber tests (with recording)
-              working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
-              env:
-                  URL: https://localhost:8081/
-                  DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
-                  DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
-                  DSI_SCHOOL_ESTABLISHMENT_REF: '900008'
-                  DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
-                  DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
-                  DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '900007'
-                  DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
-                  DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
-                  DB_SERVER: localhost
-                  DB_MODE: sql
-                  DB_USER: sa
-                  DB_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
-                  DB_PORT: 1433
-                  DB_DATABASE: plantech-mock-db
-                  HEADLESS: true
-                  NODE_ICU_DATA: ./node_modules/full-icu
-                  LANG: en_GB.UTF-8
-                  LC_ALL: en_GB.UTF-8
-                  TZ: Europe/London
-              run: npm run test:login && npm run test:record:smoke
+      - name: Run Playwright + Cucumber tests (with recording)
+        working-directory: ./tests/Dfe.PlanTech.Web.E2ETests.Beta/
+        env:
+          URL: https://localhost:8081/
+          DSI_SCHOOL_EMAIL: ${{ secrets.DSI_SCHOOL_EMAIL }}
+          DSI_SCHOOL_PASSWORD: ${{ secrets.DSI_SCHOOL_PASSWORD }}
+          DSI_SCHOOL_ESTABLISHMENT_REF: '900008'
+          DSI_MAT_EMAIL: ${{ secrets.DSI_MAT_EMAIL }}
+          DSI_MAT_PASSWORD: ${{ secrets.DSI_MAT_PASSWORD }}
+          DSI_MAT_SCHOOL_ESTABLISHMENT_REF: '900007'
+          DSI_NOORG_EMAIL: ${{ secrets.DSI_NOORG_EMAIL }}
+          DSI_NOORG_PASSWORD: ${{ secrets.DSI_NOORG_PASSWORD }}
+          DB_SERVER: localhost
+          DB_MODE: sql
+          DB_USER: sa
+          DB_PASSWORD: ${{ secrets.E2E_SQL_SA_PASSWORD }}
+          DB_PORT: 1433
+          DB_DATABASE: plantech-mock-db
+          HEADLESS: true
+          NODE_ICU_DATA: ./node_modules/full-icu
+          LANG: en_GB.UTF-8
+          LC_ALL: en_GB.UTF-8
+          TZ: Europe/London
+        run: npm run test:login && npm run test:record:smoke
 
       - name: Summarise Cucumber results
         if: always()
