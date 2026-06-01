@@ -1,13 +1,14 @@
-data "azurerm_cdn_frontdoor_endpoint" "app" {
-  name                = "${local.resource_prefix}-container-app-url"
-  profile_name        = "${local.resource_prefix}-cdnwaf"
-  resource_group_name = local.resource_prefix
-}
+#use data block if this tf runsin a separate tfstate/run to the waf files creating the cdn.
+#data "azurerm_cdn_frontdoor_endpoint" "app" {
+#  name                = "${local.resource_prefix}-container-app-url"
+#  profile_name        = "${local.resource_prefix}-cdnwaf"
+#  resource_group_name = local.resource_prefix
+#}
 
 resource "null_resource" "upsert_contentful_webhook" {
   triggers = {
     api_key_change         = azurerm_key_vault_secret.api_key.value
-    url_change             = data.azurerm_cdn_frontdoor_endpoint.app.host_name
+    url_change             = azurerm_cdn_frontdoor_endpoint.app["container-app-url"].host_name
     management_token       = var.contentful_management_token
     contentful_environment = azurerm_key_vault_secret.vault_secret_contentful_environment.value
     contentful_space       = azurerm_key_vault_secret.vault_secret_contentful_spaceid.value
