@@ -199,7 +199,7 @@ locals {
     }
   }
 
-  cdn_hostname = azurerm_cdn_frontdoor_endpoint.app["container-app-url"].host_name
+  cdn_hostname = module.waf.frontdoor_endpoint_host_name
   ####################x
   # Storage Accounts #
   ####################
