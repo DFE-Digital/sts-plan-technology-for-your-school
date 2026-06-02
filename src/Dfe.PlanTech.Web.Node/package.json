@@ -4,7 +4,6 @@
   "description": "DFE PlanTech Web Application",
   "type": "module",
   "scripts": {
-    "gulp": "gulp",
     "build": "node esbuild.config.js",
     "lint": "eslint"
   },

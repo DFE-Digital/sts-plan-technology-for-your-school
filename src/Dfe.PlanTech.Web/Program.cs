@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
@@ -76,6 +77,8 @@ builder.Services.AddScoped<IUserActionIdAccessor, UserActionIdAccessor>();
 builder.Services.AddScoped<IUserActionTrackingService, UserActionTrackingService>();
 
 var app = builder.Build();
+
+ContentComponentJsonExtensions.ValidateContentfulTypeMapping();
 
 app.UseRobotsTxtMiddleware();
 
