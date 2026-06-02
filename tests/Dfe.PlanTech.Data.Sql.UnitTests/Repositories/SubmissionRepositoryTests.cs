@@ -442,4 +442,219 @@ public class SubmissionRepositoryTests
             }
         );
     }
+
+    [Fact]
+    public async Task
+        GetLatestSubmissionPerEstablishmentForSectionAsync_Returns_Latest_Submission_Any_Status_Per_Establishment_And_Section()
+    {
+        using var db = BuildPlanTechDbContext(
+            nameof(GetLatestSubmissionPerEstablishmentForSectionAsync_Returns_Latest_Submission_Any_Status_Per_Establishment_And_Section)
+        );
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
+
+        db.Establishments.AddRange(
+            new EstablishmentEntity { Id = 1 },
+            new EstablishmentEntity { Id = 2 },
+            new EstablishmentEntity { Id = 3 },
+            new EstablishmentEntity { Id = 4 },
+            new EstablishmentEntity { Id = 5 },
+            new EstablishmentEntity { Id = 7 },
+            new EstablishmentEntity { Id = 8 },
+            new EstablishmentEntity { Id = 9 }
+        );
+
+        // Establishment 1 - 3 submissions, one older, one newer but deleted - return the middle (InProgress)
+        // Establishment 2 - 1 submission, status Obsolete - return
+        // Establishment 3 - 1 submission, status Inaccessible - return
+        // Establishment 4 - 1 submission for another section - exclude
+        // Establishment 5 - no submissions
+        // Establishment 6 - not in group - exclude
+        // Establishment 7 - 1 submission, status CompleteNotReviewed - return
+        // Establishment 8 - 1 submission, status CompletedReviewed - return
+        // Establishment 9 - 1 submission, status is None - return
+        db.Submissions.AddRange(
+            // Exclude
+            new SubmissionEntity
+            {
+                Id = 1,
+                EstablishmentId = 1,
+                SectionId = "sec1",
+                SectionName = "Section 1",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 1, 1),
+                DateCompleted = new DateTime(2024, 1, 1),
+                DateLastUpdated = new DateTime(2024, 1, 1),
+                Deleted = false,
+            },
+            // Include
+            new SubmissionEntity
+            {
+                Id = 2,
+                EstablishmentId = 1,
+                SectionId = "sec1",
+                SectionName = "Section 1",
+                Status = SubmissionStatus.InProgress,
+                DateCreated = new DateTime(2024, 2, 1),
+                DateLastUpdated = new DateTime(2024, 2, 1),
+                Deleted = false,
+            },
+            // Exclude
+            new SubmissionEntity
+            {
+                Id = 3,
+                EstablishmentId = 1,
+                SectionId = "sec1",
+                SectionName = "Section 1",
+                Status = SubmissionStatus.InProgress,
+                DateCreated = new DateTime(2024, 4, 1),
+                DateLastUpdated = new DateTime(2024, 4, 1),
+                Deleted = true,
+            },
+            // Include
+            new SubmissionEntity
+            {
+                Id = 4,
+                EstablishmentId = 2,
+                SectionId = "sec1",
+                SectionName = "Section 1",
+                Status = SubmissionStatus.Obsolete,
+                DateCreated = new DateTime(2024, 3, 1),
+                DateLastUpdated = new DateTime(2024, 3, 1),
+                Deleted = false,
+            },
+            // Include
+            new SubmissionEntity
+            {
+                Id = 5,
+                EstablishmentId = 3,
+                SectionId = "sec1",
+                SectionName = "Section 1",
+                Status = SubmissionStatus.Inaccessible,
+                DateCreated = new DateTime(2024, 5, 1),
+                DateLastUpdated = new DateTime(2024, 5, 1),
+                Deleted = false,
+            },
+            // Exclude
+            new SubmissionEntity
+            {
+                Id = 6,
+                EstablishmentId = 4,
+                SectionId = "sec2",
+                SectionName = "Section 2",
+                Status = SubmissionStatus.InProgress,
+                DateCreated = new DateTime(2024, 6, 1),
+                DateLastUpdated = new DateTime(2024, 6, 1),
+                Deleted = false,
+            },
+            // Exclude
+            new SubmissionEntity
+            {
+                Id = 8,
+                EstablishmentId = 6,
+                SectionId = "sec1",
+                SectionName = "Section 1",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 8, 1),
+                DateCompleted = new DateTime(2024, 8, 1),
+                DateLastUpdated = new DateTime(2024, 8, 1),
+                Deleted = false,
+            },
+            // Include
+            new SubmissionEntity
+            {
+                Id = 9,
+                EstablishmentId = 7,
+                SectionId = "sec1",
+                SectionName = "Section 1",
+                Status = SubmissionStatus.CompleteNotReviewed,
+                DateCreated = new DateTime(2024, 6, 1),
+                DateCompleted = new DateTime(2024, 6, 1),
+                DateLastUpdated = new DateTime(2024, 6, 1),
+                Deleted = false,
+            },
+            // Include
+            new SubmissionEntity
+            {
+                Id = 10,
+                EstablishmentId = 8,
+                SectionId = "sec1",
+                SectionName = "Section 1",
+                Status = SubmissionStatus.CompleteReviewed,
+                DateCreated = new DateTime(2024, 8, 1),
+                DateCompleted = new DateTime(2024, 8, 1),
+                DateLastUpdated = new DateTime(2024, 8, 1),
+                Deleted = false,
+            },
+            new SubmissionEntity
+            {
+                Id = 11,
+                EstablishmentId = 9,
+                SectionId = "sec1",
+                SectionName = "Section 1",
+                Status = SubmissionStatus.None,
+                DateCreated = new DateTime(2024, 8, 1),
+                DateCompleted = new DateTime(2024, 8, 1),
+                DateLastUpdated = new DateTime(2024, 8, 1),
+                Deleted = false,
+            }
+        );
+
+        await db.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var result = await repo.GetLatestSubmissionPerEstablishmentForSectionAsync(
+            [1, 2, 3, 4, 5, 7, 8, 9], "sec1"
+        );
+
+        Assert.Collection(
+            result,
+            submission =>
+            {
+                Assert.Equal(2, submission.Id);
+                Assert.Equal(1, submission.EstablishmentId);
+                Assert.Equal("sec1", submission.SectionId);
+                Assert.Equal("Section 1", submission.SectionName);
+                Assert.Equal(SubmissionStatus.InProgress, submission.Status);
+            },
+            submission =>
+            {
+                Assert.Equal(4, submission.Id);
+                Assert.Equal(2, submission.EstablishmentId);
+                Assert.Equal("sec1", submission.SectionId);
+                Assert.Equal("Section 1", submission.SectionName);
+                Assert.Equal(SubmissionStatus.Obsolete, submission.Status);
+            },
+            submission =>
+            {
+                Assert.Equal(5, submission.Id);
+                Assert.Equal(3, submission.EstablishmentId);
+                Assert.Equal("sec1", submission.SectionId);
+                Assert.Equal("Section 1", submission.SectionName);
+                Assert.Equal(SubmissionStatus.Inaccessible, submission.Status);
+            },
+            submission =>
+            {
+                Assert.Equal(9, submission.Id);
+                Assert.Equal(7, submission.EstablishmentId);
+                Assert.Equal("sec1", submission.SectionId);
+                Assert.Equal("Section 1", submission.SectionName);
+                Assert.Equal(SubmissionStatus.CompleteNotReviewed, submission.Status);
+            },
+            submission =>
+            {
+                Assert.Equal(10, submission.Id);
+                Assert.Equal(8, submission.EstablishmentId);
+                Assert.Equal("sec1", submission.SectionId);
+                Assert.Equal("Section 1", submission.SectionName);
+                Assert.Equal(SubmissionStatus.CompleteReviewed, submission.Status);
+            },
+            submission =>
+            {
+                Assert.Equal(11, submission.Id);
+                Assert.Equal(9, submission.EstablishmentId);
+                Assert.Equal("sec1", submission.SectionId);
+                Assert.Equal("Section 1", submission.SectionName);
+                Assert.Equal(SubmissionStatus.None, submission.Status);
+            }
+        );
+    }
 }
