@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.ObjectModel;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Workflows;
@@ -131,6 +132,192 @@ public class GroupWorkflowTests
         await _submissionRepository
             .Received(1)
             .GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(establishmentIds);
+    }
+
+    [Fact]
+    public async Task GetGroupSubmissionInformationForSection_CallsSubmissionRepository()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var establishmentIds = new[] { 1, 2, 3 };
+        var sectionId = "sec1";
+
+        _submissionRepository
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
+            .Returns(new List<SubmissionEntity>());
+
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+
+        await _submissionRepository
+            .Received(1)
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId);
+    }
+
+    [Fact]
+    public async Task GetGroupSubmissionInformationForSection_ReturnsSubmissionInformationModelsForAllSchools()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var establishmentIds = new[] { 1, 2, 3, 4 };
+        var sectionId = "sec1";
+
+        var submissions = new List<SubmissionEntity>
+        {
+            BuildSubmission(
+                id: 100,
+                establishmentId: 1,
+                sectionId
+            ),
+            BuildSubmission(
+                id: 200,
+                establishmentId: 2,
+                sectionId
+            ),
+        };
+
+        _submissionRepository
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
+            .Returns(submissions);
+
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+
+        Assert.NotNull(result);
+        Assert.Equal(4, result.Count);
+
+        Assert.Collection(
+            result,
+            submission =>
+            {
+                Assert.Equal(1, submission.EstablishmentId);
+            },
+            submission =>
+            {
+                Assert.Equal(2, submission.EstablishmentId);
+            }, submission =>
+            {
+                Assert.Equal(3, submission.EstablishmentId);
+            }, submission =>
+            {
+                Assert.Equal(4, submission.EstablishmentId);
+            }
+        );
+    }
+
+    [Fact]
+    public async Task GetGroupSubmissionInformationForSection_ReturnsNotStartedWhereNoSubmissionExistsForSchool()
+    {
+        var sut = CreateServiceUnderTest();
+
+        var establishmentIds = new[] { 1, 2 };
+        var sectionId = "sec1";
+
+        var submissions = new List<SubmissionEntity>
+        {
+            BuildSubmission(
+                id: 200,
+                establishmentId: 2,
+                sectionId,
+                status: SubmissionStatus.InProgress
+            ),
+        };
+
+        _submissionRepository
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
+            .Returns(submissions);
+
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+
+        Assert.Collection(
+            result,
+            submission =>
+            {
+                Assert.Equal(1, submission.EstablishmentId);
+                Assert.Equal(sectionId, submission.SectionId);
+                Assert.Equal(SubmissionStatus.NotStarted, submission.Status);
+            },
+            submission =>
+            {
+                Assert.Equal(200, submission.SubmissionId);
+                Assert.Equal(2, submission.EstablishmentId);
+                Assert.Equal(sectionId, submission.SectionId);
+                Assert.Equal(SubmissionStatus.InProgress, submission.Status);
+            }
+        );
+    }
+
+    [Fact]
+    public async Task GetGroupSubmissionInformationForSection_ReturnsCorrectSubmissionInfo()
+    { 
+        var sut = CreateServiceUnderTest();
+
+        var establishmentIds = new[] { 1, 2 };
+        var sectionId = "sec1";
+        var sectionName = "Section 1";
+
+        var submission1 = new SubmissionEntity()
+        {
+            Id = 100,
+            EstablishmentId = 1,
+            SectionId = sectionId,
+            SectionName = sectionName,
+            Status = SubmissionStatus.InProgress,
+            DateCreated = new DateTime(2025, 1, 1),
+            DateLastUpdated = new DateTime(2025, 2, 1)
+        };
+
+        var submission2 = new SubmissionEntity()
+        {
+            Id = 200,
+            EstablishmentId = 2,
+            SectionId = sectionId,
+            SectionName = sectionName,
+            Status = SubmissionStatus.CompleteReviewed,
+            DateCreated = new DateTime(2025, 3, 1),
+            DateLastUpdated = new DateTime(2025, 4, 1),
+            DateCompleted = new DateTime(2025, 5, 1)
+        };
+
+
+        var submissions = new List<SubmissionEntity>
+        {
+            submission1,
+            submission2
+        };
+
+        _submissionRepository
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
+            .Returns(submissions);
+
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+
+        Assert.Collection(
+            result,
+            submission =>
+            {
+                Assert.Equal(100, submission.SubmissionId);
+                Assert.Equal(1, submission.EstablishmentId);
+                Assert.Equal(sectionId, submission.SectionId);
+                Assert.Equal(SubmissionStatus.InProgress, submission.Status);
+                Assert.Equal(new DateTime(2025, 1, 1), submission.DateCreated);
+                Assert.Equal(new DateTime(2025, 2, 1), submission.DateLastUpdated);
+            },
+            submission =>
+            {
+                Assert.Equal(200, submission.SubmissionId);
+                Assert.Equal(2, submission.EstablishmentId);
+                Assert.Equal(sectionId, submission.SectionId);
+                Assert.Equal(SubmissionStatus.CompleteReviewed, submission.Status);
+                Assert.Equal(new DateTime(2025, 3, 1), submission.DateCreated);
+                Assert.Equal(new DateTime(2025, 4, 1), submission.DateLastUpdated);
+                Assert.Equal(new DateTime(2025, 5, 1), submission.DateCompleted);
+            }
+        );
     }
 
     [Fact]
