@@ -16,7 +16,7 @@ module "main_hosting" {
   # Networking configuration
   ############################################
   #having both true prevents the public IP issue by forcing creation of internal load balancer
-  # Deploy container apps inside a VNet
+  # Deploy container apps & db inside a VNet
   launch_in_vnet = local.launch_in_vnet
   container_app_environment_internal_load_balancer_enabled = local.container_app_environment_internal_load_balancer_enabled
 
@@ -47,7 +47,7 @@ module "main_hosting" {
   #############
   # Azure SQL #
   #############
-  enable_mssql_database              = true
+  enable_mssql_database              = local.shared_module_enable_mssql_database
   mssql_database_name                = "${local.resource_prefix}-sqldb"
   #needs to be true with firewall rules to match "selected networks"
   mssql_server_public_access_enabled = true
@@ -55,9 +55,7 @@ module "main_hosting" {
   mssql_azuread_admin_username       = local.az_sql_azuread_admin_username
   mssql_azuread_admin_object_id      = local.az_sql_azuread_admin_objectid
   mssql_azuread_auth_only            = local.az_use_azure_ad_auth_only
-
-  #this would be true, but there's an issue with their code assigning the right Principal id so we do it instead
-  #mssql_managed_identity_assign_role = false
+  mssql_managed_identity_assign_role = true
   #not in v1.2
   #enable_mssql_extended_auditing_policy = false
 
