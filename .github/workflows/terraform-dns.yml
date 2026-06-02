@@ -26,7 +26,7 @@ env:
   TF_BACKEND_KEY: 'terraform-dns.tfstate'
   TF_BACKEND_RESOURCE_GROUP: ${{ secrets.TF_BACKEND_RESOURCE_GROUP }}
 
-  TF_VAR_project_name: ${{ secrets.DFE_PROJECT_NAME }}
+  TF_VAR_project_name: ${{ vars.DFE_PROJECT_NAME }}
   TF_VAR_environment: ${{ secrets.AZ_ENVIRONMENT }}
   TF_VAR_azure_location: ${{ vars.AZ_LOCATION }}
   TF_VAR_primary_fqdn: 'plan-technology-for-your-school.education.gov.uk'

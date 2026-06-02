@@ -16,7 +16,7 @@ dependencies = [
 [tool.ruff.lint]
 extend-select = ["I"]
 
-[tool.uv]
-dev-dependencies = [
+[dependency-groups]
+dev = [
     "ruff>=0.8.4",
 ]

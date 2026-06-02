@@ -61,6 +61,7 @@ REQUIRED_TABLES: tuple[str, ...] = (
     "gias.gender",
     "gias.groupStatus",
     "gias.groupType",
+    "gias.links",
     "gias.localAuthority",
     "gias.phase",
 )
@@ -127,6 +128,11 @@ def validate_structural_integrity(data: GiasData) -> None:
         ["urn", "groupUid"],
         "group_membership",
     )
+    _check_no_nulls(
+        data.links,
+        ["urn", "linkedUrn"],
+        "links",
+    )
 
     fk_checks = [
         # child, child_col, parent, parent_col, label
@@ -185,6 +191,20 @@ def validate_structural_integrity(data: GiasData) -> None:
             data.establishment_groups,
             "groupUid",
             "group_membership -> establishment_groups",
+        ),
+        (
+            data.links,
+            "urn",
+            data.establishments,
+            "urn",
+            "links -> establishments",
+        ),
+        (
+            data.links,
+            "linkedUrn",
+            data.establishments,
+            "urn",
+            "links -> establishments",
         ),
     ]
     for child, child_col, parent, parent_col, label in fk_checks:
