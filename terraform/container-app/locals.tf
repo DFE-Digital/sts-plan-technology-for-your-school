@@ -82,7 +82,7 @@ locals {
     nic_name      = "${local.resource_prefix}-db-nic"
     endpoint_name = "${local.resource_prefix}-db"
   }
-  create_db_network = !(shared_module_enable_mssql_database && local.launch_in_vnet)
+  create_db_network = !(local.shared_module_enable_mssql_database && local.launch_in_vnet)
 
   #####################
   # Azure Redis Cache #
