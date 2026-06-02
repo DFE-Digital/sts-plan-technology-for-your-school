@@ -9,7 +9,7 @@ resource "azurerm_private_endpoint" "database" {
   location                      = local.azure_location
   name                          = local.az_sql_vnet.endpoint_name
   resource_group_name           = local.resource_group_name
-  subnet_id                     = module.main_hosting.networking.subnet_id
+  subnet_id                     = azurerm_subnet.private_endpoints.subnet_id
   tags                          = local.tags
 
   private_dns_zone_group {

@@ -66,17 +66,19 @@ resource "azapi_update_resource" "contentful_backup_storage_key_rotation_reminde
   depends_on = [azurerm_storage_account.contentful_backup_storage]
 }
 
-resource "azurerm_storage_account_network_rules" "contentful_backup_storage" {
-  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
-  default_action     = "Deny"
-  bypass             = ["AzureServices"]
-  ip_rules           = []
-}
+#not needed as matches inline block. 
+#resource "azurerm_storage_account_network_rules" "contentful_backup_storage" {
+#  storage_account_id = azurerm_storage_account.contentful_backup_storage.id
+#  default_action     = "Deny"
+#  bypass             = ["AzureServices"]
+#  ip_rules           = []
+#}
 
 resource "azurerm_role_assignment" "contentful_backup_storage_blob_contributor" {
   scope                = azurerm_storage_account.contentful_backup_storage.id
   role_definition_name = "Storage Blob Data Contributor"
   principal_id         = data.azurerm_client_config.current.object_id
+  principal_type = "ServicePrincipal"
 }
 
 resource "azurerm_storage_container" "backups_container" {
