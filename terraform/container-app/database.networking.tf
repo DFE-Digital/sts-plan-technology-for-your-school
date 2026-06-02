@@ -15,13 +15,11 @@ resource "azurerm_private_endpoint" "database" {
   tags                          = local.tags
 
   private_dns_zone_group {
-    count = local.create_db_network ? 1 : 0
     name                 = "default"
     private_dns_zone_ids = [azurerm_private_dns_zone.database[0].id]
   }
 
   private_service_connection {
-    count = local.create_db_network ? 1 : 0
     is_manual_connection           = false
     name                           = local.az_sql_vnet.endpoint_name
     private_connection_resource_id = data.azurerm_mssql_server.database.id
