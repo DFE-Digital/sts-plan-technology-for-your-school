@@ -537,7 +537,7 @@ public class RecommendationWorkflowTests
             .CreateRecommendationHistoryAsync(
                 establishmentId,
                 1,
-                userId,               
+                userId,
                 matEstablishmentId,
                 null,
                 RecommendationStatus.InProgress, // Should use current status as previous
@@ -612,10 +612,8 @@ public class RecommendationWorkflowTests
         var newStatus = RecommendationStatus.Complete;
 
         _recommendationRepository
-            .GetRecommendationsByContentfulReferencesAsync(
-                new[] { recommendationContentfulReference }
-            )
-            .Returns(new RecommendationEntity[0]);
+            .GetRecommendationsByContentfulReferencesAsync([recommendationContentfulReference])
+            .Returns([]);
 
         var workflow = CreateServiceUnderTest();
 
