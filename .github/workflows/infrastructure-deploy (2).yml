@@ -130,40 +130,40 @@ jobs:
           echo "Using project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}"
           echo "Using is_dr=${{ steps.vars.outputs.IS_DR }}"
 
-      # - name: Terraform init
-      #   working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-      #   run: |
-      #     terraform init -upgrade -reconfigure \
-      #       -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
-      #       -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
-      #       -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
-      #       -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+      - name: Terraform init
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform init -upgrade -reconfigure \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
 
-      # - name: Apply Terraform changes - RG & container registry only
-      #   working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-      #   run: |
-      #     terraform plan -input=false \
-      #       -target=azurerm_resource_group.app_rg \
-      #       -target=azurerm_container_registry.acr_notshared \
-      #       -var-file="../../normalisedTerraformVars.tfvars" \
-      #       -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-      #       -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-      #       -var="azure_location=northeurope" \
-      #       -out=tfplan
+      - name: Apply Terraform changes - RG & container registry only
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform plan -input=false \
+            -target=azurerm_resource_group.app_rg \
+            -target=azurerm_container_registry.acr_notshared \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="azure_location=northeurope" \
+            -out=tfplan
 
-      #     terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
+          terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
 
-      #     terraform apply -auto-approve -input=false tfplan
+          terraform apply -auto-approve -input=false tfplan
 
-      # - name: Promote Image
-      #   id: promote_image
-      #   uses: ./.github/actions/promote-image
-      #   with:
-      #     image_branch: ${{ steps.vars.outputs.ENVIRONMENT_NAME == 'ProductionUnprotected' && 'main' || 'development' }}
-      #     acr_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}
-      #     acr_login_server: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}.azurecr.io
-      #     package_name: ${{ env.PACKAGE_NAME }}
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Promote Image
+        id: promote_image
+        uses: ./.github/actions/promote-image
+        with:
+          image_branch: ${{ steps.vars.outputs.ENVIRONMENT_NAME == 'ProductionUnprotected' && 'main' || 'development' }}
+          acr_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}
+          acr_login_server: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}.azurecr.io
+          package_name: ${{ env.PACKAGE_NAME }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
   apply-terraform:
     name: Apply Terraform changes
