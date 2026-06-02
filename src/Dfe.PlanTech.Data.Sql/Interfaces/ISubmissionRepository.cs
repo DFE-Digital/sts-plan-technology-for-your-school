@@ -37,4 +37,5 @@ public interface ISubmissionRepository
     Task SetSubmissionDeletedAsync(int establishmentId, string sectionId);
     Task<int> SubmitResponse(AssessmentResponseModel response);
     Task<List<SubmissionEntity>> GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(IEnumerable<int> establishmentIds);
+    Task<List<SubmissionEntity>> GetLatestSubmissionPerEstablishmentForSectionAsync(IEnumerable<int> establishmentIds, string sectionId);
 }
