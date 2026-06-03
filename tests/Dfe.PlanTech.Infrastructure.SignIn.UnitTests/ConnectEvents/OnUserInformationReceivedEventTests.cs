@@ -5,6 +5,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.ConnectEvents;
+using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Http;
@@ -37,7 +38,7 @@ public class OnUserInformationReceivedEventTests
         var options = new OpenIdConnectOptions();
         var properties = new AuthenticationProperties();
 
-        var ctx = new UserInformationReceivedContext(
+        var ctx = Substitute.For<UserInformationReceivedContext>(
             httpContext,
             scheme,
             options,
@@ -70,6 +71,31 @@ public class OnUserInformationReceivedEventTests
         Assert.NotNull(ctx.Result.Failure);
         await wf.DidNotReceiveWithAnyArgs().RecordSignIn(default!, default!);
         await wf.DidNotReceiveWithAnyArgs().RecordSignInUserOnly(default!);
+    }
+
+    [Fact]
+    public async Task RecordUserSignIn_When_DsiReferencecIsNull_LogsError_And_Fails()
+    {
+        // Arrange: authenticated principal but no establishment-related claims
+        var principal = AuthenticatedPrincipal([]);
+        var (ctx, wf, logger) = BuildContext(principal);
+
+        // Act
+        await OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx);
+
+        // Assert
+        var logMessage = logger.ReceivedLogMessages().FirstOrDefault();
+        Assert.NotNull(logMessage);
+        Assert.Equal(LogLevel.Error, logMessage.LogLevel);
+        Assert.Equal(
+            "Authentication failed: no nameidentifier claim found for user.",
+            logMessage.Message
+        );
+
+        ctx.Received(1).Fail("No nameidentifier claim present in user principal.");
+
+        // Context failed
+        Assert.NotNull(ctx.Result.Failure);
     }
 
     [Fact]

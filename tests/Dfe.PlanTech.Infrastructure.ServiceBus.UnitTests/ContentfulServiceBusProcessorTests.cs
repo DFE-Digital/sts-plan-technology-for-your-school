@@ -190,22 +190,17 @@ public class ContentfulServiceBusProcessorTests
         var body = "message body";
         var subject = "message subject";
         var id = "message-id";
-
         var message = CreateServiceBusMessage(body, subject, id);
+
         var eventArgs = Substitute.For<ProcessMessageEventArgs>(
             message,
             _serviceBusReceiver,
             CancellationToken.None
         );
         eventArgs
-            .DeadLetterMessageAsync(
-                message,
-                null,
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<CancellationToken>()
-            )
+            .AbandonMessageAsync(message, null, Arg.Any<CancellationToken>())
             .Returns(Task.CompletedTask);
+
         var exception = new Exception("Problem with the thing");
 
         _webHookMessageProcessor
@@ -225,6 +220,7 @@ public class ContentfulServiceBusProcessorTests
         await _webHookMessageProcessor
             .Received(1)
             .ProcessMessage(subject, body, id, Arg.Any<CancellationToken>());
+
         await _serviceBusResultProcessor
             .Received(0)
             .ProcessMessageResult(
@@ -235,13 +231,8 @@ public class ContentfulServiceBusProcessorTests
 
         await eventArgs
             .Received(1)
-            .DeadLetterMessageAsync(
-                message,
-                null,
-                exception.Message,
-                Arg.Any<string>(),
-                Arg.Any<CancellationToken>()
-            );
+            .AbandonMessageAsync(message, null, Arg.Any<CancellationToken>());
+
         var loggedMessages = _logger.ReceivedLogMessages().ToArray();
         Assert.Equal(2, loggedMessages.Length);
 
@@ -253,7 +244,7 @@ public class ContentfulServiceBusProcessorTests
 
         var matchingAbandonMessage = loggedMessages.FirstOrDefault(msg =>
             msg.LogLevel == LogLevel.Information
-            && msg.Message.Equals($"Abandoned message: {message.MessageId}")
+            && msg.Message.Equals($"Abandoned message {message.MessageId} for retry")
         );
         Assert.NotNull(matchingAbandonMessage);
     }
