@@ -249,7 +249,7 @@ jobs:
         uses: ./.github/actions/whitelist-kv
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX }}
           keyvault-name: ${{ steps.vars.outputs.KEYVAULT_NAME }}
           verb: add
 
