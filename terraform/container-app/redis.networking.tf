@@ -9,7 +9,7 @@ resource "azurerm_private_endpoint" "redis" {
   location                      = local.azure_location
   name                          = local.redis_vnet.endpoint_name
   resource_group_name           = local.resource_group_name
-  subnet_id                     = azurerm_subnet.redis.subnet_id
+  subnet_id                     = azurerm_subnet.redis.id
   tags                          = local.tags
 
   private_dns_zone_group {
