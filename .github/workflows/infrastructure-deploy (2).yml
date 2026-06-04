@@ -344,8 +344,8 @@ jobs:
         uses: ./.github/actions/restore-db-from-bacpac
         with:
           resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
-          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}
-          target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}-sqldb
+          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
           storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
           container_name: ${{ env.BACKUP_CONTAINER_NAME }}
           bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
