@@ -59,3 +59,15 @@ output "container_app_environment_ingress_ip" {
   description = "Ingress IP address assigned to the Container App environment"
   value       = local.container_app_environment.static_ip_address
 }
+
+output "vnet_id" {
+  value = local.virtual_network.id
+}
+
+output "vnet_name" {
+  value = local.virtual_network.name
+}
+
+output "route_table_id" {
+  value = try(azurerm_route_table.default[0].id, null)
+}

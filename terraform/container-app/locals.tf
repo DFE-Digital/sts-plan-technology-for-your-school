@@ -100,6 +100,21 @@ locals {
 
   redis_public_access_enabled = var.redis_public_access_enabled
 
+  redis_networking = {
+    subnet = {
+      name             = "${local.resource_prefix}-redis-endpoint"
+      address_prefixes = ["172.16.8.0/24"] # pick unused range in the VNet
+    }
+    private_dns_zone = {
+      name = "privatelink.redis.cache.windows.net"
+    }
+    endpoint = {
+      nic_name = "${local.resource_prefix}-redis-nic"
+      name     = "${local.resource_prefix}-redis"
+    }
+  }
+
+
   ##################
   # Azure KeyVault #
   ##################
