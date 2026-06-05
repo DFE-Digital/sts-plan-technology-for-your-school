@@ -45,6 +45,15 @@ if (builder.Environment.EnvironmentName != "E2E")
 builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddCommandLine(args);
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    var timeOut = options.Cookie.MaxAge ?? TimeSpan.FromMinutes(30);
+    options.IdleTimeout = timeOut;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.AddSystemConfiguration();
 builder.AddContentAndSupportConfiguration();
 
@@ -113,6 +122,8 @@ app.UseCorrelationId();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapHealthChecks("/health");
 app.MapControllerRoute(pattern: "{controller=Pages}/{action=GetByRoute}/{id?}", name: "default");
