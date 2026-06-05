@@ -341,12 +341,19 @@ jobs:
           az_subscription_id: ${{ secrets.az_subscription_id }}
           az_client_id: ${{ secrets.az_client_id }}
 
+      - name: Get runner public IP
+        id: whats-my-ip
+        run: |
+          IP=$(curl -s https://api.ipify.org)
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+          echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
+
       - name: Restore DB from BACPAC
         uses: ./.github/actions/restore-db-from-bacpac
         with:
           resource_group_backup: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
           resource_group_app: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          ip-address: ${{ env.TF_VAR_github_ip }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
           sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
           target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
           storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
