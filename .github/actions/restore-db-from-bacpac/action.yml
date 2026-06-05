@@ -1,40 +1,62 @@
 name: Restore Azure SQL DB from BACPAC
+description: Restore Azure SQL DB from BACPAC
 
 inputs:
-  resource_group:
+  resource_group_backup:
+    description: Backup resource group
     required: true
-    type: string
+  resource_group_app:
+    description: Application resource group
+    required: true
+  ip-address:
+    description: The IP address to whitelist or remove
+    required: true
   sql_server_name:
+    description: SQL server name
     required: true
-    type: string
   target_database:
+    description: Target database
     required: true
-    type: string
   storage_account:
+    description: Storage account name
     required: true
-    type: string
   container_name:
+    description: Container name
     required: true
-    type: string
   bacpac_file:
+    description: Specific BACPAC file
     required: false
-    type: string
     default: ""
   bacpac_prefix:
+    description: BACPAC filename prefix
     required: false
-    type: string
     default: ""
   use_latest_if_not_specified:
+    description: Use latest BACPAC if no file is specified
     required: false
-    type: boolean
-    default: true
-
+    default: "true"
 runs:
   using: composite
   steps:
     - name: Install SqlPackage
       shell: bash
       run: dotnet tool install --global Microsoft.SqlPackage
+
+    - name: Whitelist Runner for backup storage
+      uses: ./.github/actions/whitelist-storage
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_backup }}
+        account-name: ${{ inputs.storage_account }}
+        verb: add
+
+    - name: Whitelist Runner for sql
+      uses: ./.github/actions/whitelist-sql
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_app }}
+        server-name: ${{ inputs.sql_server_name }}
+        verb: add
 
     - name: Resolve BACPAC blob name
       id: resolve-bacpac
@@ -120,3 +142,19 @@ runs:
           /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \
           /TargetDatabaseName:"${{ inputs.target_database }}" \
           /AccessToken:"$ACCESS_TOKEN"
+
+    - name: Undo Whitelist Runner for backup storage
+      uses: ./.github/actions/whitelist-storage
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_backup }}
+        account-name: ${{ inputs.storage_account }}
+        verb: remove
+
+    - name: Undo Whitelist Runner for sql
+      uses: ./.github/actions/whitelist-sql
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_app }}
+        server-name: ${{ inputs.sql_server_name }}
+        verb: remove

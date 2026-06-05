@@ -344,7 +344,9 @@ jobs:
       - name: Restore DB from BACPAC
         uses: ./.github/actions/restore-db-from-bacpac
         with:
-          resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
+          resource_group_backup: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
+          resource_group_app: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          ip-address: ${{ env.TF_VAR_github_ip }}
           sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
           target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
           storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
