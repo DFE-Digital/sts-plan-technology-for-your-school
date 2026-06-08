@@ -3,6 +3,8 @@ using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
@@ -410,5 +412,170 @@ public class GroupsViewBuilderTests
         await group
             .DidNotReceive()
             .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>());
+    }
+
+    // --- RouteToSelectASelfAssessmentViewModelAsync ----------------------------
+    [Fact]
+    public async Task RouteToSelectSchoolsToAssessViewModelAsync_Builds_View_With_Expected_Model()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+
+        var categorySlug = "category-one";
+        var sectionSlug = "section-one";
+
+        var section = new QuestionnaireSectionEntry()
+        {
+            Sys = new SystemDetails { Id = "sec1" },
+            InterstitialPage = new PageEntry { Slug = sectionSlug },
+        };
+
+        contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        var schools = new List<SqlEstablishmentLinkDto>
+        {
+            new() { Id = 10 },
+            new() { Id = 20 },
+            new() { Id = 30 }
+        };         
+            
+        est.GetEstablishmentLinks(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { Urn = "URN-10" },
+                    new() { Urn = "URN-20" },
+                    new() { Urn = "URN-30" }
+                }
+    );
+
+        est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
+            .Returns(
+                new List<SqlEstablishmentDto>
+                {
+                    new() { Id = 10 },
+                    new() { Id = 20 },
+                    new() { Id = 30 }
+                }
+            );
+
+        var submissionInfo = new List<SubmissionInformationModel>
+        {
+            new () { SubmissionId = 1, SectionId = section.Id, EstablishmentId = 10, Status = SubmissionStatus.InProgress },
+            new () { SubmissionId = 2, SectionId = section.Id, EstablishmentId = 20, Status = SubmissionStatus.CompleteReviewed },
+            new () { SubmissionId = 3, SectionId = section.Id, EstablishmentId = 30, Status = SubmissionStatus.NotStarted }
+        };
+
+        group.GetGroupSubmissionInformationForSection(
+                Arg.Is<int[]>(x => x.SequenceEqual(new[] { 10, 20, 30 })),
+                section.Id)
+            .Returns(submissionInfo);
+
+        var expected = new GroupsSelectSchoolsToAssessViewModel
+        {
+            SchoolSubmissionInfo = submissionInfo,
+            Section = section
+        };
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
+        var controller = new TestController();
+
+        // Act
+        var action = await sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, categorySlug, sectionSlug);
+
+        // Assert
+        await est.Received(1).GetEstablishmentLinks(100);
+
+        await group.Received(1)
+            .GetGroupSubmissionInformationForSection(
+                Arg.Is<int[]>(ids =>
+                    ids.SequenceEqual(new[] { 10, 20, 30 })
+                ),
+                section.Id
+            );
+
+        var view = Assert.IsType<ViewResult>(action);
+        Assert.Equal("GroupSelectSchoolsToAssess", view.ViewName);
+
+        var vm = Assert.IsType<GroupsSelectSchoolsToAssessViewModel>(view.Model);
+
+        Assert.Equal(section, vm.Section);
+
+        Assert.Collection(
+            vm.SchoolSubmissionInfo,
+            submission =>
+            {
+                Assert.Equal(1, submission.SubmissionId);
+                Assert.Equal(10, submission.EstablishmentId);
+                Assert.Equal(SubmissionStatus.InProgress, submission.Status);
+            },
+            submission =>
+            {
+                Assert.Equal(3, submission.SubmissionId);
+                Assert.Equal(30, submission.EstablishmentId);
+                Assert.Equal(SubmissionStatus.NotStarted, submission.Status);
+            }
+        );
+    }
+
+    [Fact]
+    public async Task RouteToSelectSchoolsToAssessViewModelAsync_Throws_When_No_Section_Found()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+
+        var categorySlug = "category-2";
+        var sectionSlug = "section-2";
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
+        var controller = new TestController();
+
+        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
+        {
+            new SqlEstablishmentLinkDto() { Id = 1 },
+            new SqlEstablishmentLinkDto() { Id = 2 }
+        };
+
+        est.GetEstablishmentLinks(100)
+            .Returns(establishmentLinks);
+
+        contentful.GetSectionBySlugAsync(sectionSlug)
+            .Returns((QuestionnaireSectionEntry?)null!);
+
+        var ex = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() => 
+            sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, categorySlug, sectionSlug)
+        );
+
+        Assert.Equal($"Could not find topic for slug '{sectionSlug}'", ex.Message);
+    }
+
+    [Fact]
+    public async Task RouteToSelectSchoolsToAssessViewModelAsync_Throws_When_No_Establishments()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+
+        var categorySlug = "category-3";
+        var sectionSlug = "section-3";
+        var section = new QuestionnaireSectionEntry();
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
+        var controller = new TestController();
+
+        contentful.GetSectionBySlugAsync(sectionSlug)
+            .Returns(section);
+
+        est.GetEstablishmentLinks(100)
+            .Returns([]);
+
+        var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, categorySlug, sectionSlug)
+        );
+
+        Assert.Equal($"Could not find linked establishments for group ID: 100", ex.Message);
     }
 }
