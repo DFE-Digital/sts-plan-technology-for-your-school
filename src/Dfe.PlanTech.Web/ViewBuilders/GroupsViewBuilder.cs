@@ -2,6 +2,7 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
@@ -151,15 +152,43 @@ public class GroupsViewBuilder(
     {
         var establishmentId = GetUserOrganisationIdOrThrowException();
 
+        var groupSchoolLinks = await _establishmentService.GetEstablishmentLinks(establishmentId);
+
+        if (groupSchoolLinks == null || groupSchoolLinks.Count == 0)
+        {
+            throw new InvalidDataException(
+                $"Could not find linked establishments for group ID: {establishmentId}"
+            );
+        }
+
+        var groupSchoolUrns = groupSchoolLinks
+            .Select(e => e.Urn)
+            .Where(urn => !string.IsNullOrWhiteSpace(urn))
+            .Distinct()
+            .ToArray();
+
+        var groupSchools = await _establishmentService.GetEstablishmentsByReferencesAsync(groupSchoolUrns) ?? [];
+
+        var groupSchoolIds = groupSchools
+            .Select(e => e.Id)
+            .Distinct()
+            .ToArray();
+
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
-                $"Could not find topic for slug '{UrlConstants.GroupsSelectionPageSlug}'"
+                $"Could not find topic for slug '{sectionSlug}'"
             );
+
+        var schoolSubmissions = await _groupService.GetGroupSubmissionInformationForSection(groupSchoolIds, section.Id);
+        var eligibleSchools = schoolSubmissions
+            .Where(sub => sub.Status != SubmissionStatus.CompleteReviewed)
+            .ToList();
 
         var viewModel = new GroupsSelectSchoolsToAssessViewModel
         {
-
+            Section = section,
+            SchoolSubmissionInfo = eligibleSchools
         };
 
         return controller.View(SelectSchoolsToAssessViewName, viewModel);
