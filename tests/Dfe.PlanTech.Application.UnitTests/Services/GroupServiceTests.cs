@@ -55,27 +55,48 @@ public class GroupServiceTests
         var sut = CreateServiceUnderTest();
 
         var establishmentIds = new[] { 1, 2, 3 };
+        var establishmentRefs = new[] { "testRef1", "testRef2", "testRef3" };
         var sectionId = "sec1";
 
         var expected = new List<SubmissionInformationModel>
         {
-            new() { EstablishmentId = 1, SectionId = sectionId, SubmissionId = 100, Status = SubmissionStatus.CompleteReviewed },
-            new() { EstablishmentId = 2, SectionId = sectionId, SubmissionId = 200, Status = SubmissionStatus.InProgress },
-            new() { EstablishmentId = 3, SectionId = sectionId, Status = SubmissionStatus.NotStarted }
+            new()
+            {
+                EstablishmentId = 1,
+                EstablishmentName = "Establishment One",
+                SectionId = sectionId,
+                SubmissionId = 100,
+                Status = SubmissionStatus.CompleteReviewed
+            },
+            new()
+            {
+                EstablishmentId = 2,
+                EstablishmentName = "Establishment Two",
+                SectionId = sectionId,
+                SubmissionId = 200,
+                Status = SubmissionStatus.InProgress
+            },
+            new()
+            {
+                EstablishmentId = 3,
+                EstablishmentName = "Establishment Three",
+                SectionId = sectionId,
+                Status = SubmissionStatus.NotStarted
+            }
         };
 
         _groupWorkflow
-            .GetGroupSubmissionInformationForSection(establishmentIds, sectionId)
+            .GetGroupSubmissionInformationForSection(establishmentRefs, sectionId)
             .Returns(expected);
 
-        var result = await sut.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentRefs, sectionId);
 
         Assert.Same(expected, result);
 
         await _groupWorkflow
             .Received(1)
             .GetGroupSubmissionInformationForSection(
-                Arg.Is<int[]>(ids => ids.SequenceEqual(establishmentIds)),
+                Arg.Is<string[]>(refs => refs.SequenceEqual(establishmentRefs)),
                 Arg.Is<string>(section => section.Equals(sectionId))
             );
     }

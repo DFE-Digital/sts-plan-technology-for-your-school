@@ -2,7 +2,6 @@ using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
-using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.ObjectModel;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Workflows;
@@ -11,8 +10,10 @@ public class GroupWorkflowTests
 {
     private readonly ISubmissionRepository _submissionRepository =
         Substitute.For<ISubmissionRepository>();
-
-    private GroupWorkflow CreateServiceUnderTest() => new(_submissionRepository);
+    private readonly IEstablishmentRepository _establishmentRepository =
+        Substitute.For<IEstablishmentRepository>();
+    
+    private GroupWorkflow CreateServiceUnderTest() => new(_submissionRepository, _establishmentRepository);
 
     private static EstablishmentEntity BuildEstablishment(int id = 1)
     {
@@ -139,14 +140,25 @@ public class GroupWorkflowTests
     {
         var sut = CreateServiceUnderTest();
 
-        var establishmentIds = new[] { 1, 2, 3 };
         var sectionId = "sec1";
+        var establishmentRefs = new[] { "testRef10", "testRef20", "testRef30" };
+        var establishments = new List<EstablishmentEntity>()
+        {
+            BuildEstablishment(10),
+            BuildEstablishment(20),
+            BuildEstablishment(30)
+        };
+
+        var establishmentIds = new int[] { 10, 20, 30 };
+
+        _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentRefs)
+            .Returns(establishments);
 
         _submissionRepository
             .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
             .Returns(new List<SubmissionEntity>());
 
-        var result = await sut.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentRefs, sectionId);
 
         await _submissionRepository
             .Received(1)
@@ -158,8 +170,21 @@ public class GroupWorkflowTests
     {
         var sut = CreateServiceUnderTest();
 
+        var establishmentRefs = new[] { "testRef1", "testRef2", "testRef3", "testRef4" };
         var establishmentIds = new[] { 1, 2, 3, 4 };
         var sectionId = "sec1";
+        var establishment1 = BuildEstablishment(1);
+        var establishment2 = BuildEstablishment(2);
+        var establishment3 = BuildEstablishment(3);
+        var establishment4 = BuildEstablishment(4);
+
+        var establishments = new List<EstablishmentEntity>()
+        {
+            establishment1,
+            establishment2,
+            establishment3,
+            establishment4
+        };
 
         var submissions = new List<SubmissionEntity>
         {
@@ -175,11 +200,24 @@ public class GroupWorkflowTests
             ),
         };
 
+        submissions[0].Establishment = establishment1;
+        submissions[1].Establishment = establishment2;
+
         _submissionRepository
-            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(
+                Arg.Is<int[]>(x => x.SequenceEqual(new[] { 1, 2, 3, 4 })),
+                sectionId)
             .Returns(submissions);
 
-        var result = await sut.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+        _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentRefs)
+            .Returns(establishments);
+        _establishmentRepository.GetEstablishmentByReferenceAsync("testRef3")
+            .Returns(establishment3);
+        _establishmentRepository.GetEstablishmentByReferenceAsync("testRef4")
+            .Returns(establishment4);
+
+
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentRefs, sectionId);
 
         Assert.NotNull(result);
         Assert.Equal(4, result.Count);
@@ -189,16 +227,22 @@ public class GroupWorkflowTests
             submission =>
             {
                 Assert.Equal(1, submission.EstablishmentId);
+                Assert.Equal("testName1", submission.EstablishmentName);
             },
             submission =>
             {
                 Assert.Equal(2, submission.EstablishmentId);
-            }, submission =>
+                Assert.Equal("testName2", submission.EstablishmentName);
+            },
+            submission =>
             {
                 Assert.Equal(3, submission.EstablishmentId);
-            }, submission =>
+                Assert.Equal("testName3", submission.EstablishmentName);
+            },
+            submission =>
             {
                 Assert.Equal(4, submission.EstablishmentId);
+                Assert.Equal("testName4", submission.EstablishmentName);
             }
         );
     }
@@ -208,7 +252,17 @@ public class GroupWorkflowTests
     {
         var sut = CreateServiceUnderTest();
 
-        var establishmentIds = new[] { 1, 2 };
+        var establishmentRefs = new string[] { "testRef1", "testRef2" };
+        var establishment1 = BuildEstablishment(1);
+        var establishment2 = BuildEstablishment(2);
+        var establishments = new List<EstablishmentEntity>()
+        {
+            establishment1,
+            establishment2
+        };
+
+        var establishmentIds = establishments.Select(est => est.Id).ToList();
+
         var sectionId = "sec1";
 
         var submissions = new List<SubmissionEntity>
@@ -221,11 +275,24 @@ public class GroupWorkflowTests
             ),
         };
 
+        submissions[0].Establishment = establishment2;
+        
+        _submissionRepository
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(
+                Arg.Is<int[]>(x => x.SequenceEqual(new[] { 1, 2 })),
+                sectionId)
+            .Returns(submissions);
+
+        _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentRefs)
+            .Returns(establishments);
+        _establishmentRepository.GetEstablishmentByReferenceAsync("testRef1")
+            .Returns(establishment1);
+
         _submissionRepository
             .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
             .Returns(submissions);
 
-        var result = await sut.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentRefs, sectionId);
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
@@ -235,6 +302,7 @@ public class GroupWorkflowTests
             submission =>
             {
                 Assert.Equal(1, submission.EstablishmentId);
+                Assert.Equal("testName1", submission.EstablishmentName);
                 Assert.Equal(sectionId, submission.SectionId);
                 Assert.Equal(SubmissionStatus.NotStarted, submission.Status);
             },
@@ -242,6 +310,7 @@ public class GroupWorkflowTests
             {
                 Assert.Equal(200, submission.SubmissionId);
                 Assert.Equal(2, submission.EstablishmentId);
+                Assert.Equal("testName2", submission.EstablishmentName);
                 Assert.Equal(sectionId, submission.SectionId);
                 Assert.Equal(SubmissionStatus.InProgress, submission.Status);
             }
@@ -254,6 +323,7 @@ public class GroupWorkflowTests
         var sut = CreateServiceUnderTest();
 
         var establishmentIds = new[] { 1, 2 };
+        var establishmentRefs = new[] { "testRef1", "testRef2" };
         var sectionId = "sec1";
         var sectionName = "Section 1";
 
@@ -261,6 +331,7 @@ public class GroupWorkflowTests
         {
             Id = 100,
             EstablishmentId = 1,
+            Establishment = BuildEstablishment(1),
             SectionId = sectionId,
             SectionName = sectionName,
             Status = SubmissionStatus.InProgress,
@@ -272,6 +343,7 @@ public class GroupWorkflowTests
         {
             Id = 200,
             EstablishmentId = 2,
+            Establishment = BuildEstablishment(2),
             SectionId = sectionId,
             SectionName = sectionName,
             Status = SubmissionStatus.CompleteReviewed,
@@ -291,7 +363,7 @@ public class GroupWorkflowTests
             .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
             .Returns(submissions);
 
-        var result = await sut.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentRefs, sectionId);
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
@@ -302,6 +374,7 @@ public class GroupWorkflowTests
             {
                 Assert.Equal(100, submission.SubmissionId);
                 Assert.Equal(1, submission.EstablishmentId);
+                Assert.Equal("testName1", submission.EstablishmentName);
                 Assert.Equal(sectionId, submission.SectionId);
                 Assert.Equal(SubmissionStatus.InProgress, submission.Status);
                 Assert.Equal(new DateTime(2025, 1, 1), submission.DateCreated);
@@ -311,6 +384,7 @@ public class GroupWorkflowTests
             {
                 Assert.Equal(200, submission.SubmissionId);
                 Assert.Equal(2, submission.EstablishmentId);
+                Assert.Equal("testName2", submission.EstablishmentName);
                 Assert.Equal(sectionId, submission.SectionId);
                 Assert.Equal(SubmissionStatus.CompleteReviewed, submission.Status);
                 Assert.Equal(new DateTime(2025, 3, 1), submission.DateCreated);
@@ -323,7 +397,15 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_SubmissionRepository_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(null!));
+        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(null!, _establishmentRepository));
+
+        Assert.Equal("submissionRepository", exception.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_Throws_ArgumentNullException_When_EstablishmentRepository_Is_Null()
+    {
+        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, null!));
 
         Assert.Equal("submissionRepository", exception.ParamName);
     }

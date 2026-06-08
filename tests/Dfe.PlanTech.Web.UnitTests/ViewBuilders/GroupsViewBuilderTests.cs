@@ -445,9 +445,9 @@ public class GroupsViewBuilderTests
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
-                    new() { Urn = "URN-10" },
-                    new() { Urn = "URN-20" },
-                    new() { Urn = "URN-30" }
+                    new() { Urn = "testRef10" },
+                    new() { Urn = "testRef20" },
+                    new() { Urn = "testRef30" }
                 }
     );
 
@@ -463,13 +463,32 @@ public class GroupsViewBuilderTests
 
         var submissionInfo = new List<SubmissionInformationModel>
         {
-            new () { SubmissionId = 1, SectionId = section.Id, EstablishmentId = 10, Status = SubmissionStatus.InProgress },
-            new () { SubmissionId = 2, SectionId = section.Id, EstablishmentId = 20, Status = SubmissionStatus.CompleteReviewed },
-            new () { SubmissionId = 3, SectionId = section.Id, EstablishmentId = 30, Status = SubmissionStatus.NotStarted }
+            new ()
+            {
+                SubmissionId = 1,
+                SectionId = section.Id,
+                EstablishmentId = 10,
+                EstablishmentName = "testName10",
+                Status = SubmissionStatus.InProgress
+            },
+            new ()
+            {
+                SubmissionId = 2,
+                SectionId = section.Id,
+                EstablishmentId = 20,
+                EstablishmentName = "testName20",
+                Status = SubmissionStatus.CompleteReviewed },
+            new ()
+            {
+                SubmissionId = 3,
+                SectionId = section.Id,
+                EstablishmentId = 30,
+                EstablishmentName = "testName30",
+                Status = SubmissionStatus.NotStarted }
         };
 
         group.GetGroupSubmissionInformationForSection(
-                Arg.Is<int[]>(x => x.SequenceEqual(new[] { 10, 20, 30 })),
+                Arg.Is<string[]>(x => x.SequenceEqual(new[] { "testRef10", "testRef20", "testRef30" })),
                 section.Id)
             .Returns(submissionInfo);
 
@@ -490,8 +509,8 @@ public class GroupsViewBuilderTests
 
         await group.Received(1)
             .GetGroupSubmissionInformationForSection(
-                Arg.Is<int[]>(ids =>
-                    ids.SequenceEqual(new[] { 10, 20, 30 })
+                Arg.Is<string[]>(urns =>
+                    urns.SequenceEqual(new[] { "testRef10", "testRef20", "testRef30" })
                 ),
                 section.Id
             );
@@ -502,6 +521,7 @@ public class GroupsViewBuilderTests
         var vm = Assert.IsType<GroupsSelectSchoolsToAssessViewModel>(view.Model);
 
         Assert.Equal(section, vm.Section);
+        Assert.Equal(categorySlug, vm.CategorySlug);
 
         Assert.Collection(
             vm.SchoolSubmissionInfo,
@@ -509,12 +529,14 @@ public class GroupsViewBuilderTests
             {
                 Assert.Equal(1, submission.SubmissionId);
                 Assert.Equal(10, submission.EstablishmentId);
+                Assert.Equal("testName10", submission.EstablishmentName);
                 Assert.Equal(SubmissionStatus.InProgress, submission.Status);
             },
             submission =>
             {
                 Assert.Equal(3, submission.SubmissionId);
                 Assert.Equal(30, submission.EstablishmentId);
+                Assert.Equal("testName30", submission.EstablishmentName);
                 Assert.Equal(SubmissionStatus.NotStarted, submission.Status);
             }
         );
