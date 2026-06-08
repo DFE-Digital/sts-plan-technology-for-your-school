@@ -3,13 +3,16 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Interfaces;
+using Dfe.PlanTech.Data.Sql.Repositories;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class GroupWorkflow(ISubmissionRepository submissionRepository) : IGroupWorkflow
+public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentRepository establishmentRepository) : IGroupWorkflow
 {
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
+    private readonly IEstablishmentRepository _establishmentRepository =
+        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
 
     public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissions(int[] establishmentIds)
     {
@@ -18,23 +21,39 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository) : IGroupW
         return submissions.Select(s => s.AsDto()).ToList();
     }
 
-    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(int[] establishmentIds, string sectionId)
+    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(string[] establishmentRefs, string sectionId)
     {
         var groupSubmissionInfo = new List<SubmissionInformationModel>();
 
-        var groupLatestSubmissions = await _submissionRepository.GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId);
+        var establishments = await _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentRefs) ?? [];
 
-        foreach (var id in establishmentIds)
+        var establishmentIds = establishments
+            .Select(e => e.Id)
+            .Distinct()
+            .ToArray();
+
+        var groupLatestSubmissions = await _submissionRepository.GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
+            ?? [];
+
+        foreach (var estRef in establishmentRefs)
         {
             var submission = groupLatestSubmissions
-                    .FirstOrDefault(s => s.EstablishmentId == id);
+                    .FirstOrDefault(s => s.Establishment.EstablishmentRef == estRef);
 
             if (submission == null)
             {
+                var school = await _establishmentRepository.GetEstablishmentByReferenceAsync(estRef);
+
+                if (school == null || school.OrgName == null)
+                {
+                    throw new InvalidDataException($"No establishment found with ref: {estRef}");
+                }
+
                 groupSubmissionInfo.Add(
                     new SubmissionInformationModel
                     {
-                        EstablishmentId = id,
+                        EstablishmentId = school.Id,
+                        EstablishmentName = school.OrgName,
                         SectionId = sectionId,
                         Status = SubmissionStatus.NotStarted
                     }
@@ -42,10 +61,12 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository) : IGroupW
             }
             else
             {
+                var establishmentName = submission.Establishment.OrgName ?? throw new InvalidDataException($"No details found for establishment reference: {estRef}");
                 groupSubmissionInfo.Add(
                     new SubmissionInformationModel
                     {
-                        EstablishmentId = id,
+                        EstablishmentId = submission.EstablishmentId,
+                        EstablishmentName = establishmentName,
                         SectionId = sectionId,
                         SubmissionId = submission.Id,
                         DateCreated = submission.DateCreated,

@@ -16,9 +16,9 @@ public class GroupService(IGroupWorkflow groupWorkflow) : IGroupService
         return submissions;
     }
 
-    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(int[] establishmentIds, string sectionId)
+    public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(string[] establishmentRefs, string sectionId)
     {
-        var submissions = await _groupWorkflow.GetGroupSubmissionInformationForSection(establishmentIds, sectionId);
+        var submissions = await _groupWorkflow.GetGroupSubmissionInformationForSection(establishmentRefs, sectionId);
         return submissions;
     }
 }

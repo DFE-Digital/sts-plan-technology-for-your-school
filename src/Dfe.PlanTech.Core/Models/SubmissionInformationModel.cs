@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Core.Models;
@@ -9,6 +10,8 @@ namespace Dfe.PlanTech.Core.Models;
 public class SubmissionInformationModel
 {
     public int EstablishmentId { get; set; }
+    public string EstablishmentName { get; set; } = null!;
+    
     public string SectionId { get; set; } = null!;
     public int? SubmissionId { get; set; }
     public DateTime? DateCompleted { get; set; }

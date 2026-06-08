@@ -6,5 +6,5 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 public interface IGroupWorkflow
 {
     Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissions(int[] establishmentIds);
-    Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(int[] establishmentIds, string sectionId);
+    Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(string[] establishmentRefs, string sectionId);
 }

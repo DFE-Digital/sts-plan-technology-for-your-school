@@ -150,43 +150,37 @@ public class GroupsViewBuilder(
         string sectionSlug
     )
     {
-        var establishmentId = GetUserOrganisationIdOrThrowException();
-
-        var groupSchoolLinks = await _establishmentService.GetEstablishmentLinks(establishmentId);
-
-        if (groupSchoolLinks == null || groupSchoolLinks.Count == 0)
-        {
-            throw new InvalidDataException(
-                $"Could not find linked establishments for group ID: {establishmentId}"
-            );
-        }
-
-        var groupSchoolUrns = groupSchoolLinks
-            .Select(e => e.Urn)
-            .Where(urn => !string.IsNullOrWhiteSpace(urn))
-            .Distinct()
-            .ToArray();
-
-        var groupSchools = await _establishmentService.GetEstablishmentsByReferencesAsync(groupSchoolUrns) ?? [];
-
-        var groupSchoolIds = groupSchools
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
-
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find topic for slug '{sectionSlug}'"
             );
 
-        var schoolSubmissions = await _groupService.GetGroupSubmissionInformationForSection(groupSchoolIds, section.Id);
+        var establishmentId = GetUserOrganisationIdOrThrowException();
+
+        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(establishmentId);
+
+        if (establishmentLinks == null || establishmentLinks.Count == 0)
+        {
+            throw new InvalidDataException(
+                $"Could not find linked establishments for group ID: {establishmentId}"
+            );
+        }
+
+        var establishmentRefs = establishmentLinks
+            .Select(e => e.Urn)
+            .Where(urn => !string.IsNullOrWhiteSpace(urn))
+            .Distinct()
+            .ToArray();
+
+        var schoolSubmissions = await _groupService.GetGroupSubmissionInformationForSection(establishmentRefs, section.Id);
         var eligibleSchools = schoolSubmissions
             .Where(sub => sub.Status != SubmissionStatus.CompleteReviewed)
             .ToList();
 
         var viewModel = new GroupsSelectSchoolsToAssessViewModel
         {
+            CategorySlug = categorySlug,
             Section = section,
             SchoolSubmissionInfo = eligibleSchools
         };
