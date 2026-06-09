@@ -11,11 +11,11 @@ public class SubmissionInformationModel
 {
     public int EstablishmentId { get; set; }
     public string EstablishmentName { get; set; } = null!;
-    
+    public string EstablishmentRef { get; set; } = null!;
     public string SectionId { get; set; } = null!;
     public int? SubmissionId { get; set; }
-    public DateTime? DateCompleted { get; set; }
-    public DateTime? DateCreated { get; set; }
-    public DateTime? DateLastUpdated { get; set; }
+    public string? DateCompleted { get; set; }
+    public string? DateCreated { get; set; }
+    public string? DateLastUpdated { get; set; }
     public SubmissionStatus Status { get; set; }
 }

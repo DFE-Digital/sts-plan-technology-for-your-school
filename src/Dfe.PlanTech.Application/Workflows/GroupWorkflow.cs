@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Data.Sql.Repositories;
@@ -44,7 +45,7 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
             {
                 var school = await _establishmentRepository.GetEstablishmentByReferenceAsync(estRef);
 
-                if (school == null || school.OrgName == null)
+                if (school == null || school.OrgName == null || school.EstablishmentRef == null)
                 {
                     throw new InvalidDataException($"No establishment found with ref: {estRef}");
                 }
@@ -54,6 +55,7 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
                     {
                         EstablishmentId = school.Id,
                         EstablishmentName = school.OrgName,
+                        EstablishmentRef = school.EstablishmentRef,
                         SectionId = sectionId,
                         Status = SubmissionStatus.NotStarted
                     }
@@ -62,16 +64,22 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
             else
             {
                 var establishmentName = submission.Establishment.OrgName ?? throw new InvalidDataException($"No details found for establishment reference: {estRef}");
+
                 groupSubmissionInfo.Add(
                     new SubmissionInformationModel
                     {
                         EstablishmentId = submission.EstablishmentId,
                         EstablishmentName = establishmentName,
+                        EstablishmentRef = estRef,
                         SectionId = sectionId,
                         SubmissionId = submission.Id,
-                        DateCreated = submission.DateCreated,
-                        DateLastUpdated = submission.DateLastUpdated,
-                        DateCompleted = submission.DateCompleted,
+                        DateCreated = DateTimeHelper.FormattedDateShort(submission.DateCreated),
+                        DateLastUpdated = submission.DateLastUpdated != null
+                            ? DateTimeHelper.FormattedDateShort(submission.DateLastUpdated.Value)
+                            : null,
+                        DateCompleted = submission.DateCompleted != null
+                            ? DateTimeHelper.FormattedDateShort(submission.DateCompleted.Value)
+                            : null,
                         Status = submission.Status
                     }
                 );
