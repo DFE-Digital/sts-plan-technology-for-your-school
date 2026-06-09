@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Workflows;
 using Dfe.PlanTech.Core.Enums;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using NSubstitute;
@@ -142,27 +143,32 @@ public class GroupWorkflowTests
 
         var sectionId = "sec1";
         var establishmentRefs = new[] { "testRef10", "testRef20", "testRef30" };
+        var establishment10 = BuildEstablishment(10);
+        var establishment20 = BuildEstablishment(20);
+        var establishment30 = BuildEstablishment(30);
+
         var establishments = new List<EstablishmentEntity>()
         {
-            BuildEstablishment(10),
-            BuildEstablishment(20),
-            BuildEstablishment(30)
+            establishment10,
+            establishment20,
+            establishment30
         };
 
         var establishmentIds = new int[] { 10, 20, 30 };
 
         _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentRefs)
             .Returns(establishments);
-
-        _submissionRepository
-            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
-            .Returns(new List<SubmissionEntity>());
+        _establishmentRepository.GetEstablishmentByReferenceAsync("testRef10").Returns(establishment10);
+        _establishmentRepository.GetEstablishmentByReferenceAsync("testRef20").Returns(establishment20);
+        _establishmentRepository.GetEstablishmentByReferenceAsync("testRef30").Returns(establishment30);
 
         var result = await sut.GetGroupSubmissionInformationForSection(establishmentRefs, sectionId);
 
         await _submissionRepository
             .Received(1)
-            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId);
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(establishmentIds)),
+                sectionId);
     }
 
     [Fact]
@@ -325,43 +331,47 @@ public class GroupWorkflowTests
         var establishmentIds = new[] { 1, 2 };
         var establishmentRefs = new[] { "testRef1", "testRef2" };
         var sectionId = "sec1";
-        var sectionName = "Section 1";
+        var establishment1 = BuildEstablishment(1);
+        var establishment2 = BuildEstablishment(2);
 
-        var submission1 = new SubmissionEntity()
+        var establishments = new List<EstablishmentEntity>()
         {
-            Id = 100,
-            EstablishmentId = 1,
-            Establishment = BuildEstablishment(1),
-            SectionId = sectionId,
-            SectionName = sectionName,
-            Status = SubmissionStatus.InProgress,
-            DateCreated = new DateTime(2025, 1, 1),
-            DateLastUpdated = new DateTime(2025, 2, 1)
+            establishment1,
+            establishment2
         };
-
-        var submission2 = new SubmissionEntity()
-        {
-            Id = 200,
-            EstablishmentId = 2,
-            Establishment = BuildEstablishment(2),
-            SectionId = sectionId,
-            SectionName = sectionName,
-            Status = SubmissionStatus.CompleteReviewed,
-            DateCreated = new DateTime(2025, 3, 1),
-            DateLastUpdated = new DateTime(2025, 4, 1),
-            DateCompleted = new DateTime(2025, 5, 1)
-        };
-
 
         var submissions = new List<SubmissionEntity>
         {
-            submission1,
-            submission2
+            BuildSubmission(
+                id: 101,
+                establishmentId: 1,
+                sectionId,
+                status: SubmissionStatus.InProgress),
+            BuildSubmission(
+                id: 201,
+                establishmentId: 2,
+                sectionId,
+                status: SubmissionStatus.CompleteReviewed)
         };
 
+        submissions[0].Establishment = establishment1;
+        submissions[0].DateCreated = new DateTime(2025, 1, 1);
+        submissions[0].DateLastUpdated = new DateTime(2025, 2, 1);
+        submissions[1].Establishment = establishment2;
+        submissions[1].DateCreated = new DateTime(2025, 3, 1);
+        submissions[1].DateLastUpdated = new DateTime(2025, 4, 1);
+        submissions[1].DateCompleted = new DateTime(2025, 5, 1);
+
         _submissionRepository
-            .GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
+            .GetLatestSubmissionPerEstablishmentForSectionAsync(
+                Arg.Is<int[]>(x => x.SequenceEqual(new[] { 1, 2 })),
+                sectionId)
             .Returns(submissions);
+
+        _establishmentRepository.GetEstablishmentsByReferencesAsync(establishmentRefs)
+            .Returns(establishments);
+        _establishmentRepository.GetEstablishmentByReferenceAsync("testRef1").Returns(establishment1);
+        _establishmentRepository.GetEstablishmentByReferenceAsync("testRef2").Returns(establishment2);
 
         var result = await sut.GetGroupSubmissionInformationForSection(establishmentRefs, sectionId);
 
@@ -372,24 +382,24 @@ public class GroupWorkflowTests
             result,
             submission =>
             {
-                Assert.Equal(100, submission.SubmissionId);
+                Assert.Equal(101, submission.SubmissionId);
                 Assert.Equal(1, submission.EstablishmentId);
                 Assert.Equal("testName1", submission.EstablishmentName);
                 Assert.Equal(sectionId, submission.SectionId);
                 Assert.Equal(SubmissionStatus.InProgress, submission.Status);
-                Assert.Equal(new DateTime(2025, 1, 1), submission.DateCreated);
-                Assert.Equal(new DateTime(2025, 2, 1), submission.DateLastUpdated);
+                Assert.Equal(DateTimeHelper.FormattedDateShort(new DateTime(2025, 1, 1)), submission.DateCreated);
+                Assert.Equal(DateTimeHelper.FormattedDateShort(new DateTime(2025, 2, 1)), submission.DateLastUpdated);
             },
             submission =>
             {
-                Assert.Equal(200, submission.SubmissionId);
+                Assert.Equal(201, submission.SubmissionId);
                 Assert.Equal(2, submission.EstablishmentId);
                 Assert.Equal("testName2", submission.EstablishmentName);
                 Assert.Equal(sectionId, submission.SectionId);
                 Assert.Equal(SubmissionStatus.CompleteReviewed, submission.Status);
-                Assert.Equal(new DateTime(2025, 3, 1), submission.DateCreated);
-                Assert.Equal(new DateTime(2025, 4, 1), submission.DateLastUpdated);
-                Assert.Equal(new DateTime(2025, 5, 1), submission.DateCompleted);
+                Assert.Equal(DateTimeHelper.FormattedDateShort(new DateTime(2025, 3, 1)), submission.DateCreated);
+                Assert.Equal(DateTimeHelper.FormattedDateShort(new DateTime(2025, 4, 1)), submission.DateLastUpdated);
+                Assert.Equal(DateTimeHelper.FormattedDateShort(new DateTime(2025, 5, 1)), submission.DateCompleted);
             }
         );
     }
@@ -407,6 +417,6 @@ public class GroupWorkflowTests
     {
         var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, null!));
 
-        Assert.Equal("submissionRepository", exception.ParamName);
+        Assert.Equal("establishmentRepository", exception.ParamName);
     }
 }
