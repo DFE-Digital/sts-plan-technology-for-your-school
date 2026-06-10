@@ -15,13 +15,13 @@ on:
         type: choice
         options: ['Dev', 'Test', 'StagingUnprotected', 'ProductionUnprotected']
         default: 'Dev'
-  # push:
-  #    branches:
-  #      - disaster-recovery-e2e-terraform
+  push:
+     branches:
+       - disaster-recovery-e2e-terraform
 env:
   SQL_BACKUP_CONTAINER_NAME: sqlbackups
   SECRETMANIFEST_BACKUP_CONTAINER_NAME: secretnames
-  MANIFEST: "secret-manifest.txt"
+  MANIFEST: secret-manifest.txt
 
 jobs:
   # backup-db:
