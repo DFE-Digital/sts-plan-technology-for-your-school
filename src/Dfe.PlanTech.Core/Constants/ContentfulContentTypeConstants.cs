@@ -20,6 +20,9 @@ public static class ContentfulContentTypeConstants
             key => EntryClassToContentTypeMapBasis[key]
         );
 
+    public static IReadOnlyDictionary<Type, string> EntryTypeToContentTypeMap =>
+        EntryClassToContentTypeMapBasis;
+
     // Internal mappings between C# and Contentful content type ID's
     private static readonly Dictionary<Type, string> EntryClassToContentTypeMapBasis = new()
     {

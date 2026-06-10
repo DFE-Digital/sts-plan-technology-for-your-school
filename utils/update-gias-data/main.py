@@ -27,7 +27,16 @@ def main(connection_string: str, skip_validation: bool = False):
     else:
         logger.info("Starting GIAS data update process with validation checks enabled.")
 
-    fetch_and_save_gias_data()
+    try:
+        fetch_and_save_gias_data()
+    except RuntimeError as e:
+        logger.error(
+            "Error while checking for latest available GIAS files: %s. "
+            "Cannot proceed with update without more recent data from Edubase",
+            e,
+        )
+        raise
+
     data = extract_gias_data()
     update_database(data, connection_string, skip_validation)
 
