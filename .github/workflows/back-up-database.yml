@@ -1,4 +1,4 @@
-name: Back up database
+name: Back up database & secrets
 
 on:
   workflow_call:
@@ -19,71 +19,193 @@ on:
   #    branches:
   #      - disaster-recovery-e2e-terraform
 env:
-  BACKUP_CONTAINER_NAME: sqlbackups
+  SQL_BACKUP_CONTAINER_NAME: sqlbackups
+  SECRETMANIFEST_BACKUP_CONTAINER_NAME: secretnames
+  MANIFEST: "secret-manifest.txt"
 
 jobs:
-  backup:
-    environment:
-      name: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call')  && inputs.environment || 'Dev' }}
-    name: Back up database
-    runs-on: ubuntu-22.04
-    permissions:
-      id-token: write
-      contents: read
+  # backup-db:
+  #   environment:
+  #     name: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call')  && inputs.environment || 'Dev' }}
+  #   name: Back up database
+  #   runs-on: ubuntu-22.04
+  #   permissions:
+  #     id-token: write
+  #     contents: read
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref }}
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         ref: ${{ github.ref }}
 
-      - name: Azure CLI Login
-        uses: ./.github/actions/azure-login
-        with:
-          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+  #     - name: Azure CLI Login
+  #       uses: ./.github/actions/azure-login
+  #       with:
+  #         az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+  #         az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+  #         az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
-      - name: Install SqlPackage
-        run: dotnet tool install --global Microsoft.SqlPackage
+  #     - name: Install SqlPackage
+  #       run: dotnet tool install --global Microsoft.SqlPackage
 
-      - name: Get GitHub Runner IP
-        id: whats-my-ip
-        uses: ./.github/actions/whats-my-ip-address
+  #     - name: Get GitHub Runner IP
+  #       id: whats-my-ip
+  #       uses: ./.github/actions/whats-my-ip-address
 
-      - name: Whitelist Runner for SQL Server
-        uses: ./.github/actions/whitelist-sql
-        with:
-          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          verb: 'add'
+  #     - name: Whitelist Runner for SQL Server
+  #       uses: ./.github/actions/whitelist-sql
+  #       with:
+  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+  #         resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+  #         server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+  #         verb: 'add'
 
-      - name: Export database
-        run: |
-          ACCESS_TOKEN="$(az account get-access-token \
-            --resource https://database.windows.net/ \
-            --query accessToken -o tsv)"
+  #     - name: Whitelist Runner for backup storage
+  #       uses: ./.github/actions/whitelist-storage
+  #       with:
+  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+  #         resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+  #         account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup//-/}
+  #         verb: add
 
-          sqlpackage /Action:Export \
-            /SourceServerName:"tcp:${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net,1433" \
-            /SourceDatabaseName:"${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
-            /TargetFile:"db-$(date +%F).bacpac" \
-            /AccessToken:"$ACCESS_TOKEN"
+  #     - name: Export database
+  #       run: |
+  #         ACCESS_TOKEN="$(az account get-access-token \
+  #           --resource https://database.windows.net/ \
+  #           --query accessToken -o tsv)"
 
-      - name: Save bacpac
-        run: |
-          az storage blob upload \
-          --account-name "$(echo "${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}backup" | tr -d '-')" \
-          --container-name ${{ env.BACKUP_CONTAINER_NAME }} \
-          --name db-$(date +%F).bacpac \
-          --file db-$(date +%F).bacpac \
-          --auth-mode login
+  #         sqlpackage /Action:Export \
+  #           /SourceServerName:"tcp:${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}.database.windows.net,1433" \
+  #           /SourceDatabaseName:"${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-sqldb" \
+  #           /TargetFile:"db-$(date +%F).bacpac" \
+  #           /AccessToken:"$ACCESS_TOKEN"
 
-      - name: De-Whitelist Runner for SQL Server
-        uses: ./.github/actions/whitelist-sql
-        with:
-          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          verb: 'remove'
+  #     - name: Save bacpac
+  #       run: |
+  #         az storage blob upload \
+  #         --account-name "$(echo "${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}backup" | tr -d '-')" \
+  #         --container-name ${{ env.SQL_BACKUP_CONTAINER_NAME }} \
+  #         --name db-$(date +%F).bacpac \
+  #         --file db-$(date +%F).bacpac \
+  #         --auth-mode login
+
+  #     - name: De-Whitelist Runner for SQL Server
+  #       uses: ./.github/actions/whitelist-sql
+  #       with:
+  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+  #         resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+  #         server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+  #         verb: 'remove'
+
+  #     - name: De-Whitelist Runner for backup storage
+  #       uses: ./.github/actions/whitelist-storage
+  #       with:
+  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+  #         resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+  #         account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup//-/}
+  #         verb: remove
+
+  backup-secrets:
+      environment:
+        name: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call')  && inputs.environment || 'Dev' }}
+      name: Back up app secrets
+      runs-on: ubuntu-22.04
+      permissions:
+        id-token: write
+        contents: read
+
+      steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v4
+          with:
+            ref: ${{ github.ref }}
+
+        - name: Azure CLI Login
+          uses: ./.github/actions/azure-login
+          with:
+            az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+            az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+            az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+        - name: Get GitHub Runner IP
+          id: whats-my-ip
+          uses: ./.github/actions/whats-my-ip-address
+
+        - name: Whitelist Runner for backup keyvault
+          uses: ./.github/actions/whitelist-kv
+          with:
+            ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            verb: 'add'
+
+        - name: Whitelist Runner for backup storage
+          uses: ./.github/actions/whitelist-storage
+          with:
+            ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup//-/}
+            verb: add
+
+        - name: Copy secrets
+          run: |
+            SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
+            TARGET_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv-backup"
+            az keyvault secret list \
+              --vault-name "$SOURCE_KV" \
+              --query "[].{name:name,id:id}" \
+              -o tsv |
+            while IFS=$'\t' read -r SECRET_NAME SECRET_ID; do
+              echo "Copying $SECRET_NAME"
+
+              az keyvault secret show \
+                --id "$SECRET_ID" \
+                --query "value" \
+                -o tsv > secret-value.tmp
+
+              if [ ! -s secret-value.tmp ]; then
+                echo "Skipping $SECRET_NAME because value was empty"
+                continue
+              fi
+
+              az keyvault secret set \
+                --vault-name "$TARGET_KV" \
+                --name "$SECRET_NAME" \
+                --file secret-value.tmp \
+                >/dev/null
+            done
+
+            rm -f secret-value.tmp
+
+        - name: Copy secret manifest
+          run: |
+            SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
+            az keyvault secret list \
+              --vault-name "$SOURCE_KV" \
+              --query "[].name" \
+              -o tsv > "${{ env.MANIFEST }}"
+
+            az storage blob upload \
+              --account-name "$(echo "${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}backup" | tr -d '-')" \
+              --container-name "${{ env.SECRETMANIFEST_BACKUP_CONTAINER_NAME }}" \
+              --name "${{ env.MANIFEST }}" \
+              --file "${{ env.MANIFEST }}" \
+              --auth-mode login \
+              --overwrite true
+
+        - name: De-Whitelist Runner for backup keyvault
+          uses: ./.github/actions/whitelist-kv
+          with:
+            ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            verb: 'remove'
+
+        - name: De-Whitelist Runner for backup storage
+          uses: ./.github/actions/whitelist-storage
+          with:
+            ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup//-/}
+            verb: remove
