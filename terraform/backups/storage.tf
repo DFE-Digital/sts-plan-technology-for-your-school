@@ -59,3 +59,21 @@ resource "azurerm_storage_container_immutability_policy" "contentful" {
   immutability_period_in_days           = var.immutability_period_days
   protected_append_writes_all_enabled   = false
 }
+
+resource "azurerm_storage_container" "secrets" {
+  name                  = var.backup_container_name_secrets
+  storage_account_id    = azurerm_storage_account.backups.id
+  container_access_type = "private"
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "azurerm_storage_container_immutability_policy" "secrets" {
+  count = var.immutability_enabled ? 1 : 0
+
+  storage_container_resource_manager_id = azurerm_storage_container.secrets.id
+  immutability_period_in_days           = var.immutability_period_days
+  protected_append_writes_all_enabled   = false
+}
