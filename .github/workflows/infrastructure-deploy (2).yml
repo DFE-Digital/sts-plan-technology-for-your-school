@@ -415,7 +415,7 @@ jobs:
           RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
 
           echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-          echo "PROJECT_PREFIX_APP=$DFE_PROJECT_NAME" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
 
       - name: Restore app secrets
         uses: ./.github/actions/restore-app-secrets
