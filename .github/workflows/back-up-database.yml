@@ -22,6 +22,7 @@ env:
   SQL_BACKUP_CONTAINER_NAME: sqlbackups
   SECRETMANIFEST_BACKUP_CONTAINER_NAME: secretnames
   MANIFEST: secret-manifest.txt
+  SOURCE_KV: "${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
 
 jobs:
   # backup-db:
@@ -152,6 +153,14 @@ jobs:
             keyvault-name: ${{ steps.backup_names.outputs.kv }}
             verb: 'add'
 
+        - name: Whitelist Runner for app keyvault
+          uses: ./.github/actions/whitelist-kv
+          with:
+            ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            keyvault-name: ${{ ENV.SOURCE_KV }}
+            verb: 'add'
+
         - name: Whitelist Runner for backup storage
           uses: ./.github/actions/whitelist-storage
           with:
@@ -212,6 +221,14 @@ jobs:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
             resource-group: ${{ steps.backup_names.outputs.resource_group }}
             keyvault-name: ${{ steps.backup_names.outputs.kv }}
+            verb: 'remove'
+
+        - name: De-Whitelist Runner for app keyvault
+          uses: ./.github/actions/whitelist-kv
+          with:
+            ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+            keyvault-name: ${{ ENV.SOURCE_KV }}
             verb: 'remove'
 
         - name: De-Whitelist Runner for backup storage
