@@ -119,7 +119,7 @@ Before(async function (scenario: ITestCaseHookParameter) {
           name: this.selectedSchool.NAME,
         }).click();
       } catch {
-          console.warn(`Failed to select school ${this.selectedSchool.NAME} on dashboard. ` + 
+          console.warn(`Failed to select school ${this.selectedSchool.NAME} on dashboard. `);
       }
       console.log(`Navigated to dashboard for: ${this.selectedSchool.NAME}`);
     }
