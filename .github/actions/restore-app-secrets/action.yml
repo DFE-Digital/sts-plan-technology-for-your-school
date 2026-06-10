@@ -19,8 +19,8 @@ inputs:
     required: true
   manifest_blob_name:
     description: Blob path to the secret manifest
-    required: false
-    default: keyvault/secret-manifest.txt
+    required: true
+    default: secret-manifest.txt
   app_resource_group:
     description: app resource group
     required: true

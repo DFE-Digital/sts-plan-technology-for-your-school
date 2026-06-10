@@ -429,7 +429,7 @@ jobs:
 
           backup_storage_account: ${{ steps.backup_names.outputs.storage_account }}
           secret_container_name: secretnames
-          manifest_blob_name: keyvault/secret-manifest.txt
+          manifest_blob_name: secret-manifest.txt
 
           sql_server_secret_name: connectionstrings--database
           sql_server_python_secret_name: python--dbconnectionstring
