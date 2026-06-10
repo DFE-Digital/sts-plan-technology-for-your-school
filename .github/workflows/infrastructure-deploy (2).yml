@@ -367,7 +367,7 @@ jobs:
 
   restore-tokens:
     name: Restore app tokens from backup kv
-    needs: [apply-terraform]
+    #needs: [apply-terraform]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-tokens) }}
     runs-on: ubuntu-latest
     environment:
