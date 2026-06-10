@@ -440,7 +440,7 @@ jobs:
           redis_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
 
           servicebus_secret_name: connectionstrings--servicebusconnection
-          servicebus_namespace: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-plan-tech-app
+          servicebus_namespace: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}servicebus
 
           appinsights_secret_name: applicationinsights--connectionstring
           appinsights_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-insights
