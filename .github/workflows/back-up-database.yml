@@ -132,26 +132,38 @@ jobs:
           id: whats-my-ip
           uses: ./.github/actions/whats-my-ip-address
 
+        - name: Prepare backup names
+          id: backup_names
+          shell: bash
+          run: |
+            BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+            BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+            BACKUP_STORAGE_ACCOUNT="${BACKUP_RESOURCE_GROUP//-/}"
+
+            echo "resource_group=$BACKUP_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
+            echo "storage_account=$BACKUP_STORAGE_ACCOUNT" >> "$GITHUB_OUTPUT"
+            echo "kv=$BACKUP_KV" >> "$GITHUB_OUTPUT"
+
         - name: Whitelist Runner for backup keyvault
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
-            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            resource-group: ${{ steps.backup_names.outputs.resource_group }}
+            keyvault-name: ${{ steps.backup_names.outputs.kv }}
             verb: 'add'
 
         - name: Whitelist Runner for backup storage
           uses: ./.github/actions/whitelist-storage
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
-            account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup//-/}
+            resource-group: ${{ steps.backup_names.outputs.resource_group }}
+            account-name: ${{ steps.backup_names.outputs.storage_account }}
             verb: add
 
         - name: Copy secrets
           run: |
             SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
-            TARGET_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv-backup"
+            TARGET_KV="${{ steps.backup_names.outputs.kv }}"
             az keyvault secret list \
               --vault-name "$SOURCE_KV" \
               --query "[].{name:name,id:id}" \
@@ -187,7 +199,7 @@ jobs:
               -o tsv > "${{ env.MANIFEST }}"
 
             az storage blob upload \
-              --account-name "$(echo "${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}backup" | tr -d '-')" \
+              --account-name "${{ steps.backup_names.outputs.storage_account }}" \
               --container-name "${{ env.SECRETMANIFEST_BACKUP_CONTAINER_NAME }}" \
               --name "${{ env.MANIFEST }}" \
               --file "${{ env.MANIFEST }}" \
@@ -198,14 +210,14 @@ jobs:
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
-            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            resource-group: ${{ steps.backup_names.outputs.resource_group }}
+            keyvault-name: ${{ steps.backup_names.outputs.kv }}
             verb: 'remove'
 
         - name: De-Whitelist Runner for backup storage
           uses: ./.github/actions/whitelist-storage
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-            resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
-            account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup//-/}
+            resource-group: ${{ steps.backup_names.outputs.resource_group }}
+            account-name: ${{ steps.backup_names.outputs.storage_account }}
             verb: remove
