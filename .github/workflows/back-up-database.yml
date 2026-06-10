@@ -170,22 +170,31 @@ jobs:
             verb: add
 
         - name: Copy secrets
+          shell: bash
           run: |
+            set -euo pipefail
+
             SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
             TARGET_KV="${{ steps.backup_names.outputs.kv }}"
+
             az keyvault secret list \
               --vault-name "$SOURCE_KV" \
               --query "[].{name:name,id:id}" \
               -o tsv |
             while IFS=$'\t' read -r SECRET_NAME SECRET_ID; do
+              SECRET_NAME="${SECRET_NAME//$'\r'/}"
+              SECRET_ID="${SECRET_ID//$'\r'/}"
+
+              [ -z "$SECRET_NAME" ] && continue
+
               echo "Copying $SECRET_NAME"
 
-              az keyvault secret show \
+              SECRET_VALUE="$(az keyvault secret show \
                 --id "$SECRET_ID" \
                 --query "value" \
-                -o tsv > secret-value.tmp
+                -o tsv | tr -d '\r\n')"
 
-              if [ ! -s secret-value.tmp ]; then
+              if [ -z "$SECRET_VALUE" ]; then
                 echo "Skipping $SECRET_NAME because value was empty"
                 continue
               fi
@@ -193,11 +202,9 @@ jobs:
               az keyvault secret set \
                 --vault-name "$TARGET_KV" \
                 --name "$SECRET_NAME" \
-                --file secret-value.tmp \
+                --value "$SECRET_VALUE" \
                 >/dev/null
             done
-
-            rm -f secret-value.tmp
 
         - name: Copy secret manifest
           run: |
