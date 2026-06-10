@@ -85,12 +85,19 @@ public class GroupsViewBuilder(
     }
 
     public async Task<IActionResult> RouteToViewInProgressAnswers(
-        Controller controller,
-        string categorySlug,
-        string sectionSlug
-    )
+      Controller controller,
+      string categorySlug,
+      string sectionSlug,
+      string schoolUrn
+  )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var schoolEstablishment =
+            await _establishmentService.GetEstablishmentByReferenceAsync(schoolUrn);
+
+        if (schoolEstablishment is null)
+        {
+            return controller.RedirectToHomePage();
+        }
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -99,30 +106,25 @@ public class GroupsViewBuilder(
             );
 
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
-            establishmentId,
+            schoolEstablishment.Id,
             section,
             status: SubmissionStatus.InProgress
         );
 
         switch (submissionRoutingData.Status)
         {
-            case SubmissionStatus.NotStarted:
-                return controller.RedirectToHomePage();
-
             case SubmissionStatus.InProgress:
             case SubmissionStatus.CompleteNotReviewed:
-
                 var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
-                section,
-                submissionRoutingData,
-                categorySlug,
-                sectionSlug,
-                isMatInProgressView: true,
-                schoolName: CurrentUser.GroupSelectedSchoolName
+                    section,
+                    submissionRoutingData,
+                    categorySlug,
+                    sectionSlug,
+                    isMatInProgressView: true,
+                    schoolName: schoolEstablishment.OrgName
                 );
 
-                viewModel.IsMatInProgressView = true;
-                viewModel.BackLinkHref = $"/{categorySlug}";
+                viewModel.BackLinkHref = $"/{categorySlug}/{sectionSlug}/self-assessment";
 
                 return controller.View(
                     ReviewAnswersViewBuilder.ViewAnswersViewName,
@@ -192,6 +194,8 @@ public class GroupsViewBuilder(
                     return new GroupSelectAssessmentSectionViewModel()
                     {
                         SectionName = ccs.Name,
+                        CategorySlug = c.Header?.Text?.Slugify(),
+                        SectionSlug = ccs.Name?.Slugify(),
                         UncompletedGroupSubmissions = uncompletedCount
                     };
                 }).ToList()

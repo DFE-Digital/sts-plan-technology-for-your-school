@@ -361,9 +361,15 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var submissionService = Substitute.For<ISubmissionService>();
         var currentUser = Substitute.For<ICurrentUser>();
+        var est = Substitute.For<IEstablishmentService>();
 
-        currentUser.GetActiveEstablishmentIdAsync().Returns(100);
-        currentUser.GroupSelectedSchoolName.Returns("Test School");
+        est.GetEstablishmentByReferenceAsync("900006")
+            .Returns(new SqlEstablishmentDto
+            {
+                Id = 100,
+                OrgName = "Test School",
+                EstablishmentRef = "900006"
+            });
 
         var section = new QuestionnaireSectionEntry
         {
@@ -406,17 +412,19 @@ public class GroupsViewBuilderTests
             .Returns(routingData);
 
         var sut = CreateServiceUnderTest(
-            contentful: contentful,
-            currentUser: currentUser,
-            submissionService: submissionService
-        );
+          contentful: contentful,
+          est: est,
+          currentUser: currentUser,
+          submissionService: submissionService
+      );
 
         var controller = new TestController();
 
         var result = await sut.RouteToViewInProgressAnswers(
             controller,
             "cyber-security-standard",
-            "cyber-security-processes"
+            "cyber-security-processes",
+            "900006"
         );
 
         var view = Assert.IsType<ViewResult>(result);
@@ -497,5 +505,116 @@ public class GroupsViewBuilderTests
         await group
             .DidNotReceive()
             .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>());
+    }
+
+    [Fact]
+    public async Task RouteToViewInProgressAnswers_WhenSchoolNotFound_RedirectsHome()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+
+        est.GetEstablishmentByReferenceAsync("900006")
+            .Returns((SqlEstablishmentDto?)null);
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est);
+        var controller = new TestController();
+
+        var result = await sut.RouteToViewInProgressAnswers(
+            controller,
+            "cyber-security-standard",
+            "cyber-security-processes",
+            "900006"
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("GetByRoute", redirect.ActionName);
+    }
+
+    [Fact]
+    public async Task RouteToViewInProgressAnswers_WhenSubmissionNotStarted_RedirectsHome()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var submissionService = Substitute.For<ISubmissionService>();
+        var est = Substitute.For<IEstablishmentService>();
+
+        est.GetEstablishmentByReferenceAsync("900006")
+            .Returns(new SqlEstablishmentDto
+            {
+                Id = 100,
+                OrgName = "Test School",
+                EstablishmentRef = "900006"
+            });
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Name = "Cyber security processes",
+            Questions = []
+        };
+
+        contentful.GetSectionBySlugAsync("cyber-security-processes").Returns(section);
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: null,
+            status: SubmissionStatus.NotStarted
+        );
+
+        submissionService
+            .GetSubmissionRoutingDataAsync(100, section, SubmissionStatus.InProgress)
+            .Returns(routingData);
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            submissionService: submissionService
+        );
+
+        var controller = new TestController();
+
+        var result = await sut.RouteToViewInProgressAnswers(
+            controller,
+            "cyber-security-standard",
+            "cyber-security-processes",
+            "900006"
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("GetByRoute", redirect.ActionName);
+    }
+
+    [Fact]
+    public async Task RouteToSelectASelfAssessmentViewModelAsync_Populates_Section_Slugs()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+
+        var section = MakeSection("SEC-1");
+        var category = MakeCategory(section);
+
+        contentful
+            .GetAllCategoriesAsync()
+            .Returns(new List<QuestionnaireCategoryEntry> { category });
+
+        est.GetEstablishmentLinks(100)
+            .Returns(new List<SqlEstablishmentLinkDto>());
+
+        est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
+            .Returns(new List<SqlEstablishmentDto>());
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
+        var controller = new TestController();
+
+        var action = await sut.RouteToSelectASelfAssessmentViewModelAsync(controller);
+
+        var view = Assert.IsType<ViewResult>(action);
+        var vm = Assert.IsType<GroupSelectAssessmentViewModel>(view.Model);
+
+        var categoryVm = Assert.Single(vm.Categories);
+        var sectionVm = Assert.Single(categoryVm.Sections);
+
+        Assert.Equal("header", sectionVm.CategorySlug);
+        Assert.Equal("sec-sec1", sectionVm.SectionSlug);
     }
 }

@@ -517,14 +517,16 @@ public class MockAuthControllerTests
 
     private class AuthCodeRecordBuilder
     {
-        private string _subject = "E2E_TEST_SCHOOL_USER";
-        private string _email = "school@test.local";
-        private string? _organisationJson = "{\"name\":\"School\"}";
-        private string _redirectUri = "https://localhost:8080/callback";
-        private string? _nonce = "nonce-1";
         private DateTime _expires = DateTime.UtcNow.AddMinutes(1);
-        private int _dbEstablishmentId = 101;
-        private int _dbUserId = 11;
+        private string _redirectUri = "https://localhost:8080/callback";
+
+        private readonly string _subject = "E2E_TEST_SCHOOL_USER";
+        private readonly string _email = "school@test.local";
+        private readonly string? _organisationJson = "{\"name\":\"School\"}";
+        private readonly string? _nonce = "nonce-1";
+        private readonly int _dbEstablishmentId = 101;
+        private readonly int _dbUserId = 11;
+        private readonly int? _dbMatEstablishmentId = null;
 
         public AuthCodeRecordBuilder WithRedirectUri(string redirectUri)
         {

@@ -1,0 +1,45 @@
+@model PageViewModel
+
+<h2 class="govuk-heading-l">Submit a self-assessment for your schools</h2>
+
+<p class="govuk-body">
+    You can submit the self-assessment for one or more schools.
+</p>
+
+<p class="govuk-body">
+    If a self-assessment has been started but not submitted for a school, you can check their answers
+    or submit a new self-assessment for them.
+</p>
+
+<table class="govuk-table">
+    <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">School</th>
+            <th scope="col" class="govuk-table__header govuk-!-text-align-right">Self-assessment submission</th>
+        </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+        @foreach (var school in Model.TrustSchoolAssessments)
+        {
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell">@school.SchoolName</td>
+                <td class="govuk-table__cell govuk-!-text-align-right">
+                    @if (school.HasAnswersInProgress)
+                    {
+                        <a class="govuk-link" href="@school.ViewAnswersHref">Answers in progress</a>
+                    }
+                    else
+                    {
+                        <span>Not started</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Model.TrustSchoolAssessmentContinueHref"
+   class="govuk-button"
+   data-module="govuk-button">
+    Continue
+</a>
