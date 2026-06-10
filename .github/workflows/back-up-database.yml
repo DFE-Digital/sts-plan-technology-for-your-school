@@ -137,7 +137,7 @@ jobs:
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
             resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
-            server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
             verb: 'add'
 
         - name: Whitelist Runner for backup storage
@@ -199,7 +199,7 @@ jobs:
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
             resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
-            server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
+            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
             verb: 'remove'
 
         - name: De-Whitelist Runner for backup storage
