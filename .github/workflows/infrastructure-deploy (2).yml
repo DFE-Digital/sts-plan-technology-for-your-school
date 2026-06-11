@@ -363,7 +363,6 @@ jobs:
           $rg = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
           $sqlServer = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
           $sqlDb = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
-          $identityName = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-uami-containerapp"
 
           $sqlFqdn = az sql server show `
             --resource-group $rg `
@@ -371,11 +370,26 @@ jobs:
             --query fullyQualifiedDomainName `
             -o tsv
 
-          $identityObjectId = az identity show `
+          $identityResourceId = az containerapp identity show `
             --resource-group $rg `
-            --name $identityName `
+            --name $rg `
+            --query "userAssignedIdentities | keys(@)[0]" `
+            -o tsv
+
+          if ([string]::IsNullOrWhiteSpace($identityResourceId)) {
+            throw "No user-assigned identity found on container app $rg"
+          }
+
+          $identityName = Split-Path $identityResourceId -Leaf
+
+          $identityObjectId = az identity show `
+            --ids $identityResourceId `
             --query principalId `
             -o tsv
+
+          if ([string]::IsNullOrWhiteSpace($identityObjectId)) {
+            throw "Could not resolve principalId for identity $identityResourceId"
+          }
 
           $sidHex = python3 -c "import uuid; print('0x' + uuid.UUID('$identityObjectId').bytes_le.hex())"
 
