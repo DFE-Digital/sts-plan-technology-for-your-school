@@ -301,55 +301,55 @@ jobs:
 
       #       terraform apply -auto-approve -input=false tfplanapp
 
-  # restore-db:
-  #   name: Restore DB from BACPAC
-  #   needs: [apply-terraform]
-  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-  #   permissions:
-  #     id-token: write
-  #     contents: read
+  restore-db:
+    name: Restore DB from BACPAC
+    #needs: [apply-terraform]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Prepare derived variables
-  #       id: vars
-  #       shell: bash
-  #       run: |
-  #         set -euo pipefail
+      - name: Prepare derived variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
 
-  #         IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
+          IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
 
-  #         if [ "$IS_DR" = "true" ]; then
-  #           DFE_PROJECT_NAME="pt-dr"
-  #         else
-  #           DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-  #         fi
+          if [ "$IS_DR" = "true" ]; then
+            DFE_PROJECT_NAME="pt-dr"
+          else
+            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+          fi
 
-  #         RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"  #not df
-  #         RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}" #could be df
+          RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"  #not df
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}" #could be df
 
-  #         echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
 
-  #     - name: Login with AZ
-  #       uses: ./.github/actions/azure-login
-  #       with:
-  #         az_tenant_id: ${{ secrets.az_tenant_id }}
-  #         az_subscription_id: ${{ secrets.az_subscription_id }}
-  #         az_client_id: ${{ secrets.az_client_id }}
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.az_tenant_id }}
+          az_subscription_id: ${{ secrets.az_subscription_id }}
+          az_client_id: ${{ secrets.az_client_id }}
 
-  #     - name: Get runner public IP
-  #       id: whats-my-ip
-  #       run: |
-  #         IP=$(curl -s https://api.ipify.org)
-  #         echo "ip=$IP" >> "$GITHUB_OUTPUT"
-  #         echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
+      - name: Get runner public IP
+        id: whats-my-ip
+        run: |
+          IP=$(curl -s https://api.ipify.org)
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+          echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
 
   #     - name: Restore DB from BACPAC
   #       uses: ./.github/actions/restore-db-from-bacpac
@@ -365,82 +365,125 @@ jobs:
   #         bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
   #         use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
 
-  restore-tokens:
-    name: Restore app tokens from backup kv
-    #needs: [apply-terraform]
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-tokens) }}
-    runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-    permissions:
-      id-token: write
-      contents: read
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Azure CLI Login
-        uses: ./.github/actions/azure-login
-        with:
-          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
-
-      - name: Prepare backup names
-        id: backup_names
-        shell: bash
-        run: |
-          BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-          BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-          BACKUP_STORAGE_ACCOUNT="${BACKUP_RESOURCE_GROUP//-/}"
-
-          echo "resource_group=$BACKUP_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
-          echo "storage_account=$BACKUP_STORAGE_ACCOUNT" >> "$GITHUB_OUTPUT"
-          echo "kv=$BACKUP_KV" >> "$GITHUB_OUTPUT"
-
-      - name: Prepare app variables
-        id: vars
+      - name: Grant Container App identity access to SQL DB
         shell: bash
         run: |
           set -euo pipefail
-          IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
 
-          if [ "$IS_DR" = "true" ]; then
-            DFE_PROJECT_NAME="pt-dr"
-          else
-            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-          fi
+          RG="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+          CONTAINER_APP_NAME="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+          SQL_SERVER="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+          SQL_DB="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
 
-          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+          SQL_FQDN=$(az sql server show \
+            --resource-group "$RG" \
+            --name "$SQL_SERVER" \
+            --query fullyQualifiedDomainName -o tsv)
 
-          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
+          IDENTITY_ID=$(az containerapp identity show \
+            --resource-group "$RG" \
+            --name "$CONTAINER_APP_NAME" \
+            --query "userAssignedIdentities | keys(@)[0]" \
+            -o tsv)
 
-      - name: Restore app secrets
-        uses: ./.github/actions/restore-app-secrets
-        with:
-          backup_resource_group: ${{ steps.backup_names.outputs.resource_group }}
-          #note, no "-kv" as it was too long
-          backup_keyvault: ${{ steps.backup_names.outputs.resource_group }}
+          IDENTITY_NAME=$(basename "$IDENTITY_ID")
 
-          app_resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          app_keyvault: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
+          TOKEN=$(az account get-access-token \
+            --resource https://database.windows.net/ \
+            --query accessToken -o tsv)
 
-          backup_storage_account: ${{ steps.backup_names.outputs.storage_account }}
-          secret_container_name: secretnames
-          manifest_blob_name: secret-manifest.txt
+          sqlcmd \
+            -S "$SQL_FQDN" \
+            -d "$SQL_DB" \
+            -G \
+            -P "$TOKEN" \
+            -Q "
+          IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$IDENTITY_NAME')
+          BEGIN
+            CREATE USER [$IDENTITY_NAME] FROM EXTERNAL PROVIDER;
+          END;
 
-          sql_server_secret_name: connectionstrings--database
-          sql_server_python_secret_name: python--dbconnectionstring
-          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          sql_database_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
+          ALTER ROLE db_datareader ADD MEMBER [$IDENTITY_NAME];
+          ALTER ROLE db_datawriter ADD MEMBER [$IDENTITY_NAME];
+          ALTER ROLE db_ddladmin ADD MEMBER [$IDENTITY_NAME];
+          "
 
-          redis_secret_name: connectionstrings--redis
-          redis_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+  # restore-tokens:
+  #   name: Restore app tokens from backup kv
+  #   #needs: [apply-terraform]
+  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-tokens) }}
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+  #   permissions:
+  #     id-token: write
+  #     contents: read
 
-          servicebus_secret_name: connectionstrings--servicebusconnection
-          servicebus_namespace: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}servicebus
+  #   steps:
+  #     - name: Checkout Repository
+  #       uses: actions/checkout@v4
 
-          appinsights_secret_name: applicationinsights--connectionstring
-          appinsights_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-insights
+  #     - name: Azure CLI Login
+  #       uses: ./.github/actions/azure-login
+  #       with:
+  #         az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+  #         az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+  #         az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+  #     - name: Prepare backup names
+  #       id: backup_names
+  #       shell: bash
+  #       run: |
+  #         BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+  #         BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+  #         BACKUP_STORAGE_ACCOUNT="${BACKUP_RESOURCE_GROUP//-/}"
+
+  #         echo "resource_group=$BACKUP_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
+  #         echo "storage_account=$BACKUP_STORAGE_ACCOUNT" >> "$GITHUB_OUTPUT"
+  #         echo "kv=$BACKUP_KV" >> "$GITHUB_OUTPUT"
+
+  #     - name: Prepare app variables
+  #       id: vars
+  #       shell: bash
+  #       run: |
+  #         set -euo pipefail
+  #         IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
+
+  #         if [ "$IS_DR" = "true" ]; then
+  #           DFE_PROJECT_NAME="pt-dr"
+  #         else
+  #           DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+  #         fi
+
+  #         RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+
+  #         echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+  #         echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
+
+  #     - name: Restore app secrets
+  #       uses: ./.github/actions/restore-app-secrets
+  #       with:
+  #         backup_resource_group: ${{ steps.backup_names.outputs.resource_group }}
+  #         #note, no "-kv" as it was too long
+  #         backup_keyvault: ${{ steps.backup_names.outputs.resource_group }}
+
+  #         app_resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+  #         app_keyvault: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
+
+  #         backup_storage_account: ${{ steps.backup_names.outputs.storage_account }}
+  #         secret_container_name: secretnames
+  #         manifest_blob_name: secret-manifest.txt
+
+  #         sql_server_secret_name: connectionstrings--database
+  #         sql_server_python_secret_name: python--dbconnectionstring
+  #         sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+  #         sql_database_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
+
+  #         redis_secret_name: connectionstrings--redis
+  #         redis_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+
+  #         servicebus_secret_name: connectionstrings--servicebusconnection
+  #         servicebus_namespace: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}servicebus
+
+  #         appinsights_secret_name: applicationinsights--connectionstring
+  #         appinsights_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-insights
