@@ -406,15 +406,10 @@ jobs:
 
           IDENTITY_NAME=$(basename "$IDENTITY_ID")
 
-          TOKEN=$(az account get-access-token \
-            --resource https://database.windows.net/ \
-            --query accessToken -o tsv)
-
           sqlcmd \
             -S "$SQL_FQDN" \
             -d "$SQL_DB" \
             -G \
-            -P "$TOKEN" \
             -Q "
           IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$IDENTITY_NAME')
           BEGIN
