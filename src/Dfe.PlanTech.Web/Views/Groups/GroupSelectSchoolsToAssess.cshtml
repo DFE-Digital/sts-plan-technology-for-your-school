@@ -17,13 +17,17 @@
         @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessBackLink, new Dictionary<string, string>{["topic"] = Model.Section.Name.ToLower() })
     </govuk-back-link>
 }
-<h1 class="govuk-header-xl">
-    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessHeader)
-</h1>
+
 <form asp-controller="Groups" asp-action="SelectSchoolsToAssess" asp-route-categorySlug="@Model.CategorySlug" asp-route-sectionSlug="@Model.Section.InterstitialPage.Slug"
       method="post">
     <div class="govuk-form-group">
         <fieldset class="govuk-fieldset">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                <span class="govuk-caption-xl">@Model.Section.Name</span>
+                <h1 class="govuk-fieldset-heading">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessHeader)
+                </h1>
+            </legend>
             <div id="select-schools-hint" class="govuk-hint">
                 @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessHint)
             </div>
@@ -43,15 +47,17 @@
                         </div>
                     }
                 }
-            </div>
-            <div class="govuk-checkboxes__divider">or</div>
-            <div class="govuk-checkboxes__item">
-                <input class="govuk-checkboxes__input" id="schools-all" name="schools" type="checkbox" value="all" data-behaviour="exclusive">
-                <label class="govuk-label govuk-checkboxes__label" for="schools-all">
-                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessCheckboxAll)
-                </label>
+                <div class="govuk-checkboxes__divider">or</div>
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="schools-all" name="schools" type="checkbox" value="all" data-behaviour="exclusive">
+                    <label class="govuk-label govuk-checkboxes__label" for="schools-all">
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessCheckboxAll)
+                    </label>
+                </div>
             </div>
         </fieldset>
+        <hr class="govuk-section-break govuk-section-break--m" />
+        <p class="govuk-body">@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessWarning)</p>
     </div>
     <govuk-button type="submit" prevent-double-click="true">
         @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessContinue)
