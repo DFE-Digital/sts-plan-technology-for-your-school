@@ -409,15 +409,15 @@ jobs:
             -U "$SQL_ADMIN_USER" \
             -P "$SQL_ADMIN_PASSWORD" \
             -Q "
-      IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$IDENTITY_NAME')
-      BEGIN
-        CREATE USER [$IDENTITY_NAME] FROM EXTERNAL PROVIDER;
-      END;
+          IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$IDENTITY_NAME')
+          BEGIN
+            CREATE USER [$IDENTITY_NAME] FROM EXTERNAL PROVIDER;
+          END;
 
-      ALTER ROLE db_datareader ADD MEMBER [$IDENTITY_NAME];
-      ALTER ROLE db_datawriter ADD MEMBER [$IDENTITY_NAME];
-      ALTER ROLE db_ddladmin ADD MEMBER [$IDENTITY_NAME];
-      "
+          ALTER ROLE db_datareader ADD MEMBER [$IDENTITY_NAME];
+          ALTER ROLE db_datawriter ADD MEMBER [$IDENTITY_NAME];
+          ALTER ROLE db_ddladmin ADD MEMBER [$IDENTITY_NAME];
+          "
 
   # restore-tokens:
   #   name: Restore app tokens from backup kv
