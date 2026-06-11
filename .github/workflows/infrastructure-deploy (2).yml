@@ -403,7 +403,6 @@ jobs:
             -Database $sqlDb `
             -AccessToken $token `
             -Query $query
-          "
 
   # restore-tokens:
   #   name: Restore app tokens from backup kv
