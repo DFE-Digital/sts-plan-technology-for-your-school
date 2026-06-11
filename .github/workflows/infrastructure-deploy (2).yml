@@ -374,8 +374,6 @@ jobs:
           sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
 
           echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
-          which sqlcmd
-          sqlcmd --version || sqlcmd -?
 
       - name: Whitelist Runner for sql
         uses: ./.github/actions/whitelist-sql
