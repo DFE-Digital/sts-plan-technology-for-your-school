@@ -168,142 +168,122 @@ jobs:
   #         package_name: ${{ env.PACKAGE_NAME }}
   #         github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  # apply-terraform:
-  #   name: Apply Terraform changes
-  #   needs: [image-and-acr]
-  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.apply-terraform) }}
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-  #   permissions:
-  #     id-token: write
-  #     contents: read
+  apply-terraform:
+    name: Apply Terraform changes
+    needs: [image-and-acr]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.apply-terraform) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v3
 
-  #     - name: Prepare derived variables
-  #       id: vars
-  #       shell: bash
-  #       run: |
-  #         set -euo pipefail
+      - name: Prepare derived variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
 
-  #         IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
+          IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
 
-  #         if [ "$IS_DR" = "true" ]; then
-  #           DFE_PROJECT_NAME="pt-dr"
-  #         else
-  #           DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-  #         fi
+          if [ "$IS_DR" = "true" ]; then
+            DFE_PROJECT_NAME="pt-dr"
+          else
+            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+          fi
 
-  #         RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
-  #         RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
-  #         TF_KEYVAULT_NAME="${RESOURCE_PREFIX_TF}-kv"
-  #         KEYVAULT_NAME="${RESOURCE_PREFIX_APP}-kv"
+          RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+          TF_KEYVAULT_NAME="${RESOURCE_PREFIX_TF}-kv"
+          KEYVAULT_NAME="${RESOURCE_PREFIX_APP}-kv"
 
-  #         echo "PROJECT_PREFIX_APP=$DFE_PROJECT_NAME" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_TF_SHORT=${RESOURCE_PREFIX_TF//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "TF_KEYVAULT_NAME=$TF_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
-  #         echo "KEYVAULT_NAME=$KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
-  #         echo "IS_DR=$IS_DR" >> "$GITHUB_OUTPUT"
+          echo "PROJECT_PREFIX_APP=$DFE_PROJECT_NAME" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_TF_SHORT=${RESOURCE_PREFIX_TF//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+          echo "TF_KEYVAULT_NAME=$TF_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
+          echo "KEYVAULT_NAME=$KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
+          echo "IS_DR=$IS_DR" >> "$GITHUB_OUTPUT"
 
-  #     - name: Get runner public IP
-  #       id: whats-my-ip
-  #       run: |
-  #         IP=$(curl -s https://api.ipify.org)
-  #         echo "ip=$IP" >> "$GITHUB_OUTPUT"
-  #         echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
+      - name: Get runner public IP
+        id: whats-my-ip
+        run: |
+          IP=$(curl -s https://api.ipify.org)
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+          echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
 
-  #     - name: Login with AZ
-  #       uses: ./.github/actions/azure-login
-  #       with:
-  #         az_tenant_id: ${{ secrets.az_tenant_id }}
-  #         az_subscription_id: ${{ secrets.az_subscription_id }}
-  #         az_client_id: ${{ secrets.az_client_id }}
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.az_tenant_id }}
+          az_subscription_id: ${{ secrets.az_subscription_id }}
+          az_client_id: ${{ secrets.az_client_id }}
 
-  #     - name: Whitelist Runner for TF keyvault
-  #       uses: ./.github/actions/whitelist-kv
-  #       with:
-  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
-  #         keyvault-name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
-  #         verb: add
+      - name: Whitelist Runner for TF keyvault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
+          keyvault-name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
+          verb: add
 
-  #     - name: Whitelist Runner for TF storage
-  #       uses: ./.github/actions/whitelist-storage
-  #       with:
-  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
-  #         account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
-  #         verb: add
+      - name: Whitelist Runner for TF storage
+        uses: ./.github/actions/whitelist-storage
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
+          account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
+          verb: add
 
-  #     - name: Get secret and clean tfvars file
-  #       shell: pwsh
-  #       run: |
-  #         ./.github/scripts/get-and-normalise-tfvars.ps1 `
-  #           -SecretName "${{ secrets.TF_SECRET_NAME }}" `
-  #           -KeyVaultName "${{ steps.vars.outputs.TF_KEYVAULT_NAME }}"
+      - name: Get secret and clean tfvars file
+        shell: pwsh
+        run: |
+          ./.github/scripts/get-and-normalise-tfvars.ps1 `
+            -SecretName "${{ secrets.TF_SECRET_NAME }}" `
+            -KeyVaultName "${{ steps.vars.outputs.TF_KEYVAULT_NAME }}"
 
-  #     - name: Whitelist Runner for app keyvault(in case exists)
-  #       uses: ./.github/actions/whitelist-kv
-  #       with:
-  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX }}
-  #         keyvault-name: ${{ steps.vars.outputs.KEYVAULT_NAME }}
-  #         verb: add
+      - name: Whitelist Runner for app keyvault(in case exists)
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX }}
+          keyvault-name: ${{ steps.vars.outputs.KEYVAULT_NAME }}
+          verb: add
 
-  #     - name: Terraform init
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-  #       run: |
-  #         terraform init \
-  #           -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
-  #           -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
-  #           -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
-  #           -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+      - name: Terraform init
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
 
-                       # -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
-            #because the shared module for container app does not output the container env, and the azure front door private link in the shared waf module needs it
-            #we must make it first so we can reference with a data block IF using the external version.
-      # - name: Apply Terraform changes - main hosting only
-      #   working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-      #   run: |
-      #     terraform plan -input=false \
-      #       -target=module.main_hosting \
-      #       -var-file="../../normalisedTerraformVars.tfvars" \
-      #       -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-      #       -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-      #       -var="image_tag=development-fcbd108f2ea4351c1b75077816151a4a9f75daa4" \
-      #       -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
-      #       -var="azure_location=northeurope" \
-      #       -out=tfplanmh
+      - name: Apply Terraform changes - rest of app
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform plan -input=false \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
+            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
+            -var="azure_location=northeurope" \
+            -out=tfplanapp
 
-      #       terraform show -no-color tfplanmh || true
+            terraform show -no-color tfplanapp || true
 
-      #       terraform apply -auto-approve -input=false tfplanmh
-
-      # - name: Apply Terraform changes - rest of app
-      #   working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-      #   run: |
-      #     terraform plan -input=false \
-      #       -var-file="../../normalisedTerraformVars.tfvars" \
-      #       -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-      #       -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-      #       -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
-      #       -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
-      #       -var="azure_location=northeurope" \
-      #       -out=tfplanapp
-
-      #       terraform show -no-color tfplanapp || true
-
-      #       terraform apply -auto-approve -input=false tfplanapp
+            terraform apply -auto-approve -input=false tfplanapp
 
   restore-db:
     name: Restore DB from BACPAC
-    #needs: [apply-terraform]
+    needs: [apply-terraform]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
     runs-on: ubuntu-latest
     environment:
