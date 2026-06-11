@@ -364,58 +364,46 @@ jobs:
   #         bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
   #         bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
   #         use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
-      - name: Install sqlcmd
-        shell: bash
-        run: |
-          curl https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-          curl https://packages.microsoft.com/config/ubuntu/22.04/prod.list | sudo tee /etc/apt/sources.list.d/msprod.list
-
-          sudo apt-get update
-          sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-
-          echo "/opt/mssql-tools18/bin" >> $GITHUB_PATH
-
-      - name: Whitelist Runner for sql
-        uses: ./.github/actions/whitelist-sql
-        with:
-          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          verb: add
-
       - name: Grant Container App identity access to restored SQL DB
-        shell: bash
-        env:
-          SQL_ADMIN_USER: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-admin
-          SQL_ADMIN_PASSWORD: ${{ secrets.AZ_SQL_ADMIN_PASSWORD }}
+        shell: pwsh
         run: |
-          set -euo pipefail
+          $ErrorActionPreference = "Stop"
 
-          RG="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
-          SQL_SERVER="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
-          SQL_DB="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
-          IDENTITY_NAME="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-uami-containerapp"
+          Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
 
-          SQL_FQDN=$(az sql server show \
-            --resource-group "$RG" \
-            --name "$SQL_SERVER" \
-            --query fullyQualifiedDomainName -o tsv)
+          $rg = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+          $sqlServer = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+          $sqlDb = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
+          $identityName = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-uami-containerapp"
 
-          sqlcmd \
-            -S "$SQL_FQDN" \
-            -d "$SQL_DB" \
-            -U "$SQL_ADMIN_USER" \
-            -P "$SQL_ADMIN_PASSWORD" \
-            -Q "
-              IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$IDENTITY_NAME')
-              BEGIN
-                CREATE USER [$IDENTITY_NAME] FROM EXTERNAL PROVIDER;
-              END;
+          $sqlFqdn = az sql server show `
+            --resource-group $rg `
+            --name $sqlServer `
+            --query fullyQualifiedDomainName `
+            -o tsv
 
-              ALTER ROLE db_datareader ADD MEMBER [$IDENTITY_NAME];
-              ALTER ROLE db_datawriter ADD MEMBER [$IDENTITY_NAME];
-              ALTER ROLE db_ddladmin ADD MEMBER [$IDENTITY_NAME];
-              "
+          $token = az account get-access-token `
+            --resource https://database.windows.net/ `
+            --query accessToken `
+            -o tsv
+
+          $query = @"
+          IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$identityName')
+          BEGIN
+            CREATE USER [$identityName] FROM EXTERNAL PROVIDER;
+          END;
+
+          ALTER ROLE db_datareader ADD MEMBER [$identityName];
+          ALTER ROLE db_datawriter ADD MEMBER [$identityName];
+          ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
+          "@
+
+          Invoke-Sqlcmd `
+            -ServerInstance $sqlFqdn `
+            -Database $sqlDb `
+            -AccessToken $token `
+            -Query $query
+          "
 
   # restore-tokens:
   #   name: Restore app tokens from backup kv
