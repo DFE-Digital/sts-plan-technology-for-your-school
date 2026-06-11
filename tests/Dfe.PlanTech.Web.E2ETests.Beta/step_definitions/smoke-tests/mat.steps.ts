@@ -12,28 +12,11 @@ Then('I should see the select a school heading', async function () {
 });
 
 Then('I should see the following schools:', async function (dataTable: DataTable) {
-  const schoolRows = dataTable.raw().flat();
+  const schoolNames = dataTable.raw().flat(); // single column
 
-  for (const schoolRow of schoolRows) {
-    const possibleSchoolNames = schoolRow
-      .split(' OR ')
-      .map(name => name.trim());
-
-    let schoolFound = false;
-
-    for (const schoolName of possibleSchoolNames) {
-      const button = this.page.getByRole('button', { name: schoolName });
-
-      if (await button.isVisible().catch(() => false)) {
-        schoolFound = true;
-        break;
-      }
-    }
-
-    expect(
-      schoolFound,
-      `None of the expected school names were visible: ${possibleSchoolNames.join(', ')}`
-    ).toBe(true);
+  for (const schoolName of schoolNames) {
+    const button = this.page.getByRole('button', { name: schoolName });
+    await expect(button, `School button not visible: ${schoolName}`).toBeVisible();
   }
 });
 
