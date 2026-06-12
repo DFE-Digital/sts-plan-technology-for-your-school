@@ -30,7 +30,7 @@ We use two external modules to create the majority of the resources required:
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
-| <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | = 1.15.0 |
+| <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | 1.15.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | 4.74.0 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | = 3.2.3 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | = 3.6.3 |
@@ -107,7 +107,7 @@ We use two external modules to create the majority of the resources required:
 |------|-------------|------|---------|:--------:|
 | <a name="input_az_app_kestrel_endpoint"></a> [az\_app\_kestrel\_endpoint](#input\_az\_app\_kestrel\_endpoint) | Endpoint for Kestrel setup | `string` | n/a | yes |
 | <a name="input_az_container_port"></a> [az\_container\_port](#input\_az\_container\_port) | What port the container app is bound to | `number` | `8080` | no |
-| <a name="input_az_mssql_ipv4_allow_list"></a> [az\_mssql\_ipv4\_allow\_list](#input\_az\_mssql\_ipv4\_allow\_list) | IPv4 allow list for SQL DB | <pre>map(object({<br>    start_ip_range : string,<br>    end_ip_range : optional(string, "")<br>  }))</pre> | `{}` | no |
+| <a name="input_az_mssql_ipv4_allow_list"></a> [az\_mssql\_ipv4\_allow\_list](#input\_az\_mssql\_ipv4\_allow\_list) | IPv4 allow list for SQL DB | <pre>map(object({<br/>    start_ip_range : string,<br/>    end_ip_range : optional(string, "")<br/>  }))</pre> | `{}` | no |
 | <a name="input_az_sql_admin_password"></a> [az\_sql\_admin\_password](#input\_az\_sql\_admin\_password) | Password for the admin listed in the 'az\_sql\_azuread\_admin\_username' variable | `string` | n/a | yes |
 | <a name="input_az_sql_azuread_admin_objectid"></a> [az\_sql\_azuread\_admin\_objectid](#input\_az\_sql\_azuread\_admin\_objectid) | Object ID for the admin listed in the 'az\_sql\_azuread\_admin\_username' variable | `string` | n/a | yes |
 | <a name="input_az_sql_azuread_admin_username"></a> [az\_sql\_azuread\_admin\_username](#input\_az\_sql\_azuread\_admin\_username) | Username/email/service principal name/etc of the Azure AD account to use as admin for the SQL Server | `string` | n/a | yes |
@@ -118,7 +118,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_azure_location"></a> [azure\_location](#input\_azure\_location) | Recourse location | `string` | n/a | yes |
 | <a name="input_cdn_create_custom_domain"></a> [cdn\_create\_custom\_domain](#input\_cdn\_create\_custom\_domain) | A flag to create the A and TXT records for the container app as part of setting up the cdn | `bool` | `false` | no |
 | <a name="input_cdn_frontdoor_host_add_response_headers"></a> [cdn\_frontdoor\_host\_add\_response\_headers](#input\_cdn\_frontdoor\_host\_add\_response\_headers) | List of response headers to add at the CDN Front Door `[{ "Name" = "Strict-Transport-Security", "value" = "max-age=31536000" }]` | `list(map(string))` | `[]` | no |
-| <a name="input_cdn_frontdoor_url_path_redirects"></a> [cdn\_frontdoor\_url\_path\_redirects](#input\_cdn\_frontdoor\_url\_path\_redirects) | List of url path redirects to add at the CDN Front Door `[{ "redirect_type": "PermanentRedirect", "destination_path": "/example", "destination_hostname": "www.example.uk", "operator": "Equals", "match_values": ["/example"] }]` | <pre>list(object({<br>    redirect_type        = string<br>    redirect_protocol    = optional(string)<br>    destination_path     = optional(string)<br>    destination_hostname = optional(string)<br>    destination_fragment = optional(string)<br>    query_string         = optional(string)<br>    operator             = string<br>    match_values         = optional(list(string))<br>    transforms           = optional(list(string))<br>  }))</pre> | `[]` | no |
+| <a name="input_cdn_frontdoor_url_path_redirects"></a> [cdn\_frontdoor\_url\_path\_redirects](#input\_cdn\_frontdoor\_url\_path\_redirects) | List of url path redirects to add at the CDN Front Door `[{ "redirect_type": "PermanentRedirect", "destination_path": "/example", "destination_hostname": "www.example.uk", "operator": "Equals", "match_values": ["/example"] }]` | <pre>list(object({<br/>    redirect_type        = string<br/>    redirect_protocol    = optional(string)<br/>    destination_path     = optional(string)<br/>    destination_hostname = optional(string)<br/>    destination_fragment = optional(string)<br/>    query_string         = optional(string)<br/>    operator             = string<br/>    match_values         = optional(list(string))<br/>    transforms           = optional(list(string))<br/>  }))</pre> | `[]` | no |
 | <a name="input_container_app_blob_storage_public_access_enabled"></a> [container\_app\_blob\_storage\_public\_access\_enabled](#input\_container\_app\_blob\_storage\_public\_access\_enabled) | Enable app blob storage public access | `bool` | `false` | no |
 | <a name="input_container_app_http_concurrency"></a> [container\_app\_http\_concurrency](#input\_container\_app\_http\_concurrency) | Scale up at this number of HTTP requests | `number` | `10` | no |
 | <a name="input_container_app_max_replicas"></a> [container\_app\_max\_replicas](#input\_container\_app\_max\_replicas) | Maximum replicas for the container app | `number` | `2` | no |
@@ -132,7 +132,7 @@ We use two external modules to create the majority of the resources required:
 | <a name="input_contentful_webhook_name"></a> [contentful\_webhook\_name](#input\_contentful\_webhook\_name) | Prefix for the Contentful webhook name | `string` | `"Plan Tech Webhook"` | no |
 | <a name="input_environment"></a> [environment](#input\_environment) | Environment name, used along with `project_name` as a prefix for all resources | `string` | n/a | yes |
 | <a name="input_image_tag"></a> [image\_tag](#input\_image\_tag) | Image tag | `string` | n/a | yes |
-| <a name="input_key_ops"></a> [key\_ops](#input\_key\_ops) | The permitted JSON web key operations of the key to be created. | `list(string)` | <pre>[<br>  "decrypt",<br>  "encrypt",<br>  "sign",<br>  "unwrapKey",<br>  "verify",<br>  "wrapKey"<br>]</pre> | no |
+| <a name="input_key_ops"></a> [key\_ops](#input\_key\_ops) | The permitted JSON web key operations of the key to be created. | `list(string)` | <pre>[<br/>  "decrypt",<br/>  "encrypt",<br/>  "sign",<br/>  "unwrapKey",<br/>  "verify",<br/>  "wrapKey"<br/>]</pre> | no |
 | <a name="input_key_size"></a> [key\_size](#input\_key\_size) | The size in bits of the key to be created. | `number` | `2048` | no |
 | <a name="input_key_type"></a> [key\_type](#input\_key\_type) | The JsonWebKeyType of the key to be created. | `string` | `"RSA"` | no |
 | <a name="input_key_vault_cidr_rules"></a> [key\_vault\_cidr\_rules](#input\_key\_vault\_cidr\_rules) | A set of CIDR rules representing allowed IP addresses for network access to the keyvault s190x0x-plantech-kv | `set(string)` | `[]` | no |
