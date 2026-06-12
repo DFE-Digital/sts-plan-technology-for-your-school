@@ -44,6 +44,11 @@ module "main_hosting" {
   #not in v1.2
   #container_app_environment_workload_profile_type = var.container_app_environment_workload_profile_type
 
+  ###################
+  # Azure Key Vault #
+  ###################
+  escrow_container_app_secrets_in_key_vault = true
+  #we will back up the secrets separately
   #############
   # Azure SQL #
   #############
