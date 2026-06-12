@@ -526,7 +526,6 @@ public class MockAuthControllerTests
         private readonly string? _nonce = "nonce-1";
         private readonly int _dbEstablishmentId = 101;
         private readonly int _dbUserId = 11;
-        private readonly int? _dbMatEstablishmentId = null;
 
         public AuthCodeRecordBuilder WithRedirectUri(string redirectUri)
         {

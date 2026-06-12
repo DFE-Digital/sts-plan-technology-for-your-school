@@ -1,15 +1,14 @@
 using System.Collections.Concurrent;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Options;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Dfe.PlanTech.Web.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -20,8 +19,8 @@ public class MockAuthController(
     IEstablishmentRepository establishmentRepository,
     IUserRepository userRepository,
     IMemoryCache cache,
-    IOptions<AutomatedTestingConfiguration> options)
-    : Controller
+    IOptions<AutomatedTestingConfiguration> options
+) : Controller
 {
     private const string SelectorCookieName = "e2e_user";
     private const string SelectorCookieKey = "e2e_key";
@@ -38,11 +37,12 @@ public class MockAuthController(
 
     private static readonly RSA Rsa = RSA.Create(2048);
 
-    private static readonly RsaSecurityKey SecurityKey =
-        new(Rsa) { KeyId = "e2e-auth-test-key" };
+    private static readonly RsaSecurityKey SecurityKey = new(Rsa) { KeyId = "e2e-auth-test-key" };
 
-    private static readonly SigningCredentials SigningCredentials =
-        new(SecurityKey, SecurityAlgorithms.RsaSha256);
+    private static readonly SigningCredentials SigningCredentials = new(
+        SecurityKey,
+        SecurityAlgorithms.RsaSha256
+    );
 
     private static readonly ConcurrentDictionary<string, DateTime> CodeExpiries = new();
 
@@ -51,18 +51,19 @@ public class MockAuthController(
     {
         var baseUrl = GetBaseUrl();
 
-        return Ok(new
-        {
-            issuer = baseUrl,
-            authorization_endpoint = $"{baseUrl}/authorize",
-            token_endpoint = $"{baseUrl}/token",
-            jwks_uri = $"{baseUrl}/jwks",
-            response_types_supported = ResponseTypesSupported,
-            subject_types_supported = SubjectTypesSupported,
-            id_token_signing_alg_values_supported = IdTokenAlgValuesSupported,
-            end_session_endpoint = $"{baseUrl}/endsession",
-
-        });
+        return Ok(
+            new
+            {
+                issuer = baseUrl,
+                authorization_endpoint = $"{baseUrl}/authorize",
+                token_endpoint = $"{baseUrl}/token",
+                jwks_uri = $"{baseUrl}/jwks",
+                response_types_supported = ResponseTypesSupported,
+                subject_types_supported = SubjectTypesSupported,
+                id_token_signing_alg_values_supported = IdTokenAlgValuesSupported,
+                end_session_endpoint = $"{baseUrl}/endsession",
+            }
+        );
     }
 
     [HttpGet("jwks")]
@@ -70,24 +71,25 @@ public class MockAuthController(
     {
         var parameters = Rsa.ExportParameters(false);
 
-        string Base64Url(byte[] input) =>
-            Base64UrlEncoder.Encode(input);
+        string Base64Url(byte[] input) => Base64UrlEncoder.Encode(input);
 
-        return Ok(new
-        {
-            keys = new[]
+        return Ok(
+            new
             {
-                new
+                keys = new[]
                 {
-                    kty = "RSA",
-                    use = "sig",
-                    alg = "RS256",
-                    kid = SecurityKey.KeyId,
-                    n = Base64Url(parameters.Modulus!),
-                    e = Base64Url(parameters.Exponent!)
-                }
+                    new
+                    {
+                        kty = "RSA",
+                        use = "sig",
+                        alg = "RS256",
+                        kid = SecurityKey.KeyId,
+                        n = Base64Url(parameters.Modulus!),
+                        e = Base64Url(parameters.Exponent!),
+                    },
+                },
             }
-        });
+        );
     }
 
     [HttpGet("authorize")]
@@ -95,11 +97,15 @@ public class MockAuthController(
         [FromQuery] string redirect_uri,
         [FromQuery] string response_type,
         [FromQuery] string state,
-        [FromQuery] string? nonce)
+        [FromQuery] string? nonce
+    )
     {
         if (!IsAllowed())
         {
-            return Content("The service is currently unavailable to use while E2E tests are running.", "text/plain");
+            return Content(
+                "The service is currently unavailable to use while E2E tests are running.",
+                "text/plain"
+            );
         }
 
         var allowedRedirectUri = GetAllowedAuthorizeRedirectUri();
@@ -118,19 +124,22 @@ public class MockAuthController(
         var now = DateTime.UtcNow;
         foreach (var kvp in CodeExpiries)
         {
-            if (kvp.Value >= now) continue;
+            if (kvp.Value >= now)
+                continue;
             if (CodeExpiries.TryRemove(kvp.Key, out _))
             {
                 cache.Remove(kvp.Key);
             }
         }
 
-        var schoolTestEstablishments =
-            await establishmentRepository.GetEstablishmentsByAsync(e => e.OrgName != null && e.OrgName == SchoolTestOrgName);
+        var schoolTestEstablishments = await establishmentRepository.GetEstablishmentsByAsync(e =>
+            e.OrgName != null && e.OrgName.Contains(SchoolTestOrgName)
+        );
         var schoolTestEstablishment = schoolTestEstablishments.FirstOrDefault();
 
-        var matTestEstablishments =
-            await establishmentRepository.GetEstablishmentsByAsync(e => e.OrgName == MatTestOrgName);
+        var matTestEstablishments = await establishmentRepository.GetEstablishmentsByAsync(e =>
+            e.OrgName == MatTestOrgName
+        );
         var matTestEstablishment = matTestEstablishments.FirstOrDefault();
 
         var schoolUser = await userRepository.GetUserBySignInRefAsync(TestSchoolUserId);
@@ -149,24 +158,30 @@ public class MockAuthController(
             RedirectUri = redirect_uri,
             Nonce = nonce,
             Expires = DateTime.UtcNow.AddMinutes(2),
-            DbUserId = testSchoolUserId ?? throw new InvalidOperationException("testSchoolUserId not set"),
-            DbEstablishmentId = testSchoolEstablishmentId ?? throw new InvalidOperationException("testSchoolEstablishmentId not set"),
+            DbUserId =
+                testSchoolUserId ?? throw new InvalidOperationException("testSchoolUserId not set"),
+            DbEstablishmentId =
+                testSchoolEstablishmentId
+                ?? throw new InvalidOperationException("testSchoolEstablishmentId not set"),
         };
 
         if (userType == "mat")
         {
-            record.DbEstablishmentId = testMatEstablishmentId ?? throw new InvalidOperationException("testMatEstablishmentId not set");
-            record.DbUserId = testMatUserId ?? throw new InvalidOperationException("testMatUserId not set");
+            record.DbEstablishmentId =
+                testMatEstablishmentId
+                ?? throw new InvalidOperationException("testMatEstablishmentId not set");
+            record.DbUserId =
+                testMatUserId ?? throw new InvalidOperationException("testMatUserId not set");
         }
 
         CodeExpiries[code] = record.Expires;
-        cache.Set(code, record, new MemoryCacheEntryOptions
-        {
-            AbsoluteExpiration = record.Expires
-        });
+        cache.Set(
+            code,
+            record,
+            new MemoryCacheEntryOptions { AbsoluteExpiration = record.Expires }
+        );
 
-        var redirect =
-            $"{allowedRedirectUri}?code={code}&state={Uri.EscapeDataString(state)}";
+        var redirect = $"{allowedRedirectUri}?code={code}&state={Uri.EscapeDataString(state)}";
 
         return Redirect(redirect);
     }
@@ -176,9 +191,9 @@ public class MockAuthController(
         [FromForm] string grant_type,
         [FromForm] string code,
         [FromForm] string redirect_uri,
-        [FromForm] string client_id)
+        [FromForm] string client_id
+    )
     {
-
         var baseUrl = GetBaseUrl();
 
         if (grant_type != "authorization_code")
@@ -207,9 +222,11 @@ public class MockAuthController(
             new(JwtRegisteredClaimNames.Aud, client_id),
             new(ClaimConstants.DB_ESTABLISHMENT_ID, record.DbEstablishmentId.ToString()),
             new(ClaimConstants.DB_USER_ID, record.DbUserId.ToString()),
-            new(JwtRegisteredClaimNames.Iat,
+            new(
+                JwtRegisteredClaimNames.Iat,
                 new DateTimeOffset(now).ToUnixTimeSeconds().ToString(),
-                ClaimValueTypes.Integer64)
+                ClaimValueTypes.Integer64
+            ),
         };
 
         if (!string.IsNullOrEmpty(record.Nonce))
@@ -225,40 +242,45 @@ public class MockAuthController(
             new(JwtRegisteredClaimNames.Sub, record.Subject),
             new(JwtRegisteredClaimNames.Iss, baseUrl),
             new(JwtRegisteredClaimNames.Aud, client_id),
-            new(JwtRegisteredClaimNames.Iat,
+            new(
+                JwtRegisteredClaimNames.Iat,
                 new DateTimeOffset(now).ToUnixTimeSeconds().ToString(),
-                ClaimValueTypes.Integer64),
+                ClaimValueTypes.Integer64
+            ),
             new(ClaimConstants.Organisation, record.OrganisationJson ?? ""),
             new("scope", "openid profile email"),
         };
 
         if (record.DbMatEstablishmentId is not null)
         {
-            claims.Add(new(ClaimConstants.DB_MAT_ESTABLISHMENT_ID, record.DbMatEstablishmentId.ToString()!));
+            claims.Add(
+                new(ClaimConstants.DB_MAT_ESTABLISHMENT_ID, record.DbMatEstablishmentId.ToString()!)
+            );
         }
 
         var accessToken = CreateJwt(baseUrl, claims, now, expires);
 
-        return Ok(new
-        {
-            access_token = accessToken,
-            id_token = idToken,
-            token_type = "Bearer",
-            expires_in = 1800
-        });
+        return Ok(
+            new
+            {
+                access_token = accessToken,
+                id_token = idToken,
+                token_type = "Bearer",
+                expires_in = 1800,
+            }
+        );
     }
 
     [HttpGet("endsession")]
-    public IActionResult EndSession(
-        [FromQuery] string? state)
+    public IActionResult EndSession([FromQuery] string? state)
     {
-        if (!IsAllowed()) return NotFound();
+        if (!IsAllowed())
+            return NotFound();
 
         Response.Cookies.Delete(SelectorCookieName);
         Response.Cookies.Delete(SelectorCookieKey);
 
         var redirect = "/";
-
 
         if (!string.IsNullOrEmpty(state))
         {
@@ -268,18 +290,23 @@ public class MockAuthController(
         return Redirect(redirect);
     }
 
-
-    private static string CreateJwt(string baseUrl, IEnumerable<Claim> claims,
-        DateTime notBefore, DateTime expires)
+    private static string CreateJwt(
+        string baseUrl,
+        IEnumerable<Claim> claims,
+        DateTime notBefore,
+        DateTime expires
+    )
     {
-        var token = new JwtSecurityToken(
-            issuer: baseUrl,
-            claims: claims,
-            notBefore: notBefore,
-            expires: expires,
-            signingCredentials: SigningCredentials);
+        var descriptor = new SecurityTokenDescriptor
+        {
+            Issuer = baseUrl,
+            Subject = new ClaimsIdentity(claims),
+            NotBefore = notBefore,
+            Expires = expires,
+            SigningCredentials = SigningCredentials,
+        };
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return new JsonWebTokenHandler().CreateToken(descriptor);
     }
 
     private sealed class AuthCodeRecord
@@ -301,7 +328,8 @@ public class MockAuthController(
         return request.Cookies.TryGetValue(SelectorCookieName, out var v) ? v : "school";
     }
 
-    private static readonly string SchoolOrganisationJson = @"{
+    private static readonly string SchoolOrganisationJson =
+        @"{
       ""id"": ""EED74904-DB35-4A46-AC23-E2E19C95F715"",
       ""name"": ""DSI TEST Establishment (001) Miscellanenous (27)"",
       ""category"": { ""id"": ""001"", ""name"": ""Establishment"" },
@@ -311,7 +339,8 @@ public class MockAuthController(
       ""legacyId"": ""4000499""
     }";
 
-    private static readonly string MatOrganisationJson = @"{
+    private static readonly string MatOrganisationJson =
+        @"{
       ""id"": ""91380A4E-F30F-4FF8-80A1-D37178CD6AB3"",
       ""name"": ""DSI TEST Multi-Academy Trust (010)"",
       ""category"": { ""id"": ""010"", ""name"": ""Multi-Academy Trust"" },
@@ -322,11 +351,7 @@ public class MockAuthController(
       ""legacyId"": ""4000527""
     }";
 
-    public sealed record FixtureUser(
-        string Sub,
-        string Email,
-        string? OrganisationJson
-    );
+    public sealed record FixtureUser(string Sub, string Email, string? OrganisationJson);
 
     private static FixtureUser FromSelector(string? selector)
     {
@@ -356,7 +381,7 @@ public class MockAuthController(
                 Sub: "E2E_TEST_SCHOOL_USER",
                 Email: "school@test.local",
                 OrganisationJson: SchoolOrganisationJson
-            )
+            ),
         };
     }
 
@@ -384,7 +409,7 @@ public class MockAuthController(
             "Dev" => "https://dev.plan-technology-for-your-school.education.gov.uk",
             "Test" => "https://test.dev.plan-technology-for-your-school.education.gov.uk",
             "Staging" => "https://staging.plan-technology-for-your-school.education.gov.uk",
-            _ => $"{Request.Scheme}://{Request.Host}"
+            _ => $"{Request.Scheme}://{Request.Host}",
         };
     }
 
