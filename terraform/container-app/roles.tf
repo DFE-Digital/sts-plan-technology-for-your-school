@@ -2,7 +2,7 @@
 resource "azurerm_role_assignment" "github_actions_kv_secretsadmin" {
   scope                = azurerm_key_vault.vault.id
   role_definition_name = "Key Vault Administrator"
-  principal_id         = var.github_actions_principal_id
+  principal_id         = var.msi_id
   principal_type       = "ServicePrincipal"
 }
 
