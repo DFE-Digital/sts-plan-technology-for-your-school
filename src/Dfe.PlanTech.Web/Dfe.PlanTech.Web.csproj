@@ -20,6 +20,7 @@
         </Content>
     </ItemGroup>
     <ItemGroup>
+        <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Data.Contentful\Dfe.PlanTech.Data.Contentful.csproj" />
         <ProjectReference Include="..\Dfe.PlanTech.Infrastructure.SignIn\Dfe.PlanTech.Infrastructure.SignIn.csproj" />
