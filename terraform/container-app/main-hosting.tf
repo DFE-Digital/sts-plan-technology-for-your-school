@@ -47,8 +47,8 @@ module "main_hosting" {
   ###################
   # Azure Key Vault #
   ###################
-  escrow_container_app_secrets_in_key_vault = true
-  key_vault_managed_identity_assign_role = true
+  escrow_container_app_secrets_in_key_vault = false
+  key_vault_managed_identity_assign_role = false
   #we will back up the secrets separately
   #############
   # Azure SQL #
