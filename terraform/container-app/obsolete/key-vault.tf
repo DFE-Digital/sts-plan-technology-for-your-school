@@ -1,41 +1,215 @@
-resource "azurerm_key_vault" "default" {
-  count = local.escrow_container_app_secrets_in_key_vault && local.existing_key_vault == "" ? 1 : 0
-
-  name                       = "${local.resource_prefix}-kv"
+resource "azurerm_key_vault" "vault" {
+  name                       = local.kv_name
   location                   = local.azure_location
-  resource_group_name        = local.resource_group.name
-  tenant_id                  = data.azurerm_subscription.current.tenant_id
+  resource_group_name        = local.resource_group_name
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
-  soft_delete_retention_days = 7
-  rbac_authorization_enabled  = true
+  soft_delete_retention_days = 90
+  tags                       = local.tags
   purge_protection_enabled   = true
 
   network_acls {
-    bypass         = "AzureServices"
-    default_action = "Deny"
-    ip_rules       = length(local.key_vault_access_ipv4) > 0 ? local.key_vault_access_ipv4 : null
-    virtual_network_subnet_ids = local.launch_in_vnet ? [
-      azurerm_subnet.container_apps_infra_subnet[0].id
-    ] : []
+    bypass                     = "None"
+    default_action             = "Deny"
+    virtual_network_subnet_ids = [module.main_hosting.networking.subnet_id]
+    ip_rules                   = toset(concat(tolist(local.kv_firewall_cidr_rules), [var.workflow_runner_ip]))
   }
+}
+
+###################
+# Access Policies #
+###################
+
+resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
+  key_vault_id = azurerm_key_vault.vault.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = local.current_user_id
+
+  secret_permissions = ["List", "Get", "Set"]
+  key_permissions    = ["List", "Get", "Create", "GetRotationPolicy", "SetRotationPolicy", "Delete", "Purge", "UnwrapKey", "WrapKey"]
+}
+
+resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
+  key_vault_id = azurerm_key_vault.vault.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+
+  secret_permissions = ["List", "Get"]
+  key_permissions    = ["List", "Get", "WrapKey", "UnwrapKey"]
+}
+
+###########
+# Secrets #
+###########
+
+######################
+# Contentful secrets #
+######################
+
+resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
+  key_vault_id = azurerm_key_vault.vault.id
+  name         = "contentful--deliveryapikey"
+  value        = "temp value"
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "vault_secret_contentful_previewapikey" {
+  key_vault_id = azurerm_key_vault.vault.id
+  name         = "contentful--previewapikey"
+  value        = "temp value"
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "vault_secret_contentful_spaceid" {
+  key_vault_id = azurerm_key_vault.vault.id
+  name         = "contentful--spaceid"
+  value        = "temp value"
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "vault_secret_contentful_environment" {
+  key_vault_id = azurerm_key_vault.vault.id
+  name         = "contentful--environment"
+  value        = "temp value"
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+####################
+# Database secrets #
+####################
+
+resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
+  key_vault_id = azurerm_key_vault.vault.id
+  name         = "connectionstrings--database"
+  value        = local.az_sql_connection_string
+
+  lifecycle {
+    ignore_changes = [
+      expiration_date
+    ]
+  }
+}
+
+###################################
+# Content Security Policy secrets #
+###################################
+
+resource "azurerm_key_vault_secret" "csp_connect_src" {
+  name         = "CSP--ConnectSrc"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = local.kv_secrets_csp_connectsrc
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "csp_default_src" {
+  name         = "CSP--DefaultSrc"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = local.kv_secrets_csp_defaultsrc
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "csp_frame_src" {
+  name         = "CSP--FrameSrc"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = local.kv_secrets_csp_framesrc
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+resource "azurerm_key_vault_secret" "csp_img_src" {
+  name         = "CSP--ImgSrc"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = local.kv_secrets_csp_imgsrc
+
+  lifecycle {
+    ignore_changes = [
+      value,
+      expiration_date
+    ]
+  }
+}
+
+########
+# Keys #
+########
+
+resource "azurerm_key_vault_key" "data_protection_key" {
+  name         = "dataprotection"
+  key_vault_id = azurerm_key_vault.vault.id
+
+  key_type = var.key_type
+  key_size = var.key_size
+  key_opts = var.key_ops
 
   tags = local.tags
+
+  rotation_policy {
+    automatic {
+      time_before_expiry = "P7D"
+    }
+    expire_after         = "P1M"
+    notify_before_expiry = "P14D"
+  }
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
-resource "azurerm_key_vault_secret" "secret_app_setting" {
-  for_each = local.escrow_container_app_secrets_in_key_vault ? nonsensitive(local.container_app_secrets) : {}
+#######
+# API #
+#######
 
-  name         = each.value["name"]
-  value        = sensitive(each.value["value"])
-  key_vault_id = local.key_vault.id
-  content_type = "Container App Environment Variable"
+resource "random_password" "api_key_value" {
+  length  = 32
+  special = true
 }
 
-resource "azurerm_role_assignment" "kv_secret_reader" {
-  count = local.escrow_container_app_secrets_in_key_vault && local.key_vault_managed_identity_assign_role ? 1 : 0
+resource "azurerm_key_vault_secret" "api_key" {
+  name         = "api--authentication--keyvalue"
+  key_vault_id = azurerm_key_vault.vault.id
+  value        = random_password.api_key_value.result
 
-  scope                = local.key_vault.id
-  role_definition_name = "Key Vault Secret User"
-  principal_id         = azurerm_user_assigned_identity.containerapp[0].id
-  description          = "Allow Azure Container Apps to read secrets from an Azure Key Vault"
+  expiration_date = timeadd(timestamp(), "${local.contentful_webhook_secret_timetolive_hours}h")
 }
