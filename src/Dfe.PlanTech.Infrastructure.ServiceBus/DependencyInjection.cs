@@ -82,7 +82,7 @@ public static class DependencyInjection
         services.AddTransient<IWriteCmsWebhookToQueueCommand, WriteCmsWebhookToQueueCommand>();
 
         services.Configure<ServiceBusOptions>(
-            configuration.GetRequiredSection(ConfigurationConstants.ServiceBusOptions)
+            configuration.GetRequiredSection(ConfigurationConstants.ServiceBusOptions).Bind
         );
         return services;
     }

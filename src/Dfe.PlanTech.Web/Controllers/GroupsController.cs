@@ -54,20 +54,23 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpGet(
-        $"school/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.ViewAnswersSlug}"
-    )]
+       $"school/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.ViewAnswersSlug}"
+   )]
     public async Task<IActionResult> ViewInProgressAnswers(
-        string categorySlug,
-        string sectionSlug
-    )
+       string categorySlug,
+       string sectionSlug,
+       string schoolUrn
+   )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(schoolUrn);
 
         return await _groupsViewBuilder.RouteToViewInProgressAnswers(
             this,
             categorySlug,
-            sectionSlug
+            sectionSlug,
+            schoolUrn
         );
     }
 }
