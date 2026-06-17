@@ -90,6 +90,8 @@ jobs:
         id: terraform-apply
         if: steps.terraform-plan.outcome == 'success'
         id: terraform-apply
+        if: steps.terraform-plan.outcome == 'success'
+        id: terraform-apply
         shell: bash
         run: |
           RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
