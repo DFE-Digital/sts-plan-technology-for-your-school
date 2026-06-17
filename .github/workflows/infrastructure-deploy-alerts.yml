@@ -103,6 +103,7 @@ jobs:
       - name: Whitelist Runner for TF storage
         if: always()
         if: always()
+        if: always()
         uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
