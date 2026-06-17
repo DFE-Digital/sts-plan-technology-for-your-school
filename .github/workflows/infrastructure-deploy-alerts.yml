@@ -21,7 +21,7 @@ permissions:
 
 jobs:
   terraform:
-    name: Terraform Apply
+    name: Apply Terraform
     runs-on: ubuntu-latest
     environment:
       name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
@@ -37,7 +37,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Terraform
+      - name: Set up Terraform
         uses: hashicorp/setup-terraform@v3
 
       - name: Login with AZ
@@ -67,33 +67,37 @@ jobs:
       - name: Terraform init
         shell: bash
         run: |
-            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
+          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
+          terraform init \
+              -backend-config="resource_group_name=${RESOURCE_GROUP_NAME}"  \
+              -backend-config="storage_account_name=${{secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}"  \
 
-            terraform init \
-                -backend-config="resource_group_name=${RESOURCE_GROUP_NAME}"  \
-                -backend-config="storage_account_name=${{secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}"  \
-
-# none of the variables are secret, so they can be stored in a checked-in json file. if that changes, move to key vault as per other infra pipeline.
-#Use plan instead of apply for testing.
-      # - name: Terraform plan
-      #   shell: bash
-      #   run: |
-      #       RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
-      #       terraform plan \
-      #       -var-file="terraform.tfvars.json" \
-      #       -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
-      #       -var="environment_github=${{env.ENVIRONMENT}}"
-
-      - name: Terraform apply
+      # None of the variables are secret, so they can be stored in a checked-in json file.
+      # If that changes, move to key vault as per other infra pipeline.
+      # Use plan instead of apply for testing.
+      - name: Terraform plan
+        id: terraform-plan
         shell: bash
         run: |
-            RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
-            terraform apply -auto-approve \
-            -var-file="terraform.tfvars.json" \
-            -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
-            -var="environment_github=${{env.ENVIRONMENT}}"
+          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
+          terraform plan \
+          -var-file="terraform.tfvars.json" \
+          -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
+          -var="environment_github=${{env.ENVIRONMENT}}"
+
+      - name: Terraform apply
+        if: steps.terraform-plan.outcome == 'success'
+        id: terraform-apply
+        shell: bash
+        run: |
+          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
+          terraform apply -auto-approve \
+          -var-file="terraform.tfvars.json" \
+          -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
+          -var="environment_github=${{env.ENVIRONMENT}}"
 
       - name: Whitelist Runner for TF storage
+        if: always()
         uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
