@@ -2,8 +2,8 @@ using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -12,12 +12,12 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
 
 public class SubmissionRepository(
     PlanTechDbContext dbContext,
-    IUserActionIdAccessor userActionIdAccessor
+    IUserActionIdProvider userActionIdAccessor
 ) : ISubmissionRepository
 {
     protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-    private readonly IUserActionIdAccessor _userActionIdAccessor = userActionIdAccessor;
+    private readonly IUserActionIdProvider _userActionIdAccessor = userActionIdAccessor;
 
     public async Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission)
     {
@@ -149,6 +149,19 @@ public class SubmissionRepository(
         await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
             submissionId
         );
+    }
+
+    public Task<SubmissionEntity?> GetLatestCompletedSubmissionBySectionIdAsync(
+        int establishmentId,
+        string sectionId
+    )
+    {
+        return GetPreviousSubmissionsInDescendingOrder(
+                establishmentId,
+                sectionId,
+                SubmissionStatus.CompleteReviewed
+            )
+            .FirstOrDefaultAsync();
     }
 
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(

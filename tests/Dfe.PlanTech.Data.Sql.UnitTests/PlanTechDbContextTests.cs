@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Core.Interfaces;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,14 +6,15 @@ namespace Dfe.PlanTech.Data.Sql.UnitTests;
 
 public class PlanTechDbContextTests
 {
-    private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdAccessor
+    private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdProvider
     {
         public Guid GetUserActionId() => userActionId;
     }
 
     private static PlanTechDbContext BuildPlanTechDbContext(
         string name,
-        IUserActionIdAccessor? userActionIdAccessor = null)
+        IUserActionIdProvider? userActionIdAccessor = null
+    )
     {
         var options = new DbContextOptionsBuilder<PlanTechDbContext>()
             .UseInMemoryDatabase(name)
@@ -30,13 +31,10 @@ public class PlanTechDbContextTests
 
         using var db = BuildPlanTechDbContext(
             nameof(SaveChangesAsync_WhenEntityAdded_ThenSetsUserActionId),
-            new TestUserActionIdAccessor(expectedUserActionId));
+            new TestUserActionIdAccessor(expectedUserActionId)
+        );
 
-        var answer = new AnswerEntity
-        {
-            AnswerText = "Answer",
-            ContentfulRef = "A001",
-        };
+        var answer = new AnswerEntity { AnswerText = "Answer", ContentfulRef = "A001" };
 
         db.Answers.Add(answer);
 
@@ -52,13 +50,10 @@ public class PlanTechDbContextTests
 
         using var db = BuildPlanTechDbContext(
             nameof(SaveChangesAsync_WhenEntityModified_ThenSetsUserActionId),
-            new TestUserActionIdAccessor(updatedUserActionId));
+            new TestUserActionIdAccessor(updatedUserActionId)
+        );
 
-        var answer = new AnswerEntity
-        {
-            AnswerText = "Answer",
-            ContentfulRef = "A001",
-        };
+        var answer = new AnswerEntity { AnswerText = "Answer", ContentfulRef = "A001" };
 
         db.Answers.Add(answer);
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
@@ -74,13 +69,10 @@ public class PlanTechDbContextTests
     public async Task SaveChangesAsync_WhenAccessorIsNull_ThenDoesNotSetUserActionId()
     {
         using var db = BuildPlanTechDbContext(
-            nameof(SaveChangesAsync_WhenAccessorIsNull_ThenDoesNotSetUserActionId));
+            nameof(SaveChangesAsync_WhenAccessorIsNull_ThenDoesNotSetUserActionId)
+        );
 
-        var answer = new AnswerEntity
-        {
-            AnswerText = "Answer",
-            ContentfulRef = "A001",
-        };
+        var answer = new AnswerEntity { AnswerText = "Answer", ContentfulRef = "A001" };
 
         db.Answers.Add(answer);
 

@@ -1,12 +1,12 @@
 using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 
-namespace Dfe.PlanTech.Infrastructure.SignIn.UnitTests;
+namespace Dfe.PlanTech.Core.UnitTests.Helpers;
 
-public class UserClaimsExtensionsTests
+public class UserClaimsHelperTests
 {
     [Fact]
     public void GetDsiReference_Should_Return_UserId_When_ClaimsPrincipal_Exists()
@@ -18,7 +18,7 @@ public class UserClaimsExtensionsTests
         );
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var userId = UserClaimsExtensions.GetDsiReference(claimsPrincipal.Claims);
+        var userId = claimsPrincipal.Claims.GetDsiReference();
 
         Assert.Equal(expectedUserId, userId);
     }
@@ -26,13 +26,13 @@ public class UserClaimsExtensionsTests
     [Fact]
     public void GetDsiReference_Should_Throw_When_ClaimsPrincipal_Is_Null()
     {
-        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsExtensions.GetDsiReference(null!));
+        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsHelper.GetDsiReference(null!));
     }
 
     [Fact]
     public void GetOrganisation_Should_Throw_When_ClaimsPrincipal_Is_Null()
     {
-        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsExtensions.GetOrganisation(null!));
+        Assert.ThrowsAny<ArgumentNullException>(() => UserClaimsHelper.GetOrganisation(null!));
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public class UserClaimsExtensionsTests
         var identity = new ClaimsIdentity(Array.Empty<Claim>());
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var organisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
+        var organisation = claimsPrincipal.Claims.GetOrganisation();
 
         Assert.Null(organisation);
     }
@@ -54,9 +54,7 @@ public class UserClaimsExtensionsTests
         );
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        Assert.ThrowsAny<Exception>(() =>
-            UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims)
-        );
+        Assert.ThrowsAny<Exception>(() => claimsPrincipal.Claims.GetOrganisation());
     }
 
     [Fact]
@@ -76,7 +74,7 @@ public class UserClaimsExtensionsTests
         );
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
+        var foundOrganisation = claimsPrincipal.Claims.GetOrganisation();
 
         Assert.Null(foundOrganisation);
     }
@@ -98,7 +96,7 @@ public class UserClaimsExtensionsTests
         );
         var claimsPrincipal = new ClaimsPrincipal(identity);
 
-        var foundOrganisation = UserClaimsExtensions.GetOrganisation(claimsPrincipal.Claims);
+        var foundOrganisation = claimsPrincipal.Claims.GetOrganisation();
 
         Assert.NotNull(foundOrganisation);
         Assert.Equal(organisation.Id, foundOrganisation.Id);

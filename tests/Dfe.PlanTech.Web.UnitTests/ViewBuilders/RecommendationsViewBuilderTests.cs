@@ -10,7 +10,6 @@ using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders;
@@ -28,7 +27,7 @@ public class RecommendationsViewBuilderTests
 
     // ---- Substitutes (collaborators)
     private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
-    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
     private readonly INotifyService _notifyService = Substitute.For<INotifyService>();
     private readonly IRecommendationService _recommendationService =
         Substitute.For<IRecommendationService>();

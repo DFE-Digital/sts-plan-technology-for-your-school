@@ -1,6 +1,6 @@
-namespace Dfe.PlanTech.Web.Context.Interfaces;
+namespace Dfe.PlanTech.Application.Providers.Interfaces;
 
-public interface ICurrentUser
+public interface ICurrentUserProvider
 {
     string? DsiReference { get; }
     string? Email { get; }

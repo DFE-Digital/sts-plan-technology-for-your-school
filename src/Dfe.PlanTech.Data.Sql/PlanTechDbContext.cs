@@ -1,6 +1,6 @@
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Interfaces;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -28,13 +28,14 @@ public class PlanTechDbContext : DbContext
 
     public virtual DbSet<UserActionEntity> UserActions { get; set; } = null!;
 
-    private readonly IUserActionIdAccessor? _userActionIdAccessor;
+    private readonly IUserActionIdProvider? _userActionIdAccessor;
 
     public PlanTechDbContext() { }
 
     public PlanTechDbContext(
         DbContextOptions<PlanTechDbContext> options,
-        IUserActionIdAccessor? correlationIdAccessor = null)
+        IUserActionIdProvider? correlationIdAccessor = null
+    )
         : base(options)
     {
         _userActionIdAccessor = correlationIdAccessor;
@@ -74,9 +75,11 @@ public class PlanTechDbContext : DbContext
 
             if (userActionId is not null)
             {
-                foreach (var entry in ChangeTracker
-                    .Entries<IUserActionEntity>()
-                    .Where(e => e.State is EntityState.Added or EntityState.Modified))
+                foreach (
+                    var entry in ChangeTracker
+                        .Entries<IUserActionEntity>()
+                        .Where(e => e.State is EntityState.Added or EntityState.Modified)
+                )
                 {
                     entry.Entity.UserActionId = userActionId;
                 }

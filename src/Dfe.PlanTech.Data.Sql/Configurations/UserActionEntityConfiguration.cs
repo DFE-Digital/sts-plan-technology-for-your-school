@@ -12,26 +12,22 @@ public class UserActionEntityConfiguration : IEntityTypeConfiguration<UserAction
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Id)
-            .HasColumnName("id")
-            .ValueGeneratedNever();
+        builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
 
-        builder.Property(x => x.UserId)
-            .HasColumnName("userId")
-            .IsRequired();
+        builder.Property(x => x.UserId).HasColumnName("userId").IsRequired();
 
-        builder.Property(x => x.EstablishmentId)
-            .HasColumnName("establishmentId");
+        builder.Property(x => x.EstablishmentId).HasColumnName("establishmentId");
 
-        builder.Property(x => x.MatEstablishmentId)
-            .HasColumnName("matEstablishmentId");
+        builder.Property(x => x.MatEstablishmentId).HasColumnName("matEstablishmentId");
 
-        builder.Property(x => x.RequestedUrl)
+        builder
+            .Property(x => x.RequestedUrl)
             .HasColumnName("requestedUrl")
             .IsRequired()
             .HasMaxLength(2048);
 
-        builder.Property(x => x.DateCreated)
+        builder
+            .Property(x => x.DateCreated)
             .HasColumnName("dateCreated")
             .IsRequired()
             .HasDefaultValueSql("SYSUTCDATETIME()")

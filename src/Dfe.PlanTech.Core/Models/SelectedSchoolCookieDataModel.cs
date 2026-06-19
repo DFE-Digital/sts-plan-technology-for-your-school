@@ -1,6 +1,6 @@
-namespace Dfe.PlanTech.Web.Context
+namespace Dfe.PlanTech.Core.Models
 {
-    public class SelectedSchoolCookieData
+    public class SelectedSchoolCookieDataModel
     {
         public string? Urn { get; set; }
         public string? Name { get; set; }

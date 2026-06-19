@@ -8,7 +8,6 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -22,7 +21,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class RecommendationsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     INotifyService notifyService,
     IRecommendationService recommendationService,
     ISubmissionService submissionService,
