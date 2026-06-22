@@ -10,6 +10,7 @@ using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -414,7 +415,7 @@ public class GroupsViewBuilderTests
             .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>());
     }
 
-    // --- RouteToSelectASelfAssessmentViewModelAsync ----------------------------
+    // --- RouteToSelectSchoolsToAssessViewModelAsync ----------------------------
     [Fact]
     public async Task RouteToSelectSchoolsToAssessViewModelAsync_Builds_View_With_Expected_Model()
     {
@@ -439,8 +440,8 @@ public class GroupsViewBuilderTests
             new() { Id = 10 },
             new() { Id = 20 },
             new() { Id = 30 }
-        };         
-            
+        };
+
         est.GetEstablishmentLinks(100)
             .Returns(
                 new List<SqlEstablishmentLinkDto>
@@ -499,10 +500,17 @@ public class GroupsViewBuilderTests
         };
 
         var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
-        var controller = new TestController();
+        var controller = new TestController()
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData()
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
 
         // Act
-        var action = await sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, categorySlug, sectionSlug);
+        var action = await sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, sectionSlug);
 
         // Assert
         await est.Received(1).GetEstablishmentLinks(100);
@@ -553,7 +561,14 @@ public class GroupsViewBuilderTests
         var sectionSlug = "section-2";
 
         var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
-        var controller = new TestController();
+        var controller = new TestController()
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData()
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
 
         var establishmentLinks = new List<SqlEstablishmentLinkDto>()
         {
@@ -567,8 +582,8 @@ public class GroupsViewBuilderTests
         contentful.GetSectionBySlugAsync(sectionSlug)
             .Returns((QuestionnaireSectionEntry?)null!);
 
-        var ex = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() => 
-            sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, categorySlug, sectionSlug)
+        var ex = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, sectionSlug)
         );
 
         Assert.Equal($"Could not find topic for slug '{sectionSlug}'", ex.Message);
@@ -586,7 +601,14 @@ public class GroupsViewBuilderTests
         var section = new QuestionnaireSectionEntry();
 
         var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
-        var controller = new TestController();
+        var controller = new TestController()
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData()
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
 
         contentful.GetSectionBySlugAsync(sectionSlug)
             .Returns(section);
@@ -595,7 +617,7 @@ public class GroupsViewBuilderTests
             .Returns([]);
 
         var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, categorySlug, sectionSlug)
+            sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, sectionSlug)
         );
 
         Assert.Equal($"Could not find linked establishments for group ID: 100", ex.Message);

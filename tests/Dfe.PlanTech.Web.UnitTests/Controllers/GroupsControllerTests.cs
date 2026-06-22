@@ -2,7 +2,10 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
+using Microsoft.Azure.Amqp.Transaction;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -20,7 +23,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _logger = Substitute.For<ILogger<GroupsController>>();
             _viewBuilder = Substitute.For<IGroupsViewBuilder>();
             _currentUser = Substitute.For<ICurrentUser>();
-            _controller = new GroupsController(_logger, _currentUser, _viewBuilder);
+            _controller = new GroupsController(_logger, _currentUser, _viewBuilder)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    RouteData = new RouteData()
+                }
+            };
         }
 
         [Fact]
@@ -55,20 +64,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         }
 
         [Fact]
-        public async Task GetSelectSchoolsToAssessViewModelAsync_CallsViewBuilderAndReturnsResult()
-        {
-            var categorySlug = "some-category";
-            var sectionSlug = "some-section";
-
-            _viewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(_controller, categorySlug, sectionSlug).Returns(new OkResult());
-
-            var result = await _controller.GetSelectSchoolsToAssessView(categorySlug, sectionSlug);
-
-            await _viewBuilder.Received(1).RouteToSelectSchoolsToAssessViewModelAsync(_controller, categorySlug, sectionSlug);
-            Assert.IsType<OkResult>(result);
-        }
-
-        [Fact]
         public async Task SelectSchool_RecordsSelectionAndRedirects()
         {
             var schoolUrn = "123456";
@@ -83,6 +78,43 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             var redirect = Assert.IsType<RedirectResult>(result);
             Assert.Equal(UrlConstants.HomePage, redirect.Url);
+        }
+
+        [Fact]
+        public async Task GetSelectSchoolsToAssessViewModelAsync_CallsViewBuilderAndReturnsResult()
+        {
+            var sectionSlug = "some-section";
+
+            _viewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug).Returns(new OkResult());
+
+            var result = await _controller.GetSelectSchoolsToAssessView(sectionSlug);
+
+            await _viewBuilder.Received(1).RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug);
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task SubmitSelectedSchoolsToAssess_ThrowsArgumentNullException_NoSectionSlug()
+        {
+            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.SubmitSelectedSchoolsToAssess(new GroupSelectSchoolsToAssessInputViewModel(), null!));
+        }
+
+        [Fact]
+        public async Task SubmitSelectedSchoolsToAssess_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "category";
+            var sectionSlug = "section";
+            var schoolRefs = new List<string> { "000001", "000002" };
+            var inputViewModel = new GroupSelectSchoolsToAssessInputViewModel();
+            _controller.RouteData.Values["categorySlug"] = categorySlug;
+
+            _viewBuilder.SubmitSelectedSchoolsToAssessAndRedirect(_controller, inputViewModel, sectionSlug).Returns(new OkResult());
+
+            var result = await _controller.SubmitSelectedSchoolsToAssess(inputViewModel, sectionSlug);
+
+            await _viewBuilder.Received(1).SubmitSelectedSchoolsToAssessAndRedirect(_controller, inputViewModel, sectionSlug);
+            Assert.IsType<OkResult>(result);
         }
     }
 }
