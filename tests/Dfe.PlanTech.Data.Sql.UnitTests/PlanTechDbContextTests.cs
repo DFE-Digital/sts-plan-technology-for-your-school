@@ -13,7 +13,7 @@ public class PlanTechDbContextTests
 
     private static PlanTechDbContext BuildPlanTechDbContext(
         string name,
-        IUserActionIdProvider? userActionIdAccessor = null
+        IUserActionIdProvider? userActionIdProvider = null
     )
     {
         var options = new DbContextOptionsBuilder<PlanTechDbContext>()
@@ -21,7 +21,7 @@ public class PlanTechDbContextTests
             .EnableSensitiveDataLogging()
             .Options;
 
-        return new PlanTechDbContext(options, userActionIdAccessor);
+        return new PlanTechDbContext(options, userActionIdProvider);
     }
 
     [Fact]

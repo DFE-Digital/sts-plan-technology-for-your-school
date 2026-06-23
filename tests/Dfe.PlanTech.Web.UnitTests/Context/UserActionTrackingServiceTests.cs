@@ -27,9 +27,9 @@ public class UserActionTrackingServiceTests
 
         return new UserActionTrackingService(
             _logger,
-            _userActionRepository,
+            _currentUser,
             _httpContextAccessor,
-            _currentUser
+            _userActionRepository
         );
     }
 
@@ -104,9 +104,9 @@ public class UserActionTrackingServiceTests
 
         var service = new UserActionTrackingService(
             _logger,
-            _userActionRepository,
+            _currentUser,
             _httpContextAccessor,
-            _currentUser
+            _userActionRepository
         );
 
         var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>

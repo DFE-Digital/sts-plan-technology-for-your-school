@@ -1,10 +1,10 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
@@ -16,8 +16,9 @@ public class BannerConditionsContextProvider(
     IHttpContextAccessor contextAccessor,
     ISubmissionService submissionService,
     IRecommendationService recommendationService,
-    IUserActionTrackingService userActionTrackingService
-)
+    IUserActionTrackingService userActionTrackingService,
+    IUserContentViewService userContentViewService
+) : IBannerConditionsContextProvider
 {
     private readonly ILogger<BannerConditionsContextProvider> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
@@ -32,29 +33,17 @@ public class BannerConditionsContextProvider(
     private readonly IUserActionTrackingService _userActionTrackingService =
         userActionTrackingService
         ?? throw new ArgumentNullException(nameof(userActionTrackingService));
+    private readonly IUserContentViewService _userContentViewService =
+        userContentViewService ?? throw new ArgumentNullException(nameof(userContentViewService));
 
-    public BannerConditionsContextModel GetBannerConditionsContext()
-    {
-        return new BannerConditionsContextModel
-        {
-            TimesShown = 0,
-            IsSchoolUser = HasCategoryId([DsiConstants.EstablishmentCategoryId]),
-            IsGroupUser = HasCategoryId(DsiConstants.OrganisationGroupCategories),
-            IsUnknownStatus = false,
-            IsNotStartedStatus = false,
-            IsInProgressStatus = false,
-            IsCompletedStatus = false,
-        };
-    }
-
-    public async Task<bool> DetermineBannerVisibilityAndRecordViewAction(
+    public async Task<bool> RecordViewActionAndGetBannerVisibility(
         ComponentNotificationBannerEntry banner
     )
     {
         var shouldShowBanner = await ShouldShowBanner(banner);
         if (shouldShowBanner)
         {
-            await _userActionTrackingService.RecordBannerViewAsync(banner.Id);
+            await _userContentViewService.RecordContentViewAsync(banner.Id);
         }
 
         return shouldShowBanner;
@@ -78,11 +67,14 @@ public class BannerConditionsContextProvider(
             return false; // Banner has expired
         }
 
-        var numberOfTimesShown =
-            await _userActionTrackingService.GetNumberOfTimesBannerViewedByUserAsync(banner.Id);
-        if (numberOfTimesShown >= banner.NumberOfTimesToShow)
+        if (banner.NumberOfTimesToShow != null)
         {
-            return false; // Banner has been shown enough times
+            var numberOfTimesShown =
+                await _userContentViewService.GetNumberOfTimesContentViewedByUserAsync(banner.Id);
+            if (numberOfTimesShown >= banner.NumberOfTimesToShow)
+            {
+                return false; // Banner has been shown enough times
+            }
         }
 
         if (
@@ -114,7 +106,7 @@ public class BannerConditionsContextProvider(
         {
             if (condition.Entry is QuestionnaireSectionEntry sectionEntry)
             {
-                var shouldShow = await DetermineVisibilityForSection(
+                var shouldShow = await GetVisibilityForSection(
                     condition,
                     establishmentId,
                     sectionEntry.Id
@@ -130,7 +122,7 @@ public class BannerConditionsContextProvider(
 
             if (condition.Entry is RecommendationChunkEntry recommendationEntry)
             {
-                var shouldShow = await DetermineVisibilityForRecommendation(
+                var shouldShow = await GetVisibilityForRecommendation(
                     condition,
                     establishmentId,
                     recommendationEntry.Id
@@ -148,7 +140,7 @@ public class BannerConditionsContextProvider(
         return true;
     }
 
-    private async Task<bool> DetermineVisibilityForSection(
+    private async Task<bool> GetVisibilityForSection(
         ConditionEntry condition,
         int establishmentId,
         string sectionId
@@ -195,7 +187,7 @@ public class BannerConditionsContextProvider(
         return true;
     }
 
-    private async Task<bool> DetermineVisibilityForRecommendation(
+    private async Task<bool> GetVisibilityForRecommendation(
         ConditionEntry condition,
         int establishmentId,
         string recommendationId

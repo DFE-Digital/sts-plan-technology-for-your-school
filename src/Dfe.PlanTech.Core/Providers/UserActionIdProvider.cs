@@ -6,10 +6,13 @@ namespace Dfe.PlanTech.Core.Providers;
 
 public class UserActionIdProvider(IHttpContextAccessor httpContextAccessor) : IUserActionIdProvider
 {
+    private readonly IHttpContextAccessor _httpContextAccessor =
+        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+
     public Guid GetUserActionId()
     {
         var httpContext =
-            httpContextAccessor.HttpContext
+            _httpContextAccessor.HttpContext
             ?? throw new InvalidOperationException("No active HttpContext found.");
 
         if (

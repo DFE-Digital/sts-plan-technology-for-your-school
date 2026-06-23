@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -124,7 +123,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.NotStarted.ToString(),
+            NewStatus = RecommendationStatus.NotStarted,
             NoteText = null,
         };
 
@@ -135,8 +134,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             MatEstablishmentId = group.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.NotStarted.ToString(),
-            NewStatus = RecommendationStatus.InProgress.ToString(),
+            PreviousStatus = RecommendationStatus.NotStarted,
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = null,
         };
 
@@ -162,7 +161,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         Assert.Equal("Test Answer", result.AnswerText);
 
         // Should reflect the earliest history record
-        Assert.Equal(RecommendationStatus.NotStarted.ToString(), result.StatusText);
+        Assert.Equal(RecommendationStatus.NotStarted, result.Status);
         Assert.True(
             (result.StatusChangeDate - earliest).Duration() < TimeSpan.FromMilliseconds(3.3),
             $"Expected timtstamp within 3.3ms of record value. Expected={earliest:o}, Actual={result.StatusChangeDate:o}"
@@ -263,7 +262,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.NotStarted.ToString(),
+            NewStatus = RecommendationStatus.NotStarted,
             NoteText = null,
         };
 
@@ -274,8 +273,8 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
             MatEstablishmentId = null,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.NotStarted.ToString(),
-            NewStatus = RecommendationStatus.InProgress.ToString(),
+            PreviousStatus = RecommendationStatus.NotStarted,
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = null,
         };
 
@@ -301,7 +300,7 @@ public class StoredProcedureCallValidationTests : DatabaseIntegrationTestBase
         Assert.Equal("Test Answer", result.AnswerText);
 
         // Should reflect the earliest history record
-        Assert.Equal(RecommendationStatus.NotStarted.ToString(), result.StatusText);
+        Assert.Equal(RecommendationStatus.NotStarted, result.Status);
         Assert.True(
             (result.StatusChangeDate - earliest).Duration() < TimeSpan.FromMilliseconds(3.3),
             $"Expected timtstamp within 3.3ms of record value. Expected={earliest:o}, Actual={result.StatusChangeDate:o}"

@@ -12,18 +12,18 @@ namespace Dfe.PlanTech.Data.Sql.Repositories;
 
 public class SubmissionRepository(
     PlanTechDbContext dbContext,
-    IUserActionIdProvider userActionIdAccessor
+    IUserActionIdProvider userActionIdProvider
 ) : ISubmissionRepository
 {
     protected readonly PlanTechDbContext _db =
         dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-    private readonly IUserActionIdProvider _userActionIdAccessor = userActionIdAccessor;
+    private readonly IUserActionIdProvider _userActionIdProvider = userActionIdProvider;
 
     public async Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission)
     {
         ArgumentNullException.ThrowIfNull(existingSubmission);
 
-        var userActionId = _userActionIdAccessor.GetUserActionId();
+        var userActionId = _userActionIdProvider.GetUserActionId();
 
         var newSubmission = new SubmissionEntity
         {
@@ -106,15 +106,15 @@ public class SubmissionRepository(
             {
                 if (r.CompletingAnswers.Any(ca => responses.Contains(ca.Id)))
                 {
-                    return new { r.Id, Status = RecommendationStatus.Complete.ToString() };
+                    return new { r.Id, Status = RecommendationStatus.Complete };
                 }
 
                 if (r.InProgressAnswers.Any(ca => responses.Contains(ca.Id)))
                 {
-                    return new { r.Id, Status = RecommendationStatus.InProgress.ToString() };
+                    return new { r.Id, Status = RecommendationStatus.InProgress };
                 }
 
-                return new { r.Id, Status = RecommendationStatus.NotStarted.ToString() };
+                return new { r.Id, Status = RecommendationStatus.NotStarted };
             })
             .Where(x => x is not null)
             .ToDictionary(x => x!.Id, x => x.Status);
@@ -259,7 +259,7 @@ public class SubmissionRepository(
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
-        var userActionId = _userActionIdAccessor.GetUserActionId();
+        var userActionId = _userActionIdProvider.GetUserActionId();
 
         submission.DateCompleted = DateTime.UtcNow;
         submission.CompletedUserActionId = userActionId;
@@ -312,7 +312,7 @@ public class SubmissionRepository(
         }
 
         submission.Status = SubmissionStatus.Inaccessible;
-        submission.LastUpdatedUserActionId = _userActionIdAccessor.GetUserActionId();
+        submission.LastUpdatedUserActionId = _userActionIdProvider.GetUserActionId();
 
         await _db.SaveChangesAsync();
 
@@ -349,7 +349,7 @@ public class SubmissionRepository(
         if (submission.Status.Equals(SubmissionStatus.Inaccessible))
         {
             submission.Status = SubmissionStatus.InProgress;
-            submission.LastUpdatedUserActionId = _userActionIdAccessor.GetUserActionId();
+            submission.LastUpdatedUserActionId = _userActionIdProvider.GetUserActionId();
 
             await _db.SaveChangesAsync();
         }
@@ -499,15 +499,17 @@ public class SubmissionRepository(
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
 
-        var currentSubmissions = await _db
+        var currentSubmissionsRaw = await _db
             .Submissions.Where(s =>
                 !s.Deleted
                 && s.EstablishmentId == establishmentId
                 && sectionIdList.Contains(s.SectionId)
             )
-            .GroupBy(s => s.SectionId)
-            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
+
+        var currentSubmissions = currentSubmissionsRaw
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First());
 
         var lastCompleteSubmissions = await _db
             .Submissions.Where(s =>
@@ -566,7 +568,7 @@ public class SubmissionRepository(
         if (submissionId is null)
             return;
 
-        var userActionId = _userActionIdAccessor.GetUserActionId();
+        var userActionId = _userActionIdProvider.GetUserActionId();
 
         await _db
             .Submissions.Where(s => s.Id == submissionId.Value)
@@ -622,7 +624,7 @@ public class SubmissionRepository(
             DateCreated = DateTime.UtcNow,
         };
 
-        var userActionId = _userActionIdAccessor.GetUserActionId();
+        var userActionId = _userActionIdProvider.GetUserActionId();
 
         await _db.Responses.AddAsync(responseEntity);
 
@@ -652,7 +654,7 @@ public class SubmissionRepository(
             return submissionId.Value;
         }
 
-        var userActionId = _userActionIdAccessor.GetUserActionId();
+        var userActionId = _userActionIdProvider.GetUserActionId();
 
         var submission = new SubmissionEntity
         {
@@ -776,6 +778,7 @@ public class SubmissionRepository(
             RecommendationText = recommendationDto.RecommendationText,
             QuestionId = recommendationDto.QuestionId,
             QuestionContentfulRef = recommendationDto.QuestionContentfulRef,
+            Archived = recommendationDto.Archived,
         };
     }
 }

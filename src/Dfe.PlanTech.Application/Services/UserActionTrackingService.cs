@@ -10,66 +10,52 @@ namespace Dfe.PlanTech.Application.Services;
 
 public class UserActionTrackingService(
     ILogger<UserActionTrackingService> logger,
-    IUserActionRepository userActionRepository,
+    ICurrentUserProvider currentUser,
     IHttpContextAccessor httpContextAccessor,
-    ICurrentUserProvider currentUser
+    IUserActionRepository userActionRepository
 ) : IUserActionTrackingService
 {
+    private readonly ILogger<UserActionTrackingService> logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
+    private readonly ICurrentUserProvider _currentUser =
+        currentUser ?? throw new ArgumentNullException(nameof(currentUser));
     private readonly IHttpContextAccessor _httpContextAccessor =
         httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+    private readonly IUserActionRepository _userActionRepository =
+        userActionRepository ?? throw new ArgumentNullException(nameof(userActionRepository));
 
-    public Task RecordActionAsync()
+    public async Task RecordActionAsync()
     {
-        var request =
-            httpContextAccessor.HttpContext?.Request
+        var httpContext =
+            _httpContextAccessor.HttpContext
             ?? throw new InvalidOperationException("No active HttpContext found.");
 
-        return RecordAsync($"{request.Path}{request.QueryString}");
-    }
+        var request =
+            httpContext?.Request
+            ?? throw new InvalidOperationException("No active HttpRequest found.");
 
-    public Task RecordBannerViewAsync(string bannerId)
-    {
-        var contentfulEntryUrl =
-            $"https://app.contentful.com/spaces/py5afvqdlxgo/environments/development/entries/{bannerId}";
-
-        return RecordAsync(contentfulEntryUrl);
-    }
-
-    public async Task<int> GetNumberOfTimesBannerViewedByUserAsync(string bannerId)
-    {
-        var userId = currentUser.UserId;
+        var userId = _currentUser.UserId;
         if (userId is null)
         {
             logger.LogInformation("No current user ID found");
-            return 0;
-        }
-
-        return await userActionRepository.GetNumberOfTimesBannerViewedByUserAsync(
-            userId.Value,
-            bannerId
-        );
-    }
-
-    private async Task RecordAsync(string requestedUrl)
-    {
-        var httpContext =
-            httpContextAccessor.HttpContext
-            ?? throw new InvalidOperationException("No active HttpContext found.");
-
-        if (httpContext.Items.ContainsKey(UserActionIdConstants.HttpContextItemKey))
-        {
             return;
         }
 
-        var userId = currentUser.UserId;
-        if (userId is null)
+        var requestedUrl = $"{request.Path}{request.QueryString}";
+
+        if (
+            httpContext.Items.TryGetValue(UserActionIdConstants.HttpContextItemKey, out var value)
+            && value is Guid
+        )
         {
-            logger.LogInformation("No current user ID found");
+            logger.LogInformation(
+                "User action already recorded for request {RequestPath}.",
+                requestedUrl
+            );
             return;
         }
 
         var userActionId = Guid.NewGuid();
-
         var userAction = new UserActionEntity
         {
             Id = userActionId,
@@ -82,6 +68,6 @@ public class UserActionTrackingService(
 
         httpContext.Items[UserActionIdConstants.HttpContextItemKey] = userActionId;
 
-        await userActionRepository.CreateAsync(userAction);
+        await _userActionRepository.CreateAsync(userAction);
     }
 }

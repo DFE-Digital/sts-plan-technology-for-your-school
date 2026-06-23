@@ -5,7 +5,6 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Utilities;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 
@@ -187,7 +186,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 {
                     Header = sr.HeaderText,
                     LastUpdated = recommendations[sr.Id].DateCreated,
-                    Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
+                    Status = sr.GetStatus(recommendations),
                     Slug = sr.Slug,
                 })
                 .ToList();

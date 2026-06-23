@@ -10,9 +10,7 @@
                 <div class="govuk-grid-row dfe-feedback-banner--content align-items-center">
                     <div class="govuk-grid-column-two-thirds govuk-!-padding-left-0">
                         <p class="govuk-!-margin-bottom-4 govuk-!-margin-top-4 govuk-!-font-weight-bold">
-                            @{
-                                await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
-                            }
+                            @Model.Text
                         </p>
                     </div>
                     <div class="govuk-grid-column-one-third govuk-!-padding-top-2 govuk-!-padding-bottom-2 govuk-!-text-align-right">

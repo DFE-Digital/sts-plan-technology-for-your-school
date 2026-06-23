@@ -86,7 +86,7 @@ public static class ContentfulContentTypeConstants
     public const string ComponentAccordionContentfulContentTypeId = "CSAccordion";
     public const string ComponentAccordionSectionContentfulContentTypeId = "accordionSection";
     public const string ComponentAttachmentContentfulContentTypeId = "Attachment";
-    public const string ComponentBannerContentfulContentTypeId = "banner";
+    public const string ComponentBannerContentfulContentTypeId = "componentBanner";
     public const string ComponentButtonContentfulContentTypeId = "button";
     public const string ComponentButtonWithEntryReferenceContentfulContentTypeId =
         "buttonWithEntryReference";

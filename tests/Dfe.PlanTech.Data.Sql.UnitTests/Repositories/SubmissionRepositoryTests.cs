@@ -19,6 +19,18 @@ public class SubmissionRepositoryTests
         return ctx;
     }
 
+    private static EstablishmentEntity BuildEstablishmentEntity(int id)
+    {
+        return new EstablishmentEntity
+        {
+            Id = id,
+            DateCreated = DateTime.UtcNow.AddDays(-30),
+            DateLastUpdated = DateTime.UtcNow.AddDays(-30),
+            EstablishmentRef = "EST" + id,
+            EstablishmentType = "School",
+        };
+    }
+
     private static IUserActionIdProvider BuildUserActionIdAccessor()
     {
         var accessor = Substitute.For<IUserActionIdProvider>();
@@ -175,7 +187,7 @@ public class SubmissionRepositoryTests
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
-        db.Establishments.Add(new EstablishmentEntity { Id = 1 });
+        db.Establishments.Add(BuildEstablishmentEntity(1));
 
         db.Submissions.AddRange(
             new SubmissionEntity
@@ -301,9 +313,9 @@ public class SubmissionRepositoryTests
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         db.Establishments.AddRange(
-            new EstablishmentEntity { Id = 1 },
-            new EstablishmentEntity { Id = 2 },
-            new EstablishmentEntity { Id = 3 }
+            BuildEstablishmentEntity(1),
+            BuildEstablishmentEntity(2),
+            BuildEstablishmentEntity(3)
         );
 
         db.Submissions.AddRange(

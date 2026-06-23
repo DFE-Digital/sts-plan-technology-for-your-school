@@ -12,25 +12,20 @@ public class UserActionEntityConfiguration : IEntityTypeConfiguration<UserAction
 
         builder.HasKey(x => x.Id);
 
-        builder.Property(x => x.Id).HasColumnName("id").ValueGeneratedNever();
-
-        builder.Property(x => x.UserId).HasColumnName("userId").IsRequired();
-
-        builder.Property(x => x.EstablishmentId).HasColumnName("establishmentId");
-
-        builder.Property(x => x.MatEstablishmentId).HasColumnName("matEstablishmentId");
-
-        builder
-            .Property(x => x.RequestedUrl)
-            .HasColumnName("requestedUrl")
-            .IsRequired()
-            .HasMaxLength(2048);
-
+        builder.Property(x => x.Id).ValueGeneratedNever().IsRequired();
+        builder.Property(x => x.UserId).IsRequired();
+        builder.Property(x => x.EstablishmentId).IsRequired(false);
+        builder.Property(x => x.MatEstablishmentId).IsRequired(false);
+        builder.Property(x => x.RequestedUrl).HasMaxLength(2048).IsRequired();
         builder
             .Property(x => x.DateCreated)
-            .HasColumnName("dateCreated")
-            .IsRequired()
             .HasDefaultValueSql("SYSUTCDATETIME()")
-            .ValueGeneratedOnAdd();
+            .ValueGeneratedOnAdd()
+            .IsRequired();
+        builder
+            .Property(x => x.SessionId)
+            .HasColumnName("sessionId")
+            .HasColumnType("uniqueidentifier")
+            .IsRequired(false);
     }
 }

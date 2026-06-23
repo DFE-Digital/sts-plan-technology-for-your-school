@@ -1,8 +1,15 @@
+@inject IBannerConditionsContextProvider BannerContext
 @model ComponentNotificationBannerEntry
+
 @{
-    <govuk-notification-banner>
-    @{
-        await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
+
+    var shouldShowBanner = await BannerContext.RecordViewActionAndGetBannerVisibility(Model);
+    if (shouldShowBanner)
+    {
+        <govuk-notification-banner>
+        @{
+            await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Text);
+        }
+        </govuk-notification-banner>
     }
-    </govuk-notification-banner>
 }
