@@ -71,6 +71,8 @@ public static class ContentfulMicrocopyConstants
     public const string GroupsSelectSchoolsToAssessCheckboxAll = "msmSelectCheckboxAll";
     public const string GroupsSelectSchoolsToAssessWarning = "msmSelectWarning";
     public const string GroupsSelectSchoolsToAssessContinue = "msmSelectSchoolContinue";
+    public const string GroupsSelectSchoolsToAssessNoSelectionError = "msmErrorNoSelection";
+    public const string GroupsSelectSchoolsToAssessConflictError = "msmErrorConflictingSelection";
 
     // Fallback text
     private const string EmptyFallback = "";
@@ -117,6 +119,8 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectSchoolsToAssessCheckboxAllFallback = "Submit self-assessment for all schools without a submission";
     private const string GroupsSelectSchoolsToAssessWarningFallback = "Starting a new self-assessment will replace any previous answers.";
     private const string GroupsSelectSchoolsToAssessContinueFallback = "Continue";
+    private const string GroupsSelectSchoolsToAssessNoSelectionErrorFallback = "Select one, more or all schools";
+    private const string GroupsSelectSchoolsToAssessConflictErrorFallback = "Select one or more schools, or select 'Submit self-assessment for all schools without a submission'";
 
     public static readonly IReadOnlyDictionary<string, string> FallbackText = new Dictionary<
         string,
@@ -179,7 +183,9 @@ public static class ContentfulMicrocopyConstants
         { GroupsSelectSchoolsToAssessSchoolHint, EmptyFallback },
         { GroupsSelectSchoolsToAssessCheckboxAll, GroupsSelectSchoolsToAssessCheckboxAllFallback },
         { GroupsSelectSchoolsToAssessWarning, GroupsSelectSchoolsToAssessWarningFallback },
-        { GroupsSelectSchoolsToAssessContinue, GroupsSelectSchoolsToAssessContinueFallback }
+        { GroupsSelectSchoolsToAssessContinue, GroupsSelectSchoolsToAssessContinueFallback },
+        { GroupsSelectSchoolsToAssessNoSelectionError, GroupsSelectSchoolsToAssessNoSelectionErrorFallback },
+        { GroupsSelectSchoolsToAssessConflictError, GroupsSelectSchoolsToAssessConflictErrorFallback },
     };
 
     internal static class VariableNames
