@@ -1,4 +1,4 @@
-namespace Dfe.PlanTech.Application.Services
+namespace Dfe.PlanTech.Application.Services.Interfaces
 {
     public interface IUserContentViewService
     {

@@ -33,6 +33,7 @@ public interface ICurrentUserProvider
     bool IsAuthenticated { get; }
     bool IsMat { get; }
     int? UserId { get; }
+    bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds);
     (string Urn, string Name)? GetGroupSelectedSchool();
     bool IsInRole(string role);
     void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName);

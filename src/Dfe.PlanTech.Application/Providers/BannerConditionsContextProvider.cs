@@ -1,11 +1,8 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
-using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Helpers;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Providers;
@@ -13,10 +10,8 @@ namespace Dfe.PlanTech.Application.Providers;
 public class BannerConditionsContextProvider(
     ILogger<BannerConditionsContextProvider> logger,
     ICurrentUserProvider currentUser,
-    IHttpContextAccessor contextAccessor,
     ISubmissionService submissionService,
     IRecommendationService recommendationService,
-    IUserActionTrackingService userActionTrackingService,
     IUserContentViewService userContentViewService
 ) : IBannerConditionsContextProvider
 {
@@ -24,15 +19,10 @@ public class BannerConditionsContextProvider(
         logger ?? throw new ArgumentNullException(nameof(logger));
     private readonly ICurrentUserProvider _currentUser =
         currentUser ?? throw new ArgumentNullException(nameof(currentUser));
-    private readonly IHttpContextAccessor _contextAccessor =
-        contextAccessor ?? throw new ArgumentNullException(nameof(contextAccessor));
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IRecommendationService _recommendationService =
         recommendationService ?? throw new ArgumentNullException(nameof(recommendationService));
-    private readonly IUserActionTrackingService _userActionTrackingService =
-        userActionTrackingService
-        ?? throw new ArgumentNullException(nameof(userActionTrackingService));
     private readonly IUserContentViewService _userContentViewService =
         userContentViewService ?? throw new ArgumentNullException(nameof(userContentViewService));
 
@@ -49,15 +39,9 @@ public class BannerConditionsContextProvider(
         return shouldShowBanner;
     }
 
-    private bool HasCategoryId(IEnumerable<string> categoryIds)
-    {
-        var organisation = _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
-        return organisation?.Category?.Id != null && categoryIds.Contains(organisation.Category.Id);
-    }
-
     private async Task<bool> ShouldShowBanner(ComponentNotificationBannerEntry banner)
     {
-        if (banner.DisplayFrom.HasValue && banner.DisplayFrom.Value > DateTime.UtcNow)
+        if (banner.DisplayFrom.HasValue && banner.DisplayFrom.Value >= DateTime.UtcNow)
         {
             return false; // Banner is not yet active
         }
@@ -79,7 +63,9 @@ public class BannerConditionsContextProvider(
 
         if (
             banner.ShowToSchoolUsers == false
-            && HasCategoryId([DsiConstants.EstablishmentCategoryId])
+            && _currentUser.OrganisationCategoryIdMatchesAny(
+                DsiConstants.OrganisationEstablishmentCategoryIds
+            )
         )
         {
             return false; // Banner is not for school users, and the user is a school user
@@ -87,7 +73,9 @@ public class BannerConditionsContextProvider(
 
         if (
             banner.ShowToGroupUsers == false
-            && HasCategoryId(DsiConstants.OrganisationGroupCategories)
+            && _currentUser.OrganisationCategoryIdMatchesAny(
+                DsiConstants.OrganisationGroupCategoryIds
+            )
         )
         {
             return false; // Banner is not for group users, and the user is a group user
@@ -151,40 +139,20 @@ public class BannerConditionsContextProvider(
             sectionId
         );
 
-        if (
-            (condition.ShowIfStatusUnknown == true || condition.ShowIfNotStarted == true)
-            && submission is null
-        )
-        {
-            return true;
-        }
-
-        // We need a status for the rest of the conditions, so return early if submission is null
         if (submission == null)
         {
-            return false;
+            return condition.ShowIfStatusUnknown == true || condition.ShowIfNotStarted == true;
         }
 
-        if (condition.ShowIfNotStarted == true && submission.Status != SubmissionStatus.NotStarted)
+        return submission.Status switch
         {
-            return false;
-        }
-
-        if (condition.ShowIfInProgress == true && submission.Status != SubmissionStatus.InProgress)
-        {
-            return false;
-        }
-
-        if (
-            condition.ShowIfCompleted == true
-            && submission.Status != SubmissionStatus.CompleteNotReviewed
-            && submission.Status != SubmissionStatus.CompleteReviewed
-        )
-        {
-            return false;
-        }
-
-        return true;
+            SubmissionStatus.None when condition.ShowIfNotStarted == false => false,
+            SubmissionStatus.NotStarted when condition.ShowIfNotStarted == false => false,
+            SubmissionStatus.InProgress when condition.ShowIfInProgress == false => false,
+            SubmissionStatus.CompleteNotReviewed when condition.ShowIfCompleted == false => false,
+            SubmissionStatus.CompleteReviewed when condition.ShowIfCompleted == false => false,
+            _ => true,
+        };
     }
 
     private async Task<bool> GetVisibilityForRecommendation(
@@ -198,9 +166,9 @@ public class BannerConditionsContextProvider(
             establishmentId
         );
 
-        if (condition.ShowIfStatusUnknown == true && recommendation is null)
+        if (condition.ShowIfStatusUnknown == false && recommendation is null)
         {
-            return true;
+            return false;
         }
 
         // We need a status for the rest of the conditions, so return early if recommendation is null
@@ -210,24 +178,24 @@ public class BannerConditionsContextProvider(
         }
 
         if (
-            condition.ShowIfNotStarted == true
-            && recommendation.NewStatus != RecommendationStatus.NotStarted
+            condition.ShowIfNotStarted == false
+            && recommendation.NewStatus == RecommendationStatus.NotStarted
         )
         {
             return false;
         }
 
         if (
-            condition.ShowIfInProgress == true
-            && recommendation.NewStatus != RecommendationStatus.InProgress
+            condition.ShowIfInProgress == false
+            && recommendation.NewStatus == RecommendationStatus.InProgress
         )
         {
             return false;
         }
 
         if (
-            condition.ShowIfCompleted == true
-            && recommendation.NewStatus != RecommendationStatus.Complete
+            condition.ShowIfCompleted == false
+            && recommendation.NewStatus == RecommendationStatus.Complete
         )
         {
             return false;

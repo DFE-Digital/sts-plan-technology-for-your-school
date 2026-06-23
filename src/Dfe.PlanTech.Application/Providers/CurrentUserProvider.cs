@@ -130,7 +130,7 @@ public class CurrentUserProvider : ICurrentUserProvider
 
     public bool UserOrganisationIsGroup =>
         Organisation != null
-        && DsiConstants.OrganisationGroupCategories.Contains(
+        && DsiConstants.OrganisationGroupCategoryIds.Contains(
             Organisation.Category?.Id ?? string.Empty
         );
 
@@ -143,6 +143,11 @@ public class CurrentUserProvider : ICurrentUserProvider
         _contextAccessor.HttpContext?.User.Claims.GetOrganisation();
 
     public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
+
+    public bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds)
+    {
+        return Organisation?.Category?.Id != null && categoryIds.Contains(Organisation.Category.Id);
+    }
 
     public Guid? SessionId =>
         Guid.TryParse(GetNameIdentifierFromClaim(ClaimConstants.SessionId), out var sessionId)
