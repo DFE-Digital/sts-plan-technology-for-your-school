@@ -148,7 +148,7 @@ public class CategoryLandingViewComponentViewBuilder(
             {
                 var userAction = await _userActionTrackingService.GetAsync(id);
 
-                if ((userAction.MatEstablishmentId ?? userAction.EstablishmentId) is { } userActionEstablishmentId)
+                if ((userAction?.MatEstablishmentId ?? userAction?.EstablishmentId) is { } userActionEstablishmentId)
                 {
                     var userActionEstablishment = await _establishmentService.GetEstablishmentByIdAsync(userActionEstablishmentId);
                     establishmentName = userActionEstablishment.OrgName;
