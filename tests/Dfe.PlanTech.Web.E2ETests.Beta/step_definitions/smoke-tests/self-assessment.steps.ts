@@ -58,7 +58,7 @@ Then(
 
     if (state === 'completed') {
       const completionPara = headingEl
-        .locator('xpath=following-sibling::p[contains(normalize-space(.), "was completed on")]')
+        .locator('xpath=following-sibling::p[contains(normalize-space(.), "was submitted on")]')
         .first();
 
       await expect(completionPara).toBeVisible();
