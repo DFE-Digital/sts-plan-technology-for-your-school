@@ -3,11 +3,13 @@ using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Services;
 
 public class EstablishmentService(
     IEstablishmentWorkflow establishmentWorkflow,
+    IEstablishmentRepository establishmentRepository,
     IRecommendationWorkflow recommendationWorkflow,
     IUserWorkflow userWorkflow
 ) : IEstablishmentService
@@ -18,6 +20,8 @@ public class EstablishmentService(
         recommendationWorkflow ?? throw new ArgumentNullException(nameof(recommendationWorkflow));
     private readonly IUserWorkflow _userWorkflow =
         userWorkflow ?? throw new ArgumentNullException(nameof(userWorkflow));
+    private readonly IEstablishmentRepository _establishmentRepository =
+        establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
 
     public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
@@ -43,6 +47,12 @@ public class EstablishmentService(
         return await _establishmentWorkflow.GetEstablishmentByReferenceAsync(
             establishmentReference
         );
+    }
+
+    public async Task<SqlEstablishmentDto> GetEstablishmentByIdAsync(int id)
+    {
+        var establishmentEntity = await _establishmentRepository.GetEstablishmentByIdAsync(id);
+        return establishmentEntity?.AsDto()!;
     }
 
     public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(

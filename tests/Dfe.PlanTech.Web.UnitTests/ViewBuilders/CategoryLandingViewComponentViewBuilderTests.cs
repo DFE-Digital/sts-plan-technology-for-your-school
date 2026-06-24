@@ -20,6 +20,8 @@ public class CategoryLandingViewComponentViewBuilderTests
     private static CategoryLandingViewComponentViewBuilder CreateSut(
         IContentfulService? contentful = null,
         ISubmissionService? submission = null,
+        IEstablishmentService? establishment = null,
+        IUserActionTrackingService? userActionTracking = null,
         IUserService? user = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null
@@ -27,6 +29,8 @@ public class CategoryLandingViewComponentViewBuilderTests
     {
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
+        establishment ??= Substitute.For<IEstablishmentService>();
+        userActionTracking ??= Substitute.For<IUserActionTrackingService>();
         user ??= Substitute.For<IUserService>();
         currentUser ??= Substitute.For<ICurrentUser>();
 
@@ -39,6 +43,8 @@ public class CategoryLandingViewComponentViewBuilderTests
             contentful,
             currentUser,
             submission,
+            userActionTracking,
+            establishment,
             user
         );
     }

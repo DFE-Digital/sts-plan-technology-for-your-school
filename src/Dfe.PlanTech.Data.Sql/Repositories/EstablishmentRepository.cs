@@ -45,6 +45,11 @@ public class EstablishmentRepository : IEstablishmentRepository
         return establishments.FirstOrDefault();
     }
 
+    public async Task<EstablishmentEntity?> GetEstablishmentByIdAsync(int establishmentId)
+    {
+        return await _db.Establishments.FindAsync(establishmentId);
+    }
+
     public Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences
     )
