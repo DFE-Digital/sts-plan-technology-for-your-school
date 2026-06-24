@@ -65,7 +65,7 @@ Then(
 
       const completionText = (await completionPara.innerText()).trim();
       const normalisedText = normaliseShortDateTimeText(completionText);
-      const expectedText = `The self-assessment for ${sectionLower} was completed on ${currentDate}.`;
+      const expectedText = `The self-assessment for ${sectionLower} was submitted on ${currentDate} by DSI TEST Establishment (001) Miscellaneous (27).`;
       expect(normalisedText).toMatch(expectedText);
 
       const viewLink = headingEl.locator(
