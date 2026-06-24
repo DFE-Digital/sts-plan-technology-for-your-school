@@ -3,6 +3,8 @@ using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 
@@ -159,6 +161,135 @@ public class BannerConditionsContextProviderTests
             ShowToSchoolUsers = showToSchoolUsers,
             ShowToGroupUsers = showToGroupUsers,
             Conditions = [],
+        };
+
+        var sut = CreateServiceUnderTest();
+
+        var bannerVisible = await sut.RecordViewActionAndGetBannerVisibility(banner);
+
+        Assert.Equal(expectedVisibility, bannerVisible);
+    }
+
+    [Theory]
+    [InlineData(null, true, null, null, null, true)]
+    [InlineData(null, false, null, null, null, false)]
+    [InlineData(SubmissionStatus.None, true, null, null, null, true)]
+    [InlineData(SubmissionStatus.None, false, null, null, null, false)]
+    [InlineData(SubmissionStatus.NotStarted, null, true, null, null, true)]
+    [InlineData(SubmissionStatus.NotStarted, null, false, null, null, false)]
+    [InlineData(SubmissionStatus.InProgress, null, null, true, null, true)]
+    [InlineData(SubmissionStatus.InProgress, null, null, false, null, false)]
+    [InlineData(SubmissionStatus.CompleteNotReviewed, null, null, null, true, true)]
+    [InlineData(SubmissionStatus.CompleteNotReviewed, null, null, null, false, false)]
+    [InlineData(SubmissionStatus.CompleteReviewed, null, null, null, true, true)]
+    [InlineData(SubmissionStatus.CompleteReviewed, null, null, null, false, false)]
+    public async Task RecordViewActionAndGetBannerVisibility_ReturnsCorrectVisibility_For_SubmissionStatus(
+        SubmissionStatus? submissionStatus,
+        bool? showIfStatusUnknown,
+        bool? showIfNotStarted,
+        bool? showIfInProgress,
+        bool? showIfCompleted,
+        bool expectedVisibility
+    )
+    {
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
+
+        var questionnaireSectionEntry = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("Section"),
+        };
+
+        var condition = new ConditionEntry
+        {
+            Sys = new SystemDetails("SubmissionCondition"),
+            Entry = questionnaireSectionEntry,
+            ShowIfStatusUnknown = showIfStatusUnknown,
+            ShowIfNotStarted = showIfNotStarted,
+            ShowIfInProgress = showIfInProgress,
+            ShowIfCompleted = showIfCompleted,
+        };
+
+        var submission = submissionStatus is null
+            ? null
+            : new SqlSubmissionDto { Status = submissionStatus.Value };
+
+        _submissionService
+            .GetLatestCompletedSubmissionBySectionIdAsync(1, "Section")
+            .Returns(submission);
+
+        var banner = new ComponentNotificationBannerEntry
+        {
+            Sys = new SystemDetails("Banner"),
+            DisplayFrom = null,
+            DisplayTo = null,
+            NumberOfTimesToShow = null,
+            ShowToSchoolUsers = null,
+            ShowToGroupUsers = null,
+            Conditions = [condition],
+        };
+
+        var sut = CreateServiceUnderTest();
+
+        var bannerVisible = await sut.RecordViewActionAndGetBannerVisibility(banner);
+
+        Assert.Equal(expectedVisibility, bannerVisible);
+    }
+
+    [Theory]
+    [InlineData(null, true, null, null, null, true)]
+    [InlineData(null, false, null, null, null, false)]
+    [InlineData(RecommendationStatus.NotStarted, null, true, null, null, true)]
+    [InlineData(RecommendationStatus.NotStarted, null, false, null, null, false)]
+    [InlineData(RecommendationStatus.InProgress, null, null, true, null, true)]
+    [InlineData(RecommendationStatus.InProgress, null, null, false, null, false)]
+    [InlineData(RecommendationStatus.Complete, null, null, null, true, true)]
+    [InlineData(RecommendationStatus.Complete, null, null, null, false, false)]
+    public async Task RecordViewActionAndGetBannerVisibility_ReturnsCorrectVisibility_For_RecommendationStatus(
+        RecommendationStatus? recommendationStatus,
+        bool? showIfStatusUnknown,
+        bool? showIfNotStarted,
+        bool? showIfInProgress,
+        bool? showIfCompleted,
+        bool expectedVisibility
+    )
+    {
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(1);
+
+        var questionnaireSectionEntry = new RecommendationChunkEntry
+        {
+            Sys = new SystemDetails("Recommendation"),
+        };
+
+        var condition = new ConditionEntry
+        {
+            Sys = new SystemDetails("RecommendationCondition"),
+            Entry = questionnaireSectionEntry,
+            ShowIfStatusUnknown = showIfStatusUnknown,
+            ShowIfNotStarted = showIfNotStarted,
+            ShowIfInProgress = showIfInProgress,
+            ShowIfCompleted = showIfCompleted,
+        };
+
+        var recommendation = recommendationStatus is null
+            ? null
+            : new SqlEstablishmentRecommendationHistoryDto
+            {
+                NewStatus = recommendationStatus.Value,
+            };
+
+        _recommendationService
+            .GetLatestRecommendationHistoryAsync(1, "Recommendation")
+            .Returns(recommendation);
+
+        var banner = new ComponentNotificationBannerEntry
+        {
+            Sys = new SystemDetails("Banner"),
+            DisplayFrom = null,
+            DisplayTo = null,
+            NumberOfTimesToShow = null,
+            ShowToSchoolUsers = null,
+            ShowToGroupUsers = null,
+            Conditions = [condition],
         };
 
         var sut = CreateServiceUnderTest();

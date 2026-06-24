@@ -129,6 +129,18 @@ public class SubmissionRepositoryTests
     }
 
     [Fact]
+    public async Task GetLatestCompletedSubmissionBySectionIdAsync_Returns_Null_When_None()
+    {
+        using var db = BuildPlanTechDbContext(
+            nameof(GetLatestCompletedSubmissionBySectionIdAsync_Returns_Null_When_None)
+        );
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
+
+        var result = await repo.GetLatestCompletedSubmissionBySectionIdAsync(1, "SEC");
+        Assert.Null(result);
+    }
+
+    [Fact]
     public async Task GetLatestSubmissionAndResponses_Returns_Null_When_None()
     {
         using var db = BuildPlanTechDbContext(

@@ -71,8 +71,8 @@ public class RecommendationsViewBuilder(
 
         var currentRecommendationHistory =
             await _recommendationService.GetLatestRecommendationHistoryAsync(
-                currentRecommendationChunk.Id,
-                establishmentId
+                establishmentId,
+                currentRecommendationChunk.Id
             );
 
         var currentRecommendationIndex = recommendationChunks.IndexOf(currentRecommendationChunk);
@@ -408,8 +408,8 @@ public class RecommendationsViewBuilder(
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var latestRecommendationHistory =
             await _recommendationService.GetLatestRecommendationHistoryAsync(
-                recommendationChunk.Id,
-                establishmentId
+                establishmentId,
+                recommendationChunk.Id
             );
         if (latestRecommendationHistory?.NewStatus is null)
         {

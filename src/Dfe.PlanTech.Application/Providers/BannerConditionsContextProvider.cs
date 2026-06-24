@@ -146,11 +146,12 @@ public class BannerConditionsContextProvider(
 
         return submission.Status switch
         {
-            SubmissionStatus.None when condition.ShowIfNotStarted == false => false,
-            SubmissionStatus.NotStarted when condition.ShowIfNotStarted == false => false,
-            SubmissionStatus.InProgress when condition.ShowIfInProgress == false => false,
-            SubmissionStatus.CompleteNotReviewed when condition.ShowIfCompleted == false => false,
-            SubmissionStatus.CompleteReviewed when condition.ShowIfCompleted == false => false,
+            SubmissionStatus.None when condition.ShowIfStatusUnknown is false => false,
+            SubmissionStatus.None when condition.ShowIfNotStarted is false => false,
+            SubmissionStatus.NotStarted when condition.ShowIfNotStarted is false => false,
+            SubmissionStatus.InProgress when condition.ShowIfInProgress is false => false,
+            SubmissionStatus.CompleteNotReviewed when condition.ShowIfCompleted is false => false,
+            SubmissionStatus.CompleteReviewed when condition.ShowIfCompleted is false => false,
             _ => true,
         };
     }
@@ -162,45 +163,21 @@ public class BannerConditionsContextProvider(
     )
     {
         var recommendation = await _recommendationService.GetLatestRecommendationHistoryAsync(
-            recommendationId,
-            establishmentId
+            establishmentId,
+            recommendationId
         );
 
-        if (condition.ShowIfStatusUnknown == false && recommendation is null)
+        if (recommendation is null)
         {
-            return false;
+            return condition.ShowIfStatusUnknown == true;
         }
 
-        // We need a status for the rest of the conditions, so return early if recommendation is null
-        if (recommendation == null)
+        return recommendation.NewStatus switch
         {
-            return false;
-        }
-
-        if (
-            condition.ShowIfNotStarted == false
-            && recommendation.NewStatus == RecommendationStatus.NotStarted
-        )
-        {
-            return false;
-        }
-
-        if (
-            condition.ShowIfInProgress == false
-            && recommendation.NewStatus == RecommendationStatus.InProgress
-        )
-        {
-            return false;
-        }
-
-        if (
-            condition.ShowIfCompleted == false
-            && recommendation.NewStatus == RecommendationStatus.Complete
-        )
-        {
-            return false;
-        }
-
-        return true;
+            RecommendationStatus.NotStarted when condition.ShowIfNotStarted is false => false,
+            RecommendationStatus.InProgress when condition.ShowIfInProgress is false => false,
+            RecommendationStatus.Complete when condition.ShowIfCompleted is false => false,
+            _ => true,
+        };
     }
 }
