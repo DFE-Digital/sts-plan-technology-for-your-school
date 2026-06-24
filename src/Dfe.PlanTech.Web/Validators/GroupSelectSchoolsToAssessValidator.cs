@@ -28,7 +28,7 @@ public class GroupSelectSchoolsToAssessValidator : IGroupSelectSchoolsToAssessVa
             var noSelectionError = await _microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessNoSelectionError);
 
             modelState.AddModelError(
-                nameof(model.SelectedSchoolsRefsJson),
+                nameof(model.SelectedSchoolsRefs),
                 noSelectionError
                 );
         }
@@ -38,7 +38,7 @@ public class GroupSelectSchoolsToAssessValidator : IGroupSelectSchoolsToAssessVa
             var conflictError = await _microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessConflictError);
 
             modelState.AddModelError(
-                nameof(model.SelectedSchoolsRefsJson),
+                nameof(model.SelectedSchoolsRefs),
                 conflictError
                 );
         }

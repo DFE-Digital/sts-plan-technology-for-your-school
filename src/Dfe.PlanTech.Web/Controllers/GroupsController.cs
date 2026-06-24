@@ -1,6 +1,8 @@
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -11,20 +13,24 @@ public class GroupsController : BaseController<GroupsController>
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
     public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
     public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssess";
+    public const string SubmitSchoolsSelectionAction = "SubmitSelectedSchoolsToAssess";
 
     private readonly ICurrentUser _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;
+    private readonly IGroupSelectSchoolsToAssessValidator _validator;
 
     public GroupsController(
         ILogger<GroupsController> logger,
         ICurrentUser currentUser,
-        IGroupsViewBuilder groupsViewBuilder
+        IGroupsViewBuilder groupsViewBuilder,
+        IGroupSelectSchoolsToAssessValidator validator
     )
         : base(logger)
     {
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _groupsViewBuilder =
             groupsViewBuilder ?? throw new ArgumentNullException(nameof(groupsViewBuilder));
+        _validator = validator ?? throw new ArgumentNullException(nameof(validator));
     }
 
     [HttpGet(
@@ -58,11 +64,37 @@ public class GroupsController : BaseController<GroupsController>
         $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
         Name = GetSelectSchoolsToAssessAction
     )]
-    public async Task<IActionResult> GetSelectSchoolsToAssessView(string categorySlug, string sectionSlug)
+    public async Task<IActionResult> GetSelectSchoolsToAssessView(string sectionSlug)
     {
-        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        return await _groupsViewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(this, categorySlug, sectionSlug);
+        return await _groupsViewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(this, sectionSlug);
+    }
+
+    [HttpPost(
+        $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
+        Name = GetSelectSchoolsToAssessAction
+        )]
+    public async Task<IActionResult> SubmitSelectedSchoolsToAssess(
+        GroupSelectSchoolsToAssessInputViewModel inputViewModel,
+        string sectionSlug
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+
+        await _validator.ValidateSelectionAsync(
+            inputViewModel,
+            ModelState);
+
+
+        if (!ModelState.IsValid)
+        {
+            return await _groupsViewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(
+                this,
+                sectionSlug,
+                inputViewModel);
+        }
+
+        return await _groupsViewBuilder.SubmitSelectedSchoolsToAssessAndRedirect(this, sectionSlug, inputViewModel);
     }
 }

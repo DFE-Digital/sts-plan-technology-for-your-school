@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
@@ -12,8 +13,14 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
         );
         Task<IActionResult> RouteToSelectSchoolsToAssessViewModelAsync(
             Controller controller,
-            string categorySlug,
-            string sectionSlug
+            string sectionSlug,
+            GroupSelectSchoolsToAssessInputViewModel? inputViewModel = null
+        );
+
+        Task<IActionResult> SubmitSelectedSchoolsToAssessAndRedirect(
+            Controller controller,
+            string sectionSlug,
+            GroupSelectSchoolsToAssessInputViewModel inputViewModel
         );
     }
 }
