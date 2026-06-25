@@ -1,4 +1,4 @@
-using Dfe.PlanTech.Web.ViewModels.Inputs;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Dfe.PlanTech.Web.Validators.Interfaces;
@@ -6,7 +6,7 @@ namespace Dfe.PlanTech.Web.Validators.Interfaces;
 public interface IGroupSelectSchoolsToAssessValidator
 {
     Task ValidateSelectionAsync(
-        GroupSelectSchoolsToAssessInputViewModel model,
+        GroupsSelectSchoolsToAssessViewModel model,
         ModelStateDictionary modelState
     );
 }

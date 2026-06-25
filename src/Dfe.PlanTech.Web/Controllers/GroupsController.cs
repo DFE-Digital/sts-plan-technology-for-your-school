@@ -2,7 +2,7 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
-using Dfe.PlanTech.Web.ViewModels.Inputs;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.Controllers;
@@ -76,14 +76,14 @@ public class GroupsController : BaseController<GroupsController>
         Name = GetSelectSchoolsToAssessAction
         )]
     public async Task<IActionResult> SubmitSelectedSchoolsToAssess(
-        GroupSelectSchoolsToAssessInputViewModel inputViewModel,
+        GroupsSelectSchoolsToAssessViewModel viewModel,
         string sectionSlug
     )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
         await _validator.ValidateSelectionAsync(
-            inputViewModel,
+            viewModel,
             ModelState);
 
 
@@ -92,9 +92,9 @@ public class GroupsController : BaseController<GroupsController>
             return await _groupsViewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(
                 this,
                 sectionSlug,
-                inputViewModel);
+                viewModel);
         }
 
-        return await _groupsViewBuilder.SubmitSelectedSchoolsToAssessAndRedirect(this, sectionSlug, inputViewModel);
+        return await _groupsViewBuilder.SubmitSelectedSchoolsToAssessAndRedirect(this, sectionSlug, viewModel);
     }
 }

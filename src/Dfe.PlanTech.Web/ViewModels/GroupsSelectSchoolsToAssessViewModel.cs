@@ -11,4 +11,6 @@ public class GroupsSelectSchoolsToAssessViewModel
     public string? CategorySlug { get; init; }
     public required QuestionnaireSectionEntry Section { get; init; }
     public required List<SubmissionInformationModel> SchoolSubmissionInfo { get; init; }
+    public IEnumerable<string>? ErrorMessages { get; set; }
+    public List<string>? SelectedSchoolsRefs { get; set; } = [];
 }

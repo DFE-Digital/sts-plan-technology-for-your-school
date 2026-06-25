@@ -1,8 +1,11 @@
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
+using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -11,6 +14,7 @@ using Microsoft.Azure.Amqp.Transaction;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using NSubstitute.Core.Arguments;
 using System.ComponentModel.DataAnnotations;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
@@ -112,8 +116,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task SubmitSelectedSchoolsToAssess_ThrowsArgumentNullException_NoSectionSlug()
         {
+            var model = new GroupsSelectSchoolsToAssessViewModel()
+            {
+                Section = new QuestionnaireSectionEntry(),
+                SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
+                SelectedSchoolsRefs = new List<string> { "000001", "000002" }
+            };
+
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.SubmitSelectedSchoolsToAssess(new GroupSelectSchoolsToAssessInputViewModel(), null!));
+                _controller.SubmitSelectedSchoolsToAssess(model, null!));
         }
 
         [Fact]
@@ -121,13 +132,20 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var categorySlug = "category";
             var sectionSlug = "section";
-            var schoolRefs = new List<string> { "000001", "000002" };
-            var inputViewModel = new GroupSelectSchoolsToAssessInputViewModel();
+            var model = new GroupsSelectSchoolsToAssessViewModel()
+            {
+                Section = new QuestionnaireSectionEntry(),
+                SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
+                SelectedSchoolsRefs = new List<string> { "000001", "000002" }
+            }; 
             _controller.RouteData.Values["categorySlug"] = categorySlug;
 
-            var result = await _controller.SubmitSelectedSchoolsToAssess(inputViewModel, sectionSlug);
+            var result = await _controller.SubmitSelectedSchoolsToAssess(model, sectionSlug);
 
-            await _validator.Received(1).ValidateSelectionAsync(inputViewModel, Arg.Any<ModelStateDictionary>());
+            await _validator.Received(1).ValidateSelectionAsync(
+                model,
+                Arg.Any<ModelStateDictionary>()
+            );
         }
 
         [Fact]
@@ -135,14 +153,17 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var categorySlug = "category";
             var sectionSlug = "section";
-            var schoolRefs = new List<string> { "000001", "000002" };
-            var inputViewModel = new GroupSelectSchoolsToAssessInputViewModel();
+            var model = new GroupsSelectSchoolsToAssessViewModel()
+            {
+                Section = new QuestionnaireSectionEntry(),
+                SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
+                SelectedSchoolsRefs = new List<string> { "000001", "000002", "all" }
+            };
             _controller.RouteData.Values["categorySlug"] = categorySlug;
-
 
             _validator
                 .When(x => x.ValidateSelectionAsync(
-                    Arg.Any<GroupSelectSchoolsToAssessInputViewModel>(),
+                    Arg.Any<GroupsSelectSchoolsToAssessViewModel>(),
                     Arg.Any<ModelStateDictionary>()))
                 .Do(callInfo =>
                 {
@@ -154,20 +175,22 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                         "Error");
                 });
 
-            await _controller.SubmitSelectedSchoolsToAssess(inputViewModel, sectionSlug);
+            await _controller.SubmitSelectedSchoolsToAssess(model, sectionSlug);
 
             await _viewBuilder.Received(1)
                 .RouteToSelectSchoolsToAssessViewModelAsync(
                     _controller,
                     sectionSlug,
-                    inputViewModel);
+                    model
+                );
 
 
             await _viewBuilder.DidNotReceive()
                 .SubmitSelectedSchoolsToAssessAndRedirect(
                     _controller,
                     Arg.Any<string>(),
-                    Arg.Any<GroupSelectSchoolsToAssessInputViewModel>());
+                    Arg.Any<GroupsSelectSchoolsToAssessViewModel>()
+                );
 
         }
 
@@ -176,18 +199,24 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var categorySlug = "category";
             var sectionSlug = "section";
-            var inputViewModel = new GroupSelectSchoolsToAssessInputViewModel() { SelectedSchoolsRefs = [ "00001", "00002" ] };
+            var viewModel = new GroupsSelectSchoolsToAssessViewModel()
+            {
+                Section = new QuestionnaireSectionEntry(),
+                SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
+                SelectedSchoolsRefs = ["00001", "00002"]
+            };
             _controller.RouteData.Values["categorySlug"] = categorySlug;
 
-            await _controller.SubmitSelectedSchoolsToAssess(inputViewModel, sectionSlug);
+            await _controller.SubmitSelectedSchoolsToAssess(viewModel, sectionSlug);
 
-            await _viewBuilder.Received(1).SubmitSelectedSchoolsToAssessAndRedirect(_controller, sectionSlug, inputViewModel);
+            await _viewBuilder.Received(1).SubmitSelectedSchoolsToAssessAndRedirect(_controller, sectionSlug, viewModel);
 
             await _viewBuilder.DidNotReceive()
                 .RouteToSelectSchoolsToAssessViewModelAsync(
                     _controller,
                     Arg.Any<string>(),
-                    Arg.Any<GroupSelectSchoolsToAssessInputViewModel>());
+                    Arg.Any<GroupsSelectSchoolsToAssessViewModel>()
+                );
         }
     }
 }

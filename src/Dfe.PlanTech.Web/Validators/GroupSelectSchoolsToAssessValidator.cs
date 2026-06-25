@@ -1,7 +1,7 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Web.Validators.Interfaces;
-using Dfe.PlanTech.Web.ViewModels.Inputs;
+using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Dfe.PlanTech.Web.Validators;
@@ -17,7 +17,7 @@ public class GroupSelectSchoolsToAssessValidator : IGroupSelectSchoolsToAssessVa
     }
 
     public async Task ValidateSelectionAsync(
-        GroupSelectSchoolsToAssessInputViewModel model,
+        GroupsSelectSchoolsToAssessViewModel model,
         ModelStateDictionary modelState
     )
     {

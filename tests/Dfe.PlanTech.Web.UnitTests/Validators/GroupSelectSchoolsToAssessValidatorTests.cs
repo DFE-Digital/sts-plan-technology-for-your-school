@@ -1,6 +1,9 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Validators;
+using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using NSubstitute;
@@ -23,8 +26,10 @@ public class GroupSelectSchoolsToAssessValidatorTests
     public async Task ValidateSelectionAsync_WhenNoSchoolsSelected_AddsError()
     {
         // Arrange
-        var model = new GroupSelectSchoolsToAssessInputViewModel
+        var model = new GroupsSelectSchoolsToAssessViewModel
         {
+            Section = new QuestionnaireSectionEntry(),
+            SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
             SelectedSchoolsRefs = []
         };
         const string errorMessage = "Select at least one school";
@@ -56,8 +61,10 @@ public class GroupSelectSchoolsToAssessValidatorTests
                 ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessNoSelectionError)
             .Returns(errorMessage);
 
-        var model = new GroupSelectSchoolsToAssessInputViewModel
+        var model = new GroupsSelectSchoolsToAssessViewModel
         {
+            Section = new QuestionnaireSectionEntry(),
+            SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
             SelectedSchoolsRefs = null
         };
 
@@ -79,8 +86,10 @@ public class GroupSelectSchoolsToAssessValidatorTests
     public async Task ValidateSelectionAsync_WhenOnlyAllSelected_DoesNotAddError()
     {
         // Arrange
-        var model = new GroupSelectSchoolsToAssessInputViewModel
+        var model = new GroupsSelectSchoolsToAssessViewModel
         {
+            Section = new QuestionnaireSectionEntry(),
+            SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
             SelectedSchoolsRefs = ["all"]
         };
 
@@ -97,8 +106,10 @@ public class GroupSelectSchoolsToAssessValidatorTests
     public async Task ValidateSelectionAsync_WhenOneSchoolSelected_DoesNotAddError()
     {
         // Arrange
-        var model = new GroupSelectSchoolsToAssessInputViewModel
+        var model = new GroupsSelectSchoolsToAssessViewModel
         {
+            Section = new QuestionnaireSectionEntry(),
+            SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
             SelectedSchoolsRefs = ["000001"]
         };
 
@@ -116,8 +127,10 @@ public class GroupSelectSchoolsToAssessValidatorTests
     public async Task ValidateSelectionAsync_WhenMultipleSchoolsSelected_DoesNotAddError()
     {
         // Arrange
-        var model = new GroupSelectSchoolsToAssessInputViewModel
+        var model = new GroupsSelectSchoolsToAssessViewModel
         {
+            Section = new QuestionnaireSectionEntry(),
+            SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
             SelectedSchoolsRefs = ["000001", "000002"]
         };
 
@@ -143,8 +156,10 @@ public class GroupSelectSchoolsToAssessValidatorTests
                 ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessConflictError)
             .Returns(errorMessage);
 
-        var model = new GroupSelectSchoolsToAssessInputViewModel
+        var model = new GroupsSelectSchoolsToAssessViewModel
         {
+            Section = new QuestionnaireSectionEntry(),
+            SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
             SelectedSchoolsRefs = ["all", "000001"]
         };
 
