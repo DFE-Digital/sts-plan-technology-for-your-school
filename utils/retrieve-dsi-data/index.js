@@ -73,6 +73,7 @@ async function processCsv() {
   // Phase 3: Process users
   console.log('👥 Processing users...');
   const userIds = new Set();
+  let processedCount = 1;
   let userCount = 0;
 
   for (const userRef of signInReferences) {
@@ -87,7 +88,8 @@ async function processCsv() {
         orgData.forEach((org) => upsertOrganisation(db, org));
       }
 
-      console.log(`   Processing user: ${userData.email} (${userData.userId})`);
+      console.log(`   Processing user ${processedCount++} of ${signInReferences.length}:`);
+      console.log(`     ${userData.email} (${userData.userId})`);
       upsertUser(
         db,
         userData.userId,
