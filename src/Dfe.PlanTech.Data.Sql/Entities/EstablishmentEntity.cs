@@ -6,9 +6,9 @@ public class EstablishmentEntity
 {
     public int Id { get; set; }
 
-    public string? EstablishmentRef { get; set; }
+    public string EstablishmentRef { get; set; } = null!;
 
-    public string? EstablishmentType { get; set; }
+    public string? EstablishmentType { get; set; } = null!;
 
     public string? OrgName { get; set; }
 
