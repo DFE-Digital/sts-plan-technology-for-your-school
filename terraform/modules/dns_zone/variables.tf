@@ -40,3 +40,19 @@ variable "primary_fqdn" {
   type        = string
   default     = ""
 }
+
+variable "frontdoor_endpoint_host_name" {
+  description = "The created fd endpoint to the app: hostname"
+  type        = string
+  default     = ""
+}
+variable "frontdoor_profile_id" {
+  description = "The created fd"
+  type        = string
+  default     = ""
+}
+variable "frontdoor_route_id" {
+  description = "The created fd route to the app: id"
+  type        = string
+  default     = ""
+}

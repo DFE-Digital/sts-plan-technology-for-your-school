@@ -4,7 +4,7 @@ locals {
   resource_prefix          = "${local.environment}${local.project_name}"
   azure_location           = var.azure_location
   existing_resource_group  = var.existing_resource_group
-  resource_group           = data.azurerm_resource_group.existing_resource_group[0]
+  resource_group           = data.azurerm_resource_group.existing_resource_group
   existing_virtual_network = var.existing_virtual_network
   create_virtual_network   = local.waf_application == "AppGatewayV2"
   virtual_network_name = local.existing_virtual_network == "" ? (

@@ -1,5 +1,5 @@
 module "main_hosting" {
-  source = "./modules/shared_containerapp"
+  source = "./external_module_copies/shared_containerapp"
 
   #source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.6.3"
   depends_on = [azurerm_resource_group.app_rg, azurerm_container_registry.acr_notshared]
@@ -10,7 +10,7 @@ module "main_hosting" {
   project_name   = local.project_name
   azure_location = local.azure_location
   tags           = local.tags
-  existing_resource_group = local.existing_resource_group
+  existing_resource_group = local.app_rg_name
 
   ############################################
   # Networking configuration
@@ -99,4 +99,10 @@ module "main_hosting" {
   ###########
   storage_account_sas_expiration_period           = local.storage_account_expiration_period
   mssql_storage_account_shared_access_key_enabled = false
+
+  #######
+  # DNS #
+  #######
+  enable_dns_zone = var.enable_dns_zone_container
+  dns_zone_domain_name = var.primary_fqdn
 }

@@ -18,8 +18,10 @@ locals {
   ########################
   # App Resource Group #
   ########################
-  # what we create directly in app-rg in order to control the name. we assume if DR we have already made one. using a try breaks the pipeline.
-  existing_resource_group = local.is_dr ? local.resource_prefix : ""
+  # to create directly in app-rg rather than in shared module for greater control.
+  create_rg_separately = var.create_rg_separately || var.is_dr
+  # this is used to pass into main_hosting. if blank, that will create an rg instead
+  app_rg_name = local.create_rg_separately ? local.resource_prefix : ""
   # this will be the existing one if exists otherwise what main-hosting creates.
   resource_group = try(azurerm_resource_group.app_rg[0], module.main_hosting.azurerm_resource_group_default)
   resource_group_name = local.resource_group.name
@@ -145,7 +147,6 @@ locals {
   ##################
   # CDN/Front Door #
   ##################
-  cdn_create_custom_domain = var.cdn_create_custom_domain
   cdn_frontdoor_host_add_response_headers = length(var.cdn_frontdoor_host_add_response_headers) > 0 ? var.cdn_frontdoor_host_add_response_headers : [{
     "name"  = "Strict-Transport-Security",
     "value" = "max-age=31536000; includeSubDomains; preload",
@@ -217,6 +218,7 @@ locals {
   }
 
   cdn_hostname = module.waf.frontdoor_endpoint_host_name
+
   ####################x
   # Storage Accounts #
   ####################

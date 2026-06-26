@@ -7,7 +7,7 @@ variable "project_name" {
 }
 
 variable "environment" {
-  description = "Environment name, used along with `project_name` as a prefix for all resources"
+  description = "Environment name, used along with `project_name` as a prefix for all resources. NOT the github env"
   type        = string
 }
 
@@ -27,7 +27,22 @@ variable "az_tag_product" {
 }
 
 variable "is_dr" {
-  description = "Append dr to certain resources to build disaster recovery in new resource group"
+  description = "Append dr to certain resources to build disaster recovery in new resource group. Note: most resources will have it built into project name, and not need it again."
+  type        = bool
+  default     = false
+}
+
+variable "github_env" {
+  description = "Github env we are running on"
+  type        = string
+}
+
+##################
+# Resource Group #
+##################
+
+variable "create_rg_separately" {
+  description = "Flag to create the RG before the shared module"
   type        = bool
   default     = false
 }
@@ -261,13 +276,47 @@ variable "registry_ipv4_allow_list" {
   }))
   default = {}
 }
-##################
-# CDN/Front Door #
-##################
-variable "cdn_create_custom_domain" {
-  description = "A flag to create the A and TXT records for the container app as part of setting up the cdn"
+#######
+# DNS #
+#######
+variable "manage_custom_domain_in_app_state" {
+  description = "A flag to have this terraform create the DNS zone using local module & app tfstate. currently prod has dns in its own tf state file. so we will only create resources in container-app terraforming for other envs"
   type        = bool
-  default     = true  #has shared waf set up dns?
+  default     = true 
+}
+
+variable "primary_fqdn" {
+  description = "The host name to use in the custom domain in front door"
+  type        = string
+  default     = null
+}
+
+variable "subdomains" {
+  description = "A list of subdomain names to use in the dns a records"
+  type        = list(string)
+  default     = []
+}
+
+########################
+# CDN/Front Door & DNS #
+########################
+#has shared container app set up OR  WAF module can add custom domain to Front Door. Set up DNS first to associate.
+variable "cdn_create_custom_domain_container" {
+  description = "A flag to have the custom front door domain created IN SHARED CONTAINER MODULE"
+  type        = bool
+  default     = false 
+}
+
+variable "cdn_create_custom_domain_waf" {
+  description = "A flag to have the custom front door domain created IN SHARED WAF MODULE"
+  type        = bool
+  default     = false 
+}
+
+variable "enable_dns_zone_container" {
+  description = "A flag to have the dns created IN SHARED CONTAINER MODULE (needs front door created there too)"
+  type        = bool
+  default     = false 
 }
 
 variable "cdn_frontdoor_host_add_response_headers" {
