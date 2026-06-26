@@ -150,7 +150,7 @@ public class BannerConditionsContextProvider(
             SubmissionStatus.None when condition.ShowIfNotStarted is false => false,
             SubmissionStatus.NotStarted when condition.ShowIfNotStarted is false => false,
             SubmissionStatus.InProgress when condition.ShowIfInProgress is false => false,
-            SubmissionStatus.CompleteNotReviewed when condition.ShowIfCompleted is false => false,
+            SubmissionStatus.CompleteNotReviewed when condition.ShowIfInProgress is false => false,
             SubmissionStatus.CompleteReviewed when condition.ShowIfCompleted is false => false,
             _ => true,
         };
