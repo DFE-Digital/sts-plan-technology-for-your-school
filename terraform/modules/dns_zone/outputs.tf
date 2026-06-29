@@ -1,5 +1,5 @@
 output "resource_group_name" {
-  value = azurerm_resource_group.dns-zone[0].name
+  value = length(azurerm_resource_group.dns-zone) > 0 ? azurerm_resource_group.dns-zone[0].name : var.existing_resource_group
 }
 output "primary-zone" {
   value = {
