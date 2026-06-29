@@ -45,7 +45,6 @@ env:
   SQL_BACKUP_FILE_NAME_SEARCH: ''
   USE_LATEST_IF_NOT_SPECIFIED: true
   TF_VAR_baseurl: 'plan-technology-for-your-school.education.gov.uk'
-  TF_VAR_subdomains: 'staging'
   #do we want the container-app folder to make our DNS in the same tfstate (true), or have it run a separate tf process (prod)
   TF_VAR_dns_in_app: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && !contains(inputs.environment, 'Prod')) }}
 
@@ -289,7 +288,7 @@ jobs:
             prefix="${prefix}-dr"
           fi
 
-          echo "TF_VAR_dns_url=${prefix}${{ vars.BASE_DNS_URL }}" >> "$GITHUB_ENV"
+          echo "TF_VAR_dns_url=${prefix}${TF_VAR_baseurl}" >> "$GITHUB_ENV"
 
       - name: Terraform init - app
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
@@ -310,7 +309,7 @@ jobs:
             -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
             -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
             -var="azure_location=northeurope" \
-            -var="manage_dns_in_app_state=${ TF_VAR_dns_in_app }" \
+            -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
             -var="primary_fqdn=${ TF_VAR_dns_url }"\
             -out=tfplanapp
 
