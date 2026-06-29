@@ -279,7 +279,7 @@ variable "registry_ipv4_allow_list" {
 #######
 # DNS #
 #######
-variable "manage_custom_domain_in_app_state" {
+variable "manage_dns_in_app_state" {
   description = "A flag to have this terraform create the DNS zone using local module & app tfstate. currently prod has dns in its own tf state file. so we will only create resources in container-app terraforming for other envs"
   type        = bool
   default     = true 

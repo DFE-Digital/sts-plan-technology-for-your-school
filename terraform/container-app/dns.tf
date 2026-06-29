@@ -1,6 +1,6 @@
 module "dns" {
   source = "../modules/dns_zone"
-  count = var.manage_custom_domain_in_app_state ? 1 : 0
+  count = var.manage_dns_in_app_state ? 1 : 0
   depends_on     = [module.main_hosting, module.waf]
 
   environment    = local.environment

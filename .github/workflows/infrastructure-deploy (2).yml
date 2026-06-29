@@ -7,7 +7,7 @@ on:
         type: choice
         description: 'The environment to run infrastructure deployment on:'
         required: true
-        options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
+        options: ['Dev', 'Tst', 'ProductionUnprotected', 'Production']
       is_dr:
         type: boolean
         default: false
@@ -28,6 +28,8 @@ on:
       - disaster-recovery-e2e-terraform
 
 env:
+  #note you can't pass this var into the job environments, they don't calculate in time  
+  DEPLOY_ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}  
   ARM_CLIENT_ID: ${{ secrets.az_client_id }}
   ARM_TENANT_ID: ${{ secrets.az_tenant_id }}
   ARM_SUBSCRIPTION_ID: ${{ secrets.az_subscription_id }}
@@ -37,10 +39,15 @@ env:
   BACKUP_CONTAINER_NAME: sqlbackups
   TF_WORKING_DIRECTORY_ACR: terraform/acr
   TF_WORKING_DIRECTORY_APP: terraform/container-app
+  TF_WORKING_DIRECTORY_DNS: terraform/dns-zone
   PACKAGE_NAME: plan-technology-for-your-school
   SQL_BACKUP_FILE_NAME: ''
   SQL_BACKUP_FILE_NAME_SEARCH: ''
   USE_LATEST_IF_NOT_SPECIFIED: true
+  TF_VAR_baseurl: 'plan-technology-for-your-school.education.gov.uk'
+  TF_VAR_subdomains: 'staging'
+  #do we want the container-app folder to make our DNS in the same tfstate (true), or have it run a separate tf process (prod)
+  TF_VAR_dns_in_app: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && !contains(inputs.environment, 'Prod')) }}
 
 jobs:
   image-and-acr:
@@ -256,7 +263,35 @@ jobs:
           keyvault-name: ${{ steps.vars.outputs.KEYVAULT_NAME }}
           verb: add
 
-      - name: Terraform init
+      - name: Build DNS URL
+        shell: bash
+        run: |
+          case "$DEPLOY_ENVIRONMENT" in
+            Dev)
+              prefix="dev"
+              ;;
+            Test)
+              prefix="test"
+              ;;
+            *Staging*)
+              prefix="staging"
+              ;;
+            *Prod*)
+              prefix="prod"
+              ;;
+            *)
+              echo "Unsupported environment: $DEPLOY_ENVIRONMENT"
+              exit 1
+              ;;
+          esac
+
+          if [[ "${{ inputs.is_dr }}" == "true" ]]; then
+            prefix="${prefix}-dr"
+          fi
+
+          echo "TF_VAR_dns_url=${prefix}${{ vars.BASE_DNS_URL }}" >> "$GITHUB_ENV"
+
+      - name: Terraform init - app
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
           terraform init \
@@ -275,61 +310,63 @@ jobs:
             -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
             -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
             -var="azure_location=northeurope" \
+            -var="manage_dns_in_app_state=${ TF_VAR_dns_in_app }" \
+            -var="primary_fqdn=${{ TF_VAR_dns_url }}"\
             -out=tfplanapp
 
             terraform show -no-color tfplanapp || true
 
-            terraform apply -auto-approve -input=false tfplanapp
+            #terraform apply -auto-approve -input=false tfplanapp
 
-  restore-db:
-    name: Restore DB from BACPAC
-    needs: [apply-terraform]
-    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
-    runs-on: ubuntu-latest
-    environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-    permissions:
-      id-token: write
-      contents: read
+  # restore-db:
+  #   name: Restore DB from BACPAC
+  #   needs: [apply-terraform]
+  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
+  #   runs-on: ubuntu-latest
+  #   environment:
+  #     name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+  #   permissions:
+  #     id-token: write
+  #     contents: read
 
-    steps:
-      - uses: actions/checkout@v4
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Prepare derived variables
-        id: vars
-        shell: bash
-        run: |
-          set -euo pipefail
+  #     - name: Prepare derived variables
+  #       id: vars
+  #       shell: bash
+  #       run: |
+  #         set -euo pipefail
 
-          IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
+  #         IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
 
-          if [ "$IS_DR" = "true" ]; then
-            DFE_PROJECT_NAME="pt-dr"
-          else
-            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-          fi
+  #         if [ "$IS_DR" = "true" ]; then
+  #           DFE_PROJECT_NAME="pt-dr"
+  #         else
+  #           DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+  #         fi
 
-          RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"  #not df
-          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}" #could be df
+  #         RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"  #not df
+  #         RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}" #could be df
 
-          echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
+  #         echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
+  #         echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
+  #         echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+  #         echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
 
-      - name: Login with AZ
-        uses: ./.github/actions/azure-login
-        with:
-          az_tenant_id: ${{ secrets.az_tenant_id }}
-          az_subscription_id: ${{ secrets.az_subscription_id }}
-          az_client_id: ${{ secrets.az_client_id }}
+  #     - name: Login with AZ
+  #       uses: ./.github/actions/azure-login
+  #       with:
+  #         az_tenant_id: ${{ secrets.az_tenant_id }}
+  #         az_subscription_id: ${{ secrets.az_subscription_id }}
+  #         az_client_id: ${{ secrets.az_client_id }}
 
-      - name: Get runner public IP
-        id: whats-my-ip
-        run: |
-          IP=$(curl -s https://api.ipify.org)
-          echo "ip=$IP" >> "$GITHUB_OUTPUT"
-          echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
+  #     - name: Get runner public IP
+  #       id: whats-my-ip
+  #       run: |
+  #         IP=$(curl -s https://api.ipify.org)
+  #         echo "ip=$IP" >> "$GITHUB_OUTPUT"
+  #         echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
 
   #     - name: Restore DB from BACPAC
   #       uses: ./.github/actions/restore-db-from-bacpac
@@ -345,83 +382,90 @@ jobs:
   #         bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
   #         use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
 
-      - name: Whitelist Runner for sql
-        uses: ./.github/actions/whitelist-sql
-        with:
-          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          verb: add
+  #     - name: Whitelist Runner for sql
+  #       uses: ./.github/actions/whitelist-sql
+  #       with:
+  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+  #         server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+  #         verb: add
 
-      - name: Grant Container App identity access to restored SQL DB
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
+  #     - name: Grant Container App identity access to restored SQL DB
+  #       shell: pwsh
+  #       run: |
+  #         $ErrorActionPreference = "Stop"
 
-          Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
+  #         Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
 
-          $rg = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
-          $sqlServer = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
-          $sqlDb = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
+  #         $rg = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+  #         $sqlServer = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+  #         $sqlDb = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
 
-          $sqlFqdn = az sql server show `
-            --resource-group $rg `
-            --name $sqlServer `
-            --query fullyQualifiedDomainName `
-            -o tsv
+  #         $sqlFqdn = az sql server show `
+  #           --resource-group $rg `
+  #           --name $sqlServer `
+  #           --query fullyQualifiedDomainName `
+  #           -o tsv
 
-          $identityResourceId = az containerapp identity show `
-            --resource-group $rg `
-            --name $rg `
-            --query "userAssignedIdentities | keys(@)[0]" `
-            -o tsv
+  #         $identityResourceId = az containerapp identity show `
+  #           --resource-group $rg `
+  #           --name $rg `
+  #           --query "userAssignedIdentities | keys(@)[0]" `
+  #           -o tsv
 
-          if ([string]::IsNullOrWhiteSpace($identityResourceId)) {
-            throw "No user-assigned identity found on container app $rg"
-          }
+  #         if ([string]::IsNullOrWhiteSpace($identityResourceId)) {
+  #           throw "No user-assigned identity found on container app $rg"
+  #         }
 
-          $identityName = Split-Path $identityResourceId -Leaf
+  #         $identityName = Split-Path $identityResourceId -Leaf
 
-          $identityObjectId = az identity show `
-            --ids $identityResourceId `
-            --query principalId `
-            -o tsv
+  #         $identityClientId = az identity show `
+  #           --ids $identityResourceId `
+  #           --query clientId `
+  #           -o tsv
 
-          if ([string]::IsNullOrWhiteSpace($identityObjectId)) {
-            throw "Could not resolve principalId for identity $identityResourceId"
-          }
+  #         if ([string]::IsNullOrWhiteSpace($identityClientId)) {
+  #           throw "Could not resolve client/appId for identity $identityClientId"
+  #         }
 
-          $sidHex = python3 -c "import uuid; print('0x' + uuid.UUID('$identityObjectId').bytes_le.hex())"
+  #         $sidHex = python3 -c "import uuid; print('0x' + uuid.UUID('$identityClientId').bytes_le.hex())"
 
-          $token = az account get-access-token `
-            --resource https://database.windows.net/ `
-            --query accessToken `
-            -o tsv
+  #         $token = az account get-access-token `
+  #           --resource https://database.windows.net/ `
+  #           --query accessToken `
+  #           -o tsv
 
-          $query = @"
-          IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$identityName')
-          BEGIN
-            CREATE USER [$identityName] WITH SID = $sidHex, TYPE = E;
-          END;
+  #         $query = @"
+  #         IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$identityName')
+  #         BEGIN
+  #           CREATE USER [$identityName] WITH SID = $sidHex, TYPE = E;
+  #         END;
 
-          ALTER ROLE db_datareader ADD MEMBER [$identityName];
-          ALTER ROLE db_datawriter ADD MEMBER [$identityName];
-          ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
-          "@
+  #         ALTER ROLE db_datareader ADD MEMBER [$identityName];
+  #         ALTER ROLE db_datawriter ADD MEMBER [$identityName];
+  #         ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
+  #         ALTER ROLE db_executor ADD MEMBER [$identityName];
+  #         GRANT EXECUTE TO [$identityName];
+  #         GRANT INSERT TO [$identityName];
+  #         GRANT SELECT TO [$identityName];
 
-          Invoke-Sqlcmd `
-            -ServerInstance $sqlFqdn `
-            -Database $sqlDb `
-            -AccessToken $token `
-            -Query $query
+  #         DELETE FROM dbo.DataProtectionKeys;
 
-      - name: De-Whitelist Runner for sql
-        uses: ./.github/actions/whitelist-sql
-        with:
-          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          verb: remove
+  #         "@
+
+  #         Invoke-Sqlcmd `
+  #           -ServerInstance $sqlFqdn `
+  #           -Database $sqlDb `
+  #           -AccessToken $token `
+  #           -Query $query
+
+  #     - name: De-Whitelist Runner for sql
+  #       uses: ./.github/actions/whitelist-sql
+  #       with:
+  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+  #         server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+  #         verb: remove
 
   # restore-tokens:
   #   name: Restore app tokens from backup kv
