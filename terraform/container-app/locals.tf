@@ -3,7 +3,7 @@ locals {
   # General #
   ###########
   is_dr               = var.is_dr
-  current_user_id     = data.azurerm_client_config.current.object_id
+  current_user_id     = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
   project_name        = var.project_name
   environment         = var.environment
   azure_location      = var.azure_location
