@@ -1,3 +1,4 @@
+data "azurerm_client_config" "current" {}
 
 #front door created in WAF, needed as we are creating the custom domain here instead so that we can attach the dns zone id to it.
 #this format can look up from another state file, in the case that we are using a separate dns state file.
