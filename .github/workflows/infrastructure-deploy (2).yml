@@ -337,7 +337,6 @@ jobs:
           terraform plan -input=false \
             -var-file="../../normalisedTerraformVars.tfvars" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
             -var="azure_location=northeurope" \
             -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
             -out=tfplanapp

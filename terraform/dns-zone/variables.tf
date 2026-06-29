@@ -23,12 +23,6 @@ variable "tags" {
   default     = {}
 }
 
-variable "existing_resource_group" {
-  description = "Specifying this will NOT create a resource group. Use if running on non-prod and putting DNS in app RG"
-  type        = string
-  default     = ""
-}
-
 variable "subdomains" {
   description = "A list of subdomains that can be associated with the primary domain"
   type        = set(string)
