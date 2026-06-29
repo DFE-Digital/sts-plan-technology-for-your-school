@@ -268,16 +268,16 @@ jobs:
         run: |
           case "$DEPLOY_ENVIRONMENT" in
             Dev)
-              prefix="dev"
+              prefix="dev-"
               ;;
             Test)
-              prefix="test"
+              prefix="test-"
               ;;
             *Staging*)
-              prefix="staging"
+              prefix="staging-"
               ;;
             *Prod*)
-              prefix="prod"
+              prefix="prod-"
               ;;
             *)
               echo "Unsupported environment: $DEPLOY_ENVIRONMENT"
@@ -285,8 +285,8 @@ jobs:
               ;;
           esac
 
-          if [[ "${{ inputs.is_dr }}" == "true" ]]; then
-            prefix="${prefix}-dr"
+          if [[ "${{ steps.vars.outputs.IS_DR }}" == "true" ]]; then
+            prefix="${prefix}dr-"
           fi
 
           echo "TF_VAR_dns_url=${prefix}${TF_VAR_baseurl}" >> "$GITHUB_ENV"
