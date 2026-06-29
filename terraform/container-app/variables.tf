@@ -32,11 +32,6 @@ variable "is_dr" {
   default     = false
 }
 
-variable "github_env" {
-  description = "Github env we are running on"
-  type        = string
-}
-
 ##################
 # Resource Group #
 ##################
