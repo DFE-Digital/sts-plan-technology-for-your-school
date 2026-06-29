@@ -329,7 +329,6 @@ jobs:
             -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
             -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
-            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
 
       - name: Apply Terraform changes - separate DNS
         working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
