@@ -8,7 +8,6 @@ locals {
   environment         = var.environment
   azure_location      = var.azure_location
   resource_prefix     = "${local.environment}${local.project_name}"
-  rg_name = 
 
   ##for looking up front door in tf state. project and storage name needed shortening for dr
   tf_rg = var.is_dr ? "${var.environment}pt-dr-tf" : "${local.resource_prefix}-tf"
