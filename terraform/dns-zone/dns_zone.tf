@@ -4,7 +4,7 @@ module "dns_zone" {
   environment    = var.environment
   project_name   = var.project_name
   azure_location = var.azure_location
-  tags           = var.tags
+  tags           = local.tags
   primary_fqdn   = var.primary_fqdn
   subdomains     = var.subdomains
 
