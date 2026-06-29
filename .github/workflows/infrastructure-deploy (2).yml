@@ -339,6 +339,7 @@ jobs:
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="azure_location=northeurope" \
             -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -out=tfplanapp
 
             terraform show -no-color tfplandns || true

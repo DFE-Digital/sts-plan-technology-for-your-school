@@ -17,10 +17,14 @@ variable "azure_location" {
   default     = "West Europe"
 }
 
-variable "tags" {
-  description = "Tags to be applied to all resources"
-  type        = map(string)
-  default     = {}
+variable "az_tag_environment" {
+  description = "Environment tag to be applied to all resources"
+  type        = string
+}
+
+variable "az_tag_product" {
+  description = "Product tag to be applied to all resources"
+  type        = string
 }
 
 variable "subdomains" {
@@ -33,4 +37,10 @@ variable "primary_fqdn" {
   description = "The fully qualified domain name for the primary dns zone"
   type        = string
   default     = ""
+}
+
+variable "is_dr" {
+  description = "used to build tf filenames. Note: most resources will have it built into project name, and not need it again."
+  type        = bool
+  default     = false
 }
