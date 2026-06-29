@@ -45,8 +45,10 @@ env:
   SQL_BACKUP_FILE_NAME_SEARCH: ''
   USE_LATEST_IF_NOT_SPECIFIED: true
   TF_VAR_baseurl: 'plan-technology-for-your-school.education.gov.uk'
-  #do we want the container-app folder to make our DNS in the same tfstate (true), or have it run a separate tf process (prod)
-  TF_VAR_dns_in_app: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && !contains(inputs.environment, 'Prod')) }}
+  #do we want the container-app folder to make our DNS in the same tfstate (true), or have it run a separate tf process (prod).
+  #keep the push to run in app. note the run dns separately block uses the same (but opposite logic) but can't run off theis var so change there too
+  #TF_VAR_dns_in_app: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && !contains(inputs.environment, 'Prod')) }}
+  TF_VAR_dns_in_app: ${{ (github.event_name == 'workflow_dispatch' && !contains(inputs.environment, 'Prod')) }}
 
 jobs:
   image-and-acr:
@@ -317,6 +319,31 @@ jobs:
             terraform show -no-color tfplanapp || true
 
             #terraform apply -auto-approve -input=false tfplanapp
+
+      - name: Terraform init - separate DNS
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
+        if: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && contains(inputs.environment, 'Prod')) }}
+        #if: ${{ github.event_name == 'workflow_dispatch' && contains(inputs.environment, 'Prod') }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+
+      - name: Apply Terraform changes - separate DNS
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
+        run: |
+          terraform plan -input=false \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
+            -var="azure_location=northeurope" \
+            -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
+            -out=tfplanapp
+
+            terraform show -no-color tfplandns || true
+            #terraform apply -auto-approve -input=false tfplandns
 
   # restore-db:
   #   name: Restore DB from BACPAC
