@@ -729,7 +729,7 @@ public class CategoryLandingViewComponentViewBuilderTests
     [InlineData(SubmissionStatus.InProgress)]
     [InlineData(SubmissionStatus.CompleteNotReviewed)]
     public async Task
-        BuildViewModelAsync_When_Section_InProgress_Or_CompleteNotReviewed_Uses_CreatedUserActionId_To_Set_EstablishmentName(
+        BuildViewModelAsync_When_Section_InProgress_Or_CompleteNotReviewed_Uses_LastUpdatedUserActionId_To_Set_EstablishmentName(
             SubmissionStatus status
         )
     {
@@ -737,7 +737,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var section = MakeSection("S1", "Networking", "networking");
         var category = MakeCategory(section);
 
-        var createdUserActionId = Guid.NewGuid();
+        var lastUpdatedUserActionId = Guid.NewGuid();
 
         var statuses = new List<SqlSectionStatusDto>
         {
@@ -745,7 +745,7 @@ public class CategoryLandingViewComponentViewBuilderTests
             {
                 SectionId = "S1",
                 Status = status,
-                CreatedUserActionId = createdUserActionId,
+                LastUpdatedUserActionId = lastUpdatedUserActionId,
             },
         };
 
@@ -756,11 +756,11 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var userActionTracking = Substitute.For<IUserActionTrackingService>();
         userActionTracking
-            .GetAsync(createdUserActionId)
+            .GetAsync(lastUpdatedUserActionId)
             .Returns(
                 new SqlUserActionDto
                 {
-                    Id = createdUserActionId,
+                    Id = lastUpdatedUserActionId,
                     EstablishmentId = 2001,
                     MatEstablishmentId = null,
                 }
@@ -795,7 +795,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var secVm = Assert.Single(vm.CategoryLandingSections);
         Assert.Equal("Test School", secVm.EstablishmentName);
 
-        await userActionTracking.Received(1).GetAsync(createdUserActionId);
+        await userActionTracking.Received(1).GetAsync(lastUpdatedUserActionId);
         await establishment.Received(1).GetEstablishmentByIdAsync(2001);
     }
 
@@ -880,7 +880,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         var section = MakeSection("S1", "Devices", "devices");
         var category = MakeCategory(section);
 
-        var createdUserActionId = Guid.NewGuid();
+        var lastUpdatedUserActionId = Guid.NewGuid();
 
         var statuses = new List<SqlSectionStatusDto>
         {
@@ -888,7 +888,7 @@ public class CategoryLandingViewComponentViewBuilderTests
             {
                 SectionId = "S1",
                 Status = SubmissionStatus.InProgress,
-                CreatedUserActionId = createdUserActionId,
+                LastUpdatedUserActionId = lastUpdatedUserActionId,
             },
         };
 
@@ -899,11 +899,11 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var userActionTracking = Substitute.For<IUserActionTrackingService>();
         userActionTracking
-            .GetAsync(createdUserActionId)
+            .GetAsync(lastUpdatedUserActionId)
             .Returns(
                 new SqlUserActionDto
                 {
-                    Id = createdUserActionId,
+                    Id = lastUpdatedUserActionId,
                     EstablishmentId = 2003,
                     MatEstablishmentId = 3003,
                 }
