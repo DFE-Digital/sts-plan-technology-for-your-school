@@ -109,4 +109,62 @@ public class UserActionTrackingServiceTests
 
         Assert.Equal("No active HttpContext found.", exception.Message);
     }
+
+    [Fact]
+    public async Task GetAsync_Returns_Null_If_UserAction_Not_Found()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+
+        _userActionRepository
+            .GetUserActionAsync(id)
+            .Returns(Task.FromResult<UserActionEntity?>(null));
+
+        var sut = BuildService();
+
+        // Act
+        var result = await sut.GetAsync(id);
+
+        // Assert
+        Assert.Null(result);
+
+        await _userActionRepository.Received(1).GetUserActionAsync(id);
+    }
+
+    [Fact]
+    public async Task GetAsync_Maps_UserActionEntity_To_Dto()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+
+        var userActionEntity = new UserActionEntity
+        {
+            Id = id,
+            SessionId = Guid.NewGuid(),
+            UserId = 123,
+            EstablishmentId = 456,
+            MatEstablishmentId = 789,
+            RequestedUrl = "/test-path?section=network",
+        };
+
+        _userActionRepository
+            .GetUserActionAsync(id)
+            .Returns(Task.FromResult<UserActionEntity?>(userActionEntity));
+
+        var sut = BuildService();
+
+        // Act
+        var result = await sut.GetAsync(id);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(userActionEntity.Id, result.Id);
+        Assert.Equal(userActionEntity.SessionId, result.SessionId);
+        Assert.Equal(userActionEntity.UserId, result.UserId);
+        Assert.Equal(userActionEntity.EstablishmentId, result.EstablishmentId);
+        Assert.Equal(userActionEntity.MatEstablishmentId, result.MatEstablishmentId);
+        Assert.Equal(userActionEntity.RequestedUrl, result.RequestedUrl);
+
+        await _userActionRepository.Received(1).GetUserActionAsync(id);
+    }
 }

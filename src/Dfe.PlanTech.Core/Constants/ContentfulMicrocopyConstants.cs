@@ -175,6 +175,7 @@ public static class ContentfulMicrocopyConstants
         public const string Count = "count";
         public const string Total = "total";
         public const string ContactLink = "contactLink";
+        public const string EstablishmentName = "establishmentName";
     }
 
     public static readonly IReadOnlyDictionary<string, List<string>> Variables = new Dictionary<
@@ -186,9 +187,9 @@ public static class ContentfulMicrocopyConstants
         { LandingPageInsetIntroNotStarted, [VariableNames.Standard] },
         { LandingPageInsetIntroContinue, [VariableNames.Standard] },
         { LandingPageTopicLinkNotStarted, [VariableNames.Topic] },
-        { LandingPageTopicIntroContinue, [VariableNames.DateUpdated] },
+        { LandingPageTopicIntroContinue, [VariableNames.DateUpdated, VariableNames.EstablishmentName] },
         { LandingPageTopicLinkContinue, [VariableNames.Topic] },
-        { LandingPageTopicIntroCompleted, [VariableNames.Topic, VariableNames.DateCompleted] },
+        { LandingPageTopicIntroCompleted, [VariableNames.Topic, VariableNames.DateCompleted, VariableNames.EstablishmentName] },
         { LandingPageTopicLinkCompleted, [VariableNames.Topic] },
         { LandingPageSuccessPanelHeader, [VariableNames.Topic] },
         { SingleRecommendationPrintAllLink, [VariableNames.Topic] },
