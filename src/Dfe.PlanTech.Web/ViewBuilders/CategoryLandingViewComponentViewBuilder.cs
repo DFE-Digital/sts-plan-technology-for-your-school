@@ -131,8 +131,8 @@ public class CategoryLandingViewComponentViewBuilder(
             {
                 {
                     Status: SubmissionStatus.InProgress or SubmissionStatus.CompleteNotReviewed,
-                    CreatedUserActionId: { } createdUserActionId
-                } => createdUserActionId,
+                    LastUpdatedUserActionId: { } lastUpdatedUserActionId
+                } => lastUpdatedUserActionId,
 
                 {
                     Status: SubmissionStatus.CompleteReviewed,

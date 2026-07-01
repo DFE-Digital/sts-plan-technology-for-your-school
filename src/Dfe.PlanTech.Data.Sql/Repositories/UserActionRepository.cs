@@ -12,6 +12,6 @@ public class UserActionRepository(PlanTechDbContext dbContext) : IUserActionRepo
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task<UserActionEntity?> GetUserActionAsync(Guid id) => await dbContext.UserActions.FindAsync(id);
+    public async Task<UserActionEntity?> GetUserActionAsync(Guid id) => await  dbContext.UserActions.FindAsync(id);
 
 }

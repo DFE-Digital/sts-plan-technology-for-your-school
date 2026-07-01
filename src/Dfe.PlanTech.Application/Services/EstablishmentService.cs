@@ -52,7 +52,13 @@ public class EstablishmentService(
     public async Task<SqlEstablishmentDto> GetEstablishmentByIdAsync(int id)
     {
         var establishmentEntity = await _establishmentRepository.GetEstablishmentByIdAsync(id);
-        return establishmentEntity?.AsDto()!;
+
+        if (establishmentEntity is null)
+        {
+            throw new KeyNotFoundException($"Establishment with id {id} not found");
+        }
+
+        return establishmentEntity.AsDto();
     }
 
     public async Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(
