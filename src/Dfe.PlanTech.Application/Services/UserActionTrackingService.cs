@@ -1,6 +1,7 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.AspNetCore.Http;
@@ -69,5 +70,25 @@ public class UserActionTrackingService(
         httpContext.Items[UserActionIdConstants.HttpContextItemKey] = userActionId;
 
         await _userActionRepository.CreateAsync(userAction);
+    }
+
+    public async Task<SqlUserActionDto?> GetAsync(Guid id)
+    {
+        var userActionEntity = await userActionRepository.GetUserActionAsync(id);
+
+        if (userActionEntity is null)
+        {
+            return null;
+        }
+
+        return new SqlUserActionDto
+        {
+            Id = userActionEntity.Id,
+            SessionId = userActionEntity.SessionId,
+            UserId = userActionEntity.UserId,
+            EstablishmentId = userActionEntity.EstablishmentId,
+            MatEstablishmentId = userActionEntity.MatEstablishmentId,
+            RequestedUrl = userActionEntity.RequestedUrl,
+        };
     }
 }
