@@ -10,5 +10,5 @@ module "dns_zone" {
 
   frontdoor_profile_id         = data.terraform_remote_state.app.outputs.frontdoor_profile_id
   frontdoor_route_id           = data.terraform_remote_state.app.outputs.frontdoor_route_id
-  frontdoor_endpoint_host_name = data.terraform_remote_state.app.outputs.frontdoor_endpoint_host_name
+  frontdoor_endpoint_id        = data.terraform_remote_state.app.outputs.frontdoor_endpoint_id
 }

@@ -17,7 +17,7 @@ resource "azurerm_dns_a_record" "fd_domain" {
   resource_group_name = local.rg_name
   ttl                 = 3600
 
-  target_resource_id = var.frontdoor_profile_id
+  target_resource_id = var.frontdoor_endpoint_id
 }
 
 resource "azurerm_dns_txt_record" "frontdoor_validation" {
