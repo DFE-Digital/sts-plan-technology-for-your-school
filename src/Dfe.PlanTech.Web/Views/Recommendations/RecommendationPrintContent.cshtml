@@ -1,5 +1,5 @@
 @model RecommendationsViewModel
-@inject ICurrentUser CurrentUser
+@inject ICurrentUserProvider CurrentUser
 
 @{
     var schoolName = await CurrentUser.GetActiveEstablishmentNameAsync();

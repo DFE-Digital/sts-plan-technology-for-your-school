@@ -70,8 +70,8 @@ public class EstablishmentRecommendationHistoryRepository
             UserId = userId,
             MatEstablishmentId = matEstablishmentId,
             ResponseId = responseId,
-            PreviousStatus = previousStatus.ToString(),
-            NewStatus = newStatus.ToString(),
+            PreviousStatus = previousStatus,
+            NewStatus = newStatus,
             NoteText = noteText,
             DateCreated = DateTime.UtcNow,
         };

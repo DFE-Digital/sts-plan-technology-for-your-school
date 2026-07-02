@@ -45,6 +45,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Folder Include="Context\" />
         <Folder Include="wwwroot\css\" />
         <Folder Include="wwwroot\js\" />
     </ItemGroup>
