@@ -12,5 +12,5 @@ module "dns" {
   existing_resource_group = local.resource_group_name
   frontdoor_profile_id         = module.waf.frontdoor_profile_id
   frontdoor_route_id           = module.waf.frontdoor_route_id
-  frontdoor_endpoint_host_name = module.waf.frontdoor_endpoint_host_name
+  frontdoor_endpoint_id = module.waf.frontdoor_endpoint_id
 }
