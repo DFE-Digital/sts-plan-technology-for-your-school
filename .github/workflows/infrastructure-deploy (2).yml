@@ -318,7 +318,7 @@ jobs:
 
             terraform show -no-color tfplanapp || true
 
-            #terraform apply -auto-approve -input=false tfplanapp
+            terraform apply -auto-approve -input=false tfplanapp
 
       - name: Terraform init - separate DNS
         working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
