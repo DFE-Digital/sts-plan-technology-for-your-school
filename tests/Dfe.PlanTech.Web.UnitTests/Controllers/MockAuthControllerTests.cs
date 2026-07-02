@@ -167,7 +167,7 @@ public class MockAuthControllerTests
         EstablishmentEntity[] establishments =
         [
             new() { Id = 100, OrgName = "Other Org" },
-            new() { Id = 101, OrgName = "DSI TEST Establishment (001) Miscellanenous (27)" },
+            new() { Id = 101, OrgName = "DSI TEST Establishment (001) Miscellaneous (27)" },
             new() { Id = 201, OrgName = "DSI TEST Multi-Academy Trust (010)" },
         ];
 
@@ -469,7 +469,7 @@ public class MockAuthControllerTests
             new EstablishmentEntity
             {
                 Id = 101,
-                OrgName = "DSI TEST Establishment (001) Miscellanenous (27)",
+                OrgName = "DSI TEST Establishment (001) Miscellaneous (27)",
             },
             new EstablishmentEntity { Id = 201, OrgName = "DSI TEST Multi-Academy Trust (010)" },
             new EstablishmentEntity { Id = 999, OrgName = "Other Org" },
@@ -526,7 +526,6 @@ public class MockAuthControllerTests
         private readonly string? _nonce = "nonce-1";
         private readonly int _dbEstablishmentId = 101;
         private readonly int _dbUserId = 11;
-        private readonly int? _dbMatEstablishmentId = null;
 
         public AuthCodeRecordBuilder WithRedirectUri(string redirectUri)
         {

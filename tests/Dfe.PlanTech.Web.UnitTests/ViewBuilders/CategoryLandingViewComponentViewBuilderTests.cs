@@ -20,6 +20,8 @@ public class CategoryLandingViewComponentViewBuilderTests
     private static CategoryLandingViewComponentViewBuilder CreateSut(
         IContentfulService? contentful = null,
         ISubmissionService? submission = null,
+        IEstablishmentService? establishment = null,
+        IUserActionTrackingService? userActionTracking = null,
         IUserService? user = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null
@@ -27,6 +29,8 @@ public class CategoryLandingViewComponentViewBuilderTests
     {
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
+        establishment ??= Substitute.For<IEstablishmentService>();
+        userActionTracking ??= Substitute.For<IUserActionTrackingService>();
         user ??= Substitute.For<IUserService>();
         currentUser ??= Substitute.For<ICurrentUser>();
 
@@ -39,6 +43,8 @@ public class CategoryLandingViewComponentViewBuilderTests
             contentful,
             currentUser,
             submission,
+            userActionTracking,
+            establishment,
             user
         );
     }
@@ -715,7 +721,272 @@ public class CategoryLandingViewComponentViewBuilderTests
         Assert.NotEmpty(chunks);
         Assert.True(
             chunks[0].LastUpdated > chunks[1].LastUpdated
-                && chunks[1].LastUpdated > chunks[2].LastUpdated
+            && chunks[1].LastUpdated > chunks[2].LastUpdated
         );
+    }
+
+    [Theory]
+    [InlineData(SubmissionStatus.InProgress)]
+    [InlineData(SubmissionStatus.CompleteNotReviewed)]
+    public async Task
+        BuildViewModelAsync_When_Section_InProgress_Or_CompleteNotReviewed_Uses_LastUpdatedUserActionId_To_Set_EstablishmentName(
+            SubmissionStatus status
+        )
+    {
+        // Arrange
+        var section = MakeSection("S1", "Networking", "networking");
+        var category = MakeCategory(section);
+
+        var lastUpdatedUserActionId = Guid.NewGuid();
+
+        var statuses = new List<SqlSectionStatusDto>
+        {
+            new SqlSectionStatusDto
+            {
+                SectionId = "S1",
+                Status = status,
+                LastUpdatedUserActionId = lastUpdatedUserActionId,
+            },
+        };
+
+        var submission = Substitute.For<ISubmissionService>();
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
+
+        var userActionTracking = Substitute.For<IUserActionTrackingService>();
+        userActionTracking
+            .GetAsync(lastUpdatedUserActionId)
+            .Returns(
+                new SqlUserActionDto
+                {
+                    Id = lastUpdatedUserActionId,
+                    EstablishmentId = 2001,
+                    MatEstablishmentId = null,
+                }
+            );
+
+        var establishment = Substitute.For<IEstablishmentService>();
+        establishment
+            .GetEstablishmentByIdAsync(2001)
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 2001,
+                    OrgName = "Test School",
+                }
+            );
+
+        var sut = CreateSut(
+            submission: submission,
+            userActionTracking: userActionTracking,
+            establishment: establishment
+        );
+
+        // Act
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
+
+        // Assert
+        var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.Equal("Test School", secVm.EstablishmentName);
+
+        await userActionTracking.Received(1).GetAsync(lastUpdatedUserActionId);
+        await establishment.Received(1).GetEstablishmentByIdAsync(2001);
+    }
+
+    [Fact]
+    public async Task
+        BuildViewModelAsync_When_Section_CompleteReviewed_Uses_CompletedUserActionId_To_Set_EstablishmentName()
+    {
+        // Arrange
+        var section = MakeSection("S1", "Cyber security", "cyber-security");
+        var category = MakeCategory(section);
+
+        var createdUserActionId = Guid.NewGuid();
+        var completedUserActionId = Guid.NewGuid();
+
+        var statuses = new List<SqlSectionStatusDto>
+        {
+            new SqlSectionStatusDto
+            {
+                SectionId = "S1",
+                Status = SubmissionStatus.CompleteReviewed,
+                CreatedUserActionId = createdUserActionId,
+                CompletedUserActionId = completedUserActionId,
+            },
+        };
+
+        var submission = Substitute.For<ISubmissionService>();
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
+
+        var userActionTracking = Substitute.For<IUserActionTrackingService>();
+        userActionTracking
+            .GetAsync(completedUserActionId)
+            .Returns(
+                new SqlUserActionDto
+                {
+                    Id = completedUserActionId,
+                    EstablishmentId = 2002,
+                    MatEstablishmentId = null,
+                }
+            );
+
+        var establishment = Substitute.For<IEstablishmentService>();
+        establishment
+            .GetEstablishmentByIdAsync(2002)
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 2002,
+                    OrgName = "Completed School",
+                }
+            );
+
+        var sut = CreateSut(
+            submission: submission,
+            userActionTracking: userActionTracking,
+            establishment: establishment
+        );
+
+        // Act
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
+
+        // Assert
+        var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.Equal("Completed School", secVm.EstablishmentName);
+
+        await userActionTracking.Received(1).GetAsync(completedUserActionId);
+        await userActionTracking.DidNotReceive().GetAsync(createdUserActionId);
+        await establishment.Received(1).GetEstablishmentByIdAsync(2002);
+    }
+
+    [Fact]
+    public async Task
+        BuildViewModelAsync_When_UserAction_Has_MatEstablishmentId_Uses_MatEstablishmentId_For_EstablishmentName()
+    {
+        // Arrange
+        var section = MakeSection("S1", "Devices", "devices");
+        var category = MakeCategory(section);
+
+        var lastUpdatedUserActionId = Guid.NewGuid();
+
+        var statuses = new List<SqlSectionStatusDto>
+        {
+            new SqlSectionStatusDto
+            {
+                SectionId = "S1",
+                Status = SubmissionStatus.InProgress,
+                LastUpdatedUserActionId = lastUpdatedUserActionId,
+            },
+        };
+
+        var submission = Substitute.For<ISubmissionService>();
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
+
+        var userActionTracking = Substitute.For<IUserActionTrackingService>();
+        userActionTracking
+            .GetAsync(lastUpdatedUserActionId)
+            .Returns(
+                new SqlUserActionDto
+                {
+                    Id = lastUpdatedUserActionId,
+                    EstablishmentId = 2003,
+                    MatEstablishmentId = 3003,
+                }
+            );
+
+        var establishment = Substitute.For<IEstablishmentService>();
+        establishment
+            .GetEstablishmentByIdAsync(3003)
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 3003,
+                    OrgName = "Test MAT",
+                }
+            );
+
+        var sut = CreateSut(
+            submission: submission,
+            userActionTracking: userActionTracking,
+            establishment: establishment
+        );
+
+        // Act
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
+
+        // Assert
+        var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.Equal("Test MAT", secVm.EstablishmentName);
+
+        await establishment.Received(1).GetEstablishmentByIdAsync(3003);
+        await establishment.DidNotReceive().GetEstablishmentByIdAsync(2003);
+    }
+
+    [Fact]
+    public async Task BuildViewModelAsync_When_No_UserActionId_Does_Not_Retrieve_EstablishmentName()
+    {
+        // Arrange
+        var section = MakeSection("S1", "Broadband", "broadband");
+        var category = MakeCategory(section);
+
+        var statuses = new List<SqlSectionStatusDto>
+        {
+            new SqlSectionStatusDto
+            {
+                SectionId = "S1",
+                Status = SubmissionStatus.InProgress,
+                CreatedUserActionId = null,
+                CompletedUserActionId = null,
+            },
+        };
+
+        var submission = Substitute.For<ISubmissionService>();
+        submission
+            .GetSectionStatusesForSchoolAsync(Arg.Any<int>(), Arg.Any<IEnumerable<string>>())
+            .Returns(statuses);
+
+        var userActionTracking = Substitute.For<IUserActionTrackingService>();
+        var establishment = Substitute.For<IEstablishmentService>();
+
+        var sut = CreateSut(
+            submission: submission,
+            userActionTracking: userActionTracking,
+            establishment: establishment
+        );
+
+        // Act
+        var vm = await sut.BuildViewModelAsync(
+            category,
+            "cat",
+            null,
+            RecommendationConstants.DefaultSortOrder
+        );
+
+        // Assert
+        var secVm = Assert.Single(vm.CategoryLandingSections);
+        Assert.Null(secVm.EstablishmentName);
+
+        await userActionTracking.DidNotReceive().GetAsync(Arg.Any<Guid>());
+        await establishment.DidNotReceive().GetEstablishmentByIdAsync(Arg.Any<int>());
     }
 }
