@@ -544,6 +544,9 @@ public class SubmissionRepository(
                         ?? currentSubmission?.DateCreated
                         ?? DateTime.UtcNow,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                    LastUpdatedUserActionId = currentSubmission?.LastUpdatedUserActionId,
+                    CreatedUserActionId = currentSubmission?.CreatedUserActionId,
+                    CompletedUserActionId = lastCompleteSubmission?.CompletedUserActionId,
                 };
             })
             .ToList();

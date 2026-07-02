@@ -15,6 +15,8 @@ public class CategoryLandingViewComponentViewBuilder(
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     ISubmissionService submissionService,
+    IUserActionTrackingService userActionTrackingService,
+    IEstablishmentService establishmentService,
     IUserService userService
 )
     : BaseViewBuilder(logger, contentfulService, currentUser),
@@ -24,6 +26,10 @@ public class CategoryLandingViewComponentViewBuilder(
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IUserService _userService =
         userService ?? throw new ArgumentNullException(nameof(userService));
+    private readonly IUserActionTrackingService _userActionTrackingService =
+        userActionTrackingService ?? throw new ArgumentNullException(nameof(userActionTrackingService));
+    private readonly IEstablishmentService _establishmentService =
+        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
 
     private const string CategoryLandingSectionAssessmentLink =
         "Components/CategoryLanding/SectionAssessmentLink";
@@ -120,6 +126,34 @@ public class CategoryLandingViewComponentViewBuilder(
                 sectionStatus.SectionId.Equals(section.Id)
             );
 
+            var userActionId = sectionStatus switch
+            {
+                {
+                    Status: SubmissionStatus.InProgress or SubmissionStatus.CompleteNotReviewed,
+                    LastUpdatedUserActionId: { } lastUpdatedUserActionId
+                } => lastUpdatedUserActionId,
+
+                {
+                    Status: SubmissionStatus.CompleteReviewed,
+                    CompletedUserActionId: { } completedUserActionId
+                } => completedUserActionId,
+
+                _ => (Guid?)null
+            };
+
+            string? establishmentName = null;
+
+            if (userActionId is { } id)
+            {
+                var userAction = await _userActionTrackingService.GetAsync(id);
+
+                if ((userAction?.MatEstablishmentId ?? userAction?.EstablishmentId) is { } userActionEstablishmentId)
+                {
+                    var userActionEstablishment = await _establishmentService.GetEstablishmentByIdAsync(userActionEstablishmentId);
+                    establishmentName = userActionEstablishment.OrgName;
+                }
+            }
+
             var recommendations =
                 sectionStatus?.Status == SubmissionStatus.CompleteReviewed
                     ? await GetCategoryLandingSectionRecommendations(
@@ -133,7 +167,8 @@ public class CategoryLandingViewComponentViewBuilder(
                 section,
                 recommendations,
                 sectionStatus,
-                hadRetrievalError
+                hadRetrievalError,
+                establishmentName
             );
         }
     }
