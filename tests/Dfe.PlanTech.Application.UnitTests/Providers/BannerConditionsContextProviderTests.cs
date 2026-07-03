@@ -179,8 +179,8 @@ public class BannerConditionsContextProviderTests
     [InlineData(SubmissionStatus.NotStarted, null, false, null, null, false)]
     [InlineData(SubmissionStatus.InProgress, null, null, true, null, true)]
     [InlineData(SubmissionStatus.InProgress, null, null, false, null, false)]
-    [InlineData(SubmissionStatus.CompleteNotReviewed, null, null, null, true, true)]
-    [InlineData(SubmissionStatus.CompleteNotReviewed, null, null, null, false, false)]
+    [InlineData(SubmissionStatus.CompleteNotReviewed, null, null, true, null, true)]
+    [InlineData(SubmissionStatus.CompleteNotReviewed, null, null, false, null, false)]
     [InlineData(SubmissionStatus.CompleteReviewed, null, null, null, true, true)]
     [InlineData(SubmissionStatus.CompleteReviewed, null, null, null, false, false)]
     public async Task RecordViewActionAndGetBannerVisibility_ReturnsCorrectVisibility_For_SubmissionStatus(
