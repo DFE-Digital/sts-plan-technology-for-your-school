@@ -27,6 +27,11 @@ module "waf" {
     }
   }
 
+  ##DNS##
+  cdn_custom_domains = {
+    "container-app-url" = var.primary_fqdn
+  }
+
   waf_custom_rules = local.waf_custom_rules
 
   cdn_sku = "Premium_AzureFrontDoor"

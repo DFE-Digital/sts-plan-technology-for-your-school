@@ -66,6 +66,7 @@ resource "azurerm_cdn_frontdoor_custom_domain" "waf" {
   name                     = "${local.resource_prefix}-${each.key}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.waf[0].id
   host_name                = each.value
+  dns_zone_id              = azurerm_dns_zone.waf[each.key].id
 
   tls {
     certificate_type    = "ManagedCertificate"
@@ -105,6 +106,10 @@ resource "azurerm_cdn_frontdoor_custom_domain_association" "waf" {
 
   cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.waf[each.key].id
   cdn_frontdoor_route_ids        = [azurerm_cdn_frontdoor_route.waf[each.key].id]
+  depends_on = [
+    azurerm_dns_a_record.frontdoor,
+    azurerm_dns_txt_record.frontdoor_validation
+  ]
 }
 
 resource "azurerm_cdn_frontdoor_rule_set" "redirects" {
