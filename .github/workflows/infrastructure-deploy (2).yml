@@ -322,7 +322,7 @@ jobs:
 
             terraform show -no-color tfplanapp || true
 
-            #terraform apply -auto-approve -input=false tfplanapp
+            terraform apply -auto-approve -input=false tfplanapp
 
   # restore-db:
   #   name: Restore DB from BACPAC
