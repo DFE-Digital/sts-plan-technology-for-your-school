@@ -335,6 +335,7 @@ jobs:
 
       - name: Apply Terraform changes - separate DNS
         working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
+        if: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.use-separate-dns) }}
         run: |
           terraform plan -input=false \
             -var-file="../../normalisedTerraformVars.tfvars" \
@@ -342,7 +343,7 @@ jobs:
             -var="azure_location=northeurope" \
             -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-            -out=tfplanapp
+            -out=tfplandns
 
             terraform show -no-color tfplandns || true
             terraform apply -auto-approve -input=false tfplandns
