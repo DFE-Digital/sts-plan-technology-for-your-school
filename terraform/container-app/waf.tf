@@ -18,18 +18,14 @@ module "waf" {
     "container-app-url" = {
       health_probe_request_type = "GET"
       domain                    = module.main_hosting.container_fqdn
-      create_custom_domain      = var.cdn_create_custom_domain_waf
+      #true
+      create_custom_domain      = var.cdn_create_custom_domain_waf 
       custom_fqdn               = var.primary_fqdn
       create_private            = true
       private_link_target_id    = data.azurerm_container_app_environment.env.id
       #private_link_target_id    = module.main_hosting.container_app_environment_id #if output PR added to shared container module
       private_link_location     = local.azure_location
     }
-  }
-
-  ##DNS##
-  cdn_custom_domains = {
-    "container-app-url" = var.primary_fqdn
   }
 
   waf_custom_rules = local.waf_custom_rules

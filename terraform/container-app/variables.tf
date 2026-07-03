@@ -305,7 +305,7 @@ variable "cdn_create_custom_domain_container" {
 variable "cdn_create_custom_domain_waf" {
   description = "A flag to have the custom front door domain created IN SHARED WAF MODULE"
   type        = bool
-  default     = false 
+  default     = true 
 }
 
 variable "enable_dns_zone_container" {
