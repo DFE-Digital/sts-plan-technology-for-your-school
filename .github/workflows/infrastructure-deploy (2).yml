@@ -19,7 +19,7 @@ on:
         default: true
       use-separate-dns:
         type: boolean
-        default: true
+        default: false
         description: 'Whether the DNS zone should be created in its own RG and TF state (otherwise, it will be in the app one)'
       restore-db:
         type: boolean
@@ -52,7 +52,7 @@ env:
   #do we want the container-app folder to make our DNS in the same tfstate (true), or have it run a separate tf process (prod).
   #keep the push to run in app. note the run dns separately block uses the same (but opposite logic) but can't run off theis var so change there too
   #TF_VAR_dns_in_app: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && !contains(inputs.environment, 'Prod')) }}
-  TF_VAR_dns_in_app: ${{ (github.event_name == 'workflow_dispatch' && !inputs.use-separate-dns) }}
+  TF_VAR_dns_in_app: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && !inputs.use-separate-dns) }}
 
 jobs:
   image-and-acr:
@@ -324,29 +324,29 @@ jobs:
 
             terraform apply -auto-approve -input=false tfplanapp
 
-      - name: Terraform init - separate DNS
-        working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-        if: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.use-separate-dns) }}
-        run: |
-          terraform init \
-            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
-            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
-            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+      # - name: Terraform init - separate DNS
+      #   working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
+      #   if: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.use-separate-dns) }}
+      #   run: |
+      #     terraform init \
+      #       -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+      #       -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
+      #       -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
 
-      - name: Apply Terraform changes - separate DNS
-        working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-        if: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.use-separate-dns) }}
-        run: |
-          terraform plan -input=false \
-            -var-file="../../normalisedTerraformVars.tfvars" \
-            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-            -var="azure_location=northeurope" \
-            -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
-            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-            -out=tfplandns
+      # - name: Apply Terraform changes - separate DNS
+      #   working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
+      #   if: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.use-separate-dns) }}
+      #   run: |
+      #     terraform plan -input=false \
+      #       -var-file="../../normalisedTerraformVars.tfvars" \
+      #       -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+      #       -var="azure_location=northeurope" \
+      #       -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
+      #       -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+      #       -out=tfplandns
 
-            terraform show -no-color tfplandns || true
-            terraform apply -auto-approve -input=false tfplandns
+      #       terraform show -no-color tfplandns || true
+      #       terraform apply -auto-approve -input=false tfplandns
 
   # restore-db:
   #   name: Restore DB from BACPAC
