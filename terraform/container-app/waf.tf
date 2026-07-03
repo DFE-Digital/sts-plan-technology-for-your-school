@@ -19,7 +19,7 @@ module "waf" {
       health_probe_request_type = "GET"
       domain                    = module.main_hosting.container_fqdn
       #true
-      create_custom_domain      = var.cdn_create_custom_domain_waf 
+      cdn_create_custom_domain      = var.cdn_create_custom_domain_waf 
       custom_fqdn               = var.primary_fqdn
       create_private            = true
       private_link_target_id    = data.azurerm_container_app_environment.env.id
