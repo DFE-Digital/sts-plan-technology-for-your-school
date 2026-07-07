@@ -162,7 +162,6 @@ jobs:
           terraform plan -input=false \
             -target=azurerm_resource_group.app_rg \
             -target=azurerm_container_registry.acr_notshared \
-            -target="module.waf.data.azurerm_resource_group.existing_resource_group" \
             -var-file="../../normalisedTerraformVars.tfvars" \
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
