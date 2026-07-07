@@ -454,3 +454,15 @@ variable "app_gateway_v2_waf_request_body_enforcement" {
   type        = bool
   default     = true
 }
+
+###added to this module along with dns to allow easier coupling with front door. each waf target already had a bool to create a domain, this is an extra check
+variable "cdn_create_custom_domain" {
+  description = "A flag to have the custom front door domain created"
+  type        = bool
+  default     = false 
+}
+variable "manage_dns_in_app_state" {
+  description = "A flag to have the DNS domain created"
+  type        = bool
+  default     = false 
+}

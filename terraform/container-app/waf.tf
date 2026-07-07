@@ -129,4 +129,8 @@ module "waf" {
   cdn_url_path_redirects   = local.cdn_frontdoor_url_path_redirects
 
   tags = local.tags
+
+  #have the shared waf create the dns zone as well and couple it to the front door, within the app tfstate.
+  cdn_create_custom_domain = var.cdn_create_custom_domain_waf
+  manage_dns_in_app_state = var.manage_dns_in_app_state
 }
