@@ -61,7 +61,7 @@ resource "azurerm_cdn_frontdoor_endpoint" "waf" {
 }
 
 resource "azurerm_cdn_frontdoor_custom_domain" "waf" {
-  for_each = local.waf_application == "CDN" && && local.create_dns_zone? local.cdn_custom_domains : {}
+  for_each = local.waf_application == "CDN" && local.create_custom_domain ? local.cdn_custom_domains : {}
 
   name                     = "${local.resource_prefix}-${each.key}"
   cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.waf[0].id
@@ -102,7 +102,7 @@ resource "azurerm_cdn_frontdoor_route" "waf" {
 }
 
 resource "azurerm_cdn_frontdoor_custom_domain_association" "waf" {
-  for_each = local.waf_application == "CDN" ? local.cdn_custom_domains : {}
+  for_each = local.waf_application == "CDN" && local.create_dns_zone ? local.cdn_custom_domains : {}
 
   cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.waf[each.key].id
   cdn_frontdoor_route_ids        = [azurerm_cdn_frontdoor_route.waf[each.key].id]
