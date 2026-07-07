@@ -39,7 +39,7 @@ variable "is_dr" {
 variable "create_rg_separately" {
   description = "Flag to create the RG before the shared module"
   type        = bool
-  default     = false
+  default     = true
 }
 
 ############

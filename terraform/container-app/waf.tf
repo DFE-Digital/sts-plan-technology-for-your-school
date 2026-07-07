@@ -22,8 +22,7 @@ module "waf" {
       cdn_create_custom_domain      = var.cdn_create_custom_domain_waf 
       custom_fqdn               = var.primary_fqdn
       create_private            = true
-      private_link_target_id    = data.azurerm_container_app_environment.env.id
-      #private_link_target_id    = module.main_hosting.container_app_environment_id #if output PR added to shared container module
+      private_link_target_id    = module.main_hosting.container_app_environment_id
       private_link_location     = local.azure_location
     }
   }
