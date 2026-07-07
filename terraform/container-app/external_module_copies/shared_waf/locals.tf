@@ -59,6 +59,6 @@ locals {
   }
 
   tags = var.tags
-  create_dns_zone = var.manage_dns_in_app_state && var.create_custom_domain
+  create_dns_zone = var.manage_dns_in_app_state && var.cdn_create_custom_domain
   create_custom_domain = var.cdn_create_custom_domain
 }
