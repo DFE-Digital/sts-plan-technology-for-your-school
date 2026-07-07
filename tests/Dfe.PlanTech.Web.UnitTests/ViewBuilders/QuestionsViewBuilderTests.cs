@@ -31,6 +31,7 @@ public class QuestionsViewBuilderTests
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
     private readonly IEstablishmentService _establishmentSvc = Substitute.For<IEstablishmentService>();
     private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
 
     // Options
     private readonly IOptions<ContactOptionsConfiguration> _contactOptions = Options.Create(
@@ -59,17 +60,23 @@ public class QuestionsViewBuilderTests
             _contentfulOptions,
             _questionSvc,
             _submissionSvc,
-            _establishmentSvc
+            _establishmentSvc,
+            _httpContextAccessor
         );
 
     private static Controller MakeControllerWithTempData()
     {
         var controller = new DummyController();
-        var httpContext = new DefaultHttpContext();
+        var httpContext = new DefaultHttpContext
+        {
+            Session = new TestSession()
+        };
+
         controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
         var tempDataProvider = Substitute.For<ITempDataProvider>();
         controller.TempData = new TempDataDictionary(httpContext, tempDataProvider);
+
         return controller;
     }
 
@@ -416,6 +423,86 @@ public class QuestionsViewBuilderTests
         var redirect = Assert.IsType<RedirectToActionResult>(result);
     }
 
+    [Fact]
+    public async Task SubmitAnswerAndRedirect_WhenNonMat_SubmitsOnceForActiveEstablishment()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUser.IsMat.Returns(false);
+        _currentUser.UserId.Returns(11);
+        _currentUser.UserOrganisationId.Returns(22);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(22);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Q1");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1);
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var vm = new SubmitAnswerInputViewModel
+        {
+            ChosenAnswerJson = @"{""answer"": { ""id"": ""A1"" } }",
+        };
+
+        _submissionSvc.SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>()).Returns(1);
+        _questionSvc.GetNextUnansweredQuestion(22, section).Returns((QuestionnaireQuestionEntry?)null);
+
+        await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", null);
+
+        await _submissionSvc.Received(1)
+            .SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>());
+    }
+
+    [Fact]
+    public async Task SubmitAnswerAndRedirect_WhenMat_SubmitsOnceForEachSelectedEstablishment()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
+
+        IEnumerable<int> selectedEstablishmentIds = [101, 102, 103];
+
+        controller.HttpContext.Session.SetValue(
+            SessionConstants.SelectedEstablishmentsKey,
+            selectedEstablishmentIds
+        );
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.UserId.Returns(11);
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Q1");
+        var q2 = MakeQuestion("Q2", "q-2", "Q2");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1, q2);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var vm = new SubmitAnswerInputViewModel
+        {
+            ChosenAnswerJson = @"{""answer"": { ""id"": ""A1"" } }",
+        };
+
+        _submissionSvc.SubmitAnswerAsync(11, 101, 999, Arg.Any<SubmitAnswerModel>()).Returns(1);
+        _submissionSvc.SubmitAnswerAsync(11, 102, 999, Arg.Any<SubmitAnswerModel>()).Returns(2);
+        _submissionSvc.SubmitAnswerAsync(11, 103, 999, Arg.Any<SubmitAnswerModel>()).Returns(3);
+
+        _questionSvc.GetNextUnansweredQuestion(101, section).Returns(q2);
+
+        await sut.SubmitAnswerAndRedirect(controller, vm, "cat", "sec-1", "q-1", null);
+
+        await _submissionSvc.Received(1)
+            .SubmitAnswerAsync(11, 101, 999, Arg.Any<SubmitAnswerModel>());
+
+        await _submissionSvc.Received(1)
+            .SubmitAnswerAsync(11, 102, 999, Arg.Any<SubmitAnswerModel>());
+
+        await _submissionSvc.Received(1)
+            .SubmitAnswerAsync(11, 103, 999, Arg.Any<SubmitAnswerModel>());
+
+        await _questionSvc.Received(1).GetNextUnansweredQuestion(101, section);
+    }
+
     // ---------- RouteToContinueSelfAssessmentPage ----------
 
     [Fact]
@@ -702,6 +789,29 @@ public class QuestionsViewBuilderTests
     }
 
     // ------------- Stubs / helpers -------------
+    private sealed class TestSession : ISession
+    {
+        private readonly Dictionary<string, byte[]> _store = [];
+
+        public IEnumerable<string> Keys => _store.Keys;
+
+        public string Id { get; } = Guid.NewGuid().ToString();
+
+        public bool IsAvailable => true;
+
+        public void Clear() => _store.Clear();
+
+        public Task CommitAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public Task LoadAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
+
+        public void Remove(string key) => _store.Remove(key);
+
+        public void Set(string key, byte[] value) => _store[key] = value;
+
+        public bool TryGetValue(string key, out byte[] value) =>
+            _store.TryGetValue(key, out value!);
+    }
 
     private sealed class DummyController : Controller { }
 }
