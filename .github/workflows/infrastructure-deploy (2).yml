@@ -433,16 +433,16 @@ jobs:
           $sqlServer = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
           $sqlDb = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
 
-          $sqlFqdn = az sql server show `
-            --resource-group $rg `
-            --name $sqlServer `
-            --query fullyQualifiedDomainName `
+          $sqlFqdn = az sql server show \
+            --resource-group $rg \
+            --name $sqlServer \
+            --query fullyQualifiedDomainName \
             -o tsv
 
-          $identityResourceId = az containerapp identity show `
-            --resource-group $rg `
-            --name $rg `
-            --query "userAssignedIdentities | keys(@)[0]" `
+          $identityResourceId = az containerapp identity show \
+            --resource-group $rg \
+            --name $rg \
+            --query "userAssignedIdentities | keys(@)[0]" \
             -o tsv
 
           if ([string]::IsNullOrWhiteSpace($identityResourceId)) {
@@ -451,9 +451,9 @@ jobs:
 
           $identityName = Split-Path $identityResourceId -Leaf
 
-          $identityClientId = az identity show `
-            --ids $identityResourceId `
-            --query clientId `
+          $identityClientId = az identity show \
+            --ids $identityResourceId \
+            --query clientId \
             -o tsv
 
           if ([string]::IsNullOrWhiteSpace($identityClientId)) {
@@ -462,9 +462,9 @@ jobs:
 
           $sidHex = python3 -c "import uuid; print('0x' + uuid.UUID('$identityClientId').bytes_le.hex())"
 
-          $token = az account get-access-token `
-            --resource https://database.windows.net/ `
-            --query accessToken `
+          $token = az account get-access-token \
+            --resource https://database.windows.net/ \
+            --query accessToken \
             -o tsv
 
           $query = @"
@@ -485,10 +485,10 @@ jobs:
 
           "@
 
-          Invoke-Sqlcmd `
-            -ServerInstance $sqlFqdn `
-            -Database $sqlDb `
-            -AccessToken $token `
+          Invoke-Sqlcmd \
+            -ServerInstance $sqlFqdn \
+            -Database $sqlDb \
+            -AccessToken $token \
             -Query $query
 
       - name: De-Whitelist Runner for sql
@@ -501,7 +501,7 @@ jobs:
 
   restore-tokens:
     name: Restore app tokens from backup kv
-    #needs: [apply-terraform]
+    needs: [apply-terraform]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-tokens) }}
     runs-on: ubuntu-latest
     environment:
