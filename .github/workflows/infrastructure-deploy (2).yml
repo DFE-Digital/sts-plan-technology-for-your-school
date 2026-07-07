@@ -262,14 +262,6 @@ jobs:
             -SecretName "${{ secrets.TF_SECRET_NAME }}" `
             -KeyVaultName "${{ steps.vars.outputs.TF_KEYVAULT_NAME }}"
 
-      - name: Whitelist Runner for app keyvault(in case exists)
-        uses: ./.github/actions/whitelist-kv
-        with:
-          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX }}
-          keyvault-name: ${{ steps.vars.outputs.KEYVAULT_NAME }}
-          verb: add
-
       - name: Build DNS URL
         shell: bash
         run: |
