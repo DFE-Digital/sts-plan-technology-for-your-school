@@ -23,5 +23,5 @@ data "azurerm_virtual_network" "vnet" {
 
 data "azurerm_container_app_environment" "env" {
   name                = "${local.resource_prefix}containerapp"
-  resource_group_name = local.resource_prefix
+  resource_group_name = local.existing_resource_group
 }
