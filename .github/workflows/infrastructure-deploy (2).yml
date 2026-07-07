@@ -328,7 +328,7 @@ jobs:
 
       - name: Terraform init - separate DNS
         working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging')) }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
         run: |
           terraform init \
             -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
@@ -337,7 +337,7 @@ jobs:
 
       - name: Apply Terraform changes - separate DNS
         working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging')) }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
         run: |
           terraform plan -input=false \
             -var-file="../../normalisedTerraformVars.tfvars" \
