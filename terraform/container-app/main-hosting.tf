@@ -104,6 +104,6 @@ module "main_hosting" {
   #######
   # DNS #
   #######
-  enable_dns_zone = var.enable_dns_zone_container
+  enable_dns_zone = false
   dns_zone_domain_name = var.primary_fqdn
 }
