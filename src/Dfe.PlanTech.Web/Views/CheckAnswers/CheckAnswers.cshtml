@@ -14,6 +14,22 @@
 
 @{
     await Html.RenderPartialAsync("PrintButton", Model);
+} 
+
+@if (Model.IsMatMultiSchoolAssessment)
+{
+    <div class="govuk-inset-text">
+        <p class="govuk-body">
+            You are completing this self-assessment for @Model.SelectedSchoolCount schools:
+        </p>
+
+        <ul class="govuk-list govuk-list--bullet">
+            @foreach (var schoolName in Model.SelectedSchoolNames)
+            {
+                <li>@schoolName</li>
+            }
+        </ul>
+    </div>
 }
 
 <div id="checkYourAnswers-page">
@@ -52,12 +68,33 @@
         <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
         <input type="hidden" name="sectionName" value="@Model.SectionName">
 
-        @{
+        @if(!Model.IsMatMultiSchoolAssessment)
+        {
             foreach (var content in Model.Content ?? [])
             {
                 await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-            }
+                }
         }
+        else
+        {
+            <div>
+                <h2>What happens next</h2>
+                <p class="govuk-body">
+                    You're submitting the @Model.SectionName self-assessments for @Model.SelectedSchoolCount schools:
+                </p>
+
+                <ul class="govuk-list govuk-list--bullet">
+                    @foreach (var schoolName in Model.SelectedSchoolNames)
+                    {
+                        <li>@schoolName</li>
+                    }
+                </ul>
+                <p class="govuk-body class=" govuk-margin-bottom-2"">
+                    You'll get recommendations to help you schools meet the @Model.SectionName standards. Your self-assessment answers will be used to give these recommendations a progress status'
+                </p>
+            </div>
+        }
+
 
         <govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">
             @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.CheckAnswersSubmitButton)

@@ -22,4 +22,7 @@ public class ReviewAnswersViewModel
     public string? SectionSlug { get; init; } = null;
     public string? Slug { get; init; } = null;
     public int? SubmissionId { get; init; }
+    public bool IsMatMultiSchoolAssessment { get; set; }
+    public int SelectedSchoolCount { get; set; }
+    public List<string> SelectedSchoolNames { get; set; } = [];
 }
