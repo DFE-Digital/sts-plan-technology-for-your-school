@@ -157,6 +157,12 @@ variable "key_vault_cidr_rules" {
   default     = []
 }
 
+variable "add_secrets" {
+  description = "Add secrets using TF - leave false if restoring from backup in pipeline"
+  type        = bool
+  default     = false
+}
+
 #######################
 # Azure App Container #
 #######################
@@ -415,7 +421,7 @@ variable "contentful_webhook_name" {
 #########
 # Misc #
 #########
-
+#the current pipeline ip to add to the key vault on creation to whitelist it
 variable "workflow_runner_ip" {
   type    = string
   default = null
