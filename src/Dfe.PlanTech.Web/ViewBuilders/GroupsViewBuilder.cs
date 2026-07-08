@@ -296,7 +296,7 @@ public class GroupsViewBuilder(
                 }
             }
 
-            controller.HttpContext.Session.Set<IEnumerable<int>>(
+            controller.HttpContext.Session.SetValue<IEnumerable<int>>(
                 SessionConstants.SelectedEstablishmentsKey,
                 selectedSchoolIds);
         }
