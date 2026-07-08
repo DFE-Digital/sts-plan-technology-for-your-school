@@ -24,10 +24,20 @@ runs:
       run: |
         set -euo pipefail
 
+        keyvault_exists="$(az keyvault show \
+          --resource-group "${{ inputs.resource-group }}" \
+          --name "${{ inputs.keyvault-name }}" \
+          --query "name" -o tsv 2>/dev/null || true)"
+
+        if [ -z "$keyvault_exists" ]; then
+          echo "Key Vault ${{ inputs.keyvault-name }} does not exist yet. Skipping network rule add."
+          exit 0
+        fi
+
         purge_protection="$(az keyvault show \
           --resource-group "${{ inputs.resource-group }}" \
           --name "${{ inputs.keyvault-name }}" \
-          --query "properties.enablePurgeProtection" -o tsv || true)"
+          --query "properties.enablePurgeProtection" -o tsv)"
 
         if [ "$purge_protection" != "true" ]; then
           echo "Key Vault ${{ inputs.keyvault-name }} does not have purge protection enabled (enablePurgeProtection='$purge_protection'). Azure Policy will deny updates." >&2
