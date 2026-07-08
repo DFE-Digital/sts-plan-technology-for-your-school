@@ -8,7 +8,7 @@ resource "azurerm_key_vault" "vault" {
   tags                       = local.tags
   rbac_authorization_enabled  = var.kv_use_rbac
   #test. hard to get rid of..
-  purge_protection_enabled   = false
+  purge_protection_enabled   = true
 
   network_acls {
     bypass                     = "None"
