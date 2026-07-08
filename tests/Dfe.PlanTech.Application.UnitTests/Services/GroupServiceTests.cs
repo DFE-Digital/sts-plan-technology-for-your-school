@@ -54,8 +54,25 @@ public class GroupServiceTests
     {
         var sut = CreateServiceUnderTest();
 
-        var establishmentIds = new[] { 1, 2, 3 };
-        var establishmentRefs = new[] { "testRef1", "testRef2", "testRef3" };
+        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
+        {
+            new()
+            {
+                Urn = "testRef1",
+                EstablishmentName = "Test 1"
+            },
+            new()
+            {
+                Urn = "testRef2",
+                EstablishmentName = "Test 2"
+            },
+            new()
+            {
+                Urn = "testRef3",
+                EstablishmentName = "Test 3"
+            },
+
+        };
         var sectionId = "sec1";
 
         var expected = new List<SubmissionInformationModel>
@@ -86,17 +103,17 @@ public class GroupServiceTests
         };
 
         _groupWorkflow
-            .GetGroupSubmissionInformationForSection(establishmentRefs, sectionId)
+            .GetGroupSubmissionInformationForSection(establishmentLinks, sectionId)
             .Returns(expected);
 
-        var result = await sut.GetGroupSubmissionInformationForSection(establishmentRefs, sectionId);
+        var result = await sut.GetGroupSubmissionInformationForSection(establishmentLinks, sectionId);
 
         Assert.Same(expected, result);
 
         await _groupWorkflow
             .Received(1)
             .GetGroupSubmissionInformationForSection(
-                Arg.Is<string[]>(refs => refs.SequenceEqual(establishmentRefs)),
+                Arg.Is<List<SqlEstablishmentLinkDto>>(links => links.SequenceEqual(establishmentLinks)),
                 Arg.Is<string>(section => section.Equals(sectionId))
             );
     }
