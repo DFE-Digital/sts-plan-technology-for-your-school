@@ -23,7 +23,7 @@ public class GroupSelectSchoolsToAssessValidator : IGroupSelectSchoolsToAssessVa
     {
         var selectedSchools = model.SelectedSchoolsRefs ?? [];
 
-        if (!selectedSchools.Any())
+        if (selectedSchools.Count() == 0)
         {
             var noSelectionError = await _microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessNoSelectionError);
 

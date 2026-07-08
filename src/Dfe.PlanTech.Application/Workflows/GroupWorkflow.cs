@@ -24,14 +24,6 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
 
     public async Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(List<SqlEstablishmentLinkDto> establishmentLinks, string sectionId)
     {
-        var groupSubmissionInfo = new List<SubmissionInformationModel>();
-
-        var establishmentRefs = establishmentLinks
-            .Select(e => e.Urn)
-            .Where(urn => !string.IsNullOrWhiteSpace(urn))
-            .Distinct()
-            .ToArray();
-
         var establishments = new List<SqlEstablishmentDto>();
 
         foreach (var e in establishmentLinks)
@@ -49,6 +41,8 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
 
         var groupLatestSubmissions = await _submissionRepository.GetLatestSubmissionPerEstablishmentForSectionAsync(establishmentIds, sectionId)
             ?? [];
+
+        var groupSubmissionInfo = new List<SubmissionInformationModel>();
 
         foreach (var est in establishments)
         {

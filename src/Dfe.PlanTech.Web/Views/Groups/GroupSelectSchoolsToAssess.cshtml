@@ -21,7 +21,7 @@
     </govuk-back-link>
 }
 
-@if (Model.ErrorMessages?.Count() > 0)
+@if (Model.ErrorMessages is not null && Model.ErrorMessages.Any())
 {
     <div class="govuk-error-summary" data-module="govuk-error-summary">
         <div role="alert">
@@ -54,7 +54,7 @@
             <div id="select-schools-hint" class="govuk-hint">
                 @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessHint)
             </div>
-            @if (hasErrors && Model.ErrorMessages?.Count() > 0)
+            @if (Model.ErrorMessages is not null && Model.ErrorMessages.Any())
             {
                 foreach (var error in Model.ErrorMessages)
                 {

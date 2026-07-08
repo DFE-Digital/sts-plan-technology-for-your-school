@@ -370,7 +370,7 @@ public static class ServiceCollectionExtensions
             healthChecks.AddSqlServer(
                 configuration.GetConnectionString("Database") ?? ""
             );
-        };
+        }
 
         return services;
     }

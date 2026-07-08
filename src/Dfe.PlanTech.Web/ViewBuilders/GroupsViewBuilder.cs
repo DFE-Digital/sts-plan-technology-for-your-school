@@ -148,9 +148,9 @@ public class GroupsViewBuilder(
 
         var categories = (await ContentfulService.GetAllCategoriesAsync() ?? []).ToList();
 
-        if (categories.Count() == 0)
+        if (categories.Count == 0)
         {
-            throw new Exception("No categories found on groups assessment selection page.");
+            throw new ContentfulDataUnavailableException("No categories found on groups assessment selection page.");
         }
 
         // establishments for the MAT
@@ -264,8 +264,8 @@ public class GroupsViewBuilder(
         if (string.IsNullOrWhiteSpace(sectionSlug))        
             throw new ArgumentNullException(nameof(sectionSlug));
 
-        if (viewModel.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count() == 0)
-            throw new ArgumentNullException(nameof(viewModel.SelectedSchoolsRefs));
+        if (viewModel.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count == 0)
+            throw new InvalidDataException("No schools have been selected");
 
         var categorySlug =
             controller.RouteData.Values["categorySlug"]?.ToString()
@@ -375,7 +375,9 @@ public class GroupsViewBuilder(
 
         if (establishment == null)
         {
-            _logger.LogWarning($"Selected school with ref {schoolRef} not linked to user's group");
+            _logger.LogWarning(
+                "Selected school with ref {SchoolRef} not linked to user's group",
+                schoolRef);
             return false;
         }
 

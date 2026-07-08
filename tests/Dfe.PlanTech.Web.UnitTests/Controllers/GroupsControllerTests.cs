@@ -246,6 +246,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 );
         }
 
+        [Fact]
         public async Task GetSelectASelfAssessment_CallsViewBuilderAndReturnsResult()
         {
             _viewBuilder.RouteToSelectASelfAssessmentViewModelAsync(_controller).Returns(new OkResult());
