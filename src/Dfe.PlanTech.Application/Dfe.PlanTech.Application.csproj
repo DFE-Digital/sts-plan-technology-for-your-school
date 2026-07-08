@@ -4,11 +4,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
- 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.0" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.11" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.19.1" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
     <ProjectReference Include="..\Dfe.PlanTech.Data.Contentful\Dfe.PlanTech.Data.Contentful.csproj" />

@@ -97,4 +97,25 @@ public class GroupsController : BaseController<GroupsController>
 
         return await _groupsViewBuilder.SubmitSelectedSchoolsToAssessAndRedirect(this, sectionSlug, viewModel);
     }
+
+    [HttpGet(
+       $"school/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.ViewAnswersSlug}"
+    )]
+    public async Task<IActionResult> ViewInProgressAnswers(
+       string categorySlug,
+       string sectionSlug,
+       string schoolUrn
+    )
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(schoolUrn);
+
+        return await _groupsViewBuilder.RouteToViewInProgressAnswers(
+            this,
+            categorySlug,
+            sectionSlug,
+            schoolUrn
+        );
+    }
 }

@@ -6,16 +6,11 @@ using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
-using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.Azure.Amqp.Transaction;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.Core.Arguments;
-using System.ComponentModel.DataAnnotations;
 
 namespace Dfe.PlanTech.Web.UnitTests.Controllers
 {
@@ -148,6 +143,39 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             );
         }
 
+        [Theory]
+        [InlineData(null, "cyber-security-processes", "900006")]
+        [InlineData("cyber-security-standard", null, "900006")]
+        [InlineData("cyber-security-standard", "cyber-security-processes", null)]
+        public async Task ViewInProgressAnswers_WithNullValues_ThrowsArgumentNullException(
+            string? categorySlug,
+            string? sectionSlug,
+            string? schoolUrn
+        )
+        {
+            await Assert.ThrowsAsync<ArgumentNullException>(() =>
+                _controller.ViewInProgressAnswers(categorySlug!, sectionSlug!, schoolUrn!)
+            );
+        }
+
+        [Theory]
+        [InlineData("", "cyber-security-processes", "900006")]
+        [InlineData(" ", "cyber-security-processes", "900006")]
+        [InlineData("cyber-security-standard", "", "900006")]
+        [InlineData("cyber-security-standard", " ", "900006")]
+        [InlineData("cyber-security-standard", "cyber-security-processes", "")]
+        [InlineData("cyber-security-standard", "cyber-security-processes", " ")]
+        public async Task ViewInProgressAnswers_WithEmptyValues_ThrowsArgumentException(
+            string? categorySlug,
+            string? sectionSlug,
+            string? schoolUrn
+        )
+        {
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _controller.ViewInProgressAnswers(categorySlug!, sectionSlug!, schoolUrn!)
+            );
+        }
+
         [Fact]
         public async Task SubmitSelectedSchoolsToAssess_CallsViewBuilderGetMethod_WhenInvalidInput()
         {
@@ -191,7 +219,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     Arg.Any<string>(),
                     Arg.Any<GroupsSelectSchoolsToAssessViewModel>()
                 );
-
         }
 
         [Fact]
@@ -217,6 +244,36 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                     Arg.Any<string>(),
                     Arg.Any<GroupsSelectSchoolsToAssessViewModel>()
                 );
+        }
+
+        public async Task GetSelectASelfAssessment_CallsViewBuilderAndReturnsResult()
+        {
+            _viewBuilder.RouteToSelectASelfAssessmentViewModelAsync(_controller).Returns(new OkResult());
+
+            var result = await _controller.GetSelectASelfAssessment();
+
+            await _viewBuilder.Received(1).RouteToSelectASelfAssessmentViewModelAsync(_controller);
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task ViewInProgressAnswers_CallsViewBuilderAndReturnsResult()
+        {
+            var categorySlug = "cyber-security-standard";
+            var sectionSlug = "cyber-security-processes";
+            var schoolUrn = "900006";
+
+            _viewBuilder
+                .RouteToViewInProgressAnswers(_controller, categorySlug, sectionSlug, schoolUrn)
+                .Returns(new OkResult());
+
+            var result = await _controller.ViewInProgressAnswers(categorySlug, sectionSlug, schoolUrn);
+
+            await _viewBuilder
+                .Received(1)
+                .RouteToViewInProgressAnswers(_controller, categorySlug, sectionSlug, schoolUrn);
+
+            Assert.IsType<OkResult>(result);
         }
     }
 }

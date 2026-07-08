@@ -163,11 +163,13 @@ def _log_proposed_changes(data: GiasData, row_counts_before: dict[str, int]):
     n_est = len(data.establishments)
     n_grp = len(data.establishment_groups)
     n_mem = len(data.group_membership)
+    n_map = len(data.links)
 
     for key, proposed in [
         ("gias.establishment", n_est),
         ("gias.establishmentGroup", n_grp),
         ("gias.groupMembership", n_mem),
+        ("gias.links", n_map),
     ]:
         before = row_counts_before.get(key, 0)
         logger.info("%s: %d → %d (%+d)", key, before, proposed, proposed - before)
@@ -189,6 +191,7 @@ def _row_counts(cur: pyodbc.Cursor) -> dict[str, int]:
         "gias.establishment",
         "gias.establishmentGroup",
         "gias.groupMembership",
+        "gias.links",
     ]
     return {t: _row_count(cur, t) for t in tables}
 
@@ -421,6 +424,28 @@ def _replace_group_membership(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Replaced group_membership")
 
 
+def _replace_links(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    """DELETE current links and re-insert from the latest snapshot."""
+    cur.execute("""
+        CREATE TABLE #Link (
+            urn INT, linkedUrn INT, linkType VARCHAR(255), dateLinked DATE
+        )
+    """)
+    _bulk_insert(
+        cur,
+        "INSERT INTO #Link VALUES (?, ?, ?, ?)",
+        _params(df),
+        "#Link",
+    )
+    cur.execute("TRUNCATE TABLE gias.links")
+    cur.execute("""
+        INSERT INTO gias.links (urn, linkedUrn, linkType, dateLinked)
+        SELECT urn, linkedUrn, linkType, dateLinked FROM #Link
+    """)
+    cur.execute("DROP TABLE #Link")
+    logger.info("Replaced links")
+
+
 # ---------------------------------------------------------------------------
 # Test-data injection
 # ---------------------------------------------------------------------------
@@ -497,6 +522,7 @@ def update_database(
 
         # Child tables
         _replace_group_membership(cur, data.group_membership)
+        _replace_links(cur, data.links)
 
         counts_after = _row_counts(cur)
         for table in counts_after:

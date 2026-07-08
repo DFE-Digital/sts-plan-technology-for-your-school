@@ -15,6 +15,12 @@ public class SectionStatusEntity
 
     public DateTime? LastCompletionDate { get; set; }
 
+    public Guid? CreatedUserActionId { get; set; }
+
+    public Guid? LastUpdatedUserActionId { get; set; }
+
+    public Guid? CompletedUserActionId { get; set; }
+
     public SqlSectionStatusDto AsDto()
     {
         return new SqlSectionStatusDto
@@ -24,6 +30,9 @@ public class SectionStatusEntity
             DateUpdated = DateUpdated,
             Status = Status,
             LastCompletionDate = LastCompletionDate,
+            CreatedUserActionId = CreatedUserActionId,
+            LastUpdatedUserActionId = LastUpdatedUserActionId,
+            CompletedUserActionId = CompletedUserActionId,
         };
     }
 }

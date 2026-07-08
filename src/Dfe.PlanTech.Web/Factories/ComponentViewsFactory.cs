@@ -8,7 +8,7 @@ public class ComponentViewsFactory(ILogger<ComponentViewsFactory> logger)
     private const string SHARED_PATH = "Views_Shared";
     private const string EXCLUDED_COMPONENT_TYPE = "QuestionnaireCategory";
 
-    private readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
+    private static readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
 
     /// <summary>
     /// Tries to find matching shared view for the passed model, based on the model's name
