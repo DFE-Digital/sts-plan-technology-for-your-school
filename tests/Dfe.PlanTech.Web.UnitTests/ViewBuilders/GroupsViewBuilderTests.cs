@@ -459,7 +459,7 @@ public class GroupsViewBuilderTests
         var controller = new TestController();
 
         // Act
-        var exception = await Assert.ThrowsAsync<Exception>(() =>
+        var exception = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
             sut.RouteToSelectASelfAssessmentViewModelAsync(controller)
         );
 
