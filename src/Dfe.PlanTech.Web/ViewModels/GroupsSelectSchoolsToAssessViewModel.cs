@@ -8,9 +8,10 @@ namespace Dfe.PlanTech.Web.ViewModels;
 [ExcludeFromCodeCoverage]
 public class GroupsSelectSchoolsToAssessViewModel
 {
-    public string? CategorySlug { get; init; }
-    public required QuestionnaireSectionEntry Section { get; init; }
-    public required List<SubmissionInformationModel> SchoolSubmissionInfo { get; init; }
+    public string? CategorySlug { get; set; }
+    public QuestionnaireSectionEntry? Section { get; set; } = null!;
+    public List<SubmissionInformationModel>? SchoolSubmissionInfo { get; set; } = null!;
     public IEnumerable<string>? ErrorMessages { get; set; }
+    public List<string> PresentedSchoolRefs { get; set; } = [];
     public List<string>? SelectedSchoolsRefs { get; set; } = [];
 }
