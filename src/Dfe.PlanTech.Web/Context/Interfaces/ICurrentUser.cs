@@ -36,5 +36,6 @@ public interface ICurrentUser
     (string Urn, string Name)? GetGroupSelectedSchool();
     bool IsInRole(string role);
     void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName);
+    void ClearSelectedGroupSchool();
     Guid? SessionId { get; }
 }

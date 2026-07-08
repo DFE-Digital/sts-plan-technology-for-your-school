@@ -350,6 +350,16 @@ public class CurrentUser : ICurrentUser
         }
     }
 
+    public void ClearSelectedGroupSchool()
+    {
+        var httpContext = _contextAccessor.HttpContext;
+
+        if (httpContext != null)
+        {
+            ClearSelectedSchoolCookie(httpContext);
+        }
+    }
+
     private static void ClearSelectedSchoolCookie(HttpContext httpContext)
     {
         httpContext.Response.Cookies.Delete(CookieConstants.SelectedSchool);

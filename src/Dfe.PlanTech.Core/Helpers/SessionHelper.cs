@@ -26,4 +26,9 @@ public static class SessionHelper
         var value = session.GetString(key);
         return value != null ? JsonSerializer.Deserialize(value, type) : null;
     }
+
+    public static void Remove(this ISession session, string key)
+    {
+        session.Remove(key);
+    }
 }
