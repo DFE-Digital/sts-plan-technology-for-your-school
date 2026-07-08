@@ -24,10 +24,13 @@ on:
         description: 'Whether the DNS zone should be created in its own RG and TF state (otherwise, it will be in the app one)'
       restore-db:
         type: boolean
-        default: false
+        default: true
       restore-tokens:
         type: boolean
-        default: false
+        default: true
+      contentful-upsert-webhook:
+        type: boolean
+        default: true
   push:
     branches:
       - disaster-recovery-e2e-terraform
@@ -192,6 +195,8 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    outputs:
+      cdn_hostname: ${{ steps.tf_app_outputs.outputs.cdn_hostname }}
 
     steps:
       - uses: actions/checkout@v4
@@ -316,6 +321,17 @@ jobs:
             terraform show -no-color tfplanapp || true
 
             terraform apply -auto-approve -input=false tfplanapp
+
+      - name: Read Terraform app outputs
+        id: tf_app_outputs
+        shell: bash
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          set -euo pipefail
+
+          cdn_hostname="$(terraform output -raw cdn_hostname)"
+
+          echo "cdn_hostname=$cdn_hostname" >> "$GITHUB_OUTPUT"
 
       - name: Terraform init - separate DNS
         working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
@@ -569,3 +585,12 @@ jobs:
 
           appinsights_secret_name: applicationinsights--connectionstring
           appinsights_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-insights
+
+          ##now we need to pull the restored secrets to set up the contentful webhook.
+      - name: Upsert Contentful webhook
+        uses: ./.github/actions/upsert-contentful-webhook
+        with:
+          enabled: ${{ inputs.contentful-upsert-webhook }}
+          keyvault-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
+          env-name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+          cdn-hostname: ${{ needs.apply-terraform.outputs.cdn_hostname }}
