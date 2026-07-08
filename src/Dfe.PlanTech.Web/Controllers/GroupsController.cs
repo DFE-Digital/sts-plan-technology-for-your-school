@@ -12,7 +12,7 @@ public class GroupsController : BaseController<GroupsController>
 {
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
     public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
-    public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssess";
+    public const string GetSelectSchoolsToAssessAction = "GetSelectSchoolsToAssessView";
     public const string SubmitSchoolsSelectionAction = "SubmitSelectedSchoolsToAssess";
 
     private readonly ICurrentUser _currentUser;
@@ -73,7 +73,7 @@ public class GroupsController : BaseController<GroupsController>
 
     [HttpPost(
         $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
-        Name = GetSelectSchoolsToAssessAction
+        Name = SubmitSchoolsSelectionAction
         )]
     public async Task<IActionResult> SubmitSelectedSchoolsToAssess(
         GroupsSelectSchoolsToAssessViewModel viewModel,
