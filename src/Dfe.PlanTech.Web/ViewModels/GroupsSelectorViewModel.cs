@@ -23,5 +23,7 @@ public class GroupsSelectorViewModel
 
     public string? ContactLinkHref { get; set; }
 
+    public bool ShowSelectSelfAssessmentToSubmit { get; set; } = true;
+
     public List<MicrocopyEntry>? MicrocopyEntries { get; set; }
 }
