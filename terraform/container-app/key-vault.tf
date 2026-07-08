@@ -38,31 +38,6 @@ resource "azurerm_key_vault" "vault" {
 #  secret_permissions = ["List", "Get"]
 #  key_permissions    = ["List", "Get", "WrapKey", "UnwrapKey"]
 #}
-
-##RBAC roles##
-resource "azurerm_role_assignment" "kv_tf_secrets_officer" {
-  scope                = azurerm_key_vault.vault.id
-  role_definition_name = "Key Vault Secrets Officer"
-  principal_id         = local.current_user_id
-}
-
-resource "azurerm_role_assignment" "kv_tf_crypto_officer" {
-  scope                = azurerm_key_vault.vault.id
-  role_definition_name = "Key Vault Crypto Officer"
-  principal_id         = local.current_user_id
-}
-
-resource "azurerm_role_assignment" "kv_mi_secrets_user" {
-  scope                = azurerm_key_vault.vault.id
-  role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
-}
-
-resource "azurerm_role_assignment" "kv_mi_crypto_user" {
-  scope                = azurerm_key_vault.vault.id
-  role_definition_name = "Key Vault Crypto User"
-  principal_id         = azurerm_user_assigned_identity.user_assigned_identity.principal_id
-}
 ###########
 # Secrets #
 ###########
