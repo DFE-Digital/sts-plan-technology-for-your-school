@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -9,6 +10,7 @@ using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
+using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -18,18 +20,18 @@ using System.Data;
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
 public class GroupsViewBuilder(
-    ILogger<BaseViewBuilder> logger,
+    ILogger<GroupsViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IContentfulService contentfulService,
     ICurrentUser currentUser,
     IEstablishmentService establishmentService,
     IGroupService groupService,
-    ISubmissionService submissionService
+    ISubmissionService submissionService   
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-    private readonly IGroupService _groupService =
+   private readonly IGroupService _groupService =
         groupService ?? throw new ArgumentNullException(nameof(groupService));
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
@@ -84,6 +86,58 @@ public class GroupsViewBuilder(
 
         controller.ViewData[StatePassingMechanismConstants.Title] = "Select a school";
         return controller.View(SelectASchoolViewName, viewModel);
+    }
+
+    public async Task<IActionResult> RouteToViewInProgressAnswers(
+      Controller controller,
+      string categorySlug,
+      string sectionSlug,
+      string schoolUrn
+  )
+    {
+        var schoolEstablishment =
+            await _establishmentService.GetEstablishmentByReferenceAsync(schoolUrn);
+
+        if (schoolEstablishment is null)
+        {
+            return controller.RedirectToHomePage();
+        }
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+
+        var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
+            schoolEstablishment.Id,
+            section,
+            status: SubmissionStatus.InProgress
+        );
+
+        switch (submissionRoutingData.Status)
+        {
+            case SubmissionStatus.InProgress:
+            case SubmissionStatus.CompleteNotReviewed:
+                var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
+                    section,
+                    submissionRoutingData,
+                    categorySlug,
+                    sectionSlug,
+                    isMatInProgressView: true,
+                    schoolName: schoolEstablishment.OrgName
+                );
+
+                viewModel.BackLinkHref = $"/{categorySlug}/{sectionSlug}/self-assessment";
+
+                return controller.View(
+                    ReviewAnswersViewBuilder.ViewAnswersViewName,
+                    viewModel
+                );
+
+            default:
+                return controller.RedirectToHomePage();
+        }
     }
 
     public async Task<IActionResult> RouteToSelectASelfAssessmentViewModelAsync(Controller controller)
@@ -144,6 +198,8 @@ public class GroupsViewBuilder(
                     return new GroupSelectAssessmentSectionViewModel()
                     {
                         SectionName = ccs.Name,
+                        CategorySlug = c.Header?.Text?.Slugify(),
+                        SectionSlug = ccs.Name?.Slugify(),
                         UncompletedGroupSubmissions = uncompletedCount
                     };
                 }).ToList()

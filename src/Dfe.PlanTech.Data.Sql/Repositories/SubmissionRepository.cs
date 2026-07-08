@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
@@ -6,15 +7,16 @@ using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
 public class SubmissionRepository(
     PlanTechDbContext dbContext,
-    IUserActionIdAccessor userActionIdAccessor) : ISubmissionRepository
+    IUserActionIdAccessor userActionIdAccessor
+) : ISubmissionRepository
 {
-    protected readonly PlanTechDbContext _db = dbContext;
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
     private readonly IUserActionIdAccessor _userActionIdAccessor = userActionIdAccessor;
 
     public async Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission)
@@ -276,7 +278,7 @@ public class SubmissionRepository(
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
+            statuses: [SubmissionStatus.InProgress, SubmissionStatus.Inaccessible]
         );
 
         var submission =
@@ -309,7 +311,7 @@ public class SubmissionRepository(
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
+            statuses: [SubmissionStatus.InProgress, SubmissionStatus.Inaccessible]
         );
 
         var submission = await query.FirstOrDefaultAsync();
@@ -369,7 +371,10 @@ public class SubmissionRepository(
         var statusOptions = statuses.ToList();
 
         if (statusOptions.Count == 0)
-            throw new ArgumentException("At least one submission status must be provided", nameof(statuses));
+            throw new ArgumentException(
+                "At least one submission status must be provided",
+                nameof(statuses)
+            );
 
         return GetSubmissionsBy(submission =>
                 !submission.Deleted
@@ -524,6 +529,9 @@ public class SubmissionRepository(
                         ?? currentSubmission?.DateCreated
                         ?? DateTime.UtcNow,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                    LastUpdatedUserActionId = currentSubmission?.LastUpdatedUserActionId,
+                    CreatedUserActionId = currentSubmission?.CreatedUserActionId,
+                    CompletedUserActionId = lastCompleteSubmission?.CompletedUserActionId,
                 };
             })
             .ToList();
@@ -552,10 +560,12 @@ public class SubmissionRepository(
 
         await _db
             .Submissions.Where(s => s.Id == submissionId.Value)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(s => s.Deleted, true)
-                .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
-                .SetProperty(s => s.LastUpdatedUserActionId, userActionId));
+            .ExecuteUpdateAsync(setters =>
+                setters
+                    .SetProperty(s => s.Deleted, true)
+                    .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
+                    .SetProperty(s => s.LastUpdatedUserActionId, userActionId)
+            );
     }
 
     public async Task<int> SubmitResponse(AssessmentResponseModel response)
@@ -582,15 +592,15 @@ public class SubmissionRepository(
         var submissionId = await SelectOrInsertSubmissionIdAsync(
             response.SectionId,
             response.SectionName,
-            response.EstablishmentId);
+            response.EstablishmentId
+        );
 
-        var answerId = await GetOrCreateAnswerIdAsync(
-            response.Answer.Id,
-            response.Answer.Text);
+        var answerId = await GetOrCreateAnswerIdAsync(response.Answer.Id, response.Answer.Text);
 
         var questionId = await GetOrCreateQuestionIdAsync(
             response.Question.Id,
-            response.Question.Text);
+            response.Question.Text
+        );
 
         var responseEntity = new ResponseEntity
         {
@@ -606,11 +616,13 @@ public class SubmissionRepository(
 
         await _db.Responses.AddAsync(responseEntity);
 
-        await _db.Submissions
-            .Where(s => s.Id == submissionId)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
-                .SetProperty(s => s.LastUpdatedUserActionId, userActionId));
+        await _db
+            .Submissions.Where(s => s.Id == submissionId)
+            .ExecuteUpdateAsync(setters =>
+                setters
+                    .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
+                    .SetProperty(s => s.LastUpdatedUserActionId, userActionId)
+            );
 
         await _db.SaveChangesAsync();
 
@@ -620,7 +632,8 @@ public class SubmissionRepository(
     private async Task<int> SelectOrInsertSubmissionIdAsync(
         string sectionId,
         string sectionName,
-        int establishmentId)
+        int establishmentId
+    )
     {
         var submissionId = await GetCurrentSubmissionIdAsync(sectionId, establishmentId);
 
@@ -650,24 +663,21 @@ public class SubmissionRepository(
 
     private async Task<int?> GetCurrentSubmissionIdAsync(string sectionId, int establishmentId)
     {
-        return await _db.Submissions
-            .Where(s =>
-                s.SectionId == sectionId &&
-                s.EstablishmentId == establishmentId &&
-                s.Status == SubmissionStatus.InProgress)
+        return await _db
+            .Submissions.Where(s =>
+                s.SectionId == sectionId
+                && s.EstablishmentId == establishmentId
+                && s.Status == SubmissionStatus.InProgress
+            )
             .OrderByDescending(s => s.Id)
             .Select(s => (int?)s.Id)
             .FirstOrDefaultAsync();
     }
 
-    private async Task<int> GetOrCreateAnswerIdAsync(
-        string answerContentfulId,
-        string answerText)
+    private async Task<int> GetOrCreateAnswerIdAsync(string answerContentfulId, string answerText)
     {
-        var answerId = await _db.Answers
-            .Where(a =>
-                a.AnswerText == answerText &&
-                a.ContentfulRef == answerContentfulId)
+        var answerId = await _db
+            .Answers.Where(a => a.AnswerText == answerText && a.ContentfulRef == answerContentfulId)
             .Select(a => (int?)a.Id)
             .FirstOrDefaultAsync();
 
@@ -690,12 +700,13 @@ public class SubmissionRepository(
 
     private async Task<int> GetOrCreateQuestionIdAsync(
         string questionContentfulId,
-        string questionText)
+        string questionText
+    )
     {
-        var questionId = await _db.Questions
-            .Where(q =>
-                q.QuestionText == questionText &&
-                q.ContentfulRef == questionContentfulId)
+        var questionId = await _db
+            .Questions.Where(q =>
+                q.QuestionText == questionText && q.ContentfulRef == questionContentfulId
+            )
             .Select(q => (int?)q.Id)
             .FirstOrDefaultAsync();
 
@@ -716,26 +727,30 @@ public class SubmissionRepository(
         return question.Id;
     }
 
-    public async Task<List<SubmissionEntity>> GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
-        IEnumerable<int> establishmentIds)
+    public async Task<
+        List<SubmissionEntity>
+    > GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(IEnumerable<int> establishmentIds)
     {
-        var establishmentIdList = establishmentIds
-            .Distinct()
-            .ToList();
+        var establishmentIdList = establishmentIds.Distinct().ToList();
 
-        var results = await dbContext.Submissions
+        var results = await _db
+            .Submissions.Where(s =>
+                establishmentIdList.Contains(s.EstablishmentId)
+                && s.Status == SubmissionStatus.CompleteReviewed
+                && !s.Deleted
+                && s.DateCompleted != null
+            )
             .Where(s =>
-                establishmentIdList.Contains(s.EstablishmentId) &&
-                s.Status == SubmissionStatus.CompleteReviewed &&
-                !s.Deleted &&
-                s.DateCompleted != null)
-            .Where(s => !dbContext.Submissions.Any(s2 =>
-                s2.EstablishmentId == s.EstablishmentId &&
-                s2.SectionId == s.SectionId &&
-                s2.Status == SubmissionStatus.CompleteReviewed &&
-                !s2.Deleted &&
-                s2.DateCompleted != null &&
-                s2.DateCompleted > s.DateCompleted))
+                !_db.Submissions.Any(s2 =>
+                    s2.EstablishmentId == s.EstablishmentId
+                    && s2.SectionId == s.SectionId
+                    && s2.SectionId == s.SectionId
+                    && s2.Status == SubmissionStatus.CompleteReviewed
+                    && !s2.Deleted
+                    && s2.DateCompleted != null
+                    && s2.DateCompleted > s.DateCompleted
+                )
+            )
             .OrderBy(s => s.EstablishmentId)
             .ThenBy(s => s.SectionName)
             .ToListAsync();

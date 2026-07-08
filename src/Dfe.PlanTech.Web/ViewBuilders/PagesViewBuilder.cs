@@ -92,6 +92,10 @@ public class PagesViewBuilder(
 
         var viewModel = new PageViewModel(page);
 
+        viewModel.ShowTrustSchoolAssessmentTable =
+                   CurrentUser.IsMat
+                   && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase) == true;
+
         if (page.DisplayOrganisationName)
         {
             if (!CurrentUser.IsAuthenticated)

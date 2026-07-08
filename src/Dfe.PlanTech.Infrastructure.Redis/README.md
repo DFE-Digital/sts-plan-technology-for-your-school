@@ -28,16 +28,14 @@ graph TD
     BG[BackgroundTaskQueue]
     Redis[(Redis)]
 
-    Consumer --> RedisCache
-    Consumer --> Lock
-    RedisCache --> Conn
-    RedisCache --> GZip
-    RedisCache --> Json
-    RedisCache --> Deps
-    Lock --> Conn
-    Deps --> BG
-    Conn --> Redis
-```
+1. Run a redis container locally
+
+   ```bash
+   docker run -p 6379:6379 --name plantech-redis -d redis
+   ```
+
+2. Set your connection string to `localhost:6379,abortConnect=false`
+3. Start plan tech as normal
 
 ## Components
 

@@ -16,11 +16,16 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
             string sectionSlug,
             GroupsSelectSchoolsToAssessViewModel? viewModel = null
         );
-
         Task<IActionResult> SubmitSelectedSchoolsToAssessAndRedirect(
             Controller controller,
             string sectionSlug,
             GroupsSelectSchoolsToAssessViewModel viewModel
+         );
+        Task<IActionResult> RouteToViewInProgressAnswers(
+            Controller controller,
+            string categorySlug,
+            string sectionSlug,
+            string schoolUrn
         );
     }
 }
