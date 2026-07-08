@@ -6,6 +6,7 @@ data "azurerm_route_table" "default" {
 }
 
 resource "azurerm_subnet" "keyvault" {
+  depends_on = [module.main_hosting]
   name                 = local.kv_networking.subnet.name
   virtual_network_name = "${local.resource_prefix}default"
   resource_group_name  = local.resource_group_name
