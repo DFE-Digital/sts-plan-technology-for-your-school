@@ -129,6 +129,12 @@ variable "redis_public_access_enabled" {
 ############
 # KeyVault #
 ############
+variable "kv_use_rbac" {
+  description = "create kv with rbac instead of access."
+  type        = bool
+  default     = false
+}
+
 variable "key_type" {
   description = "The JsonWebKeyType of the key to be created."
   default     = "RSA"

@@ -7,8 +7,7 @@ resource "azurerm_key_vault" "default" {
   tenant_id                  = data.azurerm_subscription.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
-  #MAKE THIS TRUE AGAIN WHEN RE-RUNNING FRESH
-  rbac_authorization_enabled  = false
+  rbac_authorization_enabled  = true
   purge_protection_enabled   = true
 
   network_acls {

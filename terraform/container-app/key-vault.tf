@@ -6,8 +6,9 @@ resource "azurerm_key_vault" "vault" {
   sku_name                   = "standard"
   soft_delete_retention_days = 90
   tags                       = local.tags
-  rbac_authorization_enabled  = true
-  purge_protection_enabled   = true
+  rbac_authorization_enabled  = var.kv_use_rbac
+  #test. hard to get rid of..
+  purge_protection_enabled   = false
 
   network_acls {
     bypass                     = "None"
@@ -20,24 +21,25 @@ resource "azurerm_key_vault" "vault" {
 ###################
 # Access Policies #
 ###################
-#moved to RBAC
-#resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
-#  key_vault_id = azurerm_key_vault.vault.id
-#  tenant_id    = data.azurerm_client_config.current.tenant_id
-#  object_id    = local.current_user_id
-#
-#  secret_permissions = ["List", "Get", "Set"]
-#  key_permissions    = ["List", "Get", "Create", "GetRotationPolicy", "SetRotationPolicy", "Delete", "Purge", "UnwrapKey", "WrapKey"]
-#}
-#
-#resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
-#  key_vault_id = azurerm_key_vault.vault.id
-#  tenant_id    = data.azurerm_client_config.current.tenant_id
-#  object_id    = azurerm_user_assigned_identity.user_assigned_identity.principal_id
-#
-#  secret_permissions = ["List", "Get"]
-#  key_permissions    = ["List", "Get", "WrapKey", "UnwrapKey"]
-#}
+resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
+ count = var.kv_use_rbac ? 0 : 1
+ key_vault_id = azurerm_key_vault.vault.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = local.current_user_id
+
+  secret_permissions = ["List", "Get", "Set"]
+  key_permissions    = ["List", "Get", "Create", "GetRotationPolicy", "SetRotationPolicy", "Delete", "Purge", "UnwrapKey", "WrapKey"]
+}
+
+resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
+  count = var.kv_use_rbac ? 0 : 1
+  key_vault_id = azurerm_key_vault.vault.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_user_assigned_identity.user_assigned_identity.principal_id
+
+  secret_permissions = ["List", "Get"]
+  key_permissions    = ["List", "Get", "WrapKey", "UnwrapKey"]
+}
 ###########
 # Secrets #
 ###########
