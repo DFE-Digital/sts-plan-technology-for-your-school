@@ -9,12 +9,15 @@ using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
+using System.Text;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
@@ -30,6 +33,7 @@ public class GroupsViewBuilderTests
         IContentfulService? contentful = null,
         IEstablishmentService? est = null,
         IGroupService? group = null,
+        ISubmissionService? submission = null,
         ICurrentUser? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null
     )
@@ -38,6 +42,7 @@ public class GroupsViewBuilderTests
         contentful ??= Substitute.For<IContentfulService>();
         est ??= Substitute.For<IEstablishmentService>();
         group ??= Substitute.For<IGroupService>();
+        submission ??= Substitute.For<ISubmissionService>();
         currentUser ??= Substitute.For<ICurrentUser>();
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 
@@ -59,7 +64,7 @@ public class GroupsViewBuilderTests
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
         // GroupSelectedSchoolUrn not set
 
-        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est, group);
+        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est, group, submission);
     }
 
     private static QuestionnaireCategoryEntry MakeCategory(
@@ -92,6 +97,7 @@ public class GroupsViewBuilderTests
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
         var current = Substitute.For<ICurrentUser>();
+        var submission = Substitute.For<ISubmissionService>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
@@ -100,7 +106,8 @@ public class GroupsViewBuilderTests
                 contentful,
                 current,
                 est,
-                group
+                group,
+                submission
             )
         );
     }
@@ -113,6 +120,7 @@ public class GroupsViewBuilderTests
         var current = Substitute.For<ICurrentUser>();
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
+        var submission = Substitute.For<ISubmissionService>();
 
         Assert.Throws<ArgumentNullException>(() =>
             new GroupsViewBuilder(
@@ -121,7 +129,8 @@ public class GroupsViewBuilderTests
                 contentful,
                 current,
                 null!,
-                group
+                group,
+                submission
             )
         );
     }
@@ -423,6 +432,10 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
 
         var categorySlug = "category-one";
         var sectionSlug = "section-one";
@@ -431,36 +444,27 @@ public class GroupsViewBuilderTests
         {
             Sys = new SystemDetails { Id = "sec1" },
             InterstitialPage = new PageEntry { Slug = sectionSlug },
+            Questions = new List<QuestionnaireQuestionEntry>() { new() { Slug = "question" } }
         };
 
         contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
 
-        var schools = new List<SqlEstablishmentLinkDto>
+        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
         {
-            new() { Id = 10 },
-            new() { Id = 20 },
-            new() { Id = 30 }
+            new() { Urn = "testRef10", EstablishmentName = "Test 10" },
+            new() { Urn = "testRef20", EstablishmentName = "Test 20" },
+            new() { Urn = "testRef30", EstablishmentName = "Test 30" }
         };
 
-        est.GetEstablishmentLinks(100)
-            .Returns(
-                new List<SqlEstablishmentLinkDto>
-                {
-                    new() { Urn = "testRef10" },
-                    new() { Urn = "testRef20" },
-                    new() { Urn = "testRef30" }
-                }
-    );
+        est.GetEstablishmentLinks(100).Returns(establishmentLinks);
 
-        est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
-            .Returns(
-                new List<SqlEstablishmentDto>
-                {
-                    new() { Id = 10 },
-                    new() { Id = 20 },
-                    new() { Id = 30 }
-                }
-            );
+        var establishment10 = new SqlEstablishmentDto() { Id = 10, EstablishmentRef = "testRef10", OrgName = "Test 10" };
+        var establishment20 = new SqlEstablishmentDto() { Id = 20, EstablishmentRef = "testRef20", OrgName = "Test 20" };
+        var establishment30 = new SqlEstablishmentDto() { Id = 30, EstablishmentRef = "testRef30", OrgName = "Test 30" };
+
+        est.GetEstablishmentByReferenceAsync("testRef10").Returns(establishment10);
+        est.GetEstablishmentByReferenceAsync("testRef20").Returns(establishment20);
+        est.GetEstablishmentByReferenceAsync("testRef30").Returns(establishment30);
 
         var submissionInfo = new List<SubmissionInformationModel>
         {
@@ -489,7 +493,7 @@ public class GroupsViewBuilderTests
         };
 
         group.GetGroupSubmissionInformationForSection(
-                Arg.Is<string[]>(x => x.SequenceEqual(new[] { "testRef10", "testRef20", "testRef30" })),
+                Arg.Is<List<SqlEstablishmentLinkDto>>(x => x.SequenceEqual(establishmentLinks)),
                 section.Id)
             .Returns(submissionInfo);
 
@@ -504,7 +508,8 @@ public class GroupsViewBuilderTests
         {
             ControllerContext = new ControllerContext
             {
-                RouteData = new RouteData()
+                RouteData = new RouteData(),
+                HttpContext = httpContext
             }
         };
         controller.RouteData.Values["categorySlug"] = categorySlug;
@@ -517,8 +522,8 @@ public class GroupsViewBuilderTests
 
         await group.Received(1)
             .GetGroupSubmissionInformationForSection(
-                Arg.Is<string[]>(urns =>
-                    urns.SequenceEqual(new[] { "testRef10", "testRef20", "testRef30" })
+                Arg.Is<List<SqlEstablishmentLinkDto>>(urns =>
+                    urns.SequenceEqual(establishmentLinks)
                 ),
                 section.Id
             );
@@ -532,7 +537,7 @@ public class GroupsViewBuilderTests
         Assert.Equal(categorySlug, vm.CategorySlug);
 
         Assert.Collection(
-            vm.SchoolSubmissionInfo,
+            vm.SchoolSubmissionInfo!,
             submission =>
             {
                 Assert.Equal(1, submission.SubmissionId);
@@ -556,6 +561,10 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
 
         var categorySlug = "category-2";
         var sectionSlug = "section-2";
@@ -565,7 +574,8 @@ public class GroupsViewBuilderTests
         {
             ControllerContext = new ControllerContext
             {
-                RouteData = new RouteData()
+                RouteData = new RouteData(),
+                HttpContext = httpContext
             }
         };
         controller.RouteData.Values["categorySlug"] = categorySlug;
@@ -595,10 +605,99 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
 
         var categorySlug = "category-3";
         var sectionSlug = "section-3";
         var section = new QuestionnaireSectionEntry();
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
+        var controller = new TestController()
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData(),
+                HttpContext = httpContext
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        contentful.GetSectionBySlugAsync(sectionSlug)
+            .Returns(section);
+
+        est.GetEstablishmentLinks(100)
+            .Returns(new List<SqlEstablishmentLinkDto>());
+
+        var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
+            sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, sectionSlug)
+        );
+
+        Assert.Equal($"Could not find linked establishments for group ID: 100", ex.Message);
+    }
+
+    // --- SubmitSelectedSchoolsToAssessAndRedirect ----------------------------
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_ThrowsWhenNoSectionForSlug()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var categorySlug = "category-4";
+        var sectionSlug = "section-4";
+                
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
+        var controller = new TestController()
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData(),
+                HttpContext = httpContext
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
+        {
+            new SqlEstablishmentLinkDto() { Id = 1 },
+            new SqlEstablishmentLinkDto() { Id = 2 }
+        };
+
+        est.GetEstablishmentLinks(100)
+            .Returns(establishmentLinks);
+
+        contentful.GetSectionBySlugAsync(sectionSlug)
+            .Returns((QuestionnaireSectionEntry?)null!);
+
+        //Act/Assert
+        var ex = await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
+            sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, sectionSlug)
+        );
+
+        Assert.Equal($"Could not find topic for slug '{sectionSlug}'", ex.Message);
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_ThrowsWhenSectionSlugNull()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+
+        var categorySlug = "category-4";
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel()
+        {
+            Section = new QuestionnaireSectionEntry(),
+            SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
+            SelectedSchoolsRefs = ["00001", "00002"]
+        };
 
         var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
         var controller = new TestController()
@@ -610,16 +709,866 @@ public class GroupsViewBuilderTests
         };
         controller.RouteData.Values["categorySlug"] = categorySlug;
 
+        //Act/Assert
+        var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
+            sut.SubmitSelectedSchoolsToAssessAndRedirect(controller, null!, viewModel));
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_CallsSubmissionService()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var submission = Substitute.For<ISubmissionService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var categorySlug = "category-5";
+        var sectionSlug = "section-5";
+        var section = new QuestionnaireSectionEntry()
+        {
+            Sys = new SystemDetails { Id = "sec-5" },
+            InterstitialPage = new PageEntry { Slug = sectionSlug },
+            Questions = new List<QuestionnaireQuestionEntry>() { new() { Slug = "a-question" } }
+        };
+        var selectedRefs = new string[]
+        {
+            "00001",
+            "00002",
+            "00003"
+        };
+        var schoolSubmissions = new List<SubmissionInformationModel>()
+        {
+            new ()
+            {
+                EstablishmentId = 1,
+                EstablishmentRef = "00001",
+                SectionId = section.Id,
+                Status = SubmissionStatus.NotStarted
+            },
+            new ()
+            {
+                EstablishmentId = 2,
+                EstablishmentRef = "00002",
+                SectionId = section.Id,
+                Status = SubmissionStatus.InProgress
+            },
+            new()
+            {
+                EstablishmentId = 3,
+                EstablishmentRef = "00003",
+                SectionId = section.Id,
+                Status = SubmissionStatus.NotStarted
+            }
+        };
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel()
+        {
+            Section = section,
+            SchoolSubmissionInfo = schoolSubmissions,
+            SelectedSchoolsRefs = selectedRefs.ToList()
+        };
+
+        var establishmentLinks = new List<SqlEstablishmentLinkDto>
+        {
+            new() { Urn = "00001", Id = 1 },
+            new() { Urn = "00002", Id = 2 },
+            new() { Urn = "00003", Id = 3 },
+        };
+
+        var school1 = new SqlEstablishmentDto { EstablishmentRef = "00001", OrgName = "School 1", Id = 1 };
+        var school2 = new SqlEstablishmentDto { EstablishmentRef = "00002", OrgName = "School 2", Id = 2 };
+        var school3 = new SqlEstablishmentDto { EstablishmentRef = "00003", OrgName = "School 3", Id = 3 };
+
+        est.GetEstablishmentByReferenceAsync("00001").Returns(school1);
+        est.GetEstablishmentByReferenceAsync("00002").Returns(school2);
+        est.GetEstablishmentByReferenceAsync("00003").Returns(school3);
+
+        est.GetEstablishmentLinks(100)
+          .Returns(establishmentLinks);
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group, submission: submission);
+        var controller = new TestController()
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData(),
+                HttpContext = httpContext
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        group.GetGroupSubmissionInformationForSection(Arg.Any<List<SqlEstablishmentLinkDto>>(), Arg.Any<string>()).Returns(schoolSubmissions);
+
+        await sut.SubmitSelectedSchoolsToAssessAndRedirect(controller, sectionSlug, viewModel);
+
+        await submission.Received(3).GetLatestSubmissionResponsesModel(
+            Arg.Any<int>(),
+            section,
+            (SubmissionStatus?)null
+        );
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_CallsEstablishmentService()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var submission = Substitute.For<ISubmissionService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var categorySlug = "category-5";
+        var sectionSlug = "section-5";
+        var section = new QuestionnaireSectionEntry()
+        {
+            Sys = new SystemDetails { Id = "sec-5" },
+            InterstitialPage = new PageEntry { Slug = sectionSlug },
+            Questions = new List<QuestionnaireQuestionEntry>() { new() { Slug = "some-question" } }
+        };
+        var selectedRefs = new string[]
+        {
+            "00001",
+            "00002",
+            "00003"
+        };
+        var schoolSubmissions = new List<SubmissionInformationModel>()
+        {
+            new ()
+            {
+                EstablishmentId = 1,
+                EstablishmentRef = "00001",
+                SectionId = section.Id,
+                Status = SubmissionStatus.NotStarted
+            },
+            new ()
+            {
+                EstablishmentId = 2,
+                EstablishmentRef = "00002",
+                SectionId = section.Id,
+                Status = SubmissionStatus.InProgress
+            },
+            new()
+            {
+                EstablishmentId = 3,
+                EstablishmentRef = "00003",
+                SectionId = section.Id,
+                Status = SubmissionStatus.NotStarted
+            }
+        };
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel()
+        {
+            Section = section,
+            SchoolSubmissionInfo = schoolSubmissions,
+            SelectedSchoolsRefs = selectedRefs.ToList()
+        };
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group, submission: submission);
+        var controller = new TestController()
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData(),
+                HttpContext = httpContext
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        est.GetEstablishmentLinks(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { Urn = "00001", Id = 1 },
+                    new() { Urn = "00002", Id = 2 },
+                    new() { Urn = "00003", Id = 3 },
+                    new() { Urn = "00004", Id = 4 }
+                }
+            );
+
+        group.GetGroupSubmissionInformationForSection(Arg.Any<List<SqlEstablishmentLinkDto>>(), Arg.Any<string>()).Returns(schoolSubmissions);
+
+        await sut.SubmitSelectedSchoolsToAssessAndRedirect(controller, sectionSlug, viewModel);
+
+        await est.Received(1).GetEstablishmentLinks(100);
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_SetsServerSessionForMultiSchoolSelection()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var categorySlug = "category-5";
+        var sectionSlug = "section-5";
+        var section = new QuestionnaireSectionEntry()
+        {
+            Sys = new SystemDetails { Id = "sec-5" },
+            InterstitialPage = new PageEntry { Slug = sectionSlug },
+            Questions = new List<QuestionnaireQuestionEntry> { new() { Slug = "question" } }
+        };
+
+        var selectedRefs = new string[]
+        {
+            "00001",
+            "00002",
+            "00003"
+        };
+
+        var schoolSubmissions = new List<SubmissionInformationModel>()
+        {
+            new ()
+            {
+                EstablishmentId = 1,
+                EstablishmentRef = "00001",
+                SectionId = section.Id,
+                Status = SubmissionStatus.NotStarted
+            },
+            new ()
+            {
+                EstablishmentId = 2,
+                EstablishmentRef = "00002",
+                SectionId = section.Id,
+                Status = SubmissionStatus.InProgress
+            },
+            new()
+            {
+                EstablishmentId = 3,
+                EstablishmentRef = "00003",
+                SectionId = section.Id,
+                Status = SubmissionStatus.NotStarted
+            }
+        };
+        var establishmentLinks = new List<SqlEstablishmentLinkDto>()
+        {
+            new SqlEstablishmentLinkDto() { Id = 1, Urn = "00001" },
+            new SqlEstablishmentLinkDto() { Id = 2, Urn = "00002" },
+            new SqlEstablishmentLinkDto() { Id = 3, Urn = "00003" },
+        };
+
+        est.GetEstablishmentLinks(100)
+            .Returns(establishmentLinks);
+
+        var establishment1 = new SqlEstablishmentDto { EstablishmentRef = "00001", OrgName = "School 1", Id = 1 };
+        var establishment2 = new SqlEstablishmentDto { EstablishmentRef = "00002", OrgName = "School 2", Id = 2 };
+        var establishment3 = new SqlEstablishmentDto { EstablishmentRef = "00003", OrgName = "School 3", Id = 3 };
+
+        est.GetEstablishmentByReferenceAsync("00001").Returns(establishment1);
+        est.GetEstablishmentByReferenceAsync("00002").Returns(establishment2);
+        est.GetEstablishmentByReferenceAsync("00003").Returns(establishment3);
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel()
+        {
+            Section = section,
+            SchoolSubmissionInfo = schoolSubmissions,
+            SelectedSchoolsRefs = selectedRefs.ToList()
+        };
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
+        var controller = new TestController()
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData(),
+                HttpContext = httpContext
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        group.GetGroupSubmissionInformationForSection(Arg.Any<List<SqlEstablishmentLinkDto>>(), Arg.Any<string>()).Returns(schoolSubmissions);
+
+        byte[]? storedBytes = null;
+
+        session
+            .When(x => x.Set(
+                SessionConstants.SelectedEstablishmentsKey,
+                Arg.Any<byte[]>()))
+            .Do(call =>
+            {
+                storedBytes = call.ArgAt<byte[]>(1);
+            });
+
+        // Act
+        await sut.SubmitSelectedSchoolsToAssessAndRedirect(controller, sectionSlug, viewModel);
+
+        var json = Encoding.UTF8.GetString(storedBytes!);
+
+        // Assert
+        Assert.NotNull(json);
+
+        var ids =
+            JsonSerializer.Deserialize<IEnumerable<int>>(json!);
+
+        Assert.NotNull(ids);
+        Assert.Equal(new[] { 1, 2, 3 }, ids);
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_SetsUserContextForSingleSchoolSelection()
+    {
+
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var session = Substitute.For<ISession>();
+        var submission = Substitute.For<ISubmissionService>();
+        var currentUser = Substitute.For<ICurrentUser>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var categorySlug = "category-6";
+        var sectionSlug = "section-6";
+        var section = new QuestionnaireSectionEntry()
+        {
+            Sys = new SystemDetails { Id = "sec-6" },
+            InterstitialPage = new PageEntry { Slug = sectionSlug },
+            Questions = new List<QuestionnaireQuestionEntry> { new() { Slug = "first-question" } }
+        };
+
+        var selectedRefs = new List<string> { "00001" };
+
+        var establishmentLinks = new List<SqlEstablishmentLinkDto>
+        {
+            new()
+            {
+                Id = 1,
+                Urn = "00001",
+                EstablishmentName = "School A"
+            }
+        };
+
+        var establishment = new SqlEstablishmentDto() { EstablishmentRef = "00001", OrgName = "School A", Id = 1 };
+
+        est.GetEstablishmentByReferenceAsync("00001").Returns(establishment);
+
+        est.GetEstablishmentLinks(100)
+            .Returns(establishmentLinks);
+
         contentful.GetSectionBySlugAsync(sectionSlug)
             .Returns(section);
 
+        submission.GetLatestSubmissionResponsesModel(
+            1,
+            section,
+            (SubmissionStatus?)null)
+            .Returns((SubmissionResponsesModel?)null);
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel()
+        {
+            Section = section,
+            SchoolSubmissionInfo = null!,
+            SelectedSchoolsRefs = selectedRefs.ToList()
+        };
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group, submission: submission, currentUser: currentUser);
+        var controller = new TestController()
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData(),
+                HttpContext = httpContext
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        // Act
+        await sut.SubmitSelectedSchoolsToAssessAndRedirect(
+            controller,
+            sectionSlug,
+            viewModel);
+
+        // Assert
+        currentUser.Received(1)
+            .SetGroupSelectedSchool(
+                "00001",
+                "School A");
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_WhenSingleSchoolSelected_GetsLatestSubmission()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var submission = Substitute.For<ISubmissionService>();
+
+        var sectionSlug = "section-7";
+        var categorySlug = "category-7";
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails { Id = "sec-7" },
+            Questions = new List<QuestionnaireQuestionEntry> { new() { Slug = "first-question" } }
+        };
+
+        var schoolSubmissions = new List<SubmissionInformationModel>
+    {
+        new()
+        {
+            EstablishmentId = 1,
+            EstablishmentRef = "00001",
+            SectionId = section.Id,
+            Status = SubmissionStatus.NotStarted
+        }
+    };
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel
+        {
+            Section = section,
+            SchoolSubmissionInfo = schoolSubmissions,
+            SelectedSchoolsRefs = ["00001"]
+        };
+
         est.GetEstablishmentLinks(100)
-            .Returns([]);
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                new()
+                {
+                    Id = 1,
+                    Urn = "00001",
+                    EstablishmentName = "School A"
+                }
+                });
 
+        est.GetEstablishmentByReferenceAsync("00001").Returns(new SqlEstablishmentDto { EstablishmentRef = "00001", Id = 1, OrgName = "School A" });
+
+        contentful.GetSectionBySlugAsync(sectionSlug)
+            .Returns(section);
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            submission: submission);
+
+        var controller = new TestController
+        {
+            ControllerContext = new ControllerContext
+            {
+                RouteData = new RouteData(),
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        // Act
+        await sut.SubmitSelectedSchoolsToAssessAndRedirect(
+            controller,
+            sectionSlug,
+            viewModel);
+
+        // Assert
+        await submission.Received(1)
+            .GetLatestSubmissionResponsesModel(
+                1,
+                section,
+                (SubmissionStatus?)null);
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_WhenMultiSelected_SetsInProgressToInaccessible()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var submission = Substitute.For<ISubmissionService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var sectionSlug = "section-8";
+        var categorySlug = "category-8";
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails { Id = "sec-8" },
+            Questions = new List<QuestionnaireQuestionEntry> { new() { Slug = "first-question" } }
+        };
+
+        contentful.GetSectionBySlugAsync(sectionSlug)
+            .Returns(section);
+
+        var schoolSubmissions = new List<SubmissionInformationModel>
+    {
+        new()
+        {
+            EstablishmentId = 1,
+            EstablishmentRef = "00001",
+            Status = SubmissionStatus.NotStarted
+        },
+        new()
+        {
+            SubmissionId = 200,
+            EstablishmentId = 2,
+            EstablishmentRef = "00002",
+            Status = SubmissionStatus.InProgress
+        }
+    };
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel
+        {
+            Section = section,
+            SchoolSubmissionInfo = schoolSubmissions,
+            SelectedSchoolsRefs = ["00001", "00002"]
+        };
+
+        est.GetEstablishmentLinks(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                new() { Urn = "00001", EstablishmentName = "Test 1" },
+                new() { Urn = "00002", EstablishmentName = "Test 2" }
+                });
+
+        est.GetEstablishmentByReferenceAsync("00001").Returns(new SqlEstablishmentDto { EstablishmentRef = "00001", Id = 1, OrgName = "Test 1" });
+        est.GetEstablishmentByReferenceAsync("00002").Returns(new SqlEstablishmentDto { EstablishmentRef = "00002", Id = 2, OrgName = "Test 2" });
+
+        var latestSubmission = new SubmissionResponsesModel(200, new List<QuestionWithAnswerModel>())
+        {
+            Status = SubmissionStatus.InProgress
+        };
+
+        submission
+            .GetLatestSubmissionResponsesModel(
+                2,
+                section,
+                (SubmissionStatus?)null)
+            .Returns(latestSubmission);
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            group: group,
+            submission: submission);
+
+        var controller = new TestController
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext,
+                RouteData = new RouteData()
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        // Act
+        await sut.SubmitSelectedSchoolsToAssessAndRedirect(
+            controller,
+            sectionSlug,
+            viewModel);
+
+        // Assert
+        await submission.Received(1)
+            .SetSubmissionInaccessibleAsync(
+                2,
+                section.Id);
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_WhenSubmissionNotStarted_DoesNotSetInaccessible()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var submission = Substitute.For<ISubmissionService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var sectionSlug = "section-5";
+        var categorySlug = "category-5";
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails { Id = "sec-5" },
+            Questions = new List<QuestionnaireQuestionEntry> { new() { Slug = "first-question" } }
+        };
+
+        var schoolSubmissions = new List<SubmissionInformationModel>
+    {
+        new()
+        {
+            EstablishmentId = 1,
+            EstablishmentRef = "00001"
+        },
+        new()
+        {
+            EstablishmentId = 2,
+            EstablishmentRef = "00002"
+        }
+    };
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel
+        {
+            Section = section,
+            SchoolSubmissionInfo = schoolSubmissions,
+            SelectedSchoolsRefs = ["00001", "00002"],
+        };
+
+        est.GetEstablishmentLinks(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                new() { Id = 1, Urn = "00001" },
+                new() { Id = 2, Urn = "00002" }
+                });
+
+        contentful.GetSectionBySlugAsync(sectionSlug)
+            .Returns(section);
+
+        submission
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                section,
+                (SubmissionStatus?)null)
+            .Returns((SubmissionResponsesModel?)null);
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            group: group,
+            submission: submission);
+
+        var controller = new TestController
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext,
+                RouteData = new RouteData()
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        // Act
+        await sut.SubmitSelectedSchoolsToAssessAndRedirect(
+            controller,
+            sectionSlug,
+            viewModel);
+
+        // Assert
+        await submission.DidNotReceive()
+            .SetSubmissionInaccessibleAsync(
+                Arg.Any<int>(),
+                Arg.Any<string>());
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_WhenSingleSchoolNotInGroup_Throws()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var submission = Substitute.For<ISubmissionService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var sectionSlug = "section-6";
+        var categorySlug = "category-6";
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails { Id = "sec-5" }
+        };
+
+        var schoolSubmissions = new List<SubmissionInformationModel>
+    {
+        new()
+        {
+            EstablishmentId = 1,
+            EstablishmentRef = "99999"
+        }
+    };
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel
+        {
+            Section = section,
+            SchoolSubmissionInfo = schoolSubmissions,
+            SelectedSchoolsRefs = ["99999"]
+        };
+
+        est.GetEstablishmentLinks(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                new()
+                {
+                    Id = 1,
+                    Urn = "00001",
+                    EstablishmentName = "School A"
+                }
+                });
+
+        contentful.GetSectionBySlugAsync(sectionSlug)
+            .Returns(section);
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            group: group,
+            submission: submission);
+
+        var controller = new TestController
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext,
+                RouteData = new RouteData()
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+
+        // Act / Assert
         var ex = await Assert.ThrowsAsync<InvalidDataException>(() =>
-            sut.RouteToSelectSchoolsToAssessViewModelAsync(controller, sectionSlug)
-        );
+            sut.SubmitSelectedSchoolsToAssessAndRedirect(
+                controller,
+                sectionSlug,
+                viewModel));
 
-        Assert.Equal($"Could not find linked establishments for group ID: 100", ex.Message);
+        Assert.Equal(
+            "Selected school with ref 99999 not linked to user's group",
+            ex.Message);
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_WhenAllSelected_SavesAllDisplayedSchoolIdsToSession()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var submission = Substitute.For<ISubmissionService>();
+        var group = Substitute.For<IGroupService>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var sectionSlug = "section-9";
+        var categorySlug = "category-9";
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails { Id = "sec-9" },
+            Questions = new List<QuestionnaireQuestionEntry>() { new() { Slug = "question" } }
+        };
+
+        var schoolSubmissions = new List<SubmissionInformationModel>
+        {
+            new()
+            {
+                EstablishmentRef = "00001",
+                EstablishmentId = 1
+            },
+            new()
+            {
+                EstablishmentRef = "00002",
+                EstablishmentId = 2
+            },
+            new()
+            {
+                EstablishmentRef = "00003",
+                EstablishmentId = 3
+            }   
+        };
+
+        var establishmentLinks = new List<SqlEstablishmentLinkDto>
+        {
+            new() { Id = 1, Urn = "00001" },
+            new() { Id = 2, Urn = "00002" },
+            new() { Id = 3, Urn = "00003" }
+        };
+
+        est.GetEstablishmentLinks(100)
+            .Returns(establishmentLinks);
+
+        var establishment1 = new SqlEstablishmentDto { EstablishmentRef = "00001", OrgName = "School 1", Id = 1 };
+        var establishment2 = new SqlEstablishmentDto { EstablishmentRef = "00002", OrgName = "School 2", Id = 2 };
+        var establishment3 = new SqlEstablishmentDto { EstablishmentRef = "00003", OrgName = "School 3", Id = 3 };
+
+        est.GetEstablishmentByReferenceAsync("00001").Returns(establishment1);
+        est.GetEstablishmentByReferenceAsync("00002").Returns(establishment2);
+        est.GetEstablishmentByReferenceAsync("00003").Returns(establishment3);
+
+        contentful.GetSectionBySlugAsync(sectionSlug)
+            .Returns(section);
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel
+        {
+            Section = section,
+            SchoolSubmissionInfo = schoolSubmissions,
+            SelectedSchoolsRefs = ["all"],
+            PresentedSchoolRefs = [ "00001", "00002", "00003" ]
+        };
+
+        byte[]? storedBytes = null;
+
+        session
+            .When(x => x.Set(
+                SessionConstants.SelectedEstablishmentsKey,
+                Arg.Any<byte[]>()))
+            .Do(call =>
+            {
+                storedBytes = call.ArgAt<byte[]>(1);
+            });
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            group: group,
+            submission: submission);
+
+        var controller = new TestController
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext,
+                RouteData = new RouteData()
+            }
+        };
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        // Act
+        await sut.SubmitSelectedSchoolsToAssessAndRedirect(
+            controller,
+            sectionSlug,
+            viewModel);
+
+        var json = Encoding.UTF8.GetString(storedBytes!);
+
+        // Assert
+        Assert.NotNull(json);
+
+        var ids =
+            JsonSerializer.Deserialize<IEnumerable<int>>(json!);
+        
+        Assert.NotNull(ids);
+        Assert.Equal(new[] { 1, 2, 3 }, ids);
     }
 }
