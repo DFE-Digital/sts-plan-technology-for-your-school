@@ -187,7 +187,7 @@ resource "azurerm_key_vault_secret" "csp_img_src" {
 
 resource "azurerm_key_vault_key" "data_protection_key" {
   depends_on = [
-    azurerm_key_vault.vault
+    azurerm_key_vault.vault,
     azurerm_role_assignment.mi-crypto
   ]
 
