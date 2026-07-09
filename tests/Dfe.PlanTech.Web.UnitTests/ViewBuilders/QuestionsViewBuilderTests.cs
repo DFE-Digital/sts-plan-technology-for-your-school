@@ -751,6 +751,165 @@ public class QuestionsViewBuilderTests
         Assert.Equal("sec-1", redirect.RouteValues["route"]);
     }
 
+    [Fact]
+    public async Task RouteToContinueSelfAssessmentPage_WhenSubmissionIsObsolete_ReturnsRestartObsoleteView()
+    {
+        // Arrange
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider
+            .GetActiveEstablishmentIdAsync()
+            .Returns(123);
+
+        var section = MakeSection(
+            "S1",
+            "sec-1",
+            "Section 1"
+        );
+
+        _contentful
+            .GetSectionBySlugAsync("sec-1")
+            .Returns(section);
+
+        var submission = new SubmissionResponsesModel(
+            1,
+            [
+                new QuestionWithAnswerModel
+            {
+                QuestionSysId = "Q1"
+            }
+            ]
+        )
+        {
+            Status = SubmissionStatus.Obsolete
+        };
+
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(
+                123,
+                section,
+                (SubmissionStatus?)null
+            )
+            .Returns(submission);
+
+        // Act
+        var result = await sut.RouteToContinueSelfAssessmentPage(
+            controller,
+            "cat",
+            "sec-1"
+        );
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+
+        Assert.Equal(
+            "RestartObsoleteAssessment",
+            view.ViewName
+        );
+
+        var model = Assert.IsType<RestartObsoleteAssessmentViewModel>(
+            view.Model
+        );
+
+        Assert.Equal("Section 1", model.TopicName);
+        Assert.Equal("cat", model.CategorySlug);
+        Assert.Equal("sec-1", model.SectionSlug);
+    }
+
+    // ---------- RouteBySlugAndQuestionAsync ----------
+
+    [Fact]
+    public async Task RouteBySlugAndQuestionAsync_WhenSlugIsNextQuestion_ReturnsQuestionView()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Q1");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: q1,
+            questionnaireSection: section,
+            submission: null,
+            status: SubmissionStatus.InProgress
+        );
+
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(routingData);
+
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("Question", view.ViewName);
+        var model = Assert.IsType<QuestionViewModel>(view.Model);
+        Assert.Equal(q1, model.Question);
+    }
+
+    [Fact]
+    public async Task RouteBySlugAndQuestionAsync_WhenQuestionIsInResponses_ReturnsQuestionViewWithLatestAnswer()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Q1");
+        var q2 = MakeQuestion("Q2", "q-2", "Q2");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1, q2);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var submission = new SubmissionResponsesModel(
+            1,
+            [
+                new QuestionWithAnswerModel
+            {
+                QuestionSysId = "Q1",
+                AnswerSysId = "A1",
+                QuestionText = "Q1",
+                AnswerText = "Answer 1"
+            }
+            ]
+        );
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: q2,
+            questionnaireSection: section,
+            submission: submission,
+            status: SubmissionStatus.InProgress
+        );
+
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(routingData);
+
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<QuestionViewModel>(view.Model);
+
+        Assert.Equal(q1, model.Question);
+        Assert.Equal("A1", model.AnswerSysId);
+    }
+
     // ---------- RestartSelfAssessment ----------
 
     [Fact]
