@@ -15,6 +15,8 @@ locals {
     "Product"          = var.az_tag_product
   }
 
+  create_monitor_storage = var.create_self_delete_resources
+  create_kv_data_protection_key = var.create_self_delete_resources
   ########################
   # App Resource Group #
   ########################
