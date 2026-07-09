@@ -629,6 +629,52 @@ public class QuestionsViewBuilderTests
             .GetNextUnansweredQuestion(101, section);
     }
 
+    [Fact]
+    public async Task SubmitAnswerAndRedirect_WhenNonMat_UsesActiveEstablishmentForRouting()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(false);
+        _currentUserProvider.UserId.Returns(11);
+        _currentUserProvider.UserOrganisationId.Returns(22);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Q1");
+        var q2 = MakeQuestion("Q2", "q-2", "Q2");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1, q2);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var vm = new SubmitAnswerInputViewModel
+        {
+            ChosenAnswerJson = @"{""answer"": { ""id"": ""A1"" } }",
+        };
+
+        _submissionSvc
+            .SubmitAnswerAsync(11, 22, 22, Arg.Any<SubmitAnswerModel>())
+            .Returns(1);
+
+        _questionSvc
+            .GetNextUnansweredQuestion(22, section)
+            .Returns(q2);
+
+        var result = await sut.SubmitAnswerAndRedirect(
+            controller,
+            vm,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
+
+        await _questionSvc.Received(1)
+            .GetNextUnansweredQuestion(22, section);
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(nameof(QuestionsController.GetQuestionBySlug), redirect.ActionName);
+    }
+
     // ---------- RouteToContinueSelfAssessmentPage ----------
 
     [Fact]
