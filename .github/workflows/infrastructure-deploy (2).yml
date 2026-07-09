@@ -386,7 +386,7 @@ jobs:
             -var="azure_location=northeurope" \
             -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
             -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
-            -var="create_monitor_storage=${{ env.TF_VAR_create_monitor_storage }}"
+            -var="create_monitor_storage=${{ env.TF_VAR_create_monitor_storage }}" \
             -out=tfplanapp
 
             terraform show -no-color tfplanapp || true
