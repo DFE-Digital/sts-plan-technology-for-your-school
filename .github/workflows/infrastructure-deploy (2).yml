@@ -374,275 +374,275 @@ jobs:
 
             terraform apply -auto-approve -input=false tfplanapp
 
-  #     - name: Read Terraform app outputs
-  #       id: tf_app_outputs
-  #       shell: bash
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-  #       run: |
-  #         set -euo pipefail
+      - name: Read Terraform app outputs
+        id: tf_app_outputs
+        shell: bash
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          set -euo pipefail
 
-  #         cdn_hostname="$(terraform output -raw cdn_hostname)"
+          cdn_hostname="$(terraform output -raw cdn_hostname)"
 
-  #         echo "cdn_hostname=$cdn_hostname" >> "$GITHUB_OUTPUT"
+          echo "cdn_hostname=$cdn_hostname" >> "$GITHUB_OUTPUT"
 
-  #     - name: Terraform init - separate DNS
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-  #       if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
-  #       run: |
-  #         terraform init \
-  #           -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
-  #           -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
-  #           -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+      - name: Terraform init - separate DNS
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
 
-  #     - name: Apply Terraform changes - separate DNS
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-  #       if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
-  #       run: |
-  #         terraform plan -input=false \
-  #           -var-file="../../normalisedTerraformVars.tfvars" \
-  #           -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-  #           -var="azure_location=northeurope" \
-  #           -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
-  #           -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-  #           -out=tfplandns
+      - name: Apply Terraform changes - separate DNS
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
+        run: |
+          terraform plan -input=false \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="azure_location=northeurope" \
+            -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -out=tfplandns
 
-  #           terraform show -no-color tfplandns || true
-  #           terraform apply -auto-approve -input=false tfplandns
+            terraform show -no-color tfplandns || true
+            terraform apply -auto-approve -input=false tfplandns
 
-  # restore-db:
-  #   name: Restore DB from BACPAC
-  #   needs: [apply-terraform]
-  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-  #   permissions:
-  #     id-token: write
-  #     contents: read
+  restore-db:
+    name: Restore DB from BACPAC
+    needs: [apply-terraform]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - name: Prepare derived variables
-  #       id: vars
-  #       shell: bash
-  #       run: |
-  #         set -euo pipefail
+      - name: Prepare derived variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
 
-  #         IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
+          IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
 
-  #         if [ "$IS_DR" = "true" ]; then
-  #           DFE_PROJECT_NAME="pt-dr"
-  #         else
-  #           DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-  #         fi
+          if [ "$IS_DR" = "true" ]; then
+            DFE_PROJECT_NAME="pt-dr"
+          else
+            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+          fi
 
-  #         RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"  #not df
-  #         RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}" #could be df
+          RESOURCE_PREFIX_BACKUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"  #not df
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}" #could be df
 
-  #         echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
 
-  #     - name: Login with AZ
-  #       uses: ./.github/actions/azure-login
-  #       with:
-  #         az_tenant_id: ${{ secrets.az_tenant_id }}
-  #         az_subscription_id: ${{ secrets.az_subscription_id }}
-  #         az_client_id: ${{ secrets.az_client_id }}
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.az_tenant_id }}
+          az_subscription_id: ${{ secrets.az_subscription_id }}
+          az_client_id: ${{ secrets.az_client_id }}
 
-  #     - name: Get runner public IP
-  #       id: whats-my-ip
-  #       run: |
-  #         IP=$(curl -s https://api.ipify.org)
-  #         echo "ip=$IP" >> "$GITHUB_OUTPUT"
-  #         echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
+      - name: Get runner public IP
+        id: whats-my-ip
+        run: |
+          IP=$(curl -s https://api.ipify.org)
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+          echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
 
-  #     - name: Restore DB from BACPAC
-  #       uses: ./.github/actions/restore-db-from-bacpac
-  #       with:
-  #         resource_group_backup: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
-  #         resource_group_app: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-  #         sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
-  #         storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
-  #         container_name: ${{ env.BACKUP_CONTAINER_NAME }}
-  #         bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
-  #         bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
-  #         use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
+      - name: Restore DB from BACPAC
+        uses: ./.github/actions/restore-db-from-bacpac
+        with:
+          resource_group_backup: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
+          resource_group_app: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
+          storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
+          container_name: ${{ env.BACKUP_CONTAINER_NAME }}
+          bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
+          bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
+          use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
 
-  #     - name: Whitelist Runner for sql
-  #       uses: ./.github/actions/whitelist-sql
-  #       with:
-  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         verb: add
+      - name: Whitelist Runner for sql
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          verb: add
 
-  #     - name: Grant Container App identity access to restored SQL DB
-  #       shell: pwsh
-  #       run: |
-  #         $ErrorActionPreference = "Stop"
+      - name: Grant Container App identity access to restored SQL DB
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
 
-  #         Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
+          Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
 
-  #         $rg = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
-  #         $sqlServer = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
-  #         $sqlDb = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
+          $rg = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+          $sqlServer = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+          $sqlDb = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
 
-  #         $sqlFqdn = az sql server show \
-  #           --resource-group $rg \
-  #           --name $sqlServer \
-  #           --query fullyQualifiedDomainName \
-  #           -o tsv
+          $sqlFqdn = az sql server show \
+            --resource-group $rg \
+            --name $sqlServer \
+            --query fullyQualifiedDomainName \
+            -o tsv
 
-  #         $identityResourceId = az containerapp identity show \
-  #           --resource-group $rg \
-  #           --name $rg \
-  #           --query "userAssignedIdentities | keys(@)[0]" \
-  #           -o tsv
+          $identityResourceId = az containerapp identity show \
+            --resource-group $rg \
+            --name $rg \
+            --query "userAssignedIdentities | keys(@)[0]" \
+            -o tsv
 
-  #         if ([string]::IsNullOrWhiteSpace($identityResourceId)) {
-  #           throw "No user-assigned identity found on container app $rg"
-  #         }
+          if ([string]::IsNullOrWhiteSpace($identityResourceId)) {
+            throw "No user-assigned identity found on container app $rg"
+          }
 
-  #         $identityName = Split-Path $identityResourceId -Leaf
+          $identityName = Split-Path $identityResourceId -Leaf
 
-  #         $identityClientId = az identity show \
-  #           --ids $identityResourceId \
-  #           --query clientId \
-  #           -o tsv
+          $identityClientId = az identity show \
+            --ids $identityResourceId \
+            --query clientId \
+            -o tsv
 
-  #         if ([string]::IsNullOrWhiteSpace($identityClientId)) {
-  #           throw "Could not resolve client/appId for identity $identityClientId"
-  #         }
+          if ([string]::IsNullOrWhiteSpace($identityClientId)) {
+            throw "Could not resolve client/appId for identity $identityClientId"
+          }
 
-  #         $sidHex = python3 -c "import uuid; print('0x' + uuid.UUID('$identityClientId').bytes_le.hex())"
+          $sidHex = python3 -c "import uuid; print('0x' + uuid.UUID('$identityClientId').bytes_le.hex())"
 
-  #         $token = az account get-access-token \
-  #           --resource https://database.windows.net/ \
-  #           --query accessToken \
-  #           -o tsv
+          $token = az account get-access-token \
+            --resource https://database.windows.net/ \
+            --query accessToken \
+            -o tsv
 
-  #         $query = @"
-  #         IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$identityName')
-  #         BEGIN
-  #           CREATE USER [$identityName] WITH SID = $sidHex, TYPE = E;
-  #         END;
+          $query = @"
+          IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$identityName')
+          BEGIN
+            CREATE USER [$identityName] WITH SID = $sidHex, TYPE = E;
+          END;
 
-  #         ALTER ROLE db_datareader ADD MEMBER [$identityName];
-  #         ALTER ROLE db_datawriter ADD MEMBER [$identityName];
-  #         ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
-  #         ALTER ROLE db_executor ADD MEMBER [$identityName];
-  #         GRANT EXECUTE TO [$identityName];
-  #         GRANT INSERT TO [$identityName];
-  #         GRANT SELECT TO [$identityName];
+          ALTER ROLE db_datareader ADD MEMBER [$identityName];
+          ALTER ROLE db_datawriter ADD MEMBER [$identityName];
+          ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
+          ALTER ROLE db_executor ADD MEMBER [$identityName];
+          GRANT EXECUTE TO [$identityName];
+          GRANT INSERT TO [$identityName];
+          GRANT SELECT TO [$identityName];
 
-  #         DELETE FROM dbo.DataProtectionKeys;
+          DELETE FROM dbo.DataProtectionKeys;
 
-  #         "@
+          "@
 
-  #         Invoke-Sqlcmd \
-  #           -ServerInstance $sqlFqdn \
-  #           -Database $sqlDb \
-  #           -AccessToken $token \
-  #           -Query $query
+          Invoke-Sqlcmd \
+            -ServerInstance $sqlFqdn \
+            -Database $sqlDb \
+            -AccessToken $token \
+            -Query $query
 
-  #     - name: De-Whitelist Runner for sql
-  #       uses: ./.github/actions/whitelist-sql
-  #       with:
-  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         verb: remove
+      - name: De-Whitelist Runner for sql
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          verb: remove
 
-  # restore-tokens:
-  #   name: Restore app tokens from backup kv
-  #   needs: [apply-terraform]
-  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-tokens) }}
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-  #   permissions:
-  #     id-token: write
-  #     contents: read
+  restore-tokens:
+    name: Restore app tokens from backup kv
+    needs: [apply-terraform]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-tokens) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
 
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  #     - name: Azure CLI Login
-  #       uses: ./.github/actions/azure-login
-  #       with:
-  #         az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-  #         az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-  #         az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
-  #     - name: Prepare backup names
-  #       id: backup_names
-  #       shell: bash
-  #       run: |
-  #         BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-  #         BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-  #         BACKUP_STORAGE_ACCOUNT="${BACKUP_RESOURCE_GROUP//-/}"
+      - name: Prepare backup names
+        id: backup_names
+        shell: bash
+        run: |
+          BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+          BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+          BACKUP_STORAGE_ACCOUNT="${BACKUP_RESOURCE_GROUP//-/}"
 
-  #         echo "resource_group=$BACKUP_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
-  #         echo "storage_account=$BACKUP_STORAGE_ACCOUNT" >> "$GITHUB_OUTPUT"
-  #         echo "kv=$BACKUP_KV" >> "$GITHUB_OUTPUT"
+          echo "resource_group=$BACKUP_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
+          echo "storage_account=$BACKUP_STORAGE_ACCOUNT" >> "$GITHUB_OUTPUT"
+          echo "kv=$BACKUP_KV" >> "$GITHUB_OUTPUT"
 
-  #     - name: Prepare app variables
-  #       id: vars
-  #       shell: bash
-  #       run: |
-  #         set -euo pipefail
-  #         IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
+      - name: Prepare app variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
 
-  #         if [ "$IS_DR" = "true" ]; then
-  #           DFE_PROJECT_NAME="pt-dr"
-  #         else
-  #           DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-  #         fi
+          if [ "$IS_DR" = "true" ]; then
+            DFE_PROJECT_NAME="pt-dr"
+          else
+            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+          fi
 
-  #         RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
 
-  #         echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
 
-  #     - name: Restore app secrets
-  #       uses: ./.github/actions/restore-app-secrets
-  #       with:
-  #         backup_resource_group: ${{ steps.backup_names.outputs.resource_group }}
-  #         #note, no "-kv" as it was too long
-  #         backup_keyvault: ${{ steps.backup_names.outputs.resource_group }}
+      - name: Restore app secrets
+        uses: ./.github/actions/restore-app-secrets
+        with:
+          backup_resource_group: ${{ steps.backup_names.outputs.resource_group }}
+          #note, no "-kv" as it was too long
+          backup_keyvault: ${{ steps.backup_names.outputs.resource_group }}
 
-  #         app_resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         app_keyvault: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
+          app_resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          app_keyvault: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
 
-  #         backup_storage_account: ${{ steps.backup_names.outputs.storage_account }}
-  #         secret_container_name: secretnames
-  #         manifest_blob_name: secret-manifest.txt
+          backup_storage_account: ${{ steps.backup_names.outputs.storage_account }}
+          secret_container_name: secretnames
+          manifest_blob_name: secret-manifest.txt
 
-  #         sql_server_secret_name: connectionstrings--database
-  #         sql_server_python_secret_name: python--dbconnectionstring
-  #         sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         sql_database_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
+          sql_server_secret_name: connectionstrings--database
+          sql_server_python_secret_name: python--dbconnectionstring
+          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          sql_database_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
 
-  #         redis_secret_name: connectionstrings--redis
-  #         redis_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          redis_secret_name: connectionstrings--redis
+          redis_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
 
-  #         servicebus_secret_name: connectionstrings--servicebusconnection
-  #         servicebus_namespace: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}servicebus
+          servicebus_secret_name: connectionstrings--servicebusconnection
+          servicebus_namespace: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}servicebus
 
-  #         appinsights_secret_name: applicationinsights--connectionstring
-  #         appinsights_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-insights
+          appinsights_secret_name: applicationinsights--connectionstring
+          appinsights_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-insights
 
-  #         ##now we need to pull the restored secrets to set up the contentful webhook.
-  #     - name: Upsert Contentful webhook
-  #       uses: ./.github/actions/upsert-contentful-webhook
-  #       with:
-  #         enabled: ${{ inputs.contentful-upsert-webhook }}
-  #         keyvault-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
-  #         env-name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-  #         cdn-hostname: ${{ needs.apply-terraform.outputs.cdn_hostname }}
+          ##now we need to pull the restored secrets to set up the contentful webhook.
+      - name: Upsert Contentful webhook
+        uses: ./.github/actions/upsert-contentful-webhook
+        with:
+          enabled: ${{ inputs.contentful-upsert-webhook }}
+          keyvault-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
+          env-name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+          cdn-hostname: ${{ needs.apply-terraform.outputs.cdn_hostname }}
