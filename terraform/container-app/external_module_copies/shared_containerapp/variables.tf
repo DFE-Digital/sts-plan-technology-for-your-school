@@ -1446,7 +1446,7 @@ variable "create_monitor_storage" {
   description = "If these have been created previously, their soft delete will resurrect them then cause a TF error. make this false to not try create them"
 }
 
-variable "create_kv_data_proetction_key" {
+variable "create_kv_data_protection_key" {
   type        = bool
   default     = true
   description = "If these have been created previously, their soft delete will resurrect them then cause a TF error. make this false to not try create them"

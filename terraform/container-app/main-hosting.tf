@@ -101,7 +101,7 @@ module "main_hosting" {
   storage_account_sas_expiration_period           = local.storage_account_expiration_period
   mssql_storage_account_shared_access_key_enabled = false
   create_monitor_storage = var.create_self_delete_resources
-  create_kv_data_proetction_key = var.create_self_delete_resources
+  create_kv_data_protection_key = var.create_self_delete_resources
   #######
   # DNS #
   #######
