@@ -558,10 +558,75 @@ public class QuestionsViewBuilderTests
             null
         );
 
+        await _submissionSvc.DidNotReceive()
+            .SubmitAnswerAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<SubmitAnswerModel>());
+
         await _questionSvc.Received(1)
             .GetNextUnansweredQuestion(999, section);
 
         Assert.IsType<RedirectToActionResult>(result);
+    }
+
+    [Fact]
+    public async Task SubmitAnswerAndRedirect_WhenMatAndNoNextQuestion_RedirectsToCheckAnswers()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
+
+        IEnumerable<int> selectedEstablishmentIds = [101, 102];
+
+        controller.HttpContext.Session.SetValue(
+            SessionConstants.SelectedEstablishmentsKey,
+            selectedEstablishmentIds
+        );
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.UserId.Returns(11);
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Q1");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var vm = new SubmitAnswerInputViewModel
+        {
+            ChosenAnswerJson = @"{""answer"": { ""id"": ""A1"" } }",
+        };
+
+        _submissionSvc.SubmitAnswerAsync(11, 101, 999, Arg.Any<SubmitAnswerModel>()).Returns(1);
+        _submissionSvc.SubmitAnswerAsync(11, 102, 999, Arg.Any<SubmitAnswerModel>()).Returns(2);
+
+        _questionSvc
+            .GetNextUnansweredQuestion(101, section)
+            .Returns((QuestionnaireQuestionEntry?)null);
+
+        var result = await sut.SubmitAnswerAndRedirect(
+            controller,
+            vm,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
+        Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
+
+        await _submissionSvc.Received(1)
+            .SubmitAnswerAsync(11, 101, 999, Arg.Any<SubmitAnswerModel>());
+
+        await _submissionSvc.Received(1)
+            .SubmitAnswerAsync(11, 102, 999, Arg.Any<SubmitAnswerModel>());
+
+        await _questionSvc.Received(1)
+            .GetNextUnansweredQuestion(101, section);
     }
 
     // ---------- RouteToContinueSelfAssessmentPage ----------
