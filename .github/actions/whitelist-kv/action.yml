@@ -24,30 +24,66 @@ runs:
       run: |
         set -euo pipefail
 
-        keyvault_exists="$(az keyvault show \
-          --resource-group "${{ inputs.resource-group }}" \
-          --name "${{ inputs.keyvault-name }}" \
-          --query "name" -o tsv 2>/dev/null || true)"
+        resource_group="${{ inputs.resource-group }}"
+        keyvault_name="${{ inputs.keyvault-name }}"
+        ip_address="${{ inputs.ip-address }}"
 
-        if [ -z "$keyvault_exists" ]; then
-          echo "Key Vault ${{ inputs.keyvault-name }} does not exist yet. Skipping network rule add."
-          exit 0
-        fi
-
-        purge_protection="$(az keyvault show \
-          --resource-group "${{ inputs.resource-group }}" \
-          --name "${{ inputs.keyvault-name }}" \
-          --query "properties.enablePurgeProtection" -o tsv)"
-
-        if [ "$purge_protection" != "true" ]; then
-          echo "Key Vault ${{ inputs.keyvault-name }} does not have purge protection enabled (enablePurgeProtection='$purge_protection'). Azure Policy will deny updates." >&2
+        if [ -z "$resource_group" ]; then
+          echo "resource-group input is empty" >&2
           exit 1
         fi
 
+        if [ -z "$keyvault_name" ]; then
+          echo "keyvault-name input is empty" >&2
+          exit 1
+        fi
+
+        if [[ "$ip_address" != */* ]]; then
+          ip_address="${ip_address}/32"
+        fi
+
+        echo "Azure account:"
+        az account show --query "{subscription:name, subscriptionId:id, tenantId:tenantId}" -o table
+
+        echo "Looking for Key Vault:"
+        echo "  Resource group: $resource_group"
+        echo "  Key Vault:      $keyvault_name"
+
+        keyvault_exists="$(az keyvault show \
+          --resource-group "$resource_group" \
+          --name "$keyvault_name" \
+          --query "name" -o tsv 2>/dev/null || true)"
+
+        if [ -z "$keyvault_exists" ]; then
+          echo "Key Vault $keyvault_name was not found in resource group $resource_group." >&2
+
+          echo "Key Vaults found in this resource group:"
+          az keyvault list \
+            --resource-group "$resource_group" \
+            --query "[].name" \
+            -o table || true
+
+          exit 1
+        fi
+
+        purge_protection="$(az keyvault show \
+          --resource-group "$resource_group" \
+          --name "$keyvault_name" \
+          --query "properties.enablePurgeProtection" -o tsv)"
+
+        if [ "$purge_protection" != "true" ]; then
+          echo "Key Vault $keyvault_name does not have purge protection enabled (enablePurgeProtection='$purge_protection'). Azure Policy will deny updates." >&2
+          exit 1
+        fi
+
+        echo "Adding firewall rule $ip_address to $keyvault_name"
+
         az keyvault network-rule add \
-          --resource-group "${{ inputs.resource-group }}" \
-          --name "${{ inputs.keyvault-name }}" \
-          --ip-address "${{ inputs.ip-address }}" > /dev/null
+          --resource-group "$resource_group" \
+          --name "$keyvault_name" \
+          --ip-address "$ip_address" \
+          --only-show-errors \
+          -o none
 
     - name: Remove Key Vault network rule
       if: ${{ inputs.verb == 'remove' }}
