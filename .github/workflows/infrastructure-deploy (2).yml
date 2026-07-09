@@ -62,7 +62,7 @@ env:
   TF_VAR_dns_in_app: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.apply-dns && !contains(inputs.environment, 'Prod')) }}
   #we want to run dns, and we are in prod. probably staging too. note this env variable is an example and can't be used directly - amend the condition on the steps for separate dns if want to change
   TF_VAR_dns_separate: ${{ github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging')) }}
-  TF_VAR_create_monitor_storage: ${{ github.event_name == 'workflow_dispatch' && inputs.create_monitor_storage && 'true' || 'false' }}
+  TF_VAR_create_monitor_storage: ${{ github.event_name == 'workflow_dispatch' && inputs.create_monitor_storage }}
 jobs:
   image-and-acr:
     name: Apply ACR and promote image
