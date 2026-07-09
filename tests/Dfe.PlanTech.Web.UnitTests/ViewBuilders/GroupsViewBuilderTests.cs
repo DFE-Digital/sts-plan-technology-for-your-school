@@ -1,7 +1,4 @@
-using System.Text;
-using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
-using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -20,7 +17,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
+using System.Text;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
@@ -37,7 +35,7 @@ public class GroupsViewBuilderTests
         IEstablishmentService? est = null,
         IGroupService? group = null,
         ISubmissionService? submission = null,
-        ICurrentUser? currentUser = null,
+        ICurrentUserProvider? currentUser = null,
         ILogger<GroupsViewBuilder>? logger = null
     )
     {
@@ -46,7 +44,7 @@ public class GroupsViewBuilderTests
         est ??= Substitute.For<IEstablishmentService>();
         group ??= Substitute.For<IGroupService>();
         submission ??= Substitute.For<ISubmissionService>();
-        currentUser ??= Substitute.For<ICurrentUser>();
+        currentUser ??= Substitute.For<ICurrentUserProvider>();
         logger ??= NullLogger<GroupsViewBuilder>.Instance;
 
         // Set up test scenario: A MAT/Group user who needs to select a school
@@ -1176,7 +1174,7 @@ public class GroupsViewBuilderTests
         var group = Substitute.For<IGroupService>();
         var session = Substitute.For<ISession>();
         var submission = Substitute.For<ISubmissionService>();
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
 
         var httpContext = new DefaultHttpContext();
         httpContext.Session = session;

@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Providers;
@@ -38,6 +36,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Notify.Client;
 using Notify.Interfaces;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web;
 

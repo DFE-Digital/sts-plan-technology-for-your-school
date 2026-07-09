@@ -1,6 +1,5 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
@@ -22,7 +21,7 @@ public class GroupsController : BaseController<GroupsController>
 
     public GroupsController(
         ILogger<GroupsController> logger,
-        ICurrentUser currentUser,
+        ICurrentUserProvider currentUser,
         IGroupsViewBuilder groupsViewBuilder,
         IGroupSelectSchoolsToAssessValidator validator
     )
