@@ -1,10 +1,10 @@
 using System.Security.Authentication;
 using System.Text.Json;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
@@ -19,7 +19,7 @@ public class BaseViewBuilderTests
 {
     private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
     private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
-    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
 
     private const string DefaultRecipient = "test@test.com";
 
@@ -123,7 +123,7 @@ public class BaseViewBuilderTests
         };
 
         var exception = Assert.Throws<InvalidDataException>(act);
-        Assert.Equal(nameof(ICurrentUser.UserOrganisationId), exception.Message);
+        Assert.Equal(nameof(ICurrentUserProvider.UserOrganisationId), exception.Message);
     }
 
     [Fact]
@@ -148,7 +148,7 @@ public class BaseViewBuilderTests
         var act = async () => await sut.CallGetActiveEstablishmentIdOrThrowException();
 
         var exception = await Assert.ThrowsAsync<InvalidDataException>(act);
-        Assert.Equal(nameof(ICurrentUser.GetActiveEstablishmentIdAsync), exception.Message);
+        Assert.Equal(nameof(ICurrentUserProvider.GetActiveEstablishmentIdAsync), exception.Message);
     }
 
     [Fact]

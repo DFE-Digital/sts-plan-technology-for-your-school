@@ -1,5 +1,5 @@
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Web.Context;
+using Dfe.PlanTech.Core.Providers;
 using Microsoft.AspNetCore.Http;
 using NSubstitute;
 
@@ -17,7 +17,7 @@ public class UserActionIdAccessorTests
         var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
         httpContextAccessor.HttpContext.Returns(httpContext);
 
-        var accessor = new UserActionIdAccessor(httpContextAccessor);
+        var accessor = new UserActionIdProvider(httpContextAccessor);
 
         var result = accessor.GetUserActionId();
 
@@ -30,7 +30,7 @@ public class UserActionIdAccessorTests
         var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
         httpContextAccessor.HttpContext.Returns((HttpContext?)null);
 
-        var accessor = new UserActionIdAccessor(httpContextAccessor);
+        var accessor = new UserActionIdProvider(httpContextAccessor);
 
         var exception = Assert.Throws<InvalidOperationException>(() => accessor.GetUserActionId());
 
@@ -45,7 +45,7 @@ public class UserActionIdAccessorTests
         var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
         httpContextAccessor.HttpContext.Returns(httpContext);
 
-        var accessor = new UserActionIdAccessor(httpContextAccessor);
+        var accessor = new UserActionIdProvider(httpContextAccessor);
 
         var exception = Assert.Throws<InvalidOperationException>(() => accessor.GetUserActionId());
 
@@ -61,7 +61,7 @@ public class UserActionIdAccessorTests
         var httpContextAccessor = Substitute.For<IHttpContextAccessor>();
         httpContextAccessor.HttpContext.Returns(httpContext);
 
-        var accessor = new UserActionIdAccessor(httpContextAccessor);
+        var accessor = new UserActionIdProvider(httpContextAccessor);
 
         var exception = Assert.Throws<InvalidOperationException>(() => accessor.GetUserActionId());
 

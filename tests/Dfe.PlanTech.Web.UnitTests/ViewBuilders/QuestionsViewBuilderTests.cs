@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -8,7 +9,6 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
@@ -30,7 +30,7 @@ public class QuestionsViewBuilderTests
     private readonly IQuestionService _questionSvc = Substitute.For<IQuestionService>();
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
     private readonly IEstablishmentService _establishmentSvc = Substitute.For<IEstablishmentService>();
-    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ICurrentUserProvider _currentUserProvider = Substitute.For<ICurrentUserProvider>();
     private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
 
     // Options
@@ -54,7 +54,7 @@ public class QuestionsViewBuilderTests
         new QuestionsViewBuilder(
             _logger,
             _contentful,
-            _currentUser,
+            _currentUserProvider,
             _contactOptions,
             _errorMessages,
             _contentfulOptions,
@@ -126,7 +126,7 @@ public class QuestionsViewBuilderTests
             new QuestionsViewBuilder(
                 _logger,
                 _contentful,
-                _currentUser,
+                _currentUserProvider,
                 _contactOptions,
                 _errorMessages,
                 _contentfulOptions,
@@ -194,7 +194,7 @@ public class QuestionsViewBuilderTests
             InternalName = "Section name",
             Name = "Section name",
             ShortDescription = "Short description",
-            Questions = []
+            Questions = [],
         };
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
@@ -218,7 +218,7 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
 
         // Current user info needed by BaseViewBuilder
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(123);
 
         var section = MakeSection("S1", "sec-1", "Section", MakeQuestion("Q1", "q-1", "Text"));
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
@@ -245,7 +245,7 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(123);
         var section = MakeSection("S1", "sec-1", "Section");
         _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
 
@@ -271,7 +271,7 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(987);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(987);
         var section = MakeSection("S99", "sec-err", "Section Err");
         _contentful.GetSectionBySlugAsync("sec-err").Returns(section);
 
@@ -312,9 +312,9 @@ public class QuestionsViewBuilderTests
         var controller = MakeControllerWithTempData();
         controller.ModelState.AddModelError("Answer", "Answer is required");
 
-        _currentUser.UserId.Returns(11);
-        _currentUser.UserOrganisationId.Returns(22);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(22);
+        _currentUserProvider.UserId.Returns(11);
+        _currentUserProvider.UserOrganisationId.Returns(22);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
 
         var q = MakeQuestion("Q1", "q-1", "Question 1");
         var section = MakeSection("S1", "sec-1", "Section 1", q);
@@ -355,9 +355,9 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.UserId.Returns(11);
-        _currentUser.UserOrganisationId.Returns(22);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(22);
+        _currentUserProvider.UserId.Returns(11);
+        _currentUserProvider.UserOrganisationId.Returns(22);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
 
         var q = MakeQuestion("Q1", "q-1", "Question 1");
         var section = MakeSection("S1", "sec-1", "Section 1", q);
@@ -402,9 +402,9 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.UserId.Returns(11);
-        _currentUser.UserOrganisationId.Returns(22);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(22);
+        _currentUserProvider.UserId.Returns(11);
+        _currentUserProvider.UserOrganisationId.Returns(22);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
 
         var q1 = MakeQuestion("Q1", "q-1", "Q1");
         var q2 = MakeQuestion("Q2", "question2", "Q2");
@@ -450,10 +450,10 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.IsMat.Returns(false);
-        _currentUser.UserId.Returns(11);
-        _currentUser.UserOrganisationId.Returns(22);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(22);
+        _currentUserProvider.IsMat.Returns(false);
+        _currentUserProvider.UserId.Returns(11);
+        _currentUserProvider.UserOrganisationId.Returns(22);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
 
         var q1 = MakeQuestion("Q1", "q-1", "Q1");
         var section = MakeSection("S1", "sec-1", "Section 1", q1);
@@ -488,10 +488,10 @@ public class QuestionsViewBuilderTests
             selectedEstablishmentIds
         );
 
-        _currentUser.IsMat.Returns(true);
-        _currentUser.UserId.Returns(11);
-        _currentUser.UserOrganisationId.Returns(999);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserId.Returns(11);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);
 
         var q1 = MakeQuestion("Q1", "q-1", "Q1");
         var q2 = MakeQuestion("Q2", "q-2", "Q2");
@@ -532,10 +532,10 @@ public class QuestionsViewBuilderTests
 
         _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
 
-        _currentUser.IsMat.Returns(true);
-        _currentUser.UserId.Returns(11);
-        _currentUser.UserOrganisationId.Returns(999);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserId.Returns(11);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);
 
         var q1 = MakeQuestion("Q1", "q-1", "Q1");
         var q2 = MakeQuestion("Q2", "q-2", "Q2");
@@ -582,10 +582,10 @@ public class QuestionsViewBuilderTests
             selectedEstablishmentIds
         );
 
-        _currentUser.IsMat.Returns(true);
-        _currentUser.UserId.Returns(11);
-        _currentUser.UserOrganisationId.Returns(999);
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserId.Returns(11);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(999);
 
         var q1 = MakeQuestion("Q1", "q-1", "Q1");
         var section = MakeSection("S1", "sec-1", "Section 1", q1);
@@ -638,8 +638,8 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
-        _currentUser.GetActiveEstablishmentNameAsync().Returns("Everwood Learning Trust");
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(123);
+        _currentUserProvider.GetActiveEstablishmentNameAsync().Returns("Everwood Learning Trust");
 
         var sectionSlug = "sec-1";
         var section = MakeSection("S1", sectionSlug, "Section 1");
@@ -668,8 +668,8 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
-        _currentUser.GetActiveEstablishmentNameAsync().Returns("Test Trust");
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(123);
+        _currentUserProvider.GetActiveEstablishmentNameAsync().Returns("Test Trust");
 
         var q1 = MakeQuestion("Q1", "q-1", "Question 1");
         var q2 = MakeQuestion("Q2", "q-2", "Question 2");
@@ -714,7 +714,7 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(555);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(555);
 
         var sectionSlug = "sec-restart";
         var section = MakeSection("S123", sectionSlug, "Restart Section");
@@ -742,7 +742,7 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.GetActiveEstablishmentIdAsync().Returns(555);
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(555);
 
         var sectionSlug = "sec-continue-prev";
         var section = MakeSection("S123", sectionSlug, "Continue previous assessment");
@@ -769,39 +769,42 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.IsMat.Returns(true);
-        _currentUser.UserOrganisationId.Returns(999);
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserOrganisationId.Returns(999);
 
-        var page = new PageEntry { Slug = "section-slug", SectionTitle = "Interstitial", Content = [] };
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
         var section = new QuestionnaireSectionEntry
         {
             InternalName = "Section name",
             Name = "Section name",
             ShortDescription = "Short description",
-            Questions = []
+            Questions = [],
         };
 
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
         _establishmentSvc
-        .GetEstablishmentLinksWithRecommendationCounts(999)
-        .Returns(
-        [
-            new SqlEstablishmentLinkDto
-            {
-                EstablishmentName = "Test School",
-                Urn = "900006"
-            }
-        ]);
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
 
-        _establishmentSvc.GetEstablishmentByReferenceAsync("900006").Returns(
-            new SqlEstablishmentDto
-            {
-                Id = 101,
-                OrgName = "Test School",
-                EstablishmentRef = "900006"
-            });
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 101,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
 
         _submissionSvc
             .GetLatestSubmissionResponsesModel(
@@ -829,42 +832,40 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.IsMat.Returns(true);
-        _currentUser.UserOrganisationId.Returns(999);
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserOrganisationId.Returns(999);
 
-        var page = new PageEntry { Slug = "section-slug", SectionTitle = "Interstitial", Content = [] };
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
         var section = new QuestionnaireSectionEntry
         {
             InternalName = "Section name",
             Name = "Section name",
             ShortDescription = "Short description",
-            Questions = []
+            Questions = [],
         };
 
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
         _establishmentSvc
-          .GetEstablishmentLinks(999)
-          .Returns(new List<SqlEstablishmentLinkDto>
-          {
-        new()
-          {
-              EstablishmentName = "Test School",
-              Urn = "900006"
-          }
-        });
+            .GetEstablishmentLinks(999)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { EstablishmentName = "Test School", Urn = "900006" },
+                }
+            );
 
         _establishmentSvc
-          .GetEstablishmentLinksWithRecommendationCounts(999)
-          .Returns(
-          [
-              new SqlEstablishmentLinkDto
-                    {
-                        EstablishmentName = "Test School",
-                        Urn = "900006"
-                    }
-          ]);
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
 
         _submissionSvc
             .GetLatestSubmissionResponsesModel(
@@ -891,7 +892,7 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _currentUser.IsMat.Returns(false);
+        _currentUserProvider.IsMat.Returns(false);
 
         var page = new PageEntry { Slug = "section-slug", SectionTitle = "Interstitial" };
         var section = new QuestionnaireSectionEntry
@@ -899,7 +900,7 @@ public class QuestionsViewBuilderTests
             InternalName = "Section name",
             Name = "Section name",
             ShortDescription = "Short description",
-            Questions = []
+            Questions = [],
         };
 
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);

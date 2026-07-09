@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -5,7 +6,6 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
@@ -16,7 +16,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class ReviewAnswersViewBuilder(
     ILogger<ReviewAnswersViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     ISubmissionService submissionService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
@@ -213,10 +213,10 @@ public class ReviewAnswersViewBuilder(
         List<QuestionWithAnswerModel> responses =
         [
             .. orderedCoreResponses
-            .Union(orderedRetiredResponses)
-            .Where(r => r != null)
-            .Cast<QuestionWithAnswerModel>(),
-    ];
+                .Union(orderedRetiredResponses)
+                .Where(r => r != null)
+                .Cast<QuestionWithAnswerModel>(),
+        ];
 
         var viewModel = new ViewAnswersViewModel
         {
@@ -232,9 +232,7 @@ public class ReviewAnswersViewBuilder(
             QuestionsAnswered = responses.Count,
             TotalQuestions = section.Questions.Count(),
             ShowInProgressDisclaimer = isMatInProgressView,
-            BackLinkHref = isMatInProgressView
-                ? $"/school/{categorySlug}"
-                : $"/{categorySlug}",
+            BackLinkHref = isMatInProgressView ? $"/school/{categorySlug}" : $"/{categorySlug}",
             BackButtonText = isMatInProgressView
                 ? $"Back to {section.Name.ToLower()}"
                 : "Back to recommendations",

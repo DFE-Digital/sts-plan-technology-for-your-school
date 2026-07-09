@@ -3,12 +3,11 @@ using System.Security.Claims;
 using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Models;
 
-namespace Dfe.PlanTech.Infrastructure.SignIn.Extensions;
+namespace Dfe.PlanTech.Core.Helpers;
 
 [ExcludeFromCodeCoverage]
-public static class UserClaimsExtensions
+public static class UserClaimsHelper
 {
     private static readonly JsonSerializerOptions _jsonSerialiserOptions =
         new JsonSerializerOptions() { PropertyNameCaseInsensitive = true };

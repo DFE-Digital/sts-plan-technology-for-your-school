@@ -59,7 +59,7 @@ public class CookieServiceTests
         var expiresPart = header
             .Split(';')
             .FirstOrDefault(p =>
-                p.TrimStart().StartsWith("expires=", StringComparison.InvariantCultureIgnoreCase)
+                p.TrimStart().StartsWith("expires=", StringComparison.OrdinalIgnoreCase)
             );
         if (expiresPart is null)
         {
@@ -115,8 +115,8 @@ public class CookieServiceTests
         );
 
         var last = headers.Last();
-        Assert.Contains("httponly", last, StringComparison.InvariantCultureIgnoreCase);
-        Assert.Contains("secure", last, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Contains("httponly", last, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("secure", last, StringComparison.OrdinalIgnoreCase);
 
         var exp = GetExpires(httpContext);
         Assert.NotNull(exp);
