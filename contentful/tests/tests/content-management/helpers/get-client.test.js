@@ -24,7 +24,7 @@ jest.mock('contentful-management', () => ({
   })),
 }));
 
-const contentfulManagement = (await import('contentful-management')).default;
+const { createClient } = await import('contentful-management');
 
 const { getAndValidateClient } = await import('../../../../content-management/helpers/get-client');
 
@@ -49,7 +49,7 @@ describe('getAndValidateClient', () => {
   it('should create and return a valid client when environment is valid', async () => {
     const client = await getAndValidateClient();
 
-    expect(contentfulManagement.createClient).toHaveBeenCalledWith({
+    expect(createClient).toHaveBeenCalledWith({
       accessToken: 'test-token',
     });
 
