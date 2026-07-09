@@ -73,7 +73,7 @@ resource "azurerm_storage_management_policy" "mssql_security_storage" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "mssql_security_storage" {
-  count = local.enable_mssql_database ? 1 : 0
+  count = local.enable_mssql_database && var.create_monitor_storage ? 1 : 0
 
   name                       = "${local.resource_prefix}-mssql-blob-diag"
   target_resource_id         = "${azurerm_storage_account.mssql_security_storage[0].id}/blobServices/default"

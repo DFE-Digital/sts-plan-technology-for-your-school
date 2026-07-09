@@ -15,6 +15,10 @@ on:
       deploy-image:
         type: boolean
         default: true
+      create_monitor_storage:
+        type: boolean
+        default: true
+        description: 'whether to try TF the monitor storage.Turn off if soft delete causes errors and import later'
       apply-terraform:
         type: boolean
         default: true
@@ -58,7 +62,7 @@ env:
   TF_VAR_dns_in_app: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.apply-dns && !contains(inputs.environment, 'Prod')) }}
   #we want to run dns, and we are in prod. probably staging too. note this env variable is an example and can't be used directly - amend the condition on the steps for separate dns if want to change
   TF_VAR_dns_separate: ${{ github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging')) }}
-
+  TF_VAR_create_monitor_storage: ${{ github.event_name == 'workflow_dispatch' && inputs.create_monitor_storage && 'true' || 'false' }}
 jobs:
   image-and-acr:
     name: Apply ACR and promote image
@@ -370,23 +374,24 @@ jobs:
             echo "Key already in Terraform state."
           fi
 
-  #     - name: Apply Terraform changes - rest of app
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-  #       run: |
-  #         terraform plan -input=false \
-  #           -var-file="../../normalisedTerraformVars.tfvars" \
-  #           -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-  #           -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-  #           -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
-  #           -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
-  #           -var="azure_location=northeurope" \
-  #           -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
-  #           -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
-  #           -out=tfplanapp
+      - name: Apply Terraform changes - rest of app
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform plan -input=false \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
+            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
+            -var="azure_location=northeurope" \
+            -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
+            -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
+            -var="create_monitor_storage=${{ env.TF_VAR_create_monitor_storage }}"
+            -out=tfplanapp
 
-  #           terraform show -no-color tfplanapp || true
+            terraform show -no-color tfplanapp || true
 
-  #           terraform apply -auto-approve -input=false tfplanapp
+            terraform apply -auto-approve -input=false tfplanapp
 
   #     - name: Read Terraform app outputs
   #       id: tf_app_outputs
