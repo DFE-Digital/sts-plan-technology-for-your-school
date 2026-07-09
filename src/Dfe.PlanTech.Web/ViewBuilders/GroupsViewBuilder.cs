@@ -249,9 +249,15 @@ public class GroupsViewBuilder(
             establishmentLinks,
             section.Id
         );
+
         var eligibleSchools = schoolSubmissions
             .Where(sub => sub.Status != SubmissionStatus.CompleteReviewed)
             .ToList();
+
+        if (eligibleSchools.Count == 0)
+        {
+            return controller.RedirectToRoute(GroupsController.GetSelectASelfAssessmentAction);
+        }    
 
         viewModel ??= new GroupsSelectSchoolsToAssessViewModel();
         viewModel.CategorySlug = categorySlug;
