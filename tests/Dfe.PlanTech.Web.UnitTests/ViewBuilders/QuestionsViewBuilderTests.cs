@@ -1007,6 +1007,155 @@ public class QuestionsViewBuilderTests
         Assert.Equal("sec-1", redirect.RouteValues?["route"]);
     }
 
+    [Fact]
+    public async Task RouteBySlugAndQuestionAsync_WhenSubmissionResponsesAreNull_ThrowsInvalidOperationException()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Q1");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: null,
+            status: SubmissionStatus.InProgress
+        );
+
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(routingData);
+
+        var exception = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            sut.RouteBySlugAndQuestionAsync(
+                controller,
+                "cat",
+                "sec-1",
+                "q-1",
+                null
+            )
+        );
+
+        Assert.Contains("No responses were found for section", exception.Message);
+    }
+
+    [Fact]
+    public async Task RouteBySlugAndQuestionAsync_WhenQuestionNotInResponsesAndInProgress_RoutesToNextQuestion()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
+
+        var requestedQuestion = MakeQuestion("Q1", "q-1", "Q1");
+        var nextQuestion = MakeQuestion("Q2", "q-2", "Q2");
+        var section = MakeSection("S1", "sec-1", "Section 1", requestedQuestion, nextQuestion);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var submission = new SubmissionResponsesModel(
+            1,
+            [
+                new QuestionWithAnswerModel
+            {
+                QuestionSysId = "Q999",
+                AnswerSysId = "A999",
+                QuestionText = "Different question",
+                AnswerText = "Answer"
+            }
+            ]
+        );
+
+        var firstRoutingData = new SubmissionRoutingDataModel(
+            nextQuestion: nextQuestion,
+            questionnaireSection: section,
+            submission: submission,
+            status: SubmissionStatus.InProgress
+        );
+
+        var secondRoutingData = new SubmissionRoutingDataModel(
+            nextQuestion: nextQuestion,
+            questionnaireSection: section,
+            submission: submission,
+            status: SubmissionStatus.InProgress
+        );
+
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(firstRoutingData, secondRoutingData);
+
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("Question", view.ViewName);
+
+        var model = Assert.IsType<QuestionViewModel>(view.Model);
+        Assert.Equal(nextQuestion, model.Question);
+    }
+
+    [Fact]
+    public async Task RouteBySlugAndQuestionAsync_WhenQuestionNotInResponsesAndNotInProgress_RedirectsToCheckAnswers()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
+
+        var requestedQuestion = MakeQuestion("Q1", "q-1", "Q1");
+        var section = MakeSection("S1", "sec-1", "Section 1", requestedQuestion);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var submission = new SubmissionResponsesModel(
+            1,
+            [
+                new QuestionWithAnswerModel
+            {
+                QuestionSysId = "Q999",
+                AnswerSysId = "A999",
+                QuestionText = "Different question",
+                AnswerText = "Answer"
+            }
+            ]
+        );
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: submission,
+            status: SubmissionStatus.CompleteNotReviewed
+        );
+
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(routingData);
+
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+
+        Assert.NotNull(redirect.RouteValues);
+        Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
+        Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
+    }
+
     // ---------- RestartSelfAssessment ----------
 
     [Fact]
@@ -1215,6 +1364,57 @@ public class QuestionsViewBuilderTests
 
         Assert.False(model.ShowTrustSchoolAssessmentTable);
         Assert.Empty(model.TrustSchoolAssessments);
+    }
+
+    [Fact]
+    public async Task RouteToInterstitialPage_WhenMatUser_RemovesButtonComponentsFromContent()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+
+        var button = new ComponentButtonWithEntryReferenceEntry();
+        var remainingContent = new MissingComponentEntry();
+
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [button, remainingContent],
+        };
+
+        var section = new QuestionnaireSectionEntry
+        {
+            InternalName = "Section name",
+            Name = "Section name",
+            ShortDescription = "Short description",
+            Questions = [],
+        };
+
+        _contentful.GetPageBySlugAsync("section-slug").Returns(page);
+        _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
+
+        _establishmentSvc
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([]);
+
+        var result = await sut.RouteToInterstitialPage(
+            controller,
+            "category-slug",
+            "section-slug"
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<PageViewModel>(view.Model);
+
+        Assert.DoesNotContain(
+            model.Page.Content!,
+            content => content is ComponentButtonWithEntryReferenceEntry
+        );
+
+        Assert.Contains(remainingContent, model.Page.Content!);
     }
 
     // ------------- Stubs / helpers -------------
