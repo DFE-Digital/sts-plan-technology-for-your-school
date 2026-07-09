@@ -459,6 +459,14 @@ jobs:
           echo "ip=$IP" >> "$GITHUB_OUTPUT"
           echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
 
+      - name: Whitelist Runner for sql
+        uses: ./.github/actions/whitelist-sql
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          verb: add
+
       - name: Restore DB from BACPAC
         uses: ./.github/actions/restore-db-from-bacpac
         with:
@@ -472,14 +480,6 @@ jobs:
           bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
           bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
           use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
-
-      - name: Whitelist Runner for sql
-        uses: ./.github/actions/whitelist-sql
-        with:
-          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-          verb: add
 
       - name: Grant Container App identity access to restored SQL DB
         shell: pwsh
