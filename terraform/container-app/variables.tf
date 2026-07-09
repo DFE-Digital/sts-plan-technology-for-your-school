@@ -169,6 +169,12 @@ variable "add_secrets" {
   default     = false
 }
 
+variable "include_kv_subnet_acl" {
+  description = "Whether to add the link to the virtual network"
+  type    = bool
+  default = true
+}
+
 #######################
 # Azure App Container #
 #######################

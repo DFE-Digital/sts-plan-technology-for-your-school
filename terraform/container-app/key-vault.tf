@@ -13,7 +13,10 @@ resource "azurerm_key_vault" "vault" {
   network_acls {
     bypass                     = "None"
     default_action             = "Deny"
-    virtual_network_subnet_ids = [module.main_hosting.networking.subnet_id]
+    #this allows it to not be created as a dependency on first apply
+    virtual_network_subnet_ids = var.include_kv_subnet_acl ? [
+      module.main_hosting.networking.subnet_id
+    ] : []
     ip_rules                   = concat(tolist(local.kv_firewall_cidr_rules))
   }
   #this prevents the second apply for all app removing the runner ip added in the whitelist kv step
