@@ -1,10 +1,8 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
-[Table("question")]
 public class QuestionEntity : IUserActionEntity
 {
     public int Id { get; init; }
@@ -28,7 +26,7 @@ public class QuestionEntity : IUserActionEntity
             ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated,
             Order = Order,
-            UserActionId = UserActionId
+            UserActionId = UserActionId,
         };
     }
 }

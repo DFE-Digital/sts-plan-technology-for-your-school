@@ -1,6 +1,6 @@
-namespace Dfe.PlanTech.Web.Context.Interfaces;
+namespace Dfe.PlanTech.Application.Providers.Interfaces;
 
-public interface ICurrentUser
+public interface ICurrentUserProvider
 {
     string? DsiReference { get; }
     string? Email { get; }
@@ -33,6 +33,7 @@ public interface ICurrentUser
     bool IsAuthenticated { get; }
     bool IsMat { get; }
     int? UserId { get; }
+    bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds);
     (string Urn, string Name)? GetGroupSelectedSchool();
     bool IsInRole(string role);
     void SetGroupSelectedSchool(string selectedSchoolUrn, string selectedSchoolName);
