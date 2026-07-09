@@ -119,6 +119,27 @@ public class QuestionsViewBuilderTests
         );
     }
 
+    [Fact]
+    public void Constructor_WithNullHttpContextAccessor_ThrowsArgumentNullException()
+    {
+        var ex = Assert.Throws<ArgumentNullException>(() =>
+            new QuestionsViewBuilder(
+                _logger,
+                _contentful,
+                _currentUser,
+                _contactOptions,
+                _errorMessages,
+                _contentfulOptions,
+                _questionSvc,
+                _submissionSvc,
+                _establishmentSvc,
+                null!
+            )
+        );
+
+        Assert.Equal("httpContextAccessor", ex.ParamName);
+    }
+
     // ---------- RouteByQuestionId ----------
 
     [Fact]
@@ -501,6 +522,46 @@ public class QuestionsViewBuilderTests
             .SubmitAnswerAsync(11, 103, 999, Arg.Any<SubmitAnswerModel>());
 
         await _questionSvc.Received(1).GetNextUnansweredQuestion(101, section);
+    }
+
+    [Fact]
+    public async Task SubmitAnswerAndRedirect_WhenMatHasNoSelectedEstablishments_UsesActiveEstablishmentForRouting()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.UserId.Returns(11);
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Q1");
+        var q2 = MakeQuestion("Q2", "q-2", "Q2");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1, q2);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _questionSvc.GetNextUnansweredQuestion(999, section).Returns(q2);
+
+        var vm = new SubmitAnswerInputViewModel
+        {
+            ChosenAnswerJson = @"{""answer"": { ""id"": ""A1"" } }",
+        };
+
+        var result = await sut.SubmitAnswerAndRedirect(
+            controller,
+            vm,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
+
+        await _questionSvc.Received(1)
+            .GetNextUnansweredQuestion(999, section);
+
+        Assert.IsType<RedirectToActionResult>(result);
     }
 
     // ---------- RouteToContinueSelfAssessmentPage ----------
