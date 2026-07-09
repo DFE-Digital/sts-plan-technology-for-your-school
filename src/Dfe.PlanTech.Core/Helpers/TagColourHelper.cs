@@ -16,8 +16,7 @@ public static class TagColourHelper
         string.IsNullOrEmpty(toMatch)
             ? Default
             : _colours.FirstOrDefault(
-                colour =>
-                    string.Equals(colour, toMatch, StringComparison.InvariantCultureIgnoreCase),
+                colour => string.Equals(colour, toMatch, StringComparison.OrdinalIgnoreCase),
                 Default
             );
 }

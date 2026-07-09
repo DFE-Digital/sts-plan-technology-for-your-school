@@ -9,8 +9,8 @@ public class RecommendationService(IRecommendationWorkflow recommendationWorkflo
     : IRecommendationService
 {
     public Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationHistoryAsync(
-        string recommendationContentfulReference,
-        int establishmentId
+        int establishmentId,
+        string recommendationContentfulReference
     )
     {
         return recommendationWorkflow.GetLatestRecommendationStatusAsync(

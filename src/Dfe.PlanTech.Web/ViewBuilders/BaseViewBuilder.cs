@@ -1,11 +1,11 @@
 using System.Security.Authentication;
 using System.Text.Json;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
@@ -16,13 +16,13 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class BaseViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser
+    ICurrentUserProvider currentUser
 )
 {
     protected readonly ILogger<BaseViewBuilder> Logger = logger;
     protected IContentfulService ContentfulService =
         contentfulService ?? throw new ArgumentNullException(nameof(contentfulService));
-    protected ICurrentUser CurrentUser =
+    protected ICurrentUserProvider CurrentUser =
         currentUser ?? throw new ArgumentNullException(nameof(currentUser));
 
     protected const string ShareByEmailViewName = "~/Views/Shared/Email/ShareByEmail.cshtml";

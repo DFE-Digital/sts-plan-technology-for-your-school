@@ -10,7 +10,6 @@ using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders;
@@ -28,7 +27,7 @@ public class RecommendationsViewBuilderTests
 
     // ---- Substitutes (collaborators)
     private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
-    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
     private readonly INotifyService _notifyService = Substitute.For<INotifyService>();
     private readonly IRecommendationService _recommendationService =
         Substitute.For<IRecommendationService>();
@@ -173,7 +172,7 @@ public class RecommendationsViewBuilderTests
         };
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("C2", 123)
+            .GetLatestRecommendationHistoryAsync(123, "C2")
             .Returns(currentRecommendationStatus);
 
         // Setup recommendation service with history
@@ -239,7 +238,7 @@ public class RecommendationsViewBuilderTests
         );
         Assert.Equal("second-chunk-2", vm.OriginatingSlug);
 
-        await _recommendationService.Received(1).GetLatestRecommendationHistoryAsync("C2", 123);
+        await _recommendationService.Received(1).GetLatestRecommendationHistoryAsync(123, "C2");
     }
 
     [Fact]
@@ -827,7 +826,7 @@ public class RecommendationsViewBuilderTests
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .GetLatestRecommendationHistoryAsync(123, "chunk-id")
             .Returns(new SqlEstablishmentRecommendationHistoryDto { NewStatus = null });
 
         var sut = CreateServiceUnderTest();
@@ -860,7 +859,7 @@ public class RecommendationsViewBuilderTests
         _currentUser.GetActiveEstablishmentIdAsync().Returns(123);
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .GetLatestRecommendationHistoryAsync(123, "chunk-id")
             .Returns(
                 new SqlEstablishmentRecommendationHistoryDto
                 {
@@ -907,7 +906,7 @@ public class RecommendationsViewBuilderTests
         _currentUser.GetActiveEstablishmentNameAsync().Returns((string?)null);
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .GetLatestRecommendationHistoryAsync(123, "chunk-id")
             .Returns(
                 new SqlEstablishmentRecommendationHistoryDto
                 {
@@ -955,7 +954,7 @@ public class RecommendationsViewBuilderTests
         _currentUser.GetActiveEstablishmentNameAsync().Returns("Springfield Primary");
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .GetLatestRecommendationHistoryAsync(123, "chunk-id")
             .Returns(
                 new SqlEstablishmentRecommendationHistoryDto
                 {
@@ -1006,7 +1005,7 @@ public class RecommendationsViewBuilderTests
 
         await _recommendationService
             .Received(1)
-            .GetLatestRecommendationHistoryAsync("chunk-id", 123);
+            .GetLatestRecommendationHistoryAsync(123, "chunk-id");
 
         _notifyService
             .Received(1)
@@ -1044,7 +1043,7 @@ public class RecommendationsViewBuilderTests
         _currentUser.GetActiveEstablishmentNameAsync().Returns("Springfield Primary");
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("chunk-id", 123)
+            .GetLatestRecommendationHistoryAsync(123, "chunk-id")
             .Returns(
                 new SqlEstablishmentRecommendationHistoryDto
                 {
@@ -1132,7 +1131,7 @@ public class RecommendationsViewBuilderTests
         };
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("C2", establishmentId)
+            .GetLatestRecommendationHistoryAsync(establishmentId, "C2")
             .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
 
         _recommendationService
@@ -1217,7 +1216,7 @@ public class RecommendationsViewBuilderTests
         };
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("C2", establishmentId)
+            .GetLatestRecommendationHistoryAsync(establishmentId, "C2")
             .Returns(currentRecommendationStatus);
 
         _recommendationService
@@ -1321,7 +1320,7 @@ public class RecommendationsViewBuilderTests
             .Returns(routing);
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("C2", establishmentId)
+            .GetLatestRecommendationHistoryAsync(establishmentId, "C2")
             .Returns((SqlEstablishmentRecommendationHistoryDto?)null);
 
         _recommendationService
@@ -1392,7 +1391,7 @@ public class RecommendationsViewBuilderTests
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("C2", 123)
+            .GetLatestRecommendationHistoryAsync(123, "C2")
             .Returns(
                 new SqlEstablishmentRecommendationHistoryDto
                 {
@@ -1438,7 +1437,7 @@ public class RecommendationsViewBuilderTests
         _contentfulService.GetSectionBySlugAsync("sec-1", 2).Returns(section);
 
         _recommendationService
-            .GetLatestRecommendationHistoryAsync("C2", 123)
+            .GetLatestRecommendationHistoryAsync(123, "C2")
             .Returns(
                 new SqlEstablishmentRecommendationHistoryDto
                 {

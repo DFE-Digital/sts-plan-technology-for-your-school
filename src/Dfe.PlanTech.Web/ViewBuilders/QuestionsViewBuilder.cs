@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -5,7 +6,6 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -19,7 +19,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class QuestionsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
     ContentfulOptionsConfiguration contentfulOptions,
@@ -159,14 +159,14 @@ public class QuestionsViewBuilder(
 
         if (CurrentUser.IsMat)
         {
-            interstitialPage.Content = interstitialPage.Content?
-                  .Where(x => x is not ComponentButtonWithEntryReferenceEntry)
-                  .ToList();
+            interstitialPage.Content = interstitialPage
+                .Content?.Where(x => x is not ComponentButtonWithEntryReferenceEntry)
+                .ToList();
         }
 
         var viewModel = new PageViewModel(interstitialPage)
         {
-            ShowTrustSchoolAssessmentTable = CurrentUser.IsMat
+            ShowTrustSchoolAssessmentTable = CurrentUser.IsMat,
         };
 
         var section =
@@ -183,7 +183,6 @@ public class QuestionsViewBuilder(
                 section
             );
         }
-
 
         return controller.View(InterstitialPagePath, viewModel);
     }
@@ -244,26 +243,27 @@ public class QuestionsViewBuilder(
     }
 
     private async Task<List<TrustSchoolAssessmentRowViewModel>> BuildTrustSchoolAssessments(
-    string categorySlug,
-    string sectionSlug,
-    QuestionnaireSectionEntry section
+        string categorySlug,
+        string sectionSlug,
+        QuestionnaireSectionEntry section
     )
     {
-        var groupId = CurrentUser.UserOrganisationId
+        var groupId =
+            CurrentUser.UserOrganisationId
             ?? throw new InvalidDataException(
                 "User is a MAT user but does not have an organisation ID"
             );
 
         var schools =
-                await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId)
-                ?? [];
+            await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId) ?? [];
 
         var rows = new List<TrustSchoolAssessmentRowViewModel>();
 
         foreach (var school in schools)
         {
-            var schoolEstablishment =
-                await establishmentService.GetEstablishmentByReferenceAsync(school.Urn);
+            var schoolEstablishment = await establishmentService.GetEstablishmentByReferenceAsync(
+                school.Urn
+            );
 
             var submission = schoolEstablishment is null
                 ? null
@@ -275,16 +275,18 @@ public class QuestionsViewBuilder(
 
             var hasSubmission = submission is not null;
 
-            rows.Add(new TrustSchoolAssessmentRowViewModel
-            {
-                SchoolName = school.EstablishmentName,
-                Status = hasSubmission
-                ? SubmissionStatus.InProgress
-                : SubmissionStatus.NotStarted,
-                ViewAnswersHref = hasSubmission
-                ? $"/school/{categorySlug}/{sectionSlug}/self-assessment/view-answers?schoolUrn={school.Urn}"
-                : null
-            });
+            rows.Add(
+                new TrustSchoolAssessmentRowViewModel
+                {
+                    SchoolName = school.EstablishmentName,
+                    Status = hasSubmission
+                        ? SubmissionStatus.InProgress
+                        : SubmissionStatus.NotStarted,
+                    ViewAnswersHref = hasSubmission
+                        ? $"/school/{categorySlug}/{sectionSlug}/self-assessment/view-answers?schoolUrn={school.Urn}"
+                        : null,
+                }
+            );
         }
 
         return rows;
@@ -336,7 +338,7 @@ public class QuestionsViewBuilder(
             TopicName = section.Name,
             Responses = submissionModel.Responses,
             CategorySlug = categorySlug,
-            SectionSlug = sectionSlug
+            SectionSlug = sectionSlug,
         };
 
         return controller.View(ContinueSelfAssessmentView, viewModel);
