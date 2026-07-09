@@ -158,17 +158,21 @@ jobs:
             -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
             -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
             -backend-config="key=${{ env.TF_BACKEND_KEY }}"
-
-      - name: Apply Terraform changes - RG & container registry only
+## we need the registry up to be able to copy the image in with bsh before passing it into the container app creation.
+##making KV here because Azure can resurrect old soft deleted versions with the wrong runner ip on so need to be able to add firewall rule
+##before running rest of it
+      - name: Apply Terraform changes - RG & container registry & key vault only.
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
           terraform plan -input=false \
             -target=azurerm_resource_group.app_rg \
             -target=azurerm_container_registry.acr_notshared \
+            -target=azurerm_key_vault.vault \
             -var-file="../../normalisedTerraformVars.tfvars" \
             -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="azure_location=northeurope" \
+            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
             -out=tfplan
 
           terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
@@ -252,7 +256,7 @@ jobs:
           keyvault-name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
           verb: add
 
-      - name: Whitelist Runner for app keyvault in case exists
+      - name: Whitelist Runner for app keyvault
         uses: ./.github/actions/whitelist-kv
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
