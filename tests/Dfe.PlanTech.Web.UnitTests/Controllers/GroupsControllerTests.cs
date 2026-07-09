@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
@@ -19,7 +20,6 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         private readonly ILogger<GroupsController> _logger;
         private readonly IGroupsViewBuilder _viewBuilder;
         private readonly ICurrentUser _currentUser;
-        private readonly IGroupSelectSchoolsToAssessValidator _validator;
         private readonly GroupsController _controller;
 
         public GroupsControllerTests()
@@ -27,14 +27,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             _logger = Substitute.For<ILogger<GroupsController>>();
             _viewBuilder = Substitute.For<IGroupsViewBuilder>();
             _currentUser = Substitute.For<ICurrentUser>();
-            _validator = Substitute.For<IGroupSelectSchoolsToAssessValidator>();
-            _controller = new GroupsController(_logger, _currentUser, _viewBuilder, _validator)
-            {
-                ControllerContext = new ControllerContext
-                {
-                    RouteData = new RouteData()
-                }
-            };
+            _controller = new GroupsController(_logger, _currentUser, _viewBuilder);
         }
 
         [Fact]
@@ -100,11 +93,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         {
             var sectionSlug = "some-section";
 
-            _viewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug).Returns(new OkResult());
+            _viewBuilder
+                .RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug)
+                .Returns(new OkResult());
 
             var result = await _controller.GetSelectSchoolsToAssessView(sectionSlug);
 
-            await _viewBuilder.Received(1).RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug);
+            await _viewBuilder
+                .Received(1)
+                .RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug);
             Assert.IsType<OkResult>(result);
         }
 
@@ -115,11 +112,12 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Section = new QuestionnaireSectionEntry(),
                 SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
-                SelectedSchoolsRefs = new List<string> { "000001", "000002" }
+                SelectedSchoolsRefs = new List<string> { "000001", "000002" },
             };
 
             var ex = await Assert.ThrowsAsync<ArgumentNullException>(() =>
-                _controller.SubmitSelectedSchoolsToAssess(model, null!));
+                _controller.SubmitSelectedSchoolsToAssess(model, null!)
+            );
         }
 
         [Fact]
@@ -131,16 +129,15 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Section = new QuestionnaireSectionEntry(),
                 SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
-                SelectedSchoolsRefs = new List<string> { "000001", "000002" }
-            }; 
+                SelectedSchoolsRefs = new List<string> { "000001", "000002" },
+            };
             _controller.RouteData.Values["categorySlug"] = categorySlug;
 
             var result = await _controller.SubmitSelectedSchoolsToAssess(model, sectionSlug);
 
-            await _validator.Received(1).ValidateSelectionAsync(
-                model,
-                Arg.Any<ModelStateDictionary>()
-            );
+            await _validator
+                .Received(1)
+                .ValidateSelectionAsync(model, Arg.Any<ModelStateDictionary>());
         }
 
         [Theory]
@@ -185,35 +182,32 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Section = new QuestionnaireSectionEntry(),
                 SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
-                SelectedSchoolsRefs = new List<string> { "000001", "000002", "all" }
+                SelectedSchoolsRefs = new List<string> { "000001", "000002", "all" },
             };
             _controller.RouteData.Values["categorySlug"] = categorySlug;
 
             _validator
-                .When(x => x.ValidateSelectionAsync(
-                    Arg.Any<GroupsSelectSchoolsToAssessViewModel>(),
-                    Arg.Any<ModelStateDictionary>()))
+                .When(x =>
+                    x.ValidateSelectionAsync(
+                        Arg.Any<GroupsSelectSchoolsToAssessViewModel>(),
+                        Arg.Any<ModelStateDictionary>()
+                    )
+                )
                 .Do(callInfo =>
                 {
-                    var modelState =
-                        callInfo.Arg<ModelStateDictionary>();
+                    var modelState = callInfo.Arg<ModelStateDictionary>();
 
-                    modelState.AddModelError(
-                        "SelectedSchoolsRefs",
-                        "Error");
+                    modelState.AddModelError("SelectedSchoolsRefs", "Error");
                 });
 
             await _controller.SubmitSelectedSchoolsToAssess(model, sectionSlug);
 
-            await _viewBuilder.Received(1)
-                .RouteToSelectSchoolsToAssessViewModelAsync(
-                    _controller,
-                    sectionSlug,
-                    model
-                );
+            await _viewBuilder
+                .Received(1)
+                .RouteToSelectSchoolsToAssessViewModelAsync(_controller, sectionSlug, model);
 
-
-            await _viewBuilder.DidNotReceive()
+            await _viewBuilder
+                .DidNotReceive()
                 .SubmitSelectedSchoolsToAssessAndRedirect(
                     _controller,
                     Arg.Any<string>(),
@@ -230,15 +224,18 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             {
                 Section = new QuestionnaireSectionEntry(),
                 SchoolSubmissionInfo = new List<SubmissionInformationModel>(),
-                SelectedSchoolsRefs = ["00001", "00002"]
+                SelectedSchoolsRefs = ["00001", "00002"],
             };
             _controller.RouteData.Values["categorySlug"] = categorySlug;
 
             await _controller.SubmitSelectedSchoolsToAssess(viewModel, sectionSlug);
 
-            await _viewBuilder.Received(1).SubmitSelectedSchoolsToAssessAndRedirect(_controller, sectionSlug, viewModel);
+            await _viewBuilder
+                .Received(1)
+                .SubmitSelectedSchoolsToAssessAndRedirect(_controller, sectionSlug, viewModel);
 
-            await _viewBuilder.DidNotReceive()
+            await _viewBuilder
+                .DidNotReceive()
                 .RouteToSelectSchoolsToAssessViewModelAsync(
                     _controller,
                     Arg.Any<string>(),
@@ -249,7 +246,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetSelectASelfAssessment_CallsViewBuilderAndReturnsResult()
         {
-            _viewBuilder.RouteToSelectASelfAssessmentViewModelAsync(_controller).Returns(new OkResult());
+            _viewBuilder
+                .RouteToSelectASelfAssessmentViewModelAsync(_controller)
+                .Returns(new OkResult());
 
             var result = await _controller.GetSelectASelfAssessment();
 
@@ -268,7 +267,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .RouteToViewInProgressAnswers(_controller, categorySlug, sectionSlug, schoolUrn)
                 .Returns(new OkResult());
 
-            var result = await _controller.ViewInProgressAnswers(categorySlug, sectionSlug, schoolUrn);
+            var result = await _controller.ViewInProgressAnswers(
+                categorySlug,
+                sectionSlug,
+                schoolUrn
+            );
 
             await _viewBuilder
                 .Received(1)

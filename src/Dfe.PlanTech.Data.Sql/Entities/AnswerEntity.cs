@@ -1,11 +1,9 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
-[Table("answer")]
 public class AnswerEntity : IUserActionEntity
 {
     [Required]
@@ -30,7 +28,7 @@ public class AnswerEntity : IUserActionEntity
             AnswerText = AnswerText,
             ContentfulSysId = ContentfulRef,
             DateCreated = DateCreated,
-            UserActionId = UserActionId
+            UserActionId = UserActionId,
         };
     }
 }

@@ -1,6 +1,5 @@
-using Contentful.Core.Models.Management;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Interfaces;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -20,9 +19,21 @@ public class SubmissionRepositoryTests
         return ctx;
     }
 
-    private static IUserActionIdAccessor BuildUserActionIdAccessor()
+    private static EstablishmentEntity BuildEstablishmentEntity(int id)
     {
-        var accessor = Substitute.For<IUserActionIdAccessor>();
+        return new EstablishmentEntity
+        {
+            Id = id,
+            DateCreated = DateTime.UtcNow.AddDays(-30),
+            DateLastUpdated = DateTime.UtcNow.AddDays(-30),
+            EstablishmentRef = "EST" + id,
+            EstablishmentType = "School",
+        };
+    }
+
+    private static IUserActionIdProvider BuildUserActionIdAccessor()
+    {
+        var accessor = Substitute.For<IUserActionIdProvider>();
         accessor.GetUserActionId().Returns(Guid.NewGuid());
         return accessor;
     }
@@ -118,6 +129,18 @@ public class SubmissionRepositoryTests
     }
 
     [Fact]
+    public async Task GetLatestCompletedSubmissionBySectionIdAsync_Returns_Null_When_None()
+    {
+        using var db = BuildPlanTechDbContext(
+            nameof(GetLatestCompletedSubmissionBySectionIdAsync_Returns_Null_When_None)
+        );
+        var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
+
+        var result = await repo.GetLatestCompletedSubmissionBySectionIdAsync(1, "SEC");
+        Assert.Null(result);
+    }
+
+    [Fact]
     public async Task GetLatestSubmissionAndResponses_Returns_Null_When_None()
     {
         using var db = BuildPlanTechDbContext(
@@ -125,7 +148,11 @@ public class SubmissionRepositoryTests
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
-        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", (SubmissionStatus?)null);
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(
+            1,
+            "SEC",
+            (SubmissionStatus?)null
+        );
         Assert.Null(result);
     }
 
@@ -137,7 +164,11 @@ public class SubmissionRepositoryTests
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
-        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [SubmissionStatus.CompleteReviewed]);
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(
+            1,
+            "SEC",
+            [SubmissionStatus.CompleteReviewed]
+        );
         Assert.Null(result);
     }
 
@@ -145,13 +176,15 @@ public class SubmissionRepositoryTests
     public async Task GetLatestSubmissionAndResponses_MultipleStatuses_Throws_When_Empty_Status_Enumerable()
     {
         using var db = BuildPlanTechDbContext(
-            nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Throws_When_Empty_Status_Enumerable)
+            nameof(
+                GetLatestSubmissionAndResponses_MultipleStatuses_Throws_When_Empty_Status_Enumerable
+            )
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
-        var result =
-            await Assert.ThrowsAsync<ArgumentException>(() => repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [])
-            );
+        var result = await Assert.ThrowsAsync<ArgumentException>(() =>
+            repo.GetLatestSubmissionAndResponsesAsync(1, "SEC", [])
+        );
 
         Assert.Contains("At least one submission status must be provided", result.Message);
     }
@@ -160,16 +193,13 @@ public class SubmissionRepositoryTests
     public async Task GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Latest_Of_Included_Statuses()
     {
         using var db = BuildPlanTechDbContext(
-            nameof(GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Latest_Of_Included_Statuses)
+            nameof(
+                GetLatestSubmissionAndResponses_MultipleStatuses_Returns_Latest_Of_Included_Statuses
+            )
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
-        db.Establishments.Add(
-            new EstablishmentEntity
-            {
-                Id = 1
-            }
-        );
+        db.Establishments.Add(BuildEstablishmentEntity(1));
 
         db.Submissions.AddRange(
             new SubmissionEntity
@@ -208,8 +238,11 @@ public class SubmissionRepositoryTests
 
         db.SaveChanges();
 
-        var result = await repo.GetLatestSubmissionAndResponsesAsync(1, "SEC",
-            [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]);
+        var result = await repo.GetLatestSubmissionAndResponsesAsync(
+            1,
+            "SEC",
+            [SubmissionStatus.Inaccessible, SubmissionStatus.InProgress]
+        );
 
         Assert.NotNull(result);
         Assert.Equal(2, result.Id);
@@ -282,19 +315,19 @@ public class SubmissionRepositoryTests
     }
 
     [Fact]
-    public async Task
-        GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync_Returns_Latest_Completed_NotDeleted_Submissions_Per_Establishment_And_Section()
+    public async Task GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync_Returns_Latest_Completed_NotDeleted_Submissions_Per_Establishment_And_Section()
     {
         using var db = BuildPlanTechDbContext(
             nameof(
-                GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync_Returns_Latest_Completed_NotDeleted_Submissions_Per_Establishment_And_Section)
+                GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync_Returns_Latest_Completed_NotDeleted_Submissions_Per_Establishment_And_Section
+            )
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         db.Establishments.AddRange(
-            new EstablishmentEntity { Id = 1 },
-            new EstablishmentEntity { Id = 2 },
-            new EstablishmentEntity { Id = 3 }
+            BuildEstablishmentEntity(1),
+            BuildEstablishmentEntity(2),
+            BuildEstablishmentEntity(3)
         );
 
         db.Submissions.AddRange(
@@ -311,7 +344,6 @@ public class SubmissionRepositoryTests
                 DateLastUpdated = new DateTime(2024, 1, 1),
                 Deleted = false,
             },
-
             // Establishment 1, Section B - latest valid completed submission, should be returned
             new SubmissionEntity
             {
@@ -325,7 +357,6 @@ public class SubmissionRepositoryTests
                 DateLastUpdated = new DateTime(2024, 2, 1),
                 Deleted = false,
             },
-
             // Establishment 1, Section A - different section, should also be returned
             new SubmissionEntity
             {
@@ -339,7 +370,6 @@ public class SubmissionRepositoryTests
                 DateLastUpdated = new DateTime(2024, 3, 1),
                 Deleted = false,
             },
-
             // Newer but deleted, should be excluded and should not replace Id 2
             new SubmissionEntity
             {
@@ -353,7 +383,6 @@ public class SubmissionRepositoryTests
                 DateLastUpdated = new DateTime(2024, 4, 1),
                 Deleted = true,
             },
-
             // CompleteReviewed but no DateCompleted, should be excluded
             new SubmissionEntity
             {
@@ -367,7 +396,6 @@ public class SubmissionRepositoryTests
                 DateLastUpdated = new DateTime(2024, 5, 1),
                 Deleted = false,
             },
-
             // Not CompleteReviewed, should be excluded
             new SubmissionEntity
             {
@@ -381,7 +409,6 @@ public class SubmissionRepositoryTests
                 DateLastUpdated = new DateTime(2024, 6, 1),
                 Deleted = false,
             },
-
             // Establishment 2, should be returned
             new SubmissionEntity
             {
@@ -395,7 +422,6 @@ public class SubmissionRepositoryTests
                 DateLastUpdated = new DateTime(2024, 7, 1),
                 Deleted = false,
             },
-
             // Establishment 3 is not requested, should be excluded
             new SubmissionEntity
             {
@@ -413,9 +439,11 @@ public class SubmissionRepositoryTests
 
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
-        var result = await repo.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
-            [1, 1, 2]
-        );
+        var result = await repo.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync([
+            1,
+            1,
+            2,
+        ]);
 
         Assert.Collection(
             result,
@@ -444,11 +472,12 @@ public class SubmissionRepositoryTests
     }
 
     [Fact]
-    public async Task
-        GetLatestSubmissionPerEstablishmentForSectionAsync_Returns_Latest_Submission_Any_Status_Per_Establishment_And_Section()
+    public async Task GetLatestSubmissionPerEstablishmentForSectionAsync_Returns_Latest_Submission_Any_Status_Per_Establishment_And_Section()
     {
         using var db = BuildPlanTechDbContext(
-            nameof(GetLatestSubmissionPerEstablishmentForSectionAsync_Returns_Latest_Submission_Any_Status_Per_Establishment_And_Section)
+            nameof(
+                GetLatestSubmissionPerEstablishmentForSectionAsync_Returns_Latest_Submission_Any_Status_Per_Establishment_And_Section
+            )
         );
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
@@ -602,7 +631,8 @@ public class SubmissionRepositoryTests
         await db.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var result = await repo.GetLatestSubmissionPerEstablishmentForSectionAsync(
-            [1, 2, 3, 4, 5, 7, 8, 9], "sec1"
+            [1, 2, 3, 4, 5, 7, 8, 9],
+            "sec1"
         );
 
         Assert.Collection(

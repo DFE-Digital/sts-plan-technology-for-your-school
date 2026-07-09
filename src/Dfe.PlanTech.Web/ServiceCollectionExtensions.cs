@@ -1,5 +1,9 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
+using Dfe.PlanTech.Application.Providers;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Application.Workflows;
@@ -18,8 +22,6 @@ using Dfe.PlanTech.Web.Authorisation.Handlers;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Dfe.PlanTech.Web.Background;
-using Dfe.PlanTech.Web.Context;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Factories;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
@@ -36,7 +38,6 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Notify.Client;
 using Notify.Interfaces;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web;
 
@@ -215,7 +216,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddCurrentUser(this IServiceCollection services)
     {
-        return services.AddScoped<ICurrentUser, CurrentUser>();
+        return services.AddScoped<ICurrentUserProvider, CurrentUserProvider>();
     }
 
     public static IServiceCollection AddCustomTelemetry(this IServiceCollection services)
@@ -367,9 +368,7 @@ public static class ServiceCollectionExtensions
 
         if (!environment.IsDevelopment())
         {
-            healthChecks.AddSqlServer(
-                configuration.GetConnectionString("Database") ?? ""
-            );
+            healthChecks.AddSqlServer(configuration.GetConnectionString("Database") ?? "");
         }
 
         return services;

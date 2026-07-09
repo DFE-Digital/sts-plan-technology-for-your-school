@@ -4,6 +4,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 

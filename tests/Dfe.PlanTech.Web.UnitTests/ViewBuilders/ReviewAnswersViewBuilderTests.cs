@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -5,7 +6,6 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -19,10 +19,12 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
 public class ReviewAnswersViewBuilderTests
 {
-    private readonly ILogger<ReviewAnswersViewBuilder> _logger = Substitute.For<ILogger<ReviewAnswersViewBuilder>>();
+    private readonly ILogger<ReviewAnswersViewBuilder> _logger = Substitute.For<
+        ILogger<ReviewAnswersViewBuilder>
+    >();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
-    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
 
     private ReviewAnswersViewBuilder CreateSut()
     {
@@ -566,11 +568,7 @@ public class ReviewAnswersViewBuilderTests
 
         var microcopy = new List<MicrocopyEntry>
         {
-            new MicrocopyEntry
-            {
-                Key = "testEntry",
-                Value = "test microcopy value"
-            }
+            new MicrocopyEntry { Key = "testEntry", Value = "test microcopy value" },
         };
 
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
@@ -622,13 +620,8 @@ public class ReviewAnswersViewBuilderTests
 
         var microcopy = new List<MicrocopyEntry>
         {
-            new MicrocopyEntry
-            {
-                Key = "testEntry",
-                Value = "test microcopy value"
-            }
+            new MicrocopyEntry { Key = "testEntry", Value = "test microcopy value" },
         };
-
 
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
             section,

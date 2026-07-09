@@ -1,24 +1,26 @@
 using System.Security.Authentication;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
-using Dfe.PlanTech.Web.Context.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
-namespace Dfe.PlanTech.Web.Context;
+namespace Dfe.PlanTech.Application.Providers;
 
-public class CurrentUser : ICurrentUser
+public class CurrentUserProvider : ICurrentUserProvider
 {
+    private readonly ILogger<CurrentUserProvider> _logger;
     private readonly IHttpContextAccessor _contextAccessor;
     private readonly IEstablishmentService _establishmentService;
-    private readonly ILogger<CurrentUser> _logger;
     private readonly Lazy<Task<SqlEstablishmentDto?>> _selectedSchoolLazy;
 
-    public CurrentUser(
+    public CurrentUserProvider(
         IHttpContextAccessor contextAccessor,
         IEstablishmentService establishmentService,
-        ILogger<CurrentUser> logger
+        ILogger<CurrentUserProvider> logger
     )
     {
         _contextAccessor =
@@ -128,7 +130,7 @@ public class CurrentUser : ICurrentUser
 
     public bool UserOrganisationIsGroup =>
         Organisation != null
-        && DsiConstants.OrganisationGroupCategories.Contains(
+        && DsiConstants.OrganisationGroupCategoryIds.Contains(
             Organisation.Category?.Id ?? string.Empty
         );
 
@@ -142,10 +144,15 @@ public class CurrentUser : ICurrentUser
 
     public int? UserId => GetIntFromClaim(ClaimConstants.DB_USER_ID);
 
+    public bool OrganisationCategoryIdMatchesAny(IEnumerable<string> categoryIds)
+    {
+        return Organisation?.Category?.Id != null && categoryIds.Contains(Organisation.Category.Id);
+    }
+
     public Guid? SessionId =>
         Guid.TryParse(GetNameIdentifierFromClaim(ClaimConstants.SessionId), out var sessionId)
-        ? sessionId
-        : null;
+            ? sessionId
+            : null;
 
     public bool IsInRole(string role) => _contextAccessor.HttpContext?.User.IsInRole(role) ?? false;
 
@@ -156,7 +163,7 @@ public class CurrentUser : ICurrentUser
             throw new InvalidDataException("No Urn/School name set for selection.");
         }
 
-        var schoolData = new SelectedSchoolCookieData
+        var schoolData = new SelectedSchoolCookieDataModel
         {
             Urn = selectedSchoolUrn,
             Name = selectedSchoolName,
@@ -196,12 +203,13 @@ public class CurrentUser : ICurrentUser
 
         try
         {
-            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieData>(
+            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieDataModel>(
                 cookieValue
             );
             if (
                 school != null
-                && (!string.IsNullOrEmpty(school.Urn) && !string.IsNullOrEmpty(school.Name))
+                && !string.IsNullOrEmpty(school.Urn)
+                && !string.IsNullOrEmpty(school.Name)
             )
             {
                 return (school.Urn, school.Name);
@@ -257,7 +265,7 @@ public class CurrentUser : ICurrentUser
         string? urn;
         try
         {
-            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieData>(
+            var school = System.Text.Json.JsonSerializer.Deserialize<SelectedSchoolCookieDataModel>(
                 cookieValue
             );
             urn = school?.Urn;
