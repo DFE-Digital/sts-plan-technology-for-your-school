@@ -69,6 +69,8 @@ builder
 
 builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicationWorkflows();
 
+builder.Services.AddHealthCheckServices(builder.Configuration, builder.Environment);
+
 builder.Services.AddScoped<IUserActionIdAccessor, UserActionIdAccessor>();
 
 builder.Services.AddScoped<IUserActionTrackingService, UserActionTrackingService>();
@@ -112,6 +114,7 @@ app.UseCorrelationId();
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapHealthChecks("/health");
 app.MapControllerRoute(pattern: "{controller=Pages}/{action=GetByRoute}/{id?}", name: "default");
 
 await app.RunAsync();
