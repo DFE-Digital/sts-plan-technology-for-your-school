@@ -15,10 +15,10 @@ on:
       deploy-image:
         type: boolean
         default: true
-      create_monitor_storage:
+      create_self_delete_resources:
         type: boolean
         default: true
-        description: 'whether to try TF the monitor storage.Turn off if soft delete causes errors and import later'
+        description: 'whether to try TF the monitor storage & dpkey.Turn off if soft delete causes errors and import later'
       apply-terraform:
         type: boolean
         default: true
@@ -355,25 +355,6 @@ jobs:
             echo "Access policy already in Terraform state."
           fi
 
-          key_address='azurerm_key_vault_key.data_protection_key'
-
-          if ! terraform state show "$key_address" > /dev/null 2>&1; then
-            key_id="$(az keyvault key show \
-              --vault-name "$keyvault_name" \
-              --name "dataprotection" \
-              --query "key.kid" \
-              -o tsv 2>/dev/null || true)"
-
-            if [ -n "$key_id" ]; then
-              echo "Importing recovered Key Vault key: $key_id"
-              terraform import "$key_address" "$key_id"
-            else
-              echo "Key dataprotection does not exist in Azure; Terraform will create it."
-            fi
-          else
-            echo "Key already in Terraform state."
-          fi
-
       - name: Apply Terraform changes - rest of app
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
@@ -386,7 +367,7 @@ jobs:
             -var="azure_location=northeurope" \
             -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
             -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
-            -var="create_monitor_storage=${{ env.TF_VAR_create_monitor_storage }}" \
+            -var="create_self_delete_resources=${{ env.create_self_delete_resources }}" \
             -out=tfplanapp
 
             terraform show -no-color tfplanapp || true

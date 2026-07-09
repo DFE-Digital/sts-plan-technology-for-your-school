@@ -195,6 +195,7 @@ resource "azurerm_key_vault_secret" "csp_img_src" {
 ########
 
 resource "azurerm_key_vault_key" "data_protection_key" {
+  count = var.create_kv_data_proetction_key ? 1 : 0
   depends_on = [
     azurerm_key_vault.vault,
     azurerm_role_assignment.mi-crypto
