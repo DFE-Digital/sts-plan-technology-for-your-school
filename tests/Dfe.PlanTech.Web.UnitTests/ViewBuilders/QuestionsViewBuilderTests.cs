@@ -817,6 +817,66 @@ public class QuestionsViewBuilderTests
         Assert.Equal("sec-1", model.SectionSlug);
     }
 
+    [Fact]
+    public async Task RouteToContinueSelfAssessmentPage_WhenResponsesExist_ReturnsContinueSelfAssessmentView()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(123);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Question 1");
+        var q2 = MakeQuestion("Q2", "q-2", "Question 2");
+        var section = MakeSection("S1", "sec-1", "Cyber security processes", q1, q2);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var responses = new List<QuestionWithAnswerModel>
+    {
+        new()
+        {
+            QuestionSysId = "Q1",
+            AnswerSysId = "A1",
+            QuestionText = "Question 1",
+            AnswerText = "Answer 1"
+        }
+    };
+
+        var submission = new SubmissionResponsesModel(1, responses)
+        {
+            Status = SubmissionStatus.InProgress,
+            DateCreated = new DateTime(2026, 1, 1),
+            DateLastUpdated = new DateTime(2026, 1, 2)
+        };
+
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(
+                123,
+                section,
+                (SubmissionStatus?)null
+            )
+            .Returns(submission);
+
+        var result = await sut.RouteToContinueSelfAssessmentPage(
+            controller,
+            "cat",
+            "sec-1"
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.Equal("ContinueSelfAssessment", view.ViewName);
+
+        var model = Assert.IsType<ContinueSelfAssessmentViewModel>(view.Model);
+        Assert.Equal(new DateTime(2026, 1, 1), model.AssessmentStartDate);
+        Assert.Equal(new DateTime(2026, 1, 2), model.AssessmentUpdatedDate);
+        Assert.Equal(1, model.AnsweredCount);
+        Assert.Equal(2, model.QuestionsCount);
+        Assert.Equal("Cyber security processes", model.TopicName);
+        Assert.Equal(responses, model.Responses);
+        Assert.Equal("cat", model.CategorySlug);
+        Assert.Equal("sec-1", model.SectionSlug);
+    }
+
     // ---------- RouteBySlugAndQuestionAsync ----------
 
     [Fact]
@@ -908,6 +968,43 @@ public class QuestionsViewBuilderTests
 
         Assert.Equal(q1, model.Question);
         Assert.Equal("A1", model.AnswerSysId);
+    }
+
+    [Fact]
+    public async Task RouteBySlugAndQuestionAsync_WhenSubmissionNotStarted_RedirectsToInterstitial()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
+
+        var q1 = MakeQuestion("Q1", "q-1", "Q1");
+        var section = MakeSection("S1", "sec-1", "Section 1", q1);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: null,
+            status: SubmissionStatus.NotStarted
+        );
+
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(routingData);
+
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal(nameof(PagesController.GetByRoute), redirect.ActionName);
+        Assert.Equal("sec-1", redirect.RouteValues?["route"]);
     }
 
     // ---------- RestartSelfAssessment ----------
