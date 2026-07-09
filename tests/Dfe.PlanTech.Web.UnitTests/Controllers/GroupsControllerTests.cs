@@ -2,11 +2,11 @@ using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Routing;
@@ -19,15 +19,23 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private readonly ILogger<GroupsController> _logger;
         private readonly IGroupsViewBuilder _viewBuilder;
-        private readonly ICurrentUser _currentUser;
+        private readonly ICurrentUserProvider _currentUser;
         private readonly GroupsController _controller;
+        private readonly IGroupSelectSchoolsToAssessValidator _validator;
 
         public GroupsControllerTests()
         {
             _logger = Substitute.For<ILogger<GroupsController>>();
             _viewBuilder = Substitute.For<IGroupsViewBuilder>();
-            _currentUser = Substitute.For<ICurrentUser>();
-            _controller = new GroupsController(_logger, _currentUser, _viewBuilder);
+            _currentUser = Substitute.For<ICurrentUserProvider>();
+            _validator = Substitute.For<IGroupSelectSchoolsToAssessValidator>();
+            _controller = new GroupsController(_logger, _currentUser, _viewBuilder, _validator)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    RouteData = new RouteData()
+                }
+            };
         }
 
         [Fact]

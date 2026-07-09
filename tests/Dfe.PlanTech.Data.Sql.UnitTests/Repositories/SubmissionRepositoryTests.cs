@@ -482,14 +482,14 @@ public class SubmissionRepositoryTests
         var repo = new SubmissionRepository(db, BuildUserActionIdAccessor());
 
         db.Establishments.AddRange(
-            new EstablishmentEntity { Id = 1 },
-            new EstablishmentEntity { Id = 2 },
-            new EstablishmentEntity { Id = 3 },
-            new EstablishmentEntity { Id = 4 },
-            new EstablishmentEntity { Id = 5 },
-            new EstablishmentEntity { Id = 7 },
-            new EstablishmentEntity { Id = 8 },
-            new EstablishmentEntity { Id = 9 }
+            new EstablishmentEntity { Id = 1, EstablishmentRef = "00001" },
+            new EstablishmentEntity { Id = 2, EstablishmentRef = "00002" },
+            new EstablishmentEntity { Id = 3, EstablishmentRef = "00003" },
+            new EstablishmentEntity { Id = 4, EstablishmentRef = "00004" },
+            new EstablishmentEntity { Id = 5, EstablishmentRef = "00005" },
+            new EstablishmentEntity { Id = 7, EstablishmentRef = "00007" },
+            new EstablishmentEntity { Id = 8, EstablishmentRef = "00008" },
+            new EstablishmentEntity { Id = 9, EstablishmentRef = "00009" }
         );
 
         // Establishment 1 - 3 submissions, one older, one newer but deleted - return the middle (InProgress)
