@@ -14,7 +14,13 @@ resource "azurerm_key_vault" "vault" {
     bypass                     = "None"
     default_action             = "Deny"
     virtual_network_subnet_ids = [module.main_hosting.networking.subnet_id]
-    ip_rules                   = toset(concat(tolist(local.kv_firewall_cidr_rules)))
+    ip_rules                   = concat(tolist(local.kv_firewall_cidr_rules))
+  }
+  #this prevents the second apply for all app removing the runner ip added in the whitelist kv step
+  lifecycle {
+    ignore_changes = [
+      network_acls[0].ip_rules
+    ]
   }
 }
 
