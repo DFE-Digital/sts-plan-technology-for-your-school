@@ -23,16 +23,22 @@ public static class DsiConstants
     public const string YouthCustodyServiceCategoryId = "053";
 
     /// <summary>
-    /// Organisation "groups" are those who have schools within them,
-    /// and we should show the "select a school" page after login etc.
+    /// Organisation "establishments" are those that are schools,
+    /// and we should not show the "select a school" page after login.
     /// </summary>
-    public static HashSet<string> OrganisationGroupCategories { get; } =
-        new()
-        {
-            MatOrganisationCategoryId,
-            //SatOrganisationCategoryId,
-            //SSatOrganisationCategoryId,
-        };
+    public static HashSet<string> OrganisationEstablishmentCategoryIds { get; } =
+    [EstablishmentCategoryId];
+
+    /// <summary>
+    /// Organisation "groups" are those who have schools within them,
+    /// and we should show the "select a school" page after login.
+    /// </summary>
+    public static HashSet<string> OrganisationGroupCategoryIds { get; } =
+    [
+        MatOrganisationCategoryId,
+        //SatOrganisationCategoryId,
+        //SSatOrganisationCategoryId,
+    ];
 
     // Establishment Type IDs, supplied from DSI 17-Oct-2025
     public const string CommunitySchoolEstablishmentTypeId = "01";

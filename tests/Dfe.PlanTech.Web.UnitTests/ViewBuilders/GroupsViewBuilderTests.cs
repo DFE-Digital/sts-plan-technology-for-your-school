@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -7,7 +8,6 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +31,7 @@ public class GroupsViewBuilderTests
         IContentfulService? contentful = null,
         IEstablishmentService? est = null,
         IGroupService? group = null,
-        ICurrentUser? currentUser = null,
+        ICurrentUserProvider? currentUser = null,
         ILogger<GroupsViewBuilder>? logger = null,
         ISubmissionService? submissionService = null
     )
@@ -40,7 +40,7 @@ public class GroupsViewBuilderTests
         contentful ??= Substitute.For<IContentfulService>();
         est ??= Substitute.For<IEstablishmentService>();
         group ??= Substitute.For<IGroupService>();
-        currentUser ??= Substitute.For<ICurrentUser>();
+        currentUser ??= Substitute.For<ICurrentUserProvider>();
         logger ??= NullLogger<GroupsViewBuilder>.Instance;
         submissionService ??= Substitute.For<ISubmissionService>();
 
@@ -62,7 +62,15 @@ public class GroupsViewBuilderTests
         // ActiveEstablishmentId, ActiveEstablishmentName, etc. not set
         // GroupSelectedSchoolUrn not set
 
-        return new GroupsViewBuilder(logger, contactOpts, contentful, currentUser, est, group, submissionService);
+        return new GroupsViewBuilder(
+            logger,
+            contactOpts,
+            contentful,
+            currentUser,
+            est,
+            group,
+            submissionService
+        );
     }
 
     private static QuestionnaireCategoryEntry MakeCategory(
@@ -94,7 +102,7 @@ public class GroupsViewBuilderTests
         var contentful = Substitute.For<IContentfulService>();
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
-        var current = Substitute.For<ICurrentUser>();
+        var current = Substitute.For<ICurrentUserProvider>();
         var submissionService = Substitute.For<ISubmissionService>();
 
         Assert.Throws<ArgumentNullException>(() =>
@@ -115,7 +123,7 @@ public class GroupsViewBuilderTests
     {
         var opts = Opt();
         var contentful = Substitute.For<IContentfulService>();
-        var current = Substitute.For<ICurrentUser>();
+        var current = Substitute.For<ICurrentUserProvider>();
         var est = Substitute.For<IEstablishmentService>();
         var group = Substitute.For<IGroupService>();
         var submissionService = Substitute.For<ISubmissionService>();
@@ -222,7 +230,7 @@ public class GroupsViewBuilderTests
     public async Task RecordGroupSelectionAsync_Forwards_All_Parameters_To_Service()
     {
         var est = Substitute.For<IEstablishmentService>();
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
 
         // Set up a different MAT/group than the default to test parameter forwarding
         var customGroupDsiId = Guid.Parse("20000000-0000-0000-0000-000000000002");
@@ -292,19 +300,38 @@ public class GroupsViewBuilderTests
                 }
             );
 
-        group.GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+        group
+            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
             .Returns(
                 new List<SqlSubmissionDto>
                 {
                     // SEC-1 completed by both establishments, so uncompleted count should be 0
-                    new() { Id = 1, EstablishmentId = 10, SectionId = "SEC-1" },
-                    new() { Id = 2, EstablishmentId = 20, SectionId = "SEC-1" },
-
+                    new()
+                    {
+                        Id = 1,
+                        EstablishmentId = 10,
+                        SectionId = "SEC-1",
+                    },
+                    new()
+                    {
+                        Id = 2,
+                        EstablishmentId = 20,
+                        SectionId = "SEC-1",
+                    },
                     // SEC-2 completed by one establishment, so uncompleted count should be 1
-                    new() { Id = 3, EstablishmentId = 10, SectionId = "SEC-2" },
-
+                    new()
+                    {
+                        Id = 3,
+                        EstablishmentId = 10,
+                        SectionId = "SEC-2",
+                    },
                     // Not part of the MAT establishments, should be ignored
-                    new() { Id = 4, EstablishmentId = 999, SectionId = "SEC-1" },
+                    new()
+                    {
+                        Id = 4,
+                        EstablishmentId = 999,
+                        SectionId = "SEC-1",
+                    },
                 }
             );
 
@@ -342,16 +369,13 @@ public class GroupsViewBuilderTests
 
         await est.Received(1)
             .GetEstablishmentsByReferencesAsync(
-                Arg.Is<string[]>(urns =>
-                    urns.SequenceEqual(new[] { "URN-1", "URN-2" })
-                )
+                Arg.Is<string[]>(urns => urns.SequenceEqual(new[] { "URN-1", "URN-2" }))
             );
 
-        await group.Received(1)
+        await group
+            .Received(1)
             .GetGroupCompletedSubmissionsBySections(
-                Arg.Is<int[]>(ids =>
-                    ids.SequenceEqual(new[] { 10, 20 })
-                )
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 10, 20 }))
             );
     }
 
@@ -360,38 +384,41 @@ public class GroupsViewBuilderTests
     {
         var contentful = Substitute.For<IContentfulService>();
         var submissionService = Substitute.For<ISubmissionService>();
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        var est = Substitute.For<IEstablishmentService>();
 
-        currentUser.GetActiveEstablishmentIdAsync().Returns(100);
-        currentUser.GroupSelectedSchoolName.Returns("Test School");
+        est.GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 100,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
 
         var section = new QuestionnaireSectionEntry
         {
             Name = "Cyber security processes",
-            Questions =
-            [
-                new QuestionnaireQuestionEntry
-            {
-                Sys = new SystemDetails("question-1")
-            }
-            ]
+            Questions = [new QuestionnaireQuestionEntry { Sys = new SystemDetails("question-1") }],
         };
 
         contentful.GetSectionBySlugAsync("cyber-security-processes").Returns(section);
 
         var submission = new SubmissionResponsesModel(
-           1,
-           [
-               new QuestionWithAnswerModel
-               {
+            1,
+            [
+                new QuestionWithAnswerModel
+                {
                     QuestionSysId = "question-1",
                     QuestionText = "Question 1",
                     AnswerText = "Answer 1",
-                    Order = 1
-               }
-           ])
+                    Order = 1,
+                },
+            ]
+        )
         {
-            DateCreated = new DateTime(2026, 1, 1)
+            DateCreated = new DateTime(2026, 1, 1),
         };
 
         var routingData = new SubmissionRoutingDataModel(
@@ -407,6 +434,7 @@ public class GroupsViewBuilderTests
 
         var sut = CreateServiceUnderTest(
             contentful: contentful,
+            est: est,
             currentUser: currentUser,
             submissionService: submissionService
         );
@@ -416,7 +444,8 @@ public class GroupsViewBuilderTests
         var result = await sut.RouteToViewInProgressAnswers(
             controller,
             "cyber-security-standard",
-            "cyber-security-processes"
+            "cyber-security-processes",
+            "900006"
         );
 
         var view = Assert.IsType<ViewResult>(result);
@@ -438,9 +467,7 @@ public class GroupsViewBuilderTests
         // Arrange
         var contentful = Substitute.For<IContentfulService>();
 
-        contentful
-            .GetAllCategoriesAsync()
-            .Returns(new List<QuestionnaireCategoryEntry>());
+        contentful.GetAllCategoriesAsync().Returns(new List<QuestionnaireCategoryEntry>());
 
         var sut = CreateServiceUnderTest(contentful: contentful);
         var controller = new TestController();
@@ -451,10 +478,7 @@ public class GroupsViewBuilderTests
         );
 
         // Assert
-        Assert.Equal(
-            "No categories found on groups assessment selection page.",
-            exception.Message
-        );
+        Assert.Equal("No categories found on groups assessment selection page.", exception.Message);
     }
 
     [Fact]
@@ -472,8 +496,7 @@ public class GroupsViewBuilderTests
             .GetAllCategoriesAsync()
             .Returns(new List<QuestionnaireCategoryEntry> { category });
 
-        est.GetEstablishmentLinks(100)
-            .Returns(new List<SqlEstablishmentLinkDto>());
+        est.GetEstablishmentLinks(100).Returns(new List<SqlEstablishmentLinkDto>());
 
         est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
             .Returns(new List<SqlEstablishmentDto>());
@@ -494,8 +517,117 @@ public class GroupsViewBuilderTests
         Assert.Equal("Sec SEC-1", sectionVm.SectionName);
         Assert.Equal(0, sectionVm.UncompletedGroupSubmissions);
 
-        await group
-            .DidNotReceive()
-            .GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>());
+        await group.DidNotReceive().GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>());
+    }
+
+    [Fact]
+    public async Task RouteToViewInProgressAnswers_WhenSchoolNotFound_RedirectsHome()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+
+        est.GetEstablishmentByReferenceAsync("900006").Returns((SqlEstablishmentDto?)null);
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est);
+        var controller = new TestController();
+
+        var result = await sut.RouteToViewInProgressAnswers(
+            controller,
+            "cyber-security-standard",
+            "cyber-security-processes",
+            "900006"
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("GetByRoute", redirect.ActionName);
+    }
+
+    [Fact]
+    public async Task RouteToViewInProgressAnswers_WhenSubmissionNotStarted_RedirectsHome()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var submissionService = Substitute.For<ISubmissionService>();
+        var est = Substitute.For<IEstablishmentService>();
+
+        est.GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 100,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Name = "Cyber security processes",
+            Questions = [],
+        };
+
+        contentful.GetSectionBySlugAsync("cyber-security-processes").Returns(section);
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: null,
+            questionnaireSection: section,
+            submission: null,
+            status: SubmissionStatus.NotStarted
+        );
+
+        submissionService
+            .GetSubmissionRoutingDataAsync(100, section, SubmissionStatus.InProgress)
+            .Returns(routingData);
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            submissionService: submissionService
+        );
+
+        var controller = new TestController();
+
+        var result = await sut.RouteToViewInProgressAnswers(
+            controller,
+            "cyber-security-standard",
+            "cyber-security-processes",
+            "900006"
+        );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+        Assert.Equal("GetByRoute", redirect.ActionName);
+    }
+
+    [Fact]
+    public async Task RouteToSelectASelfAssessmentViewModelAsync_Populates_Section_Slugs()
+    {
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+
+        var section = MakeSection("SEC-1");
+        var category = MakeCategory(section);
+
+        contentful
+            .GetAllCategoriesAsync()
+            .Returns(new List<QuestionnaireCategoryEntry> { category });
+
+        est.GetEstablishmentLinks(100).Returns(new List<SqlEstablishmentLinkDto>());
+
+        est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
+            .Returns(new List<SqlEstablishmentDto>());
+
+        var sut = CreateServiceUnderTest(contentful: contentful, est: est, group: group);
+        var controller = new TestController();
+
+        var action = await sut.RouteToSelectASelfAssessmentViewModelAsync(controller);
+
+        var view = Assert.IsType<ViewResult>(action);
+        var vm = Assert.IsType<GroupSelectAssessmentViewModel>(view.Model);
+
+        var categoryVm = Assert.Single(vm.Categories);
+        var sectionVm = Assert.Single(categoryVm.Sections);
+
+        Assert.Equal("header", sectionVm.CategorySlug);
+        Assert.Equal("sec-sec1", sectionVm.SectionSlug);
     }
 }

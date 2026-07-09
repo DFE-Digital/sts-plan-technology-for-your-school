@@ -11,8 +11,7 @@ public class SingleRecommendationInputViewModel : IValidatableObject
 
     public string? Notes { get; set; }
 
-    public RecommendationStatus? SelectedStatusEnum =>
-        SelectedStatus.GetRecommendationStatusEnumValue();
+    public RecommendationStatus? SelectedStatusEnum => SelectedStatus.ToRecommendationStatus();
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

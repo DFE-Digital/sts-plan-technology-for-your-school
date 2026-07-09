@@ -2,8 +2,8 @@ using System.Security.Claims;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -29,6 +29,14 @@ public static class OnUserInformationReceivedEvent
         }
 
         var dsiReference = context.Principal.Claims.GetDsiReference();
+
+        if (dsiReference is null)
+        {
+            logger.LogError("Authentication failed: no nameidentifier claim found for user.");
+            context.Fail("No nameidentifier claim present in user principal.");
+            return;
+        }
+
         var establishment = context.Principal.Claims.GetOrganisation();
         var signInWorkflow =
             context.HttpContext.RequestServices.GetRequiredService<ISignInWorkflow>();

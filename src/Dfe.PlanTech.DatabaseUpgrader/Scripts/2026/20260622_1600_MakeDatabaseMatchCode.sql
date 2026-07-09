@@ -1,0 +1,2 @@
+ALTER TABLE dbo.submission ALTER COLUMN status NVARCHAR(50) NOT NULL;
+GO

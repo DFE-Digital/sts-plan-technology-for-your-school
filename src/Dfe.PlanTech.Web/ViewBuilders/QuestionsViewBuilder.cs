@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -5,7 +6,6 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -19,18 +19,21 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class QuestionsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
     ContentfulOptionsConfiguration contentfulOptions,
     IQuestionService questionService,
-    ISubmissionService submissionService
+    ISubmissionService submissionService,
+    IEstablishmentService establishmentService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
     private readonly IQuestionService _questionService =
         questionService ?? throw new ArgumentNullException(nameof(questionService));
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IEstablishmentService establishmentService =
+        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorMessagesConfiguration _errorMessages =
@@ -154,7 +157,33 @@ public class QuestionsViewBuilder(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
 
-        var viewModel = new PageViewModel(interstitialPage);
+        if (CurrentUser.IsMat)
+        {
+            interstitialPage.Content = interstitialPage
+                .Content?.Where(x => x is not ComponentButtonWithEntryReferenceEntry)
+                .ToList();
+        }
+
+        var viewModel = new PageViewModel(interstitialPage)
+        {
+            ShowTrustSchoolAssessmentTable = CurrentUser.IsMat,
+        };
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+
+        if (CurrentUser.IsMat)
+        {
+            viewModel.TrustSchoolAssessments = await BuildTrustSchoolAssessments(
+                categorySlug,
+                sectionSlug,
+                section
+            );
+        }
+
         return controller.View(InterstitialPagePath, viewModel);
     }
 
@@ -213,6 +242,56 @@ public class QuestionsViewBuilder(
         }
     }
 
+    private async Task<List<TrustSchoolAssessmentRowViewModel>> BuildTrustSchoolAssessments(
+        string categorySlug,
+        string sectionSlug,
+        QuestionnaireSectionEntry section
+    )
+    {
+        var groupId =
+            CurrentUser.UserOrganisationId
+            ?? throw new InvalidDataException(
+                "User is a MAT user but does not have an organisation ID"
+            );
+
+        var schools =
+            await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId) ?? [];
+
+        var rows = new List<TrustSchoolAssessmentRowViewModel>();
+
+        foreach (var school in schools)
+        {
+            var schoolEstablishment = await establishmentService.GetEstablishmentByReferenceAsync(
+                school.Urn
+            );
+
+            var submission = schoolEstablishment is null
+                ? null
+                : await _submissionService.GetLatestSubmissionResponsesModel(
+                    schoolEstablishment.Id,
+                    section,
+                    [SubmissionStatus.InProgress]
+                );
+
+            var hasSubmission = submission is not null;
+
+            rows.Add(
+                new TrustSchoolAssessmentRowViewModel
+                {
+                    SchoolName = school.EstablishmentName,
+                    Status = hasSubmission
+                        ? SubmissionStatus.InProgress
+                        : SubmissionStatus.NotStarted,
+                    ViewAnswersHref = hasSubmission
+                        ? $"/school/{categorySlug}/{sectionSlug}/self-assessment/view-answers?schoolUrn={school.Urn}"
+                        : null,
+                }
+            );
+        }
+
+        return rows;
+    }
+
     public async Task<IActionResult> RouteToContinueSelfAssessmentPage(
         Controller controller,
         string categorySlug,
@@ -259,7 +338,7 @@ public class QuestionsViewBuilder(
             TopicName = section.Name,
             Responses = submissionModel.Responses,
             CategorySlug = categorySlug,
-            SectionSlug = sectionSlug
+            SectionSlug = sectionSlug,
         };
 
         return controller.View(ContinueSelfAssessmentView, viewModel);

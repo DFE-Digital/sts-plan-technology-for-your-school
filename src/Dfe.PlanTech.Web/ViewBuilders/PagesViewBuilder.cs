@@ -1,11 +1,11 @@
 using System.Text.Json;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -21,7 +21,7 @@ public class PagesViewBuilder(
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorPagesConfiguration> errorPages,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     IEstablishmentService establishmentService,
     INotifyService notifyService,
     ISubmissionService submissionService,
@@ -91,6 +91,11 @@ public class PagesViewBuilder(
             ?? PageTitleConstants.PlanTechnologyForYourSchool;
 
         var viewModel = new PageViewModel(page);
+
+        viewModel.ShowTrustSchoolAssessmentTable =
+            CurrentUser.IsMat
+            && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase)
+                == true;
 
         if (page.DisplayOrganisationName)
         {

@@ -14,7 +14,8 @@ namespace Dfe.PlanTech.Web.ViewBuilders.Interfaces
         Task<IActionResult> RouteToViewInProgressAnswers(
             Controller controller,
             string categorySlug,
-            string sectionSlug
+            string sectionSlug,
+            string schoolUrn
         );
     }
 }

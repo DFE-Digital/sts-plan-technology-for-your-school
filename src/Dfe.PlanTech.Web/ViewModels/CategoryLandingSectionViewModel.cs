@@ -16,17 +16,21 @@ public class CategoryLandingSectionViewModel
     public string ShortDescription { get; init; }
     public string? Slug { get; init; }
 
+    public string? EstablishmentName { get; set; }
+
     public CategoryLandingSectionViewModel(
         QuestionnaireSectionEntry section,
         CategoryLandingSectionRecommendationsViewModel? recommendations,
         SqlSectionStatusDto? sectionStatus,
-        bool hadRetrievalError
+        bool hadRetrievalError,
+        string? establishmentName
     )
     {
         Slug = section.InterstitialPage?.Slug;
         Name = section.Name;
         ShortDescription = section.ShortDescription;
         Recommendations = recommendations;
+        EstablishmentName = establishmentName;
 
         if (sectionStatus is not null)
         {

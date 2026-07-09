@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using DbUp;
 using DbUp.Builder;
@@ -7,6 +8,7 @@ using Polly.Retry;
 
 namespace Dfe.PlanTech.DatabaseUpgrader;
 
+[ExcludeFromCodeCoverage]
 public class DatabaseExecutor
 {
     private readonly Logger _logger;
@@ -34,17 +36,17 @@ public class DatabaseExecutor
 
     private UpgradeEngine CreateUpgradeEngine()
     {
-        var executingAssembley = Assembly.GetExecutingAssembly();
+        var executingAssembly = Assembly.GetExecutingAssembly();
 
         var engine = DeployChanges
             .To.SqlDatabase(_options.DatabaseConnectionString)
             .WithScriptsEmbeddedInAssembly(
-                executingAssembley,
+                executingAssembly,
                 ScriptNamespaceMatches(SCRIPTS_NAMESPACE)
             );
 
         AddSqlParameters(engine);
-        AddEnvironmentSpecificScripts(executingAssembley, engine);
+        AddEnvironmentSpecificScripts(executingAssembly, engine);
 
         return engine
             .LogToConsole()
@@ -80,10 +82,7 @@ public class DatabaseExecutor
 
     private static Func<string, bool> ScriptNamespaceMatches(string expectedStartsWith) =>
         scriptNamespace =>
-            scriptNamespace.StartsWith(
-                expectedStartsWith,
-                StringComparison.InvariantCultureIgnoreCase
-            );
+            scriptNamespace.StartsWith(expectedStartsWith, StringComparison.OrdinalIgnoreCase);
 
     private static string GetNamespaceForEnvironment(string environment) =>
         string.Format("{0}.{1}", ENVIRONMENT_SPECIFIC_SCRIPTS_NAMESPACE, environment);
@@ -105,8 +104,11 @@ public class DatabaseExecutor
 
     private static RetryPolicy SetupRetryPolicy() =>
         Policy
-            .Handle<Exception>()
-            .WaitAndRetry(
-                new[] { TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(3) }
-            );
+            .Handle<System.Data.Common.DbException>()
+            .Or<TimeoutException>()
+            .WaitAndRetry([
+                TimeSpan.FromMinutes(1),
+                TimeSpan.FromMinutes(2),
+                TimeSpan.FromMinutes(3),
+            ]);
 }

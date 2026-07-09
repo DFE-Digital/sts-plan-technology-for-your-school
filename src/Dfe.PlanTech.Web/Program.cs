@@ -1,13 +1,14 @@
 using Dfe.PlanTech.Application;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Interfaces;
+using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Providers;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql;
 using Dfe.PlanTech.Infrastructure.ServiceBus;
 using Dfe.PlanTech.Infrastructure.SignIn;
 using Dfe.PlanTech.Web;
 using Dfe.PlanTech.Web.Attributes;
-using Dfe.PlanTech.Web.Context;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Extensions;
 using Dfe.PlanTech.Web.Middleware;
 using GovUk.Frontend.AspNetCore;
@@ -45,6 +46,15 @@ if (builder.Environment.EnvironmentName != "E2E")
 builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddCommandLine(args);
 
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    var timeOut = options.Cookie.MaxAge ?? TimeSpan.FromMinutes(30);
+    options.IdleTimeout = timeOut;
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
 builder.AddSystemConfiguration();
 builder.AddContentAndSupportConfiguration();
 
@@ -71,11 +81,13 @@ builder.Services.AddApplicationProviders().AddApplicationServices().AddApplicati
 
 builder.Services.AddHealthCheckServices(builder.Configuration, builder.Environment);
 
-builder.Services.AddScoped<IUserActionIdAccessor, UserActionIdAccessor>();
+builder.Services.AddScoped<IUserActionIdProvider, UserActionIdProvider>();
 
 builder.Services.AddScoped<IUserActionTrackingService, UserActionTrackingService>();
 
 var app = builder.Build();
+
+ContentComponentJsonExtensions.ValidateContentfulTypeMapping();
 
 app.UseRobotsTxtMiddleware();
 
@@ -113,6 +125,8 @@ app.UseCorrelationId();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseSession();
 
 app.MapHealthChecks("/health");
 app.MapControllerRoute(pattern: "{controller=Pages}/{action=GetByRoute}/{id?}", name: "default");

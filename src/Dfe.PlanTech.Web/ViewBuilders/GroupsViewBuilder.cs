@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -6,7 +7,6 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
@@ -19,10 +19,10 @@ public class GroupsViewBuilder(
     ILogger<GroupsViewBuilder> logger,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     IEstablishmentService establishmentService,
     IGroupService groupService,
-    ISubmissionService submissionService   
+    ISubmissionService submissionService
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IGroupsViewBuilder
 {
     private readonly IEstablishmentService _establishmentService =
@@ -87,10 +87,18 @@ public class GroupsViewBuilder(
     public async Task<IActionResult> RouteToViewInProgressAnswers(
         Controller controller,
         string categorySlug,
-        string sectionSlug
+        string sectionSlug,
+        string schoolUrn
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var schoolEstablishment = await _establishmentService.GetEstablishmentByReferenceAsync(
+            schoolUrn
+        );
+
+        if (schoolEstablishment is null)
+        {
+            return controller.RedirectToHomePage();
+        }
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -99,42 +107,36 @@ public class GroupsViewBuilder(
             );
 
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
-            establishmentId,
+            schoolEstablishment.Id,
             section,
             status: SubmissionStatus.InProgress
         );
 
         switch (submissionRoutingData.Status)
         {
-            case SubmissionStatus.NotStarted:
-                return controller.RedirectToHomePage();
-
             case SubmissionStatus.InProgress:
             case SubmissionStatus.CompleteNotReviewed:
-
                 var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
-                section,
-                submissionRoutingData,
-                categorySlug,
-                sectionSlug,
-                isMatInProgressView: true,
-                schoolName: CurrentUser.GroupSelectedSchoolName
+                    section,
+                    submissionRoutingData,
+                    categorySlug,
+                    sectionSlug,
+                    isMatInProgressView: true,
+                    schoolName: schoolEstablishment.OrgName
                 );
 
-                viewModel.IsMatInProgressView = true;
-                viewModel.BackLinkHref = $"/{categorySlug}";
+                viewModel.BackLinkHref = $"/{categorySlug}/{sectionSlug}/self-assessment";
 
-                return controller.View(
-                    ReviewAnswersViewBuilder.ViewAnswersViewName,
-                    viewModel
-                );
+                return controller.View(ReviewAnswersViewBuilder.ViewAnswersViewName, viewModel);
 
             default:
                 return controller.RedirectToHomePage();
         }
     }
 
-    public async Task<IActionResult> RouteToSelectASelfAssessmentViewModelAsync(Controller controller)
+    public async Task<IActionResult> RouteToSelectASelfAssessmentViewModelAsync(
+        Controller controller
+    )
     {
         // Get the MAT id
         var establishmentId = GetUserOrganisationIdOrThrowException();
@@ -148,7 +150,8 @@ public class GroupsViewBuilder(
         }
 
         // establishments for the MAT
-        var matEstablishmentLinks = await _establishmentService.GetEstablishmentLinks(establishmentId) ?? [];
+        var matEstablishmentLinks =
+            await _establishmentService.GetEstablishmentLinks(establishmentId) ?? [];
 
         // Get urn's from links (filter for distinct, white spaces).
         var matEstablishmentUrns = matEstablishmentLinks
@@ -158,44 +161,53 @@ public class GroupsViewBuilder(
             .ToArray();
 
         // Retrieve the actual establishments.
-        var matEstablishments = await _establishmentService.GetEstablishmentsByReferencesAsync(matEstablishmentUrns) ?? [];
+        var matEstablishments =
+            await _establishmentService.GetEstablishmentsByReferencesAsync(matEstablishmentUrns)
+            ?? [];
 
         // Get the ids of the establishments.
-        var matEstablishmentIds = matEstablishments
-            .Select(e => e.Id)
-            .Distinct()
-            .ToArray();
+        var matEstablishmentIds = matEstablishments.Select(e => e.Id).Distinct().ToArray();
 
         // Get the completed submissions for the MAT.
-        var completedSubmissions = matEstablishmentIds.Length != 0
-            ? await _groupService.GetGroupCompletedSubmissionsBySections(matEstablishmentIds) ?? []
-            : [];
+        var completedSubmissions =
+            matEstablishmentIds.Length != 0
+                ? await _groupService.GetGroupCompletedSubmissionsBySections(matEstablishmentIds)
+                    ?? []
+                : [];
 
         var completedCountBySectionId = completedSubmissions
             .Where(cs => matEstablishmentIds.Contains(cs.EstablishmentId))
             .GroupBy(cs => cs.SectionId)
-            .ToDictionary(
-                g => g.Key,
-                g => g.Select(cs => cs.EstablishmentId).Distinct().Count());
-
+            .ToDictionary(g => g.Key, g => g.Select(cs => cs.EstablishmentId).Distinct().Count());
 
         var viewModel = new GroupSelectAssessmentViewModel()
         {
             GroupName = groupName,
-            Categories = categories.Select(c => new CategorySectionViewModel
-            {
-                CategoryName = c.Header?.Text ?? string.Empty,
-                Sections = (c.Sections ?? []).Select(ccs =>
+            Categories = categories
+                .Select(c => new CategorySectionViewModel
                 {
-                    var completedCount = completedCountBySectionId.GetValueOrDefault(ccs.Id);
-                    var uncompletedCount = Math.Max(0, matEstablishmentIds.Length - completedCount);
-                    return new GroupSelectAssessmentSectionViewModel()
-                    {
-                        SectionName = ccs.Name,
-                        UncompletedGroupSubmissions = uncompletedCount
-                    };
-                }).ToList()
-            }).ToList()
+                    CategoryName = c.Header?.Text ?? string.Empty,
+                    Sections = (c.Sections ?? [])
+                        .Select(ccs =>
+                        {
+                            var completedCount = completedCountBySectionId.GetValueOrDefault(
+                                ccs.Id
+                            );
+                            var uncompletedCount = Math.Max(
+                                0,
+                                matEstablishmentIds.Length - completedCount
+                            );
+                            return new GroupSelectAssessmentSectionViewModel()
+                            {
+                                SectionName = ccs.Name,
+                                CategorySlug = c.Header?.Text?.Slugify(),
+                                SectionSlug = ccs.Name?.Slugify(),
+                                UncompletedGroupSubmissions = uncompletedCount,
+                            };
+                        })
+                        .ToList(),
+                })
+                .ToList(),
         };
 
         return controller.View(SelectASelfAssessmentViewName, viewModel);

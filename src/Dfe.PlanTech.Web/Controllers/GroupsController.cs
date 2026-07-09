@@ -1,5 +1,5 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,12 +11,12 @@ public class GroupsController : BaseController<GroupsController>
     public const string GetSelectASchoolAction = "GetSelectASchoolView";
     public const string GetSelectASelfAssessmentAction = "GetSelectASelfAssessment";
 
-    private readonly ICurrentUser _currentUser;
+    private readonly ICurrentUserProvider _currentUser;
     private readonly IGroupsViewBuilder _groupsViewBuilder;
 
     public GroupsController(
         ILogger<GroupsController> logger,
-        ICurrentUser currentUser,
+        ICurrentUserProvider currentUser,
         IGroupsViewBuilder groupsViewBuilder
     )
         : base(logger)
@@ -58,16 +58,19 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> ViewInProgressAnswers(
         string categorySlug,
-        string sectionSlug
+        string sectionSlug,
+        string schoolUrn
     )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(schoolUrn);
 
         return await _groupsViewBuilder.RouteToViewInProgressAnswers(
             this,
             categorySlug,
-            sectionSlug
+            sectionSlug,
+            schoolUrn
         );
     }
 }

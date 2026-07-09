@@ -8,12 +8,17 @@ let windowSpy;
 
 describe('BrowserHistory tests', () => {
   beforeEach(() => {
+    sessionStorage.clear();
+    localStorage.clear();
+    document.body.innerHTML = '';
     windowSpy = jest.spyOn(window, 'window', 'get');
   });
 
   afterEach(() => {
     windowSpy.mockRestore();
+    sessionStorage.clear();
     localStorage.clear();
+    document.body.innerHTML = '';
   });
 
   test('constructs', () => {
@@ -178,7 +183,7 @@ describe('BrowserHistory tests', () => {
   });
 
   /**
-   * Set the window.locaton value in the window spy
+   * Set the window.location value in the window spy
    * @param {WindowLocation} location
    */
   const setWindowSpyLocation = (location) => {

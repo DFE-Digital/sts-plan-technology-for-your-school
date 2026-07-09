@@ -6,14 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Dfe.PlanTech.Application\Dfe.PlanTech.Application.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Azure.Identity" Version="1.21.0" />
+        <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.11" />
+        <PackageReference Include="Microsoft.Extensions.Azure" Version="1.14.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.9" />
+    </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.1" />
-        <PackageReference Include="Microsoft.Extensions.Azure" Version="1.13.0" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <ProjectReference Include="..\Dfe.PlanTech.Core\Dfe.PlanTech.Core.csproj" />
     </ItemGroup>
 
 </Project>
