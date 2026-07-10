@@ -329,7 +329,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          subscription_id="${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+          subscription_id="${{ secrets.az_subscription_id }}"
           resource_group="${{  steps.vars.outputs.RESOURCE_PREFIX_APP }}"
           keyvault_name="${{ steps.vars.outputs.KEYVAULT_NAME }}"
               terraform_object_id="$(az ad sp show \
