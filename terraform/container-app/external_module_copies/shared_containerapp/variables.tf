@@ -1451,3 +1451,9 @@ variable "create_kv_data_protection_key" {
   default     = true
   description = "If these have been created previously, their soft delete will resurrect them then cause a TF error. make this false to not try create them"
 }
+
+##this was derived as a local but its causes issues with planning as the count isn't known
+variable "container_apps_allow_agw" {
+  type    = bool
+  default = false
+}

@@ -74,10 +74,10 @@ data "azurerm_virtual_network" "existing_agw_vnet" {
 }
 
 data "azurerm_public_ip" "existing_agw_ip" {
-  count = local.container_apps_allow_agw_pip_resource_id != null ? 1 : 0
+  count = var.container_apps_allow_agw ? 1 : 0
 
-  name                = element(local.container_apps_allow_agw_pip_resource_id, 8)
-  resource_group_name = element(local.container_apps_allow_agw_pip_resource_id, 4)
+  resource_group_name = local.agw_pip_resource_id_parts[4]
+  name                = local.agw_pip_resource_id_parts[8]
 }
 
 resource "terraform_data" "function_app_package_sha" {
