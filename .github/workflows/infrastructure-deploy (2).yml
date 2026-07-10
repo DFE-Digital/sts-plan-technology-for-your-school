@@ -552,9 +552,9 @@ jobs:
 
           $sidHex = python3 -c "import uuid; print('0x' + uuid.UUID('$identityClientId').bytes_le.hex())"
 
-          $token = az account get-access-token \
-            --resource https://database.windows.net/ \
-            --query accessToken \
+          $token = az account get-access-token `
+            --resource https://database.windows.net/ `
+            --query accessToken `
             -o tsv
 
           $query = @"
