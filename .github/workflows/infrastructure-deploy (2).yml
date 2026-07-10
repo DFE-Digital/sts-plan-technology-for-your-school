@@ -364,16 +364,6 @@ jobs:
             fi
           fi
 
-          if [ -n "$key_id" ] && ! terraform state show 'azurerm_key_vault_key.data_protection_key[0]' >/dev/null 2>&1; then
-            cat >> zz_recovery_imports.tf <<EOF
-          import {
-            to = azurerm_key_vault_key.data_protection_key[0]
-            id = "${key_id}"
-          }
-
-          EOF
-          fi
-
           if [ -f zz_recovery_imports.tf ]; then
             echo "Importing recovered Key Vault resources via import blocks"
             cat zz_recovery_imports.tf
@@ -390,7 +380,6 @@ jobs:
               -var="primary_fqdn=${{ env.TF_VAR_dns_url }}" \
               -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
               -target='azurerm_key_vault_access_policy.vault_access_policy_tf[0]' \
-              -target='azurerm_key_vault_key.data_protection_key'
 
             rm -f zz_recovery_imports.tf
           else
