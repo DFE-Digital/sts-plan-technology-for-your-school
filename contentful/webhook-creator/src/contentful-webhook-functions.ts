@@ -57,14 +57,9 @@ const getContentfulSpaceClient = async (options: WebhookCreateRequestOptions): P
   try {
     console.log('Creating Contentful management client');
 
-    const client = createClient(
-      {
-        accessToken: options.MANAGEMENT_TOKEN,
-      },
-      {
-        type: 'legacy',
-      },
-    );
+    const client = createClient({
+      accessToken: options.MANAGEMENT_TOKEN,
+    });
 
     return await client.getSpace(options.SPACE_ID);
   } catch (err) {
