@@ -227,6 +227,200 @@ public class GroupsViewBuilderTests
         await est.Received(1).GetEstablishmentLinksWithRecommendationCounts(100);
     }
 
+    [Fact]
+    public async Task RouteToSelectASchoolViewModelAsync_Shows_SelectSelfAssessment_When_Assessments_Remain()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+
+        var sec1 = MakeSection("SEC-1", 1);
+        var sec2 = MakeSection("SEC-2", 1);
+
+        contentful
+            .GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
+            .Returns(new PageEntry());
+
+        contentful
+            .GetAllSectionsAsync()
+            .Returns(new List<QuestionnaireSectionEntry> { sec1, sec2 });
+
+        contentful
+            .GetLinkByIdAsync("contact-123")
+            .Returns(new NavigationLinkEntry { Href = "/contact-us" });
+
+        est.GetEstablishmentLinksWithRecommendationCounts(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                new()
+                {
+                    Id = 10,
+                    Urn = "URN-1",
+                    EstablishmentName = "School A"
+                },
+                new()
+                {
+                    Id = 20,
+                    Urn = "URN-2",
+                    EstablishmentName = "School B"
+                }
+                }
+            );
+
+        est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
+            .Returns(
+                new List<SqlEstablishmentDto>
+                {
+                new() { Id = 10 },
+                new() { Id = 20 }
+                }
+            );
+
+        group.GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns(
+                new List<SqlSubmissionDto>
+                {
+                new()
+                {
+                    Id = 1,
+                    EstablishmentId = 10,
+                    SectionId = "SEC-1"
+                },
+                new()
+                {
+                    Id = 2,
+                    EstablishmentId = 20,
+                    SectionId = "SEC-1"
+                },
+                new()
+                {
+                    Id = 3,
+                    EstablishmentId = 10,
+                    SectionId = "SEC-2"
+                }
+                }
+            );
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            group: group
+        );
+
+        var controller = new TestController();
+
+        // Act
+        var action = await sut.RouteToSelectASchoolViewModelAsync(controller);
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(action);
+        var vm = Assert.IsType<GroupsSelectorViewModel>(view.Model);
+
+        Assert.True(vm.ShowSelectSelfAssessmentToSubmit);
+    }
+
+    [Fact]
+    public async Task RouteToSelectASchoolViewModelAsync_Hides_SelectSelfAssessment_When_All_Assessments_Complete()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+
+        var sec1 = MakeSection("SEC-1", 1);
+        var sec2 = MakeSection("SEC-2", 1);
+
+        contentful
+            .GetPageBySlugAsync(UrlConstants.GroupsSelectionPageSlug)
+            .Returns(new PageEntry());
+
+        contentful
+            .GetAllSectionsAsync()
+            .Returns(new List<QuestionnaireSectionEntry> { sec1, sec2 });
+
+        contentful
+            .GetLinkByIdAsync("contact-123")
+            .Returns(new NavigationLinkEntry { Href = "/contact-us" });
+
+        est.GetEstablishmentLinksWithRecommendationCounts(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                new()
+                {
+                    Id = 10,
+                    Urn = "URN-1",
+                    EstablishmentName = "School A"
+                },
+                new()
+                {
+                    Id = 20,
+                    Urn = "URN-2",
+                    EstablishmentName = "School B"
+                }
+                }
+            );
+
+        est.GetEstablishmentsByReferencesAsync(Arg.Any<string[]>())
+            .Returns(
+                new List<SqlEstablishmentDto>
+                {
+                new() { Id = 10 },
+                new() { Id = 20 }
+                }
+            );
+
+        group.GetGroupCompletedSubmissionsBySections(Arg.Any<int[]>())
+            .Returns(
+                new List<SqlSubmissionDto>
+                {
+                new()
+                {
+                    Id = 1,
+                    EstablishmentId = 10,
+                    SectionId = "SEC-1"
+                },
+                new()
+                {
+                    Id = 2,
+                    EstablishmentId = 20,
+                    SectionId = "SEC-1"
+                },
+                new()
+                {
+                    Id = 3,
+                    EstablishmentId = 10,
+                    SectionId = "SEC-2"
+                },
+                new()
+                {
+                    Id = 4,
+                    EstablishmentId = 20,
+                    SectionId = "SEC-2"
+                }
+                }
+            );
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            group: group
+        );
+
+        var controller = new TestController();
+
+        // Act
+        var action = await sut.RouteToSelectASchoolViewModelAsync(controller);
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(action);
+        var vm = Assert.IsType<GroupsSelectorViewModel>(view.Model);
+
+        Assert.False(vm.ShowSelectSelfAssessmentToSubmit);
+    }
+
     // --- RecordGroupSelectionAsync -----------------------------------------
 
     [Fact]

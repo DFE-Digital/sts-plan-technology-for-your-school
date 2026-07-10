@@ -62,6 +62,12 @@ public class GroupsViewBuilder(
         var allRecommendations = sections.SelectMany(section => section.CoreRecommendations);
         string totalRecommendations = allRecommendations.Count().ToString();
 
+        var showSelectSelfAssessmentToSubmit =
+            await HasOutstandingSelfAssessmentsAsync(
+                establishmentId,
+                sections
+            );
+
         var groupSchools =
             await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(
                 establishmentId
@@ -81,6 +87,7 @@ public class GroupsViewBuilder(
                 ? "Unable to retrieve progress"
                 : null,
             ContactLinkHref = contactLink?.Href,
+            ShowSelectSelfAssessmentToSubmit = showSelectSelfAssessmentToSubmit,
         };
 
         controller.ViewData[StatePassingMechanismConstants.Title] = "Select a school";
@@ -463,5 +470,56 @@ public class GroupsViewBuilder(
             selectedEstablishmentUrn,
             selectedEstablishmentName
         );
+    }
+
+    private async Task<bool> HasOutstandingSelfAssessmentsAsync(
+    int matEstablishmentId,
+    IEnumerable<QuestionnaireSectionEntry> sections
+)
+    {
+        var matEstablishmentLinks =
+            await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
+
+        var matEstablishmentUrns = matEstablishmentLinks
+            .Select(e => e.Urn)
+            .Where(urn => !string.IsNullOrWhiteSpace(urn))
+            .Distinct()
+            .ToArray();
+
+        var matEstablishments =
+            await _establishmentService.GetEstablishmentsByReferencesAsync(
+                matEstablishmentUrns
+            ) ?? [];
+
+        var matEstablishmentIds = matEstablishments
+            .Select(e => e.Id)
+            .Distinct()
+            .ToArray();
+
+        if (matEstablishmentIds.Length == 0)
+        {
+            return false;
+        }
+
+        var completedSubmissions =
+            await _groupService.GetGroupCompletedSubmissionsBySections(
+                matEstablishmentIds
+            ) ?? [];
+
+        var requiredSectionIds = sections
+            .Select(s => s.Id)
+            .Distinct()
+            .ToHashSet();
+
+        var completedSchoolSections = completedSubmissions
+            .Where(s => requiredSectionIds.Contains(s.SectionId))
+            .Select(s => (s.EstablishmentId, s.SectionId))
+            .Distinct()
+            .Count();
+
+        var totalRequiredSchoolSections =
+            matEstablishmentIds.Length * requiredSectionIds.Count;
+
+        return completedSchoolSections < totalRequiredSchoolSections;
     }
 }
