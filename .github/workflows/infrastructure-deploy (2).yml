@@ -381,13 +381,14 @@ jobs:
             terraform apply -input=false -auto-approve \
               -var-file="../../normalisedTerraformVars.tfvars" \
               -var="is_dr=true" \
-              -var="project_name=pt-dr" \
+              -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
               -var="image_tag=${{needs.image-and-acr.outputs.image_tag}}" \
-              -var="workflow_runner_ip=${workflow_runner_ip}" \
+              -var="workflow_runner_ip=${{env.TF_VAR_github_ip}}" \
               -var="azure_location=northeurope" \
               -var="manage_dns_in_app_state=true" \
-              -var="primary_fqdn=${primary_fqdn}" \
-              -var="create_monitor_storage=false" \
+              -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
+              -var="primary_fqdn=${{ env.TF_VAR_dns_url }}" \
+              -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
               -target='azurerm_key_vault_access_policy.vault_access_policy_tf[0]' \
               -target='azurerm_key_vault_key.data_protection_key'
 
