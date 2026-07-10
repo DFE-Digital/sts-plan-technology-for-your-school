@@ -12,8 +12,10 @@
     }
 }
 
-@{
-    await Html.RenderPartialAsync("PrintButton", Model);
+@section RelatedActions{
+    @{
+        await Html.RenderPartialAsync("PrintButton", Model);
+    }
 } 
 
 @if (Model.IsMatMultiSchoolAssessment)
