@@ -749,7 +749,9 @@ public class SubmissionRepository(
         var establishmentIdList = establishmentIds.Distinct().ToList();
 
         var results = await _db
-            .Submissions.Where(s =>
+            .Submissions
+            .Include(s => s.Establishment)
+            .Where(s =>
                 establishmentIdList.Contains(s.EstablishmentId)
                 && s.Status == SubmissionStatus.CompleteReviewed
                 && !s.Deleted
@@ -758,7 +760,6 @@ public class SubmissionRepository(
             .Where(s =>
                 !_db.Submissions.Any(s2 =>
                     s2.EstablishmentId == s.EstablishmentId
-                    && s2.SectionId == s.SectionId
                     && s2.SectionId == s.SectionId
                     && s2.Status == SubmissionStatus.CompleteReviewed
                     && !s2.Deleted

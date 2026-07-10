@@ -343,6 +343,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();
         services.AddTransient<IRecommendationsViewBuilder, RecommendationsViewBuilder>();
         services.AddTransient<IReviewAnswersViewBuilder, ReviewAnswersViewBuilder>();
+        services.AddTransient<ISelfAssessmentSummaryViewBuilder, SelfAssessmentSummaryViewBuilder>();
 
         return services;
     }

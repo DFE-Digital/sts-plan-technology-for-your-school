@@ -166,7 +166,15 @@ public class ReviewAnswersViewBuilder(
         }
 
         controller.TempData["SectionName"] = sectionName;
-        return controller.RedirectToCategoryLandingPage(categorySlug);
+
+        //Check to be removed when we have sorted routing of new pages
+        if (CurrentUser.IsMat)
+        {
+            return controller.RedirectToTrustSelfAssessmentSummary(categorySlug, sectionSlug);
+        }
+
+        //Uncomment for single school assessment page.
+        return controller.RedirectToSchoolSelfAssessmentSummary(categorySlug, sectionSlug);
     }
 
     public static ViewAnswersViewModel BuildViewAnswersViewModel(

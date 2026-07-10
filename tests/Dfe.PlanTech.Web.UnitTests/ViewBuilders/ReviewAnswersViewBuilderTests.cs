@@ -6,6 +6,7 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
+using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -532,6 +533,60 @@ public class ReviewAnswersViewBuilderTests
             ctl.TempData["ErrorMessage"]
         );
         Assert.IsType<RedirectToActionResult>(result);
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswers_WhenMatUser_Redirects_To_Trust_SelfAssessmentSummary()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.UserId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(2);
+
+        var section = MakeSection("S1", "sec", "My Section");
+        _contentful.GetSectionBySlugAsync("sec").Returns(section);
+
+        _submissions
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                2,
+                999,
+                42,
+                1,
+                section
+            )
+            .Returns(Task.CompletedTask);
+
+        var result = await sut.ConfirmCheckAnswers(
+            ctl,
+            "cat",
+            "sec",
+            "My Section",
+            42
+        );
+
+        await _submissions
+            .Received(1)
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                2,
+                999,
+                42,
+                1,
+                section
+            );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+
+        Assert.Equal(
+            nameof(ReviewAnswersController.GetTrustSelfAssessmentSummary),
+            redirect.ActionName
+        );
+
+        Assert.Equal("cat", redirect.RouteValues?["categorySlug"]);
+        Assert.Equal("sec", redirect.RouteValues?["sectionSlug"]);
+        Assert.Equal("My Section", ctl.TempData["SectionName"]);
     }
 
     [Fact]

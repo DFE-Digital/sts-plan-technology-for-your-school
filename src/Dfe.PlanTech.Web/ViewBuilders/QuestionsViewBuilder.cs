@@ -160,6 +160,11 @@ public class QuestionsViewBuilder(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
 
+
+        /*
+        * NOTE for testing: as we can't submit as a MAT locally with the new work yet, comment this out locally to do so.
+        * Also set ShowTrustSchoolAssessmentTable to false below
+        */
         if (CurrentUser.IsMat)
         {
             interstitialPage.Content = interstitialPage

@@ -14,7 +14,8 @@ namespace Dfe.PlanTech.Web.Controllers;
 public class ReviewAnswersController(
     ILogger<ReviewAnswersController> logger,
     IUserJourneyMissingContentExceptionHandler userJourneyMissingContentExceptionHandler,
-    IReviewAnswersViewBuilder reviewAnswersViewBuilder
+    IReviewAnswersViewBuilder reviewAnswersViewBuilder,
+    ISelfAssessmentSummaryViewBuilder selfAssessmentSummaryViewBuilder
 ) : BaseController<ReviewAnswersController>(logger)
 {
     private readonly IUserJourneyMissingContentExceptionHandler _userJourneyMissingContentExceptionHandler =
@@ -23,6 +24,9 @@ public class ReviewAnswersController(
     private readonly IReviewAnswersViewBuilder _reviewAnswersViewBuilder =
         reviewAnswersViewBuilder
         ?? throw new ArgumentNullException(nameof(reviewAnswersViewBuilder));
+    private readonly ISelfAssessmentSummaryViewBuilder _selfAssessmentSummaryViewBuilder =
+        selfAssessmentSummaryViewBuilder
+        ?? throw new ArgumentNullException(nameof(selfAssessmentSummaryViewBuilder));
 
     [HttpGet($"{{categorySlug}}/{{sectionSlug}}/{UrlConstants.CheckAnswersSlug}")]
     public async Task<IActionResult> CheckAnswers(string categorySlug, string sectionSlug)
@@ -95,6 +99,32 @@ public class ReviewAnswersController(
             sectionSlug,
             sectionName,
             submissionId
+        );
+    }
+
+    [HttpGet("school/{categorySlug}/{sectionSlug}/self-assessment/summary")]
+    public async Task<IActionResult> GetSchoolSelfAssessmentSummary(string categorySlug, string sectionSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+
+        return await _selfAssessmentSummaryViewBuilder.RouteToSelfAssessmentSummary(
+            this,
+            categorySlug,
+            sectionSlug
+        );
+    }
+
+    [HttpGet("trust/{categorySlug}/{sectionSlug}/self-assessment/summary")]
+    public async Task<IActionResult> GetTrustSelfAssessmentSummary(string categorySlug, string sectionSlug)
+    {
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
+
+        return await _selfAssessmentSummaryViewBuilder.RouteToSelfAssessmentSummary(
+            this,
+            categorySlug,
+            sectionSlug
         );
     }
 }
