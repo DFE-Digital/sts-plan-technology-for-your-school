@@ -130,7 +130,8 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-
+        echo "Waiting for SQL firewall rule to propagate..."
+        sleep 120
         ACCESS_TOKEN="$(az account get-access-token \
           --resource https://database.windows.net/ \
           --query accessToken \
