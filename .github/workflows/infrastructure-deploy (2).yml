@@ -329,41 +329,71 @@ jobs:
         run: |
           set -euo pipefail
 
-          subscription_id="${{ secrets.az_subscription_id }}"
-          resource_group="${{  steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+          subscription_id="$(az account show --query id -o tsv)"
+          resource_group="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
           keyvault_name="${{ steps.vars.outputs.KEYVAULT_NAME }}"
-              terraform_object_id="$(az ad sp show \
-              --id "${{ secrets.az_client_id }}" \
-              --query id -o tsv)"
 
-          access_policy_address='azurerm_key_vault_access_policy.vault_access_policy_tf[0]'
+          terraform_object_id="$(az ad sp show \
+            --id "$ARM_CLIENT_ID" \
+            --query id -o tsv)"
+
           access_policy_id_tf="/subscriptions/${subscription_id}/resourceGroups/${resource_group}/providers/Microsoft.KeyVault/vaults/${keyvault_name}/objectId/${terraform_object_id}"
 
-          if ! terraform state show "$access_policy_address" > /dev/null 2>&1; then
+          key_id="$(az keyvault key show \
+            --vault-name "$keyvault_name" \
+            --name "dataprotection" \
+            --query "key.kid" \
+            -o tsv 2>/dev/null || true)"
+
+          rm -f zz_recovery_imports.tf
+
+          if ! terraform state show 'azurerm_key_vault_access_policy.vault_access_policy_tf[0]' >/dev/null 2>&1; then
             if az keyvault show \
               --resource-group "$resource_group" \
               --name "$keyvault_name" \
               --query "properties.accessPolicies[?objectId=='${terraform_object_id}'] | length(@)" \
               -o tsv | grep -q '^1$'; then
 
-              echo "Importing recovered Key Vault access policy"
-              terraform import -input=false \
-                -var-file="../../normalisedTerraformVars.tfvars" \
-                -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-                -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-                -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
-                -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
-                -var="azure_location=northeurope" \
-                -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
-                -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
-                -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
-                "$access_policy_address" \
-                "$access_policy_id_tf"
-            else
-              echo "Access policy does not exist in Azure; Terraform will create it."
+              cat >> zz_recovery_imports.tf <<EOF
+          import {
+            to = azurerm_key_vault_access_policy.vault_access_policy_tf[0]
+            id = "${access_policy_id_tf}"
+          }
+
+          EOF
             fi
+          fi
+
+          if [ -n "$key_id" ] && ! terraform state show 'azurerm_key_vault_key.data_protection_key' >/dev/null 2>&1; then
+            cat >> zz_recovery_imports.tf <<EOF
+          import {
+            to = azurerm_key_vault_key.data_protection_key
+            id = "${key_id}"
+          }
+
+          EOF
+          fi
+
+          if [ -f zz_recovery_imports.tf ]; then
+            echo "Importing recovered Key Vault resources via import blocks"
+            cat zz_recovery_imports.tf
+
+            terraform apply -input=false -auto-approve \
+              -var-file="../../normalisedTerraformVars.tfvars" \
+              -var="is_dr=true" \
+              -var="project_name=pt-dr" \
+              -var="image_tag=${image_tag}" \
+              -var="workflow_runner_ip=${workflow_runner_ip}" \
+              -var="azure_location=northeurope" \
+              -var="manage_dns_in_app_state=true" \
+              -var="primary_fqdn=${primary_fqdn}" \
+              -var="create_monitor_storage=false" \
+              -target='azurerm_key_vault_access_policy.vault_access_policy_tf[0]' \
+              -target='azurerm_key_vault_key.data_protection_key'
+
+            rm -f zz_recovery_imports.tf
           else
-            echo "Access policy already in Terraform state."
+            echo "No recovered Key Vault resources to import."
           fi
 
       - name: Apply Terraform changes - rest of app
