@@ -382,7 +382,7 @@ jobs:
               -var-file="../../normalisedTerraformVars.tfvars" \
               -var="is_dr=true" \
               -var="project_name=pt-dr" \
-              -var="image_tag=${image_tag}" \
+              -var="image_tag=${needs.image-and-acr.outputs.image_tag}" \
               -var="workflow_runner_ip=${workflow_runner_ip}" \
               -var="azure_location=northeurope" \
               -var="manage_dns_in_app_state=true" \
