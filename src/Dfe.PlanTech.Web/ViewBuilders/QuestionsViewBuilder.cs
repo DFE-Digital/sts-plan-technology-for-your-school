@@ -25,7 +25,8 @@ public class QuestionsViewBuilder(
     ContentfulOptionsConfiguration contentfulOptions,
     IQuestionService questionService,
     ISubmissionService submissionService,
-    IEstablishmentService establishmentService
+    IEstablishmentService establishmentService,
+    IHttpContextAccessor httpContextAccessor
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
     private readonly IQuestionService _questionService =
@@ -40,6 +41,8 @@ public class QuestionsViewBuilder(
         errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
     private readonly ContentfulOptionsConfiguration _contentfulOptions =
         contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
+    private readonly IHttpContextAccessor _httpContextAccessor =
+        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
@@ -73,7 +76,7 @@ public class QuestionsViewBuilder(
 
         if (isSlugForNextQuestion)
         {
-            var nextQuestionViewModel = GenerateViewModel(
+            var nextQuestionViewModel = await GenerateViewModel(
                 controller,
                 submissionRoutingData.NextQuestion!,
                 submissionRoutingData.QuestionnaireSection,
@@ -114,7 +117,7 @@ public class QuestionsViewBuilder(
             var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(
                 question.Id
             );
-            var viewModel = GenerateViewModel(
+            var viewModel = await GenerateViewModel(
                 controller,
                 question,
                 submissionRoutingData.QuestionnaireSection,
@@ -196,7 +199,7 @@ public class QuestionsViewBuilder(
 
         var question = await ContentfulService.GetQuestionByIdAsync(questionId);
 
-        var viewModel = GenerateViewModel(controller, question, null, null, null, null, null);
+        var viewModel = await GenerateViewModel(controller, question, null, null, null, null, null);
         return controller.View(QuestionView, viewModel);
     }
 
@@ -422,7 +425,7 @@ public class QuestionsViewBuilder(
 
         if (!controller.ModelState.IsValid)
         {
-            var viewModel = GenerateViewModel(
+            var viewModel = await GenerateViewModel(
                 controller,
                 question,
                 section,
@@ -440,12 +443,12 @@ public class QuestionsViewBuilder(
 
         try
         {
-            await _submissionService.SubmitAnswerAsync(
-                userId,
-                activeEstablishmentId,
-                userOrganisationId,
-                answerViewModel.ToModel()
-            );
+            await SubmitAnswerForSelectedEstablishments(
+               userId,
+               userOrganisationId,
+               answerViewModel,
+               activeEstablishmentId
+           );
         }
         catch (Exception e)
         {
@@ -454,7 +457,7 @@ public class QuestionsViewBuilder(
                 "An error occurred while submitting an answer with the following message: {Message} ",
                 e.Message
             );
-            var viewModel = GenerateViewModel(
+            var viewModel = await GenerateViewModel(
                 controller,
                 question,
                 section,
@@ -468,10 +471,20 @@ public class QuestionsViewBuilder(
             return controller.View(QuestionView, viewModel);
         }
 
+        var routingEstablishmentId = CurrentUser.IsMat
+            ? GetSelectedEstablishmentIdsFromSession().FirstOrDefault()
+            : activeEstablishmentId;
+
+        if (routingEstablishmentId == 0)
+        {
+            routingEstablishmentId = activeEstablishmentId;
+        }
+
         var nextQuestion = await _questionService.GetNextUnansweredQuestion(
-            activeEstablishmentId,
+            routingEstablishmentId,
             section
         );
+
         if (nextQuestion is not null)
         {
             return controller.RedirectToAction(
@@ -491,6 +504,76 @@ public class QuestionsViewBuilder(
         return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
     }
 
+    private async Task SubmitAnswerForSelectedEstablishments(
+    int userId,
+    int userOrganisationId,
+    SubmitAnswerInputViewModel answerViewModel,
+    int activeEstablishmentId
+)
+    {
+        var establishmentIds = CurrentUser.IsMat
+            ? GetSelectedEstablishmentIdsFromSession().ToArray()
+            : [activeEstablishmentId];
+
+        foreach (var establishmentId in establishmentIds)
+        {
+            await _submissionService.SubmitAnswerAsync(
+                userId,
+                establishmentId,
+                userOrganisationId,
+                answerViewModel.ToModel()
+            );
+        }
+    }
+
+    private IEnumerable<int> GetSelectedEstablishmentIdsFromSession()
+    {
+        var selectedEstablishments =
+            _httpContextAccessor.HttpContext!.Session.GetValue(
+                SessionConstants.SelectedEstablishmentsKey
+            );
+
+        return selectedEstablishments as IEnumerable<int> ?? [];
+    }
+
+    private async Task<List<string>> GetSelectedSchoolNames()
+    {
+        var selectedEstablishmentIds = GetSelectedEstablishmentIdsFromSession().ToArray();
+
+        if (selectedEstablishmentIds.Length == 0)
+        {
+            return [];
+        }
+
+        var schools = new List<string>();
+
+        foreach (var establishmentId in selectedEstablishmentIds)
+        {
+            var establishment = await establishmentService.GetEstablishmentByIdAsync(establishmentId);
+
+            if (!string.IsNullOrWhiteSpace(establishment.OrgName))
+            {
+                schools.Add(establishment.OrgName);
+            }
+        }
+
+        return schools;
+    }
+
+    private async Task PopulateMatSelectedSchools(QuestionViewModel viewModel)
+    {
+        if (!CurrentUser.IsMat)
+        {
+            return;
+        }
+
+        var selectedSchoolNames = await GetSelectedSchoolNames();
+
+        viewModel.IsMatMultiSchoolAssessment = selectedSchoolNames.Any();
+        viewModel.SelectedSchoolCount = selectedSchoolNames.Count;
+        viewModel.SelectedSchoolNames = selectedSchoolNames;
+    }
+
     private async Task<string> BuildErrorMessage()
     {
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
@@ -507,7 +590,7 @@ public class QuestionsViewBuilder(
         return errorMessage;
     }
 
-    private static QuestionViewModel GenerateViewModel(
+    private async Task<QuestionViewModel> GenerateViewModel(
         Controller controller,
         QuestionnaireQuestionEntry question,
         QuestionnaireSectionEntry? section,
@@ -535,7 +618,7 @@ public class QuestionsViewBuilder(
             nextQuestion.Answers = [];
         }
 
-        return new QuestionViewModel()
+        var viewModel = new QuestionViewModel
         {
             Question = question,
             AnswerSysId = latestAnswerContentfulId,
@@ -544,5 +627,9 @@ public class QuestionsViewBuilder(
             SectionSlug = sectionSlug,
             SectionId = section?.Id,
         };
+
+        await PopulateMatSelectedSchools(viewModel);
+
+        return viewModel;
     }
 }

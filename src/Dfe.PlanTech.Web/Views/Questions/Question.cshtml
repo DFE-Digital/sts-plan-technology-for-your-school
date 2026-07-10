@@ -6,6 +6,22 @@
     }
 }
 
+@if (Model.IsMatMultiSchoolAssessment)
+{
+    <div class="govuk-inset-text">
+        <p class="govuk-body">
+            You are completing this self-assessment for @Model.SelectedSchoolCount schools:
+        </p>
+
+        <ul class="govuk-list govuk-list--bullet">
+            @foreach (var schoolName in Model.SelectedSchoolNames)
+            {
+                <li>@schoolName</li>
+            }
+        </ul>
+    </div>
+}
+
 <form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-categorySlug="@Model.CategorySlug" asp-route-sectionSlug="@Model.SectionSlug"
       asp-route-questionSlug="@Model.Question.Slug" method="post">
     <input id="QuestionText" type="hidden" value="@Model.Question.Text" name="QuestionText" />
