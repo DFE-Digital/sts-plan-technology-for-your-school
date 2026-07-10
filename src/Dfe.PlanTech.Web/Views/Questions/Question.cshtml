@@ -3,23 +3,27 @@
 @section NavButton {
     @{
         await Html.RenderPartialAsync("BackButton");
+
+        @if (Model.IsMatMultiSchoolAssessment)
+        {
+            <details class="govuk-details govuk-!-margin-top-n6" open>
+                <summary class="govuk-details__summary">
+                    <span class="govuk-details__summary-text">
+                        You are submitting the self-assessment for @Model.SelectedSchoolCount schools
+                    </span>
+                </summary>
+
+                <div class="govuk-details__text">
+                    @foreach (var schoolName in Model.SelectedSchoolNames)
+                    {
+                        <p class="govuk-body govuk-!-margin-bottom-0">
+                            @schoolName
+                        </p>
+                    }
+                </div>
+            </details>
+        }
     }
-}
-
-@if (Model.IsMatMultiSchoolAssessment)
-{
-    <div class="govuk-inset-text">
-        <p class="govuk-body">
-            You are completing this self-assessment for @Model.SelectedSchoolCount schools:
-        </p>
-
-        <ul class="govuk-list govuk-list--bullet">
-            @foreach (var schoolName in Model.SelectedSchoolNames)
-            {
-                <li>@schoolName</li>
-            }
-        </ul>
-    </div>
 }
 
 <form asp-controller="Questions" asp-action="SubmitAnswer" asp-route-categorySlug="@Model.CategorySlug" asp-route-sectionSlug="@Model.SectionSlug"
