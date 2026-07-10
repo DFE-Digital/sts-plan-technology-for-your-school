@@ -349,6 +349,7 @@ public class GroupsViewBuilder(
                 if (
                     latestSubmissionForRef != null
                     && latestSubmissionForRef.Status == SubmissionStatus.InProgress
+                    // Add CompleteNotReviewed here
                 )
                 {
                     return controller.RedirectToRoute(
@@ -382,7 +383,10 @@ public class GroupsViewBuilder(
 
                         if (
                             latestSubmissionForRef != null
-                            && latestSubmissionForRef.Status == SubmissionStatus.InProgress
+                            && (
+                                latestSubmissionForRef.Status == SubmissionStatus.InProgress
+                                || latestSubmissionForRef.Status == SubmissionStatus.CompleteNotReviewed
+                                )
                         )
                         {
                             await _submissionService.SetSubmissionInaccessibleAsync(
