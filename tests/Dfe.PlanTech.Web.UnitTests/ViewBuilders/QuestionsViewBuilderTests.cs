@@ -180,6 +180,94 @@ public class QuestionsViewBuilderTests
         Assert.Equal(question, vm.Question);
     }
 
+    [Fact]
+    public async Task RouteByQuestionId_WhenMatUserHasSelectedSchools_PopulatesSelectedSchoolNames()
+    {
+        // Arrange
+        _contentfulOptions = new ContentfulOptionsConfiguration
+        {
+            UsePreviewApi = true
+        };
+
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
+
+        IEnumerable<int> selectedEstablishmentIds = [101, 102, 103];
+
+        controller.HttpContext.Session.SetValue(
+            SessionConstants.SelectedEstablishmentsKey,
+            selectedEstablishmentIds
+        );
+
+        _currentUserProvider.IsMat.Returns(true);
+
+        _establishmentSvc
+            .GetEstablishmentByIdAsync(101)
+            .Returns(new SqlEstablishmentDto
+            {
+                Id = 101,
+                OrgName = "School One"
+            });
+
+        _establishmentSvc
+            .GetEstablishmentByIdAsync(102)
+            .Returns(new SqlEstablishmentDto
+            {
+                Id = 102,
+                OrgName = " "
+            });
+
+        _establishmentSvc
+            .GetEstablishmentByIdAsync(103)
+            .Returns(new SqlEstablishmentDto
+            {
+                Id = 103,
+                OrgName = "School Three"
+            });
+
+        var question = MakeQuestion(
+            "Q1",
+            "q-1",
+            "Question text"
+        );
+
+        _contentful
+            .GetQuestionByIdAsync("Q1")
+            .Returns(question);
+
+        // Act
+        var result = await sut.RouteByQuestionId(
+            controller,
+            "Q1"
+        );
+
+        // Assert
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<QuestionViewModel>(view.Model);
+
+        Assert.True(model.IsMatMultiSchoolAssessment);
+        Assert.Equal(2, model.SelectedSchoolCount);
+
+        Assert.Equal(
+            new[] { "School One", "School Three" },
+            model.SelectedSchoolNames
+        );
+
+        await _establishmentSvc
+            .Received(1)
+            .GetEstablishmentByIdAsync(101);
+
+        await _establishmentSvc
+            .Received(1)
+            .GetEstablishmentByIdAsync(102);
+
+        await _establishmentSvc
+            .Received(1)
+            .GetEstablishmentByIdAsync(103);
+    }
+
     // ---------- RouteToInterstitialPage ----------
 
     [Fact]
@@ -1154,6 +1242,59 @@ public class QuestionsViewBuilderTests
         Assert.NotNull(redirect.RouteValues);
         Assert.Equal("cat", redirect.RouteValues["categorySlug"]);
         Assert.Equal("sec-1", redirect.RouteValues["sectionSlug"]);
+    }
+
+    [Fact]
+    public async Task RouteBySlugAndQuestionAsync_WhenReturnToProvided_SetsReturnToViewData_AndClearsNestedNextQuestionAnswers()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.GetActiveEstablishmentIdAsync().Returns(22);
+
+        var nestedNextQuestion = MakeQuestion("Q2", "q-2", "Q2");
+        nestedNextQuestion.Answers = [new QuestionnaireAnswerEntry()];
+
+        var question = MakeQuestion("Q1", "q-1", "Q1");
+        question.Answers =
+        [
+            new QuestionnaireAnswerEntry
+        {
+            NextQuestion = nestedNextQuestion
+        },
+        new QuestionnaireAnswerEntry
+        {
+            NextQuestion = null
+        }
+        ];
+
+        var section = MakeSection("S1", "sec-1", "Section 1", question);
+
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(22, section, SubmissionStatus.InProgress)
+            .Returns(new SubmissionRoutingDataModel(
+                nextQuestion: question,
+                questionnaireSection: section,
+                submission: null,
+                status: SubmissionStatus.InProgress
+            ));
+
+        await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            "check-answers"
+        );
+
+        Assert.Equal(
+            "check-answers",
+            controller.ViewData[StatePassingMechanismConstants.ReturnTo]
+        );
+
+        Assert.Empty(nestedNextQuestion.Answers);
     }
 
     // ---------- RestartSelfAssessment ----------
