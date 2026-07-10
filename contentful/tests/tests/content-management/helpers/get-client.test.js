@@ -18,15 +18,17 @@ const mockSpace = {
 
 const mockGetSpace = jest.fn().mockResolvedValue(mockSpace);
 
-jest.mock('contentful-management', () => ({
-  createClient: jest.fn(() => ({
-    getSpace: mockGetSpace,
-  })),
+jest.unstable_mockModule('contentful-management', () => ({
+  default: {
+    createClient: jest.fn(() => ({
+      getSpace: mockGetSpace,
+    })),
+  },
 }));
 
-const { createClient } = await import('contentful-management');
-
-const { getAndValidateClient } = await import('../../../../content-management/helpers/get-client');
+const contentfulManagement = (await import('contentful-management')).default;
+const { getAndValidateClient } =
+  await import('../../../../content-management/helpers/get-client.js');
 
 describe('getAndValidateClient', () => {
   const originalEnv = process.env;
@@ -49,7 +51,7 @@ describe('getAndValidateClient', () => {
   it('should create and return a valid client when environment is valid', async () => {
     const client = await getAndValidateClient();
 
-    expect(createClient).toHaveBeenCalledWith({
+    expect(contentfulManagement.createClient).toHaveBeenCalledWith({
       accessToken: 'test-token',
     });
 
