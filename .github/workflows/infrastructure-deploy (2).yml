@@ -364,10 +364,10 @@ jobs:
             fi
           fi
 
-          if [ -n "$key_id" ] && ! terraform state show 'azurerm_key_vault_key.data_protection_key' >/dev/null 2>&1; then
+          if [ -n "$key_id" ] && ! terraform state show 'azurerm_key_vault_key.data_protection_key[0]' >/dev/null 2>&1; then
             cat >> zz_recovery_imports.tf <<EOF
           import {
-            to = azurerm_key_vault_key.data_protection_key
+            to = azurerm_key_vault_key.data_protection_key[0]
             id = "${key_id}"
           }
 
