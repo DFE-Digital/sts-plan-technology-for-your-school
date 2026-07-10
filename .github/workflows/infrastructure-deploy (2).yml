@@ -347,7 +347,18 @@ jobs:
               -o tsv | grep -q '^1$'; then
 
               echo "Importing recovered Key Vault access policy"
-              terraform import "$access_policy_address" "$access_policy_id_tf"
+              terraform import -input=false \
+                -var-file="../../normalisedTerraformVars.tfvars" \
+                -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+                -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+                -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
+                -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
+                -var="azure_location=northeurope" \
+                -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
+                -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
+                -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
+                "$access_policy_address" \
+                "$access_policy_id_tf"
             else
               echo "Access policy does not exist in Azure; Terraform will create it."
             fi
