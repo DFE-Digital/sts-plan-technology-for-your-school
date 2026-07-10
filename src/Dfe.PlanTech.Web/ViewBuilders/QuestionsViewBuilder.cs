@@ -182,6 +182,8 @@ public class QuestionsViewBuilder(
                 sectionSlug,
                 section
             );
+
+            viewModel.TrustSchoolAssessmentContinueHref = $"/groups/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
         }
 
         return controller.View(InterstitialPagePath, viewModel);
