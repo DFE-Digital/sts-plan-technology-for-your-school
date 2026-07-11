@@ -9,6 +9,14 @@ internal class EstablishmentGroupEntityConfiguration
 {
     public void Configure(EntityTypeBuilder<EstablishmentGroupEntity> builder)
     {
-        builder.HasKey(group => group.Id);
+        builder.ToTable("establishmentGroup", "dbo");
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.Uid).HasMaxLength(100).IsRequired(false);
+        builder.Property(x => x.GroupName).HasMaxLength(400).IsRequired(false);
+        builder.Property(x => x.GroupType).HasMaxLength(400).IsRequired(false);
+        builder.Property(x => x.GroupStatus).HasMaxLength(400).IsRequired(false);
     }
 }

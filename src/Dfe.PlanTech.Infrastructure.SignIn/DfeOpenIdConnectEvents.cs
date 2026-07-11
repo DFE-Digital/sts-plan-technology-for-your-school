@@ -68,11 +68,7 @@ public static partial class DfeOpenIdConnectEvents
     {
         var forwardHostHeader = context
             .HttpContext.Request.Headers.Where(header =>
-                string.Equals(
-                    ForwardHostHeader,
-                    header.Key,
-                    StringComparison.InvariantCultureIgnoreCase
-                )
+                string.Equals(ForwardHostHeader, header.Key, StringComparison.OrdinalIgnoreCase)
             )
             .Select(header => header.Value.FirstOrDefault())
             .FirstOrDefault();
