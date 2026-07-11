@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Data.Sql.Common;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -13,13 +14,17 @@ namespace Dfe.PlanTech.Data.Sql.Configurations
         {
             builder.HasNoKey();
 
-            builder.Property(e => e.StatusChangeDate).HasColumnType("datetime");
-            builder.Property(e => e.StatusText).HasMaxLength(50);
-            builder.Property(e => e.SchoolName).HasMaxLength(200);
-            builder.Property(e => e.GroupName).HasMaxLength(200);
-            builder.Property(e => e.UserId).HasColumnType("int");
-            builder.Property(e => e.QuestionText);
-            builder.Property(e => e.AnswerText);
+            builder.Property(x => x.StatusChangeDate);
+            builder
+                .Property(x => x.Status)
+                .HasColumnName("statusText")
+                .HasConversion(StatusConverters.RecommendationStatusConverter)
+                .HasMaxLength(50);
+            builder.Property(x => x.SchoolName).HasMaxLength(200);
+            builder.Property(x => x.GroupName).HasMaxLength(200);
+            builder.Property(x => x.UserId);
+            builder.Property(x => x.QuestionText).HasMaxLength(4000);
+            builder.Property(x => x.AnswerText).HasMaxLength(4000);
         }
     }
 }

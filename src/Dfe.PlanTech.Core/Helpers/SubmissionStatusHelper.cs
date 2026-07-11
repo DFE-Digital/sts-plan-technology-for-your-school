@@ -2,7 +2,7 @@ using Dfe.PlanTech.Core.Enums;
 
 namespace Dfe.PlanTech.Core.Helpers;
 
-public static class SubmissionHelper
+public static class SubmissionStatusHelper
 {
     public static SubmissionStatus ToSubmissionStatus(this string submissionStatus)
     {
