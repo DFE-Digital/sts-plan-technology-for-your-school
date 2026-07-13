@@ -1,6 +1,3 @@
-using Dfe.PlanTech.Web.Context.Interfaces;
-using Microsoft.AspNetCore.Http;
-
 namespace Dfe.PlanTech.Web.Middleware;
 
 public class UserActionIdMiddleware(RequestDelegate next)
@@ -19,8 +16,10 @@ public class UserActionIdMiddleware(RequestDelegate next)
 
     private static Guid GetOrCreateCorrelationId(HttpContext context)
     {
-        if (context.Request.Headers.TryGetValue(HeaderName, out var headerValues)
-            && Guid.TryParse(headerValues.FirstOrDefault(), out var headerGuid))
+        if (
+            context.Request.Headers.TryGetValue(HeaderName, out var headerValues)
+            && Guid.TryParse(headerValues.FirstOrDefault(), out var headerGuid)
+        )
         {
             return headerGuid;
         }

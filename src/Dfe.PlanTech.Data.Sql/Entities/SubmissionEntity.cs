@@ -1,11 +1,9 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
-[Table("submission")]
 public class SubmissionEntity : IUserActionEntity
 {
     public int Id { get; set; }
@@ -56,7 +54,7 @@ public class SubmissionEntity : IUserActionEntity
             UserActionId = UserActionId,
             CreatedUserActionId = CreatedUserActionId,
             LastUpdatedUserActionId = LastUpdatedUserActionId,
-            CompletedUserActionId = CompletedUserActionId
+            CompletedUserActionId = CompletedUserActionId,
         };
     }
 }

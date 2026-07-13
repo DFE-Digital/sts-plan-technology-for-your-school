@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -8,7 +9,6 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
@@ -29,9 +29,9 @@ public class QuestionsViewBuilderTests
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly IQuestionService _questionSvc = Substitute.For<IQuestionService>();
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
-    private readonly IEstablishmentService _establishmentSvc = Substitute.For<IEstablishmentService>();
-    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
-    private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+    private readonly IEstablishmentService _establishmentSvc =
+        Substitute.For<IEstablishmentService>();
+    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
 
     // Options
     private readonly IOptions<ContactOptionsConfiguration> _contactOptions = Options.Create(
@@ -173,7 +173,7 @@ public class QuestionsViewBuilderTests
             InternalName = "Section name",
             Name = "Section name",
             ShortDescription = "Short description",
-            Questions = []
+            Questions = [],
         };
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
@@ -646,36 +646,39 @@ public class QuestionsViewBuilderTests
         _currentUser.IsMat.Returns(true);
         _currentUser.UserOrganisationId.Returns(999);
 
-        var page = new PageEntry { Slug = "section-slug", SectionTitle = "Interstitial", Content = [] };
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
         var section = new QuestionnaireSectionEntry
         {
             InternalName = "Section name",
             Name = "Section name",
             ShortDescription = "Short description",
-            Questions = []
+            Questions = [],
         };
 
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
         _establishmentSvc
-        .GetEstablishmentLinksWithRecommendationCounts(999)
-        .Returns(
-        [
-            new SqlEstablishmentLinkDto
-            {
-                EstablishmentName = "Test School",
-                Urn = "900006"
-            }
-        ]);
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
 
-        _establishmentSvc.GetEstablishmentByReferenceAsync("900006").Returns(
-            new SqlEstablishmentDto
-            {
-                Id = 101,
-                OrgName = "Test School",
-                EstablishmentRef = "900006"
-            });
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 101,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
 
         _submissionSvc
             .GetLatestSubmissionResponsesModel(
@@ -706,39 +709,37 @@ public class QuestionsViewBuilderTests
         _currentUser.IsMat.Returns(true);
         _currentUser.UserOrganisationId.Returns(999);
 
-        var page = new PageEntry { Slug = "section-slug", SectionTitle = "Interstitial", Content = [] };
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
         var section = new QuestionnaireSectionEntry
         {
             InternalName = "Section name",
             Name = "Section name",
             ShortDescription = "Short description",
-            Questions = []
+            Questions = [],
         };
 
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);
         _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
 
         _establishmentSvc
-          .GetEstablishmentLinks(999)
-          .Returns(new List<SqlEstablishmentLinkDto>
-          {
-        new()
-          {
-              EstablishmentName = "Test School",
-              Urn = "900006"
-          }
-        });
+            .GetEstablishmentLinks(999)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { EstablishmentName = "Test School", Urn = "900006" },
+                }
+            );
 
         _establishmentSvc
-          .GetEstablishmentLinksWithRecommendationCounts(999)
-          .Returns(
-          [
-              new SqlEstablishmentLinkDto
-                    {
-                        EstablishmentName = "Test School",
-                        Urn = "900006"
-                    }
-          ]);
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
 
         _submissionSvc
             .GetLatestSubmissionResponsesModel(
@@ -773,7 +774,7 @@ public class QuestionsViewBuilderTests
             InternalName = "Section name",
             Name = "Section name",
             ShortDescription = "Short description",
-            Questions = []
+            Questions = [],
         };
 
         _contentful.GetPageBySlugAsync("section-slug").Returns(page);

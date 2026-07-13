@@ -1,5 +1,5 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -12,14 +12,14 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
     {
         private readonly ILogger<GroupsController> _logger;
         private readonly IGroupsViewBuilder _viewBuilder;
-        private readonly ICurrentUser _currentUser;
+        private readonly ICurrentUserProvider _currentUser;
         private readonly GroupsController _controller;
 
         public GroupsControllerTests()
         {
             _logger = Substitute.For<ILogger<GroupsController>>();
             _viewBuilder = Substitute.For<IGroupsViewBuilder>();
-            _currentUser = Substitute.For<ICurrentUser>();
+            _currentUser = Substitute.For<ICurrentUserProvider>();
             _controller = new GroupsController(_logger, _currentUser, _viewBuilder);
         }
 
@@ -107,7 +107,9 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         [Fact]
         public async Task GetSelectASelfAssessment_CallsViewBuilderAndReturnsResult()
         {
-            _viewBuilder.RouteToSelectASelfAssessmentViewModelAsync(_controller).Returns(new OkResult());
+            _viewBuilder
+                .RouteToSelectASelfAssessmentViewModelAsync(_controller)
+                .Returns(new OkResult());
 
             var result = await _controller.GetSelectASelfAssessment();
 
@@ -126,7 +128,11 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
                 .RouteToViewInProgressAnswers(_controller, categorySlug, sectionSlug, schoolUrn)
                 .Returns(new OkResult());
 
-            var result = await _controller.ViewInProgressAnswers(categorySlug, sectionSlug, schoolUrn);
+            var result = await _controller.ViewInProgressAnswers(
+                categorySlug,
+                sectionSlug,
+                schoolUrn
+            );
 
             await _viewBuilder
                 .Received(1)

@@ -1,3 +1,5 @@
+using System.Security.Claims;
+using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -6,7 +8,6 @@ using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,8 +16,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.UnitTests.Authorisation.Policies;
 
@@ -242,20 +241,16 @@ public class PageModelAuthorisationPolicyTests
             Name = "Test School",
             Urn = "123456",
             Ukprn = "00000018",
-            Category = new IdWithNameModel
-            {
-                Id = "001",
-                Name = "Establishment",
-            },
+            Category = new IdWithNameModel { Id = "001", Name = "Establishment" },
         };
 
         var claimsIdentity = new ClaimsIdentity(
-        [
-            new Claim(ClaimConstants.NameIdentifier, "dsi-ref"),
-            new Claim(ClaimConstants.DB_USER_ID, "101"),
-            new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, "201"),
-            new Claim(ClaimConstants.Organisation, JsonSerializer.Serialize(org)),
-        ],
+            [
+                new Claim(ClaimConstants.NameIdentifier, "dsi-ref"),
+                new Claim(ClaimConstants.DB_USER_ID, "101"),
+                new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, "201"),
+                new Claim(ClaimConstants.Organisation, JsonSerializer.Serialize(org)),
+            ],
             CookieAuthenticationDefaults.AuthenticationScheme
         );
 
@@ -272,7 +267,7 @@ public class PageModelAuthorisationPolicyTests
         await _policy.HandleAsync(_authContext);
 
         Assert.True(_authContext.HasSucceeded);
-        await _userActionTrackingService.Received(1).RecordAsync();
+        await _userActionTrackingService.Received(1).RecordActionAsync();
     }
 
     [Fact]
@@ -284,6 +279,6 @@ public class PageModelAuthorisationPolicyTests
 
         await _policy.HandleAsync(_authContext);
 
-        await _userActionTrackingService.DidNotReceive().RecordAsync();
+        await _userActionTrackingService.DidNotReceive().RecordActionAsync();
     }
 }

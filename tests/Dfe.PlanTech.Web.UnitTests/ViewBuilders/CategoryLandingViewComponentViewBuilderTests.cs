@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -6,7 +7,6 @@ using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -23,7 +23,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         IEstablishmentService? establishment = null,
         IUserActionTrackingService? userActionTracking = null,
         IUserService? user = null,
-        ICurrentUser? currentUser = null,
+        ICurrentUserProvider? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null
     )
     {
@@ -32,7 +32,7 @@ public class CategoryLandingViewComponentViewBuilderTests
         establishment ??= Substitute.For<IEstablishmentService>();
         userActionTracking ??= Substitute.For<IUserActionTrackingService>();
         user ??= Substitute.For<IUserService>();
-        currentUser ??= Substitute.For<ICurrentUser>();
+        currentUser ??= Substitute.For<ICurrentUserProvider>();
 
         currentUser.GetActiveEstablishmentIdAsync().Returns(1001);
 
@@ -216,7 +216,11 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
+            new SqlSectionStatusDto
+            {
+                SectionId = "S1",
+                Status = SubmissionStatus.CompleteReviewed,
+            },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -253,7 +257,11 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
+            new SqlSectionStatusDto
+            {
+                SectionId = "S1",
+                Status = SubmissionStatus.CompleteReviewed,
+            },
         };
 
         var submission = Substitute.For<ISubmissionService>();
@@ -298,7 +306,11 @@ public class CategoryLandingViewComponentViewBuilderTests
 
         var statuses = new List<SqlSectionStatusDto>
         {
-            new SqlSectionStatusDto { SectionId = "S1", Status = SubmissionStatus.CompleteReviewed },
+            new SqlSectionStatusDto
+            {
+                SectionId = "S1",
+                Status = SubmissionStatus.CompleteReviewed,
+            },
         };
 
         var submission = Substitute.For<ISubmissionService>();
