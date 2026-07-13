@@ -27,3 +27,10 @@ cd ../Dfe.PlanTech.Web.E2ETests.Beta/
 echo "Reinstalling node modules and fixing vulnerabilities"
 npx reinstall
 npm audit fix
+echo
+echo "================================"
+echo "Changing directory to root"
+cd ../..
+echo "Reinstalling node modules and fixing vulnerabilities"
+npx reinstall
+npm audit fix
