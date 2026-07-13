@@ -1,3 +1,4 @@
+echo "Adding this line in the hope it kicks off the pipelines"
 cd ..
 echo
 echo "Changing directory to /contentful/"
