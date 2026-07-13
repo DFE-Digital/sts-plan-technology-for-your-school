@@ -9,7 +9,7 @@ dependencies = [
     "pandas>=2.2.3",
     "playwright>=1.49.1",
     "pyodbc>=5.2.0",
-    "python-dotenv>=1.0.1",
+    "python-dotenv>=1.2.2",
 ]
 
 [tool.ruff.lint]
