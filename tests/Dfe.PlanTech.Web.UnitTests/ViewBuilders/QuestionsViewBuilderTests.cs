@@ -32,6 +32,7 @@ public class QuestionsViewBuilderTests
     private readonly IEstablishmentService _establishmentSvc =
         Substitute.For<IEstablishmentService>();
     private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
+    private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
 
     // Options
     private readonly IOptions<ContactOptionsConfiguration> _contactOptions = Options.Create(
