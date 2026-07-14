@@ -26,63 +26,107 @@
     <div class="govuk-panel__body">
         @if (Model.IsMatSummary)
         {
-            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.MatSummarySuccessBody, dynamicValues)
-        }
+            @await Microcopy.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.MatSummarySuccessBody,
+                dynamicValues
+                )
+            }
         else
         {
-            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SchoolSummarySuccessBody, schoolSuccessValues)
-        }
+            @await Microcopy.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.SchoolSummarySuccessBody,
+                schoolSuccessValues
+                )
+            }
     </div>
 </div>
 
 <h2 class="govuk-heading-l">
-    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SchoolSummaryHeader)
+    @await Microcopy.GetTextByKeyAsync(
+    ContentfulMicrocopyConstants.SchoolSummaryHeader
+        )
 </h2>
 
 <h3 class="govuk-heading-m">
-    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SummaryRecHeader)
+    @await Microcopy.GetTextByKeyAsync(
+        ContentfulMicrocopyConstants.SummaryRecHeader
+        )
 </h3>
 
-<p class="govuk-body">
-    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SummaryRecBody, dynamicValues)
+<p class="govuk-body govuk-!-margin-bottom-6">
+    @await Microcopy.GetTextByKeyAsync(
+        ContentfulMicrocopyConstants.SummaryRecBody,
+        dynamicValues
+        )
 </p>
 
 @if (Model.IsMatSummary)
 {
-    <p class="govuk-body">
-        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.MatSummaryRecLinkIntro, dynamicValues)
-    </p>
+<p class="govuk-body govuk-!-margin-bottom-6">
+    @await Microcopy.GetTextByKeyAsync(
+        ContentfulMicrocopyConstants.MatSummaryRecLinkIntro,
+        dynamicValues
+        )
+</p>
 
-    <ul class="govuk-list govuk-list--bullet">
-        @foreach (var recommendation in Model.RecommendationLinks)
+<ul class="govuk-list govuk-list--bullet">
+    @foreach (var recommendation in Model.RecommendationLinks)
         {
-            <li>
-                <a class="govuk-link" href="@recommendation.Href">
-                    @recommendation.LinkText
-                </a>
-            </li>
+    <li>
+        <form asp-controller="Groups"
+              asp-action="SelectSchool"
+              method="post"
+              class="govuk-!-display-inline">
+
+            <input type="hidden"
+                   name="schoolUrn"
+                   value="@recommendation.SchoolUrn" />
+
+            <input type="hidden"
+                   name="schoolName"
+                   value="@recommendation.SchoolName" />
+
+            <input type="hidden"
+                   name="categorySlug"
+                   value="@recommendation.Href.TrimStart('/')" />
+
+            <a class="govuk-link govuk-!-display-inline-block govuk-!-margin-bottom-4"
+               asp-controller="Groups"
+               asp-action="SelectSchoolAndRedirect"
+               asp-route-schoolUrn="@recommendation.SchoolUrn"
+               asp-route-schoolName="@recommendation.SchoolName"
+               asp-route-categorySlug="@recommendation.Href.TrimStart('/')">
+                @recommendation.LinkText
+            </a>
+        </form>
+    </li>
         }
-    </ul>
+</ul>
 }
 else if (Model.RecommendationLinks.Any())
 {
     <p class="govuk-body">
-        <a class="govuk-link" href="@Model.RecommendationLinks.First().Href">
-            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SchoolSummaryRecLink, dynamicValues)
+        <a class="govuk-link"
+           href="@Model.RecommendationLinks.First().Href">
+            @await Microcopy.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.SchoolSummaryRecLink,
+                dynamicValues
+            )
         </a>
     </p>
 }
 
 @if (Model.ShowSubmitAnotherSelfAssessment)
 {
-    <h3 class="govuk-heading-m govuk-!-margin-top-8">
-        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SummarySubmitAnotherHeading)
+    <h3 class="govuk-heading-m">
+        @await Microcopy.GetTextByKeyAsync(
+        ContentfulMicrocopyConstants.SummarySubmitAnotherHeading
+        )
     </h3>
 
-    @if (Model.IsMatSummary)
+@if (Model.IsMatSummary)
     {
-        var submitRemainingLink =
-            $"<a class=\"govuk-link\" href=\"{Model.SubmitAnotherSelfAssessmentHref}\">submit the remaining self-assessments</a>";
+        var submitRemainingLink = $"<a class=\"govuk-link\" href=\"{Model.SubmitAnotherSelfAssessmentHref}\">submit the remaining self-assessments</a>";
 
         var submitAnotherValues = new Dictionary<string, string>
         {
@@ -90,19 +134,24 @@ else if (Model.RecommendationLinks.Any())
         };
 
         <p class="govuk-body">
-            @Html.Raw(await Microcopy.GetTextByKeyAsync(
+            @Html.Raw(
+            await Microcopy.GetTextByKeyAsync(
             ContentfulMicrocopyConstants.MatSummarySubmitAnotherBody,
-        submitAnotherValues
-        ))
-</p>
+            submitAnotherValues
+            )
+        )
+        </p>
     }
     else
     {
         <p class="govuk-body">
-            <a class="govuk-link" href="@Model.SubmitAnotherSelfAssessmentHref">
+            <a class="govuk-link"
+               href="@Model.SubmitAnotherSelfAssessmentHref">
                 Submit self-assessments
             </a>
-            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.SchoolSummarySubmitAnotherBody)
+            @await Microcopy.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.SchoolSummarySubmitAnotherBody
+        )
         </p>
     }
 }
