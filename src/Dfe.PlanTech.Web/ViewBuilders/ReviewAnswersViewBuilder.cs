@@ -10,6 +10,7 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
+using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -17,11 +18,14 @@ public class ReviewAnswersViewBuilder(
     ILogger<ReviewAnswersViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
-    ISubmissionService submissionService
+    ISubmissionService submissionService,
+    IHttpContextAccessor httpContextAccessor
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IHttpContextAccessor _httpContextAccessor =
+        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
     public const string ViewAnswersViewName = "~/Views/ViewAnswers/ViewAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
@@ -35,7 +39,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetRoutingEstablishmentId();
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -82,7 +86,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetRoutingEstablishmentId();
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -144,15 +148,60 @@ public class ReviewAnswersViewBuilder(
             var userOrganisationId = CurrentUser.UserOrganisationId;
             var userId = GetUserIdOrThrowException();
 
-            var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
+            var section =
+                await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+                ?? throw new ContentfulDataUnavailableException(
+                    $"Could not find section for slug {sectionSlug}"
+                );
 
-            await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-                establishmentId,
-                CurrentUser.IsMat ? userOrganisationId : null,
-                submissionId,
-                userId,
-                section
-            );
+            if (CurrentUser.IsMat)
+            {
+                var selectedEstablishmentIds =
+                    _httpContextAccessor.HttpContext!.Session.GetSelectedEstablishmentIds();
+
+                if (selectedEstablishmentIds.Count == 0)
+                {
+                    throw new InvalidOperationException(
+                        "No selected establishments were found for the MAT self-assessment."
+                    );
+                }
+
+                foreach (var selectedEstablishmentId in selectedEstablishmentIds)
+                {
+                    var submissionModel =
+                        await _submissionService.GetLatestSubmissionResponsesModel(
+                            selectedEstablishmentId,
+                            section,
+                            SubmissionStatus.InProgress
+                        );
+
+                    if (submissionModel is null)
+                    {
+                        throw new InvalidOperationException(
+                            $"Could not find an in-progress submission for establishment "
+                            + $"{selectedEstablishmentId}"
+                        );
+                    }
+
+                    await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                        selectedEstablishmentId,
+                        userOrganisationId,
+                        submissionModel.SubmissionId,
+                        userId,
+                        section
+                    );
+                }
+            }
+            else
+            {
+                await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                    establishmentId,
+                    null,
+                    submissionId,
+                    userId,
+                    section
+                );
+            }
         }
         catch (Exception e)
         {
@@ -264,6 +313,29 @@ public class ReviewAnswersViewBuilder(
             UrlConstants.CheckAnswersSlug,
             errorMessage
         );
+    }
+
+    private async Task<int> GetRoutingEstablishmentId()
+    {
+        var activeEstablishmentId =
+            await GetActiveEstablishmentIdOrThrowException();
+
+        if (!CurrentUser.IsMat)
+        {
+            return activeEstablishmentId;
+        }
+
+        var selectedEstablishments =
+            _httpContextAccessor.HttpContext?.Session.GetValue(
+                SessionConstants.SelectedEstablishmentsKey
+            );
+
+        var selectedEstablishmentId =
+            (selectedEstablishments as IEnumerable<int>)?.FirstOrDefault() ?? 0;
+
+        return selectedEstablishmentId > 0
+            ? selectedEstablishmentId
+            : activeEstablishmentId;
     }
 
     private async Task<ReviewAnswersViewModel> BuildViewModel(

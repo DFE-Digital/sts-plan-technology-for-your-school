@@ -49,15 +49,6 @@ public class PagesViewBuilder(
         PageEntry page
     )
     {
-        var needsToSelectSchool =
-            page.RequiresAuthorisation
-            && CurrentUser.UserOrganisationIsGroup
-            && CurrentUser.GroupSelectedSchoolUrn is null;
-        if (needsToSelectSchool)
-        {
-            return controller.Redirect(UrlConstants.SelectASchoolPage);
-        }
-
         // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
         var hasSelectedASchool =
             CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is not null;

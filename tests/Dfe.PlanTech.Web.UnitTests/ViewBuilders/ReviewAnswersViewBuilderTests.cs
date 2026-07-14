@@ -26,6 +26,7 @@ public class ReviewAnswersViewBuilderTests
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
     private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
+    private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
 
     private ReviewAnswersViewBuilder CreateSut()
     {
@@ -33,7 +34,7 @@ public class ReviewAnswersViewBuilderTests
         _currentUser.UserOrganisationId.Returns((int?)null); // non-MAT user by default
         _currentUser.UserId.Returns(1);
 
-        return new ReviewAnswersViewBuilder(_logger, _contentful, _currentUser, _submissions);
+        return new ReviewAnswersViewBuilder(_logger, _contentful, _currentUser, _submissions, _httpContextAccessor);
     }
 
     private static DummyController MakeController()
