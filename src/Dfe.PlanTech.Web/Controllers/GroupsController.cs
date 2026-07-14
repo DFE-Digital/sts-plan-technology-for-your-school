@@ -48,6 +48,12 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASelfAssessment()
     {
+        _currentUser.ClearSelectedGroupSchool();
+
+        HttpContext.Session.Remove(
+            SessionConstants.SelectedEstablishmentsKey
+        );
+
         return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
     }
 

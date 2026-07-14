@@ -173,12 +173,11 @@ public class QuestionsViewBuilder(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
 
+        var isMatWithoutSelectedSchool =
+            CurrentUser.IsMat
+            && string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolUrn);
 
-        /*
-        * NOTE for testing: as we can't submit as a MAT locally with the new work yet, comment this out locally to do so.
-        * Also set ShowTrustSchoolAssessmentTable to false below
-        */
-        if (CurrentUser.IsMat)
+        if (isMatWithoutSelectedSchool)
         {
             interstitialPage.Content = interstitialPage
                 .Content?.Where(x => x is not ComponentButtonWithEntryReferenceEntry)
@@ -187,7 +186,7 @@ public class QuestionsViewBuilder(
 
         var viewModel = new PageViewModel(interstitialPage)
         {
-            ShowTrustSchoolAssessmentTable = CurrentUser.IsMat,
+            ShowTrustSchoolAssessmentTable = isMatWithoutSelectedSchool,
         };
 
         var section =
@@ -196,7 +195,7 @@ public class QuestionsViewBuilder(
                 $"Could not find section for slug {sectionSlug}"
             );
 
-        if (CurrentUser.IsMat)
+        if (isMatWithoutSelectedSchool)
         {
             viewModel.TrustSchoolAssessments = await BuildTrustSchoolAssessments(
                 categorySlug,
@@ -204,7 +203,8 @@ public class QuestionsViewBuilder(
                 section
             );
 
-            viewModel.TrustSchoolAssessmentContinueHref = $"/groups/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
+            viewModel.TrustSchoolAssessmentContinueHref =
+                $"/groups/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
         }
 
         return controller.View(InterstitialPagePath, viewModel);

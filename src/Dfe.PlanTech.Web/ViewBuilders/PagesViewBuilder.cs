@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -13,6 +12,7 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -85,8 +85,8 @@ public class PagesViewBuilder(
 
         viewModel.ShowTrustSchoolAssessmentTable =
             CurrentUser.IsMat
-            && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase)
-                == true;
+            && CurrentUser.GroupSelectedSchoolUrn is null
+            && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase) == true;
 
         if (page.DisplayOrganisationName)
         {
