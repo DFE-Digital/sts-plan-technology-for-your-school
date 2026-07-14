@@ -284,28 +284,40 @@ public class QuestionsViewBuilder(
 
         foreach (var school in schools)
         {
-            var schoolEstablishment = await establishmentService.GetEstablishmentByReferenceAsync(
-                school.Urn
-            );
+            var schoolEstablishment =
+                await establishmentService.GetEstablishmentByReferenceAsync(
+                    school.Urn
+                );
 
             var submission = schoolEstablishment is null
                 ? null
                 : await _submissionService.GetLatestSubmissionResponsesModel(
                     schoolEstablishment.Id,
                     section,
-                    [SubmissionStatus.InProgress]
+                    [
+                        SubmissionStatus.InProgress,
+                        SubmissionStatus.CompleteNotReviewed,
+                        SubmissionStatus.CompleteReviewed
+                    ]
                 );
 
-            var hasSubmission = submission is not null;
+            var status = submission?.Status ?? SubmissionStatus.NotStarted;
+
+            if (status == SubmissionStatus.CompleteReviewed)
+            {
+                continue;
+            }
+
+            var hasInProgressSubmission =
+                status is SubmissionStatus.InProgress
+                    or SubmissionStatus.CompleteNotReviewed;
 
             rows.Add(
                 new TrustSchoolAssessmentRowViewModel
                 {
                     SchoolName = school.EstablishmentName,
-                    Status = hasSubmission
-                        ? SubmissionStatus.InProgress
-                        : SubmissionStatus.NotStarted,
-                    ViewAnswersHref = hasSubmission
+                    Status = status,
+                    ViewAnswersHref = hasInProgressSubmission
                         ? $"/school/{categorySlug}/{sectionSlug}/self-assessment/view-answers?schoolUrn={school.Urn}"
                         : null,
                 }
