@@ -72,6 +72,34 @@ public class GroupsController : BaseController<GroupsController>
         );
     }
 
+    [HttpGet($"{UrlConstants.GroupsSlug}/select-school-and-redirect")]
+    public async Task<IActionResult> SelectSchoolAndRedirect(
+    string schoolUrn,
+    string schoolName,
+    string categorySlug
+)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(schoolUrn);
+        ArgumentException.ThrowIfNullOrWhiteSpace(schoolName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        await _groupsViewBuilder.RecordGroupSelectionAsync(
+            schoolUrn,
+            schoolName
+        );
+
+        _currentUser.SetGroupSelectedSchool(
+            schoolUrn,
+            schoolName
+        );
+
+        return RedirectToAction(
+            nameof(PagesController.GetByRoute),
+            nameof(PagesController).GetControllerNameSlug(),
+            new { route = categorySlug }
+        );
+    }
+
     [HttpPost(
         $"{UrlConstants.GroupsSlug}/{{categorySlug}}/{{sectionSlug}}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}",
         Name = SubmitSchoolsSelectionAction
@@ -122,17 +150,12 @@ public class GroupsController : BaseController<GroupsController>
         );
     }
 
-    [HttpGet($"{UrlConstants.GroupsSlug}/select-school")]
-    public async Task<IActionResult> SelectSchoolAndRedirect(
+    [HttpPost($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
+    public async Task<IActionResult> SelectSchool(
         string schoolUrn,
-        string schoolName,
-        string categorySlug
+        string schoolName
     )
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(schoolUrn);
-        ArgumentException.ThrowIfNullOrWhiteSpace(schoolName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
-
         await _groupsViewBuilder.RecordGroupSelectionAsync(
             schoolUrn,
             schoolName
@@ -143,10 +166,6 @@ public class GroupsController : BaseController<GroupsController>
             schoolName
         );
 
-        return RedirectToAction(
-            nameof(PagesController.GetByRoute),
-            nameof(PagesController).GetControllerNameSlug(),
-            new { route = categorySlug }
-        );
+        return Redirect(UrlConstants.HomePage);
     }
 }
