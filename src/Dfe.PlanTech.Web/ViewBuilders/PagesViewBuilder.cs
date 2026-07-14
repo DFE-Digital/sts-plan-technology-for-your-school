@@ -49,9 +49,26 @@ public class PagesViewBuilder(
         PageEntry page
     )
     {
+        var isMatTopicStartPage =
+            CurrentUser.IsMat
+            && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase)
+                == true;
+
+        var shouldRedirectToSchoolSelection =
+            page.RequiresAuthorisation
+            && CurrentUser.UserOrganisationIsGroup
+            && CurrentUser.GroupSelectedSchoolUrn is null
+            && !isMatTopicStartPage;
+
+        if (shouldRedirectToSchoolSelection)
+        {
+            return controller.Redirect(UrlConstants.SelectASchoolPage);
+        }
+
         // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
         var hasSelectedASchool =
             CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is not null;
+
         if (hasSelectedASchool)
         {
             // Named `establishmentId`, but for a group (e.g. MAT) this is the internal PlanTech synthetic database ID for the group not the selected establishment.
@@ -60,12 +77,14 @@ public class PagesViewBuilder(
                 ?? throw new InvalidDataException(
                     "User is a MAT user but does not have an organisation ID (for the group)"
                 );
+
             var groupSchools =
                 await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
 
             var selectedSchoolIsValid = groupSchools.Any(s =>
                 s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn)
             );
+
             if (!selectedSchoolIsValid)
             {
                 return controller.Redirect(UrlConstants.SelectASchoolPage);
@@ -85,8 +104,8 @@ public class PagesViewBuilder(
 
         viewModel.ShowTrustSchoolAssessmentTable =
             CurrentUser.IsMat
-            && CurrentUser.GroupSelectedSchoolUrn is null
-            && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase) == true;
+            && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase)
+                == true;
 
         if (page.DisplayOrganisationName)
         {
