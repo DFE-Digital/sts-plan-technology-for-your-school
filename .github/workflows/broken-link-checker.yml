@@ -1,13 +1,25 @@
 name: Contentful Broken Link Checker
 
 on:
+  schedule:
+    - cron: 0 1 * * 1-5
   workflow_dispatch:
+    inputs:
+      environment:
+        description: Which Contentful environment to check for broken links
+        required: true
+        type: choice
+        options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
+        default: 'StagingUnprotected'
 
 jobs:
-  checker:
+  check_broken_links:
     name: Contentful broken link checker
     runs-on: ubuntu-latest
-    environment: StagingUnprotected
+    environment: ${{ inputs.environment || 'StagingUnprotected' }}
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - name: Checkout
@@ -16,8 +28,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
-          cache: "npm"
+          node-version: '20'
+          cache: 'npm'
 
       - name: Install export-processor deps
         working-directory: ./contentful/export-processor/
@@ -30,15 +42,15 @@ jobs:
       - name: Run get-links.js && checker.js
         working-directory: ./contentful/broken-link-checker/
         env:
-          MANAGEMENT_TOKEN: ${{ secrets.CONTENTFUL_MANAGEMENT_TOKEN }}
-          USE_PREVIEW: false
-          SPACE_ID: ${{ secrets.SPACE_ID }}
           CONTENTFUL_ENVIRONMENT: ${{ secrets.CONTENTFUL_ENVIRONMENT }}
+          MANAGEMENT_TOKEN: ${{ secrets.CONTENTFUL_MANAGEMENT_TOKEN }}
+          SPACE_ID: ${{ secrets.SPACE_ID }}
+          USE_PREVIEW: false
         run: npm run checker
 
-      - name: Upload CSV's
+      - name: Upload report files
         uses: actions/upload-artifact@v4
         with:
-            name: csvs
-            path: ./contentful/broken-link-checker/report/
-            if-no-files-found: warn
+          name: report-files
+          path: ./contentful/broken-link-checker/report/
+          if-no-files-found: warn
