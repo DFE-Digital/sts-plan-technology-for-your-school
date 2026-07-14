@@ -540,16 +540,9 @@ public class QuestionsViewBuilder(
         int[] selectedEstablishmentIds
     )
     {
-        var establishmentIds = CurrentUser.IsMat
+        var establishmentIds = CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
             ? selectedEstablishmentIds
             : [activeEstablishmentId];
-
-        if (CurrentUser.IsMat && establishmentIds.Length == 0)
-        {
-            throw new InvalidOperationException(
-                "No selected establishments were found for the MAT self-assessment."
-            );
-        }
 
         foreach (var establishmentId in establishmentIds)
         {
@@ -611,6 +604,11 @@ public class QuestionsViewBuilder(
 
         var selectedSchoolNames = await GetSelectedSchoolNames();
 
+        if (selectedSchoolNames.Count == 0 && !string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolName))
+        {
+            selectedSchoolNames.Add(CurrentUser.GroupSelectedSchoolName);
+        }
+
         viewModel.IsMatMultiSchoolAssessment = selectedSchoolNames.Any();
         viewModel.SelectedSchoolCount = selectedSchoolNames.Count;
         viewModel.SelectedSchoolNames = selectedSchoolNames;
@@ -634,7 +632,7 @@ public class QuestionsViewBuilder(
         }
 
         var selectedEstablishmentId =
-            GetSelectedEstablishmentIdsFromSession(session).FirstOrDefault();
+            session.GetSelectedEstablishmentIds().FirstOrDefault();
 
         return selectedEstablishmentId > 0
             ? selectedEstablishmentId

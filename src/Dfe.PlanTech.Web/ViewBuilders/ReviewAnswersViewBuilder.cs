@@ -159,34 +159,39 @@ public class ReviewAnswersViewBuilder(
                 var selectedEstablishmentIds =
                     _httpContextAccessor.HttpContext!.Session.GetSelectedEstablishmentIds();
 
-                if (selectedEstablishmentIds.Count == 0)
+                if (selectedEstablishmentIds.Count > 0)
                 {
-                    throw new InvalidOperationException(
-                        "No selected establishments were found for the MAT self-assessment."
-                    );
-                }
-
-                foreach (var selectedEstablishmentId in selectedEstablishmentIds)
-                {
-                    var submissionModel =
-                        await _submissionService.GetLatestSubmissionResponsesModel(
-                            selectedEstablishmentId,
-                            section,
-                            SubmissionStatus.InProgress
-                        );
-
-                    if (submissionModel is null)
+                    foreach (var selectedEstablishmentId in selectedEstablishmentIds)
                     {
-                        throw new InvalidOperationException(
-                            $"Could not find an in-progress submission for establishment "
-                            + $"{selectedEstablishmentId}"
+                        var submissionModel =
+                            await _submissionService.GetLatestSubmissionResponsesModel(
+                                selectedEstablishmentId,
+                                section,
+                                SubmissionStatus.InProgress
+                            );
+
+                        if (submissionModel is null)
+                        {
+                            throw new InvalidOperationException(
+                                $"Could not find an in-progress submission for establishment {selectedEstablishmentId}"
+                            );
+                        }
+
+                        await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                            selectedEstablishmentId,
+                            userOrganisationId,
+                            submissionModel.SubmissionId,
+                            userId,
+                            section
                         );
                     }
-
+                }
+                else
+                {
                     await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-                        selectedEstablishmentId,
+                        establishmentId,
                         userOrganisationId,
-                        submissionModel.SubmissionId,
+                        submissionId,
                         userId,
                         section
                     );

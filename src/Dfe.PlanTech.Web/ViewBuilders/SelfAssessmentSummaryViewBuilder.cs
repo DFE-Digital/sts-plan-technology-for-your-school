@@ -99,17 +99,22 @@ public class SelfAssessmentSummaryViewBuilder(
         string sectionId
     )
     {
-        var selectedEstablishments =
-            _httpContextAccessor.HttpContext!.Session.GetValue(
-                SessionConstants.SelectedEstablishmentsKey
-            );
-
         var selectedEstablishmentIds =
-            selectedEstablishments as IEnumerable<int> ?? [];
+            _httpContextAccessor.HttpContext!.Session
+                .GetSelectedEstablishmentIds()
+                .ToArray();
+
+        if (selectedEstablishmentIds.Length == 0)
+        {
+            var activeEstablishmentId =
+                await GetActiveEstablishmentIdOrThrowException();
+
+            selectedEstablishmentIds = [activeEstablishmentId];
+        }
 
         var completedSubmissions =
             await _groupService.GetGroupCompletedSubmissionsBySections(
-                selectedEstablishmentIds.ToArray()
+                selectedEstablishmentIds
             );
 
         return completedSubmissions
