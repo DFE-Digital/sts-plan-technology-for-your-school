@@ -31,7 +31,7 @@ public class QuestionsViewBuilderTests
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
     private readonly IEstablishmentService _establishmentSvc = Substitute.For<IEstablishmentService>();
     private readonly ICurrentUserProvider _currentUserProvider = Substitute.For<ICurrentUserProvider>();
-    private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider = Substitute.For<IMatEstablishmentProvider>();
 
     // Options
     private readonly IOptions<ContactOptionsConfiguration> _contactOptions = Options.Create(
@@ -120,7 +120,7 @@ public class QuestionsViewBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNullHttpContextAccessor_ThrowsArgumentNullException()
+    public void Constructor_WithNullMatEstablishmentProvider_ThrowsArgumentNullException()
     {
         var ex = Assert.Throws<ArgumentNullException>(() =>
             new QuestionsViewBuilder(
@@ -137,7 +137,7 @@ public class QuestionsViewBuilderTests
             )
         );
 
-        Assert.Equal("httpContextAccessor", ex.ParamName);
+        Assert.Equal("matEstablishmentProvider", ex.ParamName);
     }
 
     // ---------- RouteByQuestionId ----------
@@ -183,7 +183,6 @@ public class QuestionsViewBuilderTests
     [Fact]
     public async Task RouteByQuestionId_WhenMatUserHasSelectedSchools_PopulatesSelectedSchoolNames()
     {
-        // Arrange
         _contentfulOptions = new ContentfulOptionsConfiguration
         {
             UsePreviewApi = true
@@ -192,40 +191,17 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
-
-        IEnumerable<int> selectedEstablishmentIds = [101, 102, 103];
-
-        controller.HttpContext.Session.SetValue(
-            SessionConstants.SelectedEstablishmentsKey,
-            selectedEstablishmentIds
-        );
-
         _currentUserProvider.IsMat.Returns(true);
 
-        _establishmentSvc
-            .GetEstablishmentByIdAsync(101)
-            .Returns(new SqlEstablishmentDto
-            {
-                Id = 101,
-                OrgName = "School One"
-            });
+        var matEstablishmentModel = new MatEstablishmentModel(
+            true,
+            2,
+            ["School One", "School Three"]
+        );
 
-        _establishmentSvc
-            .GetEstablishmentByIdAsync(102)
-            .Returns(new SqlEstablishmentDto
-            {
-                Id = 102,
-                OrgName = " "
-            });
-
-        _establishmentSvc
-            .GetEstablishmentByIdAsync(103)
-            .Returns(new SqlEstablishmentDto
-            {
-                Id = 103,
-                OrgName = "School Three"
-            });
+        _matEstablishmentProvider
+            .PopulateMatSelectedSchools(_currentUserProvider)
+            .Returns(matEstablishmentModel);
 
         var question = MakeQuestion(
             "Q1",
@@ -237,35 +213,25 @@ public class QuestionsViewBuilderTests
             .GetQuestionByIdAsync("Q1")
             .Returns(question);
 
-        // Act
         var result = await sut.RouteByQuestionId(
             controller,
             "Q1"
         );
 
-        // Assert
         var view = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<QuestionViewModel>(view.Model);
 
-        Assert.True(model.IsMatMultiSchoolAssessment);
-        Assert.Equal(2, model.SelectedSchoolCount);
-
+        Assert.NotNull(model.MatEstablishmentModel);
+        Assert.True(model.MatEstablishmentModel.IsMatMultiSchoolAssessment);
+        Assert.Equal(2, model.MatEstablishmentModel.SelectedSchoolCount);
         Assert.Equal(
             new[] { "School One", "School Three" },
-            model.SelectedSchoolNames
+            model.MatEstablishmentModel.SelectedSchoolNames
         );
 
-        await _establishmentSvc
+        await _matEstablishmentProvider
             .Received(1)
-            .GetEstablishmentByIdAsync(101);
-
-        await _establishmentSvc
-            .Received(1)
-            .GetEstablishmentByIdAsync(102);
-
-        await _establishmentSvc
-            .Received(1)
-            .GetEstablishmentByIdAsync(103);
+            .PopulateMatSelectedSchools(_currentUserProvider);
     }
 
     // ---------- RouteToInterstitialPage ----------
@@ -567,14 +533,9 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
-
-        IEnumerable<int> selectedEstablishmentIds = [101, 102, 103];
-
-        controller.HttpContext.Session.SetValue(
-            SessionConstants.SelectedEstablishmentsKey,
-            selectedEstablishmentIds
-        );
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101, 102, 103]);
 
         _currentUserProvider.IsMat.Returns(true);
         _currentUserProvider.UserId.Returns(11);
@@ -618,7 +579,9 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([]);
 
         _currentUserProvider.IsMat.Returns(true);
         _currentUserProvider.UserId.Returns(11);
@@ -661,14 +624,9 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
-
-        IEnumerable<int> selectedEstablishmentIds = [101, 102];
-
-        controller.HttpContext.Session.SetValue(
-            SessionConstants.SelectedEstablishmentsKey,
-            selectedEstablishmentIds
-        );
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101, 102]);
 
         _currentUserProvider.IsMat.Returns(true);
         _currentUserProvider.UserId.Returns(11);
