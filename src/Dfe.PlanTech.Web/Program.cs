@@ -1,4 +1,6 @@
 using Dfe.PlanTech.Application;
+using Dfe.PlanTech.Application.Providers;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Extensions;
@@ -85,6 +87,8 @@ builder.Services.AddScoped<IUserActionIdProvider, UserActionIdProvider>();
 
 builder.Services.AddScoped<IUserActionTrackingService, UserActionTrackingService>();
 
+builder.Services.AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>();
+
 var app = builder.Build();
 
 ContentComponentJsonExtensions.ValidateContentfulTypeMapping();
@@ -121,7 +125,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseCorrelationId();
+app.UseUserActionId();
 
 app.UseAuthentication();
 app.UseAuthorization();

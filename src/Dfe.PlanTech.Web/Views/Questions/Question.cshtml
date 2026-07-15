@@ -3,6 +3,33 @@
 @section NavButton {
     @{
         await Html.RenderPartialAsync("BackButton");
+
+        @if (Model.MatEstablishmentModel?.IsMatMultiSchoolAssessment == true)
+        {
+            var schoolLabel =
+                Model.MatEstablishmentModel.SelectedSchoolCount == 1
+                    ? "school"
+                    : "schools";
+
+            <details class="govuk-details govuk-!-margin-top-n6" open>
+                <summary class="govuk-details__summary">
+                    <span class="govuk-details__summary-text">
+                        You are submitting the self-assessment for
+                        @Model.MatEstablishmentModel.SelectedSchoolCount
+                        @schoolLabel
+                    </span>
+                </summary>
+
+                <div class="govuk-details__text">
+                    @foreach (var schoolName in Model.MatEstablishmentModel.SelectedSchoolNames)
+                    {
+                        <p class="govuk-body govuk-!-margin-bottom-0">
+                            @schoolName
+                        </p>
+                    }
+                </div>
+            </details>
+        }
     }
 }
 

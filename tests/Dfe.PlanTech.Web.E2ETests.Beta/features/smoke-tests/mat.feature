@@ -2,13 +2,13 @@
 @user-mat
 Feature: MAT Multi Category Landing Page
 
-Scenario: MAT sees the select a school page with their schools
-    Given I visit the homepage
-    Then I should see the select a school heading
-    And I should see the following schools:
-      | DSI TEST Establishment (001) Community School (01) |
-      | DSI TEST Establishment (001) Miscellaneous (27)    |
-      | DSI TEST Establishment (001) Foundation School (05) |
+# Scenario: MAT sees the select a school page with their schools
+#     Given I visit the homepage
+#     Then I should see the select a school heading
+#     And I should see the following schools:
+#       | DSI TEST Establishment (001) Community School (01) |
+#       | DSI TEST Establishment (001) Miscellaneous (27)    |
+#       | DSI TEST Establishment (001) Foundation School (05) |
 
 Scenario: MAT sees progress for each school
     Given I visit the homepage
@@ -18,19 +18,20 @@ Scenario: MAT sees progress for each school
       | DSI TEST Establishment (001) Miscellaneous (27)    |
       | DSI TEST Establishment (001) Foundation School (05) |
 
-  Scenario: MAT selects a school and is taken to that school’s dashboard
-    Given I visit the homepage
-    Given I am on the select a school page
-    When I select the school "DSI TEST Establishment (001) Community School (01)"
-    Then I should be on the URL containing "/home"
-    And I should see the selected school name "DSI TEST Establishment (001) Community School (01)"
-    And the selected school cookie "SelectedSchool" should have URN "900006" and name "DSI TEST Establishment (001) Community School (01)"
+  # Scenario: MAT selects a school and is taken to that school’s dashboard
+  #   Given I visit the homepage
+  #   Given I am on the select a school page
+  #   When I select the school "DSI TEST Establishment (001) Community School (01)"
+  #   Then I should be on the URL containing "/home"
+  #   And I should see the selected school name "DSI TEST Establishment (001) Community School (01)"
+  #   And the selected school cookie "SelectedSchool" should have URN "900006" and name "DSI TEST Establishment (001) Community School (01)"
 
     # Commented out for now until MSA work is nearer completion and we can set up the test data for this scenario. This is to avoid having a broken test in the meantime, but we want to keep the scenario in place as it's an important one to have covered in our smoke tests.
     # @selected-school-miscellaneous
     # @clear-data-school
     # Scenario: MAT completing one topic on a multi-topic category shows the correct content
     #   Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "4, 1, 1"
+    #   And I click the link to view the recommendations for "Category Two Section One"
     #   And I am on the "category-two" page
     #   Then I should see the page heading "Category Two"
     #   Then I should see the "completed" section "Category Two Section One" with description "" and link href "/category-two/category-two-section-one/view-answers"

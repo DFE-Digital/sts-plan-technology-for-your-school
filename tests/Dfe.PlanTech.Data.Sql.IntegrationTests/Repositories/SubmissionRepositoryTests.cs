@@ -1353,6 +1353,105 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await Assert.ThrowsAsync<ArgumentException>(() => _repository.SubmitResponse(response));
     }
 
+    [Fact]
+    public async Task GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync_ReturnsLatestCompletedSubmissionsWithEstablishmentIncluded()
+    {
+        // Arrange
+        var establishment1 = CreateEstablishment(101);
+        var establishment2 = CreateEstablishment(102);
+        var establishment3 = CreateEstablishment(103);
+
+        DbContext.Establishments.AddRange(establishment1, establishment2, establishment3);
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var olderSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment1.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.CompleteReviewed,
+            Deleted = false,
+            DateCompleted = DateTime.UtcNow.AddDays(-10),
+            DateCreated = DateTime.UtcNow.AddDays(-12),
+        };
+
+        var latestSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment1.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.CompleteReviewed,
+            Deleted = false,
+            DateCompleted = DateTime.UtcNow.AddDays(-1),
+            DateCreated = DateTime.UtcNow.AddDays(-2),
+        };
+
+        var otherEstablishmentSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment2.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.CompleteReviewed,
+            Deleted = false,
+            DateCompleted = DateTime.UtcNow.AddDays(-3),
+            DateCreated = DateTime.UtcNow.AddDays(-4),
+        };
+
+        var deletedSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment3.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.CompleteReviewed,
+            Deleted = true,
+            DateCompleted = DateTime.UtcNow,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        var inProgressSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment3.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.InProgress,
+            Deleted = false,
+            DateCompleted = null,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        DbContext.Submissions.AddRange(
+            olderSubmission,
+            latestSubmission,
+            otherEstablishmentSubmission,
+            deletedSubmission,
+            inProgressSubmission
+        );
+
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        DbContext.ChangeTracker.Clear();
+
+        // Act
+        var result = await _repository.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+            [establishment1.Id, establishment2.Id, establishment3.Id]
+        );
+
+        // Assert
+        Assert.Equal(2, result.Count);
+
+        Assert.Contains(result, s => s.Id == latestSubmission.Id);
+        Assert.Contains(result, s => s.Id == otherEstablishmentSubmission.Id);
+        Assert.DoesNotContain(result, s => s.Id == olderSubmission.Id);
+        Assert.DoesNotContain(result, s => s.Id == deletedSubmission.Id);
+        Assert.DoesNotContain(result, s => s.Id == inProgressSubmission.Id);
+
+        Assert.All(result, submission =>
+        {
+            Assert.NotNull(submission.Establishment);
+            Assert.False(string.IsNullOrWhiteSpace(submission.Establishment.OrgName));
+        });
+    }
+
     private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdProvider
     {
         public Guid GetUserActionId() => userActionId;

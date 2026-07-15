@@ -1,4 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Providers;
@@ -25,6 +24,8 @@ using Dfe.PlanTech.Web.Factories;
 using Dfe.PlanTech.Web.Handlers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.Middleware;
+using Dfe.PlanTech.Web.Validators;
+using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using GovUk.Frontend.AspNetCore;
@@ -35,6 +36,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Notify.Client;
 using Notify.Interfaces;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Web;
 
@@ -332,11 +334,16 @@ public static class ServiceCollectionExtensions
             IFooterLinksViewComponentViewBuilder,
             FooterLinksViewComponentViewBuilder
         >();
+        services.AddTransient<
+            IGroupSelectSchoolsToAssessValidator,
+            GroupSelectSchoolsToAssessValidator
+        >();
         services.AddTransient<IGroupsViewBuilder, GroupsViewBuilder>();
         services.AddTransient<IPagesViewBuilder, PagesViewBuilder>();
         services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();
         services.AddTransient<IRecommendationsViewBuilder, RecommendationsViewBuilder>();
         services.AddTransient<IReviewAnswersViewBuilder, ReviewAnswersViewBuilder>();
+        services.AddTransient<ISelfAssessmentSummaryViewBuilder, SelfAssessmentSummaryViewBuilder>();
 
         return services;
     }
@@ -363,7 +370,6 @@ public static class ServiceCollectionExtensions
         {
             healthChecks.AddSqlServer(configuration.GetConnectionString("Database") ?? "");
         }
-        ;
 
         return services;
     }

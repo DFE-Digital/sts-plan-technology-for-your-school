@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -16,4 +17,5 @@ public class QuestionViewModel
     public string? SectionName { get; init; }
     public string? SectionSlug { get; init; }
     public string? SectionId { get; init; }
+    public MatEstablishmentModel? MatEstablishmentModel { get; init; } = null;
 }

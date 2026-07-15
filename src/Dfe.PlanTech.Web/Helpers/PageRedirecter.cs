@@ -30,6 +30,28 @@ public static class PageRedirecter
             new { categorySlug, sectionSlug }
         );
 
+    public static RedirectToActionResult RedirectToSchoolSelfAssessmentSummary(
+        this Controller controller,
+        string categorySlug,
+        string sectionSlug
+    ) =>
+        controller.RedirectToAction(
+            nameof(ReviewAnswersController.GetSchoolSelfAssessmentSummary),
+            nameof(ReviewAnswersController).GetControllerNameSlug(),
+            new { categorySlug, sectionSlug }
+    );
+
+    public static RedirectToActionResult RedirectToTrustSelfAssessmentSummary(
+    this Controller controller,
+    string categorySlug,
+    string sectionSlug
+    ) =>
+    controller.RedirectToAction(
+        nameof(ReviewAnswersController.GetTrustSelfAssessmentSummary),
+        nameof(ReviewAnswersController).GetControllerNameSlug(),
+        new { categorySlug, sectionSlug }
+    );
+
     public static RedirectToActionResult RedirectToHomePage(this Controller controller) =>
         RedirectToPage(controller, UrlConstants.HomePage);
 

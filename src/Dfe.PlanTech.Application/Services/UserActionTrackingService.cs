@@ -31,11 +31,10 @@ public class UserActionTrackingService(
             _httpContextAccessor.HttpContext
             ?? throw new InvalidOperationException("No active HttpContext found.");
 
-        var request =
-            httpContext?.Request
-            ?? throw new InvalidOperationException("No active HttpRequest found.");
+        var request = httpContext.Request;
 
         var userId = _currentUser.UserId;
+
         if (userId is null)
         {
             logger.LogInformation("No current user ID found");
@@ -45,31 +44,49 @@ public class UserActionTrackingService(
         var requestedUrl = $"{request.Path}{request.QueryString}";
 
         if (
-            httpContext.Items.TryGetValue(UserActionIdConstants.HttpContextItemKey, out var value)
-            && value is Guid
+            httpContext.Items.TryGetValue(
+                UserActionIdConstants.RecordedHttpContextItemKey,
+                out var recorded
+            )
+            && recorded is true
         )
         {
             logger.LogInformation(
                 "User action already recorded for request {RequestPath}.",
                 requestedUrl
             );
+
             return;
         }
 
-        var userActionId = Guid.NewGuid();
-        var userAction = new UserActionEntity
-        {
-            Id = userActionId,
-            SessionId = currentUser.SessionId,
-            UserId = userId.Value,
-            EstablishmentId = await currentUser.GetActiveEstablishmentIdAsync(),
-            MatEstablishmentId = currentUser.IsMat ? currentUser.UserOrganisationId : null,
-            RequestedUrl = requestedUrl,
-        };
+        var userActionId =
+            httpContext.Items.TryGetValue(
+                UserActionIdConstants.HttpContextItemKey,
+                out var value
+            )
+            && value is Guid existingUserActionId
+                ? existingUserActionId
+                : Guid.NewGuid();
 
         httpContext.Items[UserActionIdConstants.HttpContextItemKey] = userActionId;
 
+        var userAction = new UserActionEntity
+        {
+            Id = userActionId,
+            SessionId = _currentUser.SessionId,
+            UserId = userId.Value,
+            EstablishmentId = await _currentUser.GetActiveEstablishmentIdAsync(),
+            MatEstablishmentId = _currentUser.IsMat
+                ? _currentUser.UserOrganisationId
+                : null,
+            RequestedUrl = requestedUrl,
+        };
+
         await _userActionRepository.CreateAsync(userAction);
+
+        httpContext.Items[
+            UserActionIdConstants.RecordedHttpContextItemKey
+        ] = true;
     }
 
     public async Task<SqlUserActionDto?> GetAsync(Guid id)
