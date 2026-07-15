@@ -4,10 +4,10 @@
     @{
         await Html.RenderPartialAsync("BackButton");
 
-        @if (Model.MatEstablishmentModel?.IsMatMultiSchoolAssessment == true)
+        @if (Model?.IsMatMultiSchoolAssessment == true)
         {
             var schoolLabel =
-                Model.MatEstablishmentModel.SelectedSchoolCount == 1
+                Model.SelectedSchoolCount == 1
                     ? "school"
                     : "schools";
 
@@ -15,7 +15,7 @@
                 <summary class="govuk-details__summary">
                     <span class="govuk-details__summary-text">
                         You are submitting the self-assessment for
-                        @Model.MatEstablishmentModel.SelectedSchoolCount
+                        @Model.SelectedSchoolCount
                         @schoolLabel
                     </span>
                 </summary>

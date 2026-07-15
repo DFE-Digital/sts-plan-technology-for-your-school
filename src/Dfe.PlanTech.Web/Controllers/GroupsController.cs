@@ -88,6 +88,10 @@ public class GroupsController : BaseController<GroupsController>
             schoolName
         );
 
+        HttpContext.Session.Remove(
+            SessionConstants.SelectedEstablishmentsKey
+        );
+
         _currentUser.SetGroupSelectedSchool(
             schoolUrn,
             schoolName
