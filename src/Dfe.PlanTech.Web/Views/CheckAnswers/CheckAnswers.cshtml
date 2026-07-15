@@ -16,22 +16,32 @@
     @{
         await Html.RenderPartialAsync("PrintButton", Model);
     }
-} 
-
+}
 @if (Model.MatEstablishmentModel?.IsMatMultiSchoolAssessment == true)
 {
-    <div class="govuk-inset-text">
-        <p class="govuk-body">
-            You are completing this self-assessment for @Model.MatEstablishmentModel.SelectedSchoolCount schools:
-        </p>
+    var schoolLabel =
+        Model.MatEstablishmentModel.SelectedSchoolCount == 1
+            ? "school"
+            : "schools";
 
-        <ul class="govuk-list govuk-list--bullet">
+    <details class="govuk-details govuk-!-margin-top-n6" open>
+        <summary class="govuk-details__summary">
+            <span class="govuk-details__summary-text">
+                You are submitting the self-assessment for
+                @Model.MatEstablishmentModel.SelectedSchoolCount
+                @schoolLabel
+            </span>
+        </summary>
+
+        <div class="govuk-details__text">
             @foreach (var schoolName in Model.MatEstablishmentModel.SelectedSchoolNames)
             {
-                <li>@schoolName</li>
+                <p class="govuk-body govuk-!-margin-bottom-0">
+                    @schoolName
+                </p>
             }
-        </ul>
-    </div>
+        </div>
+    </details>
 }
 
 <div id="checkYourAnswers-page">
@@ -84,14 +94,14 @@
                         <li>@schoolName</li>
                     }
                 </ul>
-                <p class="govuk-body class=" govuk-margin-bottom-2"">
-                    You'll get recommendations to help you schools meet the @Model.SectionName standards. Your self-assessment answers will be used to give these recommendations a progress status'
+                <p>
+                    You'll get recommendations to help you schools meet the @Model.SectionName standards. Your self-assessment answers will be used to give these recommendations a progress status.
                 </p>
             </div>
         }
         else
         {
-            
+
             foreach (var content in Model.Content ?? [])
             {
                 await Html.RenderPartialAsync("Components/PageComponentFactory", content);
