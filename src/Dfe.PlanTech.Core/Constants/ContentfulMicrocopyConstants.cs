@@ -141,6 +141,17 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectSchoolsToAssessNoSelectionErrorFallback = "Select one, more or all schools";
     private const string GroupsSelectSchoolsToAssessConflictErrorFallback = "Select one or more schools, or select 'Submit self-assessment for all schools without a submission'";
 
+    public const string SchoolSummarySuccessBodyFallback = "Self-assessment has been submitted";
+    public const string SchoolSummaryHeaderFallback = "What to do next";
+    public const string SchoolSummaryRecLinkFallback = "View the recommendations";
+    public const string SchoolSummarySubmitAnotherBodyFallback = "Submit self-assessments to get recommendations and track your school's progress towards meeting the standards.";
+    public const string MatSummarySuccessBodyFallback = "Self-assessment has been submitted for the schools";
+    public const string MatSummaryRecLinkIntroFallback = "View recommendations:";
+    public const string MatSummarySubmitAnotherBodyFallback = "Self-assessments are required for some schools in your trust.";
+    public const string SummaryRecHeaderFallback = "View recommendations and track progress";
+    public const string SummaryRecBodyFallback = "Completing recommendations will help you meet the {{category}} standard.";
+    public const string SummarySubmitAnotherHeadingFallback = "Submit another self-assessment";
+
     public static readonly IReadOnlyDictionary<string, string> FallbackText = new Dictionary<
         string,
         string
@@ -208,6 +219,16 @@ public static class ContentfulMicrocopyConstants
         { GroupsSelectSchoolsToAssessContinue, GroupsSelectSchoolsToAssessContinueFallback },
         { GroupsSelectSchoolsToAssessNoSelectionError, GroupsSelectSchoolsToAssessNoSelectionErrorFallback },
         { GroupsSelectSchoolsToAssessConflictError, GroupsSelectSchoolsToAssessConflictErrorFallback },
+        { SchoolSummarySuccessBody, SchoolSummarySuccessBodyFallback },
+        { SchoolSummaryHeader, SchoolSummaryHeaderFallback },
+        { SchoolSummaryRecLink, SchoolSummaryRecLinkFallback },
+        { SchoolSummarySubmitAnotherBody, SchoolSummarySubmitAnotherBodyFallback },
+        { MatSummarySuccessBody, MatSummarySuccessBodyFallback },
+        { MatSummaryRecLinkIntro, MatSummaryRecLinkIntroFallback },
+        { MatSummarySubmitAnotherBody, MatSummarySubmitAnotherBodyFallback },
+        { SummaryRecHeader, SummaryRecHeaderFallback },
+        { SummaryRecBody, SummaryRecBodyFallback },
+        { SummarySubmitAnotherHeading, SummarySubmitAnotherHeadingFallback },
     };
 
     internal static class VariableNames

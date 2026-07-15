@@ -75,7 +75,8 @@ public class MicrocopyProvider(
             )
         )
         {
-            throw new KeyNotFoundException($"Microcopy record with key '{key}' was not found.");
+            logger.LogInformation($"Microcopy with key '{key}' was not found in contentful or fallback text.");
+            return key;
         }
 
         return record?.GetText(dynamicValues) ?? noRecordFallbackText!;
