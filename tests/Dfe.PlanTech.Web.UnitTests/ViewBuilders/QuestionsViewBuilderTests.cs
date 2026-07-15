@@ -33,6 +33,7 @@ public class QuestionsViewBuilderTests
         Substitute.For<IEstablishmentService>();
     private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
     private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider = Substitute.For<IMatEstablishmentProvider>();
 
     // Options
     private readonly IOptions<ContactOptionsConfiguration> _contactOptions = Options.Create(
@@ -62,7 +63,7 @@ public class QuestionsViewBuilderTests
             _questionSvc,
             _submissionSvc,
             _establishmentSvc,
-            _httpContextAccessor
+            _matEstablishmentProvider
         );
 
     private static Controller MakeControllerWithTempData()

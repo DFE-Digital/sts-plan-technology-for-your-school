@@ -5,7 +5,6 @@ using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
-using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
 using Dfe.PlanTech.Web.Helpers;
@@ -20,15 +19,14 @@ public class ReviewAnswersViewBuilder(
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
     ISubmissionService submissionService,
-    IHttpContextAccessor httpContextAccessor,
-    IEstablishmentService establishmentService
+    IMatEstablishmentProvider matEstablishmentProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
 
-    private readonly IHttpContextAccessor _httpContextAccessor =
-        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
+        matEstablishmentProvider ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     public const string ViewAnswersViewName = "~/Views/ViewAnswers/ViewAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
@@ -255,16 +253,19 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage
     )
     {
+
+        var matUser = await _matEstablishmentProvider.PopulateMatSelectedSchools(CurrentUser);
+
         var viewModel = await BuildViewModel(
             routingData,
             categorySlug,
             sectionSlug,
             PageTitleConstants.CheckAnswers,
             UrlConstants.CheckAnswersSlug,
-            errorMessage
+            errorMessage,
+            matUser
         );
 
-        await PopulateMatSelectedSchools(viewModel);
 
         return viewModel;
     }
@@ -275,7 +276,8 @@ public class ReviewAnswersViewBuilder(
         string sectionSlug,
         string pageTitle,
         string pageSlug,
-        string? errorMessage
+        string? errorMessage,
+        MatEstablishmentModel? establishmentModel = null
     )
     {
         List<ContentfulEntry> content = [];
@@ -301,54 +303,8 @@ public class ReviewAnswersViewBuilder(
             SubmissionId = routingData.Submission?.SubmissionId,
             SubmissionResponses = submissionResponsesViewModel,
             ErrorMessage = errorMessage,
+            MatEstablishmentModel = establishmentModel
         };
     }
 
-    private async Task PopulateMatSelectedSchools(ReviewAnswersViewModel viewModel)
-    {
-        if (!CurrentUser.IsMat)
-        {
-            return;
-        }
-
-        var selectedSchoolNames = await GetSelectedSchoolNames();
-
-        viewModel.IsMatMultiSchoolAssessment = selectedSchoolNames.Any();
-        viewModel.SelectedSchoolCount = selectedSchoolNames.Count;
-        viewModel.SelectedSchoolNames = selectedSchoolNames;
-    }
-
-    private IEnumerable<int> GetSelectedEstablishmentIdsFromSession()
-    {
-        var selectedEstablishments =
-            _httpContextAccessor.HttpContext!.Session.GetValue(
-                SessionConstants.SelectedEstablishmentsKey
-                );
-
-        return selectedEstablishments as IEnumerable<int> ?? [];
-    }
-
-    private async Task<List<string>> GetSelectedSchoolNames()
-    {
-        var selectedEstablishmentIds = GetSelectedEstablishmentIdsFromSession().ToArray();
-
-        if (selectedEstablishmentIds.Length == 0)
-        {
-            return [];
-        }
-
-        var schools = new List<string>();
-
-        foreach (var establishmentId in selectedEstablishmentIds)
-        {
-            var establishment = await establishmentService.GetEstablishmentByIdAsync(establishmentId);
-
-            if (!string.IsNullOrWhiteSpace(establishment.OrgName))
-            {
-                schools.Add(establishment.OrgName);
-            }
-        }
-
-        return schools;
-    }
 }

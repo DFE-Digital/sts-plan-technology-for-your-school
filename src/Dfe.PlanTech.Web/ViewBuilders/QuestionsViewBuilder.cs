@@ -26,7 +26,7 @@ public class QuestionsViewBuilder(
     IQuestionService questionService,
     ISubmissionService submissionService,
     IEstablishmentService establishmentService,
-    IHttpContextAccessor httpContextAccessor
+    IMatEstablishmentProvider matEstablishmentProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
     private readonly IQuestionService _questionService =
@@ -41,8 +41,8 @@ public class QuestionsViewBuilder(
         errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
     private readonly ContentfulOptionsConfiguration _contentfulOptions =
         contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
-    private readonly IHttpContextAccessor _httpContextAccessor =
-        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
+        matEstablishmentProvider ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
@@ -470,7 +470,7 @@ public class QuestionsViewBuilder(
         }
 
         var routingEstablishmentId = CurrentUser.IsMat
-            ? GetSelectedEstablishmentIdsFromSession().FirstOrDefault()
+            ? _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().FirstOrDefault()
             : activeEstablishmentId;
 
         if (routingEstablishmentId == 0)
@@ -510,7 +510,7 @@ public class QuestionsViewBuilder(
 )
     {
         var establishmentIds = CurrentUser.IsMat
-            ? GetSelectedEstablishmentIdsFromSession().ToArray()
+            ? _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().ToArray()
             : [activeEstablishmentId];
 
         foreach (var establishmentId in establishmentIds)
@@ -522,54 +522,6 @@ public class QuestionsViewBuilder(
                 answerViewModel.ToModel()
             );
         }
-    }
-
-    private IEnumerable<int> GetSelectedEstablishmentIdsFromSession()
-    {
-        var selectedEstablishments =
-            _httpContextAccessor.HttpContext!.Session.GetValue(
-                SessionConstants.SelectedEstablishmentsKey
-            );
-
-        return selectedEstablishments as IEnumerable<int> ?? [];
-    }
-
-    private async Task<List<string>> GetSelectedSchoolNames()
-    {
-        var selectedEstablishmentIds = GetSelectedEstablishmentIdsFromSession().ToArray();
-
-        if (selectedEstablishmentIds.Length == 0)
-        {
-            return [];
-        }
-
-        var schools = new List<string>();
-
-        foreach (var establishmentId in selectedEstablishmentIds)
-        {
-            var establishment = await establishmentService.GetEstablishmentByIdAsync(establishmentId);
-
-            if (!string.IsNullOrWhiteSpace(establishment.OrgName))
-            {
-                schools.Add(establishment.OrgName);
-            }
-        }
-
-        return schools;
-    }
-
-    private async Task PopulateMatSelectedSchools(QuestionViewModel viewModel)
-    {
-        if (!CurrentUser.IsMat)
-        {
-            return;
-        }
-
-        var selectedSchoolNames = await GetSelectedSchoolNames();
-
-        viewModel.IsMatMultiSchoolAssessment = selectedSchoolNames.Any();
-        viewModel.SelectedSchoolCount = selectedSchoolNames.Count;
-        viewModel.SelectedSchoolNames = selectedSchoolNames;
     }
 
     private async Task<string> BuildErrorMessage()
@@ -616,6 +568,8 @@ public class QuestionsViewBuilder(
             nextQuestion.Answers = [];
         }
 
+        var matUser = await _matEstablishmentProvider.PopulateMatSelectedSchools(CurrentUser);
+
         var viewModel = new QuestionViewModel
         {
             Question = question,
@@ -624,9 +578,9 @@ public class QuestionsViewBuilder(
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
             SectionId = section?.Id,
+            MatEstablishmentModel = matUser
         };
 
-        await PopulateMatSelectedSchools(viewModel);
 
         return viewModel;
     }

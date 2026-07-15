@@ -18,15 +18,15 @@
     }
 } 
 
-@if (Model.IsMatMultiSchoolAssessment)
+@if (Model.MatEstablishmentModel?.IsMatMultiSchoolAssessment == true)
 {
     <div class="govuk-inset-text">
         <p class="govuk-body">
-            You are completing this self-assessment for @Model.SelectedSchoolCount schools:
+            You are completing this self-assessment for @Model.MatEstablishmentModel.SelectedSchoolCount schools:
         </p>
 
         <ul class="govuk-list govuk-list--bullet">
-            @foreach (var schoolName in Model.SelectedSchoolNames)
+            @foreach (var schoolName in Model.MatEstablishmentModel.SelectedSchoolNames)
             {
                 <li>@schoolName</li>
             }
@@ -70,23 +70,16 @@
         <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
         <input type="hidden" name="sectionName" value="@Model.SectionName">
 
-        @if(!Model.IsMatMultiSchoolAssessment)
-        {
-            foreach (var content in Model.Content ?? [])
-            {
-                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-                }
-        }
-        else
+        @if(Model.MatEstablishmentModel?.IsMatMultiSchoolAssessment == true)
         {
             <div>
                 <h2>What happens next</h2>
                 <p class="govuk-body">
-                    You're submitting the @Model.SectionName self-assessments for @Model.SelectedSchoolCount schools:
+                    You're submitting the @Model.SectionName self-assessments for @Model.MatEstablishmentModel.SelectedSchoolCount schools:
                 </p>
 
                 <ul class="govuk-list govuk-list--bullet">
-                    @foreach (var schoolName in Model.SelectedSchoolNames)
+                    @foreach (var schoolName in Model.MatEstablishmentModel.SelectedSchoolNames)
                     {
                         <li>@schoolName</li>
                     }
@@ -95,6 +88,14 @@
                     You'll get recommendations to help you schools meet the @Model.SectionName standards. Your self-assessment answers will be used to give these recommendations a progress status'
                 </p>
             </div>
+        }
+        else
+        {
+            
+            foreach (var content in Model.Content ?? [])
+            {
+                await Html.RenderPartialAsync("Components/PageComponentFactory", content);
+            }
         }
 
 

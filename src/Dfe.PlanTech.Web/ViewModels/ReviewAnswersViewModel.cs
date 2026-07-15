@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.Models;
 
 namespace Dfe.PlanTech.Web.ViewModels;
 
@@ -22,7 +23,6 @@ public class ReviewAnswersViewModel
     public string? SectionSlug { get; init; } = null;
     public string? Slug { get; init; } = null;
     public int? SubmissionId { get; init; }
-    public bool IsMatMultiSchoolAssessment { get; set; }
-    public int SelectedSchoolCount { get; set; }
-    public List<string> SelectedSchoolNames { get; set; } = [];
+    public MatEstablishmentModel? MatEstablishmentModel { get; init; } = null;
+ 
 }
