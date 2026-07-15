@@ -61,7 +61,7 @@ public class QuestionsViewBuilderTests
             _questionSvc,
             _submissionSvc,
             _establishmentSvc,
-            _httpContextAccessor
+            _matEstablishmentProvider
         );
 
     private static Controller MakeControllerWithTempData()
