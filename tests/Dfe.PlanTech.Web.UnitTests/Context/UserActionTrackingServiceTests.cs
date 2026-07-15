@@ -61,6 +61,8 @@ public class UserActionTrackingServiceTests
 
         Assert.True(_httpContext.Items.ContainsKey(UserActionIdConstants.HttpContextItemKey));
         Assert.IsType<Guid>(_httpContext.Items[UserActionIdConstants.HttpContextItemKey]);
+        Assert.True(_httpContext.Items.ContainsKey(UserActionIdConstants.RecordedHttpContextItemKey));
+        Assert.True(Assert.IsType<bool>(_httpContext.Items[UserActionIdConstants.RecordedHttpContextItemKey]));
     }
 
     [Fact]
@@ -172,5 +174,57 @@ public class UserActionTrackingServiceTests
         Assert.Equal(userActionEntity.RequestedUrl, result.RequestedUrl);
 
         await _userActionRepository.Received(1).GetUserActionAsync(id);
+    }
+
+    [Fact]
+    public async Task RecordAsync_WhenMiddlewareHasCreatedUserActionId_UsesExistingId()
+    {
+        var userActionId = Guid.NewGuid();
+
+        _httpContext.Items[UserActionIdConstants.HttpContextItemKey] =
+            userActionId;
+
+        _currentUser.UserId.Returns(101);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(201);
+        _currentUser.IsMat.Returns(false);
+
+        var service = BuildService();
+
+        await service.RecordActionAsync();
+
+        await _userActionRepository
+            .Received(1)
+            .CreateAsync(
+                Arg.Is<UserActionEntity>(entity =>
+                    entity.Id == userActionId
+                )
+            );
+
+        Assert.Equal(
+            userActionId,
+            _httpContext.Items[UserActionIdConstants.HttpContextItemKey]
+        );
+    }
+
+    [Fact]
+    public async Task RecordAsync_WhenActionAlreadyRecorded_DoesNotCreateAnotherUserAction()
+    {
+        _httpContext.Items[
+            UserActionIdConstants.HttpContextItemKey
+        ] = Guid.NewGuid();
+
+        _httpContext.Items[
+            UserActionIdConstants.RecordedHttpContextItemKey
+        ] = true;
+
+        _currentUser.UserId.Returns(101);
+
+        var service = BuildService();
+
+        await service.RecordActionAsync();
+
+        await _userActionRepository
+            .DidNotReceive()
+            .CreateAsync(Arg.Any<UserActionEntity>());
     }
 }

@@ -1,5 +1,6 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Core.Constants;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.Validators.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
@@ -48,16 +49,13 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASelfAssessment()
     {
+        _currentUser.ClearSelectedGroupSchool();
+
+        HttpContext.Session.Remove(
+            SessionConstants.SelectedEstablishmentsKey
+        );
+
         return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
-    }
-
-    [HttpPost($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
-    public async Task<IActionResult> SelectSchool(string schoolUrn, string schoolName)
-    {
-        await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
-        _currentUser.SetGroupSelectedSchool(schoolUrn, schoolName);
-
-        return Redirect(UrlConstants.HomePage);
     }
 
     [HttpGet(
@@ -71,6 +69,34 @@ public class GroupsController : BaseController<GroupsController>
         return await _groupsViewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(
             this,
             sectionSlug
+        );
+    }
+
+    [HttpGet($"{UrlConstants.GroupsSlug}/select-school-and-redirect")]
+    public async Task<IActionResult> SelectSchoolAndRedirect(
+    string schoolUrn,
+    string schoolName,
+    string categorySlug
+)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(schoolUrn);
+        ArgumentException.ThrowIfNullOrWhiteSpace(schoolName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        await _groupsViewBuilder.RecordGroupSelectionAsync(
+            schoolUrn,
+            schoolName
+        );
+
+        _currentUser.SetGroupSelectedSchool(
+            schoolUrn,
+            schoolName
+        );
+
+        return RedirectToAction(
+            nameof(PagesController.GetByRoute),
+            nameof(PagesController).GetControllerNameSlug(),
+            new { route = categorySlug }
         );
     }
 
@@ -122,5 +148,24 @@ public class GroupsController : BaseController<GroupsController>
             sectionSlug,
             schoolUrn
         );
+    }
+
+    [HttpPost($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
+    public async Task<IActionResult> SelectSchool(
+        string schoolUrn,
+        string schoolName
+    )
+    {
+        await _groupsViewBuilder.RecordGroupSelectionAsync(
+            schoolUrn,
+            schoolName
+        );
+
+        _currentUser.SetGroupSelectedSchool(
+            schoolUrn,
+            schoolName
+        );
+
+        return Redirect(UrlConstants.HomePage);
     }
 }

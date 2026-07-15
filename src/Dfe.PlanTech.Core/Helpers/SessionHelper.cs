@@ -32,6 +32,13 @@ public static class SessionHelper
         return value != null ? JsonSerializer.Deserialize(value, type) : null;
     }
 
+    public static IReadOnlyList<int> GetSelectedEstablishmentIds(this ISession session)
+    {
+        return session.GetValue(SessionConstants.SelectedEstablishmentsKey) as int[]
+            ?? (session.GetValue(SessionConstants.SelectedEstablishmentsKey) as IEnumerable<int>)?.ToArray()
+            ?? [];
+    }
+
     public static void Remove(this ISession session, string key)
     {
         session.Remove(key);

@@ -31,7 +31,7 @@ public class QuestionsViewBuilderTests
     private readonly ISubmissionService _submissionSvc = Substitute.For<ISubmissionService>();
     private readonly IEstablishmentService _establishmentSvc = Substitute.For<IEstablishmentService>();
     private readonly ICurrentUserProvider _currentUserProvider = Substitute.For<ICurrentUserProvider>();
-    private readonly IHttpContextAccessor _httpContextAccessor = Substitute.For<IHttpContextAccessor>();
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider = Substitute.For<IMatEstablishmentProvider>();
 
     // Options
     private readonly IOptions<ContactOptionsConfiguration> _contactOptions = Options.Create(
@@ -61,7 +61,7 @@ public class QuestionsViewBuilderTests
             _questionSvc,
             _submissionSvc,
             _establishmentSvc,
-            _httpContextAccessor
+            _matEstablishmentProvider
         );
 
     private static Controller MakeControllerWithTempData()
@@ -120,7 +120,7 @@ public class QuestionsViewBuilderTests
     }
 
     [Fact]
-    public void Constructor_WithNullHttpContextAccessor_ThrowsArgumentNullException()
+    public void Constructor_WithNullMatEstablishmentProvider_ThrowsArgumentNullException()
     {
         var ex = Assert.Throws<ArgumentNullException>(() =>
             new QuestionsViewBuilder(
@@ -137,7 +137,7 @@ public class QuestionsViewBuilderTests
             )
         );
 
-        Assert.Equal("httpContextAccessor", ex.ParamName);
+        Assert.Equal("matEstablishmentProvider", ex.ParamName);
     }
 
     // ---------- RouteByQuestionId ----------
@@ -183,7 +183,6 @@ public class QuestionsViewBuilderTests
     [Fact]
     public async Task RouteByQuestionId_WhenMatUserHasSelectedSchools_PopulatesSelectedSchoolNames()
     {
-        // Arrange
         _contentfulOptions = new ContentfulOptionsConfiguration
         {
             UsePreviewApi = true
@@ -192,40 +191,17 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
-
-        IEnumerable<int> selectedEstablishmentIds = [101, 102, 103];
-
-        controller.HttpContext.Session.SetValue(
-            SessionConstants.SelectedEstablishmentsKey,
-            selectedEstablishmentIds
-        );
-
         _currentUserProvider.IsMat.Returns(true);
 
-        _establishmentSvc
-            .GetEstablishmentByIdAsync(101)
-            .Returns(new SqlEstablishmentDto
-            {
-                Id = 101,
-                OrgName = "School One"
-            });
+        var matEstablishmentModel = new MatEstablishmentModel(
+            true,
+            2,
+            ["School One", "School Three"]
+        );
 
-        _establishmentSvc
-            .GetEstablishmentByIdAsync(102)
-            .Returns(new SqlEstablishmentDto
-            {
-                Id = 102,
-                OrgName = " "
-            });
-
-        _establishmentSvc
-            .GetEstablishmentByIdAsync(103)
-            .Returns(new SqlEstablishmentDto
-            {
-                Id = 103,
-                OrgName = "School Three"
-            });
+        _matEstablishmentProvider
+            .PopulateMatSelectedSchools(_currentUserProvider)
+            .Returns(matEstablishmentModel);
 
         var question = MakeQuestion(
             "Q1",
@@ -237,35 +213,25 @@ public class QuestionsViewBuilderTests
             .GetQuestionByIdAsync("Q1")
             .Returns(question);
 
-        // Act
         var result = await sut.RouteByQuestionId(
             controller,
             "Q1"
         );
 
-        // Assert
         var view = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<QuestionViewModel>(view.Model);
 
-        Assert.True(model.IsMatMultiSchoolAssessment);
-        Assert.Equal(2, model.SelectedSchoolCount);
-
+        Assert.NotNull(model.MatEstablishmentModel);
+        Assert.True(model.MatEstablishmentModel.IsMatMultiSchoolAssessment);
+        Assert.Equal(2, model.MatEstablishmentModel.SelectedSchoolCount);
         Assert.Equal(
             new[] { "School One", "School Three" },
-            model.SelectedSchoolNames
+            model.MatEstablishmentModel.SelectedSchoolNames
         );
 
-        await _establishmentSvc
+        await _matEstablishmentProvider
             .Received(1)
-            .GetEstablishmentByIdAsync(101);
-
-        await _establishmentSvc
-            .Received(1)
-            .GetEstablishmentByIdAsync(102);
-
-        await _establishmentSvc
-            .Received(1)
-            .GetEstablishmentByIdAsync(103);
+            .PopulateMatSelectedSchools(_currentUserProvider);
     }
 
     // ---------- RouteToInterstitialPage ----------
@@ -567,14 +533,9 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
-
-        IEnumerable<int> selectedEstablishmentIds = [101, 102, 103];
-
-        controller.HttpContext.Session.SetValue(
-            SessionConstants.SelectedEstablishmentsKey,
-            selectedEstablishmentIds
-        );
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101, 102, 103]);
 
         _currentUserProvider.IsMat.Returns(true);
         _currentUserProvider.UserId.Returns(11);
@@ -618,7 +579,9 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([]);
 
         _currentUserProvider.IsMat.Returns(true);
         _currentUserProvider.UserId.Returns(11);
@@ -646,8 +609,8 @@ public class QuestionsViewBuilderTests
             null
         );
 
-        await _submissionSvc.DidNotReceive()
-            .SubmitAnswerAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<SubmitAnswerModel>());
+        await _submissionSvc.Received(1)
+            .SubmitAnswerAsync(11, 999, 999, Arg.Any<SubmitAnswerModel>());
 
         await _questionSvc.Received(1)
             .GetNextUnansweredQuestion(999, section);
@@ -661,14 +624,9 @@ public class QuestionsViewBuilderTests
         var sut = CreateServiceUnderTest();
         var controller = MakeControllerWithTempData();
 
-        _httpContextAccessor.HttpContext.Returns(controller.HttpContext);
-
-        IEnumerable<int> selectedEstablishmentIds = [101, 102];
-
-        controller.HttpContext.Session.SetValue(
-            SessionConstants.SelectedEstablishmentsKey,
-            selectedEstablishmentIds
-        );
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101, 102]);
 
         _currentUserProvider.IsMat.Returns(true);
         _currentUserProvider.UserId.Returns(11);
@@ -1404,7 +1362,10 @@ public class QuestionsViewBuilderTests
                 section,
                 Arg.Is<IEnumerable<SubmissionStatus>>(s => s.Contains(SubmissionStatus.InProgress))
             )
-            .Returns(new SubmissionResponsesModel(1, []));
+            .Returns(new SubmissionResponsesModel(1, [])
+            {
+                Status = SubmissionStatus.InProgress
+            });
 
         var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
 
@@ -1416,6 +1377,186 @@ public class QuestionsViewBuilderTests
         Assert.Equal("Test School", model.TrustSchoolAssessments[0].SchoolName);
         Assert.Equal(SubmissionStatus.InProgress, model.TrustSchoolAssessments[0].Status);
         Assert.Contains("schoolUrn=900006", model.TrustSchoolAssessments[0].ViewAnswersHref);
+    }
+
+
+    [Fact]
+    public async Task RouteToInterstitialPage_WhenMatSchoolHasCompleteNotReviewedSubmission_AddsViewAnswersLink()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
+        var section = new QuestionnaireSectionEntry
+        {
+            InternalName = "Section name",
+            Name = "Section name",
+            ShortDescription = "Short description",
+            Questions = [],
+        };
+
+        _contentful.GetPageBySlugAsync("section-slug").Returns(page);
+        _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
+
+        _establishmentSvc
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
+
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 101,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
+
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(
+                101,
+                section,
+                Arg.Any<IEnumerable<SubmissionStatus>>()
+            )
+            .Returns(new SubmissionResponsesModel(1, [])
+            {
+                Status = SubmissionStatus.CompleteNotReviewed
+            });
+
+        var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<PageViewModel>(view.Model);
+
+        Assert.Single(model.TrustSchoolAssessments);
+        Assert.Equal(SubmissionStatus.CompleteNotReviewed, model.TrustSchoolAssessments[0].Status);
+        Assert.Contains("schoolUrn=900006", model.TrustSchoolAssessments[0].ViewAnswersHref);
+    }
+
+    [Fact]
+    public async Task RouteToInterstitialPage_WhenMatSchoolHasCompleteReviewedSubmission_DoesNotAddRow()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
+        var section = new QuestionnaireSectionEntry
+        {
+            InternalName = "Section name",
+            Name = "Section name",
+            ShortDescription = "Short description",
+            Questions = [],
+        };
+
+        _contentful.GetPageBySlugAsync("section-slug").Returns(page);
+        _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
+
+        _establishmentSvc
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
+
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 101,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
+
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(
+                101,
+                section,
+                Arg.Any<IEnumerable<SubmissionStatus>>()
+            )
+            .Returns(new SubmissionResponsesModel(1, [])
+            {
+                Status = SubmissionStatus.CompleteReviewed
+            });
+
+        var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<PageViewModel>(view.Model);
+
+        Assert.Empty(model.TrustSchoolAssessments);
+    }
+
+    [Fact]
+    public async Task RouteToInterstitialPage_WhenMatSchoolCannotBeResolved_AddsNotStartedRow()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
+        var section = new QuestionnaireSectionEntry
+        {
+            InternalName = "Section name",
+            Name = "Section name",
+            ShortDescription = "Short description",
+            Questions = [],
+        };
+
+        _contentful.GetPageBySlugAsync("section-slug").Returns(page);
+        _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
+
+        _establishmentSvc
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
+
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns((SqlEstablishmentDto?)null);
+
+        var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<PageViewModel>(view.Model);
+
+        Assert.Single(model.TrustSchoolAssessments);
+        Assert.Equal(SubmissionStatus.NotStarted, model.TrustSchoolAssessments[0].Status);
+        Assert.Null(model.TrustSchoolAssessments[0].ViewAnswersHref);
+
+        await _submissionSvc.DidNotReceive()
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                Arg.Any<QuestionnaireSectionEntry>(),
+                Arg.Any<IEnumerable<SubmissionStatus>>()
+            );
     }
 
     [Fact]

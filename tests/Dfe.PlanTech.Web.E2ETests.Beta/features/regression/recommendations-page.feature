@@ -6,6 +6,7 @@ Feature: Recommendations Page
   @clear-data-school
     Scenario: Completing an assessment shows the correct recommendations
       Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 1"
+      And I click the link to view the recommendations for "Category One Section One"
       When I click the first recommendation link on the category landing page
       Then I should see the page heading "Recommendation Header - C1 - S1 - Q1"
 

@@ -44,9 +44,9 @@ public class SelfAssessmentSummaryViewBuilder(
     }
 
     private async Task<SelfAssessmentSummaryViewModel> BuildSelfAssessmentSummaryViewModel(
-        string categorySlug,
-        string sectionSlug
-    )
+    string categorySlug,
+    string sectionSlug
+)
     {
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -59,6 +59,22 @@ public class SelfAssessmentSummaryViewBuilder(
                 $"Could not find section id for slug {sectionSlug}"
             );
 
+        var categories =
+            await ContentfulService.GetAllCategoriesAsync()
+            ?? [];
+
+        var category = categories.FirstOrDefault(c =>
+            c.Sections?.Any(s => s.Id == sectionId) == true
+        );
+
+        var recommendationCategorySlug =
+                category?.LandingPage?.Slug
+                ?? categorySlug;
+
+        var categoryName =
+                category?.Header?.Text
+                ?? categorySlug.Replace("-", " ");
+
         var submittedSubmissions = CurrentUser.IsMat
             ? await GetMatSubmittedSubmissions(sectionId)
             : await GetSchoolSubmittedSubmissions(sectionId);
@@ -66,7 +82,7 @@ public class SelfAssessmentSummaryViewBuilder(
         return new SelfAssessmentSummaryViewModel
         {
             SectionName = section.Name,
-            CategoryName = categorySlug.Replace("-", " "),
+            CategoryName = categoryName,
             CompletedSchoolCount = submittedSubmissions.Count,
             IsMatSummary = CurrentUser.IsMat,
             RecommendationLinks = submittedSubmissions
@@ -75,7 +91,7 @@ public class SelfAssessmentSummaryViewBuilder(
             ShowSubmitAnotherSelfAssessment = true,
             SubmitAnotherSelfAssessmentHref = CurrentUser.IsMat
                 ? $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
-                : $"/{categorySlug}",
+                : $"/{recommendationCategorySlug}",
             BackToHomeHref = UrlConstants.HomePage
         };
 
@@ -88,9 +104,16 @@ public class SelfAssessmentSummaryViewBuilder(
                 LinkText = CurrentUser.IsMat
                     ? submission.Establishment!.OrgName
                     : $"View the recommendations for {section.Name!.ToLower()}",
-                Href = CurrentUser.IsMat
-                    ? $"/school/{categorySlug}/{sectionSlug}"
-                    : $"/{categorySlug}"
+
+                SchoolUrn = CurrentUser.IsMat
+            ? submission.Establishment!.EstablishmentRef
+            : null,
+
+                SchoolName = CurrentUser.IsMat
+            ? submission.Establishment!.OrgName
+            : null,
+
+                Href = $"/{recommendationCategorySlug}"
             };
         }
     }
@@ -99,17 +122,22 @@ public class SelfAssessmentSummaryViewBuilder(
         string sectionId
     )
     {
-        var selectedEstablishments =
-            _httpContextAccessor.HttpContext!.Session.GetValue(
-                SessionConstants.SelectedEstablishmentsKey
-            );
-
         var selectedEstablishmentIds =
-            selectedEstablishments as IEnumerable<int> ?? [];
+            _httpContextAccessor.HttpContext!.Session
+                .GetSelectedEstablishmentIds()
+                .ToArray();
+
+        if (selectedEstablishmentIds.Length == 0)
+        {
+            var activeEstablishmentId =
+                await GetActiveEstablishmentIdOrThrowException();
+
+            selectedEstablishmentIds = [activeEstablishmentId];
+        }
 
         var completedSubmissions =
             await _groupService.GetGroupCompletedSubmissionsBySections(
-                selectedEstablishmentIds.ToArray()
+                selectedEstablishmentIds
             );
 
         return completedSubmissions
