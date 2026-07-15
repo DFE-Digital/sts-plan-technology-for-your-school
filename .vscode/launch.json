@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Jest Test",
+      "program": "${workspaceFolder}/contentful/node_modules/jest/bin/jest.js",
+      "args": ["tests/tests/export-processor/content-types/section.test.js", "--runInBand"],
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "cwd": "${workspaceFolder}/contentful",
+      "runtimeArgs": ["--experimental-vm-modules"]
+    }
+  ]
+}
