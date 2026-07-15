@@ -68,6 +68,8 @@ public class UserActionTrackingService(
                 ? existingUserActionId
                 : Guid.NewGuid();
 
+        httpContext.Items[UserActionIdConstants.HttpContextItemKey] = userActionId;
+
         var userAction = new UserActionEntity
         {
             Id = userActionId,
