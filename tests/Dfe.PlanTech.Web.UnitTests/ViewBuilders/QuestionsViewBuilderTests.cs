@@ -646,8 +646,8 @@ public class QuestionsViewBuilderTests
             null
         );
 
-        await _submissionSvc.DidNotReceive()
-            .SubmitAnswerAsync(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<int>(), Arg.Any<SubmitAnswerModel>());
+        await _submissionSvc.Received(1)
+            .SubmitAnswerAsync(11, 999, 999, Arg.Any<SubmitAnswerModel>());
 
         await _questionSvc.Received(1)
             .GetNextUnansweredQuestion(999, section);
@@ -1404,7 +1404,10 @@ public class QuestionsViewBuilderTests
                 section,
                 Arg.Is<IEnumerable<SubmissionStatus>>(s => s.Contains(SubmissionStatus.InProgress))
             )
-            .Returns(new SubmissionResponsesModel(1, []));
+            .Returns(new SubmissionResponsesModel(1, [])
+            {
+                Status = SubmissionStatus.InProgress
+            });
 
         var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
 
@@ -1416,6 +1419,186 @@ public class QuestionsViewBuilderTests
         Assert.Equal("Test School", model.TrustSchoolAssessments[0].SchoolName);
         Assert.Equal(SubmissionStatus.InProgress, model.TrustSchoolAssessments[0].Status);
         Assert.Contains("schoolUrn=900006", model.TrustSchoolAssessments[0].ViewAnswersHref);
+    }
+
+
+    [Fact]
+    public async Task RouteToInterstitialPage_WhenMatSchoolHasCompleteNotReviewedSubmission_AddsViewAnswersLink()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
+        var section = new QuestionnaireSectionEntry
+        {
+            InternalName = "Section name",
+            Name = "Section name",
+            ShortDescription = "Short description",
+            Questions = [],
+        };
+
+        _contentful.GetPageBySlugAsync("section-slug").Returns(page);
+        _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
+
+        _establishmentSvc
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
+
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 101,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
+
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(
+                101,
+                section,
+                Arg.Any<IEnumerable<SubmissionStatus>>()
+            )
+            .Returns(new SubmissionResponsesModel(1, [])
+            {
+                Status = SubmissionStatus.CompleteNotReviewed
+            });
+
+        var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<PageViewModel>(view.Model);
+
+        Assert.Single(model.TrustSchoolAssessments);
+        Assert.Equal(SubmissionStatus.CompleteNotReviewed, model.TrustSchoolAssessments[0].Status);
+        Assert.Contains("schoolUrn=900006", model.TrustSchoolAssessments[0].ViewAnswersHref);
+    }
+
+    [Fact]
+    public async Task RouteToInterstitialPage_WhenMatSchoolHasCompleteReviewedSubmission_DoesNotAddRow()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
+        var section = new QuestionnaireSectionEntry
+        {
+            InternalName = "Section name",
+            Name = "Section name",
+            ShortDescription = "Short description",
+            Questions = [],
+        };
+
+        _contentful.GetPageBySlugAsync("section-slug").Returns(page);
+        _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
+
+        _establishmentSvc
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
+
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns(
+                new SqlEstablishmentDto
+                {
+                    Id = 101,
+                    OrgName = "Test School",
+                    EstablishmentRef = "900006",
+                }
+            );
+
+        _submissionSvc
+            .GetLatestSubmissionResponsesModel(
+                101,
+                section,
+                Arg.Any<IEnumerable<SubmissionStatus>>()
+            )
+            .Returns(new SubmissionResponsesModel(1, [])
+            {
+                Status = SubmissionStatus.CompleteReviewed
+            });
+
+        var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<PageViewModel>(view.Model);
+
+        Assert.Empty(model.TrustSchoolAssessments);
+    }
+
+    [Fact]
+    public async Task RouteToInterstitialPage_WhenMatSchoolCannotBeResolved_AddsNotStartedRow()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+        _currentUserProvider.UserOrganisationId.Returns(999);
+
+        var page = new PageEntry
+        {
+            Slug = "section-slug",
+            SectionTitle = "Interstitial",
+            Content = [],
+        };
+        var section = new QuestionnaireSectionEntry
+        {
+            InternalName = "Section name",
+            Name = "Section name",
+            ShortDescription = "Short description",
+            Questions = [],
+        };
+
+        _contentful.GetPageBySlugAsync("section-slug").Returns(page);
+        _contentful.GetSectionBySlugAsync("section-slug").Returns(section);
+
+        _establishmentSvc
+            .GetEstablishmentLinksWithRecommendationCounts(999)
+            .Returns([
+                new SqlEstablishmentLinkDto { EstablishmentName = "Test School", Urn = "900006" },
+            ]);
+
+        _establishmentSvc
+            .GetEstablishmentByReferenceAsync("900006")
+            .Returns((SqlEstablishmentDto?)null);
+
+        var result = await sut.RouteToInterstitialPage(controller, "category-slug", "section-slug");
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<PageViewModel>(view.Model);
+
+        Assert.Single(model.TrustSchoolAssessments);
+        Assert.Equal(SubmissionStatus.NotStarted, model.TrustSchoolAssessments[0].Status);
+        Assert.Null(model.TrustSchoolAssessments[0].ViewAnswersHref);
+
+        await _submissionSvc.DidNotReceive()
+            .GetLatestSubmissionResponsesModel(
+                Arg.Any<int>(),
+                Arg.Any<QuestionnaireSectionEntry>(),
+                Arg.Any<IEnumerable<SubmissionStatus>>()
+            );
     }
 
     [Fact]

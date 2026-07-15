@@ -26,18 +26,28 @@
     <div class="govuk-panel__body">
         @if (Model.IsMatSummary)
         {
-            @await Microcopy.GetTextByKeyAsync(
+            var successBody = await Microcopy.GetTextByKeyAsync(
             ContentfulMicrocopyConstants.MatSummarySuccessBody,
-                dynamicValues
-                )
+            dynamicValues
+            );
+
+            if (Model.CompletedSchoolCount == 1)
+            {
+                successBody = successBody.Replace(
+                "1 schools",
+                "1 school"
+                );
             }
+
+            @successBody
+        }
         else
         {
             @await Microcopy.GetTextByKeyAsync(
             ContentfulMicrocopyConstants.SchoolSummarySuccessBody,
                 schoolSuccessValues
-                )
-            }
+            )
+        }
     </div>
 </div>
 
