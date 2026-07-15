@@ -121,7 +121,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseCorrelationId();
+app.UseUserActionId();
 
 app.UseAuthentication();
 app.UseAuthorization();
