@@ -91,6 +91,10 @@ public class GroupsViewBuilderTests
         {
             Sys = new SystemDetails(id),
             Name = $"Sec {id}",
+            InterstitialPage = new PageEntry
+            {
+                Slug = $"sec-{id.ToLowerInvariant()}"
+            },
             Questions = Enumerable.Repeat(new QuestionnaireQuestionEntry(), countAnswers).ToList(),
             CoreRecommendations = Enumerable
                 .Repeat(new RecommendationChunkEntry(), countAnswers)
@@ -1999,6 +2003,6 @@ public class GroupsViewBuilderTests
         var sectionVm = Assert.Single(categoryVm.Sections);
 
         Assert.Equal("header", sectionVm.CategorySlug);
-        Assert.Equal("sec-sec1", sectionVm.SectionSlug);
+        Assert.Equal("sec-sec-1", sectionVm.SectionSlug);
     }
 }
