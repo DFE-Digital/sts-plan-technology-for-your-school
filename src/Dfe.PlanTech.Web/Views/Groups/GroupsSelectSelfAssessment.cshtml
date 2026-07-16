@@ -1,36 +1,46 @@
 @model GroupSelectAssessmentViewModel
 @{
-    ViewData[StatePassingMechanismConstants.Title] = "Select a self-assessment";
+ViewData[StatePassingMechanismConstants.Title] = "Select a self-assessment";
 }
 <div>
     <h1 class="govuk-heading-xl">Select a self-assessment</h1>
 
     @foreach (var category in Model.Categories)
     {
-        <h2 class="govuk-heading-m">@category.CategoryName</h2>
-        <ul class="govuk-task-list">
-            @foreach (var s in category.Sections)
-            {
-                <li class="govuk-task-list__item govuk-task-list__item--with-link govuk-!-padding-bottom-3 govuk-!-padding-top-3">
-                    <div class="govuk-task-list__name-and-hint">
-                        <a class="govuk-link govuk-task-list__link"
-                           href="/@s.CategorySlug/@s.SectionSlug/self-assessment"
-                           aria-describedby="@($"{s.SectionSlug}-status")">
-                            @s.SectionName
-                        </a>
-                    </div>
-                    <div class="govuk-task-list__status" id="@($"{s.SectionSlug}-status")">
-                            @if (s.UncompletedGroupSubmissions == 0)
-                            {
-                                <span>All self-assessments submitted.</span>
-                            }
-                            else
-                            {
-                                <span>Self assessment required for @s.UncompletedGroupSubmissions schools.</span>
-                            }
-                    </div>
-                </li>
-            }
-        </ul>
+    <h2 class="govuk-heading-m">@category.CategoryName</h2>
+    <ul class="govuk-task-list">
+        @foreach (var s in category.Sections)
+        {
+        <li class="govuk-task-list__item govuk-task-list__item--with-link govuk-!-padding-bottom-3 govuk-!-padding-top-3">
+            <div class="govuk-task-list__name-and-hint">
+                @if (s.UncompletedGroupSubmissions == 0) {
+                <span>@s.SectionName</span>
+                }
+                else {
+                <a class="govuk-link govuk-task-list__link"
+                   href="/@s.CategorySlug/@s.SectionSlug/self-assessment"
+                   aria-describedby="@($"{s.SectionSlug}-status")">
+                    @s.SectionName
+                </a>
+                }
+
+            </div>
+            <div class="govuk-task-list__status" id="@($"{s.SectionSlug}-status")">
+                @if (s.UncompletedGroupSubmissions == 0)
+                {
+                            <span>All self-assessments submitted.</span>
+                }
+                else
+                {
+                    var schoolPluralisation = s.UncompletedGroupSubmissions == 1 ? "school" : "schools";
+
+                    <span>
+                        Self assessment required for @s.UncompletedGroupSubmissions @schoolPluralisation.
+                    </span>
+                }
+            </div>
+        </li>
+        }
+    </ul>
     }
 </div>

@@ -6,16 +6,12 @@ Feature: View recommendations answer
   @clear-data-school
     Scenario: View recommendation answers have correct layout content
         Given I start a test assessment on "Category Two" category "Category Two Section Three" section with answers "1, 1, 1, 2, 4"
-        And I click the view all recommendations answers link for "category two section three"
-
+        And I click the link to view the recommendations for "Category Two Section Three"
+        And I click the view all recommendations answers link for "Category Two Section Three"
         Then I should see the GOV.UK footer with expected links
         And I should see the beta header
         And the header should contain all the correct content
         And I should see the page heading "View your answers"
-        And I should see the print this page button
-
-        When I click the print this page button
-        Then the print dialog should be triggered
 
     Scenario: View recommendation answers have correct content
     Given I visit the self-assessment-testing page

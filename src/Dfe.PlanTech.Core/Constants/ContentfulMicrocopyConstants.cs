@@ -68,6 +68,31 @@ public static class ContentfulMicrocopyConstants
     public const string PhaseBannerLink = "phaseBannerLink";
     public const string PhaseBannerLinkText = "phaseBannerLinkText";
     
+    public const string SchoolSummarySuccessBody = "schoolSummarySuccessBody";
+    public const string SchoolSummaryHeader = "summaryHeader";
+    public const string SchoolSummaryRecLink = "schoolSummaryRecLink";
+    public const string SchoolSummarySubmitAnotherBody = "schoolSummarySubmitAnotherBody";
+    public const string MatSummarySuccessBody = "matSummarySuccessBody";
+    public const string MatSummaryRecLinkIntro = "matSummaryRecLinkIntro";
+    public const string MatSummarySubmitAnotherBody = "matSummarySubmitAnotherBody";
+    public const string SummaryRecHeader = "summaryRecHeader";
+    public const string SummaryRecBody = "summaryRecBody";
+    public const string SummarySubmitAnotherHeading = "summarySubmitAnotherHeading";
+
+    public const string msmTopicStartHeading = "msmTopicStartHeading";
+    public const string msmTopicStartText1 = "msmTopicStartText1";
+    public const string msmTopicStartText2 = "msmTopicStartText2";
+
+    public const string GroupsSelectSchoolsToAssessHeader = "msmSelectHeader";
+    public const string GroupsSelectSchoolsToAssessBackLink = "msmSelectBack";
+    public const string GroupsSelectSchoolsToAssessHint = "msmSelectHint";
+    public const string GroupsSelectSchoolsToAssessSchoolHint = "msmSelectSchoolHint";
+    public const string GroupsSelectSchoolsToAssessCheckboxAll = "msmSelectCheckboxAll";
+    public const string GroupsSelectSchoolsToAssessWarning = "msmSelectWarning";
+    public const string GroupsSelectSchoolsToAssessContinue = "msmSelectSchoolContinue";
+    public const string GroupsSelectSchoolsToAssessNoSelectionError = "msmErrorNoSelection";
+    public const string GroupsSelectSchoolsToAssessConflictError = "msmErrorConflictingSelection";
+
     // Fallback text
     private const string EmptyFallback = "";
 
@@ -107,6 +132,29 @@ public static class ContentfulMicrocopyConstants
     private const string ContinueAnswersHeaderFallback = "Your self-assessment answers";
     private const string ContinueContinueButtonFallback = "Continue self-assessment";
     private const string ContinueRestartButtonFallback = "Restart self-assessment";
+
+    private const string MsmTopicStartHeadingFallback = "Submit a self-assessment for your schools";
+    private const string MsmTopicStartText1Fallback = "You can submit the self-assessment for one or more schools.";
+    private const string MsmTopicStartText2Fallback = "If a self-assessment has been started but not submitted for a school, you can check their answers or submit a new self-assessment for them.";
+
+    private const string GroupsSelectSchoolsToAssessBackLinkFallback = "Back";
+    private const string GroupsSelectSchoolsToAssessHeaderFallback = "Which schools do you want to submit the self-assessment for?";
+    private const string GroupsSelectSchoolsToAssessCheckboxAllFallback = "Submit self-assessment for all schools without a submission";
+    private const string GroupsSelectSchoolsToAssessWarningFallback = "Starting a new self-assessment will replace any previous answers.";
+    private const string GroupsSelectSchoolsToAssessContinueFallback = "Continue";
+    private const string GroupsSelectSchoolsToAssessNoSelectionErrorFallback = "Select one, more or all schools";
+    private const string GroupsSelectSchoolsToAssessConflictErrorFallback = "Select one or more schools, or select 'Submit self-assessment for all schools without a submission'";
+
+    public const string SchoolSummarySuccessBodyFallback = "Self-assessment has been submitted";
+    public const string SchoolSummaryHeaderFallback = "What to do next";
+    public const string SchoolSummaryRecLinkFallback = "View the recommendations";
+    public const string SchoolSummarySubmitAnotherBodyFallback = "Submit self-assessments to get recommendations and track your school's progress towards meeting the standards.";
+    public const string MatSummarySuccessBodyFallback = "Self-assessment has been submitted for the schools";
+    public const string MatSummaryRecLinkIntroFallback = "View recommendations:";
+    public const string MatSummarySubmitAnotherBodyFallback = "Self-assessments are required for some schools in your trust.";
+    public const string SummaryRecHeaderFallback = "View recommendations and track progress";
+    public const string SummaryRecBodyFallback = "Completing recommendations will help you meet the {{category}} standard.";
+    public const string SummarySubmitAnotherHeadingFallback = "Submit another self-assessment";
 
     public static readonly IReadOnlyDictionary<string, string> FallbackText = new Dictionary<
         string,
@@ -163,6 +211,28 @@ public static class ContentfulMicrocopyConstants
         { GroupsSelectHeader, GroupsSelectHeaderFallback },
         { GroupsSelectRecommendationCount, EmptyFallback },
         { GroupsSelectContactUs, EmptyFallback },
+        { msmTopicStartHeading, MsmTopicStartHeadingFallback },
+        { msmTopicStartText1, MsmTopicStartText1Fallback },
+        { msmTopicStartText2, MsmTopicStartText2Fallback },
+        { GroupsSelectSchoolsToAssessBackLink, GroupsSelectSchoolsToAssessBackLinkFallback },
+        { GroupsSelectSchoolsToAssessHeader, GroupsSelectSchoolsToAssessHeaderFallback },
+        { GroupsSelectSchoolsToAssessHint, EmptyFallback },
+        { GroupsSelectSchoolsToAssessSchoolHint, EmptyFallback },
+        { GroupsSelectSchoolsToAssessCheckboxAll, GroupsSelectSchoolsToAssessCheckboxAllFallback },
+        { GroupsSelectSchoolsToAssessWarning, GroupsSelectSchoolsToAssessWarningFallback },
+        { GroupsSelectSchoolsToAssessContinue, GroupsSelectSchoolsToAssessContinueFallback },
+        { GroupsSelectSchoolsToAssessNoSelectionError, GroupsSelectSchoolsToAssessNoSelectionErrorFallback },
+        { GroupsSelectSchoolsToAssessConflictError, GroupsSelectSchoolsToAssessConflictErrorFallback },
+        { SchoolSummarySuccessBody, SchoolSummarySuccessBodyFallback },
+        { SchoolSummaryHeader, SchoolSummaryHeaderFallback },
+        { SchoolSummaryRecLink, SchoolSummaryRecLinkFallback },
+        { SchoolSummarySubmitAnotherBody, SchoolSummarySubmitAnotherBodyFallback },
+        { MatSummarySuccessBody, MatSummarySuccessBodyFallback },
+        { MatSummaryRecLinkIntro, MatSummaryRecLinkIntroFallback },
+        { MatSummarySubmitAnotherBody, MatSummarySubmitAnotherBodyFallback },
+        { SummaryRecHeader, SummaryRecHeaderFallback },
+        { SummaryRecBody, SummaryRecBodyFallback },
+        { SummarySubmitAnotherHeading, SummarySubmitAnotherHeadingFallback },
     };
 
     internal static class VariableNames
@@ -180,6 +250,9 @@ public static class ContentfulMicrocopyConstants
         public const string Total = "total";
         public const string ContactLink = "contactLink";
         public const string EstablishmentName = "establishmentName";
+        public const string Category = "category";
+        public const string SchoolCount = "schoolCount";
+        public const string Link = "link";
     }
 
     public static readonly IReadOnlyDictionary<string, List<string>> Variables = new Dictionary<
@@ -212,5 +285,13 @@ public static class ContentfulMicrocopyConstants
         { CategoryPrintSectionCompleted, [VariableNames.Topic, VariableNames.DateCompleted] },
         { GroupsSelectRecommendationCount, [VariableNames.Count, VariableNames.Total] },
         { GroupsSelectContactUs, [VariableNames.ContactLink] },
+        { SchoolSummarySuccessBody, [VariableNames.Topic] },
+        { SchoolSummaryRecLink, [VariableNames.Topic] },
+        { SummaryRecBody, [VariableNames.Category] },
+        { MatSummarySuccessBody, [VariableNames.Topic, VariableNames.SchoolCount] },
+        { MatSummaryRecLinkIntro, [VariableNames.Topic] },
+        { MatSummarySubmitAnotherBody, [VariableNames.Link] },
+        { GroupsSelectSchoolsToAssessBackLink, [VariableNames.Topic] },
+        { GroupsSelectSchoolsToAssessSchoolHint, [VariableNames.DateUpdated] }
     };
 }

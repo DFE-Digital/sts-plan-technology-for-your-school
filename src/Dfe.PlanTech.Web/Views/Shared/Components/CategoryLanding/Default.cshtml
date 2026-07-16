@@ -23,18 +23,6 @@
     </p>
 }
 
-@if (!string.IsNullOrEmpty(Model.SectionName))
-{
-    <div class="govuk-panel govuk-panel--confirmation govuk-!-margin-bottom-8">
-        <h1 class="govuk-panel__title">
-            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.LandingPageSuccessPanelHeader, dynamicValues)
-        </h1>
-        <div class="govuk-panel__body">
-            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.LandingPageSuccessPanelBody)
-        </div>
-    </div>
-}
-
 @{
     var title = new ComponentTitleEntry(Model.CategoryName);
 }

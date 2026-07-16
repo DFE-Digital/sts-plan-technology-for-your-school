@@ -1,6 +1,8 @@
-using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Enums;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Core.Models;
 
@@ -8,8 +10,12 @@ namespace Dfe.PlanTech.Core.Models;
 public class SubmissionInformationModel
 {
     public int EstablishmentId { get; set; }
-    public QuestionnaireSectionEntry Section { get; set; } = null!;
-    public SubmissionResponsesModel? SubmissionResponses { get; set; } = null!;
-    public QuestionWithAnswerModel OrderedResponses { get; set; } = null!;
-    public SqlSectionStatusDto SectionStatus { get; set; } = null!;
+    public string EstablishmentName { get; set; } = null!;
+    public string EstablishmentRef { get; set; } = null!;
+    public string SectionId { get; set; } = null!;
+    public int? SubmissionId { get; set; }
+    public string? DateCompleted { get; set; }
+    public string? DateCreated { get; set; }
+    public string? DateLastUpdated { get; set; }
+    public SubmissionStatus Status { get; set; }
 }

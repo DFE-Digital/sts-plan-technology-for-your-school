@@ -1,4 +1,6 @@
 using Dfe.PlanTech.Application;
+using Dfe.PlanTech.Application.Providers;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Extensions;
@@ -46,13 +48,12 @@ if (builder.Environment.EnvironmentName != "E2E")
 builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddCommandLine(args);
 
-builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    var timeOut = options.Cookie.MaxAge ?? TimeSpan.FromMinutes(30);
-    options.IdleTimeout = timeOut;
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".Dfe.PlanTech";
+    options.IdleTimeout = options.Cookie.MaxAge ?? TimeSpan.FromMinutes(30);
 });
 
 builder.AddSystemConfiguration();
@@ -83,7 +84,11 @@ builder.Services.AddHealthCheckServices(builder.Configuration, builder.Environme
 
 builder.Services.AddScoped<IUserActionIdProvider, UserActionIdProvider>();
 
+builder.Services.AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>();
+
 builder.Services.AddScoped<IUserActionTrackingService, UserActionTrackingService>();
+
+builder.Services.AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>();
 
 var app = builder.Build();
 
@@ -121,7 +126,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseCorrelationId();
+app.UseUserActionId();
 
 app.UseAuthentication();
 app.UseAuthorization();

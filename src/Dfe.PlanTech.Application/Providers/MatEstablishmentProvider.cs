@@ -1,73 +1,79 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
-using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Models;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 
 namespace Dfe.PlanTech.Application.Providers;
 
 public class MatEstablishmentProvider(
     IHttpContextAccessor httpContextAccessor,
     IEstablishmentService establishmentService
-    ) : IMatEstablishmentProvider
+) : IMatEstablishmentProvider
 {
-
     private readonly IHttpContextAccessor _httpContextAccessor =
-        httpContextAccessor ?? throw new ArgumentNullException(nameof(httpContextAccessor));
+        httpContextAccessor
+        ?? throw new ArgumentNullException(nameof(httpContextAccessor));
 
-    public async Task<MatEstablishmentModel?> PopulateMatSelectedSchools(ICurrentUserProvider currentUser)
+    private readonly IEstablishmentService _establishmentService =
+        establishmentService
+        ?? throw new ArgumentNullException(nameof(establishmentService));
+
+    public IReadOnlyList<int> GetSelectedEstablishmentIdsFromSession()
     {
-        if (!currentUser.IsMat)
-        {
-            return null;
-        }
+        var session = _httpContextAccessor.HttpContext?.Session;
 
-        var selectedSchoolNames = await GetSelectedSchoolNames();
-
-        var model = new MatEstablishmentModel(
-            selectedSchoolNames.Count != 0,
-            selectedSchoolNames.Count,
-            selectedSchoolNames
-        );
-
-        return model;
-    }
-
-    public IEnumerable<int> GetSelectedEstablishmentIdsFromSession()
-    {
-        var selectedEstablishments =
-            _httpContextAccessor.HttpContext!.Session.GetValue(
-                SessionConstants.SelectedEstablishmentsKey
-            );
-
-        return selectedEstablishments as IEnumerable<int> ?? [];
-    }
-
-    private async Task<List<string>> GetSelectedSchoolNames()
-    {
-        var selectedEstablishmentIds = GetSelectedEstablishmentIdsFromSession().ToArray();
-
-        if (selectedEstablishmentIds.Length == 0)
+        if (session is null)
         {
             return [];
         }
 
-        var schools = new List<string>();
+        return session
+            .GetSelectedEstablishmentIds()
+            .Distinct()
+            .ToArray();
+    }
+
+    public async Task<IReadOnlyList<string>> GetSelectedSchoolNamesAsync(
+        ICurrentUserProvider currentUser
+    )
+    {
+        ArgumentNullException.ThrowIfNull(currentUser);
+
+        if (!currentUser.IsMat)
+        {
+            return [];
+        }
+
+        var selectedEstablishmentIds =
+            GetSelectedEstablishmentIdsFromSession();
+
+        if (selectedEstablishmentIds.Count == 0)
+        {
+            return string.IsNullOrWhiteSpace(
+                currentUser.GroupSelectedSchoolName
+            )
+                ? []
+                : [currentUser.GroupSelectedSchoolName];
+        }
+
+        var schoolNames = new List<string>();
 
         foreach (var establishmentId in selectedEstablishmentIds)
         {
-            var establishment = await establishmentService.GetEstablishmentByIdAsync(establishmentId);
+            var establishment =
+                await _establishmentService.GetEstablishmentByIdAsync(
+                    establishmentId
+                );
 
-            if (!string.IsNullOrWhiteSpace(establishment.OrgName))
+            if (
+                establishment is not null
+                && !string.IsNullOrWhiteSpace(establishment.OrgName)
+            )
             {
-                schools.Add(establishment.OrgName);
+                schoolNames.Add(establishment.OrgName);
             }
         }
 
-        return schools;
+        return schoolNames;
     }
-
-
 }

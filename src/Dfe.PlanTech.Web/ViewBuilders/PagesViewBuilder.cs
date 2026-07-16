@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -13,6 +12,7 @@ using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -49,11 +49,18 @@ public class PagesViewBuilder(
         PageEntry page
     )
     {
-        var needsToSelectSchool =
+        var isMatTopicStartPage =
+            CurrentUser.IsMat
+            && page.InternalName?.Contains("topic start", StringComparison.OrdinalIgnoreCase)
+                == true;
+
+        var shouldRedirectToSchoolSelection =
             page.RequiresAuthorisation
             && CurrentUser.UserOrganisationIsGroup
-            && CurrentUser.GroupSelectedSchoolUrn is null;
-        if (needsToSelectSchool)
+            && CurrentUser.GroupSelectedSchoolUrn is null
+            && !isMatTopicStartPage;
+
+        if (shouldRedirectToSchoolSelection)
         {
             return controller.Redirect(UrlConstants.SelectASchoolPage);
         }
@@ -61,6 +68,7 @@ public class PagesViewBuilder(
         // If the selected URN isn't valid (doesn't exist, isn't within the current user's trust, etc.), redirect them to the select a school page.
         var hasSelectedASchool =
             CurrentUser.UserOrganisationIsGroup && CurrentUser.GroupSelectedSchoolUrn is not null;
+
         if (hasSelectedASchool)
         {
             // Named `establishmentId`, but for a group (e.g. MAT) this is the internal PlanTech synthetic database ID for the group not the selected establishment.
@@ -69,12 +77,14 @@ public class PagesViewBuilder(
                 ?? throw new InvalidDataException(
                     "User is a MAT user but does not have an organisation ID (for the group)"
                 );
+
             var groupSchools =
                 await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId);
 
             var selectedSchoolIsValid = groupSchools.Any(s =>
                 s.Urn.Equals(CurrentUser.GroupSelectedSchoolUrn)
             );
+
             if (!selectedSchoolIsValid)
             {
                 return controller.Redirect(UrlConstants.SelectASchoolPage);
