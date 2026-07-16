@@ -8,7 +8,7 @@
     var dynamicValues = new Dictionary<string, string>
     {
         ["topic"] = Model.SectionName,
-        ["schoolCount"] = Model.CompletedSchoolCount.ToString(),
+        ["schoolCount"] = Model.CompletedSchoolCount.ToString() ?? "0",
         ["category"] = Model.CategoryName.ToLower()
     };
 
