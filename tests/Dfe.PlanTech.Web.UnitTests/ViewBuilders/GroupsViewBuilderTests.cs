@@ -2003,6 +2003,6 @@ public class GroupsViewBuilderTests
         var sectionVm = Assert.Single(categoryVm.Sections);
 
         Assert.Equal("header", sectionVm.CategorySlug);
-        Assert.Equal("sec-sec1", sectionVm.SectionSlug);
+        Assert.Equal("sec-sec-1", sectionVm.SectionSlug);
     }
 }
