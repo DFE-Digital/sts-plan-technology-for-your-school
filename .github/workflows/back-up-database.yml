@@ -108,8 +108,8 @@ jobs:
         uses: ./.github/actions/whitelist-sql
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-          server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          resource-group: ${{ steps.backup-names.outputs.resource-group }}
+          account-name: ${{ steps.backup-names.outputs.account-name }}
           verb: 'remove'
 
       - name: De-Whitelist Runner for backup storage
