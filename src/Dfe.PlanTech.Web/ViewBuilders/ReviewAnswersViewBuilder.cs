@@ -10,13 +10,22 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
-public class ReviewAnswersViewBuilder(ILogger<ReviewAnswersViewBuilder> logger, IContentfulService contentfulService, ICurrentUserProvider currentUser, ISubmissionService submissionService, IMatEstablishmentProvider matEstablishmentProvider) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
+public class ReviewAnswersViewBuilder(
+    ILogger<ReviewAnswersViewBuilder> logger,
+    IContentfulService contentfulService,
+    ICurrentUserProvider currentUser,
+    ISubmissionService submissionService,
+    IMatEstablishmentProvider matEstablishmentProvider
+) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
-    private readonly ISubmissionService _submissionService = submissionService ?? throw new ArgumentNullException(nameof(submissionService)); private readonly IMatEstablishmentProvider _matEstablishmentProvider = matEstablishmentProvider ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
+    private readonly ISubmissionService _submissionService =
+        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
+        matEstablishmentProvider
+        ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     public const string ViewAnswersViewName = "~/Views/ViewAnswers/ViewAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
@@ -147,18 +156,8 @@ public class ReviewAnswersViewBuilder(ILogger<ReviewAnswersViewBuilder> logger, 
 
             if (CurrentUser.IsMat)
             {
-                var selectedEstablishmentIds = _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
-
-                Logger.LogInformation(
-                    "ConfirmCheckAnswers. Instance: {Instance}, SessionId: {SessionId}, IsMat: {IsMat}, ActiveEstablishmentId: {ActiveEstablishmentId}, SelectedEstablishmentIds: {SelectedEstablishmentIds}, SelectedSchoolUrn: {SelectedSchoolUrn}, SelectedSchoolName: {SelectedSchoolName}",
-                    Environment.MachineName,
-                    controller.HttpContext.Session.Id,
-                    CurrentUser.IsMat,
-                    establishmentId,
-                    string.Join(",", selectedEstablishmentIds),
-                    CurrentUser.GroupSelectedSchoolUrn,
-                    CurrentUser.GroupSelectedSchoolName
-                );
+                var selectedEstablishmentIds =
+                    _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
 
                 if (selectedEstablishmentIds.Count > 0)
                 {
@@ -276,10 +275,10 @@ public class ReviewAnswersViewBuilder(ILogger<ReviewAnswersViewBuilder> logger, 
         List<QuestionWithAnswerModel> responses =
         [
             .. orderedCoreResponses
-            .Union(orderedRetiredResponses)
-            .Where(r => r != null)
-            .Cast<QuestionWithAnswerModel>(),
-    ];
+                .Union(orderedRetiredResponses)
+                .Where(r => r != null)
+                .Cast<QuestionWithAnswerModel>(),
+        ];
 
         var viewModel = new ViewAnswersViewModel
         {
@@ -323,22 +322,18 @@ public class ReviewAnswersViewBuilder(ILogger<ReviewAnswersViewBuilder> logger, 
 
     private async Task<int> GetRoutingEstablishmentId()
     {
-        var activeEstablishmentId =
-            await GetActiveEstablishmentIdOrThrowException();
+        var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
 
         if (!CurrentUser.IsMat)
         {
             return activeEstablishmentId;
         }
 
-        var selectedEstablishmentId =
-            _matEstablishmentProvider
-                .GetSelectedEstablishmentIdsFromSession()
-                .FirstOrDefault();
+        var selectedEstablishmentId = _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .FirstOrDefault();
 
-        return selectedEstablishmentId > 0
-            ? selectedEstablishmentId
-            : activeEstablishmentId;
+        return selectedEstablishmentId > 0 ? selectedEstablishmentId : activeEstablishmentId;
     }
 
     private async Task<ReviewAnswersViewModel> BuildViewModel(
@@ -362,7 +357,9 @@ public class ReviewAnswersViewBuilder(ILogger<ReviewAnswersViewBuilder> logger, 
             ? null
             : new SubmissionResponsesViewModel(routingData.Submission);
 
-        var selectedSchoolNames = await _matEstablishmentProvider.GetSelectedSchoolNamesAsync(CurrentUser);
+        var selectedSchoolNames = await _matEstablishmentProvider.GetSelectedSchoolNamesAsync(
+            CurrentUser
+        );
 
         return new ReviewAnswersViewModel
         {
