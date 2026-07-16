@@ -9,28 +9,16 @@ internal class GroupReadActivityEntityConfiguration
 {
     public void Configure(EntityTypeBuilder<GroupReadActivityEntity> builder)
     {
-        builder.ToTable("groupReadActivity");
+        builder.ToTable("groupReadActivity", "dbo");
 
-        builder.HasKey(b => b.Id);
+        builder.HasKey(x => x.Id);
 
-        builder.Property(b => b.Id).HasColumnName("id");
-        builder.Property(b => b.UserId).HasColumnName("userId");
-        builder.Property(b => b.UserEstablishmentId).HasColumnName("establishmentId");
-        builder.Property(b => b.SelectedEstablishmentId).HasColumnName("selectedEstablishmentId");
-        builder
-            .Property(b => b.SelectedEstablishmentName)
-            .HasColumnName("selectedEstablishmentName")
-            .HasColumnType("nvarchar(200)")
-            .IsRequired();
-
-        builder
-            .Property(b => b.DateSelected)
-            .HasColumnName("dateSelected")
-            .HasColumnType("datetime")
-            .IsRequired();
-
-        builder.Property(b => b.UserActionId)
-            .HasColumnName("userActionId")
-            .IsRequired(false);
+        builder.Property(x => x.Id).IsRequired();
+        builder.Property(x => x.UserId).IsRequired();
+        builder.Property(x => x.UserEstablishmentId).HasColumnName("establishmentId").IsRequired();
+        builder.Property(x => x.SelectedEstablishmentId).IsRequired();
+        builder.Property(x => x.SelectedEstablishmentName).HasMaxLength(400).IsRequired();
+        builder.Property(x => x.DateSelected).IsRequired();
+        builder.Property(x => x.UserActionId).IsRequired(false);
     }
 }

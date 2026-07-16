@@ -18,7 +18,8 @@
     {
         ["dateUpdated"] = topic.DateUpdated ?? "",
         ["topic"] = topic.Name.ToLower().Trim(),
-        ["dateCompleted"] = topic.LastCompletionDate ?? ""
+        ["dateCompleted"] = topic.LastCompletionDate ?? "",
+        ["establishmentName"] = topic.EstablishmentName ?? "",
     };
 
     switch (topicStatus)

@@ -47,7 +47,7 @@ public class RecommendationWorkflowTests
             RecommendationId = recommendationId ?? recommendation!.Id,
             Recommendation = recommendation!,
             UserId = userId,
-            NewStatus = newStatus.ToString(),
+            NewStatus = newStatus,
         };
     }
 
@@ -213,7 +213,7 @@ public class RecommendationWorkflowTests
                 RecommendationId = 1,
                 UserId = 1,
                 Recommendation = recommendation,
-                NewStatus = RecommendationStatus.NotStarted.ToString(),
+                NewStatus = RecommendationStatus.NotStarted,
                 DateCreated = DateTime.UtcNow.AddDays(-5),
             },
             new EstablishmentRecommendationHistoryEntity
@@ -223,7 +223,7 @@ public class RecommendationWorkflowTests
                 RecommendationId = 1,
                 Recommendation = recommendation,
                 UserId = 1,
-                NewStatus = RecommendationStatus.InProgress.ToString(),
+                NewStatus = RecommendationStatus.InProgress,
                 DateCreated = DateTime.UtcNow.AddDays(-2),
             },
             new EstablishmentRecommendationHistoryEntity
@@ -233,7 +233,7 @@ public class RecommendationWorkflowTests
                 RecommendationId = 1,
                 Recommendation = recommendation,
                 UserId = 1,
-                NewStatus = RecommendationStatus.Complete.ToString(),
+                NewStatus = RecommendationStatus.Complete,
                 DateCreated = DateTime.UtcNow, // Most recent
             },
         };
@@ -281,8 +281,8 @@ public class RecommendationWorkflowTests
             EstablishmentId = establishmentId,
             RecommendationId = 1,
             UserId = 42,
-            NewStatus = RecommendationStatus.Complete.ToString(),
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.Complete,
+            PreviousStatus = RecommendationStatus.InProgress,
             NoteText = "Work completed",
             DateCreated = DateTime.UtcNow,
         };
@@ -504,7 +504,7 @@ public class RecommendationWorkflowTests
             EstablishmentId = establishmentId,
             RecommendationId = 1,
             UserId = 1,
-            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.InProgress,
             DateCreated = DateTime.UtcNow.AddDays(-1),
         };
 
@@ -537,7 +537,7 @@ public class RecommendationWorkflowTests
             .CreateRecommendationHistoryAsync(
                 establishmentId,
                 1,
-                userId,               
+                userId,
                 matEstablishmentId,
                 null,
                 RecommendationStatus.InProgress, // Should use current status as previous
@@ -612,10 +612,8 @@ public class RecommendationWorkflowTests
         var newStatus = RecommendationStatus.Complete;
 
         _recommendationRepository
-            .GetRecommendationsByContentfulReferencesAsync(
-                new[] { recommendationContentfulReference }
-            )
-            .Returns(new RecommendationEntity[0]);
+            .GetRecommendationsByContentfulReferencesAsync([recommendationContentfulReference])
+            .Returns([]);
 
         var workflow = CreateServiceUnderTest();
 

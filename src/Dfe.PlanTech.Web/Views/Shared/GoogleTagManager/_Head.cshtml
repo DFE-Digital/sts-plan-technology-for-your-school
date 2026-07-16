@@ -1,6 +1,6 @@
-@inject GoogleTagManagerConfiguration GtmConfiguration
-@inject ICookieService CookieService
-@inject ICurrentUser CurrentUser
+@inject GoogleTagManagerConfiguration GtmConfiguration;
+@inject ICookieService CookieService;
+@inject ICurrentUserProvider CurrentUser
 
 @if (!CookieService.Cookie.UseCookies)
 {

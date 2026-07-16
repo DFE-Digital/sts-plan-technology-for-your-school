@@ -1,5 +1,5 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v1.20.0"
+  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.8.2"
 
   ###########
   # General #

@@ -10,10 +10,11 @@ on:
         options: ['Dev', 'ProductionUnprotected']
   # push:
   #   branches:
-  #     - 300872-email-alerts-terraform
+  #     - feature/300874/Azure-Monitoring-errors-exceptions-tf
 env:
   TF_WORKING_DIRECTORY: terraform/alerts
-  ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
+  ENVIRONMENT:
+    ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
 
 permissions:
   id-token: write
@@ -24,7 +25,9 @@ jobs:
     name: Apply Terraform
     runs-on: ubuntu-latest
     environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
+      name:
+        ${{ github.event_name == 'workflow_dispatch' && inputs.environment ||
+        'ProductionUnprotected' }}
     permissions:
       id-token: write
       contents: read
@@ -84,12 +87,9 @@ jobs:
           -var-file="terraform.tfvars.json" \
           -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
           -var="environment_github=${{env.ENVIRONMENT}}"
+          -var="az_tag_environment=${{env.ENVIRONMENT}}"
 
       - name: Terraform apply
-        if: steps.terraform-plan.outcome == 'success'
-        id: terraform-apply
-        if: steps.terraform-plan.outcome == 'success'
-        id: terraform-apply
         if: steps.terraform-plan.outcome == 'success'
         id: terraform-apply
         shell: bash
@@ -98,11 +98,10 @@ jobs:
           terraform apply -auto-approve \
           -var-file="terraform.tfvars.json" \
           -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
-          -var="environment_github=${{env.ENVIRONMENT}}"
+          -var="environment_github=${{env.ENVIRONMENT}}" \
+          -var="az_tag_environment=${{env.ENVIRONMENT}}"
 
       - name: Whitelist Runner for TF storage
-        if: always()
-        if: always()
         if: always()
         uses: ./.github/actions/whitelist-storage
         with:

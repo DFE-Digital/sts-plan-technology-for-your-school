@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Helpers;
 using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
@@ -12,7 +11,7 @@ public class FirstActivityForEstablishmentRecommendationEntity
 {
     public DateTime StatusChangeDate { get; init; }
 
-    public string StatusText { get; init; } = null!;
+    public RecommendationStatus? Status { get; init; } = null!;
 
     public string SchoolName { get; init; } = null!;
 
@@ -29,9 +28,7 @@ public class FirstActivityForEstablishmentRecommendationEntity
         return new SqlFirstActivityForEstablishmentRecommendationDto
         {
             StatusChangeDate = StatusChangeDate,
-            Status =
-                RecommendationStatusHelper.GetRecommendationStatusEnumValue(StatusText)
-                ?? RecommendationStatus.NotStarted,
+            Status = Status ?? RecommendationStatus.NotStarted,
             SchoolName = SchoolName,
             GroupName = GroupName,
             UserId = UserId,

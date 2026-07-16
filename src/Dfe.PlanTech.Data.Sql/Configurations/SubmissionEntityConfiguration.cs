@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Data.Sql.Common;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -8,20 +9,27 @@ internal class SubmissionEntityConfiguration : IEntityTypeConfiguration<Submissi
 {
     public void Configure(EntityTypeBuilder<SubmissionEntity> builder)
     {
-        builder.HasKey(submission => submission.Id);
+        builder.ToTable("submission", "dbo");
         builder.ToTable(tb => tb.HasTrigger("tr_submission"));
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.EstablishmentId).IsRequired();
+        builder.Property(x => x.SectionId).IsRequired();
+        builder.Property(x => x.SectionName).IsRequired();
+        builder.Property(x => x.DateCreated).HasDefaultValue();
+        builder.Property(x => x.DateLastUpdated).HasDefaultValue();
+        builder.Property(x => x.DateCompleted).IsRequired(false);
+        builder.Property(x => x.Deleted).IsRequired();
         builder
-            .Property(submission => submission.DateCreated)
-            .HasColumnType("datetime")
-            .HasDefaultValue();
-        builder
-            .Property(submission => submission.DateLastUpdated)
-            .HasColumnType("datetime")
-            .HasDefaultValue();
-        builder.Property(submission => submission.Status).HasMaxLength(50);
-        builder
-            .Property(b => b.UserActionId)
-            .HasColumnName("userActionId")
-            .IsRequired(false);
+            .Property(x => x.Status)
+            .HasMaxLength(50)
+            .HasConversion(StatusConverters.SubmissionStatusConverter)
+            .IsRequired();
+        builder.Property(x => x.UserActionId).IsRequired(false);
+        builder.Property(x => x.CreatedUserActionId).IsRequired(false);
+        builder.Property(x => x.LastUpdatedUserActionId).IsRequired(false);
+        builder.Property(x => x.CompletedUserActionId).IsRequired(false);
     }
 }

@@ -1,26 +1,25 @@
-using Dfe.PlanTech.Web.Context.Interfaces;
-using Microsoft.AspNetCore.Http;
+using Dfe.PlanTech.Core.Constants;
 
 namespace Dfe.PlanTech.Web.Middleware;
 
 public class UserActionIdMiddleware(RequestDelegate next)
 {
-    public const string HttpContextItemKey = "CorrelationId";
-    public const string HeaderName = "X-Correlation-Id";
-
     public async Task InvokeAsync(HttpContext context)
     {
-        var correlationId = GetOrCreateCorrelationId(context);
+        var userActionId = GetOrCreateUserActionId(context);
 
-        context.Items[HttpContextItemKey] = correlationId;
-        context.Response.Headers[HeaderName] = correlationId.ToString();
+        context.Items[UserActionIdConstants.HttpContextItemKey] = userActionId;
+        context.Response.Headers[UserActionIdConstants.HeaderName] = userActionId.ToString();
+
         await next(context);
     }
 
-    private static Guid GetOrCreateCorrelationId(HttpContext context)
+    private static Guid GetOrCreateUserActionId(HttpContext context)
     {
-        if (context.Request.Headers.TryGetValue(HeaderName, out var headerValues)
-            && Guid.TryParse(headerValues.FirstOrDefault(), out var headerGuid))
+        if (
+            context.Request.Headers.TryGetValue(UserActionIdConstants.HeaderName, out var headerValues)
+            && Guid.TryParse(headerValues.FirstOrDefault(), out var headerGuid)
+        )
         {
             return headerGuid;
         }

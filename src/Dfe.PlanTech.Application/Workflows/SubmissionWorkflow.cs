@@ -8,9 +8,7 @@ using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class SubmissionWorkflow(
-    ISubmissionRepository submissionRepository
-) : ISubmissionWorkflow
+public class SubmissionWorkflow(ISubmissionRepository submissionRepository) : ISubmissionWorkflow
 {
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
@@ -55,6 +53,18 @@ public class SubmissionWorkflow(
         return submission is null
             ? throw new InvalidOperationException($"Submission with ID '{submissionId}' not found")
             : submission.AsDto();
+    }
+
+    public async Task<SqlSubmissionDto?> GetLatestCompletedSubmissionBySectionIdAsync(
+        int establishmentId,
+        string sectionId
+    )
+    {
+        var submission = await _submissionRepository.GetLatestCompletedSubmissionBySectionIdAsync(
+            establishmentId,
+            sectionId
+        );
+        return submission?.AsDto();
     }
 
     public async Task<SqlSubmissionDto?> GetLatestSubmissionWithOrderedResponsesAsync(
