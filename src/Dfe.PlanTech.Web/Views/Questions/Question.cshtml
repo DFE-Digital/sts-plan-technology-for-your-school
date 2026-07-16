@@ -4,10 +4,10 @@
     @{
         await Html.RenderPartialAsync("BackButton");
 
-        @if (Model.MatEstablishmentModel?.IsMatMultiSchoolAssessment == true)
+        @if (Model?.IsMatMultiSchoolAssessment == true)
         {
             var schoolLabel =
-                Model.MatEstablishmentModel.SelectedSchoolCount == 1
+                Model.SelectedSchoolCount == 1
                     ? "school"
                     : "schools";
 
@@ -15,13 +15,13 @@
                 <summary class="govuk-details__summary">
                     <span class="govuk-details__summary-text">
                         You are submitting the self-assessment for
-                        @Model.MatEstablishmentModel.SelectedSchoolCount
+                        @Model.SelectedSchoolCount
                         @schoolLabel
                     </span>
                 </summary>
 
                 <div class="govuk-details__text">
-                    @foreach (var schoolName in Model.MatEstablishmentModel.SelectedSchoolNames)
+                    @foreach (var schoolName in Model.SelectedSchoolNames)
                     {
                         <p class="govuk-body govuk-!-margin-bottom-0">
                             @schoolName

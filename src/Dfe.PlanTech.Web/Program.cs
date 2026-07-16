@@ -85,6 +85,8 @@ builder.Services.AddHealthCheckServices(builder.Configuration, builder.Environme
 
 builder.Services.AddScoped<IUserActionIdProvider, UserActionIdProvider>();
 
+builder.Services.AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>();
+
 builder.Services.AddScoped<IUserActionTrackingService, UserActionTrackingService>();
 
 builder.Services.AddScoped<IMatEstablishmentProvider, MatEstablishmentProvider>();

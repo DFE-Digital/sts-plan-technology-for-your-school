@@ -51,7 +51,7 @@
     </div>
 </div>
 
-<h2 class="govuk-heading-l">
+<h2 class="govuk-heading-xl">
     @await Microcopy.GetTextByKeyAsync(
     ContentfulMicrocopyConstants.SchoolSummaryHeader
         )
@@ -101,11 +101,11 @@
                    value="@recommendation.Href.TrimStart('/')" />
 
             <a class="govuk-link govuk-!-display-inline-block govuk-!-margin-bottom-4"
-               asp-controller="Groups"
-               asp-action="SelectSchoolAndRedirect"
-               asp-route-schoolUrn="@recommendation.SchoolUrn"
-               asp-route-schoolName="@recommendation.SchoolName"
-               asp-route-categorySlug="@recommendation.Href.TrimStart('/')">
+                   asp-controller="Groups"
+                   asp-action="SelectSchoolAndRedirect"
+                   asp-route-schoolUrn="@recommendation.SchoolUrn"
+                   asp-route-schoolName="@recommendation.SchoolName"
+                   asp-route-categorySlug="@recommendation.Href.TrimStart('/')">
                 @recommendation.LinkText
             </a>
         </form>
