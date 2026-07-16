@@ -50,14 +50,16 @@ runs:
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ inputs.github_token }}" \
             -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/orgs/DFE-Digital/packages/container/${PACKAGE}/versions?per_page=20&page=1" \
+            "https://api.github.com/orgs/DFE-Digital/packages/container/${PACKAGE}/versions?per_page=100&page=1" \
           | jq -r \
               --arg search "$SEARCH" '
-                first(
-                  .[]
-                  | .metadata.container.tags[]?
-                  | select(startswith($search))
-                ) // empty
+                sort_by(.created_at)
+                | reverse
+                | first(
+                    .[]
+                    | .metadata.container.tags[]?
+                    | select(startswith($search))
+                  ) // empty
               '
         )
 
@@ -68,6 +70,26 @@ runs:
 
         echo "Found tag: $TAG"
         echo "image_tag=$TAG" >> "$GITHUB_OUTPUT"
+
+        curl -fsSL \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ inputs.github_token }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          "https://api.github.com/orgs/DFE-Digital/packages/container/${PACKAGE}/versions?per_page=100&page=1" \
+        | jq -r \
+            --arg search "$SEARCH" '
+              sort_by(.created_at)
+              | reverse
+              | .[]
+              | select(
+                  any(
+                    .metadata.container.tags[]?;
+                    startswith($search)
+                  )
+                )
+              | "\(.created_at) | \(.metadata.container.tags | join(", "))"
+            ' \
+        | head -n 10
 
     - name: Pull image from GHCR
       shell: bash
