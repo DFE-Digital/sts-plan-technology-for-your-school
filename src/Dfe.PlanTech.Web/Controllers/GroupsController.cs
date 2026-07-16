@@ -49,13 +49,33 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASelfAssessment()
     {
+        var selectedEstablishmentIdsBeforeClear =
+            HttpContext.Session.GetSelectedEstablishmentIds();
+
+        Logger.LogInformation(
+            "Clearing MAT school selection before self-assessment selection. Instance: {Instance}, SessionId: {SessionId}, GroupSelectedSchoolUrn: {GroupSelectedSchoolUrn}, SelectedEstablishmentIdsBeforeClear: {SelectedEstablishmentIdsBeforeClear}",
+            Environment.MachineName,
+            HttpContext.Session.Id,
+            _currentUser.GroupSelectedSchoolUrn,
+            selectedEstablishmentIdsBeforeClear
+        );
+
         _currentUser.ClearSelectedGroupSchool();
 
         HttpContext.Session.Remove(
             SessionConstants.SelectedEstablishmentsKey
         );
 
-        return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
+        Logger.LogInformation(
+            "MAT school selection cleared. Instance: {Instance}, SessionId: {SessionId}, GroupSelectedSchoolUrn: {GroupSelectedSchoolUrn}, SelectedEstablishmentIdsAfterClear: {SelectedEstablishmentIdsAfterClear}",
+            Environment.MachineName,
+            HttpContext.Session.Id,
+            _currentUser.GroupSelectedSchoolUrn,
+            HttpContext.Session.GetSelectedEstablishmentIds()
+        );
+
+        return await _groupsViewBuilder
+            .RouteToSelectASelfAssessmentViewModelAsync(this);
     }
 
     [HttpGet(
@@ -74,14 +94,26 @@ public class GroupsController : BaseController<GroupsController>
 
     [HttpGet($"{UrlConstants.GroupsSlug}/select-school-and-redirect")]
     public async Task<IActionResult> SelectSchoolAndRedirect(
-    string schoolUrn,
-    string schoolName,
-    string categorySlug
-)
+        string schoolUrn,
+        string schoolName,
+        string categorySlug
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(schoolUrn);
         ArgumentException.ThrowIfNullOrWhiteSpace(schoolName);
         ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
+
+        var selectedEstablishmentIdsBeforeClear =
+            HttpContext.Session.GetSelectedEstablishmentIds();
+
+        Logger.LogInformation(
+            "Selecting single MAT school. Instance: {Instance}, SessionId: {SessionId}, SchoolUrn: {SchoolUrn}, SchoolName: {SchoolName}, SelectedEstablishmentIdsBeforeClear: {SelectedEstablishmentIdsBeforeClear}",
+            Environment.MachineName,
+            HttpContext.Session.Id,
+            schoolUrn,
+            schoolName,
+            selectedEstablishmentIdsBeforeClear
+        );
 
         await _groupsViewBuilder.RecordGroupSelectionAsync(
             schoolUrn,
@@ -95,6 +127,18 @@ public class GroupsController : BaseController<GroupsController>
         _currentUser.SetGroupSelectedSchool(
             schoolUrn,
             schoolName
+        );
+
+        var selectedEstablishmentIdsAfterClear =
+            HttpContext.Session.GetSelectedEstablishmentIds();
+
+        Logger.LogInformation(
+            "Single MAT school selected. Instance: {Instance}, SessionId: {SessionId}, SchoolUrn: {SchoolUrn}, SelectedEstablishmentIdsAfterClear: {SelectedEstablishmentIdsAfterClear}, GroupSelectedSchoolUrn: {GroupSelectedSchoolUrn}",
+            Environment.MachineName,
+            HttpContext.Session.Id,
+            schoolUrn,
+            selectedEstablishmentIdsAfterClear,
+            _currentUser.GroupSelectedSchoolUrn
         );
 
         return RedirectToAction(
@@ -115,22 +159,54 @@ public class GroupsController : BaseController<GroupsController>
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
 
-        await _validator.ValidateSelectionAsync(viewModel, ModelState);
+        Logger.LogInformation(
+          "Submitting MAT school selection. Instance: {Instance}, SessionId: {SessionId}, SectionSlug: {SectionSlug}, PresentedSchools: {PresentedSchools}, SelectedSchools: {SelectedSchools}",
+          Environment.MachineName,
+          HttpContext.Session.Id,
+          sectionSlug,
+          viewModel.PresentedSchoolRefs,
+          viewModel.SelectedSchoolsRefs
+        );
+
+        await _validator.ValidateSelectionAsync(
+            viewModel,
+            ModelState
+        );
 
         if (!ModelState.IsValid)
         {
-            return await _groupsViewBuilder.RouteToSelectSchoolsToAssessViewModelAsync(
-                this,
-                sectionSlug,
-                viewModel
+            Logger.LogWarning(
+                "MAT school selection validation failed. Instance: {Instance}, SessionId: {SessionId}, SectionSlug: {SectionSlug}",
+                Environment.MachineName,
+                HttpContext.Session.Id,
+                sectionSlug
             );
+
+            return await _groupsViewBuilder
+                .RouteToSelectSchoolsToAssessViewModelAsync(
+                    this,
+                    sectionSlug,
+                    viewModel
+                );
         }
 
-        return await _groupsViewBuilder.SubmitSelectedSchoolsToAssessAndRedirect(
-            this,
+        var result =
+            await _groupsViewBuilder
+                .SubmitSelectedSchoolsToAssessAndRedirect(
+                    this,
+                    sectionSlug,
+                    viewModel
+                );
+
+        Logger.LogInformation(
+            "MAT school selection processed. Instance: {Instance}, SessionId: {SessionId}, SectionSlug: {SectionSlug}, StoredSelectedEstablishmentIds: {StoredSelectedEstablishmentIds}",
+            Environment.MachineName,
+            HttpContext.Session.Id,
             sectionSlug,
-            viewModel
+            HttpContext.Session.GetSelectedEstablishmentIds()
         );
+
+        return result;
     }
 
     [HttpGet(
