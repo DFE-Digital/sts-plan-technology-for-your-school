@@ -17,5 +17,7 @@ public class QuestionViewModel
     public string? SectionName { get; init; }
     public string? SectionSlug { get; init; }
     public string? SectionId { get; init; }
-    public MatEstablishmentModel? MatEstablishmentModel { get; init; } = null;
+    public bool IsMatMultiSchoolAssessment { get; set; }
+    public int SelectedSchoolCount { get; set; }
+    public List<string> SelectedSchoolNames { get; set; } = [];
 }

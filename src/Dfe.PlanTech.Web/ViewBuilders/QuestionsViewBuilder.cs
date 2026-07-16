@@ -1,4 +1,3 @@
-using Dfe.PlanTech.Application.Providers;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
@@ -32,7 +31,6 @@ public class QuestionsViewBuilder(ILogger<BaseViewBuilder> logger, IContentfulSe
        string sectionSlug,
        string questionSlug,
        string? returnTo
-
     )
     {
         var establishmentId = await GetRoutingEstablishmentId();
@@ -333,8 +331,7 @@ public class QuestionsViewBuilder(ILogger<BaseViewBuilder> logger, IContentfulSe
             };
 
             return controller.View(RestartObsoleteAssessmentView, restartObsoleteViewModel);
-        }
-        ;
+        };
 
         var viewModel = new ContinueSelfAssessmentViewModel
         {

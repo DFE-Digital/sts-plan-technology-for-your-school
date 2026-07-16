@@ -50,6 +50,23 @@ public class QuestionsViewBuilderTests
         UsePreviewApi = false,
     };
 
+    public QuestionsViewBuilderTests()
+    {
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns(Array.Empty<int>());
+
+        _matEstablishmentProvider
+            .GetSelectedSchoolNamesAsync(
+                Arg.Any<ICurrentUserProvider>()
+            )
+            .Returns(
+                Task.FromResult<IReadOnlyList<string>>(
+                    Array.Empty<string>()
+                )
+            );
+    }
+
     private QuestionsViewBuilder CreateServiceUnderTest() =>
         new QuestionsViewBuilder(
             _logger,
@@ -181,11 +198,11 @@ public class QuestionsViewBuilderTests
     }
 
     [Fact]
-    public async Task RouteByQuestionId_WhenMatUserHasSelectedSchools_PopulatesSelectedSchoolNames()
+    public async Task RouteByQuestionId_WhenMatUserHasSelectedSchools_PopulatesMatSchoolDetails()
     {
         _contentfulOptions = new ContentfulOptionsConfiguration
         {
-            UsePreviewApi = true
+            UsePreviewApi = true,
         };
 
         var sut = CreateServiceUnderTest();
@@ -193,15 +210,15 @@ public class QuestionsViewBuilderTests
 
         _currentUserProvider.IsMat.Returns(true);
 
-        var matEstablishmentModel = new MatEstablishmentModel(
-            true,
-            2,
-            ["School One", "School Three"]
-        );
+        IReadOnlyList<string> selectedSchoolNames =
+        [
+            "School One",
+        "School Three",
+    ];
 
         _matEstablishmentProvider
-            .PopulateMatSelectedSchools(_currentUserProvider)
-            .Returns(matEstablishmentModel);
+            .GetSelectedSchoolNamesAsync(_currentUserProvider)
+            .Returns(Task.FromResult(selectedSchoolNames));
 
         var question = MakeQuestion(
             "Q1",
@@ -219,19 +236,73 @@ public class QuestionsViewBuilderTests
         );
 
         var view = Assert.IsType<ViewResult>(result);
-        var model = Assert.IsType<QuestionViewModel>(view.Model);
 
-        Assert.NotNull(model.MatEstablishmentModel);
-        Assert.True(model.MatEstablishmentModel.IsMatMultiSchoolAssessment);
-        Assert.Equal(2, model.MatEstablishmentModel.SelectedSchoolCount);
+        Assert.Equal("Question", view.ViewName);
+
+        var model = Assert.IsType<QuestionViewModel>(
+            view.Model
+        );
+
+        Assert.True(model.IsMatMultiSchoolAssessment);
+        Assert.Equal(2, model.SelectedSchoolCount);
+
         Assert.Equal(
-            new[] { "School One", "School Three" },
-            model.MatEstablishmentModel.SelectedSchoolNames
+            selectedSchoolNames,
+            model.SelectedSchoolNames
         );
 
         await _matEstablishmentProvider
             .Received(1)
-            .PopulateMatSelectedSchools(_currentUserProvider);
+            .GetSelectedSchoolNamesAsync(
+                _currentUserProvider
+            );
+    }
+
+    [Fact]
+    public async Task RouteByQuestionId_WhenNoSelectedSchools_DoesNotShowMatSchoolDetails()
+    {
+        _contentfulOptions = new ContentfulOptionsConfiguration
+        {
+            UsePreviewApi = true,
+        };
+
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+
+        _matEstablishmentProvider
+            .GetSelectedSchoolNamesAsync(_currentUserProvider)
+            .Returns(
+                Task.FromResult<IReadOnlyList<string>>(
+                    Array.Empty<string>()
+                )
+            );
+
+        var question = MakeQuestion(
+            "Q1",
+            "q-1",
+            "Question text"
+        );
+
+        _contentful
+            .GetQuestionByIdAsync("Q1")
+            .Returns(question);
+
+        var result = await sut.RouteByQuestionId(
+            controller,
+            "Q1"
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+
+        var model = Assert.IsType<QuestionViewModel>(
+            view.Model
+        );
+
+        Assert.False(model.IsMatMultiSchoolAssessment);
+        Assert.Equal(0, model.SelectedSchoolCount);
+        Assert.Empty(model.SelectedSchoolNames);
     }
 
     // ---------- RouteToInterstitialPage ----------
@@ -571,6 +642,8 @@ public class QuestionsViewBuilderTests
             .SubmitAnswerAsync(11, 103, 999, Arg.Any<SubmitAnswerModel>());
 
         await _questionSvc.Received(1).GetNextUnansweredQuestion(101, section);
+
+        await _submissionSvc.DidNotReceive().SubmitAnswerAsync(11, 999, 999, Arg.Any<SubmitAnswerModel>());
     }
 
     [Fact]
@@ -614,6 +687,10 @@ public class QuestionsViewBuilderTests
 
         await _questionSvc.Received(1)
             .GetNextUnansweredQuestion(999, section);
+
+        _matEstablishmentProvider
+            .Received(1)
+            .GetSelectedEstablishmentIdsFromSession();
 
         Assert.IsType<RedirectToActionResult>(result);
     }
@@ -1253,6 +1330,82 @@ public class QuestionsViewBuilderTests
         );
 
         Assert.Empty(nestedNextQuestion.Answers);
+    }
+
+    [Fact]
+    public async Task RouteBySlugAndQuestionAsync_WhenMatHasSelectedSchools_UsesFirstSelectedSchoolForRouting()
+    {
+        var sut = CreateServiceUnderTest();
+        var controller = MakeControllerWithTempData();
+
+        _currentUserProvider.IsMat.Returns(true);
+
+        _currentUserProvider
+            .GetActiveEstablishmentIdAsync()
+            .Returns(999);
+
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101, 102]);
+
+        var question = MakeQuestion(
+            "Q1",
+            "q-1",
+            "Question 1"
+        );
+
+        var section = MakeSection(
+            "S1",
+            "sec-1",
+            "Section 1",
+            question
+        );
+
+        _contentful
+            .GetSectionBySlugAsync("sec-1")
+            .Returns(section);
+
+        var routingData = new SubmissionRoutingDataModel(
+            nextQuestion: question,
+            questionnaireSection: section,
+            submission: null,
+            status: SubmissionStatus.InProgress
+        );
+
+        _submissionSvc
+            .GetSubmissionRoutingDataAsync(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            )
+            .Returns(routingData);
+
+        var result = await sut.RouteBySlugAndQuestionAsync(
+            controller,
+            "cat",
+            "sec-1",
+            "q-1",
+            null
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        Assert.IsType<QuestionViewModel>(view.Model);
+
+        await _submissionSvc
+            .Received(1)
+            .GetSubmissionRoutingDataAsync(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            );
+
+        await _submissionSvc
+            .DidNotReceive()
+            .GetSubmissionRoutingDataAsync(
+                999,
+                section,
+                SubmissionStatus.InProgress
+            );
     }
 
     // ---------- RestartSelfAssessment ----------
