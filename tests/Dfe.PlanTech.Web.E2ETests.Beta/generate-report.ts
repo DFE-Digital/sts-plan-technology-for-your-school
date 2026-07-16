@@ -1,9 +1,9 @@
-const os = require('os');
-const reporter = require('multiple-cucumber-html-reporter');
+import * as os from 'node:os';
+import { generate } from 'multiple-cucumber-html-reporter';
 
-const isCI = !!process.env.CI;
+const isCI = Boolean(process.env.CI);
 
-reporter.generate({
+generate({
   jsonDir: 'reports',
   reportPath: './reports/html',
   metadata: {
@@ -13,4 +13,4 @@ reporter.generate({
       version: os.release(),
     },
   },
-});
+});s
