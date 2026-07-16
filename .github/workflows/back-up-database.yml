@@ -47,6 +47,19 @@ jobs:
           az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
           az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
+      - name: Build backup resource names
+        id: backup-names
+        shell: bash
+        env:
+          ENVIRONMENT: ${{ secrets.AZ_ENVIRONMENT }}
+          PROJECT_NAME: ${{ secrets.DFE_PROJECT_NAME }}
+        run: |
+          resource_group="${ENVIRONMENT}${PROJECT_NAME}-backup"
+          account_name="${resource_group//-/}"
+
+          echo "resource-group=$resource_group" >> "$GITHUB_OUTPUT"
+          echo "account-name=$account_name" >> "$GITHUB_OUTPUT"
+
       - name: Install SqlPackage
         run: dotnet tool install --global Microsoft.SqlPackage
 
@@ -66,8 +79,8 @@ jobs:
         uses: ./.github/actions/whitelist-storage
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup
-          account-name: ${${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup//-/}
+          resource-group: ${{ steps.backup-names.outputs.resource-group }}
+          account-name: ${{ steps.backup-names.outputs.account-name }}
           verb: add
 
       - name: Export database
