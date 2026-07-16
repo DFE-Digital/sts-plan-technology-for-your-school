@@ -11,8 +11,9 @@ on:
       - '.github/actions/run-unit-tests/action.yml'
 
 concurrency:
-  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label ||
-    github.head_ref || github.ref }}'
+  group:
+    '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref ||
+    github.ref }}'
   cancel-in-progress: true
 
 env:
@@ -38,9 +39,15 @@ jobs:
       - name: Cache SonarCloud packages
         uses: actions/cache@v4
         with:
-          path: ~\sonar\cache
+          path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
+      - name: Install latest JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '21'
 
       - name: Install dotnet coverage
         run: dotnet tool install --global dotnet-coverage --version 17.9.3
@@ -80,8 +87,9 @@ jobs:
           solution_filename: plan-technology-for-your-school.sln
 
       - name: Merge test results
-        run: dotnet-coverage merge -f xml -o "coverage.xml" -s "coverage.settings.xml"
-          -r coverage.cobertura.xml
+        run:
+          dotnet-coverage merge -f xml -o "coverage.xml" -s "coverage.settings.xml" -r
+          coverage.cobertura.xml
 
       - name: End SonarCloud Scanner
         run: dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"

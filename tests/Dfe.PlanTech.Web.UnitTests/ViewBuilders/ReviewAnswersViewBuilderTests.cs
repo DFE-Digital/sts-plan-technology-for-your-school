@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -5,7 +6,7 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
+using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Http;
@@ -14,15 +15,22 @@ using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using NSubstitute.ExceptionExtensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
 public class ReviewAnswersViewBuilderTests
 {
-    private readonly ILogger<BaseViewBuilder> _logger = Substitute.For<ILogger<BaseViewBuilder>>();
+    private readonly ILogger<ReviewAnswersViewBuilder> _logger = Substitute.For<
+        ILogger<ReviewAnswersViewBuilder>
+    >();
     private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
     private readonly ISubmissionService _submissions = Substitute.For<ISubmissionService>();
-    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider = Substitute.For<IMatEstablishmentProvider>();
 
     private ReviewAnswersViewBuilder CreateSut()
     {
@@ -30,7 +38,7 @@ public class ReviewAnswersViewBuilderTests
         _currentUser.UserOrganisationId.Returns((int?)null); // non-MAT user by default
         _currentUser.UserId.Returns(1);
 
-        return new ReviewAnswersViewBuilder(_logger, _contentful, _currentUser, _submissions);
+        return new ReviewAnswersViewBuilder(_logger, _contentful, _currentUser, _submissions, _matEstablishmentProvider);
     }
 
     private static DummyController MakeController()
@@ -184,6 +192,197 @@ public class ReviewAnswersViewBuilderTests
 
         var result = await sut.RouteToCheckAnswers(ctl, "cat", "sec-1");
         Assert.IsType<RedirectToActionResult>(result);
+    }
+
+    [Fact]
+    public async Task RouteToCheckAnswers_WhenMatHasSelectedEstablishment_UsesSelectedEstablishment()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101]);
+
+        var section = MakeSection("S1", "sec-1", "Section 1");
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentful
+            .GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
+            .Returns(new PageEntry { Content = [] });
+
+        _submissions
+            .GetSubmissionRoutingDataAsync(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            )
+            .Returns(MakeRouting(SubmissionStatus.InProgress, section));
+
+        await sut.RouteToCheckAnswers(ctl, "cat", "sec-1");
+
+        await _submissions
+            .Received(1)
+            .GetSubmissionRoutingDataAsync(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            );
+
+         _matEstablishmentProvider
+            .Received(1)
+            .GetSelectedEstablishmentIdsFromSession();
+    }
+
+    [Fact]
+    public async Task RouteToCheckAnswers_WhenMatHasNoSelectedEstablishment_UsesActiveEstablishment()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([]);
+
+        var section = MakeSection("S1", "sec-1", "Section 1");
+        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+        _contentful
+            .GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
+            .Returns(new PageEntry { Content = [] });
+
+        _submissions
+            .GetSubmissionRoutingDataAsync(
+                999,
+                section,
+                SubmissionStatus.InProgress
+            )
+            .Returns(MakeRouting(SubmissionStatus.InProgress, section));
+
+        await sut.RouteToCheckAnswers(ctl, "cat", "sec-1");
+
+        await _submissions
+            .Received(1)
+            .GetSubmissionRoutingDataAsync(
+                999,
+                section,
+                SubmissionStatus.InProgress
+            );
+
+        _matEstablishmentProvider
+            .Received(1)
+            .GetSelectedEstablishmentIdsFromSession();
+    }
+
+    [Fact]
+    public async Task RouteToCheckAnswers_WhenMatUser_PopulatesSelectedSchoolDetails()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(101);
+
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101]);
+
+        IReadOnlyList<string> selectedSchoolNames =
+        [
+            "School One"
+        ];
+
+        _matEstablishmentProvider
+            .GetSelectedSchoolNamesAsync(_currentUser)
+            .Returns(Task.FromResult(selectedSchoolNames));
+
+        var section = MakeSection("S1", "sec-1", "Section 1");
+
+        _contentful
+            .GetSectionBySlugAsync("sec-1")
+            .Returns(section);
+
+        _contentful
+            .GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
+            .Returns(new PageEntry { Content = [] });
+
+        _submissions
+            .GetSubmissionRoutingDataAsync(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            )
+            .Returns(MakeRouting(SubmissionStatus.InProgress, section));
+
+        var result = await sut.RouteToCheckAnswers(
+            ctl,
+            "cat",
+            "sec-1"
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<ReviewAnswersViewModel>(view.Model);
+
+        Assert.True(model.IsMatMultiSchoolAssessment);
+        Assert.Equal(1, model.SelectedSchoolCount);
+        Assert.Equal(selectedSchoolNames, model.SelectedSchoolNames);
+
+        await _matEstablishmentProvider
+            .Received(1)
+            .GetSelectedSchoolNamesAsync(_currentUser);
+    }
+
+    [Fact]
+    public async Task RouteToCheckAnswers_WhenNoSchoolsSelected_DoesNotPopulateSchoolDetails()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(101);
+
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([]);
+
+        _matEstablishmentProvider
+            .GetSelectedSchoolNamesAsync(_currentUser)
+            .Returns(
+                Task.FromResult<IReadOnlyList<string>>([])
+            );
+
+        var section = MakeSection("S1", "sec-1", "Section 1");
+
+        _contentful
+            .GetSectionBySlugAsync("sec-1")
+            .Returns(section);
+
+        _contentful
+            .GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
+            .Returns(new PageEntry { Content = [] });
+
+        _submissions
+            .GetSubmissionRoutingDataAsync(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            )
+            .Returns(MakeRouting(SubmissionStatus.InProgress, section));
+
+        var result = await sut.RouteToCheckAnswers(
+            ctl,
+            "cat",
+            "sec-1"
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<ReviewAnswersViewModel>(view.Model);
+
+        Assert.False(model.IsMatMultiSchoolAssessment);
+        Assert.Equal(0, model.SelectedSchoolCount);
+        Assert.Empty(model.SelectedSchoolNames);
     }
 
     // ---------------- RouteToViewAnswers ----------------
@@ -501,6 +700,173 @@ public class ReviewAnswersViewBuilderTests
     }
 
     [Fact]
+    public async Task ConfirmCheckAnswers_WhenMatHasSelectedEstablishments_ConfirmsEachSubmission()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.UserId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(999);
+
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101, 102]);
+
+        var section = MakeSection("S1", "sec", "My Section");
+        _contentful.GetSectionBySlugAsync("sec").Returns(section);
+
+        _submissions
+            .GetLatestSubmissionResponsesModel(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            )
+            .Returns(new SubmissionResponsesModel(11, []));
+
+        _submissions
+            .GetLatestSubmissionResponsesModel(
+                102,
+                section,
+                SubmissionStatus.InProgress
+            )
+            .Returns(new SubmissionResponsesModel(12, []));
+
+        var result = await sut.ConfirmCheckAnswers(
+            ctl,
+            "cat",
+            "sec",
+            "My Section",
+            42
+        );
+
+        await _submissions
+            .Received(1)
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                101,
+                999,
+                11,
+                1,
+                section
+            );
+
+        await _submissions
+            .Received(1)
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                102,
+                999,
+                12,
+                1,
+                section
+            );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+
+        Assert.Equal(
+            nameof(ReviewAnswersController.GetTrustSelfAssessmentSummary),
+            redirect.ActionName
+        );
+        Assert.Equal("cat", redirect.RouteValues?["categorySlug"]);
+        Assert.Equal("sec", redirect.RouteValues?["sectionSlug"]);
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswers_WhenMatHasNoSelectedEstablishments_UsesActiveSubmission()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.UserId.Returns(1);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(2);
+
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([]);
+
+        var section = MakeSection("S1", "sec", "My Section");
+        _contentful.GetSectionBySlugAsync("sec").Returns(section);
+
+        var result = await sut.ConfirmCheckAnswers(
+            ctl,
+            "cat",
+            "sec",
+            "My Section",
+            42
+        );
+
+        await _submissions
+            .Received(1)
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                2,
+                999,
+                42,
+                1,
+                section
+            );
+
+        var redirect = Assert.IsType<RedirectToActionResult>(result);
+
+        Assert.Equal(
+            nameof(ReviewAnswersController.GetTrustSelfAssessmentSummary),
+            redirect.ActionName
+        );
+    }
+
+    [Fact]
+    public async Task ConfirmCheckAnswers_WhenSelectedSubmissionMissing_SetsErrorAndRedirectsToCheckAnswers()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.UserOrganisationId.Returns(999);
+        _currentUser.UserId.Returns(1);
+
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([101]);
+
+        var section = MakeSection("S1", "sec", "My Section");
+        _contentful.GetSectionBySlugAsync("sec").Returns(section);
+
+        _submissions
+            .GetLatestSubmissionResponsesModel(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            )
+            .Returns((SubmissionResponsesModel?)null);
+
+        var result = await sut.ConfirmCheckAnswers(
+            ctl,
+            "cat",
+            "sec",
+            "My Section",
+            42
+        );
+
+        Assert.Equal(
+            ReviewAnswersViewBuilder.InlineRecommendationUnavailableErrorMessage,
+            ctl.TempData["ErrorMessage"]
+        );
+
+        await _submissions
+            .DidNotReceive()
+            .ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                Arg.Any<int>(),
+                Arg.Any<int?>(),
+                Arg.Any<int>(),
+                Arg.Any<int>(),
+                Arg.Any<QuestionnaireSectionEntry>()
+            );
+
+        Assert.IsType<RedirectToActionResult>(result);
+    }
+
+    [Fact]
     public async Task ConfirmCheckAnswers_Failure_Sets_Error_TempData_And_Redirects_Back_To_CheckAnswers()
     {
         var ctl = MakeController();
@@ -566,11 +932,7 @@ public class ReviewAnswersViewBuilderTests
 
         var microcopy = new List<MicrocopyEntry>
         {
-            new MicrocopyEntry
-            {
-                Key = "testEntry",
-                Value = "test microcopy value"
-            }
+            new MicrocopyEntry { Key = "testEntry", Value = "test microcopy value" },
         };
 
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
@@ -622,13 +984,8 @@ public class ReviewAnswersViewBuilderTests
 
         var microcopy = new List<MicrocopyEntry>
         {
-            new MicrocopyEntry
-            {
-                Key = "testEntry",
-                Value = "test microcopy value"
-            }
+            new MicrocopyEntry { Key = "testEntry", Value = "test microcopy value" },
         };
-
 
         var viewModel = ReviewAnswersViewBuilder.BuildViewAnswersViewModel(
             section,
@@ -643,6 +1000,23 @@ public class ReviewAnswersViewBuilderTests
         {
             Assert.Equal(i + 1, viewModel.Responses.Skip(i).First().Order);
         }
+    }
+
+
+    [Fact]
+    public void Constructor_WithNullMatEstablishmentProvider_ThrowsArgumentNullException()
+    {
+        var exception = Assert.Throws<ArgumentNullException>(() =>
+            new ReviewAnswersViewBuilder(
+                _logger,
+                _contentful,
+                _currentUser,
+                _submissions,
+                null!
+            )
+        );
+
+        Assert.Equal("matEstablishmentProvider", exception.ParamName);
     }
 
     private sealed class DummyController : Controller { }

@@ -4,6 +4,7 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Data.Sql.Interfaces;
 using NSubstitute;
 
 namespace Dfe.PlanTech.Application.UnitTests.Services;
@@ -12,6 +13,8 @@ public class EstablishmentServiceTests
 {
     private readonly IEstablishmentWorkflow _establishmentWorkflow =
         Substitute.For<IEstablishmentWorkflow>();
+    private readonly IEstablishmentRepository _establishmentRepository =
+        Substitute.For<IEstablishmentRepository>();
     private readonly IRecommendationWorkflow _recommendationWorkflow =
         Substitute.For<IRecommendationWorkflow>();
     private readonly IUserWorkflow _userWorkflow = Substitute.For<IUserWorkflow>();
@@ -19,7 +22,7 @@ public class EstablishmentServiceTests
     private static readonly string[] urnAandBandC = ["URN-A", "URN-B", "URN-C"];
 
     private EstablishmentService CreateServiceUnderTest() =>
-        new EstablishmentService(_establishmentWorkflow, _recommendationWorkflow, _userWorkflow);
+        new EstablishmentService(_establishmentWorkflow, _establishmentRepository, _recommendationWorkflow, _userWorkflow);
 
     [Fact]
     public async Task GetOrCreateEstablishmentAsync_Delegates_To_Workflow()

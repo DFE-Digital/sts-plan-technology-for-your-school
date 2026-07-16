@@ -20,6 +20,9 @@ public static class ContentfulContentTypeConstants
             key => EntryClassToContentTypeMapBasis[key]
         );
 
+    public static IReadOnlyDictionary<Type, string> EntryTypeToContentTypeMap =>
+        EntryClassToContentTypeMapBasis;
+
     // Internal mappings between C# and Contentful content type ID's
     private static readonly Dictionary<Type, string> EntryClassToContentTypeMapBasis = new()
     {
@@ -30,6 +33,7 @@ public static class ContentfulContentTypeConstants
             ComponentAccordionSectionContentfulContentTypeId
         },
         { typeof(ComponentAttachmentEntry), ComponentAttachmentContentfulContentTypeId },
+        { typeof(ComponentBannerEntry), ComponentBannerContentfulContentTypeId },
         { typeof(ComponentButtonEntry), ComponentButtonContentfulContentTypeId },
         {
             typeof(ComponentButtonWithEntryReferenceEntry),
@@ -52,6 +56,7 @@ public static class ContentfulContentTypeConstants
         { typeof(ComponentTextBodyEntry), ComponentTextBodyContentfulContentTypeId },
         { typeof(ComponentTitleEntry), ComponentTitleContentfulContentTypeId },
         { typeof(ComponentWarningEntry), ComponentWarningContentfulContentTypeId },
+        { typeof(ConditionEntry), ConditionContentfulContentTypeId },
         { typeof(ContentSupportPageEntry), ContentSupportPageContentfulContentTypeId },
         { typeof(CsBodyTextEntry), CsBodyTextContentfulContentTypeId },
         { typeof(MicrocopyEntry), MicrocopyEntryTypeId },
@@ -73,7 +78,6 @@ public static class ContentfulContentTypeConstants
             RichTextContentSupportDataContentfulContentTypeId
         },
         { typeof(RichTextMarkField), RichTextMarkContentfulContentTypeId },
-        { typeof(ComponentBannerEntry), ComponentBannerEntryId }
     };
 
     // Contentful content type IDs are managed in Contentful.
@@ -82,6 +86,7 @@ public static class ContentfulContentTypeConstants
     public const string ComponentAccordionContentfulContentTypeId = "CSAccordion";
     public const string ComponentAccordionSectionContentfulContentTypeId = "accordionSection";
     public const string ComponentAttachmentContentfulContentTypeId = "Attachment";
+    public const string ComponentBannerContentfulContentTypeId = "componentBanner";
     public const string ComponentButtonContentfulContentTypeId = "button";
     public const string ComponentButtonWithEntryReferenceContentfulContentTypeId =
         "buttonWithEntryReference";
@@ -99,6 +104,7 @@ public static class ContentfulContentTypeConstants
     public const string ComponentTextBodyContentfulContentTypeId = "textBody";
     public const string ComponentTitleContentfulContentTypeId = "title";
     public const string ComponentWarningContentfulContentTypeId = "warningComponent";
+    public const string ConditionContentfulContentTypeId = "condition";
     public const string ContentSupportPageContentfulContentTypeId = "contentSupportPage";
     public const string CsBodyTextContentfulContentTypeId = "csBodyText";
     public const string MicrocopyEntryTypeId = "microcopy";
@@ -118,5 +124,4 @@ public static class ContentfulContentTypeConstants
     public const string RichTextContentSupportDataContentfulContentTypeId =
         "richTextContentSupportData";
     public const string RichTextMarkContentfulContentTypeId = "richTextMark";
-    public const string ComponentBannerEntryId = "componentBanner";
 }

@@ -37,7 +37,7 @@ Run `npm run test:login` - This will create the different session.jsons that the
 | test:all             | npm run test:parallel && npm run test:serial                                                                                                                | Runs all regression tests without recording                                  |
 | test:record:smoke    | cucumber-js -p smoke --retry 4 --format json:reports/cucumber-smoke.json --world-parameters="{\"record\": true}"                                            | Runs smoke tests with recording enabled                                      |
 | test:smoke           | cucumber-js -p smoke                                                                                                                                        | Runs smoke tests with default settings                                       |
-| test:regression           | cucumber-js -p smoke                                                                                                                                        | Runs regression tests with default settings                                       |
+| test:regression           | cucumber-js -p regression                                                                                                                                        | Runs regression tests with default settings                                       |
 
 Key commands are:
 
@@ -45,7 +45,7 @@ regression:
 
 - npm run test:all - runs all regression tests
 - npm run test:record - runs all regression tests and records the videos/traces/screenshots
-- npm run test:regression - runs all smoke tests
+- npm run test:regression - runs all regression tests
 
 smoke:
 
@@ -101,3 +101,10 @@ URL - this is the URL the tests will be running against - e.g. https://localhost
 @selected-school-miscellaneous - for MAT tests, it will select the miscellaneous school in the select-a-school page. This is generated from the matConstants.ts file - e.g. you can use @selected-school-community, @selected-school-foundation
 
 @smoke - Tests which are for the smoke tests.
+
+## See also
+
+- [Web application](../../src/Dfe.PlanTech.Web/README.md) — the application under test
+- [Seed test data](../Dfe.PlanTech.Web.SeedTestData/README.md) — create a clean local database before running tests
+- [GitHub Actions workflows](../../.github/README.md) — `e2e-test-playwright-environment.yml` and smoke workflows
+- [Tests overview](../README.md)

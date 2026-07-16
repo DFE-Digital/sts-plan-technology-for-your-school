@@ -1,82 +1,80 @@
+using Dfe.PlanTech.Data.Sql.Common;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Dfe.PlanTech.Data.Sql.Configurations;
 
-/// Created via: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250905_1200_AddRecommendationTables.sql
-/// Updated via: src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2025/20250920_1200_FixRecommendationHistoryForAppendOnly.sql
 internal class EstablishmentRecommendationHistoryEntityConfiguration
     : IEntityTypeConfiguration<EstablishmentRecommendationHistoryEntity>
 {
     public void Configure(EntityTypeBuilder<EstablishmentRecommendationHistoryEntity> builder)
     {
-        // Use identity column as primary key (changed from composite key)
-        builder.HasKey(history => history.Id);
-        builder.Property(history => history.Id).ValueGeneratedOnAdd();
+        builder.ToTable("establishmentRecommendationHistory", "dbo");
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.DateCreated).HasDefaultValue();
+        builder.Property(x => x.EstablishmentId).IsRequired();
+        builder.Property(x => x.MatEstablishmentId).IsRequired(false);
+        builder.Property(x => x.RecommendationId).IsRequired();
+        builder.Property(x => x.UserId).IsRequired();
+        builder
+            .Property(x => x.PreviousStatus)
+            .HasMaxLength(100)
+            .HasConversion(StatusConverters.RecommendationStatusConverter)
+            .IsRequired(false);
+        builder
+            .Property(x => x.NewStatus)
+            .HasConversion(StatusConverters.RecommendationStatusConverter)
+            .HasMaxLength(100);
+        builder.Property(x => x.NoteText).HasMaxLength(4000).IsRequired(false);
+        builder.Property(x => x.ResponseId).IsRequired(false);
+        builder.Property(x => x.UserActionId).IsRequired(false);
 
         builder
-            .Property(history => history.DateCreated)
-            .HasColumnType("datetime")
-            .HasDefaultValue();
-
-        builder.Property(history => history.PreviousStatus).HasMaxLength(50);
-        builder.Property(history => history.NewStatus).HasMaxLength(50);
-        builder.Property(history => history.NoteText);
-
-        builder.Property(h => h.ResponseId)
-            .HasColumnName("responseId");
-
-        // Create index on the composite key for performance (matches migration script)
-        builder
-            .HasIndex(h => new { h.EstablishmentId, h.RecommendationId })
+            .HasIndex(x => new { x.EstablishmentId, x.RecommendationId })
             .HasDatabaseName("IX_establishmentRecommendationHistory_EstablishmentRecommendation");
 
-        // Create index on dateCreated for ordering (matches migration script)
         builder
-            .HasIndex(h => h.DateCreated)
+            .HasIndex(x => x.DateCreated)
             .HasDatabaseName("IX_establishmentRecommendationHistory_DateCreated")
             .IsDescending();
 
         builder
-            .HasIndex(h => h.ResponseId)
+            .HasIndex(x => x.ResponseId)
             .HasDatabaseName("IX_establishmentRecommendationHistory_responseId");
 
         builder
-            .HasOne(h => h.Establishment)
+            .HasOne(x => x.Establishment)
             .WithMany()
-            .HasForeignKey(h => h.EstablishmentId)
+            .HasForeignKey(x => x.EstablishmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasOne(h => h.MatEstablishment)
+            .HasOne(x => x.MatEstablishment)
             .WithMany()
-            .HasForeignKey(h => h.MatEstablishmentId)
+            .HasForeignKey(x => x.MatEstablishmentId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasOne(h => h.Recommendation)
+            .HasOne(x => x.Recommendation)
             .WithMany()
-            .HasForeignKey(h => h.RecommendationId)
+            .HasForeignKey(x => x.RecommendationId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasOne(h => h.User)
+            .HasOne(x => x.User)
             .WithMany()
-            .HasForeignKey(h => h.UserId)
+            .HasForeignKey(x => x.UserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         builder
-            .HasOne(h => h.Response)
+            .HasOne(x => x.Response)
             .WithMany()
-            .HasForeignKey(h => h.ResponseId)
+            .HasForeignKey(x => x.ResponseId)
             .IsRequired(false)
             .OnDelete(DeleteBehavior.SetNull);
-
-        builder
-            .Property(b => b.UserActionId)
-            .HasColumnName("userActionId")
-            .IsRequired(false);
-
     }
 }

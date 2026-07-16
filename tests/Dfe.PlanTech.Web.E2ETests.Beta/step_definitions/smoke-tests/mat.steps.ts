@@ -22,16 +22,35 @@ Then('I should see the following schools:', async function (dataTable: DataTable
 
 Then('I should see the following school progress:', async function (dataTable: DataTable) {
   const rows = dataTable.hashes();
+
   for (const row of rows) {
-    const schoolName = row['School name'];
+    const possibleSchoolNames = row['School name']
+      .split(' OR ')
+      .map(name => name.trim());
 
-    const form = this.page.locator('form').filter({
-      has: this.page.getByRole('button', { name: schoolName }),
-    });
+    let matchingForm = null;
 
-    const progress = form.locator('p');
+    for (const schoolName of possibleSchoolNames) {
+      const form = this.page.locator('form').filter({
+        has: this.page.getByRole('button', { name: schoolName }),
+      });
 
-    await expect(progress).toContainText('recommendations completed or in progress');
+      if (await form.count() > 0) {
+        matchingForm = form;
+        break;
+      }
+    }
+
+    expect(
+      matchingForm,
+      `No matching school form found for: ${possibleSchoolNames.join(', ')}`
+    ).toBeTruthy();
+
+    const progress = matchingForm!.locator('p');
+
+    await expect(progress).toContainText(
+      'recommendations completed or in progress'
+    );
   }
 });
 

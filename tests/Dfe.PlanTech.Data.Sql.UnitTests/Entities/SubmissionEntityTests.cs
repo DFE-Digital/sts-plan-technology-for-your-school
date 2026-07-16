@@ -15,7 +15,13 @@ public class SubmissionEntityTests
         var expectedSectionId = "Arbitrary string - section id";
         var expectedSectionName = "Arbitrary string - section name";
         var expectedUserActionId = Guid.NewGuid();
+
+        var expectedCreatedUserActionId = Guid.NewGuid();
+        var expectedLastUpdatedUserActionId = Guid.NewGuid();
+        Guid? expectedCompletedUserActionId = null;
+
         var expectedDateCreated = new DateTime(2024, 08, 01, 10, 00, 00, DateTimeKind.Utc);
+
         DateTime? expectedDateLastUpdated = new DateTime(
             2024,
             08,
@@ -25,7 +31,9 @@ public class SubmissionEntityTests
             00,
             DateTimeKind.Utc
         );
+
         DateTime? expectedDateCompleted = null;
+
         var expectedDeleted = false;
         var expectedStatus = SubmissionStatus.InProgress;
 
@@ -48,13 +56,19 @@ public class SubmissionEntityTests
             DateCreated = expectedDateCreated,
             DateLastUpdated = expectedDateLastUpdated,
             DateCompleted = expectedDateCompleted,
+            UserActionId = expectedUserActionId,
+
             // Note deliberate empty collection here to prevent circular references (a full response has a reference to the submission).
             // TODO: Additional tests to validate the mapping (e.g. to verify no infinite recursion occurs with circular references).
             // TODO: Consider if it is reasonable to redesign this to remove the circular references / risk for infinite recursion when mapping.
             Responses = new List<ResponseEntity>(),
+
             Deleted = expectedDeleted,
             Status = expectedStatus,
-            UserActionId = expectedUserActionId,
+
+            CreatedUserActionId = expectedCreatedUserActionId,
+            LastUpdatedUserActionId = expectedLastUpdatedUserActionId,
+            CompletedUserActionId = expectedCompletedUserActionId,
         };
 
         // Act
@@ -70,10 +84,13 @@ public class SubmissionEntityTests
         Assert.Equal(expectedDateCreated, dto.DateCreated);
         Assert.Equal(expectedDateLastUpdated, dto.DateLastUpdated);
         Assert.Equal(expectedDateCompleted, dto.DateCompleted);
+        Assert.Equal(expectedUserActionId, dto.UserActionId);
         Assert.Empty(dto.Responses);
         Assert.Equal(expectedDeleted, dto.Deleted);
         Assert.Equal(expectedStatus, dto.Status);
-        Assert.Equal(expectedUserActionId, dto.UserActionId);
+        Assert.Equal(expectedCreatedUserActionId, dto.CreatedUserActionId);
+        Assert.Equal(expectedLastUpdatedUserActionId, dto.LastUpdatedUserActionId);
+        Assert.Equal(expectedCompletedUserActionId, dto.CompletedUserActionId);
 
         // Assert - ensure all DTO properties are accounted for
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlSubmissionDto>(
@@ -91,6 +108,9 @@ public class SubmissionEntityTests
                 nameof(SqlSubmissionDto.Deleted),
                 nameof(SqlSubmissionDto.Status),
                 nameof(SqlSubmissionDto.UserActionId),
+                nameof(SqlSubmissionDto.CreatedUserActionId),
+                nameof(SqlSubmissionDto.LastUpdatedUserActionId),
+                nameof(SqlSubmissionDto.CompletedUserActionId),
             }
         );
     }

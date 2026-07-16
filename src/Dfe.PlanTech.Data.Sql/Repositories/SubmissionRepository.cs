@@ -1,25 +1,29 @@
+using System.Linq.Expressions;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace Dfe.PlanTech.Data.Sql.Repositories;
 
 public class SubmissionRepository(
     PlanTechDbContext dbContext,
-    IUserActionIdAccessor userActionIdAccessor) : ISubmissionRepository
+    IUserActionIdProvider userActionIdProvider
+) : ISubmissionRepository
 {
-    protected readonly PlanTechDbContext _db = dbContext;
-    private readonly IUserActionIdAccessor _userActionIdAccessor = userActionIdAccessor;
+    protected readonly PlanTechDbContext _db =
+        dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+    private readonly IUserActionIdProvider _userActionIdProvider = userActionIdProvider;
 
     public async Task<SubmissionEntity> CloneSubmission(SubmissionEntity? existingSubmission)
     {
         ArgumentNullException.ThrowIfNull(existingSubmission);
+
+        var userActionId = _userActionIdProvider.GetUserActionId();
 
         var newSubmission = new SubmissionEntity
         {
@@ -28,6 +32,8 @@ public class SubmissionRepository(
             EstablishmentId = existingSubmission.EstablishmentId,
             DateCreated = DateTime.UtcNow,
             Status = SubmissionStatus.InProgress,
+            CreatedUserActionId = userActionId,
+            LastUpdatedUserActionId = userActionId,
             Responses = existingSubmission
                 .Responses.Select(r => new ResponseEntity
                 {
@@ -100,15 +106,15 @@ public class SubmissionRepository(
             {
                 if (r.CompletingAnswers.Any(ca => responses.Contains(ca.Id)))
                 {
-                    return new { r.Id, Status = RecommendationStatus.Complete.ToString() };
+                    return new { r.Id, Status = RecommendationStatus.Complete };
                 }
 
                 if (r.InProgressAnswers.Any(ca => responses.Contains(ca.Id)))
                 {
-                    return new { r.Id, Status = RecommendationStatus.InProgress.ToString() };
+                    return new { r.Id, Status = RecommendationStatus.InProgress };
                 }
 
-                return new { r.Id, Status = RecommendationStatus.NotStarted.ToString() };
+                return new { r.Id, Status = RecommendationStatus.NotStarted };
             })
             .Where(x => x is not null)
             .ToDictionary(x => x!.Id, x => x.Status);
@@ -143,6 +149,19 @@ public class SubmissionRepository(
         await SetSubmissionReviewedAndOtherCompleteReviewedSubmissionsInaccessibleAsync(
             submissionId
         );
+    }
+
+    public Task<SubmissionEntity?> GetLatestCompletedSubmissionBySectionIdAsync(
+        int establishmentId,
+        string sectionId
+    )
+    {
+        return GetPreviousSubmissionsInDescendingOrder(
+                establishmentId,
+                sectionId,
+                SubmissionStatus.CompleteReviewed
+            )
+            .FirstOrDefaultAsync();
     }
 
     public async Task<SubmissionEntity?> GetLatestSubmissionAndResponsesAsync(
@@ -240,7 +259,11 @@ public class SubmissionRepository(
             throw new InvalidOperationException($"Submission not found for ID '{submissionId}'");
         }
 
+        var userActionId = _userActionIdProvider.GetUserActionId();
+
         submission.DateCompleted = DateTime.UtcNow;
+        submission.CompletedUserActionId = userActionId;
+        submission.LastUpdatedUserActionId = userActionId;
         submission.Status = SubmissionStatus.CompleteReviewed;
 
         var otherSubmissions = await _db
@@ -268,7 +291,7 @@ public class SubmissionRepository(
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
+            statuses: [SubmissionStatus.InProgress, SubmissionStatus.Inaccessible]
         );
 
         var submission =
@@ -289,6 +312,8 @@ public class SubmissionRepository(
         }
 
         submission.Status = SubmissionStatus.Inaccessible;
+        submission.LastUpdatedUserActionId = _userActionIdProvider.GetUserActionId();
+
         await _db.SaveChangesAsync();
 
         return submission;
@@ -299,7 +324,7 @@ public class SubmissionRepository(
         var query = GetPreviousSubmissionsInDescendingOrder(
             establishmentId,
             sectionId,
-            statuses: [ SubmissionStatus.InProgress, SubmissionStatus.Inaccessible ]
+            statuses: [SubmissionStatus.InProgress, SubmissionStatus.Inaccessible]
         );
 
         var submission = await query.FirstOrDefaultAsync();
@@ -324,6 +349,8 @@ public class SubmissionRepository(
         if (submission.Status.Equals(SubmissionStatus.Inaccessible))
         {
             submission.Status = SubmissionStatus.InProgress;
+            submission.LastUpdatedUserActionId = _userActionIdProvider.GetUserActionId();
+
             await _db.SaveChangesAsync();
         }
 
@@ -357,7 +384,10 @@ public class SubmissionRepository(
         var statusOptions = statuses.ToList();
 
         if (statusOptions.Count == 0)
-            throw new ArgumentException("At least one submission status must be provided", nameof(statuses));
+            throw new ArgumentException(
+                "At least one submission status must be provided",
+                nameof(statuses)
+            );
 
         return GetSubmissionsBy(submission =>
                 !submission.Deleted
@@ -469,15 +499,17 @@ public class SubmissionRepository(
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
 
-        var currentSubmissions = await _db
+        var currentSubmissionsRaw = await _db
             .Submissions.Where(s =>
                 !s.Deleted
                 && s.EstablishmentId == establishmentId
                 && sectionIdList.Contains(s.SectionId)
             )
-            .GroupBy(s => s.SectionId)
-            .Select(g => g.OrderByDescending(s => s.DateCreated).First())
             .ToListAsync();
+
+        var currentSubmissions = currentSubmissionsRaw
+            .GroupBy(s => s.SectionId)
+            .Select(g => g.OrderByDescending(s => s.DateCreated).First());
 
         var lastCompleteSubmissions = await _db
             .Submissions.Where(s =>
@@ -512,6 +544,9 @@ public class SubmissionRepository(
                         ?? currentSubmission?.DateCreated
                         ?? DateTime.UtcNow,
                     LastCompletionDate = lastCompleteSubmission?.DateCompleted,
+                    LastUpdatedUserActionId = currentSubmission?.LastUpdatedUserActionId,
+                    CreatedUserActionId = currentSubmission?.CreatedUserActionId,
+                    CompletedUserActionId = lastCompleteSubmission?.CompletedUserActionId,
                 };
             })
             .ToList();
@@ -536,13 +571,16 @@ public class SubmissionRepository(
         if (submissionId is null)
             return;
 
-        var userActionId = _userActionIdAccessor.GetUserActionId();
+        var userActionId = _userActionIdProvider.GetUserActionId();
 
         await _db
             .Submissions.Where(s => s.Id == submissionId.Value)
-            .ExecuteUpdateAsync(setters => setters
-                .SetProperty(s => s.Deleted, true)
-                .SetProperty(s => s.UserActionId, userActionId));
+            .ExecuteUpdateAsync(setters =>
+                setters
+                    .SetProperty(s => s.Deleted, true)
+                    .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
+                    .SetProperty(s => s.LastUpdatedUserActionId, userActionId)
+            );
     }
 
     public async Task<int> SubmitResponse(AssessmentResponseModel response)
@@ -569,15 +607,15 @@ public class SubmissionRepository(
         var submissionId = await SelectOrInsertSubmissionIdAsync(
             response.SectionId,
             response.SectionName,
-            response.EstablishmentId);
+            response.EstablishmentId
+        );
 
-        var answerId = await GetOrCreateAnswerIdAsync(
-            response.Answer.Id,
-            response.Answer.Text);
+        var answerId = await GetOrCreateAnswerIdAsync(response.Answer.Id, response.Answer.Text);
 
         var questionId = await GetOrCreateQuestionIdAsync(
             response.Question.Id,
-            response.Question.Text);
+            response.Question.Text
+        );
 
         var responseEntity = new ResponseEntity
         {
@@ -589,7 +627,18 @@ public class SubmissionRepository(
             DateCreated = DateTime.UtcNow,
         };
 
+        var userActionId = _userActionIdProvider.GetUserActionId();
+
         await _db.Responses.AddAsync(responseEntity);
+
+        await _db
+            .Submissions.Where(s => s.Id == submissionId)
+            .ExecuteUpdateAsync(setters =>
+                setters
+                    .SetProperty(s => s.DateLastUpdated, DateTime.UtcNow)
+                    .SetProperty(s => s.LastUpdatedUserActionId, userActionId)
+            );
+
         await _db.SaveChangesAsync();
 
         return responseEntity.Id;
@@ -598,7 +647,8 @@ public class SubmissionRepository(
     private async Task<int> SelectOrInsertSubmissionIdAsync(
         string sectionId,
         string sectionName,
-        int establishmentId)
+        int establishmentId
+    )
     {
         var submissionId = await GetCurrentSubmissionIdAsync(sectionId, establishmentId);
 
@@ -607,6 +657,8 @@ public class SubmissionRepository(
             return submissionId.Value;
         }
 
+        var userActionId = _userActionIdProvider.GetUserActionId();
+
         var submission = new SubmissionEntity
         {
             EstablishmentId = establishmentId,
@@ -614,6 +666,8 @@ public class SubmissionRepository(
             SectionName = sectionName,
             Status = SubmissionStatus.InProgress,
             DateCreated = DateTime.UtcNow,
+            CreatedUserActionId = userActionId,
+            LastUpdatedUserActionId = userActionId,
         };
 
         await _db.Submissions.AddAsync(submission);
@@ -624,24 +678,21 @@ public class SubmissionRepository(
 
     private async Task<int?> GetCurrentSubmissionIdAsync(string sectionId, int establishmentId)
     {
-        return await _db.Submissions
-            .Where(s =>
-                s.SectionId == sectionId &&
-                s.EstablishmentId == establishmentId &&
-                s.Status == SubmissionStatus.InProgress)
+        return await _db
+            .Submissions.Where(s =>
+                s.SectionId == sectionId
+                && s.EstablishmentId == establishmentId
+                && s.Status == SubmissionStatus.InProgress
+            )
             .OrderByDescending(s => s.Id)
             .Select(s => (int?)s.Id)
             .FirstOrDefaultAsync();
     }
 
-    private async Task<int> GetOrCreateAnswerIdAsync(
-        string answerContentfulId,
-        string answerText)
+    private async Task<int> GetOrCreateAnswerIdAsync(string answerContentfulId, string answerText)
     {
-        var answerId = await _db.Answers
-            .Where(a =>
-                a.AnswerText == answerText &&
-                a.ContentfulRef == answerContentfulId)
+        var answerId = await _db
+            .Answers.Where(a => a.AnswerText == answerText && a.ContentfulRef == answerContentfulId)
             .Select(a => (int?)a.Id)
             .FirstOrDefaultAsync();
 
@@ -664,12 +715,13 @@ public class SubmissionRepository(
 
     private async Task<int> GetOrCreateQuestionIdAsync(
         string questionContentfulId,
-        string questionText)
+        string questionText
+    )
     {
-        var questionId = await _db.Questions
-            .Where(q =>
-                q.QuestionText == questionText &&
-                q.ContentfulRef == questionContentfulId)
+        var questionId = await _db
+            .Questions.Where(q =>
+                q.QuestionText == questionText && q.ContentfulRef == questionContentfulId
+            )
             .Select(q => (int?)q.Id)
             .FirstOrDefaultAsync();
 
@@ -690,6 +742,68 @@ public class SubmissionRepository(
         return question.Id;
     }
 
+    public async Task<
+        List<SubmissionEntity>
+    > GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(IEnumerable<int> establishmentIds)
+    {
+        var establishmentIdList = establishmentIds.Distinct().ToList();
+
+        var results = await _db
+            .Submissions
+            .Include(s => s.Establishment)
+            .Where(s =>
+                establishmentIdList.Contains(s.EstablishmentId)
+                && s.Status == SubmissionStatus.CompleteReviewed
+                && !s.Deleted
+                && s.DateCompleted != null
+            )
+            .Where(s =>
+                !_db.Submissions.Any(s2 =>
+                    s2.EstablishmentId == s.EstablishmentId
+                    && s2.SectionId == s.SectionId
+                    && s2.Status == SubmissionStatus.CompleteReviewed
+                    && !s2.Deleted
+                    && s2.DateCompleted != null
+                    && s2.DateCompleted > s.DateCompleted
+                )
+            )
+            .OrderBy(s => s.EstablishmentId)
+            .ThenBy(s => s.SectionName)
+            .ToListAsync();
+
+        return results;
+    }
+
+    public async Task<List<SubmissionEntity>> GetLatestSubmissionPerEstablishmentForSectionAsync(
+        IEnumerable<int> establishmentIds,
+        string sectionId
+    )
+    {
+        var establishmentIdList = establishmentIds.Distinct().ToList();
+
+        var results = await dbContext
+            .Submissions.Where(s =>
+                establishmentIdList.Contains(s.EstablishmentId)
+                && s.SectionId == sectionId
+                && !s.Deleted
+                && s.DateLastUpdated != null
+            )
+            .Where(s =>
+                !dbContext.Submissions.Any(s2 =>
+                    s2.EstablishmentId == s.EstablishmentId
+                    && s2.SectionId == s.SectionId
+                    && !s2.Deleted
+                    && s2.DateLastUpdated != null
+                    && s2.DateLastUpdated > s.DateLastUpdated
+                )
+            )
+            .OrderBy(s => s.EstablishmentId)
+            .ThenBy(s => s.SectionName)
+            .ToListAsync();
+
+        return results;
+    }
+
     private RecommendationEntity BuildRecommendationEntity(SqlRecommendationDto recommendationDto)
     {
         return new RecommendationEntity
@@ -698,6 +812,7 @@ public class SubmissionRepository(
             RecommendationText = recommendationDto.RecommendationText,
             QuestionId = recommendationDto.QuestionId,
             QuestionContentfulRef = recommendationDto.QuestionContentfulRef,
+            Archived = recommendationDto.Archived,
         };
     }
 }

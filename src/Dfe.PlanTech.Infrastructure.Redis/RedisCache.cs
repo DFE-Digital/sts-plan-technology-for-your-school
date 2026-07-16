@@ -53,7 +53,7 @@ public class RedisCache : ICmsCache
     public async Task<T?> GetOrCreateAsync<T>(
         string key,
         Func<Task<T>> action,
-        TimeSpan? expiry = null,
+        Expiration expiry = default,
         Func<T, Task>? onCacheItemCreation = null,
         int databaseId = -1
     )
@@ -85,7 +85,7 @@ public class RedisCache : ICmsCache
                 }
             }
 
-            return await CreateAndCacheItemAsync(db, key, action, expiry, onCacheItemCreation);
+            return await CreateAndCacheItemAsync(db, key, action, onCacheItemCreation, expiry);
         }
         catch (RedisConnectionException redisException)
         {
@@ -103,7 +103,7 @@ public class RedisCache : ICmsCache
     public async Task<string> SetAsync<T>(
         string key,
         T value,
-        TimeSpan? expiry = null,
+        Expiration expiry = default,
         int databaseId = -1
     )
     {
@@ -206,14 +206,15 @@ public class RedisCache : ICmsCache
         IDatabase database,
         string key,
         T value,
-        TimeSpan? expiry = null
+        Expiration expiry = default
     )
     {
         var redisValue = value as string ?? value.Serialise();
+        var compressedRedisValue = GZipRedisValueCompressor.Compress(redisValue);
         _logger.LogInformation("Setting cache item with key: {Key}", key);
         _logger.LogTrace("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
         await _retryPolicyAsync.ExecuteAsync(() =>
-            database.StringSetAsync(key, GZipRedisValueCompressor.Compress(redisValue), expiry)
+            database.StringSetAsync(key, compressedRedisValue, expiry)
         );
         await _dependencyManager.RegisterDependenciesAsync(database, key, value, default);
         return key;
@@ -291,15 +292,15 @@ public class RedisCache : ICmsCache
     /// <param name="db">The database connection to use for caching.</param>
     /// <param name="key">The key associated with the cached item.</param>
     /// <param name="action">A function that creates the item asynchronously.</param>
-    /// <param name="expiry">Optional. The time span after which the cached item expires.</param>
     /// <param name="onCacheItemCreation">Optional. A function that is called after the item is created and cached.</param>
+    /// <param name="expiry">Optional. The time span after which the cached item expires.</param>
     /// <returns>The newly created cached item or default value if the action returned null.</returns>
     private async Task<T?> CreateAndCacheItemAsync<T>(
         IDatabase db,
         string key,
         Func<Task<T>> action,
-        TimeSpan? expiry,
-        Func<T, Task>? onCacheItemCreation
+        Func<T, Task>? onCacheItemCreation,
+        Expiration expiry = default
     )
     {
         _logger.LogTrace(
