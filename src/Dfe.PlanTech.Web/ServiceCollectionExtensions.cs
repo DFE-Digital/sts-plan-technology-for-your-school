@@ -84,7 +84,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSession(options =>
         {
-            options.IdleTimeout = TimeSpan.FromSeconds(10);
+            options.IdleTimeout = TimeSpan.FromMinutes(60);
             options.Cookie.HttpOnly = true;
             options.Cookie.IsEssential = true;
             options.Cookie.Name = ".Dfe.PlanTech";

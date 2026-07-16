@@ -149,6 +149,17 @@ public class ReviewAnswersViewBuilder(ILogger<ReviewAnswersViewBuilder> logger, 
             {
                 var selectedEstablishmentIds = _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
 
+                Logger.LogInformation(
+                    "ConfirmCheckAnswers. Instance: {Instance}, SessionId: {SessionId}, IsMat: {IsMat}, ActiveEstablishmentId: {ActiveEstablishmentId}, SelectedEstablishmentIds: {SelectedEstablishmentIds}, SelectedSchoolUrn: {SelectedSchoolUrn}, SelectedSchoolName: {SelectedSchoolName}",
+                    Environment.MachineName,
+                    controller.HttpContext.Session.Id,
+                    CurrentUser.IsMat,
+                    establishmentId,
+                    string.Join(",", selectedEstablishmentIds),
+                    CurrentUser.GroupSelectedSchoolUrn,
+                    CurrentUser.GroupSelectedSchoolName
+                );
+
                 if (selectedEstablishmentIds.Count > 0)
                 {
                     foreach (var selectedEstablishmentId in selectedEstablishmentIds)
