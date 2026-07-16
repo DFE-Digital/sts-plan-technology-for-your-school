@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Providers;
@@ -371,6 +372,7 @@ public static class ServiceCollectionExtensions
         {
             healthChecks.AddSqlServer(configuration.GetConnectionString("Database") ?? "");
         }
+        ;
 
         return services;
     }

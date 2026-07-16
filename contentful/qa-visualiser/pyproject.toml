@@ -7,8 +7,8 @@ requires-python = ">=3.12"
 dependencies = [
     "graphviz>=0.20.3",
     "pydantic>=2.10.1",
-    "python-dotenv>=1.0.1",
-    "requests>=2.32.3",
+    "python-dotenv>=1.2.2",
+    "requests>=2.33.0",
 ]
 
 [tool.ruff.lint]

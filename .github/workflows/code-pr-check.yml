@@ -55,6 +55,12 @@ jobs:
       - name: Install SonarCloud scanners
         run: dotnet tool install --global dotnet-sonarscanner
 
+      - name: Install latest JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+
       - name: Start SonarCloud scanner
         run: |
           dotnet-sonarscanner begin \
@@ -111,6 +117,10 @@ jobs:
   run-javascript-tests:
     runs-on: ubuntu-22.04
     name: Run javascript tests
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
