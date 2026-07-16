@@ -64,6 +64,10 @@ public static class ContentfulMicrocopyConstants
     public const string GroupsSelectRecommendationCount = "matCount";
     public const string GroupsSelectContactUs = "matContact";
 
+    public const string PhaseBannerText = "phaseBannerText";
+    public const string PhaseBannerLink = "phaseBannerLink";
+    public const string PhaseBannerLinkText = "phaseBannerLinkText";
+    
     // Fallback text
     private const string EmptyFallback = "";
 
