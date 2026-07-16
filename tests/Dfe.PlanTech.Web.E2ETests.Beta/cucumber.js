@@ -11,7 +11,6 @@ module.exports = {
     'support/world.ts',
     '--tags',
     '@smoke',
-    '--publish-quiet',
   ],
   regression: [
     '--require-module',
@@ -24,6 +23,5 @@ module.exports = {
     'support/world.ts',
     '--tags',
     'not @smoke',
-    '--publish-quiet',
   ],
 };
