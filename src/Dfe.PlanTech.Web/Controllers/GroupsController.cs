@@ -40,6 +40,10 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASchoolView()
     {
+        HttpContext.Session.Remove(
+            SessionConstants.SelectedEstablishmentsKey
+        );
+
         return await _groupsViewBuilder.RouteToSelectASchoolViewModelAsync(this);
     }
 
