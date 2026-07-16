@@ -416,6 +416,17 @@ public class QuestionsViewBuilder(ILogger<BaseViewBuilder> logger, IContentfulSe
         var userId = GetUserIdOrThrowException();
         var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
 
+        Logger.LogInformation(
+            "SubmitAnswerAndRedirect. Instance: {Instance}, SessionId: {SessionId}, IsMat: {IsMat}, ActiveEstablishmentId: {ActiveEstablishmentId}, SelectedEstablishmentIds: {SelectedEstablishmentIds}, SectionSlug: {SectionSlug}, QuestionSlug: {QuestionSlug}",
+            Environment.MachineName,
+            controller.HttpContext.Session.Id,
+            CurrentUser.IsMat,
+            activeEstablishmentId,
+            string.Join(", ", selectedEstablishmentIds),
+            sectionSlug,
+            questionSlug
+        );
+
         var userOrganisationId =
             CurrentUser.UserOrganisationId
             ?? throw new InvalidOperationException(
@@ -485,6 +496,16 @@ public class QuestionsViewBuilder(ILogger<BaseViewBuilder> logger, IContentfulSe
             CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
                 ? selectedEstablishmentIds[0]
                 : activeEstablishmentId;
+
+        var targetEstablishmentIdsLog =
+            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+                ? selectedEstablishmentIds
+                : [activeEstablishmentId];
+
+        Logger.LogInformation(
+            "Submitting answer for establishment IDs: {TargetEstablishmentIds}",
+            string.Join(", ", targetEstablishmentIdsLog)
+        );
 
         var nextQuestion = await _questionService.GetNextUnansweredQuestion(
             routingEstablishmentId,
