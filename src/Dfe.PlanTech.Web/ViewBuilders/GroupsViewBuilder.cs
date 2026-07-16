@@ -213,7 +213,7 @@ public class GroupsViewBuilder(
                             {
                                 SectionName = ccs.Name,
                                 CategorySlug = c.Header?.Text?.Slugify(),
-                                SectionSlug = ccs.InterstitialPage.Slug,
+                                SectionSlug = ccs.Name?.Slugify(),
                                 UncompletedGroupSubmissions = uncompletedCount,
                             };
                         })

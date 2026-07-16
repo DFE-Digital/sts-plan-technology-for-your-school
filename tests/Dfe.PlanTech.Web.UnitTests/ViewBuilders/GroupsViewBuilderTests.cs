@@ -91,6 +91,10 @@ public class GroupsViewBuilderTests
         {
             Sys = new SystemDetails(id),
             Name = $"Sec {id}",
+            InterstitialPage = new PageEntry
+            {
+                Slug = $"sec-{id.ToLowerInvariant()}"
+            },
             Questions = Enumerable.Repeat(new QuestionnaireQuestionEntry(), countAnswers).ToList(),
             CoreRecommendations = Enumerable
                 .Repeat(new RecommendationChunkEntry(), countAnswers)
