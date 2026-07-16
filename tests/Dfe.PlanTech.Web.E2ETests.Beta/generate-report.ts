@@ -13,4 +13,4 @@ generate({
       version: os.release(),
     },
   },
-});s
+});
