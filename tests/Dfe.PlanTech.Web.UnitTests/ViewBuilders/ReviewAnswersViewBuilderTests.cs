@@ -229,6 +229,10 @@ public class ReviewAnswersViewBuilderTests
                 section,
                 SubmissionStatus.InProgress
             );
+
+         _matEstablishmentProvider
+            .Received(1)
+            .GetSelectedEstablishmentIdsFromSession();
     }
 
     [Fact]
@@ -266,32 +270,40 @@ public class ReviewAnswersViewBuilderTests
                 section,
                 SubmissionStatus.InProgress
             );
+
+        _matEstablishmentProvider
+            .Received(1)
+            .GetSelectedEstablishmentIdsFromSession();
     }
 
     [Fact]
-    public async Task RouteToCheckAnswers_WhenMatUser_PopulatesMatEstablishmentModel()
+    public async Task RouteToCheckAnswers_WhenMatUser_PopulatesSelectedSchoolDetails()
     {
         var sut = CreateSut();
         var ctl = MakeController();
 
         _currentUser.IsMat.Returns(true);
         _currentUser.GetActiveEstablishmentIdAsync().Returns(101);
+
         _matEstablishmentProvider
             .GetSelectedEstablishmentIdsFromSession()
             .Returns([101]);
 
-        var matModel = new MatEstablishmentModel(
-            true,
-            1,
-            ["School One"]
-        );
+        IReadOnlyList<string> selectedSchoolNames =
+        [
+            "School One"
+        ];
 
         _matEstablishmentProvider
-            .PopulateMatSelectedSchools(_currentUser)
-            .Returns(matModel);
+            .GetSelectedSchoolNamesAsync(_currentUser)
+            .Returns(Task.FromResult(selectedSchoolNames));
 
         var section = MakeSection("S1", "sec-1", "Section 1");
-        _contentful.GetSectionBySlugAsync("sec-1").Returns(section);
+
+        _contentful
+            .GetSectionBySlugAsync("sec-1")
+            .Returns(section);
+
         _contentful
             .GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
             .Returns(new PageEntry { Content = [] });
@@ -313,11 +325,64 @@ public class ReviewAnswersViewBuilderTests
         var view = Assert.IsType<ViewResult>(result);
         var model = Assert.IsType<ReviewAnswersViewModel>(view.Model);
 
-        Assert.Equal(matModel, model.MatEstablishmentModel);
+        Assert.True(model.IsMatMultiSchoolAssessment);
+        Assert.Equal(1, model.SelectedSchoolCount);
+        Assert.Equal(selectedSchoolNames, model.SelectedSchoolNames);
 
         await _matEstablishmentProvider
             .Received(1)
-            .PopulateMatSelectedSchools(_currentUser);
+            .GetSelectedSchoolNamesAsync(_currentUser);
+    }
+
+    [Fact]
+    public async Task RouteToCheckAnswers_WhenNoSchoolsSelected_DoesNotPopulateSchoolDetails()
+    {
+        var sut = CreateSut();
+        var ctl = MakeController();
+
+        _currentUser.IsMat.Returns(true);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(101);
+
+        _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .Returns([]);
+
+        _matEstablishmentProvider
+            .GetSelectedSchoolNamesAsync(_currentUser)
+            .Returns(
+                Task.FromResult<IReadOnlyList<string>>([])
+            );
+
+        var section = MakeSection("S1", "sec-1", "Section 1");
+
+        _contentful
+            .GetSectionBySlugAsync("sec-1")
+            .Returns(section);
+
+        _contentful
+            .GetPageBySlugAsync(UrlConstants.CheckAnswersSlug)
+            .Returns(new PageEntry { Content = [] });
+
+        _submissions
+            .GetSubmissionRoutingDataAsync(
+                101,
+                section,
+                SubmissionStatus.InProgress
+            )
+            .Returns(MakeRouting(SubmissionStatus.InProgress, section));
+
+        var result = await sut.RouteToCheckAnswers(
+            ctl,
+            "cat",
+            "sec-1"
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+        var model = Assert.IsType<ReviewAnswersViewModel>(view.Model);
+
+        Assert.False(model.IsMatMultiSchoolAssessment);
+        Assert.Equal(0, model.SelectedSchoolCount);
+        Assert.Empty(model.SelectedSchoolNames);
     }
 
     // ---------------- RouteToViewAnswers ----------------

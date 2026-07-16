@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 using Dfe.PlanTech.Application;
 using Dfe.PlanTech.Application.Background;
 using Dfe.PlanTech.Application.Providers;
@@ -36,7 +38,7 @@ using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Serialization;
 using Notify.Client;
 using Notify.Interfaces;
-using System.Diagnostics.CodeAnalysis;
+using StackExchange.Redis;
 
 namespace Dfe.PlanTech.Web;
 
@@ -80,16 +82,6 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddCaching(this IServiceCollection services)
     {
-        services.AddDistributedMemoryCache();
-
-        services.AddSession(options =>
-        {
-            options.IdleTimeout = TimeSpan.FromSeconds(10);
-            options.Cookie.HttpOnly = true;
-            options.Cookie.IsEssential = true;
-            options.Cookie.Name = ".Dfe.PlanTech";
-        });
-
         services.AddHttpContextAccessor();
         services.AddSingleton<ICacheOptions>(new CacheOptions());
         services.AddTransient<ICacher, CacheHelper>();
@@ -298,16 +290,23 @@ public static class ServiceCollectionExtensions
         IConfiguration configuration
     )
     {
-        services.AddSingleton(
-            new DistributedCachingOptions(
-                ConnectionString: configuration.GetConnectionString("redis") ?? ""
-            )
-        );
-        services.AddSingleton<ICmsCache, RedisCache>();
-        services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
-        services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
+        var redisConnectionString = configuration.GetConnectionString("redis") ?? "";
 
+        services.AddSingleton(
+            new DistributedCachingOptions(ConnectionString: redisConnectionString)
+        );
+        services.AddSingleton<ICmsCache, Infrastructure.Redis.RedisCache>();
+        services.AddSingleton<IDistributedLockProvider, RedisLockProvider>();
+        services.AddSingleton<IRedisConnectionManager, RedisConnectionManager>();
         services.AddSingleton<IRedisDependencyManager, RedisDependencyManager>();
+
+        // Add a separate cache for session tracking using database 1
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.ConfigurationOptions = ConfigurationOptions.Parse(redisConnectionString);
+            options.ConfigurationOptions.DefaultDatabase = 1;
+            options.InstanceName = RedisConstants.SessionInstancePrefix;
+        });
 
         services
             .AddOptions<BackgroundTaskQueueOptions>()
@@ -343,7 +342,10 @@ public static class ServiceCollectionExtensions
         services.AddTransient<IQuestionsViewBuilder, QuestionsViewBuilder>();
         services.AddTransient<IRecommendationsViewBuilder, RecommendationsViewBuilder>();
         services.AddTransient<IReviewAnswersViewBuilder, ReviewAnswersViewBuilder>();
-        services.AddTransient<ISelfAssessmentSummaryViewBuilder, SelfAssessmentSummaryViewBuilder>();
+        services.AddTransient<
+            ISelfAssessmentSummaryViewBuilder,
+            SelfAssessmentSummaryViewBuilder
+        >();
 
         return services;
     }
@@ -370,6 +372,7 @@ public static class ServiceCollectionExtensions
         {
             healthChecks.AddSqlServer(configuration.GetConnectionString("Database") ?? "");
         }
+        ;
 
         return services;
     }

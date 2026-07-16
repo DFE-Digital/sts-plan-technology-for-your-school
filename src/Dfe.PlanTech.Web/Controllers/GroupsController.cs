@@ -53,11 +53,11 @@ public class GroupsController : BaseController<GroupsController>
     )]
     public async Task<IActionResult> GetSelectASelfAssessment()
     {
+        var selectedEstablishmentIdsBeforeClear = HttpContext.Session.GetSelectedEstablishmentIds();
+
         _currentUser.ClearSelectedGroupSchool();
 
-        HttpContext.Session.Remove(
-            SessionConstants.SelectedEstablishmentsKey
-        );
+        HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
 
         return await _groupsViewBuilder.RouteToSelectASelfAssessmentViewModelAsync(this);
     }
@@ -78,24 +78,24 @@ public class GroupsController : BaseController<GroupsController>
 
     [HttpGet($"{UrlConstants.GroupsSlug}/select-school-and-redirect")]
     public async Task<IActionResult> SelectSchoolAndRedirect(
-    string schoolUrn,
-    string schoolName,
-    string categorySlug
-)
+        string schoolUrn,
+        string schoolName,
+        string categorySlug
+    )
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(schoolUrn);
         ArgumentException.ThrowIfNullOrWhiteSpace(schoolName);
         ArgumentException.ThrowIfNullOrWhiteSpace(categorySlug);
 
-        await _groupsViewBuilder.RecordGroupSelectionAsync(
-            schoolUrn,
-            schoolName
-        );
+        var selectedEstablishmentIdsBeforeClear = HttpContext.Session.GetSelectedEstablishmentIds();
 
-        _currentUser.SetGroupSelectedSchool(
-            schoolUrn,
-            schoolName
-        );
+        await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
+
+        HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
+
+        _currentUser.SetGroupSelectedSchool(schoolUrn, schoolName);
+
+        var selectedEstablishmentIdsAfterClear = HttpContext.Session.GetSelectedEstablishmentIds();
 
         return RedirectToAction(
             nameof(PagesController.GetByRoute),
@@ -126,11 +126,13 @@ public class GroupsController : BaseController<GroupsController>
             );
         }
 
-        return await _groupsViewBuilder.SubmitSelectedSchoolsToAssessAndRedirect(
+        var result = await _groupsViewBuilder.SubmitSelectedSchoolsToAssessAndRedirect(
             this,
             sectionSlug,
             viewModel
         );
+
+        return result;
     }
 
     [HttpGet(
@@ -155,20 +157,11 @@ public class GroupsController : BaseController<GroupsController>
     }
 
     [HttpPost($"{UrlConstants.GroupsSlug}/{UrlConstants.GroupsSelectionPageSlug}")]
-    public async Task<IActionResult> SelectSchool(
-        string schoolUrn,
-        string schoolName
-    )
+    public async Task<IActionResult> SelectSchool(string schoolUrn, string schoolName)
     {
-        await _groupsViewBuilder.RecordGroupSelectionAsync(
-            schoolUrn,
-            schoolName
-        );
+        await _groupsViewBuilder.RecordGroupSelectionAsync(schoolUrn, schoolName);
 
-        _currentUser.SetGroupSelectedSchool(
-            schoolUrn,
-            schoolName
-        );
+        _currentUser.SetGroupSelectedSchool(schoolUrn, schoolName);
 
         return Redirect(UrlConstants.HomePage);
     }

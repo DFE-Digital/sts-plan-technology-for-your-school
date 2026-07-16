@@ -15,6 +15,7 @@
 *.userprefs
 
 # Local settings.
+.vscode/launch.json
 src/Dfe.PlanTech.Web/Properties/launchSettings.json
 src/Dfe.PlanTech.DatabaseUpgrader/Properties/launchSettings.json
 tests/Dfe.PlanTech.Web.SiteOfflineMicrosite.UnitTests/Properties/launchSettings.json
@@ -332,9 +333,10 @@ paket-files/
 # CodeRush personal settings
 .cr/personal
 
-# Python Tools for Visual Studio (PTVS)
+# Python
 __pycache__/
 *.pyc
+**/uv.lock
 
 # Cake - Uncomment if you are using it
 # tools/**

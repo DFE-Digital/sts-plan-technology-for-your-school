@@ -16,42 +16,28 @@ namespace Dfe.PlanTech.Web.UnitTests.ViewBuilders;
 
 public class SelfAssessmentSummaryViewBuilderTests
 {
-    private readonly ILogger<SelfAssessmentSummaryViewBuilder> _logger =
-        Substitute.For<ILogger<SelfAssessmentSummaryViewBuilder>>();
+    private readonly ILogger<SelfAssessmentSummaryViewBuilder> _logger = Substitute.For<
+        ILogger<SelfAssessmentSummaryViewBuilder>
+    >();
 
-    private readonly IContentfulService _contentful =
-        Substitute.For<IContentfulService>();
+    private readonly IContentfulService _contentful = Substitute.For<IContentfulService>();
 
-    private readonly ICurrentUserProvider _currentUser =
-        Substitute.For<ICurrentUserProvider>();
+    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
 
-    private readonly IGroupService _groupService =
-        Substitute.For<IGroupService>();
+    private readonly IGroupService _groupService = Substitute.For<IGroupService>();
 
     private readonly IHttpContextAccessor _httpContextAccessor =
         Substitute.For<IHttpContextAccessor>();
 
     private SelfAssessmentSummaryViewBuilder CreateSut() =>
-        new(
-            _logger,
-            _contentful,
-            _currentUser,
-            _groupService,
-            _httpContextAccessor
-        );
+        new(_logger, _contentful, _currentUser, _groupService, _httpContextAccessor);
 
     private static Controller MakeController()
     {
         var controller = new DummyController();
-        var httpContext = new DefaultHttpContext
-        {
-            Session = new TestSession()
-        };
+        var httpContext = new DefaultHttpContext { Session = new TestSession() };
 
-        controller.ControllerContext = new ControllerContext
-        {
-            HttpContext = httpContext
-        };
+        controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
         return controller;
     }
@@ -68,32 +54,31 @@ public class SelfAssessmentSummaryViewBuilderTests
         var section = new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("section-1"),
-            Name = "Cyber security"
+            Name = "Cyber security",
         };
 
         _contentful.GetSectionBySlugAsync("cyber-security").Returns(section);
         _contentful.GetAllCategoriesAsync().Returns([]);
 
         _groupService
-            .GetGroupCompletedSubmissionsBySections(Arg.Is<int[]>(ids =>
-                ids.SequenceEqual(new[] { 123 })
-            ))
-            .Returns(
-            [
+            .GetGroupCompletedSubmissionsBySections(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 123 }))
+            )
+            .Returns([
                 new SqlSubmissionDto
                 {
                     Id = 1,
                     EstablishmentId = 123,
                     SectionId = "section-1",
-                    SectionName = "Cyber security"
+                    SectionName = "Cyber security",
                 },
                 new SqlSubmissionDto
                 {
                     Id = 2,
                     EstablishmentId = 123,
                     SectionId = "other-section",
-                    SectionName = "Other"
-                }
+                    SectionName = "Other",
+                },
             ]);
 
         var result = await sut.RouteToSelfAssessmentSummary(
@@ -141,18 +126,17 @@ public class SelfAssessmentSummaryViewBuilderTests
         var section = new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("section-1"),
-            Name = "Cyber security"
+            Name = "Cyber security",
         };
 
         _contentful.GetSectionBySlugAsync("cyber-security").Returns(section);
         _contentful.GetAllCategoriesAsync().Returns([]);
 
         _groupService
-            .GetGroupCompletedSubmissionsBySections(Arg.Is<int[]>(ids =>
-                ids.SequenceEqual(new[] { 101, 102 })
-            ))
-            .Returns(
-            [
+            .GetGroupCompletedSubmissionsBySections(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 101, 102 }))
+            )
+            .Returns([
                 new SqlSubmissionDto
                 {
                     Id = 1,
@@ -162,8 +146,8 @@ public class SelfAssessmentSummaryViewBuilderTests
                     Establishment = new SqlEstablishmentDto
                     {
                         OrgName = "School One",
-                        EstablishmentRef = "100001"
-                    }
+                        EstablishmentRef = "100001",
+                    },
                 },
                 new SqlSubmissionDto
                 {
@@ -174,8 +158,8 @@ public class SelfAssessmentSummaryViewBuilderTests
                     Establishment = new SqlEstablishmentDto
                     {
                         OrgName = "School Two",
-                        EstablishmentRef = "100002"
-                    }
+                        EstablishmentRef = "100002",
+                    },
                 },
                 new SqlSubmissionDto
                 {
@@ -186,9 +170,9 @@ public class SelfAssessmentSummaryViewBuilderTests
                     Establishment = new SqlEstablishmentDto
                     {
                         OrgName = "School Two",
-                        EstablishmentRef = "100002"
-                    }
-                }
+                        EstablishmentRef = "100002",
+                    },
+                },
             ]);
 
         var result = await sut.RouteToSelfAssessmentSummary(
@@ -244,18 +228,17 @@ public class SelfAssessmentSummaryViewBuilderTests
         var section = new QuestionnaireSectionEntry
         {
             Sys = new SystemDetails("section-1"),
-            Name = "Cyber security"
+            Name = "Cyber security",
         };
 
         _contentful.GetSectionBySlugAsync("cyber-security").Returns(section);
         _contentful.GetAllCategoriesAsync().Returns([]);
 
         _groupService
-            .GetGroupCompletedSubmissionsBySections(Arg.Is<int[]>(ids =>
-                ids.SequenceEqual(new[] { 999 })
-            ))
-            .Returns(
-            [
+            .GetGroupCompletedSubmissionsBySections(
+                Arg.Is<int[]>(ids => ids.SequenceEqual(new[] { 999 }))
+            )
+            .Returns([
                 new SqlSubmissionDto
                 {
                     Id = 1,
@@ -265,9 +248,9 @@ public class SelfAssessmentSummaryViewBuilderTests
                     Establishment = new SqlEstablishmentDto
                     {
                         OrgName = "Active School",
-                        EstablishmentRef = "900999"
-                    }
-                }
+                        EstablishmentRef = "900999",
+                    },
+                },
             ]);
 
         var result = await sut.RouteToSelfAssessmentSummary(
@@ -301,14 +284,10 @@ public class SelfAssessmentSummaryViewBuilderTests
 
         _contentful
             .GetSectionBySlugAsync("missing-section")
-            .Returns((QuestionnaireSectionEntry?)null);
+            .Returns((QuestionnaireSectionEntry)null!);
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.RouteToSelfAssessmentSummary(
-                controller,
-                "category",
-                "missing-section"
-            )
+            sut.RouteToSelfAssessmentSummary(controller, "category", "missing-section")
         );
     }
 
@@ -320,17 +299,10 @@ public class SelfAssessmentSummaryViewBuilderTests
 
         _contentful
             .GetSectionBySlugAsync("missing-section-id")
-            .Returns(new QuestionnaireSectionEntry
-            {
-                Name = "Section"
-            });
+            .Returns(new QuestionnaireSectionEntry { Name = "Section" });
 
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
-            sut.RouteToSelfAssessmentSummary(
-                controller,
-                "category",
-                "missing-section-id"
-            )
+            sut.RouteToSelfAssessmentSummary(controller, "category", "missing-section-id")
         );
     }
 
@@ -381,8 +353,7 @@ public class SelfAssessmentSummaryViewBuilderTests
         public Task CommitAsync(CancellationToken cancellationToken = default) =>
             Task.CompletedTask;
 
-        public Task LoadAsync(CancellationToken cancellationToken = default) =>
-            Task.CompletedTask;
+        public Task LoadAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
 
         public void Remove(string key) => _store.Remove(key);
 

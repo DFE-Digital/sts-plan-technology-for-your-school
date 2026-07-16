@@ -1,14 +1,12 @@
-using Dfe.PlanTech.Application.Services;
-using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Models;
-using Microsoft.AspNetCore.Http;
+using Dfe.PlanTech.Application.Providers.Interfaces;
 
 namespace Dfe.PlanTech.Application.Providers.Interfaces;
 
 public interface IMatEstablishmentProvider
 {
+    IReadOnlyList<int> GetSelectedEstablishmentIdsFromSession();
 
-    public Task<MatEstablishmentModel?> PopulateMatSelectedSchools(ICurrentUserProvider currentUser);
-    public IEnumerable<int> GetSelectedEstablishmentIdsFromSession();
+    Task<IReadOnlyList<string>> GetSelectedSchoolNamesAsync(
+        ICurrentUserProvider currentUser
+    );
 }
-

@@ -1,13 +1,11 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
-using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
@@ -35,18 +33,15 @@ public class SelfAssessmentSummaryViewBuilder(
         string sectionSlug
     )
     {
-        var viewModel = await BuildSelfAssessmentSummaryViewModel(
-            categorySlug,
-            sectionSlug
-        );
+        var viewModel = await BuildSelfAssessmentSummaryViewModel(categorySlug, sectionSlug);
 
         return controller.View(SelfAssessmentSummaryViewName, viewModel);
     }
 
     private async Task<SelfAssessmentSummaryViewModel> BuildSelfAssessmentSummaryViewModel(
-    string categorySlug,
-    string sectionSlug
-)
+        string categorySlug,
+        string sectionSlug
+    )
     {
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -54,26 +49,21 @@ public class SelfAssessmentSummaryViewBuilder(
                 $"Could not find section for slug {sectionSlug}"
             );
 
-        var sectionId = section.Sys?.Id
+        var sectionId =
+            section.Sys?.Id
             ?? throw new ContentfulDataUnavailableException(
                 $"Could not find section id for slug {sectionSlug}"
             );
 
-        var categories =
-            await ContentfulService.GetAllCategoriesAsync()
-            ?? [];
+        var categories = await ContentfulService.GetAllCategoriesAsync() ?? [];
 
         var category = categories.FirstOrDefault(c =>
             c.Sections?.Any(s => s.Id == sectionId) == true
         );
 
-        var recommendationCategorySlug =
-                category?.LandingPage?.Slug
-                ?? categorySlug;
+        var recommendationCategorySlug = category?.LandingPage?.Slug ?? categorySlug;
 
-        var categoryName =
-                category?.Header?.Text
-                ?? categorySlug.Replace("-", " ");
+        var categoryName = category?.Header?.Text ?? categorySlug.Replace("-", " ");
 
         var submittedSubmissions = CurrentUser.IsMat
             ? await GetMatSubmittedSubmissions(sectionId)
@@ -85,79 +75,63 @@ public class SelfAssessmentSummaryViewBuilder(
             CategoryName = categoryName,
             CompletedSchoolCount = submittedSubmissions.Count,
             IsMatSummary = CurrentUser.IsMat,
-            RecommendationLinks = submittedSubmissions
-                .Select(BuildRecommendationLink)
-                .ToList(),
+            RecommendationLinks = submittedSubmissions.Select(BuildRecommendationLink).ToList(),
             ShowSubmitAnotherSelfAssessment = true,
             SubmitAnotherSelfAssessmentHref = CurrentUser.IsMat
                 ? $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
                 : $"/{recommendationCategorySlug}",
-            BackToHomeHref = UrlConstants.HomePage
+            BackToHomeHref = UrlConstants.HomePage,
         };
 
         SelfAssessmentSummaryRecommendationLinkViewModel BuildRecommendationLink(
             SqlSubmissionDto submission
         )
         {
+            var organisationName = submission.Establishment?.OrgName ?? "Unknown Establishment";
+
             return new SelfAssessmentSummaryRecommendationLinkViewModel
             {
                 LinkText = CurrentUser.IsMat
-                    ? submission.Establishment!.OrgName
+                    ? organisationName
                     : $"View the recommendations for {section.Name!.ToLower()}",
 
-                SchoolUrn = CurrentUser.IsMat
-            ? submission.Establishment!.EstablishmentRef
-            : null,
+                SchoolUrn = CurrentUser.IsMat ? submission.Establishment!.EstablishmentRef : null,
 
-                SchoolName = CurrentUser.IsMat
-            ? submission.Establishment!.OrgName
-            : null,
+                SchoolName = CurrentUser.IsMat ? submission.Establishment!.OrgName : null,
 
-                Href = $"/{recommendationCategorySlug}"
+                Href = $"/{recommendationCategorySlug}",
             };
         }
     }
 
-    private async Task<List<SqlSubmissionDto>> GetMatSubmittedSubmissions(
-        string sectionId
-    )
+    private async Task<List<SqlSubmissionDto>> GetMatSubmittedSubmissions(string sectionId)
     {
-        var selectedEstablishmentIds =
-            _httpContextAccessor.HttpContext!.Session
-                .GetSelectedEstablishmentIds()
-                .ToArray();
+        var selectedEstablishmentIds = _httpContextAccessor
+            .HttpContext!.Session.GetSelectedEstablishmentIds()
+            .ToArray();
 
         if (selectedEstablishmentIds.Length == 0)
         {
-            var activeEstablishmentId =
-                await GetActiveEstablishmentIdOrThrowException();
+            var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
 
             selectedEstablishmentIds = [activeEstablishmentId];
         }
 
-        var completedSubmissions =
-            await _groupService.GetGroupCompletedSubmissionsBySections(
-                selectedEstablishmentIds
-            );
+        var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections(
+            selectedEstablishmentIds
+        );
 
-        return completedSubmissions
-            .Where(s => s.SectionId == sectionId)
-            .ToList();
+        return completedSubmissions.Where(s => s.SectionId == sectionId).ToList();
     }
 
-    private async Task<List<SqlSubmissionDto>> GetSchoolSubmittedSubmissions(
-        string sectionId
-    )
+    private async Task<List<SqlSubmissionDto>> GetSchoolSubmittedSubmissions(string sectionId)
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
-        var completedSubmissions =
-            await _groupService.GetGroupCompletedSubmissionsBySections(
-                [establishmentId]
-            );
+        var completedSubmissions = await _groupService.GetGroupCompletedSubmissionsBySections([
+            establishmentId,
+        ]);
 
-        return completedSubmissions
-            .Where(s => s.SectionId == sectionId)
-            .ToList();
+        return completedSubmissions.Where(s => s.SectionId == sectionId).ToList();
     }
 }

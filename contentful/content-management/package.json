@@ -11,8 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "contentful-import": "^9.4.80",
-    "contentful-management": "^11.41.0",
+    "contentful-import": "^9.4.140",
+    "contentful-management": "~> 11.35.1",
     "dotenv": "^16.4.5"
   },
   "overrides": {
