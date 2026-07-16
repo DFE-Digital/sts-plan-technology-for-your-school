@@ -49,13 +49,16 @@ runs:
           curl -fsSL \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ inputs.github_token }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
             "https://api.github.com/orgs/DFE-Digital/packages/container/${PACKAGE}/versions?per_page=100" \
-          | jq -r '
-              .[]
-              | .metadata.container.tags[]
-            ' \
-          | grep "$SEARCH" \
-          | sort -r \
+          | jq -r \
+              --arg search "$SEARCH" '
+                sort_by(.created_at)
+                | reverse
+                | .[]
+                | .metadata.container.tags[]?
+                | select(startswith($search))
+              ' \
           | head -n 1
         )
 
