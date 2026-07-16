@@ -48,13 +48,12 @@ if (builder.Environment.EnvironmentName != "E2E")
 builder.Configuration.AddEnvironmentVariables();
 builder.Configuration.AddCommandLine(args);
 
-builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    var timeOut = options.Cookie.MaxAge ?? TimeSpan.FromMinutes(30);
-    options.IdleTimeout = timeOut;
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
+    options.Cookie.Name = ".Dfe.PlanTech";
+    options.IdleTimeout = options.Cookie.MaxAge ?? TimeSpan.FromMinutes(30);
 });
 
 builder.AddSystemConfiguration();
