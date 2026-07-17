@@ -7,7 +7,7 @@
     var categorySlug = Model.CategorySlug;
     var sectionSlug = Model.Section?.InterstitialPage.Slug;
     var sectionName = Model.Section?.Name ?? "";
-    var backLinkHref = $"{UrlConstants.GroupsSlug}/{categorySlug}/{sectionSlug}/self-assessment";
+    var backLinkHref = $"/{categorySlug}/{sectionSlug}/self-assessment";
 
     var hasErrors = Model.ErrorMessages?.Any() == true;
 }

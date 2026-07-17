@@ -1,5 +1,5 @@
 {
   "always": ["PR Sentinel (always runs)"],
-  "src_or_tests": ["Build and run unit tests", "JEST Tests", "Build database upgrader"],
-  "contentful": ["Contentful Jest Tests"]
+  "src_or_tests": ["Build and run unit tests", "Run javascript tests", "Build database upgrader"],
+  "contentful": ["Run Jest Tests for Contentful"]
 }
