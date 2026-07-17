@@ -66,9 +66,6 @@
         topicStatus == SubmissionStatus.Obsolete ||
         topicStatus == SubmissionStatus.InProgress;
 
-    if (Model.Section.EstablishmentName is null)
-    {
-    }
     var linkText = await Microcopy.GetTextByKeyAsync(linkTextKey, dynamicValues);
 
     if (Model.Context == "Sections")
