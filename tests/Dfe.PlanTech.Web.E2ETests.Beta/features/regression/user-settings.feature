@@ -6,6 +6,7 @@ Feature: Recommendation recent activity
     @clear-data-school
     Scenario: Sorting recommendations as default on category landing page updates table correctly.
       Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 2"
+      And I click the link to view the recommendations for "Category One Section One"
       Then I should be on the URL containing "/category-one"
       Then I should see the page heading "Category One"
       And I am on the "category-one" page
@@ -17,6 +18,7 @@ Feature: Recommendation recent activity
     @clear-data-school
     Scenario: Sorting recommendations as Status on category landing page updates table correctly.
       Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 2"
+      And I click the link to view the recommendations for "Category One Section One"
       Then I should be on the URL containing "/category-one"
       Then I should see the page heading "Category One"
       And I am on the "category-one" page
@@ -28,6 +30,7 @@ Feature: Recommendation recent activity
     @clear-data-school
     Scenario: Sorting recommendations as Last updated on category landing page updates table correctly.
       Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 2"
+      And I click the link to view the recommendations for "Category One Section One"
       Then I should be on the URL containing "/category-one"
       Then I should see the page heading "Category One"
       And I am on the "category-one" page

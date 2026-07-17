@@ -36,7 +36,7 @@ Then(
       // Paragraph with the "started on" text
       const inProgressPara = headingEl
         .locator(
-          'xpath=following-sibling::p[contains(normalize-space(.), "A self-assessment was started on")]',
+          'xpath=following-sibling::p[contains(normalize-space(.), "The self-assessment was started by")]',
         )
         .first();
 
@@ -44,7 +44,7 @@ Then(
 
       const text = (await inProgressPara.innerText()).trim();
       const normalisedText = normaliseShortDateTimeText(text);
-      const expectedText = `A self-assessment was started on ${currentDate}.`;
+      const expectedText = `The self-assessment was started by DSI TEST Establishment (001) Miscellaneous (27) on ${currentDate}.`;
       expect(normalisedText).toMatch(expectedText);
 
       // Next paragraph that actually contains the link

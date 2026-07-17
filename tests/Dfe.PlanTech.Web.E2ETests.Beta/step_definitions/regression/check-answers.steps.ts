@@ -61,10 +61,10 @@ Then('I should see a view recommendations button', async function () {
   const submitButton = form.locator('button.govuk-button');
   await expect(submitButton).toHaveCount(1);
   await expect(submitButton).toHaveAttribute('type', 'submit');
-  await expect(submitButton).toContainText('Submit and view recommendations');
+  await expect(submitButton).toContainText('Submit');
 
   await expect(
-    this.page.getByRole('button', { name: 'Submit and view recommendations' }),
+    this.page.getByRole('button', { name: 'Submit' }),
   ).toBeVisible();
 });
 

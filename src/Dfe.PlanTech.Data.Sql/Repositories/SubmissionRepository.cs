@@ -749,7 +749,9 @@ public class SubmissionRepository(
         var establishmentIdList = establishmentIds.Distinct().ToList();
 
         var results = await _db
-            .Submissions.Where(s =>
+            .Submissions
+            .Include(s => s.Establishment)
+            .Where(s =>
                 establishmentIdList.Contains(s.EstablishmentId)
                 && s.Status == SubmissionStatus.CompleteReviewed
                 && !s.Deleted
@@ -759,11 +761,40 @@ public class SubmissionRepository(
                 !_db.Submissions.Any(s2 =>
                     s2.EstablishmentId == s.EstablishmentId
                     && s2.SectionId == s.SectionId
-                    && s2.SectionId == s.SectionId
                     && s2.Status == SubmissionStatus.CompleteReviewed
                     && !s2.Deleted
                     && s2.DateCompleted != null
                     && s2.DateCompleted > s.DateCompleted
+                )
+            )
+            .OrderBy(s => s.EstablishmentId)
+            .ThenBy(s => s.SectionName)
+            .ToListAsync();
+
+        return results;
+    }
+
+    public async Task<List<SubmissionEntity>> GetLatestSubmissionPerEstablishmentForSectionAsync(
+        IEnumerable<int> establishmentIds,
+        string sectionId
+    )
+    {
+        var establishmentIdList = establishmentIds.Distinct().ToList();
+
+        var results = await dbContext
+            .Submissions.Where(s =>
+                establishmentIdList.Contains(s.EstablishmentId)
+                && s.SectionId == sectionId
+                && !s.Deleted
+                && s.DateLastUpdated != null
+            )
+            .Where(s =>
+                !dbContext.Submissions.Any(s2 =>
+                    s2.EstablishmentId == s.EstablishmentId
+                    && s2.SectionId == s.SectionId
+                    && !s2.Deleted
+                    && s2.DateLastUpdated != null
+                    && s2.DateLastUpdated > s.DateLastUpdated
                 )
             )
             .OrderBy(s => s.EstablishmentId)

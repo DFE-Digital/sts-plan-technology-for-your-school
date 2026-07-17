@@ -57,4 +57,9 @@ public interface ISubmissionRepository
     Task<List<SubmissionEntity>> GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
         IEnumerable<int> establishmentIds
     );
+
+    Task<List<SubmissionEntity>> GetLatestSubmissionPerEstablishmentForSectionAsync(
+        IEnumerable<int> establishmentIds,
+        string sectionId
+    );
 }

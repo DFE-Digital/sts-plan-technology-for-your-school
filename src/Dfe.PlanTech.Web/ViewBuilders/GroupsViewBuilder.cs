@@ -1,17 +1,20 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
-using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
+using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using System.Data;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
@@ -27,18 +30,18 @@ public class GroupsViewBuilder(
 {
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
-
-    private readonly ISubmissionService _submissionService =
-        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
-
     private readonly IGroupService _groupService =
         groupService ?? throw new ArgumentNullException(nameof(groupService));
-
+    private readonly ISubmissionService _submissionService =
+        submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+    private readonly ILogger<BaseViewBuilder> _logger =
+        logger ?? throw new ArgumentNullException(nameof(logger));
 
     private const string SelectASchoolViewName = "GroupsSelectSchool";
     private const string SelectASelfAssessmentViewName = "GroupsSelectSelfAssessment";
+    private const string SelectSchoolsToAssessViewName = "GroupSelectSchoolsToAssess";
 
     public async Task<IActionResult> RouteToSelectASchoolViewModelAsync(Controller controller)
     {
@@ -59,6 +62,12 @@ public class GroupsViewBuilder(
         var allRecommendations = sections.SelectMany(section => section.CoreRecommendations);
         string totalRecommendations = allRecommendations.Count().ToString();
 
+        var showSelectSelfAssessmentToSubmit =
+            await HasOutstandingSelfAssessmentsAsync(
+                establishmentId,
+                sections
+            );
+
         var groupSchools =
             await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(
                 establishmentId
@@ -78,6 +87,7 @@ public class GroupsViewBuilder(
                 ? "Unable to retrieve progress"
                 : null,
             ContactLinkHref = contactLink?.Href,
+            ShowSelectSelfAssessmentToSubmit = showSelectSelfAssessmentToSubmit,
         };
 
         controller.ViewData[StatePassingMechanismConstants.Title] = "Select a school";
@@ -144,9 +154,11 @@ public class GroupsViewBuilder(
 
         var categories = (await ContentfulService.GetAllCategoriesAsync() ?? []).ToList();
 
-        if (categories.Count() == 0)
+        if (categories.Count == 0)
         {
-            throw new Exception("No categories found on groups assessment selection page.");
+            throw new ContentfulDataUnavailableException(
+                "No categories found on groups assessment selection page."
+            );
         }
 
         // establishments for the MAT
@@ -201,7 +213,7 @@ public class GroupsViewBuilder(
                             {
                                 SectionName = ccs.Name,
                                 CategorySlug = c.Header?.Text?.Slugify(),
-                                SectionSlug = ccs.Name?.Slugify(),
+                                SectionSlug = ccs.InterstitialPage.Slug,
                                 UncompletedGroupSubmissions = uncompletedCount,
                             };
                         })
@@ -211,6 +223,222 @@ public class GroupsViewBuilder(
         };
 
         return controller.View(SelectASelfAssessmentViewName, viewModel);
+    }
+
+    public async Task<IActionResult> RouteToSelectSchoolsToAssessViewModelAsync(
+        Controller controller,
+        string sectionSlug,
+        GroupsSelectSchoolsToAssessViewModel? viewModel = null
+    )
+    {
+        CurrentUser.ClearSelectedGroupSchool();
+        controller.HttpContext.Session.Remove(SessionConstants.SelectedEstablishmentsKey);
+
+        var categorySlug = controller.RouteData.Values["categorySlug"]?.ToString();
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find topic for slug '{sectionSlug}'"
+            );
+
+        var establishmentId = GetUserOrganisationIdOrThrowException();
+
+        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(establishmentId);
+
+        if (establishmentLinks == null || establishmentLinks.Count == 0)
+        {
+            throw new InvalidDataException(
+                $"Could not find linked establishments for group ID: {establishmentId}"
+            );
+        }
+
+        var schoolSubmissions = await _groupService.GetGroupSubmissionInformationForSection(
+            establishmentLinks,
+            section.Id
+        );
+
+        var eligibleSchools = schoolSubmissions
+            .Where(sub => sub.Status != SubmissionStatus.CompleteReviewed)
+            .ToList();
+
+        if (eligibleSchools.Count == 0)
+        {
+            return controller.RedirectToRoute(GroupsController.GetSelectASelfAssessmentAction);
+        }    
+
+        viewModel ??= new GroupsSelectSchoolsToAssessViewModel();
+        viewModel.CategorySlug = categorySlug;
+        viewModel.Section = section;
+        viewModel.SchoolSubmissionInfo = eligibleSchools;
+
+        viewModel.ErrorMessages = controller
+            .ModelState.Values.SelectMany(value => value.Errors.Select(err => err.ErrorMessage))
+            .ToArray();
+
+        return controller.View(SelectSchoolsToAssessViewName, viewModel);
+    }
+
+    public async Task<IActionResult> SubmitSelectedSchoolsToAssessAndRedirect(
+        Controller controller,
+        string sectionSlug,
+        GroupsSelectSchoolsToAssessViewModel viewModel
+    )
+    {
+        if (string.IsNullOrWhiteSpace(sectionSlug))
+            throw new ArgumentNullException(nameof(sectionSlug));
+
+        if (viewModel.SelectedSchoolsRefs == null || viewModel.SelectedSchoolsRefs.Count == 0)
+            throw new InvalidDataException("No schools have been selected");
+
+        var categorySlug =
+            controller.RouteData.Values["categorySlug"]?.ToString()
+            ?? throw new InvalidDataException("Missing category slug");
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find topic for slug '{sectionSlug}'"
+            );
+
+        var userEstablishmentId = GetUserOrganisationIdOrThrowException();
+
+        var establishmentLinks = await _establishmentService.GetEstablishmentLinks(
+            userEstablishmentId
+        );
+
+        if (establishmentLinks == null || establishmentLinks.Count == 0)
+        {
+            throw new InvalidDataException(
+                $"Could not find linked establishments for group ID: {userEstablishmentId}"
+            );
+        }
+
+        var selectedRefs = viewModel.SelectedSchoolsRefs.Contains("all")
+            ? viewModel.PresentedSchoolRefs.ToArray()
+            : viewModel.SelectedSchoolsRefs.ToArray();
+
+        if (selectedRefs.Length == 1)
+        {
+            var isGroupSchool = VerifyGroupSchoolMembership(selectedRefs[0], establishmentLinks);
+            if (!isGroupSchool)
+            {
+                throw new InvalidDataException(
+                    $"Selected school with ref {selectedRefs[0]} not linked to user's group"
+                );
+            }
+            else
+            {
+                var school =
+                    await _establishmentService.GetEstablishmentByReferenceAsync(selectedRefs[0])
+                    ?? throw new InvalidDataException(
+                        $"School with ref {selectedRefs[0]} not found"
+                    );
+
+                if (
+                    string.IsNullOrWhiteSpace(school.EstablishmentRef)
+                    || string.IsNullOrWhiteSpace(school.OrgName)
+                )
+                {
+                    throw new InvalidDataException(
+                        $"School with ref {selectedRefs[0]} is missing required data"
+                    );
+                }
+
+                CurrentUser.SetGroupSelectedSchool(school.EstablishmentRef, school.OrgName);
+
+                var latestSubmissionForRef =
+                    await _submissionService.GetLatestSubmissionResponsesModel(
+                        school.Id,
+                        section,
+                        (SubmissionStatus?)null
+                    );
+
+                if (
+                    latestSubmissionForRef != null
+                    && latestSubmissionForRef.Status == SubmissionStatus.InProgress
+                )
+                {
+                    return controller.RedirectToRoute(
+                        QuestionsController.GetContinueSelfAssessmentAction,
+                        new { categorySlug, sectionSlug }
+                    );
+                }
+            }
+        }
+        else if (selectedRefs.Length > 1)
+        {
+            var selectedSchoolIds = new List<int>();
+
+            foreach (var schoolRef in selectedRefs)
+            {
+                var isGroupSchool = VerifyGroupSchoolMembership(schoolRef, establishmentLinks);
+                if (isGroupSchool)
+                {
+                    var school = await _establishmentService.GetEstablishmentByReferenceAsync(
+                        schoolRef
+                    );
+
+                    if (school != null)
+                    {
+                        var latestSubmissionForRef =
+                            await _submissionService.GetLatestSubmissionResponsesModel(
+                                school.Id,
+                                section,
+                                (SubmissionStatus?)null
+                            );
+
+                        if (
+                            latestSubmissionForRef != null
+                            && latestSubmissionForRef.Status == SubmissionStatus.InProgress
+                        )
+                        {
+                            await _submissionService.SetSubmissionInaccessibleAsync(
+                                school.Id,
+                                section.Id
+                            );
+                        }
+
+                        selectedSchoolIds.Add(school.Id);
+                    }
+                }
+            }
+
+            controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+                SessionConstants.SelectedEstablishmentsKey,
+                selectedSchoolIds
+            );
+        }
+
+        var questionSlug = section.Questions.First().Slug;
+
+        return controller.RedirectToRoute(
+            QuestionsController.GetQuestionBySlugAction,
+            new
+            {
+                categorySlug,
+                sectionSlug,
+                questionSlug,
+            }
+        );
+    }
+
+    private bool VerifyGroupSchoolMembership(
+        string schoolRef,
+        List<SqlEstablishmentLinkDto> establishmentLinks
+    )
+    {
+        var establishment = establishmentLinks.Find(est => est.Urn == schoolRef);
+
+        if (establishment == null)
+        {
+            _logger.LogWarning(
+                "Selected school with ref {SchoolRef} not linked to user's group",
+                schoolRef
+            );
+            return false;
+        }
+
+        return true;
     }
 
     public async Task RecordGroupSelectionAsync(
@@ -242,5 +470,56 @@ public class GroupsViewBuilder(
             selectedEstablishmentUrn,
             selectedEstablishmentName
         );
+    }
+
+    private async Task<bool> HasOutstandingSelfAssessmentsAsync(
+    int matEstablishmentId,
+    IEnumerable<QuestionnaireSectionEntry> sections
+)
+    {
+        var matEstablishmentLinks =
+            await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
+
+        var matEstablishmentUrns = matEstablishmentLinks
+            .Select(e => e.Urn)
+            .Where(urn => !string.IsNullOrWhiteSpace(urn))
+            .Distinct()
+            .ToArray();
+
+        var matEstablishments =
+            await _establishmentService.GetEstablishmentsByReferencesAsync(
+                matEstablishmentUrns
+            ) ?? [];
+
+        var matEstablishmentIds = matEstablishments
+            .Select(e => e.Id)
+            .Distinct()
+            .ToArray();
+
+        if (matEstablishmentIds.Length == 0)
+        {
+            return false;
+        }
+
+        var completedSubmissions =
+            await _groupService.GetGroupCompletedSubmissionsBySections(
+                matEstablishmentIds
+            ) ?? [];
+
+        var requiredSectionIds = sections
+            .Select(s => s.Id)
+            .Distinct()
+            .ToHashSet();
+
+        var completedSchoolSections = completedSubmissions
+            .Where(s => requiredSectionIds.Contains(s.SectionId))
+            .Select(s => (s.EstablishmentId, s.SectionId))
+            .Distinct()
+            .Count();
+
+        var totalRequiredSchoolSections =
+            matEstablishmentIds.Length * requiredSectionIds.Count;
+
+        return completedSchoolSections < totalRequiredSchoolSections;
     }
 }

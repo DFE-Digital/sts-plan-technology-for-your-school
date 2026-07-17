@@ -17,6 +17,7 @@ Feature: Multi Category Landing Page
     Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "4, 1, 1"
     And I start a test assessment on "Category Two" category "Category Two Section Two" section with answers "3, 2, 2"
     And I start a test assessment on "Category Two" category "Category Two Section Three" section with answers "1, 1, 1, 2, 4"
+    And I click the link to view the recommendations for "Category Two Section Three"
     And I am on the "category-two" page
     Then I should see the page heading "Category Two"
     And I should see the "completed" section "Category Two Section One" with description "This is the Category Two Section One Description" and link href "/category-two/category-two-section-one/view-answers"

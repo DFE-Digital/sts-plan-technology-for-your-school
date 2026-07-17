@@ -21,39 +21,86 @@
     }
 }
 
+<h2 class="govuk-heading-l">
+    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectHeader)
+</h2>
+
+<p class="govuk-body">
+    You can submit self-assessments for one or more schools at a time.
+</p>
+
+<hr class="govuk-section-break govuk-section-break--l">
+
+@if (Model.ShowSelectSelfAssessmentToSubmit)
+{
+    <div class="dfe-grid-container govuk-!-margin-bottom-8">  
+        <div class="dfe-card">
+            <div class="dfe-card-container">
+                <h3 class="govuk-heading-m">
+                    <a href="/groups/select-a-self-assessment"
+                       class="govuk-link govuk-link--no-visited-state dfe-card-link--header">
+                        Select a self-assessment to submit
+                    </a>
+                </h3>
+            </div>
+        </div>
+    </div>
+}
+
+<h2 class="govuk-heading-l">
+    View recommendations and track progress
+</h2>
+
+<p class="govuk-body govuk-!-margin-bottom-5">
+    Select a school to view recommendations and track progress towards meeting the core standards.
+</p>
+
 @{
     var schoolNameGroups = Model.GroupEstablishments.GroupBy(ge => ge.EstablishmentName);
     var hasMultipleSchoolsWithSameName = schoolNameGroups.Any(group => group.Count() > 1);
-
-    <h2 class="govuk-heading-l">@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectHeader)</h2>
-
-    foreach (var school in @Model.GroupEstablishments)
-    {
-        var schoolUrn = school.Urn;
-        var schoolName = school.EstablishmentName;
-        var dynamicValues = new Dictionary<string, string>
-        {
-            ["count"] = school.InProgressOrCompletedRecommendationsCount.ToString(),
-            ["total"] = Model.TotalRecommendations,
-        };
-
-        <form asp-action="SelectSchool" method="post">
-            @{
-                var hasUrn = !string.IsNullOrWhiteSpace(school.Urn);
-                var linkClass = hasUrn ? "govuk-!-margin-bottom-0" : "";
-            }
-
-            <button type="submit" class="govuk-button school-button govuk-!-text-align-left @linkClass" value="@schoolUrn">@schoolName</button>
-            @if(hasUrn && hasMultipleSchoolsWithSameName)
-            {
-                <p class="govuk-caption-m govuk-!-margin-top-0 govuk-!-margin-bottom-2">URN: @school.Urn</p>
-            }
-            <input type="hidden" name="schoolUrn" value="@schoolUrn" />
-            <input type="hidden" name="schoolName" value="@schoolName" />
-            <p>@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectRecommendationCount, dynamicValues)</p>
-        </form>
-    }
 }
+
+@foreach (var school in Model.GroupEstablishments)
+{
+    var schoolUrn = school.Urn;
+    var schoolName = school.EstablishmentName;
+
+    var dynamicValues = new Dictionary<string, string>
+    {
+        ["count"] = school.InProgressOrCompletedRecommendationsCount.ToString(),
+        ["total"] = Model.TotalRecommendations,
+    };
+
+    <form asp-action="SelectSchool"
+          method="post"
+          class="govuk-!-margin-bottom-6">
+        @{
+            var hasUrn = !string.IsNullOrWhiteSpace(school.Urn);
+            var linkClass = hasUrn ? "govuk-!-margin-bottom-0" : "";
+        }
+
+        <button type="submit"
+                class="govuk-button school-button govuk-!-text-align-left govuk-!-margin-bottom-2"
+                value="@schoolUrn">
+            @schoolName
+        </button>
+
+        @if (hasUrn && hasMultipleSchoolsWithSameName)
+        {
+            <p class="govuk-caption-m govuk-!-margin-top-0 govuk-!-margin-bottom-2">
+                URN: @school.Urn
+            </p>
+        }
+
+        <input type="hidden" name="schoolUrn" value="@schoolUrn" />
+        <input type="hidden" name="schoolName" value="@schoolName" />
+
+        <p class="govuk-body govuk-!-margin-top-0 govuk-!-margin-bottom-0">
+            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectRecommendationCount, dynamicValues)
+        </p>
+    </form>
+}
+
 @{
     var contactLink = new Dictionary<string, string>
     {
@@ -62,4 +109,7 @@
 }
 
 <hr class="govuk-section-break govuk-section-break--m" />
-<p class="govuk-body">@Html.Raw(await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectContactUs, contactLink))</p>
+
+<p class="govuk-body">
+    @Html.Raw(await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectContactUs,contactLink))
+</p>

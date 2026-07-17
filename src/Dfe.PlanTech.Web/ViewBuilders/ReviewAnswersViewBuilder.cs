@@ -17,11 +17,15 @@ public class ReviewAnswersViewBuilder(
     ILogger<ReviewAnswersViewBuilder> logger,
     IContentfulService contentfulService,
     ICurrentUserProvider currentUser,
-    ISubmissionService submissionService
+    ISubmissionService submissionService,
+    IMatEstablishmentProvider matEstablishmentProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IReviewAnswersViewBuilder
 {
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
+        matEstablishmentProvider
+        ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     public const string ViewAnswersViewName = "~/Views/ViewAnswers/ViewAnswers.cshtml";
     public const string CheckAnswersViewName = "~/Views/CheckAnswers/CheckAnswers.cshtml";
@@ -35,7 +39,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetRoutingEstablishmentId();
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -82,7 +86,7 @@ public class ReviewAnswersViewBuilder(
         string? errorMessage = null
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetRoutingEstablishmentId();
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
             ?? throw new ContentfulDataUnavailableException(
@@ -144,15 +148,65 @@ public class ReviewAnswersViewBuilder(
             var userOrganisationId = CurrentUser.UserOrganisationId;
             var userId = GetUserIdOrThrowException();
 
-            var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
+            var section =
+                await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+                ?? throw new ContentfulDataUnavailableException(
+                    $"Could not find section for slug {sectionSlug}"
+                );
 
-            await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
-                establishmentId,
-                CurrentUser.IsMat ? userOrganisationId : null,
-                submissionId,
-                userId,
-                section
-            );
+            if (CurrentUser.IsMat)
+            {
+                var selectedEstablishmentIds =
+                    _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession();
+
+                if (selectedEstablishmentIds.Count > 0)
+                {
+                    foreach (var selectedEstablishmentId in selectedEstablishmentIds)
+                    {
+                        var submissionModel =
+                            await _submissionService.GetLatestSubmissionResponsesModel(
+                                selectedEstablishmentId,
+                                section,
+                                SubmissionStatus.InProgress
+                            );
+
+                        if (submissionModel is null)
+                        {
+                            throw new InvalidOperationException(
+                                $"Could not find an in-progress submission for establishment {selectedEstablishmentId}"
+                            );
+                        }
+
+                        await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                            selectedEstablishmentId,
+                            userOrganisationId,
+                            submissionModel.SubmissionId,
+                            userId,
+                            section
+                        );
+                    }
+                }
+                else
+                {
+                    await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                        establishmentId,
+                        userOrganisationId,
+                        submissionId,
+                        userId,
+                        section
+                    );
+                }
+            }
+            else
+            {
+                await _submissionService.ConfirmCheckAnswersAndUpdateRecommendationsAsync(
+                    establishmentId,
+                    null,
+                    submissionId,
+                    userId,
+                    section
+                );
+            }
         }
         catch (Exception e)
         {
@@ -166,7 +220,15 @@ public class ReviewAnswersViewBuilder(
         }
 
         controller.TempData["SectionName"] = sectionName;
-        return controller.RedirectToCategoryLandingPage(categorySlug);
+
+        //Check to be removed when we have sorted routing of new pages
+        if (CurrentUser.IsMat)
+        {
+            return controller.RedirectToTrustSelfAssessmentSummary(categorySlug, sectionSlug);
+        }
+
+        //Uncomment for single school assessment page.
+        return controller.RedirectToSchoolSelfAssessmentSummary(categorySlug, sectionSlug);
     }
 
     public static ViewAnswersViewModel BuildViewAnswersViewModel(
@@ -258,6 +320,22 @@ public class ReviewAnswersViewBuilder(
         );
     }
 
+    private async Task<int> GetRoutingEstablishmentId()
+    {
+        var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
+
+        if (!CurrentUser.IsMat)
+        {
+            return activeEstablishmentId;
+        }
+
+        var selectedEstablishmentId = _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .FirstOrDefault();
+
+        return selectedEstablishmentId > 0 ? selectedEstablishmentId : activeEstablishmentId;
+    }
+
     private async Task<ReviewAnswersViewModel> BuildViewModel(
         SubmissionRoutingDataModel routingData,
         string categorySlug,
@@ -279,7 +357,11 @@ public class ReviewAnswersViewBuilder(
             ? null
             : new SubmissionResponsesViewModel(routingData.Submission);
 
-        return new ReviewAnswersViewModel()
+        var selectedSchoolNames = await _matEstablishmentProvider.GetSelectedSchoolNamesAsync(
+            CurrentUser
+        );
+
+        return new ReviewAnswersViewModel
         {
             Title = new ComponentTitleEntry(pageTitle),
             Content = content,
@@ -290,6 +372,9 @@ public class ReviewAnswersViewBuilder(
             SubmissionId = routingData.Submission?.SubmissionId,
             SubmissionResponses = submissionResponsesViewModel,
             ErrorMessage = errorMessage,
+            IsMatMultiSchoolAssessment = selectedSchoolNames.Count > 0,
+            SelectedSchoolCount = selectedSchoolNames.Count,
+            SelectedSchoolNames = selectedSchoolNames.ToList(),
         };
     }
 }
