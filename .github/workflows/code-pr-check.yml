@@ -18,16 +18,17 @@ jobs:
     name: PR Sentinel (always runs)
     runs-on: ubuntu-22.04
     steps:
-      - run: echo "PR detected – checks will conditionally run."
+      - run: echo "PR detected - checks will conditionally run."
 
   # Use per-job path filters with dorny/paths-filter instead of top-level paths
   detect-changes:
     name: Detect changed areas
     runs-on: ubuntu-22.04
     outputs:
+      contentful: ${{ steps.filter.outputs.contentful }}
+      github: ${{ steps.filter.outputs.github }}
       src: ${{ steps.filter.outputs.src }}
       tests: ${{ steps.filter.outputs.tests }}
-      contentful: ${{ steps.filter.outputs.contentful }}
     steps:
       - uses: actions/checkout@v4
         with: { fetch-depth: 2 }
@@ -45,7 +46,8 @@ jobs:
       contents: read
     if:
       ${{ always() && (needs.detect-changes.outputs.src == 'true' ||
-      needs.detect-changes.outputs.tests == 'true') }}
+      needs.detect-changes.outputs.tests == 'true' || needs.detect-changes.outputs.github ==
+      'true')}}
 
     steps:
       - name: Check out repository
@@ -116,7 +118,9 @@ jobs:
     name: Build database upgrader
     runs-on: ubuntu-22.04
     needs: [detect-changes]
-    if: ${{ needs.detect-changes.outputs.src == 'true' }}
+    if:
+      ${{needs.detect-changes.outputs.src == 'true' || needs.detect-changes.outputs.github
+      =='true'}}
 
     steps:
       - name: Check out repository
@@ -132,7 +136,9 @@ jobs:
     runs-on: ubuntu-22.04
     name: Run javascript tests
     needs: [detect-changes]
-    if: ${{ needs.detect-changes.outputs.tests == 'true' }}
+    if:
+      ${{ needs.detect-changes.outputs.tests == 'true' || needs.detect-changes.outputs.github
+      =='true'}}
     permissions:
       contents: read
       checks: write
@@ -166,7 +172,9 @@ jobs:
     name: Run Jest Tests for Contentful
     runs-on: ubuntu-22.04
     needs: [detect-changes]
-    if: ${{ needs.detect-changes.outputs.contentful == 'true' }}
+    if:
+      ${{ needs.detect-changes.outputs.contentful == 'true' || needs.detect-changes.outputs.github
+      =='true'}}
     permissions:
       checks: write
       contents: read
