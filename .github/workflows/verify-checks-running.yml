@@ -1,6 +1,6 @@
 name: Verify Checks Running
 on:
-  pull_request:
+  pull_request_target:
     branches: ['main', 'development']
     types: [opened, reopened, synchronize, ready_for_review]
 
