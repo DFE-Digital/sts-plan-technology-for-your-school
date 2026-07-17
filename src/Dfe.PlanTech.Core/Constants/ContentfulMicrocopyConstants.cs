@@ -19,8 +19,10 @@ public static class ContentfulMicrocopyConstants
     public const string LandingPageInsetIntroContinue = "insetIntroContinue";
     public const string LandingPageTopicLinkNotStarted = "topicLinkNotStarted";
     public const string LandingPageTopicIntroContinue = "topicIntroContinue";
+    public const string LandingPageTopicIntroContinueNoEstablishment = "topicIntroContinueNoEstablishment";
     public const string LandingPageTopicLinkContinue = "topicLinkContinue";
     public const string LandingPageTopicIntroCompleted = "topicIntroCompleted";
+    public const string LandingPageTopicIntroCompletedNoEstablishment = "topicIntroCompletedNoEstablishment";
     public const string LandingPageTopicLinkCompleted = "topicLinkCompleted";
     public const string LandingPageSuccessPanelHeader = "successHeader";
     public const string LandingPageSuccessPanelBody = "successBody";
@@ -169,8 +171,10 @@ public static class ContentfulMicrocopyConstants
         { LandingPageInsetIntroContinue, EmptyFallback },
         { LandingPageTopicLinkNotStarted, TopicLinksFallback },
         { LandingPageTopicIntroContinue, EmptyFallback },
+        { LandingPageTopicIntroContinueNoEstablishment, EmptyFallback },
         { LandingPageTopicLinkContinue, TopicLinksFallback },
         { LandingPageTopicIntroCompleted, EmptyFallback },
+        { LandingPageTopicIntroCompletedNoEstablishment, EmptyFallback },
         { LandingPageTopicLinkCompleted, TopicLinksFallback },
         { LandingPageSuccessPanelHeader, SuccessHeaderFallback },
         { LandingPageSuccessPanelBody, EmptyFallback },
@@ -261,8 +265,10 @@ public static class ContentfulMicrocopyConstants
         { LandingPageInsetIntroContinue, [VariableNames.Standard] },
         { LandingPageTopicLinkNotStarted, [VariableNames.Topic] },
         { LandingPageTopicIntroContinue, [VariableNames.DateUpdated, VariableNames.EstablishmentName] },
+        { LandingPageTopicIntroContinueNoEstablishment, [VariableNames.DateUpdated] },
         { LandingPageTopicLinkContinue, [VariableNames.Topic] },
         { LandingPageTopicIntroCompleted, [VariableNames.Topic, VariableNames.DateCompleted, VariableNames.EstablishmentName] },
+        { LandingPageTopicIntroCompletedNoEstablishment, [VariableNames.Topic, VariableNames.DateCompleted] },
         { LandingPageTopicLinkCompleted, [VariableNames.Topic] },
         { LandingPageSuccessPanelHeader, [VariableNames.Topic] },
         { SingleRecommendationPrintAllLink, [VariableNames.Topic] },
