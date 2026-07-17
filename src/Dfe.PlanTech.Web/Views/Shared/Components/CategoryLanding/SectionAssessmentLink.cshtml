@@ -27,13 +27,13 @@
         case SubmissionStatus.InProgress:
         case SubmissionStatus.Inaccessible:
         case SubmissionStatus.Obsolete:
-            statusTextKey = ContentfulMicrocopyConstants.LandingPageTopicIntroContinue;
+            statusTextKey = !string.IsNullOrWhiteSpace(topic.EstablishmentName) ? ContentfulMicrocopyConstants.LandingPageTopicIntroContinue : ContentfulMicrocopyConstants.LandingPageTopicIntroCompletedNoEstablishment;
             linkTextKey = ContentfulMicrocopyConstants.LandingPageTopicLinkContinue;
             controller = nameof(QuestionsController);
             action = nameof(QuestionsController.GetContinueSelfAssessment);
             break;
         case SubmissionStatus.CompleteReviewed:
-            statusTextKey = ContentfulMicrocopyConstants.LandingPageTopicIntroCompleted;
+            statusTextKey = !string.IsNullOrWhiteSpace(topic.EstablishmentName) ? ContentfulMicrocopyConstants.LandingPageTopicIntroCompleted : ContentfulMicrocopyConstants.LandingPageTopicIntroCompletedNoEstablishment;
             linkTextKey = ContentfulMicrocopyConstants.LandingPageTopicLinkCompleted;
             controller = nameof(ReviewAnswersController);
             action = nameof(ReviewAnswersController.ViewAnswers);
@@ -66,6 +66,9 @@
         topicStatus == SubmissionStatus.Obsolete ||
         topicStatus == SubmissionStatus.InProgress;
 
+    if (Model.Section.EstablishmentName is null)
+    {
+    }
     var linkText = await Microcopy.GetTextByKeyAsync(linkTextKey, dynamicValues);
 
     if (Model.Context == "Sections")
