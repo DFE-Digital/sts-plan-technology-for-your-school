@@ -15,6 +15,28 @@ env:
 
 jobs:
   sentinel:
+    # PR Sentinel (always runs)
+    #
+    # This job has no `if:` condition, so it runs on every PR regardless of
+    # which files changed. It exists for two reasons:
+    #
+    # 1. Branch protection needs a check that's *guaranteed* to report.
+    #    Conditional jobs below (build/test/etc.) don't post any status at all
+    #    when their `if:` evaluates false — they don't "pass", they just never
+    #    run. If branch protection required one of those directly, a PR that
+    #    doesn't touch the relevant files would block forever waiting for a
+    #    check that will never appear. Sentinel is the safe thing to mark as
+    #    a required check.
+    #
+    # 2. verify-checks-running.yml needs a non-empty baseline to poll for.
+    #    Its `expected` set always includes this job's name (see
+    #    .github/pr-check-manifest.json -> "always"). Without it, a PR that
+    #    touches nothing matched by pr-check-areas.yml would have an empty
+    #    expected set, and the poll would trivially "pass" without ever
+    #    confirming this workflow actually triggered at all.
+    #
+    # tl;dr: don't remove this or give it a conditional — it's the anchor
+    # both branch protection and the verification workflow rely on.
     name: PR Sentinel (always runs)
     runs-on: ubuntu-22.04
     steps:
