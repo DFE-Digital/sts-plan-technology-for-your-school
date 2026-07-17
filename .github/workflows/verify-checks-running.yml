@@ -14,13 +14,14 @@ jobs:
     name: Verify Checks Running
     runs-on: ubuntu-22.04
     steps:
-      # We check out the base branch here without `ref:` so that we get the trusted
-      # workflow config from the base branch. We do not check out the PR *head* branch
-      # because that would allow untrusted code to run in this workflow. This prevents
-      # attackers from removing checks from .github/pr-check-manifest.json in order to
-      # make it look like the PR is passing when it is not.
+      # We check out the base branch here using `ref:` so that we get the trusted workflow
+      # config from the base branch, not the committed .github/pr-check-manifest.json.
+      # This prevents attackers from removing checks from the manifest in order to make it
+      # look like the PR is passing when it is not.
       - name: Check out base branch (trusted config only)
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
 
       - name: Install script dependencies
         run: npm install js-yaml@4 minimatch@10 --no-save
