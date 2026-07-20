@@ -1,4 +1,4 @@
-name: Nightly Database Backup
+name: Scheduled Database Backup
 
 on:
   schedule:
@@ -9,7 +9,7 @@ on:
         description: Which environment to back up
         required: true
         type: choice
-        options: ['Dev', 'ProductionUnprotected']
+        options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
         default: 'Dev'
 
 jobs:
@@ -22,4 +22,4 @@ jobs:
         target: ${{ inputs.environment }}
     uses: ./.github/workflows/back-up-database.yml
     with:
-      environment: ${{ inputs.environment || 'Dev' }}
+      environment: ${{ inputs.environment || 'ProductionUnprotected' }}

@@ -35,9 +35,9 @@ on:
       contentful-upsert-webhook:
         type: boolean
         default: true
-  push:
-    branches:
-      - disaster-recovery-e2e-terraform
+  # push:
+  #   branches:
+  #     - disaster-recovery-e2e-terraform
 
 env:
   #note you can't pass this var into the job environments, they don't calculate in time  
@@ -154,295 +154,295 @@ jobs:
           echo "Using project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}"
           echo "Using is_dr=${{ steps.vars.outputs.IS_DR }}"
 
-      # - name: Terraform init
-      #   working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-      #   run: |
-      #     terraform init -upgrade -reconfigure \
-      #       -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
-      #       -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
-      #       -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
-      #       -backend-config="key=${{ env.TF_BACKEND_KEY }}"
-## we need the registry up to be able to copy the image in with bsh before passing it into the container app creation.
-##making KV here because Azure can resurrect old soft deleted versions with the wrong runner ip on so need to be able to add firewall rule
-##before running rest of it
-      # - name: Apply Terraform changes - RG & container registry & key vault only.
-      #   working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-      #   run: |
-      #     terraform plan -input=false \
-      #       -target=azurerm_resource_group.app_rg \
-      #       -target=azurerm_container_registry.acr_notshared \
-      #       -target=azurerm_key_vault.vault \
-      #       -var-file="../../normalisedTerraformVars.tfvars" \
-      #       -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-      #       -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-      #       -var="azure_location=northeurope" \
-      #       -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
-      #       -var="include_kv_subnet_acl=false" \
-      #       -out=tfplan
+      - name: Terraform init
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform init -upgrade -reconfigure \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+# we need the registry up to be able to copy the image in with bsh before passing it into the container app creation.
+#making KV here because Azure can resurrect old soft deleted versions with the wrong runner ip on so need to be able to add firewall rule
+#before running rest of it
+      - name: Apply Terraform changes - RG & container registry & key vault only.
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform plan -input=false \
+            -target=azurerm_resource_group.app_rg \
+            -target=azurerm_container_registry.acr_notshared \
+            -target=azurerm_key_vault.vault \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="azure_location=northeurope" \
+            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
+            -var="include_kv_subnet_acl=false" \
+            -out=tfplan
 
-      #     terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
+          terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
 
-      #     terraform apply -auto-approve -input=false tfplan
+          terraform apply -auto-approve -input=false tfplan
 
-      # - name: Promote Image
-      #   id: promote_image
-      #   uses: ./.github/actions/promote-image
-      #   with:
-      #     image_branch: ${{ steps.vars.outputs.ENVIRONMENT_NAME == 'ProductionUnprotected' && 'main' || 'development' }}
-      #     acr_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}
-      #     acr_login_server: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}.azurecr.io
-      #     package_name: ${{ env.PACKAGE_NAME }}
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Promote Image
+        id: promote_image
+        uses: ./.github/actions/promote-image
+        with:
+          image_branch: ${{ steps.vars.outputs.ENVIRONMENT_NAME == 'ProductionUnprotected' && 'main' || 'development' }}
+          acr_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}
+          acr_login_server: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP_SHORT }}.azurecr.io
+          package_name: ${{ env.PACKAGE_NAME }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
-  # apply-terraform:
-  #   name: Apply Terraform changes
-  #   needs: [image-and-acr]
-  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.apply-terraform) }}
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-  #   permissions:
-  #     id-token: write
-  #     contents: read
-  #   outputs:
-  #     cdn_hostname: ${{ steps.tf_app_outputs.outputs.cdn_hostname }}
+  apply-terraform:
+    name: Apply Terraform changes
+    needs: [image-and-acr]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.apply-terraform) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      cdn_hostname: ${{ steps.tf_app_outputs.outputs.cdn_hostname }}
 
-  #   steps:
-  #     - uses: actions/checkout@v4
+    steps:
+      - uses: actions/checkout@v4
 
-  #     - uses: hashicorp/setup-terraform@v3
+      - uses: hashicorp/setup-terraform@v3
 
-  #     - name: Prepare derived variables
-  #       id: vars
-  #       shell: bash
-  #       run: |
-  #         set -euo pipefail
+      - name: Prepare derived variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
 
-  #         IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
+          IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
 
-  #         if [ "$IS_DR" = "true" ]; then
-  #           DFE_PROJECT_NAME="pt-dr"
-  #         else
-  #           DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-  #         fi
+          if [ "$IS_DR" = "true" ]; then
+            DFE_PROJECT_NAME="pt-dr"
+          else
+            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+          fi
 
-  #         RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
-  #         RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
-  #         TF_KEYVAULT_NAME="${RESOURCE_PREFIX_TF}-kv"
-  #         KEYVAULT_NAME="${RESOURCE_PREFIX_APP}-kv"
+          RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+          TF_KEYVAULT_NAME="${RESOURCE_PREFIX_TF}-kv"
+          KEYVAULT_NAME="${RESOURCE_PREFIX_APP}-kv"
 
-  #         echo "PROJECT_PREFIX_APP=$DFE_PROJECT_NAME" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_TF_SHORT=${RESOURCE_PREFIX_TF//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "TF_KEYVAULT_NAME=$TF_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
-  #         echo "KEYVAULT_NAME=$KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
-  #         echo "IS_DR=$IS_DR" >> "$GITHUB_OUTPUT"
+          echo "PROJECT_PREFIX_APP=$DFE_PROJECT_NAME" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_TF_SHORT=${RESOURCE_PREFIX_TF//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+          echo "TF_KEYVAULT_NAME=$TF_KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
+          echo "KEYVAULT_NAME=$KEYVAULT_NAME" >> "$GITHUB_OUTPUT"
+          echo "IS_DR=$IS_DR" >> "$GITHUB_OUTPUT"
 
-  #     - name: Get runner public IP
-  #       id: whats-my-ip
-  #       run: |
-  #         IP=$(curl -s https://api.ipify.org)
-  #         echo "ip=$IP" >> "$GITHUB_OUTPUT"
-  #         echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
+      - name: Get runner public IP
+        id: whats-my-ip
+        run: |
+          IP=$(curl -s https://api.ipify.org)
+          echo "ip=$IP" >> "$GITHUB_OUTPUT"
+          echo "TF_VAR_github_ip=$IP" >> "$GITHUB_ENV"
 
-  #     - name: Login with AZ
-  #       uses: ./.github/actions/azure-login
-  #       with:
-  #         az_tenant_id: ${{ secrets.az_tenant_id }}
-  #         az_subscription_id: ${{ secrets.az_subscription_id }}
-  #         az_client_id: ${{ secrets.az_client_id }}
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.az_tenant_id }}
+          az_subscription_id: ${{ secrets.az_subscription_id }}
+          az_client_id: ${{ secrets.az_client_id }}
 
-  #     - name: Whitelist Runner for TF keyvault
-  #       uses: ./.github/actions/whitelist-kv
-  #       with:
-  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
-  #         keyvault-name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
-  #         verb: add
+      - name: Whitelist Runner for TF keyvault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
+          keyvault-name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
+          verb: add
 
-  #     - name: Whitelist Runner for app keyvault
-  #       uses: ./.github/actions/whitelist-kv
-  #       with:
-  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         keyvault-name: ${{ steps.vars.outputs.KEYVAULT_NAME }}
-  #         verb: add
+      - name: Whitelist Runner for app keyvault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          keyvault-name: ${{ steps.vars.outputs.KEYVAULT_NAME }}
+          verb: add
 
-  #     - name: Whitelist Runner for TF storage
-  #       uses: ./.github/actions/whitelist-storage
-  #       with:
-  #         ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-  #         resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
-  #         account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
-  #         verb: add
+      - name: Whitelist Runner for TF storage
+        uses: ./.github/actions/whitelist-storage
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
+          account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
+          verb: add
 
-  #     - name: Get secret and clean tfvars file
-  #       shell: pwsh
-  #       run: |
-  #         ./.github/scripts/get-and-normalise-tfvars.ps1 `
-  #           -SecretName "${{ secrets.TF_SECRET_NAME }}" `
-  #           -KeyVaultName "${{ steps.vars.outputs.TF_KEYVAULT_NAME }}"
+      - name: Get secret and clean tfvars file
+        shell: pwsh
+        run: |
+          ./.github/scripts/get-and-normalise-tfvars.ps1 `
+            -SecretName "${{ secrets.TF_SECRET_NAME }}" `
+            -KeyVaultName "${{ steps.vars.outputs.TF_KEYVAULT_NAME }}"
 
-  #     - name: Build DNS URL
-  #       shell: bash
-  #       run: |
-  #         case "$DEPLOY_ENVIRONMENT" in
-  #           Dev)
-  #             prefix="dev-"
-  #             ;;
-  #           Test)
-  #             prefix="test-"
-  #             ;;
-  #           *Staging*)
-  #             prefix="staging-"
-  #             ;;
-  #           *Prod*)
-  #             prefix="prod-"
-  #             ;;
-  #           *)
-  #             echo "Unsupported environment: $DEPLOY_ENVIRONMENT"
-  #             exit 1
-  #             ;;
-  #         esac
+      - name: Build DNS URL
+        shell: bash
+        run: |
+          case "$DEPLOY_ENVIRONMENT" in
+            Dev)
+              prefix="dev-"
+              ;;
+            Test)
+              prefix="test-"
+              ;;
+            *Staging*)
+              prefix="staging-"
+              ;;
+            *Prod*)
+              prefix="prod-"
+              ;;
+            *)
+              echo "Unsupported environment: $DEPLOY_ENVIRONMENT"
+              exit 1
+              ;;
+          esac
 
-  #         if [[ "${{ steps.vars.outputs.IS_DR }}" == "true" ]]; then
-  #           prefix="${prefix}dr-"
-  #         fi
+          if [[ "${{ steps.vars.outputs.IS_DR }}" == "true" ]]; then
+            prefix="${prefix}dr-"
+          fi
 
-  #         echo "TF_VAR_dns_url=${prefix}${TF_VAR_baseurl}" >> "$GITHUB_ENV"
+          echo "TF_VAR_dns_url=${prefix}${TF_VAR_baseurl}" >> "$GITHUB_ENV"
 
-  #     - name: Terraform init - app
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-  #       run: |
-  #         terraform init \
-  #           -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
-  #           -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
-  #           -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
-  #           -backend-config="key=${{ env.TF_BACKEND_KEY }}"
+      - name: Terraform init - app
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+            -backend-config="key=${{ env.TF_BACKEND_KEY }}"
 
-  #    #some resources azure will have recovered already as linked somehow which will then fail trying to create hahaha.
-  #     - name: Import recovered Key Vault resources
-  #       shell: bash
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-  #       run: |
-  #         set -euo pipefail
+     #some resources azure will have recovered already if prevously soft-deleted as linked somehow which will then fail trying to create, so check here.
+      - name: Import recovered Key Vault resources
+        shell: bash
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          set -euo pipefail
 
-  #         subscription_id="$(az account show --query id -o tsv)"
-  #         resource_group="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
-  #         keyvault_name="${{ steps.vars.outputs.KEYVAULT_NAME }}"
+          subscription_id="$(az account show --query id -o tsv)"
+          resource_group="${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
+          keyvault_name="${{ steps.vars.outputs.KEYVAULT_NAME }}"
 
-  #         terraform_object_id="$(az ad sp show \
-  #           --id "$ARM_CLIENT_ID" \
-  #           --query id -o tsv)"
+          terraform_object_id="$(az ad sp show \
+            --id "$ARM_CLIENT_ID" \
+            --query id -o tsv)"
 
-  #         access_policy_id_tf="/subscriptions/${subscription_id}/resourceGroups/${resource_group}/providers/Microsoft.KeyVault/vaults/${keyvault_name}/objectId/${terraform_object_id}"
+          access_policy_id_tf="/subscriptions/${subscription_id}/resourceGroups/${resource_group}/providers/Microsoft.KeyVault/vaults/${keyvault_name}/objectId/${terraform_object_id}"
 
-  #         key_id="$(az keyvault key show \
-  #           --vault-name "$keyvault_name" \
-  #           --name "dataprotection" \
-  #           --query "key.kid" \
-  #           -o tsv 2>/dev/null || true)"
+          key_id="$(az keyvault key show \
+            --vault-name "$keyvault_name" \
+            --name "dataprotection" \
+            --query "key.kid" \
+            -o tsv 2>/dev/null || true)"
 
-  #         rm -f zz_recovery_imports.tf
+          rm -f zz_recovery_imports.tf
 
-  #         if ! terraform state show 'azurerm_key_vault_access_policy.vault_access_policy_tf[0]' >/dev/null 2>&1; then
-  #           if az keyvault show \
-  #             --resource-group "$resource_group" \
-  #             --name "$keyvault_name" \
-  #             --query "properties.accessPolicies[?objectId=='${terraform_object_id}'] | length(@)" \
-  #             -o tsv | grep -q '^1$'; then
+          if ! terraform state show 'azurerm_key_vault_access_policy.vault_access_policy_tf[0]' >/dev/null 2>&1; then
+            if az keyvault show \
+              --resource-group "$resource_group" \
+              --name "$keyvault_name" \
+              --query "properties.accessPolicies[?objectId=='${terraform_object_id}'] | length(@)" \
+              -o tsv | grep -q '^1$'; then
 
-  #             cat >> zz_recovery_imports.tf <<EOF
-  #         import {
-  #           to = azurerm_key_vault_access_policy.vault_access_policy_tf[0]
-  #           id = "${access_policy_id_tf}"
-  #         }
+              cat >> zz_recovery_imports.tf <<EOF
+          import {
+            to = azurerm_key_vault_access_policy.vault_access_policy_tf[0]
+            id = "${access_policy_id_tf}"
+          }
 
-  #         EOF
-  #           fi
-  #         fi
+          EOF
+            fi
+          fi
 
-  #         if [ -f zz_recovery_imports.tf ]; then
-  #           echo "Importing recovered Key Vault resources via import blocks"
-  #           cat zz_recovery_imports.tf
+          if [ -f zz_recovery_imports.tf ]; then
+            echo "Importing recovered Key Vault resources via import blocks"
+            cat zz_recovery_imports.tf
 
-  #           terraform apply -input=false -auto-approve \
-  #             -var-file="../../normalisedTerraformVars.tfvars" \
-  #             -var="is_dr=true" \
-  #             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-  #             -var="image_tag=${{needs.image-and-acr.outputs.image_tag}}" \
-  #             -var="workflow_runner_ip=${{env.TF_VAR_github_ip}}" \
-  #             -var="azure_location=northeurope" \
-  #             -var="manage_dns_in_app_state=true" \
-  #             -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
-  #             -var="primary_fqdn=${{ env.TF_VAR_dns_url }}" \
-  #             -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
-  #             -target='azurerm_key_vault_access_policy.vault_access_policy_tf[0]' \
+            terraform apply -input=false -auto-approve \
+              -var-file="../../normalisedTerraformVars.tfvars" \
+              -var="is_dr=true" \
+              -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+              -var="image_tag=${{needs.image-and-acr.outputs.image_tag}}" \
+              -var="workflow_runner_ip=${{env.TF_VAR_github_ip}}" \
+              -var="azure_location=northeurope" \
+              -var="manage_dns_in_app_state=true" \
+              -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
+              -var="primary_fqdn=${{ env.TF_VAR_dns_url }}" \
+              -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
+              -target='azurerm_key_vault_access_policy.vault_access_policy_tf[0]' \
 
-  #           rm -f zz_recovery_imports.tf
-  #         else
-  #           echo "No recovered Key Vault resources to import."
-  #         fi
+            rm -f zz_recovery_imports.tf
+          else
+            echo "No recovered Key Vault resources to import."
+          fi
 
-  #     - name: Apply Terraform changes - rest of app
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-  #       run: |
-  #         terraform plan -input=false \
-  #           -var-file="../../normalisedTerraformVars.tfvars" \
-  #           -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-  #           -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-  #           -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
-  #           -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
-  #           -var="azure_location=northeurope" \
-  #           -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
-  #           -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
-  #           -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
-  #           -out=tfplanapp
+      - name: Apply Terraform changes - rest of app
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          terraform plan -input=false \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
+            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
+            -var="azure_location=northeurope" \
+            -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
+            -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
+            -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
+            -out=tfplanapp
 
-  #           terraform show -no-color tfplanapp || true
+            terraform show -no-color tfplanapp || true
 
-  #           terraform apply -auto-approve -input=false tfplanapp
+            terraform apply -auto-approve -input=false tfplanapp
 
-  #     - name: Read Terraform app outputs
-  #       id: tf_app_outputs
-  #       shell: bash
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
-  #       run: |
-  #         set -euo pipefail
+      - name: Read Terraform app outputs
+        id: tf_app_outputs
+        shell: bash
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
+        run: |
+          set -euo pipefail
 
-  #         cdn_hostname="$(terraform output -raw cdn_hostname)"
+          cdn_hostname="$(terraform output -raw cdn_hostname)"
 
-  #         echo "cdn_hostname=$cdn_hostname" >> "$GITHUB_OUTPUT"
+          echo "cdn_hostname=$cdn_hostname" >> "$GITHUB_OUTPUT"
 
-  #     - name: Terraform init - separate DNS
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-  #       if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
-  #       run: |
-  #         terraform init \
-  #           -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
-  #           -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
-  #           -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
+      - name: Terraform init - separate DNS
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
+            -backend-config="storage_account_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}" \
+            -backend-config="container_name=${{ env.TF_BACKEND_CONTAINER_NAME }}" \
 
-  #     - name: Apply Terraform changes - separate DNS
-  #       working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-  #       if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
-  #       run: |
-  #         terraform plan -input=false \
-  #           -var-file="../../normalisedTerraformVars.tfvars" \
-  #           -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
-  #           -var="azure_location=northeurope" \
-  #           -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
-  #           -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
-  #           -out=tfplandns
+      - name: Apply Terraform changes - separate DNS
+        working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
+        run: |
+          terraform plan -input=false \
+            -var-file="../../normalisedTerraformVars.tfvars" \
+            -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
+            -var="azure_location=northeurope" \
+            -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
+            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
+            -out=tfplandns
 
-  #           terraform show -no-color tfplandns || true
-  #           terraform apply -auto-approve -input=false tfplandns
+            terraform show -no-color tfplandns || true
+            terraform apply -auto-approve -input=false tfplandns
 
   restore-db:
     name: Restore DB from BACPAC
-    #needs: [apply-terraform]
+    needs: [apply-terraform]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
     runs-on: ubuntu-latest
     environment:
@@ -589,91 +589,82 @@ jobs:
           server-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
           verb: remove
 
-  # restore-tokens:
-  #   name: Restore app tokens from backup kv
-  #   needs: [apply-terraform,restore-db]
-  #   if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-tokens) }}
-  #   runs-on: ubuntu-latest
-  #   environment:
-  #     name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-  #   permissions:
-  #     id-token: write
-  #     contents: read
+  restore-tokens:
+    name: Restore app tokens from backup kv
+    needs: [apply-terraform,restore-db]
+    if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-tokens) }}
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
 
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v4
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  #     - name: Azure CLI Login
-  #       uses: ./.github/actions/azure-login
-  #       with:
-  #         az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-  #         az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-  #         az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
-  #     - name: Prepare backup names
-  #       id: backup_names
-  #       shell: bash
-  #       run: |
-  #         BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-  #         BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
-  #         BACKUP_STORAGE_ACCOUNT="${BACKUP_RESOURCE_GROUP//-/}"
+      - name: Prepare backup names
+        id: backup_names
+        shell: bash
+        run: |
+          BACKUP_RESOURCE_GROUP="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+          BACKUP_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+          BACKUP_STORAGE_ACCOUNT="${BACKUP_RESOURCE_GROUP//-/}"
 
-  #         echo "resource_group=$BACKUP_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
-  #         echo "storage_account=$BACKUP_STORAGE_ACCOUNT" >> "$GITHUB_OUTPUT"
-  #         echo "kv=$BACKUP_KV" >> "$GITHUB_OUTPUT"
+          echo "resource_group=$BACKUP_RESOURCE_GROUP" >> "$GITHUB_OUTPUT"
+          echo "storage_account=$BACKUP_STORAGE_ACCOUNT" >> "$GITHUB_OUTPUT"
+          echo "kv=$BACKUP_KV" >> "$GITHUB_OUTPUT"
 
-  #     - name: Prepare app variables
-  #       id: vars
-  #       shell: bash
-  #       run: |
-  #         set -euo pipefail
-  #         IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
+      - name: Prepare app variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+          IS_DR="${{ github.event_name == 'push' && true || inputs.is_dr }}"
 
-  #         if [ "$IS_DR" = "true" ]; then
-  #           DFE_PROJECT_NAME="pt-dr"
-  #         else
-  #           DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
-  #         fi
+          if [ "$IS_DR" = "true" ]; then
+            DFE_PROJECT_NAME="pt-dr"
+          else
+            DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+          fi
 
-  #         RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
 
-  #         echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-  #         echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
 
-  #     - name: Restore app secrets
-  #       uses: ./.github/actions/restore-app-secrets
-  #       with:
-  #         backup_resource_group: ${{ steps.backup_names.outputs.resource_group }}
-  #         #note, no "-kv" as it was too long
-  #         backup_keyvault: ${{ steps.backup_names.outputs.resource_group }}
+      - name: Restore app secrets
+        uses: ./.github/actions/restore-app-secrets
+        with:
+          backup_resource_group: ${{ steps.backup_names.outputs.resource_group }}
+          #note, no "-kv" as it was too long
+          backup_keyvault: ${{ steps.backup_names.outputs.resource_group }}
 
-  #         app_resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         app_keyvault: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
+          app_resource_group: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          app_keyvault: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
 
-  #         backup_storage_account: ${{ steps.backup_names.outputs.storage_account }}
-  #         secret_container_name: secretnames
-  #         manifest_blob_name: secret-manifest.txt
+          backup_storage_account: ${{ steps.backup_names.outputs.storage_account }}
+          secret_container_name: secretnames
+          manifest_blob_name: secret-manifest.txt
 
-  #         sql_server_secret_name: connectionstrings--database
-  #         sql_server_python_secret_name: python--dbconnectionstring
-  #         sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
-  #         sql_database_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
+          sql_server_secret_name: connectionstrings--database
+          sql_server_python_secret_name: python--dbconnectionstring
+          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          sql_database_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
 
-  #         redis_secret_name: connectionstrings--redis
-  #         redis_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          redis_secret_name: connectionstrings--redis
+          redis_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
 
-  #         servicebus_secret_name: connectionstrings--servicebusconnection
-  #         servicebus_namespace: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}servicebus
+          servicebus_secret_name: connectionstrings--servicebusconnection
+          servicebus_namespace: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}servicebus
 
-  #         appinsights_secret_name: applicationinsights--connectionstring
-  #         appinsights_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-insights
-
-  #         ##now we need to pull the restored secrets to set up the contentful webhook.
-  #     - name: Upsert Contentful webhook
-  #       uses: ./.github/actions/upsert-contentful-webhook
-  #       with:
-  #         enabled: ${{ inputs.contentful-upsert-webhook }}
-  #         keyvault-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-kv
-  #         env-name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
-  #         cdn-hostname: ${{ needs.apply-terraform.outputs.cdn_hostname }}
+          appinsights_secret_name: applicationinsights--connectionstring
+          appinsights_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-insights
