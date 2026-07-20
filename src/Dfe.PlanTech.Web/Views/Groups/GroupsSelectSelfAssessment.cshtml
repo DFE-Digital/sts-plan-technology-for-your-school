@@ -1,6 +1,6 @@
 @model GroupSelectAssessmentViewModel
 @{
-ViewData[StatePassingMechanismConstants.Title] = "Select a self-assessment";
+    ViewData[StatePassingMechanismConstants.Title] = "Select a self-assessment";
 }
 <div>
     <h1 class="govuk-heading-xl">Select a self-assessment</h1>
@@ -28,14 +28,14 @@ ViewData[StatePassingMechanismConstants.Title] = "Select a self-assessment";
             <div class="govuk-task-list__status" id="@($"{s.SectionSlug}-status")">
                 @if (s.UncompletedGroupSubmissions == 0)
                 {
-                            <span>All self-assessments submitted.</span>
+                    <span>All self-assessments submitted.</span>
                 }
                 else
                 {
                     var schoolPluralisation = s.UncompletedGroupSubmissions == 1 ? "school" : "schools";
 
                     <span>
-                        Self-assessment required for @s.UncompletedGroupSubmissions @schoolPluralisation.
+                        Self-assessment required for @s.UncompletedGroupSubmissions @schoolPluralisation
                     </span>
                 }
             </div>
