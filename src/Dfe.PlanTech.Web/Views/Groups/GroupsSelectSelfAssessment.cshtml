@@ -1,6 +1,17 @@
 @model GroupSelectAssessmentViewModel
+@inject IMicrocopyProvider Microcopy
+
 @{
     ViewData[StatePassingMechanismConstants.Title] = "Select a self-assessment";
+}
+
+@section NavButton {
+    <govuk-back-link id="nonjs-topic-back-link" href="@UrlConstants.GroupsSelectionPageSlug" class="noprint non-js-only govuk-back-link">
+        Back to home
+    </govuk-back-link>
+    <govuk-back-link id="topic-back-link" href="@UrlConstants.GroupsSelectionPageSlug" class="noprint js-only">
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSelfAssessmentBackLink)
+    </govuk-back-link>
 }
 <div>
     <h1 class="govuk-heading-xl">Select a self-assessment</h1>
