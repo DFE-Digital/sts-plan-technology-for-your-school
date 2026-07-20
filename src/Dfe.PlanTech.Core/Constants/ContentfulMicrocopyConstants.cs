@@ -282,7 +282,15 @@ public static class ContentfulMicrocopyConstants
         { SingleRecommendationHistoryChange, [VariableNames.RecStatus] },
         { SingleRecommendationHistoryReason, [VariableNames.RecStatus] },
         { ViewAnswersIntroText, [VariableNames.DateCompleted] },
-        { ContinueIntroText, [VariableNames.DateUpdated] },
+        {
+            ContinueIntroText,
+            [
+                VariableNames.EstablishmentName,
+                VariableNames.DateUpdated,
+                VariableNames.Count,
+                VariableNames.Total
+            ]
+        },
         { CategoryPrintSectionInProgress, [VariableNames.DateUpdated] },
         { CategoryPrintSectionCompleted, [VariableNames.Topic, VariableNames.DateCompleted] },
         { GroupsSelectRecommendationCount, [VariableNames.Count, VariableNames.Total] },

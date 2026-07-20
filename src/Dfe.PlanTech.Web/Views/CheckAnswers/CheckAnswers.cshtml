@@ -10,7 +10,7 @@
     @{
         await Html.RenderPartialAsync("BackButton");
 
-        @if (Model.IsMatMultiSchoolAssessment)
+        @if (Model?.IsMatMultiSchoolAssessment == true && Model?.IsMatBulkAssessment == true)
         {
             var schoolLabel =
                 Model.SelectedSchoolCount == 1
@@ -129,7 +129,7 @@
                     }
                 </ul>
                 <p>
-                    You'll get recommendations to help you schools meet the @Model.SectionName standards. Your self-assessment answers will be used to give these recommendations a progress status.
+                    You'll get recommendations to help you schools meet the @Model.CategoryName.ToLower() standard. Your self-assessment answers will be used to give these recommendations a progress status.
                 </p>
             </div>
         }
