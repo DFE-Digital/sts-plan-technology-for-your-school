@@ -152,7 +152,19 @@ public class GroupsViewBuilder(
         var establishmentId = GetUserOrganisationIdOrThrowException();
         var groupName = CurrentUser.UserOrganisationName ?? "Your organisation";
 
-        var categories = (await ContentfulService.GetAllCategoriesAsync() ?? []).ToList();
+        //Get all categories so e2e testing categories appear when enabled
+        var allCategories = await ContentfulService.GetAllCategoriesAsync() ?? [];
+
+        //Get ordered categories from home page
+        var orderedCategories = ((await ContentfulService.GetPageBySlugAsync("home")).Content ?? [])
+            .OfType<QuestionnaireCategoryEntry>()
+            .ToList();
+
+        var categories = orderedCategories
+            .Concat(allCategories.ExceptBy(
+                orderedCategories.Select(x => x.Sys?.Id),
+                x => x.Sys?.Id))
+            .ToList();
 
         if (categories.Count == 0)
         {
@@ -264,7 +276,7 @@ public class GroupsViewBuilder(
         if (eligibleSchools.Count == 0)
         {
             return controller.RedirectToRoute(GroupsController.GetSelectASelfAssessmentAction);
-        }    
+        }
 
         viewModel ??= new GroupsSelectSchoolsToAssessViewModel();
         viewModel.CategorySlug = categorySlug;
