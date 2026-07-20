@@ -156,7 +156,7 @@ public class GroupsViewBuilder(
         var allCategories = await ContentfulService.GetAllCategoriesAsync() ?? [];
 
         //Get ordered categories from home page
-        var orderedCategories = ((await ContentfulService.GetPageBySlugAsync("home")).Content ?? [])
+        var orderedCategories = ((await ContentfulService.GetPageBySlugAsync("home"))?.Content ?? [])
             .OfType<QuestionnaireCategoryEntry>()
             .ToList();
 
