@@ -309,11 +309,6 @@ variable "primary_fqdn" {
 # CDN/Front Door & DNS #
 ########################
 #has shared container app set up OR  WAF module can add custom domain to Front Door. Set up DNS first to associate.
-variable "cdn_create_custom_domain_container" {
-  description = "A flag to have the custom front door domain created IN SHARED CONTAINER MODULE"
-  type        = bool
-  default     = false 
-}
 
 variable "cdn_create_custom_domain_waf" {
   description = "A flag to have the custom front door domain created IN SHARED WAF MODULE"
@@ -400,31 +395,31 @@ variable "storage_account_expiration_period" {
 ##############
 
 ##didn't find the hook creation to work from here as it needs the secrt
-variable "contentful_management_token" {
-  description = "Contentful management token"
-  type        = string
-  sensitive   = true
-  default     = null
-}
+# variable "contentful_management_token" {
+#   description = "Contentful management token"
+#   type        = string
+#   sensitive   = true
+#   default     = null
+# }
 
-variable "contentful_webhook_endpoint" {
-  description = "Endpoint for Contentful webhook"
-  type        = string
-  sensitive   = false
-  default     = "/api/cms/webhook"
-}
+# variable "contentful_webhook_endpoint" {
+#   description = "Endpoint for Contentful webhook"
+#   type        = string
+#   sensitive   = false
+#   default     = "/api/cms/webhook"
+# }
 
-variable "contentful_upsert_webhook" {
-  description = "Whether to create/update the webhook or not"
-  type        = bool
-  default     = false
-}
+# variable "contentful_upsert_webhook" {
+#   description = "Whether to create/update the webhook or not"
+#   type        = bool
+#   default     = false
+# }
 
-variable "contentful_webhook_name" {
-  description = "Prefix for the Contentful webhook name"
-  type        = string
-  default     = "Plan Tech Webhook"
-}
+# variable "contentful_webhook_name" {
+#   description = "Prefix for the Contentful webhook name"
+#   type        = string
+#   default     = "Plan Tech Webhook"
+# }
 
 #########
 # Misc #
