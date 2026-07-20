@@ -361,6 +361,8 @@ public class ReviewAnswersViewBuilder(
             CurrentUser
         );
 
+        var isMatBulkAssessment = _matEstablishmentProvider.IsBulkAssessment();
+
         return new ReviewAnswersViewModel
         {
             Title = new ComponentTitleEntry(pageTitle),
@@ -373,6 +375,7 @@ public class ReviewAnswersViewBuilder(
             SubmissionResponses = submissionResponsesViewModel,
             ErrorMessage = errorMessage,
             IsMatMultiSchoolAssessment = selectedSchoolNames.Count > 0,
+            IsMatBulkAssessment = isMatBulkAssessment,
             SelectedSchoolCount = selectedSchoolNames.Count,
             SelectedSchoolNames = selectedSchoolNames.ToList(),
         };
