@@ -8,7 +8,7 @@ terraform {
 
     azapi = {
       source  = "azure/azapi"
-      version = "~> 1.15"
+      version = "~> 2.11"
     }
 
     null = {
