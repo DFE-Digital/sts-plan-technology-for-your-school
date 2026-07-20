@@ -1,11 +1,13 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Dfe.PlanTech.Application.Services.Interfaces;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Dfe.PlanTech.Web.Authorisation.Policies;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -231,11 +233,41 @@ public class PageModelAuthorisationPolicyTests
     {
         _contentfulService
             .GetPageBySlugAsync(Arg.Any<string>())
-            .Returns(callInfo => AuthNotRequiredPage);
+            .Returns(callInfo => AuthRequiredPage);
+
+        var org = new EstablishmentModel
+        {
+            Id = Guid.NewGuid(),
+            Name = "Test School",
+            Urn = "123456",
+            Ukprn = "00000018",
+            Category = new IdWithNameModel { Id = "001", Name = "Establishment" },
+        };
+
+        var claimsIdentity = new ClaimsIdentity(
+            [
+                new Claim(ClaimConstants.NameIdentifier, "dsi-ref"),
+                new Claim(ClaimConstants.DB_USER_ID, "101"),
+                new Claim(ClaimConstants.DB_ESTABLISHMENT_ID, "201"),
+                new Claim(ClaimConstants.Organisation, JsonSerializer.Serialize(org)),
+            ],
+            CookieAuthenticationDefaults.AuthenticationScheme
+        );
+
+        var principal = new ClaimsPrincipal(claimsIdentity);
+
+        _httpContext.User.Returns(principal);
+
+        _authContext = new AuthorizationHandlerContext(
+            [new PageAuthorisationRequirement()],
+            principal,
+            _httpContext
+        );
 
         await _policy.HandleAsync(_authContext);
 
-        await _userActionTrackingService.Received(1).RecordAsync();
+        Assert.True(_authContext.HasSucceeded);
+        await _userActionTrackingService.Received(1).RecordActionAsync();
     }
 
     [Fact]
@@ -247,6 +279,6 @@ public class PageModelAuthorisationPolicyTests
 
         await _policy.HandleAsync(_authContext);
 
-        await _userActionTrackingService.DidNotReceive().RecordAsync();
+        await _userActionTrackingService.DidNotReceive().RecordActionAsync();
     }
 }

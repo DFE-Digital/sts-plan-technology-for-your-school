@@ -1,5 +1,4 @@
 using Dfe.PlanTech.Web.Attributes;
-using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
 using Microsoft.AspNetCore.Authorization;
@@ -19,7 +18,6 @@ public class RecommendationsController(
         recommendationsViewBuilder
         ?? throw new ArgumentNullException(nameof(recommendationsViewBuilder));
 
-    [ValidateMatSelected]
     [HttpGet(
         "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}",
         Name = "GetSingleRecommendation"
@@ -43,7 +41,6 @@ public class RecommendationsController(
         );
     }
 
-    [ValidateMatSelected]
     [HttpGet(
         "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print",
         Name = "PrintSingleRecommendation"
@@ -66,7 +63,6 @@ public class RecommendationsController(
         );
     }
 
-    [ValidateMatSelected]
     [HttpGet(
         "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/print-all",
         Name = "PrintAllRecommendations"
@@ -89,7 +85,6 @@ public class RecommendationsController(
         );
     }
 
-    [ValidateMatSelected]
     [HttpGet(
         "{categorySlug}/{sectionSlug}/recommendations/{chunkSlug}/share",
         Name = "ShareSingleRecommendation"
@@ -141,29 +136,21 @@ public class RecommendationsController(
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        [FromForm] string selectedStatus,
-        [FromForm] string? notes
+        [FromForm] SingleRecommendationInputViewModel inputModel
     )
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(categorySlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(sectionSlug);
         ArgumentNullException.ThrowIfNullOrWhiteSpace(chunkSlug);
 
-        if (string.IsNullOrWhiteSpace(selectedStatus))
+        if (!ModelState.IsValid)
         {
-            try
-            {
-                TempData["StatusUpdateError"] = "Select a status";
-            }
-            catch
-            { /* TempData will be null during unit testing and without this some tests fail. */
-            }
-
-            return PageRedirecter.RedirectToGetSingleRecommendation(
+            return await _recommendationsViewBuilder.RouteToSingleRecommendation(
                 this,
                 categorySlug,
                 sectionSlug,
-                chunkSlug
+                chunkSlug,
+                false
             );
         }
 
@@ -172,8 +159,7 @@ public class RecommendationsController(
             categorySlug,
             sectionSlug,
             chunkSlug,
-            selectedStatus,
-            notes
+            inputModel
         );
     }
 }

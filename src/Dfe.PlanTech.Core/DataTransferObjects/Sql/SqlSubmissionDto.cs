@@ -16,4 +16,7 @@ public class SqlSubmissionDto : ISqlDto
     public bool Deleted { get; set; }
     public SubmissionStatus Status { get; set; }
     public Guid? UserActionId { get; set; }
+    public Guid? CreatedUserActionId { get; set; }
+    public Guid? LastUpdatedUserActionId { get; set; }
+    public Guid? CompletedUserActionId { get; set; }
 }

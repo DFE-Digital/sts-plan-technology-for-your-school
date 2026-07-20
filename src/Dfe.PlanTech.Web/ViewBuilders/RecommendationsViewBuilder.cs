@@ -8,7 +8,6 @@ using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Extensions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.RoutingDataModels;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -22,7 +21,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class RecommendationsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     INotifyService notifyService,
     IRecommendationService recommendationService,
     ISubmissionService submissionService,
@@ -72,8 +71,8 @@ public class RecommendationsViewBuilder(
 
         var currentRecommendationHistory =
             await _recommendationService.GetLatestRecommendationHistoryAsync(
-                currentRecommendationChunk.Id,
-                establishmentId
+                establishmentId,
+                currentRecommendationChunk.Id
             );
 
         var currentRecommendationIndex = recommendationChunks.IndexOf(currentRecommendationChunk);
@@ -240,21 +239,37 @@ public class RecommendationsViewBuilder(
         string categorySlug,
         string sectionSlug,
         string chunkSlug,
-        string? selectedStatus,
-        string? notes
+        SingleRecommendationInputViewModel inputModel
     )
     {
-        var selectedStatusEnum = selectedStatus.GetRecommendationStatusEnumValue();
+        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
 
-        // Allow only specific statuses
-        if (selectedStatusEnum is null)
-        {
-            Logger.LogWarning(
-                "Invalid / unrecognised status value received: {SelectedStatus}: {SelectedStatusDisplayName}",
-                selectedStatus,
-                selectedStatusEnum
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
             );
-            controller.TempData["StatusUpdateError"] = "Select a valid status";
+
+        var recommendationChunks = section.CoreRecommendations.ToList();
+
+        var currentRecommendationChunk =
+            recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"No recommendation chunk found with slug matching: {chunkSlug}"
+            );
+
+        var recommendationHistory = await _recommendationService.GetRecommendationHistoryAsync(
+            currentRecommendationChunk.Id,
+            establishmentId
+        );
+
+        var currentStatus = recommendationHistory
+            .OrderByDescending(rh => rh.DateCreated)
+            .FirstOrDefault();
+
+        var validationResults = inputModel.ValidateForWorkflow(currentStatus?.NewStatus);
+        if (validationResults.Any())
+        {
             return await RouteToSingleRecommendation(
                 controller,
                 categorySlug,
@@ -264,34 +279,19 @@ public class RecommendationsViewBuilder(
             );
         }
 
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var userId = GetUserIdOrThrowException();
-        var userOrganisationId = CurrentUser.UserOrganisationId;
-
-        var section =
-            await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
-            ?? throw new ContentfulDataUnavailableException(
-                $"Could not find section for slug {sectionSlug}"
-            );
         var submissionRoutingData = await _submissionService.GetSubmissionRoutingDataAsync(
             establishmentId,
             section,
             status: SubmissionStatus.CompleteReviewed
         );
 
-        var answerIds = submissionRoutingData.Submission!.Responses.Select(r => r.AnswerSysId);
-        var recommendationChunks = section.CoreRecommendations.ToList();
-
-        var currentRecommendationChunk =
-            recommendationChunks.FirstOrDefault(chunk => chunk.Slug == chunkSlug)
-            ?? throw new ContentfulDataUnavailableException(
-                $"No recommendation chunk found with slug matching: {chunkSlug}"
-            );
-
-        var dynamicValues = new Dictionary<string, string>
-        {
-            ["recStatus"] = selectedStatusEnum.Value.GetDisplayName(),
-        };
+        var dynamicValues =
+            currentStatus?.NewStatus != inputModel.SelectedStatusEnum
+                ? new Dictionary<string, string>
+                {
+                    ["recStatus"] = inputModel.SelectedStatusEnum!.Value.GetDisplayName(),
+                }
+                : null;
 
         string? defaultNoteText = await _microcopyProvider.GetTextByKeyAsync(
             ContentfulMicrocopyConstants.SingleRecommendationHistoryReason,
@@ -299,13 +299,15 @@ public class RecommendationsViewBuilder(
         );
 
         defaultNoteText = string.IsNullOrWhiteSpace(defaultNoteText) ? null : defaultNoteText;
+        var userId = GetUserIdOrThrowException();
+        var userOrganisationId = CurrentUser.UserOrganisationId;
 
         await _recommendationService.UpdateRecommendationStatusAsync(
             currentRecommendationChunk.Id,
             establishmentId,
             userId,
-            selectedStatusEnum.Value,
-            notes ?? defaultNoteText,
+            inputModel.SelectedStatusEnum!.Value,
+            inputModel.Notes ?? defaultNoteText,
             CurrentUser.IsMat ? userOrganisationId : null
         );
 
@@ -406,8 +408,8 @@ public class RecommendationsViewBuilder(
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
         var latestRecommendationHistory =
             await _recommendationService.GetLatestRecommendationHistoryAsync(
-                recommendationChunk.Id,
-                establishmentId
+                establishmentId,
+                recommendationChunk.Id
             );
         if (latestRecommendationHistory?.NewStatus is null)
         {

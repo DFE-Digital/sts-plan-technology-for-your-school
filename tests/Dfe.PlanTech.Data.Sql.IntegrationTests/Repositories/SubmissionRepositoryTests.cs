@@ -1,8 +1,7 @@
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
-using Dfe.PlanTech.Core.Extensions;
-using Dfe.PlanTech.Core.Interfaces;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Core.Providers.Interfaces;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +11,7 @@ namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 {
     private SubmissionRepository _repository = null!;
+    private readonly Guid _userActionId = Guid.NewGuid();
 
     public SubmissionRepositoryTests(DatabaseFixture fixture)
         : base(fixture) { }
@@ -21,7 +21,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await base.InitializeAsync();
         _repository = new SubmissionRepository(
             DbContext,
-            new TestUserActionIdAccessor(Guid.NewGuid())
+            new TestUserActionIdAccessor(_userActionId)
         );
     }
 
@@ -425,10 +425,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             erh => erh.RecommendationId == recommendation.Id
         );
         Assert.NotNull(recommendationHistory);
-        Assert.Equal(
-            RecommendationStatus.Complete.GetDisplayName(),
-            recommendationHistory.NewStatus
-        );
+        Assert.Equal(RecommendationStatus.Complete, recommendationHistory.NewStatus);
     }
 
     [Fact]
@@ -707,6 +704,9 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.Equal(SubmissionStatus.CompleteReviewed, result.Status);
         Assert.True(result.DateCompleted >= beforeUpdate);
 
+        Assert.Equal(_userActionId, result.CompletedUserActionId);
+        Assert.Equal(_userActionId, result.LastUpdatedUserActionId);
+
         // Check that the other submission was marked inaccessible
         var otherSubmission = await DbContext.Submissions.FindAsync(
             [submission1.Id],
@@ -837,6 +837,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         Assert.NotNull(result);
         Assert.Equal(SubmissionStatus.InProgress, result.Status);
+        Assert.Equal(_userActionId, result.LastUpdatedUserActionId);
     }
 
     [Fact]
@@ -1029,6 +1030,9 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         Assert.False(refreshedOlder!.Deleted);
         Assert.True(refreshedLatest!.Deleted);
         Assert.False(refreshedInaccessible!.Deleted);
+
+        Assert.Equal(_userActionId, refreshedLatest.LastUpdatedUserActionId);
+        Assert.NotNull(refreshedLatest.DateLastUpdated);
     }
 
     [Fact]
@@ -1065,16 +1069,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         {
             SectionId = "S001",
             SectionName = "Test Section 1",
-            Question = new IdWithTextModel
-            {
-                Id = "Q900",
-                Text = "Question 900",
-            },
-            ChosenAnswer = new IdWithTextModel
-            {
-                Id = "A900",
-                Text = "Answer 900",
-            },
+            Question = new IdWithTextModel { Id = "Q900", Text = "Question 900" },
+            ChosenAnswer = new IdWithTextModel { Id = "A900", Text = "Answer 900" },
         };
 
         var response = new AssessmentResponseModel(
@@ -1086,16 +1082,36 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
-        var createdSubmission = await DbContext.Submissions.SingleAsync(s => s.Id == createdResponse.SubmissionId, cancellationToken: TestContext.Current.CancellationToken);
-        var createdQuestion = await DbContext.Questions.SingleAsync(q => q.Id == createdResponse.QuestionId, cancellationToken: TestContext.Current.CancellationToken);
-        var createdAnswer = await DbContext.Answers.SingleAsync(a => a.Id == createdResponse.AnswerId, cancellationToken: TestContext.Current.CancellationToken);
+        var createdResponse = await DbContext.Responses.SingleAsync(
+            r => r.Id == responseId,
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+
+        var createdSubmission = await DbContext.Submissions.SingleAsync(
+            s => s.Id == createdResponse.SubmissionId,
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+
+        var createdQuestion = await DbContext.Questions.SingleAsync(
+            q => q.Id == createdResponse.QuestionId,
+            cancellationToken: TestContext.Current.CancellationToken
+        );
+
+        var createdAnswer = await DbContext.Answers.SingleAsync(
+            a => a.Id == createdResponse.AnswerId,
+            cancellationToken: TestContext.Current.CancellationToken
+        );
 
         Assert.NotEqual(0, responseId);
+
         Assert.Equal(establishment.Id, createdSubmission.EstablishmentId);
         Assert.Equal("S001", createdSubmission.SectionId);
         Assert.Equal("Test Section 1", createdSubmission.SectionName);
         Assert.Equal(SubmissionStatus.InProgress, createdSubmission.Status);
+
+        Assert.Equal(_userActionId, createdSubmission.CreatedUserActionId);
+        Assert.Equal(_userActionId, createdSubmission.LastUpdatedUserActionId);
+        Assert.NotNull(createdSubmission.DateLastUpdated);
 
         Assert.Equal(user.Id, createdResponse.UserId);
         Assert.Equal(establishment.Id, createdResponse.UserEstablishmentId);
@@ -1145,16 +1161,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         {
             SectionId = "S001",
             SectionName = "Test Section 1",
-            Question = new IdWithTextModel
-            {
-                Id = "Q910",
-                Text = "Question 910",
-            },
-            ChosenAnswer = new IdWithTextModel
-            {
-                Id = "A910",
-                Text = "Answer 910",
-            },
+            Question = new IdWithTextModel { Id = "Q910", Text = "Question 910" },
+            ChosenAnswer = new IdWithTextModel { Id = "A910", Text = "Answer 910" },
         };
 
         var response = new AssessmentResponseModel(
@@ -1166,9 +1174,22 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
+        var createdResponse = await DbContext.Responses.SingleAsync(
+            r => r.Id == responseId,
+            cancellationToken: TestContext.Current.CancellationToken
+        );
 
         Assert.Equal(secondSubmission.Id, createdResponse.SubmissionId);
+
+        var updatedSubmission = await DbContext
+            .Submissions.AsNoTracking()
+            .SingleAsync(
+                s => s.Id == secondSubmission.Id,
+                cancellationToken: TestContext.Current.CancellationToken
+            );
+
+        Assert.NotNull(updatedSubmission.DateLastUpdated);
+        Assert.Equal(_userActionId, updatedSubmission.LastUpdatedUserActionId);
     }
 
     [Fact]
@@ -1176,16 +1197,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
     {
         var establishment = CreateEstablishment(5201);
         var user = CreateUser(5202);
-        var question = new QuestionEntity
-        {
-            ContentfulRef = "Q920",
-            QuestionText = "Question 920",
-        };
-        var answer = new AnswerEntity
-        {
-            ContentfulRef = "A920",
-            AnswerText = "Answer 920",
-        };
+        var question = new QuestionEntity { ContentfulRef = "Q920", QuestionText = "Question 920" };
+        var answer = new AnswerEntity { ContentfulRef = "A920", AnswerText = "Answer 920" };
 
         DbContext.Establishments.Add(establishment);
         DbContext.Users.Add(user);
@@ -1197,16 +1210,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         {
             SectionId = "S001",
             SectionName = "Test Section 1",
-            Question = new IdWithTextModel
-            {
-                Id = "Q920",
-                Text = "Question 920",
-            },
-            ChosenAnswer = new IdWithTextModel
-            {
-                Id = "A920",
-                Text = "Answer 920",
-            },
+            Question = new IdWithTextModel { Id = "Q920", Text = "Question 920" },
+            ChosenAnswer = new IdWithTextModel { Id = "A920", Text = "Answer 920" },
         };
 
         var response = new AssessmentResponseModel(
@@ -1218,12 +1223,27 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
+        var createdResponse = await DbContext.Responses.SingleAsync(
+            r => r.Id == responseId,
+            cancellationToken: TestContext.Current.CancellationToken
+        );
 
         Assert.Equal(question.Id, createdResponse.QuestionId);
         Assert.Equal(answer.Id, createdResponse.AnswerId);
-        Assert.Equal(1, await DbContext.Questions.CountAsync(q => q.ContentfulRef == "Q920", cancellationToken: TestContext.Current.CancellationToken));
-        Assert.Equal(1, await DbContext.Answers.CountAsync(a => a.ContentfulRef == "A920", cancellationToken: TestContext.Current.CancellationToken));
+        Assert.Equal(
+            1,
+            await DbContext.Questions.CountAsync(
+                q => q.ContentfulRef == "Q920",
+                cancellationToken: TestContext.Current.CancellationToken
+            )
+        );
+        Assert.Equal(
+            1,
+            await DbContext.Answers.CountAsync(
+                a => a.ContentfulRef == "A920",
+                cancellationToken: TestContext.Current.CancellationToken
+            )
+        );
     }
 
     [Fact]
@@ -1264,16 +1284,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         {
             SectionId = "S001",
             SectionName = "Test Section 1",
-            Question = new IdWithTextModel
-            {
-                Id = "Q930",
-                Text = "Question 930",
-            },
-            ChosenAnswer = new IdWithTextModel
-            {
-                Id = "A930",
-                Text = "Answer 930",
-            },
+            Question = new IdWithTextModel { Id = "Q930", Text = "Question 930" },
+            ChosenAnswer = new IdWithTextModel { Id = "A930", Text = "Answer 930" },
         };
 
         var response = new AssessmentResponseModel(
@@ -1285,7 +1297,10 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
 
         var responseId = await _repository.SubmitResponse(response);
 
-        var createdResponse = await DbContext.Responses.SingleAsync(r => r.Id == responseId, cancellationToken: TestContext.Current.CancellationToken);
+        var createdResponse = await DbContext.Responses.SingleAsync(
+            r => r.Id == responseId,
+            cancellationToken: TestContext.Current.CancellationToken
+        );
 
         Assert.Equal(deletedSubmission.Id, createdResponse.SubmissionId);
     }
@@ -1297,11 +1312,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         {
             SectionId = "S001",
             SectionName = "Test Section 1",
-            Question = new IdWithTextModel
-            {
-                Id = "Q940",
-                Text = "Question 940",
-            },
+            Question = new IdWithTextModel { Id = "Q940", Text = "Question 940" },
             ChosenAnswer = null,
         };
 
@@ -1318,11 +1329,7 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
             SectionId = "S001",
             SectionName = "Test Section 1",
             Question = null!,
-            ChosenAnswer = new IdWithTextModel
-            {
-                Id = "A950",
-                Text = "Answer 950",
-            },
+            ChosenAnswer = new IdWithTextModel { Id = "A950", Text = "Answer 950" },
         };
 
         var response = new AssessmentResponseModel(1, 1, 1, submitAnswer);
@@ -1337,16 +1344,8 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         {
             SectionId = "",
             SectionName = "Test Section 1",
-            Question = new IdWithTextModel
-            {
-                Id = "Q960",
-                Text = "Question 960",
-            },
-            ChosenAnswer = new IdWithTextModel
-            {
-                Id = "A960",
-                Text = "Answer 960",
-            },
+            Question = new IdWithTextModel { Id = "Q960", Text = "Question 960" },
+            ChosenAnswer = new IdWithTextModel { Id = "A960", Text = "Answer 960" },
         };
 
         var response = new AssessmentResponseModel(1, 1, 1, submitAnswer);
@@ -1354,7 +1353,106 @@ public class SubmissionRepositoryTests : DatabaseIntegrationTestBase
         await Assert.ThrowsAsync<ArgumentException>(() => _repository.SubmitResponse(response));
     }
 
-    private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdAccessor
+    [Fact]
+    public async Task GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync_ReturnsLatestCompletedSubmissionsWithEstablishmentIncluded()
+    {
+        // Arrange
+        var establishment1 = CreateEstablishment(101);
+        var establishment2 = CreateEstablishment(102);
+        var establishment3 = CreateEstablishment(103);
+
+        DbContext.Establishments.AddRange(establishment1, establishment2, establishment3);
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        var olderSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment1.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.CompleteReviewed,
+            Deleted = false,
+            DateCompleted = DateTime.UtcNow.AddDays(-10),
+            DateCreated = DateTime.UtcNow.AddDays(-12),
+        };
+
+        var latestSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment1.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.CompleteReviewed,
+            Deleted = false,
+            DateCompleted = DateTime.UtcNow.AddDays(-1),
+            DateCreated = DateTime.UtcNow.AddDays(-2),
+        };
+
+        var otherEstablishmentSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment2.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.CompleteReviewed,
+            Deleted = false,
+            DateCompleted = DateTime.UtcNow.AddDays(-3),
+            DateCreated = DateTime.UtcNow.AddDays(-4),
+        };
+
+        var deletedSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment3.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.CompleteReviewed,
+            Deleted = true,
+            DateCompleted = DateTime.UtcNow,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        var inProgressSubmission = new SubmissionEntity
+        {
+            EstablishmentId = establishment3.Id,
+            SectionId = "S001",
+            SectionName = "Section 1",
+            Status = SubmissionStatus.InProgress,
+            Deleted = false,
+            DateCompleted = null,
+            DateCreated = DateTime.UtcNow,
+        };
+
+        DbContext.Submissions.AddRange(
+            olderSubmission,
+            latestSubmission,
+            otherEstablishmentSubmission,
+            deletedSubmission,
+            inProgressSubmission
+        );
+
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
+
+        DbContext.ChangeTracker.Clear();
+
+        // Act
+        var result = await _repository.GetLatestEstablishmentsCompletedSubmissionsBySectionsAsync(
+            [establishment1.Id, establishment2.Id, establishment3.Id]
+        );
+
+        // Assert
+        Assert.Equal(2, result.Count);
+
+        Assert.Contains(result, s => s.Id == latestSubmission.Id);
+        Assert.Contains(result, s => s.Id == otherEstablishmentSubmission.Id);
+        Assert.DoesNotContain(result, s => s.Id == olderSubmission.Id);
+        Assert.DoesNotContain(result, s => s.Id == deletedSubmission.Id);
+        Assert.DoesNotContain(result, s => s.Id == inProgressSubmission.Id);
+
+        Assert.All(result, submission =>
+        {
+            Assert.NotNull(submission.Establishment);
+            Assert.False(string.IsNullOrWhiteSpace(submission.Establishment.OrgName));
+        });
+    }
+
+    private class TestUserActionIdAccessor(Guid userActionId) : IUserActionIdProvider
     {
         public Guid GetUserActionId() => userActionId;
     }

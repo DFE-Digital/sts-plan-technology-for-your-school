@@ -21,11 +21,13 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
             Substitute.For<IReviewAnswersViewBuilder>();
         private readonly IUserJourneyMissingContentExceptionHandler _exceptionHandler =
             Substitute.For<IUserJourneyMissingContentExceptionHandler>();
+        private readonly ISelfAssessmentSummaryViewBuilder _selfAssessmentSummaryViewBuilder =
+        Substitute.For<ISelfAssessmentSummaryViewBuilder>();
         private readonly ReviewAnswersController _controller;
 
         public ReviewAnswersControllerTests()
         {
-            _controller = new ReviewAnswersController(_logger, _exceptionHandler, _viewBuilder);
+            _controller = new ReviewAnswersController(_logger, _exceptionHandler, _viewBuilder, _selfAssessmentSummaryViewBuilder);
             var httpContext = new DefaultHttpContext();
             var tempDataProvider = Substitute.For<ITempDataProvider>();
             _controller.TempData = new TempDataDictionary(httpContext, tempDataProvider);
@@ -35,7 +37,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullViewBuilder_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new ReviewAnswersController(_logger, _exceptionHandler, null!)
+                new ReviewAnswersController(_logger, _exceptionHandler, null!, _selfAssessmentSummaryViewBuilder)
             );
 
             Assert.Equal("reviewAnswersViewBuilder", ex.ParamName);
@@ -45,10 +47,20 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
         public void Constructor_WithNullExceptionHandler_ThrowsArgumentNullException()
         {
             var ex = Assert.Throws<ArgumentNullException>(() =>
-                new ReviewAnswersController(_logger, null!, _viewBuilder)
+                new ReviewAnswersController(_logger, null!, _viewBuilder, _selfAssessmentSummaryViewBuilder)
             );
 
             Assert.Equal("userJourneyMissingContentExceptionHandler", ex.ParamName);
+        }
+
+        [Fact]
+        public void Constructor_WithNullSelfAssessmentSummaryViewBuilder_ThrowsArgumentNullException()
+        {
+            var ex = Assert.Throws<ArgumentNullException>(() =>
+                new ReviewAnswersController(_logger, _exceptionHandler, _viewBuilder, null!)
+            );
+
+            Assert.Equal("selfAssessmentSummaryViewBuilder", ex.ParamName);
         }
 
         [Fact]
@@ -200,6 +212,44 @@ namespace Dfe.PlanTech.Web.UnitTests.Controllers
 
             await _exceptionHandler.Received(1).Handle(_controller, exception);
             Assert.IsType<BadRequestResult>(result);
+        }
+
+        [Fact]
+        public async Task GetSchoolSelfAssessmentSummary_ReturnsExpectedResult()
+        {
+            var categorySlug = "cat";
+            var sectionSlug = "sec";
+
+            _selfAssessmentSummaryViewBuilder
+                .RouteToSelfAssessmentSummary(_controller, categorySlug, sectionSlug)
+                .Returns(new OkResult());
+
+            var result = await _controller.GetSchoolSelfAssessmentSummary(categorySlug, sectionSlug);
+
+            await _selfAssessmentSummaryViewBuilder
+                .Received(1)
+                .RouteToSelfAssessmentSummary(_controller, categorySlug, sectionSlug);
+
+            Assert.IsType<OkResult>(result);
+        }
+
+        [Fact]
+        public async Task GetTrustSelfAssessmentSummary_ReturnsExpectedResult()
+        {
+            var categorySlug = "cat";
+            var sectionSlug = "sec";
+
+            _selfAssessmentSummaryViewBuilder
+                .RouteToSelfAssessmentSummary(_controller, categorySlug, sectionSlug)
+                .Returns(new OkResult());
+
+            var result = await _controller.GetTrustSelfAssessmentSummary(categorySlug, sectionSlug);
+
+            await _selfAssessmentSummaryViewBuilder
+                .Received(1)
+                .RouteToSelfAssessmentSummary(_controller, categorySlug, sectionSlug);
+
+            Assert.IsType<OkResult>(result);
         }
     }
 }

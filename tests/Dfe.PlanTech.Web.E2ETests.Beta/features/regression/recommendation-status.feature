@@ -6,6 +6,7 @@ Feature: Recommendations Status
   @clear-data-school
     Scenario: Completing an assessment with completing answers sets the status to complete
       Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "4, 1, 1"
+      And I click the link to view the recommendations for "Category Two Section One"
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "Complete"
       And recommendation "Recommendation Header - C2 - S1 - Q2" should have status "Complete"
       And recommendation "Recommendation Header - C2 - S1 - Q3" should have status "Complete"
@@ -13,6 +14,7 @@ Feature: Recommendations Status
   @clear-data-school
     Scenario: Completing an assessment correctly sets the status to not started
       Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "3, 2, 2"
+      And I click the link to view the recommendations for "Category Two Section One"
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "Not started"
       And recommendation "Recommendation Header - C2 - S1 - Q2" should have status "Not started"
       And recommendation "Recommendation Header - C2 - S1 - Q3" should have status "Not started"
@@ -20,6 +22,7 @@ Feature: Recommendations Status
   @clear-data-school
     Scenario: Completing an assessment with an in-progress answer sets the status to in progress
       Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "3, 2, 4"
+      And I click the link to view the recommendations for "Category Two Section One"
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "Not started"
       And recommendation "Recommendation Header - C2 - S1 - Q2" should have status "Not started"
       And recommendation "Recommendation Header - C2 - S1 - Q3" should have status "In progress"
@@ -27,6 +30,7 @@ Feature: Recommendations Status
   @clear-data-school
     Scenario: Ability to update the recommendation status to each status
       Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "3, 2, 4"
+      And I click the link to view the recommendations for "Category Two Section One"
       Then recommendation "Recommendation Header - C2 - S1 - Q1" should have status "Not started"
       And I click the recommendation link "Recommendation Header - C2 - S1 - Q1" on the category landing page
 

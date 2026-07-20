@@ -126,7 +126,7 @@ Then(
       hasText: `Print your school's ${topic.toLowerCase()} recommendations`,
     });
     await expect(printLink).toBeVisible();
-    printLink.click();
+    await printLink.click();
   },
 );
 
@@ -263,4 +263,36 @@ Then('status last updated date is {string}', async function (expectedDate: strin
     .nth(1);
 
   await expect(lastUpdatedCell).toHaveText(expectedDate);
+});
+
+Then(
+  'I click the print recommendations link in the related action',
+  async function () {
+    const container = this.page.locator(
+      '.govuk-grid-column-one-third-from-desktop.govuk-float-right',
+    );
+    const printLink = container.locator('a', {
+      hasText: `Print this recommendation`,
+    });
+    await expect(printLink).toBeVisible();
+    printLink.click();
+  },
+);
+
+Then(
+  'I click the share recommendations link', async function () {
+    const container = this.page.locator(
+      '.govuk-grid-column-one-third-from-desktop.govuk-float-right',
+    );
+    const shareRecommendationLink = container.locator('a', {
+      hasText: `Share this recommendation`,
+    });
+    await expect(shareRecommendationLink).toBeVisible();
+    shareRecommendationLink.click();
+  },
+);
+
+When('I click the share recommendations button', async function () {
+  const link = this.page.locator('a.govuk-pagination__link[rel="next"]:visible');
+  await link.click();
 });

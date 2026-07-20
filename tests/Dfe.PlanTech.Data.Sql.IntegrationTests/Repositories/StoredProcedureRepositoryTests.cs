@@ -29,10 +29,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
 
     private static UserEntity CreateUser(int id)
     {
-        return new UserEntity
-        {
-            DfeSignInRef = $"User{id}",
-        };
+        return new UserEntity { DfeSignInRef = $"User{id}" };
     }
 
     private static QuestionEntity CreateQuestion(int id)
@@ -77,7 +74,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -87,7 +84,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await DbContext.Database.ExecuteSqlRawAsync(
             """
@@ -108,7 +105,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var response = new ResponseEntity
         {
@@ -130,12 +127,12 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.NotStarted.ToString(),
+            NewStatus = RecommendationStatus.NotStarted,
             DateCreated = fixedDate,
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(history);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var result = await _repository.GetFirstActivityForEstablishmentRecommendationAsync(
             school.Id,
@@ -144,7 +141,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
 
         Assert.NotNull(result);
         Assert.Equal(fixedDate, result!.StatusChangeDate);
-        Assert.Equal(history.NewStatus, result.StatusText);
+        Assert.Equal(history.NewStatus, result.Status);
         Assert.Equal(school.OrgName, result.SchoolName);
         Assert.Equal(mat.OrgName, result.GroupName);
         Assert.Equal(user.Id, result.UserId);
@@ -164,7 +161,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         DbContext.Users.Add(user);
         DbContext.Questions.Add(question);
         DbContext.Answers.Add(answer);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var recommendation = new RecommendationEntity
         {
@@ -174,7 +171,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Recommendations.Add(recommendation);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         await DbContext.Database.ExecuteSqlRawAsync(
             """
@@ -195,7 +192,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Submissions.Add(submission);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var response = new ResponseEntity
         {
@@ -207,7 +204,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         };
 
         DbContext.Responses.Add(response);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var firstDate = new DateTime(2026, 03, 21, 12, 0, 0, 0, DateTimeKind.Utc);
         var latestDate = new DateTime(2026, 03, 22, 15, 34, 47, 990, DateTimeKind.Utc);
@@ -218,12 +215,12 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.NotStarted.ToString(),
+            NewStatus = RecommendationStatus.NotStarted,
             DateCreated = firstDate,
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(firstHistory);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var latestHistory = new EstablishmentRecommendationHistoryEntity
         {
@@ -231,12 +228,12 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.InProgress,
             DateCreated = latestDate,
         };
 
         DbContext.EstablishmentRecommendationHistories.Add(latestHistory);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
 
         var result = await _repository.GetFirstActivityForEstablishmentRecommendationAsync(
             school.Id,
@@ -245,6 +242,6 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
 
         Assert.NotNull(result);
         Assert.Equal(latestDate, result!.StatusChangeDate);
-        Assert.Equal(latestHistory.NewStatus, result.StatusText);
+        Assert.Equal(latestHistory.NewStatus, result.Status);
     }
 }
