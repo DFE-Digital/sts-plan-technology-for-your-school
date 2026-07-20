@@ -429,11 +429,6 @@ variable "contentful_webhook_name" {
 #########
 # Misc #
 #########
-#the current pipeline ip to add to the key vault on creation to whitelist it
-variable "workflow_runner_ip" {
-  type    = string
-  default = null
-}
 
 variable "create_self_delete_resources" {
   type        = bool

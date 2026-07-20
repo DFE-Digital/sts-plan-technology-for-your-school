@@ -167,6 +167,7 @@ jobs:
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="azure_location=northeurope" \
             -var="include_kv_subnet_acl=false" \
+            -var="create_rg_separately=true" \
             -out=tfplan
 
           terraform show -no-color tfplan | grep -A20 "azurerm_resource_group.app_rg" || true
@@ -384,6 +385,7 @@ jobs:
             -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
             -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
             -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
+            -var="create_rg_separately=true" \
             -out=tfplanapp
 
             terraform show -no-color tfplanapp || true

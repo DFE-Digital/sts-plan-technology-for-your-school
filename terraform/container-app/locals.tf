@@ -20,7 +20,7 @@ locals {
   # App Resource Group #
   ########################
   # to create directly in app-rg rather than in shared module for greater control.
-  create_rg_separately = var.create_rg_separately || var.is_dr
+  create_rg_separately = var.create_rg_separately
   # this is used to pass into main_hosting. if blank, that will create an rg instead
   app_rg_name = local.create_rg_separately ? local.resource_prefix : ""
   # this will be the existing one if exists otherwise what main-hosting creates.
@@ -239,8 +239,8 @@ locals {
   # Contentful Webhook #
   ######################
   #this has been moved to the pipeline as it was using dummy contentful data at this point.
-  #contentful_webhook_name                    = var.contentful_webhook_name
-  #contentful_webhook_url                     = "https://${local.cdn_hostname}${var.contentful_webhook_endpoint}"
-  #contentful_webhook_shell_command           = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment[0].value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid[0].value} --webhook-api-key \"${random_password.api_key_value[0].result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url}" : "echo Not updating webhook"
+  contentful_webhook_name                    = var.contentful_webhook_name
+  contentful_webhook_url                     = "https://${local.cdn_hostname}${var.contentful_webhook_endpoint}"
+  contentful_webhook_shell_command           = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment[0].value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid[0].value} --webhook-api-key \"${random_password.api_key_value[0].result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url}" : "echo Not updating webhook"
   contentful_webhook_secret_timetolive_hours = 365 * 24
 }
