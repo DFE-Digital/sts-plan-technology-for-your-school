@@ -18,6 +18,7 @@ public class ReviewAnswersViewModel
 
     public List<ContentfulEntry>? Content { get; init; }
     public string? CategorySlug { get; init; } = null;
+    public string CategoryName { get; init; } = string.Empty;
     public string? ErrorMessage { get; set; } = null;
     public string? SectionSlug { get; init; } = null;
     public string? Slug { get; init; } = null;

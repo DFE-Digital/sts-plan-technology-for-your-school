@@ -33,9 +33,22 @@ public class SelfAssessmentSummaryViewBuilder(
         string sectionSlug
     )
     {
-        var viewModel = await BuildSelfAssessmentSummaryViewModel(categorySlug, sectionSlug);
+        var viewModel = await BuildSelfAssessmentSummaryViewModel(
+            categorySlug,
+            sectionSlug
+        );
 
-        return controller.View(SelfAssessmentSummaryViewName, viewModel);
+        if (CurrentUser.IsMat && viewModel.CompletedSchoolCount == 0)
+        {
+            return controller.Redirect(
+                $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
+            );
+        }
+
+        return controller.View(
+            SelfAssessmentSummaryViewName,
+            viewModel
+        );
     }
 
     private async Task<SelfAssessmentSummaryViewModel> BuildSelfAssessmentSummaryViewModel(
