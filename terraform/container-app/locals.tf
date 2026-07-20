@@ -2,7 +2,6 @@ locals {
   ###########
   # General #
   ###########
-  is_dr               = var.is_dr
   current_user_id     = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
   project_name        = var.project_name
   environment         = var.environment
@@ -27,9 +26,9 @@ locals {
   # this will be the existing one if exists otherwise what main-hosting creates.
   resource_group = try(azurerm_resource_group.app_rg[0], module.main_hosting.azurerm_resource_group_default)
   resource_group_name = local.resource_group.name
-  #######################
-  # Container Registry #
-  #######################
+  #########################################
+  # Container Registry : shared_container #
+  #########################################
   enable_container_registry = var.enable_container_registry
   registry_server           = var.registry_server
   registry_username         = var.registry_username

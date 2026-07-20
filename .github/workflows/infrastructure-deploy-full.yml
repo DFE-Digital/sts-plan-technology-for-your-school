@@ -22,7 +22,7 @@ on:
       apply-terraform:
         type: boolean
         default: true
-      apply-dns:
+      apply-separate-dns:
         type: boolean
         default: false
         description: 'Whether the DNS zone should be created in its own RG and TF state (otherwise, it will be in the app one)'
@@ -58,10 +58,9 @@ env:
   USE_LATEST_IF_NOT_SPECIFIED: true
   TF_VAR_baseurl: 'plan-technology-for-your-school.education.gov.uk'
   #do we want the container-app folder to make our DNS in the same tfstate (true), or have it run a separate tf process (prod).
-  #we want to run dns, but we are not in prod.
-  TF_VAR_dns_in_app: ${{ (github.event_name == 'push') || (github.event_name == 'workflow_dispatch' && inputs.apply-dns && !contains(inputs.environment, 'Prod')) }}
+  TF_VAR_dns_in_app: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && (!inputs['apply-separate-dns'] || !contains(inputs.environment, 'Prod'))) }}
   #we want to run dns, and we are in prod. probably staging too. note this env variable is an example and can't be used directly - amend the condition on the steps for separate dns if want to change
-  TF_VAR_dns_separate: ${{ github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging')) }}
+  TF_VAR_dns_separate: ${{ github.event_name == 'workflow_dispatch' && inputs.apply-separate-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging')) }}
   TF_VAR_create_self_delete_resources: ${{ github.event_name == 'workflow_dispatch' && inputs.create_self_delete_resources }}
 jobs:
   image-and-acr:
@@ -146,14 +145,6 @@ jobs:
             -SecretName "${{ secrets.TF_SECRET_NAME }}" `
             -KeyVaultName "${{ steps.vars.outputs.TF_KEYVAULT_NAME }}"
 
-      - name: Test Vars
-        shell: bash
-        run: |
-          echo "Using tfprefix"=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
-          echo "Using tf storage"=${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
-          echo "Using project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}"
-          echo "Using is_dr=${{ steps.vars.outputs.IS_DR }}"
-
       - name: Terraform init
         working-directory: ${{ env.TF_WORKING_DIRECTORY_APP }}
         run: |
@@ -173,10 +164,8 @@ jobs:
             -target=azurerm_container_registry.acr_notshared \
             -target=azurerm_key_vault.vault \
             -var-file="../../normalisedTerraformVars.tfvars" \
-            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="azure_location=northeurope" \
-            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
             -var="include_kv_subnet_acl=false" \
             -out=tfplan
 
@@ -370,10 +359,8 @@ jobs:
 
             terraform apply -input=false -auto-approve \
               -var-file="../../normalisedTerraformVars.tfvars" \
-              -var="is_dr=true" \
               -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
               -var="image_tag=${{needs.image-and-acr.outputs.image_tag}}" \
-              -var="workflow_runner_ip=${{env.TF_VAR_github_ip}}" \
               -var="azure_location=northeurope" \
               -var="manage_dns_in_app_state=true" \
               -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
@@ -391,10 +378,8 @@ jobs:
         run: |
           terraform plan -input=false \
             -var-file="../../normalisedTerraformVars.tfvars" \
-            -var="is_dr=${{ steps.vars.outputs.IS_DR }}" \
             -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
             -var="image_tag=${{ needs.image-and-acr.outputs.image_tag }}" \
-            -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}" \
             -var="azure_location=northeurope" \
             -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
             -var="primary_fqdn=${{ env.TF_VAR_dns_url }}"\
@@ -415,10 +400,10 @@ jobs:
           cdn_hostname="$(terraform output -raw cdn_hostname)"
 
           echo "cdn_hostname=$cdn_hostname" >> "$GITHUB_OUTPUT"
-
+#prod currently works using a separate DNS. if starting from scratch, this isn't necessary.
       - name: Terraform init - separate DNS
         working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-separate-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
         run: |
           terraform init \
             -backend-config="resource_group_name=${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}" \
@@ -427,7 +412,7 @@ jobs:
 
       - name: Apply Terraform changes - separate DNS
         working-directory: ${{ env.TF_WORKING_DIRECTORY_DNS }}
-        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.apply-separate-dns && (contains(inputs.environment, 'Prod') || contains(inputs.environment, 'Staging'))) }}
         run: |
           terraform plan -input=false \
             -var-file="../../normalisedTerraformVars.tfvars" \

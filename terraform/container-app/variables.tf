@@ -26,12 +26,6 @@ variable "az_tag_product" {
   type        = string
 }
 
-variable "is_dr" {
-  description = "Append dr to certain resources to build disaster recovery in new resource group. Note: most resources will have it built into project name, and not need it again."
-  type        = bool
-  default     = false
-}
-
 ##################
 # Resource Group #
 ##################
@@ -248,7 +242,7 @@ variable "container_app_environment_internal_load_balancer_enabled" {
 variable "enable_container_registry" {
   description = "Create registry within shared module"
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "registry_sku" {
@@ -304,11 +298,12 @@ variable "primary_fqdn" {
   default     = null
 }
 
-variable "subdomains" {
-  description = "A list of subdomain names to use in the dns a records"
-  type        = list(string)
-  default     = []
-}
+#unusued, even staging is not set up as a subdomain.
+#variable "subdomains" {
+#  description = "A list of subdomain names to use in the dns a records"
+#  type        = list(string)
+#  default     = []
+#}
 
 ########################
 # CDN/Front Door & DNS #
@@ -404,6 +399,7 @@ variable "storage_account_expiration_period" {
 # Contentful #
 ##############
 
+##didn't find the hook creation to work from here as it needs the secrt
 variable "contentful_management_token" {
   description = "Contentful management token"
   type        = string

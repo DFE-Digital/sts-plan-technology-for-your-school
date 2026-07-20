@@ -79,29 +79,28 @@ module "main_hosting" {
   # Azure Container Registry #
   #############################
   registry_server = coalesce(
-    var.registry_server,
+    local.registry_server,
     azurerm_container_registry.acr_notshared[0].login_server
   )
 
   registry_username = coalesce(
-    var.registry_username,
+    local.registry_username,
     azurerm_container_registry.acr_notshared[0].admin_username
   )
 
   registry_password = coalesce(
-    var.registry_password,
+    local.registry_password,
     azurerm_container_registry.acr_notshared[0].admin_password
   )
   image_tag         = local.image_tag
-  #this should be Consumption, but the shared module has some logic that then doesn't work...
 
   ###########
   # Storage #
   ###########
   storage_account_sas_expiration_period           = local.storage_account_expiration_period
   mssql_storage_account_shared_access_key_enabled = false
-  create_monitor_storage = var.create_self_delete_resources
-  create_kv_data_protection_key = var.create_self_delete_resources
+  create_monitor_storage = local.create_monitor_storage
+  create_kv_data_protection_key = local.create_kv_data_protection_key
   #######
   # DNS #
   #######

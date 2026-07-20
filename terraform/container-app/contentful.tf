@@ -6,20 +6,21 @@
 #}
 
 #this has been moved to the pipeline as it was using dummy contentful data at this point.
-#resource "null_resource" "upsert_contentful_webhook" {
-#  triggers = {
-#    api_key_change         = azurerm_key_vault_secret.api_key.value
-#    url_change             = local.cdn_hostname
-#    management_token       = var.contentful_management_token
-#    contentful_environment = azurerm_key_vault_secret.vault_secret_contentful_environment.value
-#    contentful_space       = azurerm_key_vault_secret.vault_secret_contentful_spaceid.value
-#    webhook_url            = var.contentful_webhook_endpoint
-#    should_upsert          = var.contentful_upsert_webhook == true ? timestamp() : var.contentful_upsert_webhook
-#  }
-#  provisioner "local-exec" {
-#    command = local.contentful_webhook_shell_command
-#  }
-#}
+resource "null_resource" "upsert_contentful_webhook" {
+  count = var.contentful_upsert_webhook ? 1 : 0
+  triggers = {
+    api_key_change         = azurerm_key_vault_secret.api_key.value
+    url_change             = local.cdn_hostname
+    management_token       = var.contentful_management_token
+    contentful_environment = azurerm_key_vault_secret.vault_secret_contentful_environment.value
+    contentful_space       = azurerm_key_vault_secret.vault_secret_contentful_spaceid.value
+    webhook_url            = var.contentful_webhook_endpoint
+    should_upsert          = var.contentful_upsert_webhook == true ? timestamp() : var.contentful_upsert_webhook
+  }
+  provisioner "local-exec" {
+    command = local.contentful_webhook_shell_command
+  }
+}
 
 resource "azurerm_storage_account" "contentful_backup_storage" {
   name                            = replace("${local.resource_prefix}content", "-", "")

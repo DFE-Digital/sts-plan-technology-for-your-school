@@ -1,3 +1,5 @@
+#dns module no longer called from central TF, but the shared waf version is used - as it needs to be coupled with the FD creation
+
 #module "dns" {
 #  source = "../modules/dns_zone"
 #  count = var.manage_dns_in_app_state ? 1 : 0

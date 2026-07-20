@@ -4,7 +4,7 @@
 resource "azurerm_resource_group" "app_rg" {
   count = local.create_rg_separately ? 1 : 0
 
-  name     = "${local.resource_prefix}"
+  name     = local.resource_prefix
   location = local.azure_location
   tags     = local.tags
 }
