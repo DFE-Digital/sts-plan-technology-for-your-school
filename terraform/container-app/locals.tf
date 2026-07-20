@@ -242,5 +242,5 @@ locals {
  # contentful_webhook_name                    = var.contentful_webhook_name
  # contentful_webhook_url                     = "https://${local.cdn_hostname}${var.contentful_webhook_endpoint}"
  # contentful_webhook_shell_command           = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment[0].value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid[0].value} --webhook-api-key \"${random_password.api_key_value[0].result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url}" : "echo Not updating webhook"
- # contentful_webhook_secret_timetolive_hours = 365 * 24
+  contentful_webhook_secret_timetolive_hours = 365 * 24
 }
