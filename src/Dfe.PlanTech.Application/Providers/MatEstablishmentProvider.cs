@@ -18,6 +18,8 @@ public class MatEstablishmentProvider(
         establishmentService
         ?? throw new ArgumentNullException(nameof(establishmentService));
 
+    public bool IsBulkAssessment() => GetSelectedEstablishmentIdsFromSession().Count > 0;
+
     public IReadOnlyList<int> GetSelectedEstablishmentIdsFromSession()
     {
         var session = _httpContextAccessor.HttpContext?.Session;

@@ -557,10 +557,10 @@ public class QuestionsViewBuilder(
             CurrentUser
         );
 
+        viewModel.IsMatBulkAssessment = _matEstablishmentProvider.IsBulkAssessment();
+
         viewModel.IsMatMultiSchoolAssessment = selectedSchoolNames.Count > 0;
-
         viewModel.SelectedSchoolCount = selectedSchoolNames.Count;
-
         viewModel.SelectedSchoolNames = selectedSchoolNames.ToList();
     }
 

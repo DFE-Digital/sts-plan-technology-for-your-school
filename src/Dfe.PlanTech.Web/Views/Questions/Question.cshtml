@@ -4,7 +4,7 @@
     @{
         await Html.RenderPartialAsync("BackButton");
 
-        @if (Model?.IsMatMultiSchoolAssessment == true)
+        @if (Model?.IsMatMultiSchoolAssessment == true && Model?.IsMatBulkAssessment == true)
         {
             var schoolLabel =
                 Model.SelectedSchoolCount == 1
