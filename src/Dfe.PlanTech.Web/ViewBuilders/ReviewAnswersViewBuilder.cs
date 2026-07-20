@@ -10,7 +10,6 @@ using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 using Microsoft.AspNetCore.Mvc;
-using static System.Collections.Specialized.BitVector32;
 
 namespace Dfe.PlanTech.Web.ViewBuilders;
 
