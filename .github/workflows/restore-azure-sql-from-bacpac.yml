@@ -67,9 +67,9 @@ on:
         type: boolean
         default: true
 
-  push:
-    branches:
-       - disaster-recovery-e2e-terraform
+  # push:
+  #   branches:
+  #      - disaster-recovery-e2e-terraform
 
 jobs:
   restore:
@@ -80,15 +80,15 @@ jobs:
       contents: read
 
     env:
-      BACKUP_RESOURCE_GROUP: ${{ github.event_name == 'push' && 's190d01-plantech-backups' || inputs.resource_group }}
-      RESOURCE_GROUP: ${{ github.event_name == 'push' && 's190d01-plantech-dr' || inputs.resource_group }}
-      SQL_SERVER_NAME: ${{ github.event_name == 'push' && 's190d01plantechdr' || inputs.sql_server_name }}
-      TARGET_DATABASE: ${{ github.event_name == 'push' && 's190d01-plantechdr-sqldb' || inputs.target_database }}
-      BACKUP_STORAGE_ACCOUNT: ${{ github.event_name == 'push' && 'plantechsqlbackups' || inputs.storage_account }}
-      CONTAINER_NAME: ${{ github.event_name == 'push' && 'sqlbackups' || inputs.container_name }}
-      BACPAC_FILE: ${{ github.event_name == 'push' && '' || inputs.bacpac_file }}
-      BACPAC_PREFIX: ${{ github.event_name == 'push' && '' || inputs.bacpac_prefix }}
-      USE_LATEST_IF_NOT_SPECIFIED: ${{ github.event_name == 'push' && 'true' || inputs.use_latest_if_not_specified }}
+      BACKUP_RESOURCE_GROUP: ${{ inputs.resource_group }}
+      RESOURCE_GROUP: ${{ inputs.resource_group }}
+      SQL_SERVER_NAME: ${{ inputs.sql_server_name }}
+      TARGET_DATABASE: ${{ inputs.target_database }}
+      BACKUP_STORAGE_ACCOUNT: ${{ inputs.storage_account }}
+      CONTAINER_NAME: ${{ inputs.container_name }}
+      BACPAC_FILE: ${{ inputs.bacpac_file }}
+      BACPAC_PREFIX: ${{ inputs.bacpac_prefix }}
+      USE_LATEST_IF_NOT_SPECIFIED: ${{ inputs.use_latest_if_not_specified }}
 
     steps:
       - name: Checkout
