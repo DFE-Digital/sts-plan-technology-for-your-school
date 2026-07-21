@@ -52,6 +52,7 @@ env:
   TF_VAR_registry_username: ${{ github.repository_owner }}
   TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
   TF_VAR_container_environment: 'Dev'
+  TF_VAR_baseurl: 'plan-technology-for-your-school.education.gov.uk'
 
   TF_WORKING_DIRECTORY: terraform/container-app
 
@@ -142,7 +143,7 @@ jobs:
       - name: Terraform Plan
         id: plan
         run:
-          terraform plan -var-file="normalisedTerraformVars.tfvars" -no-color
+          terraform plan -var-file="normalisedTerraformVars.tfvars" -var="primary_fqdn=dev.${{ env.TF_VAR_baseurl }}" -no-color
 
       - name: Delete generated files
         shell: pwsh
