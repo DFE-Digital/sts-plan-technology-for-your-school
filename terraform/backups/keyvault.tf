@@ -1,13 +1,13 @@
 resource "azurerm_key_vault" "backup" {
-  tenant_id                   = data.azurerm_client_config.current.tenant_id
-  location                    = var.azure_location
-  name                        = var.backup_keyvault_name
-  resource_group_name         = var.backup_resource_group_name
-  sku_name                    = "standard"
+  tenant_id           = data.azurerm_client_config.current.tenant_id
+  location            = var.azure_location
+  name                = var.backup_keyvault_name
+  resource_group_name = var.backup_resource_group_name
+  sku_name            = "standard"
 
-  enable_rbac_authorization   = true
-  purge_protection_enabled    = true
-  soft_delete_retention_days  = 90
+  enable_rbac_authorization  = true
+  purge_protection_enabled   = true
+  soft_delete_retention_days = 90
 
   tags = {
     Environment        = var.az_tag_environment

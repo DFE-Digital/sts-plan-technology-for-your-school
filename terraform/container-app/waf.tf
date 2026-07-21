@@ -19,11 +19,11 @@ module "waf" {
       health_probe_request_type = "GET"
       domain                    = module.main_hosting.container_fqdn
       #true
-      cdn_create_custom_domain      = var.cdn_create_custom_domain_waf 
-      custom_fqdn               = var.primary_fqdn
-      create_private            = true
-      private_link_target_id    = module.main_hosting.container_app_environment_id
-      private_link_location     = local.azure_location
+      cdn_create_custom_domain = var.cdn_create_custom_domain_waf
+      custom_fqdn              = var.primary_fqdn
+      create_private           = true
+      private_link_target_id   = module.main_hosting.container_app_environment_id
+      private_link_location    = local.azure_location
     }
   }
 
@@ -131,5 +131,5 @@ module "waf" {
 
   #have the shared waf create the dns zone as well and couple it to the front door, within the app tfstate.
   cdn_create_custom_domain = var.cdn_create_custom_domain_waf
-  manage_dns_in_app_state = var.manage_dns_in_app_state
+  manage_dns_in_app_state  = var.manage_dns_in_app_state
 }

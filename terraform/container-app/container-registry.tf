@@ -1,6 +1,6 @@
 resource "azurerm_container_registry" "acr_notshared" {
   depends_on = [azurerm_resource_group.app_rg]
-  count = !local.enable_container_registry ? 1 : 0
+  count      = !local.enable_container_registry ? 1 : 0
   #enable_container_registry being true refers to the shared module making it instead
 
   name                          = replace(local.resource_prefix, "-", "")

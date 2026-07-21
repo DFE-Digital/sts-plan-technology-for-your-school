@@ -15,7 +15,7 @@ resource "azurerm_cdn_frontdoor_custom_domain" "custom_domain" {
 
 resource "azurerm_cdn_frontdoor_custom_domain_association" "custom_domain_route" {
   cdn_frontdoor_custom_domain_id = azurerm_cdn_frontdoor_custom_domain.custom_domain.id
-  cdn_frontdoor_route_ids          = [var.frontdoor_route_id]
+  cdn_frontdoor_route_ids        = [var.frontdoor_route_id]
 
   depends_on = [
     azurerm_dns_txt_record.frontdoor_validation,

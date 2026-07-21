@@ -21,7 +21,7 @@ resource "azurerm_resource_group" "main" {
   tags = {
     Product            = var.product
     Environment        = var.environment
-    Service Offering = var.product
+    "Service Offering" = var.product
   }
 }
 
@@ -30,13 +30,13 @@ resource "azurerm_container_registry" "acr" {
   name                = var.acr_name
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-  admin_enabled = true
-  sku           = "Standard"
+  admin_enabled       = true
+  sku                 = "Standard"
 
   tags = {
-    Product     = var.product
-    Environment = var.environment
-    Service Offering = var.product
+    Product            = var.product
+    Environment        = var.environment
+    "Service Offering" = var.product
   }
 }
 
@@ -47,14 +47,14 @@ resource "azurerm_resource_group" "costings" {
 }
 
 resource "azurerm_storage_account" "example" {
-  name                     = var.costings_name
-  resource_group_name      = azurerm_resource_group.main.name
-  location                 = azurerm_resource_group.main.location
-  account_tier             = "Standard"
+  name                = var.costings_name
+  resource_group_name = azurerm_resource_group.main.name
+  location            = azurerm_resource_group.main.location
+  account_tier        = "Standard"
 
   tags = {
     Product            = var.product
     Environment        = var.environment
-    Service Offering = var.product
+    "Service Offering" = var.product
   }
 }

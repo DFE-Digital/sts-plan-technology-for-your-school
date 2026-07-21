@@ -6,10 +6,10 @@ module "main_hosting" {
   ###########
   # General #
   ###########
-  environment    = local.environment
-  project_name   = local.project_name
-  azure_location = local.azure_location
-  tags           = local.tags
+  environment             = local.environment
+  project_name            = local.project_name
+  azure_location          = local.azure_location
+  tags                    = local.tags
   existing_resource_group = local.app_rg_name
 
   ############################################
@@ -17,7 +17,7 @@ module "main_hosting" {
   ############################################
   #having both true prevents the public IP issue by forcing creation of internal load balancer
   # Deploy container apps & db inside a VNet
-  launch_in_vnet = local.launch_in_vnet
+  launch_in_vnet                                           = local.launch_in_vnet
   container_app_environment_internal_load_balancer_enabled = local.container_app_environment_internal_load_balancer_enabled
 
   #################
@@ -25,10 +25,10 @@ module "main_hosting" {
   #################
   enable_container_registry = local.enable_container_registry
   image_name                = local.container_app_image_name
-  force_new_revision = false
+  force_new_revision        = false
   #new tagged revision will update anyway
   container_app_name_override = local.container_app_name_override
-  container_port            = local.container_port
+  container_port              = local.container_port
   container_secret_environment_variables = {
     "KeyVaultName"    = local.kv_name,
     "AZURE_CLIENT_ID" = azurerm_user_assigned_identity.user_assigned_identity.client_id,
@@ -49,13 +49,13 @@ module "main_hosting" {
   # Azure Key Vault #
   ###################
   escrow_container_app_secrets_in_key_vault = false
-  key_vault_managed_identity_assign_role = false
+  key_vault_managed_identity_assign_role    = false
   #we will back up the secrets separately
   #############
   # Azure SQL #
   #############
-  enable_mssql_database              = local.shared_module_enable_mssql_database
-  mssql_database_name                = "${local.resource_prefix}-sqldb"
+  enable_mssql_database = local.shared_module_enable_mssql_database
+  mssql_database_name   = "${local.resource_prefix}-sqldb"
   #needs to be true with firewall rules to match "selected networks"
   mssql_server_public_access_enabled = true
   mssql_server_admin_password        = local.az_sql_admin_password
@@ -66,9 +66,9 @@ module "main_hosting" {
   #not in v1.2
   #enable_mssql_extended_auditing_policy = false
 
-  mssql_sku_name                     = local.az_sql_sku
-  mssql_max_size_gb                  = local.az_sql_max_size_gb
-  mssql_firewall_ipv4_allow_list     = local.az_mssql_ipv4_allow_list
+  mssql_sku_name                 = local.az_sql_sku
+  mssql_max_size_gb              = local.az_sql_max_size_gb
+  mssql_firewall_ipv4_allow_list = local.az_mssql_ipv4_allow_list
 
   ##############
   # Networking #
@@ -92,18 +92,18 @@ module "main_hosting" {
     local.registry_password,
     azurerm_container_registry.acr_notshared[0].admin_password
   )
-  image_tag         = local.image_tag
+  image_tag = local.image_tag
 
   ###########
   # Storage #
   ###########
   storage_account_sas_expiration_period           = local.storage_account_expiration_period
   mssql_storage_account_shared_access_key_enabled = false
-  create_monitor_storage = local.create_monitor_storage
-  create_kv_data_protection_key = local.create_kv_data_protection_key
+  create_monitor_storage                          = local.create_monitor_storage
+  create_kv_data_protection_key                   = local.create_kv_data_protection_key
   #######
   # DNS #
   #######
-  enable_dns_zone = false
+  enable_dns_zone      = false
   dns_zone_domain_name = var.primary_fqdn
 }

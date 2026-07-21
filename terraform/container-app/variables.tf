@@ -165,8 +165,8 @@ variable "add_secrets" {
 
 variable "include_kv_subnet_acl" {
   description = "Whether to add the link to the virtual network"
-  type    = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 #######################
@@ -218,7 +218,7 @@ variable "container_environment_variables" {
   default     = {}
 }
 
-variable "container_app_environment_workload_profile_type"  {
+variable "container_app_environment_workload_profile_type" {
   description = "Container app environment type"
   type        = string
   default     = "Consumption"
@@ -248,28 +248,28 @@ variable "enable_container_registry" {
 variable "registry_sku" {
   description = "Container registry sku level"
   type        = string
-  default = "Standard"
+  default     = "Standard"
 }
 
-variable "registry_admin_enabled"  {
+variable "registry_admin_enabled" {
   description = "Create admin logon on ACR"
   type        = bool
   default     = true
 }
 
-variable "registry_public_access_enabled"  {
+variable "registry_public_access_enabled" {
   description = "Create public access on ACR"
   type        = bool
   default     = true
 }
 
-variable "enable_registry_retention_policy"  {
+variable "enable_registry_retention_policy" {
   description = "Create public access on ACR"
   type        = bool
   default     = false
 }
 
-variable "registry_retention_days"  {
+variable "registry_retention_days" {
   description = "registry retention days"
   type        = number
   default     = null
@@ -289,7 +289,7 @@ variable "registry_ipv4_allow_list" {
 variable "manage_dns_in_app_state" {
   description = "A flag to have this terraform create the DNS zone using local module & app tfstate. currently prod has dns in its own tf state file. so we will only create resources in container-app terraforming for other envs"
   type        = bool
-  default     = true 
+  default     = true
 }
 
 variable "primary_fqdn" {
@@ -313,7 +313,7 @@ variable "primary_fqdn" {
 variable "cdn_create_custom_domain_waf" {
   description = "A flag to have the custom front door domain created IN SHARED WAF MODULE"
   type        = bool
-  default     = true 
+  default     = true
 }
 
 variable "cdn_frontdoor_host_add_response_headers" {

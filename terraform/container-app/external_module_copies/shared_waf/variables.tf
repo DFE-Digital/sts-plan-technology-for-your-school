@@ -192,7 +192,7 @@ variable "waf_targets" {
       # Private Link additions
       create_private : optional(bool, false)
       private_link_target_id : optional(string)
-      private_link_location  : optional(string)
+      private_link_location : optional(string)
       private_link_target_type : optional(string, "managedEnvironments")
     })
   )
@@ -459,10 +459,10 @@ variable "app_gateway_v2_waf_request_body_enforcement" {
 variable "cdn_create_custom_domain" {
   description = "A flag to have the custom front door domain created"
   type        = bool
-  default     = false 
+  default     = false
 }
 variable "manage_dns_in_app_state" {
   description = "A flag to have the DNS domain created"
   type        = bool
-  default     = false 
+  default     = false
 }
