@@ -23,7 +23,7 @@ jobs:
       - name: Setup Node.JS
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: '24'
 
       - name: Install dependencies
         working-directory: ./.github/semver-release

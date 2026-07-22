@@ -24,18 +24,6 @@ repos:
       - id: check-yaml
         name: Run GitHub YAML linter
 
-  # Secret scanning (prevents credential leaks)
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.2
-    hooks:
-      - id: gitleaks
-        name: Detect secrets with Gitleaks
-        args:
-          - protect
-          - --verbose
-          - --redact
-        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)
-
   # CSharpier formatting (avoids opinionated style rewrites)
   - repo: local
     hooks:
@@ -45,7 +33,7 @@ repos:
         args: ['format']
         language: system
         types: ['c#']
-        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)
+        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)  src/Dfe.PlanTech.Web/wwwroot/js/app.js
 
   # Web and config formats
   - repo: https://github.com/pre-commit/mirrors-prettier

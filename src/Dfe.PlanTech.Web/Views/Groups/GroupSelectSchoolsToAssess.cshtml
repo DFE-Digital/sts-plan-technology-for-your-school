@@ -1,0 +1,98 @@
+@using Dfe.PlanTech.Application.Providers.Interfaces
+@inject IMicrocopyProvider Microcopy
+@model GroupsSelectSchoolsToAssessViewModel
+
+@{
+    ViewData[StatePassingMechanismConstants.Title] = "Select schools";
+    var categorySlug = Model.CategorySlug;
+    var sectionSlug = Model.Section?.InterstitialPage.Slug;
+    var sectionName = Model.Section?.Name ?? "";
+    var backLinkHref = $"/{categorySlug}/{sectionSlug}/self-assessment";
+
+    var hasErrors = Model.ErrorMessages?.Any() == true;
+}
+
+@section NavButton {
+    <govuk-back-link id="nonjs-topic-back-link" href="@UrlConstants.HomePage" class="noprint non-js-only govuk-back-link">
+        Home
+    </govuk-back-link>
+    <govuk-back-link id="topic-back-link" href="@backLinkHref" class="noprint js-only">
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessBackLink, new Dictionary<string, string>{["topic"] = sectionName.ToLower() })
+    </govuk-back-link>
+}
+
+@if (Model.ErrorMessages is not null && Model.ErrorMessages.Any())
+{
+    <div class="govuk-error-summary" data-module="govuk-error-summary">
+        <div role="alert">
+            <h2 class="govuk-error-summary__title">
+                There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+                <ul class="govuk-list govuk-error-summary__list">
+                    @foreach (var error in Model.ErrorMessages)
+                    {
+                        <li>
+                            <a href="#">@error</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+
+<form asp-controller="Groups" asp-action="SubmitSelectedSchoolsToAssess" asp-route-categorySlug="@categorySlug" asp-route-sectionSlug="@sectionSlug" method="post" novalidate>
+    <div class="govuk-form-group @(hasErrors ? "govuk-form-group--error" : "")">
+        <fieldset class="govuk-fieldset" aria-describedby="select-schools-hint  @(hasErrors ? "select-schools-error" : "")">
+            <legend class="govuk-fieldset__legend govuk-fieldset__legend--l">
+                <span class="govuk-caption-xl">@sectionName</span>
+                <h1 class="govuk-fieldset-heading">
+                    @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessHeader)
+                </h1>
+            </legend>
+            <div id="select-schools-hint" class="govuk-hint">
+                @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessHint)
+            </div>
+            @if (Model.ErrorMessages is not null && Model.ErrorMessages.Any())
+            {
+                foreach (var error in Model.ErrorMessages)
+                {
+                    <p id="select-schools-error" class="govuk-error-message">
+                        <span class="govuk-visually-hidden">Error:</span>@error
+                    </p>
+                }
+            }
+            <div class="govuk-checkboxes" data-module="govuk-checkboxes">
+                @foreach (var school in Model.SchoolSubmissionInfo ?? [])
+                {
+                    <input type="hidden" name="PresentedSchoolRefs" value="@school.EstablishmentRef" />
+                    <div class="govuk-checkboxes__item">
+                        <input class="govuk-checkboxes__input" id="schools-@school.EstablishmentRef" name="SelectedSchoolsRefs" type="checkbox" value="@school.EstablishmentRef">
+                        <label class="govuk-label govuk-checkboxes__label" for="schools-@school.EstablishmentRef">
+                            @school.EstablishmentName
+                        </label>
+                    </div>
+                    if (school.Status == SubmissionStatus.InProgress && school.DateLastUpdated != null)
+                    {
+                        <div id="schools-item-hint" class="govuk-hint govuk-checkboxes__hint">
+                            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessSchoolHint, new Dictionary<string, string>{["dateUpdated"] = school.DateLastUpdated })
+                        </div>
+                    }
+                }
+                <div class="govuk-checkboxes__divider">or</div>
+                <div class="govuk-checkboxes__item">
+                    <input class="govuk-checkboxes__input" id="schools-all" name="SelectedSchoolsRefs" type="checkbox" value="all" data-behaviour="exclusive">
+                    <label class="govuk-label govuk-checkboxes__label" for="schools-all">
+                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessCheckboxAll)
+                    </label>
+                </div>
+            </div>
+        </fieldset>
+        <hr class="govuk-section-break govuk-section-break--m" />
+        <p class="govuk-body">@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessWarning)</p>
+    </div>
+    <govuk-button type="submit" prevent-double-click="true">
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSchoolsToAssessContinue)
+    </govuk-button>
+</form>

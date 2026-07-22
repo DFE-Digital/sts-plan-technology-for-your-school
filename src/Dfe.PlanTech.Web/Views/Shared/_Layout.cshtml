@@ -1,5 +1,5 @@
 @using Dfe.PlanTech.Infrastructure.SignIn.Models
-@inject ICurrentUser CurrentUser
+@inject ICurrentUserProvider CurrentUser
 
 @{
     Layout = "_GovUkPageTemplate";
@@ -19,6 +19,7 @@
 }
 
 @{
+
     var showChangeSchool = false;
 
     var selectedSchool = CurrentUser.GroupSelectedSchoolName;
@@ -67,7 +68,12 @@
                 },
                 {
                     "Groups", new HashSet<string>(
-                        [GroupsController.GetSelectASchoolAction, GroupsController.GetSelectASelfAssessmentAction],
+                        [
+                            GroupsController.GetSelectASchoolAction,
+                            GroupsController.GetSelectASelfAssessmentAction,
+                            GroupsController.GetSelectSchoolsToAssessAction,
+                            GroupsController.SubmitSchoolsSelectionAction
+                        ],
                         StringComparer.OrdinalIgnoreCase)
                 },
             };
@@ -104,6 +110,7 @@
     <div class="govuk-grid-column-two-thirds-from-desktop">
         @await RenderSectionAsync("Panel", required: false)
         @RenderBody()
+        <script src="~/js/site.bundle.js"></script>
     </div>
 
     <div class="govuk-grid-column-one-third-from-desktop govuk-float-right">

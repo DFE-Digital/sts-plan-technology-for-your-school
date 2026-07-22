@@ -16,34 +16,48 @@ public interface ISubmissionService
         QuestionnaireSectionEntry section
     );
     Task SetSubmissionInaccessibleAsync(int establishmentId, string sectionId);
+
     Task<
         Dictionary<string, SqlEstablishmentRecommendationHistoryDto>
     > GetLatestRecommendationStatusesByEstablishmentIdAsync(int establishmentId);
+
     Task RestoreInaccessibleSubmissionAsync(int establishmentId, string sectionId);
+
+    Task<SqlSubmissionDto?> GetLatestCompletedSubmissionBySectionIdAsync(
+        int establishmentId,
+        string sectionId
+    );
+
     Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
         int establishmentId,
         QuestionnaireSectionEntry section,
         SubmissionStatus? status
     );
+
     Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
         int establishmentId,
         QuestionnaireSectionEntry section,
         IEnumerable<SubmissionStatus> statuses
     );
+
     Task<List<SqlSectionStatusDto>> GetSectionStatusesForSchoolAsync(
         int establishmentId,
         IEnumerable<string> sectionIds
     );
+
     Task<SqlSubmissionDto> GetSubmissionByIdAsync(int submissionId);
+
     Task<SubmissionRoutingDataModel> GetSubmissionRoutingDataAsync(
         int establishmentId,
         QuestionnaireSectionEntry section,
         SubmissionStatus? status
     );
+
     Task<SqlSubmissionDto> RemovePreviousSubmissionsAndCloneMostRecentCompletedAsync(
         int establishmentId,
         string sectionId
     );
+
     Task<int> SubmitAnswerAsync(
         int userId,
         int activeEstablishmentId,

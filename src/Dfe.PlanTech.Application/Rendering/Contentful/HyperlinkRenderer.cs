@@ -87,6 +87,6 @@ public class HyperlinkRenderer : BaseRichTextContentPartRenderer
     private static bool IsExternalLink(RichTextContentField content)
     {
         var uri = content.Data?.Uri ?? "";
-        return uri.StartsWith("http", StringComparison.InvariantCultureIgnoreCase);
+        return uri.StartsWith("http", StringComparison.OrdinalIgnoreCase);
     }
 }

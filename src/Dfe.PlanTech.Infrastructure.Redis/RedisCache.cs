@@ -210,10 +210,11 @@ public class RedisCache : ICmsCache
     )
     {
         var redisValue = value as string ?? value.Serialise();
+        var compressedRedisValue = GZipRedisValueCompressor.Compress(redisValue);
         _logger.LogInformation("Setting cache item with key: {Key}", key);
         _logger.LogTrace("Setting cache item with key: {Key} and value: {Value}", key, redisValue);
         await _retryPolicyAsync.ExecuteAsync(() =>
-            database.StringSetAsync(key, GZipRedisValueCompressor.Compress(redisValue), expiry)
+            database.StringSetAsync(key, compressedRedisValue, expiry)
         );
         await _dependencyManager.RegisterDependenciesAsync(database, key, value, default);
         return key;

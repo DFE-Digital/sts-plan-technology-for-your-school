@@ -17,10 +17,13 @@
     @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.ContinueHeader)
 </h1>
 
-    @{
+@{
     var dynamicValues = new Dictionary<string, string>
     {
-        ["dateUpdated"] = Model.AssessmentUpdatedDate.ToString("dd MMMM yyyy")
+        ["establishmentName"] = Model.SchoolName,
+        ["dateUpdated"] = Model.AssessmentStartDate.ToString("d MMMM yyyy"),
+        ["count"] = Model.AnsweredCount.ToString(),
+        ["total"] = Model.QuestionsCount.ToString()
     };
 }
 

@@ -18,8 +18,13 @@ public class ReviewAnswersViewModel
 
     public List<ContentfulEntry>? Content { get; init; }
     public string? CategorySlug { get; init; } = null;
+    public string CategoryName { get; init; } = string.Empty;
     public string? ErrorMessage { get; set; } = null;
     public string? SectionSlug { get; init; } = null;
     public string? Slug { get; init; } = null;
     public int? SubmissionId { get; init; }
+    public bool IsMatMultiSchoolAssessment { get; init; }
+    public bool IsMatBulkAssessment { get; init; }
+    public int SelectedSchoolCount { get; init; }
+    public List<string> SelectedSchoolNames { get; init; } = [];
 }

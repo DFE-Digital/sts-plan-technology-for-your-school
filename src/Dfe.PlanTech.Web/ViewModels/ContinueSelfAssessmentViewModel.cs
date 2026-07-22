@@ -13,4 +13,5 @@ public class ContinueSelfAssessmentViewModel
     public List<QuestionWithAnswerModel> Responses { get; set; } = new();
     public string CategorySlug { get; set; } = string.Empty;
     public string SectionSlug { get; set; } = string.Empty;
+    public string SchoolName { get; set; } = string.Empty;
 }

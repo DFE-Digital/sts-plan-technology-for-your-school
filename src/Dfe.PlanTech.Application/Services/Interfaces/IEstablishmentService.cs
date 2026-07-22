@@ -5,6 +5,10 @@ namespace Dfe.PlanTech.Application.Services.Interfaces;
 
 public interface IEstablishmentService
 {
+    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
+        string establishmentUrn,
+        string establishmentName
+    );
     Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinksWithRecommendationCounts(
         int establishmentId
     );
@@ -16,6 +20,9 @@ public interface IEstablishmentService
     );
 
     Task<SqlEstablishmentDto?> GetEstablishmentByReferenceAsync(string establishmentReference);
+
+    Task<SqlEstablishmentDto> GetEstablishmentByIdAsync(int id);
+    
     Task RecordGroupSelection(
         string userDsiReference,
         int? userEstablishmentId,
