@@ -24,6 +24,18 @@ repos:
       - id: check-yaml
         name: Run GitHub YAML linter
 
+  # Secret scanning (prevents credential leaks)
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+        name: Detect secrets with Gitleaks
+        args:
+          - protect
+          - --verbose
+          - --redact
+        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)
+
   # CSharpier formatting (avoids opinionated style rewrites)
   - repo: local
     hooks:
