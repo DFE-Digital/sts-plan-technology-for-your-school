@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # ============================================================================
-# branch-report.sh
+# git-cleanup.sh
 # ============================================================================
 #
 # Reports on the current state of branches in this repository, classifies
@@ -9,9 +9,9 @@
 # safe deletions.
 #
 # Usage:
-#   ./branch-report.sh                # full report + tiers + cleanup prompt
-#   ./branch-report.sh --report-only  # full report + tiers, no cleanup prompt
-#   ./branch-report.sh --quick        # skip the raw report, just tiers + cleanup
+#   ./git-cleanup.sh                # full report + tiers + cleanup prompt
+#   ./git-cleanup.sh --report-only  # full report + tiers, no cleanup prompt
+#   ./git-cleanup.sh --quick        # skip the raw report, just tiers + cleanup
 #
 # ----------------------------------------------------------------------------
 # HOW THIS SCRIPT IS STRUCTURED (read this first)
@@ -62,7 +62,7 @@ MAIN_REF="origin/main"
 # "$@" means "all the arguments passed to this script, each kept as a
 # separate word" (as opposed to $* which would glob them into one string).
 # This for-loop walks through each argument typed on the command line,
-# e.g. running `./branch-report.sh --quick --report-only` would loop twice.
+# e.g. running `./git-cleanup.sh --quick --report-only` would loop twice.
 REPORT_ONLY=false
 QUICK=false
 for arg in "$@"; do
