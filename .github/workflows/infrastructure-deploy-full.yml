@@ -32,9 +32,6 @@ on:
       restore-tokens:
         type: boolean
         default: true
-      contentful-upsert-webhook:
-        type: boolean
-        default: true
   # push:
   #   branches:
   #     - disaster-recovery-e2e-terraform
@@ -363,7 +360,6 @@ jobs:
               -var="project_name=${{ steps.vars.outputs.PROJECT_PREFIX_APP }}" \
               -var="image_tag=${{needs.image-and-acr.outputs.image_tag}}" \
               -var="azure_location=northeurope" \
-              -var="manage_dns_in_app_state=true" \
               -var="manage_dns_in_app_state=${{ env.TF_VAR_dns_in_app }}" \
               -var="primary_fqdn=${{ env.TF_VAR_dns_url }}" \
               -var="create_self_delete_resources=${{ env.TF_VAR_create_self_delete_resources }}" \
@@ -429,7 +425,7 @@ jobs:
 
   restore-db:
     name: Restore DB from BACPAC
-    needs: [apply-terraform]
+    #needs: [apply-terraform]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-db) }}
     runs-on: ubuntu-latest
     environment:
@@ -578,7 +574,7 @@ jobs:
 
   restore-tokens:
     name: Restore app tokens from backup kv
-    needs: [apply-terraform,restore-db]
+    #needs: [apply-terraform,restore-db]
     if: ${{ always() && !failure() && !cancelled() && (github.event_name == 'push' || inputs.restore-tokens) }}
     runs-on: ubuntu-latest
     environment:
