@@ -56,13 +56,13 @@ resource "azurerm_storage_account" "contentful_backup_storage" {
 resource "azapi_update_resource" "contentful_backup_storage_key_rotation_reminder" {
   type        = "Microsoft.Storage/storageAccounts@2023-01-01"
   resource_id = azurerm_storage_account.contentful_backup_storage.id
-  body = jsonencode({
+  body = {
     properties = {
       keyPolicy = {
         keyExpirationPeriodInDays = 90
       }
     }
-  })
+  }
 
   depends_on = [azurerm_storage_account.contentful_backup_storage]
 }
