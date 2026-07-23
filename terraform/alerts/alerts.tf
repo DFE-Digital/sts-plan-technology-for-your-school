@@ -10,7 +10,7 @@ resource "azurerm_monitor_activity_log_alert" "this" {
   scopes              = [local.resource_group_scope]
   enabled             = var.enabled
   tags                = local.tags
-  
+
 
   action {
     action_group_id = data.azurerm_monitor_action_group.existing.id
@@ -20,22 +20,22 @@ resource "azurerm_monitor_activity_log_alert" "this" {
     category       = each.value.category
     operation_name = each.value.operation_name
     statuses       = each.value.statuses
-    level               = each.value.level
+    level          = each.value.level
   }
 }
 
 resource "azurerm_monitor_metric_alert" "this" {
   for_each = var.metric_alerts
 
-  name                = each.value.name
-  description         = each.value.description
-  resource_group_name = var.resource_group_name
-  target_resource_location            = var.azure_location
-  enabled             = var.enabled
-  tags                = local.tags
-  severity            = each.value.severity
-  scopes = ["${local.resource_group_scope}${local.scope_insights}"]
-  window_size = each.value.dynamic_criteria == null ? "PT15M" : "PT5M"
+  name                     = each.value.name
+  description              = each.value.description
+  resource_group_name      = var.resource_group_name
+  target_resource_location = var.azure_location
+  enabled                  = var.enabled
+  tags                     = local.tags
+  severity                 = each.value.severity
+  scopes                   = ["${local.resource_group_scope}${local.scope_insights}"]
+  window_size              = each.value.dynamic_criteria == null ? "PT15M" : "PT5M"
 
   action {
     action_group_id = data.azurerm_monitor_action_group.existing.id

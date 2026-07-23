@@ -1,0 +1,248 @@
+name: Restore app secrets
+description: Restore Key Vault secrets from backup and rewrite DR-specific connection strings
+
+inputs:
+  backup_resource_group:
+    description: Backup/app resource group
+    required: true
+  backup_keyvault:
+    description: Backup Key Vault name
+    required: true
+  app_keyvault:
+    description: Target app Key Vault name
+    required: true
+  backup_storage_account:
+    description: Storage account holding the secret manifest
+    required: true
+  secret_container_name:
+    description: Storage container holding the secret manifest
+    required: true
+  manifest_blob_name:
+    description: Blob path to the secret manifest
+    required: false
+    default: secret-manifest.txt
+  app_resource_group:
+    description: App resource group
+    required: true
+  sql_server_secret_name:
+    description: SQL server connection string secret name
+    required: false
+    default: connectionstrings--database
+  sql_server_python_secret_name:
+    description: SQL server connection string used by Python secret name
+    required: false
+    default: python--dbconnectionstring
+  sql_server_name:
+    description: SQL server name
+    required: true
+  sql_database_name:
+    description: SQL database name
+    required: true
+  redis_secret_name:
+    description: Redis connection string secret name
+    required: false
+    default: connectionstrings--redis
+  redis_name:
+    description: Redis cache name
+    required: true
+  servicebus_secret_name:
+    description: Service Bus connection string secret name
+    required: false
+    default: connectionstrings--servicebusconnection
+  servicebus_namespace:
+    description: Service Bus namespace
+    required: true
+  appinsights_secret_name:
+    description: App Insights connection string secret name
+    required: false
+    default: applicationinsights--connectionstring
+  appinsights_name:
+    description: Application Insights name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Get GitHub Runner IP
+      id: whats-my-ip
+      uses: ./.github/actions/whats-my-ip-address
+
+    - name: Whitelist Runner for backup keyvault
+      uses: ./.github/actions/whitelist-kv
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.backup_resource_group }}
+        keyvault-name: ${{ inputs.backup_keyvault }}
+        verb: add
+
+    - name: Whitelist Runner for app keyvault
+      uses: ./.github/actions/whitelist-kv
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.app_resource_group }}
+        keyvault-name: ${{ inputs.app_keyvault }}
+        verb: add
+
+    - name: Whitelist Runner for backup storage
+      uses: ./.github/actions/whitelist-storage
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.backup_resource_group }}
+        account-name: ${{ inputs.backup_storage_account }}
+        verb: add
+
+    - name: Whitelist Runner for SQL Server
+      uses: ./.github/actions/whitelist-sql
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.app_resource_group }}
+        server-name: ${{ inputs.sql_server_name }}
+        verb: add
+
+    - name: Restore and rewrite secrets
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        BACKUP_KV="${{ inputs.backup_keyvault }}"
+        TARGET_KV="${{ inputs.app_keyvault }}"
+        STORAGE_ACCOUNT="${{ inputs.backup_storage_account }}"
+        CONTAINER_NAME="${{ inputs.secret_container_name }}"
+        MANIFEST="secret-manifest.txt"
+        RG="${{ inputs.app_resource_group }}"
+
+        echo "Downloading secret manifest..."
+        az storage blob download \
+          --account-name "$STORAGE_ACCOUNT" \
+          --container-name "$CONTAINER_NAME" \
+          --name "${{ inputs.manifest_blob_name }}" \
+          --file "$MANIFEST" \
+          --auth-mode login \
+          --overwrite true
+
+        tr -d '\r' < "$MANIFEST" > "${MANIFEST}.clean"
+        mv "${MANIFEST}.clean" "$MANIFEST"
+
+        echo "Restoring secrets from $BACKUP_KV to $TARGET_KV..."
+        while IFS= read -r SECRET_NAME || [ -n "$SECRET_NAME" ]; do
+          SECRET_NAME="${SECRET_NAME//$'\r'/}"
+          [ -z "$SECRET_NAME" ] && continue
+
+          echo "Restoring $SECRET_NAME"
+
+          SECRET_ID=$(az keyvault secret show \
+            --vault-name "$BACKUP_KV" \
+            --name "$SECRET_NAME" \
+            --query "id" -o tsv)
+
+          SECRET_VALUE="$(az keyvault secret show \
+            --id "$SECRET_ID" \
+            --query "value" \
+            -o tsv | tr -d '\r\n')"
+
+          az keyvault secret set \
+            --vault-name "$TARGET_KV" \
+            --name "$SECRET_NAME" \
+            --value "$SECRET_VALUE" \
+            >/dev/null
+        done < "$MANIFEST"
+
+        echo "Updating SQL connection string..."
+        SQL_FQDN=$(az sql server show \
+          --resource-group "$RG" \
+          --name "${{ inputs.sql_server_name }}" \
+          --query "fullyQualifiedDomainName" -o tsv)
+
+        SQL_CONNECTION_STRING="Server=tcp:${SQL_FQDN},1433;Initial Catalog=${{ inputs.sql_database_name }};Authentication=Active Directory Default;Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Max Pool Size=100;"
+
+        az keyvault secret set \
+          --vault-name "$TARGET_KV" \
+          --name "${{ inputs.sql_server_secret_name }}" \
+          --value "$SQL_CONNECTION_STRING" \
+          >/dev/null
+
+        echo "Updating SQL connection string used by Python..."
+        SQL_PYTHONCONNECTION_STRING="DRIVER=ODBC Driver 18 for SQL Server;Server=tcp:${SQL_FQDN},1433;Database=${{ inputs.sql_database_name }};Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+
+        az keyvault secret set \
+          --vault-name "$TARGET_KV" \
+          --name "${{ inputs.sql_server_python_secret_name }}" \
+          --value "$SQL_PYTHONCONNECTION_STRING" \
+          >/dev/null
+
+        echo "Updating Redis connection string..."
+        REDIS_KEY=$(az redis list-keys \
+          --resource-group "$RG" \
+          --name "${{ inputs.redis_name }}" \
+          --query primaryKey -o tsv)
+
+        az keyvault secret set \
+          --vault-name "$TARGET_KV" \
+          --name "${{ inputs.redis_secret_name }}" \
+          --value "${{ inputs.redis_name }}.redis.cache.windows.net:6380,password=${REDIS_KEY},ssl=True,abortConnect=False" \
+          >/dev/null
+
+        echo "Updating Service Bus connection string..."
+        SB_CONN=$(az servicebus namespace authorization-rule keys list \
+          --resource-group "$RG" \
+          --namespace-name "${{ inputs.servicebus_namespace }}" \
+          --name RootManageSharedAccessKey \
+          --query primaryConnectionString \
+          -o tsv)
+
+        az keyvault secret set \
+          --vault-name "$TARGET_KV" \
+          --name "${{ inputs.servicebus_secret_name }}" \
+          --value "$SB_CONN" \
+          >/dev/null
+
+        echo "Updating Application Insights connection string..."
+        AI_CONN=$(az monitor app-insights component show \
+          --app "${{ inputs.appinsights_name }}" \
+          --resource-group "$RG" \
+          --query connectionString \
+          -o tsv)
+
+        az keyvault secret set \
+          --vault-name "$TARGET_KV" \
+          --name "${{ inputs.appinsights_secret_name }}" \
+          --value "$AI_CONN" \
+          >/dev/null
+
+        echo "Secrets restored and values updated."
+
+    - name: De-Whitelist Runner for backup keyvault
+      if: always()
+      uses: ./.github/actions/whitelist-kv
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.backup_resource_group }}
+        keyvault-name: ${{ inputs.backup_keyvault }}
+        verb: remove
+
+    - name: De-Whitelist Runner for app keyvault
+      if: always()
+      uses: ./.github/actions/whitelist-kv
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.app_resource_group }}
+        keyvault-name: ${{ inputs.app_keyvault }}
+        verb: remove
+
+    - name: De-Whitelist Runner for backup storage
+      if: always()
+      uses: ./.github/actions/whitelist-storage
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.backup_resource_group }}
+        account-name: ${{ inputs.backup_storage_account }}
+        verb: remove
+
+    - name: De-Whitelist Runner for SQL Server
+      if: always()
+      uses: ./.github/actions/whitelist-sql
+      with:
+        ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+        resource-group: ${{ inputs.app_resource_group }}
+        server-name: ${{ inputs.sql_server_name }}
+        verb: remove

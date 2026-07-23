@@ -4,13 +4,13 @@ description: Login to Azure using service principal
 inputs:
   az_tenant_id:
     required: true
-    type: string
+    description: azure tenant id
   az_subscription_id:
     required: true
-    type: string
+    description: azure subscription id
   az_client_id:
     required: true
-    type: string
+    description: azure client id to log in as 
 
 runs:
   using: composite

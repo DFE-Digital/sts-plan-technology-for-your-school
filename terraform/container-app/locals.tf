@@ -2,15 +2,11 @@ locals {
   ###########
   # General #
   ###########
-  current_user_id     = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
-  project_name        = var.project_name
-  environment         = var.environment
-  azure_location      = var.azure_location
-  resource_prefix     = "${local.environment}${local.project_name}"
-  resource_group_name = module.main_hosting.azurerm_resource_group_default.name
-  registry_server     = var.registry_server
-  registry_username   = var.registry_username
-  registry_password   = var.registry_password
+  current_user_id = coalesce(var.msi_id, data.azurerm_client_config.current.object_id)
+  project_name    = var.project_name
+  environment     = var.environment
+  azure_location  = var.azure_location
+  resource_prefix = "${local.environment}${local.project_name}"
 
   tags = {
     "Environment"      = var.az_tag_environment,
@@ -18,17 +14,45 @@ locals {
     "Product"          = var.az_tag_product
   }
 
+  create_monitor_storage        = var.create_self_delete_resources
+  create_kv_data_protection_key = var.create_self_delete_resources
+  ########################
+  # App Resource Group #
+  ########################
+  # to create directly in app-rg rather than in shared module for greater control.
+  create_rg_separately = var.create_rg_separately
+  # this is used to pass into main_hosting. if blank, that will create an rg instead
+  app_rg_name = local.create_rg_separately ? local.resource_prefix : ""
+  # this will be the existing one if exists otherwise what main-hosting creates.
+  resource_group      = try(azurerm_resource_group.app_rg[0], module.main_hosting.azurerm_resource_group_default)
+  resource_group_name = local.resource_group.name
+  #########################################
+  # Container Registry : shared_container #
+  #########################################
+  enable_container_registry        = var.enable_container_registry
+  registry_server                  = var.registry_server
+  registry_username                = var.registry_username
+  registry_password                = var.registry_password
+  image_tag                        = var.image_tag
+  registry_sku                     = var.registry_sku
+  registry_admin_enabled           = var.registry_admin_enabled
+  registry_public_access_enabled   = var.registry_public_access_enabled
+  enable_registry_retention_policy = var.enable_registry_retention_policy
+  registry_retention_days          = var.registry_retention_days
+  registry_ipv4_allow_list         = var.registry_ipv4_allow_list
   #################
   # Container App #
   #################
-  container_app_image_name       = "plan-tech-app"
-  kestrel_endpoint               = var.az_app_kestrel_endpoint
-  container_port                 = var.az_container_port
-  image_tag                      = var.image_tag
-  container_app_min_replicas     = var.container_app_min_replicas
-  container_app_max_replicas     = var.container_app_max_replicas
-  container_app_http_concurrency = var.container_app_http_concurrency
-
+  launch_in_vnet                                           = var.launch_in_vnet
+  container_app_environment_internal_load_balancer_enabled = var.container_app_environment_internal_load_balancer_enabled
+  container_app_image_name                                 = "plan-technology-for-your-school"
+  kestrel_endpoint                                         = var.az_app_kestrel_endpoint
+  container_port                                           = var.az_container_port
+  container_app_min_replicas                               = var.container_app_min_replicas
+  container_app_max_replicas                               = var.container_app_max_replicas
+  container_app_http_concurrency                           = var.container_app_http_concurrency
+  #otherwise it includes the image name and is too long
+  container_app_name_override = local.resource_prefix
   container_environment_variables_default = {
     "Kestrel__Endpoints__Http__Url"       = local.kestrel_endpoint,
     "ASPNETCORE_FORWARDEDHEADERS_ENABLED" = "true",
@@ -45,21 +69,23 @@ locals {
   #############
   # Azure SQL #
   #############
-  az_sql_connection_string      = "Server=tcp:${local.resource_prefix}.database.windows.net,1433;Initial Catalog=${local.resource_prefix}-sqldb;Authentication=Active Directory Default; Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Max Pool Size=${local.az_sql_max_pool_size};"
-  az_sql_azuread_admin_username = var.az_sql_azuread_admin_username
-  az_sql_admin_password         = var.az_sql_admin_password
-  az_sql_azuread_admin_objectid = var.az_sql_azuread_admin_objectid
-  az_use_azure_ad_auth_only     = true
-  az_sql_sku                    = var.az_sql_sku
-  az_sql_max_pool_size          = var.az_sql_max_pool_size
-  az_sql_max_size_gb            = local.az_sql_sku == "Basic" ? null : 10
-  az_mssql_ipv4_allow_list      = var.az_mssql_ipv4_allow_list
+  shared_module_enable_mssql_database = true
+  az_sql_connection_string            = "Server=tcp:${local.resource_prefix}.database.windows.net,1433;Initial Catalog=${local.resource_prefix}-sqldb;Authentication=Active Directory Default; Persist Security Info=False;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;Max Pool Size=${local.az_sql_max_pool_size};"
+  az_sql_azuread_admin_username       = var.az_sql_azuread_admin_username
+  az_sql_admin_password               = var.az_sql_admin_password
+  az_sql_azuread_admin_objectid       = var.az_sql_azuread_admin_objectid
+  az_use_azure_ad_auth_only           = false
+  az_sql_sku                          = var.az_sql_sku
+  az_sql_max_pool_size                = var.az_sql_max_pool_size
+  az_sql_max_size_gb                  = local.az_sql_sku == "Basic" ? null : 10
+  az_mssql_ipv4_allow_list            = var.az_mssql_ipv4_allow_list
 
   az_sql_vnet = {
     dns_zone_name = "privatelink.database.windows.net"
     nic_name      = "${local.resource_prefix}-db-nic"
     endpoint_name = "${local.resource_prefix}-db"
   }
+  create_db_network = !(local.shared_module_enable_mssql_database && local.launch_in_vnet)
 
   #####################
   # Azure Redis Cache #
@@ -77,10 +103,25 @@ locals {
 
   redis_public_access_enabled = var.redis_public_access_enabled
 
+  redis_networking = {
+    subnet = {
+      name             = "${local.resource_prefix}-redis-endpoint"
+      address_prefixes = ["172.16.8.0/24"] # pick unused range in the VNet
+    }
+    private_dns_zone = {
+      name = "privatelink.redis.cache.windows.net"
+    }
+    endpoint = {
+      nic_name = "${local.resource_prefix}-redis-nic"
+      name     = "${local.resource_prefix}-redis"
+    }
+  }
+
+
   ##################
   # Azure KeyVault #
   ##################
-  kv_name = "${local.environment}${local.project_name}-kv"
+  kv_name = "${local.resource_prefix}-kv"
 
   kv_secrets_csp_connectsrc = "${local.csp_google_tag_manager_domain} region1.google-analytics.com ${local.csp_clarity_domains}"
   kv_secrets_csp_defaultsrc = local.csp_clarity_domains
@@ -102,11 +143,11 @@ locals {
   }
 
   kv_firewall_cidr_rules = var.key_vault_cidr_rules
+  has_route_table        = var.container_app_environment_workload_profile_type != "Consumption"
 
   ##################
   # CDN/Front Door #
   ##################
-  cdn_create_custom_domain = var.cdn_create_custom_domain
   cdn_frontdoor_host_add_response_headers = length(var.cdn_frontdoor_host_add_response_headers) > 0 ? var.cdn_frontdoor_host_add_response_headers : [{
     "name"  = "Strict-Transport-Security",
     "value" = "max-age=31536000; includeSubDomains; preload",
@@ -177,6 +218,8 @@ locals {
     }
   }
 
+  cdn_hostname = module.waf.frontdoor_endpoint_host_name
+
   ####################x
   # Storage Accounts #
   ####################
@@ -195,9 +238,9 @@ locals {
   ######################
   # Contentful Webhook #
   ######################
-
-  contentful_webhook_name                    = var.contentful_webhook_name
-  contentful_webhook_url                     = "https://${data.azurerm_cdn_frontdoor_endpoint.app.host_name}${var.contentful_webhook_endpoint}"
-  contentful_webhook_shell_command           = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment.value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid.value} --webhook-api-key \"${random_password.api_key_value.result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url}" : "echo Not updating webhook"
+  #this has been moved to the pipeline as it was using dummy contentful data at this point.
+  # contentful_webhook_name                    = var.contentful_webhook_name
+  # contentful_webhook_url                     = "https://${local.cdn_hostname}${var.contentful_webhook_endpoint}"
+  # contentful_webhook_shell_command           = var.contentful_management_token != null && var.contentful_upsert_webhook == true ? "bash ./scripts/create-contentful-webhook.sh --env-id ${azurerm_key_vault_secret.vault_secret_contentful_environment[0].value} --env-name \"${var.container_environment}\" --management-token \"${var.contentful_management_token}\" --space-id ${azurerm_key_vault_secret.vault_secret_contentful_spaceid[0].value} --webhook-api-key \"${random_password.api_key_value[0].result}\" --webhook-name \"${local.contentful_webhook_name}\" --webhook-url ${local.contentful_webhook_url}" : "echo Not updating webhook"
   contentful_webhook_secret_timetolive_hours = 365 * 24
 }

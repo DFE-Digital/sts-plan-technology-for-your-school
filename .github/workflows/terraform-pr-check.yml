@@ -52,6 +52,7 @@ env:
   TF_VAR_registry_username: ${{ github.repository_owner }}
   TF_VAR_registry_password: ${{ secrets.GITHUB_TOKEN }}
   TF_VAR_container_environment: 'Dev'
+  TF_VAR_baseurl: 'plan-technology-for-your-school.education.gov.uk'
 
   TF_WORKING_DIRECTORY: terraform/container-app
 
@@ -135,15 +136,14 @@ jobs:
       - name: Get secret and clean tfvars file (PowerShell)
         shell: pwsh
         run: |
-          ./scripts-workflow/get-and-normalise-tfvars.ps1 `
+            ../../.github/scripts/get-and-normalise-tfvars.ps1 `
             -SecretName "${{ secrets.TF_SECRET_NAME }}" `
             -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
 
       - name: Terraform Plan
         id: plan
         run:
-          terraform plan -var-file="normalisedTerraformVars.tfvars" -var="workflow_runner_ip=${{
-          env.TF_VAR_github_ip }}" -no-color
+          terraform plan -var-file="normalisedTerraformVars.tfvars" -var="primary_fqdn=dev.${{ env.TF_VAR_baseurl }}" -no-color
 
       - name: Delete generated files
         shell: pwsh

@@ -1,0 +1,161 @@
+name: Restore Azure SQL DB from BACPAC
+description: Restore Azure SQL DB from BACPAC
+
+inputs:
+  resource_group_backup:
+    description: Backup resource group
+    required: true
+  resource_group_app:
+    description: Application resource group
+    required: true
+  ip-address:
+    description: The IP address to whitelist or remove
+    required: true
+  sql_server_name:
+    description: SQL server name
+    required: true
+  target_database:
+    description: Target database
+    required: true
+  storage_account:
+    description: Storage account name
+    required: true
+  container_name:
+    description: Container name
+    required: true
+  bacpac_file:
+    description: Specific BACPAC file
+    required: false
+    default: ""
+  bacpac_prefix:
+    description: BACPAC filename prefix
+    required: false
+    default: ""
+  use_latest_if_not_specified:
+    description: Use latest BACPAC if no file is specified
+    required: false
+    default: "true"
+runs:
+  using: composite
+  steps:
+    - name: Install SqlPackage
+      shell: bash
+      run: dotnet tool install --global Microsoft.SqlPackage
+
+    - name: Whitelist Runner for backup storage
+      uses: ./.github/actions/whitelist-storage
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_backup }}
+        account-name: ${{ inputs.storage_account }}
+        verb: add
+
+    - name: Whitelist Runner for sql
+      uses: ./.github/actions/whitelist-sql
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_app }}
+        server-name: ${{ inputs.sql_server_name }}
+        verb: add
+
+    - name: Resolve BACPAC blob name
+      id: resolve-bacpac
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        INPUT_BACPAC_FILE="${{ inputs.bacpac_file }}"
+        PREFIX="${{ inputs.bacpac_prefix }}"
+        USE_LATEST="${{ inputs.use_latest_if_not_specified }}"
+        ACCOUNT="${{ inputs.storage_account }}"
+        CONTAINER="${{ inputs.container_name }}"
+
+        if [ -n "$INPUT_BACPAC_FILE" ]; then
+          BACPAC_FILE="$INPUT_BACPAC_FILE"
+          echo "Using explicit BACPAC file: $BACPAC_FILE"
+        else
+          if [ "$USE_LATEST" != "true" ]; then
+            echo "No bacpac_file provided and use_latest_if_not_specified is false."
+            exit 1
+          fi
+
+          echo "Finding latest .bacpac blob in container $CONTAINER..."
+
+          if [ -n "$PREFIX" ]; then
+            QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac') && starts_with(name, '$PREFIX')] | sort_by(@, &properties.lastModified) | [-1].name"
+          else
+            QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac')] | sort_by(@, &properties.lastModified) | [-1].name"
+          fi
+
+          BACPAC_FILE=$(az storage blob list \
+            --account-name "$ACCOUNT" \
+            --container-name "$CONTAINER" \
+            --auth-mode login \
+            --query "$QUERY" \
+            -o tsv)
+
+          if [ -z "$BACPAC_FILE" ]; then
+            echo "No matching .bacpac blob found."
+            exit 1
+          fi
+
+          echo "Resolved latest BACPAC file: $BACPAC_FILE"
+        fi
+
+        echo "bacpac_file=$BACPAC_FILE" >> "$GITHUB_OUTPUT"
+        echo "bacpac_uri=https://${ACCOUNT}.blob.core.windows.net/${CONTAINER}/${BACPAC_FILE}" >> "$GITHUB_OUTPUT"
+
+    - name: Download resolved BACPAC
+      id: download
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        ACCOUNT="${{ inputs.storage_account }}"
+        CONTAINER="${{ inputs.container_name }}"
+        BLOB_NAME="${{ steps.resolve-bacpac.outputs.bacpac_file }}"
+
+        echo "Downloading resolved bacpac: $BLOB_NAME"
+
+        az storage blob download \
+          --account-name "$ACCOUNT" \
+          --container-name "$CONTAINER" \
+          --name "$BLOB_NAME" \
+          --file "$BLOB_NAME" \
+          --auth-mode login
+
+        echo "bacpac_file=$BLOB_NAME" >> "$GITHUB_OUTPUT"
+
+    - name: Import BACPAC with SqlPackage
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "Waiting for SQL firewall rule to propagate..."
+        sleep 120
+        ACCESS_TOKEN="$(az account get-access-token \
+          --resource https://database.windows.net/ \
+          --query accessToken \
+          -o tsv)"
+
+        sqlpackage \
+          /Action:Import \
+          /SourceFile:"${{ steps.download.outputs.bacpac_file }}" \
+          /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \
+          /TargetDatabaseName:"${{ inputs.target_database }}" \
+          /AccessToken:"$ACCESS_TOKEN"
+
+    - name: Undo Whitelist Runner for backup storage
+      uses: ./.github/actions/whitelist-storage
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_backup }}
+        account-name: ${{ inputs.storage_account }}
+        verb: remove
+
+    - name: Undo Whitelist Runner for sql
+      uses: ./.github/actions/whitelist-sql
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_app }}
+        server-name: ${{ inputs.sql_server_name }}
+        verb: remove

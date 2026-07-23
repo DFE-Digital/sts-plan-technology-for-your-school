@@ -2,21 +2,20 @@ name: Check Azure Key Vault Expiry
 description: Check key bault for expiring secrets, certificates, and keys
 inputs:
   az_tenant_id:
+    description: Azure tenant ID
     required: true
-    type: string
   az_subscription_id:
+    description: Azure subscription ID
     required: true
-    type: string
   az_client_id:
+    description: Azure client ID
     required: true
-    type: string
   az_keyvault_name:
+    description: Azure keyvault name
     required: true
-    type: string
   environment:
     description: GitHub environment name
     required: true
-    type: string
 
 runs:
   using: 'composite'
