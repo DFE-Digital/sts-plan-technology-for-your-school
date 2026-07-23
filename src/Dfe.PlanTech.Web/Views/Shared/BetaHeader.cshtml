@@ -2,14 +2,10 @@
 <section aria-label="Service beta banner">
 <govuk-phase-banner aria-label="Phase banner">
     <govuk-phase-banner-tag>Beta</govuk-phase-banner-tag>
-        @{
-                await Microcopy.GetTextByKeyAsync(
-                        ContentfulMicrocopyConstants.PhaseBannerText);
-            }
-    <a href="@{await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.PhaseBannerLink);}" class="govuk-link" rel="noopener" target="_blank">
-        @{
-            await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.PhaseBannerLinkText);
-        }
-    </a>.
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.PhaseBannerText)
+    <a href="@await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.PhaseBannerLink)" class="govuk-link" rel="noopener" target="_blank">
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.PhaseBannerLinkText)
+
+    </a>
 </govuk-phase-banner>
 </section>
