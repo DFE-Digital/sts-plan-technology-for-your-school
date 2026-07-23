@@ -36,7 +36,7 @@ Whenever variables are changed in `/container-app/terraform-*.tfvars`, they shou
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
-| <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | = 1.15.0 |
+| <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | ~> 2.11 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.37 |
 | <a name="requirement_null"></a> [null](#requirement\_null) | = 3.2.3 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | = 3.6.3 |
@@ -45,7 +45,7 @@ Whenever variables are changed in `/container-app/terraform-*.tfvars`, they shou
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 1.15.0 |
+| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 2.11.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.81.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
 
@@ -60,8 +60,8 @@ Whenever variables are changed in `/container-app/terraform-*.tfvars`, they shou
 
 | Name | Type |
 |------|------|
-| [azapi_update_resource.contentful_backup_storage_key_rotation_reminder](https://registry.terraform.io/providers/Azure/azapi/1.15.0/docs/resources/update_resource) | resource |
-| [azapi_update_resource.costing_storage_key_rotation_reminder](https://registry.terraform.io/providers/Azure/azapi/1.15.0/docs/resources/update_resource) | resource |
+| [azapi_update_resource.contentful_backup_storage_key_rotation_reminder](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/update_resource) | resource |
+| [azapi_update_resource.costing_storage_key_rotation_reminder](https://registry.terraform.io/providers/Azure/azapi/latest/docs/resources/update_resource) | resource |
 | [azurerm_container_registry.acr_notshared](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/container_registry) | resource |
 | [azurerm_key_vault.vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault) | resource |
 | [azurerm_key_vault_access_policy.vault_access_policy_mi](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_access_policy) | resource |
