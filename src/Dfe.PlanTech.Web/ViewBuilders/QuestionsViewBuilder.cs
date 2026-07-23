@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -343,6 +344,8 @@ public class QuestionsViewBuilder(
         }
         ;
 
+        var establishment =await establishmentService.GetEstablishmentByIdAsync(establishmentId);
+
         var viewModel = new ContinueSelfAssessmentViewModel
         {
             AssessmentStartDate = submissionModel.DateCreated ?? DateTime.UtcNow,
@@ -353,6 +356,7 @@ public class QuestionsViewBuilder(
             Responses = submissionModel.Responses,
             CategorySlug = categorySlug,
             SectionSlug = sectionSlug,
+            SchoolName = establishment?.OrgName ?? string.Empty,
         };
 
         return controller.View(ContinueSelfAssessmentView, viewModel);
@@ -557,10 +561,10 @@ public class QuestionsViewBuilder(
             CurrentUser
         );
 
+        viewModel.IsMatBulkAssessment = _matEstablishmentProvider.IsBulkAssessment();
+
         viewModel.IsMatMultiSchoolAssessment = selectedSchoolNames.Count > 0;
-
         viewModel.SelectedSchoolCount = selectedSchoolNames.Count;
-
         viewModel.SelectedSchoolNames = selectedSchoolNames.ToList();
     }
 
