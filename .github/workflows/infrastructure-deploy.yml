@@ -119,7 +119,11 @@ jobs:
             -KeyVaultName "${{ secrets.TF_SECRETS_KEYVAULT_NAME }}"
 
       - name: Plan Terraform changes
-        run: terraform plan -var-file="normalisedTerraformVars.tfvars" -var="image_tag=$TF_VAR_image_tag" -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
+        run: |
+          terraform plan \
+          -var-file="normalisedTerraformVars.tfvars"
+          -var="image_tag=$TF_VAR_image_tag"
+          -var="workflow_runner_ip=${{ env.TF_VAR_github_ip }}"
 
       - name: Delete generated files
         shell: pwsh

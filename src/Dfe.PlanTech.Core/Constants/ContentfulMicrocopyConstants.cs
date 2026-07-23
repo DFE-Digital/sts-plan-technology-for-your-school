@@ -19,8 +19,10 @@ public static class ContentfulMicrocopyConstants
     public const string LandingPageInsetIntroContinue = "insetIntroContinue";
     public const string LandingPageTopicLinkNotStarted = "topicLinkNotStarted";
     public const string LandingPageTopicIntroContinue = "topicIntroContinue";
+    public const string LandingPageTopicIntroContinueNoEstablishment = "topicIntroContinueNoEstablishment";
     public const string LandingPageTopicLinkContinue = "topicLinkContinue";
     public const string LandingPageTopicIntroCompleted = "topicIntroCompleted";
+    public const string LandingPageTopicIntroCompletedNoEstablishment = "topicIntroCompletedNoEstablishment";
     public const string LandingPageTopicLinkCompleted = "topicLinkCompleted";
     public const string LandingPageSuccessPanelHeader = "successHeader";
     public const string LandingPageSuccessPanelBody = "successBody";
@@ -93,6 +95,9 @@ public static class ContentfulMicrocopyConstants
     public const string GroupsSelectSchoolsToAssessNoSelectionError = "msmErrorNoSelection";
     public const string GroupsSelectSchoolsToAssessConflictError = "msmErrorConflictingSelection";
 
+    public const string GroupsSelectSelfAssessmentBackLink = "msmSelectAssessmentBackLink";
+
+
     // Fallback text
     private const string EmptyFallback = "";
 
@@ -145,6 +150,8 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectSchoolsToAssessNoSelectionErrorFallback = "Select one, more or all schools";
     private const string GroupsSelectSchoolsToAssessConflictErrorFallback = "Select one or more schools, or select 'Submit self-assessment for all schools without a submission'";
 
+    private const string GroupsSelectSelfAssessmentBackLinkFallback = "Back to home";
+
     public const string SchoolSummarySuccessBodyFallback = "Self-assessment has been submitted";
     public const string SchoolSummaryHeaderFallback = "What to do next";
     public const string SchoolSummaryRecLinkFallback = "View the recommendations";
@@ -173,8 +180,10 @@ public static class ContentfulMicrocopyConstants
         { LandingPageInsetIntroContinue, EmptyFallback },
         { LandingPageTopicLinkNotStarted, TopicLinksFallback },
         { LandingPageTopicIntroContinue, EmptyFallback },
+        { LandingPageTopicIntroContinueNoEstablishment, EmptyFallback },
         { LandingPageTopicLinkContinue, TopicLinksFallback },
         { LandingPageTopicIntroCompleted, EmptyFallback },
+        { LandingPageTopicIntroCompletedNoEstablishment, EmptyFallback },
         { LandingPageTopicLinkCompleted, TopicLinksFallback },
         { LandingPageSuccessPanelHeader, SuccessHeaderFallback },
         { LandingPageSuccessPanelBody, EmptyFallback },
@@ -233,6 +242,7 @@ public static class ContentfulMicrocopyConstants
         { SummaryRecHeader, SummaryRecHeaderFallback },
         { SummaryRecBody, SummaryRecBodyFallback },
         { SummarySubmitAnotherHeading, SummarySubmitAnotherHeadingFallback },
+        { GroupsSelectSelfAssessmentBackLink, GroupsSelectSelfAssessmentBackLinkFallback },
     };
 
     internal static class VariableNames
@@ -265,8 +275,10 @@ public static class ContentfulMicrocopyConstants
         { LandingPageInsetIntroContinue, [VariableNames.Standard] },
         { LandingPageTopicLinkNotStarted, [VariableNames.Topic] },
         { LandingPageTopicIntroContinue, [VariableNames.DateUpdated, VariableNames.EstablishmentName] },
+        { LandingPageTopicIntroContinueNoEstablishment, [VariableNames.DateUpdated] },
         { LandingPageTopicLinkContinue, [VariableNames.Topic] },
         { LandingPageTopicIntroCompleted, [VariableNames.Topic, VariableNames.DateCompleted, VariableNames.EstablishmentName] },
+        { LandingPageTopicIntroCompletedNoEstablishment, [VariableNames.Topic, VariableNames.DateCompleted] },
         { LandingPageTopicLinkCompleted, [VariableNames.Topic] },
         { LandingPageSuccessPanelHeader, [VariableNames.Topic] },
         { SingleRecommendationPrintAllLink, [VariableNames.Topic] },
@@ -280,7 +292,15 @@ public static class ContentfulMicrocopyConstants
         { SingleRecommendationHistoryChange, [VariableNames.RecStatus] },
         { SingleRecommendationHistoryReason, [VariableNames.RecStatus] },
         { ViewAnswersIntroText, [VariableNames.DateCompleted] },
-        { ContinueIntroText, [VariableNames.DateUpdated] },
+        {
+            ContinueIntroText,
+            [
+                VariableNames.EstablishmentName,
+                VariableNames.DateUpdated,
+                VariableNames.Count,
+                VariableNames.Total
+            ]
+        },
         { CategoryPrintSectionInProgress, [VariableNames.DateUpdated] },
         { CategoryPrintSectionCompleted, [VariableNames.Topic, VariableNames.DateCompleted] },
         { GroupsSelectRecommendationCount, [VariableNames.Count, VariableNames.Total] },

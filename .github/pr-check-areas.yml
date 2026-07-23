@@ -1,0 +1,10 @@
+contentful:
+  - 'contentful/**'
+  - 'contentful/tests/**'
+github:
+  - '.github/workflows/code-pr-check.yml'
+  - '.github/actions/**'
+src:
+  - 'src/**'
+tests:
+  - 'tests/**'
