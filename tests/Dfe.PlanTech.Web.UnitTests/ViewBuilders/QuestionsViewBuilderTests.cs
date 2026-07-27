@@ -217,6 +217,10 @@ public class QuestionsViewBuilderTests
     ];
 
         _matEstablishmentProvider
+            .IsBulkAssessment()
+            .Returns(true);
+
+        _matEstablishmentProvider
             .GetSelectedSchoolNamesAsync(_currentUserProvider)
             .Returns(Task.FromResult(selectedSchoolNames));
 
@@ -243,7 +247,7 @@ public class QuestionsViewBuilderTests
             view.Model
         );
 
-        Assert.True(model.IsMatMultiSchoolAssessment);
+        Assert.True(model.IsMatBulkAssessment);
         Assert.Equal(2, model.SelectedSchoolCount);
 
         Assert.Equal(
@@ -279,6 +283,10 @@ public class QuestionsViewBuilderTests
                 )
             );
 
+        _matEstablishmentProvider
+            .IsBulkAssessment()
+            .Returns(false);
+
         var question = MakeQuestion(
             "Q1",
             "q-1",
@@ -300,7 +308,7 @@ public class QuestionsViewBuilderTests
             view.Model
         );
 
-        Assert.False(model.IsMatMultiSchoolAssessment);
+        Assert.False(model.IsMatBulkAssessment);
         Assert.Equal(0, model.SelectedSchoolCount);
         Assert.Empty(model.SelectedSchoolNames);
     }

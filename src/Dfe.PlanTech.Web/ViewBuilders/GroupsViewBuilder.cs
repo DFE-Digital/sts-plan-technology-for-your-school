@@ -329,66 +329,23 @@ public class GroupsViewBuilder(
             ? viewModel.PresentedSchoolRefs.ToArray()
             : viewModel.SelectedSchoolsRefs.ToArray();
 
-        if (selectedRefs.Length == 1)
-        {
-            var isGroupSchool = VerifyGroupSchoolMembership(selectedRefs[0], establishmentLinks);
-            if (!isGroupSchool)
-            {
-                throw new InvalidDataException(
-                    $"Selected school with ref {selectedRefs[0]} not linked to user's group"
-                );
-            }
-            else
-            {
-                var school =
-                    await _establishmentService.GetEstablishmentByReferenceAsync(selectedRefs[0])
-                    ?? throw new InvalidDataException(
-                        $"School with ref {selectedRefs[0]} not found"
-                    );
-
-                if (
-                    string.IsNullOrWhiteSpace(school.EstablishmentRef)
-                    || string.IsNullOrWhiteSpace(school.OrgName)
-                )
-                {
-                    throw new InvalidDataException(
-                        $"School with ref {selectedRefs[0]} is missing required data"
-                    );
-                }
-
-                CurrentUser.SetGroupSelectedSchool(school.EstablishmentRef, school.OrgName);
-
-                var latestSubmissionForRef =
-                    await _submissionService.GetLatestSubmissionResponsesModel(
-                        school.Id,
-                        section,
-                        (SubmissionStatus?)null
-                    );
-
-                if (
-                    latestSubmissionForRef != null
-                    && latestSubmissionForRef.Status == SubmissionStatus.InProgress
-                )
-                {
-                    return controller.RedirectToRoute(
-                        QuestionsController.GetContinueSelfAssessmentAction,
-                        new { categorySlug, sectionSlug }
-                    );
-                }
-            }
-        }
-        else if (selectedRefs.Length > 1)
+        if (selectedRefs.Length > 0)
         {
             var selectedSchoolIds = new List<int>();
 
             foreach (var schoolRef in selectedRefs)
             {
-                var isGroupSchool = VerifyGroupSchoolMembership(schoolRef, establishmentLinks);
+                var isGroupSchool = VerifyGroupSchoolMembership(
+                    schoolRef,
+                    establishmentLinks
+                );
+
                 if (isGroupSchool)
                 {
-                    var school = await _establishmentService.GetEstablishmentByReferenceAsync(
-                        schoolRef
-                    );
+                    var school =
+                        await _establishmentService.GetEstablishmentByReferenceAsync(
+                            schoolRef
+                        );
 
                     if (school != null)
                     {
@@ -401,7 +358,8 @@ public class GroupsViewBuilder(
 
                         if (
                             latestSubmissionForRef != null
-                            && latestSubmissionForRef.Status == SubmissionStatus.InProgress
+                            && latestSubmissionForRef.Status
+                            == SubmissionStatus.InProgress
                         )
                         {
                             await _submissionService.SetSubmissionInaccessibleAsync(
