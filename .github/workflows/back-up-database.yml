@@ -15,6 +15,10 @@ on:
         type: choice
         options: ['Dev', 'Test', 'StagingUnprotected', 'ProductionUnprotected']
         default: 'Dev'
+      tfvars_secret_name:
+        description: the name of the secret holding the tfvars. not consistent, so manual input needed.
+        required: false
+        type: string
   # push:
   #    branches:
   #      - disaster-recovery-e2e-terraform
@@ -166,6 +170,15 @@ jobs:
             keyvault-name: ${{ steps.backup_names.outputs.kv }}
             verb: 'add'
 
+        - name: Whitelist Runner for TF keyvault
+          if: ${{ (github.event_name == 'workflow_dispatch' || inputs.tfvars_secret_name) }}
+          uses: ./.github/actions/whitelist-kv
+          with:
+            ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+            resource-group: $${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf
+            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf-kv
+            verb: 'add'
+
         - name: Whitelist Runner for app keyvault
           uses: ./.github/actions/whitelist-kv
           with:
@@ -182,7 +195,7 @@ jobs:
             account-name: ${{ steps.backup_names.outputs.storage_account }}
             verb: add
 
-        - name: Copy secrets
+        - name: Copy app secrets
           shell: bash
           run: |
             set -euo pipefail
@@ -219,7 +232,7 @@ jobs:
                 >/dev/null
             done
 
-        - name: Copy secret manifest
+        - name: Copy app secret manifest
           run: |
             SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
             az keyvault secret list \
@@ -234,6 +247,36 @@ jobs:
               --file "${{ env.MANIFEST }}" \
               --auth-mode login \
               --overwrite true
+
+        - name: Copy tf vars secret
+          if: ${{ (github.event_name == 'workflow_dispatch' || inputs.tfvars_secret_name) }}
+          shell: bash
+          run: |
+            set -euo pipefail
+
+            SOURCE_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv"
+            TARGET_KV="${{ steps.backup_names.outputs.kv }}"
+            $SECRET_NAME = "${{ inputs.tfvars_secret_name }}"
+
+              SECRET_VALUE=$(
+                az keyvault secret show \
+                  --vault-name "$SOURCE_VAULT" \
+                  --name "$SECRET_NAME" \
+                  --query value \
+                  -o tsv
+              )
+
+              if [ -z "$SECRET_VALUE" ]; then
+                echo "Skipping $SECRET_NAME because value was empty"
+                continue
+              fi
+
+              az keyvault secret set \
+                --vault-name "$TARGET_KV" \
+                --name "$SECRET_NAME" \
+                --value "$SECRET_VALUE" \
+                >/dev/null
+            done
 
         - name: De-Whitelist Runner for backup keyvault
           uses: ./.github/actions/whitelist-kv
@@ -258,3 +301,12 @@ jobs:
             resource-group: ${{ steps.backup_names.outputs.resource_group }}
             account-name: ${{ steps.backup_names.outputs.storage_account }}
             verb: remove
+
+        - name: Whitelist Runner for TF keyvault
+          if: ${{ (github.event_name == 'workflow_dispatch' || inputs.tfvars_secret_name) }}
+          uses: ./.github/actions/whitelist-kv
+          with:
+            ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+            resource-group: $${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf
+            keyvault-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf-kv
+            verb: 'remove'
