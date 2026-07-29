@@ -79,3 +79,45 @@ resource "azurerm_monitor_metric_alert" "this" {
     }
   }
 }
+
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "key_vault_expiry" {
+  count = var.enabled ? 1 : 0
+
+  name                = "Key Vault expiry approaching"
+  description         = "Alert when Key Vault secrets or keys are due to expire within ${var.key_vault_expiry_alert_days} days"
+  resource_group_name = var.resource_group_name
+  location            = var.azure_location
+  tags                = local.tags
+
+  evaluation_frequency = "PT1H"
+  window_duration      = "PT1H"
+  scopes               = [local.key_vault_log_analytics_workspace_id]
+  severity             = 2
+
+  criteria {
+    query = <<-QUERY
+      AzureDiagnostics
+      | where ResourceProvider == "MICROSOFT.KEYVAULT"
+      | where Category == "AuditEvent"
+      | where operationName_s in~ ("SecretSet", "SecretUpdate", "KeyCreate", "KeyUpdate")
+      | extend props = parse_json(properties_s)
+      | extend expirationDate = todatetime(tostring(props.expirationDate))
+      | where isnotempty(expirationDate)
+      | where expirationDate between (now() .. now() + ${var.key_vault_expiry_alert_days}d)
+      | summarize AlertCount = count()
+    QUERY
+
+    time_aggregation_method = "Count"
+    threshold               = 0
+    operator                = "GreaterThan"
+
+    failing_periods {
+      minimum_failing_periods_to_trigger_alert = 1
+      number_of_evaluation_periods             = 1
+    }
+  }
+
+  action {
+    action_groups = [data.azurerm_monitor_action_group.existing.id]
+  }
+}
