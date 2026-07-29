@@ -24,10 +24,9 @@ runs:
       run: |
         set -euo pipefail
 
-        purge_protection="$(az resource show \
+        purge_protection="$(az keyvault show \
           --resource-group "${{ inputs.resource-group }}" \
           --name "${{ inputs.keyvault-name }}" \
-          --resource-type "Microsoft.KeyVault/vaults" \
           --query "properties.enablePurgeProtection" -o tsv || true)"
 
         if [ "$purge_protection" != "true" ]; then

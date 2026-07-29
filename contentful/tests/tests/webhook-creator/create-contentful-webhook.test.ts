@@ -49,7 +49,7 @@ describe('createOrUpdateWebhook', () => {
     topics: [],
   };
 
-  let createOrUpdateWebhook;
+  let createOrUpdateWebhook: () => Promise<void>;
 
   beforeEach(async () => {
     jest.clearAllMocks();

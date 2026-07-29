@@ -29,6 +29,6 @@ public class Options
 
     public Dictionary<string, string>? FormattedSqlParameters =>
         SqlParameters
-            ?.Select(param => param.Split('='))
+            ?.Select(param => param.Split('=', 2))
             .ToDictionary(param => param[0], param => param[1]);
 }

@@ -1,0 +1,111 @@
+name: Apply Terraform Alerts
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'The environment to run infrastructure deployment on:'
+        required: true
+        options: ['Dev', 'ProductionUnprotected']
+  # push:
+  #   branches:
+  #     - feature/300874/Azure-Monitoring-errors-exceptions-tf
+env:
+  TF_WORKING_DIRECTORY: terraform/alerts
+  ENVIRONMENT:
+    ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'ProductionUnprotected' }}
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terraform:
+    name: Apply Terraform
+    runs-on: ubuntu-latest
+    environment:
+      name:
+        ${{ github.event_name == 'workflow_dispatch' && inputs.environment ||
+        'ProductionUnprotected' }}
+    permissions:
+      id-token: write
+      contents: read
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Whitelist Runner for TF storage
+        uses: ./.github/actions/whitelist-storage
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf
+          account-name: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}
+          verb: add
+
+          #as they were created directly in Azure, we import them into TF state the first time. Remove this after.
+      - name: Add prod import blocks
+        if: env.ENVIRONMENT == 'ProductionUnprotected'
+        run: cp imports/prodimports.tf ./prod.import.tf
+
+      - name: Terraform init
+        shell: bash
+        run: |
+          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf"
+          terraform init \
+              -backend-config="resource_group_name=${RESOURCE_GROUP_NAME}"  \
+              -backend-config="storage_account_name=${{secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}"  \
+
+      # None of the variables are secret, so they can be stored in a checked-in json file.
+      # If that changes, move to key vault as per other infra pipeline.
+      # Use plan instead of apply for testing.
+      - name: Terraform plan
+        id: terraform-plan
+        shell: bash
+        run: |
+          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
+          terraform plan \
+          -var-file="terraform.tfvars.json" \
+          -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
+          -var="environment_github=${{env.ENVIRONMENT}}"
+          -var="az_tag_environment=${{env.ENVIRONMENT}}"
+
+      - name: Terraform apply
+        if: steps.terraform-plan.outcome == 'success'
+        id: terraform-apply
+        shell: bash
+        run: |
+          RESOURCE_GROUP_NAME="${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}"
+          terraform apply -auto-approve \
+          -var-file="terraform.tfvars.json" \
+          -var="resource_group_name=${RESOURCE_GROUP_NAME}" \
+          -var="environment_github=${{env.ENVIRONMENT}}" \
+          -var="az_tag_environment=${{env.ENVIRONMENT}}"
+
+      - name: Whitelist Runner for TF storage
+        if: always()
+        uses: ./.github/actions/whitelist-storage
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{secrets.DFE_PROJECT_NAME}}-tf
+          account-name: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME}}
+          verb: remove

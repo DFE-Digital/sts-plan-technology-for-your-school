@@ -38,3 +38,9 @@ py -m pre_commit run --all-files
 
 - [Formatting](./FORMATTING.md)
 - [TOOLING](./TOOLING.md)
+
+## See also
+
+- [Formatting reference](FORMATTING.md) — detailed per-language formatting rules
+- [Tooling](TOOLING.md) — repository configuration files and inventory scripts
+- [GitHub Actions workflows](../.github/README.md) — CI complements the local pre-commit hooks

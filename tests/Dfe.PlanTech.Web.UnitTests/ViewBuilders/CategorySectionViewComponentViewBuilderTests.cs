@@ -1,7 +1,7 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -15,13 +15,13 @@ public class CategorySectionViewComponentViewBuilderTests
     private static CategorySectionViewComponentViewBuilder CreateSut(
         IContentfulService? contentful = null,
         ISubmissionService? submission = null,
-        ICurrentUser? currentUser = null,
+        ICurrentUserProvider? currentUser = null,
         ILogger<BaseViewBuilder>? logger = null
     )
     {
         contentful ??= Substitute.For<IContentfulService>();
         submission ??= Substitute.For<ISubmissionService>();
-        currentUser ??= Substitute.For<ICurrentUser>();
+        currentUser ??= Substitute.For<ICurrentUserProvider>();
         currentUser.GetActiveEstablishmentIdAsync().Returns(1234);
         logger ??= NullLogger<BaseViewBuilder>.Instance;
 

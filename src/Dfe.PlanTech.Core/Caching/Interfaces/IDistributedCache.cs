@@ -1,3 +1,5 @@
+using StackExchange.Redis;
+
 namespace Dfe.PlanTech.Core.Caching.Interfaces;
 
 /// <summary>
@@ -18,7 +20,7 @@ public interface IDistributedCache
     Task<T?> GetOrCreateAsync<T>(
         string key,
         Func<Task<T>> action,
-        TimeSpan? expiry = null,
+        Expiration expiry = default,
         Func<T, Task>? onCacheItemCreation = null,
         int databaseId = -1
     );
@@ -32,7 +34,7 @@ public interface IDistributedCache
     /// <param name="expiry">The optional expiration time for the cache item.</param>
     /// <param name="databaseId">The optional database identifier.</param>
     /// <returns>The key of the cache item.</returns>
-    Task<string> SetAsync<T>(string key, T value, TimeSpan? expiry = null, int databaseId = -1);
+    Task<string> SetAsync<T>(string key, T value, Expiration expiry = default, int databaseId = -1);
 
     /// <summary>
     /// Removes a cache item asynchronously.

@@ -1,5 +1,5 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Web.Attributes;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -34,7 +34,8 @@ public class ValidateMatSelectedAttributeTests
     public void OnActionExecuting_WhenRedirectConditionsAreNotMet_DoesNotRedirect(
         bool isAuthenticated,
         bool isMat,
-        string? groupSelectedSchoolUrn)
+        string? groupSelectedSchoolUrn
+    )
     {
         var currentUser = CreateCurrentUser(isAuthenticated, isMat, groupSelectedSchoolUrn);
         var context = CreateActionExecutingContext(currentUser);
@@ -69,12 +70,13 @@ public class ValidateMatSelectedAttributeTests
         Assert.Equal("GetSelectASchoolView", redirect.RouteValues?["action"]);
     }
 
-    private static ICurrentUser CreateCurrentUser(
+    private static ICurrentUserProvider CreateCurrentUser(
         bool isAuthenticated,
         bool isMat,
-        string? groupSelectedSchoolUrn)
+        string? groupSelectedSchoolUrn
+    )
     {
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
 
         currentUser.IsAuthenticated.Returns(isAuthenticated);
         currentUser.IsMat.Returns(isMat);
@@ -83,18 +85,15 @@ public class ValidateMatSelectedAttributeTests
         return currentUser;
     }
 
-    private static ActionExecutingContext CreateActionExecutingContext(ICurrentUser currentUser)
+    private static ActionExecutingContext CreateActionExecutingContext(
+        ICurrentUserProvider currentUser
+    )
     {
         var serviceProvider = Substitute.For<IServiceProvider>();
 
-        serviceProvider
-            .GetService(typeof(ICurrentUser))
-            .Returns(currentUser);
+        serviceProvider.GetService(typeof(ICurrentUserProvider)).Returns(currentUser);
 
-        var httpContext = new DefaultHttpContext
-        {
-            RequestServices = serviceProvider
-        };
+        var httpContext = new DefaultHttpContext { RequestServices = serviceProvider };
 
         var actionContext = new ActionContext(
             httpContext,

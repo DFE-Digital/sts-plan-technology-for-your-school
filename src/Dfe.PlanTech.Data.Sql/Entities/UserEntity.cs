@@ -1,9 +1,7 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
-[Table("user")]
 public class UserEntity
 {
     public int Id { get; set; }

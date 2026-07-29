@@ -1,9 +1,7 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
-[Table("signIn")]
 public class SignInEntity
 {
     public int Id { get; set; }

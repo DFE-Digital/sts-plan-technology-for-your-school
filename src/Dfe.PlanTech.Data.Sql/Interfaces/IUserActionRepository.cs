@@ -5,4 +5,5 @@ namespace Dfe.PlanTech.Data.Sql.Interfaces;
 public interface IUserActionRepository
 {
     Task CreateAsync(UserActionEntity userAction);
+    Task<UserActionEntity?> GetUserActionAsync(Guid id);
 }

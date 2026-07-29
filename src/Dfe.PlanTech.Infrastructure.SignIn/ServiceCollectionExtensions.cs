@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
 
         services
             .AddAuthentication(ConfigureAuthentication)
-            .AddOpenIdConnect(options => ConfigureOpenIdConnect(services, options, config))
+            .AddOpenIdConnect(options => ConfigureOpenIdConnect(options, config))
             .AddCookie(options => ConfigureCookie(options, config));
 
         services.AddScoped((services) => config);
@@ -66,7 +66,6 @@ public static class ServiceCollectionExtensions
     }
 
     private static void ConfigureOpenIdConnect(
-        IServiceCollection services,
         OpenIdConnectOptions options,
         DfeSignInConfiguration config
     )
@@ -91,13 +90,13 @@ public static class ServiceCollectionExtensions
         options.GetClaimsFromUserInfoEndpoint = config.GetClaimsFromUserInfoEndpoint;
         options.SaveTokens = config.SaveTokens;
 
-        var serviceProvider = services.BuildServiceProvider();
-        var logger = serviceProvider.GetRequiredService<ILogger<IDfeSignIn>>();
-
         options.Events = new OpenIdConnectEvents()
         {
             OnUserInformationReceived = (UserInformationReceivedContext context) =>
-                OnUserInformationReceivedEvent.RecordUserSignIn(logger, context),
+            {
+                var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<IDfeSignIn>>();
+                return OnUserInformationReceivedEvent.RecordUserSignIn(logger, context);
+            },
             OnRedirectToIdentityProvider = DfeOpenIdConnectEvents.OnRedirectToIdentityProvider,
             OnRedirectToIdentityProviderForSignOut =
                 DfeOpenIdConnectEvents.OnRedirectToIdentityProviderForSignOut,

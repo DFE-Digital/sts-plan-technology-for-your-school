@@ -15,7 +15,6 @@ public class EstablishmentWorkflow(
     private readonly IEstablishmentLinkRepository _establishmentLinkRepository =
         establishmentLinkRepository
         ?? throw new ArgumentNullException(nameof(establishmentLinkRepository));
-
     public async Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
         EstablishmentModel establishmentModel
     )

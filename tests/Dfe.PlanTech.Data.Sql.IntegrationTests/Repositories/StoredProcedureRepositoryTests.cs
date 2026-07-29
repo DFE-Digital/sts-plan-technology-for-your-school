@@ -127,7 +127,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.NotStarted.ToString(),
+            NewStatus = RecommendationStatus.NotStarted,
             DateCreated = fixedDate,
         };
 
@@ -141,7 +141,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
 
         Assert.NotNull(result);
         Assert.Equal(fixedDate, result!.StatusChangeDate);
-        Assert.Equal(history.NewStatus, result.StatusText);
+        Assert.Equal(history.NewStatus, result.Status);
         Assert.Equal(school.OrgName, result.SchoolName);
         Assert.Equal(mat.OrgName, result.GroupName);
         Assert.Equal(user.Id, result.UserId);
@@ -215,7 +215,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.NotStarted.ToString(),
+            NewStatus = RecommendationStatus.NotStarted,
             DateCreated = firstDate,
         };
 
@@ -228,7 +228,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.InProgress,
             DateCreated = latestDate,
         };
 
@@ -242,6 +242,6 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
 
         Assert.NotNull(result);
         Assert.Equal(latestDate, result!.StatusChangeDate);
-        Assert.Equal(latestHistory.NewStatus, result.StatusText);
+        Assert.Equal(latestHistory.NewStatus, result.Status);
     }
 }

@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Azure.Identity;
 using Dfe.PlanTech.Data.Sql;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
@@ -15,7 +14,7 @@ public static class ReleaseProgramExtensions
     )
     {
         var keyVaultUri = $"https://{configuration["KeyVaultName"]}.vault.azure.net/";
-        var azureCredentials = new DefaultAzureCredential();
+        var azureCredentials = new Azure.Identity.DefaultAzureCredential();
         configuration.AddAzureKeyVault(new Uri(keyVaultUri), azureCredentials);
 
         AddDataProtection(services, configuration, keyVaultUri, azureCredentials);
@@ -27,7 +26,7 @@ public static class ReleaseProgramExtensions
         IServiceCollection services,
         ConfigurationManager configuration,
         string keyVaultUri,
-        DefaultAzureCredential azureCredentials
+        Azure.Identity.DefaultAzureCredential azureCredentials
     )
     {
         services.AddDbContext<DataProtectionDbContext>(options =>

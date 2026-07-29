@@ -42,14 +42,6 @@
 @section AfterContent {
     @foreach (var content in Model.AfterContentContent)
     {
-        if (Model.HasBanner && content.GetType() == typeof(ComponentBannerEntry))
-        {
-            await Html.RenderPartialAsync("Banner", content);
-        }
-        else
-        {
-            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-        }
-        
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
     }
 }

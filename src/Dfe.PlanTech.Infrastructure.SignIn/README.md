@@ -1,55 +1,144 @@
 # Dfe.PlanTech.Infrastructure.SignIn
 
-Project containing code for integrating with DFE Sign-in
+Integrates the application with [DfE Sign-in](https://github.com/DFE-Digital/login.dfe.oidc-dotnetclient) using OpenID Connect (Authorization Code flow). Handles the full sign-in lifecycle: redirecting to DfE Sign-in, processing the returned identity, mapping it to database records, and enriching the claims principal with application-specific IDs.
 
-## Overview
+## Target framework
 
-| File                                                                                   | Purpose/Functionality                                                                       |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| [DfeSignInSetup.cs](./DfeSignInSetup.cs)                                               | Methods to inject services + authentication to the web application                          |
-| [DfeOpenIdConnectEvents](./DfeOpenIdConnectEvents.cs)                                  | Manages URIs and URLs for login and signout events                                          |
-| [UserClaimsExtensions.cs](./Extensions/UserClaimsExtensions.cs)                        | Extensions for retrieving common values from user roles (currently UserId and Organisation) |
-| [OnUserInformationReceivedEvent.cs](./ConnectEvents/OnUserInformationReceivedEvent.cs) | Records sign in and adds user and organisation claims to principal                          |
+.NET 9.0
 
-## How to use
+## Dependencies
 
-You will need to set the following variables to match the ones set in the DFE Sign-in environment:
+| Package | Purpose |
+|---|---|
+| `Microsoft.AspNetCore.Authentication.OpenIdConnect` | OIDC Authorization Code flow |
+| `Microsoft.AspNetCore.Identity.UI` | ASP.NET Core Identity scaffolding |
+| `Dfe.PlanTech.Application` | `ISignInWorkflow`, `DfeSignInConfiguration` |
 
-| Env variable           | Description                                  | Example                   |
-| ---------------------- | -------------------------------------------- | ------------------------- |
-| DfeSignIn:Authority    |                                              |                           |
-| DfeSignIn:MetadataUrl  |                                              |                           |
-| DfeSignIn:ClientId     |                                              |                           |
-| DfeSignIn:ClientSecret |                                              |                           |
-| DfeSignIn:FrontDoorUrl | The resulting path for the app on front-door | https://dev.plan-tech.com |
+## Authentication flow
 
-These should be set in the `Azure KeyVault` for deployed instances, or `dotnet user-secrets` for local testing.
+```mermaid
+sequenceDiagram
+    participant User
+    participant App as Application
+    participant DSI as DfE Sign-in
+    participant DB as Database
 
-## Running Locally
+    User->>App: Request protected page
+    App->>DSI: Redirect (OnRedirectToIdentityProvider rewrites callback URI)
+    User->>DSI: Authenticates
+    DSI->>App: Authorization code → /signin-oidc
+    App->>DSI: Exchange code for tokens
+    App->>DSI: Fetch claims from UserInfo endpoint
+    App->>App: OnUserInformationReceived event fires
+    App->>DB: ISignInWorkflow.RecordSignIn — get/create User + Establishment
+    App->>App: Add DB_USER_ID + DB_ESTABLISHMENT_ID claims to principal
+    App->>App: Create session cookie
+    App->>User: Redirect to original page
+```
 
-With DSi enabled, when running the application locally you need to ensure that the server is running in `https` mode. Failure to do so will result in an error similar to
+## Components
+
+### `ServiceCollectionExtensions`
+
+Entry point for DI setup. Call `services.AddDfeSignIn(configuration)` to register everything. Configures:
+
+- **Cookie authentication** — session cookie with configurable name, expiry, sliding expiration, and `SameSite=Lax; Secure`
+- **OpenID Connect** — Authorization Code flow with configurable scopes, callback paths, and event hooks
+- **Forwarded headers** — `X-Forwarded-For` and `X-Forwarded-Proto` support for deployment behind a proxy or Azure Front Door
+
+### `DfeOpenIdConnectEvents`
+
+Hooks into the OIDC redirect events to rewrite callback and post-logout URIs. This is necessary because the application runs behind Azure Front Door — the internal host seen by ASP.NET Core differs from the external URL that DfE Sign-in must redirect back to.
+
+The correct origin URL is taken from the `X-Forwarded-Host` header if present, falling back to `DfeSignIn:FrontDoorUrl` from configuration. A missing URL scheme defaults to `https://`.
+
+### `OnUserInformationReceivedEvent`
+
+Fires after DfE Sign-in returns the user's claims. Responsible for:
+
+1. Extracting the DSI reference from the `nameidentifier` claim
+2. Deserialising the `organisation` claim (a JSON blob) into an `EstablishmentModel`
+3. Calling `ISignInWorkflow.RecordSignIn` to get-or-create the `User` and `Establishment` database records and write a `SignIn` audit entry
+4. Adding `db_user_id` and `db_establishment_id` claims to the principal so downstream code can identify the user without hitting the database again
+
+If a user authenticates but has no organisation assigned in DfE Sign-in, `RecordSignInUserOnly` is called instead and a warning is logged.
+
+### `UserClaimsExtensions`
+
+Extension methods on `IEnumerable<Claim>` and `ClaimsPrincipal`:
+
+| Method | Returns |
+|---|---|
+| `GetDsiReference()` | The user's unique DfE Sign-in ID (from `nameidentifier`) |
+| `GetOrganisation()` | `EstablishmentModel?` deserialised from the `organisation` claim JSON |
+| `GetAuthorisationStatus()` | `UserAuthorisationStatus` — whether the user is authenticated and has an organisation |
+
+### `UserAuthorisationResult` / `UserAuthorisationStatus`
+
+Two small record types used to check access to a page:
+
+- `UserAuthorisationStatus` — carries `IsAuthenticated` and `HasOrganisation` flags; `IsAuthorised` is `true` only when `HasOrganisation` is `true`
+- `UserAuthorisationResult` — combines the page's access requirements with the user's status; `CanViewPage` returns `true` if the page doesn't require auth or the user is authorised
+
+Results are stored on `HttpContext` under the key `UserAuthorisationResult.HttpContextKey`.
+
+## Claims added to principal
+
+| Claim | Source | Value |
+|---|---|---|
+| `nameidentifier` | DfE Sign-in | Unique user reference from DSI |
+| `organisation` | DfE Sign-in | JSON blob with establishment details |
+| `db_user_id` | Added by this project | `User.Id` from the application database |
+| `db_establishment_id` | Added by this project | `Establishment.Id` from the application database |
+
+## Configuration
+
+All settings live under the `DfeSignIn` key. Set in **Azure Key Vault** for deployed environments, or `dotnet user-secrets` for local development.
+
+| Key | Required | Description |
+|---|---|---|
+| `DfeSignIn:Authority` | Yes | DfE Sign-in OIDC authority URL |
+| `DfeSignIn:MetaDataUrl` | Yes | OIDC discovery endpoint (`/.well-known/openid-configuration`) |
+| `DfeSignIn:ClientId` | Yes | OAuth client ID for this application |
+| `DfeSignIn:ClientSecret` | Yes | OAuth client secret |
+| `DfeSignIn:FrontDoorUrl` | Yes | The external base URL of the application (e.g. `https://dev.plan-tech.com`) |
+| `DfeSignIn:CallbackUrl` | No | OIDC callback path (default: `/signin-oidc`) |
+| `DfeSignIn:SignoutCallbackUrl` | No | Post-logout callback path |
+| `DfeSignIn:SignoutRedirectUrl` | No | Where to redirect after sign-out |
+| `DfeSignIn:CookieName` | No | Session cookie name |
+| `DfeSignIn:CookieExpireTimeSpanInMinutes` | No | Session lifetime in minutes |
+| `DfeSignIn:SlidingExpiration` | No | Whether to reset expiry on activity |
+| `DfeSignIn:Scopes` | No | OIDC scopes to request (e.g. `openid`, `profile`, `email`) |
+
+## Running locally
+
+The application must run over **HTTPS** — DfE Sign-in will reject HTTP callback URLs with a correlation error:
 
 ```
 Exception: Correlation failed.
-Unknown location
 Exception: An error was encountered while handling the remote login.
-Microsoft.AspNetCore.Authentication.RemoteAuthenticationHandler<TOptions>.HandleRequestAsync()
 ```
 
-The easiest way to do this is through the Kestrel settings, by adding something similar to the following to your `appsettings.json`:
+Configure Kestrel to use HTTPS in `appsettings.Development.json`:
 
-```
+```json
 "Kestrel": {
-    "Endpoints": {
-      "Https": {
-        "Url": "https://localhost:16251"
-      }
+  "Endpoints": {
+    "Https": {
+      "Url": "https://localhost:16251"
     }
   }
+}
 ```
 
-**Note: Your `DfeSignIn:FrontDoorUrl` variable should match the URL that the site is running from, and this is currently set to `http://localhost:16251`, so you will need to change this as well**
+Then set `DfeSignIn:FrontDoorUrl` to match:
 
-## Additional Information
+```shell
+dotnet user-secrets set DfeSignIn:FrontDoorUrl https://localhost:16251
+```
 
-For additional information on using, or setup, look at [login.dfe.oidc-dotnetclient](https://github.com/DFE-Digital/login.dfe.oidc-dotnetclient)
+## See also
+
+- [Authentication overview](../../docs/Authentication.md) — high-level description of the auth flow
+- [Web application](../Dfe.PlanTech.Web/README.md) — registers and uses SignIn services
+- [ADR 0012 — Authentication provider](../../docs/architecture-decision-record/0012-authentication-provider.md) — decision record for choosing DfE Sign-in

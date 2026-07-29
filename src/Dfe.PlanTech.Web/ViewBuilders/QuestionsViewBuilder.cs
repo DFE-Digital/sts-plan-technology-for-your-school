@@ -1,3 +1,5 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -5,7 +7,6 @@ using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
@@ -19,24 +20,31 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class QuestionsViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     IOptions<ContactOptionsConfiguration> contactOptions,
     IOptions<ErrorMessagesConfiguration> errorMessages,
     ContentfulOptionsConfiguration contentfulOptions,
     IQuestionService questionService,
-    ISubmissionService submissionService
+    ISubmissionService submissionService,
+    IEstablishmentService establishmentService,
+    IMatEstablishmentProvider matEstablishmentProvider
 ) : BaseViewBuilder(logger, contentfulService, currentUser), IQuestionsViewBuilder
 {
     private readonly IQuestionService _questionService =
         questionService ?? throw new ArgumentNullException(nameof(questionService));
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+    private readonly IEstablishmentService establishmentService =
+        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
     private readonly ErrorMessagesConfiguration _errorMessages =
         errorMessages?.Value ?? throw new ArgumentNullException(nameof(errorMessages));
     private readonly ContentfulOptionsConfiguration _contentfulOptions =
         contentfulOptions ?? throw new ArgumentNullException(nameof(contentfulOptions));
+    private readonly IMatEstablishmentProvider _matEstablishmentProvider =
+        matEstablishmentProvider
+        ?? throw new ArgumentNullException(nameof(matEstablishmentProvider));
 
     private const string QuestionView = "Question";
     private const string InterstitialPagePath = "~/Views/Pages/Page.cshtml";
@@ -51,7 +59,7 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetRoutingEstablishmentId();
 
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug)
@@ -70,7 +78,7 @@ public class QuestionsViewBuilder(
 
         if (isSlugForNextQuestion)
         {
-            var nextQuestionViewModel = GenerateViewModel(
+            var nextQuestionViewModel = await GenerateViewModel(
                 controller,
                 submissionRoutingData.NextQuestion!,
                 submissionRoutingData.QuestionnaireSection,
@@ -79,6 +87,7 @@ public class QuestionsViewBuilder(
                 null,
                 returnTo
             );
+
             return controller.View(QuestionView, nextQuestionViewModel);
         }
 
@@ -94,16 +103,8 @@ public class QuestionsViewBuilder(
             );
         }
 
-        /*
-         * Now check to see if the question is part of the latest user responses.
-         * If so:
-         *   show page
-         * If not:
-         *   if on "check answers" status, redirect to check answers page
-         *   if on "next question" status, redirect to next question
-         */
-
         var question = submissionRoutingData.GetQuestionForSlug(questionSlug);
+
         var isQuestionInResponses = submissionRoutingData.IsQuestionInResponses(question.Id);
 
         if (isQuestionInResponses)
@@ -111,7 +112,8 @@ public class QuestionsViewBuilder(
             var latestResponseForQuestion = submissionRoutingData.GetLatestResponseForQuestion(
                 question.Id
             );
-            var viewModel = GenerateViewModel(
+
+            var viewModel = await GenerateViewModel(
                 controller,
                 question,
                 submissionRoutingData.QuestionnaireSection,
@@ -154,7 +156,39 @@ public class QuestionsViewBuilder(
                 $"Could not find interstitial page for section {sectionSlug}"
             );
 
-        var viewModel = new PageViewModel(interstitialPage);
+        var isMatWithoutSelectedSchool =
+            CurrentUser.IsMat && string.IsNullOrWhiteSpace(CurrentUser.GroupSelectedSchoolUrn);
+
+        if (isMatWithoutSelectedSchool)
+        {
+            interstitialPage.Content = interstitialPage
+                .Content?.Where(x => x is not ComponentButtonWithEntryReferenceEntry)
+                .ToList();
+        }
+
+        var viewModel = new PageViewModel(interstitialPage)
+        {
+            ShowTrustSchoolAssessmentTable = isMatWithoutSelectedSchool,
+        };
+
+        var section =
+            await ContentfulService.GetSectionBySlugAsync(sectionSlug)
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section for slug {sectionSlug}"
+            );
+
+        if (isMatWithoutSelectedSchool)
+        {
+            viewModel.TrustSchoolAssessments = await BuildTrustSchoolAssessments(
+                categorySlug,
+                sectionSlug,
+                section
+            );
+
+            viewModel.TrustSchoolAssessmentContinueHref =
+                $"/groups/{categorySlug}/{sectionSlug}/self-assessment/{UrlConstants.GroupsSelectSchoolsToAssessSlug}";
+        }
+
         return controller.View(InterstitialPagePath, viewModel);
     }
 
@@ -165,7 +199,7 @@ public class QuestionsViewBuilder(
 
         var question = await ContentfulService.GetQuestionByIdAsync(questionId);
 
-        var viewModel = GenerateViewModel(controller, question, null, null, null, null, null);
+        var viewModel = await GenerateViewModel(controller, question, null, null, null, null, null);
         return controller.View(QuestionView, viewModel);
     }
 
@@ -175,7 +209,7 @@ public class QuestionsViewBuilder(
         string sectionSlug
     )
     {
-        var establishmentId = await GetActiveEstablishmentIdOrThrowException();
+        var establishmentId = await GetRoutingEstablishmentId();
         var section = await ContentfulService.GetSectionBySlugAsync(sectionSlug);
 
         try
@@ -211,6 +245,66 @@ public class QuestionsViewBuilder(
                 new { route = UrlConstants.Home }
             );
         }
+    }
+
+    private async Task<List<TrustSchoolAssessmentRowViewModel>> BuildTrustSchoolAssessments(
+        string categorySlug,
+        string sectionSlug,
+        QuestionnaireSectionEntry section
+    )
+    {
+        var groupId =
+            CurrentUser.UserOrganisationId
+            ?? throw new InvalidDataException(
+                "User is a MAT user but does not have an organisation ID"
+            );
+
+        var schools =
+            await establishmentService.GetEstablishmentLinksWithRecommendationCounts(groupId) ?? [];
+
+        var rows = new List<TrustSchoolAssessmentRowViewModel>();
+
+        foreach (var school in schools)
+        {
+            var schoolEstablishment = await establishmentService.GetEstablishmentByReferenceAsync(
+                school.Urn
+            );
+
+            var submission = schoolEstablishment is null
+                ? null
+                : await _submissionService.GetLatestSubmissionResponsesModel(
+                    schoolEstablishment.Id,
+                    section,
+                    [
+                        SubmissionStatus.InProgress,
+                        SubmissionStatus.CompleteNotReviewed,
+                        SubmissionStatus.CompleteReviewed,
+                    ]
+                );
+
+            var status = submission?.Status ?? SubmissionStatus.NotStarted;
+
+            if (status == SubmissionStatus.CompleteReviewed)
+            {
+                continue;
+            }
+
+            var hasInProgressSubmission =
+                status is SubmissionStatus.InProgress or SubmissionStatus.CompleteNotReviewed;
+
+            rows.Add(
+                new TrustSchoolAssessmentRowViewModel
+                {
+                    SchoolName = school.EstablishmentName,
+                    Status = status,
+                    ViewAnswersHref = hasInProgressSubmission
+                        ? $"/school/{categorySlug}/{sectionSlug}/self-assessment/view-answers?schoolUrn={school.Urn}"
+                        : null,
+                }
+            );
+        }
+
+        return rows;
     }
 
     public async Task<IActionResult> RouteToContinueSelfAssessmentPage(
@@ -250,6 +344,8 @@ public class QuestionsViewBuilder(
         }
         ;
 
+        var establishment =await establishmentService.GetEstablishmentByIdAsync(establishmentId);
+
         var viewModel = new ContinueSelfAssessmentViewModel
         {
             AssessmentStartDate = submissionModel.DateCreated ?? DateTime.UtcNow,
@@ -259,7 +355,8 @@ public class QuestionsViewBuilder(
             TopicName = section.Name,
             Responses = submissionModel.Responses,
             CategorySlug = categorySlug,
-            SectionSlug = sectionSlug
+            SectionSlug = sectionSlug,
+            SchoolName = establishment?.OrgName ?? string.Empty,
         };
 
         return controller.View(ContinueSelfAssessmentView, viewModel);
@@ -323,8 +420,13 @@ public class QuestionsViewBuilder(
         string? returnTo
     )
     {
+        var selectedEstablishmentIds = CurrentUser.IsMat
+            ? _matEstablishmentProvider.GetSelectedEstablishmentIdsFromSession().ToArray()
+            : [];
+
         var userId = GetUserIdOrThrowException();
         var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
+
         var userOrganisationId =
             CurrentUser.UserOrganisationId
             ?? throw new InvalidOperationException(
@@ -341,7 +443,7 @@ public class QuestionsViewBuilder(
 
         if (!controller.ModelState.IsValid)
         {
-            var viewModel = GenerateViewModel(
+            var viewModel = await GenerateViewModel(
                 controller,
                 question,
                 section,
@@ -350,6 +452,7 @@ public class QuestionsViewBuilder(
                 answerViewModel.ChosenAnswer?.Answer.Id,
                 returnTo
             );
+
             viewModel.ErrorMessages = controller
                 .ModelState.Values.SelectMany(value => value.Errors.Select(err => err.ErrorMessage))
                 .ToArray();
@@ -359,21 +462,23 @@ public class QuestionsViewBuilder(
 
         try
         {
-            await _submissionService.SubmitAnswerAsync(
+            await SubmitAnswerForSelectedEstablishments(
                 userId,
-                activeEstablishmentId,
                 userOrganisationId,
-                answerViewModel.ToModel()
+                answerViewModel,
+                activeEstablishmentId,
+                selectedEstablishmentIds
             );
         }
         catch (Exception e)
         {
             Logger.LogError(
                 e,
-                "An error occurred while submitting an answer with the following message: {Message} ",
+                "An error occurred while submitting an answer with the following message: {Message}",
                 e.Message
             );
-            var viewModel = GenerateViewModel(
+
+            var viewModel = await GenerateViewModel(
                 controller,
                 question,
                 section,
@@ -382,15 +487,32 @@ public class QuestionsViewBuilder(
                 questionSlug,
                 null
             );
+
             viewModel.ErrorMessages = ["Save failed. Please try again later."];
 
             return controller.View(QuestionView, viewModel);
         }
 
+        var routingEstablishmentId =
+            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+                ? selectedEstablishmentIds[0]
+                : activeEstablishmentId;
+
+        var targetEstablishmentIdsLog =
+            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+                ? selectedEstablishmentIds
+                : [activeEstablishmentId];
+
+        Logger.LogInformation(
+            "Submitting answer for establishment IDs: {TargetEstablishmentIds}",
+            string.Join(", ", targetEstablishmentIdsLog)
+        );
+
         var nextQuestion = await _questionService.GetNextUnansweredQuestion(
-            activeEstablishmentId,
+            routingEstablishmentId,
             section
         );
+
         if (nextQuestion is not null)
         {
             return controller.RedirectToAction(
@@ -406,8 +528,60 @@ public class QuestionsViewBuilder(
             );
         }
 
-        // No next questions so check answers
         return controller.RedirectToCheckAnswers(categorySlug, sectionSlug);
+    }
+
+    private async Task SubmitAnswerForSelectedEstablishments(
+        int userId,
+        int userOrganisationId,
+        SubmitAnswerInputViewModel answerViewModel,
+        int activeEstablishmentId,
+        int[] selectedEstablishmentIds
+    )
+    {
+        var establishmentIds =
+            CurrentUser.IsMat && selectedEstablishmentIds.Length > 0
+                ? selectedEstablishmentIds
+                : [activeEstablishmentId];
+
+        foreach (var establishmentId in establishmentIds)
+        {
+            await _submissionService.SubmitAnswerAsync(
+                userId,
+                establishmentId,
+                userOrganisationId,
+                answerViewModel.ToModel()
+            );
+        }
+    }
+
+    private async Task PopulateMatSelectedSchools(QuestionViewModel viewModel)
+    {
+        var selectedSchoolNames = await _matEstablishmentProvider.GetSelectedSchoolNamesAsync(
+            CurrentUser
+        );
+
+        viewModel.IsMatBulkAssessment = _matEstablishmentProvider.IsBulkAssessment();
+
+        viewModel.IsMatMultiSchoolAssessment = selectedSchoolNames.Count > 0;
+        viewModel.SelectedSchoolCount = selectedSchoolNames.Count;
+        viewModel.SelectedSchoolNames = selectedSchoolNames.ToList();
+    }
+
+    private async Task<int> GetRoutingEstablishmentId()
+    {
+        var activeEstablishmentId = await GetActiveEstablishmentIdOrThrowException();
+
+        if (!CurrentUser.IsMat)
+        {
+            return activeEstablishmentId;
+        }
+
+        var selectedEstablishmentId = _matEstablishmentProvider
+            .GetSelectedEstablishmentIdsFromSession()
+            .FirstOrDefault();
+
+        return selectedEstablishmentId > 0 ? selectedEstablishmentId : activeEstablishmentId;
     }
 
     private async Task<string> BuildErrorMessage()
@@ -426,7 +600,7 @@ public class QuestionsViewBuilder(
         return errorMessage;
     }
 
-    private static QuestionViewModel GenerateViewModel(
+    private async Task<QuestionViewModel> GenerateViewModel(
         Controller controller,
         QuestionnaireQuestionEntry question,
         QuestionnaireSectionEntry? section,
@@ -454,7 +628,7 @@ public class QuestionsViewBuilder(
             nextQuestion.Answers = [];
         }
 
-        return new QuestionViewModel()
+        var viewModel = new QuestionViewModel
         {
             Question = question,
             AnswerSysId = latestAnswerContentfulId,
@@ -463,5 +637,9 @@ public class QuestionsViewBuilder(
             SectionSlug = sectionSlug,
             SectionId = section?.Id,
         };
+
+        await PopulateMatSelectedSchools(viewModel);
+
+        return viewModel;
     }
 }

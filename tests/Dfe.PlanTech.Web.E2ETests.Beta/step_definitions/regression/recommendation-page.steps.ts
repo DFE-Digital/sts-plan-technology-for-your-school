@@ -278,3 +278,21 @@ Then(
     printLink.click();
   },
 );
+
+Then(
+  'I click the share recommendations link', async function () {
+    const container = this.page.locator(
+      '.govuk-grid-column-one-third-from-desktop.govuk-float-right',
+    );
+    const shareRecommendationLink = container.locator('a', {
+      hasText: `Share this recommendation`,
+    });
+    await expect(shareRecommendationLink).toBeVisible();
+    shareRecommendationLink.click();
+  },
+);
+
+When('I click the share recommendations button', async function () {
+  const link = this.page.locator('a.govuk-pagination__link[rel="next"]:visible');
+  await link.click();
+});

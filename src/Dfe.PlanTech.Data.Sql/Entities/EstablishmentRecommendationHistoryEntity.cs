@@ -1,11 +1,9 @@
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
-using Dfe.PlanTech.Core.Helpers;
+using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Interfaces;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
-[Table("establishmentRecommendationHistory")]
 public class EstablishmentRecommendationHistoryEntity : IUserActionEntity
 {
     public int Id { get; init; } // New identity primary key
@@ -27,9 +25,9 @@ public class EstablishmentRecommendationHistoryEntity : IUserActionEntity
 
     public DateTime DateCreated { get; set; } = DateTime.UtcNow;
 
-    public string? PreviousStatus { get; set; }
+    public RecommendationStatus? PreviousStatus { get; set; }
 
-    public string? NewStatus { get; set; } = null!;
+    public RecommendationStatus? NewStatus { get; set; } = null!;
 
     public string? NoteText { get; set; }
 
@@ -45,10 +43,8 @@ public class EstablishmentRecommendationHistoryEntity : IUserActionEntity
             MatEstablishmentId = MatEstablishmentId,
             ResponseId = ResponseId,
             DateCreated = DateCreated,
-            PreviousStatus = PreviousStatus is null
-                ? null
-                : PreviousStatus.GetRecommendationStatusEnumValue()!,
-            NewStatus = NewStatus.GetRecommendationStatusEnumValue()!,
+            PreviousStatus = PreviousStatus,
+            NewStatus = NewStatus,
             NoteText = NoteText,
             UserActionId = UserActionId,
         };

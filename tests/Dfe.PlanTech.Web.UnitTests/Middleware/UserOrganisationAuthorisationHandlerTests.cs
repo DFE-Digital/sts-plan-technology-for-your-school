@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Infrastructure.SignIn.Models;
 using Dfe.PlanTech.Web.Authorisation.Handlers;
 using Dfe.PlanTech.Web.Authorisation.Requirements;

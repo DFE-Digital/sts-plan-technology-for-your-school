@@ -8,7 +8,11 @@ internal class UserSettingsEntityConfiguration : IEntityTypeConfiguration<UserSe
 {
     public void Configure(EntityTypeBuilder<UserSettingsEntity> builder)
     {
-        builder.HasKey(settings => settings.UserId);
-        builder.Property(settings => settings.SortOrder).IsRequired(false);
+        builder.ToTable("userSettings", "dbo");
+
+        builder.HasKey(x => x.UserId);
+
+        builder.Property(x => x.UserId).IsRequired();
+        builder.Property(x => x.SortOrder).IsRequired(false);
     }
 }

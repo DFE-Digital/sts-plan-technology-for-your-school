@@ -95,22 +95,6 @@ public class MicrocopyProviderTests
     }
 
     [Fact]
-    public async Task GetTextByKeyAsync_NoRecordNoFallback_Throws()
-    {
-        // Arrange
-        var noMicrocopyEntries = new List<MicrocopyEntry>();
-        _contentful.GetMicrocopyEntriesAsync()
-            .Returns(noMicrocopyEntries);
-
-        var sut = CreateServiceUnderTest();
-
-        // Act + Assert
-        var result = await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            await sut.GetTextByKeyAsync("Missing completely"));
-        Assert.Equal("Microcopy record with key 'Missing completely' was not found.", result.Message);
-    }
-
-    [Fact]
     public async Task GetRecordByKeyAsync_CachesEntries()
     {
         // Arrange

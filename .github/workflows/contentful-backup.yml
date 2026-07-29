@@ -9,15 +9,8 @@ on:
         required: true
         type: choice
         options:
-          [
-            "Dev",
-            "Tst",
-            "Staging",
-            "Production",
-            "StagingUnprotected",
-            "ProductionUnprotected",
-          ]
-        default: "Staging"
+          ['Dev', 'Tst', 'Staging', 'Production', 'StagingUnprotected', 'ProductionUnprotected']
+        default: 'Staging'
 
 jobs:
   backup_content:
@@ -28,9 +21,9 @@ jobs:
     environment: ${{ inputs.environment || 'StagingUnprotected' }}
     name: Backup content for ${{ inputs.environment || 'Staging' }}
     env:
-      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-kv
-      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
-      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+      az_keyvault_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv
+      az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
+      az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
       az_keyvault_contentful_environment: contentful--environment
       az_keyvault_contentful_space_id: contentful--spaceid
       az_keyvault_contentful_delivery_token: contentful--deliveryapikey
@@ -38,7 +31,7 @@ jobs:
       SQL_IP_NAME: export-processor
       USE_PREVIEW: true
       SAVE_FILE: true
-      OUTPUT_FILE_DIR: "./output/"
+      OUTPUT_FILE_DIR: './output/'
 
     steps:
       - name: Checkout Repository

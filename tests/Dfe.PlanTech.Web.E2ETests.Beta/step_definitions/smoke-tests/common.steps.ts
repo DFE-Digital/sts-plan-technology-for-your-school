@@ -28,6 +28,10 @@ Given('I visit the homepage', async function () {
   await this.page.goto(`${process.env.URL}home`);
 });
 
+Then('I click the link {string}', async function (linkName: string) {
+  await this.page.getByRole('link', { name: linkName }).first().click();
+});
+
 Given('I visit the self-assessment-testing page', async function () {
   await this.page.goto(`${process.env.URL}self-assessment-testing`);
 });
@@ -303,3 +307,16 @@ Then('I should see a confirmation panel saying {string}', async function (expect
   await expect(panelTitle).toBeVisible();
   await expect(panelTitle).toHaveText(expectedText);
 });
+
+
+When(
+  'I click the link to view the recommendations for {string}',
+  async function (categoryName: string) {
+    await this.page
+      .getByRole('link', {
+        name: `View the recommendations for ${categoryName}`,
+        exact: true,
+      })
+      .click();
+  }
+);

@@ -1,10 +1,8 @@
-using System.ComponentModel.DataAnnotations.Schema;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Data.Sql.Entities;
 
-[Table("groupReadActivity")]
 public class GroupReadActivityEntity : IUserActionEntity
 {
     public int Id { get; set; }
@@ -31,7 +29,7 @@ public class GroupReadActivityEntity : IUserActionEntity
             SelectedEstablishmentId = SelectedEstablishmentId,
             SelectedEstablishmentName = SelectedEstablishmentName,
             DateSelected = DateSelected,
-            UserActionId = UserActionId
+            UserActionId = UserActionId,
         };
     }
 }

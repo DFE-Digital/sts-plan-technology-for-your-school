@@ -26,5 +26,6 @@
   "[python]": {
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.tabSize": 2
-  }
+  },
+  "python-envs.defaultEnvManager": "ms-python.python:system"
 }

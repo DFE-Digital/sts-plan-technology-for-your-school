@@ -8,12 +8,14 @@ internal class UserEntityConfiguration : IEntityTypeConfiguration<UserEntity>
 {
     public void Configure(EntityTypeBuilder<UserEntity> builder)
     {
-        builder.HasKey(user => user.Id);
-        builder.Property(user => user.Id).ValueGeneratedOnAdd();
-        builder.Property(user => user.DfeSignInRef).HasMaxLength(30);
-        builder.Property(user => user.DateCreated).ValueGeneratedOnAdd();
-        builder.Property(user => user.DateLastUpdated).HasColumnType("datetime").HasDefaultValue();
-
+        builder.ToTable("user", "dbo");
         builder.ToTable(tb => tb.HasTrigger("tr_user"));
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.DfeSignInRef).HasMaxLength(30).IsRequired();
+        builder.Property(x => x.DateCreated).ValueGeneratedOnAdd();
+        builder.Property(x => x.DateLastUpdated).HasDefaultValue();
     }
 }

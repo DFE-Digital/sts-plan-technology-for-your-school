@@ -5,8 +5,18 @@
 @section NavButton {
     @if (Model.Page.DisplayBackButton)
     {
-        await Html.RenderPartialAsync("BackButton", Model);
+        if (Model.ShowTrustSchoolAssessmentTable)
+        {
+            <govuk-back-link href="/groups/@UrlConstants.GroupSelfAssessmentSelectionSlug">
+                Back to select a self-assessment
+            </govuk-back-link>
+        }
+        else
+        {
+            await Html.RenderPartialAsync("BackButton", Model);
+        }
     }
+
     @if (Model.Page.DisplayHomeButton)
     {
         await Html.RenderPartialAsync("HomeButton", Model);
@@ -54,6 +64,7 @@
     @if ((isHomeCategoryPage || isAutomatedTestingHomePage) && categories is not null && categories.Any())
     {
         await Html.RenderPartialAsync("Components/Page", Model.Page);
+
         var homeHeader = await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.HomeHeader);
 
         <h2 class="govuk-heading-l">@homeHeader</h2>
@@ -67,6 +78,11 @@
     else
     {
         await Html.RenderPartialAsync("Components/Page", Model.Page);
+
+        if (Model.ShowTrustSchoolAssessmentTable)
+        {
+            await Html.RenderPartialAsync("Components/TrustSchoolAssessmentTable", Model);
+        }
     }
 
     @section RelatedActions {
@@ -97,13 +113,6 @@
 @section AfterContent {
     @foreach (var content in Model.Page.AfterContentContent)
     {
-        if (Model.Page.HasBanner && content.GetType() == typeof(ComponentBannerEntry))
-        {
-            await Html.RenderPartialAsync("Banner", content);
-        }
-        else
-        {
-            await Html.RenderPartialAsync("Components/PageComponentFactory", content);
-        }
+        await Html.RenderPartialAsync("Components/PageComponentFactory", content);
     }
 }

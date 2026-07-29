@@ -2,11 +2,9 @@ using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Infrastructure.SignIn.Extensions;
 using Dfe.PlanTech.Infrastructure.SignIn.Models;
 using Dfe.PlanTech.Web.Authorisation.Requirements;
 using Dfe.PlanTech.Web.Binders;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Microsoft.AspNetCore.Authorization;
 
@@ -45,16 +43,19 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
         {
             context.Succeed(requirement);
 
-            try
+            if (userAuthorisationResult.UserAuthorisationStatus.IsAuthenticated)
             {
-                var userActionTrackingService =
-                    httpContext.RequestServices.GetRequiredService<IUserActionTrackingService>();
+                try
+                {
+                    var userActionTrackingService =
+                        httpContext.RequestServices.GetRequiredService<IUserActionTrackingService>();
 
-                await userActionTrackingService.RecordAsync();
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to record user action for authorised request.");
+                    await userActionTrackingService.RecordActionAsync();
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to record user action for authorised request.");
+                }
             }
         }
         else

@@ -6,8 +6,8 @@ namespace Dfe.PlanTech.Application.Services.Interfaces;
 public interface IRecommendationService
 {
     Task<SqlEstablishmentRecommendationHistoryDto?> GetLatestRecommendationHistoryAsync(
-        string recommendationContentfulReference,
-        int establishmentId
+        int establishmentId,
+        string recommendationContentfulReference
     );
 
     Task<IEnumerable<SqlEstablishmentRecommendationHistoryDto>> GetRecommendationHistoryAsync(

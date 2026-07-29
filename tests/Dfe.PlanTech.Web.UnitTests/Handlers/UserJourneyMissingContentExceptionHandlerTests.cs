@@ -1,10 +1,10 @@
 using System.Security.Claims;
+using Dfe.PlanTech.Application.Providers;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Web.Context;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Handlers;
 using Microsoft.AspNetCore.Http;
@@ -18,7 +18,7 @@ namespace Dfe.PlanTech.Web.UnitTests.Handlers;
 
 public class UserJourneyMissingContentExceptionHandlerTests
 {
-    private static (CurrentUser currentUser, HttpContext http) MakeCurrentUser(
+    private static (CurrentUserProvider currentUser, HttpContext http) MakeCurrentUser(
         int? establishmentId = null
     )
     {
@@ -34,8 +34,8 @@ public class UserJourneyMissingContentExceptionHandlerTests
         http.User = new ClaimsPrincipal(identity);
         var accessor = new HttpContextAccessor { HttpContext = http };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        return (new CurrentUser(accessor, establishmentService, logger), http);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        return (new CurrentUserProvider(accessor, establishmentService, logger), http);
     }
 
     private static Controller MakeController(HttpContext http)
@@ -134,7 +134,7 @@ public class UserJourneyMissingContentExceptionHandlerTests
         var thrown = await Assert.ThrowsAsync<InvalidDataException>(() =>
             sut.Handle(controller, ex)
         );
-        Assert.Contains(nameof(CurrentUser.GetActiveEstablishmentIdAsync), thrown.Message);
+        Assert.Contains(nameof(CurrentUserProvider.GetActiveEstablishmentIdAsync), thrown.Message);
 
         await submissionSvc
             .DidNotReceiveWithAnyArgs()

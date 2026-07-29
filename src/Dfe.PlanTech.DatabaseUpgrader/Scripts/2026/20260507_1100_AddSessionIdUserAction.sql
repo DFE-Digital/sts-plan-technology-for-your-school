@@ -1,0 +1,3 @@
+ALTER TABLE dbo.userAction
+ADD sessionId UNIQUEIDENTIFIER NULL;
+GO

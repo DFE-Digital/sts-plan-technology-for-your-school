@@ -8,14 +8,18 @@ internal class QuestionEntityConfiguration : IEntityTypeConfiguration<QuestionEn
 {
     public void Configure(EntityTypeBuilder<QuestionEntity> builder)
     {
-        builder.ToTable("question");
-        builder.HasKey(question => question.Id);
-        builder.Property(question => question.Id).ValueGeneratedOnAdd();
-        builder.Property(question => question.QuestionText).HasMaxLength(4000); // NVARCHAR max length
-        builder.Property(question => question.ContentfulRef).HasMaxLength(50);
-        builder.Property(question => question.DateCreated).ValueGeneratedOnAdd();
-        builder.Property(b => b.UserActionId)
-               .HasColumnName("userActionId")
-               .IsRequired(false);
+        builder.ToTable("question", "dbo");
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder
+            .Property(x => x.QuestionText)
+            .HasMaxLength(4000) // NVARCHAR max length
+            .IsRequired(false);
+        builder.Property(x => x.ContentfulRef).HasMaxLength(100).IsRequired();
+        builder.Property(x => x.DateCreated).ValueGeneratedOnAdd();
+        builder.Property(x => x.Order).IsRequired(false);
+        builder.Property(x => x.UserActionId).IsRequired(false);
     }
 }

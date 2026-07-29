@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Extensions;
+using Dfe.PlanTech.Core.Helpers;
 
 namespace Dfe.PlanTech.Core.UnitTests.Extensions;
 
@@ -76,26 +77,6 @@ public class EnumExtensionsTests
         var displayName = value.GetDisplayName();
 
         Assert.Equal("Third", displayName);
-    }
-
-    [Fact]
-    public void GetDescription_UsesDescription_WhenAttributePresent()
-    {
-        var value = SampleEnum.Second;
-
-        var description = value.GetDescription();
-
-        Assert.Equal("The second sample value", description);
-    }
-
-    [Fact]
-    public void GetDescription_FallsBackToLowercaseName_WhenNoDisplayAttribute()
-    {
-        var value = SampleEnum.Third;
-
-        var description = value.GetDescription();
-
-        Assert.Equal("third", description);
     }
 
     [Fact]

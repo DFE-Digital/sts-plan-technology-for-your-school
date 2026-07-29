@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Dfe.PlanTech.Application.Providers;
 using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Rendering.Contentful;
@@ -8,7 +9,6 @@ using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Rendering;
 using Microsoft.Extensions.DependencyInjection;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Dfe.PlanTech.Application;
 
@@ -24,12 +24,16 @@ public static class ServiceCollectionExtensions
             .AddScoped<IQuestionService, QuestionService>()
             .AddScoped<IRecommendationService, RecommendationService>()
             .AddScoped<ISubmissionService, SubmissionService>()
+            .AddScoped<IGroupService, GroupService>()
+            .AddScoped<IUserContentViewService, UserContentViewService>()
             .AddScoped<IUserService, UserService>();
     }
 
     public static IServiceCollection AddApplicationProviders(this IServiceCollection services)
     {
-        return services.AddScoped<IMicrocopyProvider, MicrocopyProvider>();
+        return services
+            .AddScoped<IMicrocopyProvider, MicrocopyProvider>()
+            .AddScoped<IBannerConditionsContextProvider, BannerConditionsContextProvider>();
     }
 
     public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)
@@ -41,6 +45,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<ISignInWorkflow, SignInWorkflow>()
             .AddScoped<IRecommendationWorkflow, RecommendationWorkflow>()
             .AddScoped<ISubmissionWorkflow, SubmissionWorkflow>()
+            .AddScoped<IGroupWorkflow, GroupWorkflow>()
             .AddScoped<IUserWorkflow, UserWorkflow>();
     }
 

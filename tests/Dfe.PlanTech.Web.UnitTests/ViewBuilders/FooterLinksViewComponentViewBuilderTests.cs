@@ -1,6 +1,6 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -12,12 +12,12 @@ public class FooterLinksViewComponentViewBuilderTests
 {
     private static FooterLinksViewComponentViewBuilder CreateServiceUnderTest(
         IContentfulService? contentful = null,
-        ICurrentUser? currentUser = null,
+        ICurrentUserProvider? currentUser = null,
         ILogger<FooterLinksViewComponentViewBuilder>? mockLogger = null
     )
     {
         contentful ??= Substitute.For<IContentfulService>();
-        currentUser ??= Substitute.For<ICurrentUser>();
+        currentUser ??= Substitute.For<ICurrentUserProvider>();
         mockLogger ??= Substitute.For<ILogger<FooterLinksViewComponentViewBuilder>>();
 
         return new FooterLinksViewComponentViewBuilder(mockLogger, contentful, currentUser);

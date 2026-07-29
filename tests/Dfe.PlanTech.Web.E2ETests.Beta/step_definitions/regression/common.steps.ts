@@ -282,3 +282,15 @@ Then('I should see a confirmation panel saying {string}', async function (expect
   await expect(panelTitle).toBeVisible();
   await expect(panelTitle).toHaveText(expectedText);
 });
+
+When(
+  'I click the link to view the recommendations for {string}',
+  async function (categoryName: string) {
+    await this.page
+      .getByRole('link', {
+        name: `View the recommendations for ${categoryName}`,
+        exact: true,
+      })
+      .click();
+  }
+);

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.UnitTests.Shared.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -33,7 +34,7 @@ public class RedisCacheTests : RedisCacheTestsBase
             .Returns(callinfo =>
             {
                 var arg = callinfo.ArgAt<string>(0);
-                return $"Dependency:{arg}";
+                return $"{RedisConstants.ContentfulDependencyPrefix}{arg}";
             });
     }
 

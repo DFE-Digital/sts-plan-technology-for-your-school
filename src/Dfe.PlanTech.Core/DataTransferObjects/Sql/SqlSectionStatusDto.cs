@@ -11,5 +11,10 @@ public class SqlSectionStatusDto : ISqlDto
     public DateTime? LastCompletionDate { get; set; }
     public DateTime DateCreated { get; set; }
     public DateTime DateUpdated { get; set; }
+    public Guid? CreatedUserActionId { get; set; }
+
+    public Guid? LastUpdatedUserActionId { get; set; }
+
+    public Guid? CompletedUserActionId { get; set; }
     public SubmissionStatus Status { get; set; }
 }

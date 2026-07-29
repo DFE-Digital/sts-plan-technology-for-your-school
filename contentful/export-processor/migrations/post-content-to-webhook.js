@@ -110,7 +110,7 @@ async function tryPostContent(entry) {
   let errorSleepTime = SleepTimeInMs.OnError;
 
   while (true) {
-    const result = await postToWebook(entry);
+    const result = await postToWebHook(entry);
 
     if (result && result.success) {
       return result;
@@ -131,7 +131,7 @@ async function tryPostContent(entry) {
   }
 }
 
-async function postToWebook(content) {
+async function postToWebHook(content) {
   const minifiedContent = minifyContent(content);
 
   const body = JSON.stringify(minifiedContent);

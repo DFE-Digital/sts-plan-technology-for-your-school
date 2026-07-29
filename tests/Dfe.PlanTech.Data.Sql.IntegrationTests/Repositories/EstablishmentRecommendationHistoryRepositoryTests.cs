@@ -54,8 +54,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment1.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "First history entry for establishment 1",
         };
 
@@ -64,8 +64,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment1.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.Complete.ToString(),
-            NewStatus = "Reviewed",
+            PreviousStatus = RecommendationStatus.Complete,
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = "Second history entry for establishment 1",
         };
 
@@ -74,8 +74,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment2.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "History entry for different establishment",
         };
 
@@ -149,8 +149,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment1.Id,
             RecommendationId = recommendation1.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "First history entry for establishment 1",
         };
 
@@ -159,8 +159,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment1.Id,
             RecommendationId = recommendation2.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.Complete.ToString(),
-            NewStatus = "Reviewed",
+            PreviousStatus = RecommendationStatus.Complete,
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = "Second history entry for establishment 1",
         };
 
@@ -234,8 +234,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "Test history entry for existing establishment",
         };
 
@@ -287,8 +287,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation1.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "History for first recommendation",
         };
 
@@ -297,8 +297,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation2.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "History for second recommendation",
         };
 
@@ -307,8 +307,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation1.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.Complete.ToString(),
-            NewStatus = "Reviewed",
+            PreviousStatus = RecommendationStatus.Complete,
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = "Second history entry for first recommendation",
         };
 
@@ -367,8 +367,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             MatEstablishmentId = matEstablishment.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "History entry with MAT establishment reference",
         };
 
@@ -418,7 +418,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = "Oldest history entry - initial status",
             DateCreated = DateTime.UtcNow.AddDays(-5),
         };
@@ -428,8 +428,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.Complete.ToString(),
-            NewStatus = "Reviewed",
+            PreviousStatus = RecommendationStatus.Complete,
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = "Newest history entry - final review",
             DateCreated = DateTime.UtcNow.AddDays(-1),
         };
@@ -439,8 +439,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "Middle history entry - completion",
             DateCreated = DateTime.UtcNow.AddDays(-3),
         };
@@ -505,7 +505,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = "Initial status",
             DateCreated = DateTime.UtcNow.AddDays(-5),
         };
@@ -515,8 +515,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "Latest status - should be returned",
             DateCreated = DateTime.UtcNow.AddDays(-1),
         };
@@ -526,8 +526,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             EstablishmentId = establishment.Id,
             RecommendationId = recommendation.Id,
             UserId = user.Id,
-            PreviousStatus = RecommendationStatus.InProgress.ToString(),
-            NewStatus = "InReview",
+            PreviousStatus = RecommendationStatus.InProgress,
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = "Middle status",
             DateCreated = DateTime.UtcNow.AddDays(-3),
         };
@@ -548,7 +548,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         // Assert
         Assert.NotNull(result);
         Assert.Equal("Latest status - should be returned", result.NoteText);
-        Assert.Equal(RecommendationStatus.Complete.ToString(), result.NewStatus);
+        Assert.Equal(RecommendationStatus.Complete, result.NewStatus);
         Assert.Equal(latestHistory.DateCreated, result.DateCreated);
     }
 
@@ -626,7 +626,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation1.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "History for first recommendation",
         };
 
@@ -681,7 +681,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "History for first establishment",
         };
 
@@ -730,7 +730,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = "Only history entry",
         };
 
@@ -747,7 +747,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         Assert.NotNull(result);
         Assert.Equal(singleHistory.Id, result.Id);
         Assert.Equal("Only history entry", result.NoteText);
-        Assert.Equal(RecommendationStatus.InProgress.ToString(), result.NewStatus);
+        Assert.Equal(RecommendationStatus.InProgress, result.NewStatus);
     }
 
     [Fact]
@@ -782,7 +782,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "History for valid establishment",
         };
 
@@ -831,7 +831,7 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
             RecommendationId = recommendation.Id,
             UserId = user.Id,
             PreviousStatus = null,
-            NewStatus = RecommendationStatus.Complete.ToString(),
+            NewStatus = RecommendationStatus.Complete,
             NoteText = "History for valid recommendation",
         };
 
@@ -909,8 +909,8 @@ public class EstablishmentRecommendationHistoryRepositoryTests : DatabaseIntegra
         Assert.Equal(recommendation.Id, createdHistory.RecommendationId);
         Assert.Equal(user.Id, createdHistory.UserId);
         Assert.Null(createdHistory.MatEstablishmentId);
-        Assert.Equal(RecommendationStatus.InProgress.ToString(), createdHistory.PreviousStatus);
-        Assert.Equal(RecommendationStatus.Complete.ToString(), createdHistory.NewStatus);
+        Assert.Equal(RecommendationStatus.InProgress, createdHistory.PreviousStatus);
+        Assert.Equal(RecommendationStatus.Complete, createdHistory.NewStatus);
         Assert.Equal("Recommendation completed successfully", createdHistory.NoteText);
         Assert.True(createdHistory.DateCreated >= beforeCreate);
         Assert.True(createdHistory.DateCreated <= afterCreate);

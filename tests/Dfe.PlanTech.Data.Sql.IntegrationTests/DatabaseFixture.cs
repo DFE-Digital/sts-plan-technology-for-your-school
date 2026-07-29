@@ -17,8 +17,7 @@ public class DatabaseFixture : IAsyncLifetime
 
     public async ValueTask InitializeAsync()
     {
-        DbContainer = new MsSqlBuilder()
-            .WithImage("mcr.microsoft.com/mssql/server:2022-latest")
+        DbContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2022-latest")
             .WithPassword(TestContainerPassword)
             .Build();
         await DbContainer.StartAsync();

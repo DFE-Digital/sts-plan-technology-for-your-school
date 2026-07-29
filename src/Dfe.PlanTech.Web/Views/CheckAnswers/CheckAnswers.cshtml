@@ -9,67 +9,165 @@
 @section NavButton {
     @{
         await Html.RenderPartialAsync("BackButton");
+
+        @if (Model?.IsMatMultiSchoolAssessment == true && Model?.IsMatBulkAssessment == true)
+        {
+            var schoolLabel =
+                Model.SelectedSchoolCount == 1
+                    ? "school"
+                    : "schools";
+
+            <details class="govuk-details govuk-!-margin-top-n6" close>
+                <summary class="govuk-details__summary">
+                    <span class="govuk-details__summary-text">
+                        You are submitting the self-assessment for
+                        @Model.SelectedSchoolCount
+                        @schoolLabel
+                    </span>
+                </summary>
+
+                <div class="govuk-details__text">
+                    @foreach (var schoolName in Model.SelectedSchoolNames)
+                    {
+                        <p class="govuk-body govuk-!-margin-bottom-0">
+                            @schoolName
+                        </p>
+                    }
+                </div>
+            </details>
+        }
     }
 }
 
-@{
-    await Html.RenderPartialAsync("PrintButton", Model);
+@section RelatedActions {
+    @{
+        await Html.RenderPartialAsync("PrintButton", Model);
+    }
 }
 
 <div id="checkYourAnswers-page">
     <span class="govuk-caption-xl">@Model.SectionName</span>
+
     @{
-        await Html.RenderPartialAsync("Components/PageComponentFactory", Model.Title);
+        await Html.RenderPartialAsync(
+        "Components/PageComponentFactory",
+        Model.Title
+        );
     }
+
     <dl class="govuk-summary-list govuk-!-margin-bottom-9">
-        @foreach (var questionWithAnswer in Model.SubmissionResponses?.Responses ?? [])
+        @foreach (
+                var questionWithAnswer
+                in Model.SubmissionResponses?.Responses ?? []
+                )
         {
-            var anchorLabel = $"your answer for {questionWithAnswer.QuestionText}";
+            var anchorLabel =
+            $"your answer for {questionWithAnswer.QuestionText}";
 
             <div class="govuk-summary-list__row">
                 <dt class="govuk-summary-list__key spacer">
                     @questionWithAnswer.QuestionText
                 </dt>
+
                 <dd class="govuk-summary-list__value spacer">
                     @questionWithAnswer.AnswerText
                 </dd>
+
                 <dd class="noprint govuk-summary-list__actions spacer">
-                    <a asp-controller="Questions" asp-action="GetQuestionBySlug"
+                    <a asp-controller="Questions"
+                       asp-action="GetQuestionBySlug"
                        asp-route-categorySlug="@Model.CategorySlug"
-                       asp-route-sectionSlug="@Model.SectionSlug" class="govuk-link"
+                       asp-route-sectionSlug="@Model.SectionSlug"
                        asp-route-questionSlug="@questionWithAnswer.QuestionSlug"
+                       class="govuk-link"
                        title="@questionWithAnswer.QuestionText">
-                        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.CheckAnswersChangeLink)
-                        <span class="govuk-visually-hidden">@anchorLabel</span>
-                    </a>
-                </dd>
+                        @await Microcopy.GetTextByKeyAsync(
+                        ContentfulMicrocopyConstants.CheckAnswersChangeLink
+                                        )
+
+                    <span class="govuk-visually-hidden">
+                        @anchorLabel
+                    </span>
+                </a>
+            </dd>
+        </div>
+                }
+    </dl>
+
+    <form asp-controller="@nameof(ReviewAnswersController).GetControllerNameSlug()"
+          asp-action="@nameof(ReviewAnswersController.ConfirmCheckAnswers)"
+          method="post"
+          class="noprint">
+        <input type="hidden"
+               name="submissionId"
+               value="@Model.SubmissionId" />
+
+        <input type="hidden"
+               name="categorySlug"
+               value="@Model.CategorySlug" />
+
+        <input type="hidden"
+               name="sectionSlug"
+               value="@Model.SectionSlug" />
+
+        <input type="hidden"
+               name="sectionName"
+               value="@Model.SectionName" />
+
+        @if (Model.IsMatMultiSchoolAssessment == true)
+        {
+            var isSingleSchool = Model.SelectedSchoolCount == 1;
+            var assessmentText = isSingleSchool ? "self-assessment" : "self-assessments";
+            var schoolText = isSingleSchool ? "school" : "schools";
+
+            <div>
+                <h2>What happens next</h2>
+                <p class="govuk-body govuk-!-margin-bottom-6">
+                    You're submitting the @Model.SectionName @assessmentText for @Model.SelectedSchoolCount @schoolText:
+                </p>
+
+                <ul class="govuk-list govuk-list--bullet">
+                    @foreach (var schoolName in Model.SelectedSchoolNames)
+                    {
+                        <li>@schoolName</li>
+                    }
+                </ul>
+                <p>
+                    You'll get recommendations to help your schools meet the @Model.CategoryName.ToLower() standard. Your self-assessment answers will be used to give these recommendations a progress status.
+                </p>
             </div>
         }
-    </dl>
-    <form asp-controller="@nameof(ReviewAnswersController).GetControllerNameSlug()" asp-action="@nameof(ReviewAnswersController.ConfirmCheckAnswers)" method="post" class="noprint">
-        <input type="hidden" name="submissionId" value="@Model.SubmissionId" />
-        <input type="hidden" name="categorySlug" value="@Model.CategorySlug" />
-        <input type="hidden" name="sectionSlug" value="@Model.SectionSlug">
-        <input type="hidden" name="sectionName" value="@Model.SectionName">
+        else
+        {
 
-        @{
             foreach (var content in Model.Content ?? [])
             {
                 await Html.RenderPartialAsync("Components/PageComponentFactory", content);
             }
         }
 
-        <govuk-button class="govuk-!-margin-right-5" type="submit" prevent-double-click="true">
-            @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.CheckAnswersSubmitButton)
+        <govuk-button class="govuk-!-margin-right-5"
+                      type="submit"
+                      prevent-double-click="true">
+            @await Microcopy.GetTextByKeyAsync(
+            ContentfulMicrocopyConstants.CheckAnswersSubmitButton
+                        )
         </govuk-button>
 
         @if (Model.ErrorMessage != null)
         {
             <p class="govuk-error-message">
-                <span class="govuk-visually-hidden">Error:</span> @Model.ErrorMessage
-                <a class="govuk-error-message" href="@UrlConstants.HomePage">Return to the homepage</a>
+                <span class="govuk-visually-hidden">
+                    Error:
+                </span>
+
+                @Model.ErrorMessage
+
+                <a class="govuk-error-message"
+                   href="@UrlConstants.HomePage">
+                    Return to the homepage
+                </a>
             </p>
         }
-
     </form>
 </div>

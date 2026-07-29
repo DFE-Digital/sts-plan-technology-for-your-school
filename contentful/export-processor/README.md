@@ -1,175 +1,128 @@
-# Contentful Export Processing
+# Export Processor
 
-Classes/functions/etc to process exported Contentful entries for various purposes.
+A shared library and standalone tool for exporting Contentful data and processing it into various outputs: user journey paths, automated QA test suites, recommendations CSVs, and content validation reports.
 
-## Core Classes
+Also used as a local package dependency by `broken-link-checker`.
 
-### Data Mapper
+## What it produces
 
-The [data mapper](./src/contentful/export-processor/data-mapper.js) class is the main class.
+| Output | Description |
+|---|---|
+| `plan-tech-test-suite.csv` | Manual QA test cases — one row per test step per subtopic |
+| `plan-tech-test-suite-appendix.csv` | Supporting data for verifying test suite correctness |
+| `<subtopic>-paths.json` | All possible user journey paths through a subtopic |
+| `subtopic-paths-overview.json` | Summary statistics (journey counts per maturity, path lengths) |
+| `recommendations.csv` | All recommendations mapped to answers, with staging preview links |
+| `contentful-errors.md` | Validation report — missing references, unreachable questions, orphaned chunks |
 
-It takes a Contentful export in its constuctor, then performs various data mapping functions.
+## Architecture
 
-1. It uses the content type definitions to know what content type(s) a content reference ID could be referring to
-2. Using this, it then edits all content and, where there is a reference, replaces it with the actual referenced content (e.g. if a `question` has an `answers` field containing ["id1"], it'll find `answer` with id `id1` and edit the array to be `[{id:"id1", text: "answer text"}]`)
-3. It maps each subtopic when the field `mappedSections` is called. This takes all the subtopics, gets paths through them for each question, paths for each maturity, what recommendation content would be retrieved for these, etc..
+```mermaid
+flowchart TD
+    CF[Contentful API] --> Exporter
+    Exporter --> DataMapper
+    DataMapper --> Section
+    Section --> PathCalculator
+    PathCalculator --> UserJourney
+    UserJourney --> TestSuiteGenerator
+    UserJourney --> UserJourneyWriter
+    DataMapper --> ErrorLogger
+    TestSuiteGenerator --> CSV[CSV outputs]
+    UserJourneyWriter --> JSON[JSON outputs]
+    ErrorLogger --> MD[contentful-errors.md]
+```
 
-This is used in the test suite generator (see below), and also in the dynamic test suites in the E2E tests.
+The `DataMapper` is the core class. It takes a raw Contentful export, resolves all entry references (replacing IDs with actual content objects), and produces richly typed `Section`, `Question`, `Answer`, and `Recommendation` objects. The `PathCalculator` then walks the question graph to enumerate all possible user journeys.
 
-### Content Types
+## Running
 
-The key content types for the user journey process (e.g. section, question, recommendations, etc.) are under the [content-types](./src/contentful/export-processor/content-types) folder
+```bash
+cd contentful/export-processor
+cp .env.example .env   # fill in values
+npm install
+```
 
-These have bespoke classes for them to allow additional functionality, particularly around the calculating potential user journeys.
+| Command | What it does |
+|---|---|
+| `npm run generate-test-suites` | Export data and generate QA test suite CSVs |
+| `npm run data-tools` | Export data, generate user journey paths, save errors (no test suites) |
+| `npm run export-all-only` | Export raw Contentful data only — no processing |
+| `npm run export-recommendations-csv` | Generate recommendations CSV (requires extended heap — see note below) |
 
-The main one of all of them is the [section](./src/contentful/export-processor/content-types/section.js) class, which contains all logic for things such as calculating possible user journey paths for that section.
+### Environment variables
 
-## Data Tools
+| Variable | Description |
+|---|---|
+| `MANAGEMENT_TOKEN` | Contentful management API token |
+| `DELIVERY_TOKEN` | Contentful delivery API token |
+| `SPACE_ID` | Contentful space ID |
+| `ENVIRONMENT` | Target environment (e.g. `master`) |
+| `USE_PREVIEW` | Export draft/preview content (`true`/`false`) |
+| `SAVE_FILE` | Save exported Contentful data to JSON file (default: `true`) |
+| `GENERATE_TEST_SUITES` | Generate QA test suite CSVs (default: `false`) |
+| `EXPORT_USER_JOURNEY_PATHS` | Generate user journey path JSON files (default: `false`) |
+| `EXPORT_ALL_PATHS` | Export all journeys, not just minimal set (default: `false`) |
+| `OUTPUT_FILE_DIR` | Directory for output files (default: `./output/`) |
+| `FUNCTION_APP_URL` | Webhook URL for `data-migrator.js` |
 
-[data-tools.js](/src/contentful/export-processor/data-tools.js) exports data from Contentful, processes it in various ways, and has the ability to save various information. It can:
+All variables except `FUNCTION_APP_URL` can also be passed as CLI arguments (which take precedence). Run `node data-tools.js --help` for the full list.
 
-1. Generate test suites
-2. Generate possible user journey paths
-3. Save errors about possible Contentful content issues
+## Generated test suites
 
-### Usage
+For each subtopic, the test suite covers 17 test scenarios including:
 
-1. Copy the `.env.example` file in the root of the folder and name it `.env`.
-2. Fill in the various values for the Contentful space, access token etc..
-3. Run `npm install` to install dependencies.
-4. Run `node data-tools` to generate the test suites
-   - You can also use:
-     1. `npm run generate-test-suites` to generate the test suites
-     2. `npm run data-tools` to run the other data tools but not the test suites
-     3. `npm run export-all-only` to export all data from Contentful, but not run any of the data validations etc.
+- Navigation and question answering
+- Error handling (submitting without an answer)
+- Partial completion and resume
+- Blocking manual URL-ahead navigation
+- Low, Medium, and High maturity recommendation paths
+- Check answers, back button, and share page behaviour
+- Footer link accessibility (accessibility, contact, cookies, privacy)
+- 404 page rendering
 
-#### Environment variables
+## User journey paths
 
-| Name                      | Description                                                                                                                                            |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| MANAGEMENT_TOKEN          | Contentful content management access token. These are personal tokens which can be generated under the `CMA Tokens` section of the Contentful settings |
-| DELIVERY_TOKEN            |                                                                                                                                                        |
-| USE_PREVIEW               |                                                                                                                                                        |
-| SPACE_ID                  |                                                                                                                                                        |
-| ENVIRONMENT               |                                                                                                                                                        |
-| SAVE_FILE                 |                                                                                                                                                        |
-| EXPORT_ALL_PATHS          |                                                                                                                                                        |
-| GENERATE_TEST_SUITES      |                                                                                                                                                        |
-| EXPORT_USER_JOURNEY_PATHS |                                                                                                                                                        |
-| OUTPUT_FILE_DIR           |                                                                                                                                                        |
-| FUNCTION_APP_URL          | Webhook URL where to post content migrations to                                                                                                        |
+The minimum exported set per subtopic is:
+- One or more paths covering all questions
+- One path per maturity rating (Low, Medium, High)
 
-#### CLI Arguments
+Set `EXPORT_ALL_PATHS=true` to export every possible path.
 
-Some variables can also be passed as CLI arguments.
-CLI arguments will take precedence over environment variables.
+## Content validation
 
-| CLI Argument                | Description                                                                                                                                                                                                                                                              | Matching env variable       |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- |
-| -ts, --test-suites          | Generate test suites                                                                                                                                                                                                                                                     | `GENERATE_TEST_SUITES`      |
-| -uj, --export-user-journeys | Export all user journeys                                                                                                                                                                                                                                                 | `EXPORT_USER_JOURNEY_PATHS` |
-| -o, --output-dir            | Where to save the outputted data to                                                                                                                                                                                                                                      | `OUTPUT_FILE_DIR`           |
-| -s, --save-all-journeys     | Save all user journeys, not just the minimal required for various paths                                                                                                                                                                                                  | `EXPORT_ALL_PATHS`          |
-| --environment               | Contentful environment                                                                                                                                                                                                                                                   | `ENV` or `ENVIRONMENT`      |
-| --space-id                  | Contentful space ID                                                                                                                                                                                                                                                      | `SPACE_ID`                  |
-| --delivery-token            |                                                                                                                                                                                                                                                                          | `DELIVERY_TOKEN`            |
-| --management-token          |                                                                                                                                                                                                                                                                          | `MANAGEMENT_TOKEN`          |
-| -e, --export                | What data to export from Contentful (e.g. content, contentmodel). HAS to be the lst option provided. Anything supplied will default to 'true', but can be explicitly stated by adding `=<true/false>` after it. E.g. `--export content contentmodel=false webhooks=true` |                             |
-| `--save-file`               | Whether to save the exported Contentful data to a JSON file or not. Defaults to true.                                                                                                                                                                                    | `SAVE_FILE`                 |
-| `--use-preview`             | Export preview/draft from Contentful. Defaults to false                                                                                                                                                                                                                  | `USE_PREVIEW`               |
-
-### Generate Test Suites
-
-The data-tools.js file can generate test suites using [generate-test-suites.js](./src/contentful/export-processor/generate-test-suites.js) generates test suites for each sub-topic based on the exported Contentful data.
-
-To generate test suites, make sure `GENERATE_TEST_SUITES` is set to `"true"` in your `.env` file.
-
-#### Created files
-
-- `plan-tech-test-suite.csv` - The actual tests for a user to follow
-- `plan-tech-test-suite-appendix.csv` - Data to verify that the test suites are correct (e.g. specific expected content)
-
-#### Generated Tests
-
-For each sub-topic, the following tests should be created:
-
-1. Can the user navigate to the sub-topic?
-2. Can the user answer questions for a sub-topic?
-3. An error is generated when a user tries to submit a question without answering it
-4. A user can leave a partially completed sub-topic and it shows as "In Progress" at the self-assessment page
-5. A user can continue a partially completed sub-topic
-6. A user can't navigate ahead of their user journey by navigating to the URL manually
-7. After completing a user journey, they see a success modal at the top of page
-8. A user can change their answers from the check answers page
-9. A path for "Low" recommendations
-10. A path for "Medium" recommendations
-11. A path for "High" recommendations
-12. A user can navigate the chunks of a recommendation
-13. A user can access C&S resources from their recommendation
-14. The accessibility page is accessibile from the footer link
-15. The contact page is accessibile from the footer link
-16. The cookies page is accessibile from the footer link
-17. The privacy policy page is accessibile from the footer link
-18. the 404 page is rendered when a user navigates to an invalid URL
-
-### User Journey Paths
-
-Data-tools.js can also generate and save possible user journeys for each sub-topic using the [write-user-journey-paths.js](./src/contentful/export-processor/write-user-journey-paths.js) file.
-
-To export the journey paths, make sure `EXPORT_USER_JOURNEY_PATHS` is set to `true` in your `.env` file.
-
-By default, it will only export a minimal amount of data:
-
-1. Per subtopic, it will create a `json` file containing:
-
-- Total number of possible user journeys through the sub-topic per maturity
-- One+ user journey path required to navigate through all questions in the sub-topic
-- One user journey per maturity rating
-
-2. If `EXPORT_ALL_PATHS` is set to `true` it will save _all_ possible user journeys.
-
-### Errors
-
-Finally, the data-tools.js file will write a `contentful-errors.md` file containing various errors, if any, encountered during the Contentful mapping. This includes:
-
-1. Missing data that is referenced
-2. Maturity ratings without a possible user journey in a subtopic
-3. Questions in a sub-topic that have no path to them.
-4. Recommendation chunks with no answers attached to them
+`contentful-errors.md` is generated automatically and reports:
+- Entries referenced by other entries that don't exist
+- Questions with no path leading to them (orphaned questions)
+- Maturity ratings with no possible journey in a subtopic
+- Recommendation chunks with no answers attached
 
 ## Data Migrator
 
-1. Uses Data Mapper class
-2. Uses Contentful API to fetch data from Contentful
-3. Gets content and calculates how many outgoing references it has, and how many incoming references it has
-4. Gets all content with 0 outgoing references
-5. POSTs to webhook
-6. Updates content with references changes
-7. Repeat step 4-6 until all content has been posted
+`data-migrator.js` posts content to the application's webhook in dependency order (entries with no outgoing references first). Requires `FUNCTION_APP_URL` in addition to the standard export variables.
 
-### Usage
+```bash
+node data-migrator.js
+```
 
-1. Setup `.env` (copy `.env.example` and setup fields as necessary)
-2. Run `npm install`
-3. Run `node data-migrator.js`
+## Recommendations CSV
 
-### Required Environment variables
+```bash
+npm run export-recommendations-csv
+```
 
-MANAGEMENT_TOKEN
-DELIVERY_TOKEN
-USE_PREVIEW
-SPACE_ID
-ENVIRONMENT
-FUNCTION_APP_URL
+Generates a CSV mapping every answer to its recommendation chunks, with staging preview links. The script runs with `--max-old-space-size=9000` due to the size of the data being processed.
 
-## Recommendations Exporter
+## Tests
 
-[recommmendations_csv_outputter.js](/src/contentful/export-processor/recommendations_csv_outputter.js) exports data from Contentful (uses the exporter) and generates a .csv in the output directory with the recommendations attached to each answer and a link to view on staging:
+Tests for this project live in `../tests/tests/export-processor/`. Run from `/contentful`:
 
-### Usage
+```bash
+npm run test
+```
 
-The recommendations exporter does not need any additional environment variables. It relies on the data-exporter so ensure you have those required environment variables.
+## See also
 
-3. Run `npm run export-recommendations-csv` to run the script.
-
-You may need to add the following parameter infront of the script in package.json (--max-old-space-size=9000) [`"export-recommendations-csv": "node --max-old-space-size=9000 recommendations_csv_outputter.js"`]
+- [Broken link checker](../broken-link-checker/README.md) — uses this as a local package dependency
+- [QA visualiser](../qa-visualiser/README.md) — consumes exported data to generate flowcharts
+- [Contentful tests](../tests/README.md) — test suite for this library
+- [Contentful tooling overview](../README.md)

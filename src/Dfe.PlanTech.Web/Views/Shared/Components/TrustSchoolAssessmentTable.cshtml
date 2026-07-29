@@ -1,0 +1,64 @@
+@model PageViewModel
+@inject IMicrocopyProvider Microcopy
+
+<h2 class="govuk-heading-l govuk-!-margin-top-8">
+    @await Microcopy.GetTextByKeyAsync(
+    ContentfulMicrocopyConstants.msmTopicStartHeading
+        )
+</h2>
+
+<p class="govuk-body">
+    @await Microcopy.GetTextByKeyAsync(
+        ContentfulMicrocopyConstants.msmTopicStartText1
+        )
+</p>
+
+<p class="govuk-body">
+    @await Microcopy.GetTextByKeyAsync(
+        ContentfulMicrocopyConstants.msmTopicStartText2
+        )
+</p>
+
+<table class="govuk-table">
+    <thead class="govuk-table__head">
+        <tr class="govuk-table__row">
+            <th scope="col" class="govuk-table__header">
+                School
+            </th>
+            <th scope="col"
+                class="govuk-table__header govuk-!-text-align-right"
+                style="width: 280px; white-space: nowrap;">
+                Self-assessment submission
+            </th>
+        </tr>
+    </thead>
+    <tbody class="govuk-table__body">
+        @foreach (var school in Model.TrustSchoolAssessments)
+        {
+            <tr class="govuk-table__row">
+                <td class="govuk-table__cell govuk-!-padding-top-4 govuk-!-padding-bottom-4">
+                    @school.SchoolName
+                </td>
+                <td class="govuk-table__cell govuk-!-padding-top-4 govuk-!-padding-bottom-4 govuk-!-text-align-right"
+                    style="white-space: nowrap;">
+                    @if (school.HasAnswersInProgress)
+                    {
+                        <a class="govuk-link" href="@school.ViewAnswersHref">
+                            Answers in progress
+                        </a>
+                    }
+                    else
+                    {
+                        <span>Not started</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a href="@Model.TrustSchoolAssessmentContinueHref"
+   class="govuk-button"
+   data-module="govuk-button">
+    Continue
+</a>

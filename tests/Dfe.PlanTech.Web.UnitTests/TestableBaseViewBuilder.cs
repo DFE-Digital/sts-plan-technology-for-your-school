@@ -1,7 +1,7 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders;
 using Dfe.PlanTech.Web.ViewModels;
 using Dfe.PlanTech.Web.ViewModels.Inputs;
@@ -13,7 +13,7 @@ namespace Dfe.PlanTech.Web.UnitTests;
 public sealed class TestableBaseViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser
+    ICurrentUserProvider currentUser
 ) : BaseViewBuilder(logger, contentfulService, currentUser)
 {
     public string CallGetDsiReferenceOrThrowException() => GetDsiReferenceOrThrowException();

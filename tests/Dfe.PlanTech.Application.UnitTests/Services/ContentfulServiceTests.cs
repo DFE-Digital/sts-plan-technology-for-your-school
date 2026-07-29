@@ -40,6 +40,22 @@ public class ContentfulServiceTests
     }
 
     [Fact]
+    public async Task GetAllCategories_Delegates_And_Returns()
+    {
+        var (contentfulService, contentfulWorkflow) = Build();
+        var expected = new List<QuestionnaireCategoryEntry>
+        {
+            new() { Sys = new SystemDetails("S1") },
+        };
+        contentfulWorkflow.GetAllCategoriesAsync().Returns(expected);
+
+        var result = await contentfulService.GetAllCategoriesAsync();
+
+        Assert.Same(expected, result);
+        await contentfulWorkflow.Received(1).GetAllCategoriesAsync();
+    }
+
+    [Fact]
     public async Task GetCategoryHeaderTextBySlug_Delegates_And_Returns()
     {
         var (contentfulService, contentfulWorkflow) = Build();

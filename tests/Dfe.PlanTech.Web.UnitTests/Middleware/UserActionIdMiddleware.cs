@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Web.Middleware;
 using Microsoft.AspNetCore.Http;
 
@@ -10,14 +11,23 @@ public class UserActionIdMiddlewareTests
     {
         var expectedId = Guid.NewGuid();
         var context = new DefaultHttpContext();
-        context.Request.Headers[UserActionIdMiddleware.HeaderName] = expectedId.ToString();
+
+        context.Request.Headers[UserActionIdConstants.HeaderName] =
+            expectedId.ToString();
 
         var middleware = new UserActionIdMiddleware(_ => Task.CompletedTask);
 
         await middleware.InvokeAsync(context);
 
-        Assert.Equal(expectedId, context.Items[UserActionIdMiddleware.HttpContextItemKey]);
-        Assert.Equal(expectedId.ToString(), context.Response.Headers[UserActionIdMiddleware.HeaderName]);
+        Assert.Equal(
+            expectedId,
+            context.Items[UserActionIdConstants.HttpContextItemKey]
+        );
+
+        Assert.Equal(
+            expectedId.ToString(),
+            context.Response.Headers[UserActionIdConstants.HeaderName]
+        );
     }
 
     [Fact]
@@ -29,24 +39,40 @@ public class UserActionIdMiddlewareTests
 
         await middleware.InvokeAsync(context);
 
-        var userActionId = Assert.IsType<Guid>(context.Items[UserActionIdMiddleware.HttpContextItemKey]);
+        var userActionId = Assert.IsType<Guid>(
+            context.Items[UserActionIdConstants.HttpContextItemKey]
+        );
+
         Assert.NotEqual(Guid.Empty, userActionId);
-        Assert.Equal(userActionId.ToString(), context.Response.Headers[UserActionIdMiddleware.HeaderName]);
+
+        Assert.Equal(
+            userActionId.ToString(),
+            context.Response.Headers[UserActionIdConstants.HeaderName]
+        );
     }
 
     [Fact]
     public async Task InvokeAsync_WhenHeaderInvalid_ThenCreatesGuid()
     {
         var context = new DefaultHttpContext();
-        context.Request.Headers[UserActionIdMiddleware.HeaderName] = "not-a-guid";
+
+        context.Request.Headers[UserActionIdConstants.HeaderName] =
+            "not-a-guid";
 
         var middleware = new UserActionIdMiddleware(_ => Task.CompletedTask);
 
         await middleware.InvokeAsync(context);
 
-        var userActionId = Assert.IsType<Guid>(context.Items[UserActionIdMiddleware.HttpContextItemKey]);
+        var userActionId = Assert.IsType<Guid>(
+            context.Items[UserActionIdConstants.HttpContextItemKey]
+        );
+
         Assert.NotEqual(Guid.Empty, userActionId);
-        Assert.NotEqual("not-a-guid", context.Response.Headers[UserActionIdMiddleware.HeaderName].ToString());
+
+        Assert.NotEqual(
+            "not-a-guid",
+            context.Response.Headers[UserActionIdConstants.HeaderName].ToString()
+        );
     }
 
     [Fact]

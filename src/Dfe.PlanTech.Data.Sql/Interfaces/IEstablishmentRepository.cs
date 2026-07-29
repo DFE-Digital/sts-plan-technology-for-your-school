@@ -11,6 +11,7 @@ public interface IEstablishmentRepository
     Task<List<EstablishmentEntity>> GetEstablishmentsByAsync(
         Expression<Func<EstablishmentEntity, bool>> predicate
     );
+    Task<EstablishmentEntity?> GetEstablishmentByIdAsync(int establishmentId);
     Task<List<EstablishmentEntity>> GetEstablishmentsByReferencesAsync(
         IEnumerable<string> establishmentReferences
     );

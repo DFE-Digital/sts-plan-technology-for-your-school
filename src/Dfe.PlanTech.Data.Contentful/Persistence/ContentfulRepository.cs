@@ -197,14 +197,6 @@ public class ContentfulRepository : IContentfulRepository
     }
 
     [ExcludeFromCodeCoverage]
-    GetEntriesOptions IContentfulRepository.GetEntryByIdOptions(string id, int include)
-    {
-        if (string.IsNullOrEmpty(id))
-            throw new ArgumentNullException(nameof(id));
-
-        return new GetEntriesOptions(
-            include,
-            [new ContentfulQuerySingleValue() { Field = "sys.id", Value = id }]
-        );
-    }
+    GetEntriesOptions IContentfulRepository.GetEntryByIdOptions(string id, int include) =>
+        GetEntryByIdOptions(id, include);
 }

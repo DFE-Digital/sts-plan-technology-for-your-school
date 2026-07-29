@@ -9,13 +9,13 @@ internal class AnswerEntityConfiguration : IEntityTypeConfiguration<AnswerEntity
     public void Configure(EntityTypeBuilder<AnswerEntity> builder)
     {
         builder.ToTable("answer");
-        builder.HasKey(answer => answer.Id);
-        builder.Property(answer => answer.Id).ValueGeneratedOnAdd();
-        builder.Property(answer => answer.AnswerText).HasMaxLength(4000); // NVARCHAR Max Length
-        builder.Property(answer => answer.ContentfulRef).HasMaxLength(50);
-        builder.Property(answer => answer.DateCreated).ValueGeneratedOnAdd();
-        builder.Property(answer => answer.UserActionId)
-               .HasColumnName("userActionId")
-               .IsRequired(false);
+
+        builder.HasKey(x => x.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedOnAdd();
+        builder.Property(x => x.AnswerText).HasMaxLength(4000).IsRequired();
+        builder.Property(x => x.ContentfulRef).HasMaxLength(100).IsRequired();
+        builder.Property(x => x.DateCreated).ValueGeneratedOnAdd();
+        builder.Property(x => x.UserActionId).IsRequired(false);
     }
 }

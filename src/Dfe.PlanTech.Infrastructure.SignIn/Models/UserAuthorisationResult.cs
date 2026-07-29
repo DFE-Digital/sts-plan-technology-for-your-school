@@ -1,3 +1,5 @@
+using Dfe.PlanTech.Core.Models;
+
 namespace Dfe.PlanTech.Infrastructure.SignIn.Models;
 
 public record UserAuthorisationResult(

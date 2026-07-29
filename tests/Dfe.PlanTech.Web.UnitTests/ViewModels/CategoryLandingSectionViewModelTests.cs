@@ -37,7 +37,8 @@ public class CategoryLandingSectionViewModelTests
             section,
             Recs(),
             sectionStatus: null,
-            hadRetrievalError: false
+            hadRetrievalError: false,
+            "Test establishment name"
         );
 
         Assert.Equal(SubmissionStatus.RetrievalError, vm.ProgressStatus);
@@ -47,6 +48,7 @@ public class CategoryLandingSectionViewModelTests
         Assert.Equal("Devices", vm.Name);
         Assert.Equal("desc", vm.ShortDescription);
         Assert.Equal(string.Empty, vm.Slug);
+        Assert.Equal("Test establishment name", vm.EstablishmentName);;
     }
 
     [Fact]
@@ -64,7 +66,8 @@ public class CategoryLandingSectionViewModelTests
             section,
             Recs(),
             status,
-            hadRetrievalError: true
+            hadRetrievalError: true,
+            "Test establishment name"
         );
 
         Assert.Equal(SubmissionStatus.RetrievalError, vm.ProgressStatus);
@@ -74,6 +77,8 @@ public class CategoryLandingSectionViewModelTests
         Assert.False(string.IsNullOrWhiteSpace(vm.LastCompletionDate));
         Assert.Equal("networking", vm.Slug);
         Assert.Null(vm.ErrorMessage);
+        Assert.Equal("Test establishment name", vm.EstablishmentName);;
+
     }
 
     [Fact]
@@ -92,7 +97,8 @@ public class CategoryLandingSectionViewModelTests
             section,
             Recs(),
             status,
-            hadRetrievalError: false
+            hadRetrievalError: false,
+            "Test establishment name"
         );
 
         Assert.Equal(SubmissionStatus.CompleteReviewed, vm.ProgressStatus);
@@ -101,6 +107,8 @@ public class CategoryLandingSectionViewModelTests
         Assert.NotNull(vm.LastCompletionDate);
         Assert.False(string.IsNullOrWhiteSpace(vm.LastCompletionDate));
         Assert.Null(vm.ErrorMessage);
+        Assert.Equal("Test establishment name", vm.EstablishmentName);;
+
     }
 
     [Fact]
@@ -119,7 +127,8 @@ public class CategoryLandingSectionViewModelTests
             section,
             Recs(),
             status,
-            hadRetrievalError: false
+            hadRetrievalError: false,
+            "Test establishment name"
         );
 
         Assert.Equal(SubmissionStatus.InProgress, vm.ProgressStatus);
@@ -127,6 +136,8 @@ public class CategoryLandingSectionViewModelTests
         Assert.False(string.IsNullOrWhiteSpace(vm.DateUpdated));
         Assert.Equal(string.Empty, vm.LastCompletionDate); // explicitly empty string per code path
         Assert.Null(vm.ErrorMessage);
+        Assert.Equal("Test establishment name", vm.EstablishmentName);;
+
     }
 
     [Fact]
@@ -138,7 +149,8 @@ public class CategoryLandingSectionViewModelTests
             section,
             Recs(),
             sectionStatus: null,
-            hadRetrievalError: false
+            hadRetrievalError: false,
+            "Test establishment name"
         );
 
         Assert.Equal(SubmissionStatus.NotStarted, vm.ProgressStatus);
@@ -146,6 +158,8 @@ public class CategoryLandingSectionViewModelTests
         Assert.Null(vm.LastCompletionDate);
         Assert.Equal("hosting", vm.Slug);
         Assert.Null(vm.ErrorMessage);
+        Assert.Equal("Test establishment name", vm.EstablishmentName);;
+
     }
 
     [Fact]
@@ -158,12 +172,15 @@ public class CategoryLandingSectionViewModelTests
             section,
             recs,
             sectionStatus: null,
-            hadRetrievalError: false
+            hadRetrievalError: false,
+            "Test establishment name"
         );
 
         Assert.Equal("Connectivity", vm.Name);
         Assert.Equal("Get online", vm.ShortDescription);
         Assert.Equal("connectivity", vm.Slug);
         Assert.Same(recs, vm.Recommendations);
+        Assert.Equal("Test establishment name", vm.EstablishmentName);;
+
     }
 }

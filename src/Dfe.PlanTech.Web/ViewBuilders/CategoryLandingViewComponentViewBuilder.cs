@@ -1,11 +1,10 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Utilities;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 
@@ -14,8 +13,10 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class CategoryLandingViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     ISubmissionService submissionService,
+    IUserActionTrackingService userActionTrackingService,
+    IEstablishmentService establishmentService,
     IUserService userService
 )
     : BaseViewBuilder(logger, contentfulService, currentUser),
@@ -25,6 +26,10 @@ public class CategoryLandingViewComponentViewBuilder(
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
     private readonly IUserService _userService =
         userService ?? throw new ArgumentNullException(nameof(userService));
+    private readonly IUserActionTrackingService _userActionTrackingService =
+        userActionTrackingService ?? throw new ArgumentNullException(nameof(userActionTrackingService));
+    private readonly IEstablishmentService _establishmentService =
+        establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
 
     private const string CategoryLandingSectionAssessmentLink =
         "Components/CategoryLanding/SectionAssessmentLink";
@@ -92,7 +97,7 @@ public class CategoryLandingViewComponentViewBuilder(
             Print = print,
             StatusLinkPartialName = print
                 ? CategoryLandingSectionAssessmentLinkPrintContent
-                : CategoryLandingSectionAssessmentLink
+                : CategoryLandingSectionAssessmentLink,
         };
 
         return viewModel;
@@ -121,19 +126,49 @@ public class CategoryLandingViewComponentViewBuilder(
                 sectionStatus.SectionId.Equals(section.Id)
             );
 
-            var recommendations = sectionStatus?.Status == SubmissionStatus.CompleteReviewed
-                ? await GetCategoryLandingSectionRecommendations(
-                    establishmentId,
-                    section,
-                    sortType
+            var userActionId = sectionStatus switch
+            {
+                {
+                    Status: SubmissionStatus.InProgress or SubmissionStatus.CompleteNotReviewed,
+                    LastUpdatedUserActionId: { } lastUpdatedUserActionId
+                } => lastUpdatedUserActionId,
+
+                {
+                    Status: SubmissionStatus.CompleteReviewed,
+                    CompletedUserActionId: { } completedUserActionId
+                } => completedUserActionId,
+
+                _ => (Guid?)null
+            };
+
+            string? establishmentName = null;
+
+            if (userActionId is { } id)
+            {
+                var userAction = await _userActionTrackingService.GetAsync(id);
+
+                if ((userAction?.MatEstablishmentId ?? userAction?.EstablishmentId) is { } userActionEstablishmentId)
+                {
+                    var userActionEstablishment = await _establishmentService.GetEstablishmentByIdAsync(userActionEstablishmentId);
+                    establishmentName = userActionEstablishment.OrgName;
+                }
+            }
+
+            var recommendations =
+                sectionStatus?.Status == SubmissionStatus.CompleteReviewed
+                    ? await GetCategoryLandingSectionRecommendations(
+                        establishmentId,
+                        section,
+                        sortType
                     )
-                : null;
+                    : null;
 
             yield return new CategoryLandingSectionViewModel(
                 section,
                 recommendations,
                 sectionStatus,
-                hadRetrievalError
+                hadRetrievalError,
+                establishmentName
             );
         }
     }
@@ -186,7 +221,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 {
                     Header = sr.HeaderText,
                     LastUpdated = recommendations[sr.Id].DateCreated,
-                    Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
+                    Status = sr.GetStatus(recommendations),
                     Slug = sr.Slug,
                 })
                 .ToList();

@@ -37,8 +37,8 @@ public class RecommendationServiceTests
 
         // Act
         var result = await service.GetLatestRecommendationHistoryAsync(
-            recommendationContentfulReference,
-            establishmentId
+            establishmentId,
+            recommendationContentfulReference
         );
 
         // Assert
@@ -63,8 +63,8 @@ public class RecommendationServiceTests
 
         // Act
         var result = await service.GetLatestRecommendationHistoryAsync(
-            recommendationContentfulReference,
-            establishmentId
+            establishmentId,
+            recommendationContentfulReference
         );
 
         // Assert
@@ -91,8 +91,8 @@ public class RecommendationServiceTests
         // Act & Assert
         var actualException = await Assert.ThrowsAsync<InvalidOperationException>(() =>
             service.GetLatestRecommendationHistoryAsync(
-                recommendationContentfulReference,
-                establishmentId
+                establishmentId,
+                recommendationContentfulReference
             )
         );
 

@@ -40,3 +40,8 @@ We could add API tests to the collection. At the moment we only have the one rou
 - ["what is bruno"](https://docs.usebruno.com/introduction/what-is-bruno) (bruno documentation)
 - [Variables overview](https://docs.usebruno.com/get-started/variables/overview) (bruno documentation)
 - [dotenv file information](https://docs.usebruno.com/secrets-management/dotenv-file) (bruno documentation)
+
+## See also
+
+- [Service Bus infrastructure](../src/Dfe.PlanTech.Infrastructure.ServiceBus/README.md) — the CMS webhook endpoint tested in this collection
+- [Contentful tooling](../contentful/README.md) — scripts that interact with the same Contentful APIs

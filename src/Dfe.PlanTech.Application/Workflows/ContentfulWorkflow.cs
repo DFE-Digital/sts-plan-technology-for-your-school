@@ -91,6 +91,25 @@ public class ContentfulWorkflow(
         }
     }
 
+    public async Task<IEnumerable<QuestionnaireCategoryEntry>> GetAllCategoriesAsync()
+    {
+        try
+        {
+            var options = new GetEntriesOptions(include: 2);
+            var categories = await _contentfulRepository.GetEntriesAsync<QuestionnaireCategoryEntry>(
+                options
+            );
+            return categories;
+        }
+        catch (Exception ex)
+        {
+            throw new ContentfulDataUnavailableException(
+                "Error getting categories from Contentful",
+                ex
+            );
+        }
+    }
+
     public async Task<string?> GetCategoryHeaderTextBySlugAsync(string slug)
     {
         var contentTypeQuery = new ContentfulQuerySingleValue

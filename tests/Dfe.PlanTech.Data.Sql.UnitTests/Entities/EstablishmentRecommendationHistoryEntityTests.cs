@@ -31,8 +31,8 @@ public class EstablishmentRecommendationHistoryEntityTests
             ResponseId = expectedResponseId,
             UserActionId = expectedUserActionId,
             DateCreated = expectedDateCreated,
-            PreviousStatus = expectedPreviousStatus.ToString(),
-            NewStatus = expectedNewStatus.ToString(),
+            PreviousStatus = expectedPreviousStatus,
+            NewStatus = expectedNewStatus,
             NoteText = expectedNoteText,
         };
 
@@ -55,16 +55,16 @@ public class EstablishmentRecommendationHistoryEntityTests
         DtoPropertyCoverageAssert.AssertAllPropertiesAccountedFor<SqlEstablishmentRecommendationHistoryDto>(
             new[]
             {
-            nameof(SqlEstablishmentRecommendationHistoryDto.EstablishmentId),
-            nameof(SqlEstablishmentRecommendationHistoryDto.RecommendationId),
-            nameof(SqlEstablishmentRecommendationHistoryDto.UserId),
-            nameof(SqlEstablishmentRecommendationHistoryDto.MatEstablishmentId),
-            nameof(SqlEstablishmentRecommendationHistoryDto.ResponseId),
-             nameof(SqlEstablishmentRecommendationHistoryDto.UserActionId),
-            nameof(SqlEstablishmentRecommendationHistoryDto.DateCreated),
-            nameof(SqlEstablishmentRecommendationHistoryDto.PreviousStatus),
-            nameof(SqlEstablishmentRecommendationHistoryDto.NewStatus),
-            nameof(SqlEstablishmentRecommendationHistoryDto.NoteText),
+                nameof(SqlEstablishmentRecommendationHistoryDto.EstablishmentId),
+                nameof(SqlEstablishmentRecommendationHistoryDto.RecommendationId),
+                nameof(SqlEstablishmentRecommendationHistoryDto.UserId),
+                nameof(SqlEstablishmentRecommendationHistoryDto.MatEstablishmentId),
+                nameof(SqlEstablishmentRecommendationHistoryDto.ResponseId),
+                nameof(SqlEstablishmentRecommendationHistoryDto.UserActionId),
+                nameof(SqlEstablishmentRecommendationHistoryDto.DateCreated),
+                nameof(SqlEstablishmentRecommendationHistoryDto.PreviousStatus),
+                nameof(SqlEstablishmentRecommendationHistoryDto.NewStatus),
+                nameof(SqlEstablishmentRecommendationHistoryDto.NoteText),
             }
         );
     }
@@ -83,7 +83,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             ResponseId = null,
             DateCreated = DateTime.UtcNow,
             PreviousStatus = null, // Optional
-            NewStatus = RecommendationStatus.InProgress.ToString(),
+            NewStatus = RecommendationStatus.InProgress,
             NoteText = null, // Optional
         };
 
@@ -110,7 +110,7 @@ public class EstablishmentRecommendationHistoryEntityTests
             EstablishmentId = 1,
             RecommendationId = 2,
             UserId = 3,
-            NewStatus = "Arbitrary string - new status",
+            NewStatus = RecommendationStatus.InProgress,
             // DateCreated is not set explicitly
         };
 

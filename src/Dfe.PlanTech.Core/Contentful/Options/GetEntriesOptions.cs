@@ -42,7 +42,7 @@ public class GetEntriesOptions
         builder.Append(Include);
 
         if (Select != null && Select.Any())
-            builder.Append($":Select=[{string.Join(",", Select)}]");
+            builder.Append($":Select=[{string.Join(",", Select.OrderBy(s => s))}]");
 
         if (Queries != null && Queries.Any())
         {
@@ -54,7 +54,7 @@ public class GetEntriesOptions
                 if (query is ContentfulQuerySingleValue queryEquals)
                     builder.Append($"={queryEquals.Value}");
                 else if (query is ContentfulQueryMultipleValues queryIncludes)
-                    builder.Append($"=[{string.Join(',', queryIncludes.Value)}]");
+                    builder.Append($"=[{string.Join(',', queryIncludes.Value.OrderBy(v => v))}]");
 
                 builder.Append(',');
             }

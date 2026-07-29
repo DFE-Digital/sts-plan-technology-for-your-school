@@ -1,0 +1,139 @@
+version: 2
+updates:
+
+  # npm — all directories
+  - package-ecosystem: 'npm'
+    directories:
+      - '/'
+      - '/contentful'
+      - '/contentful/*'
+      - '/src/Dfe.PlanTech.Web.Node'
+      - '/tests/*'
+      - '/utils/retrieve-user-data'
+      - '/.github/semver-release'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '02:00'
+    open-pull-requests-limit: 15
+    target-branch: "development"
+    labels:
+      - 'dependencies'
+      - 'npm'
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "lodash"
+        versions: ["4.17.15"]
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # pip
+  - package-ecosystem: 'pip'
+    directories:
+      - '/contentful/qa-visualiser'
+      - '/utils/update-gias-data'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '03:00'
+    open-pull-requests-limit: 5
+    target-branch: "development"
+    labels:
+      - 'dependencies'
+      - 'python'
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # terraform
+  - package-ecosystem: 'terraform'
+    directories:
+      - '/terraform/container-app'
+      - '/terraform/dns-zone'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+      time: '04:00'
+    open-pull-requests-limit: 5
+    target-branch: "development"
+    labels:
+      - 'dependencies'
+      - 'terraform'
+    groups:
+      terraform-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  # nuget
+  - package-ecosystem: 'nuget'
+    directory: '/'
+    schedule: { interval: 'weekly', day: 'monday', time: '05:00' }
+    open-pull-requests-limit: 5
+    target-branch: "development"
+    labels: ['dependencies', '.net']
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      nuget-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  #docker
+  - package-ecosystem: 'docker'
+    directory: '/src/Dfe.PlanTech.Web'
+    schedule: { interval: 'weekly', day: 'monday', time: '06:00' }
+    open-pull-requests-limit: 3
+    target-branch: "development"
+    labels: ['dependencies', 'docker']
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      docker-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+  #actions
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule: { interval: 'weekly', day: 'monday', time: '07:00' }
+    open-pull-requests-limit: 5
+    target-branch: "development"
+    labels: ['dependencies', 'github-actions']
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      actions-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"

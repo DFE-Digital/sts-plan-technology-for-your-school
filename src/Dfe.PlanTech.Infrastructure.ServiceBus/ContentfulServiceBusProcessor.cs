@@ -84,15 +84,13 @@ public class ContentfulServiceBusProcessor(
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing message: {Message}", ex.Message);
-            await processMessageEventArgs.DeadLetterMessageAsync(
+            await processMessageEventArgs.AbandonMessageAsync(
                 processMessageEventArgs.Message,
                 null,
-                ex.Message,
-                ex.StackTrace,
                 processMessageEventArgs.CancellationToken
             );
             _logger.LogInformation(
-                "Abandoned message: {MessageId}",
+                "Abandoned message {MessageId} for retry",
                 processMessageEventArgs.Message.MessageId
             );
         }

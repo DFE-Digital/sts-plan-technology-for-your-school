@@ -6,9 +6,9 @@ public class ComponentViewsFactory(ILogger<ComponentViewsFactory> logger)
 {
     private const string GENERATED_VIEW_NAMESPACE = "AspNetCoreGeneratedDocument";
     private const string SHARED_PATH = "Views_Shared";
-    private const string EXCLUDED_COMPONENT_TYPE = "QuestionnaireCategory";
+    private static readonly string[] EXCLUDED_COMPONENT_TYPES = ["QuestionnaireCategory"];
 
-    private readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
+    private static readonly Type[] _viewTypes = GetSharedViewTypes().ToArray();
 
     /// <summary>
     /// Tries to find matching shared view for the passed model, based on the model's name
@@ -25,7 +25,7 @@ public class ComponentViewsFactory(ILogger<ComponentViewsFactory> logger)
 
         if (matchingViewType is null)
         {
-            if (componentTypeName != EXCLUDED_COMPONENT_TYPE)
+            if (!EXCLUDED_COMPONENT_TYPES.Contains(componentTypeName))
             {
                 logger.LogWarning("Could not find matching view for {Model}", model);
             }

@@ -11,6 +11,8 @@ public class EstablishmentWorkflowTests
     private readonly IEstablishmentRepository _estRepo = Substitute.For<IEstablishmentRepository>();
     private readonly IEstablishmentLinkRepository _linkRepo =
         Substitute.For<IEstablishmentLinkRepository>();
+    private readonly ISubmissionRepository _subRepo =
+        Substitute.For<ISubmissionRepository>();
     private static readonly string[] abString = new[] { "A", "B" };
 
     private EstablishmentWorkflow CreateServiceUnderTest() =>
