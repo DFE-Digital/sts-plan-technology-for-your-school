@@ -171,7 +171,7 @@ jobs:
             verb: 'add'
 
         - name: Whitelist Runner for TF keyvault
-          if: ${{ (github.event_name == 'workflow_dispatch' || inputs.tfvars_secret_name) }}
+          if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tfvars_secret_name) }}
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}
@@ -249,7 +249,7 @@ jobs:
               --overwrite true
 
         - name: Copy tf vars secret
-          if: ${{ (github.event_name == 'workflow_dispatch' || inputs.tfvars_secret_name) }}
+          if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tfvars_secret_name) }}
           shell: bash
           run: |
             set -euo pipefail
@@ -303,7 +303,7 @@ jobs:
             verb: remove
 
         - name: Whitelist Runner for TF keyvault
-          if: ${{ (github.event_name == 'workflow_dispatch' || inputs.tfvars_secret_name) }}
+          if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tfvars_secret_name) }}
           uses: ./.github/actions/whitelist-kv
           with:
             ip-address: ${{ steps.whats-my-ip.outputs.ip }}

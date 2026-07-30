@@ -14,6 +14,10 @@ on:
       is_dr:
         type: boolean
         default: false
+      tfvars_secret_name:
+        description: the name of the secret holding the tfvars. not consistent, so manual input needed.
+        required: false
+        type: string
   # push:
   #   branches:
   #     - disaster-recovery-e2e-terraform
@@ -90,3 +94,29 @@ jobs:
           tf_storage_acc_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
           tf_keyvault_name: ${{ steps.vars.outputs.TF_KEYVAULT_NAME }}
           az_client_id: ${{ secrets.az_client_id }}
+
+      - name: Restore tfvar secret
+        if: ${{ (github.event_name == 'workflow_dispatch' && inputs.tfvars_secret_name) }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          BACKUP_KV="${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}"
+          TARGET_KV="${{ steps.vars.outputs.TF_KEYVAULT_NAME }}"
+          SECRET_NAME = "${{ inputs.tfvars_secret_name }}"
+
+          SECRET_ID=$(az keyvault secret show \
+            --vault-name "$BACKUP_KV" \
+            --name "$SECRET_NAME" \
+            --query "id" -o tsv)
+
+          SECRET_VALUE="$(az keyvault secret show \
+            --id "$SECRET_ID" \
+            --query "value" \
+            -o tsv | tr -d '\r\n')"
+
+          az keyvault secret set \
+            --vault-name "$TARGET_KV" \
+            --name "$SECRET_NAME" \
+            --value "$SECRET_VALUE" \
+            >/dev/null
