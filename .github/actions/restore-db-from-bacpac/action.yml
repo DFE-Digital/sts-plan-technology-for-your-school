@@ -35,6 +35,10 @@ inputs:
     description: Use latest BACPAC if no file is specified
     required: false
     default: "true"
+  delete_if_exists:
+    description: Can only restore into an empty or non-existant db. Delete if found?
+    required: false
+    default: "false"
 runs:
   using: composite
   steps:
@@ -125,6 +129,41 @@ runs:
           --auth-mode login
 
         echo "bacpac_file=$BLOB_NAME" >> "$GITHUB_OUTPUT"
+
+    - name: Delete existing db to allow importing into empty
+      id: delete
+      if: ${{ inputs.delete_if_exists == 'true' }}
+      shell: bash
+      run: |
+          set -euo pipefail
+          echo "Target database: ${TARGET_DATABASE}"
+
+          if az sql db show \
+            --resource-group "${{ inputs.resource_group_app }}" \
+            --server "£{{ inputs.sql_server_name }}" \
+            --name "${{ inputs.target_database }}" \
+            >/dev/null 2>&1; then
+
+          echo "Deleting existing spare database..."
+
+          az sql db delete \
+            --resource-group "${{ inputs.resource_group_app }}" \
+            --server "${{ inputs.sql_server_name }}" \
+            --name "${{ inputs.target_database }}" \
+            --yes
+
+          echo "Waiting for deletion to complete..."
+
+          until ! az sql db show \
+            --resource-group "${{ inputs.resource_group_app }}" \
+            --server "${{ inputs.sql_server_name }}" \
+            --name "${{ inputs.target_database }}" \
+            >/dev/null 2>&1; do
+            sleep 10
+          done
+          else
+            echo "Target database does not currently exist."
+          fi
 
     - name: Import BACPAC with SqlPackage
       shell: bash
