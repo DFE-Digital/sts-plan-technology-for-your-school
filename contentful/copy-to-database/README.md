@@ -1,124 +1,101 @@
 # Contentful Questionnaire Extract
 
-This pipeline downloads several content types (see [content-types.txt](./content-types.txt)) from
-Contentful, stores them in SQL Server, and flattens the JSON into relational tables for analysis or
-mapping.
+This pipeline downloads a list of Contentful content types (see
+[content-types.txt](./content-types.txt)), stores the JSON payloads in a staging table, and then
+parses them into relational tables for analysis or mapping.
 
-> **Prerequisite: jq**
+> **Prerequisite: curl, jq, and base64**
 >
-> This project’s Bash script (`get-content.sh`) requires [jq](https://stedolan.github.io/jq/), a
-> lightweight command-line JSON processor.
+> The Bash script [get-content.sh](./get-content.sh) requires [jq](https://stedolan.github.io/jq/),
+> [curl](https://curl.se/), and a base64 implementation.
 >
 > Install instructions:
 >
-> - **Windows (Git Bash / MINGW / WSL)**:  
->   Download from [GitHub releases](https://github.com/jqlang/jq/releases) (e.g. `jq-win64.exe`),
->   rename to `jq.exe`, and edit your environment variables (`PATH`) (e.g. `C:\Program Files\jq`).  
->   Or install via package manager:
->   - Chocolatey: `choco install jq`
->   - Scoop: `scoop install jq`
+> - **Windows (Git Bash / MINGW / WSL)**:
+>   - Install [jq](https://github.com/jqlang/jq/releases) and ensure it is available on your PATH.
+>   - Install curl if it is not already available.
+>   - Git Bash typically includes base64 support.
 > - **Linux**:
->   - Debian/Ubuntu: `sudo apt-get install jq`
->   - RHEL/CentOS: `sudo yum install jq`
->   - Fedora: `sudo dnf install jq`
-> - **macOS**:  
->   `brew install jq`
+>   - Debian/Ubuntu: `sudo apt-get install curl jq coreutils`
+>   - RHEL/CentOS: `sudo yum install curl jq coreutils`
+>   - Fedora: `sudo dnf install curl jq coreutils`
+> - **macOS**:
+>   - `brew install curl jq`
 >
 > Verify installation with:
 >
 > ```bash
+> curl --version
 > jq --version
+> base64 --version
 > ```
 
 ## Setup
 
-- Create a copy of `/sql/.env-template` and rename it to `/sql/.env`
-- Populate the variables in `.env` with the corresponding values from Contentful
-  - You may need to create an API key if you don't have one already
+- Create a copy of [.env-template](./.env-template) and rename it to [.env](./.env).
+- Populate the variables in [.env](./.env) with your Contentful values:
+  - `CONTENTFUL_TOKEN`
+  - `ENVIRONMENT`
+  - `SPACE_ID`
+- Add or remove content types in [content-types.txt](./content-types.txt). Put one content type per
+  line; comments after `#` are ignored.
+
+## Files
+
+- [get-content.sh](./get-content.sh) downloads the configured entries from Contentful and writes a
+  SQL file containing the imported payloads.
+- [content-types.txt](./content-types.txt) defines which Contentful content types to extract.
+- [2.create-tables.sql](./2.create-tables.sql) creates the relational tables in the `contentful`
+  schema.
+- [3.populate-tables.sql](./3.populate-tables.sql) parses the staged JSON and populates those
+  tables.
 
 ## Usage
 
-The process has two main parts:
+The process has four main steps:
 
-1. **Bash Script (`get-content.sh`)**
-   - Calls the Contentful CDN API for each content type in [content-types.txt](./content-types.txt).
-   - Uses pagination (`limit/skip`) to fetch _all_ entries, not just the first 100.
-   - Base64-encodes the full JSON responses for safe SQL insertion.
-   - Generates a SQL script `1.insert-content-yyyyMMdd.sql` which can be run in SQL Server.
+1. **Download the Contentful data**
+   - Run [get-content.sh](./get-content.sh).
+   - The script reads the values from [.env](./.env) and the content types from
+     [content-types.txt](./content-types.txt).
+   - It calls the Contentful CDN API for each content type, follows pagination to retrieve all
+     entries, and base64-encodes the JSON payloads.
+   - It generates a SQL file named `1.insert-content-yyyyMMdd.sql` in the current folder.
 
-2. **SQL Script (`1.insert-content-yyyyMMdd.sql`)**
-   - Creates a staging table `contentful.contentfulImport`.
-   - Inserts the downloaded JSON blobs into this table.
-   - Parses them into temp tables:
-     - `#questions` → Question metadata, plus linked Answer IDs.
-     - `#questionAnswers` → Normalised QuestionId → AnswerId mapping.
-     - `#answers` → Answer metadata, plus optional next question link.
-     - `#recommendationChunks` → Recommendation metadata, plus linked Answer IDs.
-     - `#answerRecommendations` → Normalised RecommendationId → AnswerId mapping.
-   - Provides a **full chain query** joining Question → Answer → Recommendation(s).
+2. **Load the staged JSON**
+   - Run the generated SQL file in Azure SQL or SQL Server Management Studio.
+   - This creates and clears the staging table `contentful.contentfulImport`.
+   - The script inserts the downloaded payloads as base64-decoded JSON into the `JsonResponse`
+     column.
 
-### Suggested Process
+3. **Create the target tables**
+   - Run [2.create-tables.sql](./2.create-tables.sql).
+   - This drops and recreates the relational tables used for the extract.
 
-1. Run the Bash script
+4. **Populate the tables**
+   - Run [3.populate-tables.sql](./3.populate-tables.sql).
+   - This reads the latest JSON from `contentful.contentfulImport` for each content type and inserts
+     the parsed values into the relational tables.
 
-   ```bash
-   .\get-content.sh
-   ```
+5. **_Optional_**
+   - Run the script in [Full Chain Query](#full-chain-query) to check the data.
 
-   This will generate `1.insert-content-yyyyMMdd.sql`.
+## Output tables
 
-2. Copy and paste the top 48 lines of the generated SQL into Azure DB / SSMS. Run those lines and
-   check the data was decoded correctly.
+The scripts create and populate tables such as:
 
-3. Copy and paste the rest of the script. Run those lines.
+- `contentful.category`
+- `contentful.page`
+- `contentful.title`
+- `contentful.section`
+- `contentful.question`
+- `contentful.answer`
+- `contentful.recommendation`
+- `contentful.textBody`
 
-4. (Optional): Run the script in [Full Chain Query](#full-chain-query) to check the data.
-
-## Temp Table Structures
-
-### `#questions`
-
-| Column       | Description                       |
-| ------------ | --------------------------------- |
-| ContentfulId | Question entry ID                 |
-| InternalName | Contentful internal name          |
-| QuestionText | Question text (en-US)             |
-| HelpText     | Help text (optional)              |
-| Slug         | Slug field                        |
-| AnswerIds    | Comma-separated linked answer IDs |
-
-### `#questionAnswers`
-
-| Column     | Description            |
-| ---------- | ---------------------- |
-| QuestionId | Question entry ID      |
-| AnswerId   | Linked answer entry ID |
-
-### `#answers`
-
-| Column         | Description                       |
-| -------------- | --------------------------------- |
-| ContentfulId   | Answer entry ID                   |
-| InternalName   | Contentful internal name          |
-| AnswerText     | Answer text (en-US)               |
-| NextQuestionId | Linked next question (if present) |
-
-### `#recommendationChunks`
-
-| Column       | Description                               |
-| ------------ | ----------------------------------------- |
-| ContentfulId | Recommendation entry ID                   |
-| InternalName | Contentful internal name                  |
-| Header       | Recommendation header                     |
-| ContentValue | Recommendation content (en-US, long text) |
-| AnswerIds    | Comma-separated linked answer IDs         |
-
-### `#answerRecommendations`
-
-| Column           | Description             |
-| ---------------- | ----------------------- |
-| RecommendationId | Recommendation entry ID |
-| AnswerId         | Linked answer entry ID  |
+They also create join tables such as `contentful.categorySection`, `contentful.questionAnswer`,
+`contentful.sectionQuestion`, `contentful.sectionRecommendation`, and
+`contentful.recommendationAnswerStatus`.
 
 ## Full Chain Query
 
@@ -150,13 +127,11 @@ This produces one row per Question + Answer, with all linked recommendations agg
 
 ## Notes
 
-- **Locale**: Currently assumes `en-US` is the default locale. If new locales are added, the parse
-  logic may need adjustment.
-- **Base64 encoding**: The JSON responses are encoded to handle special characters safely when
-  inserting into SQL.
-- **Reserved keywords**: `Content` field has been renamed to `ContentValue` to avoid conflicts with
-  protected keywords in SQL.
-- **Pagination**: The Bash function `get_contentful_entries` ensures all entries are pulled,
-  regardless of count.
-- **Staging table:**: The staging table `contentful.contentfulImport` is truncated on each run. If
-  you need history, remove the DELETE line.
+- Base64 encoding is used to handle special characters safely when inserting into SQL.
+- The import script uses the most recent row for each content type from
+  `contentful.contentfulImport`, so re-running the populate script after a fresh import will use the
+  latest payloads.
+- The tables are recreated each time by [2.create-tables.sql](./2.create-tables.sql), so any earlier
+  data will be removed.
+- The staging table is cleared each time the generated SQL file is run, so if you need history you
+  should remove the delete step from the script.
