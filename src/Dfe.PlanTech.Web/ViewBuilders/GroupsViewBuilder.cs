@@ -30,12 +30,16 @@ public class GroupsViewBuilder(
 {
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+
     private readonly IGroupService _groupService =
         groupService ?? throw new ArgumentNullException(nameof(groupService));
+
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+
     private readonly ILogger<BaseViewBuilder> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -196,7 +200,7 @@ public class GroupsViewBuilder(
         var completedSubmissions =
             matEstablishmentIds.Length != 0
                 ? await _groupService.GetGroupCompletedSubmissionsBySections(matEstablishmentIds)
-                    ?? []
+                  ?? []
                 : [];
 
         var completedCountBySectionId = completedSubmissions
@@ -329,107 +333,104 @@ public class GroupsViewBuilder(
             ? viewModel.PresentedSchoolRefs.ToArray()
             : viewModel.SelectedSchoolsRefs.ToArray();
 
-if (selectedRefs.Length > 0)
-{
-    var selectedSchoolIds = new List<int>();
-
-    if (selectedRefs.Length == 1)
-    {
-        var selectedRef = selectedRefs[0];
-
-        if (!VerifyGroupSchoolMembership(selectedRef, establishmentLinks))
+        if (selectedRefs.Length == 1)
         {
-            throw new InvalidDataException(
-                $"Selected school with ref {selectedRef} not linked to user's group"
-            );
-        }
-
-        var school =
-            await _establishmentService.GetEstablishmentByReferenceAsync(selectedRef)
-            ?? throw new InvalidDataException(
-                $"School with ref {selectedRef} not found"
-            );
-
-        if (
-            string.IsNullOrWhiteSpace(school.EstablishmentRef)
-            || string.IsNullOrWhiteSpace(school.OrgName)
-        )
-        {
-            throw new InvalidDataException(
-                $"School with ref {selectedRef} is missing required data"
-            );
-        }
-
-        CurrentUser.SetGroupSelectedSchool(
-            school.EstablishmentRef,
-            school.OrgName
-        );
-
-        selectedSchoolIds.Add(school.Id);
-
-        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
-            SessionConstants.SelectedEstablishmentsKey,
-            selectedSchoolIds
-        );
-
-        var latestSubmission =
-            await _submissionService.GetLatestSubmissionResponsesModel(
-                school.Id,
-                section,
-                status: null
-            );
-
-        if (latestSubmission?.Status == SubmissionStatus.InProgress)
-        {
-            return controller.RedirectToRoute(
-                QuestionsController.GetContinueSelfAssessmentAction,
-                new { categorySlug, sectionSlug }
-            );
-        }
-    }
-    else
-    {
-        foreach (var schoolRef in selectedRefs)
-        {
-            if (!VerifyGroupSchoolMembership(schoolRef, establishmentLinks))
+            var isGroupSchool = VerifyGroupSchoolMembership(selectedRefs[0], establishmentLinks);
+            if (!isGroupSchool)
             {
-                continue;
-            }
-
-            var school =
-                await _establishmentService.GetEstablishmentByReferenceAsync(
-                    schoolRef
-                );
-
-            if (school is null)
-            {
-                continue;
-            }
-
-            var latestSubmission =
-                await _submissionService.GetLatestSubmissionResponsesModel(
-                    school.Id,
-                    section,
-                    status: null
-                );
-
-            if (latestSubmission?.Status == SubmissionStatus.InProgress)
-            {
-                await _submissionService.SetSubmissionInaccessibleAsync(
-                    school.Id,
-                    section.Id
+                throw new InvalidDataException(
+                    $"Selected school with ref {selectedRefs[0]} not linked to user's group"
                 );
             }
+            else
+            {
+                var school =
+                    await _establishmentService.GetEstablishmentByReferenceAsync(selectedRefs[0])
+                    ?? throw new InvalidDataException(
+                        $"School with ref {selectedRefs[0]} not found"
+                    );
 
-            selectedSchoolIds.Add(school.Id);
+                if (
+                    string.IsNullOrWhiteSpace(school.EstablishmentRef)
+                    || string.IsNullOrWhiteSpace(school.OrgName)
+                )
+                {
+                    throw new InvalidDataException(
+                        $"School with ref {selectedRefs[0]} is missing required data"
+                    );
+                }
+
+                // This has to remain due to user-action requiring it for the continue self-assessment page
+                CurrentUser.SetGroupSelectedSchool(school.EstablishmentRef, school.OrgName);
+
+                // This has been added, so that we know it has come through as a bulk assessment
+                controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+                    SessionConstants.SelectedEstablishmentsKey,
+                    new List<int> { school.Id }
+                );
+
+                var latestSubmissionForRef =
+                    await _submissionService.GetLatestSubmissionResponsesModel(
+                        school.Id,
+                        section,
+                        (SubmissionStatus?)null
+                    );
+
+                if (
+                    latestSubmissionForRef != null
+                    && latestSubmissionForRef.Status == SubmissionStatus.InProgress
+                )
+                {
+                    return controller.RedirectToRoute(
+                        QuestionsController.GetContinueSelfAssessmentAction,
+                        new { categorySlug, sectionSlug }
+                    );
+                }
+            }
         }
+        else if (selectedRefs.Length > 1)
+        {
+            var selectedSchoolIds = new List<int>();
 
-        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
-            SessionConstants.SelectedEstablishmentsKey,
-            selectedSchoolIds
-        );
-    }
-}
+            foreach (var schoolRef in selectedRefs)
+            {
+                var isGroupSchool = VerifyGroupSchoolMembership(schoolRef, establishmentLinks);
+                if (isGroupSchool)
+                {
+                    var school = await _establishmentService.GetEstablishmentByReferenceAsync(
+                        schoolRef
+                    );
+
+                    if (school != null)
+                    {
+                        var latestSubmissionForRef =
+                            await _submissionService.GetLatestSubmissionResponsesModel(
+                                school.Id,
+                                section,
+                                (SubmissionStatus?)null
+                            );
+
+                        if (
+                            latestSubmissionForRef != null
+                            && latestSubmissionForRef.Status == SubmissionStatus.InProgress
+                        )
+                        {
+                            await _submissionService.SetSubmissionInaccessibleAsync(
+                                school.Id,
+                                section.Id
+                            );
+                        }
+
+                        selectedSchoolIds.Add(school.Id);
+                    }
+                }
+            }
+
+            controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+                SessionConstants.SelectedEstablishmentsKey,
+                selectedSchoolIds
+            );
+        }
 
         var questionSlug = section.Questions.First().Slug;
 
@@ -443,6 +444,7 @@ if (selectedRefs.Length > 0)
             }
         );
     }
+
 
     private bool VerifyGroupSchoolMembership(
         string schoolRef,
@@ -479,7 +481,8 @@ if (selectedRefs.Length > 0)
             Urn = CurrentUser.UserOrganisationUrn,
             Ukprn = CurrentUser.UserOrganisationUkprn,
             Uid = CurrentUser.UserOrganisationUid,
-            GroupUid = CurrentUser.UserOrganisationUid, // TODO: resolve some confusion here - the database table is `GroupUid` and is populated from the `uid` OIDC claim - possibly remove `groupUid` from `EstablishmentModel`?
+            GroupUid = CurrentUser
+                .UserOrganisationUid, // TODO: resolve some confusion here - the database table is `GroupUid` and is populated from the `uid` OIDC claim - possibly remove `groupUid` from `EstablishmentModel`?
             Type = CurrentUser.UserOrganisationTypeName is null
                 ? null
                 : new IdWithNameModel { Name = CurrentUser.UserOrganisationTypeName },
@@ -495,9 +498,9 @@ if (selectedRefs.Length > 0)
     }
 
     private async Task<bool> HasOutstandingSelfAssessmentsAsync(
-    int matEstablishmentId,
-    IEnumerable<QuestionnaireSectionEntry> sections
-)
+        int matEstablishmentId,
+        IEnumerable<QuestionnaireSectionEntry> sections
+    )
     {
         var matEstablishmentLinks =
             await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];
