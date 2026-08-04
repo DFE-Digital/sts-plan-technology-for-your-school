@@ -329,55 +329,107 @@ public class GroupsViewBuilder(
             ? viewModel.PresentedSchoolRefs.ToArray()
             : viewModel.SelectedSchoolsRefs.ToArray();
 
-        if (selectedRefs.Length > 0)
+if (selectedRefs.Length > 0)
+{
+    var selectedSchoolIds = new List<int>();
+
+    if (selectedRefs.Length == 1)
+    {
+        var selectedRef = selectedRefs[0];
+
+        if (!VerifyGroupSchoolMembership(selectedRef, establishmentLinks))
         {
-            var selectedSchoolIds = new List<int>();
-
-            foreach (var schoolRef in selectedRefs)
-            {
-                var isGroupSchool = VerifyGroupSchoolMembership(
-                    schoolRef,
-                    establishmentLinks
-                );
-
-                if (isGroupSchool)
-                {
-                    var school =
-                        await _establishmentService.GetEstablishmentByReferenceAsync(
-                            schoolRef
-                        );
-
-                    if (school != null)
-                    {
-                        var latestSubmissionForRef =
-                            await _submissionService.GetLatestSubmissionResponsesModel(
-                                school.Id,
-                                section,
-                                (SubmissionStatus?)null
-                            );
-
-                        if (
-                            latestSubmissionForRef != null
-                            && latestSubmissionForRef.Status
-                            == SubmissionStatus.InProgress
-                        )
-                        {
-                            await _submissionService.SetSubmissionInaccessibleAsync(
-                                school.Id,
-                                section.Id
-                            );
-                        }
-
-                        selectedSchoolIds.Add(school.Id);
-                    }
-                }
-            }
-
-            controller.HttpContext.Session.SetValue<IEnumerable<int>>(
-                SessionConstants.SelectedEstablishmentsKey,
-                selectedSchoolIds
+            throw new InvalidDataException(
+                $"Selected school with ref {selectedRef} not linked to user's group"
             );
         }
+
+        var school =
+            await _establishmentService.GetEstablishmentByReferenceAsync(selectedRef)
+            ?? throw new InvalidDataException(
+                $"School with ref {selectedRef} not found"
+            );
+
+        if (
+            string.IsNullOrWhiteSpace(school.EstablishmentRef)
+            || string.IsNullOrWhiteSpace(school.OrgName)
+        )
+        {
+            throw new InvalidDataException(
+                $"School with ref {selectedRef} is missing required data"
+            );
+        }
+
+        CurrentUser.SetGroupSelectedSchool(
+            school.EstablishmentRef,
+            school.OrgName
+        );
+
+        selectedSchoolIds.Add(school.Id);
+
+        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+            SessionConstants.SelectedEstablishmentsKey,
+            selectedSchoolIds
+        );
+
+        var latestSubmission =
+            await _submissionService.GetLatestSubmissionResponsesModel(
+                school.Id,
+                section,
+                status: null
+            );
+
+        if (latestSubmission?.Status == SubmissionStatus.InProgress)
+        {
+            return controller.RedirectToRoute(
+                QuestionsController.GetContinueSelfAssessmentAction,
+                new { categorySlug, sectionSlug }
+            );
+        }
+    }
+    else
+    {
+        foreach (var schoolRef in selectedRefs)
+        {
+            if (!VerifyGroupSchoolMembership(schoolRef, establishmentLinks))
+            {
+                continue;
+            }
+
+            var school =
+                await _establishmentService.GetEstablishmentByReferenceAsync(
+                    schoolRef
+                );
+
+            if (school is null)
+            {
+                continue;
+            }
+
+            var latestSubmission =
+                await _submissionService.GetLatestSubmissionResponsesModel(
+                    school.Id,
+                    section,
+                    status: null
+                );
+
+            if (latestSubmission?.Status == SubmissionStatus.InProgress)
+            {
+                await _submissionService.SetSubmissionInaccessibleAsync(
+                    school.Id,
+                    section.Id
+                );
+            }
+
+            selectedSchoolIds.Add(school.Id);
+        }
+
+        controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+            SessionConstants.SelectedEstablishmentsKey,
+            selectedSchoolIds
+        );
+    }
+}
 
         var questionSlug = section.Questions.First().Slug;
 
