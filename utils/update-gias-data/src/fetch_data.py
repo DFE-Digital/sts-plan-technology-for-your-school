@@ -122,16 +122,14 @@ def _find_latest_available_gias_file_date(
 
 def _find_latest_downloaded_gias_file_date(
     today: date, max_days_back: int = DEFAULT_MAX_DAYS_BACK
-) -> date:
+) -> date | None:
     for days_back in range(max_days_back + 1):
         candidate_date = today - timedelta(days=days_back)
 
         if all(get_file_path(stem, candidate_date).exists() for stem in CSV_STEMS):
             return candidate_date
 
-    raise RuntimeError(
-        f"Could not find a complete GIAS file set from the last {max_days_back} days"
-    )
+    return None
 
 
 def fetch_and_save_gias_data() -> None:
@@ -142,13 +140,23 @@ def fetch_and_save_gias_data() -> None:
         logger.info("Files already exist for today, skipping download")
         return
 
-    logger.info(
-        "Most recent downloaded GIAS files are from %s - checking if today's files are available",
-        most_recent_download_date,
-    )
+    if most_recent_download_date is None:
+        logger.info(
+            "No GIAS files found in the last %s days, downloading most recent available files",
+            DEFAULT_MAX_DAYS_BACK,
+        )
+    else:
+        logger.info(
+            "Most recent downloaded GIAS files are from %s - checking if today's files are available",
+            most_recent_download_date,
+        )
 
     most_recent_remote_date = _find_latest_available_gias_file_date(date.today())
-    if most_recent_remote_date <= most_recent_download_date:
+
+    if (
+        most_recent_download_date != None
+        and most_recent_remote_date <= most_recent_download_date
+    ):
         logger.info(
             "No more recent GIAS files available (most recent: %s), skipping download",
             most_recent_remote_date,
