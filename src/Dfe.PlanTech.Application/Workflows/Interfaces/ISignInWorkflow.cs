@@ -5,6 +5,9 @@ namespace Dfe.PlanTech.Application.Workflows.Interfaces;
 
 public interface ISignInWorkflow
 {
-    Task<SqlSignInDto> RecordSignIn(string dfeSignInRef, EstablishmentModel establishmentModel);
+    Task<(EstablishmentModel updatedOrganisation, SqlSignInDto signIn)> RecordSignIn(
+        string dfeSignInRef,
+        EstablishmentModel establishmentModel
+    );
     Task<SqlSignInDto> RecordSignInUserOnly(string dfeSignInRef);
 }

@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
@@ -37,11 +38,11 @@ public static class OnUserInformationReceivedEvent
             return;
         }
 
-        var establishment = context.Principal.Claims.GetOrganisation();
+        var organisation = context.Principal.Claims.GetOrganisation();
         var signInWorkflow =
             context.HttpContext.RequestServices.GetRequiredService<ISignInWorkflow>();
 
-        if (establishment is null)
+        if (organisation is null)
         {
             logger.LogWarning(
                 "User {UserId} is authenticated but has no establishment",
@@ -51,7 +52,14 @@ public static class OnUserInformationReceivedEvent
             return;
         }
 
-        var signin = await signInWorkflow.RecordSignIn(dsiReference, establishment);
+        (EstablishmentModel updatedOrganisation, SqlSignInDto signin) =
+            await signInWorkflow.RecordSignIn(dsiReference, organisation);
+
+        if (updatedOrganisation != null && updatedOrganisation.Urn != organisation.Urn)
+        {
+            // Remove the trust organisation from the cookie and replace it with the school organisation
+            ReplaceOrganisationClaim(context, organisation, updatedOrganisation);
+        }
 
         AddClaimsToPrincipal(context, signin);
     }
@@ -61,12 +69,7 @@ public static class OnUserInformationReceivedEvent
         SqlSignInDto signin
     )
     {
-        var principal = context.Principal;
-
-        if (principal is null)
-        {
-            return;
-        }
+        var principal = context.Principal!;
 
         string establishmentId =
             (signin.EstablishmentId?.ToString())
@@ -79,5 +82,27 @@ public static class OnUserInformationReceivedEvent
         ]);
 
         principal.AddIdentity(claimsIdentity);
+    }
+
+    private static void ReplaceOrganisationClaim(
+        UserInformationReceivedContext context,
+        EstablishmentModel originalOrganisation,
+        EstablishmentModel updatedOrganisation
+    )
+    {
+        var principal = context.Principal!;
+        var identity = (ClaimsIdentity)principal.Identity!;
+
+        var existingClaim = identity.FindFirst(ClaimConstants.Organisation);
+        if (existingClaim != null)
+        {
+            var newOrganisationJson = JsonSerializer.Serialize(updatedOrganisation);
+            ClaimsIdentity claimsIdentity = new([
+                new Claim(ClaimConstants.Organisation, newOrganisationJson),
+            ]);
+
+            identity.RemoveClaim(existingClaim);
+            principal.AddIdentity(claimsIdentity);
+        }
     }
 }
