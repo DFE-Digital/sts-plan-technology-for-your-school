@@ -9,21 +9,28 @@ namespace Dfe.PlanTech.Application.UnitTests.Workflows;
 public class SignInWorkflowTests
 {
     private readonly IEstablishmentRepository _estRepo = Substitute.For<IEstablishmentRepository>();
+    private readonly IGiasRepository _giasRepo = Substitute.For<IGiasRepository>();
     private readonly ISignInRepository _signInRepo = Substitute.For<ISignInRepository>();
     private readonly IUserRepository _userRepo = Substitute.For<IUserRepository>();
 
-    private SignInWorkflow CreateServiceUnderTest() => new(_estRepo, _signInRepo, _userRepo);
+    private SignInWorkflow CreateServiceUnderTest() =>
+        new(_estRepo, _giasRepo, _signInRepo, _userRepo);
 
     // ── ctor guards ────────────────────────────────────────────────────────────
     [Fact]
     public void Ctor_NullDeps_Throw()
     {
         Assert.Throws<ArgumentNullException>(() =>
-            new SignInWorkflow(null!, _signInRepo, _userRepo)
+            new SignInWorkflow(null!, _giasRepo, _signInRepo, _userRepo)
         );
-        Assert.Throws<ArgumentNullException>(() => new SignInWorkflow(_estRepo, null!, _userRepo));
         Assert.Throws<ArgumentNullException>(() =>
-            new SignInWorkflow(_estRepo, _signInRepo, null!)
+            new SignInWorkflow(_estRepo, null!, _signInRepo, _userRepo)
+        );
+        Assert.Throws<ArgumentNullException>(() =>
+            new SignInWorkflow(_estRepo, _giasRepo, null!, _userRepo)
+        );
+        Assert.Throws<ArgumentNullException>(() =>
+            new SignInWorkflow(_estRepo, _giasRepo, _signInRepo, null!)
         );
     }
 

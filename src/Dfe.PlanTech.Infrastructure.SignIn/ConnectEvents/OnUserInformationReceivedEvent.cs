@@ -86,7 +86,11 @@ public static class OnUserInformationReceivedEvent
         SqlSignInDto signin
     )
     {
-        var principal = context.Principal!;
+        var principal = context.Principal;
+        if (principal is null)
+        {
+            return;
+        }
 
         string establishmentId =
             (signin.EstablishmentId?.ToString())
