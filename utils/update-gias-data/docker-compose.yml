@@ -1,0 +1,25 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: gias-data
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: 'Dev_Password1!'
+      MSSQL_PID: 'Developer'
+    ports:
+      - '1433:1433'
+    volumes:
+      - ./init-db.sh:/usr/local/bin/init-db.sh:ro
+      - ../../src:/usr/src/app/src:ro
+    entrypoint: ['/bin/bash', '-c', '/usr/local/bin/init-db.sh']
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P 'Dev_Password1!' -Q 'SELECT 1' ||
+          exit 1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
