@@ -53,13 +53,13 @@ jobs:
       - name: Put Production into Development
         uses: ./.github/actions/restore-db-from-bacpac
         with:
-          resource_group_backup: ${{  secret.TF_BACKEND_RESOURCE_GROUP  }}
+          resource_group_backup: ${{  secrets.TF_BACKEND_RESOURCE_GROUP  }}
           resource_group_app: ${{  env.az_resource_group_name }}
           ip-address: ${{  steps.whats-my-ip.outputs.ip  }}
           sql_server_name: ${{  env.az_sql_database_server_name  }}
           target_database: ${{  secrets.DEV_DATABASE  }}
-          storage_account: ${{ secret.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
-          container_name: ${{  secret.TF_BACKEND_CONTAINER_NAME  }}
+          storage_account: ${{ secrets.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+          container_name: ${{  secrets.TF_BACKEND_CONTAINER_NAME  }}
 
       - name: Remove IP Runner for azure keyvault
         uses: ./.github/actions/whitelist-kv
@@ -76,7 +76,3 @@ jobs:
           resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
           account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
           verb: remove
-
-
-      - name: Give permissions
-        uses: 
