@@ -1,0 +1,82 @@
+name: Fortnightly copy of Production to Dev
+
+on:
+  schedule:
+    - cron: '0 0 */14 * *'
+    #I am not sure this is correct.
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: false
+        default: 'Dev'
+  
+env:
+  SECRETMANIFEST_BACKUP_CONTAINER_NAME: secretnames
+  az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
+  az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
+
+jobs:
+  copydb:
+    runs-on: ubuntu-latest
+    environment: ${{  var.AZ_TAG_ENVIRONMENT  }}
+    steps:
+      - name: clone repo
+        uses: actions/checkout@v4
+
+      - name: Get GitHub Runner IP
+        id: whats-my-ip
+        uses: ./.github/actions/whats-my-ip-address
+
+      - name: Azure CLI Login
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Whitelist Runner for azure keyvault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.AZ_ACA_RESOURCE_GROUP }}
+          keyvault-name: ${{ steps.vars.outputs.AZ_KEYVAULT_NAME }}
+          verb: add
+
+      - name: Whitelist Runner for backup storage
+        uses: ./.github/actions/whitelist-storage
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
+          account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
+          verb: add
+
+      - name: Put Production into Development
+        uses: ./.github/actions/restore-db-from-bacpac
+        with:
+          resource_group_backup: ${{  secret.TF_BACKEND_RESOURCE_GROUP  }}
+          resource_group_app: ${{  env.az_resource_group_name }}
+          ip-address: ${{  steps.whats-my-ip.outputs.ip  }}
+          sql_server_name: ${{  env.az_sql_database_server_name  }}
+          target_database: ${{  secrets.DEV_DATABASE  }}
+          storage_account: ${{ secret.TF_BACKEND_STORAGE_ACCOUNT_NAME }}
+          container_name: ${{  secret.TF_BACKEND_CONTAINER_NAME  }}
+
+      - name: Remove IP Runner for azure keyvault
+        uses: ./.github/actions/whitelist-kv
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.AZ_ACA_RESOURCE_GROUP }}
+          keyvault-name: ${{ steps.vars.outputs.AZ_KEYVAULT_NAME }}
+          verb: remove
+
+      - name: Remove IP Runner for backup storage
+        uses: ./.github/actions/whitelist-storage
+        with:
+          ip-address: ${{ steps.whats-my-ip.outputs.ip }}
+          resource-group: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF }}
+          account-name: ${{ steps.vars.outputs.RESOURCE_PREFIX_TF_SHORT }}
+          verb: remove
+
+
+      - name: Give permissions
+        uses: 
