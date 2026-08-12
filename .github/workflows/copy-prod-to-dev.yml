@@ -10,7 +10,7 @@ on:
         default: 'Dev'
   
 env:
-  az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
+  az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv
   az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
 
 jobs:
@@ -36,9 +36,27 @@ jobs:
         uses: ./.github/actions/whitelist-kv
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.vars.outputs.AZ_ACA_RESOURCE_GROUP }}
-          keyvault-name: ${{ steps.vars.outputs.AZ_KEYVAULT_NAME }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_sql_database_server_name }}
           verb: add
+
+      - name: Prepare derived variables
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ENVIRONMENT_NAME='Dev'
+
+          DFE_PROJECT_NAME="${{ secrets.DFE_PROJECT_NAME }}"
+
+          RESOURCE_PREFIX_TF="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}-tf"
+          TF_KEYVAULT_NAME="${RESOURCE_PREFIX_TF}-kv"
+          RESOURCE_PREFIX_APP="${{ secrets.AZ_ENVIRONMENT }}${DFE_PROJECT_NAME}"
+
+          echo "ENVIRONMENT_NAME=$ENVIRONMENT_NAME" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_TF=$RESOURCE_PREFIX_TF" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_TF_SHORT=${RESOURCE_PREFIX_TF//-/}" >> "$GITHUB_OUTPUT"
 
       - name: Whitelist Runner for backup storage
         uses: ./.github/actions/whitelist-storage
@@ -63,8 +81,8 @@ jobs:
         uses: ./.github/actions/whitelist-kv
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.vars.outputs.AZ_ACA_RESOURCE_GROUP }}
-          keyvault-name: ${{ steps.vars.outputs.AZ_KEYVAULT_NAME }}
+          resource-group: ${{ env.az_resource_group_name }}
+          keyvault-name: ${{ env.az_sql_database_server_name }}
           verb: remove
 
       - name: Remove IP Runner for backup storage
