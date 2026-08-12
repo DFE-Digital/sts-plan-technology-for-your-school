@@ -1,4 +1,4 @@
-name: Fortnightly copy of Production to Dev
+name: Copy of Production to Dev
 
 on:
   schedule:
