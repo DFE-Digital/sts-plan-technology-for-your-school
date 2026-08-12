@@ -3,7 +3,6 @@ name: Fortnightly copy of Production to Dev
 on:
   schedule:
     - cron: '0 0 */14 * *'
-    #I am not sure this is correct.
   workflow_dispatch:
     inputs:
       environment:
@@ -11,7 +10,6 @@ on:
         default: 'Dev'
   
 env:
-  SECRETMANIFEST_BACKUP_CONTAINER_NAME: secretnames
   az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
   az_resource_group_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}
 
