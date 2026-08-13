@@ -24,6 +24,10 @@ jobs:
   copydb:
     runs-on: ubuntu-latest
     environment: ${{  vars.AZ_TAG_ENVIRONMENT  }}
+    permissions:
+      id-token: write
+      contents: read
+
     steps:
       - name: clone repo
         uses: actions/checkout@v4
