@@ -10,6 +10,8 @@ on:
         type: choice
         options: ['Dev']
         default: 'Dev'
+  push:
+    branches: ['localbranch']
   
 env:
   az_sql_database_server_name: ${{ secrets.AZ_ENVIRONMENT }}${{ vars.DFE_PROJECT_NAME }}-kv
