@@ -1,26 +1,37 @@
 resource "azurerm_key_vault" "vault" {
   name                       = local.kv_name
   location                   = local.azure_location
-  resource_group_name        = module.main_hosting.azurerm_resource_group_default.name
+  resource_group_name        = local.resource_group_name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 90
   tags                       = local.tags
-  purge_protection_enabled   = true
+  rbac_authorization_enabled = var.kv_use_rbac
+  #test. hard to get rid of..
+  purge_protection_enabled = true
 
   network_acls {
-    bypass                     = "None"
-    default_action             = "Deny"
-    virtual_network_subnet_ids = [module.main_hosting.networking.subnet_id]
-    ip_rules                   = toset(concat(tolist(local.kv_firewall_cidr_rules), [var.workflow_runner_ip]))
+    bypass         = "None"
+    default_action = "Deny"
+    #this allows it to not be created as a dependency on first apply
+    virtual_network_subnet_ids = var.include_kv_subnet_acl ? [
+      module.main_hosting.networking.subnet_id
+    ] : []
+    ip_rules = concat(tolist(local.kv_firewall_cidr_rules))
+  }
+  #this prevents the second apply for all app removing the runner ip added in the whitelist kv step
+  lifecycle {
+    ignore_changes = [
+      network_acls[0].ip_rules
+    ]
   }
 }
 
 ###################
 # Access Policies #
 ###################
-
 resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
+  count        = var.kv_use_rbac ? 0 : 1
   key_vault_id = azurerm_key_vault.vault.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = local.current_user_id
@@ -30,6 +41,7 @@ resource "azurerm_key_vault_access_policy" "vault_access_policy_tf" {
 }
 
 resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
+  count        = var.kv_use_rbac ? 0 : 1
   key_vault_id = azurerm_key_vault.vault.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
   object_id    = azurerm_user_assigned_identity.user_assigned_identity.principal_id
@@ -37,7 +49,6 @@ resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
   secret_permissions = ["List", "Get"]
   key_permissions    = ["List", "Get", "WrapKey", "UnwrapKey"]
 }
-
 ###########
 # Secrets #
 ###########
@@ -47,6 +58,7 @@ resource "azurerm_key_vault_access_policy" "vault_access_policy_mi" {
 ######################
 
 resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
+  count        = var.add_secrets ? 1 : 0
   key_vault_id = azurerm_key_vault.vault.id
   name         = "contentful--deliveryapikey"
   value        = "temp value"
@@ -60,6 +72,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_deliveryapikey" {
 }
 
 resource "azurerm_key_vault_secret" "vault_secret_contentful_previewapikey" {
+  count        = var.add_secrets ? 1 : 0
   key_vault_id = azurerm_key_vault.vault.id
   name         = "contentful--previewapikey"
   value        = "temp value"
@@ -73,6 +86,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_previewapikey" {
 }
 
 resource "azurerm_key_vault_secret" "vault_secret_contentful_spaceid" {
+  count        = var.add_secrets ? 1 : 0
   key_vault_id = azurerm_key_vault.vault.id
   name         = "contentful--spaceid"
   value        = "temp value"
@@ -86,6 +100,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_spaceid" {
 }
 
 resource "azurerm_key_vault_secret" "vault_secret_contentful_environment" {
+  count        = var.add_secrets ? 1 : 0
   key_vault_id = azurerm_key_vault.vault.id
   name         = "contentful--environment"
   value        = "temp value"
@@ -103,6 +118,7 @@ resource "azurerm_key_vault_secret" "vault_secret_contentful_environment" {
 ####################
 
 resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
+  count        = var.add_secrets ? 1 : 0
   key_vault_id = azurerm_key_vault.vault.id
   name         = "connectionstrings--database"
   value        = local.az_sql_connection_string
@@ -119,6 +135,7 @@ resource "azurerm_key_vault_secret" "vault_secret_database_connectionstring" {
 ###################################
 
 resource "azurerm_key_vault_secret" "csp_connect_src" {
+  count        = var.add_secrets ? 1 : 0
   name         = "CSP--ConnectSrc"
   key_vault_id = azurerm_key_vault.vault.id
   value        = local.kv_secrets_csp_connectsrc
@@ -132,6 +149,7 @@ resource "azurerm_key_vault_secret" "csp_connect_src" {
 }
 
 resource "azurerm_key_vault_secret" "csp_default_src" {
+  count        = var.add_secrets ? 1 : 0
   name         = "CSP--DefaultSrc"
   key_vault_id = azurerm_key_vault.vault.id
   value        = local.kv_secrets_csp_defaultsrc
@@ -145,6 +163,7 @@ resource "azurerm_key_vault_secret" "csp_default_src" {
 }
 
 resource "azurerm_key_vault_secret" "csp_frame_src" {
+  count        = var.add_secrets ? 1 : 0
   name         = "CSP--FrameSrc"
   key_vault_id = azurerm_key_vault.vault.id
   value        = local.kv_secrets_csp_framesrc
@@ -158,6 +177,7 @@ resource "azurerm_key_vault_secret" "csp_frame_src" {
 }
 
 resource "azurerm_key_vault_secret" "csp_img_src" {
+  count        = var.add_secrets ? 1 : 0
   name         = "CSP--ImgSrc"
   key_vault_id = azurerm_key_vault.vault.id
   value        = local.kv_secrets_csp_imgsrc
@@ -175,6 +195,12 @@ resource "azurerm_key_vault_secret" "csp_img_src" {
 ########
 
 resource "azurerm_key_vault_key" "data_protection_key" {
+  count = local.create_kv_data_protection_key ? 1 : 0
+  depends_on = [
+    azurerm_key_vault.vault,
+    azurerm_role_assignment.mi-crypto
+  ]
+
   name         = "dataprotection"
   key_vault_id = azurerm_key_vault.vault.id
 
@@ -202,14 +228,16 @@ resource "azurerm_key_vault_key" "data_protection_key" {
 #######
 
 resource "random_password" "api_key_value" {
+  count   = var.add_secrets ? 1 : 0
   length  = 32
   special = true
 }
 
 resource "azurerm_key_vault_secret" "api_key" {
+  count        = var.add_secrets ? 1 : 0
   name         = "api--authentication--keyvalue"
   key_vault_id = azurerm_key_vault.vault.id
-  value        = random_password.api_key_value.result
+  value        = random_password.api_key_value[0].result
 
   expiration_date = timeadd(timestamp(), "${local.contentful_webhook_secret_timetolive_hours}h")
 }

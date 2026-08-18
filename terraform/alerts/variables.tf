@@ -3,7 +3,7 @@ variable "resource_group_name" {
 }
 
 variable "environment_github" {
-  type = string
+  type    = string
   default = "Dev"
 }
 
