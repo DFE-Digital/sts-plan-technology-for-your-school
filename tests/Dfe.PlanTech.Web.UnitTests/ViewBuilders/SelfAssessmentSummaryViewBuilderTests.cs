@@ -1,4 +1,5 @@
 using Dfe.PlanTech.Application.Providers.Interfaces;
+using Dfe.PlanTech.Application.Services;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.Contentful.Models;
@@ -304,6 +305,68 @@ public class SelfAssessmentSummaryViewBuilderTests
         await Assert.ThrowsAsync<ContentfulDataUnavailableException>(() =>
             sut.RouteToSelfAssessmentSummary(controller, "category", "missing-section-id")
         );
+    }
+
+    [Fact]
+    public async Task RouteToSelfAssessmentSummary_WhenMatHasCompletedSchools_ReturnsSummaryView()
+    {
+        var sut = CreateSut();
+        _currentUser.IsMat.Returns(true);
+        _currentUser.GetActiveEstablishmentIdAsync().Returns(101);
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails("section-id"),
+            Name = "Cyber risk assessment",
+        };
+
+        _contentful
+            .GetSectionBySlugAsync("cyber-risk-assessment")
+            .Returns(section);
+
+        _contentful
+            .GetAllCategoriesAsync()
+            .Returns([]);
+
+        _groupService
+            .GetGroupCompletedSubmissionsBySections(
+                Arg.Any<int[]>()
+            )
+            .Returns(
+            [
+                new SqlSubmissionDto
+            {
+                SectionId = "section-id",
+                Establishment = new SqlEstablishmentDto
+                {
+                    OrgName = "Test School",
+                    EstablishmentRef = "123456",
+                },
+            },
+            ]);
+
+        var controller = new TestController();
+
+        var result = await sut.RouteToSelfAssessmentSummary(
+            controller,
+            "cyber-security-standard",
+            "cyber-risk-assessment"
+        );
+
+        var view = Assert.IsType<ViewResult>(result);
+
+        Assert.Equal(
+            SelfAssessmentSummaryViewBuilder.SelfAssessmentSummaryViewName,
+            view.ViewName
+        );
+
+        var model =
+            Assert.IsType<SelfAssessmentSummaryViewModel>(
+                view.Model
+            );
+
+        Assert.Equal(1, model.CompletedSchoolCount);
+        Assert.Single(model.RecommendationLinks);
     }
 
     [Fact]

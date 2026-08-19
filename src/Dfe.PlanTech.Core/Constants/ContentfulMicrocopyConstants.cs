@@ -91,6 +91,9 @@ public static class ContentfulMicrocopyConstants
     public const string GroupsSelectSchoolsToAssessNoSelectionError = "msmErrorNoSelection";
     public const string GroupsSelectSchoolsToAssessConflictError = "msmErrorConflictingSelection";
 
+    public const string GroupsSelectSelfAssessmentBackLink = "msmSelectAssessmentBackLink";
+
+
     // Fallback text
     private const string EmptyFallback = "";
 
@@ -142,6 +145,8 @@ public static class ContentfulMicrocopyConstants
     private const string GroupsSelectSchoolsToAssessContinueFallback = "Continue";
     private const string GroupsSelectSchoolsToAssessNoSelectionErrorFallback = "Select one, more or all schools";
     private const string GroupsSelectSchoolsToAssessConflictErrorFallback = "Select one or more schools, or select 'Submit self-assessment for all schools without a submission'";
+
+    private const string GroupsSelectSelfAssessmentBackLinkFallback = "Back to home";
 
     public const string SchoolSummarySuccessBodyFallback = "Self-assessment has been submitted";
     public const string SchoolSummaryHeaderFallback = "What to do next";
@@ -233,6 +238,7 @@ public static class ContentfulMicrocopyConstants
         { SummaryRecHeader, SummaryRecHeaderFallback },
         { SummaryRecBody, SummaryRecBodyFallback },
         { SummarySubmitAnotherHeading, SummarySubmitAnotherHeadingFallback },
+        { GroupsSelectSelfAssessmentBackLink, GroupsSelectSelfAssessmentBackLinkFallback },
     };
 
     internal static class VariableNames
@@ -282,7 +288,15 @@ public static class ContentfulMicrocopyConstants
         { SingleRecommendationHistoryChange, [VariableNames.RecStatus] },
         { SingleRecommendationHistoryReason, [VariableNames.RecStatus] },
         { ViewAnswersIntroText, [VariableNames.DateCompleted] },
-        { ContinueIntroText, [VariableNames.DateUpdated] },
+        {
+            ContinueIntroText,
+            [
+                VariableNames.EstablishmentName,
+                VariableNames.DateUpdated,
+                VariableNames.Count,
+                VariableNames.Total
+            ]
+        },
         { CategoryPrintSectionInProgress, [VariableNames.DateUpdated] },
         { CategoryPrintSectionCompleted, [VariableNames.Topic, VariableNames.DateCompleted] },
         { GroupsSelectRecommendationCount, [VariableNames.Count, VariableNames.Total] },
