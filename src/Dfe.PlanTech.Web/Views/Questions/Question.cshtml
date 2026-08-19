@@ -4,14 +4,14 @@
     @{
         await Html.RenderPartialAsync("BackButton");
 
-        @if (Model?.IsMatMultiSchoolAssessment == true)
+        @if (Model?.IsMatMultiSchoolAssessment == true && Model?.IsMatBulkAssessment == true)
         {
             var schoolLabel =
                 Model.SelectedSchoolCount == 1
                     ? "school"
                     : "schools";
 
-            <details class="govuk-details govuk-!-margin-top-n6" open>
+            <details class="govuk-details govuk-!-margin-top-n6" closed>
                 <summary class="govuk-details__summary">
                     <span class="govuk-details__summary-text">
                         You are submitting the self-assessment for

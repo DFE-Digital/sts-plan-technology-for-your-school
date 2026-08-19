@@ -10,7 +10,7 @@
     @{
         await Html.RenderPartialAsync("BackButton");
 
-        @if (Model.IsMatMultiSchoolAssessment)
+        @if (Model?.IsMatMultiSchoolAssessment == true && Model?.IsMatBulkAssessment == true)
         {
             var schoolLabel =
                 Model.SelectedSchoolCount == 1
@@ -116,10 +116,14 @@
 
         @if (Model.IsMatMultiSchoolAssessment == true)
         {
+            var isSingleSchool = Model.SelectedSchoolCount == 1;
+            var assessmentText = isSingleSchool ? "self-assessment" : "self-assessments";
+            var schoolText = isSingleSchool ? "school" : "schools";
+
             <div>
                 <h2>What happens next</h2>
                 <p class="govuk-body govuk-!-margin-bottom-6">
-                    You're submitting the @Model.SectionName self-assessments for @Model.SelectedSchoolCount schools:
+                    You're submitting the @Model.SectionName @assessmentText for @Model.SelectedSchoolCount @schoolText:
                 </p>
 
                 <ul class="govuk-list govuk-list--bullet">
@@ -129,7 +133,7 @@
                     }
                 </ul>
                 <p>
-                    You'll get recommendations to help you schools meet the @Model.SectionName standards. Your self-assessment answers will be used to give these recommendations a progress status.
+                    You'll get recommendations to help your schools meet the @Model.CategoryName.ToLower() standard. Your self-assessment answers will be used to give these recommendations a progress status.
                 </p>
             </div>
         }

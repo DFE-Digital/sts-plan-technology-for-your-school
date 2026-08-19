@@ -361,18 +361,41 @@ public class ReviewAnswersViewBuilder(
             CurrentUser
         );
 
+
+        var sectionId =
+            routingData.QuestionnaireSection.Sys?.Id
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find section id for slug {sectionSlug}"
+            );
+
+        var categories = await ContentfulService.GetAllCategoriesAsync();
+
+        var category = categories.FirstOrDefault(c =>
+            c.Sections?.Any(s => s.Id == sectionId) == true
+        );
+
+        var categoryName =
+            category?.Header?.Text
+            ?? throw new ContentfulDataUnavailableException(
+                $"Could not find category for section {sectionSlug}"
+            );
+
+        var isMatBulkAssessment = _matEstablishmentProvider.IsBulkAssessment();
+
         return new ReviewAnswersViewModel
         {
             Title = new ComponentTitleEntry(pageTitle),
             Content = content,
             SectionName = routingData.QuestionnaireSection.Name,
             CategorySlug = categorySlug,
+            CategoryName = categoryName,
             SectionSlug = sectionSlug,
             Slug = pageSlug,
             SubmissionId = routingData.Submission?.SubmissionId,
             SubmissionResponses = submissionResponsesViewModel,
             ErrorMessage = errorMessage,
             IsMatMultiSchoolAssessment = selectedSchoolNames.Count > 0,
+            IsMatBulkAssessment = isMatBulkAssessment,
             SelectedSchoolCount = selectedSchoolNames.Count,
             SelectedSchoolNames = selectedSchoolNames.ToList(),
         };

@@ -5,8 +5,18 @@
 @section NavButton {
     @if (Model.Page.DisplayBackButton)
     {
-        await Html.RenderPartialAsync("BackButton", Model);
+        if (Model.ShowTrustSchoolAssessmentTable)
+        {
+            <govuk-back-link href="/groups/@UrlConstants.GroupSelfAssessmentSelectionSlug">
+                Back to select a self-assessment
+            </govuk-back-link>
+        }
+        else
+        {
+            await Html.RenderPartialAsync("BackButton", Model);
+        }
     }
+
     @if (Model.Page.DisplayHomeButton)
     {
         await Html.RenderPartialAsync("HomeButton", Model);

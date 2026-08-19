@@ -1,6 +1,17 @@
 @model GroupSelectAssessmentViewModel
+@inject IMicrocopyProvider Microcopy
+
 @{
-ViewData[StatePassingMechanismConstants.Title] = "Select a self-assessment";
+    ViewData[StatePassingMechanismConstants.Title] = "Select a self-assessment";
+}
+
+@section NavButton {
+    <govuk-back-link id="nonjs-topic-back-link" href="@UrlConstants.GroupsSelectionPageSlug" class="noprint non-js-only govuk-back-link">
+        Back to home
+    </govuk-back-link>
+    <govuk-back-link id="topic-back-link" href="@UrlConstants.GroupsSelectionPageSlug" class="noprint js-only">
+        @await Microcopy.GetTextByKeyAsync(ContentfulMicrocopyConstants.GroupsSelectSelfAssessmentBackLink)
+    </govuk-back-link>
 }
 <div>
     <h1 class="govuk-heading-xl">Select a self-assessment</h1>
@@ -28,14 +39,14 @@ ViewData[StatePassingMechanismConstants.Title] = "Select a self-assessment";
             <div class="govuk-task-list__status" id="@($"{s.SectionSlug}-status")">
                 @if (s.UncompletedGroupSubmissions == 0)
                 {
-                            <span>All self-assessments submitted.</span>
+                    <span>All self-assessments submitted.</span>
                 }
                 else
                 {
                     var schoolPluralisation = s.UncompletedGroupSubmissions == 1 ? "school" : "schools";
 
                     <span>
-                        Self assessment required for @s.UncompletedGroupSubmissions @schoolPluralisation.
+                        Self-assessment required for @s.UncompletedGroupSubmissions @schoolPluralisation
                     </span>
                 }
             </div>
