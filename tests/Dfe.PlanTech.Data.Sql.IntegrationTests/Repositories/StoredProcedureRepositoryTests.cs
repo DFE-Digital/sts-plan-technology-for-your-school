@@ -141,7 +141,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
     }
 
     [Fact]
-    public async Task StoredProcedureRepository_GetFirstActivityForEstablishmentRecommendationAsync_WhenMultipleMatchingHistoriesExist_ThenReturnsLatestByHistoryId()
+    public async Task StoredProcedureRepository_GetFirstActivityForEstablishmentRecommendationAsync_WhenMultipleMatchingHistoriesExist_ThenReturnsEarliestByHistoryId()
     {
         var school = CreateEstablishment(111, "School 111");
         var user = CreateUser(211);
@@ -224,7 +224,7 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
         );
 
         Assert.NotNull(result);
-        Assert.Equal(latestDate, result!.StatusChangeDate);
-        Assert.Equal(latestHistory.NewStatus, result.Status);
+        Assert.Equal(firstDate, result!.StatusChangeDate);
+        Assert.Equal(firstHistory.NewStatus, result.Status);
     }
 }
