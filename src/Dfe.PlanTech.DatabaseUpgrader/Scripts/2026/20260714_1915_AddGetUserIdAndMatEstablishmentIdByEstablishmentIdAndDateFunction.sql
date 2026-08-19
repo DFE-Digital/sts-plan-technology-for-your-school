@@ -1,5 +1,5 @@
 /****** Object:  UserDefinedFunction [dbo].[getMatEstablishmentIdForUserIdEstablishmentIdOnGivenDate]    Script Date: 15/07/2026 14:51:27 ******/
-DROP FUNCTION [dbo].[getUserIdAndMatEstablishmentIdByEstablishmentIdAndDate]
+DROP FUNCTION IF EXISTS [dbo].[getUserIdAndMatEstablishmentIdByEstablishmentIdAndDate]
 GO
 
 /****** Object:  UserDefinedFunction [dbo].[getMatEstablishmentIdForUserIdEstablishmentIdOnGivenDate]    Script Date: 15/07/2026 14:51:27 ******/
