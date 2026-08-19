@@ -1,0 +1,81 @@
+name: Upsert Contentful Webhook
+description: Runs the existing Contentful webhook script using values restored into Key Vault.
+
+inputs:
+  enabled:
+    required: false
+    default: "true"
+    description: whether to run
+
+  keyvault-name:
+    required: true
+    description: the app kv holding contentful secrets
+
+  env-name:
+    required: true
+    description: which Github env are we running in
+
+  webhook-name:
+    required: false
+    default: "Plan Tech Webhook"
+    description: name of webhook
+
+  cdn-hostname:
+    required: true
+    description: the front door?
+
+  contentful_webhook_endpoint:
+    required: false
+    default: "/api/cms/webhook"
+    description: Webhook setup endpoint
+
+runs:
+  using: composite
+  steps:
+    - name: Upsert Contentful webhook
+      if: ${{ inputs.enabled }}
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        keyvault_name="${{ inputs.keyvault-name }}"
+
+        contentful_management_token="$(az keyvault secret show \
+          --vault-name "$keyvault_name" \
+          --name "contentful--managementtoken" \
+          --query value -o tsv)"
+
+        contentful_environment="$(az keyvault secret show \
+          --vault-name "$keyvault_name" \
+          --name "contentful--environment" \
+          --query value -o tsv)"
+
+        contentful_space_id="$(az keyvault secret show \
+          --vault-name "$keyvault_name" \
+          --name "contentful--spaceid" \
+          --query value -o tsv)"
+
+        webhook_api_key="$(az keyvault secret show \
+          --vault-name "$keyvault_name" \
+          --name "contentful--deliveryapikey" \
+          --query value -o tsv)"
+
+        echo "::add-mask::$contentful_management_token"
+        echo "::add-mask::$contentful_environment"
+        echo "::add-mask::$contentful_space_id"
+        echo "::add-mask::$webhook_api_key"
+
+        cdn-hostname="${{ inputs.cdn-hostname }}"
+        webhook_endpoint="${{ inputs.contentful_webhook_endpoint }}"
+
+        webhook_endpoint="/${webhook_endpoint#/}"
+        contentful_webhook_url="https://${cdn-hostname}${webhook_endpoint}"
+
+        bash ./scripts/create-contentful-webhook.sh \
+          --env-id "$contentful_environment" \
+          --env-name "${{ inputs.env-name }}" \
+          --management-token "$contentful_management_token" \
+          --space-id "$contentful_space_id" \
+          --webhook-api-key "$webhook_api_key" \
+          --webhook-name "${{ inputs.webhook-name }}" \
+          --webhook-url "$contentful_webhook_url"
