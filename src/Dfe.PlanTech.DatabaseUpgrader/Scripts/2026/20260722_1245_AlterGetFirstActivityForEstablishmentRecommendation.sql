@@ -41,6 +41,8 @@ BEGIN
 		AND s.status = 'CompleteReviewed'
 		AND rec.contentfulRef = @RecommendationContentfulRef
 	ORDER BY
-		s.id DESC;
+    s.id DESC,
+    erh.id ASC
+  ;
 
 END

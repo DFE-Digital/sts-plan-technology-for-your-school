@@ -1,7 +1,6 @@
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 namespace Dfe.PlanTech.Data.Sql.IntegrationTests.Repositories;
 
@@ -81,19 +80,11 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             ContentfulRef = "REC001",
             RecommendationText = "Recommendation 1",
             QuestionId = question.Id,
+            QuestionContentfulRef = question.ContentfulRef,
         };
 
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        await DbContext.Database.ExecuteSqlRawAsync(
-            """
-            INSERT INTO migration.sectionRecommendations (sectionRef, recommendationRef)
-            VALUES ({0}, {1})
-            """,
-            "S001",
-            recommendation.ContentfulRef
-        );
 
         var submission = new SubmissionEntity
         {
@@ -168,19 +159,11 @@ public class StoredProcedureRepositoryTests : DatabaseIntegrationTestBase
             ContentfulRef = "REC002",
             RecommendationText = "Recommendation 2",
             QuestionId = question.Id,
+            QuestionContentfulRef = question.ContentfulRef,
         };
 
         DbContext.Recommendations.Add(recommendation);
         await DbContext.SaveChangesAsync(TestContext.Current.CancellationToken);
-
-        await DbContext.Database.ExecuteSqlRawAsync(
-            """
-            INSERT INTO migration.sectionRecommendations (sectionRef, recommendationRef)
-            VALUES ({0}, {1})
-            """,
-            "S002",
-            recommendation.ContentfulRef
-        );
 
         var submission = new SubmissionEntity
         {
