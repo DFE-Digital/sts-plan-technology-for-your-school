@@ -1,20 +1,34 @@
 module "main_hosting" {
-  source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.8.2"
+  source = "./external_module_copies/shared_containerapp"
 
+  #source = "github.com/DFE-Digital/terraform-azurerm-container-apps-hosting?ref=v2.6.3"
+  depends_on = [azurerm_resource_group.app_rg, azurerm_container_registry.acr_notshared]
   ###########
   # General #
   ###########
-  environment    = local.environment
-  project_name   = local.project_name
-  azure_location = local.azure_location
-  tags           = local.tags
+  environment             = local.environment
+  project_name            = local.project_name
+  azure_location          = local.azure_location
+  tags                    = local.tags
+  existing_resource_group = local.app_rg_name
+
+  ############################################
+  # Networking configuration
+  ############################################
+  #having both true prevents the public IP issue by forcing creation of internal load balancer
+  # Deploy container apps & db inside a VNet
+  launch_in_vnet                                           = local.launch_in_vnet
+  container_app_environment_internal_load_balancer_enabled = local.container_app_environment_internal_load_balancer_enabled
 
   #################
   # Container App #
   #################
-  enable_container_registry = true
+  enable_container_registry = local.enable_container_registry
   image_name                = local.container_app_image_name
-  container_port            = local.container_port
+  force_new_revision        = false
+  #new tagged revision will update anyway
+  container_app_name_override = local.container_app_name_override
+  container_port              = local.container_port
   container_secret_environment_variables = {
     "KeyVaultName"    = local.kv_name,
     "AZURE_CLIENT_ID" = azurerm_user_assigned_identity.user_assigned_identity.client_id,
@@ -28,21 +42,33 @@ module "main_hosting" {
   container_max_replicas           = local.container_app_max_replicas
   container_min_replicas           = local.container_app_min_replicas
   container_scale_http_concurrency = local.container_app_http_concurrency
+  #not in v1.2
+  #container_app_environment_workload_profile_type = var.container_app_environment_workload_profile_type
 
+  ###################
+  # Azure Key Vault #
+  ###################
+  escrow_container_app_secrets_in_key_vault = false
+  key_vault_managed_identity_assign_role    = false
+  #we will back up the secrets separately
   #############
   # Azure SQL #
   #############
-  enable_mssql_database              = true
-  mssql_database_name                = "${local.resource_prefix}-sqldb"
-  mssql_server_public_access_enabled = false
+  enable_mssql_database = local.shared_module_enable_mssql_database
+  mssql_database_name   = "${local.resource_prefix}-sqldb"
+  #needs to be true with firewall rules to match "selected networks"
+  mssql_server_public_access_enabled = true
   mssql_server_admin_password        = local.az_sql_admin_password
   mssql_azuread_admin_username       = local.az_sql_azuread_admin_username
   mssql_azuread_admin_object_id      = local.az_sql_azuread_admin_objectid
   mssql_azuread_auth_only            = local.az_use_azure_ad_auth_only
   mssql_managed_identity_assign_role = true
-  mssql_sku_name                     = local.az_sql_sku
-  mssql_max_size_gb                  = local.az_sql_max_size_gb
-  mssql_firewall_ipv4_allow_list     = local.az_mssql_ipv4_allow_list
+  #not in v1.2
+  #enable_mssql_extended_auditing_policy = false
+
+  mssql_sku_name                 = local.az_sql_sku
+  mssql_max_size_gb              = local.az_sql_max_size_gb
+  mssql_firewall_ipv4_allow_list = local.az_mssql_ipv4_allow_list
 
   ##############
   # Networking #
@@ -50,16 +76,34 @@ module "main_hosting" {
   container_apps_infra_subnet_service_endpoints = ["Microsoft.KeyVault", "Microsoft.Storage"]
 
   #############################
-  # Github Container Registry #
+  # Azure Container Registry #
   #############################
-  registry_server   = local.registry_server
-  registry_username = local.registry_username
-  registry_password = local.registry_password
-  image_tag         = local.image_tag
+  registry_server = coalesce(
+    local.registry_server,
+    azurerm_container_registry.acr_notshared[0].login_server
+  )
+
+  registry_username = coalesce(
+    local.registry_username,
+    azurerm_container_registry.acr_notshared[0].admin_username
+  )
+
+  registry_password = coalesce(
+    local.registry_password,
+    azurerm_container_registry.acr_notshared[0].admin_password
+  )
+  image_tag = local.image_tag
 
   ###########
   # Storage #
   ###########
   storage_account_sas_expiration_period           = local.storage_account_expiration_period
   mssql_storage_account_shared_access_key_enabled = false
+  create_monitor_storage                          = local.create_monitor_storage
+  create_kv_data_protection_key                   = local.create_kv_data_protection_key
+  #######
+  # DNS #
+  #######
+  enable_dns_zone      = false
+  dns_zone_domain_name = var.primary_fqdn
 }

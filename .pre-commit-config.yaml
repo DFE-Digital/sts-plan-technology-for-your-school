@@ -45,7 +45,7 @@ repos:
         args: ['format']
         language: system
         types: ['c#']
-        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)
+        exclude: ^(bin/|obj/|wwwroot/|.*Generated.*)  src/Dfe.PlanTech.Web/wwwroot/js/app.js
 
   # Web and config formats
   - repo: https://github.com/pre-commit/mirrors-prettier
