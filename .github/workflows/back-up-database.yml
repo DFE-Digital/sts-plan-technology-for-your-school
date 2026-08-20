@@ -19,9 +19,9 @@ on:
         description: the name of the secret holding the tfvars. not consistent, so manual input needed.
         required: false
         type: string
-  # push:
-  #    branches:
-  #      - disaster-recovery-e2e-terraform
+  push:
+     branches:
+       - dev-workflow-triggers
 env:
   SQL_BACKUP_CONTAINER_NAME: sqlbackups
   SECRETMANIFEST_BACKUP_CONTAINER_NAME: secretnames
@@ -31,7 +31,7 @@ env:
 jobs:
   backup-db:
     environment:
-      name: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call')  && inputs.environment || 'Dev' }}
+      name: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call')  && inputs.environment || 'ProductionUnprotected' }}
     name: Back up database
     runs-on: ubuntu-22.04
     permissions:
@@ -126,7 +126,7 @@ jobs:
 
   backup-secrets:
       environment:
-        name: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call')  && inputs.environment || 'Dev' }}
+        name: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call')  && inputs.environment || 'ProductionUnprotected' }}
       name: Back up app secrets
       runs-on: ubuntu-22.04
       permissions:
