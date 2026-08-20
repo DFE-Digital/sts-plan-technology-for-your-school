@@ -45,7 +45,7 @@ Whenever variables are changed in `/container-app/terraform-*.tfvars`, they shou
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 2.11.0 |
+| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 2.12.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.81.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
 
