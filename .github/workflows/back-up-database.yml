@@ -19,9 +19,9 @@ on:
         description: the name of the secret holding the tfvars. not consistent, so manual input needed.
         required: false
         type: string
-  push:
-     branches:
-       - dev-workflow-triggers
+  # push:
+  #    branches:
+  #      - dev-workflow-triggers
 env:
   SQL_BACKUP_CONTAINER_NAME: sqlbackups
   SECRETMANIFEST_BACKUP_CONTAINER_NAME: secretnames
@@ -112,8 +112,8 @@ jobs:
         uses: ./.github/actions/whitelist-sql
         with:
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          resource-group: ${{ steps.backup-names.outputs.resource-group }}
-          account-name: ${{ steps.backup-names.outputs.account-name }}
+          resource-group: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
+          server-name: ${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}
           verb: 'remove'
 
       - name: De-Whitelist Runner for backup storage
