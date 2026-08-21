@@ -1,9 +1,75 @@
-project_name                              = "plantech"
-environment                               = ""
-azure_location                            = ""
-az_tag_environment                        = "Dev"
-az_tag_product                            = "Plan Technology for your School"
-az_sql_admin_password                     = ""
-az_sql_admin_userid_postfix               = ""
-az_app_kestrel_endpoint                   = "http://*:8080"
-container_port                            = 8080
+# Core
+
+project_name   = "plantech"
+environment    = ""
+azure_location = "westeurope"
+
+## Tags
+az_tag_environment = ""
+az_tag_product     = "Plan Technology for your School"
+
+## SQL
+az_sql_azuread_admin_username = ""
+az_sql_azuread_admin_objectid = ""
+az_sql_admin_password         = ""
+az_sql_max_pool_size          = 0
+az_sql_sku                    = ""
+
+## App
+az_app_kestrel_endpoint        = "http://*:8080"
+container_app_min_replicas     = 0
+container_app_max_replicas     = 0
+container_app_http_concurrency = 0
+
+container_environment           = ""
+
+### Staging and Production only
+container_environment_variables = {
+    "ASPNETCORE_ENVIRONMENT" = ""
+}
+
+## Container Registry
+registry_server   = "XXX.azurecr.io"
+registry_username = ""
+registry_password = ""
+image_tag         = ""
+
+## Contentful
+contentful_upsert_webhook   =
+
+### Staging and Production only
+msi_id = ""
+
+## Storage Account
+storage_account_public_access_enabled                   =
+container_app_storage_account_shared_access_key_enabled =
+
+######################### Staging and Production only #########################
+
+# DNS
+
+enable_dns  =
+domain_name = "XXX.education.gov.uk"
+custom_domains = {
+    "main"    = "XXX.education.gov.uk",
+    "www"     = "www.XXX.education.gov.uk",
+    "staging" = "staging.XXX.education.gov.uk"
+}
+
+############################### Production only ###############################
+
+
+## Frontdoor rules
+cdn_frontdoor_url_path_redirects = [
+  {
+    "redirect_type" : "PermanentRedirect",
+    "redirect_protocol" : "Https"
+    "destination_path" : "",
+    "destination_hostname" : "www.gov.uk",
+    "operator" : "Equal",
+    "match_values" : ["/"],
+  }
+]
+
+## WAF
+create_custom_domain = true

@@ -9,7 +9,7 @@ resource "azurerm_private_endpoint" "redis" {
   location                      = local.azure_location
   name                          = local.redis_vnet.endpoint_name
   resource_group_name           = local.resource_group_name
-  subnet_id                     = module.main_hosting.networking.subnet_id
+  subnet_id                     = azurerm_subnet.redis.id
   tags                          = local.tags
 
   private_dns_zone_group {
@@ -32,4 +32,11 @@ resource "azurerm_private_dns_zone_virtual_network_link" "redis_default" {
   virtual_network_id    = module.main_hosting.networking.vnet_id
 
   tags = local.tags
+}
+
+resource "azurerm_subnet" "redis" {
+  name                 = local.redis_networking.subnet.name
+  virtual_network_name = module.main_hosting.vnet_name
+  resource_group_name  = local.resource_group_name
+  address_prefixes     = local.redis_networking.subnet.address_prefixes
 }
