@@ -1,0 +1,103 @@
+name: Infrastructure - Backup Resources Deployment
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'The environment to run infrastructure deployment on:'
+        required: true
+        options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
+  # push:
+  #   branches:
+  #     - disaster-recovery-e2e-terraform
+
+env:
+  BACKUP_CONTAINER_NAME_SQL: sqlbackups
+  BACKUP_CONTAINER_NAME_TF: terraform
+  BACKUP_CONTAINER_NAME_CONTENTFUL: contentful
+  TF_WORKING_DIRECTORY: terraform/backups
+
+jobs:
+  terraform:
+    name: Terraform Apply
+    runs-on: ubuntu-latest
+    environment:
+      name: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+    permissions:
+      id-token: write
+      contents: read
+
+    defaults:
+      run:
+        working-directory: ${{ env.TF_WORKING_DIRECTORY }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Prepare derived variables
+        shell: bash
+        run: |
+          TF_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tf"
+          TF_KV="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+          TF_SA_FULL="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-tfstate"
+          TF_SA="${TF_SA_FULL//-/}"
+          B_RG="${{ secrets.AZ_ENVIRONMENT }}${{ secrets.DFE_PROJECT_NAME }}-backup"
+          B_SA="${B_RG//-/}"
+
+          echo "TF_RG=$TF_RG" >> "$GITHUB_ENV"
+          echo "TF_KV=$TF_KV" >> "$GITHUB_ENV"
+          echo "TF_SA=$TF_SA" >> "$GITHUB_ENV"
+          echo "B_RG=$B_RG" >> "$GITHUB_ENV"
+          echo "B_SA=$B_SA" >> "$GITHUB_ENV"
+
+      - name: Login with AZ
+        uses: ./.github/actions/azure-login
+        with:
+          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
+          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
+          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
+
+      - name: Terraform init
+        id: init
+        run: |
+          for attempt in {1..3}; do
+              echo "Terraform init attempt $attempt..."
+          if terraform init \
+            -backend-config="resource_group_name=$TF_RG" \
+            -backend-config="storage_account_name=$TF_SA"; then
+            echo "Terraform init succeeded."
+            exit 0
+          fi
+          echo "Terraform init failed. Waiting before retry..."
+            sleep 30
+          done
+
+          echo "Terraform init failed after retries."
+          exit 1
+
+      - name: Terraform Apply
+        run: |
+
+          ASSIGNEE_OBJECT_ID=$(az ad sp show \
+            --id "${{ secrets.az_client_id }}" \
+            --query id \
+            -o tsv)
+
+          terraform apply -auto-approve -input=false -lock-timeout=20m \
+            -var="subscription_id=${{ secrets.az_subscription_id }}" \
+            -var="project_name=${{ secrets.DFE_PROJECT_NAME }}" \
+            -var="github_actions_principal_id=$ASSIGNEE_OBJECT_ID" \
+            -var="environment=${{ secrets.AZ_ENVIRONMENT }}" \
+            -var="az_tag_environment=${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}" \
+            -var="az_tag_product=Plan Technology for your School" \
+            -var="backup_resource_group_name=$B_RG" \
+            -var="backup_keyvault_name=$TF_KV" \
+            -var="backup_storage_account_name=$B_SA" \
+            -var="backup_container_name_sql=${{ env.BACKUP_CONTAINER_NAME_SQL }}" \
+            -var="backup_container_name_contentful=${{ env.BACKUP_CONTAINER_NAME_CONTENTFUL }}" \
+            

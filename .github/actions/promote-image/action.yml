@@ -1,0 +1,125 @@
+name: Promote image
+description: Find the latest matching image in GHCR and push it to ACR
+
+inputs:
+  image_branch:
+    required: true
+    description: branch string to match in the image tag, e.g. main or development
+  acr_name:
+    required: true
+    description: Azure Container Registry name
+  acr_login_server:
+    required: true
+    description: Azure Container Registry login server, e.g. myacr.azurecr.io
+  package_name:
+    required: true
+    description: GHCR package/image name, e.g. plan-technology-for-your-school
+    default: 'plan-technology-for-your-school'
+  github_token:
+    required: true
+    description: access token for github api
+outputs:
+  image_tag:
+    value: ${{ steps.pick_tag.outputs.image_tag }}
+    description: Selected image tag
+runs:
+  using: composite
+  steps:
+    - name: Log in to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ inputs.github_token }}
+
+    - name: Login to ACR via OIDC
+      shell: bash
+      run: az acr login --name ${{ inputs.acr_name }}
+
+    - name: Find latest matching tag
+      id: pick_tag
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        SEARCH="${{ inputs.image_branch }}"
+        PACKAGE="${{ inputs.package_name }}"
+
+        TAG=$(
+          curl -fsSL \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ inputs.github_token }}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/orgs/DFE-Digital/packages/container/${PACKAGE}/versions?per_page=100&page=1" \
+          | jq -r \
+              --arg search "$SEARCH" '
+                sort_by(.created_at)
+                | reverse
+                | first(
+                    .[]
+                    | .metadata.container.tags[]?
+                    | select(startswith($search))
+                  ) // empty
+              '
+        )
+
+        if [ -z "$TAG" ]; then
+          echo "No matching tag found for search: $SEARCH"
+          exit 1
+        fi
+
+        echo "Found tag: $TAG"
+        echo "image_tag=$TAG" >> "$GITHUB_OUTPUT"
+
+        curl -fsSL \
+          -H "Accept: application/vnd.github+json" \
+          -H "Authorization: Bearer ${{ inputs.github_token }}" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          "https://api.github.com/orgs/DFE-Digital/packages/container/${PACKAGE}/versions?per_page=100&page=1" \
+        | jq -r \
+            --arg search "$SEARCH" '
+              sort_by(.created_at)
+              | reverse
+              | .[]
+              | select(
+                  any(
+                    .metadata.container.tags[]?;
+                    startswith($search)
+                  )
+                )
+              | "\(.created_at) | \(.metadata.container.tags | join(", "))"
+            ' \
+        | head -n 10
+
+    - name: Pull image from GHCR
+      shell: bash
+      run: |
+        set -euo pipefail
+        docker pull "ghcr.io/dfe-digital/${{ inputs.package_name }}:${{ steps.pick_tag.outputs.image_tag }}"
+
+    - name: Tag and push image to ACR
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        IMAGE_NAME="${{ inputs.package_name }}"
+        IMAGE_TAG="${{ steps.pick_tag.outputs.image_tag }}"
+        ACR_IMAGE="${{ inputs.acr_login_server }}/${IMAGE_NAME}:${IMAGE_TAG}"
+        ACR_NAME="${{inputs.acr_name}}"
+
+        echo "Checking if image already exists in ACR..."
+
+        if az acr repository show-tags \
+          --name "$ACR_NAME" \
+          --repository "$IMAGE_NAME" \
+          --query "contains(@, '$IMAGE_TAG')" \
+          -o tsv | grep -q true; then
+
+          echo "Image already exists in ACR: $ACR_IMAGE"
+          exit 0
+        fi
+
+        echo "Image not found in ACR. Pushing..."
+
+        docker tag "ghcr.io/dfe-digital/${IMAGE_NAME}:${IMAGE_TAG}" "$ACR_IMAGE"
+        docker push "$ACR_IMAGE"
