@@ -258,18 +258,18 @@ public class GroupsViewBuilderTests
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
-                new()
-                {
-                    Id = 10,
-                    Urn = "URN-1",
-                    EstablishmentName = "School A"
-                },
-                new()
-                {
-                    Id = 20,
-                    Urn = "URN-2",
-                    EstablishmentName = "School B"
-                }
+                    new()
+                    {
+                        Id = 10,
+                        Urn = "URN-1",
+                        EstablishmentName = "School A"
+                    },
+                    new()
+                    {
+                        Id = 20,
+                        Urn = "URN-2",
+                        EstablishmentName = "School B"
+                    }
                 }
             );
 
@@ -277,8 +277,8 @@ public class GroupsViewBuilderTests
             .Returns(
                 new List<SqlEstablishmentDto>
                 {
-                new() { Id = 10 },
-                new() { Id = 20 }
+                    new() { Id = 10 },
+                    new() { Id = 20 }
                 }
             );
 
@@ -286,24 +286,24 @@ public class GroupsViewBuilderTests
             .Returns(
                 new List<SqlSubmissionDto>
                 {
-                new()
-                {
-                    Id = 1,
-                    EstablishmentId = 10,
-                    SectionId = "SEC-1"
-                },
-                new()
-                {
-                    Id = 2,
-                    EstablishmentId = 20,
-                    SectionId = "SEC-1"
-                },
-                new()
-                {
-                    Id = 3,
-                    EstablishmentId = 10,
-                    SectionId = "SEC-2"
-                }
+                    new()
+                    {
+                        Id = 1,
+                        EstablishmentId = 10,
+                        SectionId = "SEC-1"
+                    },
+                    new()
+                    {
+                        Id = 2,
+                        EstablishmentId = 20,
+                        SectionId = "SEC-1"
+                    },
+                    new()
+                    {
+                        Id = 3,
+                        EstablishmentId = 10,
+                        SectionId = "SEC-2"
+                    }
                 }
             );
 
@@ -352,18 +352,18 @@ public class GroupsViewBuilderTests
             .Returns(
                 new List<SqlEstablishmentLinkDto>
                 {
-                new()
-                {
-                    Id = 10,
-                    Urn = "URN-1",
-                    EstablishmentName = "School A"
-                },
-                new()
-                {
-                    Id = 20,
-                    Urn = "URN-2",
-                    EstablishmentName = "School B"
-                }
+                    new()
+                    {
+                        Id = 10,
+                        Urn = "URN-1",
+                        EstablishmentName = "School A"
+                    },
+                    new()
+                    {
+                        Id = 20,
+                        Urn = "URN-2",
+                        EstablishmentName = "School B"
+                    }
                 }
             );
 
@@ -371,8 +371,8 @@ public class GroupsViewBuilderTests
             .Returns(
                 new List<SqlEstablishmentDto>
                 {
-                new() { Id = 10 },
-                new() { Id = 20 }
+                    new() { Id = 10 },
+                    new() { Id = 20 }
                 }
             );
 
@@ -380,30 +380,30 @@ public class GroupsViewBuilderTests
             .Returns(
                 new List<SqlSubmissionDto>
                 {
-                new()
-                {
-                    Id = 1,
-                    EstablishmentId = 10,
-                    SectionId = "SEC-1"
-                },
-                new()
-                {
-                    Id = 2,
-                    EstablishmentId = 20,
-                    SectionId = "SEC-1"
-                },
-                new()
-                {
-                    Id = 3,
-                    EstablishmentId = 10,
-                    SectionId = "SEC-2"
-                },
-                new()
-                {
-                    Id = 4,
-                    EstablishmentId = 20,
-                    SectionId = "SEC-2"
-                }
+                    new()
+                    {
+                        Id = 1,
+                        EstablishmentId = 10,
+                        SectionId = "SEC-1"
+                    },
+                    new()
+                    {
+                        Id = 2,
+                        EstablishmentId = 20,
+                        SectionId = "SEC-1"
+                    },
+                    new()
+                    {
+                        Id = 3,
+                        EstablishmentId = 10,
+                        SectionId = "SEC-2"
+                    },
+                    new()
+                    {
+                        Id = 4,
+                        EstablishmentId = 20,
+                        SectionId = "SEC-2"
+                    }
                 }
             );
 
@@ -1344,10 +1344,7 @@ public class GroupsViewBuilderTests
 
         session
             .When(x => x.Set(SessionConstants.SelectedEstablishmentsKey, Arg.Any<byte[]>()))
-            .Do(call =>
-            {
-                storedBytes = call.ArgAt<byte[]>(1);
-            });
+            .Do(call => { storedBytes = call.ArgAt<byte[]>(1); });
 
         // Act
         await sut.SubmitSelectedSchoolsToAssessAndRedirect(controller, sectionSlug, viewModel);
@@ -1705,10 +1702,7 @@ public class GroupsViewBuilderTests
 
         session
             .When(x => x.Set(SessionConstants.SelectedEstablishmentsKey, Arg.Any<byte[]>()))
-            .Do(call =>
-            {
-                storedBytes = call.ArgAt<byte[]>(1);
-            });
+            .Do(call => { storedBytes = call.ArgAt<byte[]>(1); });
 
         var sut = CreateServiceUnderTest(
             contentful: contentful,
@@ -1773,5 +1767,106 @@ public class GroupsViewBuilderTests
 
         Assert.Equal("header", sectionVm.CategorySlug);
         Assert.Equal("sec-sec-1", sectionVm.SectionSlug);
+    }
+
+    [Fact]
+    public async Task SubmitSelectedSchoolsToAssessAndRedirect_WhenSingleSchoolSelected_SetsSelectedSchoolAndSession()
+    {
+        // Arrange
+        var contentful = Substitute.For<IContentfulService>();
+        var est = Substitute.For<IEstablishmentService>();
+        var group = Substitute.For<IGroupService>();
+        var submission = Substitute.For<ISubmissionService>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
+        var session = Substitute.For<ISession>();
+
+        var httpContext = new DefaultHttpContext();
+        httpContext.Session = session;
+
+        var categorySlug = "category-5";
+        var sectionSlug = "section-5";
+
+        var section = new QuestionnaireSectionEntry
+        {
+            Sys = new SystemDetails { Id = "sec-5" },
+            Questions = new List<QuestionnaireQuestionEntry>
+            {
+                new() { Slug = "first-question" }
+            },
+        };
+
+        var school = new SqlEstablishmentDto
+        {
+            Id = 1,
+            EstablishmentRef = "00001",
+            OrgName = "School 1",
+        };
+
+        var viewModel = new GroupsSelectSchoolsToAssessViewModel
+        {
+            Section = section,
+            SelectedSchoolsRefs = ["00001"],
+        };
+
+        contentful.GetSectionBySlugAsync(sectionSlug).Returns(section);
+
+        est.GetEstablishmentLinks(100)
+            .Returns(
+                new List<SqlEstablishmentLinkDto>
+                {
+                    new() { Id = 1, Urn = "00001" },
+                }
+            );
+
+        est.GetEstablishmentByReferenceAsync("00001").Returns(school);
+
+        submission
+            .GetLatestSubmissionResponsesModel(1, section, (SubmissionStatus?)null)
+            .Returns((SubmissionResponsesModel?)null);
+
+        byte[]? storedBytes = null;
+
+        session
+            .When(x => x.Set(SessionConstants.SelectedEstablishmentsKey, Arg.Any<byte[]>()))
+            .Do(call => { storedBytes = call.ArgAt<byte[]>(1); });
+
+        var sut = CreateServiceUnderTest(
+            contentful: contentful,
+            est: est,
+            group: group,
+            submission: submission,
+            currentUser: currentUser
+        );
+
+        var controller = new TestController
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext,
+                RouteData = new RouteData(),
+            },
+        };
+
+        controller.RouteData.Values["categorySlug"] = categorySlug;
+
+        // Act
+        await sut.SubmitSelectedSchoolsToAssessAndRedirect(
+            controller,
+            sectionSlug,
+            viewModel
+        );
+
+        // Assert
+        currentUser
+            .Received(1)
+            .SetGroupSelectedSchool("00001", "School 1");
+
+        Assert.NotNull(storedBytes);
+
+        var json = Encoding.UTF8.GetString(storedBytes!);
+        var ids = JsonSerializer.Deserialize<IEnumerable<int>>(json);
+
+        Assert.NotNull(ids);
+        Assert.Equal(new[] { 1 }, ids);
     }
 }
