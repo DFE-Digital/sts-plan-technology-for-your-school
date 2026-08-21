@@ -11,7 +11,8 @@ We use two external modules to create the majority of the resources required:
 
 Several variables are shared across the `backups` and `container-app` stacks.
 
-Whenever variables are changed in `/container-app/terraform-*.tfvars`, they should also be changed in `/backups/terraform-*.tfvars`.
+Whenever variables are changed in `/container-app/terraform-*.tfvars`, they should also be changed
+in `/backups/terraform-*.tfvars`.
 
 ## Detailed Overview
 
@@ -45,7 +46,7 @@ Whenever variables are changed in `/container-app/terraform-*.tfvars`, they shou
 
 | Name | Version |
 |------|---------|
-| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 2.11.0 |
+| <a name="provider_azapi"></a> [azapi](#provider\_azapi) | 2.12.0 |
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.81.0 |
 | <a name="provider_random"></a> [random](#provider\_random) | 3.6.3 |
 
@@ -77,6 +78,7 @@ Whenever variables are changed in `/container-app/terraform-*.tfvars`, they shou
 | [azurerm_key_vault_secret.vault_secret_contentful_previewapikey](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.vault_secret_contentful_spaceid](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
 | [azurerm_key_vault_secret.vault_secret_database_connectionstring](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/key_vault_secret) | resource |
+| [azurerm_monitor_diagnostic_setting.key_vault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/monitor_diagnostic_setting) | resource |
 | [azurerm_private_dns_zone.database](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) | resource |
 | [azurerm_private_dns_zone.keyvault](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) | resource |
 | [azurerm_private_dns_zone.redis](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/private_dns_zone) | resource |
