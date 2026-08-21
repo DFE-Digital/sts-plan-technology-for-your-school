@@ -89,3 +89,22 @@ variable "metric_alerts" {
     }))
   }))
 }
+
+variable "scheduled_query_alerts" {
+  description = "Map of scheduled query rule alerts to create"
+  type = map(object({
+    name                                     = string
+    description                              = string
+    evaluation_frequency                     = string
+    window_duration                          = string
+    severity                                 = number
+    scopes                                   = optional(list(string), [])
+    query                                    = string
+    time_aggregation_method                  = string
+    threshold                                = number
+    operator                                 = string
+    minimum_failing_periods_to_trigger_alert = number
+    number_of_evaluation_periods             = number
+  }))
+  default = {}
+}
