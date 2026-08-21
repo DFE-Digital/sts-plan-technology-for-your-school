@@ -136,7 +136,6 @@ public partial class DfeOpenIdConnectEventsTests
 
         var signInWorkflowSubstitute = Substitute.For<SignInWorkflow>(
             establishmentRepositorySubstitute,
-            giasRepositorySubstitute,
             signInRepositorySubstitute,
             userRepositorySubstitute
         );

@@ -7,15 +7,12 @@ namespace Dfe.PlanTech.Application.Workflows;
 
 public class SignInWorkflow(
     IEstablishmentRepository establishmentRepository,
-    IGiasRepository giasRepository,
     ISignInRepository signInRepository,
     IUserRepository userRepository
 ) : ISignInWorkflow
 {
     private readonly IEstablishmentRepository _establishmentRepository =
         establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
-    private readonly IGiasRepository _giasRepository =
-        giasRepository ?? throw new ArgumentNullException(nameof(giasRepository));
     private readonly ISignInRepository _signInRepository =
         signInRepository ?? throw new ArgumentNullException(nameof(signInRepository));
     private readonly IUserRepository _userRepository =

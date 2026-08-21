@@ -54,6 +54,10 @@ public static class OnUserInformationReceivedEvent
             return;
         }
 
+        var signin = await signInWorkflow.RecordSignIn(dsiUserReference, dsiUserOrganisation);
+
+        AddClaimsToPrincipal(context, signin);
+
         EstablishmentModel? satSchoolOrganisation = null;
         if (
             dsiUserOrganisation.Category != null
@@ -65,20 +69,13 @@ public static class OnUserInformationReceivedEvent
                 dsiUserOrganisation,
                 dsiUserReference
             );
+
+            if (satSchoolOrganisation != null)
+            {
+                // Add the single academy establishment to the cookie
+                AddSingleAcademyOrganisationClaim(context, satSchoolOrganisation);
+            }
         }
-
-        var signin = await signInWorkflow.RecordSignIn(
-            dsiUserReference,
-            satSchoolOrganisation ?? dsiUserOrganisation
-        );
-
-        if (satSchoolOrganisation != null)
-        {
-            // Add the single academy establishment to the cookie
-            AddSingleAcademyOrganisationClaim(context, dsiUserOrganisation, satSchoolOrganisation);
-        }
-
-        AddClaimsToPrincipal(context, signin);
     }
 
     private static void AddClaimsToPrincipal(
@@ -105,7 +102,7 @@ public static class OnUserInformationReceivedEvent
         principal.AddIdentity(claimsIdentity);
     }
 
-    private static async Task<EstablishmentModel> GetReplacementDsiOrganisationForSat(
+    private static async Task<EstablishmentModel?> GetReplacementDsiOrganisationForSat(
         UserInformationReceivedContext context,
         EstablishmentModel dsiOrganisation,
         string dsiUserReference
@@ -149,12 +146,11 @@ public static class OnUserInformationReceivedEvent
             school.Urn.ToString()
         );
 
-        return replacementDsiOrganisation ?? dsiOrganisation;
+        return replacementDsiOrganisation;
     }
 
     private static void AddSingleAcademyOrganisationClaim(
         UserInformationReceivedContext context,
-        EstablishmentModel originalOrganisation,
         EstablishmentModel updatedOrganisation
     )
     {
