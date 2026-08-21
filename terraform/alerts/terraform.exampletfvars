@@ -1,7 +1,7 @@
 az_tag_environment = "Prod"
 az_tag_product = "Plan Technology for your School"
-az_tag_product = "Plan Technology for your School"
 azure_location = "westeurope",
+key_vault_expiry_alert_days = 30
 
 activity_log_alerts = {
   container_app_environment_change = {

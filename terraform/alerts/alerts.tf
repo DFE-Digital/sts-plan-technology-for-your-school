@@ -79,3 +79,34 @@ resource "azurerm_monitor_metric_alert" "this" {
     }
   }
 }
+
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "this" {
+  for_each = var.enabled ? var.scheduled_query_alerts : {}
+
+  name                = each.value.name
+  description         = each.value.description
+  resource_group_name = var.resource_group_name
+  location            = var.azure_location
+  tags                = local.tags
+
+  evaluation_frequency = each.value.evaluation_frequency
+  window_duration      = each.value.window_duration
+  scopes               = length(each.value.scopes) > 0 ? each.value.scopes : [local.key_vault_log_analytics_workspace_id]
+  severity             = each.value.severity
+
+  criteria {
+    query                   = replace(each.value.query, "__EXPIRY_DAYS__", tostring(var.key_vault_expiry_alert_days))
+    time_aggregation_method = each.value.time_aggregation_method
+    threshold               = each.value.threshold
+    operator                = each.value.operator
+
+    failing_periods {
+      minimum_failing_periods_to_trigger_alert = each.value.minimum_failing_periods_to_trigger_alert
+      number_of_evaluation_periods             = each.value.number_of_evaluation_periods
+    }
+  }
+
+  action {
+    action_groups = [data.azurerm_monitor_action_group.existing.id]
+  }
+}
