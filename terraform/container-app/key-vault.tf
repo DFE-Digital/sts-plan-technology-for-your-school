@@ -27,6 +27,20 @@ resource "azurerm_key_vault" "vault" {
   }
 }
 
+resource "azurerm_monitor_diagnostic_setting" "key_vault" {
+  name                       = "${local.kv_name}-diagnostics"
+  target_resource_id         = azurerm_key_vault.vault.id
+  log_analytics_workspace_id = module.main_hosting.azurerm_log_analytics_workspace_container_app.id
+
+  enabled_log {
+    category_group = "allLogs"
+  }
+
+  enabled_metric {
+    category = "AllMetrics"
+  }
+}
+
 ###################
 # Access Policies #
 ###################
