@@ -136,7 +136,7 @@ runs:
       shell: bash
       run: |
           set -euo pipefail
-          echo "Target database: ${TARGET_DATABASE}"
+          echo "Target database: ${inputs.target_database}"
 
           if az sql db show \
             --resource-group "${{ inputs.resource_group_app }}" \
