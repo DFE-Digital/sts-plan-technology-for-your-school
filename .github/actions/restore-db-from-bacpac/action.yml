@@ -140,7 +140,7 @@ runs:
 
           if az sql db show \
             --resource-group "${{ inputs.resource_group_app }}" \
-            --server "£{{ inputs.sql_server_name }}" \
+            --server "${{ inputs.sql_server_name }}" \
             --name "${{ inputs.target_database }}" \
             >/dev/null 2>&1; then
 
