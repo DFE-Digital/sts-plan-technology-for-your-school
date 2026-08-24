@@ -95,3 +95,4 @@ jobs:
           bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}
           bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
           use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
+          delete_if_exists: true
