@@ -61,6 +61,12 @@ jobs:
   create-and-tag-release:
     needs: [set-env, create-and-publish-image]
     name: Create & Tag Release
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
+      packages: write
     uses: ./.github/workflows/create-tag-release.yml
     secrets: inherit
 
