@@ -5,19 +5,35 @@ on:
     - cron: '0 2 * * *'
   workflow_dispatch:
     inputs:
-      environment:
+      backup_environment:
         required: false
         type: choice
-        options: ['Prod']
-        default: 'Prod'
+        options: ['ProductionUnprotected', 'Dev']
+        default: 'ProductionUnprotected'
+      db_environment:
+        required: false
+        type: choice
+        options: ['ProductionUnprotected', 'Dev']
+        default: 'Dev'
+      db_name_suffix:
+        required: false
+        default: '-sqldb-prod-backup'
+      backup_filename:
+        required: false
+        default: ''
+      backup_filename_search_term:
+        required: false
+        default: ''
   push:
     branches: ['feature/322958/copy-prod-into-dev']
   
 env:
+  BACKUP_ENVIRONMENT: ${{ github.event.inputs.backup_environment || 'ProductionUnprotected' }}
+  DB_ENVIRONMENT: ${{ github.event.inputs.db_environment || 'Dev' }}  
   BACKUP_CONTAINER_NAME: sqlbackups
-  SQL_BACKUP_FILE_NAME: ''
-  SQL_BACKUP_FILE_NAME_SEARCH: ''
-  SQL_TARGET_DATABASE: 's190d01-plantech-sqldb-prod-backup'
+  SQL_BACKUP_FILE_NAME: ${{ github.event.inputs.backup_filename || '' }}
+  SQL_BACKUP_FILE_NAME_SEARCH: ${{ github.event.inputs.backup_filename_search_term || '' }}
+  SQL_TARGET_DATABASE_SUFFIX: ${{ github.event.inputs.db_name_suffix || '-sqldb-prod-backup' }}
   USE_LATEST_IF_NOT_SPECIFIED: true
 
 jobs:
@@ -41,8 +57,20 @@ jobs:
         run: | 
           set -euo pipefail
 
-          RESOURCE_PREFIX_BACKUP="${{ vars.AZ_ENVIRONMENT_PROD }}${{ vars.DFE_PROJECT_NAME }}-backup"
-          RESOURCE_PREFIX_DB="${{ vars.AZ_ENVIRONMENT_DEV }}${{ vars.DFE_PROJECT_NAME }}" 
+          if [[ "$BACKUP_ENVIRONMENT" == *"Production"* ]]; then
+            BACKUP_AZ_ENVIRONMENT="${{ vars.AZ_ENVIRONMENT_PROD }}"
+          else
+            BACKUP_AZ_ENVIRONMENT="${{ vars.AZ_ENVIRONMENT_DEV }}"
+          fi
+          if [[ "DB_ENVIRONMENT" == *"Production"* ]]; then
+            DB_AZ_ENVIRONMENT="${{ vars.AZ_ENVIRONMENT_PROD }}"
+          else
+            DB_AZ_ENVIRONMENT="${{ vars.AZ_ENVIRONMENT_DEV }}"
+          fi
+
+          RESOURCE_PREFIX_BACKUP="${BACKUP_AZ_ENVIRONMENT}${{ vars.DFE_PROJECT_NAME }}"-backup
+          RESOURCE_PREFIX_DB="${DB_AZ_ENVIRONMENT}${{ vars.DFE_PROJECT_NAME }}"
+
           echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
           echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
           echo "RESOURCE_PREFIX_DB_SHORT=${RESOURCE_PREFIX_DB//-/}" >> "$GITHUB_OUTPUT"
@@ -51,13 +79,13 @@ jobs:
       - name: Restore DB from BACPAC
         uses: ./.github/actions/restore-db-from-bacpac
         with:
-          backup_env: 'ProductionUnprotected'
-          db_env: 'Dev'
+          backup_env: ${{ env.BACKUP_ENVIRONMENT }}
+          db_env: ${{ env.DB_ENVIRONMENT }}
           resource_group_backup: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
           resource_group_db: ${{ steps.vars.outputs.RESOURCE_PREFIX_DB }}
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
           sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_DB }}
-          target_database: ${{ env.SQL_TARGET_DATABASE }}
+          target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_DB }}${{ env.SQL_TARGET_DATABASE_SUFFIX }}
           storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
           container_name: ${{ env.BACKUP_CONTAINER_NAME }}
           bacpac_file: ${{ env.SQL_BACKUP_FILE_NAME }}

@@ -256,7 +256,7 @@ runs:
       if: ${{ inputs.delete_if_exists == 'true' || steps.db-check.outputs.exists == 'false' }}
       shell: bash
       run: |
-        if [[ "${{ steps.azure-envs.outputs.backup_base }}" == "Production" ]]; then
+        if [[ "${{ steps.azure-envs.outputs.db_base }}" == "Production" ]]; then
           SKU="S2"
         else
           SKU="Basic"
