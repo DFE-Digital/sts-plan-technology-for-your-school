@@ -237,8 +237,23 @@ runs:
             echo "Target database does not currently exist."
           fi
 
+    - name: Check whether database exists
+      id: db-check
+      shell: bash
+      run: |
+        if az sql db show \
+          --resource-group "${{ inputs.resource_group_app }}" \
+          --server "${{ inputs.sql_server_name }}" \
+          --name "${{ inputs.target_database }}" \
+          >/dev/null 2>&1; then
+
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
+
     - name: Recreate database
-      if: ${{ inputs.delete_if_exists == 'true' }}
+      if: ${{ inputs.delete_if_exists == 'true' || steps.db-check.outputs.exists == 'false' }}
       shell: bash
       run: |
         if [[ "${ENVIRONMENT,,}" == *"prod"* ]]; then
@@ -274,7 +289,6 @@ runs:
           /AccessToken:"$ACCESS_TOKEN"
 
     - name: Grant Container App identity access to restored SQL DB
-      if: ${{ steps.azure-envs.outputs.backup_base != steps.azure-envs.outputs.db_base }}
       shell: pwsh
       run: |
         $ErrorActionPreference = "Stop"
@@ -284,6 +298,7 @@ runs:
         $rg = "${{ inputs.resource_group_db }}"
         $sqlServer = "${{ inputs.sql_server_name }}"
         $sqlDb = "${{ inputs.target_database }}"
+        $containerApp = "${{ inputs.resource_group_db }}-plan-tech-app"
 
         $sqlFqdn = az sql server show `
           --resource-group $rg `
