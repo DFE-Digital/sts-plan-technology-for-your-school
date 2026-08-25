@@ -60,6 +60,13 @@ Then('I should see the question heading {string}', async function (expectedHeadi
   await expect(heading).toHaveText(expectedHeading);
 });
 
+Then('I should see the h1 fieldset heading {string}', async function (expectedHeading: string) {
+  const heading = this.page.locator('h1.govuk-fieldset__heading');
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveText(expectedHeading);
+});
+
+
 Then('I should see a subheading with the text {string}', async function (text: string) {
   const heading = this.page.locator(`h2:has-text("${text}")`);
   await expect(heading).toBeVisible();
