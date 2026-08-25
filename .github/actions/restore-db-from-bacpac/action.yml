@@ -91,96 +91,96 @@ runs:
         echo "Backup Azure environment: $BACKUP_BASE"
         echo "Database Azure environment: $DB_BASE"
 
-    - name: Login for backup access
-      uses: azure/login@v3
-      with:
-        client-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && inputs.prod_client_id || inputs.dev_client_id }}
-        tenant-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && inputs.prod_tenant_id || inputs.dev_tenant_id }}
-        subscription-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && inputs.prod_subscription_id || inputs.dev_subscription_id }}
+    # - name: Login for backup access
+    #   uses: azure/login@v3
+    #   with:
+    #     client-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && inputs.prod_client_id || inputs.dev_client_id }}
+    #     tenant-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && inputs.prod_tenant_id || inputs.dev_tenant_id }}
+    #     subscription-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && inputs.prod_subscription_id || inputs.dev_subscription_id }}
 
-    - name: Whitelist Runner for backup storage
-      uses: ./.github/actions/whitelist-storage
-      with:
-        ip-address: ${{ inputs.ip-address }}
-        resource-group: ${{ inputs.resource_group_backup }}
-        account-name: ${{ inputs.storage_account }}
-        verb: add
+    # - name: Whitelist Runner for backup storage
+    #   uses: ./.github/actions/whitelist-storage
+    #   with:
+    #     ip-address: ${{ inputs.ip-address }}
+    #     resource-group: ${{ inputs.resource_group_backup }}
+    #     account-name: ${{ inputs.storage_account }}
+    #     verb: add
 
-    - name: Resolve BACPAC blob name
-      id: resolve-bacpac
-      shell: bash
-      run: |
-        set -euo pipefail
+    # - name: Resolve BACPAC blob name
+    #   id: resolve-bacpac
+    #   shell: bash
+    #   run: |
+    #     set -euo pipefail
 
-        INPUT_BACPAC_FILE="${{ inputs.bacpac_file }}"
-        PREFIX="${{ inputs.bacpac_prefix }}"
-        USE_LATEST="${{ inputs.use_latest_if_not_specified }}"
-        ACCOUNT="${{ inputs.storage_account }}"
-        CONTAINER="${{ inputs.container_name }}"
+    #     INPUT_BACPAC_FILE="${{ inputs.bacpac_file }}"
+    #     PREFIX="${{ inputs.bacpac_prefix }}"
+    #     USE_LATEST="${{ inputs.use_latest_if_not_specified }}"
+    #     ACCOUNT="${{ inputs.storage_account }}"
+    #     CONTAINER="${{ inputs.container_name }}"
 
-        if [ -n "$INPUT_BACPAC_FILE" ]; then
-          BACPAC_FILE="$INPUT_BACPAC_FILE"
-          echo "Using explicit BACPAC file: $BACPAC_FILE"
-        else
-          if [ "$USE_LATEST" != "true" ]; then
-            echo "No bacpac_file provided and use_latest_if_not_specified is false."
-            exit 1
-          fi
+    #     if [ -n "$INPUT_BACPAC_FILE" ]; then
+    #       BACPAC_FILE="$INPUT_BACPAC_FILE"
+    #       echo "Using explicit BACPAC file: $BACPAC_FILE"
+    #     else
+    #       if [ "$USE_LATEST" != "true" ]; then
+    #         echo "No bacpac_file provided and use_latest_if_not_specified is false."
+    #         exit 1
+    #       fi
 
-          echo "Finding latest .bacpac blob in container $CONTAINER..."
+    #       echo "Finding latest .bacpac blob in container $CONTAINER..."
 
-          if [ -n "$PREFIX" ]; then
-            QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac') && starts_with(name, '$PREFIX')] | sort_by(@, &properties.lastModified) | [-1].name"
-          else
-            QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac')] | sort_by(@, &properties.lastModified) | [-1].name"
-          fi
+    #       if [ -n "$PREFIX" ]; then
+    #         QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac') && starts_with(name, '$PREFIX')] | sort_by(@, &properties.lastModified) | [-1].name"
+    #       else
+    #         QUERY="[?properties.blobType=='BlockBlob' && ends_with(name, '.bacpac')] | sort_by(@, &properties.lastModified) | [-1].name"
+    #       fi
 
-          BACPAC_FILE=$(az storage blob list \
-            --account-name "$ACCOUNT" \
-            --container-name "$CONTAINER" \
-            --auth-mode login \
-            --query "$QUERY" \
-            -o tsv)
+    #       BACPAC_FILE=$(az storage blob list \
+    #         --account-name "$ACCOUNT" \
+    #         --container-name "$CONTAINER" \
+    #         --auth-mode login \
+    #         --query "$QUERY" \
+    #         -o tsv)
 
-          if [ -z "$BACPAC_FILE" ]; then
-            echo "No matching .bacpac blob found."
-            exit 1
-          fi
+    #       if [ -z "$BACPAC_FILE" ]; then
+    #         echo "No matching .bacpac blob found."
+    #         exit 1
+    #       fi
 
-          echo "Resolved latest BACPAC file: $BACPAC_FILE"
-        fi
+    #       echo "Resolved latest BACPAC file: $BACPAC_FILE"
+    #     fi
 
-        echo "bacpac_file=$BACPAC_FILE" >> "$GITHUB_OUTPUT"
-        echo "bacpac_uri=https://${ACCOUNT}.blob.core.windows.net/${CONTAINER}/${BACPAC_FILE}" >> "$GITHUB_OUTPUT"
+    #     echo "bacpac_file=$BACPAC_FILE" >> "$GITHUB_OUTPUT"
+    #     echo "bacpac_uri=https://${ACCOUNT}.blob.core.windows.net/${CONTAINER}/${BACPAC_FILE}" >> "$GITHUB_OUTPUT"
 
-    - name: Download resolved BACPAC
-      id: download
-      shell: bash
-      run: |
-        set -euo pipefail
+    # - name: Download resolved BACPAC
+    #   id: download
+    #   shell: bash
+    #   run: |
+    #     set -euo pipefail
 
-        ACCOUNT="${{ inputs.storage_account }}"
-        CONTAINER="${{ inputs.container_name }}"
-        BLOB_NAME="${{ steps.resolve-bacpac.outputs.bacpac_file }}"
+    #     ACCOUNT="${{ inputs.storage_account }}"
+    #     CONTAINER="${{ inputs.container_name }}"
+    #     BLOB_NAME="${{ steps.resolve-bacpac.outputs.bacpac_file }}"
 
-        echo "Downloading resolved bacpac: $BLOB_NAME"
+    #     echo "Downloading resolved bacpac: $BLOB_NAME"
 
-        az storage blob download \
-          --account-name "$ACCOUNT" \
-          --container-name "$CONTAINER" \
-          --name "$BLOB_NAME" \
-          --file "$BLOB_NAME" \
-          --auth-mode login
+    #     az storage blob download \
+    #       --account-name "$ACCOUNT" \
+    #       --container-name "$CONTAINER" \
+    #       --name "$BLOB_NAME" \
+    #       --file "$BLOB_NAME" \
+    #       --auth-mode login
 
-        echo "bacpac_file=$BLOB_NAME" >> "$GITHUB_OUTPUT"
+    #     echo "bacpac_file=$BLOB_NAME" >> "$GITHUB_OUTPUT"
 
-    - name: Undo Whitelist Runner for backup storage
-      uses: ./.github/actions/whitelist-storage
-      with:
-        ip-address: ${{ inputs.ip-address }}
-        resource-group: ${{ inputs.resource_group_backup }}
-        account-name: ${{ inputs.storage_account }}
-        verb: remove
+    # - name: Undo Whitelist Runner for backup storage
+    #   uses: ./.github/actions/whitelist-storage
+    #   with:
+    #     ip-address: ${{ inputs.ip-address }}
+    #     resource-group: ${{ inputs.resource_group_backup }}
+    #     account-name: ${{ inputs.storage_account }}
+    #     verb: remove
 
     - name: Login for database restore
       if: ${{ steps.azure-envs.outputs.backup_base != steps.azure-envs.outputs.db_base }}
@@ -202,91 +202,91 @@ runs:
         server-name: ${{ inputs.sql_server_name }}
         verb: add
 
-    - name: Delete existing db to allow importing into empty
-      id: delete
-      if: ${{ inputs.delete_if_exists == 'true' }}
-      shell: bash
-      run: |
-          set -euo pipefail
-          echo "Target database: ${{ inputs.target_database }}"
+    # - name: Delete existing db to allow importing into empty
+    #   id: delete
+    #   if: ${{ inputs.delete_if_exists == 'true' }}
+    #   shell: bash
+    #   run: |
+    #       set -euo pipefail
+    #       echo "Target database: ${{ inputs.target_database }}"
 
-          if az sql db show \
-            --resource-group "${{ inputs.resource_group_db }}" \
-            --server "${{ inputs.sql_server_name }}" \
-            --name "${{ inputs.target_database }}" \
-            >/dev/null 2>&1; then
+    #       if az sql db show \
+    #         --resource-group "${{ inputs.resource_group_db }}" \
+    #         --server "${{ inputs.sql_server_name }}" \
+    #         --name "${{ inputs.target_database }}" \
+    #         >/dev/null 2>&1; then
 
-          echo "Deleting existing spare database..."
+    #       echo "Deleting existing spare database..."
 
-          az sql db delete \
-            --resource-group "${{ inputs.resource_group_db }}" \
-            --server "${{ inputs.sql_server_name }}" \
-            --name "${{ inputs.target_database }}" \
-            --yes
+    #       az sql db delete \
+    #         --resource-group "${{ inputs.resource_group_db }}" \
+    #         --server "${{ inputs.sql_server_name }}" \
+    #         --name "${{ inputs.target_database }}" \
+    #         --yes
 
-          echo "Waiting for deletion to complete..."
+    #       echo "Waiting for deletion to complete..."
 
-          until ! az sql db show \
-            --resource-group "${{ inputs.resource_group_db }}" \
-            --server "${{ inputs.sql_server_name }}" \
-            --name "${{ inputs.target_database }}" \
-            >/dev/null 2>&1; do
-            sleep 10
-          done
-          else
-            echo "Target database does not currently exist."
-          fi
+    #       until ! az sql db show \
+    #         --resource-group "${{ inputs.resource_group_db }}" \
+    #         --server "${{ inputs.sql_server_name }}" \
+    #         --name "${{ inputs.target_database }}" \
+    #         >/dev/null 2>&1; do
+    #         sleep 10
+    #       done
+    #       else
+    #         echo "Target database does not currently exist."
+    #       fi
 
-    - name: Check whether database exists
-      id: db-check
-      shell: bash
-      run: |
-        if az sql db show \
-          --resource-group "${{ inputs.resource_group_app }}" \
-          --server "${{ inputs.sql_server_name }}" \
-          --name "${{ inputs.target_database }}" \
-          >/dev/null 2>&1; then
+    # - name: Check whether database exists
+    #   id: db-check
+    #   shell: bash
+    #   run: |
+    #     if az sql db show \
+    #       --resource-group "${{ inputs.resource_group_app }}" \
+    #       --server "${{ inputs.sql_server_name }}" \
+    #       --name "${{ inputs.target_database }}" \
+    #       >/dev/null 2>&1; then
 
-          echo "exists=true" >> "$GITHUB_OUTPUT"
-        else
-          echo "exists=false" >> "$GITHUB_OUTPUT"
-        fi
+    #       echo "exists=true" >> "$GITHUB_OUTPUT"
+    #     else
+    #       echo "exists=false" >> "$GITHUB_OUTPUT"
+    #     fi
 
-    - name: Recreate database
-      if: ${{ inputs.delete_if_exists == 'true' || steps.db-check.outputs.exists == 'false' }}
-      shell: bash
-      run: |
-        if [[ "${{ steps.azure-envs.outputs.backup_base }}" == "Production" ]]; then
-          SKU="S2"
-        else
-          SKU="Basic"
-        fi
+    # - name: Recreate database
+    #   if: ${{ inputs.delete_if_exists == 'true' || steps.db-check.outputs.exists == 'false' }}
+    #   shell: bash
+    #   run: |
+    #     if [[ "${{ steps.azure-envs.outputs.backup_base }}" == "Production" ]]; then
+    #       SKU="S2"
+    #     else
+    #       SKU="Basic"
+    #     fi
 
-        echo "Creating ${{ inputs.target_database }} with SKU ${SKU}"
+    #     echo "Creating ${{ inputs.target_database }} with SKU ${SKU}"
 
-        az sql db create \
-          --resource-group "${{ inputs.resource_group_db }}" \
-          --server "${{ inputs.sql_server_name }}" \
-          --name "${{ inputs.target_database }}" \
-          --service-objective "${SKU}"
+    #     az sql db create \
+    #       --resource-group "${{ inputs.resource_group_db }}" \
+    #       --server "${{ inputs.sql_server_name }}" \
+    #       --name "${{ inputs.target_database }}" \
+    #       --service-objective "${SKU}"
 
-    - name: Import BACPAC with SqlPackage
-      shell: bash
-      run: |
-        set -euo pipefail
-        echo "Waiting for SQL firewall rule to propagate..."
-        sleep 120
-        ACCESS_TOKEN="$(az account get-access-token \
-          --resource https://database.windows.net/ \
-          --query accessToken \
-          -o tsv)"
+    # - name: Import BACPAC with SqlPackage
+    #   shell: bash
+    #   run: |
+    #     set -euo pipefail
+    #     echo "Waiting for SQL firewall rule to propagate..."
+    #     sleep 120
+    #     ACCESS_TOKEN="$(az account get-access-token \
+    #       --resource https://database.windows.net/ \
+    #       --query accessToken \
+    #       -o tsv)"
 
-        sqlpackage \
-          /Action:Import \
-          /SourceFile:"${{ steps.download.outputs.bacpac_file }}" \
-          /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \
-          /TargetDatabaseName:"${{ inputs.target_database }}" \
-          /AccessToken:"$ACCESS_TOKEN"
+    #     sqlpackage \
+    #       /Action:Import \
+    #       /SourceFile:"${{ steps.download.outputs.bacpac_file }}" \
+    #       /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \
+    #       /TargetDatabaseName:"${{ inputs.target_database }}" \
+    #       /AccessToken:"$ACCESS_TOKEN"
 
     - name: Grant Container App identity access to restored SQL DB
       shell: pwsh

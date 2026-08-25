@@ -11,7 +11,7 @@ on:
         options: ['Prod']
         default: 'Prod'
   push:
-    #branches: ['feature/322958/copy-prod-into-dev']
+    branches: ['feature/322958/copy-prod-into-dev']
   
 env:
   BACKUP_CONTAINER_NAME: sqlbackups
