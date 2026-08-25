@@ -73,6 +73,9 @@ jobs:
     name: Deployment to Dev
     needs: [set-env, create-and-publish-image, create-and-tag-release]
     if: needs.set-env.outputs.allow-deploy-to-dev == 'true'
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -90,6 +93,9 @@ jobs:
     name: Deployment to Test
     needs: [set-env, deploy-to-dev]
     if: needs.set-env.outputs.allow-deploy-to-test == 'true'
+    permissions:
+      contents: read
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -107,6 +113,9 @@ jobs:
     needs: [set-env, deploy-to-test]
     name: Run the visualisation workflow against staging content.
     if: needs.set-env.outputs.allow-deploy-to-staging == 'true'
+    permissions:
+      contents: read
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -121,6 +130,9 @@ jobs:
     needs: [set-env, deploy-to-test]
     name: Deployment to Staging
     if: needs.set-env.outputs.allow-deploy-to-staging == 'true'
+    permissions:
+      contents: read
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -138,6 +150,9 @@ jobs:
     needs: [set-env, deploy-to-staging]
     name: Deployment to Production
     if: needs.set-env.outputs.allow-deploy-to-production == 'true'
+    permissions:
+      contents: read
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
