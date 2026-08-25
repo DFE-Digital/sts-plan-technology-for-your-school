@@ -54,6 +54,9 @@ jobs:
     name: Create & Publish Image
     uses: ./.github/workflows/build-image.yml
     secrets: inherit
+    permissions:
+      contents: read
+      packages: write
     with:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
