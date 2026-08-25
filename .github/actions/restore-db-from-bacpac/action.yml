@@ -47,6 +47,24 @@ inputs:
     description: Can only restore into an empty or non-existant db. Delete if found?
     required: false
     default: "false"
+  dev_client_id:
+    description: az client id dev
+    required: true
+  dev_tenant_id: 
+    description: az tenant id dev
+    required: true
+  dev_subscription_id:
+    description: az sub id dev
+    required: true
+  prod_client_id:
+    description: az client id prod
+    required: true
+  prod_tenant_id:
+    description: az tenant id prod
+    required: true
+  prod_subscription_id:
+    description: az sub id prod
+    required: true
 runs:
   using: composite
   steps:
@@ -76,9 +94,9 @@ runs:
     - name: Login for backup access
       uses: azure/login@v3
       with:
-        client-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && secrets.PROD_CLIENT_ID || secrets.DEV_CLIENT_ID }}
-        tenant-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && secrets.PROD_TENANT_ID || secrets.DEV_TENANT_ID }}
-        subscription-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && secrets.PROD_SUBSCRIPTION_ID || secrets.DEV_SUBSCRIPTION_ID }}
+        client-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && inputs.prod_client_id || inputs.dev_client_id }}
+        tenant-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && inputs.prod_tenant_id || inputs.dev_tenant_id }}
+        subscription-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && inputs.prod_subscription_id || inputs.dev_subscription_id }}
 
     - name: Whitelist Runner for backup storage
       uses: ./.github/actions/whitelist-storage
@@ -168,9 +186,9 @@ runs:
       if: ${{ steps.azure-envs.outputs.backup_base != steps.azure-envs.outputs.db_base }}
       uses: azure/login@v3
       with:
-        client-id: ${{ steps.azure-envs.outputs.db_base == 'Production' && secrets.PROD_CLIENT_ID || secrets.DEV_CLIENT_ID }}
-        tenant-id: ${{ steps.azure-envs.outputs.db_base == 'Production' && secrets.PROD_TENANT_ID || secrets.DEV_TENANT_ID }}
-        subscription-id: ${{ steps.azure-envs.outputs.db_base == 'Production' && secrets.PROD_SUBSCRIPTION_ID || secrets.DEV_SUBSCRIPTION_ID }}
+        client-id: ${{ steps.azure-envs.outputs.db_base == 'Production' && inputs.prod_client_id || inputs.dev_client_id }}
+        tenant-id: ${{ steps.azure-envs.outputs.db_base == 'Production' && inputs.prod_tenant_id || inputs.dev_tenant_id }}
+        subscription-id: ${{ steps.azure-envs.outputs.db_base == 'Production' && inputs.prod_subscription_id || inputs.dev_subscription_id }}
 
     - name: Install SqlPackage
       shell: bash

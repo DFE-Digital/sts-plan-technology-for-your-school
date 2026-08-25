@@ -71,3 +71,9 @@ jobs:
           bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
           use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
           delete_if_exists: true
+          dev_client_id: ${{ secrets.DEV_CLIENT_ID }}
+          dev_tenant_id: ${{ secrets.DEV_TENANT_ID }}
+          dev_subscription_id: ${{ secrets.DEV_SUBSCRIPTION_ID }}
+          prod_client_id: ${{ secrets.PROD_CLIENT_ID }}
+          prod_tenant_id: ${{ secrets.PROD_TENANT_ID }}
+          prod_subscription_id: ${{ secrets.PROD_SUBSCRIPTION_ID }}
