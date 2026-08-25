@@ -2,7 +2,7 @@ name: Copy of Production to Dev
 
 on:
   schedule:
-    - cron: '0 2 * * *'
+    - cron: '0 4 * * 1'
   workflow_dispatch:
     inputs:
       backup_environment:
@@ -25,7 +25,7 @@ on:
         required: false
         default: ''
   push:
-    branches: ['feature/322958/copy-prod-into-dev']
+    #branches: ['feature/322958/copy-prod-into-dev']
   
 env:
   BACKUP_ENVIRONMENT: ${{ github.event.inputs.backup_environment || 'ProductionUnprotected' }}
@@ -37,7 +37,29 @@ env:
   USE_LATEST_IF_NOT_SPECIFIED: true
 
 jobs:
+  cadence:
+      runs-on: ubuntu-latest
+      outputs:
+        run: ${{ steps.check.outputs.run }}
+
+      steps:
+        - name: Check fortnightly cadence
+          id: check
+          shell: bash
+          run: |
+            ANCHOR="2026-07-27"
+            TODAY=$(date -u +%Y-%m-%d)
+
+            DAYS=$(( ($(date -u -d "$TODAY" +%s) - $(date -u -d "$ANCHOR" +%s)) / 86400 ))
+
+            if (( DAYS % 14 == 0 )); then
+              echo "run=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "run=false" >> "$GITHUB_OUTPUT"
+            fi  
   copydb:
+    needs: cadence
+    if: needs.cadence.outputs.run == 'true'
     runs-on: ubuntu-latest
     environment: 'ProductionUnprotected'
     permissions:
