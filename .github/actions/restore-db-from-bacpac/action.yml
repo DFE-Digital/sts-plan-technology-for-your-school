@@ -202,91 +202,91 @@ runs:
         server-name: ${{ inputs.sql_server_name }}
         verb: add
 
-    # - name: Delete existing db to allow importing into empty
-    #   id: delete
-    #   if: ${{ inputs.delete_if_exists == 'true' }}
-    #   shell: bash
-    #   run: |
-    #       set -euo pipefail
-    #       echo "Target database: ${{ inputs.target_database }}"
+    - name: Delete existing db to allow importing into empty
+      id: delete
+      if: ${{ inputs.delete_if_exists == 'true' }}
+      shell: bash
+      run: |
+          set -euo pipefail
+          echo "Target database: ${{ inputs.target_database }}"
 
-    #       if az sql db show \
-    #         --resource-group "${{ inputs.resource_group_db }}" \
-    #         --server "${{ inputs.sql_server_name }}" \
-    #         --name "${{ inputs.target_database }}" \
-    #         >/dev/null 2>&1; then
+          if az sql db show \
+            --resource-group "${{ inputs.resource_group_db }}" \
+            --server "${{ inputs.sql_server_name }}" \
+            --name "${{ inputs.target_database }}" \
+            >/dev/null 2>&1; then
 
-    #       echo "Deleting existing spare database..."
+          echo "Deleting existing spare database..."
 
-    #       az sql db delete \
-    #         --resource-group "${{ inputs.resource_group_db }}" \
-    #         --server "${{ inputs.sql_server_name }}" \
-    #         --name "${{ inputs.target_database }}" \
-    #         --yes
+          az sql db delete \
+            --resource-group "${{ inputs.resource_group_db }}" \
+            --server "${{ inputs.sql_server_name }}" \
+            --name "${{ inputs.target_database }}" \
+            --yes
 
-    #       echo "Waiting for deletion to complete..."
+          echo "Waiting for deletion to complete..."
 
-    #       until ! az sql db show \
-    #         --resource-group "${{ inputs.resource_group_db }}" \
-    #         --server "${{ inputs.sql_server_name }}" \
-    #         --name "${{ inputs.target_database }}" \
-    #         >/dev/null 2>&1; do
-    #         sleep 10
-    #       done
-    #       else
-    #         echo "Target database does not currently exist."
-    #       fi
+          until ! az sql db show \
+            --resource-group "${{ inputs.resource_group_db }}" \
+            --server "${{ inputs.sql_server_name }}" \
+            --name "${{ inputs.target_database }}" \
+            >/dev/null 2>&1; do
+            sleep 10
+          done
+          else
+            echo "Target database does not currently exist."
+          fi
 
-    # - name: Check whether database exists
-    #   id: db-check
-    #   shell: bash
-    #   run: |
-    #     if az sql db show \
-    #       --resource-group "${{ inputs.resource_group_app }}" \
-    #       --server "${{ inputs.sql_server_name }}" \
-    #       --name "${{ inputs.target_database }}" \
-    #       >/dev/null 2>&1; then
+    - name: Check whether database exists
+      id: db-check
+      shell: bash
+      run: |
+        if az sql db show \
+          --resource-group "${{ inputs.resource_group_app }}" \
+          --server "${{ inputs.sql_server_name }}" \
+          --name "${{ inputs.target_database }}" \
+          >/dev/null 2>&1; then
 
-    #       echo "exists=true" >> "$GITHUB_OUTPUT"
-    #     else
-    #       echo "exists=false" >> "$GITHUB_OUTPUT"
-    #     fi
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+        else
+          echo "exists=false" >> "$GITHUB_OUTPUT"
+        fi
 
-    # - name: Recreate database
-    #   if: ${{ inputs.delete_if_exists == 'true' || steps.db-check.outputs.exists == 'false' }}
-    #   shell: bash
-    #   run: |
-    #     if [[ "${{ steps.azure-envs.outputs.backup_base }}" == "Production" ]]; then
-    #       SKU="S2"
-    #     else
-    #       SKU="Basic"
-    #     fi
+    - name: Recreate database
+      if: ${{ inputs.delete_if_exists == 'true' || steps.db-check.outputs.exists == 'false' }}
+      shell: bash
+      run: |
+        if [[ "${{ steps.azure-envs.outputs.backup_base }}" == "Production" ]]; then
+          SKU="S2"
+        else
+          SKU="Basic"
+        fi
 
-    #     echo "Creating ${{ inputs.target_database }} with SKU ${SKU}"
+        echo "Creating ${{ inputs.target_database }} with SKU ${SKU}"
 
-    #     az sql db create \
-    #       --resource-group "${{ inputs.resource_group_db }}" \
-    #       --server "${{ inputs.sql_server_name }}" \
-    #       --name "${{ inputs.target_database }}" \
-    #       --service-objective "${SKU}"
+        az sql db create \
+          --resource-group "${{ inputs.resource_group_db }}" \
+          --server "${{ inputs.sql_server_name }}" \
+          --name "${{ inputs.target_database }}" \
+          --service-objective "${SKU}"
 
-    # - name: Import BACPAC with SqlPackage
-    #   shell: bash
-    #   run: |
-    #     set -euo pipefail
-    #     echo "Waiting for SQL firewall rule to propagate..."
-    #     sleep 120
-    #     ACCESS_TOKEN="$(az account get-access-token \
-    #       --resource https://database.windows.net/ \
-    #       --query accessToken \
-    #       -o tsv)"
+    - name: Import BACPAC with SqlPackage
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "Waiting for SQL firewall rule to propagate..."
+        sleep 120
+        ACCESS_TOKEN="$(az account get-access-token \
+          --resource https://database.windows.net/ \
+          --query accessToken \
+          -o tsv)"
 
-    #     sqlpackage \
-    #       /Action:Import \
-    #       /SourceFile:"${{ steps.download.outputs.bacpac_file }}" \
-    #       /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \
-    #       /TargetDatabaseName:"${{ inputs.target_database }}" \
-    #       /AccessToken:"$ACCESS_TOKEN"
+        sqlpackage \
+          /Action:Import \
+          /SourceFile:"${{ steps.download.outputs.bacpac_file }}" \
+          /TargetServerName:"${{ inputs.sql_server_name }}.database.windows.net" \
+          /TargetDatabaseName:"${{ inputs.target_database }}" \
+          /AccessToken:"$ACCESS_TOKEN"
 
     - name: Grant Container App identity access to restored SQL DB
       shell: pwsh
