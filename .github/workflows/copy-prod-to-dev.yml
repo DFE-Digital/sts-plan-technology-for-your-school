@@ -24,7 +24,7 @@ on:
       backup_filename_search_term:
         required: false
         default: ''
-  push:
+  #push:
     #branches: ['feature/322958/copy-prod-into-dev']
   
 env:
