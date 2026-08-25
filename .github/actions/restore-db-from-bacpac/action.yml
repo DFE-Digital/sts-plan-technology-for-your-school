@@ -198,7 +198,7 @@ runs:
       uses: ./.github/actions/whitelist-sql
       with:
         ip-address: ${{ inputs.ip-address }}
-        resource-group: ${{ inputs.resource_group_app }}
+        resource-group: ${{ inputs.resource_group_db }}
         server-name: ${{ inputs.sql_server_name }}
         verb: add
 
@@ -211,7 +211,7 @@ runs:
           echo "Target database: ${{ inputs.target_database }}"
 
           if az sql db show \
-            --resource-group "${{ inputs.resource_group_app }}" \
+            --resource-group "${{ inputs.resource_group_db }}" \
             --server "${{ inputs.sql_server_name }}" \
             --name "${{ inputs.target_database }}" \
             >/dev/null 2>&1; then
@@ -219,7 +219,7 @@ runs:
           echo "Deleting existing spare database..."
 
           az sql db delete \
-            --resource-group "${{ inputs.resource_group_app }}" \
+            --resource-group "${{ inputs.resource_group_db }}" \
             --server "${{ inputs.sql_server_name }}" \
             --name "${{ inputs.target_database }}" \
             --yes
@@ -227,7 +227,7 @@ runs:
           echo "Waiting for deletion to complete..."
 
           until ! az sql db show \
-            --resource-group "${{ inputs.resource_group_app }}" \
+            --resource-group "${{ inputs.resource_group_db }}" \
             --server "${{ inputs.sql_server_name }}" \
             --name "${{ inputs.target_database }}" \
             >/dev/null 2>&1; do
@@ -250,7 +250,7 @@ runs:
         echo "Creating ${{ inputs.target_database }} with SKU ${SKU}"
 
         az sql db create \
-          --resource-group "${{ inputs.resource_group_app }}" \
+          --resource-group "${{ inputs.resource_group_db }}" \
           --server "${{ inputs.sql_server_name }}" \
           --name "${{ inputs.target_database }}" \
           --service-objective "${SKU}"
@@ -281,7 +281,7 @@ runs:
 
         Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
 
-        $rg = "${{ inputs.resource_group_app }}"
+        $rg = "${{ inputs.resource_group_db }}"
         $sqlServer = "${{ inputs.sql_server_name }}"
         $sqlDb = "${{ inputs.target_database }}"
 
@@ -347,6 +347,6 @@ runs:
       uses: ./.github/actions/whitelist-sql
       with:
         ip-address: ${{ inputs.ip-address }}
-        resource-group: ${{ inputs.resource_group_app }}
+        resource-group: ${{ inputs.resource_group_db }}
         server-name: ${{ inputs.sql_server_name }}
         verb: remove
