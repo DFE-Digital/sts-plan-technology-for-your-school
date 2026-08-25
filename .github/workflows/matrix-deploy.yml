@@ -54,6 +54,9 @@ jobs:
     name: Create & Publish Image
     uses: ./.github/workflows/build-image.yml
     secrets: inherit
+    permissions:
+      contents: read
+      packages: write
     with:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
@@ -61,14 +64,13 @@ jobs:
   create-and-tag-release:
     needs: [set-env, create-and-publish-image]
     name: Create & Tag Release
+    uses: ./.github/workflows/create-tag-release.yml
+    secrets: inherit
     permissions:
       contents: write
       issues: write
       pull-requests: write
       id-token: write
-      packages: write
-    uses: ./.github/workflows/create-tag-release.yml
-    secrets: inherit
 
   deploy-to-dev:
     name: Deployment to Dev
@@ -96,7 +98,7 @@ jobs:
     if: needs.set-env.outputs.allow-deploy-to-test == 'true'
     permissions:
       contents: read
-      id-token: write
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -116,7 +118,7 @@ jobs:
     if: needs.set-env.outputs.allow-deploy-to-staging == 'true'
     permissions:
       contents: read
-      id-token: write
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -133,7 +135,7 @@ jobs:
     if: needs.set-env.outputs.allow-deploy-to-staging == 'true'
     permissions:
       contents: read
-      id-token: write
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -153,7 +155,7 @@ jobs:
     if: needs.set-env.outputs.allow-deploy-to-production == 'true'
     permissions:
       contents: read
-      id-token: write
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
