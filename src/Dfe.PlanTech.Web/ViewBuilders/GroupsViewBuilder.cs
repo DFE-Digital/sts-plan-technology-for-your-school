@@ -30,12 +30,16 @@ public class GroupsViewBuilder(
 {
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+
     private readonly IGroupService _groupService =
         groupService ?? throw new ArgumentNullException(nameof(groupService));
+
     private readonly ISubmissionService _submissionService =
         submissionService ?? throw new ArgumentNullException(nameof(submissionService));
+
     private readonly ContactOptionsConfiguration _contactOptions =
         contactOptions?.Value ?? throw new ArgumentNullException(nameof(contactOptions));
+
     private readonly ILogger<BaseViewBuilder> _logger =
         logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -196,7 +200,7 @@ public class GroupsViewBuilder(
         var completedSubmissions =
             matEstablishmentIds.Length != 0
                 ? await _groupService.GetGroupCompletedSubmissionsBySections(matEstablishmentIds)
-                    ?? []
+                  ?? []
                 : [];
 
         var completedCountBySectionId = completedSubmissions
@@ -356,7 +360,14 @@ public class GroupsViewBuilder(
                     );
                 }
 
+                // This has to remain due to user-action requiring it for the continue self-assessment page
                 CurrentUser.SetGroupSelectedSchool(school.EstablishmentRef, school.OrgName);
+
+                // This has been added, so that we know it has come through as a bulk assessment
+                controller.HttpContext.Session.SetValue<IEnumerable<int>>(
+                    SessionConstants.SelectedEstablishmentsKey,
+                    new List<int> { school.Id }
+                );
 
                 var latestSubmissionForRef =
                     await _submissionService.GetLatestSubmissionResponsesModel(
@@ -434,6 +445,7 @@ public class GroupsViewBuilder(
         );
     }
 
+
     private bool VerifyGroupSchoolMembership(
         string schoolRef,
         List<SqlEstablishmentLinkDto> establishmentLinks
@@ -469,7 +481,8 @@ public class GroupsViewBuilder(
             Urn = CurrentUser.UserOrganisationUrn,
             Ukprn = CurrentUser.UserOrganisationUkprn,
             Uid = CurrentUser.UserOrganisationUid,
-            GroupUid = CurrentUser.UserOrganisationUid, // TODO: resolve some confusion here - the database table is `GroupUid` and is populated from the `uid` OIDC claim - possibly remove `groupUid` from `EstablishmentModel`?
+            GroupUid = CurrentUser
+                .UserOrganisationUid, // TODO: resolve some confusion here - the database table is `GroupUid` and is populated from the `uid` OIDC claim - possibly remove `groupUid` from `EstablishmentModel`?
             Type = CurrentUser.UserOrganisationTypeName is null
                 ? null
                 : new IdWithNameModel { Name = CurrentUser.UserOrganisationTypeName },
@@ -485,9 +498,9 @@ public class GroupsViewBuilder(
     }
 
     private async Task<bool> HasOutstandingSelfAssessmentsAsync(
-    int matEstablishmentId,
-    IEnumerable<QuestionnaireSectionEntry> sections
-)
+        int matEstablishmentId,
+        IEnumerable<QuestionnaireSectionEntry> sections
+    )
     {
         var matEstablishmentLinks =
             await _establishmentService.GetEstablishmentLinks(matEstablishmentId) ?? [];

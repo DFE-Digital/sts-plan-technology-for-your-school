@@ -27,7 +27,7 @@
         case SubmissionStatus.InProgress:
         case SubmissionStatus.Inaccessible:
         case SubmissionStatus.Obsolete:
-            statusTextKey = !string.IsNullOrWhiteSpace(topic.EstablishmentName) ? ContentfulMicrocopyConstants.LandingPageTopicIntroContinue : ContentfulMicrocopyConstants.LandingPageTopicIntroCompletedNoEstablishment;
+            statusTextKey = !string.IsNullOrWhiteSpace(topic.EstablishmentName) ? ContentfulMicrocopyConstants.LandingPageTopicIntroContinue : ContentfulMicrocopyConstants.LandingPageTopicIntroContinueNoEstablishment;
             linkTextKey = ContentfulMicrocopyConstants.LandingPageTopicLinkContinue;
             controller = nameof(QuestionsController);
             action = nameof(QuestionsController.GetContinueSelfAssessment);
