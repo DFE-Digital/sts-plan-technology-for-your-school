@@ -42,11 +42,11 @@ jobs:
           set -euo pipefail
 
           RESOURCE_PREFIX_BACKUP="${{ vars.AZ_ENVIRONMENT_PROD }}${{ vars.DFE_PROJECT_NAME }}-backup"
-          RESOURCE_PREFIX_APP="${{ vars.AZ_ENVIRONMENT-DEV }}${{ vars.DFE_PROJECT_NAME }}" 
+          RESOURCE_PREFIX_DB="${{ vars.AZ_ENVIRONMENT-DEV }}${{ vars.DFE_PROJECT_NAME }}" 
           echo "RESOURCE_PREFIX_BACKUP=$RESOURCE_PREFIX_BACKUP" >> "$GITHUB_OUTPUT"
           echo "RESOURCE_PREFIX_BACKUP_SHORT=${RESOURCE_PREFIX_BACKUP//-/}" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_APP_SHORT=${RESOURCE_PREFIX_APP//-/}" >> "$GITHUB_OUTPUT"
-          echo "RESOURCE_PREFIX_APP=$RESOURCE_PREFIX_APP" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_DB_SHORT=${RESOURCE_PREFIX_DB//-/}" >> "$GITHUB_OUTPUT"
+          echo "RESOURCE_PREFIX_DB=$RESOURCE_PREFIX_DB" >> "$GITHUB_OUTPUT"
 
       - name: Restore DB from BACPAC
         uses: ./.github/actions/restore-db-from-bacpac
@@ -54,9 +54,9 @@ jobs:
           backup_env: 'ProductionUnprotected'
           db_env: 'Dev'
           resource_group_backup: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
-          resource_group_app: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          resource_group_db: ${{ steps.vars.outputs.RESOURCE_PREFIX_DB }}
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
-          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_DB }}
           target_database: ${{ env.SQL_TARGET_DATABASE }}
           storage_account: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP_SHORT }}
           container_name: ${{ env.BACKUP_CONTAINER_NAME }}
