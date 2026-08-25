@@ -17,7 +17,7 @@ env:
   BACKUP_CONTAINER_NAME: sqlbackups
   SQL_BACKUP_FILE_NAME: ''
   SQL_BACKUP_FILE_NAME_SEARCH: ''
-  SQL_TARGET_DATABASE: 's190p01-plantech-sqldb-old'
+  SQL_TARGET_DATABASE: 's190d01-plantech-sqldb-prod-backup'
   USE_LATEST_IF_NOT_SPECIFIED: true
 
 jobs:
@@ -28,39 +28,12 @@ jobs:
       id-token: write
       contents: read
     steps:
-
-      - name: Check if its backup time
-        id: check
-        run: |
-          ANCHOR_DATE="2026-08-24"
-          TODAY=$(date -u +%Y-%m-%d)
-          ANCHOR_EPOCH=$(date -d "$ANCHOR_DATE" +%s)
-          TODAY_EPOCH=$(date -d "$TODAY" +%s)
-          DAYS_DIFF=$(( (TODAY_EPOCH - ANCHOR_EPOCH) / 86400 ))
-          if (( DAYS_DIFF >= 0 && DAYS_DIFF % 14 == 0 )); then
-            echo "run=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "run=false" >> "$GITHUB_OUTPUT"
-          fi
-
-      - name: Run backup
-        if: steps.check.outputs.run == 'true'
-        run: |
-          # your backup command
-
       - name: clone repo
         uses: actions/checkout@v4
 
       - name: Get GitHub Runner IP
         id: whats-my-ip
         uses: ./.github/actions/whats-my-ip-address
-
-      - name: Azure CLI Login
-        uses: ./.github/actions/azure-login
-        with:
-          az_tenant_id: ${{ secrets.AZ_TENANT_ID }}
-          az_subscription_id: ${{ secrets.AZ_SUBSCRIPTION_ID }}
-          az_client_id: ${{ secrets.AZ_CLIENT_ID }}
 
       - name: Prepare derived variables
         id: vars
@@ -85,6 +58,8 @@ jobs:
       - name: Restore DB from BACPAC
         uses: ./.github/actions/restore-db-from-bacpac
         with:
+          backup_env: 'ProductionUnprotected'
+          db_env: 'Dev'
           resource_group_backup: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
           resource_group_app: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}

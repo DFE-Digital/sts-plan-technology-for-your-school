@@ -484,8 +484,10 @@ jobs:
       - name: Restore DB from BACPAC
         uses: ./.github/actions/restore-db-from-bacpac
         with:
+          backup_env: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
+          db_env: ${{ github.event_name == 'workflow_dispatch' && inputs.environment || 'Dev' }}
           resource_group_backup: ${{ steps.vars.outputs.RESOURCE_PREFIX_BACKUP }}
-          resource_group_app: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
+          resource_group_db: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
           ip-address: ${{ steps.whats-my-ip.outputs.ip }}
           sql_server_name: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}
           target_database: ${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb
@@ -495,74 +497,7 @@ jobs:
           bacpac_prefix: ${{ env.SQL_BACKUP_FILE_NAME_SEARCH }}
           use_latest_if_not_specified: ${{ env.USE_LATEST_IF_NOT_SPECIFIED }}
 
-      - name: Grant Container App identity access to restored SQL DB
-        shell: pwsh
-        run: |
-          $ErrorActionPreference = "Stop"
-
-          Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
-
-          $rg = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
-          $sqlServer = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}"
-          $sqlDb = "${{ steps.vars.outputs.RESOURCE_PREFIX_APP }}-sqldb"
-
-          $sqlFqdn = az sql server show `
-            --resource-group $rg `
-            --name $sqlServer `
-            --query fullyQualifiedDomainName `
-            -o tsv
-
-          $identityResourceId = az containerapp identity show `
-            --resource-group $rg `
-            --name $rg `
-            --query "userAssignedIdentities | keys(@)[0]" `
-            -o tsv
-
-          if ([string]::IsNullOrWhiteSpace($identityResourceId)) {
-            throw "No user-assigned identity found on container app $rg"
-          }
-
-          $identityName = Split-Path $identityResourceId -Leaf
-
-          $identityClientId = az identity show `
-            --ids $identityResourceId `
-            --query clientId `
-            -o tsv
-
-          if ([string]::IsNullOrWhiteSpace($identityClientId)) {
-            throw "Could not resolve client/appId for identity $identityClientId"
-          }
-
-          $sidHex = python3 -c "import uuid; print('0x' + uuid.UUID('$identityClientId').bytes_le.hex())"
-
-          $token = az account get-access-token `
-            --resource https://database.windows.net/ `
-            --query accessToken `
-            -o tsv
-
-          $query = @"
-          IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$identityName')
-          BEGIN
-            CREATE USER [$identityName] WITH SID = $sidHex, TYPE = E;
-          END;
-
-          ALTER ROLE db_datareader ADD MEMBER [$identityName];
-          ALTER ROLE db_datawriter ADD MEMBER [$identityName];
-          ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
-          ALTER ROLE db_executor ADD MEMBER [$identityName];
-          GRANT EXECUTE TO [$identityName];
-          GRANT INSERT TO [$identityName];
-          GRANT SELECT TO [$identityName];
-
-          DELETE FROM dbo.DataProtectionKeys;
-
-          "@
-
-          Invoke-Sqlcmd `
-            -ServerInstance $sqlFqdn `
-            -Database $sqlDb `
-            -AccessToken $token `
-            -Query $query
+      
 
       - name: De-Whitelist Runner for sql
         uses: ./.github/actions/whitelist-sql

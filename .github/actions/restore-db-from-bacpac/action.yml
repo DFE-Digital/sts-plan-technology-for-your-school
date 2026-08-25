@@ -2,11 +2,19 @@ name: Restore Azure SQL DB from BACPAC
 description: Restore Azure SQL DB from BACPAC
 
 inputs:
+  backup_env:
+    description: The github env to take the backup from
+    required: true
+    default: 'ProductionUnprotected'
+  db_env:
+    description: The github env to restore the db to
+    required: true
+    default: 'Dev'
   resource_group_backup:
     description: Backup resource group
     required: true
-  resource_group_app:
-    description: Application resource group
+  resource_group_db:
+    description: Db resource group
     required: true
   ip-address:
     description: The IP address to whitelist or remove
@@ -42,9 +50,35 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Install SqlPackage
+
+    - name: Determine Azure environments
+      id: azure-envs
       shell: bash
-      run: dotnet tool install --global Microsoft.SqlPackage
+      env:
+        BACKUP_ENV: ${{ inputs.backup_env }}
+        DB_ENV: ${{ inputs.db_env }}
+      run: |
+        set -euo pipefail
+
+        normalise_env() {
+          echo "${1%Unprotected}"
+        }
+
+        BACKUP_BASE="$(normalise_env "$BACKUP_ENV")"
+        DB_BASE="$(normalise_env "$DB_ENV")"
+
+        echo "backup_base=$BACKUP_BASE" >> "$GITHUB_OUTPUT"
+        echo "db_base=$DB_BASE" >> "$GITHUB_OUTPUT"
+
+        echo "Backup Azure environment: $BACKUP_BASE"
+        echo "Database Azure environment: $DB_BASE"
+
+    - name: Login for backup access
+      uses: azure/login@v3
+      with:
+        client-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && secrets.PROD_CLIENT_ID || secrets.DEV_CLIENT_ID }}
+        tenant-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && secrets.PROD_TENANT_ID || secrets.DEV_TENANT_ID }}
+        subscription-id: ${{ steps.azure-envs.outputs.backup_base == 'Production' && secrets.PROD_SUBSCRIPTION_ID || secrets.DEV_SUBSCRIPTION_ID }}
 
     - name: Whitelist Runner for backup storage
       uses: ./.github/actions/whitelist-storage
@@ -52,14 +86,6 @@ runs:
         ip-address: ${{ inputs.ip-address }}
         resource-group: ${{ inputs.resource_group_backup }}
         account-name: ${{ inputs.storage_account }}
-        verb: add
-
-    - name: Whitelist Runner for sql
-      uses: ./.github/actions/whitelist-sql
-      with:
-        ip-address: ${{ inputs.ip-address }}
-        resource-group: ${{ inputs.resource_group_app }}
-        server-name: ${{ inputs.sql_server_name }}
         verb: add
 
     - name: Resolve BACPAC blob name
@@ -130,6 +156,34 @@ runs:
 
         echo "bacpac_file=$BLOB_NAME" >> "$GITHUB_OUTPUT"
 
+    - name: Undo Whitelist Runner for backup storage
+      uses: ./.github/actions/whitelist-storage
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_backup }}
+        account-name: ${{ inputs.storage_account }}
+        verb: remove
+
+    - name: Login for database restore
+      if: ${{ steps.azure-envs.outputs.backup_base != steps.azure-envs.outputs.db_base }}
+      uses: azure/login@v3
+      with:
+        client-id: ${{ steps.azure-envs.outputs.db_base == 'Production' && secrets.PROD_CLIENT_ID || secrets.DEV_CLIENT_ID }}
+        tenant-id: ${{ steps.azure-envs.outputs.db_base == 'Production' && secrets.PROD_TENANT_ID || secrets.DEV_TENANT_ID }}
+        subscription-id: ${{ steps.azure-envs.outputs.db_base == 'Production' && secrets.PROD_SUBSCRIPTION_ID || secrets.DEV_SUBSCRIPTION_ID }}
+
+    - name: Install SqlPackage
+      shell: bash
+      run: dotnet tool install --global Microsoft.SqlPackage
+
+    - name: Whitelist Runner for sql
+      uses: ./.github/actions/whitelist-sql
+      with:
+        ip-address: ${{ inputs.ip-address }}
+        resource-group: ${{ inputs.resource_group_app }}
+        server-name: ${{ inputs.sql_server_name }}
+        verb: add
+
     - name: Delete existing db to allow importing into empty
       id: delete
       if: ${{ inputs.delete_if_exists == 'true' }}
@@ -165,6 +219,24 @@ runs:
             echo "Target database does not currently exist."
           fi
 
+    - name: Recreate database
+      if: ${{ inputs.delete_if_exists == 'true' }}
+      shell: bash
+      run: |
+        if [[ "${ENVIRONMENT,,}" == *"prod"* ]]; then
+          SKU="S2"
+        else
+          SKU="Basic"
+        fi
+
+        echo "Creating ${{ inputs.target_database }} with SKU ${SKU}"
+
+        az sql db create \
+          --resource-group "${{ inputs.resource_group_app }}" \
+          --server "${{ inputs.sql_server_name }}" \
+          --name "${{ inputs.target_database }}" \
+          --service-objective "${SKU}"
+
     - name: Import BACPAC with SqlPackage
       shell: bash
       run: |
@@ -183,13 +255,75 @@ runs:
           /TargetDatabaseName:"${{ inputs.target_database }}" \
           /AccessToken:"$ACCESS_TOKEN"
 
-    - name: Undo Whitelist Runner for backup storage
-      uses: ./.github/actions/whitelist-storage
-      with:
-        ip-address: ${{ inputs.ip-address }}
-        resource-group: ${{ inputs.resource_group_backup }}
-        account-name: ${{ inputs.storage_account }}
-        verb: remove
+    - name: Grant Container App identity access to restored SQL DB
+      if: ${{ steps.azure-envs.outputs.backup_base != steps.azure-envs.outputs.db_base }}
+      shell: pwsh
+      run: |
+        $ErrorActionPreference = "Stop"
+
+        Install-Module SqlServer -Force -Scope CurrentUser -AllowClobber
+
+        $rg = "${{ inputs.resource_group_app }}"
+        $sqlServer = "${{ inputs.sql_server_name }}"
+        $sqlDb = "${{ inputs.target_database }}"
+
+        $sqlFqdn = az sql server show `
+          --resource-group $rg `
+          --name $sqlServer `
+          --query fullyQualifiedDomainName `
+          -o tsv
+
+        $identityResourceId = az containerapp identity show `
+          --resource-group $rg `
+          --name $rg `
+          --query "userAssignedIdentities | keys(@)[0]" `
+          -o tsv
+
+        if ([string]::IsNullOrWhiteSpace($identityResourceId)) {
+          throw "No user-assigned identity found on container app $rg"
+        }
+
+        $identityName = Split-Path $identityResourceId -Leaf
+
+        $identityClientId = az identity show `
+          --ids $identityResourceId `
+          --query clientId `
+          -o tsv
+
+        if ([string]::IsNullOrWhiteSpace($identityClientId)) {
+          throw "Could not resolve client/appId for identity $identityClientId"
+        }
+
+        $sidHex = python3 -c "import uuid; print('0x' + uuid.UUID('$identityClientId').bytes_le.hex())"
+
+        $token = az account get-access-token `
+          --resource https://database.windows.net/ `
+          --query accessToken `
+          -o tsv
+
+        $query = @"
+        IF NOT EXISTS (SELECT 1 FROM sys.database_principals WHERE name = '$identityName')
+        BEGIN
+          CREATE USER [$identityName] WITH SID = $sidHex, TYPE = E;
+        END;
+
+        ALTER ROLE db_datareader ADD MEMBER [$identityName];
+        ALTER ROLE db_datawriter ADD MEMBER [$identityName];
+        ALTER ROLE db_ddladmin ADD MEMBER [$identityName];
+        ALTER ROLE db_executor ADD MEMBER [$identityName];
+        GRANT EXECUTE TO [$identityName];
+        GRANT INSERT TO [$identityName];
+        GRANT SELECT TO [$identityName];
+
+        DELETE FROM dbo.DataProtectionKeys;
+
+        "@
+
+        Invoke-Sqlcmd `
+          -ServerInstance $sqlFqdn `
+          -Database $sqlDb `
+          -AccessToken $token `
+          -Query $query
 
     - name: Undo Whitelist Runner for sql
       uses: ./.github/actions/whitelist-sql
