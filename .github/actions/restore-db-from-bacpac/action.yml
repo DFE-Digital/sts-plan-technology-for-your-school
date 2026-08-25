@@ -256,7 +256,7 @@ runs:
       if: ${{ inputs.delete_if_exists == 'true' || steps.db-check.outputs.exists == 'false' }}
       shell: bash
       run: |
-        if [[ "${ENVIRONMENT,,}" == *"prod"* ]]; then
+        if [[ "${{ steps.azure-envs.outputs.backup_base }}" == "Production" ]]; then
           SKU="S2"
         else
           SKU="Basic"
@@ -308,7 +308,7 @@ runs:
 
         $identityResourceId = az containerapp identity show `
           --resource-group $rg `
-          --name $rg `
+          --name $containerApp `
           --query "userAssignedIdentities | keys(@)[0]" `
           -o tsv
 
