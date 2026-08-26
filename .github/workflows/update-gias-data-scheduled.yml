@@ -21,7 +21,7 @@ jobs:
     needs: update_dev
     uses: ./.github/workflows/update-gias-data-common.yml
     with:
-      environment: Tst
+      environment: TstUnprotected
       skip_gias_validation: false
     secrets: inherit
 
