@@ -5,6 +5,7 @@ using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
@@ -285,7 +286,7 @@ public class OnUserInformationReceivedEventTests
         gias.GetSingleAcademySchool(42).Returns((GiasEstablishmentEntity?)null);
 
         // Act / Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<InvalidGiasDataException>(() =>
             OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx)
         );
 
@@ -319,7 +320,7 @@ public class OnUserInformationReceivedEventTests
         signIn.RecordSignIn(Arg.Any<string>(), Arg.Any<EstablishmentModel>()).Returns(signInDto);
 
         // Act / Assert
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        var ex = await Assert.ThrowsAsync<InvalidGiasDataException>(() =>
             OnUserInformationReceivedEvent.RecordUserSignIn(logger, ctx)
         );
 

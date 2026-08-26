@@ -4,6 +4,7 @@ using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Workflows.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
+using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
 using Dfe.PlanTech.Data.Sql.Entities;
@@ -133,8 +134,8 @@ public static class OnUserInformationReceivedEvent
                 _ => "unknown organisation type",
             };
 
-            throw new InvalidOperationException(
-                $"GIAS establishment not found for {organisationType} with UID '{dsiOrganisation.Uid}'"
+            throw new InvalidGiasDataException(
+                $"GIAS establishment not found for {organisationType} with group UID '{dsiOrganisation.Uid}'"
             );
         }
 

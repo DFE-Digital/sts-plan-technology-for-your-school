@@ -12,7 +12,7 @@ public class GiasEstablishmentGroupEntityTests
         var expectedGroupUid = 1;
         var expectedGroupId = "ID123";
         var expectedGroupName = "Group name";
-        var expectedGroupStatusCode = 2;
+        var expectedGroupStatusCode = "OPEN";
         var expectedGroupTypeCode = 3;
         var expectedSyncedAt = new DateTime(2026, 8, 24, 9, 0, 0);
         var expectedUkprn = "PRN456";
@@ -61,7 +61,7 @@ public class GiasEstablishmentGroupEntityTests
             GroupUid = 1,
             GroupId = null, // Optional
             GroupName = "Group name",
-            GroupStatusCode = 2,
+            GroupStatusCode = "OPEN",
             GroupTypeCode = 3,
             SyncedAt = new DateTime(2026, 8, 24, 9, 0, 0),
             Ukprn = null, // Optional
