@@ -2,13 +2,7 @@ name: Code PR Check
 
 on:
   pull_request:
-    paths:
-      - 'contentful/**'
-      - 'src/**'
-      - 'tests/**'
-      - '.github/workflows/code-pr-check.yml'
-      - '.github/actions/build-dotnet-app/action.yml'
-      - '.github/actions/run-unit-tests/action.yml'
+    types: [opened, reopened, synchronize, ready_for_review]
 
 concurrency:
   group:
@@ -20,14 +14,62 @@ env:
   DOTNET_VERSION: ${{ vars.DOTNET_VERSION }}
 
 jobs:
+  sentinel:
+    # PR Sentinel (always runs)
+    #
+    # This job has no `if:` condition, so it runs on every PR regardless of
+    # which files changed. It exists for two reasons:
+    #
+    # 1. Branch protection needs a check that's *guaranteed* to report.
+    #    Conditional jobs below (build/test/etc.) don't post any status at all
+    #    when their `if:` evaluates false — they don't "pass", they just never
+    #    run. If branch protection required one of those directly, a PR that
+    #    doesn't touch the relevant files would block forever waiting for a
+    #    check that will never appear. Sentinel is the safe thing to mark as
+    #    a required check.
+    #
+    # 2. verify-checks-running.yml needs a non-empty baseline to poll for.
+    #    Its `expected` set always includes this job's name (see
+    #    .github/pr-check-manifest.json -> "always"). Without it, a PR that
+    #    touches nothing matched by pr-check-areas.yml would have an empty
+    #    expected set, and the poll would trivially "pass" without ever
+    #    confirming this workflow actually triggered at all.
+    #
+    # tl;dr: don't remove this or give it a conditional — it's the anchor
+    # both branch protection and the verification workflow rely on.
+    name: PR Sentinel (always runs)
+    runs-on: ubuntu-22.04
+    steps:
+      - run: echo "PR detected - checks will conditionally run."
+
+  # Use per-job path filters with dorny/paths-filter instead of top-level paths
+  detect-changes:
+    name: Detect changed areas
+    runs-on: ubuntu-22.04
+    outputs:
+      contentful: ${{ steps.filter.outputs.contentful }}
+      github: ${{ steps.filter.outputs.github }}
+      src: ${{ steps.filter.outputs.src }}
+      tests: ${{ steps.filter.outputs.tests }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: '.github/pr-check-areas.yml'
+
   build-test-web-app:
     name: Build and run unit tests
     runs-on: ubuntu-22.04
+    needs: [detect-changes]
     permissions:
       checks: write
       contents: read
-
-    if: always()
+    if:
+      ${{ always() && (needs.detect-changes.outputs.src == 'true' ||
+      needs.detect-changes.outputs.tests == 'true' || needs.detect-changes.outputs.github ==
+      'true')}}
 
     steps:
       - name: Check out repository
@@ -97,6 +139,10 @@ jobs:
   build-database-upgrader:
     name: Build database upgrader
     runs-on: ubuntu-22.04
+    needs: [detect-changes]
+    if:
+      ${{needs.detect-changes.outputs.src == 'true' || needs.detect-changes.outputs.github
+      =='true'}}
 
     steps:
       - name: Check out repository
@@ -111,6 +157,14 @@ jobs:
   run-javascript-tests:
     runs-on: ubuntu-22.04
     name: Run javascript tests
+    needs: [detect-changes]
+    if:
+      ${{ needs.detect-changes.outputs.tests == 'true' || needs.detect-changes.outputs.github
+      =='true'}}
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -118,7 +172,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 'latest'
+          node-version: '24'
 
       - name: Install Dependencies
         working-directory: ./tests/Dfe.PlanTech.Web.Node.UnitTests/
@@ -139,6 +193,10 @@ jobs:
   run-contentful-jest-tests:
     name: Run Jest Tests for Contentful
     runs-on: ubuntu-22.04
+    needs: [detect-changes]
+    if:
+      ${{ needs.detect-changes.outputs.contentful == 'true' || needs.detect-changes.outputs.github
+      =='true'}}
     permissions:
       checks: write
       contents: read
@@ -147,36 +205,21 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Check if contentful files changed
-        id: contentful-check
-        run: |
-          git fetch origin ${{ github.base_ref }} --depth=1
-          if git diff --name-only HEAD^ HEAD | grep '^contentful/'; then
-            echo "contentful_changes=true" >> $GITHUB_ENV
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "contentful_changes=false" >> $GITHUB_ENV
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Setup Node.js
-        if: steps.contentful-check.outputs.changed == 'true'
         uses: actions/setup-node@v4
         with:
-          node-version: 'latest'
+          node-version: '24'
 
       - name: Install Dependencies
-        if: steps.contentful-check.outputs.changed == 'true'
         working-directory: ./contentful
         run: npm install
 
-      - name: Run Jest Tests
-        if: steps.contentful-check.outputs.changed == 'true'
+      - name: Run JEST Tests
         working-directory: ./contentful/tests
         run: npm test -- --ci --reporters=default --reporters=jest-junit
 
       - name: Test Report
-        if: steps.contentful-check.outputs.changed == 'true' && (success() || failure())
+        if: (success() || failure())
         uses: dorny/test-reporter@v1
         with:
           name: Contentful Jest Tests

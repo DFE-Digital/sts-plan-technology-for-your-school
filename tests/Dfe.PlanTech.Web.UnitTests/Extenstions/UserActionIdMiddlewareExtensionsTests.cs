@@ -18,7 +18,7 @@ public class UserActionIdMiddlewareExtensionsTests
             .Returns(appBuilder);
 
         // Act
-        var result = appBuilder.UseCorrelationId();
+        var result = appBuilder.UseUserActionId();
 
         // Assert
         appBuilder.Received(1).Use(Arg.Any<Func<RequestDelegate, RequestDelegate>>());

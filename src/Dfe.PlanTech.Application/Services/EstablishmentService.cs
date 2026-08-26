@@ -30,6 +30,14 @@ public class EstablishmentService(
         return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentModel);
     }
 
+    public Task<SqlEstablishmentDto> GetOrCreateEstablishmentAsync(
+        string establishmentUrn,
+        string establishmentName
+    )
+    {
+        return _establishmentWorkflow.GetOrCreateEstablishmentAsync(establishmentUrn, establishmentName);
+    }
+
     public Task<List<SqlEstablishmentLinkDto>> GetEstablishmentLinks(int establishmentId)
     {
         return _establishmentWorkflow.GetGroupEstablishments(establishmentId);

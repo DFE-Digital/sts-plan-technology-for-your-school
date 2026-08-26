@@ -14,7 +14,6 @@ public class PageEntry : ContentfulEntry, IHasSlug
     public bool DisplayTopicTitle { get; init; }
     public bool? IsLandingPage { get; set; }
     public bool RequiresAuthorisation { get; init; } = true;
-    public bool HasBanner { get; init; } = false;
     public string? SectionTitle { get; init; }
     public List<RelatedActionEntry> RelatedActions { get; init; } = [];
     public List<ContentfulEntry> BeforeTitleContent { get; init; } = [];

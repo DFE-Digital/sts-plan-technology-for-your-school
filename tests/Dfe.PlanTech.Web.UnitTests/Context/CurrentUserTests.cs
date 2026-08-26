@@ -1,21 +1,21 @@
+using System.Security.Authentication;
+using System.Security.Claims;
+using System.Text.Json;
+using Dfe.PlanTech.Application.Providers;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Constants;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Web.Context;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using NSubstitute;
-using System.Security.Authentication;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace Dfe.PlanTech.Web.UnitTests.Context;
 
 public class CurrentUserTests
 {
-    private static (CurrentUser sut, DefaultHttpContext ctx) Build(
+    private static (CurrentUserProvider sut, DefaultHttpContext ctx) Build(
         IEnumerable<Claim>? claims = null,
         bool authenticated = true
     )
@@ -33,8 +33,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = ctx };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
         return (sut, ctx);
     }
 
@@ -46,9 +46,9 @@ public class CurrentUserTests
     public void Ctor_Throws_When_ContextAccessor_Null()
     {
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
         Assert.Throws<ArgumentNullException>(() =>
-            new CurrentUser(null!, establishmentService, logger)
+            new CurrentUserProvider(null!, establishmentService, logger)
         );
     }
 
@@ -56,8 +56,10 @@ public class CurrentUserTests
     public void Ctor_Throws_When_EstablishmentService_Null()
     {
         var accessor = new HttpContextAccessor();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        Assert.Throws<ArgumentNullException>(() => new CurrentUser(accessor, null!, logger));
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        Assert.Throws<ArgumentNullException>(() =>
+            new CurrentUserProvider(accessor, null!, logger)
+        );
     }
 
     // ---------- DsiReference ----------
@@ -170,8 +172,8 @@ public class CurrentUserTests
                 }
             );
 
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var result = await sut.GetActiveEstablishmentIdAsync();
@@ -217,9 +219,7 @@ public class CurrentUserTests
     {
         var expectedSessionId = Guid.NewGuid();
 
-        var (sut, _) = Build([
-            BuildClaim(ClaimConstants.SessionId, expectedSessionId.ToString())
-        ]);
+        var (sut, _) = Build([BuildClaim(ClaimConstants.SessionId, expectedSessionId.ToString())]);
 
         Assert.Equal(expectedSessionId, sut.SessionId);
     }
@@ -235,9 +235,7 @@ public class CurrentUserTests
     [Fact]
     public void SessionId_ReturnsNull_When_Claim_Is_Not_Guid()
     {
-        var (sut, _) = Build([
-            BuildClaim(ClaimConstants.SessionId, "not-a-guid")
-        ]);
+        var (sut, _) = Build([BuildClaim(ClaimConstants.SessionId, "not-a-guid")]);
 
         Assert.Null(sut.SessionId);
     }
@@ -416,10 +414,10 @@ public class CurrentUserTests
 
         var ctx = new DefaultHttpContext { User = principal };
         var accessor = new HttpContextAccessor { HttpContext = ctx };
-        var sut = new CurrentUser(
+        var sut = new CurrentUserProvider(
             accessor,
             Substitute.For<IEstablishmentService>(),
-            Substitute.For<ILogger<CurrentUser>>()
+            Substitute.For<ILogger<CurrentUserProvider>>()
         );
 
         Assert.True(sut.IsInRole("Admin"));
@@ -512,8 +510,8 @@ public class CurrentUserTests
         var context = new DefaultHttpContext();
         var httpContextAccessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(httpContextAccessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(httpContextAccessor, establishmentService, logger);
 
         // Act & Assert
         var ex = Assert.Throws<InvalidDataException>(() =>
@@ -630,8 +628,8 @@ public class CurrentUserTests
                 }
             );
 
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var result = await sut.GetActiveEstablishmentNameAsync();
@@ -676,8 +674,8 @@ public class CurrentUserTests
                 )
             );
 
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var result = await sut.GetActiveEstablishmentNameAsync();
@@ -791,8 +789,8 @@ public class CurrentUserTests
                 }
             );
 
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var result = await sut.GetActiveEstablishmentUrnAsync();
@@ -879,8 +877,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var result = sut.GetActiveEstablishmentUkprn();
@@ -967,8 +965,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var result = sut.GetActiveEstablishmentUid();
@@ -1051,8 +1049,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var result = sut.GetActiveEstablishmentDsiId();
@@ -1136,8 +1134,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var result = sut.GetActiveEstablishmentReference();
@@ -1268,8 +1266,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1357,8 +1355,8 @@ public class CurrentUserTests
                 }
             );
 
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1405,8 +1403,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1495,8 +1493,8 @@ public class CurrentUserTests
                 }
             );
 
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1569,8 +1567,8 @@ public class CurrentUserTests
                 )
             );
 
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1632,8 +1630,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1697,8 +1695,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1766,8 +1764,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1835,8 +1833,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1895,8 +1893,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -1955,8 +1953,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();
@@ -2016,8 +2014,8 @@ public class CurrentUserTests
 
         var accessor = new HttpContextAccessor { HttpContext = context };
         var establishmentService = Substitute.For<IEstablishmentService>();
-        var logger = Substitute.For<ILogger<CurrentUser>>();
-        var sut = new CurrentUser(accessor, establishmentService, logger);
+        var logger = Substitute.For<ILogger<CurrentUserProvider>>();
+        var sut = new CurrentUserProvider(accessor, establishmentService, logger);
 
         // Act
         var activeEstablishmentId = await sut.GetActiveEstablishmentIdAsync();

@@ -48,6 +48,17 @@ public class SubmissionService(
         );
     }
 
+    public Task<SqlSubmissionDto?> GetLatestCompletedSubmissionBySectionIdAsync(
+        int establishmentId,
+        string sectionId
+    )
+    {
+        return _submissionWorkflow.GetLatestCompletedSubmissionBySectionIdAsync(
+            establishmentId,
+            sectionId
+        );
+    }
+
     public async Task<SubmissionResponsesModel?> GetLatestSubmissionResponsesModel(
         int establishmentId,
         QuestionnaireSectionEntry section,
@@ -67,7 +78,7 @@ public class SubmissionService(
         int establishmentId,
         QuestionnaireSectionEntry section,
         IEnumerable<SubmissionStatus> statuses
-)
+    )
     {
         var submission = await _submissionWorkflow.GetLatestSubmissionWithOrderedResponsesAsync(
             establishmentId,
@@ -112,7 +123,9 @@ public class SubmissionService(
 
         var submissionResponsesModel = new SubmissionResponsesModel(latestSubmission!, section);
 
-        var lastResponse = submissionResponsesModel.Responses[submissionResponsesModel.Responses.Count - 1];
+        var lastResponse = submissionResponsesModel.Responses[
+            submissionResponsesModel.Responses.Count - 1
+        ];
         var cmsLastAnswer = section
             .Questions.FirstOrDefault(q => q.Id.Equals(lastResponse.QuestionSysId))
             ?.Answers.FirstOrDefault(a => a.Id.Equals(lastResponse.AnswerSysId));

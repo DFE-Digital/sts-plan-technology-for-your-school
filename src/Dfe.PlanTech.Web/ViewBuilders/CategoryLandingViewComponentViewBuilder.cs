@@ -1,11 +1,10 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Contentful.Models;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
-using Dfe.PlanTech.Core.Utilities;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.ViewBuilders.Interfaces;
 using Dfe.PlanTech.Web.ViewModels;
 
@@ -14,7 +13,7 @@ namespace Dfe.PlanTech.Web.ViewBuilders;
 public class CategoryLandingViewComponentViewBuilder(
     ILogger<BaseViewBuilder> logger,
     IContentfulService contentfulService,
-    ICurrentUser currentUser,
+    ICurrentUserProvider currentUser,
     ISubmissionService submissionService,
     IUserActionTrackingService userActionTrackingService,
     IEstablishmentService establishmentService,
@@ -98,7 +97,7 @@ public class CategoryLandingViewComponentViewBuilder(
             Print = print,
             StatusLinkPartialName = print
                 ? CategoryLandingSectionAssessmentLinkPrintContent
-                : CategoryLandingSectionAssessmentLink
+                : CategoryLandingSectionAssessmentLink,
         };
 
         return viewModel;
@@ -155,13 +154,14 @@ public class CategoryLandingViewComponentViewBuilder(
                 }
             }
 
-            var recommendations = sectionStatus?.Status == SubmissionStatus.CompleteReviewed
-                ? await GetCategoryLandingSectionRecommendations(
-                    establishmentId,
-                    section,
-                    sortType
+            var recommendations =
+                sectionStatus?.Status == SubmissionStatus.CompleteReviewed
+                    ? await GetCategoryLandingSectionRecommendations(
+                        establishmentId,
+                        section,
+                        sortType
                     )
-                : null;
+                    : null;
 
             yield return new CategoryLandingSectionViewModel(
                 section,
@@ -221,7 +221,7 @@ public class CategoryLandingViewComponentViewBuilder(
                 {
                     Header = sr.HeaderText,
                     LastUpdated = recommendations[sr.Id].DateCreated,
-                    Status = RecommendationStatusHelper.GetStatus(sr, recommendations),
+                    Status = sr.GetStatus(recommendations),
                     Slug = sr.Slug,
                 })
                 .ToList();

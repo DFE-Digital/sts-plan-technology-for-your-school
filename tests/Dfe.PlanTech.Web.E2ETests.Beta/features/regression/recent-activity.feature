@@ -7,6 +7,7 @@ Feature: Recommendation recent activity
 
     Scenario: Completing an assessment shows the correct initial recent activity 
       Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 1"
+      And I click the link to view the recommendations for "Category One Section One"
       Then I should be on the URL containing "/category-one"
       Then I should see the page heading "Category One"
       And I am on the "category-one" page
@@ -25,6 +26,7 @@ Feature: Recommendation recent activity
     @clear-data-school
     Scenario: Changing status on a recommendation updates the recent activity.
       Given I start a test assessment on "Category One" category "Category One Section One" section with answers "1, 1"
+      And I click the link to view the recommendations for "Category One Section One"
       Then I should be on the URL containing "/category-one"
       Then I should see the page heading "Category One"
       And I am on the "category-one" page

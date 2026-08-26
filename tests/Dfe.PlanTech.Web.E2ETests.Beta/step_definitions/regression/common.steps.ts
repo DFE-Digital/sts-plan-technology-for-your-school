@@ -35,6 +35,12 @@ Then('I should see the question heading {string}', async function (expectedHeadi
   await expect(heading).toHaveText(expectedHeading);
 });
 
+Then('I should see the h1 fieldset heading {string}', async function (expectedHeading: string) {
+  const heading = this.page.locator('h1.govuk-fieldset-heading');
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveText(expectedHeading);
+});
+
 Then('I should see a subheading with the text {string}', async function (text: string) {
   const heading = this.page.locator(`h2:has-text("${text}")`);
   await expect(heading).toBeVisible();
@@ -282,3 +288,45 @@ Then('I should see a confirmation panel saying {string}', async function (expect
   await expect(panelTitle).toBeVisible();
   await expect(panelTitle).toHaveText(expectedText);
 });
+
+When(
+  'I click the link to view the recommendations for {string}',
+  async function (categoryName: string) {
+    await this.page
+      .getByRole('link', {
+        name: `View the recommendations for ${categoryName}`,
+        exact: true,
+      })
+      .click();
+  }
+);
+
+Given('I visit the select-a-self-assessment page', async function () {
+  await this.page.goto(`${process.env.URL}groups/select-a-self-assessment`);
+});
+
+Then(
+  'I should see a back link with text {string} and URL {string}',
+  async function (text: string, url: string) {
+    const backLink = this.page.getByRole('link', {
+      name: text,
+    });
+
+    await expect(backLink).toBeVisible();
+    await expect(backLink).toHaveText(text);
+    await expect(backLink).toHaveAttribute('href', url);
+  },
+);
+
+When(
+  'I click the {string} link',
+  async function (linkText: string) {
+    const link = this.page.getByRole('link', {
+      name: linkText,
+      exact: true,
+    });
+
+    await expect(link).toBeVisible();
+    await link.click();
+  },
+);

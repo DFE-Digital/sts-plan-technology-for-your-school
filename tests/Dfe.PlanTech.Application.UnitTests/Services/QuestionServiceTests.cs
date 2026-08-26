@@ -134,7 +134,7 @@ public class QuestionServiceTests
             questionService.GetNextUnansweredQuestion(establishmentId, section)
         );
 
-        Assert.Contains("no responses", ex.Message, StringComparison.InvariantCultureIgnoreCase);
+        Assert.Contains("no responses", ex.Message, StringComparison.OrdinalIgnoreCase);
         Assert.Contains(submission.Id.ToString(), ex.Message);
         Assert.Contains(establishmentId.ToString(), ex.Message);
     }

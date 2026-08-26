@@ -6,6 +6,7 @@ Feature: Print recommendations Page
   @clear-data-school
     Scenario: Print recommendations page has correct layout content
         Given I start a test assessment on "Category Two" category "Category Two Section Three" section with answers "1, 1, 1, 2, 4"
+        And I click the link to view the recommendations for "Category Two Section Three"
         And I click the recommendation link "Recommendation Header - C2 - S3 - Q5" on the category landing page
         And I click the print all recommendations link in the related actions for "Category Two Section Three"
 

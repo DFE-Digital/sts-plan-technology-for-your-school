@@ -66,11 +66,11 @@ Then(
     var currentDate = getCurrentShortDate();
 
     const sectionNameLower = sectionName.toLowerCase();
-    const expectedTextRaw = `The self-assessment for ${sectionNameLower} was completed on ${currentDate}.`;
+    const expectedTextRaw = `The self-assessment for ${sectionNameLower} was submitted on ${currentDate} by DSI TEST Establishment (001) Miscellaneous (27).`;
 
     // check the self assessment completed text
     const completionParagraph = this.page.locator('p', {
-      hasText: `The self-assessment for ${sectionNameLower} was completed on`,
+      hasText: `The self-assessment for ${sectionNameLower} was submitted on`,
     });
 
     await expect(completionParagraph).toBeVisible();

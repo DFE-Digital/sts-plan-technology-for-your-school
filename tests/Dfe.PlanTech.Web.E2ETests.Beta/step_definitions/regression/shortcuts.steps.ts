@@ -34,7 +34,7 @@ Given(
 );
 
 Given('I click the submit and view recommendations button', async function () {
-  const submitBtn = this.page.getByRole('button', { name: 'Submit and view recommendations' });
+  const submitBtn = this.page.getByRole('button', { name: 'Submit' });
   await submitBtn.click();
 });
 
@@ -44,7 +44,7 @@ Given(
     await startAndAnswerAssessment(this, category, section, answers);
 
     // Final submit to reach recommendations
-    const submitBtn = this.page.getByRole('button', { name: 'Submit and view recommendations' });
+    const submitBtn = this.page.getByRole('button', { name: 'Submit' });
     await submitBtn.click();
   },
 );

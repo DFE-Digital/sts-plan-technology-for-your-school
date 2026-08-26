@@ -1,6 +1,6 @@
-using System.Text.Json;
 using Dfe.PlanTech.Core.Constants;
 using Microsoft.AspNetCore.Http;
+using System.Text.Json;
 
 namespace Dfe.PlanTech.Core.Helpers;
 
@@ -30,5 +30,17 @@ public static class SessionHelper
 
         var value = session.GetString(key);
         return value != null ? JsonSerializer.Deserialize(value, type) : null;
+    }
+
+    public static IReadOnlyList<int> GetSelectedEstablishmentIds(this ISession session)
+    {
+        return session.GetValue(SessionConstants.SelectedEstablishmentsKey) as int[]
+            ?? (session.GetValue(SessionConstants.SelectedEstablishmentsKey) as IEnumerable<int>)?.ToArray()
+            ?? [];
+    }
+
+    public static void Remove(this ISession session, string key)
+    {
+        session.Remove(key);
     }
 }

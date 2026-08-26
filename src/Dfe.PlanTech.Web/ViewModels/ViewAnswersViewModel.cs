@@ -21,4 +21,5 @@ public class ViewAnswersViewModel
     public int TotalQuestions { get; set; }
     public bool ShowInProgressDisclaimer { get; set; }
     public string BackButtonText { get; set; } = string.Empty;
+
 }

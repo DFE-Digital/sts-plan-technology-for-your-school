@@ -37,7 +37,6 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
         return _pagesViewBuilder.RouteBasedOnOrganisationTypeAsync(this, page);
     }
         
-    [ValidateMatSelected]
     [HttpGet("{categorySlug}/print", Name = "GetStandardChecklist")]
     public async Task<IActionResult> GetStandardChecklist(string categorySlug)
     {
@@ -46,7 +45,6 @@ public class PagesController(ILogger<PagesController> logger, IPagesViewBuilder 
         return await _pagesViewBuilder.RouteToCategoryLandingPrintPageAsync(this, categorySlug);
     }
         
-    [ValidateMatSelected]
     [HttpGet("{categorySlug}/share", Name = "ShareStandard")]
     public async Task<IActionResult> ShareStandard(string categorySlug)
     {

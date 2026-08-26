@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Application.Providers.Interfaces;
 using Dfe.PlanTech.Application.Services.Interfaces;
 using Dfe.PlanTech.Core.Configuration;
 using Dfe.PlanTech.Core.Constants;
@@ -6,7 +7,6 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Exceptions;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
-using Dfe.PlanTech.Web.Context.Interfaces;
 using Dfe.PlanTech.Web.Controllers;
 using Dfe.PlanTech.Web.Helpers;
 using Dfe.PlanTech.Web.ViewBuilders;
@@ -31,7 +31,7 @@ public class PagesViewBuilderTests
     private readonly ICategoryLandingViewComponentViewBuilder _viewBuilder =
         Substitute.For<ICategoryLandingViewComponentViewBuilder>();
     private readonly IContentfulService _contentfulService = Substitute.For<IContentfulService>();
-    private readonly ICurrentUser _currentUser = Substitute.For<ICurrentUser>();
+    private readonly ICurrentUserProvider _currentUser = Substitute.For<ICurrentUserProvider>();
     private readonly IEstablishmentService _establishmentService =
         Substitute.For<IEstablishmentService>();
     private readonly INotifyService _notifyService = Substitute.For<INotifyService>();
@@ -55,7 +55,7 @@ public class PagesViewBuilderTests
         IOptions<ErrorPagesConfiguration>? errors = null,
         ICategoryLandingViewComponentViewBuilder? viewBuilder = null,
         IContentfulService? contentful = null,
-        ICurrentUser? currentUser = null,
+        ICurrentUserProvider? currentUser = null,
         IEstablishmentService? establishmentService = null,
         INotifyService? notifyService = null,
         ISubmissionService? submissionService = null,
@@ -144,7 +144,7 @@ public class PagesViewBuilderTests
     {
         var errors = ErrorOpts();
         var contentful = Substitute.For<IContentfulService>();
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var notifyService = Substitute.For<INotifyService>();
         var submissionService = Substitute.For<ISubmissionService>();
@@ -170,7 +170,7 @@ public class PagesViewBuilderTests
     {
         var contact = ContactOpts();
         var contentful = Substitute.For<IContentfulService>();
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
         var notifyService = Substitute.For<INotifyService>();
         var submissionService = Substitute.For<ISubmissionService>();
@@ -202,7 +202,7 @@ public class PagesViewBuilderTests
         var page = CreatePage(homeSlug, isLanding: false);
 
         var contentful = Substitute.For<IContentfulService>();
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
 
         var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser);
 
@@ -231,7 +231,7 @@ public class PagesViewBuilderTests
         var page = CreatePage(homeSlug, isLanding: false);
 
         var contentful = Substitute.For<IContentfulService>();
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         var sut = CreateServiceUnderTest(
@@ -268,7 +268,7 @@ public class PagesViewBuilderTests
         var page = CreatePage(homeSlug, isLanding: false);
 
         var contentful = Substitute.For<IContentfulService>();
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
         var establishmentService = Substitute.For<IEstablishmentService>();
 
         // Setup establishmentService to return a list containing the selected school
@@ -430,7 +430,7 @@ public class PagesViewBuilderTests
     {
         var page = CreatePage("about", isLanding: false, title: "About", displayOrg: true);
 
-        var current = Substitute.For<ICurrentUser>();
+        var current = Substitute.For<ICurrentUserProvider>();
         var sut = CreateServiceUnderTest(currentUser: current);
         current.IsAuthenticated.Returns(false);
         current.IsMat.Returns(false);
@@ -455,7 +455,7 @@ public class PagesViewBuilderTests
             .GetCategoryBySlugAsync("invalidCategory", 4)
             .Returns(default(QuestionnaireCategoryEntry?));
 
-        var current = Substitute.For<ICurrentUser>();
+        var current = Substitute.For<ICurrentUserProvider>();
         var sut = CreateServiceUnderTest(contentful: contentful, currentUser: current);
         current.IsAuthenticated.Returns(false);
         current.IsMat.Returns(false);
@@ -473,7 +473,7 @@ public class PagesViewBuilderTests
     public async Task RouteToCategoryLandingPrintPageAsync_When_CategoryFound_Then_ReturnsView()
     {
         var category = CreateCategory("Networking");
-        var currentUser = Substitute.For<ICurrentUser>();
+        var currentUser = Substitute.For<ICurrentUserProvider>();
         var contentful = Substitute.For<IContentfulService>();
         var slug = "networking";
         var sut = CreateServiceUnderTest(contentful: contentful, currentUser: currentUser);
@@ -725,11 +725,7 @@ public class PagesViewBuilderTests
             }
         );
         page.RelatedActions.Add(
-            new RelatedActionEntry
-            {
-                Title = "Print recommendations",
-                Url = "/networking/print",
-            }
+            new RelatedActionEntry { Title = "Print recommendations", Url = "/networking/print" }
         );
 
         var category = CreateCategory(categoryTitle);

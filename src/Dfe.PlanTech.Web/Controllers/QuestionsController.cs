@@ -13,6 +13,7 @@ public class QuestionsController : BaseController<QuestionsController>
     public const string Controller = "Questions";
 
     public const string GetQuestionBySlugAction = "GetQuestionBySlug";
+    public const string GetContinueSelfAssessmentAction = "GetContinueSelfAssessmentPage";
 
     private readonly IQuestionsViewBuilder _questionsViewBuilder;
 
@@ -51,7 +52,6 @@ public class QuestionsController : BaseController<QuestionsController>
     }
 
     [LogInvalidModelState]
-    [ValidateMatSelected]
     [HttpGet("{categorySlug}/{sectionSlug}/self-assessment", Name = "GetInterstitialPage")]
     public async Task<IActionResult> GetInterstitialPage(string categorySlug, string sectionSlug)
     {

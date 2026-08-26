@@ -53,6 +53,7 @@ public static class ServiceCollectionExtensions
             .AddScoped<ISubmissionRepository, SubmissionRepository>()
             .AddScoped<IUserRepository, UserRepository>()
             .AddScoped<IUserSettingsRepository, UserSettingsRepository>()
-            .AddScoped<IUserActionRepository, UserActionRepository>();
+            .AddScoped<IUserActionRepository, UserActionRepository>()
+            .AddScoped<IUserContentViewRepository, UserContentViewRepository>();
     }
 }

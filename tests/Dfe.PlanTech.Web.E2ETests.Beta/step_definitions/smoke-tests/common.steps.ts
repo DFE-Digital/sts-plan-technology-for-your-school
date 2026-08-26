@@ -60,6 +60,13 @@ Then('I should see the question heading {string}', async function (expectedHeadi
   await expect(heading).toHaveText(expectedHeading);
 });
 
+Then('I should see the h1 fieldset heading {string}', async function (expectedHeading: string) {
+  const heading = this.page.locator('h1.govuk-fieldset__heading');
+  await expect(heading).toBeVisible();
+  await expect(heading).toHaveText(expectedHeading);
+});
+
+
 Then('I should see a subheading with the text {string}', async function (text: string) {
   const heading = this.page.locator(`h2:has-text("${text}")`);
   await expect(heading).toBeVisible();
@@ -307,3 +314,16 @@ Then('I should see a confirmation panel saying {string}', async function (expect
   await expect(panelTitle).toBeVisible();
   await expect(panelTitle).toHaveText(expectedText);
 });
+
+
+When(
+  'I click the link to view the recommendations for {string}',
+  async function (categoryName: string) {
+    await this.page
+      .getByRole('link', {
+        name: `View the recommendations for ${categoryName}`,
+        exact: true,
+      })
+      .click();
+  }
+);

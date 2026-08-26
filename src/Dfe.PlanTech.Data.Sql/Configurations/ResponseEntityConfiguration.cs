@@ -8,18 +8,19 @@ internal class ResponseEntityConfiguration : IEntityTypeConfiguration<ResponseEn
 {
     public void Configure(EntityTypeBuilder<ResponseEntity> builder)
     {
-        builder.HasKey(response => response.Id);
+        builder.ToTable("response", "dbo");
         builder.ToTable(tb => tb.HasTrigger("tr_response"));
-        builder
-            .Property(response => response.DateCreated)
-            .HasColumnType("datetime")
-            .ValueGeneratedOnAdd();
-        builder
-            .Property(submission => submission.DateLastUpdated)
-            .HasColumnType("datetime")
-            .HasDefaultValue();
-        builder.Property(b => b.UserActionId)
-               .HasColumnName("userActionId")
-               .IsRequired(false);
+
+        builder.HasKey(response => response.Id);
+
+        builder.Property(x => x.Id).ValueGeneratedOnAdd().IsRequired();
+        builder.Property(x => x.UserId).IsRequired();
+        builder.Property(x => x.SubmissionId).IsRequired();
+        builder.Property(x => x.QuestionId).IsRequired();
+        builder.Property(x => x.AnswerId).IsRequired();
+        builder.Property(x => x.DateCreated).ValueGeneratedOnAdd();
+        builder.Property(x => x.DateLastUpdated).HasDefaultValue();
+        builder.Property(x => x.UserEstablishmentId).IsRequired(false);
+        builder.Property(x => x.UserActionId).IsRequired(false);
     }
 }

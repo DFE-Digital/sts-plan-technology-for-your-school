@@ -23,7 +23,6 @@ Feature: Multi Category Landing Page
     @clear-data-school
     Scenario: Completing one topic on a multi-topic category shows the correct content
       Given I start a test assessment on "Category Two" category "Category Two Section One" section with answers "4, 1, 1"
-      Then I should see the confirmation panel for "Category Two Section One"
       And I am on the "category-two" page
       Then I should see the page heading "Category Two"
       Then I should see the "completed" section "Category Two Section One" with description "" and link href "/category-two/category-two-section-one/view-answers"
