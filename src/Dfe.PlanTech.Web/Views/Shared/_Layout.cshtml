@@ -62,7 +62,8 @@
                     "Questions", new HashSet<string>(
                         [
                             QuestionsController.GetQuestionBySlugAction,
-                            nameof(QuestionsController.SubmitAnswer)
+                            nameof(QuestionsController.SubmitAnswer),
+                            nameof(QuestionsController.GetContinueSelfAssessment)
                         ],
                         StringComparer.OrdinalIgnoreCase)
                 },
