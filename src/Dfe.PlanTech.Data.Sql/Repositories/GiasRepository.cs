@@ -12,20 +12,12 @@ public class GiasRepository(PlanTechDbContext dbContext) : IGiasRepository
     public Task<GiasEstablishmentEntity?> GetSingleAcademySchool(int groupUid)
     {
         return _db
-            .GiasEstablishmentGroups.Where(e => e.GroupUid == groupUid)
-            .Join(
-                _db.GiasGroupMemberships,
-                establishmentGroup => establishmentGroup.GroupUid,
-                groupMembership => groupMembership.GroupUid,
-                (establishmentGroup, groupMembership) => groupMembership
+            .GiasEstablishmentGroups.Where(eg =>
+                eg.GroupUid == groupUid && eg.GroupStatusCode.Equals("OPEN")
             )
-            .Join(
-                _db.GiasEstablishments,
-                groupMembership => groupMembership.Urn,
-                establishment => establishment.Urn,
-                (groupMembership, establishment) => establishment
-            )
-            .Include(establishment => establishment.TypeOfEstablishment)
+            .SelectMany(eg => eg.GroupMemberships)
+            .SelectMany(gm => gm.Establishments)
+            .Include(e => e.TypeOfEstablishment)
             .SingleOrDefaultAsync();
     }
 }

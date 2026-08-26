@@ -27,6 +27,6 @@ internal class GiasEstablishmentEntityConfiguration
             .HasOne(e => e.TypeOfEstablishment)
             .WithMany()
             .HasForeignKey(e => e.TypeOfEstablishmentCode)
-            .HasPrincipalKey(toe => toe.TypeOfEstablishmentCode);
+            .IsRequired(false);
     }
 }

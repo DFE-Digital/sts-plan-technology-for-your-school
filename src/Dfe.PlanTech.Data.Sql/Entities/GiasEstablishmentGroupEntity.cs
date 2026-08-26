@@ -14,7 +14,7 @@ public class GiasEstablishmentGroupEntity
     public string GroupName { get; init; } = null!;
 
     [Required]
-    public int GroupStatusCode { get; init; }
+    public string GroupStatusCode { get; init; } = null!;
 
     [Required]
     public int GroupTypeCode { get; init; }
@@ -23,6 +23,8 @@ public class GiasEstablishmentGroupEntity
     public DateTime SyncedAt { get; set; }
 
     public string? Ukprn { get; set; } = null!;
+
+    public IEnumerable<GiasGroupMembershipEntity> GroupMemberships { get; set; } = [];
 
     public SqlGiasEstablishmentGroupDto AsDto()
     {

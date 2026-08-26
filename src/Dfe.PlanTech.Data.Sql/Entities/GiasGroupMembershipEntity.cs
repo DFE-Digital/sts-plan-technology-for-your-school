@@ -17,6 +17,10 @@ public class GiasGroupMembershipEntity
     [Required]
     public DateTime SyncedAt { get; set; }
 
+    public GiasEstablishmentGroupEntity EstablishmentGroup { get; set; } = null!;
+
+    public IEnumerable<GiasEstablishmentEntity> Establishments { get; set; } = [];
+
     public SqlGiasGroupMembershipDto AsDto()
     {
         return new SqlGiasGroupMembershipDto

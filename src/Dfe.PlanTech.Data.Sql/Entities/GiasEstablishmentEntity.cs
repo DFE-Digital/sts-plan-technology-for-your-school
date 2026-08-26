@@ -24,8 +24,7 @@ public class GiasEstablishmentEntity
     [Required]
     public int PhaseCode { get; init; }
 
-    [Required]
-    public int TypeOfEstablishmentCode { get; init; }
+    public int? TypeOfEstablishmentCode { get; init; }
 
     public GiasTypeOfEstablishmentEntity? TypeOfEstablishment { get; init; }
 
@@ -34,6 +33,8 @@ public class GiasEstablishmentEntity
 
     [Required]
     public DateTime SyncedAt { get; init; }
+
+    public GiasGroupMembershipEntity? GroupMembership { get; init; }
 
     public SqlGiasEstablishmentDto AsDto()
     {
