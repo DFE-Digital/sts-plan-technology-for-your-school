@@ -47,8 +47,9 @@ public static class ServiceCollectionExtensions
                 EstablishmentRecommendationHistoryRepository
             >()
             .AddScoped<IEstablishmentRepository, EstablishmentRepository>()
-            .AddScoped<ISignInRepository, SignInRepository>()
+            .AddScoped<IGiasRepository, GiasRepository>()
             .AddScoped<IRecommendationRepository, RecommendationRepository>()
+            .AddScoped<ISignInRepository, SignInRepository>()
             .AddScoped<IStoredProcedureRepository, StoredProcedureRepository>()
             .AddScoped<ISubmissionRepository, SubmissionRepository>()
             .AddScoped<IUserRepository, UserRepository>()

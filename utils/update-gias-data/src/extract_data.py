@@ -115,6 +115,7 @@ def extract_gias_data() -> GiasData:
     group_types = _group_types(grp)
     local_authorities = _local_authorities(edu)
     phases = _phases(edu)
+    types_of_establishment = _types_of_establishment(edu)
 
     logger.info("Extracted data - establishments:%d", len(establishments))
     logger.info("Extracted data - establishmentGroups:%d", len(establishment_groups))
@@ -128,7 +129,10 @@ def extract_gias_data() -> GiasData:
     logger.info("Extracted data - groupStatuses:%d", len(group_statuses))
     logger.info("Extracted data - groupTypes:%d", len(group_types))
     logger.info("Extracted data - localAuthorities:%d", len(local_authorities))
-    logger.info("Extracted data - phases:%d\n", len(phases))
+    logger.info("Extracted data - phases:%d", len(phases))
+    logger.info(
+        "Extracted data - typesOfEstablishment:%d\n", len(types_of_establishment)
+    )
 
     valid_urns = set(establishments["urn"].dropna())
     valid_group_uids = set(establishment_groups["groupUid"].dropna())
@@ -186,6 +190,7 @@ def extract_gias_data() -> GiasData:
         genders=genders,
         local_authorities=local_authorities,
         phases=phases,
+        types_of_establishment=types_of_establishment,
     )
 
 
@@ -242,6 +247,18 @@ def _phases(edu: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def _types_of_establishment(edu: pd.DataFrame) -> pd.DataFrame:
+    return _lookup(
+        edu,
+        "TypeOfEstablishment (code)",
+        "typeOfEstablishmentCode",
+        True,
+        "TypeOfEstablishment (name)",
+        "typeOfEstablishmentName",
+        blank_replacement="Unknown",
+    )
+
+
 # ---------------------------------------------------------------------------
 # Lookup tables - groups
 # ---------------------------------------------------------------------------
@@ -287,6 +304,7 @@ def _establishments(edu: pd.DataFrame) -> pd.DataFrame:
         "Gender (code)": "genderCode",
         "LA (code)": "localAuthorityCode",
         "PhaseOfEducation (code)": "phaseCode",
+        "TypeOfEstablishment (code)": "typeOfEstablishmentCode",
     }
     out = edu[list(cols)].rename(columns=cols).copy()
 
@@ -299,6 +317,7 @@ def _establishments(edu: pd.DataFrame) -> pd.DataFrame:
         "genderCode",
         "localAuthorityCode",
         "phaseCode",
+        "typeOfEstablishmentCode",
     ):
         out[col] = _coerce_int(out[col])
 
@@ -310,7 +329,7 @@ def _establishments(edu: pd.DataFrame) -> pd.DataFrame:
         )
 
     # Zero → None for non-URN numeric columns
-    for col in ["uprn", "ukprn", "establishmentNumber"]:
+    for col in ["uprn", "ukprn", "establishmentNumber", "typeOfEstablishmentCode"]:
         out[col] = out[col].where(out[col] > 0, other=None)
 
     return out.dropna(subset=["urn"]).reset_index(drop=True)

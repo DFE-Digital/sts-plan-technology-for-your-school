@@ -23,7 +23,7 @@ _TEST_GROUP = pd.DataFrame(
         {
             "groupUid": 99999,
             "groupId": None,
-            "ukprn": None,
+            "ukprn": "00000046",
             "groupName": "DSI TEST Multi-Academy Trust (010)",
             "groupStatusCode": "OPEN",
             "groupTypeCode": 6,
@@ -301,6 +301,20 @@ def _merge_phases(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merged phase")
 
 
+def _merge_types_of_establishment(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging type of establishment lookup")
+    _merge_lookup(
+        cur,
+        "#TOE",
+        "gias.typeOfEstablishment",
+        "typeOfEstablishmentCode",
+        "INT",
+        ["typeOfEstablishmentName"],
+        df,
+    )
+    logger.info("Merged type of establishment")
+
+
 def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     cur.execute("""
         CREATE TABLE #Est (
@@ -312,12 +326,13 @@ def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
             establishmentStatusCode INT NOT NULL,
             genderCode INT NOT NULL,
             localAuthorityCode INT NOT NULL,
-            phaseCode INT NOT NULL
+            phaseCode INT NOT NULL,
+            typeOfEstablishmentCode INT NULL
         )
     """)
     _bulk_insert(
         cur,
-        "INSERT INTO #Est VALUES (" + ",".join(["?"] * 9) + ")",
+        "INSERT INTO #Est VALUES (" + ",".join(["?"] * 10) + ")",
         _params(df),
         "#Est",
     )
@@ -333,7 +348,8 @@ def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
             genderCode = src.genderCode,
             localAuthorityCode = src.localAuthorityCode,
             phaseCode = src.phaseCode,
-            syncedAt = SYSUTCDATETIME()
+            syncedAt = SYSUTCDATETIME(),
+            typeOfEstablishmentCode = src.typeOfEstablishmentCode
         WHEN NOT MATCHED THEN INSERT (
             urn,
             uprn,
@@ -343,7 +359,8 @@ def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
             establishmentStatusCode,
             genderCode,
             localAuthorityCode,
-            phaseCode
+            phaseCode,
+            typeOfEstablishmentCode
         ) VALUES (
             src.urn,
             src.uprn,
@@ -353,7 +370,8 @@ def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
             src.establishmentStatusCode,
             src.genderCode,
             src.localAuthorityCode,
-            src.phaseCode
+            src.phaseCode,
+            src.typeOfEstablishmentCode
         );
     """)
     cur.execute("DROP TABLE #Est")
@@ -515,6 +533,7 @@ def update_database(
         _merge_group_types(cur, data.group_types)
         _merge_local_authorities(cur, data.local_authorities)
         _merge_phases(cur, data.phases)
+        _merge_types_of_establishment(cur, data.types_of_establishment)
 
         # Core entities
         _merge_establishments(cur, data.establishments)
