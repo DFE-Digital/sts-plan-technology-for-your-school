@@ -76,7 +76,8 @@ def _lookup(
     out.columns = [output_code_col, output_name_col]
 
     return (
-        out.dropna(subset=[output_name_col])
+        out.dropna(subset=[output_code_col])
+        .dropna(subset=[output_name_col])
         .drop_duplicates(subset=[output_code_col])
         .reset_index(drop=True)
     )

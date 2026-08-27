@@ -146,7 +146,7 @@ ADD sixthFormStatusCode INT NOT NULL
     FOREIGN KEY (sixthFormStatusCode) REFERENCES gias.sixthFormStatus (sixthFormStatusCode);
 
 ALTER TABLE gias.establishment
-ADD trustCode INT NOT NULL
+ADD trustCode INT NULL
     CONSTRAINT FK_giasEstablishment_trust
     FOREIGN KEY (trustCode) REFERENCES gias.trust (trustCode);
 
@@ -160,6 +160,7 @@ ADD urbanRuralCode NVARCHAR(8) NOT NULL
     CONSTRAINT FK_giasEstablishment_urbanRuralClassification
     FOREIGN KEY (urbanRuralCode) REFERENCES gias.urbanRuralClassification (urbanRuralCode);
 
+GO
 -- --------------------------------------------------------
 -- Indexes
 -- --------------------------------------------------------

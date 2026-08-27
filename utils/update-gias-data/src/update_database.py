@@ -433,7 +433,7 @@ def _merge_trusts(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     _merge_lookup(
         cur,
         "#Trusts",
-        "gias.trusts",
+        "gias.trust",
         "trustCode",
         "INT",
         ["trustName"],
@@ -522,27 +522,27 @@ def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
             ukprn INT,
             establishmentNumber INT,
             establishmentName NVARCHAR(255),
-            administrativeDistrictCode NVARCHAR(20),
-            administrativeWardCode NVARCHAR(20),
+            administrativeWardCode NVARCHAR(16),
             admissionsPolicyCode INT,
+            administrativeDistrictCode NVARCHAR(16),
             establishmentStatusCode INT NOT NULL,
             establishmentTypeGroupCode INT,
             genderCode INT NOT NULL,
-            governmentOfficeRegionCode NVARCHAR(10),
+            governmentOfficeRegionCode NVARCHAR(4),
             localAuthorityCode INT NOT NULL,
-            parliamentaryConstituencyCode NVARCHAR(20),
+            parliamentaryConstituencyCode NVARCHAR(16),
             phaseCode INT NOT NULL,
             religiousCharacterCode INT,
             sixthFormStatusCode INT,
             trustCode INT,
             trustSchoolFlagCode INT,
             typeOfEstablishmentCode INT,
-            urbanRuralCode NVARCHAR(10)
+            urbanRuralCode NVARCHAR(8)
         )
     """)
     _bulk_insert(
         cur,
-        "INSERT INTO #Est VALUES (" + ",".join(["?"] * 20) + ")",
+        "INSERT INTO #Est VALUES (" + ",".join(["?"] * 21) + ")",
         _params(df),
         "#Est",
     )

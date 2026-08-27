@@ -24,7 +24,9 @@ sqlcmd_cmd=(/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$MSSQL_SA_PA
 if ! "${sqlcmd_cmd[@]}" -Q "SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'establishmentGroup'" | grep -q 1; then
   for script in \
     /usr/src/app/src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2026/20260519_0930_AddGIASTables.sql \
-    /usr/src/app/src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2026/20260521_1415_AddGIASLinksTable.sql; do
+    /usr/src/app/src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2026/20260521_1415_AddGIASLinksTable.sql \
+    /usr/src/app/src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2026/20260803_1545_AddGiasTypesOfEstablishment.sql \
+    /usr/src/app/src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2026/20260827_1045_AddMoreGIASTables.sql; do
     echo "Applying $(basename "$script")"
     "${sqlcmd_cmd[@]}" -i "$script"
   done
