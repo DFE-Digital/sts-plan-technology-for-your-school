@@ -7,7 +7,7 @@ services:
       MSSQL_SA_PASSWORD: 'Dev_Password1!'
       MSSQL_PID: 'Developer'
     ports:
-      - '1433:1433'
+      - '1434:1433'
     volumes:
       - ./init-db.sh:/usr/local/bin/init-db.sh:ro
       - ../../src:/usr/src/app/src:ro

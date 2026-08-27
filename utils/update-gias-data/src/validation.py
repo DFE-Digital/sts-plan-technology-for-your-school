@@ -54,16 +54,31 @@ MAX_CHANGE_PCT = 0.10
 MIN_CHANGE_ABS = 500
 
 REQUIRED_TABLES: tuple[str, ...] = (
+    # Core
     "gias.establishment",
     "gias.establishmentGroup",
     "gias.groupMembership",
+    "gias.links",
+    # Establishment lookups
+    "gias.administrativeDistrict",
+    "gias.administrativeWard",
+    "gias.admissionsPolicy",
     "gias.establishmentStatus",
+    "gias.establishmentTypeGroup",
     "gias.gender",
+    "gias.governmentOfficeRegion",
+    "gias.localAuthority",
+    "gias.parliamentaryConstituency",
+    "gias.phase",
+    "gias.religiousCharacter",
+    "gias.sixthFormStatus",
+    "gias.trust",
+    "gias.trustSchoolFlag",
+    "gias.typeOfEstablishment",
+    "gias.urbanRuralClassification",
+    # Group lookups
     "gias.groupStatus",
     "gias.groupType",
-    "gias.links",
-    "gias.localAuthority",
-    "gias.phase",
 )
 
 
@@ -111,10 +126,21 @@ def validate_structural_integrity(data: GiasData) -> None:
         [
             "urn",
             "establishmentName",
+            "administrativeDistrictCode",
+            "administrativeWardCode",
+            "admissionsPolicyCode",
             "establishmentStatusCode",
+            "establishmentTypeGroupCode",
             "genderCode",
+            "governmentOfficeRegionCode",
             "localAuthorityCode",
+            "parliamentaryConstituencyCode",
             "phaseCode",
+            "religiousCharacterCode",
+            "sixthFormStatusCode",
+            "trustSchoolFlagCode",
+            "typeOfEstablishmentCode",
+            "urbanRuralCode",
         ],
         "establishments",
     )
