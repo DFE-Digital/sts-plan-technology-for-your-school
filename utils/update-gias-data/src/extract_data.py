@@ -559,12 +559,6 @@ def _establishments(edu: pd.DataFrame) -> pd.DataFrame:
             f"Found {blank_name_count} rows with blank establishment name. Cannot proceed."
         )
 
-    # Change zero → None for non-URN numeric columns
-    for col in int_cols:
-        if col == "urn":
-            continue
-        out[col] = out[col].where(out[col] > 0, other=None)
-
     return out.dropna(subset=["urn"]).reset_index(drop=True)
 
 
