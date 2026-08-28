@@ -21,15 +21,19 @@ done
 
 sqlcmd_cmd=(/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$MSSQL_SA_PASSWORD" -d GIASData)
 
-if ! "${sqlcmd_cmd[@]}" -Q "SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'establishmentGroup'" | grep -q 1; then
+"${sqlcmd_cmd[@]}" -Q "SET QUOTED_IDENTIFIER ON;"
+
+if ! "${sqlcmd_cmd[@]}" -Q "SELECT 1 FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = 'establishment'" | grep -q 1; then
   for script in \
     /usr/src/app/src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2026/20260519_0930_AddGIASTables.sql \
     /usr/src/app/src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2026/20260521_1415_AddGIASLinksTable.sql \
     /usr/src/app/src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2026/20260803_1545_AddGiasTypesOfEstablishment.sql \
     /usr/src/app/src/Dfe.PlanTech.DatabaseUpgrader/Scripts/2026/20260827_1045_AddMoreGIASTables.sql; do
-    echo "Applying $(basename "$script")"
-    "${sqlcmd_cmd[@]}" -i "$script"
+    echo "Applying $(basename "$script")..."
+    { echo "SET QUOTED_IDENTIFIER ON;"; echo "GO"; cat "$script"; } | "${sqlcmd_cmd[@]}"
   done
 fi
+
+echo "All scripts applied."
 
 wait "$sqlserver_pid"

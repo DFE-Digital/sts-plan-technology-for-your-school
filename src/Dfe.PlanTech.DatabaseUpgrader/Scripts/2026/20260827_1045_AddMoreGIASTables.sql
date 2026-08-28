@@ -166,18 +166,15 @@ GO
 -- --------------------------------------------------------
 
 CREATE INDEX IX_giasEstablishment_administrativeDistrict
-ON gias.establishment (administrativeDistrictCode)
-WHERE administrativeDistrictCode IS NOT NULL;
+ON gias.establishment (administrativeDistrictCode);
 GO
 
 CREATE INDEX IX_giasEstablishment_establishmentTypeGroup
-ON gias.establishment (establishmentTypeGroupCode)
-WHERE establishmentTypeGroupCode IS NOT NULL;
+ON gias.establishment (establishmentTypeGroupCode);
 GO
 
 CREATE INDEX IX_giasEstablishment_governmentOfficeRegion
-ON gias.establishment (governmentOfficeRegionCode)
-WHERE governmentOfficeRegionCode IS NOT NULL;
+ON gias.establishment (governmentOfficeRegionCode);
 GO
 
 CREATE INDEX IX_giasEstablishment_trust
@@ -185,8 +182,13 @@ ON gias.establishment (trustCode)
 WHERE trustCode IS NOT NULL;
 GO
 
--- Create missing index on typeOfEstablishment
+-- Correction to column definition and addition of missing
+-- index for typeOfEstablishmentCode
+ALTER TABLE gias.establishment
+ALTER COLUMN typeOfEstablishmentCode INT NOT NULL;
+GO
+
+-- Working
 CREATE INDEX IX_giasEstablishment_typeOfEstablishment
-ON gias.establishment (typeOfEstablishment)
-WHERE typeOfEstablishment IS NOT NULL;
+ON gias.establishment (typeOfEstablishmentCode)
 GO
