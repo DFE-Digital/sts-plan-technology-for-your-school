@@ -12,6 +12,7 @@ class GiasData:
     genders: DataFrame
     local_authorities: DataFrame
     phases: DataFrame
+    types_of_establishment: DataFrame
 
     # Core entities
     establishments: DataFrame
