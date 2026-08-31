@@ -10,7 +10,7 @@
         <PackageReference Include="Azure.Identity" Version="1.21.0" />
         <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.20.2" />
         <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.3.12" />
-        <PackageReference Include="Microsoft.Extensions.Azure" Version="1.14.0" />
+        <PackageReference Include="Microsoft.Extensions.Azure" Version="1.14.1" />
         <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.11" />
     </ItemGroup>
 
