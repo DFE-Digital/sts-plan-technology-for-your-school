@@ -29,8 +29,8 @@
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="AspNetCore.HealthChecks.SqlServer" Version="9.0.0" />
-        <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.5.1" />
-        <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.6.3" />
+        <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.5.2" />
+        <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.6.4" />
         <PackageReference Include="Azure.Identity" Version="1.21.0" />
         <PackageReference Include="GovUk.Frontend.AspNetCore" Version="3.5.1" />
         <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.23.0" />
