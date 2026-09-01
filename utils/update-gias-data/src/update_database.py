@@ -36,29 +36,66 @@ _TEST_ESTABLISHMENTS = pd.DataFrame(
         {
             "urn": 900006,
             "establishmentName": "DSI TEST Establishment (001) Community School (01)",
+            "administrativeDistrictCode": 9999,
+            "administrativeWardCode": 999999,
+            "admissionsPolicyCode": 9,
             "establishmentStatusCode": 1,
+            "establishmentTypeGroupCode": 13,
             "genderCode": 3,
+            "governmentOfficeRegionCode": "B",
             "localAuthorityCode": 352,
+            "parliamentaryConstituencyCode": 999,
             "phaseCode": 7,
+            "religiousCharacterCode": 0,
+            "sixthFormStatusCode": 0,
+            "trustCode": None,
+            "trustSchoolFlagCode": 0,
+            "typeOfEstablishmentCode": 27,
+            "urbanRuralCode": "A1",
         },
         {
             "urn": 900007,
             "establishmentName": "DSI TEST Establishment (001) Foundation School (05)",
+            "administrativeDistrictCode": 9999,
+            "administrativeWardCode": 999999,
+            "admissionsPolicyCode": 9,
             "establishmentStatusCode": 1,
+            "establishmentTypeGroupCode": 13,
             "genderCode": 3,
+            "governmentOfficeRegionCode": "B",
             "localAuthorityCode": 352,
+            "parliamentaryConstituencyCode": 999,
             "phaseCode": 7,
+            "religiousCharacterCode": 0,
+            "sixthFormStatusCode": 0,
+            "trustCode": None,
+            "trustSchoolFlagCode": 0,
+            "typeOfEstablishmentCode": 27,
+            "urbanRuralCode": "A1",
         },
         {
             "urn": 900008,
             "establishmentName": "DSI TEST Establishment (001) Miscellaneous (27)",
+            "administrativeDistrictCode": 9999,
+            "administrativeWardCode": 999999,
+            "admissionsPolicyCode": 9,
             "establishmentStatusCode": 1,
+            "establishmentTypeGroupCode": 13,
             "genderCode": 3,
+            "governmentOfficeRegionCode": "B",
             "localAuthorityCode": 352,
+            "parliamentaryConstituencyCode": 999,
             "phaseCode": 7,
+            "religiousCharacterCode": 0,
+            "sixthFormStatusCode": 0,
+            "trustCode": None,
+            "trustSchoolFlagCode": 0,
+            "typeOfEstablishmentCode": 27,
+            "urbanRuralCode": "A1",
         },
     ]
 )
+
 
 _TEST_MEMBERSHIP = pd.DataFrame(
     [
@@ -237,6 +274,48 @@ def _merge_lookup(
 # ---------------------------------------------------------------------------
 
 
+def _merge_administrative_districts(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging administrative district lookup")
+    _merge_lookup(
+        cur,
+        "#AdminDist",
+        "gias.administrativeDistrict",
+        "administrativeDistrictCode",
+        "NVARCHAR(20)",
+        ["administrativeDistrictName"],
+        df,
+    )
+    logger.info("Merged administrative district")
+
+
+def _merge_administrative_wards(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging administrative ward lookup")
+    _merge_lookup(
+        cur,
+        "#AdminWard",
+        "gias.administrativeWard",
+        "administrativeWardCode",
+        "NVARCHAR(20)",
+        ["administrativeWardName"],
+        df,
+    )
+    logger.info("Merged administrative ward")
+
+
+def _merge_admissions_policies(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging admissions policy lookup")
+    _merge_lookup(
+        cur,
+        "#AdmPolicy",
+        "gias.admissionsPolicy",
+        "admissionsPolicyCode",
+        "INT",
+        ["admissionsPolicyName"],
+        df,
+    )
+    logger.info("Merged admissions policy")
+
+
 def _merge_establishment_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merging establishment status lookup")
     _merge_lookup(
@@ -251,12 +330,158 @@ def _merge_establishment_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merged establishment status")
 
 
+def _merge_establishment_type_groups(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging establishment type group lookup")
+    _merge_lookup(
+        cur,
+        "#EstTypeGrp",
+        "gias.establishmentTypeGroup",
+        "establishmentTypeGroupCode",
+        "INT",
+        ["establishmentTypeGroupName"],
+        df,
+    )
+    logger.info("Merged establishment type group")
+
+
 def _merge_genders(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merging gender lookup")
     _merge_lookup(
         cur, "#Gender", "gias.gender", "genderCode", "INT", ["genderName"], df
     )
     logger.info("Merged gender")
+
+
+def _merge_government_office_regions(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging government office region lookup")
+    _merge_lookup(
+        cur,
+        "#GOR",
+        "gias.governmentOfficeRegion",
+        "governmentOfficeRegionCode",
+        "NVARCHAR(10)",
+        ["governmentOfficeRegionName"],
+        df,
+    )
+    logger.info("Merged government office region")
+
+
+def _merge_local_authorities(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging local authority lookup")
+    _merge_lookup(
+        cur,
+        "#LA",
+        "gias.localAuthority",
+        "localAuthorityCode",
+        "INT",
+        ["localAuthorityName"],
+        df,
+    )
+    logger.info("Merged local authority")
+
+
+def _merge_parliamentary_constituencies(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging parliamentary constituency lookup")
+    _merge_lookup(
+        cur,
+        "#ParlConst",
+        "gias.parliamentaryConstituency",
+        "parliamentaryConstituencyCode",
+        "NVARCHAR(20)",
+        ["parliamentaryConstituencyName"],
+        df,
+    )
+    logger.info("Merged parliamentary constituency")
+
+
+def _merge_phases(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging phase lookup")
+    _merge_lookup(cur, "#Phase", "gias.phase", "phaseCode", "INT", ["phaseName"], df)
+    logger.info("Merged phase")
+
+
+def _merge_religious_characters(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging religious character lookup")
+    _merge_lookup(
+        cur,
+        "#RelChar",
+        "gias.religiousCharacter",
+        "religiousCharacterCode",
+        "INT",
+        ["religiousCharacterName"],
+        df,
+    )
+    logger.info("Merged religious character")
+
+
+def _merge_sixth_form_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging sixth form status lookup")
+    _merge_lookup(
+        cur,
+        "#SixthForm",
+        "gias.sixthFormStatus",
+        "sixthFormStatusCode",
+        "INT",
+        ["sixthFormStatusName"],
+        df,
+    )
+    logger.info("Merged sixth form status")
+
+
+def _merge_trusts(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging trusts lookup")
+    _merge_lookup(
+        cur,
+        "#Trusts",
+        "gias.trust",
+        "trustCode",
+        "INT",
+        ["trustName"],
+        df,
+    )
+    logger.info("Merged trusts")
+
+
+def _merge_trust_school_flags(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging trust school flag lookup")
+    _merge_lookup(
+        cur,
+        "#TrustFlag",
+        "gias.trustSchoolFlag",
+        "trustSchoolFlagCode",
+        "INT",
+        ["trustSchoolFlagName"],
+        df,
+    )
+    logger.info("Merged trust school flag")
+
+
+def _merge_types_of_establishment(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging type of establishment lookup")
+    _merge_lookup(
+        cur,
+        "#TypeEst",
+        "gias.typeOfEstablishment",
+        "typeOfEstablishmentCode",
+        "INT",
+        ["typeOfEstablishmentName"],
+        df,
+    )
+    logger.info("Merged type of establishment")
+
+
+def _merge_urban_rural_classifications(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    logger.info("Merging urban/rural classification lookup")
+    _merge_lookup(
+        cur,
+        "#UrbanRural",
+        "gias.urbanRuralClassification",
+        "urbanRuralCode",
+        "NVARCHAR(10)",
+        ["urbanRuralName"],
+        df,
+    )
+    logger.info("Merged urban/rural classification")
 
 
 def _merge_group_statuses(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
@@ -281,41 +506,15 @@ def _merge_group_types(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
     logger.info("Merged groupType")
 
 
-def _merge_local_authorities(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
-    logger.info("Merging local authority lookup")
-    _merge_lookup(
-        cur,
-        "#LA",
-        "gias.localAuthority",
-        "localAuthorityCode",
-        "INT",
-        ["localAuthorityName"],
-        df,
-    )
-    logger.info("Merged local authority")
-
-
-def _merge_phases(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
-    logger.info("Merging phase lookup")
-    _merge_lookup(cur, "#Phase", "gias.phase", "phaseCode", "INT", ["phaseName"], df)
-    logger.info("Merged phase")
-
-
-def _merge_types_of_establishment(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
-    logger.info("Merging type of establishment lookup")
-    _merge_lookup(
-        cur,
-        "#TOE",
-        "gias.typeOfEstablishment",
-        "typeOfEstablishmentCode",
-        "INT",
-        ["typeOfEstablishmentName"],
-        df,
-    )
-    logger.info("Merged type of establishment")
+# ---------------------------------------------------------------------------
+# Core entity merges
+# ---------------------------------------------------------------------------
 
 
 def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
+    # Column order must match src.classes / extraction.py's _establishments()
+    # output: urn, uprn, ukprn, establishmentNumber, establishmentName, then
+    # every FK lookup code in the order they're assembled there.
     cur.execute("""
         CREATE TABLE #Est (
             urn INT,
@@ -323,16 +522,27 @@ def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
             ukprn INT,
             establishmentNumber INT,
             establishmentName NVARCHAR(255),
+            administrativeWardCode NVARCHAR(16),
+            admissionsPolicyCode INT,
+            administrativeDistrictCode NVARCHAR(16),
             establishmentStatusCode INT NOT NULL,
+            establishmentTypeGroupCode INT,
             genderCode INT NOT NULL,
+            governmentOfficeRegionCode NVARCHAR(4),
             localAuthorityCode INT NOT NULL,
+            parliamentaryConstituencyCode NVARCHAR(16),
             phaseCode INT NOT NULL,
-            typeOfEstablishmentCode INT NULL
+            religiousCharacterCode INT,
+            sixthFormStatusCode INT,
+            trustCode INT,
+            trustSchoolFlagCode INT,
+            typeOfEstablishmentCode INT,
+            urbanRuralCode NVARCHAR(8)
         )
     """)
     _bulk_insert(
         cur,
-        "INSERT INTO #Est VALUES (" + ",".join(["?"] * 10) + ")",
+        "INSERT INTO #Est VALUES (" + ",".join(["?"] * 21) + ")",
         _params(df),
         "#Est",
     )
@@ -344,34 +554,67 @@ def _merge_establishments(cur: pyodbc.Cursor, df: pd.DataFrame) -> None:
             ukprn = src.ukprn,
             establishmentNumber = src.establishmentNumber,
             establishmentName = src.establishmentName,
+            administrativeDistrictCode = src.administrativeDistrictCode,
+            administrativeWardCode = src.administrativeWardCode,
+            admissionsPolicyCode = src.admissionsPolicyCode,
             establishmentStatusCode = src.establishmentStatusCode,
+            establishmentTypeGroupCode = src.establishmentTypeGroupCode,
             genderCode = src.genderCode,
+            governmentOfficeRegionCode = src.governmentOfficeRegionCode,
             localAuthorityCode = src.localAuthorityCode,
+            parliamentaryConstituencyCode = src.parliamentaryConstituencyCode,
             phaseCode = src.phaseCode,
-            syncedAt = SYSUTCDATETIME(),
-            typeOfEstablishmentCode = src.typeOfEstablishmentCode
+            religiousCharacterCode = src.religiousCharacterCode,
+            sixthFormStatusCode = src.sixthFormStatusCode,
+            trustCode = src.trustCode,
+            trustSchoolFlagCode = src.trustSchoolFlagCode,
+            typeOfEstablishmentCode = src.typeOfEstablishmentCode,
+            urbanRuralCode = src.urbanRuralCode,
+            syncedAt = SYSUTCDATETIME()
         WHEN NOT MATCHED THEN INSERT (
             urn,
             uprn,
             ukprn,
             establishmentNumber,
             establishmentName,
+            administrativeDistrictCode,
+            administrativeWardCode,
+            admissionsPolicyCode,
             establishmentStatusCode,
+            establishmentTypeGroupCode,
             genderCode,
+            governmentOfficeRegionCode,
             localAuthorityCode,
+            parliamentaryConstituencyCode,
             phaseCode,
-            typeOfEstablishmentCode
+            religiousCharacterCode,
+            sixthFormStatusCode,
+            trustCode,
+            trustSchoolFlagCode,
+            typeOfEstablishmentCode,
+            urbanRuralCode
         ) VALUES (
             src.urn,
             src.uprn,
             src.ukprn,
             src.establishmentNumber,
             src.establishmentName,
+            src.administrativeDistrictCode,
+            src.administrativeWardCode,
+            src.admissionsPolicyCode,
             src.establishmentStatusCode,
+            src.establishmentTypeGroupCode,
             src.genderCode,
+            src.governmentOfficeRegionCode,
             src.localAuthorityCode,
+            src.parliamentaryConstituencyCode,
             src.phaseCode,
-            src.typeOfEstablishmentCode
+            src.religiousCharacterCode,
+            src.sixthFormStatusCode,
+            src.trustCode,
+            src.trustSchoolFlagCode,
+            src.typeOfEstablishmentCode,
+            src.urbanRuralCode
         );
     """)
     cur.execute("DROP TABLE #Est")
@@ -526,14 +769,27 @@ def update_database(
         _log_proposed_changes(data, counts_before)
 
         # Lookups
+        # These must run before establishments/establishment_groups, since
+        # those tables carry FKs into every one of these lookup tables.
 
+        _merge_administrative_districts(cur, data.administrative_districts)
+        _merge_administrative_wards(cur, data.administrative_wards)
+        _merge_admissions_policies(cur, data.admissions_policies)
         _merge_establishment_statuses(cur, data.establishment_statuses)
+        _merge_establishment_type_groups(cur, data.establishment_type_groups)
         _merge_genders(cur, data.genders)
+        _merge_government_office_regions(cur, data.government_office_regions)
         _merge_group_statuses(cur, data.group_statuses)
         _merge_group_types(cur, data.group_types)
         _merge_local_authorities(cur, data.local_authorities)
+        _merge_parliamentary_constituencies(cur, data.parliamentary_constituencies)
         _merge_phases(cur, data.phases)
+        _merge_religious_characters(cur, data.religious_characters)
+        _merge_sixth_form_statuses(cur, data.sixth_form_statuses)
+        _merge_trusts(cur, data.trusts)
+        _merge_trust_school_flags(cur, data.trust_school_flags)
         _merge_types_of_establishment(cur, data.types_of_establishment)
+        _merge_urban_rural_classifications(cur, data.urban_rural_classifications)
 
         # Core entities
         _merge_establishments(cur, data.establishments)
