@@ -39,7 +39,7 @@ in `/backups/terraform-*.tfvars`.
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >= 1.5.0 |
 | <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) | ~> 2.11 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.37 |
-| <a name="requirement_null"></a> [null](#requirement\_null) | = 3.2.3 |
+| <a name="requirement_null"></a> [null](#requirement\_null) | 3.3.1 |
 | <a name="requirement_random"></a> [random](#requirement\_random) | = 3.6.3 |
 
 ## Providers
