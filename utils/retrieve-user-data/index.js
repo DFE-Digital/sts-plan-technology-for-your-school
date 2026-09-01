@@ -19,6 +19,8 @@ function generateJwt() {
 
 async function processCsv() {
   const token = generateJwt();
+
+  console.log('Using the following JWT for API calls:', token);
   const results = [];
   const promises = [];
 

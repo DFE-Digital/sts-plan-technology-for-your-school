@@ -5,6 +5,10 @@ namespace Dfe.PlanTech.Core.Configuration;
 [ExcludeFromCodeCoverage]
 public sealed class DfeSignInConfiguration
 {
+    public string ApiSecret { get; set; } = null!;
+
+    public string ApiUrl { get; set; } = null!;
+
     public string Authority { get; set; } = null!;
 
     public string MetaDataUrl { get; set; } = null!;

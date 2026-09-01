@@ -54,6 +54,9 @@ jobs:
     name: Create & Publish Image
     uses: ./.github/workflows/build-image.yml
     secrets: inherit
+    permissions:
+      contents: read
+      packages: write
     with:
       branch: ${{ needs.set-env.outputs.branch }}
       checked-out-sha: ${{ needs.set-env.outputs.checked-out-sha }}
@@ -63,11 +66,19 @@ jobs:
     name: Create & Tag Release
     uses: ./.github/workflows/create-tag-release.yml
     secrets: inherit
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      id-token: write
 
   deploy-to-dev:
     name: Deployment to Dev
     needs: [set-env, create-and-publish-image, create-and-tag-release]
     if: needs.set-env.outputs.allow-deploy-to-dev == 'true'
+    permissions:
+      contents: read
+      id-token: write
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -85,6 +96,9 @@ jobs:
     name: Deployment to Test
     needs: [set-env, deploy-to-dev]
     if: needs.set-env.outputs.allow-deploy-to-test == 'true'
+    permissions:
+      contents: read
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -102,6 +116,9 @@ jobs:
     needs: [set-env, deploy-to-test]
     name: Run the visualisation workflow against staging content.
     if: needs.set-env.outputs.allow-deploy-to-staging == 'true'
+    permissions:
+      contents: read
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -116,6 +133,9 @@ jobs:
     needs: [set-env, deploy-to-test]
     name: Deployment to Staging
     if: needs.set-env.outputs.allow-deploy-to-staging == 'true'
+    permissions:
+      contents: read
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
@@ -133,6 +153,9 @@ jobs:
     needs: [set-env, deploy-to-staging]
     name: Deployment to Production
     if: needs.set-env.outputs.allow-deploy-to-production == 'true'
+    permissions:
+      contents: read
+      id-token: write    
     strategy:
       max-parallel: 1
       fail-fast: true
