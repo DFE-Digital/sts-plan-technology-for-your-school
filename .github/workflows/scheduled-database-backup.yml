@@ -2,7 +2,7 @@ name: Scheduled Database Backup
 
 on:
   schedule:
-    - cron: '0 3 * * *' # 3am UTC
+    - cron: '0 4 * * 1'
   workflow_dispatch:
     inputs:
       environment:
@@ -10,7 +10,7 @@ on:
         required: true
         type: choice
         options: ['Dev', 'Tst', 'StagingUnprotected', 'ProductionUnprotected']
-        default: 'Dev'
+        default: 'ProductionUnprotected'
 
 jobs:
   backup_database:
