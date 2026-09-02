@@ -16,8 +16,10 @@ public class GroupWorkflowTests
         Substitute.For<ISubmissionRepository>();
     private readonly IEstablishmentService _establishmentService =
         Substitute.For<IEstablishmentService>();
-    
-    private GroupWorkflow CreateServiceUnderTest() => new(_submissionRepository, _establishmentService);
+    private readonly IEstablishmentRecommendationHistoryRepository _recommendationHistoryRepository =
+        Substitute.For<IEstablishmentRecommendationHistoryRepository>();
+
+    private GroupWorkflow CreateServiceUnderTest() => new(_submissionRepository, _establishmentService, _recommendationHistoryRepository);
 
     private static EstablishmentEntity BuildEstablishment(int id = 1)
     {
@@ -191,7 +193,7 @@ public class GroupWorkflowTests
             OrgName = "testName3"
         };
 
-        var establishmentIds = new int[] { 1, 2, 3 }; 
+        var establishmentIds = new int[] { 1, 2, 3 };
 
         _establishmentService.GetOrCreateEstablishmentAsync("testRef1", "testName1").Returns(establishment1);
         _establishmentService.GetOrCreateEstablishmentAsync("testRef2", "testName2").Returns(establishment2);
@@ -418,7 +420,7 @@ public class GroupWorkflowTests
 
     [Fact]
     public async Task GetGroupSubmissionInformationForSection_ReturnsCorrectSubmissionInfo()
-    { 
+    {
         var sut = CreateServiceUnderTest();
         var sectionId = "sec3";
 
@@ -521,7 +523,7 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_SubmissionRepository_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(null!, _establishmentService));
+        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(null!, _establishmentService, _recommendationHistoryRepository));
 
         Assert.Equal("submissionRepository", exception.ParamName);
     }
@@ -529,8 +531,16 @@ public class GroupWorkflowTests
     [Fact]
     public void Constructor_Throws_ArgumentNullException_When_EstablishmentService_Is_Null()
     {
-        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, null!));
+        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, null!, _recommendationHistoryRepository));
 
         Assert.Equal("establishmentService", exception.ParamName);
+    }
+
+    [Fact]
+    public void Constructor_Throws_ArgumentNullException_When_RecommendationHistoryRepository_Is_Null()
+    {
+        var exception = Assert.Throws<ArgumentNullException>(() => new GroupWorkflow(_submissionRepository, _establishmentService, null!));
+
+        Assert.Equal("recommendationHistoryRepository", exception.ParamName);
     }
 }
