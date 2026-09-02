@@ -1,8 +1,11 @@
-CREATE TABLE gias.typeOfEstablishment (
-    typeOfEstablishmentCode  INT            NOT NULL,
-    typeOfEstablishmentName  NVARCHAR(100)  NOT NULL,
-    CONSTRAINT PK_giasTypeOfEstablishment PRIMARY KEY (typeOfEstablishmentCode)
-);
+IF OBJECT_ID(N'gias.typeOfEstablishment', N'U') IS NULL
+BEGIN
+    CREATE TABLE gias.typeOfEstablishment (
+        typeOfEstablishmentCode  INT            NOT NULL,
+        typeOfEstablishmentName  NVARCHAR(100)  NOT NULL,
+        CONSTRAINT PK_giasTypeOfEstablishment PRIMARY KEY (typeOfEstablishmentCode)
+    );
+END;
 GO
 
 ALTER TABLE gias.establishment
