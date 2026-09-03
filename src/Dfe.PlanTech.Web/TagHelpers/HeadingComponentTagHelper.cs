@@ -24,7 +24,7 @@ public class HeaderComponentTagHelper(ILogger<HeaderComponentTagHelper> logger) 
 
     public bool TryBuildElement(TagHelperOutput output)
     {
-        var tagName = Model!.Tag.ToString().ToLower();
+        var tagName = Model!.Tag.ToString().ToLowerInvariant();
         var classForSize = Model.GetClassForSize();
 
         output.TagName = tagName;

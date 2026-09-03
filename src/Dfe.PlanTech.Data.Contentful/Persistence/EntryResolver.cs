@@ -19,7 +19,7 @@ public class EntryResolver : IContentTypeResolver
     {
         if (
             ContentfulContentTypeConstants.ContentTypeToEntryClassTypeMap.TryGetValue(
-                contentTypeId.ToLower(),
+                contentTypeId.ToLowerInvariant(),
                 out var type
             )
         )

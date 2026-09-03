@@ -50,11 +50,13 @@ public class RecommendationsViewBuilder(
     )
     {
         var establishmentId = await GetActiveEstablishmentIdOrThrowException();
-        var categoryHeaderText =
-            await ContentfulService.GetCategoryHeaderTextBySlugAsync(categorySlug)
+        var category =
+            await ContentfulService.GetCategoryBySlugAsync(categorySlug)
             ?? throw new ContentfulDataUnavailableException(
-                $"Could not find category header text for slug {categorySlug}"
+                $"Could not find category for slug {categorySlug}"
             );
+        var categoryHeaderText = category.Header.Text;
+
         var section =
             await ContentfulService.GetSectionBySlugAsync(sectionSlug, includeLevel: 2)
             ?? throw new ContentfulDataUnavailableException(
