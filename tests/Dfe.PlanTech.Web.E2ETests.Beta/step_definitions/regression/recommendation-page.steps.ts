@@ -120,16 +120,15 @@ Then(
   'I click the print all recommendations link in the related actions for {string}',
   async function (topic: string) {
     const relatedActions = this.page
-      .getByRole('heading', { name: 'Related actions' })
+      .getByRole('heading', { name: 'Related actions', exact: true })
       .locator('..');
 
-    const printLink = relatedActions.getByRole('link', {
-      name: `Print your school's ${topic.toLowerCase()} recommendations`,
-      exact: true,
+    const printAllLink = relatedActions.locator('a[href$="/print-all"]').filter({
+      hasText: `Print your school's ${topic.toLowerCase()} recommendations`,
     });
 
-    await expect(printLink).toBeVisible();
-    await printLink.click();
+    await expect(printAllLink).toBeVisible();
+    await printAllLink.click();
   },
 );
 
