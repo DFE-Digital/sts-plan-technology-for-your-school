@@ -33,22 +33,14 @@ public class SelfAssessmentSummaryViewBuilder(
         string sectionSlug
     )
     {
-        var viewModel = await BuildSelfAssessmentSummaryViewModel(
-            categorySlug,
-            sectionSlug
-        );
+        var viewModel = await BuildSelfAssessmentSummaryViewModel(categorySlug, sectionSlug);
 
         if (CurrentUser.IsMat && viewModel.CompletedSchoolCount == 0)
         {
-            return controller.Redirect(
-                $"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}"
-            );
+            return controller.Redirect($"/groups/{UrlConstants.GroupSelfAssessmentSelectionSlug}");
         }
 
-        return controller.View(
-            SelfAssessmentSummaryViewName,
-            viewModel
-        );
+        return controller.View(SelfAssessmentSummaryViewName, viewModel);
     }
 
     private async Task<SelfAssessmentSummaryViewModel> BuildSelfAssessmentSummaryViewModel(
@@ -106,7 +98,7 @@ public class SelfAssessmentSummaryViewBuilder(
             {
                 LinkText = CurrentUser.IsMat
                     ? organisationName
-                    : $"View the recommendations for {section.Name!.ToLower()}",
+                    : $"View the recommendations for {section.Name!.ToLowerInvariant()}",
 
                 SchoolUrn = CurrentUser.IsMat ? submission.Establishment!.EstablishmentRef : null,
 

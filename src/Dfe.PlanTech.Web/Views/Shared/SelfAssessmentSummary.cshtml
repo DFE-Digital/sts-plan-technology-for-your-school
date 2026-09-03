@@ -9,7 +9,7 @@
     {
         ["topic"] = Model.SectionName,
         ["schoolCount"] = Model.CompletedSchoolCount.ToString() ?? "0",
-        ["category"] = Model.CategoryName.ToLower()
+        ["category"] = Model.CategoryName.ToLowerInvariant()
     };
 
     var schoolSuccessValues = new Dictionary<string, string>

@@ -147,7 +147,6 @@ public class PageModelAuthorisationPolicy(ILogger<PageModelAuthorisationPolicy> 
         var contentfulService = scope.ServiceProvider.GetRequiredService<IContentfulService>();
         var page = await contentfulService.GetPageBySlugAsync(slug);
         httpContext.Items.Add(nameof(PageEntry), page);
-
         return page;
     }
 

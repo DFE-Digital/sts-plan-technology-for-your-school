@@ -35,8 +35,9 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddApplicationProviders(this IServiceCollection services)
     {
         return services
+            .AddScoped<IBannerConditionsContextProvider, BannerConditionsContextProvider>()
             .AddScoped<IMicrocopyProvider, MicrocopyProvider>()
-            .AddScoped<IBannerConditionsContextProvider, BannerConditionsContextProvider>();
+            .AddScoped<IRedirectProvider, RedirectProvider>();
     }
 
     public static IServiceCollection AddApplicationWorkflows(this IServiceCollection services)
