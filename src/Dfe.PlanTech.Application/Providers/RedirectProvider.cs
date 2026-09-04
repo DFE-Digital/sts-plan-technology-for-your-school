@@ -72,8 +72,8 @@ public class RedirectProvider : IRedirectProvider
     {
         try
         {
-            var redirects = await _contentfulService.GetRedirectsAsync();
-            var redirectGroups = redirects
+            var redirectEntries = await _contentfulService.GetRedirectsAsync();
+            var redirectGroups = redirectEntries
                 .SelectMany(r =>
                     r.RedirectFromList.Select(rl => new KeyValuePair<string, string>(
                         rl,
@@ -91,7 +91,7 @@ public class RedirectProvider : IRedirectProvider
                 );
             }
 
-            var redirectDict = redirectGroups
+            var redirects = redirectGroups
                 .Where(rg => rg.Count() == 1)
                 .ToDictionary(
                     rg => rg.Key,
@@ -99,14 +99,14 @@ public class RedirectProvider : IRedirectProvider
                     StringComparer.OrdinalIgnoreCase
                 );
 
-            // Return flattened links (A-B-C --> A-C) and remove circular references
-            return FlattenRedirects(redirectDict);
+            // Return flattened links (A-B-C -> A-C) and remove circular references
+            return FlattenRedirects(redirects);
         }
         catch (Exception ex)
         {
             _logger.LogError(
                 ex,
-                "Failed to build redirect dictionary from Contentful. Not serving redirects."
+                "Failed to build redirect dictionary from Contentful. Will not serve redirects."
             );
             return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         }
@@ -114,78 +114,43 @@ public class RedirectProvider : IRedirectProvider
 
     private enum VisitState
     {
-        InProgress,
+        Seen,
         Resolved,
         Circular,
     }
 
     /// <summary>
     /// Resolves each redirect to its eventual target (A-B-C becomes A-C, B-C)
-    /// and excludes paths which loop back on themselves in any way.
+    /// and excludes paths which loop back on themselves in some way.
     /// </summary>
     private Dictionary<string, string> FlattenRedirects(Dictionary<string, string> redirects)
     {
         var state = new Dictionary<string, VisitState>(StringComparer.OrdinalIgnoreCase);
         var circularPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        var finalTarget = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var targetPaths = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        foreach (var startPath in redirects.Keys)
+        foreach (var fromPath in redirects.Keys)
         {
-            if (state.ContainsKey(startPath))
+            if (state.ContainsKey(fromPath))
             {
                 continue;
             }
 
-            var chain = new List<string>();
-            var currentPath = startPath;
-            var @continue = false;
-
-            while (!@continue && redirects.TryGetValue(currentPath, out var nextPath))
+            var (chain, targetPath) = WalkPath(
+                redirects,
+                state,
+                circularPaths,
+                targetPaths,
+                fromPath
+            );
+            if (targetPath != null)
             {
-                if (state.TryGetValue(currentPath, out var currentState))
+                // Chain ends in a valid target.
+                foreach (var path in chain)
                 {
-                    switch (currentState)
-                    {
-                        // We're back in the current chain.
-                        // Everything before this feeds into a cycle.
-                        // Everything from this point onward is a cycle.
-                        case VisitState.InProgress:
-
-                        // Feeds into a known cycle.
-                        case VisitState.Circular:
-
-                            foreach (var path in chain)
-                            {
-                                state[path] = VisitState.Circular;
-                                circularPaths.Add(path);
-                            }
-                            break;
-
-                        // Chains into a resolved target. Re-use it.
-                        case VisitState.Resolved:
-                            var target = finalTarget[currentPath];
-                            foreach (var node in chain)
-                            {
-                                finalTarget[node] = target;
-                                state[node] = VisitState.Resolved;
-                            }
-                            break;
-                    }
-
-                    @continue = true;
-                    break;
+                    state[path] = VisitState.Resolved;
+                    targetPaths[path] = targetPath;
                 }
-
-                state[currentPath] = VisitState.InProgress;
-                chain.Add(currentPath);
-                currentPath = nextPath;
-            }
-
-            // No next path: chain ends in a valid target.
-            foreach (var node in chain)
-            {
-                finalTarget[node] = currentPath;
-                state[node] = VisitState.Resolved;
             }
         }
 
@@ -197,6 +162,45 @@ public class RedirectProvider : IRedirectProvider
             );
         }
 
-        return finalTarget;
+        return targetPaths;
+    }
+
+    private static (List<string> chain, string? targetPath) WalkPath(
+        Dictionary<string, string> redirects,
+        Dictionary<string, VisitState> state,
+        HashSet<string> circularPaths,
+        Dictionary<string, string> targetPaths,
+        string fromPath
+    )
+    {
+        var chain = new List<string>();
+
+        while (redirects.TryGetValue(fromPath, out var toPath))
+        {
+            if (state.TryGetValue(fromPath, out var currentState))
+            {
+                if (currentState == VisitState.Resolved)
+                {
+                    return (chain, targetPaths[fromPath]);
+                }
+
+                // If the state is Seen or Circular then everything
+                // before this feeds into a cycle, and everything from
+                // this point on is a cycle.
+                foreach (var path in chain)
+                {
+                    state[path] = VisitState.Circular;
+                    circularPaths.Add(path);
+                }
+
+                return (chain, null);
+            }
+
+            state[fromPath] = VisitState.Seen;
+            chain.Add(fromPath);
+            fromPath = toPath;
+        }
+
+        return (chain, fromPath);
     }
 }
