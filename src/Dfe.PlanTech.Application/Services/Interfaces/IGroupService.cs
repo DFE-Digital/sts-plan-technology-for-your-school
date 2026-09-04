@@ -1,3 +1,4 @@
+using Dfe.PlanTech.Core.DataTransferObjects;
 using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Models;
 
@@ -7,4 +8,5 @@ public interface IGroupService
 {
     Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissionsBySections(int[] establishmentIds);
     Task<List<SubmissionInformationModel>> GetGroupSubmissionInformationForSection(List<SqlEstablishmentLinkDto> establishmentLinks, string sectionId);
+    Task<GroupEstablishmentDTO?> GetGroupWithEstablishmentsBasic(int groupEstId);
 }

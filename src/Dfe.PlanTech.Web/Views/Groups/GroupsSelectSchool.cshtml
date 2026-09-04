@@ -56,14 +56,14 @@
 </p>
 
 @{
-    var schoolNameGroups = Model.GroupEstablishments.GroupBy(ge => ge.EstablishmentName);
+    var schoolNameGroups = Model.GroupEstablishments.GroupBy(ge => ge.Name);
     var hasMultipleSchoolsWithSameName = schoolNameGroups.Any(group => group.Count() > 1);
 }
 
 @foreach (var school in Model.GroupEstablishments)
 {
     var schoolUrn = school.Urn;
-    var schoolName = school.EstablishmentName;
+    var schoolName = school.Name;
 
     var dynamicValues = new Dictionary<string, string>
     {

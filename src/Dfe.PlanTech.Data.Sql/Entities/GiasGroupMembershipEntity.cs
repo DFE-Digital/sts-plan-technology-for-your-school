@@ -19,7 +19,7 @@ public class GiasGroupMembershipEntity
 
     public GiasEstablishmentGroupEntity EstablishmentGroup { get; set; } = null!;
 
-    public IEnumerable<GiasEstablishmentEntity> Establishments { get; set; } = [];
+    public ICollection<GiasEstablishmentEntity> Establishments { get; set; } = new List<GiasEstablishmentEntity>();
 
     public SqlGiasGroupMembershipDto AsDto()
     {

@@ -4,16 +4,19 @@ using Dfe.PlanTech.Core.DataTransferObjects.Sql;
 using Dfe.PlanTech.Core.Enums;
 using Dfe.PlanTech.Core.Helpers;
 using Dfe.PlanTech.Core.Models;
+using Dfe.PlanTech.Data.Sql.Entities;
 using Dfe.PlanTech.Data.Sql.Interfaces;
 
 namespace Dfe.PlanTech.Application.Workflows;
 
-public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService) : IGroupWorkflow
+public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablishmentService establishmentService, IEstablishmentRepository establishmentRepository) : IGroupWorkflow
 {
     private readonly ISubmissionRepository _submissionRepository =
         submissionRepository ?? throw new ArgumentNullException(nameof(submissionRepository));
     private readonly IEstablishmentService _establishmentService =
         establishmentService ?? throw new ArgumentNullException(nameof(establishmentService));
+    private readonly IEstablishmentRepository _establishmentRepository =
+    establishmentRepository ?? throw new ArgumentNullException(nameof(establishmentRepository));
 
     public async Task<List<SqlSubmissionDto>> GetGroupCompletedSubmissions(int[] establishmentIds)
     {
@@ -86,5 +89,10 @@ public class GroupWorkflow(ISubmissionRepository submissionRepository, IEstablis
         }
 
         return groupSubmissionInfo;
+    }
+
+    public async Task <EstablishmentEntity?> GetGroupFromDboEstablishmentAsync(int id)
+    {
+        return await _establishmentRepository.GetEstablishmentByIdAsync(id);
     }
 }

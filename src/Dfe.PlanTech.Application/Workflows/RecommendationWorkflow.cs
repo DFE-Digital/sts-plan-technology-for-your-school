@@ -128,4 +128,12 @@ public class RecommendationWorkflow(
 
         return firstActivity?.AsDto();
     }
+
+    public Task<Dictionary<string, int>> GetRecommendationInProgressOrCompletedRecommendationsCount(IEnumerable<string> urns)
+    {
+        return establishmentRecommendationHistoryRepository.GetRecommendationHistoryCountsForEstablishmentsAsync(r =>
+                    urns.Contains(r.Establishment.EstablishmentRef) &&
+                    (r.NewStatus == RecommendationStatus.Complete || r.NewStatus == RecommendationStatus.InProgress)
+            );
+    }
 }

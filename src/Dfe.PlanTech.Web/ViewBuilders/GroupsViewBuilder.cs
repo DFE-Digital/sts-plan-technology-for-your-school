@@ -72,17 +72,14 @@ public class GroupsViewBuilder(
                 sections
             );
 
-        var groupSchools =
-            await _establishmentService.GetEstablishmentLinksWithRecommendationCounts(
-                establishmentId
-            );
+        var group = await groupService.GetGroupWithEstablishmentsBasic(establishmentId);
 
         var contactLink = await ContentfulService.GetLinkByIdAsync(_contactOptions.LinkId);
 
         var viewModel = new GroupsSelectorViewModel
         {
             GroupName = groupName,
-            GroupEstablishments = groupSchools,
+            GroupEstablishments = group?.BasicEstablishments ?? [],
             BeforeTitleContent = selectASchoolPageContent.BeforeTitleContent ?? [],
             Title = new ComponentTitleEntry(groupName),
             Content = content,
