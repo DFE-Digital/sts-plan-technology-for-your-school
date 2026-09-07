@@ -90,11 +90,11 @@ public class EstablishmentRecommendationHistoryRepository
         var results = await (
                 from activeEstablishment in _db.Establishments
 
-                join link in _db.EstablishmentLinks
-                    on activeEstablishment.GroupUid equals link.GroupUid
+                join link in _db.GiasGroupMemberships
+                    on activeEstablishment.GroupUid equals link.GroupUid.ToString()
 
                 join establishment in _db.Establishments
-                    on link.Urn equals establishment.EstablishmentRef
+                    on link.Urn.ToString() equals establishment.EstablishmentRef
 
                 where activeEstablishment.Id == establishmentId
 
