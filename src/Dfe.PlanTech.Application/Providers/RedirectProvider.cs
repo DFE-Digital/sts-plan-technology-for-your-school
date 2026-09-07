@@ -148,6 +148,10 @@ public class RedirectProvider : IRedirectProvider
                 // Chain ends in a valid target.
                 foreach (var path in chain)
                 {
+                    if (string.Equals(path, targetPath.TrimStart('/'), StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
                     state[path] = VisitState.Resolved;
                     targetPaths[path] = targetPath;
                 }
