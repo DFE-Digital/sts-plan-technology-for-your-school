@@ -130,10 +130,7 @@ public class EstablishmentService(
             userEstablishmentId = userEstablishment.Id;
         }
 
-        var selectedEstablishment = await _establishmentWorkflow.GetEstablishmentByReferenceAsync(
-            selectedEstablishmentUrn
-        );
-        selectedEstablishment ??= await _establishmentWorkflow.GetOrCreateEstablishmentAsync(
+        var selectedEstablishment = await _establishmentWorkflow.GetOrCreateEstablishmentAsync(
             selectedEstablishmentUrn,
             selectedEstablishmentName
         );
