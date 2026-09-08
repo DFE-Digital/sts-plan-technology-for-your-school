@@ -47,7 +47,10 @@ public class DatabaseFixture : IAsyncLifetime
             throw new Exception($"DbUp migration failed: {result.Error}");
         }
 
-        await SeedGiasReferenceDataAsync(CreateDbContext());
+        await SeedGiasReferenceDataAsync(
+            CreateDbContext(),
+            TestContext.Current.CancellationToken
+        );
     }
 
     /// <summary>
@@ -68,7 +71,9 @@ public class DatabaseFixture : IAsyncLifetime
         GC.SuppressFinalize(this);
     }
 
-    private async Task SeedGiasReferenceDataAsync(DbContext dbContext)
+    private static async Task SeedGiasReferenceDataAsync(
+        DbContext dbContext,
+        CancellationToken cancellationToken)
     {
         try
         {
@@ -338,7 +343,7 @@ public class DatabaseFixture : IAsyncLifetime
                         );
                 END;
                 """,
-                TestContext.Current.CancellationToken
+                cancellationToken
             );
         }
         catch (Exception ex)
