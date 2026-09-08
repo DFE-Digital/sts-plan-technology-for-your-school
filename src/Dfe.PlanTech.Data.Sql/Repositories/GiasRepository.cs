@@ -36,5 +36,8 @@ public class GiasRepository(PlanTechDbContext dbContext) : IGiasRepository
             .SingleOrDefaultAsync();
     }
 
-
+    public async Task<GiasEstablishmentEntity?> GetSchoolEstablishmentByURN(int urn)
+    {
+        return await _db.GiasEstablishments.FindAsync(urn);
+    }
 }

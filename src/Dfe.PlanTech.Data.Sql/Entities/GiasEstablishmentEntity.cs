@@ -37,8 +37,6 @@ public class GiasEstablishmentEntity
 
     public GiasGroupMembershipEntity? GroupMembership { get; init; }
 
-    public EstablishmentEntity? DboEstablishment { get; init; }
-
     public SqlGiasEstablishmentDto AsDto()
     {
         return new SqlGiasEstablishmentDto
