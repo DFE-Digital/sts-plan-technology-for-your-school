@@ -67,7 +67,7 @@ jobs:
           echo "::add-mask::$environment"
           echo "::add-mask::$space_id"
           echo "::add-mask::$management_token"
-          echo "ENVIRONMENT=$environment" >> $GITHUB_ENV
+          echo "CONTENTFUL_ENVIRONMENT=$environment" >> $GITHUB_ENV
           echo "SPACE_ID=$space_id" >> $GITHUB_ENV
           echo "MANAGEMENT_TOKEN=$management_token" >> $GITHUB_ENV
 
